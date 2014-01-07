@@ -2,7 +2,7 @@ from fabric.api import task, run, local
 import os
 
 COVERAGE_ENABLED = False
-PROJECT_PACKGE = 'gladminds'
+PROJECT_PACKGE = '${project-name}'
 
 def _ensure_dir(path):
     if not os.path.exists(path):
