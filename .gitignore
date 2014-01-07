@@ -1,0 +1,13 @@
+*.pyc
+*.pyo
+.project
+.pydevproject
+.pydevproject.bak
+.installed.cfg
+.coverage
+bin
+out
+src/*.egg-info
+lib/buildout
+eggs
+dlcache
