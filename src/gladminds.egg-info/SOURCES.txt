@@ -1,0 +1,12 @@
+setup.py
+src/gladminds/__init__.py
+src/gladminds/dev_settings.py
+src/gladminds/settings.py
+src/gladminds/test_settings.py
+src/gladminds/urls.py
+src/gladminds/wsgi.py
+src/gladminds.egg-info/PKG-INFO
+src/gladminds.egg-info/SOURCES.txt
+src/gladminds.egg-info/dependency_links.txt
+src/gladminds.egg-info/requires.txt
+src/gladminds.egg-info/top_level.txt
