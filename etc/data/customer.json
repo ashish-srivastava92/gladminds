@@ -9,7 +9,7 @@
   },
   {
     "model": "gladminds.customer",
-    "pk": 1,
+    "pk": 2,
     "fields": {
       "customer_id":"1234ABD",
       "phone_number":"9000900098"
