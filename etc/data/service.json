@@ -1,0 +1,76 @@
+[
+  {
+    "model": "gladminds.service",
+    "pk": 1,
+    "fields": {
+      "product": "1ABC",
+      "unique_service_code": "SERVICECODE11"
+    }
+  },
+  {
+    "model": "gladminds.service",
+    "pk": 2,
+    "fields": {
+      "product": "1ABC",
+      "unique_service_code": "SERVICECODE12"
+    }
+  },
+  {
+    "model": "gladminds.service",
+    "pk": 3,
+    "fields": {
+      "product": "1ABC",
+      "unique_service_code": "SERVICECODE13"
+    }
+  },
+  {
+    "model": "gladminds.service",
+    "pk": 4,
+    "fields": {
+      "product": "2ABC",
+      "unique_service_code": "SERVICECODE21"
+    }
+  },
+  {
+    "model": "gladminds.service",
+    "pk": 5,
+    "fields": {
+      "product": "2ABC",
+      "unique_service_code": "SERVICECODE22"
+    }
+  },
+  {
+    "model": "gladminds.service",
+    "pk": 6,
+    "fields": {
+      "product": "2ABC",
+      "unique_service_code": "SERVICECODE23"
+    }
+  },
+  {
+    "model": "gladminds.service",
+    "pk": 7,
+    "fields": {
+      "product": "3ABC",
+      "unique_service_code": "SERVICECODE31"
+    }
+  },
+  {
+    "model": "gladminds.service",
+    "pk": 8,
+    "fields": {
+      "product": "3ABC",
+      "unique_service_code": "SERVICECODE32"
+    }
+  },
+  {
+    "model": "gladminds.service",
+    "pk": 9,
+    "fields": {
+      "product": "3ABC",
+      "unique_service_code": "SERVICECODE33"
+    }
+  }
+  
+  
+]

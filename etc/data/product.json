@@ -1,0 +1,27 @@
+[
+  {
+    "model": "gladminds.product",
+    "pk": 1,
+    "fields": {
+      "product_id": "1ABC",
+      "brand_name": "Bajaj"
+    }
+  },
+  {
+    "model": "gladminds.product",
+    "pk": 2,
+    "fields": {
+      "product_id": "2ABC",
+      "brand_name": "Bajaj"
+    }
+  },
+  {
+    "model": "gladminds.product",
+    "pk": 3,
+    "fields": {
+      "product_id": "3ABC",
+      "brand_name": "Bajaj"
+    }
+  }
+  
+]

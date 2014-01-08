@@ -1,0 +1,23 @@
+[
+  {
+    "model": "gladminds.registereddealers",
+    "pk": 1,
+    "fields": {
+      "phone_number":"9000900099"
+    }
+  },
+  {
+    "model": "gladminds.registeredDealers",
+    "pk": 2,
+    "fields": {
+      "phone_number":"9000900098"
+    }
+  },
+  {
+    "model": "gladminds.registeredDealers",
+    "pk": 3,
+    "fields": {
+      "phone_number":"9000900097"
+    }
+  }
+]
