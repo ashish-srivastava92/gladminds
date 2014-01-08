@@ -14,6 +14,10 @@ TEMPLATE_DEBUG = DEBUG
 
 DATABASES['default']['NAME'] = os.path.join(OUT_DIR, 'project.db')
 
+BROKER_URL= 'redis://localhost:6379/gladminds'
+REDIS_URL = 'redis://localhost:6379/gladminds'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/gladminds'
+
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
