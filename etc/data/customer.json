@@ -1,0 +1,18 @@
+[
+  {
+    "model": "gladminds.customer",
+    "pk": 1,
+    "fields": {
+      "customer_id":"1234ABC",
+      "phone_number":"9000900099"
+    }
+  },
+  {
+    "model": "gladminds.customer",
+    "pk": 1,
+    "fields": {
+      "customer_id":"1234ABD",
+      "phone_number":"9000900098"
+    }
+  }
+]
