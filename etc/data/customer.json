@@ -1,0 +1,11 @@
+[
+  {
+    "model": "gladminds.customer",
+    "pk": 1,
+    "fields": {
+      "cid": "111",
+      "phone_number": "80808080"
+    }
+  }
+  
+]
