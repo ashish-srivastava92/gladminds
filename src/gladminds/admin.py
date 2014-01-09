@@ -1,5 +1,6 @@
 from django.contrib import admin
 from models.common import Customer,Product,Service,RegisteredDealers,ProductPurchased
+from models.logs import AuditLog 
 from suit.widgets import NumberInput
 from suit.admin import SortableModelAdmin
 from django.forms import ModelForm, TextInput
@@ -35,9 +36,14 @@ class ProductPurchasedAdmin(ModelAdmin):
     search_fields = ('product_id','customer_id')
     list_display = ('product_id','customer_id')
     
+class AuditLogAdmin(ModelAdmin):
+    search_fields = ('status','date')
+    list_display = ('date','action','message','sender','reciever','status')
+    
 
 admin.site.register(Customer, CustomerAdmin)
 admin.site.register(Product,ProductAdmin)
 admin.site.register(Service,ServiceAdmin)
 admin.site.register(RegisteredDealers,DealerAdmin)
 admin.site.register(ProductPurchased,ProductPurchasedAdmin)
+admin.site.register(AuditLog,AuditLogAdmin)

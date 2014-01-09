@@ -22,7 +22,10 @@ class GladmindsResources(Resource):
             ]   
     
     def dispatch_gladminds(self, request, **kwargs):
-        message = request.body
+        if request.POST.get('text'):
+            message=request.POST.get('text')
+        else:
+            message = request.body
         handler_str, attr_list = self.parse_message(message)
         handler = getattr(self, handler_str, None)
         to_be_serialized = handler(attr_list)

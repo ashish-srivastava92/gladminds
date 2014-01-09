@@ -21,6 +21,7 @@ TEMPLATE_CONTEXT_PROCESSORS = TCP + (
 SUIT_CONFIG = {
     'ADMIN_NAME': 'Gladminds',
     'CONFIRM_UNSAVED_CHANGES': True,
+     'MENU_EXCLUDE': ('auth.group', 'auth'),
     'LIST_PER_PAGE': 20,
 }
 
