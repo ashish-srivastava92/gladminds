@@ -12,26 +12,18 @@
 					<table class="table table-bordered table-hover table-striped tablesorter">
 						<thead>
 							<tr>
-								<th class="header headerSortDown">Customer Id # <i class="fa fa-sort"></i></th>
-								<th class="header">Mobile Number <i class="fa fa-sort"></i></th>
-								<th class="header">Status <i class="fa fa-sort"></i></th>
-								<th class="header">Edit</th>
+								<th class="header headerSortDown">Product Id # <i class="fa fa-sort"></i></th>
+								<th class="header">Service Coupon<i class="fa fa-sort"></i></th>
 							</tr>
 						</thead>
 						<tbody>
 
-							<tr>
-								<td>1</td>
-								<td>9090909090</td>
-								<td>Authoried</td>
-								<td></td>
-							</tr>
-							<tr>
-								<td>2</td>
-								<td>9090909091</td>
-								<td>Hold</td>
-								<td></td>
-							</tr>
+					{% for data in admin_data %}
+						<tr>
+							<td><input type="text" value={{data.product_id}}></td>
+							<td><input type="text" value={{data.unique_service_code}}></td>
+						</tr>
+					{% endfor %}
 							
 						</tbody>
 					</table>

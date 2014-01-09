@@ -12,6 +12,18 @@ ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
+
+TEMPLATE_CONTEXT_PROCESSORS = TCP + (
+    'django.core.context_processors.request',
+)
+
+SUIT_CONFIG = {
+    'ADMIN_NAME': 'Gladminds',
+    'CONFIRM_UNSAVED_CHANGES': True,
+    'LIST_PER_PAGE': 20,
+}
+
 
 MANAGERS = ADMINS
 
@@ -128,6 +140,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'suit',
     'django.contrib.admin',
     'gladminds.models',
     'gladminds.superadmin',
