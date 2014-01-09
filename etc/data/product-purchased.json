@@ -1,0 +1,10 @@
+[
+  {
+    "model": "gladminds.productpurchased",
+    "pk": 1,
+    "fields": {
+      "customer_id":"1234ABC",
+      "product_id":"testid"
+    }
+  }
+]
