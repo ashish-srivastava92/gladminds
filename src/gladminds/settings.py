@@ -1,11 +1,28 @@
 # Django settings for gladminds project.
+import os
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+PROJECT_DIR = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
+BASE_DIR = os.path.join(PROJECT_DIR, os.pardir)
+STATIC_DIR = os.path.join(PROJECT_DIR, "static")
+TEMPLATE_DIR = os.path.join(PROJECT_DIR, "templates")
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
+
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
+
+TEMPLATE_CONTEXT_PROCESSORS = TCP + (
+    'django.core.context_processors.request',
+)
+
+SUIT_CONFIG = {
+    'ADMIN_NAME': 'Gladminds',
+    'CONFIRM_UNSAVED_CHANGES': True,
+    'LIST_PER_PAGE': 20,
+}
 
 
 MANAGERS = ADMINS
@@ -62,7 +79,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -70,6 +87,7 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
+                    STATIC_DIR,
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -109,6 +127,7 @@ ROOT_URLCONF = 'gladminds.urls'
 WSGI_APPLICATION = 'gladminds.wsgi.application'
 
 TEMPLATE_DIRS = (
+                 TEMPLATE_DIR,
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -121,9 +140,12 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'suit',
     'django.contrib.admin',
     'gladminds.models',
+    'gladminds.superadmin',
     'gladminds',
+    
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )

@@ -8,7 +8,7 @@ admin.autodiscover()
 api_v1 = Api(api_name="v1")
 api_v1.register(r.GladmindsResources())
 
-urlpatterns = patterns('',
+urlpatterns = patterns('gladminds',
     (r'', include(api_v1.urls)),
     # Examples:
     # url(r'^$', 'gladminds.views.home', name='home'),
@@ -19,4 +19,6 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
+#     url(r'^superadmin/', 'superadmin.views.page', name='page'),
+    url(r'^superadmin/(.+)$', 'superadmin.views.page', name='admin-page'),
 )
