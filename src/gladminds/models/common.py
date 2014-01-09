@@ -13,9 +13,15 @@ class Product(models.Model):
     brand_name=models.CharField(max_length=215)
     class Meta:
         app_label="gladminds" 
+    
+    def __unicode__(self):
+        return self.product_id
+
+    def save(self, force_insert=False, force_update=False, using=None):
+        return super(Product, self).save(force_insert, force_update, using)
         
 class Service(models.Model):
-    product=ForeignKey(to=Product,related_name='product')
+    product=models.ForeignKey(Product, null=True)
     unique_service_code=models.CharField(max_length=215,primary_key=True)
     class Meta:
         app_label="gladminds"  
