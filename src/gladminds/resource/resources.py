@@ -2,14 +2,14 @@ from django.db import models
 from django.conf.urls import url
 from tastypie.resources import Resource
 from gladminds import utils,  message_template as templates
-from gladminds.models import common
+from gladminds.models import common, logs
 from gladminds.tasks import send_message
+from datetime import datetime
 
 
 HANDLER_MAPPER = {
                   'reg':'register_customer',
                   'service': 'customer_service_detail',
-                  'product': 'register_product_for_customer'
                   }
 
 class GladmindsResources(Resource):    
@@ -51,25 +51,45 @@ class GladmindsResources(Resource):
             cust.save()
         message = templates.CUSTOMER_REGISTER.format(customer_id)
         send_message.delay(phone_number=phone_number, message=message)
+        
+        kwargs = {
+                    'action':'SEND',
+                    'reciever': '55680',
+                    'sender':str(phone_number),
+                    'message': message,
+                    'status':'success'
+                  }
+        
+        self.save_log(**kwargs)
         return True
 
     def customer_service_detail(self, attr_list):
         customer_id = attr_list[1]
         phone_number = 6657657
         message = None
-        #Retrive the service list for customer
         try:
             object = common.ProductPurchased.objects.get(customer_id = customer_id)
             product_id = object.__dict__['product_id']
-            print "product_id", product_id
-            
             service_object = common.Service.objects.filter(product__product_id = product_id)
             service_code=' ,'.join(object.__dict__['unique_service_code'] for object in service_object)
             message = templates.SERVICE_DETAIL.format(customer_id, product_id, service_code)
         except Exception as ex:
             message = templates.INVALID_SERVICE_DETAIL.format(customer_id)
         send_message.delay(phone_number=phone_number, message=message)
+        kwargs = {
+                    'action':'SEND',
+                    'reciever': '55680',
+                    'sender':str(phone_number),
+                    'message': message,
+                    'status':'success'
+                  }
+        
+        self.save_log(**kwargs)
         return True
+    
+    def save_log(self, **kwargs):
+        action_log = logs.AuditLog(date=datetime.now(), action=kwargs['action'], sender=kwargs['sender'], reciever=kwargs['reciever'], status=kwargs['status'], message=kwargs['message'])
+        action_log.save()
 
     def determine_format(self, request):
         return 'application/json'
