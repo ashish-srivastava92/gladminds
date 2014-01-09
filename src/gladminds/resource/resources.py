@@ -35,7 +35,6 @@ class GladmindsResources(Resource):
         action = attr_list[0]
         if action:
             action = action.lower()
-            
         return (HANDLER_MAPPER.get(action, None), attr_list)
     
     def register_customer(self, attr_list):
@@ -50,22 +49,24 @@ class GladmindsResources(Resource):
         message = templates.CUSTOMER_REGISTER.format(customer_id)
         send_message.delay(phone_number=phone_number, message=message)
         return True
-        
-    
-    def register_product_for_customer(self, attr_list):
-        customer_id = attr_list[1]
-        product_id = attr_list[0]
-        #Register the product into DB
-        
-        return templates.REGISTER_PRODUCT(product_id, customer_id)
-        
-    
+
     def customer_service_detail(self, attr_list):
         customer_id = attr_list[1]
+        phone_number = 6657657
+        message = None
         #Retrive the service list for customer
-        product_id = ""
-        service_detail = []
-        return templates.SERVICE_DETAIL.format(customer_id, product_id, service_detail)
+        try:
+            object = common.ProductPurchased.objects.get(customer_id = customer_id)
+            product_id = object.__dict__['product_id']
+            print "product_id", product_id
+            
+            service_object = common.Service.objects.filter(product__product_id = product_id)
+            service_code=' ,'.join(object.__dict__['unique_service_code'] for object in service_object)
+            message = templates.SERVICE_DETAIL.format(customer_id, product_id, service_code)
+        except Exception as ex:
+            message = templates.INVALID_SERVICE_DETAIL.format(customer_id)
+        send_message.delay(phone_number=phone_number, message=message)
+        return True
 
     def determine_format(self, request):
         return 'application/json'
