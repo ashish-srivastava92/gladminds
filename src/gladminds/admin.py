@@ -24,6 +24,7 @@ class ProductAdmin(ModelAdmin):
     
 class ServiceAdmin(ModelAdmin):
     search_fields = ('unique_service_code',)
+    list_filter = ('product',)
     list_display = ('product', 'unique_service_code')
 
 admin.site.register(Customer, CustomerAdmin)
