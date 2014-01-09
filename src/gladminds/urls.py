@@ -1,10 +1,15 @@
 from django.conf.urls import patterns, include, url
-
+from tastypie.api import Api
+from gladminds.resource import resources as r 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
 
+api_v1 = Api(api_name="v1")
+api_v1.register(r.GladmindsResources())
+
 urlpatterns = patterns('',
+    (r'', include(api_v1.urls)),
     # Examples:
     # url(r'^$', 'gladminds.views.home', name='home'),
     # url(r'^gladminds/', include('gladminds.foo.urls')),

@@ -1,8 +1,9 @@
 from django.db import models
+from django.conf.urls import url
 from tastypie.resources import Resource
-from models import common 
-import utils
-import message_template as templates 
+from gladminds import utils,  message_template as templates
+from gladminds.models import common
+from gladminds.tasks import send_message
 
 
 HANDLER_MAPPER = {
@@ -11,40 +12,51 @@ HANDLER_MAPPER = {
                   'product': 'register_product_for_customer'
                   }
 
-class GladmindsResources(Resource):
-    
-    class META:
+class GladmindsResources(Resource):    
+    class Meta:
         resource_name = 'messages'
-        
-    def __init__(self):
-        Resource.__init__();
     
     def base_urls(self):
         return [
-            url(r"^messages$", self.wrap_view('dispatch_handler'), kwargs={'handler': self.get_patients})
+            url(r"^messages$", self.wrap_view('dispatch_gladminds'))
             ]   
     
-    def dispatch_handler(self, request):
+    def dispatch_gladminds(self, request, **kwargs):
         message = request.body
-        handler_str = parse_message(message)
-        handler, attr_list = getattr(self, handler, None)
-        handler(attr_list)
+        handler_str, attr_list = self.parse_message(message)
+        handler = getattr(self, handler_str, None)
+        to_be_serialized = handler(attr_list)
+        to_be_serialized = {"status": to_be_serialized}
+        return self.create_response(request, data = to_be_serialized)
     
     def parse_message(self, message):
         attr_list = message.split()
-        action = data[0]
-        return (HANDLER_MAPPER[action], attr_list)
+        print attr_list
+        action = attr_list[0]
+        if action:
+            action = action.lower()
+            
+        return (HANDLER_MAPPER.get(action, None), attr_list)
     
     def register_customer(self, attr_list):
-        mobile_number = attr_list[1]
-        #TODO: Verify this number from DB
-        customer_id = utils.generate_unique_customer_id()
-        return templates.CUSTOMER_REGISTER.format(customer_id)
+        phone_number = int(attr_list[1])
+        try:
+            object = common.Customer.objects.get(phone_number=phone_number)
+            customer_id = object.__dict__['customer_id']
+        except Exception as ex:
+            customer_id = utils.generate_unique_customer_id()
+            cust = common.Customer(customer_id = customer_id, phone_number = phone_number)
+            cust.save()
+        message = templates.CUSTOMER_REGISTER.format(customer_id)
+        send_message.delay(phone_number=phone_number, message=message)
+        return True
+        
     
     def register_product_for_customer(self, attr_list):
         customer_id = attr_list[1]
         product_id = attr_list[0]
         #Register the product into DB
+        
         return templates.REGISTER_PRODUCT(product_id, customer_id)
         
     
@@ -54,3 +66,6 @@ class GladmindsResources(Resource):
         product_id = ""
         service_detail = []
         return templates.SERVICE_DETAIL.format(customer_id, product_id, service_detail)
+
+    def determine_format(self, request):
+        return 'application/json'
