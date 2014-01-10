@@ -69,9 +69,9 @@ class GladmindsResources(Resource):
         message = None
         try:
             object = common.ProductPurchased.objects.get(customer_id = customer_id)
-            product_id = object.__dict__['product_id']
+            product_id = object.product_id
             service_object = common.Service.objects.filter(product__product_id = product_id)
-            service_code=' ,'.join(object.__dict__['unique_service_code'] for object in service_object)
+            service_code=' ,'.join(object.__dict__['unique_service_code'] +" Expiry Duration "+ object.__dict__['expiry_time'] for object in service_object)
             message = templates.SERVICE_DETAIL.format(customer_id, product_id, service_code)
         except Exception as ex:
             message = templates.INVALID_SERVICE_DETAIL.format(customer_id)

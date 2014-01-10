@@ -1,19 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
+{% extends "base.html" %}
+{% block body  %}
+<style>
+  .header {
+background: #15425F;
+border-bottom: 1px solid #093856;
+height: 100px;
+margin-bottom: 4px;
+}
+
+
+#messageBox {
+height: 400px;
+margin: 50px auto 0;
+width:300px;
+padding: 20px 20px;
+background: #114465;
+background-image: -webkit-linear-gradient(top,#114465,#194364);
+background-image: -moz-linear-gradient(top,#114465,#194364);
+background-image: -ms-linear-gradient(top,#114465,#194364);
+background-image: -o-linear-gradient(top,#114465,#194364);
+background-image: linear-gradient(top,#114465,#194364);
+-webkit-border-radius: 10px;
+-moz-border-radius: 10px;
+-ms-border-radius: 10px;
+border-radius: 10px;
+color: #eee;
+}
+
+select {
+  font-size: 22px;
+  height: 38px;
+  display: block;
+  margin-top:0;
+  margin-bottom:0;
+}
+
+.btn {
+  font-size: 22px;
+	margin-left:60px;
+  font-weight: bold;
+  
+}
+
+
+
+
+.main-div{
+	margin-left: -120px;
+}
+
+</style>
+<div class="container main-div" >
+  
+  <div class="row">
+    <div>
+      <div id="messageBox" class="login section">
+	      <h3>Welcome to Gladminds</h3>
+	      
+	      
+	     
+		<p>Please enter your message</p>
 		
-		<title>mobile</title>
-	</head>
-	<body>
-		<center>
-		<h2>SEND SMS</h2>
-		</center>
     <form action="http://127.0.0.1:8000/v1/messages" method="POST">
-    	<center>
+    	
+   
       <textarea name="text" rows="10" cols="30" required></textarea>
-      <input type="submit" value="submit">
-      </center>
+      <button type="submit" class="btn btn-primary">SEND SMS</button>
+      
     </form>
-	</body>
-</html>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

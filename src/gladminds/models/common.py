@@ -23,16 +23,19 @@ class Product(models.Model):
 class Service(models.Model):
     product=models.ForeignKey(Product, null=True)
     unique_service_code=models.CharField(max_length=215,primary_key=True)
+    expiry_time=models.CharField(max_length=215, null=False)
     class Meta:
         app_label="gladminds"  
         
 class ProductPurchased(models.Model):
     customer_id=models.CharField(max_length=215,null= False)
-    product_id=models.CharField(max_length=215,null= False)
+    product_id=models.ForeignKey(Product, null=False)
     class Meta:
         app_label="gladminds" 
+        db_table = "productpurchased"
+        verbose_name_plural = "product Purchased"
         
-class RegisteredDealers(models.Model):
+class RegisteredDealer(models.Model):
     phone_number = models.IntegerField(max_length=10,blank=False, null= False, unique= True)
     class Meta:
         app_label="gladminds" 

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models.common import Customer,Product,Service,RegisteredDealers,ProductPurchased
+from models.common import Customer,Product,Service,RegisteredDealer,ProductPurchased
 from models.logs import AuditLog 
 from suit.widgets import NumberInput
 from suit.admin import SortableModelAdmin
@@ -26,7 +26,7 @@ class ProductAdmin(ModelAdmin):
 class ServiceAdmin(ModelAdmin):
     search_fields = ('unique_service_code',)
     list_filter = ('product',)
-    list_display = ('product', 'unique_service_code')
+    list_display = ('product', 'unique_service_code','expiry_time')
     
 class DealerAdmin(ModelAdmin):
     search_fields = ('phone_number',)
@@ -44,6 +44,6 @@ class AuditLogAdmin(ModelAdmin):
 admin.site.register(Customer, CustomerAdmin)
 admin.site.register(Product,ProductAdmin)
 admin.site.register(Service,ServiceAdmin)
-admin.site.register(RegisteredDealers,DealerAdmin)
+admin.site.register(RegisteredDealer,DealerAdmin)
 admin.site.register(ProductPurchased,ProductPurchasedAdmin)
 admin.site.register(AuditLog,AuditLogAdmin)

@@ -3,16 +3,16 @@
     "model": "gladminds.customer",
     "pk": 1,
     "fields": {
-      "customer_id":"1234ABC",
-      "phone_number":"9000900099"
+      "customer_id":"F0B18AE",
+      "phone_number":"9876123412"
     }
   },
   {
     "model": "gladminds.customer",
     "pk": 2,
     "fields": {
-      "customer_id":"1234ABD",
-      "phone_number":"9000900098"
+      "customer_id":"93D1423",
+      "phone_number":"9876123413"
     }
   }
 ]
