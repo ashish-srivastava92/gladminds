@@ -2,7 +2,7 @@ from django.db import models
 from django.conf.urls import url
 from tastypie.resources import Resource
 from gladminds import utils,  message_template as templates
-from gladminds.models import common, logs
+from gladminds.models import common
 from gladminds.tasks import send_message
 from datetime import datetime
 
@@ -60,7 +60,7 @@ class GladmindsResources(Resource):
                     'status':'success'
                   }
         
-        self.save_log(**kwargs)
+        utils.save_log(**kwargs)
         return True
 
     def customer_service_detail(self, attr_list):
@@ -84,12 +84,8 @@ class GladmindsResources(Resource):
                     'status':'success'
                   }
         
-        self.save_log(**kwargs)
+        utils.save_log(**kwargs)
         return True
-    
-    def save_log(self, **kwargs):
-        action_log = logs.AuditLog(date=datetime.now(), action=kwargs['action'], sender=kwargs['sender'], reciever=kwargs['reciever'], status=kwargs['status'], message=kwargs['message'])
-        action_log.save()
 
     def determine_format(self, request):
         return 'application/json'
