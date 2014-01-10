@@ -29,7 +29,7 @@ class Service(models.Model):
         
 class ProductPurchased(models.Model):
     customer_id=models.CharField(max_length=215,null= False)
-    product_id=models.ForeignKey(Product, null=False)
+    product_id=models.ForeignKey(Product, null=False,primary_key=True)
     class Meta:
         app_label="gladminds" 
         db_table = "productpurchased"

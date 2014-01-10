@@ -37,7 +37,7 @@ class ProductPurchasedAdmin(ModelAdmin):
     list_display = ('product_id','customer_id')
     
 class AuditLogAdmin(ModelAdmin):
-    search_fields = ('status','date')
+    search_fields = ('status','date','sender','reciever')
     list_display = ('date','action','message','sender','reciever','status')
     
 

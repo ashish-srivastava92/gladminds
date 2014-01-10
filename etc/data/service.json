@@ -3,7 +3,7 @@
     "model": "gladminds.service",
     "pk": 1,
     "fields": {
-      "product": "AVENGER220DTSI",
+      "product": "AVENGER220DTSIIND1",
       "unique_service_code": "SERVICECODE11",
       "expiry_time":"30 Days"
     }
@@ -12,7 +12,7 @@
     "model": "gladminds.service",
     "pk": 2,
     "fields": {
-      "product": "AVENGER220DTSI",
+      "product": "AVENGER220DTSIIND1",
       "unique_service_code": "SERVICECODE12",
       "expiry_time":"60 Days"
     }
@@ -21,7 +21,7 @@
     "model": "gladminds.service",
     "pk": 3,
     "fields": {
-      "product": "AVENGER220DTSI",
+      "product": "AVENGER220DTSIIND1",
       "unique_service_code": "SERVICECODE13",
       "expiry_time":"90 Days"
     }
@@ -30,7 +30,7 @@
     "model": "gladminds.service",
     "pk": 4,
     "fields": {
-      "product": "PULSAR200NS",
+      "product": "PULSAR200NSIND1",
       "unique_service_code": "SERVICECODE21",
       "expiry_time":"30 Days"
     }
@@ -39,7 +39,7 @@
     "model": "gladminds.service",
     "pk": 5,
     "fields": {
-      "product": "PULSAR200NS",
+      "product": "PULSAR200NSIND1",
       "unique_service_code": "SERVICECODE22",
       "expiry_time":"90 Days"
     }
@@ -48,7 +48,7 @@
     "model": "gladminds.service",
     "pk": 6,
     "fields": {
-      "product": "PULSAR200NS",
+      "product": "PULSAR200NSIND1",
       "unique_service_code": "SERVICECODE23",
       "expiry_time":"120 Days"
     }
@@ -57,7 +57,7 @@
     "model": "gladminds.service",
     "pk": 7,
     "fields": {
-      "product": "PULSAR220",
+      "product": "PULSAR220IND1",
       "unique_service_code": "SERVICECODE31",
       "expiry_time":"40 Days"
     }
@@ -66,7 +66,7 @@
     "model": "gladminds.service",
     "pk": 8,
     "fields": {
-      "product": "PULSAR220",
+      "product": "PULSAR220IND1",
       "unique_service_code": "SERVICECODE32",
       "expiry_time":"100 Days"
     }
@@ -75,7 +75,7 @@
     "model": "gladminds.service",
     "pk": 9,
     "fields": {
-      "product": "PULSAR220",
+      "product": "PULSAR220IND1",
       "unique_service_code": "SERVICECODE33",
       "expiry_time":"150 Days"
     }
