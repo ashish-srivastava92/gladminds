@@ -14,7 +14,7 @@ def send_message(**kwargs):
         print debug_message
         logger.info(debug_message)
         kwargs = {
-                    'action':'TASK SEND',
+                    'action':'SENT',
                     'reciever': '55680',
                     'sender':str(phone_number),
                     'message': message,

@@ -53,7 +53,7 @@ class GladmindsResources(Resource):
         send_message.delay(phone_number=phone_number, message=message)
         
         kwargs = {
-                    'action':'SEND',
+                    'action':'SEND TO QUEUE',
                     'reciever': '55680',
                     'sender':str(phone_number),
                     'message': message,
@@ -65,9 +65,11 @@ class GladmindsResources(Resource):
 
     def customer_service_detail(self, attr_list):
         customer_id = attr_list[1]
-        phone_number = 6657657
+        phone_number = None
         message = None
         try:
+            customer_object = common.Customer.objects.get(customer_id = customer_id)
+            phone_number = customer_object.__dict__['customer_id']
             object = common.ProductPurchased.objects.get(customer_id = customer_id)
             product_id = object.product_id
             service_object = common.Service.objects.filter(product__product_id = product_id)
@@ -77,7 +79,7 @@ class GladmindsResources(Resource):
             message = templates.INVALID_SERVICE_DETAIL.format(customer_id)
         send_message.delay(phone_number=phone_number, message=message)
         kwargs = {
-                    'action':'SEND',
+                    'action':'SEND TO QUEUE',
                     'reciever': '55680',
                     'sender':str(phone_number),
                     'message': message,
