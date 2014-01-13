@@ -3,7 +3,7 @@
     "model": "gladminds.product",
     "pk": 1,
     "fields": {
-      "product_id": "AVENGER220DTSI",
+      "product_id": "AVENGER220DTSIIND1",
       "brand_name": "Bajaj"
     }
   },
@@ -11,7 +11,7 @@
     "model": "gladminds.product",
     "pk": 2,
     "fields": {
-      "product_id": "PULSAR200NS",
+      "product_id": "PULSAR200NSIND1",
       "brand_name": "Bajaj"
     }
   },
@@ -19,7 +19,7 @@
     "model": "gladminds.product",
     "pk": 3,
     "fields": {
-      "product_id": "PULSAR220",
+      "product_id": "PULSAR220IND1",
       "brand_name": "Bajaj"
     }
   },
@@ -27,7 +27,7 @@
     "model": "gladminds.product",
     "pk": 3,
     "fields": {
-      "product_id": "KARIZMA200",
+      "product_id": "KARIZMA200IND1",
       "brand_name": "Hero"
     }
   }
