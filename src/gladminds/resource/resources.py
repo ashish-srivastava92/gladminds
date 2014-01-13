@@ -3,7 +3,7 @@ from django.conf.urls import url
 from tastypie.resources import Resource
 from gladminds import utils,  message_template as templates
 from gladminds.models import common
-from gladminds.tasks import send_message
+from gladminds.tasks import send_registration_detail,send_service_detail
 from datetime import datetime
 
 
@@ -50,7 +50,7 @@ class GladmindsResources(Resource):
             cust = common.Customer(customer_id = customer_id, phone_number = phone_number)
             cust.save()
         message = templates.CUSTOMER_REGISTER.format(customer_id)
-        send_message.delay(phone_number=phone_number, message=message)
+        send_registration_detail.delay(phone_number=phone_number, message=message)
         
         kwargs = {
                     'action':'SEND TO QUEUE',
@@ -77,7 +77,7 @@ class GladmindsResources(Resource):
             message = templates.SERVICE_DETAIL.format(customer_id, product_id, service_code)
         except Exception as ex:
             message = templates.INVALID_SERVICE_DETAIL.format(customer_id)
-        send_message.delay(phone_number=phone_number, message=message)
+        send_service_detail.delay(phone_number=phone_number, message=message)
         kwargs = {
                     'action':'SEND TO QUEUE',
                     'reciever': '55680',
