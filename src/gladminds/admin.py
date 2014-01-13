@@ -10,13 +10,13 @@ class CustomerForm(ModelForm):
     class Meta:
         widgets = {
             'customer_id': TextInput(attrs={'class': 'input-mini'}),
-            'phone_number': NumberInput()
+            'phone_number': NumberInput(),
         }
 
 class CustomerAdmin(ModelAdmin):
     sortable = 'customer_id'
     search_fields = ('customer_id','phone_number')
-    list_display = ('customer_id', 'phone_number','is_authenticated')
+    list_display = ('customer_id', 'phone_number', 'registration_date', 'is_authenticated')
     form = CustomerForm
     
 class ProductAdmin(ModelAdmin):
@@ -26,14 +26,14 @@ class ProductAdmin(ModelAdmin):
 class ServiceAdmin(ModelAdmin):
     search_fields = ('unique_service_code',)
     list_filter = ('product',)
-    list_display = ('product', 'unique_service_code','expiry_time')
+    list_display = ('product', 'unique_service_code','expiry_time', 'valid_days', 'start_kms', 'end_kms', 'is_expired', 'is_closed', 'closed_date', 'expired_date')
     
 class DealerAdmin(ModelAdmin):
     search_fields = ('phone_number',)
     list_display = ('phone_number',)
     
 class ProductPurchasedAdmin(ModelAdmin):
-    search_fields = ('product_id','customer_id')
+    search_fields = ('product_id','customer_id', 'sap_customer_id', 'purchased_date')
     list_display = ('product_id','customer_id')
     
 class AuditLogAdmin(ModelAdmin):

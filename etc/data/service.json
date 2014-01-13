@@ -5,7 +5,12 @@
     "fields": {
       "product": "AVENGER220DTSI",
       "unique_service_code": "SERVICECODE11",
-      "expiry_time":"30 Days"
+      "expiry_time":"30 Days",
+      "valid_days":30, 
+      "start_kms":0,
+      "end_kms": 700,
+      "is_expired":"False", 
+      "is_closed": "False"
     }
   },
   {
@@ -14,7 +19,12 @@
     "fields": {
       "product": "AVENGER220DTSI",
       "unique_service_code": "SERVICECODE12",
-      "expiry_time":"60 Days"
+      "expiry_time":"60 Days",
+      "valid_days":60, 
+      "start_kms":700,
+      "end_kms": 1500,
+      "is_expired":"False", 
+      "is_closed": "False"
     }
   },
   {
@@ -23,7 +33,12 @@
     "fields": {
       "product": "AVENGER220DTSI",
       "unique_service_code": "SERVICECODE13",
-      "expiry_time":"90 Days"
+      "expiry_time":"90 Days",
+      "valid_days":90, 
+      "start_kms":1500,
+      "end_kms": 2500,
+      "is_expired":"False", 
+      "is_closed": "False"
     }
   },
   {
@@ -32,7 +47,13 @@
     "fields": {
       "product": "PULSAR200NS",
       "unique_service_code": "SERVICECODE21",
-      "expiry_time":"30 Days"
+      "expiry_time":"30 Days",
+      "valid_days":30, 
+      "start_kms":0,
+      "end_kms": 1000,
+      "is_expired":"False", 
+      "is_closed": "False", 
+      "expired_date":"2014-02-10 00:00:00"
     }
   },
   {
@@ -41,7 +62,13 @@
     "fields": {
       "product": "PULSAR200NS",
       "unique_service_code": "SERVICECODE22",
-      "expiry_time":"90 Days"
+      "expiry_time":"90 Days",
+      "valid_days":90, 
+      "start_kms":1000,
+      "end_kms": 2000,
+      "is_expired":"False", 
+      "is_closed": "False", 
+      "expired_date":"2014-04-10 00:00:00"
     }
   },
   {
@@ -50,7 +77,13 @@
     "fields": {
       "product": "PULSAR200NS",
       "unique_service_code": "SERVICECODE23",
-      "expiry_time":"120 Days"
+      "expiry_time":"120 Days",
+      "valid_days":120, 
+      "start_kms":2000,
+      "end_kms": 3000,
+      "is_expired":"False", 
+      "is_closed": "False", 
+      "expired_date":"2014-06-10 00:00:00"
     }
   },
   {
@@ -59,7 +92,12 @@
     "fields": {
       "product": "PULSAR220",
       "unique_service_code": "SERVICECODE31",
-      "expiry_time":"40 Days"
+      "expiry_time":"40 Days",
+      "valid_days":40, 
+      "start_kms":0,
+      "end_kms": 800,
+      "is_expired":"False", 
+      "is_closed": "False"
     }
   },
   {
@@ -68,7 +106,12 @@
     "fields": {
       "product": "PULSAR220",
       "unique_service_code": "SERVICECODE32",
-      "expiry_time":"100 Days"
+      "expiry_time":"100 Days",
+      "valid_days":100, 
+      "start_kms":800,
+      "end_kms": 200,
+      "is_expired":"False", 
+      "is_closed": "False"
     }
   },
   {
@@ -77,7 +120,12 @@
     "fields": {
       "product": "PULSAR220",
       "unique_service_code": "SERVICECODE33",
-      "expiry_time":"150 Days"
+      "expiry_time":"150 Days",
+      "valid_days":150, 
+      "start_kms":2000,
+      "end_kms": 3000,
+      "is_expired":"False", 
+      "is_closed": "False"
     }
   }
   

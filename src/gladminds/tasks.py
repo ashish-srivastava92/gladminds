@@ -32,4 +32,3 @@ def send_reminder(*args, **kwargs):
 @shared_task
 def import_data(*args, **kwargs):
     print "import data from SAP CRM to MySQL"
-    print 

@@ -4,7 +4,8 @@
     "pk": 1,
     "fields": {
       "customer_id":"F0B18AE",
-      "phone_number":"9876123412"
+      "phone_number":"9876123412",
+      "registration_date":"2014-01-07 17:41:28"
     }
   },
   {
@@ -12,7 +13,8 @@
     "pk": 2,
     "fields": {
       "customer_id":"93D1423",
-      "phone_number":"9876123413"
+      "phone_number":"9876123413",
+      "registration_date":"2013-01-08 17:41:28"
     }
   }
 ]

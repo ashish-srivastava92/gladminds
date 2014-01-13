@@ -4,7 +4,9 @@
     "pk": 1,
     "fields": {
       "customer_id":"1234ABC",
-      "product_id":"PULSAR200NS"
+      "product_id":"PULSAR200NS",
+      "sap_customer_id":"SAP25667788DB09",
+      "purchased_date":"2013-01-08 18:41:28"
     }
   }
 ]
