@@ -39,5 +39,30 @@ class RegisteredDealer(models.Model):
     phone_number = models.IntegerField(max_length=10,blank=False, null= False, unique= True)
     class Meta:
         app_label="gladminds" 
+        
+
+
+class GladMindUsers(models.Model):
+    gcid=models.CharField(max_length=215,null= False)
+    phone_number=models.CharField(max_length=10,null= False,unique= True)
+    class Meta:
+        app_label="gladminds" 
+        
+    def __unicode__(self):
+        return self.gcid
+
+    def save(self, force_insert=False, force_update=False, using=None):
+        return super(GladMindUsers, self).save(force_insert, force_update, using)
+        
+class SAPData(models.Model):
+    phone_number=models.ForeignKey(GladMindUsers, null=False)
+    customer_id=models.CharField(max_length=215,null= False,unique= True)
+    product_id=models.CharField(max_length=215,null= False,unique= True)
+    unique_service_code=models.CharField(max_length=215,null= False)
+    validity_days_kms=models.CharField(max_length=215,null= False)
+    status=models.CharField(max_length=215,null= False)
+    class Meta:
+        app_label="gladminds" 
+    
     
     
