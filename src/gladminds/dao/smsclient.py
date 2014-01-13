@@ -62,7 +62,7 @@ class AirtelSmsClient(SmsClientBaseObject):
         params = {'login':self.username, 'pass': self.password}
         return self.send_request(url = self.authenticate_url, params = parama)
 
-    def send_stateful(self, **kwargs):
+    def send_stateless(self, **kwargs):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
         session_id = self._get_session_id()
@@ -82,3 +82,19 @@ class AirtelSmsClient(SmsClientBaseObject):
         json = import_json()
         data = resp.content
         return json.loads(data)
+
+class MockSmsClient(SmsClientBaseObject):
+    
+    def __init__(self, username, password, authenticate_url, message_url):
+        AirtelSmsClient.__init__(self, username, password, authenticate_url, message_url)
+    
+    def authenticate(self):
+        return {"sessionID":"23ef53u78s090df9ac0vvg011f"}
+    
+    def send_stateless(self):
+        return {"jobId":695, "message":"Your message has been successfully sent", "messagesLeft":99999862}
+    
+    def send_stateful(self, **kwargs):
+        return {"sessionID":"23ef53u78s090df9ac0vvg011f", "jobId":695, "message":"Your message has been successfully sent", "messagesLeft":99999862}
+    
+        
