@@ -47,6 +47,9 @@ class SmsClientBaseObject(object):
     def send_stateful(self, **kwargs):
         return
     
+    def bulk_sms(self, **kwargs):
+        return 
+    
     def _get_session_id(self):
         return self.session_id
     

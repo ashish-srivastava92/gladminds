@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from celery import shared_task
 from gladminds.utils import save_log
+from gladminds.dao.smsclient import MockSmsClient as smsclient
 import logging
 logger = logging.getLogger(__name__)
 
@@ -10,6 +11,8 @@ def send_registration_detail(**kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
+        respone_data = smsclient.send_stateless(**kwargs)
+        
         debug_message = "Send the message: %s To : %s" % (phone_number, message)
         print debug_message
         logger.info(debug_message)
@@ -31,6 +34,8 @@ def send_service_detail(**kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
+        response_data = smsclient.send_stateless(**kwargs)
+        
         debug_message = "Send the message: %s To : %s" % (phone_number, message)
         print debug_message
         logger.info(debug_message)
