@@ -27,3 +27,6 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
     TEMPLATE_DIR,
 )
+
+#Celery Configuration
+BROKER_URL= 'redis://localhost:6379/0'
