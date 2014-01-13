@@ -49,8 +49,6 @@ class RegisteredDealer(models.Model):
     phone_number = models.IntegerField(max_length=10,blank=False, null= False, unique= True)
     class Meta:
         app_label="gladminds" 
-        
-
 
 class GladMindUsers(models.Model):
     gcid=models.CharField(max_length=215,null= False)

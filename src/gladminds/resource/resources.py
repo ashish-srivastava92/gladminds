@@ -6,7 +6,6 @@ from gladminds.models import common
 from gladminds.tasks import send_registration_detail,send_service_detail
 from datetime import datetime
 
-
 HANDLER_MAPPER = {
                   'reg':'register_customer',
                   'service': 'customer_service_detail',
