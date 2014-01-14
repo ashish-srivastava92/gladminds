@@ -1,64 +1,40 @@
 from django.contrib import admin
-from models.common import Customer,Product,Service,RegisteredDealer,ProductPurchased
-from models.common import GladMindUsers,SAPData
+from models.common import RegisteredDealer
+from models.common import GladMindUsers,CustomerData,RegisteredDealer,ServiceCouponData
 from models.logs import AuditLog 
 from suit.widgets import NumberInput
 from suit.admin import SortableModelAdmin
 from django.forms import ModelForm, TextInput
 from django.contrib.admin import ModelAdmin
 
-class CustomerForm(ModelForm):
-    class Meta:
-        widgets = {
-            'customer_id': TextInput(attrs={'class': 'input-mini'}),
-            'phone_number': NumberInput(),
-        }
 
-class CustomerAdmin(ModelAdmin):
-    sortable = 'customer_id'
-    search_fields = ('customer_id','phone_number')
-    list_display = ('customer_id', 'phone_number', 'registration_date', 'is_authenticated')
-    form = CustomerForm
-    
-class ProductAdmin(ModelAdmin):
-    search_fields = ('product_id','brand_name')
-    list_display = ('product_id', 'brand_name')
-    
-class ServiceAdmin(ModelAdmin):
-    search_fields = ('unique_service_code',)
-    list_filter = ('product',)
-    list_display = ('product', 'unique_service_code','expiry_time', 'valid_days', 'start_kms', 'end_kms', 'is_expired', 'is_closed', 'closed_date', 'expired_date')
-    
 class DealerAdmin(ModelAdmin):
     search_fields = ('phone_number',)
-    list_display = ('phone_number',)
+    list_filter = ('dealer_id',)
+    list_display = ('dealer_id','phone_number')
     
-class ProductPurchasedAdmin(ModelAdmin):
-    search_fields = ('product_id','customer_id', 'sap_customer_id', 'purchased_date')
-    list_display = ('product_id','customer_id')
-    
+
 class AuditLogAdmin(ModelAdmin):
     search_fields = ('status','date','sender','reciever')
     list_display = ('date','action','message','sender','reciever','status')
     
 class GladMindUserAdmin(ModelAdmin):
-    search_fields = ('gcid','phone_number')
-    list_display = ('gcid','phone_number')
+    search_fields = ('gladmind_customer_id','phone_number')
+    list_display = ('gladmind_customer_id','phone_number','registration_date')
     
-class SAPDataAdmin(ModelAdmin):
-    search_fields = ('phone_number','customer_id','product_id','unique_service_code'
-                     ,'status')
-    list_display = ('phone_number','customer_id','product_id','unique_service_code',
-                     'validity_days_kms','status')
-    
-    
+class CustomerDataAdmin(ModelAdmin):
+    search_fields = ('phone_number','sap_customer_id','product_id','unique_service_code',
+                     'is_expired','is_closed')
+    list_display = ('phone_number','sap_customer_id','product_id','unique_service_code'
+                     ,'valid_days','valid_kms','is_expired','is_closed','closed_date'
+                     ,'expired_date')
 
-admin.site.register(Customer, CustomerAdmin)
-admin.site.register(Product,ProductAdmin)
-admin.site.register(Service,ServiceAdmin)
+class ServiceCouponDataAdmin(ModelAdmin):
+    search_fields = ('service_coupon','last_reminder_date','schedule_reminder_date')
+    list_display = ('service_coupon','last_reminder_date','schedule_reminder_date')
+    
 admin.site.register(RegisteredDealer,DealerAdmin)
-admin.site.register(ProductPurchased,ProductPurchasedAdmin)
 admin.site.register(AuditLog,AuditLogAdmin)
-
-admin.site.register(SAPData,SAPDataAdmin)
+admin.site.register(CustomerData,CustomerDataAdmin)
 admin.site.register(GladMindUsers,GladMindUserAdmin)
+admin.site.register(ServiceCouponData,ServiceCouponDataAdmin)
