@@ -1,0 +1,21 @@
+#!/bin/bash
+
+do_start()
+{
+echo "Starting celery...."
+su -l gunicorn -c "cd /opt/app/gladminds; nohup bin/django celery beat --config=$1 --app=gladminds --loglevel DEBUG -f beat.out &" > /dev/null 2>&1
+su -l gunicorn -c "cd /opt/app/gladminds; nohup bin/celery worker --app=gladminds -l info &" > /dev/null 2>&1
+}
+
+do_stop()
+{
+ps -ef | grep celery | grep -v grep | awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+}
+
+case $1 in
+start) do_start $2
+;;
+stop) do_stop
+;;
+esac
+
