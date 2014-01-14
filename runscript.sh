@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#Set Environment
+export DJANGO_SETTINGS_MODULE=gladminds.prod_settings
+
 # Pull latest code changes from Github
 #git pull origin master
 
