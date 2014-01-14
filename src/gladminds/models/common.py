@@ -1,13 +1,13 @@
 from django.db import models
 from django.db.models.fields.related import  ForeignKey,OneToOneField
   
-class Customer(models.Model):
-    customer_id=models.CharField(max_length=215,primary_key=True)
-    phone_number = models.IntegerField(max_length=10,blank=False, null= False, unique= True)
-    registration_date = models.DateTimeField()
-    is_authenticated=models.BooleanField(default=False)
-    class Meta:
-        app_label="gladminds"
+# class Customer(models.Model):
+#     customer_id=models.CharField(max_length=215,primary_key=True)
+#     phone_number = models.IntegerField(max_length=10,blank=False, null= False, unique= True)
+#     registration_date = models.DateTimeField()
+#     is_authenticated=models.BooleanField(default=False)
+#     class Meta:
+#         app_label="gladminds"
               
 class Product(models.Model):
     product_id=models.CharField(max_length=215,primary_key=True) 
@@ -51,26 +51,35 @@ class RegisteredDealer(models.Model):
         app_label="gladminds" 
 
 class GladMindUsers(models.Model):
-    gcid=models.CharField(max_length=215,null= False)
-    phone_number=models.CharField(max_length=10,null= False,unique= True)
+    gladmind_customer_id=models.CharField(max_length=215,null= False)
+    phone_number=models.CharField(max_length=10)
+    registration_date = models.DateTimeField()
     class Meta:
         app_label="gladminds" 
+        verbose_name_plural = "Gladmind Users"
         
     def __unicode__(self):
-        return self.gcid
+        return self.phone_number
+ 
 
     def save(self, force_insert=False, force_update=False, using=None):
         return super(GladMindUsers, self).save(force_insert, force_update, using)
         
 class SAPData(models.Model):
     phone_number=models.ForeignKey(GladMindUsers, null=False)
-    customer_id=models.CharField(max_length=215,null= False,unique= True)
-    product_id=models.CharField(max_length=215,null= False,unique= True)
+    sap_customer_id=models.CharField(max_length=215,null= False)
+    product_id=models.CharField(max_length=215,null= False)
     unique_service_code=models.CharField(max_length=215,null= False)
-    validity_days_kms=models.CharField(max_length=215,null= False)
-    status=models.CharField(max_length=215,null= False)
+    valid_days = models.IntegerField(max_length=10)
+    valid_kms=models.IntegerField(max_length=10)
+    is_expired = models.BooleanField()
+    is_closed = models.BooleanField()
+    closed_date = models.DateTimeField(null=True)
+    expired_date = models.DateTimeField(null=True)
     class Meta:
         app_label="gladminds" 
+        verbose_name_plural = "SAP Data"
+        
     
     
     

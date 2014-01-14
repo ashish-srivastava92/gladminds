@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models.common import Customer,Product,Service,RegisteredDealer,ProductPurchased
+from models.common import Product,Service,RegisteredDealer,ProductPurchased
 from models.common import GladMindUsers,SAPData
 from models.logs import AuditLog 
 from suit.widgets import NumberInput
@@ -42,18 +42,17 @@ class AuditLogAdmin(ModelAdmin):
     list_display = ('date','action','message','sender','reciever','status')
     
 class GladMindUserAdmin(ModelAdmin):
-    search_fields = ('gcid','phone_number')
-    list_display = ('gcid','phone_number')
+    search_fields = ('gladmind_customer_id','phone_number')
+    list_display = ('gladmind_customer_id','phone_number','registration_date')
     
 class SAPDataAdmin(ModelAdmin):
-    search_fields = ('phone_number','customer_id','product_id','unique_service_code'
-                     ,'status')
-    list_display = ('phone_number','customer_id','product_id','unique_service_code',
-                     'validity_days_kms','status')
-    
-    
+    search_fields = ('phone_number','sap_customer_id','product_id','unique_service_code',
+                     'is_expired','is_closed')
+    list_display = ('phone_number','sap_customer_id','product_id','unique_service_code'
+                     ,'valid_days','valid_kms','is_expired','is_closed','closed_date'
+                     ,'expired_date')
 
-admin.site.register(Customer, CustomerAdmin)
+# admin.site.register(Customer, CustomerAdmin)
 admin.site.register(Product,ProductAdmin)
 admin.site.register(Service,ServiceAdmin)
 admin.site.register(RegisteredDealer,DealerAdmin)

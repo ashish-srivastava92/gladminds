@@ -21,5 +21,5 @@ urlpatterns = patterns('gladminds',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^sms/','superadmin.views.send_sms', name='send_sms'),
 #     url(r'^superadmin/', 'superadmin.views.page', name='page'),
-    url(r'^superadmin/(.+)$', 'superadmin.views.page', name='admin-page'),
+#     url(r'^superadmin/(.+)$', 'superadmin.views.page', name='admin-page'),
 )
