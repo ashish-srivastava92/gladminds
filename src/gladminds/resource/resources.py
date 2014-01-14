@@ -71,7 +71,7 @@ class GladmindsResources(Resource):
         try:
             customer_object = common.GladMindUsers.objects.get(gladmind_customer_id = gladmind_customer_id)
             phone_number = customer_object.__dict__['phone_number']
-            object = common.SAPData.objects.filter(phone_number__phone_number=phone_number)
+            object = common.CustomerData.objects.filter(phone_number__phone_number=phone_number)
             product_id =object[0].product_id
             service_code=' ,'.join(data.unique_service_code +" Expiry Days "+str(data.valid_days)
                                    +" Valid KMS "+str(data.valid_kms) for data in object if data.product_id==product_id)
