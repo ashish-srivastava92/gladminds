@@ -38,6 +38,17 @@ class CustomerData(models.Model):
         app_label="gladminds" 
         verbose_name_plural = "Customer Data"
         
+    def __unicode__(self):
+        return self.unique_service_code
+    
+class ServiceCouponData(models.Model):
+    service_coupon=models.ForeignKey(CustomerData,unique=True, null=False)
+    last_reminder_date=models.DateTimeField(null=True)
+    schedule_reminder_date=models.DateTimeField(null=True)
+    class Meta:
+        app_label="gladminds" 
+    
+        
     
     
     

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from models.common import RegisteredDealer
-from models.common import GladMindUsers,CustomerData,RegisteredDealer
+from models.common import GladMindUsers,CustomerData,RegisteredDealer,ServiceCouponData
 from models.logs import AuditLog 
 from suit.widgets import NumberInput
 from suit.admin import SortableModelAdmin
@@ -29,7 +29,12 @@ class CustomerDataAdmin(ModelAdmin):
                      ,'valid_days','valid_kms','is_expired','is_closed','closed_date'
                      ,'expired_date')
 
+class ServiceCouponDataAdmin(ModelAdmin):
+    search_fields = ('service_coupon','last_reminder_date','schedule_reminder_date')
+    list_display = ('service_coupon','last_reminder_date','schedule_reminder_date')
+    
 admin.site.register(RegisteredDealer,DealerAdmin)
 admin.site.register(AuditLog,AuditLogAdmin)
 admin.site.register(CustomerData,CustomerDataAdmin)
 admin.site.register(GladMindUsers,GladMindUserAdmin)
+admin.site.register(ServiceCouponData,ServiceCouponDataAdmin)
