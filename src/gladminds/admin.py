@@ -23,9 +23,9 @@ class GladMindUserAdmin(ModelAdmin):
     list_display = ('gladmind_customer_id','phone_number','registration_date')
     
 class CustomerDataAdmin(ModelAdmin):
-    search_fields = ('phone_number','sap_customer_id','product_id','unique_service_code',
+    search_fields = ('phone_number','sap_customer_id','product_id','unique_service_coupon',
                      'is_expired','is_closed')
-    list_display = ('phone_number','sap_customer_id','product_id','unique_service_code'
+    list_display = ('phone_number','sap_customer_id','product_id','unique_service_coupon'
                      ,'valid_days','valid_kms','is_expired','is_closed','closed_date'
                      ,'expired_date','product_purchase_date','actual_service_date',
                      'actual_kms','dealer','last_reminder_date','schedule_reminder_date')
