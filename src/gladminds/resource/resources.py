@@ -92,3 +92,12 @@ class GladmindsResources(Resource):
 
     def determine_format(self, request):
         return 'application/json'
+
+class GladmindsTaskManager(object):
+    
+    def get_customers_to_send_reminder(self):
+        
+        pass
+    
+    def import_data_from_sap(self):
+        pass
