@@ -7,6 +7,8 @@ class RegisteredDealer(models.Model):
     phone_number = models.IntegerField(max_length=10,blank=False, null= False, unique= True)
     class Meta:
         app_label="gladminds" 
+    def __unicode__(self):
+        return self.dealer_id
 
 class GladMindUsers(models.Model):
     gladmind_customer_id=models.CharField(max_length=215,null= False)
@@ -32,21 +34,21 @@ class CustomerData(models.Model):
     valid_kms=models.IntegerField(max_length=10)
     is_expired = models.BooleanField()
     is_closed = models.BooleanField()
-    closed_date = models.DateTimeField(null=True)
-    expired_date = models.DateTimeField(null=True)
+    closed_date = models.DateField(null=True,blank=True)
+    expired_date = models.DateField(null=True)
+    product_purchase_date=models.DateField()
+    actual_service_date=models.DateField(null=True,blank=True)
+    actual_kms=models.CharField(max_length=10,null= True,blank=True)
+    dealer=models.ForeignKey(RegisteredDealer, null=False)
+    last_reminder_date=models.DateField(null=True,blank=True)
+    schedule_reminder_date=models.DateField(null=True,blank=True)
     class Meta:
         app_label="gladminds" 
         verbose_name_plural = "Customer Data"
         
     def __unicode__(self):
         return self.unique_service_code
-    
-class ServiceCouponData(models.Model):
-    service_coupon=models.ForeignKey(CustomerData,unique=True, null=False)
-    last_reminder_date=models.DateTimeField(null=True)
-    schedule_reminder_date=models.DateTimeField(null=True)
-    class Meta:
-        app_label="gladminds" 
+
     
         
     
