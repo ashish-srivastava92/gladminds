@@ -6,7 +6,7 @@ from gladminds.models import common
 from gladminds.tasks import send_registration_detail,send_service_detail, send_reminder_message
 from datetime import datetime
 from django.db import connection
-
+__all__ = ['GladmindsTaskManager']
 HANDLER_MAPPER = {
                   'reg':'register_customer',
                   'service': 'customer_service_detail',
