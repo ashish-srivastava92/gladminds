@@ -134,7 +134,7 @@ class GladmindsTaskManager(object):
     
     def get_customers_to_send_reminder(self):
         REMINDER_QUERY = """SELECT id, phone_number_id, unique_service_coupon, product_id, expired_date, valid_days, 
-                            valid_kms FROM gladminds_customerdata WHERE DATE(expired_date) = DATE_ADD(DATE(NOW()),INTERVAL 31 DAY) 
+                            valid_kms FROM gladminds_customerdata WHERE DATE(expired_date) = DATE_ADD(DATE(NOW()),INTERVAL 7 DAY) 
                             AND is_closed !=1 AND is_expired!=1 AND last_reminder_date is NULL;"""
                             
         data = common.CustomerData.objects.raw(REMINDER_QUERY)  
