@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from celery import shared_task
 from gladminds.utils import save_log
 from gladminds.dao.smsclient import MockSmsClient as smsclient
+from gladminds.resource import resources
 import logging
 logger = logging.getLogger(__name__)
 
@@ -76,7 +77,9 @@ def send_coupon_validity_detail(**kwargs):
 
 @shared_task
 def send_reminder(*args, **kwargs):
-    pass
+    obj = resources.GladmindsTaskManager()
+    obj.get_customers_to_send_reminder()
+    
 
 def send_reminder_message(*args, **kwargs):
     try:
