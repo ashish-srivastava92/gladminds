@@ -3,12 +3,12 @@ from celery import shared_task
 from django.conf import settings
 from gladminds.utils import save_log
 from gladminds.dao.smsclient import MockSmsClient
-#from gladminds.resource.resources import GladmindsTaskManager
+from gladminds.tasksmanager import GladmindsTaskManager
 import logging
 logger = logging.getLogger(__name__)
 
 @shared_task
-def send_registration_detail(**kwargs):
+def send_registration_detail(*args, **kwargs):
     try:
         client = settings.SMS_CLIENT_DETAIL
         sms_client = MockSmsClient(**client)
@@ -30,7 +30,7 @@ def send_registration_detail(**kwargs):
         
         
 @shared_task
-def send_service_detail(**kwargs):
+def send_service_detail(*args, **kwargs):
     try:
         client = settings.SMS_CLIENT_DETAIL
         sms_client = MockSmsClient(**client)
@@ -52,7 +52,7 @@ def send_service_detail(**kwargs):
 
 
 @shared_task
-def send_coupon_validity_detail(**kwargs):
+def send_coupon_validity_detail(*args, **kwargs):
     try:
         client = settings.SMS_CLIENT_DETAIL
         sms_client = MockSmsClient(**client)
