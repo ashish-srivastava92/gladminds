@@ -14,7 +14,7 @@ app = Celery('gladminds')
 app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 app.conf.CELERY_TIMEZONE = 'UTC'
-app.conf.CELERYBEAT_SCHEDULE = {
+app.conf.CELERYBEAT_SCHEDULE= {
     # Execute daily at midnight.
     'send-reminder-daily-midnight': {
         'task': 'gladminds.tasks.send_reminder',
@@ -27,6 +27,9 @@ app.conf.CELERYBEAT_SCHEDULE = {
         'schedule': crontab(minute='*/1'),
     },                         
 }
+app.conf.update(
+    CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend',
+)
 
 @app.task(bind=True)
 def debug_task(self):

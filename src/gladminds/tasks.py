@@ -3,7 +3,7 @@ from celery import shared_task
 from django.conf import settings
 from gladminds.utils import save_log
 from gladminds.dao.smsclient import MockSmsClient
-from gladminds.tasksmanager import GladmindsTaskManager
+from gladminds import taskmanager
 import logging
 logger = logging.getLogger(__name__)
 
@@ -74,17 +74,16 @@ def send_coupon_validity_detail(*args, **kwargs):
 
 @shared_task
 def send_reminder(*args, **kwargs):
-    obj = GladmindsTaskManager()
-    obj.get_customers_to_send_reminder()
+    taskmanager.get_customers_to_send_reminder()
     
-
+@shared_task
 def send_reminder_message(*args, **kwargs):
     try:
         client = settings.SMS_CLIENT_DETAIL
         sms_client = MockSmsClient(**client)
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = mock_client.send_stateless(**kwargs)
+        respone_data = sms_client.send_stateless(**kwargs)
         debug_message = "Send the message: %s To : %s" % (phone_number, message)
         logger.info(debug_message)
         kwargs = {
@@ -95,7 +94,6 @@ def send_reminder_message(*args, **kwargs):
                     'status':'success'
                   }
         save_log(**kwargs)
-        
     except Exception as ex:
         send_reminder_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
     
