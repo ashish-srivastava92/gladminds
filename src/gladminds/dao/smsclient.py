@@ -19,12 +19,12 @@ class SmsClientMessageFailted(Exception):{}
 
 class SmsClientBaseObject(object):
     
-    def __init__(self, username, password, authenticate_url = None, message_url = None):
+    def __init__(self, *args, **kwargs):
         """Set username and password"""
-        self.username = username
-        self.password = password
-        self.authenticate_url = authenticate_url
-        self.message_url = message_url
+        self.username = kwargs['username']
+        self.password = kwargs['password']
+        self.authenticate_url = kwargs['authenticate_url']
+        self.message_url = kwargs['message_url']
         self.session_id = None
         
     """Authenticate the user and return session Id"""
@@ -58,8 +58,8 @@ class SmsClientBaseObject(object):
 
 class AirtelSmsClient(SmsClientBaseObject):
     
-    def __init__(self, username, password, authenticate_url, message_url):
-        AirtelSmsClient.__init__(self, username, password, authenticate_url, message_url)
+    def __init__(self, *args, **kwargs):
+        SmsClientBaseObject.__init__(self, *args, **kwargs)
     
     def authenticate(self):
         params = {'login':self.username, 'pass': self.password}
@@ -88,14 +88,14 @@ class AirtelSmsClient(SmsClientBaseObject):
 
 class MockSmsClient(SmsClientBaseObject):
     
-    def __init__(self, username, password, authenticate_url, message_url):
-        AirtelSmsClient.__init__(self, username, password, authenticate_url, message_url)
+    def __init__(self, *args, **kwargs):
+        SmsClientBaseObject.__init__(self, *args, **kwargs)
     
-    def authenticate(self):
+    def authenticate(self, **kwargs):
         return {"sessionID":"23ef53u78s090df9ac0vvg011f"}
     
-    def send_stateless(self):
-        return {"jobId":695, "message":"Your message has been successfully sent", "messagesLeft":99999862}
+    def send_stateless(self, **kwargs):
+        return {"jobId":695, "message":"Your message has been sent to {0}".format(kwargs['phone_number']), "messagesLeft":99999862}
     
     def send_stateful(self, **kwargs):
         return {"sessionID":"23ef53u78s090df9ac0vvg011f", "jobId":695, "message":"Your message has been successfully sent", "messagesLeft":99999862}

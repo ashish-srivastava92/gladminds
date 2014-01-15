@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #Set Environment
-export DJANGO_SETTINGS_MODULE=gladminds.prod_settings
+export DJANGO_SETTINGS_MODULE=gladminds.dev_settings
 
 #bin/django collectstatic
 # Pull latest code changes from Github
@@ -36,8 +36,8 @@ sleep 3
 
 #Starting Celery and Celery beat ...
 echo Starting Celery and Celery beat ...
-nohup bin/celery -A gladminds worker --loglevel info -f tasks.out & > /dev/null 2>&1
-nohup bin/celery -A gladminds beat --loglevel info -f beat.out & > /dev/null 2>&1
+nohup bin/django celery -A gladminds worker --loglevel info -f tasks.out & > /dev/null 2>&1
+nohup bin/django celery -A gladminds beat -S djcelery.schedulers.DatabaseScheduler --loglevel info -f beat.out & > /dev/null 2>&1
 sleep 5
 
 # Run server
