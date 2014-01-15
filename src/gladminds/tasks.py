@@ -13,7 +13,6 @@ def send_registration_detail(**kwargs):
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = smsclient.send_stateless(**kwargs)
-        
         debug_message = "Send the message: %s To : %s" % (phone_number, message)
         print debug_message
         logger.info(debug_message)
