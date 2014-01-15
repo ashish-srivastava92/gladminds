@@ -29,7 +29,7 @@ class CustomerData(models.Model):
     phone_number=models.ForeignKey(GladMindUsers, null=False)
     sap_customer_id=models.CharField(max_length=215,null= False)
     product_id=models.CharField(max_length=215,null= False)
-    unique_service_coupon=models.CharField(max_length=215,null= False)
+    unique_service_coupon=models.CharField(max_length=215,unique= True,null= False)
     valid_days = models.IntegerField(max_length=10)
     valid_kms=models.IntegerField(max_length=10)
     is_expired = models.BooleanField()
