@@ -75,6 +75,10 @@ def send_coupon_validity_detail(*args, **kwargs):
 @shared_task
 def send_reminder(*args, **kwargs):
     taskmanager.get_customers_to_send_reminder()
+
+@shared_task
+def send_schedule_reminder(*args, **kwargs):
+    taskmanager.get_customers_to_send_reminder_by_admin()
     
 @shared_task
 def send_reminder_message(*args, **kwargs):

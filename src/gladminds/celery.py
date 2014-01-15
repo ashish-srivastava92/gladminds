@@ -24,8 +24,14 @@ app.conf.CELERYBEAT_SCHEDULE= {
     # Import data into MySQL
     'import_data_to_db': {
         'task': 'gladminds.tasks.import_data',
-        'schedule': crontab(minute='*/1'),
-    },                         
+        'schedule': crontab(minute=0, hour=0),
+    },
+    
+    #Job to send reminder message schedule by admin
+    'reminder_message_schedule_by_admin': {
+        'task': 'gladminds.tasks.send_schedule_reminder',
+        'schedule': crontab(minute=0, hour=0),
+    },                                              
 }
 app.conf.update(
     CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend',
