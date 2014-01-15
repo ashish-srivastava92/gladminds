@@ -59,7 +59,7 @@ class SmsClientBaseObject(object):
 class AirtelSmsClient(SmsClientBaseObject):
     
     def __init__(self, username, password, authenticate_url, message_url):
-        AirtelSmsClient.__init__(self, username, password, authenticate_url, message_url)
+        SmsClientBaseObject.__init__(self, username, password, authenticate_url, message_url)
     
     def authenticate(self):
         params = {'login':self.username, 'pass': self.password}
@@ -88,8 +88,8 @@ class AirtelSmsClient(SmsClientBaseObject):
 
 class MockSmsClient(SmsClientBaseObject):
     
-    def __init__(self, username, password, authenticate_url, message_url):
-        AirtelSmsClient.__init__(self, username, password, authenticate_url, message_url)
+    def __init__(self, username = None, password = None, authenticate_url = None, message_url = None):
+        SmsClientBaseObject.__init__(self, username, password, authenticate_url, message_url)
     
     def authenticate(self):
         return {"sessionID":"23ef53u78s090df9ac0vvg011f"}

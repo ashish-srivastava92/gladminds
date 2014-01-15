@@ -1,20 +1,21 @@
 from __future__ import absolute_import
 from celery import shared_task
+from django.conf import settings
 from gladminds.utils import save_log
-from gladminds.dao.smsclient import MockSmsClient as smsclient
+from gladminds.dao.smsclient import MockSmsClient
 from gladminds.resource.resources import GladmindsTaskManager
 import logging
 logger = logging.getLogger(__name__)
 
-
 @shared_task
 def send_registration_detail(**kwargs):
     try:
+        client = settings.SMS_CLIENT_DETAIL
+        sms_client = MockSmsClient(**client)
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = smsclient.send_stateless(**kwargs)
+        respone_data = sms_client.send_stateless(**kwargs)
         debug_message = "Send the message: %s To : %s" % (phone_number, message)
-        print debug_message
         logger.info(debug_message)
         kwargs = {
                     'action':'SENT',
@@ -24,7 +25,6 @@ def send_registration_detail(**kwargs):
                     'status':'success'
                   }
         save_log(**kwargs)
-        
     except Exception as ex:
         send_registration_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
         
@@ -32,12 +32,12 @@ def send_registration_detail(**kwargs):
 @shared_task
 def send_service_detail(**kwargs):
     try:
+        client = settings.SMS_CLIENT_DETAIL
+        sms_client = MockSmsClient(**client)
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        response_data = smsclient.send_stateless(**kwargs)
-        
+        response_data = sms_client.send_stateless(**kwargs)
         debug_message = "Send the message: %s To : %s" % (phone_number, message)
-        print debug_message
         logger.info(debug_message)
         kwargs = {
                     'action':'SENT',
@@ -47,7 +47,6 @@ def send_service_detail(**kwargs):
                     'status':'success'
                   }
         save_log(**kwargs)
-        
     except Exception as ex:
         send_service_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
 
@@ -55,12 +54,12 @@ def send_service_detail(**kwargs):
 @shared_task
 def send_coupon_validity_detail(**kwargs):
     try:
+        client = settings.SMS_CLIENT_DETAIL
+        sms_client = MockSmsClient(**client)
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = smsclient.send_stateless(**kwargs)
-        
+        respone_data = sms_client.send_stateless(**kwargs)
         debug_message = "Send the message: %s To : %s" % (phone_number, message)
-        print debug_message
         logger.info(debug_message)
         kwargs = {
                     'action':'SENT',
@@ -70,7 +69,6 @@ def send_coupon_validity_detail(**kwargs):
                     'status':'success'
                   }
         save_log(**kwargs)
-        
     except Exception as ex:
         send_registration_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
 
@@ -82,9 +80,11 @@ def send_reminder(*args, **kwargs):
 
 def send_reminder_message(*args, **kwargs):
     try:
+        client = settings.SMS_CLIENT_DETAIL
+        sms_client = MockSmsClient(**client)
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = smsclient.send_stateless(**kwargs)
+        respone_data = mock_client.send_stateless(**kwargs)
         debug_message = "Send the message: %s To : %s" % (phone_number, message)
         logger.info(debug_message)
         kwargs = {
