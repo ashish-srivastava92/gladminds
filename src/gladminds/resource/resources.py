@@ -130,7 +130,7 @@ class GladmindsResources(Resource):
         return 'application/json'
     
 
-class GladmindsTaskManager(object):
+class GladmindsTaskManager():
     
     def get_customers_to_send_reminder(self):
         REMINDER_QUERY = """SELECT id, phone_number_id, unique_service_coupon, product_id, expired_date, valid_days, 

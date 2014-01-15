@@ -46,6 +46,6 @@ SMS_CLIENT_DETAIL = {
     "username":"gladminds",
     "password":"gladminds",
     "gateway_url":"http://mockairtelgateway.airtel.com",
-    "authentication_url": "http://mockairtelgateway.airtel.com/cd563fg/authentication",
+    "authenticate_url": "http://mockairtelgateway.airtel.com/cd563fg/authentication",
     "message_url": "http://mockairtelgateway.airtel.com/cd563fg/sendmessage"
 }

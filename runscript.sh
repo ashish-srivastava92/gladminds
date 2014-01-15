@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #Set Environment
-export DJANGO_SETTINGS_MODULE=gladminds.prod_settings
+export DJANGO_SETTINGS_MODULE=gladminds.dev_settings
 
 #bin/django collectstatic
 # Pull latest code changes from Github

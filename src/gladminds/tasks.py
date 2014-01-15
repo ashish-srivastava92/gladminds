@@ -3,7 +3,7 @@ from celery import shared_task
 from django.conf import settings
 from gladminds.utils import save_log
 from gladminds.dao.smsclient import MockSmsClient
-from gladminds.resource.resources import GladmindsTaskManager
+#from gladminds.resource.resources import GladmindsTaskManager
 import logging
 logger = logging.getLogger(__name__)
 
