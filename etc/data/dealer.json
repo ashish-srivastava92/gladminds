@@ -1,23 +1,26 @@
 [
   {
-    "model": "gladminds.registereddealers",
+    "model": "gladminds.registereddealer",
     "pk": 1,
     "fields": {
-      "phone_number":"9000900099"
+      "dealer_id": "G675DF",
+      "phone_number":8100900099
     }
   },
   {
-    "model": "gladminds.registeredDealers",
+    "model": "gladminds.registereddealer",
     "pk": 2,
     "fields": {
-      "phone_number":"9000900098"
+      "dealer_id": "B8A5MC",
+      "phone_number":8100900098
     }
   },
   {
-    "model": "gladminds.registeredDealers",
+    "model": "gladminds.registereddealer",
     "pk": 3,
     "fields": {
-      "phone_number":"9000900097"
+      "dealer_id": "FF99ACX",
+      "phone_number":8100900097
     }
   }
 ]

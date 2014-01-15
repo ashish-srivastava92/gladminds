@@ -75,7 +75,27 @@ def send_coupon_validity_detail(**kwargs):
 
 @shared_task
 def send_reminder(*args, **kwargs):
-    print "Sent reminder to customer"
+    pass
+
+def send_reminder_message(*args, **kwargs):
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        respone_data = smsclient.send_stateless(**kwargs)
+        debug_message = "Send the message: %s To : %s" % (phone_number, message)
+        logger.info(debug_message)
+        kwargs = {
+                    'action':'SENT Reminder',
+                    'reciever': '55680',
+                    'sender':str(phone_number),
+                    'message': message,
+                    'status':'success'
+                  }
+        save_log(**kwargs)
+        
+    except Exception as ex:
+        send_reminder_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
+    
 
 @shared_task
 def import_data(*args, **kwargs):
