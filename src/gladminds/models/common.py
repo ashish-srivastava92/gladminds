@@ -3,12 +3,21 @@ from django.db.models.fields.related import  ForeignKey,OneToOneField
   
         
 class RegisteredDealer(models.Model):
-    dealer_id=models.CharField(max_length=10,blank=False, null= False)
-    phone_number = models.IntegerField(max_length=10,blank=False, null= False, unique= True)
+    dealer_code=models.CharField(max_length=10,blank=False, null= False,unique= True,
+                                 help_text="Dealer Code must be unique")
+    address=models.TextField(blank=False)
     class Meta:
         app_label="gladminds" 
     def __unicode__(self):
-        return self.dealer_id
+        return self.dealer_code
+      
+class ServiceAdvisor(models.Model):
+    dealer=models.ForeignKey(RegisteredDealer, null=False)
+    name=models.CharField(max_length=10,blank=False, null= False)
+    phone_number=models.IntegerField(max_length=10,blank=False, null= False, unique= True)
+    order = models.PositiveIntegerField(default=0)
+    class Meta:
+        app_label="gladminds"
 
 class GladMindUsers(models.Model):
     gladmind_customer_id=models.CharField(max_length=215,null= False)
@@ -44,7 +53,7 @@ class CustomerData(models.Model):
     schedule_reminder_date=models.DateField(null=True,blank=True)
     class Meta:
         app_label="gladminds" 
-        verbose_name_plural = "Customer Data"
+        verbose_name_plural = "Customers"
         
    
 
