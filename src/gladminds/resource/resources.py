@@ -134,8 +134,16 @@ class GladmindsTaskManager(object):
         message_dict = {'phone_number':'message'}
         for phone_number, message in message_dict:
             send_reminder_message.delay(phone_number = phone_number, message = message)
-            
-        
+    
+    def get_customers_to_send_reminder_by_admin(self):
+        REMINDER_QUERY = """SELECT phone_number_id, unique_service_code, product_id, expired_date, valid_days, valid_kms FROM gladminds_customerdata WHERE DATE(expired_date) = DATE(NOW())+7 AND is_closed !=1 AND is_expired!=1 AND last_reminder_date is null"""
+        data = common.CustomerData.objects.raw(REMINDER_QUERY)  
+        phone_number = []
+        message = []
+        message_dict = {'phone_number':'message'}
+        for phone_number, message in message_dict:
+            send_reminder_message.delay(phone_number = phone_number, message = message)   
+    
     
     def import_data_from_sap(self):
         pass

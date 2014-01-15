@@ -12,7 +12,16 @@ OUT_DIR = os.path.join(BASE_DIR, "out")
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-DATABASES['default']['NAME'] = os.path.join(OUT_DIR, 'project.db')
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'gladminds',
+        'USER': 'gladminds',
+        'PASSWORD': 'gladmindsRocks',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    }
+}
 
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
