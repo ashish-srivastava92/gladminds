@@ -8,10 +8,6 @@ STATIC_DIR = os.path.join(BASE_DIR, "src/static")
 TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
-
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -22,6 +18,9 @@ DATABASES = {
         'PORT': '3306',
     }
 }
+
+DEBUG = True
+TEMPLATE_DEBUG = DEBUG
 
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
