@@ -73,30 +73,26 @@ class GladmindsResources(Resource):
 
     def customer_service_detail(self, attr_list,phone_number):
         gladmind_customer_id = attr_list[1]
-        phone_number = None
         message = None
         status=None
         try:
-            customer_object = common.GladMindUsers.objects.get(gladmind_customer_id = gladmind_customer_id)
-            phone_number = customer_object.__dict__['phone_number']
             object = common.CustomerData.objects.filter(phone_number__phone_number=phone_number)
             product_id =object[0].product_id
-            service_code=' ,'.join(data.unique_service_coupon +" Expiry Days "+str(data.valid_days)
-                                   +" Valid KMS "+str(data.valid_kms) for data in object if data.product_id==product_id)
+            for data in object:
+                 if data.product_id==product_id and not (data.is_expired or data.is_closed):
+                     service_code=''.join(data.unique_service_coupon +" Expiry Date "+str(data.expired_date)
+                                   +" Valid KMS "+str(data.valid_kms))
+                     break
             message = templates.SERVICE_DETAIL.format(gladmind_customer_id, product_id, service_code)
         except Exception as ex:
             message = templates.INVALID_SERVICE_DETAIL.format(gladmind_customer_id)
         send_service_detail.delay(phone_number=phone_number, message=message)
-        if (phone_number=='9123456789'):
-            status='fail'
-        else:
-            status='success'
         kwargs = {
                     'action':'SEND TO QUEUE',
                     'reciever': '55680',
                     'sender':str(phone_number),
                     'message': message,
-                    'status':status
+                    'status':'success'
                   }
         
         utils.save_log(**kwargs)
