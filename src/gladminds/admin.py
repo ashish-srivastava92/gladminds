@@ -9,6 +9,7 @@ from django.contrib.admin import ModelAdmin
 from suit.admin import SortableTabularInline, SortableModelAdmin
 from suit.widgets import SuitDateWidget, SuitSplitDateTimeWidget, \
     EnclosedInput, LinkedSelect, AutosizedTextarea
+from django.contrib.admin import ModelAdmin, SimpleListFilter
 
 
 class DealerInlineForm(ModelForm):
@@ -43,16 +44,49 @@ class DealerAdmin(ModelAdmin):
     
     def serviceadvisor(self, obj):
         return len(obj.serviceadvisor_set.all())
+    
+    
+    
+
+class CustomerInlineForm(ModelForm):
+    class Meta:
+        widgets = {
+            'valid_days': EnclosedInput(
+                                        attrs={'class': 'input-small'}),
+            'valid_kms': EnclosedInput(
+                                        attrs={'class': 'input-small'}),
+            'unique_service_coupon': EnclosedInput(
+                                        attrs={'class': 'input-small'}),
+            'product_id': EnclosedInput(
+                                        attrs={'class': 'input-small'}),
+        }
+
+
+
+class CustomerInline(SortableTabularInline):
+    form = CustomerInlineForm
+    model = CustomerData
+    fields = ('product_id','unique_service_coupon'
+                     ,'valid_days','valid_kms','product_purchase_date','dealer')
+    extra = 1
+
+    
+class GladMindUserAdmin(ModelAdmin):
+    search_fields = ('gladmind_customer_id','phone_number','customer_name','email_id')
+    list_display = ('gladmind_customer_id','customer_name',
+                    'email_id','phone_number','registration_date','products')
+    inlines = (CustomerInline,)
+    
+    def products(self, obj):
+        return len(obj.customerdata_set.all())
+
+
+
 
 class AuditLogAdmin(ModelAdmin):
     search_fields = ('status','date','sender','reciever')
     list_display = ('date','action','message','sender','reciever','status')
-    
-class GladMindUserAdmin(ModelAdmin):
-    search_fields = ('gladmind_customer_id','phone_number')
-    list_display = ('gladmind_customer_id','phone_number','registration_date')
-    
-    
+
 
     
 class CustomersAdmin(ModelAdmin):
