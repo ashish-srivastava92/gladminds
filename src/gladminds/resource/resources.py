@@ -8,7 +8,7 @@ from datetime import datetime
 from django.db import connection
 __all__ = ['GladmindsTaskManager']
 HANDLER_MAPPER = {
-                  'reg':'register_customer',
+                  'gcp_reg':'register_customer',
                   'service': 'customer_service_detail',
                   'check':'validate_coupon'
                   }
@@ -25,11 +25,12 @@ class GladmindsResources(Resource):
     def dispatch_gladminds(self, request, **kwargs):
         if request.POST.get('text'):
             message=request.POST.get('text')
+            phone_number=request.POST.get('phoneNumber')
         else:
             message = request.body
         handler_str, attr_list = self.parse_message(message)
         handler = getattr(self, handler_str, None)
-        to_be_serialized = handler(attr_list)
+        to_be_serialized = handler(attr_list,phone_number)
         to_be_serialized = {"status": to_be_serialized}
         return self.create_response(request, data = to_be_serialized)
     
@@ -41,18 +42,22 @@ class GladmindsResources(Resource):
             action = action.lower()
         return (HANDLER_MAPPER.get(action, None), attr_list)
     
-    def register_customer(self, attr_list):
-        phone_number = int(attr_list[1])
+    def register_customer(self, attr_list,phone_number):
+        customer_name=attr_list[1]
+        email_id=attr_list[2]
         try:
             object = common.GladMindUsers.objects.get(phone_number=phone_number)
             gladmind_customer_id = object.__dict__['gladmind_customer_id']
         except Exception as ex:
             gladmind_customer_id = utils.generate_unique_customer_id()
             registration_date=datetime.now()
-            cust = common.GladMindUsers(gladmind_customer_id =gladmind_customer_id, phone_number = phone_number
-                                        ,registration_date=registration_date)
+            cust = common.GladMindUsers(gladmind_customer_id =gladmind_customer_id,
+                                         phone_number = phone_number,
+                                        customer_name=customer_name,
+                                        email_id=email_id,
+                                        registration_date=registration_date)
             cust.save()
-        message = templates.CUSTOMER_REGISTER.format(gladmind_customer_id)
+        message = templates.CUSTOMER_REGISTER.format(customer_name)
         send_registration_detail.delay(phone_number=phone_number, message=message)
         
         kwargs = {
@@ -66,7 +71,7 @@ class GladmindsResources(Resource):
         utils.save_log(**kwargs)
         return True
 
-    def customer_service_detail(self, attr_list):
+    def customer_service_detail(self, attr_list,phone_number):
         gladmind_customer_id = attr_list[1]
         phone_number = None
         message = None
@@ -98,7 +103,7 @@ class GladmindsResources(Resource):
         return True
     
     
-    def validate_coupon(self, attr_list):
+    def validate_coupon(self, attr_list,phone_number):
         unique_service_coupon = attr_list[1]
         actual_kms = int(attr_list[2])
         message = None
