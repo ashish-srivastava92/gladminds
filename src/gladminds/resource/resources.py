@@ -100,32 +100,44 @@ class GladmindsResources(Resource):
     
     
     def validate_coupon(self, attr_list,phone_number):
-        unique_service_coupon = attr_list[1]
-        actual_kms = int(attr_list[2])
-        message = None
-        try:
-            customer_data_object = common.CustomerData.objects.get(unique_service_coupon = unique_service_coupon)
-            if customer_data_object.is_expired:
-                message = templates.EXPIRED_COUPON.format(unique_service_coupon)
-            else:
-                valid_kms=customer_data_object.valid_kms
-                if (actual_kms>valid_kms):
+        if self.validate_dealer(phone_number):
+            actual_kms = int(attr_list[2])
+            unique_service_coupon = attr_list[1]
+            message = None
+            try:
+                customer_data_object = common.CustomerData.objects.get(unique_service_coupon = unique_service_coupon)
+                if customer_data_object.is_expired:
                     message = templates.EXPIRED_COUPON.format(unique_service_coupon)
                 else:
-                    message = templates.VALID_COUPON.format(unique_service_coupon)
-        except Exception as ex:
-            message = templates.INVALID_COUPON_DETAIL.format(unique_service_coupon)
-        send_service_detail.delay(phone_number='dealer', message=message)
-        kwargs = {
-                    'action':'SEND TO QUEUE',
-                    'reciever': '55680',
-                    'sender':'dealer',
-                    'message': message,
-                    'status':'success'
-                  }
-        
-        utils.save_log(**kwargs)
+                    valid_kms=customer_data_object.valid_kms
+                    if (actual_kms>valid_kms):
+                        message = templates.EXPIRED_COUPON.format(unique_service_coupon)
+                    else:
+                        message = templates.VALID_COUPON.format(unique_service_coupon)
+            except Exception as ex:
+                message = templates.INVALID_COUPON_DETAIL.format(unique_service_coupon)
+            send_service_detail.delay(phone_number='dealer', message=message)
+            kwargs = {
+                        'action':'SEND TO QUEUE',
+                        'reciever': '55680',
+                        'sender':'dealer',
+                        'message': message,
+                        'status':'success'
+                      }
+            
+            utils.save_log(**kwargs)
+            return True
+        else:
+            return False
+    
+    def validate_dealer(self,phone_number):
+        try:
+            service_advisor_object=common.ServiceAdvisor.objects.get(phone_number=phone_number)
+        except:
+            return False
         return True
+#             message = templates.UNAUTHORISED_SA.format(phone_number)
+            
     
     def determine_format(self, request):
         return 'application/json'

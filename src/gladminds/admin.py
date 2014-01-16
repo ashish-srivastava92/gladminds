@@ -96,9 +96,12 @@ class CustomersAdmin(ModelAdmin):
                      ,'valid_days','valid_kms','is_expired','is_closed','closed_date'
                      ,'expired_date','product_purchase_date','actual_service_date',
                      'actual_kms','dealer','last_reminder_date','schedule_reminder_date')
-    
+
+
+class ServiceAdvisorAdmin(ModelAdmin):
+    list_display=('name','phone_number')    
 admin.site.register(RegisteredDealer,DealerAdmin)
 admin.site.register(AuditLog,AuditLogAdmin)
 admin.site.register(CustomerData,CustomersAdmin)
 admin.site.register(GladMindUsers,GladMindUserAdmin)
-
+admin.site.register(ServiceAdvisor,ServiceAdvisorAdmin)
