@@ -18,6 +18,7 @@ def get_customers_to_send_reminder(*args, **kwargs):
         message = templates.REMINDER_COUPON_EXPIRY.format(data['unique_service_coupon'], data['product_id'], data['expired_date'])
         send_reminder_message.delay(phone_number = phone_number, message = message)
         usc_list.append(data['unique_service_coupon'])
+    
     #After Sending all message into celery queue, update the schedule time in database
     if len(usc_list):
         usc_tup =  tuple_to_str(usc_list)
@@ -43,6 +44,14 @@ def get_customers_to_send_reminder_by_admin(*args, **kwargs):
         usc_tup =  tuple_to_str(usc_list)
         UPDATE_CUSTOMER_DATA = """UPDATE gladminds_customerdata SET last_reminder_date = DATE(NOW()), schedule_reminder_date=NULL WHERE unique_service_coupon IN {0};""".format(usc_tup)
         cursor.execute(UPDATE_CUSTOMER_DATA)
-        
+
+def expire_service_coupon(*args, **kwargs):
+    UPDATE_EXPIRE_STATUS_FOR_SERVICE_COUPON = """UPDATE gladminds_customerdata SET is_expired=1 where expired_date<DATE(NOW())"""
+    try:
+        cursor = connection.cursor()
+        cursor.execute(UPDATE_EXPIRE_STATUS_FOR_SERVICE_COUPON)
+    except Exception as ex:
+        print "Caught exception : {0}".format(ex)
+
 def import_data_from_sap(*args, **kwargs):
     pass
