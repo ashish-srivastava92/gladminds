@@ -117,6 +117,14 @@ Crontab to send scheduler reminder sms setup by admin
 def send_schedule_reminder(*args, **kwargs):
     taskmanager.get_customers_to_send_reminder_by_admin()
 
+
+"""
+Crontab to set the is_expire=True for all those coupon which expire till current date time
+"""
+@shared_task
+def expire_service_coupon(*args, **kwargs):
+    taskmanager.expire_service_coupon()
+
 """
 Crontab to import data from SAP to Gladminds Database
 """

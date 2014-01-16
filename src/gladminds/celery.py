@@ -15,23 +15,29 @@ app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 app.conf.CELERY_TIMEZONE = 'UTC'
 app.conf.CELERYBEAT_SCHEDULE= {
-    # Execute daily at midnight.
-    'send-reminder-daily-midnight': {
+    # Send a reminder message to customer on service coupon expiry.
+    'cronjob-send-reminder-daily-midnight': {
         'task': 'gladminds.tasks.send_reminder',
         'schedule': crontab(minute=0, hour=0),
     },
     
-    # Import data into MySQL
-    'import_data_to_db': {
+    # Import data from SAP CRM to MySQL
+    'cronjob-import_data_to_db': {
         'task': 'gladminds.tasks.import_data',
         'schedule': crontab(minute=0, hour=0),
     },
     
     #Job to send reminder message schedule by admin
-    'reminder_message_schedule_by_admin': {
+    'cronjob-reminder_message_schedule_by_admin': {
         'task': 'gladminds.tasks.send_schedule_reminder',
         'schedule': crontab(minute=0, hour=0),
-    },                                              
+    },
+                               
+    #Job to set expire status=True for all service coupon which expire 
+    'cronjob-set-expiry-status-to-service-coupon': {
+        'task': 'gladminds.tasks.expire_service_coupon',
+        'schedule': crontab(minute=0, hour=0),
+    },                                     
 }
 app.conf.update(
     CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend',
