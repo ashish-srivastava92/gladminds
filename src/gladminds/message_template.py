@@ -8,3 +8,7 @@ EXPIRED_COUPON="COUPON :{0} is no more valid now"
 INVALID_COUPON_DETAIL="Wrong COUPON ID:{0}"
 UNAUTHORISED_SA="DEALER NOT AUTHORISED:{0}"
 REMINDER_COUPON_EXPIRY = "Reminder: Your Coupon {0} for product {1} will expire on {2}"
+
+#MESSAGE TEMPLATE RECEIVED FROM CLIENT
+RCV_CUSTOMER_REGISTRATION = "{key} {email_id} {name}"
+RCV_SA_COUPON_VALIDATION = "{key} {vin} {kms} {service_type}"
