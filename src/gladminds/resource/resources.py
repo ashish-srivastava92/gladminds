@@ -3,15 +3,17 @@ from django.conf.urls import url
 from tastypie.resources import Resource
 from gladminds import utils,  message_template as templates
 from gladminds.models import common
-from gladminds.tasks import send_registration_detail,send_service_detail, send_reminder_message
+from gladminds.tasks import send_registration_detail,send_service_detail, send_reminder_message ,send_coupon_close_message
 from datetime import datetime
 from django.db import connection
+from src.gladminds.tasks import send_coupon_close_message
 __all__ = ['GladmindsTaskManager']
 
 HANDLER_MAPPER = {
                   'gcp_reg':'register_customer',
                   'service': 'customer_service_detail',
-                  'check':'validate_coupon'
+                  'check':'validate_coupon',
+                  'complete':'close_coupon'
                   }
 
 class GladmindsResources(Resource):    
@@ -130,6 +132,8 @@ class GladmindsResources(Resource):
                             else:
                                 count=count+1
                         new_unique_service_coupon=customer_data[count].unique_service_coupon
+                        customer_data_object.is_expired=True
+                        customer_data_object.save()
                         message = templates.EXPIRED_COUPON.format(new_unique_service_coupon,unique_service_coupon)
                     else:
                         message = templates.VALID_COUPON.format(unique_service_coupon)
@@ -148,6 +152,33 @@ class GladmindsResources(Resource):
             return True
         else:
             return False
+        
+        
+    def close_coupon(self, attr_list,phone_number):
+        if self.validate_dealer(phone_number):
+            product_id=attr_list[1]
+            unique_service_coupon = attr_list[2]
+            message = None
+            try:
+                customer_data_object = common.CustomerData.objects.get(unique_service_coupon = unique_service_coupon)
+                customer_data_object.is_closed=True
+                customer_data_object.save()
+                message = templates.SA_CLOSE_COUPON
+            except:
+                return False
+        else:
+            return False
+        send_coupon_close_message.delay(phone_number='dealer', message=message)
+        kwargs = {
+                    'action':'SEND TO QUEUE',
+                    'reciever': '55680',
+                    'sender':str(phone_number),
+                    'message': message,
+                    'status':'success'
+                  }
+        
+        utils.save_log(**kwargs)
+        return True
     
     def validate_dealer(self,phone_number):
         try:
