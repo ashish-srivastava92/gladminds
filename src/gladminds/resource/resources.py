@@ -102,17 +102,35 @@ class GladmindsResources(Resource):
     
     def validate_coupon(self, attr_list,phone_number):
         if self.validate_dealer(phone_number):
+            product_id=attr_list[1]
             actual_kms = int(attr_list[2])
-            unique_service_coupon = attr_list[1]
+            unique_service_coupon = attr_list[3]
             message = None
             try:
+                customer_data = common.CustomerData.objects.filter(product_id = product_id)
                 customer_data_object = common.CustomerData.objects.get(unique_service_coupon = unique_service_coupon)
-                if customer_data_object.is_expired:
-                    message = templates.EXPIRED_COUPON.format(unique_service_coupon)
+                if customer_data_object.is_expired or customer_data_object.is_closed :
+                    count=0
+                    for data in customer_data:
+                        if data.unique_service_coupon==unique_service_coupon:
+                            count=count+1
+                            break
+                        else:
+                            count=count+1
+                    new_unique_service_coupon=customer_data[count].unique_service_coupon
+                    message = templates.EXPIRED_COUPON.format(new_unique_service_coupon,unique_service_coupon)
                 else:
                     valid_kms=customer_data_object.valid_kms
                     if (actual_kms>valid_kms):
-                        message = templates.EXPIRED_COUPON.format(unique_service_coupon)
+                        count=0
+                        for data in customer_data:
+                            if data.unique_service_coupon==unique_service_coupon:
+                                count=count+1
+                                break
+                            else:
+                                count=count+1
+                        new_unique_service_coupon=customer_data[count].unique_service_coupon
+                        message = templates.EXPIRED_COUPON.format(new_unique_service_coupon,unique_service_coupon)
                     else:
                         message = templates.VALID_COUPON.format(unique_service_coupon)
             except Exception as ex:
@@ -137,7 +155,6 @@ class GladmindsResources(Resource):
         except:
             return False
         return True
-#             message = templates.UNAUTHORISED_SA.format(phone_number)
             
     
     def determine_format(self, request):
