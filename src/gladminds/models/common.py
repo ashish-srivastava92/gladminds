@@ -1,10 +1,8 @@
 from django.db import models
 
-
-
 ##################BRAND-PRPDUCT MODELS#######################
 '''
-BrandData contains brand realted information
+BrandData contains brand related information
 '''
 class BrandData(models.Model):
     brand_id=models.CharField(max_length=50, null=False,unique=True,
@@ -115,7 +113,6 @@ class CustomerData(models.Model):
     
 ####################################################################
 
-
 STATUS_CHOICES = ((1, 'open'), (2, 'close'), (3, 'expire'))
 
 class CouponData(models.Model):
@@ -137,21 +134,3 @@ class CouponData(models.Model):
     class Meta:
         app_label = "gladminds"
         ordering = ['expired_date',]
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
