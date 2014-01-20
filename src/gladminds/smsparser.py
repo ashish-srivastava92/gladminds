@@ -20,6 +20,8 @@ def sms_parser(*args, **kwargs):
         #Added the Message keyword and handler in return dictionary
         key_args.named['keyword'] = lower_keyword
         key_args.named['handler'] = template_mapper[lower_keyword]['handler']
+        key_args.named['auth_rule'] = template_mapper[keyword]['auth_rule']
+
         return key_args.named
     else:
         raise InvalidMessage("invalid message")
