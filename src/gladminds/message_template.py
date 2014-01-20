@@ -20,10 +20,14 @@ SEND_CUSTOMER_PRODUCT_REGISTER = "Successfully register PRODUCT ID: {0} INTO CUS
 SEND_CUSTOMER_INVALID_CUSTOMER = "Invalid CUSTOMER ID: {0}"
 SEND_SA_VALID_COUPON="Customer can avail Free {0}"
 SEND_SA_EXPIRED_COUPON="Free {1} expired and can avail {0} Free Service"
+SEND_CUSTOMER_VALID_COUPON="Free Service Coupon {0} to Avail {1}"
+SEND_CUSTOMER_EXPIRED_COUPON="Free Service Coupon {0} to Avail {1}\
+ has expired (KMS/Date not valid) and Free Service Coupon {2} to Avail {3}"
 SEND_SA_INVALID_COUPON_DETAIL="Wrong COUPON ID:{0}"
 SEND_SA_UNAUTHORISED_SA="DEALER NOT AUTHORISED:{0}"
 SEND_CUSTOMER_COUPON_REMINDER = "Reminder: Your Coupon {0} for product {1} will expire on {2}"
 SEND_SA_CLOSE_COUPON="Service Completion Tagged into the System. Thank you."
+SEND_CUSTOMER_CLOSE_COUPON="Your Bike {0} service is complete. Please pick your Bike before 6.30PM. {1}, {2}.Thank you."
 SEND_INVALID_MESSAGE = "Invalid message"
 
 
@@ -56,7 +60,7 @@ MESSAGE_TEMPLATE_MAPPER = {
                      'handler':'validate_coupon',
                      'auth_rule': ['sa']
                      },
-            'complete':{
+            'close':{
                         'receive': RCV_SA_COUPON_COMPLETE,
                         'send':SEND_SA_CLOSE_COUPON,
                         'invalid':SEND_INVALID_MESSAGE,

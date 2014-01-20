@@ -4,7 +4,7 @@ from tastypie.resources import Resource
 from gladminds import utils,  message_template as templates
 from gladminds.models import common
 from gladminds import smsparser
-from gladminds.tasks import send_registration_detail, send_service_detail, send_reminder_message, send_coupon_close_message
+from gladminds.tasks import send_registration_detail, send_service_detail,send_reminder_message, send_coupon_close_message,send_coupon_detail_customer,send_close_sms_customer
 from datetime import datetime
 from django.db import connection
 from src.gladminds.tasks import send_coupon_close_message
@@ -14,7 +14,7 @@ HANDLER_MAPPER = {
     'gcp_reg': 'register_customer',
     'service': 'customer_service_detail',
     'check': 'validate_coupon',
-    'complete': 'close_coupon'
+    'close': 'close_coupon'
 }
 
 
@@ -111,52 +111,40 @@ class GladmindsResources(Resource):
         utils.save_log(**kwargs)
         return True
 
-    def validate_coupon(self, attr_list, phone_number):
+    def validate_coupon(self,sms_dict, phone_number):
         if self.validate_dealer(phone_number):
-            product_id = attr_list[1]
-            actual_kms = int(attr_list[2])
-            unique_service_coupon = attr_list[3]
+            vin = sms_dict['vin']
+            actual_kms = int(sms_dict['kms'])
+            service_type= sms_dict['service_type']
             message = None
+            customer_message=None
             try:
-                customer_data = common.CustomerData.objects.filter(
-                    product_id=product_id)
-                customer_data_object = common.CustomerData.objects.get(
-                    unique_service_coupon=unique_service_coupon)
-                if customer_data_object.is_expired or customer_data_object.is_closed:
-                    count = 0
-                    for data in customer_data:
-                        if data.unique_service_coupon == unique_service_coupon:
-                            count = count + 1
-                            break
-                        else:
-                            count = count + 1
-                    new_unique_service_coupon = customer_data[
-                        count].unique_service_coupon
-                    message = templates.EXPIRED_COUPON.format(
-                        new_unique_service_coupon, unique_service_coupon)
-                else:
-                    valid_kms = customer_data_object.valid_kms
-                    if (actual_kms > valid_kms):
-                        count = 0
-                        for data in customer_data:
-                            if data.unique_service_coupon == unique_service_coupon:
-                                count = count + 1
-                                break
-                            else:
-                                count = count + 1
-                        new_unique_service_coupon = customer_data[
-                            count].unique_service_coupon
-                        customer_data_object.is_expired = True
-                        customer_data_object.save()
-                        message = templates.EXPIRED_COUPON.format(
-                            new_unique_service_coupon, unique_service_coupon)
+                coupon_data=common.CouponData.objects.get(vin__vin=vin,service_type=service_type)
+                if coupon_data.status!=1 or actual_kms>coupon_data.valid_kms:
+                    new_service_type=int(service_type)+1
+                    if coupon_data.status == 2:
+                        pass
                     else:
-                        message = templates.VALID_COUPON.format(
-                            unique_service_coupon)
+                        coupon_data.status=3
+                    coupon_data.save()
+                    new_coupon_data=common.CouponData.objects.get(vin__vin=vin,service_type=new_service_type)
+                    message = templates.SEND_SA_EXPIRED_COUPON.format(
+                        new_service_type, service_type)
+                    customer_message = templates.SEND_CUSTOMER_EXPIRED_COUPON.format(
+                        coupon_data.unique_service_coupon, service_type,
+                        new_coupon_data.unique_service_coupon,new_service_type)
+                else:
+                    message = templates.SEND_SA_VALID_COUPON.format(
+                            service_type)
+                    customer_message = templates.SEND_CUSTOMER_VALID_COUPON.format(
+                            coupon_data.unique_service_coupon,service_type)
+                    
             except Exception as ex:
-                message = templates.INVALID_COUPON_DETAIL.format(
-                    unique_service_coupon)
+                message = templates.SEND_INVALID_MESSAGE.format(
+                    service_type)
             send_service_detail.delay(phone_number='dealer', message=message)
+            send_coupon_detail_customer.delay(phone_number='dealer',
+                                                           message=customer_message)
             kwargs = {
                 'action': 'SEND TO QUEUE',
                 'reciever': '55680',
@@ -170,21 +158,26 @@ class GladmindsResources(Resource):
         else:
             return False
 
-    def close_coupon(self, attr_list, phone_number):
+    def close_coupon(self, sms_dict, phone_number):
         if self.validate_dealer(phone_number):
-            product_id = attr_list[1]
-            unique_service_coupon = attr_list[2]
+            vin = sms_dict['vin']
+            unique_service_coupon = sms_dict['usc']
             message = None
+            customer_message=None
             try:
-                customer_data_object = common.CustomerData.objects.get(
-                    unique_service_coupon=unique_service_coupon)
-                customer_data_object.is_closed = True
-                customer_data_object.save()
-                message = templates.SA_CLOSE_COUPON
+                coupon_object = common.CouponData.objects.get(
+                    vin__vin=vin,unique_service_coupon=unique_service_coupon)
+                coupon_object.status = 2
+                coupon_object.save()
+                message = templates.SEND_SA_CLOSE_COUPON
+                service_advisor_object=common.ServiceAdvisor.objects.get(phone_number=phone_number)
+                customer_message=templates.SEND_CUSTOMER_CLOSE_COUPON.format(
+                                    vin,service_advisor_object.name,phone_number)
             except:
                 return False
         else:
             return False
+        send_close_sms_customer.delay(phone_number='GCS',message=customer_message)
         send_coupon_close_message.delay(phone_number='dealer', message=message)
         kwargs = {
             'action': 'SEND TO QUEUE',
