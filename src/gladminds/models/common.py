@@ -116,7 +116,7 @@ class CustomerData(models.Model):
 ####################################################################
 
 
-
+STATUS_CHOICES = ((1, 'open'), (2, 'close'), (3, 'expire'))
 
 class CouponData(models.Model):
     vin=models.ForeignKey(CustomerData, null=False)
@@ -125,8 +125,8 @@ class CouponData(models.Model):
     valid_days = models.IntegerField(max_length=10)
     valid_kms = models.IntegerField(max_length=10)
     dealer = models.ForeignKey(RegisteredDealer, null=False)
-    is_expired = models.BooleanField()
-    is_closed = models.BooleanField()
+    status= models.SmallIntegerField(choices=STATUS_CHOICES,
+                                       default=1)
     closed_date = models.DateField(null=True, blank=True)
     expired_date = models.DateField(null=True)
     actual_service_date = models.DateField(null=True, blank=True)
