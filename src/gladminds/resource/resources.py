@@ -3,6 +3,7 @@ from django.conf.urls import url
 from tastypie.resources import Resource
 from gladminds import utils,  message_template as templates
 from gladminds.models import common
+from gladminds import smsparser
 from gladminds.tasks import send_registration_detail,send_service_detail, send_reminder_message ,send_coupon_close_message
 from datetime import datetime
 from django.db import connection
@@ -31,9 +32,10 @@ class GladmindsResources(Resource):
             phone_number=request.POST.get('phoneNumber')
         else:
             message = request.body
-        handler_str, attr_list = self.parse_message(message)
-        handler = getattr(self, handler_str, None)
-        to_be_serialized = handler(attr_list,phone_number)
+        sms_dict=smsparser.sms_parser(message=message)
+#         handler_str, attr_list = self.parse_message(message)
+        handler = getattr(self, sms_dict['handler'], None)
+        to_be_serialized = handler(sms_dict,phone_number)
         to_be_serialized = {"status": to_be_serialized}
         return self.create_response(request, data = to_be_serialized)
     
@@ -45,9 +47,9 @@ class GladmindsResources(Resource):
             action = action.lower()
         return (HANDLER_MAPPER.get(action, None), attr_list)
     
-    def register_customer(self, attr_list,phone_number):
-        customer_name=attr_list[1]
-        email_id=attr_list[2]
+    def register_customer(self,sms_dict,phone_number):
+        customer_name=sms_dict['name']
+        email_id=sms_dict['email_id']
         try:
             object = common.GladMindUsers.objects.get(phone_number=phone_number)
             gladmind_customer_id = object.__dict__['gladmind_customer_id']

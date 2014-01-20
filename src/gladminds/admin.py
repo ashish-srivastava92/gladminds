@@ -133,7 +133,7 @@ class GladMindUserForm(ModelForm):
 class GladMindUserAdmin(ModelAdmin):
     form = GladMindUserForm
     search_fields = ('gladmind_customer_id','customer_name','phone_number','email_id')
-    list_display = ('gladmind_customer_id','customer_name','phone_number','products')
+    list_display = ('gladmind_customer_id','customer_name','email_id','phone_number','products')
     inlines = (CustomerInline,)
      
     def products(self, obj):
@@ -168,7 +168,7 @@ class CustomersAdmin(ModelAdmin):
 class CouponAdmin(ModelAdmin):
     search_fields = ('unique_service_coupon',)
     list_filter = ('status',)
-    list_display = ('vin','unique_service_coupon','valid_days','valid_kms',
+    list_display = ('vin','unique_service_coupon','service_type','valid_days','valid_kms',
                     'dealer','status')
     
         

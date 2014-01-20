@@ -124,6 +124,7 @@ class CouponData(models.Model):
         max_length=215, unique=True, null=False)
     valid_days = models.IntegerField(max_length=10)
     valid_kms = models.IntegerField(max_length=10)
+    service_type=models.IntegerField(max_length=10)
     dealer = models.ForeignKey(RegisteredDealer, null=False)
     status= models.SmallIntegerField(choices=STATUS_CHOICES,
                                        default=1)

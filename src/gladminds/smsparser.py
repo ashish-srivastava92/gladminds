@@ -12,13 +12,14 @@ def sms_parser(*args, **kwargs):
         
     #Check appropriate received message template and parse the message data
     template_mapper = templates.MESSAGE_TEMPLATE_MAPPER
-    if keyword.lower() in template_mapper.keys():
-        key_args = parse(template_mapper[keyword]['receive'], parse_message['message'])
+    lower_keyword = keyword.lower()
+    if lower_keyword in template_mapper.keys():
+        key_args = parse(template_mapper[lower_keyword]['receive'], parse_message['message'])
         if not key_args:
             raise InvalidMessage("invalid message")
         #Added the Message keyword and handler in return dictionary
-        key_args.named['keyword'] = keyword.lower()
-        key_args.named['handler'] = template_mapper[keyword]['handler']
+        key_args.named['keyword'] = lower_keyword
+        key_args.named['handler'] = template_mapper[lower_keyword]['handler']
         return key_args.named
     else:
         raise InvalidMessage("invalid message")
