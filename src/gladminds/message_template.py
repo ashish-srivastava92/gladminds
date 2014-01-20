@@ -29,7 +29,7 @@ SEND_CUSTOMER_COUPON_REMINDER = "Reminder: Your Coupon {0} for product {1} will 
 SEND_SA_CLOSE_COUPON="Service Completion Tagged into the System. Thank you."
 SEND_CUSTOMER_CLOSE_COUPON="Your Bike {0} service is complete. Please pick your Bike before 6.30PM. {1}, {2}.Thank you."
 SEND_INVALID_MESSAGE = "Invalid message"
-
+SEND_BRAND_DATA="{0}"
 
 #MESSAGE TEMPLATE RECEIVED FROM CLIENT
 RCV_MESSAGE_FORMAT = "{key} {message}"
@@ -37,6 +37,7 @@ RCV_CUSTOMER_REGISTRATION = "{email_id} {name}"
 RCV_CUSTOMER_SERVICE_DETAIL = "{customer_id}"
 RCV_SA_COUPON_VALIDATION = "{vin} {kms} {service_type}"
 RCV_SA_COUPON_COMPLETE = "{vin} {usc}"
+RCV_CUSTOMER_BRAND_DATA="{brand_id}"
 
 MESSAGE_TEMPLATE_MAPPER = {
             'gcp_reg':{
@@ -66,7 +67,14 @@ MESSAGE_TEMPLATE_MAPPER = {
                         'invalid':SEND_INVALID_MESSAGE,
                         'handler':'close_coupon',
                         'auth_rule': ['sa']
-                        }
+                        },
+            'brand':{
+                     'receive': RCV_CUSTOMER_BRAND_DATA,
+                     'send':SEND_BRAND_DATA,
+                    'invalid':SEND_INVALID_MESSAGE,
+                    'handler':'get_brand_data',
+                    'auth_rule': ['open']
+                     }
         }
 
 

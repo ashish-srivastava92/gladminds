@@ -4,7 +4,7 @@ from tastypie.resources import Resource
 from gladminds import utils,  message_template as templates
 from gladminds.models import common
 from gladminds import smsparser
-from gladminds.tasks import send_registration_detail, send_service_detail,send_reminder_message, send_coupon_close_message,send_coupon_detail_customer,send_close_sms_customer
+from gladminds.tasks import send_registration_detail, send_service_detail,send_reminder_message, send_coupon_close_message,send_coupon_detail_customer,send_brand_sms_customer,send_close_sms_customer
 from datetime import datetime
 from django.db import connection
 from src.gladminds.tasks import send_coupon_close_message
@@ -14,7 +14,8 @@ HANDLER_MAPPER = {
     'gcp_reg': 'register_customer',
     'service': 'customer_service_detail',
     'check': 'validate_coupon',
-    'close': 'close_coupon'
+    'close': 'close_coupon',
+    'brand':'get_brand_data'
 }
 
 
@@ -197,6 +198,35 @@ class GladmindsResources(Resource):
         except:
             return False
         return True
+    
+    def get_brand_data(self, sms_dict, phone_number):
+        brand_id = sms_dict['brand_id']
+        try:
+            product_object=common.ProductData.objects.filter(
+                    brand__brand_id=brand_id)
+            customer_object=common.CustomerData.objects.filter(
+                phone_number__phone_number=phone_number)
+            valid_customer_data=filter(lambda x: x.product in product_object,customer_object)
+            product_sap_id_vin=map(lambda x: {'sap_id':x.sap_customer_id,'vin':x.vin},valid_customer_data)
+            brand_message=','.join("customer_id "+ data['sap_id']+" vin "+data['vin'] for data in product_sap_id_vin)
+            
+            message = templates.SEND_BRAND_DATA.format(brand_message)
+            
+        except Exception as ex:
+            message=templates.SEND_INVALID_MESSAGE
+            
+        send_brand_sms_customer.delay(phone_number='GCS',message=message)
+        kwargs = {
+            'action': 'SEND TO QUEUE',
+            'reciever': '55680',
+            'sender': str(phone_number),
+            'message': message,
+            'status': 'success'
+        }
+
+        utils.save_log(**kwargs)
+        return True
+
 
     def determine_format(self, request):
         return 'application/json'

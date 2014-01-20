@@ -185,6 +185,27 @@ def send_close_sms_customer(*args, **kwargs):
     except Exception as ex:
         send_coupon_close_message_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
 
+@shared_task
+def send_brand_sms_customer(*args, **kwargs):
+    try:
+        client = settings.SMS_CLIENT_DETAIL
+        sms_client = MockSmsClient(**client)
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        respone_data = sms_client.send_stateless(**kwargs)
+        debug_message = "Send the message: %s To : %s" % (phone_number, message)
+        logger.info(debug_message)
+        kwargs = {
+                    'action':'SENT',
+                    'reciever': '55680',
+                    'sender':'GCS',
+                    'message': message,
+                    'status':'success'
+                  }
+        save_log(**kwargs)
+    except Exception as ex:
+        send_brand_sms_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
+
 
 
 
