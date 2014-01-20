@@ -24,6 +24,8 @@ SEND_SA_INVALID_COUPON_DETAIL="Wrong COUPON ID:{0}"
 SEND_SA_UNAUTHORISED_SA="DEALER NOT AUTHORISED:{0}"
 SEND_CUSTOMER_COUPON_REMINDER = "Reminder: Your Coupon {0} for product {1} will expire on {2}"
 SEND_SA_CLOSE_COUPON="Service Completion Tagged into the System. Thank you."
+SEND_INVALID_MESSAGE = "Invalid message"
+
 
 #MESSAGE TEMPLATE RECEIVED FROM CLIENT
 RCV_MESSAGE_FORMAT = "{key} {message}"
@@ -32,11 +34,27 @@ RCV_CUSTOMER_SERVICE_DETAIL = "{customer_id}"
 RCV_SA_COUPON_VALIDATION = "{vin} {kms} {service_type}"
 RCV_SA_COUPON_COMPLETE = "{vin} {usc}"
 
-RCV_MESSAGE_TEMPLATE_MAPPER = {
-            'gcp_reg':RCV_CUSTOMER_REGISTRATION,
-            'service':RCV_CUSTOMER_SERVICE_DETAIL,
-            'check':RCV_SA_COUPON_VALIDATION,
-            'complete':RCV_SA_COUPON_COMPLETE
-            }
+MESSAGE_TEMPLATE_MAPPER = {
+            'gcp_reg':{
+                       'receive':RCV_CUSTOMER_REGISTRATION,
+                       'send':SEND_CUSTOMER_REGISTER,
+                       'invalid':SEND_INVALID_MESSAGE
+                       },
+            'service':{
+                       'receive':RCV_CUSTOMER_SERVICE_DETAIL,
+                       'send':SEND_CUSTOMER_SERVICE_DETAIL,
+                       'invalid':SEND_CUSTOMER_INVALID_CUSTOMER
+                       },
+            'check':{
+                     'receive': RCV_SA_COUPON_VALIDATION,
+                     'send':SEND_SA_VALID_COUPON,
+                     'invalid':SEND_SA_EXPIRED_COUPON
+                     },
+            'complete':{
+                        'receive': RCV_SA_COUPON_COMPLETE,
+                        'send':SEND_SA_CLOSE_COUPON,
+                        'invalid':SEND_INVALID_MESSAGE
+                        }
+        }
 
 
