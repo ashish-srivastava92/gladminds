@@ -103,6 +103,34 @@ def send_reminder_message(*args, **kwargs):
     except Exception as ex:
         send_reminder_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
 
+
+
+
+"""
+This job send coupon close message
+"""
+@shared_task
+def send_coupon_close_message(*args, **kwargs):
+    try:
+        client = settings.SMS_CLIENT_DETAIL
+        sms_client = MockSmsClient(**client)
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        respone_data = sms_client.send_stateless(**kwargs)
+        debug_message = "Send the message: %s To : %s" % (phone_number, message)
+        logger.info(debug_message)
+        kwargs = {
+                    'action':'SENT Reminder',
+                    'reciever': '55680',
+                    'sender':str(phone_number),
+                    'message': message,
+                    'status':'success'
+                  }
+        save_log(**kwargs)
+    except Exception as ex:
+        send_coupon_close_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
+
+
 """
 Crontab to send reminder sms to customer 
 """
