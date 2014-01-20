@@ -156,7 +156,7 @@ class CouponInlineForm(ModelForm):
 class Couponline(SortableTabularInline):
     form = CouponInlineForm
     model = CouponData
-    fields = ('unique_service_coupon','valid_days','valid_kms','status','dealer')
+    fields = ('unique_service_coupon','valid_days','valid_kms','status','service_type','dealer')
     extra = 1
     
 

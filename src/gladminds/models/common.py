@@ -134,4 +134,4 @@ class CouponData(models.Model):
     order = models.PositiveIntegerField(default=0)
     class Meta:
         app_label = "gladminds"
-        ordering = ['expired_date',]
+        ordering = ['service_type',]
