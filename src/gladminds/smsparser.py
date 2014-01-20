@@ -16,6 +16,9 @@ def sms_parser(*args, **kwargs):
         key_args = parse(template_mapper[keyword]['receive'], parse_message['message'])
         if not key_args:
             raise InvalidMessage("invalid message")
+        #Added the Message keyword and handler in return dictionary
+        key_args.named['keyword'] = keyword.lower()
+        key_args.named['handler'] = template_mapper[keyword]['handler']
         return key_args.named
     else:
         raise InvalidMessage("invalid message")
@@ -33,7 +36,3 @@ def render_sms_template(*args, **kwargs):
         message_template = template_mapper[status]
         message = message_template.format(*args, **kwargs)
     return message
-
-    
-    
-    

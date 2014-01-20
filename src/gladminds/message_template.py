@@ -38,22 +38,26 @@ MESSAGE_TEMPLATE_MAPPER = {
             'gcp_reg':{
                        'receive':RCV_CUSTOMER_REGISTRATION,
                        'send':SEND_CUSTOMER_REGISTER,
-                       'invalid':SEND_INVALID_MESSAGE
+                       'invalid':SEND_INVALID_MESSAGE,
+                       'handler':'register_customer',
                        },
             'service':{
                        'receive':RCV_CUSTOMER_SERVICE_DETAIL,
                        'send':SEND_CUSTOMER_SERVICE_DETAIL,
-                       'invalid':SEND_CUSTOMER_INVALID_CUSTOMER
+                       'invalid':SEND_CUSTOMER_INVALID_CUSTOMER,
+                       'handler':'customer_service_detail',
                        },
             'check':{
                      'receive': RCV_SA_COUPON_VALIDATION,
                      'send':SEND_SA_VALID_COUPON,
-                     'invalid':SEND_SA_EXPIRED_COUPON
+                     'invalid':SEND_SA_EXPIRED_COUPON,
+                     'handler':'validate_coupon',
                      },
             'complete':{
                         'receive': RCV_SA_COUPON_COMPLETE,
                         'send':SEND_SA_CLOSE_COUPON,
-                        'invalid':SEND_INVALID_MESSAGE
+                        'invalid':SEND_INVALID_MESSAGE,
+                        'handler':'close_coupon',
                         }
         }
 
