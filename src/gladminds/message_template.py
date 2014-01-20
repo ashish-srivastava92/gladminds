@@ -9,3 +9,8 @@ INVALID_COUPON_DETAIL="Wrong COUPON ID:{0}"
 UNAUTHORISED_SA="DEALER NOT AUTHORISED:{0}"
 REMINDER_COUPON_EXPIRY = "Reminder: Your Coupon {0} for product {1} will expire on {2}"
 SA_CLOSE_COUPON="Service Completion Tagged into the System. Thank you."
+
+#MESSAGE TEMPLATE RECEIVED FROM CLIENT
+RCV_CUSTOMER_REGISTRATION = "{key} {email_id} {name}"
+RCV_SA_COUPON_VALIDATION = "{key} {vin} {kms} {service_type}"
+
