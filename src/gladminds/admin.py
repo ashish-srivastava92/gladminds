@@ -162,11 +162,13 @@ class Couponline(SortableTabularInline):
 
     
 class CustomersAdmin(ModelAdmin):
+    search_fields = ('vin','sap_customer_id','phone_number__phone_number')
+    list_filter = ('phone_number__phone_number',)
     list_display = ('phone_number','product','vin','sap_customer_id','dealer')
     inlines=(Couponline,)
     
 class CouponAdmin(ModelAdmin):
-    search_fields = ('unique_service_coupon',)
+    search_fields = ('unique_service_coupon','vin__vin')
     list_filter = ('status',)
     list_display = ('vin','unique_service_coupon','service_type','valid_days','valid_kms',
                     'dealer','status')
