@@ -120,16 +120,9 @@ class GladmindsResources(Resource):
                     else:
                         coupon_data.status=3
                     coupon_data.save()
-<<<<<<< HEAD
-                    new_coupon_data=common.CouponData.objects.get(vin__vin=vin,service_type=new_service_type)
                     message = templates.get_template('SEND_SA_EXPIRED_COUPON').format(
-                        new_service_type, service_type)
-                    customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(
-=======
-                    message = templates.SEND_SA_EXPIRED_COUPON.format(
                         next_coupon.service_type, service_type)
-                    customer_message = templates.SEND_CUSTOMER_EXPIRED_COUPON.format(
->>>>>>> a1f944747362ec27ead998edf18d4a9410013d9a
+                    customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(
                         coupon_data.unique_service_coupon, service_type,
                         next_coupon.unique_service_coupon,next_coupon.service_type)
                 else:
