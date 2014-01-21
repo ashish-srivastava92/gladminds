@@ -195,7 +195,12 @@ class AuditLogAdmin(ModelAdmin):
     search_fields = ('status','date','sender','reciever')
     list_display = ('date','action','message','sender','reciever','status')
 ##############################################################
-   
+
+######################Message Template#############################
+class MessageTemplateAdmin(ModelAdmin):
+    search_fields = ('template_key','template')
+    list_display=('template_key','template','description') 
+###################################################################
 
 admin.site.register(AuditLog,AuditLogAdmin)
 admin.site.register(CustomerData,CustomersAdmin)
