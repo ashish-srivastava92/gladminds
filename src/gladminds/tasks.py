@@ -215,14 +215,14 @@ Crontab to send reminder sms to customer
 """
 @shared_task
 def send_reminder(*args, **kwargs):
-    taskmanager.get_customers_to_send_reminder()
+    taskmanager.get_customers_to_send_reminder(*args, **kwargs)
     
 """
 Crontab to send scheduler reminder sms setup by admin
 """
 @shared_task
 def send_schedule_reminder(*args, **kwargs):
-    taskmanager.get_customers_to_send_reminder_by_admin()
+    taskmanager.get_customers_to_send_reminder_by_admin(*args, **kwargs)
 
 
 """
@@ -230,7 +230,7 @@ Crontab to set the is_expire=True for all those coupon which expire till current
 """
 @shared_task
 def expire_service_coupon(*args, **kwargs):
-    taskmanager.expire_service_coupon()
+    taskmanager.expire_service_coupon(*args, **kwargs)
 
 """
 Crontab to import data from SAP to Gladminds Database
