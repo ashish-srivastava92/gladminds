@@ -181,7 +181,6 @@ class CouponAdmin(ModelAdmin):
             '3': 'error',
         }
         css_class = class_map.get(str(obj.status))
-        print "cdsss",css_class
         if css_class:
             return {'class': css_class}
         

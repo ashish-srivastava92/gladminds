@@ -169,6 +169,11 @@ class GladmindsResources(Resource):
                 coupon_object = common.CouponData.objects.get(
                     vin__vin=vin,unique_service_coupon=unique_service_coupon)
                 coupon_object.status = 2
+                all_previous_coupon=common.CouponData.objects.filter(
+                    vin__vin=vin,service_type__lt=coupon_object.service_type)
+                for coupon in all_previous_coupon:
+                    coupon.status=3
+                    coupon.save()
                 coupon_object.save()
                 message = templates.SEND_SA_CLOSE_COUPON
                 service_advisor_object=common.ServiceAdvisor.objects.get(phone_number=phone_number)
