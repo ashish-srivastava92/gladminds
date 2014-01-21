@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from celery import shared_task
 from django.conf import settings
 from gladminds.utils import save_log
-from gladminds.dao.smsclient import MockSmsClient
+from gladminds.dao.smsclient import TwilioSmsClient
 from gladminds import taskmanager
 import logging
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ This task send sms to customer on customer registration
 def send_registration_detail(*args, **kwargs):
     try:
         client = settings.SMS_CLIENT_DETAIL
-        sms_client = MockSmsClient(**client)
+        sms_client = TwilioSmsClient(**client)
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = sms_client.send_stateless(**kwargs)
@@ -38,7 +38,7 @@ This task send customer valid service detail
 def send_service_detail(*args, **kwargs):
     try:
         client = settings.SMS_CLIENT_DETAIL
-        sms_client = MockSmsClient(**client)
+        sms_client = TwilioSmsClient(**client)
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         response_data = sms_client.send_stateless(**kwargs)
@@ -62,7 +62,7 @@ This job send sms to service advisor, whether the coupon is valid or not
 def send_coupon_validity_detail(*args, **kwargs):
     try:
         client = settings.SMS_CLIENT_DETAIL
-        sms_client = MockSmsClient(**client)
+        sms_client = TwilioSmsClient(**client)
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = sms_client.send_stateless(**kwargs)
@@ -89,7 +89,7 @@ This job send sms to customer when SA send
 def send_coupon_detail_customer(*args, **kwargs):
     try:
         client = settings.SMS_CLIENT_DETAIL
-        sms_client = MockSmsClient(**client)
+        sms_client = TwilioSmsClient(**client)
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = sms_client.send_stateless(**kwargs)
@@ -116,7 +116,7 @@ This job send reminder sms to customer
 def send_reminder_message(*args, **kwargs):
     try:
         client = settings.SMS_CLIENT_DETAIL
-        sms_client = MockSmsClient(**client)
+        sms_client = TwilioSmsClient(**client)
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = sms_client.send_stateless(**kwargs)
@@ -143,7 +143,7 @@ This job send coupon close message
 def send_coupon_close_message(*args, **kwargs):
     try:
         client = settings.SMS_CLIENT_DETAIL
-        sms_client = MockSmsClient(**client)
+        sms_client = TwilioSmsClient(**client)
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = sms_client.send_stateless(**kwargs)
@@ -168,7 +168,7 @@ This job send coupon close message to customer
 def send_close_sms_customer(*args, **kwargs):
     try:
         client = settings.SMS_CLIENT_DETAIL
-        sms_client = MockSmsClient(**client)
+        sms_client = TwilioSmsClient(**client)
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = sms_client.send_stateless(**kwargs)
@@ -189,7 +189,7 @@ def send_close_sms_customer(*args, **kwargs):
 def send_brand_sms_customer(*args, **kwargs):
     try:
         client = settings.SMS_CLIENT_DETAIL
-        sms_client = MockSmsClient(**client)
+        sms_client = TwilioSmsClient(**client)
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = sms_client.send_stateless(**kwargs)

@@ -24,6 +24,7 @@ DATABASES = {
 }
 
 
+
 BROKER_URL= 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
 
@@ -43,9 +44,9 @@ TEMPLATE_DIRS = (
 )
 
 SMS_CLIENT_DETAIL = {
-    "username":"gladminds",
-    "password":"gladminds",
-    "gateway_url":"http://mockairtelgateway.airtel.com",
-    "authenticate_url": "http://mockairtelgateway.airtel.com/cd563fg/authentication",
-    "message_url": "http://mockairtelgateway.airtel.com/cd563fg/sendmessage"
-}
+                     'OTP_TWILIO_ACCOUNT' : 'AC9ce726c861d7c5f1c783adfff9c4789a',
+                     'OTP_TWILIO_AUTH' : '51eda8b3a54bf84f9530c2b379cd02fa',
+                     'OTP_TWILIO_FROM' : '+1 574-212-0423',
+                     'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/SMS/Messages.json'
+            }
+
