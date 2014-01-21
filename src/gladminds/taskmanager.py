@@ -15,7 +15,7 @@ def get_customers_to_send_reminder(*args, **kwargs):
     data_list = [dict(zip([col[0] for col in desc], row)) for row in cursor.fetchall()]
     for data in data_list:
         phone_number = data['phone_number']
-        message = templates.get_template('REMINDER_COUPON_EXPIRY').format(data['unique_service_coupon'], data['product_id'], data['expired_date'])
+        message = templates.get_template('SEND_CUSTOMER_COUPON_REMINDER').format(data['unique_service_coupon'], data['product_id'], data['expired_date'])
         send_reminder_message.delay(phone_number = phone_number, message = message)
         usc_list.append(data['unique_service_coupon'])
     
@@ -35,7 +35,7 @@ def get_customers_to_send_reminder_by_admin(*args, **kwargs):
     data_list = [dict(zip([col[0] for col in desc], row)) for row in cursor.fetchall()]
     for data in data_list:
         phone_number = data['phone_number']
-        message = templates.get_template('REMINDER_COUPON_EXPIRY').format(data['unique_service_coupon'], data['product_id'], data['expired_date'])
+        message = templates.get_template('SEND_CUSTOMER_COUPON_REMINDER').format(data['unique_service_coupon'], data['product_id'], data['expired_date'])
         send_reminder_message.delay(phone_number = phone_number, message = message)       
         usc_list.append(data['unique_service_coupon'])
     
