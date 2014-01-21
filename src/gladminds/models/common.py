@@ -113,7 +113,7 @@ class CustomerData(models.Model):
     
 ####################################################################
 
-STATUS_CHOICES = ((1, 'open'), (2, 'close'), (3, 'expire'))
+STATUS_CHOICES = ((1, 'open'), (2, 'closed'), (3, 'expired'))
 
 class CouponData(models.Model):
     vin=models.ForeignKey(CustomerData, null=False)

@@ -113,18 +113,25 @@ class GladmindsResources(Resource):
             try:
                 coupon_data=common.CouponData.objects.get(vin__vin=vin,service_type=service_type)
                 if coupon_data.status!=1 or actual_kms>coupon_data.valid_kms:
-                    new_service_type=int(service_type)+1
+                    next_coupon=common.CouponData.objects.filter(
+                    vin__vin=vin,service_type__gt=coupon_data.service_type)[:1].get()
                     if coupon_data.status == 2:
                         pass
                     else:
                         coupon_data.status=3
                     coupon_data.save()
+<<<<<<< HEAD
                     new_coupon_data=common.CouponData.objects.get(vin__vin=vin,service_type=new_service_type)
                     message = templates.get_template('SEND_SA_EXPIRED_COUPON').format(
                         new_service_type, service_type)
                     customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(
+=======
+                    message = templates.SEND_SA_EXPIRED_COUPON.format(
+                        next_coupon.service_type, service_type)
+                    customer_message = templates.SEND_CUSTOMER_EXPIRED_COUPON.format(
+>>>>>>> a1f944747362ec27ead998edf18d4a9410013d9a
                         coupon_data.unique_service_coupon, service_type,
-                        new_coupon_data.unique_service_coupon,new_service_type)
+                        next_coupon.unique_service_coupon,next_coupon.service_type)
                 else:
                     message = templates.get_template('SEND_SA_VALID_COUPON').format(
                             service_type)
@@ -160,6 +167,8 @@ class GladmindsResources(Resource):
                 coupon_object = common.CouponData.objects.get(
                     vin__vin=vin,unique_service_coupon=unique_service_coupon)
                 coupon_object.status = 2
+                all_previous_coupon=common.CouponData.objects.filter(
+                    vin__vin=vin,service_type__lt=coupon_object.service_type).update(status=3)
                 coupon_object.save()
                 message = templates.get_template('SEND_SA_CLOSE_COUPON')
                 service_advisor_object=common.ServiceAdvisor.objects.get(phone_number=phone_number)
