@@ -10,15 +10,6 @@ from django.db import connection
 from src.gladminds.tasks import send_coupon_close_message
 __all__ = ['GladmindsTaskManager']
 
-HANDLER_MAPPER = {
-    'gcp_reg': 'register_customer',
-    'service': 'customer_service_detail',
-    'check': 'validate_coupon',
-    'close': 'close_coupon',
-    'brand':'get_brand_data'
-}
-
-
 class GladmindsResources(Resource):
 
     class Meta:
@@ -66,7 +57,7 @@ class GladmindsResources(Resource):
                 email_id=email_id,
                 registration_date=registration_date)
             cust.save()
-        message = templates.SEND_CUSTOMER_REGISTER.format(customer_name)
+        message = templates.get_template('SEND_CUSTOMER_REGISTER').format(customer_name)
         send_registration_detail.delay(
             phone_number=phone_number, message=message)
 
@@ -96,10 +87,10 @@ class GladmindsResources(Resource):
             service_code = ''.join(coupon_object[0].unique_service_coupon + 
                                        " Valid Days " + str(coupon_object[0].valid_days)
                                        + " Valid KMS " + str(coupon_object[0].valid_kms))
-            message = templates.SEND_CUSTOMER_SERVICE_DETAIL.format(
+            message = templates.get_template('SEND_CUSTOMER_SERVICE_DETAIL').format(
                 gladmind_customer_id, vin, service_code)
         except Exception as ex:
-            message = templates.INVALID_SERVICE_DETAIL.format(
+            message = templates.get_template('INVALID_SERVICE_DETAIL').format(
                 gladmind_customer_id)
         send_service_detail.delay(phone_number=phone_number, message=message)
         kwargs = {
@@ -129,19 +120,19 @@ class GladmindsResources(Resource):
                         coupon_data.status=3
                     coupon_data.save()
                     new_coupon_data=common.CouponData.objects.get(vin__vin=vin,service_type=new_service_type)
-                    message = templates.SEND_SA_EXPIRED_COUPON.format(
+                    message = templates.get_template('SEND_SA_EXPIRED_COUPON').format(
                         new_service_type, service_type)
-                    customer_message = templates.SEND_CUSTOMER_EXPIRED_COUPON.format(
+                    customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(
                         coupon_data.unique_service_coupon, service_type,
                         new_coupon_data.unique_service_coupon,new_service_type)
                 else:
-                    message = templates.SEND_SA_VALID_COUPON.format(
+                    message = templates.get_template('SEND_SA_VALID_COUPON').format(
                             service_type)
-                    customer_message = templates.SEND_CUSTOMER_VALID_COUPON.format(
+                    customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(
                             coupon_data.unique_service_coupon,service_type)
                     
             except Exception as ex:
-                message = templates.SEND_INVALID_MESSAGE.format(
+                message = templates.get_template('SEND_INVALID_MESSAGE').format(
                     service_type)
             send_service_detail.delay(phone_number='dealer', message=message)
             send_coupon_detail_customer.delay(phone_number='dealer',
@@ -170,9 +161,9 @@ class GladmindsResources(Resource):
                     vin__vin=vin,unique_service_coupon=unique_service_coupon)
                 coupon_object.status = 2
                 coupon_object.save()
-                message = templates.SEND_SA_CLOSE_COUPON
+                message = templates.get_template('SEND_SA_CLOSE_COUPON')
                 service_advisor_object=common.ServiceAdvisor.objects.get(phone_number=phone_number)
-                customer_message=templates.SEND_CUSTOMER_CLOSE_COUPON.format(
+                customer_message=templates.get_template('SEND_CUSTOMER_CLOSE_COUPON').format(
                                     vin,service_advisor_object.name,phone_number)
             except:
                 return False
@@ -210,10 +201,10 @@ class GladmindsResources(Resource):
             product_sap_id_vin=map(lambda x: {'sap_id':x.sap_customer_id,'vin':x.vin},valid_customer_data)
             brand_message=','.join("customer_id "+ data['sap_id']+" vin "+data['vin'] for data in product_sap_id_vin)
             
-            message = templates.SEND_BRAND_DATA.format(brand_message)
+            message = templates.get_template('SEND_BRAND_DATA').format(brand_message)
             
         except Exception as ex:
-            message=templates.SEND_INVALID_MESSAGE
+            message=templates.get_template('SEND_INVALID_MESSAGE')
             
         send_brand_sms_customer.delay(phone_number='GCS',message=message)
         kwargs = {

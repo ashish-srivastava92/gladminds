@@ -29,7 +29,7 @@ SUIT_CONFIG = {
     'SHOW_REQUIRED_ASTERISK': True,
     'MENU': ({'app':'gladminds','label':'GladMinds Data','icon':' icon-folder-open',
                'models': ({'model':'auditlog','label': 'Audit Log'},'branddata', 'productdata','registereddealer','serviceadvisor',
-                          'gladmindusers','customerdata','coupondata')},
+                          'gladmindusers','customerdata','coupondata','messagetemplate')},
                 {'app':'djcelery','label':'Job Management','icon':'icon-tasks'})
 }
 
