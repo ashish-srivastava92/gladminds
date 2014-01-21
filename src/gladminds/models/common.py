@@ -135,3 +135,11 @@ class CouponData(models.Model):
     class Meta:
         app_label = "gladminds"
         ordering = ['service_type',]
+
+class MessageTemplate(models.Model):
+    template_key = models.CharField(max_length=255, unique=True, null=False)
+    template = models.CharField(max_length=512, null=False)
+    description = models.CharField(max_length=512, null=True)
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "Message Template"

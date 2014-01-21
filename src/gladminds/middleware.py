@@ -21,9 +21,16 @@ class GladmindsMiddleware(object):
             return
          
         if request.path is '/v1/messages':
-            #Putting a random phone, will change once we get correct format of message
-            phone_number = '+91 7834671232'
-            message = request.body
+            message = None
+            phone_number = None
+            if request.POST.get('text'):
+                message = request.POST.get('text')
+                phone_number = request.POST.get('phoneNumber')
+            else:
+                #Putting a random phone, will change once we get correct format of message
+                phone_number = '+91 7834671232'
+                message = request.body
+            
             message_args= smsparser.sms_parser(message = message)
             auth_rule = message_args['auth_rule']
             
