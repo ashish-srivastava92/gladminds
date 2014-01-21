@@ -99,5 +99,32 @@ class MockSmsClient(SmsClientBaseObject):
     
     def send_stateful(self, **kwargs):
         return {"sessionID":"23ef53u78s090df9ac0vvg011f", "jobId":695, "message":"Your message has been successfully sent", "messagesLeft":99999862}
-    
         
+class TwilioSmsClient(SmsClientBaseObject):
+    
+    def __init__(self, *args, **kwargs):
+        self.account_key  = kwargs['OTP_TWILIO_ACCOUNT']
+        self.auth_key = kwargs['OTP_TWILIO_AUTH']
+        self.sender = kwargs['OTP_TWILIO_FROM']
+        self.uri = kwargs['OTP_TWILIO_URI']
+    
+    def authenticate(self, **kwargs):
+        return {"sessionID":"23ef53u78s090df9ac0vvg011f"}
+    
+    def send_stateless(self, **kwargs):
+        url = self.uri.format(self.account_key)
+        data = {
+            'From': self.sender,
+            'To': '+91'+str(kwargs['phone_number']),
+            'Body': kwargs['message'],
+        }
+        response = requests.post(url = url, data=data, auth=(self.account_key, self.auth_key))
+        
+    def send_stateful(self, **kwargs):
+        url = self.uri.format(self.account_key)
+        data = {
+            'From': self.sender,
+            'To': '+91'+str(kwargs['phone_number']),
+            'Body': kwargs['message'],
+        }
+        response = requests.post(url = url, data=data, auth=(self.account_key, self.auth_key))
