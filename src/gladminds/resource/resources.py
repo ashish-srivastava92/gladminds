@@ -44,10 +44,9 @@ class GladmindsResources(Resource):
         customer_name = sms_dict['name']
         email_id = sms_dict['email_id']
         try:
-            object = common.GladMindUsers.objects.get(
-                phone_number=phone_number)
+            object = common.GladMindUsers.objects.get(phone_number=phone_number)
             gladmind_customer_id = object.__dict__['gladmind_customer_id']
-        except Exception as ex:
+        except Excepion as ex:
             gladmind_customer_id = utils.generate_unique_customer_id()
             registration_date = datetime.now()
             customer = common.GladMindUsers(gladmind_customer_id=gladmind_customer_id, phone_number=phone_number,
