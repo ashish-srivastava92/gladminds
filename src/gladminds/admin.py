@@ -195,6 +195,7 @@ class AuditLogAdmin(ModelAdmin):
 class MessageTemplateAdmin(ModelAdmin):
     search_fields = ('template_key','template')
     list_display=('template_key','template','description') 
+    readonly_fields=('template_key',)
 ###################################################################
 
 
