@@ -65,7 +65,7 @@ class GladmindsResources(Resource):
         try:
             gladmind_user_object=common.GladMindUsers.objects.get(gladmind_customer_id=gladmind_customer_id)
             phone_number=str(gladmind_user_object)
-            customer_object = common.CustomerData.objects.filter(phone_number__phone_number=phone_number)
+            customer_object = common.ProductData.objects.filter(customer_phone_number__phone_number=phone_number)
             # FIXME: RIGHT NOW HANDLING FOR ONE PRODUCT ONLY
             vin = customer_object[0].vin
             coupon_object = common.CouponData.objects.filter(vin__vin=vin, status=1)
@@ -89,23 +89,19 @@ class GladmindsResources(Resource):
             try:
                 coupon_data=common.CouponData.objects.get(vin__vin=vin,service_type=service_type)
                 if coupon_data.status!=1 or actual_kms>coupon_data.valid_kms:
-                    next_coupon=common.CouponData.objects.filter(
-                    vin__vin=vin,service_type__gt=coupon_data.service_type)[:1].get()
+                    next_coupon=common.CouponData.objects.filter(vin__vin=vin,service_type__gt=coupon_data.service_type)[:1].get()
                     if coupon_data.status == 2:
                         pass
                     else:
                         coupon_data.status=3
                     coupon_data.save()
-                    message = templates.get_template('SEND_SA_EXPIRED_COUPON').format(
-                        next_coupon.service_type, service_type)
+                    message = templates.get_template('SEND_SA_EXPIRED_COUPON').format(next_coupon.service_type, service_type)
                     customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(
                         coupon_data.unique_service_coupon, service_type,
                         next_coupon.unique_service_coupon,next_coupon.service_type)
                 else:
-                    message = templates.get_template('SEND_SA_VALID_COUPON').format(
-                            service_type)
-                    customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(
-                            coupon_data.unique_service_coupon,service_type)
+                    message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type)
+                    customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon_data.unique_service_coupon,service_type)
                     
             except Exception as ex:
                 message = templates.get_template('SEND_INVALID_MESSAGE').format(
@@ -134,7 +130,7 @@ class GladmindsResources(Resource):
                 customer_message=templates.get_template('SEND_CUSTOMER_CLOSE_COUPON').format(vin,service_advisor_object.name,phone_number)
                 
                 #Fetch the Customer phone number from Customer Data
-                customer_data = common.CustomerData.object.get(vin=vin)
+                customer_data = common.ProductData.object.get(vin=vin)
                 customer_phone_number = customer_data.phone_number
             except:
                 return False
@@ -157,11 +153,9 @@ class GladmindsResources(Resource):
     def get_brand_data(self, sms_dict, phone_number):
         brand_id = sms_dict['brand_id']
         try:
-            product_object=common.ProductData.objects.filter(
-                    brand__brand_id=brand_id)
-            customer_object=common.CustomerData.objects.filter(
-                phone_number__phone_number=phone_number)
-            valid_customer_data=filter(lambda x: x.product in product_object,customer_object)
+            product_object=common.ProductTypeData.objects.filter(brand__brand_id=brand_id)
+            customer_object=common.ProductData.objects.filter(customer_phone_number__phone_number=phone_number)
+            valid_customer_data=filter(lambda x: x.product in product_object, customer_object)
             product_sap_id_vin=map(lambda x: {'sap_id':x.sap_customer_id,'vin':x.vin},valid_customer_data)
             brand_message=','.join("customer_id "+ data['sap_id']+" vin "+data['vin'] for data in product_sap_id_vin)
             message = templates.get_template('SEND_BRAND_DATA').format(brand_message)
