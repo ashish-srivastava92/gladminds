@@ -44,4 +44,3 @@ MESSAGE_TEMPLATE_MAPPER = {
                      }
         }
 
-
