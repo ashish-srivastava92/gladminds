@@ -46,7 +46,7 @@ class GladmindsResources(Resource):
         try:
             object = common.GladMindUsers.objects.get(phone_number=phone_number)
             gladmind_customer_id = object.__dict__['gladmind_customer_id']
-        except Excepion as ex:
+        except Exception as ex:
             gladmind_customer_id = utils.generate_unique_customer_id()
             registration_date = datetime.now()
             customer = common.GladMindUsers(gladmind_customer_id=gladmind_customer_id, phone_number=phone_number,
@@ -85,6 +85,7 @@ class GladmindsResources(Resource):
             service_type= sms_dict['service_type']
             message = None
             customer_message=None
+            customer_phone_number = None
             try:
                 coupon_data=common.CouponData.objects.get(vin__vin=vin,service_type=service_type)
                 if coupon_data.status!=1 or actual_kms>coupon_data.valid_kms:
@@ -101,13 +102,17 @@ class GladmindsResources(Resource):
                 else:
                     message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type)
                     customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon_data.unique_service_coupon,service_type)
-                    
+                
+                #Fetch the Customer phone number from Customer Data
+                customer_data = common.ProductData.objects.get(vin=vin)
+                customer_phone_number = customer_data.customer_phone_number 
             except Exception as ex:
                 message = templates.get_template('SEND_INVALID_MESSAGE').format(
                     service_type)
-            send_service_detail.delay(phone_number='dealer', message=message)
-            send_coupon_detail_customer.delay(phone_number='dealer', message=customer_message)
-            audit.audit_log(reciever = phone_number, action='SEND TO QUEUE')
+            send_service_detail.delay(phone_number=phone_number, message=message)
+            audit.audit_log(reciever = phone_number, action='SEND TO QUEUE', message=message)
+            send_coupon_detail_customer.delay(phone_number=customer_phone_number, message=customer_message)
+            audit.audit_log(reciever = customer_phone_number, action='SEND TO QUEUE', message=customer_message)
             return True
         else:
             return False
@@ -129,8 +134,8 @@ class GladmindsResources(Resource):
                 customer_message=templates.get_template('SEND_CUSTOMER_CLOSE_COUPON').format(vin,service_advisor_object.name,phone_number)
                 
                 #Fetch the Customer phone number from Customer Data
-                customer_data = common.ProductData.object.get(vin=vin)
-                customer_phone_number = customer_data.phone_number
+                customer_data = common.ProductData.objects.get(vin=vin)
+                customer_phone_number = customer_data.customer_phone_number
             except:
                 return False
         else:
