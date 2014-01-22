@@ -17,23 +17,21 @@ class BrandData(models.Model):
     
     
 '''
-ProductData  is linked to Brand data
+ProductTypeData  is linked to Brand data
 For 1 Brand there can be multiple Products
-here productid is not vin example:all pulsar200 have same
-product_id
 '''
     
-class ProductData(models.Model):
-    brand=models.ForeignKey(BrandData ,null=False)
-    product_name=models.CharField(max_length=215, null=False)
-    product_id=models.CharField(max_length=215,unique=True, null=False)
+class ProductTypeData(models.Model):
+    brand_id=models.ForeignKey(BrandData ,null=False)
+    product_name=models.CharField(max_length=255, null=False)
+    product_type=models.CharField(max_length=255,unique=True, null=False)
     order = models.PositiveIntegerField(default=0)
     class Meta:
         app_label = "gladminds"
-        verbose_name_plural = "Product Data"
+        verbose_name_plural = "Product Type"
         
     def __unicode__(self):
-        return self.product_id
+        return self.product_type
         
 ###################################################################
 
@@ -41,7 +39,7 @@ class ProductData(models.Model):
 
 class RegisteredDealer(models.Model):
     dealer_id = models.CharField(
-        max_length=10, blank=False, null=False, unique=True,
+        max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
     address = models.TextField(blank=False)
 
@@ -54,16 +52,16 @@ class RegisteredDealer(models.Model):
 
 
 class ServiceAdvisor(models.Model):
-    dealer = models.ForeignKey(RegisteredDealer, null=False)
+    dealer_id = models.ForeignKey(RegisteredDealer, null=False)
     service_advisor_id=models.CharField(max_length=10, blank=False,unique=True, null=False)
     name = models.CharField(max_length=10, blank=False, null=False)
-    phone_number = models.IntegerField(
-        max_length=10, blank=False, null=False, unique=True)
+    phone_number = models.CharField(
+        max_length=15, blank=False, null=False, unique=True)
     order = models.PositiveIntegerField(default=0)
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Service Advisor Data"
-    
+        
     def __unicode__(self):
         return self.phone_number
         
@@ -76,10 +74,10 @@ Gladmindusers have auto generated glamind customer id,
 and unique phone numner
 '''
 class GladMindUsers(models.Model):
-    gladmind_customer_id = models.CharField(max_length=215,unique=True, null=False)
-    customer_name = models.CharField(max_length=215, null=True)
-    email_id = models.EmailField(max_length=215, null=True)
-    phone_number = models.CharField(max_length=10,unique=True)
+    gladmind_customer_id = models.CharField(max_length=215,unique=True, null=True)
+    customer_name = models.CharField(max_length=215)
+    email_id = models.EmailField(max_length=215)
+    phone_number = models.CharField(max_length=15,unique=True)
     registration_date = models.DateTimeField()
 
     class Meta:
@@ -99,17 +97,18 @@ which customer bought which product and
 the vin of product and the dealer
 '''
 
-class CustomerData(models.Model):
-    phone_number = models.ForeignKey(GladMindUsers, null=False)
-    product= models.ForeignKey(ProductData, null=False)
+class ProductData(models.Model):
     vin=models.CharField(max_length=215, null=False,unique=True)
-    sap_customer_id = models.CharField(max_length=215, null=False)
-    product_purchase_date = models.DateField()
-    dealer = models.ForeignKey(RegisteredDealer, null=False)
+    customer_phone_number = models.ForeignKey(GladMindUsers, null=True, blank=True)
+    product_type= models.ForeignKey(ProductTypeData, null=False)
+    sap_customer_id = models.CharField(max_length=215, null=True, blank=True)
+    product_purchase_date = models.DateTimeField(null=True, blank=True)
+    invoice_date=models.DateTimeField(null=False)
+    dealer_id = models.ForeignKey(RegisteredDealer, null=False)
     order = models.PositiveIntegerField(default=0)
     class Meta:
         app_label = "gladminds"
-        verbose_name_plural = "Customer Data"
+        verbose_name_plural = "Product Data"
         
     def __unicode__(self):
         return self.vin
@@ -119,21 +118,21 @@ class CustomerData(models.Model):
 STATUS_CHOICES = ((1, 'open'), (2, 'closed'), (3, 'expired'))
 
 class CouponData(models.Model):
-    vin=models.ForeignKey(CustomerData, null=False)
+    vin=models.ForeignKey(ProductData, null=False)
     unique_service_coupon = models.CharField(
         max_length=215, unique=True, null=False)
-    valid_days = models.IntegerField(max_length=10)
-    valid_kms = models.IntegerField(max_length=10)
-    service_type=models.IntegerField(max_length=10)
-    sa_phone_number = models.ForeignKey(ServiceAdvisor, null=False)
+    valid_days = models.IntegerField(max_length=10,null=False)
+    valid_kms = models.IntegerField(max_length=10,null=False)
+    service_type=models.IntegerField(max_length=10,null=False)
+    sa_phone_number = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
     status= models.SmallIntegerField(choices=STATUS_CHOICES,
                                        default=1)
-    closed_date = models.DateField(null=True, blank=True)
-    mark_expired_on = models.DateField(null=True)
-    actual_service_date = models.DateField(null=True, blank=True)
+    closed_date = models.DateTimeField(null=True, blank=True)
+    mark_expired_on = models.DateTimeField(null=False)
+    actual_service_date = models.DateTimeField(null=True, blank=True)
     actual_kms = models.CharField(max_length=10, null=True, blank=True)
-    last_reminder_date = models.DateField(null=True, blank=True)
-    schedule_reminder_date = models.DateField(null=True, blank=True)
+    last_reminder_date = models.DateTimeField(null=True, blank=True)
+    schedule_reminder_date = models.DateTimeField(null=True, blank=True)
     order = models.PositiveIntegerField(default=0)
     class Meta:
         app_label = "gladminds"
