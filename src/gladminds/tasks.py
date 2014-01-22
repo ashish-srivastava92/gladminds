@@ -1,11 +1,9 @@
 from __future__ import absolute_import
 from celery import shared_task
 from django.conf import settings
-from gladminds.utils import save_log
+from gladminds.audit import audit_log
 from gladminds.dao.smsclient import TwilioSmsClient
 from gladminds import taskmanager
-import logging
-logger = logging.getLogger(__name__)
 
 """
 This task send sms to customer on customer registration
@@ -18,16 +16,7 @@ def send_registration_detail(*args, **kwargs):
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = sms_client.send_stateless(**kwargs)
-        debug_message = "Send the message: %s To : %s" % (phone_number, message)
-        logger.info(debug_message)
-        kwargs = {
-                    'action':'SENT',
-                    'reciever': '55680',
-                    'sender':str(phone_number),
-                    'message': message,
-                    'status':'success'
-                  }
-        save_log(**kwargs)
+        audit_log(reciever=phone_number, message=message)
     except Exception as ex:
         send_registration_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
         
@@ -42,16 +31,7 @@ def send_service_detail(*args, **kwargs):
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         response_data = sms_client.send_stateless(**kwargs)
-        debug_message = "Send the message: %s To : %s" % (phone_number, message)
-        logger.info(debug_message)
-        kwargs = {
-                    'action':'SENT',
-                    'reciever': '55680',
-                    'sender':str(phone_number),
-                    'message': message,
-                    'status':'success'
-                  }
-        save_log(**kwargs)
+        audit_log(reciever=phone_number, message=message)
     except Exception as ex:
         send_service_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
 
@@ -66,20 +46,9 @@ def send_coupon_validity_detail(*args, **kwargs):
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = sms_client.send_stateless(**kwargs)
-        debug_message = "Send the message: %s To : %s" % (phone_number, message)
-        logger.info(debug_message)
-        kwargs = {
-                    'action':'SENT',
-                    'reciever': '55680',
-                    'sender':str(phone_number),
-                    'message': message,
-                    'status':'success'
-                  }
-        save_log(**kwargs)
+        audit_log(reciever=phone_number, message=message)
     except Exception as ex:
         send_registration_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
-
-
 
 """
 This job send sms to customer when SA send 
@@ -93,21 +62,9 @@ def send_coupon_detail_customer(*args, **kwargs):
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = sms_client.send_stateless(**kwargs)
-        debug_message = "Send the message: %s To : %s" % (phone_number, message)
-        logger.info(debug_message)
-        kwargs = {
-                    'action':'SENT',
-                    'reciever': '55680',
-                    'sender':'GCP',
-                    'message': message,
-                    'status':'success'
-                  }
-        save_log(**kwargs)
+        audit_log(reciever=phone_number, message=message)
     except Exception as ex:
         send_registration_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
-
-
-
 
 """
 This job send reminder sms to customer
@@ -120,21 +77,9 @@ def send_reminder_message(*args, **kwargs):
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = sms_client.send_stateless(**kwargs)
-        debug_message = "Send the message: %s To : %s" % (phone_number, message)
-        logger.info(debug_message)
-        kwargs = {
-                    'action':'SENT Reminder',
-                    'reciever': '55680',
-                    'sender':str(phone_number),
-                    'message': message,
-                    'status':'success'
-                  }
-        save_log(**kwargs)
+        audit_log(reciever=phone_number, message=message)
     except Exception as ex:
         send_reminder_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
-
-
-
 
 """
 This job send coupon close message
@@ -147,19 +92,9 @@ def send_coupon_close_message(*args, **kwargs):
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = sms_client.send_stateless(**kwargs)
-        debug_message = "Send the message: %s To : %s" % (phone_number, message)
-        logger.info(debug_message)
-        kwargs = {
-                    'action':'SENT Reminder',
-                    'reciever': '55680',
-                    'sender':str(phone_number),
-                    'message': message,
-                    'status':'success'
-                  }
-        save_log(**kwargs)
+        audit_log(reciever=phone_number, message=message)
     except Exception as ex:
         send_coupon_close_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
-
 
 """
 This job send coupon close message to customer
@@ -172,16 +107,7 @@ def send_close_sms_customer(*args, **kwargs):
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = sms_client.send_stateless(**kwargs)
-        debug_message = "Send the message: %s To : %s" % (phone_number, message)
-        logger.info(debug_message)
-        kwargs = {
-                    'action':'SENT',
-                    'reciever': '55680',
-                    'sender':'GCS',
-                    'message': message,
-                    'status':'success'
-                  }
-        save_log(**kwargs)
+        audit_log(reciever=phone_number, message=message)
     except Exception as ex:
         send_coupon_close_message_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
 
@@ -193,22 +119,9 @@ def send_brand_sms_customer(*args, **kwargs):
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = sms_client.send_stateless(**kwargs)
-        debug_message = "Send the message: %s To : %s" % (phone_number, message)
-        logger.info(debug_message)
-        kwargs = {
-                    'action':'SENT',
-                    'reciever': '55680',
-                    'sender':'GCS',
-                    'message': message,
-                    'status':'success'
-                  }
-        save_log(**kwargs)
+        audit_log(reciever=phone_number, message=message)
     except Exception as ex:
         send_brand_sms_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
-
-
-
-
 
 """
 Crontab to send reminder sms to customer 

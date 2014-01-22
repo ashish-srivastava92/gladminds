@@ -63,6 +63,9 @@ class ServiceAdvisor(models.Model):
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Service Advisor Data"
+    
+    def __unicode__(self):
+        return self.phone_number
         
 ##################################################################  
 
@@ -122,7 +125,7 @@ class CouponData(models.Model):
     valid_days = models.IntegerField(max_length=10)
     valid_kms = models.IntegerField(max_length=10)
     service_type=models.IntegerField(max_length=10)
-    dealer = models.ForeignKey(RegisteredDealer, null=False)
+    sa_phone_number = models.ForeignKey(ServiceAdvisor, null=False)
     status= models.SmallIntegerField(choices=STATUS_CHOICES,
                                        default=1)
     closed_date = models.DateField(null=True, blank=True)

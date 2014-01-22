@@ -156,7 +156,7 @@ class CouponInlineForm(ModelForm):
 class Couponline(SortableTabularInline):
     form = CouponInlineForm
     model = CouponData
-    fields = ('unique_service_coupon','valid_days','valid_kms','status','service_type','dealer')
+    fields = ('unique_service_coupon','valid_days','valid_kms','status','service_type','sa_phone_number')
     extra = 1
     
 
@@ -171,7 +171,7 @@ class CouponAdmin(ModelAdmin):
     search_fields = ('unique_service_coupon','vin__vin')
     list_filter = ('status',)
     list_display = ('vin','unique_service_coupon','service_type','valid_days','valid_kms',
-                    'dealer','status')
+                    'sa_phone_number','status')
     
         
     def suit_row_attributes(self, obj):
