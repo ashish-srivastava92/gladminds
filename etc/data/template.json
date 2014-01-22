@@ -186,7 +186,7 @@
   }, 
   {
   	"model": "gladminds.messagetemplate",
-  	"pk": 20,
+  	"pk": 21,
   	"fields": {
   		"template_key": "SEND_CUSTOMER_SUPPORTED_KEYWORD",
   		"template": "Supported message format: 1.GCP_REG <EMAIL_ID> <NAME>  2.SERVICE <CUSTOMER_ID>  3.BRAND <BRAND_ID> 4.CHECK <VIN> <USC> <SERVICE_TYPE> 5.CLOSE <VIN> <USC>",
