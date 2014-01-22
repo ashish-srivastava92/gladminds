@@ -115,7 +115,7 @@ class TwilioSmsClient(SmsClientBaseObject):
         url = self.uri.format(self.account_key)
         data = {
             'From': self.sender,
-            'To': '+91'+str(kwargs['phone_number']),
+            'To': str(kwargs['phone_number']),
             'Body': kwargs['message'],
         }
         response = requests.post(url = url, data=data, auth=(self.account_key, self.auth_key))
@@ -124,7 +124,7 @@ class TwilioSmsClient(SmsClientBaseObject):
         url = self.uri.format(self.account_key)
         data = {
             'From': self.sender,
-            'To': '+91'+str(kwargs['phone_number']),
+            'To': str(kwargs['phone_number']),
             'Body': kwargs['message'],
         }
         response = requests.post(url = url, data=data, auth=(self.account_key, self.auth_key))
