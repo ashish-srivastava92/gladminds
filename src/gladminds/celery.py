@@ -22,7 +22,7 @@ app.conf.CELERYBEAT_SCHEDULE= {
     },
     
     # Import data from SAP CRM to MySQL
-    'cronjob-import_data_to_db': {
+    'cronjob-import_sap_data_to_db': {
         'task': 'gladminds.tasks.import_data',
         'schedule': crontab(minute=0, hour=0),
     },

@@ -3,7 +3,18 @@ from gladminds.utils import import_json
 import json
 import requests
 
-__all__ = ['AirtelSmsClient']
+__all__ = ['AirtelSmsClient', 'TwilioSmsClient']
+
+def load_gateway():
+    client = settings.SMS_CLIENT_DETAIL
+    if settings.SMS_CLIENT is 'MOCK':
+        print "returning mock object"
+        return MockSmsClient(**client)
+    elif settings.SMS_CLIENT is 'AIRTEL':
+        return AirtelSmsClient(**client)
+    elif settings.SMS_CLIENT is 'TWILIO':
+        return TwilioSmsClient(**client)
+        
 class SmsClientExcetion(Exception):
     
     def __init__(self, message, args = []):
@@ -89,7 +100,7 @@ class AirtelSmsClient(SmsClientBaseObject):
 class MockSmsClient(SmsClientBaseObject):
     
     def __init__(self, *args, **kwargs):
-        SmsClientBaseObject.__init__(self, *args, **kwargs)
+        pass
     
     def authenticate(self, **kwargs):
         return {"sessionID":"23ef53u78s090df9ac0vvg011f"}

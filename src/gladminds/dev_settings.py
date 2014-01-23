@@ -43,6 +43,8 @@ TEMPLATE_DIRS = (
     TEMPLATE_DIR,
 )
 
+SMS_CLIENT = "MOCK"
+
 SMS_CLIENT_DETAIL = {
                      'OTP_TWILIO_ACCOUNT' : 'AC9ce726c861d7c5f1c783adfff9c4789a',
                      'OTP_TWILIO_AUTH' : '51eda8b3a54bf84f9530c2b379cd02fa',

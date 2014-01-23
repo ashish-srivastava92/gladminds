@@ -63,8 +63,8 @@ class RegisteredDealer(models.Model):
 
 class ServiceAdvisor(models.Model):
     dealer_id = models.ForeignKey(RegisteredDealer, null=False)
-    service_advisor_id=models.CharField(max_length=10, blank=False,unique=True, null=False)
-    name = models.CharField(max_length=10, blank=False, null=False)
+    service_advisor_id=models.CharField(max_length=15, blank=False,unique=True, null=False)
+    name = models.CharField(max_length=25, blank=False, null=False)
     phone_number = models.CharField(
         max_length=15, blank=False, null=False, unique=True)
     order = models.PositiveIntegerField(default=0)
@@ -138,7 +138,7 @@ class CouponData(models.Model):
     status= models.SmallIntegerField(choices=STATUS_CHOICES,
                                        default=1)
     closed_date = models.DateTimeField(null=True, blank=True)
-    mark_expired_on = models.DateTimeField(null=False, blank=True)
+    mark_expired_on = models.DateTimeField(null=True, blank=True)
     actual_service_date = models.DateTimeField(null=True, blank=True)
     actual_kms = models.CharField(max_length=10, null=True, blank=True)
     last_reminder_date = models.DateTimeField(null=True, blank=True)
