@@ -12,6 +12,8 @@ from src.gladminds.tasks import send_coupon_close_message
 from tastypie.resources import Resource
 __all__ = ['GladmindsTaskManager']
 
+angular_format = lambda x: x.replace('{', '<').replace('}', '>')
+
 class GladmindsResources(Resource):
 
     class Meta:
@@ -31,16 +33,23 @@ class GladmindsResources(Resource):
             message = request.body
         try:
             sms_dict = smsparser.sms_parser(message=message)
-        except smsparser.InvalidKeyWord as ex:
+        except smsparser.InvalidKeyWord as ink:
             message = templates.get_template('SEND_CUSTOMER_SUPPORTED_KEYWORD')
             send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever = phone_number, action='SEND TO QUEUE', message = message)
             raise ImmediateHttpResponse(HttpBadRequest("Invalid Keyword"))
-        except smsparser.InvalidMessage as ex:
+        except smsparser.InvalidMessage as inm:
             message = templates.get_template('SEND_INVALID_MESSAGE')
             send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever = phone_number, action='SEND TO QUEUE', message = message)
             raise ImmediateHttpResponse(HttpBadRequest("Invalid Message"))
+        except smsparser.InvalidFormat as inf:
+            print "In Invalid format"
+            message = angular_format('CORRECT FORMAT: '+inf.message)
+            print message
+            send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
+            audit.audit_log(reciever = phone_number, action='SEND TO QUEUE', message = message)
+            raise ImmediateHttpResponse(HttpBadRequest("Invalid Message Format"))
             
         handler = getattr(self, sms_dict['handler'], None)
         to_be_serialized = handler(sms_dict, phone_number)
