@@ -8,7 +8,11 @@ class InvalidKeyWord(Exception):{}
 def sms_parser(*args, **kwargs):
     message = kwargs['message']
     parse_message = parse(templates.RCV_MESSAGE_FORMAT, message)
-    keyword = parse_message['key']
+    try:
+        keyword = parse_message['key']
+    except:
+        raise InvalidMessage("incorrect message format")
+        
     if not parse_message:
         raise InvalidMessage("incorrect message format")
         

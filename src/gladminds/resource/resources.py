@@ -36,6 +36,12 @@ class GladmindsResources(Resource):
             send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever = phone_number, action='SEND TO QUEUE', message = message)
             raise ImmediateHttpResponse(HttpBadRequest("Invalid Keyword"))
+        except smsparser.InvalidMessage as ex:
+            message = templates.get_template('SEND_INVALID_MESSAGE')
+            send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
+            audit.audit_log(reciever = phone_number, action='SEND TO QUEUE', message = message)
+            raise ImmediateHttpResponse(HttpBadRequest("Invalid Message"))
+            
         handler = getattr(self, sms_dict['handler'], None)
         to_be_serialized = handler(sms_dict, phone_number)
         to_be_serialized = {"status": to_be_serialized}
