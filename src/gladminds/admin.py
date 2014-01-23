@@ -29,7 +29,9 @@ class ProductTypeDataInline(SortableTabularInline):
     form = ProductTypeDataInlineForm
     model = ProductTypeData
     fields = ('product_name','product_type')
-    extra = 1
+#     readonly_fields= ('product_name','product_type')
+    extra=1
+    max_num=0
     
 class BrandForm(ModelForm):
     class Meta:
@@ -139,33 +141,20 @@ class GladMindUserAdmin(ModelAdmin):
 #     def products(self, obj):
 #         return len(obj.customerdata_set.all())
 #     
-# class CouponInlineForm(ModelForm):
-#     class Meta:
-#         widgets = {
-#             
-#             'unique_service_coupon': EnclosedInput(
-#                                         attrs={'class': 'input-small'}),
-#             'valid_days': EnclosedInput(
-#                                         attrs={'class': 'input-small'}),
-#             'valid_kms': EnclosedInput(
-#                                         attrs={'class': 'input-small'}),
-#         }
-#  
-#  
-#  
-# class Couponline(SortableTabularInline):
-#     form = CouponInlineForm
-#     model = CouponData
-#     fields = ('unique_service_coupon','valid_days','valid_kms','status','service_type','sa_phone_number')
-#     extra = 1
-#     
-# 
-#     
+
+
+class Couponline(SortableTabularInline):
+    model = CouponData
+    fields = ('unique_service_coupon','valid_days','valid_kms','status','service_type','sa_phone_number')
+    extra=0
+    max_num=0
+    readonly_fields=('unique_service_coupon','valid_days','valid_kms','status','service_type','sa_phone_number')
+
 class ProductDataAdmin(ModelAdmin):
     search_fields = ('vin','sap_customer_id','customer_phone_number__phone_number')
     list_filter = ('customer_phone_number__phone_number',)
     list_display = ('vin','customer_phone_number','product_type','dealer_id','invoice_date')
-#     inlines=(Couponline,)
+    inlines=(Couponline,)
      
 class CouponAdmin(ModelAdmin):
     search_fields = ('unique_service_coupon','vin__vin')
@@ -206,7 +195,5 @@ admin.site.register(RegisteredDealer,DealerAdmin)
 admin.site.register(AuditLog,AuditLogAdmin)
 admin.site.register(GladMindUsers,GladMindUserAdmin)
 admin.site.register(ProductData,ProductDataAdmin)
-
-
 admin.site.register(CouponData,CouponAdmin)
 admin.site.register(MessageTemplate,MessageTemplateAdmin)
