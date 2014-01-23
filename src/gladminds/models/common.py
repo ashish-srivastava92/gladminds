@@ -138,7 +138,7 @@ class CouponData(models.Model):
     status= models.SmallIntegerField(choices=STATUS_CHOICES,
                                        default=1)
     closed_date = models.DateTimeField(null=True, blank=True)
-    mark_expired_on = models.DateTimeField(null=False)
+    mark_expired_on = models.DateTimeField(null=False, blank=True)
     actual_service_date = models.DateTimeField(null=True, blank=True)
     actual_kms = models.CharField(max_length=10, null=True, blank=True)
     last_reminder_date = models.DateTimeField(null=True, blank=True)
