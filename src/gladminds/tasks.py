@@ -4,7 +4,7 @@ from django.conf import settings
 from gladminds.audit import audit_log
 from gladminds.dao.smsclient import load_gateway
 from gladminds import taskmanager
-from gladminds import import_data
+from gladminds import data_import
 
 sms_client = load_gateway()
 
@@ -148,6 +148,6 @@ Crontab to import data from SAP to Gladminds Database
 """
 @shared_task
 def import_data(*args, **kwargs):
-    import_data.import_data()
+    data_import.import_sap_data(*args, **kwargs)
     
 

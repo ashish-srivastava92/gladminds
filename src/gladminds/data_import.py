@@ -3,7 +3,7 @@ from django.conf import settings
 from gladminds.models import common
 from datetime import datetime
 
-def import_data(*args, **kwargs):
+def import_sap_data(*args, **kwargs):
     file_path = settings.DATA_CSV_PATH
     
     #Import data from CSV
