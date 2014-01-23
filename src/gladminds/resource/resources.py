@@ -68,7 +68,7 @@ class GladmindsResources(Resource):
                                         customer_name=customer_name, email_id=email_id,
                                         registration_date=registration_date)
             customer.save()
-        message = templates.get_template('SEND_CUSTOMER_REGISTER').format(customer_name=customer_name)
+        message = templates.get_template('SEND_CUSTOMER_REGISTER').format(customer_name=customer_name,customer_id=gladmind_customer_id)
         send_registration_detail.delay(phone_number=phone_number, message=message)
         audit.audit_log(reciever = phone_number, action='SEND TO QUEUE', message = message)
         return True
