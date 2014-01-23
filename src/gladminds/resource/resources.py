@@ -1,5 +1,7 @@
 from datetime import datetime
 from django.conf.urls import url
+from tastypie.exceptions import ImmediateHttpResponse
+from tastypie.http import HttpBadRequest
 from django.db import connection, models
 from gladminds import smsparser, utils, audit, message_template as templates
 from gladminds.models import common
@@ -29,11 +31,11 @@ class GladmindsResources(Resource):
             message = request.body
         try:
             sms_dict = smsparser.sms_parser(message=message)
-        except smsparser.InvalidMessage as ex:
+        except smsparser.InvalidKeyWord as ex:
             message = templates.get_template('SEND_CUSTOMER_SUPPORTED_KEYWORD')
             send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever = phone_number, action='SEND TO QUEUE', message = message)
-            raise smsparser.InvalidMessage("incorrect message format")
+            raise ImmediateHttpResponse(HttpBadRequest("Invalid Keyword"))
         handler = getattr(self, sms_dict['handler'], None)
         to_be_serialized = handler(sms_dict, phone_number)
         to_be_serialized = {"status": to_be_serialized}

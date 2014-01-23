@@ -3,6 +3,8 @@ from gladminds import utils, message_template as templates
 
 class InvalidMessage(Exception):{}
 
+class InvalidKeyWord(Exception):{}
+
 def sms_parser(*args, **kwargs):
     message = kwargs['message']
     parse_message = parse(templates.RCV_MESSAGE_FORMAT, message)
@@ -23,7 +25,7 @@ def sms_parser(*args, **kwargs):
         key_args.named['auth_rule'] = template_mapper[lower_keyword]['auth_rule']
         return key_args.named
     else:
-        raise InvalidMessage("invalid message")
+        raise InvalidKeyWord("invalid message")
 
 def render_sms_template(*args, **kwargs):
     key = kwargs.get('key', None)

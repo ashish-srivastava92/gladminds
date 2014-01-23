@@ -124,6 +124,21 @@ def send_brand_sms_customer(*args, **kwargs):
         send_brand_sms_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
 
 """
+This task send Invalid Keyword message
+"""
+@shared_task
+def send_invalid_keyword_message(*args, **kwargs):
+    try:
+        client = settings.SMS_CLIENT_DETAIL
+        sms_client = TwilioSmsClient(**client)
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        respone_data = sms_client.send_stateless(**kwargs)
+        audit_log(reciever=phone_number, message=message)
+    except Exception as ex:
+        send_brand_sms_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
+
+"""
 Crontab to send reminder sms to customer 
 """
 @shared_task
