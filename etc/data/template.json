@@ -121,7 +121,7 @@
     "pk": 14,
     "fields": {
       "template_key":"SEND_INVALID_MESSAGE",
-      "template":"Invalid message",
+      "template":"Invalid message For any assistance please contact our customer care at 9999999999",
       "description":"Send sms when received message is invalid"
     }
   },
