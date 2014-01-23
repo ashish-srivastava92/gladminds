@@ -172,9 +172,9 @@ class GladmindsResources(Resource):
     def get_brand_data(self, sms_dict, phone_number):
         brand_id = sms_dict['brand_id']
         try:
-            product_object=common.ProductTypeData.objects.filter(brand__brand_id=brand_id)
+            product_object=common.ProductTypeData.objects.filter(brand_id__brand_id=brand_id)
             customer_object=common.ProductData.objects.filter(customer_phone_number__phone_number=phone_number)
-            valid_customer_data=filter(lambda x: x.product in product_object, customer_object)
+            valid_customer_data=filter(lambda x: x.product_type in product_object, customer_object)
             product_sap_id_vin=map(lambda x: {'sap_id':x.sap_customer_id,'vin':x.vin},valid_customer_data)
             brand_message=','.join("customer_id "+ data['sap_id']+" vin "+data['vin'] for data in product_sap_id_vin)
             message = templates.get_template('SEND_BRAND_DATA').format(brand_message=brand_message)
