@@ -9,14 +9,17 @@ def import_data(*args, **kwargs):
     #Import data from CSV
     brand_product = csv.DictReader(open(file_path+"/brand_data.csv"))
     import_branddata(brand_source = brand_product)
+    brand_product = csv.DictReader(open(file_path+"/brand_data.csv"))
     import_product_typedata(product_source = brand_product)
     
     dealer_sa = csv.DictReader(open(file_path+"/dealer_data.csv"))
     import_dealerdata(dealer_source = dealer_sa)
+    brand_product = csv.DictReader(open(file_path+"/brand_data.csv"))
     import_serviceadvisor_data(sa_source = dealer_sa)
     
     product_coupon = csv.DictReader(open(file_path+"/product_data.csv"))
     import_productdata(product_source = product_coupon)
+    brand_product = csv.DictReader(open(file_path+"/brand_data.csv"))
     import_coupondata(coupon_source = product_coupon)
 
 def import_branddata(brand_source):
