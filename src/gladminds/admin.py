@@ -1,7 +1,7 @@
 from django.contrib import admin
 from models.common import RegisteredDealer
 from models.common import GladMindUsers,ProductTypeData,RegisteredDealer,\
-                ServiceAdvisor,BrandData,ProductData,CouponData, MessageTemplate
+                ServiceAdvisor,BrandData,ProductData,CouponData, MessageTemplate,UploadProductCSV
 from models.logs import AuditLog 
 from suit.widgets import NumberInput
 from suit.admin import SortableModelAdmin
@@ -197,3 +197,4 @@ admin.site.register(GladMindUsers,GladMindUserAdmin)
 admin.site.register(ProductData,ProductDataAdmin)
 admin.site.register(CouponData,CouponAdmin)
 admin.site.register(MessageTemplate,MessageTemplateAdmin)
+admin.site.register(UploadProductCSV)

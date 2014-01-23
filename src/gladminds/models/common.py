@@ -1,9 +1,19 @@
 from django.db import models
-
+from django.conf import settings
 ##################BRAND-PRPDUCT MODELS#######################
 '''
 BrandData contains brand related information
 '''
+
+class UploadProductCSV(models.Model):
+    file_location=settings.PROJECT_DIR+'/data/'
+    upload_brand_file= models.FileField(upload_to=file_location, blank=False)
+    upload_dealer_file=models.FileField(upload_to=file_location, blank=False)
+    upload_product_file= models.FileField(upload_to=file_location, blank=False)
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "Upload Product Data"
+
 class BrandData(models.Model):
     brand_id=models.CharField(max_length=50, null=False,unique=True,
                               help_text="Brand Id must be unique")
