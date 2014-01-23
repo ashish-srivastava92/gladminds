@@ -8,6 +8,7 @@ STATIC_DIR = os.path.join(BASE_DIR, "src/static")
 TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',

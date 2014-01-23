@@ -9,6 +9,7 @@ PROJECT_DIR = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 BASE_DIR = os.path.join(PROJECT_DIR, os.pardir)
 STATIC_DIR = os.path.join(PROJECT_DIR, "static")
 TEMPLATE_DIR = os.path.join(PROJECT_DIR, "templates")
+DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
