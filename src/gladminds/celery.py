@@ -19,6 +19,7 @@ app.conf.CELERYBEAT_SCHEDULE= {
     'cronjob-send-reminder-daily-midnight': {
         'task': 'gladminds.tasks.send_reminder',
         'schedule': crontab(minute=0, hour=0),
+        'kwargs': {'remider_day':7}
     },
     
     # Import data from SAP CRM to MySQL
