@@ -4,7 +4,7 @@
     "pk": 1,
     "fields": {
       "template_key":"SEND_CUSTOMER_REGISTER",
-      "template":"Dear {0}, Congratulations. You have enrolled for AfterBuy; a completely hassle free one-stop place to value-track-care all your purchases & beyond.",
+      "template":"Dear {customer_name}, Congratulations. You have enrolled for AfterBuy; a completely hassle free one-stop place to value-track-care all your purchases & beyond.",
       "description":"Send registration confirmation message to customer"
     }
   },
@@ -13,7 +13,7 @@
     "pk": 2,
     "fields": {
       "template_key":"SEND_CUSTOMER_SERVICE_DETAIL",
-      "template":"CUSTOMER ID: {0} PRODUCT ID: {1} COUPONS: {2}",
+      "template":"CUSTOMER ID: {gladmind_customer_id} PRODUCT ID: {vin} COUPONS: {service_code}",
       "description":"Send customer service detail with product and valid coupon id"
     }
   },
@@ -40,7 +40,7 @@
     "pk": 5,
     "fields": {
       "template_key":"SEND_SA_VALID_COUPON",
-      "template":"Customer can avail Free {0}",
+      "template":"Customer can avail Free {service_type}",
       "description":"Send on valid coupon id"
     }
   },
@@ -49,7 +49,7 @@
     "pk": 6,
     "fields": {
       "template_key":"SEND_SA_EXPIRED_COUPON",
-      "template":"Free {1} expired and can avail {0} Free Service",
+      "template":"Free {service_type} expired and can avail {next_service_type} Free Service",
       "description":"Send on invalid coupon id and it also contain next valid coupon id"
     }
   },
@@ -58,7 +58,7 @@
     "pk": 7,
     "fields": {
       "template_key":"SEND_CUSTOMER_VALID_COUPON",
-      "template":"Free Service Coupon {0} to Avail {1}",
+      "template":"Free Service Coupon {coupon} to Avail {service_type}",
       "description":"Send coupon validation sms to customer also"
     }
   },
@@ -67,7 +67,7 @@
     "pk": 8,
     "fields": {
       "template_key":"SEND_CUSTOMER_EXPIRED_COUPON",
-      "template":"Free Service Coupon {0} to Avail {1} has expired (KMS/Date not valid) and Free Service Coupon {2} to Avail {3}",
+      "template":"Free Service Coupon {service_coupon} to Avail {service_type} has expired (KMS/Date not valid) and Free Service Coupon {next_coupon} to Avail {next_service_type}",
       "description":"Send coupon invalid sms to customer also"
     }
   },
@@ -112,7 +112,7 @@
     "pk": 13,
     "fields": {
       "template_key":"SEND_CUSTOMER_CLOSE_COUPON",
-      "template":"Your Bike {0} service is complete. Please pick your Bike before 6.30PM. {1}, {2}.Thank you.",
+      "template":"Your Bike {vin} service is complete. Please pick your Bike before 6.30PM. {sa_name}, {sa_phone_number}.Thank you.",
       "description":"Send message to customer on current service detail"
     }
   },
@@ -131,7 +131,7 @@
     "pk": 15,
     "fields": {
       "template_key":"SEND_BRAND_DATA",
-      "template":"{0}",
+      "template":"{brand_message}",
       "description":"Send the brand data detail"
     }
   },
