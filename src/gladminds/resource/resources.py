@@ -115,6 +115,11 @@ class GladmindsResources(Resource):
                         service_coupon=coupon_data.unique_service_coupon,service_type= service_type,
                         next_coupon=next_coupon.unique_service_coupon,next_service_type=next_coupon.service_type)
                 else:
+                    coupon_data.actual_kms=actual_kms
+                    coupon_data.actual_service_date=datetime.now()
+                    sa_phone_number = common.ServiceAdvisor.objects.get(phone_number=phone_number)
+                    coupon_data.sa_phone_number=sa_phone_number
+                    coupon_data.save()
                     message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=service_type)
                     customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=coupon_data.unique_service_coupon,service_type=service_type)
                 
