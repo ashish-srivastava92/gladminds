@@ -16,7 +16,8 @@ bin/django syncdb
 # Run collectstatic
 echo  yes |bin/django collectstatic
 
-
+# Load the SMS Template
+bin/django loaddata etc/data/template.json
 
 # TODO: Stop already running server
 output=`ps aux | grep "bin/django r[u]nserver 0.0.0.0:8000"`
