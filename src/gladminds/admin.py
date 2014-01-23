@@ -176,8 +176,18 @@ class CouponAdmin(ModelAdmin):
  
 ###########################AUDIT ADMIN########################
 class AuditLogAdmin(ModelAdmin):
+    list_filter = ('status',)
     search_fields = ('status','date','sender','reciever')
     list_display = ('date','action','message','sender','reciever','status')
+    
+    def suit_row_attributes(self, obj):
+        class_map = {
+            'success': 'success',
+            'fail': 'warning',
+        }
+        css_class = class_map.get(str(obj.status))
+        if css_class:
+            return {'class': css_class}
 ##############################################################
  
 ######################Message Template#############################
