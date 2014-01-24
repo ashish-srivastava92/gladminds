@@ -100,6 +100,8 @@ class DealerAdmin(ModelAdmin):
 class ServiceAdvisorAdmin(ModelAdmin):
     search_fields = ('phone_number','name','dealer_id__dealer_id')
     list_display=('dealer_id','service_advisor_id','name','phone_number') 
+    exclude = ('order',)
+
       
  #################################################################### 
 # 
@@ -151,16 +153,18 @@ class Couponline(SortableTabularInline):
     readonly_fields=('unique_service_coupon','valid_days','valid_kms','status','service_type','sa_phone_number')
 
 class ProductDataAdmin(ModelAdmin):
-    search_fields = ('vin','sap_customer_id','customer_phone_number__phone_number')
+    search_fields = ('vin','sap_customer_id','customer_phone_number__phone_number','product_type__product_type')
     list_filter = ('customer_phone_number__phone_number',)
     list_display = ('vin','customer_phone_number','product_type','dealer_id','invoice_date')
     inlines=(Couponline,)
+    exclude = ('order',)
      
 class CouponAdmin(ModelAdmin):
     search_fields = ('unique_service_coupon','vin__vin')
     list_filter = ('status',)
     list_display = ('vin','unique_service_coupon','service_type','valid_days','valid_kms',
                     'status')
+    exclude = ('order',)
      
          
     def suit_row_attributes(self, obj):
@@ -176,8 +180,18 @@ class CouponAdmin(ModelAdmin):
  
 ###########################AUDIT ADMIN########################
 class AuditLogAdmin(ModelAdmin):
+    list_filter = ('status',)
     search_fields = ('status','date','sender','reciever')
     list_display = ('date','action','message','sender','reciever','status')
+    
+    def suit_row_attributes(self, obj):
+        class_map = {
+            'success': 'success',
+            'fail': 'error',
+        }
+        css_class = class_map.get(str(obj.status))
+        if css_class:
+            return {'class': css_class}
 ##############################################################
  
 ######################Message Template#############################
