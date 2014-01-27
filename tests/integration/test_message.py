@@ -40,6 +40,10 @@ class CustomerRegistrationTest(GladmindsResourceTestCase):
         MSG_INVALID_CUST_REG_KEY = "REG test.user@test.com Test User"
         self.INVALID_CUST_REG_KEY = {'text': MSG_INVALID_CUST_REG_KEY, 'phoneNumber': PHONE_NUMBER}
         
+        #Already Register
+        MSG_ALREADY_CUST_REG = "GCP_REG test.gladminds@test.com Test Gldaminds"
+        self.ALREADY_CUST_REG = {'text': MSG_ALREADY_CUST_REG, 'phoneNumber': '+TS0000000001'}
+        
 
     def test_customer_registration(self):
        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.CUST_REG)
@@ -49,23 +53,13 @@ class CustomerRegistrationTest(GladmindsResourceTestCase):
         resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.INVALID_CUST_REG)
         self.assertHttpBadRequest(resp)
          
-        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.MSG_INVALID_CUST_REG_KEY)
+        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.INVALID_CUST_REG_KEY)
         self.assertHttpBadRequest(resp)
-        #Already Register
-        MSG_ALREADY_CUST_REG = "GCP_REG test.gladminds@test.com Test Gldaminds"
-        self.ALREADY_CUST_REG = {'text': MSG_INVALID_CUST_REG_KEY, 'phoneNumber': '+TS0000000001'}
         
     def test_customer_registration(self):
        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.CUST_REG)
        self.assertHttpOK(resp)
        
-    def test_invalid_message(self):
-        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.INVALID_CUST_REG)
-        self.assertHttpBadRequest(resp)
-        
-        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.MSG_INVALID_CUST_REG_KEY)
-        self.assertHttpBadRequest(resp)
-    
     def test_already_registered_customer(self):
         resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.ALREADY_CUST_REG)
         self.assertHttpOK(resp)
@@ -84,7 +78,7 @@ class CustomerServiceTest(GladmindsResourceTestCase):
          
          #Invalid Phone Number
          INVALID_PHONE_NUMBER = "+TA0000000011"
-         self.IN_PH_MSG_SVC = {'text': INVALID_PH_MSG_SERVICE, 'phoneNumber': INVALID_PHONE_NUMBER}
+         self.IN_PH_MSG_SVC = {'text': VALID_MSG_SERVICE, 'phoneNumber': INVALID_PHONE_NUMBER}
     
      def test_valid_service(self):
         resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.MSG_SVC)
@@ -92,10 +86,10 @@ class CustomerServiceTest(GladmindsResourceTestCase):
     
      def test_invalid_service(self):
         resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.IN_MSG_SVC)
-        self.assertHttpBadRequest(resp)
+        self.assertHttpOK(resp)
         
         resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.IN_PH_MSG_SVC)
-        self.aseertHttpBadRequest(resp)
+        self.assertHttpOK(resp)
         
     
 class CouponCheckAndClosure(GladmindsResourceTestCase):
