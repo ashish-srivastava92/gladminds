@@ -6,7 +6,8 @@ class GladmindsResourceTestCase(ResourceTestCase):
     
     def setUp(self):
         super(GladmindsResourceTestCase, self).setUp()
-        management.call_command('loaddata', 'etc/data/template.json', verbosity=0)
+        management.call_command('loaddata', 'etc/testdata/template.json', verbosity=0)
+        management.call_command('loaddata', 'etc/data/customer.json', verbosity=0)
         self.MESSAGE_URL = "/v1/messages"
     
     def assertSuccessfulHttpResponse(self, resp, msg=None):
@@ -33,6 +34,10 @@ class CustomerRegistrationTest(GladmindsResourceTestCase):
         MSG_INVALID_CUST_REG_KEY = "REG test.user@test.com Test User"
         self.INVALID_CUST_REG_KEY = {'text': MSG_INVALID_CUST_REG_KEY, 'phoneNumber': PHONE_NUMBER}
         
+        #Already Register
+        MSG_ALREADY_CUST_REG = "GCP_REG test.gladminds@test.com Test Gldaminds"
+        self.ALREADY_CUST_REG = {'text': MSG_INVALID_CUST_REG_KEY, 'phoneNumber': '+TS0000000001'}
+        
     def test_customer_registration(self):
        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.CUST_REG)
        self.assertHttpOK(resp)
@@ -43,6 +48,11 @@ class CustomerRegistrationTest(GladmindsResourceTestCase):
         
         resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.MSG_INVALID_CUST_REG_KEY)
         self.assertHttpBadRequest(resp)
+    
+    def test_already_registered_customer(self):
+        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.ALREADY_CUST_REG)
+        self.assertHttpOK(resp)
+        
 
 class CustomerServiceTest(GladmindsResourceTestCase):
     
