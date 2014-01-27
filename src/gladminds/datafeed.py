@@ -4,7 +4,16 @@ from django.conf import settings
 from gladminds.models import common
 from gladminds import utils
 from datetime import datetime, timedelta
+from src.gladminds.tasks import send_on_product_purchase
+from gladminds import audit, message_template as template
 import csv
+
+def load_feed():
+    FEED_TYPE = setting.FEED_TYPE
+    if FEED_TYPE is 'CSV':
+        CSVFeed()
+    elif FEED_TYPE is 'SAP':
+        SAPFeed()
 
 class CSVFeed(object):
     def __init__(self):
@@ -90,7 +99,6 @@ class ProductPurchaseFeed(BaseFeed):
     def import_data(self):
         for product in self.data_source:
             try:
-                print product
                 product_data = common.ProductData.objects.get(vin=product['vin'])
                 try:
                     customer_data = common.GladMindUsers.objects.get(phone_number = product['customer_phone_number'])
@@ -114,7 +122,7 @@ class ProductServiceFeed(BaseFeed):
 
 def update_coupon_data(sender, **kwargs):
     instance = kwargs['instance']
-    if instance.customer_phone_number_id:
+    if instance.customer_phone_number:
         product_purchase_date = instance.product_purchase_date
         vin = instance.vin
         coupon_data = common.CouponData.objects.filter(vin = instance)
@@ -123,5 +131,9 @@ def update_coupon_data(sender, **kwargs):
             coupon_object = common.CouponData.objects.get(vin = instance, unique_service_coupon = coupon.unique_service_coupon)
             coupon_object.mark_expired_on=mark_expired_on
             coupon_object.save()
+        
+        message = templates.get_template('SEND_CUSTOMER_ON_PRODUCT_PURCHASE').format(sap_customer_id = instance.sap_customer_id)
+        send_on_product_purchase.delay(phone_number=instance.customer_phone_number, message=message)
+        audit.audit_log(reciever=instance.customer_phone_number, action='SEND TO QUEUE', message=message)
             
 post_save.connect(update_coupon_data, sender=common.ProductData)

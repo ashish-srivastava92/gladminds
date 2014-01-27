@@ -52,3 +52,4 @@ SMS_CLIENT_DETAIL = {
                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/SMS/Messages.json'
             }
 
+FEED_TYPE = 'CSV'

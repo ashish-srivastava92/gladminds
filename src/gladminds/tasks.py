@@ -19,7 +19,7 @@ def send_registration_detail(*args, **kwargs):
         respone_data = sms_client.send_stateless(**kwargs)
         audit_log(reciever=phone_number, message=message)
     except Exception as ex:
-        send_registration_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
+        send_registration_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
         
 """
 This task send customer valid service detail
@@ -31,7 +31,7 @@ def send_service_detail(*args, **kwargs):
         response_data = sms_client.send_stateless(**kwargs)
         audit_log(reciever=phone_number, message=message)
     except Exception as ex:
-        send_service_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
+        send_service_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 
 """
 This job send sms to service advisor, whether the coupon is valid or not 
@@ -43,7 +43,7 @@ def send_coupon_validity_detail(*args, **kwargs):
         respone_data = sms_client.send_stateless(**kwargs)
         audit_log(reciever=phone_number, message=message)
     except Exception as ex:
-        send_registration_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
+        send_registration_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 
 """
 This job send sms to customer when SA send 
@@ -57,7 +57,7 @@ def send_coupon_detail_customer(*args, **kwargs):
         respone_data = sms_client.send_stateless(**kwargs)
         audit_log(reciever=phone_number, message=message)
     except Exception as ex:
-        send_registration_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
+        send_registration_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 
 """
 This job send reminder sms to customer
@@ -70,7 +70,7 @@ def send_reminder_message(*args, **kwargs):
         respone_data = sms_client.send_stateless(**kwargs)
         audit_log(reciever=phone_number, message=message)
     except Exception as ex:
-        send_reminder_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
+        send_reminder_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 
 """
 This job send coupon close message
@@ -83,7 +83,7 @@ def send_coupon_close_message(*args, **kwargs):
         respone_data = sms_client.send_stateless(**kwargs)
         audit_log(reciever=phone_number, message=message)
     except Exception as ex:
-        send_coupon_close_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
+        send_coupon_close_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 
 """
 This job send coupon close message to customer
@@ -96,7 +96,7 @@ def send_close_sms_customer(*args, **kwargs):
         respone_data = sms_client.send_stateless(**kwargs)
         audit_log(reciever=phone_number, message=message)
     except Exception as ex:
-        send_coupon_close_message_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
+        send_coupon_close_message_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 
 @shared_task
 def send_brand_sms_customer(*args, **kwargs):
@@ -106,7 +106,7 @@ def send_brand_sms_customer(*args, **kwargs):
         respone_data = sms_client.send_stateless(**kwargs)
         audit_log(reciever=phone_number, message=message)
     except Exception as ex:
-        send_brand_sms_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
+        send_brand_sms_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 
 """
 This task send Invalid Keyword message
@@ -119,8 +119,22 @@ def send_invalid_keyword_message(*args, **kwargs):
         respone_data = sms_client.send_stateless(**kwargs)
         audit_log(reciever=phone_number, message=message)
     except Exception as ex:
-        send_brand_sms_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries = 5)
+        send_brand_sms_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 
+
+"""
+This job send on customer product purchase
+"""
+@shared_task
+def send_on_product_purchase(*args, **kwargs):
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        respone_data = sms_client.send_stateless(**kwargs)
+        audit_log(reciever=phone_number, message=message)
+    except Exception as ex:
+        send_coupon_close_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+        
 """
 Crontab to send reminder sms to customer 
 """
@@ -148,6 +162,7 @@ Crontab to import data from SAP to Gladminds Database
 """
 @shared_task
 def import_data(*args, **kwargs):
-    data_import.import_sap_data(*args, **kwargs)
+    from gladminds import datafeed
+    datafeed.load_feed()
     
 

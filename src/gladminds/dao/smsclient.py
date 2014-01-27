@@ -8,7 +8,6 @@ __all__ = ['AirtelSmsClient', 'TwilioSmsClient']
 def load_gateway():
     client = settings.SMS_CLIENT_DETAIL
     if settings.SMS_CLIENT is 'MOCK':
-        print "returning mock object"
         return MockSmsClient(**client)
     elif settings.SMS_CLIENT is 'AIRTEL':
         return AirtelSmsClient(**client)

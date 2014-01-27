@@ -192,6 +192,15 @@
   		"template": "Supported keyword: 1.GCP_REG 2.SERVICE 3.BRAND 4.CHECK 5.CLOSE",
   		"description": "Send supported message format to customer"
   	}
+  },
+  {
+  	"model": "gladminds.messagetemplate",
+  	"pk": 22,
+  	"fields": {
+  		"template_key": "SEND_CUSTOMER_ON_PRODUCT_PURCHASE",
+  		"template": "Dear Customer, Thank you to purchase bike. Your customer id: {sap_customer_id}",
+  		"description": "Send message to customer on purchase"
+  	}
   }
   
   
