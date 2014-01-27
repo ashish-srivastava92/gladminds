@@ -14,6 +14,7 @@ from tastypie.resources import Resource
 __all__ = ['GladmindsTaskManager']
 
 angular_format = lambda x: x.replace('{', '<').replace('}', '>')
+json = utils.import_json()
 AUDIT_ACTION = 'SEND TO QUEUE'
 
 class GladmindsResources(Resource):

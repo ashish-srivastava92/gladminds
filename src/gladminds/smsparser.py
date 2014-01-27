@@ -23,7 +23,7 @@ def sms_parser(*args, **kwargs):
     if not parse_message:
         raise InvalidMessage(message = 'invalid message', template = templates.get_template('SEND_INVALID_MESSAGE'))
     #Check appropriate received message template and parse the message data
-    template_mapper = templates.MESSAGE_TEMPLATE_MAPPER
+    template_mapper = templates.get_message_template_mapper()
     lower_keyword = keyword.lower()
     if lower_keyword in template_mapper.keys():
         key_args = parse(template_mapper[lower_keyword]['receive'], parse_message['message'])
@@ -47,7 +47,8 @@ def render_sms_template(keyword=None, status = None, template = None, *args, **k
     
     if not template and keyword:
         status = status
-        template_mapper = templates.MESSAGE_TEMPLATE_MAPPER[keyword]
-        message_template = template_mapper[status]
+        template_mapper = templates.get_message_template_mapper()
+        template_obj = template_mapper[keyword]
+        message_template = template_obj[status]
         message = message_template.format(*args, **kwargs)
     return message

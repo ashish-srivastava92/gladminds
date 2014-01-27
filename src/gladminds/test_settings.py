@@ -20,4 +20,7 @@ SMS_CLIENT_DETAIL = {
                      'OTP_TWILIO_URI' : 'MOCK_URI'
             }
 
+BROKER_URL= 'redis://localhost:6379'
+REDIS_URL = 'redis://localhost:6379'
+
 
