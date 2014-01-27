@@ -126,6 +126,7 @@ class GladmindsResources(Resource):
                 else:
                     coupon_data.actual_kms=actual_kms
                     coupon_data.actual_service_date=datetime.now()
+                    coupon_data.status=4
                     sa_phone_number = common.ServiceAdvisor.objects.get(phone_number=phone_number)
                     coupon_data.sa_phone_number=sa_phone_number
                     coupon_data.save()

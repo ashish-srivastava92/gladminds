@@ -103,27 +103,7 @@ class ServiceAdvisorAdmin(ModelAdmin):
     exclude = ('order',)
 
       
- #################################################################### 
-# 
-# 
-# #############CUSTMERDATA AND GLADMINDS USER ADMIN###################
-# 
-# class CustomerInlineForm(ModelForm):
-#     class Meta:
-#         widgets = {
-#             
-#             'vin': EnclosedInput(
-#                                         attrs={'class': 'input-small'}),
-#         }
-#  
-#  
-#  
-# class CustomerInline(SortableTabularInline):
-#     form = CustomerInlineForm
-#     model = CustomerData
-#     fields = ('vin','product','dealer','product_purchase_date')
-#     extra = 1
-# 
+##############CUSTMERDATA AND GLADMINDS USER ADMIN###################
 class GladMindUserForm(ModelForm):
     class Meta:
         widgets = { 
@@ -138,11 +118,6 @@ class GladMindUserAdmin(ModelAdmin):
     form = GladMindUserForm
     search_fields = ('gladmind_customer_id','customer_name','phone_number','email_id','registration_date')
     list_display = ('gladmind_customer_id','customer_name','email_id','phone_number','registration_date')
-#     inlines = (CustomerInline,)
-      
-#     def products(self, obj):
-#         return len(obj.customerdata_set.all())
-#     
 
 
 class Couponline(SortableTabularInline):
@@ -172,6 +147,7 @@ class CouponAdmin(ModelAdmin):
             '1': 'success',
             '2': 'warning',
             '3': 'error',
+            '4':'info'
         }
         css_class = class_map.get(str(obj.status))
         if css_class:
