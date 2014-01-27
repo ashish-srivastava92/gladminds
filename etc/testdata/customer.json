@@ -3,8 +3,10 @@
     "model": "gladminds.gladmindusers",
     "pk": 1,
     "fields": {
-      "gladmind_customer_id":"AAAAAAAAAAAAA001",
-      "phone_number":"9876123412",
+      "gladmind_customer_id":"AAAAAA001",
+      "customer_name": "Test User",
+      "email_id":"test.user@test.com",
+      "phone_number":"+TS0000000000",
       "registration_date":"2014-01-07 17:41:28"
     }
   },
@@ -12,8 +14,10 @@
     "model": "gladminds.gladmindusers",
     "pk": 2,
     "fields": {
-      "gladmind_customer_id":"AAAAAAAAAAAAA002",
-      "phone_number":"9876123413",
+      "gladmind_customer_id":"AAAAAA001",
+      "customer_name": "Test Gldaminds",
+      "phone_number":"+TS0000000001",
+      "email_id":"test.gladminds@test.com",
       "registration_date":"2013-01-08 17:41:28"
     }
   }

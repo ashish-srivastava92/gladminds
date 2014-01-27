@@ -1,35 +1,28 @@
 [
   {
-    "model": "gladminds.product",
+    "model": "gladminds.productdata",
     "pk": 1,
     "fields": {
-      "product_id": "AVENGER220DTSIIND1",
-      "brand_name": "Bajaj"
+        "vin":"TESTVECHILEID00001",
+    	"customer_phone_number":"null",
+    	"product_type":"PRODUCT001",
+    	"sap_customer_id":"null",
+	    "product_purchase_date":"null",
+	    "invoice_date":"2014-01-10 00:00:00",
+    	"dealer_id":"null"
     }
   },
   {
-    "model": "gladminds.product",
+    "model": "gladminds.productdata",
     "pk": 2,
     "fields": {
-      "product_id": "PULSAR200NSIND1",
-      "brand_name": "Bajaj"
-    }
-  },
-  {
-    "model": "gladminds.product",
-    "pk": 3,
-    "fields": {
-      "product_id": "PULSAR220IND1",
-      "brand_name": "Bajaj"
-    }
-  },
-  {
-    "model": "gladminds.product",
-    "pk": 3,
-    "fields": {
-      "product_id": "KARIZMA200IND1",
-      "brand_name": "Hero"
+      	"vin":"TESTVECHILEID00002",
+    	"customer_phone_number":"+TS0000000000",
+    	"product_type":"PRODUCT001",
+    	"sap_customer_id":"null",
+	    "product_purchase_date":"2013-10-15 00:00:00",
+	    "invoice_date":"2013-07-10 00:00:00",
+    	"dealer_id":"null"
     }
   }
-  
 ]

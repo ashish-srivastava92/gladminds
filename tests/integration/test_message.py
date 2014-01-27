@@ -35,20 +35,42 @@ class CustomerRegistrationTest(GladmindsResourceTestCase):
         MSG_INVALID_CUST_REG_KEY = "REG test.user@test.com Test User"
         self.INVALID_CUST_REG_KEY = {'text': MSG_INVALID_CUST_REG_KEY, 'phoneNumber': PHONE_NUMBER}
         
-#     def test_customer_registration(self):
-#        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.CUST_REG)
-#        self.assertHttpOK(resp)
-#        
-#     def test_invalid_message(self):
-#         resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.INVALID_CUST_REG)
-#         self.assertHttpBadRequest(resp)
-#         
-#         resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.MSG_INVALID_CUST_REG_KEY)
-#         self.assertHttpBadRequest(resp)
+
+    def test_customer_registration(self):
+       resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.CUST_REG)
+       self.assertHttpOK(resp)
+        
+    def test_invalid_message(self):
+        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.INVALID_CUST_REG)
+        self.assertHttpBadRequest(resp)
+         
+        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.MSG_INVALID_CUST_REG_KEY)
+        self.assertHttpBadRequest(resp)
         
         
        
 class CouponCheckAndClosure(GladmindsResourceTestCase):
+        #Already Register
+        MSG_ALREADY_CUST_REG = "GCP_REG test.gladminds@test.com Test Gldaminds"
+        self.ALREADY_CUST_REG = {'text': MSG_INVALID_CUST_REG_KEY, 'phoneNumber': '+TS0000000001'}
+        
+    def test_customer_registration(self):
+       resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.CUST_REG)
+       self.assertHttpOK(resp)
+       
+    def test_invalid_message(self):
+        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.INVALID_CUST_REG)
+        self.assertHttpBadRequest(resp)
+        
+        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.MSG_INVALID_CUST_REG_KEY)
+        self.assertHttpBadRequest(resp)
+    
+    def test_already_registered_customer(self):
+        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.ALREADY_CUST_REG)
+        self.assertHttpOK(resp)
+        
+
+class CustomerServiceTest(GladmindsResourceTestCase):
     
     def setUp(self):
         super(CouponCheckAndClosure, self).setUp()
