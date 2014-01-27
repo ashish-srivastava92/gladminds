@@ -1,0 +1,20 @@
+[
+  {
+    "model": "gladminds.gladmindusers",
+    "pk": 1,
+    "fields": {
+      "gladmind_customer_id":"AAAAAAAAAAAAA001",
+      "phone_number":"9876123412",
+      "registration_date":"2014-01-07 17:41:28"
+    }
+  },
+  {
+    "model": "gladminds.gladmindusers",
+    "pk": 2,
+    "fields": {
+      "gladmind_customer_id":"AAAAAAAAAAAAA002",
+      "phone_number":"9876123413",
+      "registration_date":"2013-01-08 17:41:28"
+    }
+  }
+]

@@ -19,16 +19,40 @@ class GladmindsResourceTestCase(ResourceTestCase):
         
 
 class CustomerRegistrationTest(GladmindsResourceTestCase):
-   
-   def setUp(self):
+    def setUp(self):
         super(CustomerRegistrationTest, self).setUp()
-        self.MSG_CUST_REG = "GCP_REG test.user@test.com Test User"
-        self.PHONE_NUMBER = "+TS{0}".format(int(time.time()))
-        self.CUST_REG = {'text': self.MSG_CUST_REG, 'phoneNumber': self.PHONE_NUMBER}
-    
+        MSG_CUST_REG = "GCP_REG test.user@test.com Test User"
+        PHONE_NUMBER = "+TS{0}".format(int(time.time()))
+        self.CUST_REG = {'text': MSG_CUST_REG, 'phoneNumber': PHONE_NUMBER}
         
-   def test_customer_registration(self):
+        #iNVALID MESSAGE
+        MSG_INVALID_CUST_REG = "GCP_REG test.user@test.com"
+        self.INVALID_CUST_REG = {'text': MSG_INVALID_CUST_REG, 'phoneNumber': PHONE_NUMBER}
+    
+        #INVALID KEYWORD
+        MSG_INVALID_CUST_REG_KEY = "REG test.user@test.com Test User"
+        self.INVALID_CUST_REG_KEY = {'text': MSG_INVALID_CUST_REG_KEY, 'phoneNumber': PHONE_NUMBER}
+        
+    def test_customer_registration(self):
        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.CUST_REG)
        self.assertHttpOK(resp)
+       
+    def test_invalid_message(self):
+        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.INVALID_CUST_REG)
+        self.assertHttpBadRequest(resp)
+        
+        resp = self.api_client.post(uri=self.MESSAGE_URL, data = self.MSG_INVALID_CUST_REG_KEY)
+        self.assertHttpBadRequest(resp)
+
+class CustomerServiceTest(GladmindsResourceTestCase):
+    
+    def setUp(self):
+        super(CustomerServiceTest, self).setUp()
+        MSG_CUST_REG = "SERVICE test.user@test.com Test User"
+        PHONE_NUMBER = "+TS{0}".format(int(time.time()))
+        self.CUST_REG = {'text': MSG_CUST_REG, 'phoneNumber': PHONE_NUMBER}
+    
+    
+       
        
        

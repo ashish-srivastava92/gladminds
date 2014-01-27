@@ -1,0 +1,198 @@
+[
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 1,
+    "fields": {
+      "template_key":"SEND_CUSTOMER_REGISTER",
+      "template":"Dear {customer_name}, Congratulations. You have enrolled for AfterBuy; a completely hassle free one-stop place to value-track-care all your purchases & beyond. For future communication use id {customer_id}",
+      "description":"Send registration confirmation message to customer"
+    }
+  },
+   {
+    "model": "gladminds.messagetemplate",
+    "pk": 2,
+    "fields": {
+      "template_key":"SEND_CUSTOMER_SERVICE_DETAIL",
+      "template":"CUSTOMER ID: {gladmind_customer_id} PRODUCT ID: {vin} COUPONS: {service_code}",
+      "description":"Send customer service detail with product and valid coupon id"
+    }
+  },
+    {
+    "model": "gladminds.messagetemplate",
+    "pk": 3,
+    "fields": {
+      "template_key":"SEND_CUSTOMER_PRODUCT_REGISTER",
+      "template":"Successfully register PRODUCT ID: {0} INTO CUSTOMER ID: {1}",
+      "description":"Send on product registration confirmation"
+    }
+  },
+    {
+    "model": "gladminds.messagetemplate",
+    "pk": 4,
+    "fields": {
+      "template_key":"SEND_CUSTOMER_INVALID_CUSTOMER",
+      "template":"No service register for CUSTOMER ID: {gladmind_customer_id}",
+      "description":"Send on if customer id is not valid"
+    }
+  },
+    {
+    "model": "gladminds.messagetemplate",
+    "pk": 5,
+    "fields": {
+      "template_key":"SEND_SA_VALID_COUPON",
+      "template":"Customer can avail Free {service_type}",
+      "description":"Send on valid coupon id"
+    }
+  },
+    {
+    "model": "gladminds.messagetemplate",
+    "pk": 6,
+    "fields": {
+      "template_key":"SEND_SA_EXPIRED_COUPON",
+      "template":"Free {service_type} expired and can avail {next_service_type} Free Service",
+      "description":"Send on invalid coupon id and it also contain next valid coupon id"
+    }
+  },
+    {
+    "model": "gladminds.messagetemplate",
+    "pk": 7,
+    "fields": {
+      "template_key":"SEND_CUSTOMER_VALID_COUPON",
+      "template":"Free Service Coupon {coupon} to Avail {service_type}",
+      "description":"Send coupon validation sms to customer also"
+    }
+  },
+      {
+    "model": "gladminds.messagetemplate",
+    "pk": 8,
+    "fields": {
+      "template_key":"SEND_CUSTOMER_EXPIRED_COUPON",
+      "template":"Free Service Coupon {service_coupon} to Avail {service_type} has expired (KMS/Date not valid) and Free Service Coupon {next_coupon} to Avail {next_service_type}",
+      "description":"Send coupon invalid sms to customer also"
+    }
+  },
+      {
+    "model": "gladminds.messagetemplate",
+    "pk": 9,
+    "fields": {
+      "template_key":"SEND_SA_INVALID_COUPON_DETAIL",
+      "template":"Wrong COUPON ID:{0}",
+      "description":"Send wrong coupon"
+    }
+  },
+      {
+    "model": "gladminds.messagetemplate",
+    "pk": 10,
+    "fields": {
+      "template_key":"SEND_SA_UNAUTHORISED_SA",
+      "template":"DEALER NOT AUTHORISED:{0}",
+      "description":"Send message when dealer not authorized"
+    }
+  },
+      {
+    "model": "gladminds.messagetemplate",
+    "pk": 11,
+    "fields": {
+      "template_key":"SEND_CUSTOMER_COUPON_REMINDER",
+      "template":"Reminder: Your Coupon {0} for product {1} will expire on {2}",
+      "description":"Send reminder sms on coupon expiry"
+    }
+  },
+      {
+    "model": "gladminds.messagetemplate",
+    "pk": 12,
+    "fields": {
+      "template_key":"SEND_SA_CLOSE_COUPON",
+      "template":"Service Completion Tagged into the System. Thank you.",
+      "description":"Send sms on coupon completion"
+    }
+  },
+      {
+    "model": "gladminds.messagetemplate",
+    "pk": 13,
+    "fields": {
+      "template_key":"SEND_CUSTOMER_CLOSE_COUPON",
+      "template":"Your Bike {vin} service is complete. Please pick your Bike before 6.30PM. {sa_name}, {sa_phone_number}.Thank you.",
+      "description":"Send message to customer on current service detail"
+    }
+  },
+      {
+    "model": "gladminds.messagetemplate",
+    "pk": 14,
+    "fields": {
+      "template_key":"SEND_INVALID_MESSAGE",
+      "template":"Invalid message For any assistance please contact our customer care at 9999999999",
+      "description":"Send sms when received message is invalid"
+    }
+  },
+  
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 15,
+    "fields": {
+      "template_key":"SEND_BRAND_DATA",
+      "template":"{brand_message}",
+      "description":"Send the brand data detail"
+    }
+  },
+  
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 16,
+    "fields": {
+      "template_key":"RCV_CUSTOMER_REGISTRATION",
+      "template":"{email_id} {name}",
+      "description":"Receive message template from customer for registration"
+    }
+  },
+  
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 17,
+    "fields": {
+      "template_key":"RCV_CUSTOMER_SERVICE_DETAIL",
+      "template":"{customer_id}",
+      "description":"Receive this message template when customer request for his/her service"
+    }
+  },
+  
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 18,
+    "fields": {
+      "template_key":"RCV_SA_COUPON_VALIDATION",
+      "template":"{vin} {kms} {service_type}",
+      "description":"Receive this message when SA send to check the coupon status"
+    }
+  },
+  
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 19,
+    "fields": {
+      "template_key":"RCV_SA_COUPON_COMPLETE",
+      "template":"{vin} {usc}",
+      "description":"Receive this message from SA for coupon close"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 20,
+    "fields": {
+      "template_key":"RCV_CUSTOMER_BRAND_DATA",
+      "template":"{brand_id}",
+      "description":"Receive this message from Customer for all brand procduct detail"
+    }
+  }, 
+  {
+  	"model": "gladminds.messagetemplate",
+  	"pk": 21,
+  	"fields": {
+  		"template_key": "SEND_CUSTOMER_SUPPORTED_KEYWORD",
+  		"template": "Supported keyword: 1.GCP_REG 2.SERVICE 3.BRAND 4.CHECK 5.CLOSE",
+  		"description": "Send supported message format to customer"
+  	}
+  }
+  
+  
+]
