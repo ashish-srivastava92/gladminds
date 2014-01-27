@@ -1,0 +1,95 @@
+[
+  {
+    "model": "gladminds.coupondata",
+    "pk": 1,
+    "fields": {
+        "vin":"TESTVECHILEID00001",
+	    "unique_service_coupon":"COUPON001",
+	    "valid_days":"30",
+	    "valid_kms":"500",
+	    "service_type":1,
+	    "sa_phone_number":"null",
+	    "closed_date":"null",
+	    "mark_expired_on": "null",
+	    "actual_service_date": "null",
+	    "actual_kms": "null",
+	    "last_reminder_date": "null",
+	    "schedule_reminder_date": "null"
+    }
+  },
+  {
+    "model": "gladminds.coupondata",
+    "pk": 2,
+    "fields": {
+        "vin":"TESTVECHILEID00001",
+	    "unique_service_coupon":"COUPON002",
+	    "valid_days":"60",
+	    "valid_kms":"1000",
+	    "service_type":2,
+	    "sa_phone_number":"null",
+	    "closed_date":"null",
+	    "mark_expired_on": "null",
+	    "actual_service_date": "null",
+	    "actual_kms": "null",
+	    "last_reminder_date": "null",
+	    "schedule_reminder_date": "null"
+    }
+  },
+    {
+    "model": "gladminds.coupondata",
+    "pk": 3,
+    "fields": {
+	    "vin":"TESTVECHILEID00002",
+	    "unique_service_coupon":"COUPON003",
+	    "valid_days":"30",
+	    "valid_kms":"500",
+	    "service_type":1,
+	    "status":3,
+	    "sa_phone_number":"+910000000000",
+	    "closed_date":"2014-11-09 17:00:00",
+	    "mark_expired_on": "2013-11-15 00:00:00",
+	    "actual_service_date": "2013-11-09 00:00:00",
+	    "actual_kms": "445",
+	    "last_reminder_date": "2013-11-08 00:00:00",
+	    "schedule_reminder_date": "null"
+    }
+  },
+  {
+    "model": "gladminds.coupondata",
+    "pk": 4,
+    "fields": {
+        "vin":"TESTVECHILEID00002",
+	    "unique_service_coupon":"COUPON004",
+	    "valid_days":"75",
+	    "valid_kms":"1000",
+	    "service_type":2,
+	    "status":2,
+	    "sa_phone_number":"null",
+	    "closed_date":"null",
+	    "mark_expired_on": "2013-12-30 00:00:00",
+	    "actual_service_date": "null",
+	    "actual_kms": "null",
+	    "last_reminder_date": "2013-12-23 00:00:00",
+	    "schedule_reminder_date": "null"
+    }
+  },
+    {
+    "model": "gladminds.coupondata",
+    "pk": 5,
+    "fields": {
+        "vin":"TESTVECHILEID00002",
+	    "unique_service_coupon":"COUPON005",
+	    "valid_days":"120",
+	    "valid_kms":"1500",
+	    "service_type":3,
+	    "status":1,
+	    "sa_phone_number":"null",
+	    "closed_date":"null",
+	    "mark_expired_on": "2014-01-30 00:00:00",
+	    "actual_service_date": "null",
+	    "actual_kms": "null",
+	    "last_reminder_date": "null",
+	    "schedule_reminder_date": "null"
+    }
+  }
+]
