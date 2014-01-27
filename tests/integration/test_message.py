@@ -95,15 +95,29 @@ class CustomerServiceTest(GladmindsResourceTestCase):
 class CouponCheckAndClosure(GladmindsResourceTestCase):
     def setUp(self):
         super(CouponCheckAndClosure, self).setUp()
-        self.MSG_CHECK_COUPON = "CHECK VIN1 50 1"
-        self.PHONE_NUMBER = "+910000000000"
+        self.MSG_CHECK_COUPON = "CHECK TESTVECHILEID00002 50 2"
+        self.PHONE_NUMBER = "+SA0000000000"
         self.CHECK_COUPON = {'text': self.MSG_CHECK_COUPON, 'phoneNumber': self.PHONE_NUMBER}
+        self.INVALID_PHONE_NUMBER="+0000000000"
+        self.CHECK_INVALID_COUPON={'text': self.MSG_CHECK_COUPON, 
+                                   'phoneNumber': self.INVALID_PHONE_NUMBER}
+        self.VALID_COUPON="CHECK TESTVECHILEID00002 50 3"
+        self.CHECK_VALID_COUPON = {'text': self.VALID_COUPON, 'phoneNumber': self.PHONE_NUMBER}
     
-    def test_coupon_validation(self):
-       print ":::::::;resp:::::::::::"
+    '''
+    Test Case Checking coupon validation can be done only from 
+    registered dealer's number
+    '''
+    def test_check_coupon_sa(self):
        resp = self.api_client.post(uri=self.MESSAGE_URL, data=self.CHECK_COUPON)
-       print ":::::::;resp:::::::::::",resp
-#        self.assertHttpOK(resp)
+       self.assertHttpOK(resp)
+       resp = self.api_client.post(uri=self.MESSAGE_URL, data=self.CHECK_INVALID_COUPON)
+       self.assertHttpUnauthorized(resp)
+       
+    def test_valid_coupon(self):
+        resp = self.api_client.post(uri=self.MESSAGE_URL, data=self.CHECK_VALID_COUPON)
+        self.assertHttpOK(resp)
+       
 
     
        

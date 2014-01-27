@@ -11,7 +11,7 @@
   },
   {
     "model": "gladminds.serviceadvisor",
-    "pk": 1,
+    "pk": 2,
     "fields": {
       "dealer_id":1,
       "service_advisor_id":"SA0002",
