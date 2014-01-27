@@ -1,9 +1,9 @@
 [
   {
     "model": "gladminds.serviceadvisor",
-    "pk": 1,
+    "pk": 2,
     "fields": {
-      "dealer_id":"G675DF",
+      "dealer_id":1,
       "service_advisor_id":"SA1",
       "name":"testserviceadvisor1",
       "phone_number":"+910000000000"
