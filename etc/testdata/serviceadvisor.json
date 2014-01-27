@@ -1,12 +1,22 @@
 [
   {
     "model": "gladminds.serviceadvisor",
-    "pk": 2,
+    "pk": 1,
     "fields": {
       "dealer_id":1,
-      "service_advisor_id":"SA1",
+      "service_advisor_id":"SA0001",
       "name":"testserviceadvisor1",
-      "phone_number":"+910000000000"
+      "phone_number":"+SA0000000000"
+    }
+  },
+  {
+    "model": "gladminds.serviceadvisor",
+    "pk": 1,
+    "fields": {
+      "dealer_id":1,
+      "service_advisor_id":"SA0002",
+      "name":"testserviceadvisor2",
+      "phone_number":"+SA0000000001"
     }
   }
 ]

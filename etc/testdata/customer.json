@@ -14,7 +14,7 @@
     "model": "gladminds.gladmindusers",
     "pk": 2,
     "fields": {
-      "gladmind_customer_id":"AAAAAA001",
+      "gladmind_customer_id":"AAAAAA002",
       "customer_name": "Test Gldaminds",
       "phone_number":"+TS0000000001",
       "email_id":"test.gladminds@test.com",

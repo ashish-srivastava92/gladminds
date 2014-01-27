@@ -4,12 +4,9 @@
     "pk": 1,
     "fields": {
         "vin":"TESTVECHILEID00001",
-    	"customer_phone_number":"null",
-    	"product_type":"PRODUCT001",
-    	"sap_customer_id":"null",
-	    "product_purchase_date":"null",
+    	"product_type":1,
 	    "invoice_date":"2014-01-10 00:00:00",
-    	"dealer_id":"G675DF"
+    	"dealer_id":1
     }
   },
   {
@@ -17,12 +14,12 @@
     "pk": 2,
     "fields": {
       	"vin":"TESTVECHILEID00002",
-    	"customer_phone_number":"+TS0000000000",
-    	"product_type":"PRODUCT001",
-    	"sap_customer_id":"null",
+    	"customer_phone_number":1,
+    	"product_type":1,
+    	"sap_customer_id":"SAP001",
 	    "product_purchase_date":"2013-10-15 00:00:00",
 	    "invoice_date":"2013-07-10 00:00:00",
-    	"dealer_id":"G675DF"
+    	"dealer_id":1
     }
   }
 ]

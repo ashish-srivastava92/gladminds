@@ -6,7 +6,8 @@ class GladmindsResourceTestCase(ResourceTestCase):
     
     def setUp(self):
         super(GladmindsResourceTestCase, self).setUp()
-        management.call_command('loaddata', 'etc/data/template.json', verbosity=0)
+        management.call_command('loaddata', 'etc/testdata/template.json', verbosity=0)
+        management.call_command('loaddata', 'etc/testdata/customer.json', verbosity=0)
         management.call_command('loaddata', 'etc/testdata/brand.json', verbosity=0)
         management.call_command('loaddata', 'etc/testdata/producttype.json', verbosity=0)
         management.call_command('loaddata', 'etc/testdata/dealer.json', verbosity=0)
