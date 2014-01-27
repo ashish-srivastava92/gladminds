@@ -1,5 +1,6 @@
 from datetime import datetime
 from django.conf.urls import url
+from django.core.exceptions import ObjectDoesNotExist
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpBadRequest, HttpUnauthorized
 from django.db import connection, models
@@ -13,7 +14,7 @@ from tastypie.resources import Resource
 __all__ = ['GladmindsTaskManager']
 
 angular_format = lambda x: x.replace('{', '<').replace('}', '>')
-
+AUDIT_ACTION = 'SEND TO QUEUE'
 
 class GladmindsResources(Resource):
 
@@ -37,20 +38,20 @@ class GladmindsResources(Resource):
         try:
             sms_dict = smsparser.sms_parser(message=message)
         except smsparser.InvalidKeyWord as ink:
-            message = templates.get_template('SEND_CUSTOMER_SUPPORTED_KEYWORD')
+            message = ink.template
             send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
-            audit.audit_log(reciever=phone_number, action='SEND TO QUEUE', message=message)
-            raise ImmediateHttpResponse(HttpBadRequest("Invalid Keyword"))
+            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+            raise ImmediateHttpResponse(HttpBadRequest(ink.message))
         except smsparser.InvalidMessage as inm:
-            message = templates.get_template('SEND_INVALID_MESSAGE')
+            message = inm.template
             send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
-            audit.audit_log(reciever=phone_number, action='SEND TO QUEUE', message=message)
-            raise ImmediateHttpResponse(HttpBadRequest("Invalid Message"))
+            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+            raise ImmediateHttpResponse(HttpBadRequest(inm.message))
         except smsparser.InvalidFormat as inf:
-            message = angular_format('CORRECT FORMAT: ' + inf.message)
+            message = angular_format('CORRECT FORMAT: ' + inf.template)
             send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
-            audit.audit_log(reciever=phone_number, action='SEND TO QUEUE', message=message)
-            raise ImmediateHttpResponse(HttpBadRequest("Invalid Message Format"))
+            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+            raise ImmediateHttpResponse(HttpBadRequest(inf.message))
 
         handler = getattr(self, sms_dict['handler'], None)
         to_be_serialized = handler(sms_dict, phone_number)
@@ -74,34 +75,31 @@ class GladmindsResources(Resource):
         #Please update the template variable before updating the keyword-argument
         message = smsparser.render_sms_template(status='send', keyword=sms_dict['keyword'], customer_name=customer_name, customer_id=gladmind_customer_id)
         send_registration_detail.delay(phone_number=phone_number, message=message)
-        audit.audit_log(reciever=phone_number, action='SEND TO QUEUE', message=message)
+        audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
     def customer_service_detail(self, sms_dict, phone_number):
-        gladmind_customer_id = sms_dict['customer_id']
+        gladmind_customer_id = sms_dict.get('customer_id', None)
         message = None
         try:
-            gladmind_user_object = common.GladMindUsers.objects.get(
-                gladmind_customer_id=gladmind_customer_id)
+            gladmind_user_object = common.GladMindUsers.objects.get(gladmind_customer_id=gladmind_customer_id)
             phone_number = str(gladmind_user_object)
-            customer_object = common.ProductData.objects.filter(
-                customer_phone_number__phone_number=phone_number)
-            # FIXME: RIGHT NOW HANDLING FOR ONE PRODUCT ONLY
+            customer_object = common.ProductData.objects.filter(customer_phone_number__phone_number=phone_number)
+            
+            if not customer_object:
+                raise ObjectDoesNotExist()
+            # FIX ME: RIGHT NOW HANDLING FOR ONE PRODUCT ONLY
             vin = customer_object[0].vin
-            coupon_object = common.CouponData.objects.filter(
-                vin__vin=vin, status=1)
+            coupon_object = common.CouponData.objects.filter(vin__vin=vin, status=1)
             service_code = ''.join(coupon_object[0].unique_service_coupon +
-                                   " Valid Days " + str(
-                                   coupon_object[0].valid_days)
-                                   + " Valid KMS " + str(coupon_object[0].valid_kms))
-            message = templates.get_template('SEND_CUSTOMER_SERVICE_DETAIL').format(
-                gladmind_customer_id=gladmind_customer_id, vin=vin, service_code=service_code)
-        except Exception as ex:
-            message = templates.get_template(
-                'INVALID_SERVICE_DETAIL').format(gladmind_customer_id)
+                                   " Valid Days " + str(coupon_object[0].valid_days)+ 
+                                   " Valid KMS " + str(coupon_object[0].valid_kms))                                   
+            message = smsparser.render_sms_template(status='send', keyword=sms_dict['keyword'], gladmind_customer_id=gladmind_customer_id, vin=vin, service_code=service_code)
+        except ObjectDoesNotExist as odne:
+            message = smsparser.render_sms_template(status='invalid', keyword=sms_dict['keyword'], gladmind_customer_id = gladmind_customer_id)
+        
         send_service_detail.delay(phone_number=phone_number, message=message)
-        audit.audit_log(reciever=phone_number,
-                        action='SEND TO QUEUE', message=message)
+        audit.audit_log(reciever=phone_number,action=AUDIT_ACTION, message=message)
         return True
 
     def validate_coupon(self, sms_dict, phone_number):
