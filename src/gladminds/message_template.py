@@ -1,10 +1,13 @@
+from django.core.exceptions import ObjectDoesNotExist
 from gladminds.models import common
 
-
 def get_template(template_key):
-    return common.MessageTemplate.objects.get(template_key=template_key).__dict__['template']
+    object = common.MessageTemplate.objects.get(template_key = template_key)
+    return object.template
 
 RCV_MESSAGE_FORMAT = "{key} {message}"
+
+
 
 MESSAGE_TEMPLATE_MAPPER = {
             'gcp_reg':{
@@ -43,4 +46,3 @@ MESSAGE_TEMPLATE_MAPPER = {
                     'auth_rule': ['open']
                      }
         }
-

@@ -34,16 +34,16 @@ def sms_parser(*args, **kwargs):
     else:
         raise InvalidKeyWord("invalid message")
 
-def render_sms_template(*args, **kwargs):
-    key = kwargs.get('key', None)
-    template = kwargs.get('template', None)
+def render_sms_template(keyword=None, status = None, template = None, *args, **kwargs):
+    keyword = keyword
+    template = template
     message = None
     if template:
         message = template.format(*args, **kwargs)
     
-    if not template and key:
-        status = kwargs.get('status', None)
-        template_mapper = templates.MESSAGE_TEMPLATE_MAPPER[key]
+    if not template and keyword:
+        status = status
+        template_mapper = templates.MESSAGE_TEMPLATE_MAPPER[keyword]
         message_template = template_mapper[status]
         message = message_template.format(*args, **kwargs)
     return message
