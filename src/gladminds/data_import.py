@@ -1,7 +1,7 @@
 import csv
 from django.conf import settings
 from gladminds.models import common
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def import_sap_data(*args, **kwargs):
     file_path = settings.DATA_CSV_PATH
@@ -21,6 +21,7 @@ def import_sap_data(*args, **kwargs):
     import_productdata(product_source = product_coupon)
     product_coupon = csv.DictReader(open(file_path+"/product_data.csv"))
     import_coupondata(coupon_source = product_coupon)
+    
 
 def import_branddata(brand_source):
     for brand in brand_source:
