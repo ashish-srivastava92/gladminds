@@ -9,7 +9,7 @@
     	"sap_customer_id":"null",
 	    "product_purchase_date":"null",
 	    "invoice_date":"2014-01-10 00:00:00",
-    	"dealer_id":"null"
+    	"dealer_id":"G675DF"
     }
   },
   {
@@ -22,7 +22,7 @@
     	"sap_customer_id":"null",
 	    "product_purchase_date":"2013-10-15 00:00:00",
 	    "invoice_date":"2013-07-10 00:00:00",
-    	"dealer_id":"null"
+    	"dealer_id":"G675DF"
     }
   }
 ]
