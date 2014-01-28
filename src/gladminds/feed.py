@@ -8,6 +8,8 @@ from gladminds import audit, message_template as templates
 import os
 import time
 import csv
+import logging
+logger = logging.getLogger(__name__)
 
 
 def load_feed():
@@ -20,28 +22,41 @@ def load_feed():
 class CSVFeed(object):
     def __init__(self):
         file_path = settings.DATA_CSV_PATH
+        brand_path = file_path+"/brand_data.csv"
+        dealer_path = file_path+"/dealer_data.csv"
+        product_path = file_path+"/product_data.csv"
+        product_purchase_path = file_path+"/product_purchase.csv"
+        
         #Import data from CSV
-        brand_feed = csv.DictReader(open(file_path+"/brand_data.csv"))
+        brand_feed = self.get_dict(brand_path)
         brand_data  = BrandProductTypeFeed(data_source = brand_feed)
-        brand_data.import_data()
-        dealer_feed = csv.DictReader(open(file_path+"/dealer_data.csv"))
+        brand_data.import_data()   
+        dealer_feed = self.get_dict(dealer_path)
         dealer_data = DealerAndServiceAdvisorFeed(data_source = dealer_feed)
         dealer_data.import_data()
-        productcoupon_feed = csv.DictReader(open(file_path+"/product_data.csv"))
+        productcoupon_feed = self.get_dict(product_path)
         product_data = ProductDispatchFeed(data_source = productcoupon_feed)
         product_data.import_data()
-        productpurchase_feed = csv.DictReader(open(file_path+"/product_purchase.csv"))
+        productpurchase_feed = self.get_dict(product_purchase_path)
         product_purchase_data = ProductPurchaseFeed(data_source = productpurchase_feed)
         product_purchase_data.import_data()
         
-        self.rename(fullpath = file_path+"/brand_data.csv")
-        self.rename(fullpath = file_path+"/dealer_data.csv")
-        self.rename(fullpath = file_path+"/product_data.csv")
-        self.rename(fullpath = file_path+"/product_purchase.csv")
+        self.rename(fullpath = brand_path)
+        self.rename(fullpath = dealer_path)
+        self.rename(fullpath = product_path)
+        self.rename(fullpath = product_purchase_path)
+    
+    def get_dict(self, filepath):
+        csv_dict = {}
+        try:
+            csv_dict = csv.DictReader(open(filepath))
+        except IOError as ie:
+            logger.exception("[Excpetion]: {0}".format(ie))
+        return csv_dict
     
     def rename(self, fullpath):
-        timestamp = str(int(time.time()))
-        os.rename(fullpath, fullpath+'-'+timestamp)
+        timestamp_str = str(int(time.time()))
+        os.rename(fullpath, fullpath+'-'+timestamp_str)
 
 
 class SAPFeed(object):
