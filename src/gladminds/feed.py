@@ -4,8 +4,11 @@ from django.conf import settings
 from gladminds.models import common
 from gladminds import utils
 from datetime import datetime, timedelta
-from gladminds import audit, message_template as template
+from gladminds import audit, message_template as templates
+import os
+import time
 import csv
+
 
 def load_feed():
     FEED_TYPE = settings.FEED_TYPE
@@ -30,6 +33,15 @@ class CSVFeed(object):
         productpurchase_feed = csv.DictReader(open(file_path+"/product_purchase.csv"))
         product_purchase_data = ProductPurchaseFeed(data_source = productpurchase_feed)
         product_purchase_data.import_data()
+        
+        self.rename(fullpath = file_path+"/brand_data.csv")
+        self.rename(fullpath = file_path+"/dealer_data.csv")
+        self.rename(fullpath = file_path+"/product_data.csv")
+        self.rename(fullpath = file_path+"/product_purchase.csv")
+    
+    def rename(self, fullpath):
+        timestamp = str(int(time.time()))
+        os.rename(fullpath, fullpath+'-'+timestamp)
 
 
 class SAPFeed(object):
@@ -107,11 +119,12 @@ class ProductPurchaseFeed(BaseFeed):
                     customer_data = common.GladMindUsers(gladmind_customer_id = gladmind_customer_id, phone_number = product['customer_phone_number'], registration_date = datetime.now(), customer_name = product['customer_name'])
                     customer_data.save()
                 
-                product_purchase_date = datetime.strptime(product['product_purchase_date'],'%d-%m-%Y %H:%M:%S')
-                product_data.sap_customer_id = product['sap_customer_id']
-                product_data.customer_phone_number = customer_data
-                product_data.product_purchase_date = product_purchase_date
-                product_data.save()
+                if not product_data.sap_customer_id:
+                    product_purchase_date = datetime.strptime(product['product_purchase_date'],'%d-%m-%Y %H:%M:%S')
+                    product_data.sap_customer_id = product['sap_customer_id']
+                    product_data.customer_phone_number = customer_data
+                    product_data.product_purchase_date = product_purchase_date
+                    product_data.save()
             except Exception as ex:
                 continue
             
@@ -120,7 +133,7 @@ class ProductServiceFeed(BaseFeed):
         pass
 
 def update_coupon_data(sender, **kwargs):
-    from src.gladminds.tasks import send_on_product_purchase
+    from gladminds.tasks import send_on_product_purchase
     instance = kwargs['instance']
     if instance.customer_phone_number:
         product_purchase_date = instance.product_purchase_date
@@ -132,8 +145,12 @@ def update_coupon_data(sender, **kwargs):
             coupon_object.mark_expired_on=mark_expired_on
             coupon_object.save()
         
-        message = templates.get_template('SEND_CUSTOMER_ON_PRODUCT_PURCHASE').format(sap_customer_id = instance.sap_customer_id)
-        send_on_product_purchase.delay(phone_number=instance.customer_phone_number, message=message)
-        audit.audit_log(reciever=instance.customer_phone_number, action='SEND TO QUEUE', message=message)
-            
+        try:
+            customer_data = common.GladMindUsers.objects.get(phone_number = instance.customer_phone_number) 
+            message = templates.get_template('SEND_CUSTOMER_ON_PRODUCT_PURCHASE').format(customer_name = customer_data.customer_name, sap_customer_id = instance.sap_customer_id)
+            send_on_product_purchase.delay(phone_number=instance.customer_phone_number, message=message)
+            audit.audit_log(reciever=instance.customer_phone_number, action='SEND TO QUEUE', message=message)
+        except Exception as ex:
+            print "[Exception]: Signal-In Update Coupon Data"  
+
 post_save.connect(update_coupon_data, sender=common.ProductData)

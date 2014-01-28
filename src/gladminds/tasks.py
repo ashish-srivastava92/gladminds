@@ -42,7 +42,7 @@ def send_coupon_validity_detail(*args, **kwargs):
         respone_data = sms_client.send_stateless(**kwargs)
         audit_log(reciever=phone_number, message=message)
     except Exception as ex:
-        send_registration_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+        send_coupon_validity_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 
 """
 This job send sms to customer when SA send 
@@ -56,7 +56,7 @@ def send_coupon_detail_customer(*args, **kwargs):
         respone_data = sms_client.send_stateless(**kwargs)
         audit_log(reciever=phone_number, message=message)
     except Exception as ex:
-        send_registration_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+        send_coupon_detail_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 
 """
 This job send reminder sms to customer
@@ -95,7 +95,7 @@ def send_close_sms_customer(*args, **kwargs):
         respone_data = sms_client.send_stateless(**kwargs)
         audit_log(reciever=phone_number, message=message)
     except Exception as ex:
-        send_coupon_close_message_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+        send_close_sms_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 
 @shared_task
 def send_brand_sms_customer(*args, **kwargs):
@@ -126,13 +126,16 @@ This job send on customer product purchase
 """
 @shared_task
 def send_on_product_purchase(*args, **kwargs):
+    print "Sent a mail on purchase : %s" % kwargs
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = sms_client.send_stateless(**kwargs)
+        print "Send SMS"
         audit_log(reciever=phone_number, message=message)
+        print "Save to audit logi in task"
     except Exception as ex:
-        send_coupon_close_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+        send_on_product_purchase.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
         
 """
 Crontab to send reminder sms to customer 

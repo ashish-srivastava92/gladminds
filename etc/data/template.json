@@ -198,7 +198,7 @@
   	"pk": 22,
   	"fields": {
   		"template_key": "SEND_CUSTOMER_ON_PRODUCT_PURCHASE",
-  		"template": "Dear Customer, Thank you to purchase bike. Your customer id: {sap_customer_id}",
+  		"template": "Dear {customer_name}, Congrats on your purchase of Bajaj bike. Your customer id is {sap_customer_id}. Refer this id during servicing.",
   		"description": "Send message to customer on purchase"
   	}
   }
