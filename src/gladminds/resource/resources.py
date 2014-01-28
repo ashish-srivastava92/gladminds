@@ -200,6 +200,9 @@ class GladmindsResources(Resource):
             service_advisor_object = common.ServiceAdvisor.objects.get(
                 phone_number=phone_number)
         except:
+            message = 'You are not an authorised user to avail this service'
+            send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
+            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(
                 HttpUnauthorized("Not an authorised user"))
         return True
