@@ -23,4 +23,6 @@ SMS_CLIENT_DETAIL = {
 BROKER_URL= 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
 
+FEED_TYPE='CSV'
+
 
