@@ -94,7 +94,7 @@
     "pk": 11,
     "fields": {
       "template_key":"SEND_CUSTOMER_COUPON_REMINDER",
-      "template":"Reminder: Your Coupon {0} for product {1} will expire on {2}",
+      "template":"Reminder: Your Coupon {usc} for product {vin} will expire on {expired_date} having valid kms {valid_kms}" ,
       "description":"Send reminder sms on coupon expiry"
     }
   },
