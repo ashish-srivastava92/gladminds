@@ -1,6 +1,5 @@
 import unittest
 
-
 class TestAssertWorks(unittest.TestCase):
 
     def test_assert_equals(self):
