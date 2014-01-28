@@ -7,11 +7,11 @@ BrandData contains brand related information
 
 class UploadProductCSV(models.Model):
     file_location=settings.PROJECT_DIR+'/data/'
-    upload_brand_feed= models.FileField(upload_to=file_location, blank=False)
-    upload_dealer_feed=models.FileField(upload_to=file_location, blank=False)
-    upload_product_feed= models.FileField(upload_to=file_location, blank=False)
-    upload_product_purchase_feed= models.FileField(upload_to=file_location, blank=False)
-    upload_product_service_feed= models.FileField(upload_to=file_location, blank=False)
+    upload_brand_feed= models.FileField(upload_to=file_location, blank=True)
+    upload_dealer_feed=models.FileField(upload_to=file_location, blank=True)
+    upload_product_feed= models.FileField(upload_to=file_location, blank=True)
+    upload_product_purchase_feed= models.FileField(upload_to=file_location, blank=True)
+    upload_product_service_feed= models.FileField(upload_to=file_location, blank=True)
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Upload Product Data"
