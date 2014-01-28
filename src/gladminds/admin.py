@@ -117,8 +117,10 @@ class GladMindUserForm(ModelForm):
 class GladMindUserAdmin(ModelAdmin):
     form = GladMindUserForm
     search_fields = ('gladmind_customer_id','customer_name','phone_number','email_id','registration_date')
-    list_display = ('gladmind_customer_id','customer_name','email_id','phone_number','registration_date')
-
+    list_display = ('gladmind_customer_id','customer_name','email_id','phone_number','date_of_registration')
+    
+    def date_of_registration(self, obj):
+        return obj.registration_date.strftime("%d %b %Y")
 
 class Couponline(SortableTabularInline):
     model = CouponData
