@@ -181,7 +181,7 @@
     "fields": {
       "template_key":"RCV_CUSTOMER_BRAND_DATA",
       "template":"{brand_id}",
-      "description":"Receive this message from Customer for all brand procduct detail"
+      "description":"Receive this message from Customer for all brand product detail"
     }
   }, 
   {
