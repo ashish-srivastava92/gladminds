@@ -5,7 +5,10 @@ from gladminds.models import common
 from gladminds import utils
 from datetime import datetime, timedelta
 from gladminds import audit, message_template as templates
+import os
+import time
 import csv
+
 
 def load_feed():
     FEED_TYPE = settings.FEED_TYPE
@@ -30,6 +33,15 @@ class CSVFeed(object):
         productpurchase_feed = csv.DictReader(open(file_path+"/product_purchase.csv"))
         product_purchase_data = ProductPurchaseFeed(data_source = productpurchase_feed)
         product_purchase_data.import_data()
+        
+        self.rename(fullpath = file_path+"/brand_data.csv")
+        self.rename(fullpath = file_path+"/dealer_data.csv")
+        self.rename(fullpath = file_path+"/product_data.csv")
+        self.rename(fullpath = file_path+"/product_purchase.csv")
+    
+    def rename(self, fullpath):
+        timestamp = str(int(time.time()))
+        os.rename(fullpath, fullpath+'-'+timestamp)
 
 
 class SAPFeed(object):
@@ -139,4 +151,5 @@ def update_coupon_data(sender, **kwargs):
             audit.audit_log(reciever=instance.customer_phone_number, action='SEND TO QUEUE', message=message)
         except Exception as ex:
             print "[Exception]: Signal-In Update Coupon Data"  
+
 post_save.connect(update_coupon_data, sender=common.ProductData)
