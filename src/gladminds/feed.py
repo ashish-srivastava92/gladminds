@@ -4,12 +4,11 @@ from django.conf import settings
 from gladminds.models import common
 from gladminds import utils
 from datetime import datetime, timedelta
-from src.gladminds.tasks import send_on_product_purchase
 from gladminds import audit, message_template as template
 import csv
 
 def load_feed():
-    FEED_TYPE = setting.FEED_TYPE
+    FEED_TYPE = settings.FEED_TYPE
     if FEED_TYPE is 'CSV':
         CSVFeed()
     elif FEED_TYPE is 'SAP':
@@ -121,6 +120,7 @@ class ProductServiceFeed(BaseFeed):
         pass
 
 def update_coupon_data(sender, **kwargs):
+    from src.gladminds.tasks import send_on_product_purchase
     instance = kwargs['instance']
     if instance.customer_phone_number:
         product_purchase_date = instance.product_purchase_date

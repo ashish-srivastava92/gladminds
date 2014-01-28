@@ -3,8 +3,7 @@ from celery import shared_task
 from django.conf import settings
 from gladminds.audit import audit_log
 from gladminds.dao.smsclient import load_gateway
-from gladminds import taskmanager
-from gladminds import data_import
+from gladminds import taskmanager, feed
 
 sms_client = load_gateway()
 
@@ -162,7 +161,6 @@ Crontab to import data from SAP to Gladminds Database
 """
 @shared_task
 def import_data(*args, **kwargs):
-    from gladminds import datafeed
-    datafeed.load_feed()
+    feed.load_feed()
     
 
