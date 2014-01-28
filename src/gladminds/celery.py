@@ -38,6 +38,11 @@ app.conf.CELERYBEAT_SCHEDULE= {
     'cronjob-set-expiry-status-to-service-coupon': {
         'task': 'gladminds.tasks.expire_service_coupon',
         'schedule': crontab(minute=0, hour=0),
+    },  
+    #Job to set expire status=True for all service coupon which expire 
+    'cronjob-export-csv-file': {
+        'task': 'gladminds.tasks.export_close_coupon_data',
+        'schedule': crontab(minute=0, hour=0),
     },                                     
 }
 app.conf.update(
