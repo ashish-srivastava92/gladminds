@@ -119,11 +119,12 @@ class ProductPurchaseFeed(BaseFeed):
                     customer_data = common.GladMindUsers(gladmind_customer_id = gladmind_customer_id, phone_number = product['customer_phone_number'], registration_date = datetime.now(), customer_name = product['customer_name'])
                     customer_data.save()
                 
-                product_purchase_date = datetime.strptime(product['product_purchase_date'],'%d-%m-%Y %H:%M:%S')
-                product_data.sap_customer_id = product['sap_customer_id']
-                product_data.customer_phone_number = customer_data
-                product_data.product_purchase_date = product_purchase_date
-                product_data.save()
+                if not product_data.sap_customer_id:
+                    product_purchase_date = datetime.strptime(product['product_purchase_date'],'%d-%m-%Y %H:%M:%S')
+                    product_data.sap_customer_id = product['sap_customer_id']
+                    product_data.customer_phone_number = customer_data
+                    product_data.product_purchase_date = product_purchase_date
+                    product_data.save()
             except Exception as ex:
                 continue
             
