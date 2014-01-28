@@ -3,7 +3,7 @@ from celery import shared_task
 from django.conf import settings
 from gladminds.audit import audit_log
 from gladminds.dao.smsclient import load_gateway
-from gladminds import taskmanager, feed
+from gladminds import taskmanager, feed,export_file
 
 sms_client = load_gateway()
 
@@ -167,3 +167,9 @@ def import_data(*args, **kwargs):
     feed.load_feed()
     
 
+'''
+Cronjob to export close coupon data into csv file
+'''
+@shared_task
+def export_close_coupon_data(*args,**kwargs):
+    export_file.export_data_csv()
