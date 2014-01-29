@@ -131,7 +131,7 @@
     "pk": 15,
     "fields": {
       "template_key":"SEND_BRAND_DATA",
-      "template":"CUSTOMER ID: {customer_id} VIN: {vin}",
+      "template":"CUSTOMER ID: {sap_customer_id} VIN: {vin}",
       "description":"Send the brand data detail"
     }
   },
