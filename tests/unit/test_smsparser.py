@@ -1,7 +1,7 @@
-import unittest
 from gladminds import smsparser
+from base_unit import GladmindsUnitTestCase
 
-class TestAssertWorks(unittest.TestCase):
+class SmsParserTest(GladmindsUnitTestCase):
 
     def test_sms_parse(self):
         mock_client_sms = "GCP_REG test.user@testcase.com Test User"

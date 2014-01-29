@@ -28,23 +28,29 @@ class CSVFeed(object):
         product_purchase_path = file_path+"/product_purchase.csv"
         
         #Import data from CSV
-        brand_feed = self.get_dict(brand_path)
-        brand_data  = BrandProductTypeFeed(data_source = brand_feed)
-        brand_data.import_data()   
-        dealer_feed = self.get_dict(dealer_path)
-        dealer_data = DealerAndServiceAdvisorFeed(data_source = dealer_feed)
-        dealer_data.import_data()
-        productcoupon_feed = self.get_dict(product_path)
-        product_data = ProductDispatchFeed(data_source = productcoupon_feed)
-        product_data.import_data()
-        productpurchase_feed = self.get_dict(product_purchase_path)
-        product_purchase_data = ProductPurchaseFeed(data_source = productpurchase_feed)
-        product_purchase_data.import_data()
+        if os.path.isfile(brand_path):
+            brand_feed = self.get_dict(brand_path)
+            brand_data  = BrandProductTypeFeed(data_source = brand_feed)
+            brand_data.import_data()
+            self.rename(fullpath = brand_path)   
         
-        self.rename(fullpath = brand_path)
-        self.rename(fullpath = dealer_path)
-        self.rename(fullpath = product_path)
-        self.rename(fullpath = product_purchase_path)
+        if os.path.isfile(dealer_path):
+            dealer_feed = self.get_dict(dealer_path)
+            dealer_data = DealerAndServiceAdvisorFeed(data_source = dealer_feed)
+            dealer_data.import_data()
+            self.rename(fullpath = dealer_path)
+        
+        if os.path.isfile(product_path): 
+            productcoupon_feed = self.get_dict(product_path)
+            product_data = ProductDispatchFeed(data_source = productcoupon_feed)
+            product_data.import_data()
+            self.rename(fullpath = product_path)
+        
+        if os.path.isfile(product_purchase_path):
+            productpurchase_feed = self.get_dict(product_purchase_path)
+            product_purchase_data = ProductPurchaseFeed(data_source = productpurchase_feed)
+            product_purchase_data.import_data()
+            self.rename(fullpath = product_purchase_path)
     
     def get_dict(self, filepath):
         csv_dict = {}
@@ -55,10 +61,12 @@ class CSVFeed(object):
         return csv_dict
     
     def rename(self, fullpath):
-        timestamp_str = str(int(time.time()))
-        os.rename(fullpath, fullpath+'-'+timestamp_str)
-
-
+        try:
+            timestamp_str = str(int(time.time()))
+            os.rename(fullpath, fullpath+'-'+timestamp_str)
+        except OSError as oe:
+            logger.exception("[Excpetion]: {0}".format(oe))
+            
 class SAPFeed(object):
     pass
 
