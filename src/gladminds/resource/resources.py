@@ -210,27 +210,16 @@ class GladmindsResources(Resource):
     def get_brand_data(self, sms_dict, phone_number):
         brand_id = sms_dict['brand_id']
         try:
-            product_object = common.ProductTypeData.objects.filter(
-                brand_id__brand_id=brand_id)
-            customer_object = common.ProductData.objects.filter(
-                customer_phone_number__phone_number=phone_number)
-            valid_customer_data = filter(
-                lambda x: x.product_type in product_object, customer_object)
-            product_sap_id_vin = map(lambda x: {
-                                     'sap_id': x.sap_customer_id, 
-                                     'vin': x.vin}, 
-                                     valid_customer_data)
-            brand_message = ','.join("customer_id " + data[
-                                     'sap_id'] + " vin " + 
-                                     data['vin'] for data in product_sap_id_vin)
-            message = templates.get_template(
-                'SEND_BRAND_DATA').format(brand_message=brand_message)
+            product_data=common.ProductData.objects.select_related('product_type__brand_id').filter(customer_phone_number__phone_number=phone_number, product_type__brand_id__brand_id=brand_id)
+            product_list = map(lambda object: {'sap_customer_id':object.sap_customer_id, 'vin': object.vin}, product_data)
+            template = templates.get_template('SEND_BRAND_DATA')
+            msg_list=[template.format(**key_args) for key_args in product_list]
+            message = ', '.join(msg_list)
         except Exception as ex:
             message = templates.get_template('SEND_INVALID_MESSAGE')
-        send_brand_sms_customer.delay(
-            phone_number=phone_number, message=message)
-        audit.audit_log(reciever=phone_number,
-                        action='SEND TO QUEUE', message=message)
+        
+        send_brand_sms_customer.delay(phone_number=phone_number, message=message)
+        audit.audit_log(reciever=phone_number,action=AUDIT_ACTION, message=message)
         return True
 
     def determine_format(self, request):
