@@ -11,7 +11,7 @@ from suit.admin import SortableTabularInline, SortableModelAdmin
 from suit.widgets import SuitDateWidget, SuitSplitDateTimeWidget, \
     EnclosedInput, LinkedSelect, AutosizedTextarea
 from django.contrib.admin import ModelAdmin, SimpleListFilter
-from import_export.admin import ImportExportModelAdmin
+from import_export.admin import ImportExportModelAdmin,ExportMixin
 from import_export import fields,widgets
 from import_export import resources
 from django.contrib.admin import DateFieldListFilter
@@ -155,7 +155,8 @@ class CouponResource(resources.ModelResource):
 
     class Meta:
         model = CouponData
-class CouponAdmin(ImportExportModelAdmin):
+        
+class CouponAdmin(ExportMixin,ModelAdmin):
     resource_class = CouponResource
     search_fields = ('unique_service_coupon','vin__vin')
     list_filter = ('status',('closed_date', DateFieldListFilter))
