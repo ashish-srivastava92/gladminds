@@ -1,5 +1,6 @@
 from datetime import datetime
 from django.conf.urls import url
+from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpBadRequest, HttpUnauthorized
@@ -102,62 +103,46 @@ class GladmindsResources(Resource):
         send_service_detail.delay(phone_number=phone_number, message=message)
         audit.audit_log(reciever=phone_number,action=AUDIT_ACTION, message=message)
         return True
-
+    
+    @transaction.commit_manually()
     def validate_coupon(self, sms_dict, phone_number):
-        if self.validate_dealer(phone_number):
-            vin = sms_dict['vin']
-            actual_kms = int(sms_dict['kms'])
-            service_type = sms_dict['service_type']
-            message = None
-            customer_message = None
-            customer_phone_number = None
-            try:
-                coupon_data = common.CouponData.objects.get(
-                    vin__vin=vin, service_type=service_type)
-                if coupon_data.status != 1 or actual_kms > coupon_data.valid_kms:
-                    next_coupon = common.CouponData.objects.filter(
-                        vin__vin=vin, service_type__gt=coupon_data.service_type)[:1].get()
-                    if coupon_data.status == 2:
-                        pass
-                    else:
-                        coupon_data.status = 3
-                    coupon_data.save()
-                    message = templates.get_template('SEND_SA_EXPIRED_COUPON').format(
-                        next_service_type=next_coupon.service_type, service_type=service_type)
-                    customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(
-                        service_coupon=coupon_data.unique_service_coupon, service_type=service_type,
-                        next_coupon=next_coupon.unique_service_coupon, next_service_type=next_coupon.service_type)
-                else:
-                    coupon_data.actual_kms = actual_kms
-                    coupon_data.actual_service_date = datetime.now()
-                    coupon_data.status = 4
-                    sa_phone_number = common.ServiceAdvisor.objects.get(
-                        phone_number=phone_number)
-                    coupon_data.sa_phone_number = sa_phone_number
-                    coupon_data.save()
-                    message = templates.get_template(
-                        'SEND_SA_VALID_COUPON').format(service_type=service_type)
-                    customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(
-                        coupon=coupon_data.unique_service_coupon, service_type=service_type)
-
-                # Fetch the Customer phone number from Customer Data
-                customer_data = common.ProductData.objects.get(vin=vin)
-                customer_phone_number = customer_data.customer_phone_number
-            except Exception as ex:
-                message = templates.get_template('SEND_INVALID_MESSAGE').format(
-                    service_type)
-            send_service_detail.delay(
-                phone_number=phone_number, message=message)
-            audit.audit_log(
-                reciever=phone_number, action='SEND TO QUEUE', message=message)
-            send_coupon_detail_customer.delay(
-                phone_number=customer_phone_number, message=customer_message)
-            audit.audit_log(reciever=customer_phone_number,
-                            action='SEND TO QUEUE', message=customer_message)
-            return True
-        else:
-            return False
-
+        vin = sms_dict['vin']
+        actual_kms = int(sms_dict['kms'])
+        service_type = sms_dict['service_type']
+        dealer_message = None
+        customer_phone_number = None
+        customer_message = None
+        try:
+            dealer_data = self.validate_dealer(phone_number)
+            valid_coupon = common.CouponData.objects.select_for_update().filter(vin__vin=vin, valid_kms__gte = actual_kms, status=1).select_related ('vin','customer_phone_number__phone_number').order_by('service_type')[0]
+            customer_phone_number = valid_coupon.vin.customer_phone_number.phone_number
+            if valid_coupon.service_type == int(service_type):
+                valid_coupon.actual_kms = actual_kms
+                valid_coupon.actual_service_date = datetime.now()
+                valid_coupon.status = 4
+                valid_coupon.sa_phone_number = dealer_data
+                valid_coupon.save()
+                dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=valid_coupon.service_type)
+                customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=valid_coupon.unique_service_coupon, service_type=valid_coupon.service_type)
+            else:
+                requested_coupon = common.CouponData.objects.get(vin__vin=vin, service_type=service_type)
+                update_coupon = common.CouponData.objects.filter(vin__vin=vin, valid_kms__lt = actual_kms, status=1).update(status=3)
+                dealer_message = templates.get_template('SEND_SA_EXPIRED_COUPON').format(next_service_type = valid_coupon.service_type, service_type = requested_coupon.service_type)
+                customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(service_coupon = requested_coupon.unique_service_coupon, service_type=requested_coupon.service_type, next_coupon = valid_coupon.unique_service_coupon, next_service_type = valid_coupon.service_type)
+            send_coupon_detail_customer.delay(phone_number=customer_phone_number, message=customer_message)
+            audit.audit_log(reciever=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
+        except IndexError as ie:
+            dealer_message = templates.get_template('SEND_INVALID_VIN_OR_FSC')
+        except ObjectDoesNotExist as odne:
+            dealer_message = templates.get_template('SEND_INVALID_SERVICE_TYPE').format(service_type = service_type)
+        except Exception as ex:
+            dealer_message = templates.get_template('SEND_INVALID_MESSAGE')
+        finally:
+            send_service_detail.delay(phone_number=phone_number, message=dealer_message)
+            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=dealer_message)
+            transaction.commit()
+        return True
+                
     def close_coupon(self, sms_dict, phone_number):
         if self.validate_dealer(phone_number):
             vin = sms_dict['vin']
@@ -197,15 +182,13 @@ class GladmindsResources(Resource):
 
     def validate_dealer(self, phone_number):
         try:
-            service_advisor_object = common.ServiceAdvisor.objects.get(
-                phone_number=phone_number)
+            service_advisor_object = common.ServiceAdvisor.objects.get(phone_number=phone_number)
         except:
             message = 'You are not an authorised user to avail this service'
             send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
-            raise ImmediateHttpResponse(
-                HttpUnauthorized("Not an authorised user"))
-        return True
+            raise ImmediateHttpResponse(HttpUnauthorized("Not an authorised user"))
+        return service_advisor_object
 
     def get_brand_data(self, sms_dict, phone_number):
         brand_id = sms_dict['brand_id']

@@ -53,6 +53,22 @@
       "description":"Send on invalid coupon id and it also contain next valid coupon id"
     }
   },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 23,
+    "fields": {
+      "template_key":"SEND_INVALID_VIN_OR_FSC",
+      "template":"Invalid VIN or No Free service coupon available for this product"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 24,
+    "fields": {
+      "template_key":"SEND_INVALID_SERVICE_TYPE",
+      "template":"Invalid service type: {service_type}"
+    }
+  },
     {
     "model": "gladminds.messagetemplate",
     "pk": 7,
