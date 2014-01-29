@@ -8,7 +8,7 @@ export DJANGO_SETTINGS_MODULE=gladminds.qa_settings
 #git pull origin master
 
 # Run buildout
-bin/buildout -o
+bin/buildout
 
 # Synchromize database
 bin/django syncdb
