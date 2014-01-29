@@ -153,6 +153,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'suit',
     'django.contrib.admin',
+    'import_export',
     'gladminds.models',
     'gladminds.superadmin',
     'gladminds',

@@ -11,6 +11,12 @@ from suit.admin import SortableTabularInline, SortableModelAdmin
 from suit.widgets import SuitDateWidget, SuitSplitDateTimeWidget, \
     EnclosedInput, LinkedSelect, AutosizedTextarea
 from django.contrib.admin import ModelAdmin, SimpleListFilter
+from import_export.admin import ImportExportModelAdmin
+from import_export import fields,widgets
+from import_export import resources
+from django.contrib.admin import DateFieldListFilter
+import tablib
+import datetime  
 
 
 
@@ -135,12 +141,26 @@ class ProductDataAdmin(ModelAdmin):
     list_display = ('vin','customer_phone_number','product_type','dealer_id','invoice_date')
     inlines=(Couponline,)
     exclude = ('order',)
-     
-class CouponAdmin(ModelAdmin):
+
+
+class CouponResource(resources.ModelResource):
+    def export(self, queryset=None):
+        if queryset is None:
+            queryset = self.get_queryset()
+        headers = self.get_export_headers()
+        data = tablib.Dataset(headers=headers)
+        for obj in queryset.iterator():
+                data.append(self.export_resource(obj))
+        return data
+
+    class Meta:
+        model = CouponData
+class CouponAdmin(ImportExportModelAdmin):
+    resource_class = CouponResource
     search_fields = ('unique_service_coupon','vin__vin')
-    list_filter = ('status',)
+    list_filter = ('status',('closed_date', DateFieldListFilter))
     list_display = ('vin','unique_service_coupon','service_type','valid_days','valid_kms',
-                    'status')
+                    'closed_date','status')
     exclude = ('order',)
      
          
@@ -179,7 +199,7 @@ class MessageTemplateAdmin(ModelAdmin):
     readonly_fields=('template_key',)
 ###################################################################
 
-
+############################################
 admin.site.register(BrandData,BrandAdmin)
 admin.site.register(ProductTypeData,ProductTypeDataAdmin)
 admin.site.register(ServiceAdvisor,ServiceAdvisorAdmin)
@@ -190,3 +210,4 @@ admin.site.register(ProductData,ProductDataAdmin)
 admin.site.register(CouponData,CouponAdmin)
 admin.site.register(MessageTemplate,MessageTemplateAdmin)
 admin.site.register(UploadProductCSV)
+
