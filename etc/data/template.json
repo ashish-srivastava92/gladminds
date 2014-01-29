@@ -85,7 +85,7 @@
     "pk": 10,
     "fields": {
       "template_key":"SEND_SA_UNAUTHORISED_SA",
-      "template":"DEALER NOT AUTHORISED:{0}",
+      "template":"Unauthorized dealer:{0}",
       "description":"Send message when dealer not authorized"
     }
   },

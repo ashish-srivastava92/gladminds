@@ -1,8 +1,10 @@
 from datetime import datetime
 from django.db import models, transaction
-from gladminds import utils, message_template as templates
+from gladminds import audit, utils, message_template as templates
 from gladminds.models import common
 from datetime import datetime, timedelta
+
+AUDIT_ACTION = "SENT TO QUEUE"
 
 @transaction.commit_manually()
 def get_customers_to_send_reminder(*args, **kwargs):
@@ -20,6 +22,7 @@ def get_customers_to_send_reminder(*args, **kwargs):
         valid_kms = reminder.valid_kms
         message = templates.get_template('SEND_CUSTOMER_COUPON_REMINDER').format(usc = usc, vin = vin, expired_date = expired_date, valid_kms = valid_kms)
         send_reminder_message.delay(phone_number = phone_number, message = message)
+        audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         reminder.last_reminder_date = datetime.now()
         reminder.save()
     transaction.commit()
@@ -38,6 +41,7 @@ def get_customers_to_send_reminder_by_admin(*args, **kwargs):
         valid_kms = reminder.valid_kms
         message = templates.get_template('SEND_CUSTOMER_COUPON_REMINDER').format(usc = usc, vin = vin, expired_date = expired_date, valid_kms = valid_kms)
         send_reminder_message.delay(phone_number = phone_number, message = message)
+        audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         reminder.last_reminder_date = datetime.now()
         reminder.schedule_reminder_date = None
         reminder.save()
