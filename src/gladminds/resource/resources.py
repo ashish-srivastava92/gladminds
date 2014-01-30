@@ -89,6 +89,8 @@ class GladmindsResources(Resource):
             service_list = map(lambda object: {'sap_customer_id':object.vin.sap_customer_id, 'vin': object.vin.vin, 'usc': object.unique_service_coupon, 'valid_days': object.valid_days, 'valid_kms':object.valid_kms}, customer_product_data)
             template = templates.get_template('SEND_CUSTOMER_SERVICE_DETAIL')
             msg_list=[template.format(**key_args) for key_args in service_list]
+            if not msg_list:
+                raise Exception()
             message = ', '.join(msg_list)
         except Exception as ex:
             message = smsparser.render_sms_template(status='invalid', keyword=sms_dict['keyword'], sap_customer_id = sap_customer_id)
