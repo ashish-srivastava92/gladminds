@@ -13,7 +13,7 @@
     "pk": 2,
     "fields": {
       "template_key":"SEND_CUSTOMER_SERVICE_DETAIL",
-      "template":"CUSTOMER ID: {gladmind_customer_id} PRODUCT ID: {vin} COUPONS: {service_code}",
+      "template":"Customer Id: {sap_customer_id} Product Id: {vin} Coupon: {usc} Valid days: {valid_days} Valid kms: {valid_kms}",
       "description":"Send customer service detail with product and valid coupon id"
     }
   },
@@ -31,7 +31,7 @@
     "pk": 4,
     "fields": {
       "template_key":"SEND_CUSTOMER_INVALID_CUSTOMER",
-      "template":"No service register for CUSTOMER ID: {gladmind_customer_id}",
+      "template":"No service register for Customer Id: {sap_customer_id}",
       "description":"Send on if customer id is not valid"
     }
   },
@@ -101,7 +101,7 @@
     "pk": 10,
     "fields": {
       "template_key":"SEND_SA_UNAUTHORISED_SA",
-      "template":"Unauthorised dealer:{0}",
+      "template":"Unauthorized dealer:{0}",
       "description":"Send message when dealer not authorized"
     }
   },
@@ -110,7 +110,7 @@
     "pk": 11,
     "fields": {
       "template_key":"SEND_CUSTOMER_COUPON_REMINDER",
-      "template":"Reminder: Your Coupon {usc} for product {vin} will expire on {expired_date} having valid kms {valid_kms}",
+      "template":"Reminder: Your Coupon {usc} for product {vin} will expire on {expired_date} having valid kms {valid_kms}" ,
       "description":"Send reminder sms on coupon expiry"
     }
   },
@@ -167,7 +167,7 @@
     "pk": 17,
     "fields": {
       "template_key":"RCV_CUSTOMER_SERVICE_DETAIL",
-      "template":"{customer_id}",
+      "template":"{sap_customer_id}",
       "description":"Receive this message template when customer request for his/her service"
     }
   },
@@ -197,7 +197,7 @@
     "fields": {
       "template_key":"RCV_CUSTOMER_BRAND_DATA",
       "template":"{brand_id}",
-      "description":"Receive this message from Customer for all brand product detail"
+      "description":"Receive this message from Customer for all brand procduct detail"
     }
   }, 
   {
@@ -214,7 +214,7 @@
   	"pk": 22,
   	"fields": {
   		"template_key": "SEND_CUSTOMER_ON_PRODUCT_PURCHASE",
-  		"template": "Dear Customer, Thank you to purchase bike. Your customer id: {sap_customer_id}",
+  		"template": "Dear {customer_name}, Congrats on your purchase of Bajaj bike. Your customer id is {sap_customer_id}. Refer this id during servicing.",
   		"description": "Send message to customer on purchase"
   	}
   }

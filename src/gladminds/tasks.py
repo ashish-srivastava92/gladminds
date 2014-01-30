@@ -26,6 +26,7 @@ This task send customer valid service detail
 @shared_task
 def send_service_detail(*args, **kwargs):
     try:
+        phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         response_data = sms_client.send_stateless(**kwargs)
         audit_log(reciever=phone_number, message=message)
@@ -38,6 +39,7 @@ This job send sms to service advisor, whether the coupon is valid or not
 @shared_task
 def send_coupon_validity_detail(*args, **kwargs):
     try:
+        phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         respone_data = sms_client.send_stateless(**kwargs)
         audit_log(reciever=phone_number, message=message)

@@ -66,6 +66,7 @@ class GladmindsResources(Resource):
         try:
             object = common.GladMindUsers.objects.get(phone_number=phone_number)
             gladmind_customer_id = object.gladmind_customer_id
+            customer_name = object.customer_name
         except ObjectDoesNotExist as odne:
             gladmind_customer_id = utils.generate_unique_customer_id()
             registration_date = datetime.now()
@@ -81,25 +82,16 @@ class GladmindsResources(Resource):
         return True
 
     def customer_service_detail(self, sms_dict, phone_number):
-        gladmind_customer_id = sms_dict.get('customer_id', None)
+        sap_customer_id = sms_dict.get('sap_customer_id', None)
         message = None
         try:
-            gladmind_user_object = common.GladMindUsers.objects.get(gladmind_customer_id=gladmind_customer_id)
-            phone_number = str(gladmind_user_object)
-            customer_object = common.ProductData.objects.filter(customer_phone_number__phone_number=phone_number)
-            
-            if not customer_object:
-                raise ObjectDoesNotExist()
-            # FIX ME: RIGHT NOW HANDLING FOR ONE PRODUCT ONLY
-            vin = customer_object[0].vin
-            coupon_object = common.CouponData.objects.filter(vin__vin=vin, status=1)
-            service_code = ''.join(coupon_object[0].unique_service_coupon +
-                                   " Valid Days " + str(coupon_object[0].valid_days)+ 
-                                   " Valid KMS " + str(coupon_object[0].valid_kms))                                   
-            message = smsparser.render_sms_template(status='send', keyword=sms_dict['keyword'], gladmind_customer_id=gladmind_customer_id, vin=vin, service_code=service_code)
-        except ObjectDoesNotExist as odne:
-            message = smsparser.render_sms_template(status='invalid', keyword=sms_dict['keyword'], gladmind_customer_id = gladmind_customer_id)
-        
+            customer_product_data = common.CouponData.objects.select_related('vin','customer_phone_number__phone_number').filter(vin__customer_phone_number__phone_number = phone_number, status = 1, vin__sap_customer_id = sap_customer_id).order_by('vin', 'valid_days') if sap_customer_id else common.CouponData.objects.select_related('vin','customer_phone_number__phone_number').filter(vin__customer_phone_number__phone_number = phone_number, status = 1).order_by('vin', 'valid_days')
+            service_list = map(lambda object: {'sap_customer_id':object.vin.sap_customer_id, 'vin': object.vin.vin, 'usc': object.unique_service_coupon, 'valid_days': object.valid_days, 'valid_kms':object.valid_kms}, customer_product_data)
+            template = templates.get_template('SEND_CUSTOMER_SERVICE_DETAIL')
+            msg_list=[template.format(**key_args) for key_args in service_list]
+            message = ', '.join(msg_list)
+        except Exception as ex:
+            message = smsparser.render_sms_template(status='invalid', keyword=sms_dict['keyword'], sap_customer_id = sap_customer_id)
         send_service_detail.delay(phone_number=phone_number, message=message)
         audit.audit_log(reciever=phone_number,action=AUDIT_ACTION, message=message)
         return True
