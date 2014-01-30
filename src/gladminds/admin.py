@@ -104,11 +104,17 @@ class DealerAdmin(ModelAdmin):
     def serviceadvisor(self, obj):
         return len(obj.serviceadvisor_set.all())
     
+    
 class ServiceAdvisorAdmin(ModelAdmin):
     search_fields = ('phone_number','name','dealer_id__dealer_id')
-    list_display=('dealer_id','service_advisor_id','name','phone_number') 
+    list_display=('service_advisor_id','dealer','name','phone_number') 
     exclude = ('order',)
+    
+    def dealer(self,obj):
+        return u'<a href="/gladminds/registereddealer/%s/">%s</a>' %(obj.dealer_id.pk,obj.dealer_id)
+    dealer.allow_tags=True
 
+        
       
 ##############CUSTMERDATA AND GLADMINDS USER ADMIN###################
 class GladMindUserForm(ModelForm):
