@@ -51,8 +51,9 @@ class BrandAdmin(ModelAdmin):
     form = BrandForm
     search_fields =('brand_id','brand_name')
     list_filter = ('brand_name',)
-    list_display = ('brand_id','brand_name','products')
+    list_display = ('image_tag','brand_id','brand_name','products')
     inlines = (ProductTypeDataInline,)
+#     readonly_fields = ('image_tag',)
     
     def products(self, obj):
         return len(obj.producttypedata_set.all())
