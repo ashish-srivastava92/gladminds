@@ -179,9 +179,10 @@ class CouponAdmin(ExportMixin,ModelAdmin):
 ####################################################################
  
 ###########################AUDIT ADMIN########################
+from daterange_filter.filter import DateRangeFilter
 class AuditLogAdmin(ModelAdmin):
-    list_filter = ('status',)
-    search_fields = ('status','date','sender','reciever')
+    list_filter = ('date','status')
+    search_fields = ('status','date','sender','reciever','action')
     list_display = ('date','action','message','sender','reciever','status')
     
     def has_add_permission(self, request):
