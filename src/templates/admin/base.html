@@ -32,8 +32,7 @@
       {% block header %}
         {% if not is_popup %}
           <!-- Header -->
-          <div id="header" class="header" style="background-image: -webkit-gradient(linear, left top, right top, from(rgb(169, 165, 182)), to(#373E0C));
-}">
+          <div id="header" class="header" style="background-image: -webkit-gradient(linear, left top, right top, from(#F5F5F5), to(#F5F5F5));color:#708090;">
             <div id="branding">
               <a href="{% url 'admin:index' %}"><h1 id="site-name">{% block branding %}<img style="max-width: 82%;
 max-height: 88%;" src="{{STATIC_URL}}img/logo.png" />{% endblock %}</h1></a>
@@ -46,7 +45,7 @@ max-height: 88%;" src="{{STATIC_URL}}img/logo.png" />{% endblock %}</h1></a>
               </div>
               <div class="header-column">
                 <span class="date"> {% suit_date %}</span><br>
-                <span class="time" id="clock">{% suit_time %}</span>
+                <span style="color: #708090" class="time" id="clock">{% suit_time %}</span>
               </div>
             </div>
             {% endblock %}
@@ -174,7 +173,7 @@ max-height: 88%;" src="{{STATIC_URL}}img/logo.png" />{% endblock %}</h1></a>
 
 {% block footer %}
   {% if not is_popup %}
-  <div id="footer" class="footer" style="background-image: -webkit-gradient(linear, left top, right top, from(rgb(169, 165, 182)), to(#373E0C));color:white">
+  <div id="footer" class="footer" style="background-image: -webkit-gradient(linear, left top, right top, from(#F5F5F5), to(#F5F5F5));color:black">
     <div class="content">
       <div class="tools">
         {% block footer_links %}
