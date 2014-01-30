@@ -162,7 +162,9 @@ class ProductServiceFeed(BaseFeed):
     def import_data(self):
         for redeem in self.data_source:
             try:
-                coupon_data = common.CouponData.objects.filter(vin__vin = redeem['vin'], unique_service_coupon = redeem['unique_service_coupon']).update(closed_date = redeem['closed_date'], actual_service_date = redeem['actual_service_date'], actual_kms = redeem['actual_kms'], status = 2)
+                closed_date = datetime.strptime(redeem['closed_date'],'%d-%m-%Y %H:%M:%S')
+                actual_service_date = datetime.strptime(redeem['actual_service_date'],'%d-%m-%Y %H:%M:%S')
+                coupon_data = common.CouponData.objects.filter(vin__vin = redeem['vin'], unique_service_coupon = redeem['unique_service_coupon']).update(closed_date = closed_date, actual_service_date = actual_service_date, actual_kms = redeem['actual_kms'], status = 2)
             except Exception as ex:
                 continue
 
