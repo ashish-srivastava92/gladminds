@@ -184,6 +184,9 @@ class AuditLogAdmin(ModelAdmin):
     search_fields = ('status','date','sender','reciever')
     list_display = ('date','action','message','sender','reciever','status')
     
+    def has_add_permission(self, request):
+        return False
+    
     def suit_row_attributes(self, obj):
         class_map = {
             'success': 'success',
