@@ -12,11 +12,11 @@ from gladminds.tasks import send_registration_detail, send_service_detail, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
 from src.gladminds.tasks import send_coupon_close_message
 from tastypie.resources import Resource
-__all__ = ['GladmindsTaskManager']
-
-angular_format = lambda x: x.replace('{', '<').replace('}', '>')
 json = utils.import_json()
+
+__all__ = ['GladmindsTaskManager']
 AUDIT_ACTION = 'SEND TO QUEUE'
+angular_format = lambda x: x.replace('{', '<').replace('}', '>')
 
 class GladmindsResources(Resource):
 
@@ -143,41 +143,29 @@ class GladmindsResources(Resource):
             transaction.commit()
         return True
                 
+    @transaction.commit_manually()
     def close_coupon(self, sms_dict, phone_number):
-        if self.validate_dealer(phone_number):
-            vin = sms_dict['vin']
-            unique_service_coupon = sms_dict['usc']
-            message = None
-            customer_message = None
-            customer_phone_number = None
-            try:
-                coupon_object = common.CouponData.objects.get(
-                    vin__vin=vin, unique_service_coupon=unique_service_coupon)
-                coupon_object.status = 2
-                all_previous_coupon = common.CouponData.objects.filter(
-                    vin__vin=vin, service_type__lt=coupon_object.service_type, status=1).update(status=3)
-                coupon_object.save()
-                message = templates.get_template('SEND_SA_CLOSE_COUPON')
-                service_advisor_object = common.ServiceAdvisor.objects.get(
-                    phone_number=phone_number)
-                customer_message = templates.get_template('SEND_CUSTOMER_CLOSE_COUPON').format(
-                    vin=vin, sa_name=service_advisor_object.name, sa_phone_number=phone_number)
-
-                # Fetch the Customer phone number from Customer Data
-                customer_data = common.ProductData.objects.get(vin=vin)
-                customer_phone_number = customer_data.customer_phone_number
-            except:
-                return False
-        else:
-            return False
-        send_close_sms_customer.delay(
-            phone_number=customer_phone_number, message=customer_message)
-        audit.audit_log(reciever=customer_phone_number,
-                        action='SEND TO QUEUE', message=customer_message)
-        send_coupon_close_message.delay(
-            phone_number=phone_number, message=message)
-        audit.audit_log(reciever=phone_number,
-                        action='SEND TO QUEUE', message=message)
+        sa_object = self.validate_dealer(phone_number)
+        vin = sms_dict['vin']
+        unique_service_coupon = sms_dict['usc']
+        message = None
+        try:
+            coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin','customer_phone_number__phone_number')[0]
+            customer_phone_number = coupon_object.vin.customer_phone_number.phone_number
+            coupon_object.status = 2
+            coupon_object.save()
+            all_previous_coupon = common.CouponData.objects.filter(vin__vin=vin, service_type__lt=coupon_object.service_type, status=1).update(status=3)
+            message = templates.get_template('SEND_SA_CLOSE_COUPON')
+            customer_message = templates.get_template('SEND_CUSTOMER_CLOSE_COUPON').format(vin=vin, sa_name=sa_object.name, sa_phone_number=phone_number)
+            send_close_sms_customer.delay(phone_number=customer_phone_number, message=customer_message)
+            audit.audit_log(reciever=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
+        except Exception as ex:
+            message = templates.get_template('SEND_INVALID_MESSAGE')
+            transaction.rollback()
+        finally:
+            send_coupon_close_message.delay(phone_number=phone_number, message=message)
+            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+            transaction.commit()
         return True
 
     def validate_dealer(self, phone_number):
