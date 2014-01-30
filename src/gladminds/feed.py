@@ -26,6 +26,7 @@ class CSVFeed(object):
         dealer_path = file_path+"/dealer_data.csv"
         product_path = file_path+"/product_data.csv"
         product_purchase_path = file_path+"/product_purchase.csv"
+        coupon_redeem_path = file_path+"/coupon_redeem.csv"
         
         #Import data from CSV
         if os.path.isfile(brand_path):
@@ -49,6 +50,12 @@ class CSVFeed(object):
         if os.path.isfile(product_purchase_path):
             productpurchase_feed = self.get_dict(product_purchase_path)
             product_purchase_data = ProductPurchaseFeed(data_source = productpurchase_feed)
+            product_purchase_data.import_data()
+            self.rename(fullpath = product_purchase_path)
+        
+        if os.path.isfile(coupon_redeem_path):
+            coupon_redeem_feed = self.get_dict(coupon_redeem_path)
+            product_purchase_data = ProductPurchaseFeed(data_source = coupon_redeem_feed)
             product_purchase_data.import_data()
             self.rename(fullpath = product_purchase_path)
     
@@ -153,7 +160,11 @@ class ProductPurchaseFeed(BaseFeed):
             
 class ProductServiceFeed(BaseFeed):
     def import_data(self):
-        pass
+        for redeem in self.data_source:
+            try:
+                coupon_data = common.CouponData.objects.filter(vin__vin = redeem['vin'], unique_service_coupon = redeem['unique_service_coupon']).update(closed_date = redeem['closed_date'], actual_service_date = redeem['actual_service_date'], actual_kms = redeem['actual_kms'])
+            except Exception as ex:
+                continue
 
 def update_coupon_data(sender, **kwargs):
     from gladminds.tasks import send_on_product_purchase
