@@ -27,6 +27,19 @@ class BrandData(models.Model):
     def __unicode__(self):
         return self.brand_id
     
+    def image_tag(self):
+        if self.brand_name =='Bajaj':
+            url=settings.STATIC_URL+'img/bajaj.jpg'
+            return u'<img src= '+url+' style="max-width: 37%;max-height: 15%" />'
+        elif self.brand_name=='Honda':
+            url=settings.STATIC_URL+'img/honda.jpg'
+            return u'<img src= '+url+' style="max-width: 37%;max-height: 15%" />'
+        else:
+            url=settings.STATIC_URL+'img/noimage.jpg'
+            return u'<img src= '+url+' style="max-width: 37%;max-height: 15%" />'
+    image_tag.short_description = 'Image'
+    image_tag.allow_tags = True
+    
     
 '''
 ProductTypeData  is linked to Brand data
