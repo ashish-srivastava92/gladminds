@@ -55,9 +55,9 @@ class CSVFeed(object):
         
         if os.path.isfile(coupon_redeem_path):
             coupon_redeem_feed = self.get_dict(coupon_redeem_path)
-            product_purchase_data = ProductPurchaseFeed(data_source = coupon_redeem_feed)
-            product_purchase_data.import_data()
-            self.rename(fullpath = product_purchase_path)
+            coupon_redeem_data = ProductServiceFeed(data_source = coupon_redeem_feed)
+            coupon_redeem_data.import_data()
+            self.rename(fullpath = coupon_redeem_path)
     
     def get_dict(self, filepath):
         csv_dict = {}
@@ -162,7 +162,7 @@ class ProductServiceFeed(BaseFeed):
     def import_data(self):
         for redeem in self.data_source:
             try:
-                coupon_data = common.CouponData.objects.filter(vin__vin = redeem['vin'], unique_service_coupon = redeem['unique_service_coupon']).update(closed_date = redeem['closed_date'], actual_service_date = redeem['actual_service_date'], actual_kms = redeem['actual_kms'])
+                coupon_data = common.CouponData.objects.filter(vin__vin = redeem['vin'], unique_service_coupon = redeem['unique_service_coupon']).update(closed_date = redeem['closed_date'], actual_service_date = redeem['actual_service_date'], actual_kms = redeem['actual_kms'], status = 2)
             except Exception as ex:
                 continue
 
