@@ -85,8 +85,8 @@ class GladmindsResources(Resource):
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         message = None
         try:
-            customer_product_data = common.CouponData.objects.select_related('vin','customer_phone_number__phone_number').filter(vin__customer_phone_number__phone_number = phone_number, status = 1, vin__sap_customer_id = sap_customer_id).order_by('vin', 'valid_days') if sap_customer_id else common.CouponData.objects.select_related('vin','customer_phone_number__phone_number').filter(vin__customer_phone_number__phone_number = phone_number, status = 1).order_by('vin', 'valid_days')
-            service_list = map(lambda object: {'sap_customer_id':object.vin.sap_customer_id, 'vin': object.vin.vin, 'usc': object.unique_service_coupon, 'valid_days': object.valid_days, 'valid_kms':object.valid_kms}, customer_product_data)
+            customer_product_data = common.CouponData.objects.select_related('vin','customer_phone_number__phone_number').filter(vin__customer_phone_number__phone_number = phone_number, status = 1, vin__sap_customer_id = sap_customer_id).order_by('vin', 'valid_days').distinct('vin') if sap_customer_id else common.CouponData.objects.select_related('vin','customer_phone_number__phone_number').filter(vin__customer_phone_number__phone_number = phone_number, status = 1).order_by('vin', 'valid_days').distinct('vin')
+            service_list = map(lambda object: {'vin': object.vin.vin, 'usc': object.unique_service_coupon, 'valid_days': object.valid_days, 'valid_kms':object.valid_kms}, customer_product_data)
             template = templates.get_template('SEND_CUSTOMER_SERVICE_DETAIL')
             msg_list=[template.format(**key_args) for key_args in service_list]
             if not msg_list:

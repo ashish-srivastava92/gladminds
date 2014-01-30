@@ -13,7 +13,7 @@
     "pk": 2,
     "fields": {
       "template_key":"SEND_CUSTOMER_SERVICE_DETAIL",
-      "template":"Customer Id: {sap_customer_id} Product Id: {vin} Coupon: {usc} Valid days: {valid_days} Valid kms: {valid_kms}",
+      "template":"VIN: {vin} Coupon: {usc} Valid days: {valid_days} Valid kms: {valid_kms}",
       "description":"Send customer service detail with product and valid coupon id"
     }
   },
