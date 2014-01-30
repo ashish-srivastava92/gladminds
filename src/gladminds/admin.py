@@ -145,13 +145,21 @@ class ProductDataAdmin(ModelAdmin):
 
 
 class CouponResource(resources.ModelResource):
+#     def get_export_headers(self):
+#         headers = [field.column_name for field in self.get_fields() if field.column_name is not 'order']
+#         return headers
+    
     def export(self, queryset=None):
         if queryset is None:
             queryset = self.get_queryset()
         headers = self.get_export_headers()
         data = tablib.Dataset(headers=headers)
         for obj in queryset.iterator():
-                data.append(self.export_resource(obj))
+            vin_number=str(obj.vin)
+            obj.vin=ProductData(vin_number)
+            sa_phone_number=str(obj.sa_phone_number)
+            obj.sa_phone_number=ServiceAdvisor(sa_phone_number)
+            data.append(self.export_resource(obj))
         return data
 
     class Meta:
