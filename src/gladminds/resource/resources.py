@@ -147,7 +147,7 @@ class GladmindsResources(Resource):
             coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin','customer_phone_number__phone_number')[0]
             customer_phone_number = coupon_object.vin.customer_phone_number.phone_number
             coupon_object.status = 2
-            coupon.closed_date = datetime.now()
+            coupon_object.closed_date = datetime.now()
             coupon_object.save()
             all_previous_coupon = common.CouponData.objects.filter(vin__vin=vin, service_type__lt=coupon_object.service_type, status=1).update(status=3)
             message = templates.get_template('SEND_SA_CLOSE_COUPON')
@@ -156,7 +156,6 @@ class GladmindsResources(Resource):
             audit.audit_log(reciever=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
         except Exception as ex:
             message = templates.get_template('SEND_INVALID_MESSAGE')
-            transaction.rollback()
         finally:
             send_coupon_close_message.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
