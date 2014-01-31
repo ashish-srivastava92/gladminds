@@ -20,7 +20,8 @@ def send_registration_detail(*args, **kwargs):
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_registration_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
-    audit_log(status = status, reciever=phone_number, message=message)
+    finally:
+        audit_log(status = status, reciever=phone_number, message=message)
         
 """
 This task send customer valid service detail
