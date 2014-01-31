@@ -61,8 +61,12 @@ class BrandAdmin(ModelAdmin):
 class ProductTypeDataAdmin(ModelAdmin):
     readonly_fields = ('order',)
     search_fields =('product_type','product_name','brand_id__brand_id')
-    list_filter = ('product_type','product_name')
-    list_display = ('brand_id','product_type','product_name')
+    list_filter = ('product_type',)
+    list_display = ('product_type','brand','product_name')
+    
+    def brand(self,obj):
+        return u'<a href="/gladminds/branddata/%s/">%s</a>' %(obj.brand_id.pk,obj.brand_id)
+    brand.allow_tags=True
      
  
  
