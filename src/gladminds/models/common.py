@@ -107,7 +107,7 @@ class GladMindUsers(models.Model):
 
     class Meta:
         app_label = "gladminds"
-        verbose_name_plural = "Gladmind Users"
+        verbose_name_plural = "GladMinds Users"
 
     def __unicode__(self):
         return self.phone_number
