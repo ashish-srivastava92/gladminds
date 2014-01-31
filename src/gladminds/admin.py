@@ -110,7 +110,7 @@ class DealerAdmin(ModelAdmin):
     
     
 class ServiceAdvisorAdmin(ModelAdmin):
-    search_fields = ('phone_number','name','dealer_id__dealer_id')
+    search_fields = ('service_advisor_id','phone_number','name','dealer_id__dealer_id')
     list_display=('service_advisor_id','dealer','name','phone_number') 
     exclude = ('order',)
     
@@ -133,9 +133,9 @@ class GladMindUserForm(ModelForm):
  
 class GladMindUserAdmin(ModelAdmin):
     form = GladMindUserForm
-    search_fields = ('gladmind_customer_id','customer_name','phone_number','email_id','registration_date')
+    search_fields = ('gladmind_customer_id','customer_name','phone_number','email_id')
     list_display = ('gladmind_customer_id','customer_name','email_id','phone_number','date_of_registration')
-    
+    list_filter=('registration_date',)
     def date_of_registration(self, obj):
         return obj.registration_date.strftime("%d %b %Y")
 
@@ -147,8 +147,8 @@ class Couponline(SortableTabularInline):
     readonly_fields=('unique_service_coupon','valid_days','valid_kms','status','service_type','sa_phone_number')
 
 class ProductDataAdmin(ModelAdmin):
-    search_fields = ('vin','sap_customer_id','customer_phone_number__phone_number','product_type__product_type')
-    list_filter = ('customer_phone_number__phone_number',)
+    search_fields = ('vin','sap_customer_id','customer_phone_number__phone_number','product_type__product_type','dealer_id__dealer_id')
+    list_filter = ('invoice_date',)
     list_display = ('vin','customer_phone_number','product_type','dealer_id','invoice_date')
     inlines=(Couponline,)
     exclude = ('order',)
@@ -177,7 +177,7 @@ class CouponResource(resources.ModelResource):
         
 class CouponAdmin(ExportMixin,ModelAdmin):
     resource_class = CouponResource
-    search_fields = ('unique_service_coupon','vin__vin')
+    search_fields = ('unique_service_coupon','vin__vin','valid_days','valid_kms')
     list_filter = ('status',('closed_date', DateFieldListFilter))
     list_display = ('vin','unique_service_coupon','service_type','valid_days','valid_kms',
                     'closed_date','status')
@@ -199,7 +199,7 @@ class CouponAdmin(ExportMixin,ModelAdmin):
 ###########################AUDIT ADMIN########################
 class AuditLogAdmin(ModelAdmin):
     list_filter = ('date','status')
-    search_fields = ('status','date','sender','reciever','action')
+    search_fields = ('status','sender','reciever','action')
     list_display = ('date','action','message','sender','reciever','status')
     
     def has_add_permission(self, request):
