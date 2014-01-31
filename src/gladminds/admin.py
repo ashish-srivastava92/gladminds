@@ -208,7 +208,7 @@ class AuditLogAdmin(ModelAdmin):
     def suit_row_attributes(self, obj):
         class_map = {
             'success': 'success',
-            'fail': 'error',
+            'failed': 'error',
         }
         css_class = class_map.get(str(obj.status))
         if css_class:
