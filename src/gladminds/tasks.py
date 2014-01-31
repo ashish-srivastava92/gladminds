@@ -36,7 +36,8 @@ def send_service_detail(*args, **kwargs):
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_service_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
-    audit_log(status = status, reciever=phone_number, message=message)
+    finally:
+        audit_log(status = status, reciever=phone_number, message=message)
 
 """
 This job send sms to service advisor, whether the coupon is valid or not 
@@ -51,7 +52,8 @@ def send_coupon_validity_detail(*args, **kwargs):
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_validity_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
-    audit_log(status = status, reciever=phone_number, message=message)
+    finally:
+        audit_log(status = status, reciever=phone_number, message=message)
 
 """
 This job send sms to customer when SA send 
@@ -67,7 +69,8 @@ def send_coupon_detail_customer(*args, **kwargs):
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_detail_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
-    audit_log(status = status, reciever=phone_number, message=message)
+    finally:
+        audit_log(status = status, reciever=phone_number, message=message)
 
 """
 This job send reminder sms to customer
@@ -82,7 +85,8 @@ def send_reminder_message(*args, **kwargs):
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_reminder_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
-    audit_log(status = status, reciever=phone_number, message=message)
+    finally:
+        audit_log(status = status, reciever=phone_number, message=message)
 
 """
 This job send coupon close message
@@ -97,7 +101,8 @@ def send_coupon_close_message(*args, **kwargs):
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_close_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
-    audit_log(status = status, reciever=phone_number, message=message)
+    finally:
+        audit_log(status = status, reciever=phone_number, message=message)
 
 """
 This job send coupon close message to customer
@@ -112,7 +117,8 @@ def send_close_sms_customer(*args, **kwargs):
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_close_sms_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
-    audit_log(status = status, reciever=phone_number, message=message)
+    finally:
+        audit_log(status = status, reciever=phone_number, message=message)
 
 @shared_task
 def send_brand_sms_customer(*args, **kwargs):
@@ -124,7 +130,8 @@ def send_brand_sms_customer(*args, **kwargs):
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_brand_sms_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
-    audit_log(status = status, reciever=phone_number, message=message)
+    finally:
+        audit_log(status = status, reciever=phone_number, message=message)
 
 """
 This task send Invalid Keyword message
@@ -139,7 +146,8 @@ def send_invalid_keyword_message(*args, **kwargs):
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_brand_sms_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
-    audit_log(status = status, reciever=phone_number, message=message)
+    finally:
+        audit_log(status = status, reciever=phone_number, message=message)
 
 
 """
@@ -155,7 +163,8 @@ def send_on_product_purchase(*args, **kwargs):
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_on_product_purchase.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
-    audit_log(status = status, reciever=phone_number, message=message)
+    finally:
+        audit_log(status = status, reciever=phone_number, message=message)
         
 """
 Crontab to send reminder sms to customer 
