@@ -27,6 +27,8 @@ class SmsClientSessionExpire(Exception):{}
 
 class SmsClientMessageFailted(Exception):{}
 
+class MessageSentFailed(Exception):{}
+
 class SmsClientBaseObject(object):
     
     def __init__(self, *args, **kwargs):
@@ -129,6 +131,9 @@ class TwilioSmsClient(SmsClientBaseObject):
             'Body': kwargs['message'],
         }
         response = requests.post(url = url, data=data, auth=(self.account_key, self.auth_key))
+        status_code = response.status_code
+        if (status_code>=400):
+            raise MessageSentFailed("Not able to sent sms")
         
     def send_stateful(self, **kwargs):
         url = self.uri.format(self.account_key)
