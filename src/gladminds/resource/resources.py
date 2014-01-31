@@ -147,6 +147,7 @@ class GladmindsResources(Resource):
             coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin','customer_phone_number__phone_number')[0]
             customer_phone_number = coupon_object.vin.customer_phone_number.phone_number
             coupon_object.status = 2
+            coupon.closed_date = datetime.now()
             coupon_object.save()
             all_previous_coupon = common.CouponData.objects.filter(vin__vin=vin, service_type__lt=coupon_object.service_type, status=1).update(status=3)
             message = templates.get_template('SEND_SA_CLOSE_COUPON')
