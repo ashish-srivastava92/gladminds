@@ -11,13 +11,13 @@ export DJANGO_SETTINGS_MODULE=gladminds.prod_settings
 bin/buildout
 
 # Synchromize database
-bin/django syncdb
+bin/django syncdb --settings=$DJANGO_SETTINGS_MODULE
 
 # Run collectstatic
-echo  yes |bin/django collectstatic
+echo  yes |bin/django collectstatic --settings=$DJANGO_SETTINGS_MODULE
 
 # Load the SMS Template
-bin/django loaddata etc/data/template.json
+bin/django loaddata etc/data/template.json --settings=$DJANGO_SETTINGS_MODULE
 
 # TODO: Stop already running server
 output=`ps aux | grep "bin/django r[u]nserver 0.0.0.0:8000"`
@@ -43,7 +43,7 @@ sleep 5
 
 # Run server
 echo "Starting gladminds ..."
-nohup bin/fab runserver &
+nohup bin/django runserver --settings=$DJANGO_SETTINGS_MODULE &
 sleep 5
 output=`ps aux | grep "bin/django r[u]nserver 0.0.0.0:8000"`
 set -- $output

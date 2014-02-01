@@ -15,10 +15,10 @@ TEMPLATE_DEBUG = DEBUG
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gladmindsdb',
+        'NAME': 'gladminds',
         'USER': 'gladminds',
-        'PASSWORD': 'gladminds123',
-        'HOST': 'gladminds-qa.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'PASSWORD': 'gladmindsRocks',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }
