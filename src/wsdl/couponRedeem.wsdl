@@ -7,9 +7,9 @@
           <xsd:sequence>
             <xsd:element name="vin" type="xsd:string"/>
             <xsd:element name="saPhoneNumber" type="xsd:string"/>
-            <xsd:element name="closedDate" type="xsd:string"/>
-            <xsd:element name="actualServiceDate" type="xsd:string"/>
-            <xsd:element name="actualKms" type="xsd:string"/>
+            <xsd:element name="closedDate" type="xsd:dateTime"/>
+            <xsd:element name="actualServiceDate" type="xsd:dateTime"/>
+            <xsd:element name="actualKms" type="xsd:long"/>
             <xsd:element name="uniqueServiceCoupon" type="xsd:string"/>
           </xsd:sequence>
         </xsd:complexType>

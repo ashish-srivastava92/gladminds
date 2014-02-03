@@ -7,11 +7,11 @@
           <xsd:sequence>
             <xsd:element name="vin" type="xsd:string"/>
             <xsd:element name="productType" type="xsd:string"/>
-            <xsd:element name="invoiceDate" type="xsd:string"/>
+            <xsd:element name="invoiceDate" type="xsd:dateTime"/>
             <xsd:element name="dealerId" type="xsd:string"/>
             <xsd:element name="uniqueServiceCoupon" type="xsd:string"/>
-            <xsd:element name="validDays" type="xsd:string"/>
-            <xsd:element name="validKms" type="xsd:string"/>
+            <xsd:element name="validDays" type="xsd:long"/>
+            <xsd:element name="validKms" type="xsd:long"/>
             <xsd:element name="serviceType" type="xsd:string"/>
           </xsd:sequence>
         </xsd:complexType>
