@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.example.org/dealer/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="dealer" targetNamespace="http://www.example.org/dealer/">
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://www.example.org/dealer/">
+      <xsd:element name="dealerInput">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="dealerId" type="xsd:string"/>
+            <xsd:element name="address" type="xsd:string"/>
+            <xsd:element name="serviceAdvisorId" type="xsd:string"/>
+            <xsd:element name="name" type="xsd:string"/>
+            <xsd:element name="phoneNumber" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="dealerOutput">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="responseCode" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="GetDealerInput">
+    <wsdl:part element="tns:dealerInput" name="parameters"/>
+  </wsdl:message>
+  <wsdl:message name="GetDealerOutput">
+    <wsdl:part element="tns:dealerOutput" name="parameters"/>
+  </wsdl:message>
+  <wsdl:portType name="dealer">
+    <wsdl:operation name="getDealer">
+      <wsdl:input message="tns:GetDealerInput"/>
+      <wsdl:output message="tns:GetDealerOutput"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="dealerSOAP" type="tns:dealer">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="getDealer">
+      <soap:operation soapAction="http://www.example.org/productPurchase/GetDealer"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="dealer">
+    <wsdl:port binding="tns:dealerSOAP" name="dealerSOAP">
+      <soap:address location="http://www.example.org/"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

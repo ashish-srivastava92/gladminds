@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.example.org/couponRedeem/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="couponRedeem" targetNamespace="http://www.example.org/couponRedeem/">
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://www.example.org/couponRedeem/">
+      <xsd:element name="couponRedeemInput">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="vin" type="xsd:string"/>
+            <xsd:element name="saPhoneNumber" type="xsd:string"/>
+            <xsd:element name="closedDate" type="xsd:string"/>
+            <xsd:element name="actualServiceDate" type="xsd:string"/>
+            <xsd:element name="actualKms" type="xsd:string"/>
+            <xsd:element name="uniqueServiceCoupon" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="couponRedeemOutput">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="responseCode" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="GetCouponRedeemInput">
+    <wsdl:part element="tns:CouponRedeemInput" name="parameters"/>
+  </wsdl:message>
+  <wsdl:message name="GetCouponRedeemOutput">
+    <wsdl:part element="tns:CouponRedeemOutput" name="parameters"/>
+  </wsdl:message>
+  <wsdl:portType name="couponRedeem">
+    <wsdl:operation name="getCouponRedeem">
+      <wsdl:input message="tns:GetCouponRedeemInput"/>
+      <wsdl:output message="tns:GetCouponRedeemOutput"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="couponRedeemSOAP" type="tns:couponRedeem">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="getCouponRedeem">
+      <soap:operation soapAction="http://www.example.org/productPurchase/GetCouponRedeem"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="couponRedeem">
+    <wsdl:port binding="tns:couponRedeemSOAP" name="couponRedeemSOAP">
+      <soap:address location="http://www.example.org/"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

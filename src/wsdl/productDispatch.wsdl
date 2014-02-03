@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.example.org/productDispatch/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="productDispatch" targetNamespace="http://www.example.org/productDispatch/">
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://www.example.org/productDispatch/">
+      <xsd:element name="productDispatchInput">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="vin" type="xsd:string"/>
+            <xsd:element name="productType" type="xsd:string"/>
+            <xsd:element name="invoiceDate" type="xsd:string"/>
+            <xsd:element name="dealerId" type="xsd:string"/>
+            <xsd:element name="uniqueServiceCoupon" type="xsd:string"/>
+            <xsd:element name="validDays" type="xsd:string"/>
+            <xsd:element name="validKms" type="xsd:string"/>
+            <xsd:element name="serviceType" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="productDispatchOutput">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="responseCode" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="GetProductDispatchInput">
+    <wsdl:part element="tns:productDispatchInput" name="parameters"/>
+  </wsdl:message>
+  <wsdl:message name="GetProductDispatchOutput">
+    <wsdl:part element="tns:productDispatchOutput" name="parameters"/>
+  </wsdl:message>
+  <wsdl:portType name="productDispatch">
+    <wsdl:operation name="getProductDispatch">
+      <wsdl:input message="tns:GetProductDispatchInput"/>
+      <wsdl:output message="tns:GetProductDispatchOutput"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="productDispatchSOAP" type="tns:productDispatch">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="getProductDispatch">
+      <soap:operation soapAction="http://www.example.org/productPurchase/GetProductDispatch"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="productDispatch">
+    <wsdl:port binding="tns:productDispatchSOAP" name="productDispatchSOAP">
+      <soap:address location="http://www.example.org/"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
