@@ -71,14 +71,7 @@ class CSVFeedByFile(GladmindsUnitTestCase):
     def test_brand_import(self):
         brand_data = common.BrandData.objects.get(brand_id = 'HERO001')
         self.assertEqual(brand_data.brand_name, 'HERO')
-        
-    def test_dealer_import(self):
-        pass
-        
-    
-    def test_sa_import(self):
-        pass
-    
+
     def test_product_dispatch(self):
         product_data = common.ProductData.objects.get(vin = 'TESTDDZZZHER44300')
         self.assertEqual(product_data.product_type.product_type, 'IMPULSE220')
@@ -100,10 +93,17 @@ class CSVFeedByFile(GladmindsUnitTestCase):
         self.assertEqual(product_data.sap_customer_id, 'SAPTESTCUST002')
         
     def test_coupon_redeeem(self):
-        pass
+        coupon_data = common.CouponData.objects.filter(vin__vin = 'TESTDDZZZHER44300', unique_service_coupon = 'HEROCOUP001')
+        self.assertEqual(coupon_data.sa_phone_number.phone_number, '+SA0000000001')
+        self.assertEqual(coupon_data.actual_kms, 100)
+        
+        coupon_data = common.CouponData.objects.filter(vin__vin = 'TESTDDZZZHER44301', unique_service_coupon = 'BAJAJCOUP002')
+        self.assertEqual(coupon_data.sa_phone_number.phone_number, '+SA0000000002')
+        self.assertEqual(coupon_data.actual_kms, 500)
     
     def test_user_registration(self):
-        pass
+        total_customer = common.GladMindUsers.objects.filter(phone_number = 'CUST000000001').count()
+        self.assertEqual(coupon_count, 2)
         
         
         
