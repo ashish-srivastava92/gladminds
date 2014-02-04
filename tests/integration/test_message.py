@@ -137,9 +137,3 @@ class BrandData(GladmindsResourceTestCase):
        resp = self.api_client.post(uri=self.MESSAGE_URL, data=self.CHECK_COUPON)
        self.assertHttpOK(resp)
         
-       
-
-    
-       
-       
-       
