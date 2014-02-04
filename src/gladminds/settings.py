@@ -11,6 +11,8 @@ STATIC_DIR = os.path.join(PROJECT_DIR, "static")
 TEMPLATE_DIR = os.path.join(PROJECT_DIR, "templates")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
 
+ALLOWED_HOSTS = ['*']
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )

@@ -5,17 +5,17 @@
       <xsd:element name="brandInput">
         <xsd:complexType>
           <xsd:sequence>
-            <xsd:element name="brandId" type="xsd:string"/>
-            <xsd:element name="brandName" type="xsd:string"/>
-            <xsd:element name="productType" type="xsd:string"/>
-            <xsd:element name="productName" type="xsd:string"/>
+            <xsd:element name="BRAND_ID" type="xsd:string"/>
+            <xsd:element name="BRAND_NAME" type="xsd:string"/>
+            <xsd:element name="PRODUCT_TYPE" type="xsd:string"/>
+            <xsd:element name="PRODUCT_NAME" type="xsd:string"/>
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
       <xsd:element name="brandOutput">
         <xsd:complexType>
           <xsd:sequence>
-            <xsd:element name="responseCode" type="xsd:string"/>
+            <xsd:element name="RESPONSE_CODE" type="xsd:string"/>
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>

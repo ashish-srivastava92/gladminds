@@ -5,21 +5,21 @@
       <xsd:element name="productDispatchInput">
         <xsd:complexType>
           <xsd:sequence>
-            <xsd:element name="vin" type="xsd:string"/>
-            <xsd:element name="productType" type="xsd:string"/>
-            <xsd:element name="invoiceDate" type="xsd:dateTime"/>
-            <xsd:element name="dealerId" type="xsd:string"/>
-            <xsd:element name="uniqueServiceCoupon" type="xsd:string"/>
-            <xsd:element name="validDays" type="xsd:long"/>
-            <xsd:element name="validKms" type="xsd:long"/>
-            <xsd:element name="serviceType" type="xsd:string"/>
+            <xsd:element name="CHASSIS" type="xsd:string"/>
+            <xsd:element name="PRODUCT_TYPE" type="xsd:string"/>
+            <xsd:element name="INVOICE_DATE" type="xsd:dateTime"/>
+            <xsd:element name="DEALER_ID" type="xsd:string"/>
+            <xsd:element name="UNIQUE_SERVICE_COUPON" type="xsd:string"/>
+            <xsd:element name="VALID_DAYS" type="xsd:long"/>
+            <xsd:element name="VALID_KMS" type="xsd:long"/>
+            <xsd:element name="SERVICE_TYPE" type="xsd:string"/>
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
       <xsd:element name="productDispatchOutput">
         <xsd:complexType>
           <xsd:sequence>
-            <xsd:element name="responseCode" type="xsd:string"/>
+            <xsd:element name="RESPONSE_CODE" type="xsd:string"/>
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>

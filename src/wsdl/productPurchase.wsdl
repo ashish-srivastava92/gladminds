@@ -5,21 +5,21 @@
       <xsd:element name="productPurchaseInput">
         <xsd:complexType>
           <xsd:sequence>
-            <xsd:element name="vin" type="xsd:string"/>
-            <xsd:element name="sapCustomerId" type="xsd:string"/>
-            <xsd:element name="customerPhoneNumber" type="xsd:string"/>
-            <xsd:element name="customerName" type="xsd:string"/>
-            <xsd:element name="city" type="xsd:string"/>
-            <xsd:element name="state" type="xsd:string"/>
-            <xsd:element name="pinCode" type="xsd:string"/>
-            <xsd:element name="productPurchaseDate" type="xsd:dateTime"/>
+            <xsd:element name="CHASSIS" type="xsd:string"/>
+            <xsd:element name="CUSTOMER_ID" type="xsd:string"/>
+            <xsd:element name="CUST_MOBILE" type="xsd:string"/>
+            <xsd:element name="CUSTOMER_NAME" type="xsd:string"/>
+            <xsd:element name="CITY" type="xsd:string"/>
+            <xsd:element name="STATE" type="xsd:string"/>
+            <xsd:element name="PIN_NO" type="xsd:string"/>
+            <xsd:element name="PRODUCT_PURCHASE_DATE" type="xsd:dateTime"/>
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
       <xsd:element name="productPurchaseOutput">
         <xsd:complexType>
           <xsd:sequence>
-            <xsd:element name="responseCode" type="xsd:string"/>
+            <xsd:element name="RESPONSE_CODE" type="xsd:string"/>
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>

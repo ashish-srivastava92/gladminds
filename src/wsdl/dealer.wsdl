@@ -5,18 +5,18 @@
       <xsd:element name="dealerInput">
         <xsd:complexType>
           <xsd:sequence>
-            <xsd:element name="dealerId" type="xsd:string"/>
-            <xsd:element name="address" type="xsd:string"/>
-            <xsd:element name="serviceAdvisorId" type="xsd:string"/>
-            <xsd:element name="name" type="xsd:string"/>
-            <xsd:element name="phoneNumber" type="xsd:string"/>
+            <xsd:element name="DEALER_ID" type="xsd:string"/>
+            <xsd:element name="ADDRESS" type="xsd:string"/>
+            <xsd:element name="SER_ADV_ID" type="xsd:string"/>
+            <xsd:element name="SER_ADV_NAME" type="xsd:string"/>
+            <xsd:element name="SER_ADV_MOBILE" type="xsd:string"/>
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
       <xsd:element name="dealerOutput">
         <xsd:complexType>
           <xsd:sequence>
-            <xsd:element name="responseCode" type="xsd:string"/>
+            <xsd:element name="RESPONSE_CODE" type="xsd:string"/>
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
