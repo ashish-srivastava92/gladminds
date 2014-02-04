@@ -1,0 +1,4 @@
+vin,sap_customer_id,customer_phone_number,customer_name,city,state,pin_code,product_purchase_date
+TESTDDZZZHER44300,SAPTESTCUST001,+CUST000000001,Test Customer,Location,State,567845,25-01-2014 12:10:00
+TESTDDZZZHER44301,SAPTESTCUST002,+CUST000000002,Test Customer2,Location,State,567845,25-01-2014 12:10:00
+TESTDDZZZHER44300,SAPTESTCUST004,+CUST000000003,Test Customer,Location,State,567845,25-01-2014 12:10:00

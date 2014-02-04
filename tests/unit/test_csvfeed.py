@@ -103,8 +103,4 @@ class CSVFeedByFile(GladmindsUnitTestCase):
     
     def test_user_registration(self):
         total_customer = common.GladMindUsers.objects.filter(phone_number = 'CUST000000001').count()
-        self.assertEqual(coupon_count, 2)
-        
-        
-        
-    
+        self.assertEqual(coupon_count, 2)   
