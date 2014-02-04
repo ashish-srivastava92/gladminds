@@ -3,6 +3,7 @@ from settings import *
 import os
 
 OUT_DIR = os.path.join(BASE_DIR, "out")
+DATA_CSV_PATH = os.path.join(BASE_DIR, "src/testdata")
 
 DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
 DATABASES['default']['NAME'] = os.path.join(OUT_DIR, 'test.db')
