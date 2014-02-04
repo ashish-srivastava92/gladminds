@@ -176,13 +176,15 @@ class GladmindsResources(Resource):
         brand_id = sms_dict['brand_id']
         try:
             product_data=common.ProductData.objects.select_related('product_type__brand_id').filter(customer_phone_number__phone_number=phone_number, product_type__brand_id__brand_id=brand_id)
-            product_list = map(lambda object: {'sap_customer_id':object.sap_customer_id, 'vin': object.vin}, product_data)
-            template = templates.get_template('SEND_BRAND_DATA')
-            msg_list=[template.format(**key_args) for key_args in product_list]
-            message = ', '.join(msg_list)
+            if product_data:
+                product_list = map(lambda object: {'sap_customer_id':object.sap_customer_id, 'vin': object.vin}, product_data)
+                template = templates.get_template('SEND_BRAND_DATA')
+                msg_list=[template.format(**key_args) for key_args in product_list]
+                message = ', '.join(msg_list)
+            else: 
+                raise Exception
         except Exception as ex:
             message = templates.get_template('SEND_INVALID_MESSAGE')
-        
         send_brand_sms_customer.delay(phone_number=phone_number, message=message)
         audit.audit_log(reciever=phone_number,action=AUDIT_ACTION, message=message)
         return True
