@@ -1,6 +1,6 @@
 from gladminds import feed
 from gladminds.models import common
-from django.core.exceptions import ObjectDoesNotExist,DoesNotExist
+from django.core.exceptions import ObjectDoesNotExist
 from base_unit import GladmindsUnitTestCase
 import time
 
@@ -25,7 +25,7 @@ class CSVFeedTest(GladmindsUnitTestCase):
         self.assertEqual(brand_data.brand_name, 'BRANDNAME_'+tmp, 'brand name not matched')
         producttype_data = common.ProductTypeData.objects.get(product_type = 'PRODUCTTYPE001_'+tmp)
         self.assertEqual(producttype_data.product_name, 'PRODUCTNAME1_'+tmp, 'Product type not matched')
-        self.assertEqual(producttype_data.brand_id, 'BRAND001_'+tmp, 'Brand Id is not matched in product type')
+        self.assertEqual(producttype_data.brand_id.brand_id, 'BRAND001_'+tmp, 'Brand Id is not matched in product type')
     
     def test_import_duplicate_feed(self):
         tmp=self.timestamp
@@ -39,8 +39,8 @@ class CSVFeedTest(GladmindsUnitTestCase):
         
         #Check Duplicate
         brand_data = common.BrandData.objects.get(brand_id = 'BRAND002_'+tmp)
-        producttype_data = common.ProductTypeData.objects.get(brand_id = brand_data, product_type = 'PRODUCTTYPE002_'+tmp)
-        self.assertRaise(DoesNotExist)
+        producttype_data = common.ProductTypeData.objects.filter(brand_id = brand_data, product_type = 'PRODUCTTYPE002_'+tmp)
+        self.assertEqual(len(producttype_data), 0)
     
     def test_dealer_sa_feed(self):
         pass

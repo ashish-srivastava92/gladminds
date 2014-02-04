@@ -117,9 +117,3 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
     def test_valid_coupon(self):
         resp = self.api_client.post(uri=self.MESSAGE_URL, data=self.CHECK_VALID_COUPON)
         self.assertHttpOK(resp)
-       
-
-    
-       
-       
-       
