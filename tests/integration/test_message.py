@@ -127,13 +127,17 @@ class BrandData(GladmindsResourceTestCase):
     def setUp(self):
         super(BrandData, self).setUp() 
         self.PHONE_NUMBER = "+TS0000000000"   
-        self.MSG_BRAND = "BRAND BRAND001"
-        self.CHECK_COUPON = {'text': self.MSG_BRAND, 'phoneNumber': self.PHONE_NUMBER}
+        self.VALID_BRAND_ID = {'text': "BRAND BRAND001", 'phoneNumber': self.PHONE_NUMBER}
+        self.INVALID_BRAND_ID={'text': "BRAND BRAN", 'phoneNumber': self.PHONE_NUMBER}
         
     '''
     TestCase for getting all products associated with the brand for a customer
     '''        
     def test_get_all_products_of_a_brand(self):
-       resp = self.api_client.post(uri=self.MESSAGE_URL, data=self.CHECK_COUPON)
+       resp = self.api_client.post(uri=self.MESSAGE_URL, data=self.VALID_BRAND_ID)
+       self.assertHttpOK(resp)
+       
+    def test_get_all_brand(self):
+       resp = self.api_client.post(uri=self.MESSAGE_URL, data=self.INVALID_BRAND_ID)
        self.assertHttpOK(resp)
         
