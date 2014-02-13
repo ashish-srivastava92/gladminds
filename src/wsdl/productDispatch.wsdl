@@ -7,11 +7,13 @@
           <xsd:sequence>
             <xsd:element name="CHASSIS" type="xsd:string"/>
             <xsd:element name="PRODUCT_TYPE" type="xsd:string"/>
-            <xsd:element name="INVOICE_DATE" type="xsd:dateTime"/>
+            <xsd:element name="VEC_DIS_DT" type="xsd:dateTime"/>
             <xsd:element name="DEALER_ID" type="xsd:string"/>
-            <xsd:element name="UNIQUE_SERVICE_COUPON" type="xsd:string"/>
-            <xsd:element name="VALID_DAYS" type="xsd:long"/>
-            <xsd:element name="VALID_KMS" type="xsd:long"/>
+            <xsd:element name="UCN_NO" type="xsd:string"/>
+            <xsd:element name="DAYS_LIMIT_FROM" type="xsd:long"/>
+            <xsd:element name="DAYS_LIMIT_TO" type="xsd:long"/>
+            <xsd:element name="KMS_FROM" type="xsd:long"/>
+            <xsd:element name="KMS_TO" type="xsd:long"/>
             <xsd:element name="SERVICE_TYPE" type="xsd:string"/>
           </xsd:sequence>
         </xsd:complexType>

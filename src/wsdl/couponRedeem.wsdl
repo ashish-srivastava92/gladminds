@@ -10,7 +10,7 @@
             <xsd:element name="CLOSED_DATE" type="xsd:dateTime"/>
             <xsd:element name="ACTUAL_SERVICE_DATE" type="xsd:dateTime"/>
             <xsd:element name="ACTUAL_KMS" type="xsd:long"/>
-            <xsd:element name="UNIQUE_SERVICE_COUPON" type="xsd:string"/>
+            <xsd:element name="UCN_NO" type="xsd:string"/>
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
