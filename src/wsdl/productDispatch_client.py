@@ -16,7 +16,7 @@ from ZSI.generate.pyclass import pyclass_type
 
 # Locator
 class productDispatchLocator:
-    productDispatchSOAP_address = "http://www.example.org/"
+    productDispatchSOAP_address = "http://localhost:8000/"
     def getproductDispatchSOAPAddress(self):
         return productDispatchLocator.productDispatchSOAP_address
     def getproductDispatchSOAP(self, url=None, **kw):
@@ -36,11 +36,11 @@ class productDispatchSOAPSOAP:
         if isinstance(request, GetProductDispatchInput) is False:
             raise TypeError, "%s incorrect request type" % (request.__class__)
         # no input wsaction
-        self.binding.Send(None, None, request, soapaction="http://www.example.org/productPurchase/GetProductDispatch", **kw)
+        self.binding.Send(None, None, request, soapaction="http://localhost:8000/productPurchase/GetProductDispatch", **kw)
         # no output wsaction
         response = self.binding.Receive(GetProductDispatchOutput.typecode)
         return response
 
-GetProductDispatchInput = GED("http://www.example.org/productDispatch/", "productDispatchInput").pyclass
+GetProductDispatchInput = GED("urn:ZSI", "productDispatchInput").pyclass
 
-GetProductDispatchOutput = GED("http://www.example.org/productDispatch/", "productDispatchOutput").pyclass
+GetProductDispatchOutput = GED("urn:ZSI", "productDispatchOutput").pyclass

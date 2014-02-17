@@ -16,7 +16,7 @@ from ZSI.generate.pyclass import pyclass_type
 
 # Locator
 class couponRedeemLocator:
-    couponRedeemSOAP_address = "http://www.example.org/"
+    couponRedeemSOAP_address = "http://localhost:8000/"
     def getcouponRedeemSOAPAddress(self):
         return couponRedeemLocator.couponRedeemSOAP_address
     def getcouponRedeemSOAP(self, url=None, **kw):
@@ -36,11 +36,11 @@ class couponRedeemSOAPSOAP:
         if isinstance(request, GetCouponRedeemInput) is False:
             raise TypeError, "%s incorrect request type" % (request.__class__)
         # no input wsaction
-        self.binding.Send(None, None, request, soapaction="http://www.example.org/productPurchase/GetCouponRedeem", **kw)
+        self.binding.Send(None, None, request, soapaction="http://localhost:8000/productPurchase/GetCouponRedeem", **kw)
         # no output wsaction
         response = self.binding.Receive(GetCouponRedeemOutput.typecode)
         return response
 
-GetCouponRedeemInput = GED("http://www.example.org/couponRedeem/", "CouponRedeemInput").pyclass
+GetCouponRedeemInput = GED("urn:ZSI", "CouponRedeemInput").pyclass
 
-GetCouponRedeemOutput = GED("http://www.example.org/couponRedeem/", "CouponRedeemOutput").pyclass
+GetCouponRedeemOutput = GED("urn:ZSI", "CouponRedeemOutput").pyclass

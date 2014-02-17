@@ -12,9 +12,9 @@ from productDispatch_types import *
 from ZSI.ServiceContainer import ServiceSOAPBinding
 
 # Messages  
-GetProductDispatchInput = GED("http://www.example.org/productDispatch/", "productDispatchInput").pyclass
+GetProductDispatchInput = GED("urn:ZSI", "productDispatchInput").pyclass
 
-GetProductDispatchOutput = GED("http://www.example.org/productDispatch/", "productDispatchOutput").pyclass
+GetProductDispatchOutput = GED("urn:ZSI", "productDispatchOutput").pyclass
 
 
 # Service Skeletons
@@ -29,6 +29,6 @@ class productDispatch(ServiceSOAPBinding):
         request = ps.Parse(GetProductDispatchInput.typecode)
         return request,GetProductDispatchOutput()
 
-    soapAction['http://www.example.org/productPurchase/GetProductDispatch'] = 'soap_getProductDispatch'
+    soapAction['http://localhost:8000/productPurchase/GetProductDispatch'] = 'soap_getProductDispatch'
     root[(GetProductDispatchInput.typecode.nspname,GetProductDispatchInput.typecode.pname)] = 'soap_getProductDispatch'
 

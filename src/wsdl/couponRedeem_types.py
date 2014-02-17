@@ -13,19 +13,19 @@ from ZSI.generate.pyclass import pyclass_type
 
 ##############################
 # targetNamespace
-# http://www.example.org/couponRedeem/
+# urn:ZSI
 ##############################
 
 class ns0:
-    targetNamespace = "http://www.example.org/couponRedeem/"
+    targetNamespace = "urn:ZSI"
 
     class couponRedeemInput_Dec(ZSI.TCcompound.ComplexType, ElementDeclaration):
         literal = "couponRedeemInput"
-        schema = "http://www.example.org/couponRedeem/"
+        schema = "urn:ZSI"
         def __init__(self, **kw):
             ns = ns0.couponRedeemInput_Dec.schema
             TClist = [ZSI.TC.String(pname="CHASSIS", aname="_CHASSIS", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TC.String(pname="SER_ADV_MOBILE", aname="_SER_ADV_MOBILE", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TCtimes.gDateTime(pname="CLOSED_DATE", aname="_CLOSED_DATE", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TCtimes.gDateTime(pname="ACTUAL_SERVICE_DATE", aname="_ACTUAL_SERVICE_DATE", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TCnumbers.Ilong(pname="ACTUAL_KMS", aname="_ACTUAL_KMS", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TC.String(pname="UCN_NO", aname="_UCN_NO", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded"))]
-            kw["pname"] = ("http://www.example.org/couponRedeem/","couponRedeemInput")
+            kw["pname"] = ("urn:ZSI","couponRedeemInput")
             kw["aname"] = "_couponRedeemInput"
             self.attribute_typecode_dict = {}
             ZSI.TCcompound.ComplexType.__init__(self,None,TClist,inorder=0,**kw)
@@ -46,11 +46,11 @@ class ns0:
 
     class couponRedeemOutput_Dec(ZSI.TCcompound.ComplexType, ElementDeclaration):
         literal = "couponRedeemOutput"
-        schema = "http://www.example.org/couponRedeem/"
+        schema = "urn:ZSI"
         def __init__(self, **kw):
             ns = ns0.couponRedeemOutput_Dec.schema
             TClist = [ZSI.TC.String(pname="RESPONSE_CODE", aname="_RESPONSE_CODE", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded"))]
-            kw["pname"] = ("http://www.example.org/couponRedeem/","couponRedeemOutput")
+            kw["pname"] = ("urn:ZSI","couponRedeemOutput")
             kw["aname"] = "_couponRedeemOutput"
             self.attribute_typecode_dict = {}
             ZSI.TCcompound.ComplexType.__init__(self,None,TClist,inorder=0,**kw)
@@ -64,4 +64,4 @@ class ns0:
             Holder.__name__ = "couponRedeemOutput_Holder"
             self.pyclass = Holder
 
-# end class ns0 (tns: http://www.example.org/couponRedeem/)
+# end class ns0 (tns: urn:ZSI)

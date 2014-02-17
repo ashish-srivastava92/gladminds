@@ -12,9 +12,9 @@ from dealer_types import *
 from ZSI.ServiceContainer import ServiceSOAPBinding
 
 # Messages  
-GetDealerInput = GED("http://www.example.org/dealer/", "dealerInput").pyclass
+GetDealerInput = GED("urn:ZSI", "dealerInput").pyclass
 
-GetDealerOutput = GED("http://www.example.org/dealer/", "dealerOutput").pyclass
+GetDealerOutput = GED("urn:ZSI", "dealerOutput").pyclass
 
 
 # Service Skeletons
@@ -29,6 +29,6 @@ class dealer(ServiceSOAPBinding):
         request = ps.Parse(GetDealerInput.typecode)
         return request,GetDealerOutput()
 
-    soapAction['http://www.example.org/productPurchase/GetDealer'] = 'soap_getDealer'
+    soapAction['http://localhost:8000/productPurchase/GetDealer'] = 'soap_getDealer'
     root[(GetDealerInput.typecode.nspname,GetDealerInput.typecode.pname)] = 'soap_getDealer'
 

@@ -13,19 +13,19 @@ from ZSI.generate.pyclass import pyclass_type
 
 ##############################
 # targetNamespace
-# http://www.example.org/brand/
+# urn:ZSI
 ##############################
 
 class ns0:
-    targetNamespace = "http://www.example.org/brand/"
+    targetNamespace = "urn:ZSI"
 
     class brandInput_Dec(ZSI.TCcompound.ComplexType, ElementDeclaration):
         literal = "brandInput"
-        schema = "http://www.example.org/brand/"
+        schema = "urn:ZSI"
         def __init__(self, **kw):
             ns = ns0.brandInput_Dec.schema
             TClist = [ZSI.TC.String(pname="BRAND_ID", aname="_BRAND_ID", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TC.String(pname="BRAND_NAME", aname="_BRAND_NAME", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TC.String(pname="PRODUCT_TYPE", aname="_PRODUCT_TYPE", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TC.String(pname="PRODUCT_NAME", aname="_PRODUCT_NAME", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded"))]
-            kw["pname"] = ("http://www.example.org/brand/","brandInput")
+            kw["pname"] = ("urn:ZSI","brandInput")
             kw["aname"] = "_brandInput"
             self.attribute_typecode_dict = {}
             ZSI.TCcompound.ComplexType.__init__(self,None,TClist,inorder=0,**kw)
@@ -44,11 +44,11 @@ class ns0:
 
     class brandOutput_Dec(ZSI.TCcompound.ComplexType, ElementDeclaration):
         literal = "brandOutput"
-        schema = "http://www.example.org/brand/"
+        schema = "urn:ZSI"
         def __init__(self, **kw):
             ns = ns0.brandOutput_Dec.schema
             TClist = [ZSI.TC.String(pname="RESPONSE_CODE", aname="_RESPONSE_CODE", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded"))]
-            kw["pname"] = ("http://www.example.org/brand/","brandOutput")
+            kw["pname"] = ("urn:ZSI","brandOutput")
             kw["aname"] = "_brandOutput"
             self.attribute_typecode_dict = {}
             ZSI.TCcompound.ComplexType.__init__(self,None,TClist,inorder=0,**kw)
@@ -62,4 +62,4 @@ class ns0:
             Holder.__name__ = "brandOutput_Holder"
             self.pyclass = Holder
 
-# end class ns0 (tns: http://www.example.org/brand/)
+# end class ns0 (tns: urn:ZSI)

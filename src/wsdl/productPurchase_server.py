@@ -12,9 +12,9 @@ from productPurchase_types import *
 from ZSI.ServiceContainer import ServiceSOAPBinding
 
 # Messages  
-GetProductPurchaseInput = GED("http://www.example.org/productPurchase/", "productPurchaseInput").pyclass
+GetProductPurchaseInput = GED("urn:ZSI", "productPurchaseInput").pyclass
 
-GetProductPurchaseOutput = GED("http://www.example.org/productPurchase/", "productPurchaseOutput").pyclass
+GetProductPurchaseOutput = GED("urn:ZSI", "productPurchaseOutput").pyclass
 
 
 # Service Skeletons
@@ -29,6 +29,6 @@ class productPurchase(ServiceSOAPBinding):
         request = ps.Parse(GetProductPurchaseInput.typecode)
         return request,GetProductPurchaseOutput()
 
-    soapAction['http://www.example.org/productPurchase/GetProductPurchase'] = 'soap_getProductPurchase'
+    soapAction['http://localhost:8000/productPurchase/GetProductPurchase'] = 'soap_getProductPurchase'
     root[(GetProductPurchaseInput.typecode.nspname,GetProductPurchaseInput.typecode.pname)] = 'soap_getProductPurchase'
 

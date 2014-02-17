@@ -13,19 +13,19 @@ from ZSI.generate.pyclass import pyclass_type
 
 ##############################
 # targetNamespace
-# http://www.example.org/dealer/
+# urn:ZSI
 ##############################
 
 class ns0:
-    targetNamespace = "http://www.example.org/dealer/"
+    targetNamespace = "urn:ZSI"
 
     class dealerInput_Dec(ZSI.TCcompound.ComplexType, ElementDeclaration):
         literal = "dealerInput"
-        schema = "http://www.example.org/dealer/"
+        schema = "urn:ZSI"
         def __init__(self, **kw):
             ns = ns0.dealerInput_Dec.schema
             TClist = [ZSI.TC.String(pname="DEALER_ID", aname="_DEALER_ID", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TC.String(pname="ADDRESS", aname="_ADDRESS", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TC.String(pname="SER_ADV_ID", aname="_SER_ADV_ID", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TC.String(pname="SER_ADV_NAME", aname="_SER_ADV_NAME", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TC.String(pname="SER_ADV_MOBILE", aname="_SER_ADV_MOBILE", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded"))]
-            kw["pname"] = ("http://www.example.org/dealer/","dealerInput")
+            kw["pname"] = ("urn:ZSI","dealerInput")
             kw["aname"] = "_dealerInput"
             self.attribute_typecode_dict = {}
             ZSI.TCcompound.ComplexType.__init__(self,None,TClist,inorder=0,**kw)
@@ -45,11 +45,11 @@ class ns0:
 
     class dealerOutput_Dec(ZSI.TCcompound.ComplexType, ElementDeclaration):
         literal = "dealerOutput"
-        schema = "http://www.example.org/dealer/"
+        schema = "urn:ZSI"
         def __init__(self, **kw):
             ns = ns0.dealerOutput_Dec.schema
             TClist = [ZSI.TC.String(pname="RESPONSE_CODE", aname="_RESPONSE_CODE", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded"))]
-            kw["pname"] = ("http://www.example.org/dealer/","dealerOutput")
+            kw["pname"] = ("urn:ZSI","dealerOutput")
             kw["aname"] = "_dealerOutput"
             self.attribute_typecode_dict = {}
             ZSI.TCcompound.ComplexType.__init__(self,None,TClist,inorder=0,**kw)
@@ -63,4 +63,4 @@ class ns0:
             Holder.__name__ = "dealerOutput_Holder"
             self.pyclass = Holder
 
-# end class ns0 (tns: http://www.example.org/dealer/)
+# end class ns0 (tns: urn:ZSI)

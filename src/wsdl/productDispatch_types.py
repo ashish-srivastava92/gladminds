@@ -13,19 +13,19 @@ from ZSI.generate.pyclass import pyclass_type
 
 ##############################
 # targetNamespace
-# http://www.example.org/productDispatch/
+# urn:ZSI
 ##############################
 
 class ns0:
-    targetNamespace = "http://www.example.org/productDispatch/"
+    targetNamespace = "urn:ZSI"
 
     class productDispatchInput_Dec(ZSI.TCcompound.ComplexType, ElementDeclaration):
         literal = "productDispatchInput"
-        schema = "http://www.example.org/productDispatch/"
+        schema = "urn:ZSI"
         def __init__(self, **kw):
             ns = ns0.productDispatchInput_Dec.schema
             TClist = [ZSI.TC.String(pname="CHASSIS", aname="_CHASSIS", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TC.String(pname="PRODUCT_TYPE", aname="_PRODUCT_TYPE", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TCtimes.gDateTime(pname="VEC_DIS_DT", aname="_VEC_DIS_DT", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TC.String(pname="DEALER_ID", aname="_DEALER_ID", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TC.String(pname="UCN_NO", aname="_UCN_NO", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TCnumbers.Ilong(pname="DAYS_LIMIT_FROM", aname="_DAYS_LIMIT_FROM", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TCnumbers.Ilong(pname="DAYS_LIMIT_TO", aname="_DAYS_LIMIT_TO", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TCnumbers.Ilong(pname="KMS_FROM", aname="_KMS_FROM", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TCnumbers.Ilong(pname="KMS_TO", aname="_KMS_TO", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded")), ZSI.TC.String(pname="SERVICE_TYPE", aname="_SERVICE_TYPE", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded"))]
-            kw["pname"] = ("http://www.example.org/productDispatch/","productDispatchInput")
+            kw["pname"] = ("urn:ZSI","productDispatchInput")
             kw["aname"] = "_productDispatchInput"
             self.attribute_typecode_dict = {}
             ZSI.TCcompound.ComplexType.__init__(self,None,TClist,inorder=0,**kw)
@@ -50,11 +50,11 @@ class ns0:
 
     class productDispatchOutput_Dec(ZSI.TCcompound.ComplexType, ElementDeclaration):
         literal = "productDispatchOutput"
-        schema = "http://www.example.org/productDispatch/"
+        schema = "urn:ZSI"
         def __init__(self, **kw):
             ns = ns0.productDispatchOutput_Dec.schema
             TClist = [ZSI.TC.String(pname="RESPONSE_CODE", aname="_RESPONSE_CODE", minOccurs=1, maxOccurs=1, nillable=False, typed=False, encoded=kw.get("encoded"))]
-            kw["pname"] = ("http://www.example.org/productDispatch/","productDispatchOutput")
+            kw["pname"] = ("urn:ZSI","productDispatchOutput")
             kw["aname"] = "_productDispatchOutput"
             self.attribute_typecode_dict = {}
             ZSI.TCcompound.ComplexType.__init__(self,None,TClist,inorder=0,**kw)
@@ -68,4 +68,4 @@ class ns0:
             Holder.__name__ = "productDispatchOutput_Holder"
             self.pyclass = Holder
 
-# end class ns0 (tns: http://www.example.org/productDispatch/)
+# end class ns0 (tns: urn:ZSI)

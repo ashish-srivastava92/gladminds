@@ -12,9 +12,9 @@ from couponRedeem_types import *
 from ZSI.ServiceContainer import ServiceSOAPBinding
 
 # Messages  
-GetCouponRedeemInput = GED("http://www.example.org/couponRedeem/", "CouponRedeemInput").pyclass
+GetCouponRedeemInput = GED("urn:ZSI", "CouponRedeemInput").pyclass
 
-GetCouponRedeemOutput = GED("http://www.example.org/couponRedeem/", "CouponRedeemOutput").pyclass
+GetCouponRedeemOutput = GED("urn:ZSI", "CouponRedeemOutput").pyclass
 
 
 # Service Skeletons
@@ -29,6 +29,6 @@ class couponRedeem(ServiceSOAPBinding):
         request = ps.Parse(GetCouponRedeemInput.typecode)
         return request,GetCouponRedeemOutput()
 
-    soapAction['http://www.example.org/productPurchase/GetCouponRedeem'] = 'soap_getCouponRedeem'
+    soapAction['http://localhost:8000/productPurchase/GetCouponRedeem'] = 'soap_getCouponRedeem'
     root[(GetCouponRedeemInput.typecode.nspname,GetCouponRedeemInput.typecode.pname)] = 'soap_getCouponRedeem'
 

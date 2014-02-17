@@ -12,9 +12,9 @@ from brand_types import *
 from ZSI.ServiceContainer import ServiceSOAPBinding
 
 # Messages  
-GetBrandInput = GED("http://www.example.org/brand/", "brandInput").pyclass
+GetBrandInput = GED("urn:ZSI", "brandInput").pyclass
 
-GetBrandOutput = GED("http://www.example.org/brand/", "brandOutput").pyclass
+GetBrandOutput = GED("urn:ZSI", "brandOutput").pyclass
 
 
 # Service Skeletons
@@ -29,6 +29,6 @@ class brand(ServiceSOAPBinding):
         request = ps.Parse(GetBrandInput.typecode)
         return request,GetBrandOutput()
 
-    soapAction['http://www.example.org/productPurchase/GetBrand'] = 'soap_getBrand'
+    soapAction['http://localhost:8000/productPurchase/GetBrand'] = 'soap_getBrand'
     root[(GetBrandInput.typecode.nspname,GetBrandInput.typecode.pname)] = 'soap_getBrand'
 

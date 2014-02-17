@@ -74,10 +74,10 @@ def main():
 
     application         = WSGIApplication()
     httpd               = make_server('127.0.0.1', 8000, application)
-    application['brand'] = BrandService()
-    application['dealer'] = DealerService()
-    application['productDispatch'] = ProductDispatchService()
-    application['productPurchase'] = ProductPurchaseService()
+    application['brand-feed'] = BrandService()
+    application['dealer-feed'] = DealerService()
+    application['dispatch-feed'] = ProductDispatchService()
+    application['purchase-feed'] = ProductPurchaseService()
     print "listening..."
     httpd.serve_forever()
     
