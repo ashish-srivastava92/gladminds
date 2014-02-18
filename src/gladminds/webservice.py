@@ -22,14 +22,14 @@ failed = "failed"
 class BrandService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
-    @srpc(Unicode, Unicode, Unicode,Unicode, _returns=Unicode)
-    def postBrand(BRAND_ID, BRAND_NAME, PRODUCT_TYPE, PRODUCT_NAME):
+    @srpc(Unicode, Unicode, Unicode, Unicode, DateTime, _returns=Unicode)
+    def postBrand(BRAND_ID, BRAND_NAME, PRODUCT_TYPE, PRODUCT_NAME, TIMESTAMP):
         try:
             brand_data = [{
                 'brand_id':BRAND_ID, 
                 'brand_name': BRAND_NAME, 
                 'product_type': PRODUCT_TYPE, 
-                'product_name': PRODUCT_NAME
+                'product_name': PRODUCT_NAME,
             }]
             brand_obj = BrandProductTypeFeed(data_source  = brand_data)
             brand_obj.import_data()
@@ -41,11 +41,11 @@ class BrandService(ServiceBase):
 class DealerService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
-    @srpc(Unicode, Unicode, Unicode,Unicode, Unicode, _returns=Unicode)
-    def postDealer(DEALER_ID, ADDRESS, SER_ADV_ID, SER_ADV_NAME, SER_ADV_MOBILE):
+    @srpc(Unicode, Unicode, Unicode,Unicode, Unicode, DateTime, _returns=Unicode)
+    def postDealer(KUNNR, ADDRESS, SER_ADV_ID, SER_ADV_NAME, SER_ADV_MOBILE, TIMESTAMP):
         try:
             dealer_data = [{
-                'dealer_id' : DEALER_ID,
+                'dealer_id' : KUNNR,
                 'address' : ADDRESS,
                 'service_advisor_id' : SER_ADV_ID,
                 'name' : SER_ADV_NAME,
@@ -61,14 +61,14 @@ class DealerService(ServiceBase):
 class ProductDispatchService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
 
-    @srpc(Unicode, Unicode, DateTime, Unicode, Unicode, Decimal, Decimal, Decimal, Decimal, Unicode, _returns=Unicode)
-    def postProductDispatch(CHASSIS, PRODUCT_TYPE, VEC_DIS_DT, DEALER_ID, UCN_NO, DAYS_LIMIT_FROM, DAYS_LIMIT_TO, KMS_FROM, KMS_TO, SERVICE_TYPE):
+    @srpc(Unicode, Unicode, DateTime, Unicode, Unicode, Decimal, Decimal, Decimal, Decimal, Unicode, DateTime, _returns=Unicode)
+    def postProductDispatch(CHASSIS, PRODUCT_TYPE, VEC_DIS_DT, KUNNR, UCN_NO, DAYS_LIMIT_FROM, DAYS_LIMIT_TO, KMS_FROM, KMS_TO, SERVICE_TYPE, TIMESTAMP):
         try:
             product_dispatch_data = [{
                     'vin' : CHASSIS,
                     'product_type': PRODUCT_TYPE,
                     'invoice_date': VEC_DIS_DT,
-                    'dealer_id' : DEALER_ID,
+                    'dealer_id' : KUNNR,
                     'unique_service_coupon' : UCN_NO,
                     'valid_days' : DAYS_LIMIT_TO,
                     'valid_kms' : KMS_TO,
@@ -84,8 +84,8 @@ class ProductDispatchService(ServiceBase):
 class ProductPurchaseService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
-    @srpc(Unicode, Unicode, Unicode, Unicode, Unicode, Unicode, Unicode, DateTime, _returns=Unicode)
-    def postProductPurchase(CHASSIS, CUSTOMER_ID, CUST_MOBILE, CUSTOMER_NAME, CITY, STATE, PIN_NO, VEH_SL_DT):
+    @srpc(Unicode, Unicode, Unicode, Unicode, Unicode, Unicode, Unicode, DateTime, Unicode, Unicode, Unicode, Unicode, DateTime, _returns=Unicode)
+    def postProductPurchase(CHASSIS, CUSTOMER_ID, CUST_MOBILE, CUSTOMER_NAME, CITY, STATE, PIN_NO, VEH_SL_DT, VEH_REG_NO, VEH_SL_DLR, ENGINE, KUNNR, TIMESTAMP):
         try:
             product_purchase_data = [{
                     'vin' : CHASSIS,
@@ -93,7 +93,7 @@ class ProductPurchaseService(ServiceBase):
                     'customer_phone_number' : CUST_MOBILE,
                     'customer_name' : CUSTOMER_NAME,
                     'city' : CITY,
-                    'state' : state,
+                    'state' : STATE,
                     'pin_no' : PIN_NO,
                     'product_purchase_date' : VEH_SL_DT,
             }]
