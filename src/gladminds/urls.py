@@ -10,6 +10,8 @@ api_v1.register(r.GladmindsResources())
 
 urlpatterns = patterns('gladminds',
     (r'', include(api_v1.urls)),
+    url(r'^api/v1/bajaj/feed/\?wsdl$', 'webservice.all_service'),
+    url(r'^api/v1/bajaj/feed/$', 'webservice.all_service'),
     url(r'^api/v1/bajaj/brand-feed/\?wsdl$', 'webservice.brand_service'),
     url(r'^api/v1/bajaj/brand-feed/$', 'webservice.brand_service'),
     url(r'^api/v1/bajaj/dealer-feed/\?wsdl$', 'webservice.dealer_service'),

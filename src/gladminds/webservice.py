@@ -115,6 +115,12 @@ DealerService.event_manager.add_listener('method_call', _on_method_call)
 ProductDispatchService.event_manager.add_listener('method_call', _on_method_call)
 ProductPurchaseService.event_manager.add_listener('method_call', _on_method_call)
 
+all_app = Application([BrandService, DealerService,ProductDispatchService, ProductPurchaseService],
+    tns=tns,
+    in_protocol=Soap11(validator='lxml'),
+    out_protocol=Soap11()
+)
+
 brand_app = Application([BrandService],
     tns=tns,
     in_protocol=Soap11(validator='lxml'),
@@ -139,6 +145,7 @@ purchase_app = Application([ProductPurchaseService],
     out_protocol=Soap11()
 )
 
+all_service = csrf_exempt(DjangoApplication(all_app))
 brand_service = csrf_exempt(DjangoApplication(brand_app))
 dealer_service = csrf_exempt(DjangoApplication(dealer_app))
 dispatch_service = csrf_exempt(DjangoApplication(dispatch_app))
