@@ -1,3 +1,4 @@
+from django.views.decorators.csrf import csrf_exempt
 from spyne.application import Application
 from spyne.decorator import srpc
 from spyne.model.complex import ComplexModel
@@ -8,6 +9,7 @@ from spyne.protocol.soap import Soap11
 from spyne.server.wsgi import WsgiApplication
 from spyne.service import ServiceBase
 from spyne.util.wsgi_wrapper import WsgiMounter
+from spyne.server.django import DjangoApplication
 
 from gladminds.feed import BrandProductTypeFeed, DealerAndServiceAdvisorFeed, ProductDispatchFeed, ProductPurchaseFeed
 from gladminds.soap_authentication import BasicAuthentication
@@ -136,3 +138,10 @@ purchase_app = Application([ProductPurchaseService],
     in_protocol=Soap11(validator='lxml'),
     out_protocol=Soap11()
 )
+
+brand_service = csrf_exempt(DjangoApplication(brand_app))
+dealer_service = csrf_exempt(DjangoApplication(dealer_app))
+dispatch_service = csrf_exempt(DjangoApplication(dispatch_app))
+purchase_service = csrf_exempt(DjangoApplication(purchase_app))
+
+

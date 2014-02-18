@@ -25,17 +25,17 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gladminds.settings")
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 from django.core.wsgi import get_wsgi_application
-django_application = get_wsgi_application()
+application = get_wsgi_application()
 
-from webservice import brand_app, dealer_app, dispatch_app, purchase_app
-from gladminds.wsgi_wrapper import GladmindsWsgiMounter
-
-application = GladmindsWsgiMounter(default=django_application, mounts={
-        'brand-feed': brand_app,
-        'dealer-feed': dealer_app,
-        'dispatch-feed': dispatch_app,
-        'purchase-feed': purchase_app,
-    })
+# from webservice import brand_app, dealer_app, dispatch_app, purchase_app
+# from gladminds.wsgi_wrapper import GladmindsWsgiMounter
+# 
+# application = GladmindsWsgiMounter(default=django_application, mounts={
+#         'brand-feed': brand_app,
+#         'dealer-feed': dealer_app,
+#         'dispatch-feed': dispatch_app,
+#         'purchase-feed': purchase_app,
+#     })
 
 # Apply WSGI middleware here.
 # from helloworld.wsgi import HelloWorldApplication
