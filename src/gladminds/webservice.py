@@ -56,18 +56,3 @@ purchase_app = Application([ProductPurchaseService],
     in_protocol=Soap11(validator='lxml'),
     out_protocol=Soap11()
 )
-
-# if __name__ == '__main__':
-#     # You can use any Wsgi server. Here, we chose
-#     # Python's built-in wsgi server but you're not
-#     # supposed to use it in production.
-#     from wsgiref.simple_server import make_server
-#  
-#     wsgi_app = WsgiMounter({
-#         'brand-feed': brand_app,
-#         'dealer-feed': dealer_app,
-#         'dispatch-feed': dispatch_app,
-#         'purchase-feed': purchase_app,
-#     })
-#     server = make_server(host, port, wsgi_app)
-#     server.serve_forever()
