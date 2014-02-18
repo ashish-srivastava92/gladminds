@@ -9,8 +9,6 @@ from spyne.server.wsgi import WsgiApplication
 from spyne.util.wsgi_wrapper import WsgiMounter
 
 tns = 'gladminds.webservice'
-port = 8000
-host = '127.0.0.1'
 
 class BrandService(ServiceBase):
     @srpc(Unicode, Unicode, Unicode,Unicode, _returns=Unicode)
