@@ -85,7 +85,7 @@ class ProductPurchaseService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
     @srpc(Unicode, Unicode, Unicode, Unicode, Unicode, Unicode, Unicode, DateTime, _returns=Unicode)
-    def postProductPurchase(CHASSIS, CUSTOMER_ID, CUST_MOBILE, CUSTOMER_NAME, CITY, STATE, PIN_NO, PRODUCT_PURCHASE_DATE):
+    def postProductPurchase(CHASSIS, CUSTOMER_ID, CUST_MOBILE, CUSTOMER_NAME, CITY, STATE, PIN_NO, VEH_SL_DT):
         try:
             product_purchase_data = [{
                     'vin' : CHASSIS,
@@ -95,7 +95,7 @@ class ProductPurchaseService(ServiceBase):
                     'city' : CITY,
                     'state' : state,
                     'pin_no' : PIN_NO,
-                    'product_purchase_date' : PRODUCT_PURCHASE_DATE,
+                    'product_purchase_date' : VEH_SL_DT,
             }]
             purchase_obj = ProductPurchaseFeed(data_source  = product_purchase_data)
             purchase_obj.import_data()

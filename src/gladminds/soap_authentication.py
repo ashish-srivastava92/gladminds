@@ -1,7 +1,6 @@
 import base64
+from django.contrib.auth import authenticate
 from spyne.model.fault import Fault
-
-auth_db = set([('gladminds', 'gladminds'), ('admin', 'gladminds')])
 
 class AuthenticationError(Fault):
     __namespace__ = 'gladminds.webservice.authentication'
@@ -35,7 +34,6 @@ class BasicAuthentication(object):
             raise AuthorizationError()
         try:
             (auth_type, data) = auth_detail.split()
-            print (auth_type, data)
             if auth_type.lower() != 'basic':
                 raise AuthorizationError()
             user_pass = self.decode_base64(data = data)
@@ -44,8 +42,9 @@ class BasicAuthentication(object):
         bits = user_pass.split(':', 1)
         if len(bits) != 2:
             raise AuthorizationError()
-        
-        if not (bits[0], bits[1]) in auth_db:
+
+        user = authenticate(username=bits[0], password=bits[1])
+        if user is None:
             raise AuthenticationError(bits[0])
         return True
 
