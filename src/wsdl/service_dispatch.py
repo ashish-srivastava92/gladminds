@@ -1,86 +1,73 @@
-import os
-import sys
-from productDispatch_server import *
-from brand_server import *
-from dealer_server import *
-from productPurchase_server import *
+from spyne.application import Application
+from spyne.decorator import srpc
+from spyne.service import ServiceBase
+from spyne.model.primitive import Integer,DateTime,Decimal
+from spyne.model.primitive import Unicode
+from spyne.model.complex import Iterable
+from spyne.protocol.soap import Soap11
+from spyne.server.wsgi import WsgiApplication
+from spyne.util.wsgi_wrapper import WsgiMounter
 
-from ZSI.twisted.wsgi import (SOAPApplication,
-                              soapmethod,
-                              SOAPHandlerChainFactory)
+tns = 'gladminds.webservice'
+port = 8000
+host = '127.0.0.1'
 
-class ProductDispatchService(SOAPApplication):
-    factory = SOAPHandlerChainFactory
-    def __call__(self, env, start_response):
-        self.env = env
-        return SOAPApplication.__call__(self, env, start_response)
+class BrandService(ServiceBase):
+    @srpc(Unicode, Unicode, Unicode,Unicode, _returns=Unicode)
+    def postBrand(BRAND_ID, BRAND_NAME, PRODUCT_TYPE, PRODUCT_NAME):
+        return BRAND_ID
 
-    @soapmethod(GetProductDispatchInput.typecode, 
-                GetProductDispatchOutput.typecode, 
-                operation='getProductDispatch', 
-                soapaction='productDispatchSOAP')
-    def soap_getProductDispatch(self, request, response, **kw):
-        response.RESPONSE_CODE = "SUCCESS"
-        return request, response
+class DealerService(ServiceBase):
+    @srpc(Unicode, Unicode, Unicode,Unicode, Unicode, _returns=Unicode)
+    def postDealer(DEALER_ID, ADDRESS, SER_ADV_ID, SER_ADV_NAME, SER_ADV_MOBILE):
+        pass
 
-class ProductPurchaseService(SOAPApplication):
-    factory = SOAPHandlerChainFactory
-    
-    def __call__(self, env, start_response):
-        self.env = env
-        return SOAPApplication.__call__(self, env, start_response)
+class ProductDispatchService(ServiceBase):
+    @srpc(Unicode, Unicode, DateTime, Unicode, Unicode, Decimal, Decimal, Decimal, Decimal, Unicode, _returns=Unicode)
+    def postProductDispatch(CHASSIS, PRODUCT_TYPE, VEC_DIS_DT, DEALER_ID, UCN_NO, DAYS_LIMIT_FROM, DAYS_LIMIT_TO, KMS_FROM, KMS_TO, SERVICE_TYPE):
+        pass
 
-    @soapmethod(GetProductPurchaseInput.typecode, 
-                GetProductPurchaseOutput.typecode, 
-                operation='getProductPurchase', 
-                soapaction='productPurchaseSOAP')
-    def soap_getProductPurchase(self, request, response, **kw):
-        response.RESPONSE_CODE = "SUCCESS"
-        return request, response
+class ProductPurchaseService(ServiceBase):
+    @srpc(Unicode, Unicode, Unicode, Unicode, Unicode, Unicode, Unicode, DateTime, _returns=Unicode)
+    def postProductPurchase(CHASSIS, CUSTOMER_ID, CUST_MOBILE, CUSTOMER_NAME, CITY, STATE, PIN_NO, PRODUCT_PURCHASE_DATE):
+        pass
+            
 
-class BrandService(SOAPApplication):
-    factory = SOAPHandlerChainFactory
-    
-    def __call__(self, env, start_response):
-        self.env = env
-        return SOAPApplication.__call__(self, env, start_response)
+brand_app = Application([BrandService],
+    tns=tns,
+    in_protocol=Soap11(validator='lxml'),
+    out_protocol=Soap11()
+)
 
-    @soapmethod(GetBrandInput.typecode, 
-                GetBrandOutput.typecode, 
-                operation='getBrand', 
-                soapaction='brandSOAP')
-    def soap_getBrand(self, request, response, **kw):
-        response.RESPONSE_CODE = "SUCCESS"
-        return request, response
+dealer_app = Application([DealerService],
+    tns=tns,
+    in_protocol=Soap11(validator='lxml'),
+    out_protocol=Soap11()
+)
 
-class DealerService(SOAPApplication):
-    factory = SOAPHandlerChainFactory
-    
-    def __call__(self, env, start_response):
-        self.env = env
-        return SOAPApplication.__call__(self, env, start_response)
+dispatch_app = Application([ProductDispatchService],
+    tns=tns,
+    in_protocol=Soap11(validator='lxml'),
+    out_protocol=Soap11()
+)
 
-    @soapmethod(GetDealerInput.typecode, 
-                GetDealerOutput.typecode, 
-                operation='getDealer', 
-                soapaction='dealerSOAP')
-    def soap_getDealer(self, request, response, **kw):
-        response.RESPONSE_CODE = "SUCCESS"
-        return request, response
-
-def main():
-    from wsgiref.simple_server import make_server
-    from ZSI.twisted.wsgi import WSGIApplication
-
-    application         = WSGIApplication()
-    httpd               = make_server('127.0.0.1', 8000, application)
-    application['brand-feed'] = BrandService()
-    application['dealer-feed'] = DealerService()
-    application['dispatch-feed'] = ProductDispatchService()
-    application['purchase-feed'] = ProductPurchaseService()
-    print "listening..."
-    httpd.serve_forever()
-    
+purchase_app = Application([ProductPurchaseService],
+    tns=tns,
+    in_protocol=Soap11(validator='lxml'),
+    out_protocol=Soap11()
+)
 
 if __name__ == '__main__':
-    main()
+    # You can use any Wsgi server. Here, we chose
+    # Python's built-in wsgi server but you're not
+    # supposed to use it in production.
+    from wsgiref.simple_server import make_server
+
+    wsgi_app = WsgiMounter({
+        'brand-feed': brand_app,
+        'dealer-feed': dealer_app,
+        'dispatch-feed': dispatch_app,
+        'purchase-feed': purchase_app,
+    })
+    server = make_server(host, port, wsgi_app)
+    server.serve_forever()
