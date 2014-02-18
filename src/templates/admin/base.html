@@ -33,13 +33,13 @@
         {% if not is_popup %}
           <!-- Header -->
           <div id="header" class="header" style="background-image: -webkit-gradient(linear, left top, right top, from(#F5F5F5), to(#F5F5F5));color:#708090;">
-            <div id="branding">
-              <a href="{% url 'admin:index' %}"><h1 id="site-name">{% block branding %}<img style="max-width: 82%;
-max-height: 88%;" src="{{STATIC_URL}}img/logo.png" />{% endblock %}</h1></a>
+            <div id="branding" style="border-right: 0px; min-width: 225px;">
+              <a href="{% url 'admin:index' %}"><h1 id="site-name">{% block branding %}<img style="width: 209px;height: 43px;margin-left: -11px;argin-top: -2px;
+" src="{{STATIC_URL}}img/bajaj_logo.jpg" />{% endblock %}</h1></a>
             </div>
 
             {% block header_time %}
-            <div class="header-content header-content-first">
+            <div class="header-content header-content-first" style="border-left: 0px">
               <div class="header-column icon">
                 <i class="icon-time"></i>
               </div>
