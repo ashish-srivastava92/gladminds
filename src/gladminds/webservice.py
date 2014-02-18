@@ -2,17 +2,22 @@ from spyne.application import Application
 from spyne.decorator import srpc
 from spyne.service import ServiceBase
 from spyne.model.primitive import Integer,DateTime,Decimal
-from spyne.model.primitive import Unicode
+from spyne.model.primitive import Unicode, Mandatory
 from spyne.model.complex import Iterable
 from spyne.protocol.soap import Soap11
 from spyne.server.wsgi import WsgiApplication
 from spyne.util.wsgi_wrapper import WsgiMounter
+from spyne.model.complex import ComplexModel
+from gladminds.soap_authentication import BasicAuthentication
+
 
 tns = 'gladminds.webservice'
 success = "success"
 failed = "failed"
 
 class BrandService(ServiceBase):
+    __tns__ = 'gladminds.webservice.authentication'
+    
     @srpc(Unicode, Unicode, Unicode,Unicode, _returns=Unicode)
     def postBrand(BRAND_ID, BRAND_NAME, PRODUCT_TYPE, PRODUCT_NAME):
         try:
@@ -28,6 +33,8 @@ class BrandService(ServiceBase):
             return failed
             
 class DealerService(ServiceBase):
+    __tns__ = 'gladminds.webservice.authentication'
+    
     @srpc(Unicode, Unicode, Unicode,Unicode, Unicode, _returns=Unicode)
     def postDealer(DEALER_ID, ADDRESS, SER_ADV_ID, SER_ADV_NAME, SER_ADV_MOBILE):
         try:
@@ -44,6 +51,8 @@ class DealerService(ServiceBase):
             return failed 
 
 class ProductDispatchService(ServiceBase):
+    __tns__ = 'gladminds.webservice.authentication'
+
     @srpc(Unicode, Unicode, DateTime, Unicode, Unicode, Decimal, Decimal, Decimal, Decimal, Unicode, _returns=Unicode)
     def postProductDispatch(CHASSIS, PRODUCT_TYPE, VEC_DIS_DT, DEALER_ID, UCN_NO, DAYS_LIMIT_FROM, DAYS_LIMIT_TO, KMS_FROM, KMS_TO, SERVICE_TYPE):
         try:
@@ -63,6 +72,8 @@ class ProductDispatchService(ServiceBase):
             return failed
 
 class ProductPurchaseService(ServiceBase):
+    __tns__ = 'gladminds.webservice.authentication'
+    
     @srpc(Unicode, Unicode, Unicode, Unicode, Unicode, Unicode, Unicode, DateTime, _returns=Unicode)
     def postProductPurchase(CHASSIS, CUSTOMER_ID, CUST_MOBILE, CUSTOMER_NAME, CITY, STATE, PIN_NO, PRODUCT_PURCHASE_DATE):
         try:
@@ -80,7 +91,17 @@ class ProductPurchaseService(ServiceBase):
         except Exception as ex:
             print "ProductPurchaseService: {0}".format(ex)
             return  failed
-            
+
+def _on_method_call(ctx):
+    transport = ctx.transport
+    auth = transport.req_env.get('HTTP_AUTHORIZATION', None)
+    obj_auth = BasicAuthentication(auth = auth)
+    obj_auth.is_authenticated()
+    
+BrandService.event_manager.add_listener('method_call', _on_method_call)
+DealerService.event_manager.add_listener('method_call', _on_method_call)
+ProductDispatchService.event_manager.add_listener('method_call', _on_method_call)
+ProductPurchaseService.event_manager.add_listener('method_call', _on_method_call)
 
 brand_app = Application([BrandService],
     tns=tns,
