@@ -16,7 +16,7 @@ from gladminds.feed import BrandProductTypeFeed, DealerAndServiceAdvisorFeed, Pr
 from gladminds.soap_authentication import AuthenticationService
 
 
-tns = 'gladminds.webservice'
+tns = 'bajaj.soapservice'
 success = "SUCCESS"
 failed = "FAILURE"
 
