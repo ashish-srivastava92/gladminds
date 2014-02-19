@@ -1,16 +1,16 @@
 from django.views.decorators.csrf import csrf_exempt
 from spyne.application import Application
 from spyne.decorator import srpc
+from spyne.model.complex import Array
 from spyne.model.complex import ComplexModel
 from spyne.model.complex import Iterable
 from spyne.model.primitive import Integer,DateTime,Decimal
 from spyne.model.primitive import Unicode, Mandatory
 from spyne.protocol.soap import Soap11
+from spyne.server.django import DjangoApplication
 from spyne.server.wsgi import WsgiApplication
 from spyne.service import ServiceBase
 from spyne.util.wsgi_wrapper import WsgiMounter
-from spyne.server.django import DjangoApplication
-from spyne.model.complex import Array
 
 from gladminds.feed import BrandProductTypeFeed, DealerAndServiceAdvisorFeed, ProductDispatchFeed, ProductPurchaseFeed
 from gladminds.soap_authentication import AuthenticationService
@@ -88,10 +88,10 @@ class BrandService(ServiceBase):
     __tns__ = 'bajaj.soapservice.authentication'
     
     @srpc(BrandModelList, _returns=Unicode)
-    def postBrand(BrandList):
+    def postBrand(ObjectList):
         try:
             brand_list = [] 
-            for brand in BrandList:
+            for brand in ObjectList.BrandData:
                 brand_list.append({
                     'brand_id':brand.BRAND_ID, 
                     'brand_name': brand.BRAND_NAME, 
@@ -109,10 +109,10 @@ class DealerService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
     @srpc(DealerModelList, _returns=Unicode)
-    def postDealer(DealerList):
+    def postDealer(ObjectList):
         try:
             dealer_list = []
-            for dealer in DealerList:
+            for dealer in ObjectList.DealerData:
                 dealer_list.append({
                     'dealer_id' : dealer.KUNNR,
                     'address' : dealer.ADDRESS,
@@ -132,10 +132,10 @@ class ProductDispatchService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
 
     @srpc(ProductDispatchModelList, _returns=Unicode)
-    def postProductDispatch(ProductDispatchList):
+    def postProductDispatch(ObjectList):
         try:
             product_dispatch_list = []
-            for product in  ProductDispatchList:
+            for product in  ObjectList.ProductDispatchData:
                 product_dispatch_data.append({
                         'vin' : product.CHASSIS,
                         'product_type': product.PRODUCT_TYPE,
@@ -157,10 +157,10 @@ class ProductPurchaseService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
     @srpc(ProductPurchaseModelList, _returns=Unicode)
-    def postProductPurchase(ProductPurchaseList):
+    def postProductPurchase(ObjectList):
         try:
             product_purchase_list = []
-            for product in ProductPurchaseList:
+            for product in ObjectList.ProductPurchaseData:
                 product_purchase_list = ({
                         'vin' : product.CHASSIS,
                         'sap_customer_id' : product.CUSTOMER_ID,
@@ -179,9 +179,10 @@ class ProductPurchaseService(ServiceBase):
             return  failed
 
 def _on_method_call(ctx):
+    print ctx.in_object
     if ctx.in_object is None:
         raise ArgumentError("Request doesn't contain data")
-    auth_obj = AuthenticationService(username = ctx.in_object.UserName, password = ctx.in_object.Password)
+    auth_obj = AuthenticationService(username = ctx.in_object.ObjectList.UserName, password = ctx.in_object.ObjectList.UserName)
     auth_obj.authenticate()
      
 BrandService.event_manager.add_listener('method_call', _on_method_call)
@@ -224,5 +225,3 @@ brand_service = csrf_exempt(DjangoApplication(brand_app))
 dealer_service = csrf_exempt(DjangoApplication(dealer_app))
 dispatch_service = csrf_exempt(DjangoApplication(dispatch_app))
 purchase_service = csrf_exempt(DjangoApplication(purchase_app))
-
-
