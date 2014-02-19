@@ -34,7 +34,7 @@ class BrandModel(ComplexModel):
     TIMESTAMP = DateTime
 
 class BrandModelList(AuthenticationModel):
-    BrandModel = Array(BrandModel)
+    BrandData = Array(BrandModel)
     
 class DealerModel(ComplexModel):
     __namespace__ = "dealer"
@@ -46,7 +46,7 @@ class DealerModel(ComplexModel):
     TIMESTAMP = DateTime
 
 class DealerModelList(AuthenticationModel):
-    DealerModel = Array(DealerModel)
+    DealerData = Array(DealerModel)
 
 class ProductDispatchModel(ComplexModel):
     __namespace__ = "productDispatch"
@@ -63,7 +63,7 @@ class ProductDispatchModel(ComplexModel):
     TIMESTAMP = DateTime
 
 class ProductDispatchModelList(AuthenticationModel):
-    ProductDispatchModel = Array(ProductDispatchModel)
+    ProductDispatchData = Array(ProductDispatchModel)
 
 class ProductPurchaseModel(ComplexModel):
     __namespace__ = "productPurchase"
@@ -82,16 +82,16 @@ class ProductPurchaseModel(ComplexModel):
     TIMESTAMP = DateTime
 
 class ProductPurchaseModelList(AuthenticationModel):
-    ProductPurchaseModel = Array(ProductPurchaseModel)
+    ProductPurchaseData = Array(ProductPurchaseModel)
     
 class BrandService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
     @srpc(BrandModelList, _returns=Unicode)
-    def postBrand(BrandData):
+    def postBrand(BrandList):
         try:
             brand_list = [] 
-            for brand in BrandData:
+            for brand in BrandList:
                 brand_list.append({
                     'brand_id':brand.BRAND_ID, 
                     'brand_name': brand.BRAND_NAME, 
@@ -109,10 +109,10 @@ class DealerService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
     @srpc(DealerModelList, _returns=Unicode)
-    def postDealer(DealerData):
+    def postDealer(DealerList):
         try:
             dealer_list = []
-            for dealer in DealerData:
+            for dealer in DealerList:
                 dealer_list.append({
                     'dealer_id' : dealer.KUNNR,
                     'address' : dealer.ADDRESS,
@@ -132,10 +132,10 @@ class ProductDispatchService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
 
     @srpc(ProductDispatchModelList, _returns=Unicode)
-    def postProductDispatch(ProductDispatchData):
+    def postProductDispatch(ProductDispatchList):
         try:
             product_dispatch_list = []
-            for product in  product_dispatch_list:
+            for product in  ProductDispatchList:
                 product_dispatch_data.append({
                         'vin' : product.CHASSIS,
                         'product_type': product.PRODUCT_TYPE,
@@ -157,10 +157,10 @@ class ProductPurchaseService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
     @srpc(ProductPurchaseModelList, _returns=Unicode)
-    def postProductPurchase(ProductPurchaseData):
+    def postProductPurchase(ProductPurchaseList):
         try:
             product_purchase_list = []
-            for product in product_purchase_list:
+            for product in ProductPurchaseList:
                 product_purchase_list = ({
                         'vin' : product.CHASSIS,
                         'sap_customer_id' : product.CUSTOMER_ID,
