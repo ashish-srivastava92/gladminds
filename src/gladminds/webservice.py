@@ -85,7 +85,7 @@ class ProductPurchaseModelList(AuthenticationModel):
     ProductPurchaseData = Array(ProductPurchaseModel)
     
 class BrandService(ServiceBase):
-    __tns__ = 'gladminds.webservice.authentication'
+    __tns__ = 'bajaj.soapservice.authentication'
     
     @srpc(BrandModelList, _returns=Unicode)
     def postBrand(BrandList):
@@ -178,16 +178,16 @@ class ProductPurchaseService(ServiceBase):
             print "ProductPurchaseService: {0}".format(ex)
             return  failed
 
-# def _on_method_call(ctx):
-#     if ctx.in_object is None:
-#         raise ArgumentError("RequestHeader is null")
-#     auth_obj = AuthenticationService(username = ctx.in_header.UserName, password = ctx.in_header.Password)
-#     auth_obj.authenticate()
-#     
-# BrandService.event_manager.add_listener('method_call', _on_method_call)
-# DealerService.event_manager.add_listener('method_call', _on_method_call)
-# ProductDispatchService.event_manager.add_listener('method_call', _on_method_call)
-# ProductPurchaseService.event_manager.add_listener('method_call', _on_method_call)
+def _on_method_call(ctx):
+    if ctx.in_object is None:
+        raise ArgumentError("Request doesn't contain data")
+    auth_obj = AuthenticationService(username = ctx.in_object.UserName, password = ctx.in_object.Password)
+    auth_obj.authenticate()
+     
+BrandService.event_manager.add_listener('method_call', _on_method_call)
+DealerService.event_manager.add_listener('method_call', _on_method_call)
+ProductDispatchService.event_manager.add_listener('method_call', _on_method_call)
+ProductPurchaseService.event_manager.add_listener('method_call', _on_method_call)
 
 all_app = Application([BrandService, DealerService,ProductDispatchService, ProductPurchaseService],
     tns=tns,
