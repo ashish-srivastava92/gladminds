@@ -25,7 +25,7 @@ class AuthenticationModel(ComplexModel):
     UserName = Unicode
     Password = Unicode
         
-class BrandModel(ComplexModel):
+class BrandModel(AuthenticationModel):
     __namespace__ = "brand"
     BRAND_ID = Unicode
     BRAND_NAME = Unicode
@@ -33,7 +33,7 @@ class BrandModel(ComplexModel):
     PRODUCT_NAME = Unicode
     TIMESTAMP = DateTime
 
-class DealerModel(ComplexModel):
+class DealerModel(AuthenticationModel):
     __namespace__ = "dealer"
     KUNNR = Unicode
     ADDRESS = Unicode
@@ -42,7 +42,7 @@ class DealerModel(ComplexModel):
     SER_ADV_MOBILE = Unicode
     TIMESTAMP = DateTime
 
-class ProductDispatchModel(ComplexModel):
+class ProductDispatchModel(AuthenticationModel):
     __namespace__ = "productDispatch"
     CHASSIS = Unicode
     PRODUCT_TYPE = Unicode 
@@ -56,7 +56,7 @@ class ProductDispatchModel(ComplexModel):
     SERVICE_TYPE = Unicode
     TIMESTAMP = DateTime
 
-class ProductPurchaseModel(ComplexModel):
+class ProductPurchaseModel(AuthenticationModel):
     __namespace__ = "productPurchase"
     CHASSIS = Unicode
     CUSTOMER_ID = Unicode
@@ -75,8 +75,8 @@ class ProductPurchaseModel(ComplexModel):
 class BrandService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
-    @srpc(Array(BrandModel), AuthenticationModel, _returns=Unicode)
-    def postBrand(BrandData, Credential):
+    @srpc(Array(BrandModel), _returns=Unicode)
+    def postBrand(BrandData):
         try:
             brand_list = [] 
             for brand in BrandData:
@@ -96,8 +96,8 @@ class BrandService(ServiceBase):
 class DealerService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
-    @srpc(Array(DealerModel), AuthenticationModel, _returns=Unicode)
-    def postDealer(DealerData, Credential):
+    @srpc(Array(DealerModel), _returns=Unicode)
+    def postDealer(DealerData):
         try:
             dealer_list = []
             for dealer in DealerData:
@@ -119,8 +119,8 @@ class DealerService(ServiceBase):
 class ProductDispatchService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
 
-    @srpc(Array(ProductDispatchModel), AuthenticationModel, _returns=Unicode)
-    def postProductDispatch(ProductDispatchData, Credential):
+    @srpc(Array(ProductDispatchModel), _returns=Unicode)
+    def postProductDispatch(ProductDispatchData):
         try:
             product_dispatch_list = []
             for product in  product_dispatch_list:
@@ -144,8 +144,8 @@ class ProductDispatchService(ServiceBase):
 class ProductPurchaseService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
-    @srpc(ProductPurchaseModel, AuthenticationModel, _returns=Unicode)
-    def postProductPurchase(ProductPurchaseData, Credential):
+    @srpc(ProductPurchaseModel, _returns=Unicode)
+    def postProductPurchase(ProductPurchaseData):
         try:
             product_purchase_list = []
             for product in product_purchase_list:
