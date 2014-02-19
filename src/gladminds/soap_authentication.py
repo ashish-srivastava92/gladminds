@@ -1,5 +1,5 @@
 import base64
-from django.contrib.auth import authenticate
+from django.contrib import auth
 from spyne.model.fault import Fault
 
 class AuthenticationError(Fault):
@@ -24,37 +24,14 @@ class AuthorizationError(Fault):
                 faultstring='You are not authozied to access this resource.'
             )
 
-class BasicAuthentication(object):
-    def __init__(self, auth = None):
-        self.auth = auth
+class AuthenticationService(object):
+    
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
         
-    def is_authenticated(self):
-        auth_detail = self.auth
-        if not auth_detail:
-            raise AuthorizationError()
-        try:
-            (auth_type, data) = auth_detail.split()
-            if auth_type.lower() != 'basic':
-                raise AuthorizationError()
-            user_pass = self.decode_base64(data = data)
-        except:
-            raise AuthorizationError()
-        bits = user_pass.split(':', 1)
-        if len(bits) != 2:
-            raise AuthorizationError()
-
-        user = authenticate(username=bits[0], password=bits[1])
+    def authenticate(self):
+        user = auth.authenticate(username=self.username, password=self.password)
         if user is None:
-            raise AuthenticationError(bits[0])
+            raise AuthenticationError(self.username)
         return True
-
-    def decode_base64(self, data = None):
-        print "data:", data
-        """Decode base64, padding being optional.
-        :param data: Base64 data as an ASCII byte string
-        :returns: The decoded byte string.
-        """
-        missing_padding = 4 - len(data) % 4
-        if missing_padding:
-            data += b'='* missing_padding
-        return base64.decodestring(data)

@@ -13,7 +13,7 @@ from spyne.server.django import DjangoApplication
 from spyne.model.complex import Array
 
 from gladminds.feed import BrandProductTypeFeed, DealerAndServiceAdvisorFeed, ProductDispatchFeed, ProductPurchaseFeed
-from gladminds.soap_authentication import BasicAuthentication
+from gladminds.soap_authentication import AuthenticationService
 
 
 tns = 'gladminds.webservice'
@@ -84,7 +84,8 @@ class BrandService(ServiceBase):
                     'brand_id':brand.BRAND_ID, 
                     'brand_name': brand.BRAND_NAME, 
                     'product_type': brand.PRODUCT_TYPE, 
-                    'product_name'  : brand.PRODUCT_NAME,                })
+                    'product_name'  : brand.PRODUCT_NAME,                
+                })
             brand_obj = BrandProductTypeFeed(data_source  = brand_list)
             brand_obj.import_data()
             return success
@@ -168,17 +169,16 @@ class ProductPurchaseService(ServiceBase):
             print "ProductPurchaseService: {0}".format(ex)
             return  failed
 
-# def _on_method_call(ctx):
-#     transport = ctx.transport
-#     print transport.__dict__
-#     auth = transport.req_env.get('HTTP_AUTHORIZATION', None)
-#     obj_auth = BasicAuthentication(auth = auth)
-#     obj_auth.is_authenticated()
-#     
-# BrandService.event_manager.add_listener('method_call', _on_method_call)
-# DealerService.event_manager.add_listener('method_call', _on_method_call)
-# ProductDispatchService.event_manager.add_listener('method_call', _on_method_call)
-# ProductPurchaseService.event_manager.add_listener('method_call', _on_method_call)
+def _on_method_call(ctx):
+    if ctx.in_object is None:
+        raise ArgumentError("RequestHeader is null")
+    auth_obj = AuthenticationService(username = ctx.in_header.UserName, password = ctx.in_header.Password)
+    auth_obj.authenticate()
+    
+BrandService.event_manager.add_listener('method_call', _on_method_call)
+DealerService.event_manager.add_listener('method_call', _on_method_call)
+ProductDispatchService.event_manager.add_listener('method_call', _on_method_call)
+ProductPurchaseService.event_manager.add_listener('method_call', _on_method_call)
 
 all_app = Application([BrandService, DealerService,ProductDispatchService, ProductPurchaseService],
     tns=tns,
