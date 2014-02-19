@@ -17,8 +17,8 @@ from gladminds.soap_authentication import BasicAuthentication
 
 
 tns = 'gladminds.webservice'
-success = "success"
-failed = "failed"
+success = "SUCCESS"
+failed = "FAILURE"
 
 class BasicAuthentication(ComplexModel):
     __namespace__ = "basicAuthentication"
