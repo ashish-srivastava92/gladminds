@@ -20,11 +20,10 @@ tns = 'gladminds.webservice'
 success = "SUCCESS"
 failed = "FAILURE"
 
-class BasicAuthentication(ComplexModel):
-    __namespace__ = "basicAuthentication"
-    UserName = Unicode
-    Password = Unicode
-    
+class RequestHeader(ComplexModel):
+    UserName = Mandatory.String
+    Password = Mandatory.String
+        
 class BrandModel(ComplexModel):
     __namespace__ = "brand"
     BRAND_ID = Unicode
@@ -74,9 +73,10 @@ class ProductPurchaseModel(ComplexModel):
     
 class BrandService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
+    __in_header__ = RequestHeader
     
-    @srpc(Array(BrandModel), BasicAuthentication, _returns=Unicode)
-    def postBrand(BrandData, Credential):
+    @srpc(Array(BrandModel), _returns=Unicode)
+    def postBrand(BrandData):
         try:
             brand_list = [] 
             for brand in BrandData:
@@ -84,7 +84,7 @@ class BrandService(ServiceBase):
                     'brand_id':brand.BRAND_ID, 
                     'brand_name': brand.BRAND_NAME, 
                     'product_type': brand.PRODUCT_TYPE, 
-                    'product_name': brand.PRODUCT_NAME,                })
+                    'product_name'  : brand.PRODUCT_NAME,                })
             brand_obj = BrandProductTypeFeed(data_source  = brand_list)
             brand_obj.import_data()
             return success
@@ -94,9 +94,10 @@ class BrandService(ServiceBase):
             
 class DealerService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
+    __in_header__ = RequestHeader
     
-    @srpc(Array(DealerModel), BasicAuthentication, _returns=Unicode)
-    def postDealer(DealerData,Credential):
+    @srpc(Array(DealerModel), _returns=Unicode)
+    def postDealer(DealerData):
         try:
             dealer_list = []
             for dealer in DealerData:
@@ -117,9 +118,10 @@ class DealerService(ServiceBase):
 
 class ProductDispatchService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
+    __in_header__ = RequestHeader
 
-    @srpc(Array(ProductDispatchModel), BasicAuthentication, _returns=Unicode)
-    def postProductDispatch(ProductDispatchData,Credential):
+    @srpc(Array(ProductDispatchModel), _returns=Unicode)
+    def postProductDispatch(ProductDispatchData):
         try:
             product_dispatch_list = []
             for product in  product_dispatch_list:
@@ -142,9 +144,10 @@ class ProductDispatchService(ServiceBase):
 
 class ProductPurchaseService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
+    __in_header__ = RequestHeader
     
-    @srpc(ProductPurchaseModel, BasicAuthentication, _returns=Unicode)
-    def postProductPurchase(ProductPurchaseData, Credential):
+    @srpc(ProductPurchaseModel, _returns=Unicode)
+    def postProductPurchase(ProductPurchaseData):
         try:
             product_purchase_list = []
             for product in product_purchase_list:
