@@ -10,6 +10,7 @@ from spyne.server.wsgi import WsgiApplication
 from spyne.service import ServiceBase
 from spyne.util.wsgi_wrapper import WsgiMounter
 from spyne.server.django import DjangoApplication
+from spyne.model.complex import Array
 
 from gladminds.feed import BrandProductTypeFeed, DealerAndServiceAdvisorFeed, ProductDispatchFeed, ProductPurchaseFeed
 from gladminds.soap_authentication import BasicAuthentication
@@ -19,19 +20,72 @@ tns = 'gladminds.webservice'
 success = "success"
 failed = "failed"
 
+class BasicAuthentication(ComplexModel):
+    __namespace__ = "basicAuthentication"
+    UserName = Unicode
+    Password = Unicode
+    
+class BrandModel(ComplexModel):
+    __namespace__ = "brand"
+    BRAND_ID = Unicode
+    BRAND_NAME = Unicode
+    PRODUCT_TYPE = Unicode
+    PRODUCT_NAME = Unicode
+    TIMESTAMP = DateTime
+
+class DealerModel(ComplexModel):
+    __namespace__ = "dealer"
+    KUNNR = Unicode
+    ADDRESS = Unicode
+    SER_ADV_ID = Unicode
+    SER_ADV_NAME = Unicode
+    SER_ADV_MOBILE = Unicode
+    TIMESTAMP = DateTime
+
+class ProductDispatchModel(ComplexModel):
+    __namespace__ = "productDispatch"
+    CHASSIS = Unicode
+    PRODUCT_TYPE = Unicode 
+    VEC_DIS_DT = DateTime
+    KUNNR = Unicode
+    UCN_NO = Unicode
+    DAYS_LIMIT_FROM = Decimal
+    DAYS_LIMIT_TO = Decimal
+    KMS_FROM = Decimal
+    KMS_TO = Decimal
+    SERVICE_TYPE = Unicode
+    TIMESTAMP = DateTime
+
+class ProductPurchaseModel(ComplexModel):
+    __namespace__ = "productPurchase"
+    CHASSIS = Unicode
+    CUSTOMER_ID = Unicode
+    CUST_MOBILE = Unicode
+    CUSTOMER_NAME = Unicode
+    CITY = Unicode
+    STATE = Unicode
+    PIN_NO = Unicode
+    VEH_SL_DT = DateTime
+    VEH_REG_NO = Unicode
+    VEH_SL_DLR = Unicode
+    ENGINE = Unicode
+    KUNNR = Unicode
+    TIMESTAMP = DateTime
+    
 class BrandService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
-    @srpc(Unicode, Unicode, Unicode, Unicode, DateTime, _returns=Unicode)
-    def postBrand(BRAND_ID, BRAND_NAME, PRODUCT_TYPE, PRODUCT_NAME, TIMESTAMP):
+    @srpc(Array(BrandModel), BasicAuthentication, _returns=Unicode)
+    def postBrand(BrandData, Credential):
         try:
-            brand_data = [{
-                'brand_id':BRAND_ID, 
-                'brand_name': BRAND_NAME, 
-                'product_type': PRODUCT_TYPE, 
-                'product_name': PRODUCT_NAME,
-            }]
-            brand_obj = BrandProductTypeFeed(data_source  = brand_data)
+            brand_list = [] 
+            for brand in BrandData:
+                brand_list.append({
+                    'brand_id':brand.BRAND_ID, 
+                    'brand_name': brand.BRAND_NAME, 
+                    'product_type': brand.PRODUCT_TYPE, 
+                    'product_name': brand.PRODUCT_NAME,                })
+            brand_obj = BrandProductTypeFeed(data_source  = brand_list)
             brand_obj.import_data()
             return success
         except Exception as ex:
@@ -41,40 +95,45 @@ class BrandService(ServiceBase):
 class DealerService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
-    @srpc(Unicode, Unicode, Unicode,Unicode, Unicode, DateTime, _returns=Unicode)
-    def postDealer(KUNNR, ADDRESS, SER_ADV_ID, SER_ADV_NAME, SER_ADV_MOBILE, TIMESTAMP):
+    @srpc(Array(DealerModel), BasicAuthentication, _returns=Unicode)
+    def postDealer(DealerData,Credential):
         try:
-            dealer_data = [{
-                'dealer_id' : KUNNR,
-                'address' : ADDRESS,
-                'service_advisor_id' : SER_ADV_ID,
-                'name' : SER_ADV_NAME,
-                'phone_number': SER_ADV_MOBILE
-            }]
-            dealer_obj = DealerAndServiceAdvisorFeed(data_source  = dealer_data)
+            dealer_list = []
+            for dealer in DealerData:
+                dealer_list.append({
+                    'dealer_id' : dealer.KUNNR,
+                    'address' : dealer.ADDRESS,
+                    'service_advisor_id' : dealer.SER_ADV_ID,
+                    'name' : dealer.SER_ADV_NAME,
+                    'phone_number': dealer.SER_ADV_MOBILE
+                })
+            dealer_obj = DealerAndServiceAdvisorFeed(data_source  = dealer_list)
             dealer_obj.import_data()
             return success
         except Exception as ex:
             print "DealerService: {0}".format(ex)
             return failed 
 
+
 class ProductDispatchService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
 
-    @srpc(Unicode, Unicode, DateTime, Unicode, Unicode, Decimal, Decimal, Decimal, Decimal, Unicode, DateTime, _returns=Unicode)
-    def postProductDispatch(CHASSIS, PRODUCT_TYPE, VEC_DIS_DT, KUNNR, UCN_NO, DAYS_LIMIT_FROM, DAYS_LIMIT_TO, KMS_FROM, KMS_TO, SERVICE_TYPE, TIMESTAMP):
+    @srpc(Array(ProductDispatchModel), BasicAuthentication, _returns=Unicode)
+    def postProductDispatch(ProductDispatchData,Credential):
         try:
-            product_dispatch_data = [{
-                    'vin' : CHASSIS,
-                    'product_type': PRODUCT_TYPE,
-                    'invoice_date': VEC_DIS_DT,
-                    'dealer_id' : KUNNR,
-                    'unique_service_coupon' : UCN_NO,
-                    'valid_days' : DAYS_LIMIT_TO,
-                    'valid_kms' : KMS_TO,
-                    'service_type' : SERVICE_TYPE
-                }]
-            dispatch_obj = ProductDispatchFeed(data_source  = product_dispatch_data)
+            product_dispatch_list = []
+            for product in  product_dispatch_list:
+                product_dispatch_data.append({
+                        'vin' : product.CHASSIS,
+                        'product_type': product.PRODUCT_TYPE,
+                        'invoice_date': product.VEC_DIS_DT,
+                        'dealer_id' : product.KUNNR,
+                        'unique_service_coupon' : product.UCN_NO,
+                        'valid_days' : product.DAYS_LIMIT_TO,
+                        'valid_kms' : product.KMS_TO,
+                        'service_type' : product.SERVICE_TYPE
+                    })
+            dispatch_obj = ProductDispatchFeed(data_source  = product_dispatch_list)
             dispatch_obj.import_data()
             return success
         except Exception as ex:
@@ -84,36 +143,39 @@ class ProductDispatchService(ServiceBase):
 class ProductPurchaseService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
-    @srpc(Unicode, Unicode, Unicode, Unicode, Unicode, Unicode, Unicode, DateTime, Unicode, Unicode, Unicode, Unicode, DateTime, _returns=Unicode)
-    def postProductPurchase(CHASSIS, CUSTOMER_ID, CUST_MOBILE, CUSTOMER_NAME, CITY, STATE, PIN_NO, VEH_SL_DT, VEH_REG_NO, VEH_SL_DLR, ENGINE, KUNNR, TIMESTAMP):
+    @srpc(ProductPurchaseModel, BasicAuthentication, _returns=Unicode)
+    def postProductPurchase(ProductPurchaseData, Credential):
         try:
-            product_purchase_data = [{
-                    'vin' : CHASSIS,
-                    'sap_customer_id' : CUSTOMER_ID,
-                    'customer_phone_number' : CUST_MOBILE,
-                    'customer_name' : CUSTOMER_NAME,
-                    'city' : CITY,
-                    'state' : STATE,
-                    'pin_no' : PIN_NO,
-                    'product_purchase_date' : VEH_SL_DT,
-            }]
-            purchase_obj = ProductPurchaseFeed(data_source  = product_purchase_data)
+            product_purchase_list = []
+            for product in product_purchase_list:
+                product_purchase_list = ({
+                        'vin' : product.CHASSIS,
+                        'sap_customer_id' : product.CUSTOMER_ID,
+                        'customer_phone_number' : product.CUST_MOBILE,
+                        'customer_name' : product.CUSTOMER_NAME,
+                        'city' : product.CITY,
+                        'state' : product.STATE,
+                        'pin_no' : product.PIN_NO,
+                        'product_purchase_date' : product.VEH_SL_DT,
+                })
+            purchase_obj = ProductPurchaseFeed(data_source  = product_purchase_list)
             purchase_obj.import_data()
             return success
         except Exception as ex:
             print "ProductPurchaseService: {0}".format(ex)
             return  failed
 
-def _on_method_call(ctx):
-    transport = ctx.transport
-    auth = transport.req_env.get('HTTP_AUTHORIZATION', None)
-    obj_auth = BasicAuthentication(auth = auth)
-    obj_auth.is_authenticated()
-    
-BrandService.event_manager.add_listener('method_call', _on_method_call)
-DealerService.event_manager.add_listener('method_call', _on_method_call)
-ProductDispatchService.event_manager.add_listener('method_call', _on_method_call)
-ProductPurchaseService.event_manager.add_listener('method_call', _on_method_call)
+# def _on_method_call(ctx):
+#     transport = ctx.transport
+#     print transport.__dict__
+#     auth = transport.req_env.get('HTTP_AUTHORIZATION', None)
+#     obj_auth = BasicAuthentication(auth = auth)
+#     obj_auth.is_authenticated()
+#     
+# BrandService.event_manager.add_listener('method_call', _on_method_call)
+# DealerService.event_manager.add_listener('method_call', _on_method_call)
+# ProductDispatchService.event_manager.add_listener('method_call', _on_method_call)
+# ProductPurchaseService.event_manager.add_listener('method_call', _on_method_call)
 
 all_app = Application([BrandService, DealerService,ProductDispatchService, ProductPurchaseService],
     tns=tns,
