@@ -22,10 +22,10 @@ failed = "FAILURE"
 
 class AuthenticationModel(ComplexModel):
     __namespace__ = "authentication"
-    UserName = Unicode
-    Password = Unicode
+    UserName = Unicode(min_occurs=1, nillable=False)
+    Password = Unicode(min_occurs=1, nillable=False)
         
-class BrandModel(AuthenticationModel):
+class BrandModel(ComplexModel):
     __namespace__ = "brand"
     BRAND_ID = Unicode
     BRAND_NAME = Unicode
@@ -33,7 +33,10 @@ class BrandModel(AuthenticationModel):
     PRODUCT_NAME = Unicode
     TIMESTAMP = DateTime
 
-class DealerModel(AuthenticationModel):
+class BrandModelList(AuthenticationModel):
+    BrandModel = Array(BrandModel)
+    
+class DealerModel(ComplexModel):
     __namespace__ = "dealer"
     KUNNR = Unicode
     ADDRESS = Unicode
@@ -42,7 +45,10 @@ class DealerModel(AuthenticationModel):
     SER_ADV_MOBILE = Unicode
     TIMESTAMP = DateTime
 
-class ProductDispatchModel(AuthenticationModel):
+class DealerModelList(AuthenticationModel):
+    DealerModel = Array(DealerModel)
+
+class ProductDispatchModel(ComplexModel):
     __namespace__ = "productDispatch"
     CHASSIS = Unicode
     PRODUCT_TYPE = Unicode 
@@ -56,7 +62,10 @@ class ProductDispatchModel(AuthenticationModel):
     SERVICE_TYPE = Unicode
     TIMESTAMP = DateTime
 
-class ProductPurchaseModel(AuthenticationModel):
+class ProductDispatchModelList(AuthenticationModel):
+    ProductDispatchModel = Array(ProductDispatchModel)
+
+class ProductPurchaseModel(ComplexModel):
     __namespace__ = "productPurchase"
     CHASSIS = Unicode
     CUSTOMER_ID = Unicode
@@ -71,11 +80,14 @@ class ProductPurchaseModel(AuthenticationModel):
     ENGINE = Unicode
     KUNNR = Unicode
     TIMESTAMP = DateTime
+
+class ProductPurchaseModelList(AuthenticationModel):
+    ProductPurchaseModel = Array(ProductPurchaseModel)
     
 class BrandService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
-    @srpc(Array(BrandModel), _returns=Unicode)
+    @srpc(BrandModelList, _returns=Unicode)
     def postBrand(BrandData):
         try:
             brand_list = [] 
@@ -96,7 +108,7 @@ class BrandService(ServiceBase):
 class DealerService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
-    @srpc(Array(DealerModel), _returns=Unicode)
+    @srpc(DealerModelList, _returns=Unicode)
     def postDealer(DealerData):
         try:
             dealer_list = []
@@ -119,7 +131,7 @@ class DealerService(ServiceBase):
 class ProductDispatchService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
 
-    @srpc(Array(ProductDispatchModel), _returns=Unicode)
+    @srpc(ProductDispatchModelList, _returns=Unicode)
     def postProductDispatch(ProductDispatchData):
         try:
             product_dispatch_list = []
@@ -144,7 +156,7 @@ class ProductDispatchService(ServiceBase):
 class ProductPurchaseService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
     
-    @srpc(ProductPurchaseModel, _returns=Unicode)
+    @srpc(ProductPurchaseModelList, _returns=Unicode)
     def postProductPurchase(ProductPurchaseData):
         try:
             product_purchase_list = []
