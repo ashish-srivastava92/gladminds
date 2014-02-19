@@ -20,9 +20,10 @@ tns = 'gladminds.webservice'
 success = "SUCCESS"
 failed = "FAILURE"
 
-class RequestHeader(ComplexModel):
-    UserName = Mandatory.String
-    Password = Mandatory.String
+class AuthenticationModel(ComplexModel):
+    __namespace__ = "authentication"
+    UserName = Unicode
+    Password = Unicode
         
 class BrandModel(ComplexModel):
     __namespace__ = "brand"
@@ -73,10 +74,9 @@ class ProductPurchaseModel(ComplexModel):
     
 class BrandService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
-    __in_header__ = RequestHeader
     
-    @srpc(Array(BrandModel), _returns=Unicode)
-    def postBrand(BrandData):
+    @srpc(Array(BrandModel), AuthenticationModel, _returns=Unicode)
+    def postBrand(BrandData, Credential):
         try:
             brand_list = [] 
             for brand in BrandData:
@@ -95,10 +95,9 @@ class BrandService(ServiceBase):
             
 class DealerService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
-    __in_header__ = RequestHeader
     
-    @srpc(Array(DealerModel), _returns=Unicode)
-    def postDealer(DealerData):
+    @srpc(Array(DealerModel), AuthenticationModel, _returns=Unicode)
+    def postDealer(DealerData, Credential):
         try:
             dealer_list = []
             for dealer in DealerData:
@@ -119,10 +118,9 @@ class DealerService(ServiceBase):
 
 class ProductDispatchService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
-    __in_header__ = RequestHeader
 
-    @srpc(Array(ProductDispatchModel), _returns=Unicode)
-    def postProductDispatch(ProductDispatchData):
+    @srpc(Array(ProductDispatchModel), AuthenticationModel, _returns=Unicode)
+    def postProductDispatch(ProductDispatchData, Credential):
         try:
             product_dispatch_list = []
             for product in  product_dispatch_list:
@@ -145,10 +143,9 @@ class ProductDispatchService(ServiceBase):
 
 class ProductPurchaseService(ServiceBase):
     __tns__ = 'gladminds.webservice.authentication'
-    __in_header__ = RequestHeader
     
-    @srpc(ProductPurchaseModel, _returns=Unicode)
-    def postProductPurchase(ProductPurchaseData):
+    @srpc(ProductPurchaseModel, AuthenticationModel, _returns=Unicode)
+    def postProductPurchase(ProductPurchaseData, Credential):
         try:
             product_purchase_list = []
             for product in product_purchase_list:
@@ -169,16 +166,16 @@ class ProductPurchaseService(ServiceBase):
             print "ProductPurchaseService: {0}".format(ex)
             return  failed
 
-def _on_method_call(ctx):
-    if ctx.in_object is None:
-        raise ArgumentError("RequestHeader is null")
-    auth_obj = AuthenticationService(username = ctx.in_header.UserName, password = ctx.in_header.Password)
-    auth_obj.authenticate()
-    
-BrandService.event_manager.add_listener('method_call', _on_method_call)
-DealerService.event_manager.add_listener('method_call', _on_method_call)
-ProductDispatchService.event_manager.add_listener('method_call', _on_method_call)
-ProductPurchaseService.event_manager.add_listener('method_call', _on_method_call)
+# def _on_method_call(ctx):
+#     if ctx.in_object is None:
+#         raise ArgumentError("RequestHeader is null")
+#     auth_obj = AuthenticationService(username = ctx.in_header.UserName, password = ctx.in_header.Password)
+#     auth_obj.authenticate()
+#     
+# BrandService.event_manager.add_listener('method_call', _on_method_call)
+# DealerService.event_manager.add_listener('method_call', _on_method_call)
+# ProductDispatchService.event_manager.add_listener('method_call', _on_method_call)
+# ProductPurchaseService.event_manager.add_listener('method_call', _on_method_call)
 
 all_app = Application([BrandService, DealerService,ProductDispatchService, ProductPurchaseService],
     tns=tns,
