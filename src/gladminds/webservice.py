@@ -15,12 +15,11 @@ from spyne.util.wsgi_wrapper import WsgiMounter
 from gladminds.feed import BrandProductTypeFeed, DealerAndServiceAdvisorFeed, ProductDispatchFeed, ProductPurchaseFeed
 from gladminds.soap_authentication import AuthenticationService
 
-tns = "https://api.gladmindsplatform.co/"
+tns = "http://api.gladmindsplatform.co/"
 success = "SUCCESS"
 failed = "FAILURE"
 
 class AuthenticationModel(ComplexModel):
-    __tns__= '?'
     UserName = Unicode(min_occurs=1, nillable=False)
     Password = Unicode(min_occurs=1, nillable=False)
         
