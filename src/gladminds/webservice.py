@@ -15,18 +15,16 @@ from spyne.util.wsgi_wrapper import WsgiMounter
 from gladminds.feed import BrandProductTypeFeed, DealerAndServiceAdvisorFeed, ProductDispatchFeed, ProductPurchaseFeed
 from gladminds.soap_authentication import AuthenticationService
 
-
-tns = 'bajaj.soapservice'
+tns = "https://api.gladmindsplatform.co/"
 success = "SUCCESS"
 failed = "FAILURE"
 
 class AuthenticationModel(ComplexModel):
-    __namespace__ = "authentication"
+    __tns__= '?'
     UserName = Unicode(min_occurs=1, nillable=False)
     Password = Unicode(min_occurs=1, nillable=False)
         
 class BrandModel(ComplexModel):
-    __namespace__ = "brand"
     BRAND_ID = Unicode
     BRAND_NAME = Unicode
     PRODUCT_TYPE = Unicode
@@ -37,7 +35,6 @@ class BrandModelList(AuthenticationModel):
     BrandData = Array(BrandModel)
     
 class DealerModel(ComplexModel):
-    __namespace__ = "dealer"
     KUNNR = Unicode
     ADDRESS = Unicode
     SER_ADV_ID = Unicode
@@ -49,7 +46,6 @@ class DealerModelList(AuthenticationModel):
     DealerData = Array(DealerModel)
 
 class ProductDispatchModel(ComplexModel):
-    __namespace__ = "productDispatch"
     CHASSIS = Unicode
     PRODUCT_TYPE = Unicode 
     VEC_DIS_DT = DateTime
@@ -66,7 +62,6 @@ class ProductDispatchModelList(AuthenticationModel):
     ProductDispatchData = Array(ProductDispatchModel)
 
 class ProductPurchaseModel(ComplexModel):
-    __namespace__ = "productPurchase"
     CHASSIS = Unicode
     CUSTOMER_ID = Unicode
     CUST_MOBILE = Unicode
@@ -85,7 +80,6 @@ class ProductPurchaseModelList(AuthenticationModel):
     ProductPurchaseData = Array(ProductPurchaseModel)
     
 class BrandService(ServiceBase):
-    __tns__ = 'bajaj.soapservice.authentication'
     
     @srpc(BrandModelList, _returns=Unicode)
     def postBrand(ObjectList):
@@ -106,7 +100,6 @@ class BrandService(ServiceBase):
             return failed
             
 class DealerService(ServiceBase):
-    __tns__ = 'gladminds.webservice.authentication'
     
     @srpc(DealerModelList, _returns=Unicode)
     def postDealer(ObjectList):
@@ -129,14 +122,13 @@ class DealerService(ServiceBase):
 
 
 class ProductDispatchService(ServiceBase):
-    __tns__ = 'gladminds.webservice.authentication'
 
     @srpc(ProductDispatchModelList, _returns=Unicode)
     def postProductDispatch(ObjectList):
         try:
             product_dispatch_list = []
             for product in  ObjectList.ProductDispatchData:
-                product_dispatch_data.append({
+                product_dispatch_list.append({
                         'vin' : product.CHASSIS,
                         'product_type': product.PRODUCT_TYPE,
                         'invoice_date': product.VEC_DIS_DT,
@@ -154,7 +146,6 @@ class ProductDispatchService(ServiceBase):
             return failed
 
 class ProductPurchaseService(ServiceBase):
-    __tns__ = 'gladminds.webservice.authentication'
     
     @srpc(ProductPurchaseModelList, _returns=Unicode)
     def postProductPurchase(ObjectList):
