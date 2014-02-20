@@ -200,6 +200,7 @@ LOGGING = {
             'level': 'INFO',
             'filename':'/var/log/gladminds/app/gladminds.log',
             'class': 'logging.FileHandler',
+            'formatter': 'verbose',
         }
     },
            

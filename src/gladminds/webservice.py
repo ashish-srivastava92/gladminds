@@ -22,10 +22,12 @@ success = "SUCCESS"
 failed = "FAILURE"
 
 class AuthenticationModel(ComplexModel):
+    __namespace__ = tns
     UserName = Unicode(min_occurs=1, nillable=False)
     Password = Unicode(min_occurs=1, nillable=False)
         
 class BrandModel(ComplexModel):
+    __namespace__ = tns
     BRAND_ID = Unicode
     BRAND_NAME = Unicode
     PRODUCT_TYPE = Unicode
@@ -36,6 +38,7 @@ class BrandModelList(AuthenticationModel):
     BrandData = Array(BrandModel)
     
 class DealerModel(ComplexModel):
+    __namespace__ = tns
     KUNNR = Unicode
     ADDRESS = Unicode
     SER_ADV_ID = Unicode
@@ -47,6 +50,7 @@ class DealerModelList(AuthenticationModel):
     DealerData = Array(DealerModel)
 
 class ProductDispatchModel(ComplexModel):
+    __namespace__ = tns
     CHASSIS = Unicode
     PRODUCT_TYPE = Unicode 
     VEC_DIS_DT = DateTime
@@ -63,6 +67,7 @@ class ProductDispatchModelList(AuthenticationModel):
     ProductDispatchData = Array(ProductDispatchModel)
 
 class ProductPurchaseModel(ComplexModel):
+    __namespace__ = tns
     CHASSIS = Unicode
     CUSTOMER_ID = Unicode
     CUST_MOBILE = Unicode
