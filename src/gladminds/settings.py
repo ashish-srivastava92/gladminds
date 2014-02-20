@@ -159,6 +159,7 @@ INSTALLED_APPS = (
     'import_export',
     'gladminds.models',
     'gladminds.superadmin',
+    'gladminds.afterbuy',
     'gladminds',
     'djcelery',
     

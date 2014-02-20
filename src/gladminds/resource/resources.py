@@ -191,3 +191,22 @@ class GladmindsResources(Resource):
 
     def determine_format(self, request):
         return 'application/json'
+    
+    
+#########################AfterBuy Resource############################################
+#########################=================############################################   
+# class AfterBuyResources(Resource):
+# 
+#     class Meta:
+#         resource_name = 'messages'
+# 
+#     def base_urls(self):
+#         return [
+#             url(r"^messages$", self.wrap_view('dispatch_gladminds'))
+#         ]
+# 
+#     def dispatch_gladminds(self, request, **kwargs):
+#         sms_dict = {}
+#         if request.POST.get('text'):
+#             message = request.POST.get('text')
+#             phone_number = request.POST.get('phoneNumber')
