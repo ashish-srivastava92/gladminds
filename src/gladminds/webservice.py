@@ -34,7 +34,7 @@ class BrandModel(ComplexModel):
     PRODUCT_NAME = Unicode
     TIMESTAMP = DateTime
 
-class BrandModelList(AuthenticationModel):
+class BrandModelList(ComplexModel):
     __namespace__ = tns
     BrandData = Array(BrandModel)
     
@@ -47,7 +47,7 @@ class DealerModel(ComplexModel):
     SER_ADV_MOBILE = Unicode
     TIMESTAMP = DateTime
 
-class DealerModelList(AuthenticationModel):
+class DealerModelList(ComplexModel):
     __namespace__ = tns
     DealerData = Array(DealerModel)
 
@@ -65,7 +65,7 @@ class ProductDispatchModel(ComplexModel):
     SERVICE_TYPE = Unicode
     TIMESTAMP = DateTime
 
-class ProductDispatchModelList(AuthenticationModel):
+class ProductDispatchModelList(ComplexModel):
     __namespace__ = tns
     ProductDispatchData = Array(ProductDispatchModel)
 
@@ -85,14 +85,14 @@ class ProductPurchaseModel(ComplexModel):
     KUNNR = Unicode
     TIMESTAMP = DateTime
 
-class ProductPurchaseModelList(AuthenticationModel):
+class ProductPurchaseModelList(ComplexModel):
     __namespace__ = tns
     ProductPurchaseData = Array(ProductPurchaseModel)
     
 class BrandService(ServiceBase):
     __namespace__ = tns
-    @srpc(BrandModelList, _returns=Unicode)
-    def postBrand(ObjectList):
+    @srpc(BrandModelList, AuthenticationModel,  _returns=Unicode)
+    def postBrand(ObjectList, Credential):
         try:
             brand_list = [] 
             for brand in ObjectList.BrandData:
@@ -111,8 +111,8 @@ class BrandService(ServiceBase):
             
 class DealerService(ServiceBase):
     __namespace__ = tns
-    @srpc(DealerModelList, _returns=Unicode)
-    def postDealer(ObjectList):
+    @srpc(DealerModelList, AuthenticationModel,_returns=Unicode)
+    def postDealer(ObjectList,Credential):
         try:
             dealer_list = []
             for dealer in ObjectList.DealerData:
@@ -133,8 +133,8 @@ class DealerService(ServiceBase):
 
 class ProductDispatchService(ServiceBase):
     __namespace__ = tns
-    @srpc(ProductDispatchModelList, _returns=Unicode)
-    def postProductDispatch(ObjectList):
+    @srpc(ProductDispatchModelList,AuthenticationModel, _returns=Unicode)
+    def postProductDispatch(ObjectList, Credential):
         try:
             product_dispatch_list = []
             for product in  ObjectList.ProductDispatchData:
@@ -157,8 +157,8 @@ class ProductDispatchService(ServiceBase):
 
 class ProductPurchaseService(ServiceBase):
     __namespace__ = tns
-    @srpc(ProductPurchaseModelList, _returns=Unicode)
-    def postProductPurchase(ObjectList):
+    @srpc(ProductPurchaseModelList,AuthenticationModel, _returns=Unicode)
+    def postProductPurchase(ObjectList, Credential):
         try:
             product_purchase_list = []
             for product in ObjectList.ProductPurchaseData:
@@ -180,11 +180,12 @@ class ProductPurchaseService(ServiceBase):
             return  failed
 
 def _on_method_call(ctx):
+    print "Getting feed data: %s" % ctx.in_object
     logger.info("Getting feed data: %s" % ctx.in_object)
-    if ctx.in_object is None:
-        raise ArgumentError("Request doesn't contain data")
-    auth_obj = AuthenticationService(username = ctx.in_object.ObjectList.UserName, password = ctx.in_object.ObjectList.UserName)
-    auth_obj.authenticate()
+#     if ctx.in_object is None:
+#         raise ArgumentError("Request doesn't contain data")
+#     auth_obj = AuthenticationService(username = ctx.in_object.ObjectList.UserName, password = ctx.in_object.ObjectList.UserName)
+#     auth_obj.authenticate()
      
 BrandService.event_manager.add_listener('method_call', _on_method_call)
 DealerService.event_manager.add_listener('method_call', _on_method_call)
