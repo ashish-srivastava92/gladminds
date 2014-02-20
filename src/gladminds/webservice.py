@@ -15,7 +15,7 @@ from spyne.util.wsgi_wrapper import WsgiMounter
 from gladminds.feed import BrandProductTypeFeed, DealerAndServiceAdvisorFeed, ProductDispatchFeed, ProductPurchaseFeed
 from gladminds.soap_authentication import AuthenticationService
 
-tns = "http://api.gladmindsplatform.co/"
+tns = "http://api.gladmindsplatform.co/api/v1/bajaj/feed/"
 success = "SUCCESS"
 failed = "FAILURE"
 
