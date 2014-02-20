@@ -14,6 +14,8 @@ from spyne.util.wsgi_wrapper import WsgiMounter
 
 from gladminds.feed import BrandProductTypeFeed, DealerAndServiceAdvisorFeed, ProductDispatchFeed, ProductPurchaseFeed
 from gladminds.soap_authentication import AuthenticationService
+import logging
+logger = logging.getLogger("gladminds")
 
 tns = "http://api.gladmindsplatform.co/api/v1/bajaj/feed/"
 success = "SUCCESS"
@@ -169,10 +171,7 @@ class ProductPurchaseService(ServiceBase):
             return  failed
 
 def _on_method_call(ctx):
-    print "============================="
-    print "Getting feed with ctx: %s" % ctx
-    print ctx.in_object
-    print "============================="
+    logger.info("Getting feed data: %s" % ctx.in_object)
     if ctx.in_object is None:
         raise ArgumentError("Request doesn't contain data")
     auth_obj = AuthenticationService(username = ctx.in_object.ObjectList.UserName, password = ctx.in_object.ObjectList.UserName)

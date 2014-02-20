@@ -187,13 +187,25 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'gladminds_logs': {
+            'level': 'INFO',
+            'filename':'/var/log/gladminds/app/gladminds.log',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose'
         }
     },
+           
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
         },
+      'gladminds': {
+            'handlers': ['gladminds_logs'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
     }
 }
