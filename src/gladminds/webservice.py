@@ -35,6 +35,7 @@ class BrandModel(ComplexModel):
     TIMESTAMP = DateTime
 
 class BrandModelList(AuthenticationModel):
+    __namespace__ = tns
     BrandData = Array(BrandModel)
     
 class DealerModel(ComplexModel):
@@ -47,6 +48,7 @@ class DealerModel(ComplexModel):
     TIMESTAMP = DateTime
 
 class DealerModelList(AuthenticationModel):
+    __namespace__ = tns
     DealerData = Array(DealerModel)
 
 class ProductDispatchModel(ComplexModel):
@@ -64,6 +66,7 @@ class ProductDispatchModel(ComplexModel):
     TIMESTAMP = DateTime
 
 class ProductDispatchModelList(AuthenticationModel):
+    __namespace__ = tns
     ProductDispatchData = Array(ProductDispatchModel)
 
 class ProductPurchaseModel(ComplexModel):
@@ -83,10 +86,11 @@ class ProductPurchaseModel(ComplexModel):
     TIMESTAMP = DateTime
 
 class ProductPurchaseModelList(AuthenticationModel):
+    __namespace__ = tns
     ProductPurchaseData = Array(ProductPurchaseModel)
     
 class BrandService(ServiceBase):
-    
+    __namespace__ = tns
     @srpc(BrandModelList, _returns=Unicode)
     def postBrand(ObjectList):
         try:
@@ -106,7 +110,7 @@ class BrandService(ServiceBase):
             return failed
             
 class DealerService(ServiceBase):
-    
+    __namespace__ = tns
     @srpc(DealerModelList, _returns=Unicode)
     def postDealer(ObjectList):
         try:
@@ -128,7 +132,7 @@ class DealerService(ServiceBase):
 
 
 class ProductDispatchService(ServiceBase):
-
+    __namespace__ = tns
     @srpc(ProductDispatchModelList, _returns=Unicode)
     def postProductDispatch(ObjectList):
         try:
@@ -152,7 +156,7 @@ class ProductDispatchService(ServiceBase):
             return failed
 
 class ProductPurchaseService(ServiceBase):
-    
+    __namespace__ = tns
     @srpc(ProductPurchaseModelList, _returns=Unicode)
     def postProductPurchase(ObjectList):
         try:
