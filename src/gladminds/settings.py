@@ -177,6 +177,14 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(name)-20s: %(levelname)-8s %(message)s'
+        },
+    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
@@ -192,7 +200,6 @@ LOGGING = {
             'level': 'INFO',
             'filename':'/var/log/gladminds/app/gladminds.log',
             'class': 'logging.FileHandler',
-            'formatter': 'verbose'
         }
     },
            
