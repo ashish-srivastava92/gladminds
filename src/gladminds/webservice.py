@@ -182,10 +182,10 @@ class ProductPurchaseService(ServiceBase):
 def _on_method_call(ctx):
     print "Getting feed data: %s" % ctx.in_object
     logger.info("Getting feed data: %s" % ctx.in_object)
-#     if ctx.in_object is None:
-#         raise ArgumentError("Request doesn't contain data")
-#     auth_obj = AuthenticationService(username = ctx.in_object.ObjectList.UserName, password = ctx.in_object.ObjectList.UserName)
-#     auth_obj.authenticate()
+    if ctx.in_object is None:
+        raise ArgumentError("Request doesn't contain data")
+    auth_obj = AuthenticationService(username = ctx.in_object.Credential.UserName, password = ctx.in_object.Credential.UserName)
+    auth_obj.authenticate()
      
 BrandService.event_manager.add_listener('method_call', _on_method_call)
 DealerService.event_manager.add_listener('method_call', _on_method_call)
