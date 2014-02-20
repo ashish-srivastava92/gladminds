@@ -169,7 +169,10 @@ class ProductPurchaseService(ServiceBase):
             return  failed
 
 def _on_method_call(ctx):
+    print "============================="
+    print "Getting feed with ctx: %s" % ctx
     print ctx.in_object
+    print "============================="
     if ctx.in_object is None:
         raise ArgumentError("Request doesn't contain data")
     auth_obj = AuthenticationService(username = ctx.in_object.ObjectList.UserName, password = ctx.in_object.ObjectList.UserName)
