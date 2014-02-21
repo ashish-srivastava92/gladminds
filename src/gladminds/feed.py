@@ -136,6 +136,7 @@ class ProductDispatchFeed(BaseFeed):
             except ObjectDoesNotExist as odne:
                 try:
                     dealer_data = common.RegisteredDealer.objects.get(dealer_id = product['dealer_id'])
+                    self.get_or_create_product_type(product_type = product['product_type'])
                     producttype_data = common.ProductTypeData.objects.get(product_type = product['product_type'])
                     invoice_date = datetime.strptime(product['invoice_date'],'%d-%m-%Y %H:%M:%S')
                     product_data = common.ProductData(vin = product['vin'], product_type = producttype_data, invoice_date = invoice_date, dealer_id = dealer_data)
@@ -149,6 +150,16 @@ class ProductDispatchFeed(BaseFeed):
                 coupon_data.save()
             except Exception as ex:
                 continue
+    
+    def get_or_create_product_type(self, product_type = product_type):
+        brand_list = [{
+                    'brand_id':'bajaj', 
+                    'brand_name': 'bajaj', 
+                    'product_type': product_type, 
+                    'product_name'  : product_type,                
+                }]
+        obj_brand = BrandProductTypeFeed(data_source = brand_list)
+        obj_brand.import_data()
             
 class ProductPurchaseFeed(BaseFeed):
     def import_data(self):
