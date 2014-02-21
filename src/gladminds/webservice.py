@@ -4,7 +4,7 @@ from spyne.decorator import srpc
 from spyne.model.complex import Array
 from spyne.model.complex import ComplexModel
 from spyne.model.complex import Iterable
-from spyne.model.primitive import Integer,DateTime,Decimal
+from spyne.model.primitive import Integer,Decimal, Date
 from spyne.model.primitive import Unicode, Mandatory
 from spyne.protocol.soap import Soap11
 from spyne.server.django import DjangoApplication
@@ -17,6 +17,7 @@ from gladminds.soap_authentication import AuthenticationService
 import logging
 logger = logging.getLogger("gladminds")
 
+pattern = r'(\d{4})-(\d{2})-(\d{2})(\d{2})(\d{2})(\d{2})'
 tns = "http://api.gladmindsplatform.co/api/v1/bajaj/feed/"
 success = "SUCCESS"
 failed = "FAILURE"
@@ -32,7 +33,7 @@ class BrandModel(ComplexModel):
     BRAND_NAME = Unicode
     PRODUCT_TYPE = Unicode
     PRODUCT_NAME = Unicode
-    TIMESTAMP = DateTime
+    TIMESTAMP = Unicode(pattern = pattern)
 
 class BrandModelList(ComplexModel):
     __namespace__ = tns
@@ -45,7 +46,7 @@ class DealerModel(ComplexModel):
     SER_ADV_ID = Unicode
     SER_ADV_NAME = Unicode
     SER_ADV_MOBILE = Unicode
-    TIMESTAMP = DateTime
+    TIMESTAMP = Unicode(pattern = pattern)
 
 class DealerModelList(ComplexModel):
     __namespace__ = tns
@@ -55,7 +56,7 @@ class ProductDispatchModel(ComplexModel):
     __namespace__ = tns
     CHASSIS = Unicode
     PRODUCT_TYPE = Unicode 
-    VEC_DIS_DT = DateTime
+    VEC_DIS_DT = Date
     KUNNR = Unicode
     UCN_NO = Unicode
     DAYS_LIMIT_FROM = Decimal
@@ -63,7 +64,7 @@ class ProductDispatchModel(ComplexModel):
     KMS_FROM = Decimal
     KMS_TO = Decimal
     SERVICE_TYPE = Unicode
-    TIMESTAMP = DateTime
+    TIMESTAMP = Unicode(pattern = pattern)
 
 class ProductDispatchModelList(ComplexModel):
     __namespace__ = tns
@@ -78,12 +79,12 @@ class ProductPurchaseModel(ComplexModel):
     CITY = Unicode
     STATE = Unicode
     PIN_NO = Unicode
-    VEH_SL_DT = DateTime
+    VEH_SL_DT = Date
     VEH_REG_NO = Unicode
     VEH_SL_DLR = Unicode
     ENGINE = Unicode
     KUNNR = Unicode
-    TIMESTAMP = DateTime
+    TIMESTAMP = Unicode(pattern = pattern)
 
 class ProductPurchaseModelList(ComplexModel):
     __namespace__ = tns
@@ -159,7 +160,7 @@ class ProductPurchaseService(ServiceBase):
         try:
             product_purchase_list = []
             for product in ObjectList.ProductPurchaseData:
-                product_purchase_list = ({
+                product_purchase_list.append({
                         'vin' : product.CHASSIS,
                         'sap_customer_id' : product.CUSTOMER_ID,
                         'customer_phone_number' : product.CUST_MOBILE,

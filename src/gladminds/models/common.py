@@ -19,7 +19,7 @@ class UploadProductCSV(models.Model):
 class BrandData(models.Model):
     brand_id=models.CharField(max_length=50, null=False,unique=True,
                               help_text="Brand Id must be unique")
-    brand_name=models.CharField(max_length=250, null=False,unique=True)
+    brand_name=models.CharField(max_length=250, null=False)
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Brand Data"
