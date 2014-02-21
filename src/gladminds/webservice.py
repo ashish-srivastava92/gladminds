@@ -12,7 +12,7 @@ from spyne.server.wsgi import WsgiApplication
 from spyne.service import ServiceBase
 from spyne.util.wsgi_wrapper import WsgiMounter
 
-from gladminds.feed import BrandProductTypeFeed, DealerAndServiceAdvisorFeed, ProductDispatchFeed, ProductPurchaseFeed
+from gladminds.feed import SAPFeed
 from gladminds.soap_authentication import AuthenticationService
 import logging
 logger = logging.getLogger("gladminds")
@@ -102,8 +102,7 @@ class BrandService(ServiceBase):
                     'product_type': brand.PRODUCT_TYPE, 
                     'product_name'  : brand.PRODUCT_NAME,                
                 })
-            brand_obj = BrandProductTypeFeed(data_source  = brand_list)
-            brand_obj.import_data()
+            save_to_db(feed_type = 'brand', data_source = brand_list)
             return success
         except Exception as ex:
             print "BrandService: {0}".format(ex)
@@ -123,8 +122,7 @@ class DealerService(ServiceBase):
                     'name' : dealer.SER_ADV_NAME,
                     'phone_number': dealer.SER_ADV_MOBILE
                 })
-            dealer_obj = DealerAndServiceAdvisorFeed(data_source  = dealer_list)
-            dealer_obj.import_data()
+            save_to_db(feed_type = 'dealer', data_source = dealer_list)
             return success
         except Exception as ex:
             print "DealerService: {0}".format(ex)
@@ -148,8 +146,7 @@ class ProductDispatchService(ServiceBase):
                         'valid_kms' : product.KMS_TO,
                         'service_type' : product.SERVICE_TYPE
                     })
-            dispatch_obj = ProductDispatchFeed(data_source  = product_dispatch_list)
-            dispatch_obj.import_data()
+            save_to_db(feed_type = 'dispatch', data_source = product_dispatch_list)
             return success
         except Exception as ex:
             print "ProductDispatchService: {0}".format(ex)
@@ -172,12 +169,15 @@ class ProductPurchaseService(ServiceBase):
                         'pin_no' : product.PIN_NO,
                         'product_purchase_date' : product.VEH_SL_DT,
                 })
-            purchase_obj = ProductPurchaseFeed(data_source  = product_purchase_list)
-            purchase_obj.import_data()
+            save_to_db(feed_type = 'purchase', data_source = product_purchase_list)
             return success
         except Exception as ex:
             print "ProductPurchaseService: {0}".format(ex)
             return  failed
+
+def save_to_db(feed_type = None, data_source = []):
+    sap_obj = SAPFeed()
+    sap_obj.import_to_db(feed_type = feed_type, data_source = data_source)
 
 def _on_method_call(ctx):
     print "Getting feed data: %s" % ctx.in_object

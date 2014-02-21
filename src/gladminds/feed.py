@@ -75,7 +75,21 @@ class CSVFeed(object):
             logger.exception("[Excpetion]: {0}".format(oe))
             
 class SAPFeed(object):
-    pass
+    def import_to_db(self, feed_type = None, data_source = []):
+        if feed_type == 'brand':
+            brand_obj = BrandProductTypeFeed(data_source  = data_source)
+            brand_obj.import_data()
+        elif feed_type == 'dealer':
+            dealer_obj = DealerAndServiceAdvisorFeed(data_source  = data_source)
+            dealer_obj.import_data()
+        elif feed_type == 'dispatch':
+            dispatch_obj = ProductDispatchFeed(data_source  = data_source)
+            dispatch_obj.import_data()
+        elif feed_type == 'purchase':
+            purchase_obj = ProductPurchaseFeed(data_source  = data_source)
+            purchase_obj.import_data()
+            
+            
 
 class BaseFeed(object):
     def __init__(self, data_source = None):
