@@ -204,6 +204,7 @@ Cronjob to export close coupon data into csv file
 def export_close_coupon_data(*args,**kwargs):
     export_file.export_data_csv()
 
+@shared_task
 def export_coupon_redeem_to_sap(*args, **kwargs):
     today = datetime.now().date()
     start_date = today-timedelta(days=1)

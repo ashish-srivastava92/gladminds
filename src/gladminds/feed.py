@@ -207,7 +207,7 @@ class CouponRedeemFeedToSAP(BaseFeed):
     def export_data(self, start_date = None, end_date = None):
         results=common.CouponData.objects.filter(closed_date__range = (start_date, end_date), status=2).select_related('vin','customer_phone_number__phone_number')
         items = []
-        item_batch = datetime.now()
+        item_batch = {'TIMESTAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
         for redeem in results:
             item = {
                     "CHASSIS":redeem.vin.vin,
@@ -215,11 +215,12 @@ class CouponRedeemFeedToSAP(BaseFeed):
                     "GCP_KUNNR":redeem.vin.dealer_id.dealer_id,
                     "GCP_UCN_NO":redeem.unique_service_coupon,
                     "PRODUCT_TYPE":redeem.vin.product_type.product_type,
-                    "SERVICE_TYPE":redeem.service_type,
-                    "SER_AVL_DT":redeem.actual_service_date.date(),
+                    "SERVICE_TYPE":str(redeem.service_type),
+                    "SER_AVL_DT":redeem.actual_service_date.date().strftime("%Y-%m-%d"),
                     }
             items.append(item)
-        coupon_redeem = exportfeed.ExportCouponRedeemFeed()
+            
+        coupon_redeem = exportfeed.ExportCouponRedeemFeed(username = settings.SAP_CRM_DETAIL['username'], password = settings.SAP_CRM_DETAIL['password'], wsdl_url = settings.COUPON_WSDL_URL)
         coupon_redeem.export(items = items, item_batch = item_batch)
 
 def update_coupon_data(sender, **kwargs):
