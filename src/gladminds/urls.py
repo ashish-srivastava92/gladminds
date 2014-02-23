@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, include, url
+from django.conf import settings
 from tastypie.api import Api
 from gladminds.resource import resources as r 
 # Uncomment the next two lines to enable the admin:
@@ -23,6 +24,8 @@ urlpatterns = patterns('gladminds',
     url(r'^api/v1/bajaj/dispatch-feed/$', 'webservice.dispatch_service'),
     url(r'^api/v1/bajaj/purchase-feed/\?wsdl$', 'webservice.purchase_service'),
     url(r'^api/v1/bajaj/purchase-feed/$', 'webservice.purchase_service'),
+    url(r'^api/v1/bajaj/redeem-feed/$', 'superadmin.views.views_coupon_redeem_wsdl', {'document_root': settings.WSDL_COUPON_REDEEM_LOC}),
+    
     url(r'^app/create-account', 'afterbuy.views.create_account', name='create_account'),
     url(r'^app/login', 'afterbuy.views.my_login', name='my_login'),
     url(r'^app/logout', 'afterbuy.views.app_logout', name='app_logout'),

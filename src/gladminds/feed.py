@@ -9,7 +9,7 @@ import os
 import time
 import csv
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("gladminds")
 
 
 def load_feed():
@@ -75,8 +75,20 @@ class CSVFeed(object):
             logger.exception("[Excpetion]: {0}".format(oe))
             
 class SAPFeed(object):
-    pass
-
+    def import_to_db(self, feed_type = None, data_source = []):
+        if feed_type == 'brand':
+            brand_obj = BrandProductTypeFeed(data_source  = data_source)
+            brand_obj.import_data()
+        elif feed_type == 'dealer':
+            dealer_obj = DealerAndServiceAdvisorFeed(data_source  = data_source)
+            dealer_obj.import_data()
+        elif feed_type == 'dispatch':
+            dispatch_obj = ProductDispatchFeed(data_source  = data_source)
+            dispatch_obj.import_data()
+        elif feed_type == 'purchase':
+            purchase_obj = ProductPurchaseFeed(data_source  = data_source)
+            purchase_obj.import_data()
+            
 class BaseFeed(object):
     def __init__(self, data_source = None):
         self.data_source = data_source
@@ -90,6 +102,7 @@ class BrandProductTypeFeed(BaseFeed):
             try:
                 brand_data  =common.BrandData.objects.get(brand_id = brand['brand_id'])
             except ObjectDoesNotExist as odne:
+                logger.info("[Exception: BrandProductTypeFeed_brand_data]: {0}".format(odne))
                 brand_data = common.BrandData(brand_id=brand['brand_id'], brand_name = brand['brand_name'])
                 brand_data.save()
             
@@ -97,6 +110,7 @@ class BrandProductTypeFeed(BaseFeed):
                 product_type = common.ProductTypeData(brand_id = brand_data, product_name = brand['product_name'], product_type = brand['product_type'])
                 product_type.save()
             except Exception as ex:
+                logger.info("[Exception: BrandProductTypeFeed_product_type]: {0}".format(ex))
                 continue
 
 class DealerAndServiceAdvisorFeed(BaseFeed):
@@ -105,6 +119,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
             try:
                 dealer_data = common.RegisteredDealer.objects.get(dealer_id = dealer['dealer_id'])
             except ObjectDoesNotExist as odne:
+                logger.info("[Exception: DealerAndServiceAdvisorFeed_dealer_data]: {0}".format(odne))
                 dealer_data = common.RegisteredDealer(dealer_id = dealer['dealer_id'], address = dealer['address'])
                 dealer_data.save()
             
@@ -112,6 +127,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 service_advisor = common.ServiceAdvisor(dealer_id = dealer_data, service_advisor_id = dealer['service_advisor_id'], name = dealer['name'], phone_number = dealer['phone_number'])
                 service_advisor.save()
             except Exception as ex:
+                logger.info("[Exception: DealerAndServiceAdvisorFeed_sa]: {0}".format(ex))
                 continue
 
 class ProductDispatchFeed(BaseFeed):
@@ -120,13 +136,16 @@ class ProductDispatchFeed(BaseFeed):
             try:
                 product_data = common.ProductData.objects.get(vin=product['vin'])
             except ObjectDoesNotExist as odne:
+                logger.info('[Exception: ProductDispatchFeed_product_data]: {0}'.format(odne))
                 try:
                     dealer_data = common.RegisteredDealer.objects.get(dealer_id = product['dealer_id'])
+                    self.get_or_create_product_type(product_type = product['product_type'])
                     producttype_data = common.ProductTypeData.objects.get(product_type = product['product_type'])
-                    invoice_date = datetime.strptime(product['invoice_date'],'%d-%m-%Y %H:%M:%S')
+                    invoice_date = product['invoice_date']
                     product_data = common.ProductData(vin = product['vin'], product_type = producttype_data, invoice_date = invoice_date, dealer_id = dealer_data)
                     product_data.save()
                 except Exception as ex:
+                    logger.info('[Exception: ProductDispatchFeed_product_data_save]: {0}'.format(ex))
                     continue
         
             try:
@@ -135,6 +154,16 @@ class ProductDispatchFeed(BaseFeed):
                 coupon_data.save()
             except Exception as ex:
                 continue
+    
+    def get_or_create_product_type(self, product_type = None):
+        brand_list = [{
+                    'brand_id':'bajaj', 
+                    'brand_name': 'bajaj', 
+                    'product_type': product_type, 
+                    'product_name'  : product_type,                
+                }]
+        obj_brand = BrandProductTypeFeed(data_source = brand_list)
+        obj_brand.import_data()
             
 class ProductPurchaseFeed(BaseFeed):
     def import_data(self):
@@ -144,18 +173,20 @@ class ProductPurchaseFeed(BaseFeed):
                 try:
                     customer_data = common.GladMindUsers.objects.get(phone_number = product['customer_phone_number'])
                 except ObjectDoesNotExist as odne:
+                    logger.info('[Exception: ProductPurchaseFeed_customer_data]: {0}'.format(odne))
                     #Register this customer
                     gladmind_customer_id = utils.generate_unique_customer_id()
                     customer_data = common.GladMindUsers(gladmind_customer_id = gladmind_customer_id, phone_number = product['customer_phone_number'], registration_date = datetime.now(), customer_name = product['customer_name'])
                     customer_data.save()
                 
                 if not product_data.sap_customer_id:
-                    product_purchase_date = datetime.strptime(product['product_purchase_date'],'%d-%m-%Y %H:%M:%S')
+                    product_purchase_date = product['product_purchase_date']
                     product_data.sap_customer_id = product['sap_customer_id']
                     product_data.customer_phone_number = customer_data
                     product_data.product_purchase_date = product_purchase_date
                     product_data.save()
             except Exception as ex:
+                logger.info('[Exception: ProductPurchaseFeed_product_data]: {0}'.format(ex))
                 continue
             
 class ProductServiceFeed(BaseFeed):
@@ -187,6 +218,6 @@ def update_coupon_data(sender, **kwargs):
             send_on_product_purchase.delay(phone_number=instance.customer_phone_number, message=message)
             audit.audit_log(reciever=instance.customer_phone_number, action='SEND TO QUEUE', message=message)
         except Exception as ex:
-            print "[Exception]: Signal-In Update Coupon Data"  
+            logger.info("[Exception]: Signal-In Update Coupon Data")  
 
 post_save.connect(update_coupon_data, sender=common.ProductData)

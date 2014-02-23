@@ -177,6 +177,14 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(name)-20s: %(levelname)-8s %(message)s'
+        },
+    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
@@ -187,13 +195,27 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'gladminds_logs': {
+            'level': 'INFO',
+            'filename':'/var/log/gladminds/app/gladminds.log',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
         }
     },
+           
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
         },
+      'gladminds': {
+            'handlers': ['gladminds_logs'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
     }
 }
+
+WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR+'/coupon_redeem.wsdl'
