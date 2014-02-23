@@ -1,14 +1,18 @@
+import csv
+from datetime import datetime, timedelta
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save
-from django.conf import settings
-from gladminds.models import common
-from gladminds import utils
-from datetime import datetime, timedelta
-from gladminds import audit, message_template as templates
+import logging
 import os
 import time
-import csv
-import logging
+
+from gladminds import audit, message_template as templates
+from gladminds import utils
+from gladminds.models import common
+from gladminds import exportfeed 
+
+
 logger = logging.getLogger("gladminds")
 
 
@@ -198,6 +202,25 @@ class ProductServiceFeed(BaseFeed):
                 coupon_data = common.CouponData.objects.filter(vin__vin = redeem['vin'], unique_service_coupon = redeem['unique_service_coupon']).update(closed_date = closed_date, actual_service_date = actual_service_date, actual_kms = redeem['actual_kms'], status = 2)
             except Exception as ex:
                 continue
+
+class CouponRedeemFeedToSAP(BaseFeed):
+    def export_data(self, start_date = None, end_date = None):
+        results=common.CouponData.objects.filter(closed_date__range = (start_date, end_date), status=2).select_related('vin','customer_phone_number__phone_number')
+        items = []
+        item_batch = datetime.now()
+        for redeem in results:
+            item = {
+                    "CHASSIS":redeem.vin.vin,
+                    "GCP_KMS":redeem.actual_kms,
+                    "GCP_KUNNR":redeem.vin.dealer_id.dealer_id,
+                    "GCP_UCN_NO":redeem.unique_service_coupon,
+                    "PRODUCT_TYPE":redeem.vin.product_type.product_type,
+                    "SERVICE_TYPE":redeem.service_type,
+                    "SER_AVL_DT":redeem.actual_service_date.date(),
+                    }
+            items.append(item)
+        coupon_redeem = exportfeed.ExportCouponRedeemFeed()
+        coupon_redeem.export(items = items, item_batch = item_batch)
 
 def update_coupon_data(sender, **kwargs):
     from gladminds.tasks import send_on_product_purchase
