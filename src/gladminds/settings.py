@@ -217,3 +217,5 @@ LOGGING = {
         }
     }
 }
+
+WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR+'/coupon_redeem.wsdl'
