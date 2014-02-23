@@ -20,6 +20,7 @@ urlpatterns = patterns('gladminds',
     url(r'^api/v1/bajaj/dispatch-feed/$', 'webservice.dispatch_service'),
     url(r'^api/v1/bajaj/purchase-feed/\?wsdl$', 'webservice.purchase_service'),
     url(r'^api/v1/bajaj/purchase-feed/$', 'webservice.purchase_service'),
+    url(r'^api/v1/bajaj/redeem-feed/$', 'webservice.coupon_redeem_service'),
     url(r'^app', 'afterbuy.views.home', name='home'),
     # Examples:
     # url(r'^$', 'gladminds.views.home', name='home'),
