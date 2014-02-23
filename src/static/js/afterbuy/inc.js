@@ -1,7 +1,7 @@
 var ipaddress = "http://rkarthik.in/mobile/gm/";
 //var ipaddress = "http://localhost/gm/";
 var loader = new Image(); 
-loader.src="images/ajax-loader.gif";
+loader.src="/static/img/afterbuy/ajax-loader.gif";
 
 function showLoading(){
     $("#loading").show();
@@ -41,7 +41,6 @@ mycallback = function(jsonObj){
 };
 
 regCallBack = function(jsonObj){
-
 	data = $.parseJSON(jsonObj);
 	hideLoading();
 	if(data.status=="0" || data.status=="2"){
@@ -70,7 +69,8 @@ regCallBack = function(jsonObj){
 function testPost(form,cbfunction)
 {
 	// console.log($(form).serialize())
-    postCORS(ipaddress+'loginCheck.php', $(form).serialize(), cbfunction);
+    // postCORS(ipaddress+'loginCheck.php', $(form).serialize(), cbfunction);
+    postCORS('app/login', $(form).serialize(), cbfunction);
 } 
 
 function testGet(str,cbfunction){
@@ -117,11 +117,11 @@ function populateProfile(data){
 }
 
 function populate_edit(data){
-	
+	alert(data)
 	populateStates_edit(data);
 	showLoading();
 
-	getCORS(ipaddress+'getData.php?action=getProfile&unique_id='+localStorage.getItem("unique_id"), null, showEditSettings);
+	getCORS('app/getData?action=getProfile&unique_id='+localStorage.getItem("unique_id"), null, showEditSettings);
 }
 
 function populateStates_edit(data){
@@ -623,7 +623,7 @@ function confirmLogout(){
 	z = confirm("Do you really want to logout?");
 	if(z){
 		showLoading();
-		getCORS(ipaddress+'logout.php?action=getProfile&unique_id='+localStorage.getItem("unique_id"), null, redirectToLogin);
+		getCORS('app/logout?action=getProfile&unique_id='+localStorage.getItem("unique_id"), null, redirectToLogin);
 
 	}
 }

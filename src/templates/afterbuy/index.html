@@ -240,7 +240,7 @@
 <style>
 	/*** patch for jquerymobile page flicker that was happending ***/
 	body{
-		/*background: #000000 url(/static/img/loader.gif) center center no-repeat;*/
+		/*background: #000000 url(/static/img/afterbuy/loader.gif) center center no-repeat;*/
 		background: #000000;
 	}
 	.ui-page {
@@ -269,7 +269,7 @@
 				<div class="alert alert-error hide">
 					<a class="close" data-dismiss="alert" href="#">x</a>Incorrect Username or Password!
 				</div>
-				<form action="#" method="post" id="loginForm">
+				<form action="#" method="post" id="loginForm">{% csrf_token %}
 					<input type="hidden" name="action" value="checkLogin"/>
 					<ul>
 						<li data-fix="clearfix">
@@ -334,7 +334,7 @@
 	<div data-role="page" id="register-account" data-theme="none">
 		<header data-role="header">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
 		</header>
@@ -343,7 +343,7 @@
 				<h3 class="page-title">Create your AfterBuy Account</h3>
 				
 			</div>
-			<form action="http://www.rkarthik.in/mobile/gm/fileUpload.php" method="post" id="frmRegister" enctype="multipart/form-data">
+			<form action="/app/create-account" method="post" id="frmRegister" enctype="multipart/form-data">{% csrf_token %}
 				<input type="hidden" name="action" value="newRegister"/>
 				<div class="row-fluid">
 					<div>
@@ -423,35 +423,35 @@
 		<header data-role="header">
 			<a href="#" data-role="none"></a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">	
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#" id="home" data-role="none" data-transition="slide" class="pull-left">
-					<img src="/static/img/home-icon.png" alt="Homepage">
+					<img src="/static/img/afterbuy/home-icon.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi <span id="span_username"></span>!</h4>
 					<p class="unique_id" id="span_unique_id"></p>
 				</div>
 				<a href="#myprofile" data-role="none" id="my_profile" class="pull-right" data-transition="slide">
-					<img src="/static/img/my_profile.png" alt="My Profile" class="profile">
+					<img src="/static/img/afterbuy/my_profile.png" alt="My Profile" class="profile">
 				</a>
 			</div>
 			<div class="content-padding"></div>
 			<ul class="inline dashboard-links">
 				<li>
 					<div class="notification">
-						<a href="#" class="notification-overlay"><img src="/static/img/my_buys.png" alt="My Buys"> My Buys
+						<a href="#" class="notification-overlay"><img src="/static/img/afterbuy/my_buys.png" alt="My Buys"> My Buys
 							<div class="notification-icon" data-notification-count="4">4</div>
 						</a>
 					</div>
 				</li>
-				<li><a href="#" class="csoon"><img src="/static/img/second_buy.png" alt="Second Buy"><div>Coming Soon</div></a></li>
-				<li><a href="#" class="csoon"><img src="/static/img/my_community.png" alt="My Community Buys"><div>Coming Soon</div></a></li>
-				<li><a href="#" class="csoon"><img src="/static/img/accessories.png" alt="Accessories"><div>Coming Soon</div></a></li>
-				<li><a href="#" class="csoon"><img src="/static/img/my_offers.png" alt="My Offers"><div>Coming Soon</div></a></li>
-				<li><a href="#" class="csoon"><img src="/static/img/my_wishlist.png" alt="My Wishlist"><div>Coming Soon</div></a></li>
+				<li><a href="#" class="csoon"><img src="/static/img/afterbuy/second_buy.png" alt="Second Buy"><div>Coming Soon</div></a></li>
+				<li><a href="#" class="csoon"><img src="/static/img/afterbuy/my_community.png" alt="My Community Buys"><div>Coming Soon</div></a></li>
+				<li><a href="#" class="csoon"><img src="/static/img/afterbuy/accessories.png" alt="Accessories"><div>Coming Soon</div></a></li>
+				<li><a href="#" class="csoon"><img src="/static/img/afterbuy/my_offers.png" alt="My Offers"><div>Coming Soon</div></a></li>
+				<li><a href="#" class="csoon"><img src="/static/img/afterbuy/my_wishlist.png" alt="My Wishlist"><div>Coming Soon</div></a></li>
 			</ul>
 		</div>
 		<div class="footer-margin"></div>
@@ -475,26 +475,26 @@
 	<div data-role="page" id="myprofile" data-theme="none">
 		<header data-role="header">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">	
 			<!-- <div data-role="content-header" data-fix="clearfix">
 				<a href="#dashboard" data-direction="reverse" data-transition="flip" id="home" data-role="none" data-rel="back" class="pull-left content-header">
-					<img src="/static/img/home-icon.png" alt="Homepage">
+					<img src="/static/img/afterbuy/home-icon.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi Aishwarya!</h4>
 					<p class="unique_id">CAC1234567890XYZ</p>
-					<img src="/static/img/profile-big.png" alt="">
+					<img src="/static/img/afterbuy/profile-big.png" alt="">
 				</div>
 			</div>
 			 -->
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#dashboard" id="home" data-role="none" data-transition="slide" data-direction="reverse" class="pull-left">
-					<img src="/static/img/home-icon.png" alt="Homepage">
+					<img src="/static/img/afterbuy/home-icon.png" alt="Homepage">
 					
 				</a>
 				<div class="cheader-center">
@@ -502,12 +502,12 @@
 					<p class="unique_id" id="span_unique_id_profile"></p>
 				</div>
 				<!-- <a href="#myprofile" data-role="none" id="my_profile" class="pull-right" data-transition="slide">
-					<img src="/static/img/my_profile.png" alt="My Profile">
+					<img src="/static/img/afterbuy/my_profile.png" alt="My Profile">
 				</a> -->
 			</div>
 			<div class="content-padding"></div> 
 			<div class="picutre-center">
-				<img src="/static/img/profile-big.png" alt="" class="profile">
+				<img src="/static/img/afterbuy/profile-big.png" alt="" class="profile">
 			</div>
 			<ul class="unstyled prof-cont">
 				<li>
@@ -558,7 +558,7 @@
 		<div data-role="content" class="pagesContent">
 			<h1>AfterBuy™</h1>
 			<div class="loading">
-				<img src="/static/img/loading.png" alt="Loading AfterBuy">
+				<img src="/static/img/afterbuy/loading.png" alt="Loading AfterBuy">
 				<p>Loading...</p>
 			</div>
 		</div>
@@ -566,16 +566,16 @@
 	<div id="user-settings" data-role="page">
 		<header data-role="header" data-add-back-btn="true" >
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<form id="editForm" action="http://www.rkarthik.in/mobile/gm/loginCheck.php" method="post" enctype="multipart/form-data">
 				<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 					<a href="#dashboard" id="home" data-role="none" class="pull-left" data-rel="back" data-direction="reverse" data-transition="slide">
-						<img src="/static/img/home-icon.png" alt="Homepage">
+						<img src="/static/img/afterbuy/home-icon.png" alt="Homepage">
 					</a>
 					<input type="submit" href="#" class="pull-right def-btn" id="editSave" data-role="none" data-btn="btn" value="Save & Exit">
 				</div>
@@ -656,22 +656,22 @@
 	<div id="profile-page" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="saveEdit()" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#dashboard" data-role="none" id="home" data-transition="slide" class="pull-left" data-direction="reverse">
-					<img src="/static/img/cart.png" alt="Homepage">
+					<img src="/static/img/afterbuy/cart.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi <span id="span_username" class="sp_username"></span>!</h4>
 					<p class="unique_id sp_unique_id" id="span_unique_id"></p>
 				</div>
 				<a href="#adding-item" data-role="none" data-transition="slide" id="my_profile" class="pull-right">
-					<img src="/static/img/more.png" alt="My Profile">
+					<img src="/static/img/afterbuy/more.png" alt="My Profile">
 				</a>
 			</div>
 			<div class="content-padding"></div>
@@ -682,45 +682,45 @@
 						<div class="item  item-a1">
 						   <h3 class="item-name">Air Conditioner</h3>
 						   <ul class="unstyled clearfix">
-						      <li class="item-icon"><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-details" rel="a1" data-transition="slide"><img src="/static/img/item-icon1.jpg" alt=""></a></li>
-						      <li><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-insurance-check" rel="a1" itemname="Air Conditioner" data-transition="slide" data-role="none"><img src="/static/img/insurance.png" alt=""><span>Insurance</span></a></li>
-						      <li><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-warranty-check" rel="a1" itemname="Air Conditioner" data-transition="slide" data-role="none"><img src="/static/img/warranty.png" alt=""><span>Warranty</span></a></li>
-						      <li><div class="comingsoon">Coming Soon</div><a href="#" data-role="none" class="csa"><img src="/static/img/spares.png" alt=""><span>Spares</span></a></li>
-						      <li><a href="#" data-role="none" rel="a1" itemname="Air Conditioner"><img src="/static/img/dis_edit.png" alt=""><span>Edit</span></a></li>
-						      <li><a href="#" data-role="none" rel="a1" itemname="Air Conditioner"><img src="/static/img/dis_delete.png" alt=""><span>Delete</span></a></li>
+						      <li class="item-icon"><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-details" rel="a1" data-transition="slide"><img src="/static/img/afterbuy/item-icon1.jpg" alt=""></a></li>
+						      <li><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-insurance-check" rel="a1" itemname="Air Conditioner" data-transition="slide" data-role="none"><img src="/static/img/afterbuy/insurance.png" alt=""><span>Insurance</span></a></li>
+						      <li><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-warranty-check" rel="a1" itemname="Air Conditioner" data-transition="slide" data-role="none"><img src="/static/img/afterbuy/warranty.png" alt=""><span>Warranty</span></a></li>
+						      <li><div class="comingsoon">Coming Soon</div><a href="#" data-role="none" class="csa"><img src="/static/img/afterbuy/spares.png" alt=""><span>Spares</span></a></li>
+						      <li><a href="#" data-role="none" rel="a1" itemname="Air Conditioner"><img src="/static/img/afterbuy/dis_edit.png" alt=""><span>Edit</span></a></li>
+						      <li><a href="#" data-role="none" rel="a1" itemname="Air Conditioner"><img src="/static/img/afterbuy/dis_delete.png" alt=""><span>Delete</span></a></li>
 						   </ul>
 						</div>
 				<div class="item item-a2">
 						   <h3 class="item-name">Cameras</h3>
 						   <ul class="unstyled clearfix">
-						      <li class="item-icon"><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-details" rel="a2" data-transition="slide"><img src="/static/img/item-icon2.png" alt=""></a></li>
-						      <li><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-insurance-check" rel="a2" itemname="Cameras" data-transition="slide" data-role="none"><img src="/static/img/insurance.png" alt=""><span>Insurance</span></a></li>
-						      <li><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-warranty-check" rel="a2" itemname="Cameras" data-transition="slide" data-role="none"><img src="/static/img/warranty.png" alt=""><span>Warranty</span></a></li>
-						      <li><div class="comingsoon">Coming Soon</div><a href="#" data-role="none" class="csa"><img src="/static/img/spares.png" alt=""><span>Spares</span></a></li>
-						      <li><a href="#" data-role="none" rel="a2" itemname="Cameras"><img src="/static/img/dis_edit.png" alt=""><span>Edit</span></a></li>
-						      <li><a href="#" data-role="none" rel="a2" itemname="Cameras"><img src="/static/img/dis_delete.png" alt=""><span>Delete</span></a></li>
+						      <li class="item-icon"><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-details" rel="a2" data-transition="slide"><img src="/static/img/afterbuy/item-icon2.png" alt=""></a></li>
+						      <li><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-insurance-check" rel="a2" itemname="Cameras" data-transition="slide" data-role="none"><img src="/static/img/afterbuy/insurance.png" alt=""><span>Insurance</span></a></li>
+						      <li><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-warranty-check" rel="a2" itemname="Cameras" data-transition="slide" data-role="none"><img src="/static/img/afterbuy/warranty.png" alt=""><span>Warranty</span></a></li>
+						      <li><div class="comingsoon">Coming Soon</div><a href="#" data-role="none" class="csa"><img src="/static/img/afterbuy/spares.png" alt=""><span>Spares</span></a></li>
+						      <li><a href="#" data-role="none" rel="a2" itemname="Cameras"><img src="/static/img/afterbuy/dis_edit.png" alt=""><span>Edit</span></a></li>
+						      <li><a href="#" data-role="none" rel="a2" itemname="Cameras"><img src="/static/img/afterbuy/dis_delete.png" alt=""><span>Delete</span></a></li>
 						   </ul>
 						</div>
 				<div class="item item-a3">
 						   <h3 class="item-name">Mobile Phone</h3>
 						   <ul class="unstyled clearfix">
-						      <li class="item-icon"><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-details" rel="a3" data-transition="slide"><img src="/static/img/item-icon3.png" alt=""></a></li>
-						      <li><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-insurance-check" rel="a3" itemname="Mobile Phone" data-transition="slide" data-role="none"><img src="/static/img/insurance.png" alt=""><span>Insurance</span></a></li>
-						      <li><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-warranty-check" rel="a3" itemname="Mobile Phone" data-transition="slide" data-role="none"><img src="/static/img/warranty.png" alt=""><span>Warranty</span></a></li>
-						      <li><div class="comingsoon">Coming Soon</div><a href="#" data-role="none" class="csa"><img src="/static/img/spares.png" alt=""><span>Spares</span></a></li>
-						      <li><a href="#" data-role="none" rel="a3" itemname="Mobile Phone"><img src="/static/img/dis_edit.png" alt=""><span>Edit</span></a></li>
-						      <li><a href="#" data-role="none" rel="a3" itemname="Mobile Phone"><img src="/static/img/dis_delete.png" alt=""><span>Delete</span></a></li>
+						      <li class="item-icon"><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-details" rel="a3" data-transition="slide"><img src="/static/img/afterbuy/item-icon3.png" alt=""></a></li>
+						      <li><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-insurance-check" rel="a3" itemname="Mobile Phone" data-transition="slide" data-role="none"><img src="/static/img/afterbuy/insurance.png" alt=""><span>Insurance</span></a></li>
+						      <li><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-warranty-check" rel="a3" itemname="Mobile Phone" data-transition="slide" data-role="none"><img src="/static/img/afterbuy/warranty.png" alt=""><span>Warranty</span></a></li>
+						      <li><div class="comingsoon">Coming Soon</div><a href="#" data-role="none" class="csa"><img src="/static/img/afterbuy/spares.png" alt=""><span>Spares</span></a></li>
+						      <li><a href="#" data-role="none" rel="a3" itemname="Mobile Phone"><img src="/static/img/afterbuy/dis_edit.png" alt=""><span>Edit</span></a></li>
+						      <li><a href="#" data-role="none" rel="a3" itemname="Mobile Phone"><img src="/static/img/afterbuy/dis_delete.png" alt=""><span>Delete</span></a></li>
 						   </ul>
 						</div>
 				<div class="item item-a4">
 						   <h3 class="item-name">Television</h3>
 						   <ul class="unstyled clearfix">
-						      <li class="item-icon"><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-details" rel="a4" data-transition="slide"><img src="/static/img/item-icon4.png" alt=""></a></li>
-						      <li><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-insurance-check" rel="a4" itemname="Television" data-transition="slide" data-role="none"><img src="/static/img/insurance.png" alt=""><span>Insurance</span></a></li>
-						      <li><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-warranty-check" rel="a4" itemname="Television" data-transition="slide" data-role="none"><img src="/static/img/warranty.png" alt=""><span>Warranty</span></a></li>
-						      <li><div class="comingsoon">Coming Soon</div><a href="#" data-role="none" class="csa"><img src="/static/img/spares.png" alt=""><span>Spares</span></a></li>
-						      <li><a href="#" data-role="none" rel="a4" itemname="Television"><img src="/static/img/dis_edit.png" alt=""><span>Edit</span></a></li>
-						      <li><a href="#" data-role="none" rel="a4" itemname="Television"><img src="/static/img/dis_delete.png" alt=""><span>Delete</span></a></li>
+						      <li class="item-icon"><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-details" rel="a4" data-transition="slide"><img src="/static/img/afterbuy/item-icon4.png" alt=""></a></li>
+						      <li><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-insurance-check" rel="a4" itemname="Television" data-transition="slide" data-role="none"><img src="/static/img/afterbuy/insurance.png" alt=""><span>Insurance</span></a></li>
+						      <li><a href="#" onclick="javascript:myItemPageChange(this)" pgname="#item-warranty-check" rel="a4" itemname="Television" data-transition="slide" data-role="none"><img src="/static/img/afterbuy/warranty.png" alt=""><span>Warranty</span></a></li>
+						      <li><div class="comingsoon">Coming Soon</div><a href="#" data-role="none" class="csa"><img src="/static/img/afterbuy/spares.png" alt=""><span>Spares</span></a></li>
+						      <li><a href="#" data-role="none" rel="a4" itemname="Television"><img src="/static/img/afterbuy/dis_edit.png" alt=""><span>Edit</span></a></li>
+						      <li><a href="#" data-role="none" rel="a4" itemname="Television"><img src="/static/img/afterbuy/dis_delete.png" alt=""><span>Delete</span></a></li>
 						   </ul>
 						</div>
 					</div>
@@ -736,22 +736,22 @@
 	<div id="notification-page" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#dashboard" data-role="none" id="home" data-transition="slide" class="pull-left" data-direction="reverse">
-					<img src="/static/img/cart.png" alt="Homepage">
+					<img src="/static/img/afterbuy/cart.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi <span id="span_username" class="sp_username"></span>!</h4>
 					<p class="unique_id sp_unique_id" id="span_unique_id"></p>
 				</div>
 				<a href="#adding-item" data-role="none" data-transition="slide" id="my_profile" class="pull-right">
-					<img src="/static/img/more.png" alt="My Profile">
+					<img src="/static/img/afterbuy/more.png" alt="My Profile">
 				</a>
 			</div>
 			<div class="content-padding"></div>
@@ -762,7 +762,7 @@
 							<div class="noti-page-item-title">
 								<h3 class="item-name">Air Conditioner</h3>
 								<div class="noti-page-notification">
-									<img src="/static/img/item-icon1.jpg" alt="">
+									<img src="/static/img/afterbuy/item-icon1.jpg" alt="">
 								</div>
 							</div>
 							<div class="noti-page-item-data">
@@ -777,7 +777,7 @@
 							<div class="noti-page-item-title">
 								<h3 class="item-name">Cameras</h3>
 								<div class="noti-page-notification">
-									<img src="/static/img/item-icon2.png" alt="">
+									<img src="/static/img/afterbuy/item-icon2.png" alt="">
 								</div>
 							</div>
 							<div class="noti-page-item-data">
@@ -788,7 +788,7 @@
 							<div class="noti-page-item-title">
 								<h3 class="item-name">Mobile Phone</h3>
 								<div class="noti-page-notification">
-									<img src="/static/img/item-icon3.png" alt="">
+									<img src="/static/img/afterbuy/item-icon3.png" alt="">
 								</div>
 							</div>
 							<div class="noti-page-item-data">
@@ -803,7 +803,7 @@
 							<div class="noti-page-item-title">
 								<h3 class="item-name">Television</h3>
 								<div class="noti-page-notification">
-									<img src="/static/img/item-icon4.png" alt="">
+									<img src="/static/img/afterbuy/item-icon4.png" alt="">
 								</div>
 							</div>
 							<div class="noti-page-item-data">
@@ -828,22 +828,22 @@
 	<div id="add-new-item" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#dashboard" data-role="none" id="home" data-transition="slide" class="pull-left" data-direction="reverse">
-					<img src="/static/img/cart.png" alt="Homepage">
+					<img src="/static/img/afterbuy/cart.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi <span id="span_username" class="sp_username"></span>!</h4>
 					<p class="unique_id sp_unique_id" id="span_unique_id"></p>
 				</div>
 				<a href="#adding-item" data-role="none" id="my_profile" class="pull-right" data-transition="slide">
-					<img src="/static/img/more.png" alt="My Profile">
+					<img src="/static/img/afterbuy/more.png" alt="My Profile">
 				</a>
 			</div>
 		</div>
@@ -856,15 +856,15 @@
 	<div id="edit-adding-item" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#dashboard" data-role="none" id="home" data-transition="slide" class="pull-left" data-direction="reverse">
-					<img src="/static/img/cart.png" alt="Homepage">
+					<img src="/static/img/afterbuy/cart.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi <span id="span_username" class="sp_username"></span>!</h4>
@@ -946,7 +946,7 @@
 										
 										<div class="add-invoice" data-fix="clearfix">
 											<div class="fileupload fileupload-new" data-provides="fileupload">
-												<div class="fileupload-new thumbnail epthumbnail" style="width: 60px; height: 60px;"><img src="/static/img/sel_invoice.png" /></div>
+												<div class="fileupload-new thumbnail epthumbnail" style="width: 60px; height: 60px;"><img src="/static/img/afterbuy/sel_invoice.png" /></div>
 												<div class="fileupload-preview fileupload-exists thumbnail" style="max-width: 60px; max-height: 60px; line-height: 20px;"></div>
 												<div style="text-align:center;">
 													<span class="btn btn-file  btn-mini"><span class="fileupload-new">Select</span><span class="fileupload-exists btn-mini">Change</span><input type="file"  name="invoice_file" accept="image/*;capture=camera"/></span>
@@ -958,7 +958,7 @@
 									<div class="span4">
 										<div class="add-warranty" data-fix="clearfix">
 										<div class="fileupload fileupload-new" data-provides="fileupload">
-											<div class="fileupload-new thumbnail epthumbnail" style="width: 60px; height: 60px;"><img src="/static/img/sel_warranty.png" /></div>
+											<div class="fileupload-new thumbnail epthumbnail" style="width: 60px; height: 60px;"><img src="/static/img/afterbuy/sel_warranty.png" /></div>
 											<div class="fileupload-preview fileupload-exists thumbnail" style="max-width: 60px; max-height: 60px; line-height: 20px;"></div>
 											<div style="text-align:center;">
 												<span class="btn btn-file  btn-mini"><span class="fileupload-new">Select</span><span class="fileupload-exists btn-mini">Change</span><input type="file"  name="warranty_file" accept="image/*;capture=camera"/></span>
@@ -970,7 +970,7 @@
 									<div class="span4">
 										<div class="add-insurance" data-fix="clearfix">
 										<div class="fileupload fileupload-new" data-provides="fileupload">
-											<div class="fileupload-new thumbnail epthumbnail" style="width: 60px; height: 60px;"><img src="/static/img/sel_insurance.png" /></div>
+											<div class="fileupload-new thumbnail epthumbnail" style="width: 60px; height: 60px;"><img src="/static/img/afterbuy/sel_insurance.png" /></div>
 											<div class="fileupload-preview fileupload-exists thumbnail" style="max-width: 60px; max-height: 60px; line-height: 20px;"></div>
 											<div style="text-align:center;">
 												<span class="btn btn-file  btn-mini"><span class="fileupload-new">Select</span><span class="fileupload-exists btn-mini">Change</span><input type="file"  name="insurance_file" accept="image/*;capture=camera"/></span>
@@ -998,15 +998,15 @@
 	<div id="adding-item" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#dashboard" data-role="none" id="home" data-transition="slide" class="pull-left" data-direction="reverse">
-					<img src="/static/img/cart.png" alt="Homepage">
+					<img src="/static/img/afterbuy/cart.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi <span id="span_username" class="sp_username"></span>!</h4>
@@ -1088,7 +1088,7 @@
 											
 											<div class="add-invoice" data-fix="clearfix">
 												<div class="fileupload fileupload-new" data-provides="fileupload">
-													<div class="fileupload-new thumbnail epthumbnail" style="width: 60px; height: 60px;"><img src="/static/img/sel_invoice.png" /></div>
+													<div class="fileupload-new thumbnail epthumbnail" style="width: 60px; height: 60px;"><img src="/static/img/afterbuy/sel_invoice.png" /></div>
 													<div class="fileupload-preview fileupload-exists thumbnail" style="max-width: 60px; max-height: 60px; line-height: 20px;"></div>
 													<div style="text-align:center;">
 														<span class="btn btn-file  btn-mini"><span class="fileupload-new">Select</span><span class="fileupload-exists btn-mini">Change</span><input type="file"  name="invoice_file" accept="image/*;capture=camera"/></span>
@@ -1100,7 +1100,7 @@
 										<div class="span4">
 											<div class="add-warranty" data-fix="clearfix">
 											<div class="fileupload fileupload-new" data-provides="fileupload">
-												<div class="fileupload-new thumbnail epthumbnail" style="width: 60px; height: 60px;"><img src="/static/img/sel_warranty.png" /></div>
+												<div class="fileupload-new thumbnail epthumbnail" style="width: 60px; height: 60px;"><img src="/static/img/afterbuy/sel_warranty.png" /></div>
 												<div class="fileupload-preview fileupload-exists thumbnail" style="max-width: 60px; max-height: 60px; line-height: 20px;"></div>
 												<div style="text-align:center;">
 													<span class="btn btn-file  btn-mini"><span class="fileupload-new">Select</span><span class="fileupload-exists btn-mini">Change</span><input type="file"  name="warranty_file" accept="image/*;capture=camera"/></span>
@@ -1112,7 +1112,7 @@
 										<div class="span4">
 											<div class="add-insurance" data-fix="clearfix">
 											<div class="fileupload fileupload-new" data-provides="fileupload">
-												<div class="fileupload-new thumbnail epthumbnail" style="width: 60px; height: 60px;"><img src="/static/img/sel_insurance.png" /></div>
+												<div class="fileupload-new thumbnail epthumbnail" style="width: 60px; height: 60px;"><img src="/static/img/afterbuy/sel_insurance.png" /></div>
 												<div class="fileupload-preview fileupload-exists thumbnail" style="max-width: 60px; max-height: 60px; line-height: 20px;"></div>
 												<div style="text-align:center;">
 													<span class="btn btn-file  btn-mini"><span class="fileupload-new">Select</span><span class="fileupload-exists btn-mini">Change</span><input type="file"  name="insurance_file" accept="image/*;capture=camera"/></span>
@@ -1141,32 +1141,32 @@
 	<div id="item-details" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<div class="item-title-img clearfix">
 					<h4>Television</h4>
-					<img src="/static/img/item-icon4.png" alt="">
+					<img src="/static/img/afterbuy/item-icon4.png" alt="">
 				</div>
 			</div>
 			<div class="margin-large-top"></div>
 			<ul class="unstyled item-des-parts">
-				<li><a href="#installation-complete" data-role="none" data-transition="slide"><img src="/static/img/icon_installation.png" alt="Installation"><span>Installation</span></a></li>
+				<li><a href="#installation-complete" data-role="none" data-transition="slide"><img src="/static/img/afterbuy/icon_installation.png" alt="Installation"><span>Installation</span></a></li>
 				<li>
-					<a href="#" class="csoon ui-link"><img src="/static/img/icon_service.png" alt="Second Buy"><div>Coming Soon</div></a>
+					<a href="#" class="csoon ui-link"><img src="/static/img/afterbuy/icon_service.png" alt="Second Buy"><div>Coming Soon</div></a>
 				</li>
 				<li>
-					<a href="#" class="csoon ui-link"><img src="/static/img/icon_spares.png" alt="Second Buy"><div>Coming Soon</div></a>
+					<a href="#" class="csoon ui-link"><img src="/static/img/afterbuy/icon_spares.png" alt="Second Buy"><div>Coming Soon</div></a>
 				</li>
 				<li>
-					<a href="#" class="csoon ui-link"><img src="/static/img/icon_endoflife.png" alt="Second Buy"><div>Coming Soon</div></a>
+					<a href="#" class="csoon ui-link"><img src="/static/img/afterbuy/icon_endoflife.png" alt="Second Buy"><div>Coming Soon</div></a>
 				</li>
 				<li>
-					<a href="#" class="csoon ui-link"><img src="/static/img/icon_feedback.png" alt="Second Buy"><div>Coming Soon</div></a>
+					<a href="#" class="csoon ui-link"><img src="/static/img/afterbuy/icon_feedback.png" alt="Second Buy"><div>Coming Soon</div></a>
 				</li>
 			</ul>
 		</div>
@@ -1178,15 +1178,15 @@
 	<div id="installation-complete" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#dashboard" data-role="none" id="home" data-transition="slide" class="pull-left" data-direction="reverse">
-					<img src="/static/img/cart.png" alt="Homepage">
+					<img src="/static/img/afterbuy/cart.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi <span id="span_username" class="sp_username"></span>!</h4>
@@ -1210,15 +1210,15 @@
 	<div id="item-details-des" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#dashboard" data-role="none" id="home" data-transition="slide" class="pull-left" data-direction="reverse">
-					<img src="/static/img/cart.png" alt="Homepage">
+					<img src="/static/img/afterbuy/cart.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi <span id="span_username" class="sp_username"></span>!</h4>
@@ -1272,12 +1272,12 @@
 	<div id="feedback-thanks" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#dashboard" data-role="none" id="home" data-transition="slide" class="pull-left" data-direction="reverse">
-					<img src="/static/img/cart.png" alt="Homepage">
+					<img src="/static/img/afterbuy/cart.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi <span id="span_username" class="sp_username"></span>!</h4>
@@ -1298,15 +1298,15 @@
 	<div id="feedback" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#dashboard" data-role="none" id="home" data-transition="slide" class="pull-left" data-direction="reverse">
-					<img src="/static/img/cart.png" alt="Homepage">
+					<img src="/static/img/afterbuy/cart.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi <span id="span_username" class="sp_username"></span>!</h4>
@@ -1413,15 +1413,15 @@
 	<div id="feedbackThanks" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#dashboard" data-role="none" id="home" data-transition="slide" class="pull-left" data-direction="reverse">
-					<img src="/static/img/cart.png" alt="Homepage">
+					<img src="/static/img/afterbuy/cart.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi <span id="span_username" class="sp_username"></span>!</h4>
@@ -1444,15 +1444,15 @@
 	<div id="item-warranty-check" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#dashboard" data-role="none" id="home" data-transition="slide" class="pull-left" data-direction="reverse">
-					<img src="/static/img/cart.png" alt="Homepage">
+					<img src="/static/img/afterbuy/cart.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi <span id="span_username" class="sp_username"></span>!</h4>
@@ -1496,15 +1496,15 @@
 	<div id="warranty-check-conf" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#dashboard" data-role="none" id="home" data-transition="slide" class="pull-left" data-direction="reverse">
-					<img src="/static/img/cart.png" alt="Homepage">
+					<img src="/static/img/afterbuy/cart.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi <span id="span_username" class="sp_username"></span>!</h4>
@@ -1545,15 +1545,15 @@
 	<div id="item-insurance-check" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#dashboard" data-role="none" id="home" data-transition="slide" class="pull-left" data-direction="reverse">
-					<img src="/static/img/cart.png" alt="Homepage">
+					<img src="/static/img/afterbuy/cart.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi <span id="span_username" class="sp_username"></span>!</h4>
@@ -1597,15 +1597,15 @@
 	<div id="insurance-check-conf" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#dashboard" data-role="none" id="home" data-transition="slide" class="pull-left" data-direction="reverse">
-					<img src="/static/img/cart.png" alt="Homepage">
+					<img src="/static/img/afterbuy/cart.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi <span id="span_username" class="sp_username"></span>!</h4>
@@ -1647,10 +1647,10 @@
 	<div id="privacy-policy" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<h2>Privacy Policy</h2>
@@ -1678,10 +1678,10 @@
 	<div id="terms-policy" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<h2>Privacy Policy</h2>
@@ -1701,15 +1701,15 @@
 	<!-- <div id="process-payment" data-role="page">
 		<header data-role="header" data-add-back-btn="true">
 			<a href="#" data-role="none" data-btn="back-btn" data-rel="back" data-direction="reverse">
-				<img src="/static/img/backbutton.png" alt="">
+				<img src="/static/img/afterbuy/backbutton.png" alt="">
 			</a>
 			<h1 class="logo" class="pull-left">AfterBuy™</h1>
-			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/dropdown-btn.png" alt=""></a>
+			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
 			<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 				<a href="#" data-role="none" id="home" data-transition="slide" class="pull-left">
-					<img src="/static/img/cart.png" alt="Homepage">
+					<img src="/static/img/afterbuy/cart.png" alt="Homepage">
 				</a>
 				<div class="cheader-center">
 					<h4>Hi Aishwarya!</h4>
@@ -1721,9 +1721,9 @@
 			<div class="payment-process">
 				<h4>Just a moment...</h4>
 				<p>We're processing your request</p>
-				<img src="/static/img/loader.gif" alt="Processing the Payment">
+				<img src="/static/img/afterbuy/loader.gif" alt="Processing the Payment">
 			</div>
-			<img src="/static/img/payment-option.png" class="payment methods" alt="">
+			<img src="/static/img/afterbuy/payment-option.png" class="payment methods" alt="">
 		</div>
 				<div class="footer-margin"></div>
 		<footer data-role="footer">
@@ -1736,17 +1736,17 @@
 	<ul class="unstyled">
 		<li class="sidebar-title"><div class="profilePic">
 			<div id="myImg">
-				<img src="/static/img/profile-big.png" class="profile"/>
+				<img src="/static/img/afterbuy/profile-big.png" class="profile"/>
 			</div>	
 		</div></li>
-		<li><a data-transition="slide" href="#user-settings"><img src="/static/img/my_profile.png" alt="">Account Settings</a></li>
-		<li><a href="#privacy-policy"><img src="/static/img/my_profile.png" alt="">Privacy Policy</a></li>
+		<li><a data-transition="slide" href="#user-settings"><img src="/static/img/afterbuy/my_profile.png" alt="">Account Settings</a></li>
+		<li><a href="#privacy-policy"><img src="/static/img/afterbuy/my_profile.png" alt="">Privacy Policy</a></li>
 		
-		<li><a href="#"><img src="/static/img/my_profile.png" alt="">Terms and Policies</a></li>
-		<li><a href="#"><img src="/static/img/my_profile.png" alt="">Report a Problem</a></li>
-		<li><a href="#feedback"><img src="/static/img/my_profile.png" alt="">AfterBuy Feedback</a></li>
-		<li><a href="#"><img src="/static/img/my_profile.png" alt="">Contact Us</a></li>
-		<li><a href="#" onclick="confirmLogout()"><img src="/static/img/my_profile.png" alt="">Logout</a></li>
+		<li><a href="#"><img src="/static/img/afterbuy/my_profile.png" alt="">Terms and Policies</a></li>
+		<li><a href="#"><img src="/static/img/afterbuy/my_profile.png" alt="">Report a Problem</a></li>
+		<li><a href="#feedback"><img src="/static/img/afterbuy/my_profile.png" alt="">AfterBuy Feedback</a></li>
+		<li><a href="#"><img src="/static/img/afterbuy/my_profile.png" alt="">Contact Us</a></li>
+		<li><a href="#" onclick="confirmLogout()"><img src="/static/img/afterbuy/my_profile.png" alt="">Logout</a></li>
 	</ul>
 </div>
 <div class="body-overlay"></div>

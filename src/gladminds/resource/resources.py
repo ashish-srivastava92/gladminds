@@ -3,16 +3,18 @@ from django.conf.urls import url
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from tastypie.exceptions import ImmediateHttpResponse
+from tastypie.serializers import Serializer
 from tastypie.http import HttpBadRequest, HttpUnauthorized
 from django.db import connection, models
 from gladminds import smsparser, utils, audit, message_template as templates
-from gladminds.models import common
+from gladminds.models import common,afterbuy_models
 from gladminds.tasks import send_registration_detail, send_service_detail, \
     send_reminder_message, send_coupon_close_message, send_coupon_detail_customer, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
 from src.gladminds.tasks import send_coupon_close_message
 from tastypie.resources import Resource
 json = utils.import_json()
+
 
 __all__ = ['GladmindsTaskManager']
 AUDIT_ACTION = 'SEND TO QUEUE'
@@ -193,20 +195,117 @@ class GladmindsResources(Resource):
         return 'application/json'
     
     
-#########################AfterBuy Resource############################################
-#########################=================############################################   
-# class AfterBuyResources(Resource):
-# 
-#     class Meta:
-#         resource_name = 'messages'
-# 
+#########################AfterBuy Resources############################################
+
+
+#########################Manufacture Resource########################################## 
+from tastypie import fields
+from tastypie.resources import Resource, DeclarativeMetaclass
+from tastypie.utils.mime import determine_format
+class ApdDeclarativeMetaClass(DeclarativeMetaclass):
+
+    def __new__(cls, name, bases, attrs):
+        new_class = super(ApdDeclarativeMetaClass, cls).__new__(
+            cls, name, bases, attrs)
+        new_class._meta.collection_name = 'data'
+        
+
+        if getattr(new_class._meta, 'include_resource_uri', True):
+            if not 'uri' in new_class.base_fields:
+                new_class.base_fields['uri'] = fields.CharField(readonly=True)
+        elif 'uri' in new_class.base_fields and not 'uri' in attrs:
+            del(new_class.base_fields['uri'])
+        return new_class
+    
+class ApdResource(Resource):
+    __metaclass__ = ApdDeclarativeMetaClass
+         
+    def alter_detail_data_to_serialize(self, request, data):
+        '''Wrap detail response in a data element'''
+        return {"data": data}
+
+    def determine_format(self, request):
+        '''return application/json as the default format'''
+        fmt = determine_format(
+            request, self._meta.serializer, default_format=self._meta.default_format)
+        if fmt == 'text/html' and 'format' not in request:
+            fmt = 'application/json'
+        return fmt
+
+class ApdObject(object):
+    '''Wrap dictionary into a typed object that can be accessed
+    using the dot notation '''
+    def __init__(self, initial=None):
+        self.__dict__['data'] = {}
+
+        if hasattr(initial, 'items'):
+            self.__dict__['data'] = initial
+
+    def __getattr__(self, name):
+        return self.data.get(name, None)
+
+    def __setattr__(self, name, value):
+        self.__dict__['data'][name] = value
+
+    def to_dict(self):
+        return self.data
+    
+class ManufacturerResources(ApdResource):
+#     m_id=fields.IntegerField(attribute='m_id')
+#     manufacturer=fields.CharField()
+#     m_logo=fields.CharField()
+#     active =fields.IntegerField(default=1) 
+ 
+    class Meta:
+        object_class = ApdObject
+        resource_name = 'manufacturers'
+ 
 #     def base_urls(self):
 #         return [
-#             url(r"^messages$", self.wrap_view('dispatch_gladminds'))
+#             url(r"^manufacturers$", self.wrap_view('dispatch_manufacturers'))
 #         ]
-# 
-#     def dispatch_gladminds(self, request, **kwargs):
-#         sms_dict = {}
-#         if request.POST.get('text'):
-#             message = request.POST.get('text')
-#             phone_number = request.POST.get('phoneNumber')
+#  
+#     def dispatch_manufacturers(self, request, **kwargs):
+#         data=afterbuy_models.Manufacturer.objects.all()
+#         to_be_serialized = {"data": data}
+#         return self.create_response(request, to_be_serialized)
+    def obj_get(self, bundle, **kwargs):
+        data=afterbuy_models.Manufacturer.objects.all()
+        return ApdObject(data)
+        
+
+#########################Product Resource##########################################         
+class ProductResources(Resource):
+    class Meta:
+        resource_name = 'products'
+ 
+    def base_urls(self):
+        return [
+            url(r"^products$", self.wrap_view('dispatch_products'))
+        ]
+ 
+    def dispatch_products(self, request, **kwargs):
+        data=common.ProductData.objects.all()
+        to_be_serialized = {"data": data}
+        return self.create_response(request, to_be_serialized)
+    
+    
+#########################User Resource########################################## 
+
+class UserResources(Resource):
+    class Meta:
+        resource_name = 'user'
+        
+    def base_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<%s>\w[\w-]*)/item" % (self._meta.resource_name, self._meta.detail_uri_name), 
+                self.wrap_view('api_dispatch_products'))
+        ]
+ 
+    def api_dispatch_products(self, request, **kwargs):
+        serialize = Serializer()
+        user_id=kwargs['pk']
+        data=afterbuy_models.MyItems.objects.all()
+        to_be_serialized = {"data": data}
+        return self.create_response(request, to_be_serialized)
+        

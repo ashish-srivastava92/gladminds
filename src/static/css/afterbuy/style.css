@@ -380,7 +380,7 @@ select {
 	-webkit-appearance: none;
 	-moz-appearance:window;
 	line-height: 17px;
-	background: #fff url(../images/down-arrow.png) no-repeat 99%;
+	background: #fff url(/static/img/afterbuy/down-arrow.png) no-repeat 99%;
 }
 
 input[type=text]:-webkit-placeholder, 
@@ -1996,7 +1996,7 @@ div[data-role="content-header"] + .content-padding {
 
 
 .ui-icon-loading {
-    background: url("../images/ajax-loader.gif") repeat scroll 0 0 / 46px 46px transparent;
+    background: url("/static/img/afterbuy/ajax-loader.gif") repeat scroll 0 0 / 46px 46px transparent;
 }
 
 #span_username, #span_username_profile, #pr_name{
@@ -2004,7 +2004,7 @@ div[data-role="content-header"] + .content-padding {
 }
 /*** patch for jquerymobile page flicker that was happending ***/
 body{
-	background: #000000 url(images/loader.gif) center center no-repeat;
+	background: #000000 url(/static/img/afterbuy/loader.gif) center center no-repeat;
 }
 .ui-page {
 	-webkit-backface-visibility: hidden;
