@@ -11,7 +11,7 @@ from gladminds import audit, message_template as templates
 from gladminds import utils
 from gladminds.models import common
 from gladminds import exportfeed 
-
+from gladminds.audit import feed_log
 
 logger = logging.getLogger("gladminds")
 
@@ -119,6 +119,7 @@ class BrandProductTypeFeed(BaseFeed):
 
 class DealerAndServiceAdvisorFeed(BaseFeed):
     def import_data(self):
+        total_failed = 0
         for dealer in self.data_source:
             try:
                 dealer_data = common.RegisteredDealer.objects.get(dealer_id = dealer['dealer_id'])
@@ -131,11 +132,14 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 service_advisor = common.ServiceAdvisor(dealer_id = dealer_data, service_advisor_id = dealer['service_advisor_id'], name = dealer['name'], phone_number = dealer['phone_number'])
                 service_advisor.save()
             except Exception as ex:
+                total_failed+=1
                 logger.info("[Exception: DealerAndServiceAdvisorFeed_sa]: {0}".format(ex))
                 continue
+        feed_log(feed_type = 'Dealer Feed', total_data_count = len(self.data_source), failed_data_count = total_failed, success_data_count = len(self.data_source) - total_failed, action = 'Recieved')
 
 class ProductDispatchFeed(BaseFeed):
     def import_data(self):
+        total_failed = 0
         for product in self.data_source:
             try:
                 product_data = common.ProductData.objects.get(vin=product['vin'])
@@ -157,7 +161,9 @@ class ProductDispatchFeed(BaseFeed):
                 coupon_data = common.CouponData(unique_service_coupon = product['unique_service_coupon'], vin = product_data, valid_days = product['valid_days'], valid_kms = product['valid_kms'], service_type = product['service_type'], status = status)
                 coupon_data.save()
             except Exception as ex:
+                total_failed+=1
                 continue
+        feed_log(feed_type = 'Dispatch Feed', total_data_count = len(self.data_source), failed_data_count = total_failed, success_data_count = len(self.data_source)-total_failed, action = 'Recieved')
     
     def get_or_create_product_type(self, product_type = None):
         brand_list = [{
@@ -171,6 +177,7 @@ class ProductDispatchFeed(BaseFeed):
             
 class ProductPurchaseFeed(BaseFeed):
     def import_data(self):
+        total_failed = 0
         for product in self.data_source:
             try:
                 product_data = common.ProductData.objects.get(vin=product['vin'])
@@ -190,8 +197,11 @@ class ProductPurchaseFeed(BaseFeed):
                     product_data.product_purchase_date = product_purchase_date
                     product_data.save()
             except Exception as ex:
+                total_failed+=1
                 logger.info('[Exception: ProductPurchaseFeed_product_data]: {0}'.format(ex))
                 continue
+        feed_log(feed_type = 'Purchase Feed', total_data_count = len(self.data_source), failed_data_count = total_failed, success_data_count = len(self.data_source) - total_failed, action = 'Recieved')
+        
             
 class ProductServiceFeed(BaseFeed):
     def import_data(self):

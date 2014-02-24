@@ -11,10 +11,9 @@ class AuditLog(models.Model):
     class Meta:
         app_label="gladminds"
 
-FEED_CHOICES = ((1, 'DEALER'), (2, 'DISPATCH'), (3, 'PURCHASE'),(4,'REDEEM'))
 class DataFeedLog(models.Model):
     data_feed_id = models.AutoField(primary_key=True)
-    feed_type = models.SmallIntegerField(choices = FEED_CHOICES)
+    feed_type = models.CharField(max_length=50, null=False)
     total_data_count = models.IntegerField(null=False)
     failed_data_count = models.IntegerField(null=False)
     success_data_count = models.IntegerField(null=False)
