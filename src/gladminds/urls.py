@@ -11,6 +11,8 @@ api_v1.register(r.GladmindsResources())
 api_v1.register(r.BrandResources())
 api_v1.register(r.ProductTypeResources())
 api_v1.register(r.ProductResources())
+api_v1.register(r.UserResources())
+
 
 urlpatterns = patterns('gladminds',
     (r'', include(api_v1.urls)),
