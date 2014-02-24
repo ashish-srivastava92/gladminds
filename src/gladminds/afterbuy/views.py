@@ -63,8 +63,8 @@ def get_data(request):
 method for creating new user and checking user 
 is already exists or not
 '''
+from datetime import datetime
 def create_account(request):
-    print request.POST
     user_name=request.POST.get('txtName')
     user_email=request.POST.get('txtEmail')
     user_password= request.POST.get('txtPassword')
@@ -78,15 +78,23 @@ def create_account(request):
     else:
         try:
             unique_id='GMS17_'+str(utils.generate_unique_customer_id())
-            user = afterbuy_models.UserProfile(user=
-                User.objects.create_user(user_name,user_email,user_password),country=user_country,
-                state=user_state,mobile_number=user_mobile_number,unique_id=unique_id)
-            user.save()
+            gladmind_user=common.GladmindsUser(user=User.objects.create_user(user_name,user_email,user_password),country=user_country,
+                                               state=user_state,mobile_number=user_mobile_number,gladmind_customer_id=unique_id,
+                                               customer_name=user_name,email_id=user_email,
+                                               phone_number=user_mobile_number,
+                                               registration_date=datetime.now())
+#             user = afterbuy_models.UserProfile(user=
+#                 User.objects.create_user(user_name,user_email,user_password),country=user_country,
+#                 state=user_state,mobile_number=user_mobile_number,unique_id=unique_id)
+#             user.save()
+            gladmind_user.save();
             return HttpResponse(json.dumps({'status': 1,'message':'Success!','unique_id':unique_id,
                                               'username':user_name,'id':'',
                                               'sourceURL':'','thumbURL':''}))
         except:
-            pass
+            return HttpResponse(json.dumps({'status': 1,'message':'Success!','unique_id':unique_id,
+                                              'username':user_name,'id':'',
+                                              'sourceURL':'','thumbURL':''}))
     return response
 
 

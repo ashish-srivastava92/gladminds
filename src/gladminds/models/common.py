@@ -98,12 +98,18 @@ class ServiceAdvisor(models.Model):
 Gladmindusers have auto generated glamind customer id,
 and unique phone numner
 '''
+from django.contrib.auth.models import User 
 class GladMindUsers(models.Model):
+    user = models.OneToOneField(User)
     gladmind_customer_id = models.CharField(max_length=215,unique=True, null=True)
     customer_name = models.CharField(max_length=215)
     email_id = models.EmailField(max_length=215)
     phone_number = models.CharField(max_length=15,unique=True)
     registration_date = models.DateTimeField()
+    address=models.CharField(max_length=255, null=False)
+    country=models.CharField(max_length=255, null=False)
+    state=models.CharField(max_length=255, null=False)
+    mobile_number=models.CharField(max_length=255, null=False)
 
     class Meta:
         app_label = "gladminds"
