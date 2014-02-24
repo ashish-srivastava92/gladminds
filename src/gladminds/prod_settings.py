@@ -53,3 +53,9 @@ SMS_CLIENT_DETAIL = {
             }
 
 FEED_TYPE = 'CSV'
+
+SAP_CRM_DETAIL = {
+                  'username':'pisuper',
+                  'password':'welcome123'
+                  }
+COUPON_WSDL_URL = "https://api.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl"
