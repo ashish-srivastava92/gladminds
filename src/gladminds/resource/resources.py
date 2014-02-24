@@ -12,7 +12,7 @@ from gladminds.tasks import send_registration_detail, send_service_detail, \
     send_reminder_message, send_coupon_close_message, send_coupon_detail_customer, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
 from src.gladminds.tasks import send_coupon_close_message
-from tastypie.resources import Resource
+from tastypie.resources import Resource, ModelResource
 json = utils.import_json()
 
 
@@ -196,5 +196,21 @@ class GladmindsResources(Resource):
     
     
 #########################AfterBuy Resources############################################
+class GladmindsBaseResource(ModelResource):
+    def determine_format(self, request):
+        return 'application/json'
+    
+class BrandResources(GladmindsBaseResource):
+    class Meta:
+        queryset = common.BrandData.objects.all()
+        resource_name = 'brands'
 
-
+class ProductTypeResources(GladmindsBaseResource):
+    class Meta:
+        queryset = common.ProductTypeData.objects.all()
+        resource_name = 'product-type'
+        
+class ProductResources(GladmindsBaseResource):
+    class Meta:
+        queryset = common.ProductTypeData.objects.all()
+        resource_name = 'products'
