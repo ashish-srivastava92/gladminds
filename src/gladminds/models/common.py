@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import User 
+from datetime import datetime
 ##################BRAND-PRPDUCT MODELS#######################
 '''
 BrandData contains brand related information
@@ -17,9 +19,11 @@ class UploadProductCSV(models.Model):
         verbose_name_plural = "Upload Product Data"
 
 class BrandData(models.Model):
-    brand_id=models.CharField(max_length=50, null=False,unique=True,
-                              help_text="Brand Id must be unique")
+    pk_brand_id=models.AutoField(primary_key=True)
+    brand_id=models.CharField(max_length=50, null=False,unique=True, help_text="Brand Id must be unique")
     brand_name=models.CharField(max_length=250, null=False)
+    brand_image_url = models.CharField(max_lenght=255, null=True)
+    isActive = models.BooleanField(initial=True)
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Brand Data"
@@ -47,9 +51,12 @@ For 1 Brand there can be multiple Products
 '''
     
 class ProductTypeData(models.Model):
+    product_type_id = models.AutoField(primary_key=True)
     brand_id=models.ForeignKey(BrandData ,null=False)
     product_name=models.CharField(max_length=255, null=False)
     product_type=models.CharField(max_length=255,unique=True, null=False)
+    product_image_url = models.CharField(max_length=255, null=True)
+    isActive = models.BooleanField(initial=True)
     order = models.PositiveIntegerField(default=0)
     class Meta:
         app_label = "gladminds"
@@ -80,8 +87,7 @@ class ServiceAdvisor(models.Model):
     dealer_id = models.ForeignKey(RegisteredDealer, null=False)
     service_advisor_id=models.CharField(max_length=15, blank=False,unique=True, null=False)
     name = models.CharField(max_length=25, blank=False, null=False)
-    phone_number = models.CharField(
-        max_length=15, blank=False, null=False, unique=True)
+    phone_number = models.CharField(max_length=15, blank=False, null=False, unique=True)
     order = models.PositiveIntegerField(default=0)
     class Meta:
         app_label = "gladminds"
@@ -98,7 +104,6 @@ class ServiceAdvisor(models.Model):
 Gladmindusers have auto generated glamind customer id,
 and unique phone numner
 '''
-from django.contrib.auth.models import User 
 class GladMindUsers(models.Model):
     user = models.OneToOneField(User)
     gladmind_customer_id = models.CharField(max_length=215,unique=True, null=True)
@@ -128,6 +133,7 @@ the vin of product and the dealer
 '''
 
 class ProductData(models.Model):
+    product_id=models.AutoField(primary_key=True)
     vin=models.CharField(max_length=215, null=False,unique=True)
     customer_phone_number = models.ForeignKey(GladMindUsers, null=True, blank=True)
     product_type= models.ForeignKey(ProductTypeData, null=False)
@@ -135,6 +141,20 @@ class ProductData(models.Model):
     product_purchase_date = models.DateTimeField(null=True, blank=True)
     invoice_date=models.DateTimeField(null=False)
     dealer_id = models.ForeignKey(RegisteredDealer, null=False)
+    
+    #Added below column for after buy application
+    user_id = models.OneToOneField(User, null=True, blank=True)
+    purchased_from=models.CharField(max_length=255, null=True)
+    seller_email=models.EmailField(max_length=255, null=True)
+    seller_phone=models.CharField(max_length=255, null=True)
+    warranty_yrs=models.IntegerField(null=True)
+    insurance_yrs=models.IntegerField(null=True)
+    invoice_url=models.CharField(max_length=255, null=True)
+    warranty_url=models.CharField(max_length=255, null=True)
+    insurance_url=models.CharField(max_length=255, null=True)
+    lastModified=models.DateTimeField(null=False,default=datetime.now())
+    timestamp=models.DateTimeField(null=True, default=datetime.now())
+    isActive = models.BooleanField(initial=True)
     order = models.PositiveIntegerField(default=0)
     class Meta:
         app_label = "gladminds"
@@ -149,14 +169,12 @@ STATUS_CHOICES = ((1, 'Open'), (2, 'Closed'), (3, 'Expired'),(4,'In Progress'))
 
 class CouponData(models.Model):
     vin=models.ForeignKey(ProductData, null=False)
-    unique_service_coupon = models.CharField(
-        max_length=215, unique=True, null=False)
+    unique_service_coupon = models.CharField(max_length=215, unique=True, null=False)
     valid_days = models.IntegerField(max_length=10,null=False)
     valid_kms = models.IntegerField(max_length=10,null=False)
     service_type=models.IntegerField(max_length=10,null=False)
     sa_phone_number = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
-    status= models.SmallIntegerField(choices=STATUS_CHOICES,
-                                       default=1)
+    status= models.SmallIntegerField(choices=STATUS_CHOICES, default=1)
     closed_date = models.DateTimeField(null=True, blank=True)
     mark_expired_on = models.DateTimeField(null=True, blank=True)
     actual_service_date = models.DateTimeField(null=True, blank=True)
