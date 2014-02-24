@@ -1030,7 +1030,7 @@ $('#myprofile').on('pagebeforeshow',function(event, ui)
 	$("#myprofile #span_username_profile").html(localStorage.getItem("username"));
 	$("#myprofile #span_unique_id_profile").html(localStorage.getItem("unique_id"));
 
-	getCORS(ipaddress+'getData.php?action=getProfile&unique_id='+localStorage.getItem("unique_id"), null, populateProfile);
+	getCORS('app/getData?action=getProfile&unique_id='+localStorage.getItem("unique_id"), null, populateProfile);
 
 
 });
