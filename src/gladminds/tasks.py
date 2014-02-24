@@ -219,7 +219,8 @@ Cron Job to send report email for data feed
 @shared_task
 def send_report_mail_for_feed(*args, **kwargs):
     day = kwargs['day_duration']
-    start_date = datetime.now().date()-timedelta(days=day)
-    end_date = end_date+timedelta(days = 1)
+    today = datetime.now().date()
+    start_date = today-timedelta(days=day)
+    end_date = today+timedelta(days = 1)
     feed_data = taskmanager.get_data_feed_log_detail(start_date = start_date, end_date = end_date)
     mail.feed_report(feed_data = feed_data)
