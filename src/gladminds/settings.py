@@ -201,6 +201,12 @@ LOGGING = {
             'filename':'/var/log/gladminds/app/gladminds.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
+        },
+        'afterbuy_logs': {
+            'level': 'INFO',
+            'filename':'/var/log/gladminds/app/afterbuy.log',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
         }
     },
            
@@ -212,6 +218,11 @@ LOGGING = {
         },
       'gladminds': {
             'handlers': ['gladminds_logs'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'afterbuy': {
+            'handlers': ['afterbuy_logs'],
             'level': 'DEBUG',
             'propagate': True,
         }
