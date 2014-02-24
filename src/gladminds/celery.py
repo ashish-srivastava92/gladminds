@@ -48,7 +48,13 @@ app.conf.CELERYBEAT_SCHEDULE= {
     'cronjob-export-coupon-redeem_to_sap': {
         'task': 'gladminds.tasks.export_coupon_redeem_to_sap',
         'schedule': crontab(minute=0, hour=0),
-    }, 
+    },
+    #Job to send daily mail about data feed
+    'cronjob-send-report-mail-on-data-feed': {
+        'task': 'gladminds.tasks.send_report_mail_for_feed',
+        'schedule': crontab(minute=0, hour=0),
+        'kwargs': {'day_duration':1}
+    },
 }
 app.conf.update(
     CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend',

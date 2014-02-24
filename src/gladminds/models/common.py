@@ -22,7 +22,7 @@ class BrandData(models.Model):
     pk_brand_id=models.AutoField(primary_key=True)
     brand_id=models.CharField(max_length=50, null=False,unique=True, help_text="Brand Id must be unique")
     brand_name=models.CharField(max_length=250, null=False)
-    brand_image_url = models.CharField(max_length=255, null=True)
+    brand_image_url = models.CharField(max_length=255, null=True, blank=True)
     isActive = models.BooleanField(default=True)
     class Meta:
         app_label = "gladminds"
@@ -55,7 +55,7 @@ class ProductTypeData(models.Model):
     brand_id=models.ForeignKey(BrandData ,null=False)
     product_name=models.CharField(max_length=255, null=False)
     product_type=models.CharField(max_length=255,unique=True, null=False)
-    product_image_url = models.CharField(max_length=255, null=True)
+    product_image_url = models.CharField(max_length=255, null=True, blank=True)
     isActive = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
     class Meta:
@@ -70,9 +70,7 @@ class ProductTypeData(models.Model):
 ######################DEALER-SA MODELS#############################    
 
 class RegisteredDealer(models.Model):
-    dealer_id = models.CharField(
-        max_length=25, blank=False, null=False, unique=True,
-        help_text="Dealer Code must be unique")
+    dealer_id = models.CharField(max_length=25, blank=False, null=False, unique=True, help_text="Dealer Code must be unique")
     address = models.TextField(blank=True, null=True)
 
     class Meta:
@@ -108,17 +106,17 @@ class GladMindUsers(models.Model):
     user = models.OneToOneField(User)
     gladmind_customer_id = models.CharField(max_length=215,unique=True, null=True)
     customer_name = models.CharField(max_length=215)
-    email_id = models.EmailField(max_length=215)
+    email_id = models.EmailField(max_length=215, null=True, blank=True)
     phone_number = models.CharField(max_length=15,unique=True)
-    registration_date = models.DateTimeField()
-    address=models.CharField(max_length=255, null=True)
-    country=models.CharField(max_length=255, null=True)
-    state=models.CharField(max_length=255, null=True)
-    dob=models.CharField(max_length=255, null=True)
-    gender=models.IntegerField(max_length=50, null=True)
-    img_url=models.CharField(max_length=50, null=True)
-    thumb_url=models.CharField(max_length=50, null=True)
-    enabled = models.PositiveIntegerField(max_length=1,default=1,null=True)
+    registration_date = models.DateTimeField(default=datetime.now())
+    address=models.CharField(max_length=255, null=True, blank=True)
+    country=models.CharField(max_length=255, null=True, blank=True)
+    state=models.CharField(max_length=255, null=True, blank=True)
+    date_of_birth=models.CharField(max_length=255, null=True, blank=True)
+    gender=models.IntegerField(max_length=50, null=True, blank=True)
+    img_url=models.CharField(max_length=50, null=True, blank=True)
+    thumb_url=models.CharField(max_length=50, null=True, blank=True)
+    isActive = models.BooleanField(default=True)
 
     class Meta:
         app_label = "gladminds"
@@ -139,26 +137,26 @@ the vin of product and the dealer
 
 class ProductData(models.Model):
     product_id=models.AutoField(primary_key=True)
-    vin=models.CharField(max_length=215, null=False,unique=True)
+    vin=models.CharField(max_length=215, null=False, unique=True)
     customer_phone_number = models.ForeignKey(GladMindUsers, null=True, blank=True)
     product_type= models.ForeignKey(ProductTypeData, null=False)
     sap_customer_id = models.CharField(max_length=215, null=True, blank=True)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
-    invoice_date=models.DateTimeField(null=False)
-    dealer_id = models.ForeignKey(RegisteredDealer, null=False)
+    invoice_date=models.DateTimeField(null=True, blank=True)
+    dealer_id = models.ForeignKey(RegisteredDealer, null=False, blank=True)
     
     #Added below column for after buy application
     user_id = models.OneToOneField(User, null=True, blank=True)
-    purchased_from=models.CharField(max_length=255, null=True)
-    seller_email=models.EmailField(max_length=255, null=True)
-    seller_phone=models.CharField(max_length=255, null=True)
-    warranty_yrs=models.IntegerField(null=True)
-    insurance_yrs=models.IntegerField(null=True)
-    invoice_url=models.CharField(max_length=255, null=True)
-    warranty_url=models.CharField(max_length=255, null=True)
-    insurance_url=models.CharField(max_length=255, null=True)
-    lastModified=models.DateTimeField(null=False,default=datetime.now())
-    timestamp=models.DateTimeField(null=True, default=datetime.now())
+    purchased_from=models.CharField(max_length=255, null=True, blank=True)
+    seller_email=models.EmailField(max_length=255, null=True, blank=True)
+    seller_phone=models.CharField(max_length=255, null=True, blank=True)
+    warranty_yrs=models.IntegerField(null=True,blank=True)
+    insurance_yrs=models.IntegerField(null=True, blank=True)
+    invoice_url=models.CharField(max_length=255, null=True, blank=True)
+    warranty_url=models.CharField(max_length=255, null=True, blank=True)
+    insurance_url=models.CharField(max_length=255, null=True, blank=True)
+    last_modified=models.DateTimeField(null=False,default=datetime.now())
+    created_on=models.DateTimeField(null=True, default=datetime.now())
     isActive = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
     class Meta:

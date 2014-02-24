@@ -42,8 +42,7 @@ class ProductTypeDataInline(SortableTabularInline):
 class BrandForm(ModelForm):
     class Meta:
         widgets = { 
-            'brand_id': EnclosedInput(prepend='icon-asterisk',
-                                        attrs={'class': 'input-small'}),
+            'brand_id': EnclosedInput(prepend='icon-asterisk',attrs={'class': 'input-small'}),
             'brand_name': AutosizedTextarea,
         }    
 

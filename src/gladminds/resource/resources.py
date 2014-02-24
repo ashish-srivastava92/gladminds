@@ -13,6 +13,7 @@ from gladminds.tasks import send_registration_detail, send_service_detail, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
 from src.gladminds.tasks import send_coupon_close_message
 from tastypie.resources import Resource, ModelResource
+from tastypie import fields
 json = utils.import_json()
 
 
@@ -214,3 +215,10 @@ class ProductResources(GladmindsBaseResource):
     class Meta:
         queryset = common.ProductTypeData.objects.all()
         resource_name = 'products'
+
+class UserResources(GladmindsBaseResource):
+    class Meta:
+        queryset = common.GladMindUsers.objects.all()
+        resource_name = 'users'
+        
+        

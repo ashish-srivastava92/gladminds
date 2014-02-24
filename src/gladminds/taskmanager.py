@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.db import models, transaction
 from gladminds import audit, utils, message_template as templates
-from gladminds.models import common
+from gladminds.models import common, logs
 from datetime import datetime, timedelta
 
 AUDIT_ACTION = "SENT TO QUEUE"
@@ -53,3 +53,23 @@ def expire_service_coupon(*args, **kwargs):
 
 def import_data_from_sap(*args, **kwargs):
     pass
+
+def get_data_feed_log_detail(start_date = None, end_date = None):
+    start_date = start_date
+    end_date = end_date
+    feed_logs = logs.DataFeedLog.objects.filter(timestamp__range = (start_date, end_date))
+    feed_data = []
+    for feed in feed_logs:
+        data = {}
+        data['feed_type'] = feed.feed_type
+        data['total_feed_count'] = feed.total_data_count
+        data['total_failed_count'] = feed.failed_data_count
+        data['total_success_count'] = feed.success_data_count
+        data['timestamp'] = feed.timestamp
+        data['action'] = feed.action
+        feed_data.append(data)
+    return feed_data
+    
+    
+    
+    

@@ -1,3 +1,7 @@
+"""
+This is not used anymore. but keeping it in project, perhaps we need it in future
+"""
+
 from spyne.server.wsgi import WsgiApplication
 from spyne.util.wsgi_wrapper import WsgiMounter
 
