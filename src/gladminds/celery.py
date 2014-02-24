@@ -53,6 +53,7 @@ app.conf.CELERYBEAT_SCHEDULE= {
     'cronjob-send-report-mail-on-data-feed': {
         'task': 'gladminds.tasks.send_report_mail_for_feed',
         'schedule': crontab(minute=0, hour=0),
+        'kwargs': {'day_duration':1}
     },
 }
 app.conf.update(

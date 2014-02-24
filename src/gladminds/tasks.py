@@ -5,6 +5,7 @@ from gladminds.audit import audit_log
 from gladminds.dao.smsclient import load_gateway, MessageSentFailed
 from gladminds import taskmanager, feed,export_file
 from datetime import datetime, timedelta
+from gladminds import mail
 
 sms_client = load_gateway()
 
@@ -212,6 +213,13 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
     redeem_obj = feed.CouponRedeemFeedToSAP()
     redeem_obj.export_data(start_date = start_date, end_date = end_date)
 
+'''
+Cron Job to send report email for data feed
+'''
 @shared_task
 def send_report_mail_for_feed(*args, **kwargs):
-    pass    
+    day = kwargs['day_duration']
+    end_date = datetime.now().date() 
+    start_date = end_date - timedelta(days = days)
+    feed_data = taskmanager.get_data_feed_log_detail(start_date = start_date, end_date = end_date)
+    mail.feed_report(feed_data = feed_data)
