@@ -135,7 +135,9 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 total_failed+=1
                 logger.info("[Exception: DealerAndServiceAdvisorFeed_sa]: {0}".format(ex))
                 continue
-        feed_log(feed_type = 'Dealer Feed', total_data_count = len(self.data_source), failed_data_count = total_failed, success_data_count = len(self.data_source) - total_failed, action = 'Recieved')
+        feed_log(feed_type = 'Dealer Feed', total_data_count = len(self.data_source), 
+                 failed_data_count = total_failed, success_data_count = len(self.data_source) - total_failed, 
+                 action = 'Recieved', status=True)
 
 class ProductDispatchFeed(BaseFeed):
     def import_data(self):
@@ -163,7 +165,10 @@ class ProductDispatchFeed(BaseFeed):
             except Exception as ex:
                 total_failed+=1
                 continue
-        feed_log(feed_type = 'Dispatch Feed', total_data_count = len(self.data_source), failed_data_count = total_failed, success_data_count = len(self.data_source)-total_failed, action = 'Recieved')
+            
+        feed_log(feed_type = 'Dispatch Feed', total_data_count = len(self.data_source), 
+                 failed_data_count = total_failed, success_data_count = len(self.data_source)-total_failed, 
+                 action = 'Recieved', status=True)
     
     def get_or_create_product_type(self, product_type = None):
         brand_list = [{
@@ -200,7 +205,9 @@ class ProductPurchaseFeed(BaseFeed):
                 total_failed+=1
                 logger.info('[Exception: ProductPurchaseFeed_product_data]: {0}'.format(ex))
                 continue
-        feed_log(feed_type = 'Purchase Feed', total_data_count = len(self.data_source), failed_data_count = total_failed, success_data_count = len(self.data_source) - total_failed, action = 'Recieved')
+        feed_log(feed_type = 'Purchase Feed', total_data_count = len(self.data_source), 
+                 failed_data_count = total_failed, success_data_count = len(self.data_source) - total_failed, 
+                 action = 'Recieved', status=True)
         
             
 class ProductServiceFeed(BaseFeed):

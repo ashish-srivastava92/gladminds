@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.db import models, transaction
 from gladminds import audit, utils, message_template as templates
-from gladminds.models import common
+from gladminds.models import common, logs
 from datetime import datetime, timedelta
 
 AUDIT_ACTION = "SENT TO QUEUE"
@@ -57,7 +57,7 @@ def import_data_from_sap(*args, **kwargs):
 def get_data_feed_log_detail(start_date = None, end_date = None):
     start_date = start_date
     end_date = end_date
-    feed_logs = common.DataFeedLog.objects.filter(timestamp__range = (start_date, end_date))
+    feed_logs = logs.DataFeedLog.objects.filter(timestamp__range = (start_date, end_date))
     feed_data = []
     for feed in feed_logs:
         data = {}
