@@ -22,8 +22,8 @@ class BrandData(models.Model):
     pk_brand_id=models.AutoField(primary_key=True)
     brand_id=models.CharField(max_length=50, null=False,unique=True, help_text="Brand Id must be unique")
     brand_name=models.CharField(max_length=250, null=False)
-    brand_image_url = models.CharField(max_lenght=255, null=True)
-    isActive = models.BooleanField(initial=True)
+    brand_image_url = models.CharField(max_length=255, null=True)
+    isActive = models.BooleanField(default=True)
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Brand Data"
@@ -56,7 +56,7 @@ class ProductTypeData(models.Model):
     product_name=models.CharField(max_length=255, null=False)
     product_type=models.CharField(max_length=255,unique=True, null=False)
     product_image_url = models.CharField(max_length=255, null=True)
-    isActive = models.BooleanField(initial=True)
+    isActive = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
     class Meta:
         app_label = "gladminds"
@@ -154,7 +154,7 @@ class ProductData(models.Model):
     insurance_url=models.CharField(max_length=255, null=True)
     lastModified=models.DateTimeField(null=False,default=datetime.now())
     timestamp=models.DateTimeField(null=True, default=datetime.now())
-    isActive = models.BooleanField(initial=True)
+    isActive = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
     class Meta:
         app_label = "gladminds"
