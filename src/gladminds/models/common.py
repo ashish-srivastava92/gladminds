@@ -106,10 +106,9 @@ class GladMindUsers(models.Model):
     email_id = models.EmailField(max_length=215)
     phone_number = models.CharField(max_length=15,unique=True)
     registration_date = models.DateTimeField()
-    address=models.CharField(max_length=255, null=False)
-    country=models.CharField(max_length=255, null=False)
-    state=models.CharField(max_length=255, null=False)
-    mobile_number=models.CharField(max_length=255, null=False)
+    address=models.CharField(max_length=255, null=True)
+    country=models.CharField(max_length=255, null=True)
+    state=models.CharField(max_length=255, null=True)
 
     class Meta:
         app_label = "gladminds"

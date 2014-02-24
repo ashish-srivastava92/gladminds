@@ -65,12 +65,12 @@ is already exists or not
 '''
 from datetime import datetime
 def create_account(request):
-    user_name=request.POST.get('txtName')
-    user_email=request.POST.get('txtEmail')
-    user_password= request.POST.get('txtPassword')
-    user_country=request.POST.get('txtCountry')
-    user_state=request.POST.get('txtState')
-    user_mobile_number=request.POST.get('txtMobile')
+    user_name=request.POST.get('txtName', None)
+    user_email=request.POST.get('txtEmail', None)
+    user_password= request.POST.get('txtPassword', None)
+    user_country=request.POST.get('txtCountry', None)
+    user_state=request.POST.get('txtState', None)
+    user_mobile_number=request.POST.get('txtMobile', None)
     unique_id=''
     response=None   
     if check_email_id_exists(user_email):
@@ -78,20 +78,20 @@ def create_account(request):
     else:
         try:
             unique_id='GMS17_'+str(utils.generate_unique_customer_id())
-            gladmind_user=common.GladmindsUser(user=User.objects.create_user(user_name,user_email,user_password),country=user_country,
-                                               state=user_state,mobile_number=user_mobile_number,gladmind_customer_id=unique_id,
-                                               customer_name=user_name,email_id=user_email,
+            gladmind_user=common.GladMindUsers(user=User.objects.create_user(user_name,user_email,user_password),
+                                               country=user_country,
+                                               state=user_state,
+                                               gladmind_customer_id=unique_id,
+                                               customer_name=user_name,
+                                               email_id=user_email,
                                                phone_number=user_mobile_number,
                                                registration_date=datetime.now())
-#             user = afterbuy_models.UserProfile(user=
-#                 User.objects.create_user(user_name,user_email,user_password),country=user_country,
-#                 state=user_state,mobile_number=user_mobile_number,unique_id=unique_id)
-#             user.save()
             gladmind_user.save();
             return HttpResponse(json.dumps({'status': 1,'message':'Success!','unique_id':unique_id,
                                               'username':user_name,'id':'',
                                               'sourceURL':'','thumbURL':''}))
-        except:
+        except Exception as ex:
+            print "Exception : %s" % ex
             return HttpResponse(json.dumps({'status': 1,'message':'Success!','unique_id':unique_id,
                                               'username':user_name,'id':'',
                                               'sourceURL':'','thumbURL':''}))
