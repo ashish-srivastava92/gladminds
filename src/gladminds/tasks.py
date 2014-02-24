@@ -211,3 +211,7 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
     end_date = today
     redeem_obj = feed.CouponRedeemFeedToSAP()
     redeem_obj.export_data(start_date = start_date, end_date = end_date)
+
+@shared_task
+def send_report_mail_for_feed(*args, **kwargs):
+    pass    
