@@ -114,6 +114,11 @@ class GladMindUsers(models.Model):
     address=models.CharField(max_length=255, null=True)
     country=models.CharField(max_length=255, null=True)
     state=models.CharField(max_length=255, null=True)
+    dob=models.CharField(max_length=255, null=True)
+    gender=models.IntegerField(max_length=50, null=True)
+    img_url=models.CharField(max_length=50, null=True)
+    thumb_url=models.CharField(max_length=50, null=True)
+    enabled = models.PositiveIntegerField(max_length=1,default=1,null=True)
 
     class Meta:
         app_label = "gladminds"

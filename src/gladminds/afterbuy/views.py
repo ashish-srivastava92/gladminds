@@ -25,8 +25,8 @@ def my_login(request):
             login(request, user)
             user_obj=User.objects.get(username=username)
             user_name=user_obj.username
-            user_profile=afterbuy_models.UserProfile.objects.get(user=user)
-            unique_id=user_profile.unique_id
+            user_profile=common.GladMindUsers.objects.get(user=user)
+            unique_id=user_profile.gladmind_customer_id
             id=user_profile.user_id
             response=HttpResponse(json.dumps({'status': 1,'id':id,'username':user_name,'unique_id':unique_id}))
         else:
@@ -46,10 +46,10 @@ def get_data(request):
     action= request.GET.get('action')
     if action=='getProfile':
         unique_id=request.GET.get('unique_id')
-        user_profile=afterbuy_models.UserProfile.objects.get(unique_id=unique_id)
+        user_profile=common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
         name=user_profile.user.username
         email=user_profile.user.email
-        mobile=user_profile.mobile_number
+        mobile=user_profile.phone_number
         address=user_profile.address
         country=user_profile.country
         state=user_profile.state
