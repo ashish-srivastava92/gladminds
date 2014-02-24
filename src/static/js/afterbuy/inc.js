@@ -117,7 +117,6 @@ function populateProfile(data){
 }
 
 function populate_edit(data){
-	alert(data)
 	populateStates_edit(data);
 	showLoading();
 
@@ -160,7 +159,6 @@ editReturn = function(jsonObj){
 
 function showEditSettings(data){
 	
-
 	if(!data==""){
 		data = $.parseJSON(data);
 		$("#editForm #userID").val(localStorage.getItem("userid"));
@@ -412,8 +410,8 @@ $(document).ready(function() {
 				showLoading();
 		        localStorage.setItem("thumbURL", data.thumbURL);
 		        localStorage.setItem("sourceURL", data.sourceURL);
-
-				$.mobile.changePage( '#myprofile', {transition: 'slide'});
+   				$.mobile.changePage( '#myprofile', {transition: 'slide'});
+				
 				//document.location.href="index.php";
 			}
 
@@ -806,7 +804,7 @@ function editItem(obj){
 	showLoading();
 	$("#edit-adding-item-form")[0].reset();
 	if(navigator.onLine){
-		
+		alert("111111111111111")
 		getCORS(ipaddress+'getData.php?action=getProducts', null, function(data){
 			//alert(isAdded_editmyItem)
 			if(!(isAdded_editmyItem)){
@@ -905,7 +903,7 @@ function editItem(obj){
 
 
 
-
+//////////////////////////////////////warranty//////////////////////////////
 
 $('#item-warranty-check').on('pagebeforeshow',function(event, ui)
 {
@@ -1029,7 +1027,6 @@ $('#myprofile').on('pagebeforeshow',function(event, ui)
 	$("#myprofile .profile").attr("src",ipaddress+localStorage.getItem("thumbURL"));
 	$("#myprofile #span_username_profile").html(localStorage.getItem("username"));
 	$("#myprofile #span_unique_id_profile").html(localStorage.getItem("unique_id"));
-
 	getCORS('app/getData?action=getProfile&unique_id='+localStorage.getItem("unique_id"), null, populateProfile);
 
 
@@ -1090,7 +1087,7 @@ $('#adding-item').on('pagebeforeshow',function(event, ui){
 	$("#adding-item .sp_unique_id").html(localStorage.getItem("unique_id"));
 
 	if(navigator.onLine && !(isAdded_myItem)){
-		getCORS(ipaddress+'getData.php?action=getProducts', null, function(data){
+		getCORS('app/getData?action=getProducts', null, function(data){
 
 			data = $.parseJSON(data);
 			prdData = data.Products;
@@ -1121,7 +1118,6 @@ $('#adding-item').on('pagebeforeshow',function(event, ui){
 });
 
 $('#user-settings').on('pagebeforeshow',function(event, ui){
-
 	showLoading();
 	$("#editForm")[0].reset();
 	$(".epthumbnail img").attr("src",ipaddress+localStorage.getItem("sourceURL"));

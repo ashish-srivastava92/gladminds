@@ -7,6 +7,7 @@ from gladminds.models import common,afterbuy_models
 from gladminds import utils
 from django.contrib.auth import logout
 import json
+from django.template.context import RequestContext
 
 def home(request):
     c = {}
@@ -17,6 +18,18 @@ def home(request):
  method for login
 '''
 def my_login(request):
+    c = {}
+    c.update(csrf(request))
+    if request.POST.get('action')=='checkLogin':
+        return check_login(request)
+    elif request.POST.get('action')=='editSettings' :
+        return HttpResponse(update_user_details(request),c)
+    else:
+        return HttpResponse(c)
+    
+
+
+def check_login(request):
     username = request.POST.get('txtUsername')
     password = request.POST.get('txtPassword')
     user = authenticate(username=username, password=password)
@@ -35,11 +48,48 @@ def my_login(request):
        response=HttpResponse(json.dumps({'status': 0}))
     return response
 
-
+def update_user_details(request):
+    print request.POST
+    user_id=request.POST.get('userID')
+    if user_id:
+        user_name=request.POST.get('txt_name', None)
+        user_email=request.POST.get('txt_email', None)
+        user_country=request.POST.get('txt_country', None)
+        user_state=request.POST.get('txt_state', None)
+        user_mobile_number=request.POST.get('txt_mob', None)
+        user_dob=request.POST.get('txt_dob', None)
+        user_interest=request.POST.get('txt_interest', None)
+        user_address=request.POST.get('txt_address', None)
+        user_gender=request.POST.get('txt_gender', None)
+        try:
+#             user_object=common.GladMindUsers.objects.get(user_id=user_id)
+#             print "user_object is",user_object
+# #                         update(customer_name=user_name,
+# #                         email_id=user_email,
+# #                         phone_number=user_mobile_number,
+# #                         address=user_address,
+# #                         country=user_country,
+# #                         state=user_state,
+# #                         dob=user_dob,
+# #                         gender=user_gender)
+#             user_object.user.username=user_name
+#             user_object.user.email=user_email
+#             unique_id=user_object.gladmind_customer_id
+#             user_object.save()
+            response=json.dumps({'status':" 1",'thumbURL':'','sourceURL':''})
+        except:
+            response=json.dumps({'status': 0})
+    else:
+        response=json.dumps({'status': 0})
+    return response
+        
+    
+    
+    
 
 def app_logout(request):
     logout(request)
-    return HttpResponse(1)
+    return HttpResponse('logged out')
 
 
 def get_data(request):
@@ -56,6 +106,9 @@ def get_data(request):
         return HttpResponse(json.dumps({'name':name,'email':email,'mobile':mobile,'address':address,
                                         'country':country,'state':state,'dob':'','gender':'',
                                         'Interests':''}))
+        
+    elif action=='getProducts':
+        pass
     
 
 '''

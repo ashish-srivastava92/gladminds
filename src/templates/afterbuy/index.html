@@ -572,7 +572,7 @@
 			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
-			<form id="editForm" action="http://www.rkarthik.in/mobile/gm/loginCheck.php" method="post" enctype="multipart/form-data">
+			<form id="editForm" action="/app/login" method="post" enctype="multipart/form-data">{% csrf_token %}
 				<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 					<a href="#dashboard" id="home" data-role="none" class="pull-left" data-rel="back" data-direction="reverse" data-transition="slide">
 						<img src="/static/img/afterbuy/home-icon.png" alt="Homepage">
