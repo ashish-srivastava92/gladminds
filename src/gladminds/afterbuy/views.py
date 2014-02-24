@@ -53,7 +53,6 @@ def get_data(request):
         address=user_profile.address
         country=user_profile.country
         state=user_profile.state
-        print ":::::::::::::",email
         return HttpResponse(json.dumps({'name':name,'email':email,'mobile':mobile,'address':address,
                                         'country':country,'state':state,'dob':'','gender':'',
                                         'Interests':''}))
@@ -72,9 +71,8 @@ def create_account(request):
     user_state=request.POST.get('txtState', None)
     user_mobile_number=request.POST.get('txtMobile', None)
     unique_id=''
-    response=None   
     if check_email_id_exists(user_email):
-        response=HttpResponse(json.dumps({'status': 2,'message':'Email already exists'}))
+        response= HttpResponse(json.dumps({'status': 2,'message':'Email already exists'}))
     else:
         try:
             unique_id='GMS17_'+str(utils.generate_unique_customer_id())
@@ -87,14 +85,14 @@ def create_account(request):
                                                phone_number=user_mobile_number,
                                                registration_date=datetime.now())
             gladmind_user.save();
+            response=HttpResponse(json.dumps({'status': 1,'message':'Success!','unique_id':unique_id,
+                                              'username':user_name,'id':'',
+                                              'sourceURL':'','thumbURL':''}))
             return HttpResponse(json.dumps({'status': 1,'message':'Success!','unique_id':unique_id,
                                               'username':user_name,'id':'',
                                               'sourceURL':'','thumbURL':''}))
-        except Exception as ex:
-            print "Exception : %s" % ex
-            return HttpResponse(json.dumps({'status': 1,'message':'Success!','unique_id':unique_id,
-                                              'username':user_name,'id':'',
-                                              'sourceURL':'','thumbURL':''}))
+        except :
+            pass
     return response
 
 
