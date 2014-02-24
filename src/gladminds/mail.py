@@ -18,13 +18,15 @@ def send_email(sender, receiver, subject, body, smtp_server):
     mail.quit()
 
 def feed_report(feed_data = None):
+    from gladminds import mail
     try:
-        file_stream = settings.TEMPLATE_DIR+'feed_report.html'
+        file_stream = open(settings.TEMPLATE_DIR+'/feed_report.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
-        body = template.render(Context(feed_data))
+        context = Context({"feed_logs": feed_data})
+        body = template.render(context)
         mail_detail = settings.MAIL_DETAIL
-        send_email(sender = mail_detail['sender'], receiver = mail_detail['reciever'], 
+        mail.send_email(sender = mail_detail['sender'], receiver = mail_detail['reciever'], 
                    subject = mail_detail['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
