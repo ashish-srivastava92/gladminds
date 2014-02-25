@@ -11,6 +11,9 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from django.conf import settings
 from django.template.context import RequestContext
+import logging
+
+logger = logging.getLogger("gladminds")
 
 @csrf_exempt
 def home(request):
@@ -23,8 +26,6 @@ def home(request):
 '''
 @csrf_exempt
 def my_login(request):
-#     c = {}
-#     c.update(csrf(request))
     if request.POST.get('action')=='checkLogin':
         return check_login(request)
     elif request.POST.get('action')=='editSettings' :
@@ -154,6 +155,7 @@ def create_account(request):
     user_country=request.POST.get('txtCountry', None)
     user_state=request.POST.get('txtState', None)
     user_mobile_number=request.POST.get('txtMobile', None)
+    user_address=request.POST.get('txtAddress',None)
     unique_id=''
     if check_email_id_exists(user_email):
         response= HttpResponse(json.dumps({'status': 2,'message':'Email already exists'}))
@@ -167,8 +169,10 @@ def create_account(request):
                                                customer_name=user_name,
                                                email_id=user_email,
                                                phone_number=user_mobile_number,
-                                               registration_date=datetime.now())
+                                               registration_date=datetime.now(),
+                                               address=user_address)
             gladmind_user.save();
+            send_registration_mail(gladmind_user)
             response=HttpResponse(json.dumps({'status': 1,'message':'Success!','unique_id':unique_id,
                                               'username':user_name,'id':'',
                                               'sourceURL':'','thumbURL':''}))
@@ -180,20 +184,29 @@ def create_account(request):
     return response
 
 
-def send_registration_mail():
+def send_registration_mail(user_detail):
+    unique_id= user_detail.gladmind_customer_id
+    user_name=user_detail.customer_name
+    user_mobile=user_detail.phone_number
+    user_email=user_detail.email_id
+    user_state=user_detail.state
+    user_country=user_detail.country
+    user_address=user_detail.address
     file_stream = open(settings.TEMPLATE_DIR+'/registration_mail.html')
     reg_mail_temp = file_stream.read()
     template = Template(reg_mail_temp)
-    context = Context({'unique_id':'test_unique_id',
-                       'user_name':'test_user_name',
-                       'user_mobile':'test_mobile',
-                       'user_email':'test_email',
-                       'user_state':'test_sate',
-                       'user_country':'tes_country',
-                       'user_address':'test_address',
-                       'user_password':'test_password'})
+    context = Context({'unique_id':unique_id,
+                       'user_name':user_name,
+                       'user_mobile':user_mobile,
+                       'user_email':user_email,
+                       'user_state':user_state,
+                       'user_country':user_country,
+                       'user_address':'test_address'})
     body = template.render(context)
-    mail.send_email('info@gladminds.com','avinash.garg@hashedin.com', 'testmsg', body)
+    try:
+        mail.send_email('info@gladminds.com','avinash.garg@hashedin.com', 'testmsg', body)
+    except Exception as ex:
+        logger.info("[Exception Registration mail: {0}".format(ex))
 
 
 '''
