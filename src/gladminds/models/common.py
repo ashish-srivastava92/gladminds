@@ -22,7 +22,7 @@ class BrandData(models.Model):
     pk_brand_id=models.AutoField(primary_key=True)
     brand_id=models.CharField(max_length=50, null=False,unique=True, help_text="Brand Id must be unique")
     brand_name=models.CharField(max_length=250, null=False)
-    brand_image_url = models.CharField(max_length=255, null=True, blank=True)
+    brand_image_loc = models.FileField(upload_to=settings.AFTERBUY_BRAND_LOC, blank=True)
     isActive = models.BooleanField(default=True)
     class Meta:
         app_label = "gladminds"
@@ -55,7 +55,7 @@ class ProductTypeData(models.Model):
     brand_id=models.ForeignKey(BrandData ,null=False)
     product_name=models.CharField(max_length=255, null=False)
     product_type=models.CharField(max_length=255,unique=True, null=False)
-    product_image_url = models.CharField(max_length=255, null=True, blank=True)
+    product_image_loc = models.FileField(upload_to=settings.AFTERBUY_PRODUCT_TYPE_LOC, blank=True)
     isActive = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
     class Meta:
@@ -114,8 +114,8 @@ class GladMindUsers(models.Model):
     state=models.CharField(max_length=255, null=True, blank=True)
     date_of_birth=models.CharField(max_length=255, null=True, blank=True)
     gender=models.IntegerField(max_length=50, null=True, blank=True)
-    img_url=models.CharField(max_length=50, null=True, blank=True)
-    thumb_url=models.CharField(max_length=50, null=True, blank=True)
+    img_url=models.FileField(upload_to=settings.AFTERBUY_USER_LOC, blank=True)
+    thumb_url=models.FileField(upload_to=settings.AFTERBUY_USER_LOC, blank=True)
     isActive = models.BooleanField(default=True)
 
     class Meta:
@@ -143,7 +143,7 @@ class ProductData(models.Model):
     sap_customer_id = models.CharField(max_length=215, null=True, blank=True)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
     invoice_date=models.DateTimeField(null=True, blank=True)
-    dealer_id = models.ForeignKey(RegisteredDealer, null=False, blank=True)
+    dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
     
     #Added below column for after buy application
     user_id = models.OneToOneField(User, null=True, blank=True)
@@ -152,9 +152,11 @@ class ProductData(models.Model):
     seller_phone=models.CharField(max_length=255, null=True, blank=True)
     warranty_yrs=models.IntegerField(null=True,blank=True)
     insurance_yrs=models.IntegerField(null=True, blank=True)
-    invoice_url=models.CharField(max_length=255, null=True, blank=True)
-    warranty_url=models.CharField(max_length=255, null=True, blank=True)
-    insurance_url=models.CharField(max_length=255, null=True, blank=True)
+    
+    invoice_loc=models.FileField(upload_to=settings.AFTERBUY_PRODUCT_INVOICE_LOC, blank=True)
+    warranty_loc=models.FileField(upload_to=settings.AFTERBUY_PRODUCT_WARRENTY_LOC, blank=True)
+    insurance_loc=models.FileField(upload_to=settings.AFTERBUY_PRODUCT_INSURANCE_LOC, blank=True)
+    
     last_modified=models.DateTimeField(null=False,default=datetime.now())
     created_on=models.DateTimeField(null=True, default=datetime.now())
     isActive = models.BooleanField(default=True)
