@@ -232,26 +232,29 @@ def check_email_id_exists(email_id):
 def create_item(request):
     try:
         post_data = request.POST
-        user_id = post_data['addnewitem_userID'];
-        product_name = post_data['ai_txtProduct'];
-        brand_name = post_data['ai_txtManufacturer'];
-        product_id = post_data['ai_txtitem-no'];
-        purchase_date = post_data['ai_txtpur-date'];
-        purchased_from = post_data['ai_txtpurchased-from'];
-        seller_email = post_data['ai_txtseller-email'];
-        seller_phone = post_data['ai_txtseller-phone'];
-        warranty_yrs = post_data['ai_txtwarranty'];
-        insurance_yrs = post_data['ai_txtinsurance'];
-        invoice_file = request.FILES['invoice_file']
-        warranty_file = request.FILES['warranty_file']
-        insurance_file = request.FILES['insurance_file']
-        item_obj = common.ProductData(vin = product_id, 
+        user_id = post_data['addnewitem_userID']
+        product_name = post_data['ai_txtProduct']
+        brand_name = post_data['ai_txtManufacturer']
+        product_id = post_data['ai_txtitem-no']
+        purchase_date = post_data.get('ai_txtpur-date', None)
+        purchased_from = post_data.get('ai_txtpurchased-from', None)
+        seller_email = post_data.get('ai_txtseller-email', None)
+        seller_phone = post_data.get('ai_txtseller-phone', None)
+        warranty_yrs = post_data.get('ai_txtwarranty', None)
+        insurance_yrs = post_data.get('ai_txtinsurance', None)
+        invoice_file = request.FILES.get('invoice_file', None)
+        warranty_file = request.FILES.get('warranty_file', None)
+        insurance_file = request.FILES.get('insurance_file', None)
+        user_obj = common.GladMindUsers.objects.get(user = User.objects.get(id=user_id))
+        item_obj = common.ProductData(vin = product_id, customer_phone_number = user_obj,
                                       product_purchase_date = purchase_date, purchased_from = purchased_from, 
                                       seller_email = seller_email, warranty_yrs = warranty_yrs,
                                       insurance_yrs = insurance_yrs, invoice_loc = File(insurance_file),
                                       warranty_loc = File(warranty_file), insurance_loc = File(warranty_file))
         item_obj.save()
-        return HttpResponse('{"status": "1","message":"Success!","id":"1"}')
+        
+        return HttpResponse({"status": "1","message":"Success!","id":item_obj.vin})
     except Exception as ex:
-        return HttpResponse('{"status": "1","message":"Success!","id":"1"}')
+        print ex
+        return HttpResponse({"status": "1","message":"Success!","id":1})
     

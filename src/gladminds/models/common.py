@@ -146,7 +146,6 @@ class ProductData(models.Model):
     dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
     
     #Added below column for after buy application
-    user_id = models.OneToOneField(User, null=True, blank=True)
     purchased_from=models.CharField(max_length=255, null=True, blank=True)
     seller_email=models.EmailField(max_length=255, null=True, blank=True)
     seller_phone=models.CharField(max_length=255, null=True, blank=True)
