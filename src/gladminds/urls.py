@@ -13,7 +13,6 @@ api_v1.register(r.ProductTypeResources())
 api_v1.register(r.ProductResources())
 api_v1.register(r.UserResources())
 
-
 urlpatterns = patterns('gladminds',
     (r'', include(api_v1.urls)),
     url(r'^api/v1/bajaj/feed/\?wsdl$', 'webservice.all_service'),
@@ -45,3 +44,8 @@ urlpatterns = patterns('gladminds',
     url(r'^sms/','superadmin.views.send_sms', name='send_sms'),
     url(r'^', include(admin.site.urls)),
 )
+
+if not settings.DEBUG:
+    urlpatterns += patterns('',
+        (r'^media/(?P<path>.*)$', 'django.views.static.serve', {
+        'document_root': settings.MEDIA_ROOT}))
