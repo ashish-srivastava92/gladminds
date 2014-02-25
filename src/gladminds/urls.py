@@ -32,6 +32,7 @@ urlpatterns = patterns('gladminds',
     url(r'^app/logout', 'afterbuy.views.app_logout', name='app_logout'),
     url(r'^app/getData', 'afterbuy.views.get_data', name='get_data'),
     url(r'^app', 'afterbuy.views.home', name='home'),
+     url(r'^test', 'afterbuy.views.test', name='test'),
     
     # Examples:
     # url(r'^$', 'gladminds.views.home', name='home'),

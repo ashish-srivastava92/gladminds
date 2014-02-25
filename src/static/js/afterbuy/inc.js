@@ -411,7 +411,7 @@ $(document).ready(function() {
 				showLoading();
 		        localStorage.setItem("thumbURL", data.thumbURL);
 		        localStorage.setItem("sourceURL", data.sourceURL);
-				$.mobile.changePage( '#myprofile', {transition: 'slide' }); original 
+				$.mobile.changePage( '#myprofile', {transition: 'slide' }); 
 				//document.location.href="index.php";
 			}
 
@@ -483,7 +483,7 @@ $(document).ready(function() {
 	//Load states on change of country dropdown in registerpage.
 	$("#txtCountry").change(function(){
 			showLoading();
-			getCORS(ipaddress+'getData.php?action=getStates&cID='+$(this).val(), null, populateStates);
+			getCORS('app/getData?action=getStates&cID='+$(this).val(), null, populateStates);
 	});
 
 	//Load states on change of country dropdown in Edit Profile.
