@@ -269,7 +269,7 @@
 				<div class="alert alert-error hide">
 					<a class="close" data-dismiss="alert" href="#">x</a>Incorrect Username or Password!
 				</div>
-				<form action="#" method="post" id="loginForm">{% csrf_token %}
+				<form action="#" method="post" id="loginForm">
 					<input type="hidden" name="action" value="checkLogin"/>
 					<ul>
 						<li data-fix="clearfix">
@@ -343,7 +343,7 @@
 				<h3 class="page-title">Create your AfterBuy Account</h3>
 				
 			</div>
-			<form action="/app/create-account" method="post" id="frmRegister" enctype="multipart/form-data">{% csrf_token %}
+			<form action="/app/create-account" method="post" id="frmRegister" enctype="multipart/form-data">
 				<input type="hidden" name="action" value="newRegister"/>
 				<div class="row-fluid">
 					<div>
@@ -572,7 +572,7 @@
 			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
-			<form id="editForm" action="/app/login" method="post" enctype="multipart/form-data">{% csrf_token %}
+			<form id="editForm" action="/app/login" method="post" enctype="multipart/form-data">
 				<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 					<a href="#dashboard" id="home" data-role="none" class="pull-left" data-rel="back" data-direction="reverse" data-transition="slide">
 						<img src="/static/img/afterbuy/home-icon.png" alt="Homepage">
@@ -1315,7 +1315,7 @@
 			</div>
 			<div class="margin-large-top"></div>
 			<h4>Questionnaire</h4>
-			<form id="feedbackForm" class="feedbackForm" action="http://www.rkarthik.in/mobile/gm/loginCheck.php" method="post" >
+			<form id="feedbackForm" class="feedbackForm" action="app/login" method="post" >
 
 				<input type="hidden" name="action" value="feedback"/>
 				<input type="hidden" name="userID" class="userID" value=""/>

@@ -295,6 +295,7 @@ $(document).ready(function() {
 
 			if(data.status=="1"){
 				hideLoading();
+				
 				$.mobile.changePage( '#profile-page', {transition: 'slide'});
 			}
 			else
@@ -410,8 +411,7 @@ $(document).ready(function() {
 				showLoading();
 		        localStorage.setItem("thumbURL", data.thumbURL);
 		        localStorage.setItem("sourceURL", data.sourceURL);
-   				$.mobile.changePage( '#myprofile', {transition: 'slide'});
-				
+				$.mobile.changePage( '#myprofile', {transition: 'slide' }); original 
 				//document.location.href="index.php";
 			}
 

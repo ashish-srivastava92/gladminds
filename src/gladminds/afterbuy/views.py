@@ -6,29 +6,34 @@ from django.contrib.auth import authenticate ,login
 from gladminds.models import common,afterbuy_models
 from gladminds import utils
 from django.contrib.auth import logout
+from django.views.decorators.csrf import csrf_exempt
 import json
 from django.template.context import RequestContext
 
+@csrf_exempt
 def home(request):
-    c = {}
-    c.update(csrf(request))
-    return render_to_response('afterbuy/index.html',c)
+#     c = {}
+#     c.update(csrf(request))
+    return render_to_response('afterbuy/index.html')
 
 '''
  method for login
 '''
+@csrf_exempt
 def my_login(request):
-    c = {}
-    c.update(csrf(request))
+#     c = {}
+#     c.update(csrf(request))
     if request.POST.get('action')=='checkLogin':
         return check_login(request)
     elif request.POST.get('action')=='editSettings' :
-        return HttpResponse(update_user_details(request),c)
+        return HttpResponse(update_user_details(request))
+    elif request.POST.get('action')=='feedback' :
+        return send_feedback_response(request)
     else:
-        return HttpResponse(c)
+        return HttpResponse()
     
 
-
+@csrf_exempt
 def check_login(request):
     username = request.POST.get('txtUsername')
     password = request.POST.get('txtPassword')
@@ -48,8 +53,8 @@ def check_login(request):
        response=HttpResponse(json.dumps({'status': 0}))
     return response
 
+@csrf_exempt
 def update_user_details(request):
-    print request.POST
     user_id=request.POST.get('userID')
     if user_id:
         user_name=request.POST.get('txt_name', None)
@@ -83,15 +88,19 @@ def update_user_details(request):
         response=json.dumps({'status': 0})
     return response
         
+@csrf_exempt
+def send_feedback_response(request):
+    #FIXME not saving feed back just sending the response
+    user_id=request.POST.get('userID')
+    return HttpResponse(json.dumps({"status":"1","message":"Success!","id":user_id}))   
     
     
-    
-
+@csrf_exempt
 def app_logout(request):
     logout(request)
     return HttpResponse('logged out')
 
-
+@csrf_exempt
 def get_data(request):
     action= request.GET.get('action')
     if action=='getProfile':
@@ -108,7 +117,7 @@ def get_data(request):
                                         'Interests':''}))
         
     elif action=='getProducts':
-        pass
+        pass    
     
 
 '''
@@ -116,6 +125,7 @@ method for creating new user and checking user
 is already exists or not
 '''
 from datetime import datetime
+@csrf_exempt
 def create_account(request):
     user_name=request.POST.get('txtName', None)
     user_email=request.POST.get('txtEmail', None)
@@ -154,7 +164,7 @@ update the details of existing account
 '''
 def update_account():
     pass
-
+@csrf_exempt
 def check_email_id_exists(email_id):
     try:
         user=User.objects.get(email=email_id)
