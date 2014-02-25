@@ -711,7 +711,6 @@ $('#item-insurance-check').on('pagebeforeshow',function(event, ui)
 $('#profile-page').on('pagebeforeshow',function(event, ui)
 {
 	showLoading();
-
    	$("#profile-page .sp_username").html(localStorage.getItem("username"));
 	$("#profile-page .sp_unique_id").html(localStorage.getItem("unique_id"));
 	getCORS(ipaddress+'getData.php?action=getmyItems&unique_id='+localStorage.getItem("unique_id"), null, listMyItems);
@@ -1122,8 +1121,7 @@ $('#user-settings').on('pagebeforeshow',function(event, ui){
 	$("#editForm")[0].reset();
 	$(".epthumbnail img").attr("src",ipaddress+localStorage.getItem("sourceURL"));
 	$("#txt_country").val("india");
-
-	getCORS(ipaddress+'getData.php?action=getStates&cID=india', null, populate_edit);
+	getCORS('app/getData?action=getStates&cID=india', null, populate_edit);
 });
 
 //SideBar Pages

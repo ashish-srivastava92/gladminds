@@ -81,6 +81,7 @@ def update_user_details(request):
 #             user_object.user.email=user_email
 #             unique_id=user_object.gladmind_customer_id
 #             user_object.save()
+
             response=json.dumps({'status':" 1",'thumbURL':'','sourceURL':''})
         except:
             response=json.dumps({'status': 0})
@@ -115,10 +116,28 @@ def get_data(request):
         return HttpResponse(json.dumps({'name':name,'email':email,'mobile':mobile,'address':address,
                                         'country':country,'state':state,'dob':'','gender':'',
                                         'Interests':''}))
-        
+    elif action=='getStates':
+        return get_states()    
+    
     elif action=='getProducts':
         pass    
     
+
+
+
+
+def get_states():
+    state_list=["Uttar Pradesh", "Maharashtra", 
+          "Bihar", "West Bengal", "Andhra Pradesh", "Madhya Pradesh",
+           "Tamil Nadu", "Rajasthan", "Karnataka", "Gujarat", "Odisha",
+            "Kerala", "Jharkhand", "Assam", "Punjab","Haryana","Chhattisgarh",
+            "Jammu and Kashmir","Uttarakhand","Himachal Pradesh", "Tripura", "Meghalaya", 
+            "Manipur", "Nagaland", "Goa", "Arunachal Pradesh", "Mizoram","Sikkim", 
+            "Delhi", "Puducherry", "Chandigarh", "Andaman and Nicobar Islands",
+             "Dadra and Nagar Haveli", "Daman and Diu", "Lakshadweep"]
+    states=','.join(state_list)
+    return HttpResponse(states)
+
 
 '''
 method for creating new user and checking user 
