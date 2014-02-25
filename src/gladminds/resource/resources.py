@@ -1,5 +1,6 @@
 from datetime import datetime
 from django.conf.urls import url
+from tastypie.utils.urls import trailing_slash
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
@@ -218,15 +219,25 @@ class ProductResources(GladmindsBaseResource):
         resource_name = 'products'
 
 class UserResources(GladmindsBaseResource):
-    
+    products = fields.ListField()
     class Meta:
         queryset = common.GladMindUsers.objects.all()
         resource_name = 'users'
     
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/products%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_products'), name="api_get_products"),
+        ]
+    
+    def get_products(self, request, **kwargs):
+        user_id = kwargs['pk']
+        products = common.ProductData.objects.filter(customer_phone_number__id = user_id).select_related('customer_phone_number')
+        products = [model_to_dict(product) for product in products]
+        to_be_serialized = {"products": products}
+        return self.create_response(request, data=to_be_serialized)
+    
     def dehydrate(self, bundle):
-        print bundle.data['id']
         products = common.ProductData.objects.filter(customer_phone_number__id = bundle.data['id']).select_related('customer_phone_number')
-        print products[0].customer_phone_number.id
         bundle.data['products'] = [model_to_dict(product) for product in products]
         return bundle
         
