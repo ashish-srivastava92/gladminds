@@ -35,6 +35,8 @@ def my_login(request):
         return HttpResponse(update_user_details(request))
     elif request.POST.get('action')=='feedback' :
         return send_feedback_response(request)
+    elif request.POST.get('action')=='addingItem':
+        return create_item(request)
     else:
         return HttpResponse()
     
@@ -225,6 +227,23 @@ def check_email_id_exists(email_id):
     except:
         email_exists=False
     return email_exists
-        
-
+  
+@csrf_exempt      
+def create_item(request):
+    post_data = request.POST
+    user_id = post_data['addnewitem_userID'];
+    product_name = post_data['ai_txtProduct'];
+    brand_name = post_data['ai_txtManufacturer'];
+    product_id = post_data['ai_txtitem-no'];
+    purchase_date = post_data['ai_txtpur-date'];
+    purchased_from = post_data['ai_txtpurchased-from'];
+    seller_email = post_data['ai_txtseller-email'];
+    seller_phone = post_data['ai_txtseller-phone'];
+    warranty = post_data['ai_txtwarranty'];
+    insurance = post_data['ai_txtinsurance'];
+    invoice_file = post_data['invoice_file']
+    warranty_file = post_data['warranty_file']
+    insurance_file = post_data['insurance_file']
+    
+    print user_id, product_name, brand_name, product_id,  purchase_date, purchased_from, seller_email, seller_phone, warranty, insurance
 

@@ -241,4 +241,3 @@ class UserResources(GladmindsBaseResource):
         bundle.data['products'] = [model_to_dict(product) for product in products]
         return bundle
         
-        

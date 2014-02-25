@@ -238,3 +238,13 @@ MAIL_DETAIL = {
                   "subject":"Gladminds Feed Report",
                   "body": """""",
               }
+
+#AfterBuy File Upload location configuration
+AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
+AFTERBUY_USER_LOC = os.path.join(AFTERBUY_LOC, "users")
+AFTERBUY_PRODUCT_LOC = os.path.join(AFTERBUY_LOC, "products")
+AFTERBUY_BRAND_LOC = os.path.join(AFTERBUY_LOC, "brands")
+AFTERBUY_PRODUCT_TYPE_LOC = os.path.join(AFTERBUY_LOC, "productType")
+AFTERBUY_PRODUCT_WARRENTY_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "warrenty")
+AFTERBUY_PRODUCT_INSURANCE_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "insurance")
+AFTERBUY_PRODUCT_INVOICE_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "invoice")
