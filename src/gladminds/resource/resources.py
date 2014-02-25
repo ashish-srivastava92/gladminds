@@ -2,6 +2,7 @@ from datetime import datetime
 from django.conf.urls import url
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
+from django.forms.models import model_to_dict
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.serializers import Serializer
 from tastypie.http import HttpBadRequest, HttpUnauthorized
@@ -213,12 +214,20 @@ class ProductTypeResources(GladmindsBaseResource):
         
 class ProductResources(GladmindsBaseResource):
     class Meta:
-        queryset = common.ProductTypeData.objects.all()
+        queryset = common.ProductData.objects.all()
         resource_name = 'products'
 
 class UserResources(GladmindsBaseResource):
+    
     class Meta:
         queryset = common.GladMindUsers.objects.all()
         resource_name = 'users'
+    
+    def dehydrate(self, bundle):
+        print bundle.data['id']
+        products = common.ProductData.objects.filter(customer_phone_number__id = bundle.data['id']).select_related('customer_phone_number')
+        print products[0].customer_phone_number.id
+        bundle.data['products'] = [model_to_dict(product) for product in products]
+        return bundle
         
         
