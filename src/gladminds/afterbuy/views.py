@@ -204,7 +204,7 @@ def send_registration_mail(user_detail):
                        'user_address':'test_address'})
     body = template.render(context)
     try:
-        mail.send_email('info@gladminds.com','avinash.garg@hashedin.com', 'testmsg', body)
+        mail.send_email('info@gladminds.com',user_email, 'AfterBuy Registration details - GladMinds', body)
     except Exception as ex:
         logger.info("[Exception Registration mail: {0}".format(ex))
 
