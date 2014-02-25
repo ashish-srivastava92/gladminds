@@ -4,10 +4,12 @@ from django.core.context_processors import csrf
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate ,login
 from gladminds.models import common,afterbuy_models
-from gladminds import utils
+from gladminds import utils,mail
+from django.template import Context, Template
 from django.contrib.auth import logout
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.conf import settings
 from django.template.context import RequestContext
 
 @csrf_exempt
@@ -125,7 +127,7 @@ def get_data(request):
 
 
 
-
+@csrf_exempt
 def get_states():
     state_list=["Uttar Pradesh", "Maharashtra", 
           "Bihar", "West Bengal", "Andhra Pradesh", "Madhya Pradesh",
@@ -176,6 +178,22 @@ def create_account(request):
         except :
             pass
     return response
+
+
+def send_registration_mail():
+    file_stream = open(settings.TEMPLATE_DIR+'/registration_mail.html')
+    reg_mail_temp = file_stream.read()
+    template = Template(reg_mail_temp)
+    context = Context({'unique_id':'test_unique_id',
+                       'user_name':'test_user_name',
+                       'user_mobile':'test_mobile',
+                       'user_email':'test_email',
+                       'user_state':'test_sate',
+                       'user_country':'tes_country',
+                       'user_address':'test_address',
+                       'user_password':'test_password'})
+    body = template.render(context)
+    mail.send_email('info@gladminds.com','avinash.garg@hashedin.com', 'testmsg', body)
 
 
 '''

@@ -8,7 +8,7 @@ import logging
 
 logger = logging.getLogger("gladminds")
 
-def send_email(sender, receiver, subject, body, smtp_server):
+def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER):
     msg = MIMEText(body, 'html', _charset='utf-8')
     msg['Subject'] = subject
     msg['To'] = receiver
