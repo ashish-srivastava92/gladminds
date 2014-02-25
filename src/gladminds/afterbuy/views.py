@@ -15,10 +15,13 @@ import logging
 
 logger = logging.getLogger("gladminds")
 
+
+@csrf_exempt
+def test(request):
+    return render_to_response('afterbuy/test.html')
+
 @csrf_exempt
 def home(request):
-#     c = {}
-#     c.update(csrf(request))
     return render_to_response('afterbuy/index.html')
 
 '''
@@ -120,7 +123,10 @@ def get_data(request):
                                         'country':country,'state':state,'dob':'','gender':'',
                                         'Interests':''}))
     elif action=='getStates':
-        return get_states()    
+        if request.GET.get('cID')=='india':
+            return get_states() 
+        else:
+            return HttpResponse()  
     
     elif action=='getProducts':
         pass    
@@ -208,12 +214,6 @@ def send_registration_mail(user_detail):
     except Exception as ex:
         logger.info("[Exception Registration mail: {0}".format(ex))
 
-
-'''
-update the details of existing account
-'''
-def update_account():
-    pass
 @csrf_exempt
 def check_email_id_exists(email_id):
     try:
