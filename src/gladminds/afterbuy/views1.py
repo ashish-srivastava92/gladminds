@@ -16,9 +16,12 @@ from django.contrib.auth.models import User
 from datetime import datetime
 from gladminds import mail
 import logging
+import uuid
 
 logger = logging.getLogger("gladminds")
 GLADMINDS_ADMIN_MAIL = 'admin@gladminds.co'
+
+_get_unique_id = lambda: str(uuid.uuid4())
 
 @csrf_exempt
 def main(request):
@@ -71,9 +74,9 @@ def fnc_create_item(request):
         insurance_file = request.FILES.get('insurance_file', None)
         user_obj = common.GladMindUsers.objects.get(user = User.objects.get(id=user_id))
         brand_obj = common.BrandData.objects.get(brand_id = brand_id)
-        product_type_obj = common.ProductTypeData(brand_id = brand_obj, product_name = product_name, product_type = brand_id+'_'+product_name)
+        product_type_obj = common.ProductTypeData(brand_id = brand_obj, product_name = product_name, product_type = _get_unique_id())
         product_type_obj.save()
-        item_obj = common.ProductData(vin = product_id, customer_phone_number = user_obj,
+        item_obj = common.ProductData(customer_product_number = product_id, customer_phone_number = user_obj,
                                       product_purchase_date = purchase_date, purchased_from = purchased_from, 
                                       seller_email = seller_email, warranty_yrs = warranty_yrs,
                                       insurance_yrs = insurance_yrs, invoice_loc = File(insurance_file),
@@ -81,7 +84,7 @@ def fnc_create_item(request):
                                       product_type = product_type_obj, seller_phone = seller_phone)
         item_obj.save()
         
-        data = {"status": "1","message":"Success!","id":item_obj.vin}
+        data = {"status": "1","message":"Success!","id":item_obj.customer_product_number}
     except Exception as ex:
         logger.info('[Exception fnc_create_item]: {0}'.format(ex))
         data = {"status": "1","message":"Success!","id":1}
@@ -215,7 +218,7 @@ def fnc_get_user_items(request):
         product_type = item.product_type.product_type
         brand_image_loc = "images/default.png"
         brand_name = item.product_type.brand_id.brand_name
-        item_id = item.vin
+        item_id = item.customer_product_number
         myitems.append({"id": item_id, "manufacturer": brand_name, "Product":item_id, "image":'brand_image_loc'})
     return {'myitems':myitems}
 
@@ -224,7 +227,7 @@ def fnc_get_warrenty(request):
     item_id = request.GET.get('itemID')
     data = None
     try:
-        product = common.ProductData.objects.get(vin = item_id)
+        product = common.ProductData.objects.get(customer_product_number = item_id)
         data = {'status':'1', 'purchaseDate':str(product.product_purchase_date), 'waranteeYear':product.warranty_yrs}
     except Exception as ex:
         data = {'status':'0'}
@@ -237,7 +240,7 @@ def fnc_get_insurance(request):
     item_id = request.GET.get('itemID')
     data = None
     try:
-        product = common.ProductData.objects.get(vin = item_id)
+        product = common.ProductData.objects.get(customer_product_number = item_id)
         data = {'status':1, 'purchaseDate':str(product.product_purchase_date), 'insuranceYear':product.insurance_yrs}
     except Exception as ex:
         data = {'status':0}
@@ -248,7 +251,7 @@ def fnc_delete_record(request):
     item_id = request.GET.get('itemID')
     data = None
     try:
-        result = common.ProductData.objects.get(vin = item_id).delete()
+        result = common.ProductData.objects.get(customer_product_number = item_id).delete()
         data = {'status':1}
     except Exception as ex:
         data = {'status':0}
@@ -259,7 +262,7 @@ def fnc_get_record(request):
     item_id = request.GET.get('itemID')
     data = None
     try:
-        product = common.ProductData.objects.get(vin = item_id)
+        product = common.ProductData.objects.get(customer_product_number = item_id)
         print product.__dict__
         data = {'status': '1', "userid":product.customer_phone_number.user_id,"pr_name" :'',"m_id":'', 'item_num':product.product_id, 'pur_date':str(product.product_purchase_date), 'purchased_from':product.purchased_from,
                 'seller_email':product.seller_email, 'seller_phone':product.seller_phone, 'warranty_yrs':product.warranty_yrs, 'insurance_yrs':product.insurance_yrs, 'invoice_URL':'product.invoice_loc', 

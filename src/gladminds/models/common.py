@@ -136,8 +136,8 @@ the vin of product and the dealer
 '''
 
 class ProductData(models.Model):
-    product_id=models.AutoField(primary_key=True)
-    vin=models.CharField(max_length=215, null=False, unique=True)
+    id=models.AutoField(primary_key=True)
+    vin=models.CharField(max_length=215, null=True, unique=True, blank=True)
     customer_phone_number = models.ForeignKey(GladMindUsers, null=True, blank=True)
     product_type= models.ForeignKey(ProductTypeData, null=True, blank=True)
     sap_customer_id = models.CharField(max_length=215, null=True, blank=True)
@@ -146,6 +146,7 @@ class ProductData(models.Model):
     dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
     
     #Added below column for after buy application
+    customer_product_number = models.CharField(max_length=255, null=True, blank=True)
     purchased_from=models.CharField(max_length=255, null=True, blank=True)
     seller_email=models.EmailField(max_length=255, null=True, blank=True)
     seller_phone=models.CharField(max_length=255, null=True, blank=True)
