@@ -326,7 +326,7 @@ def fnc_update_user_details(request):
     return data
         
 @csrf_exempt
-def send_feedback_response(request):
+def fnc_feedback(request):
     #FIXME not saving feed back just sending the response
     user_id=request.POST.get('userID')
     return {"status":"1","message":"Success!","id":user_id} 
