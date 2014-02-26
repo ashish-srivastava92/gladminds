@@ -46,7 +46,7 @@ urlpatterns = patterns('gladminds',
     url(r'^', include(admin.site.urls)),
 )
 
-if not settings.DEBUG:
+if settings.DEBUG:
     urlpatterns += patterns('',
         (r'^media/(?P<path>.*)$', 'django.views.static.serve', {
         'document_root': settings.MEDIA_ROOT}))
