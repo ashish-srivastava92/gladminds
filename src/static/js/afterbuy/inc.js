@@ -485,13 +485,13 @@ $(document).ready(function() {
 	//Load states on change of country dropdown in registerpage.
 	$("#txtCountry").change(function(){
 			showLoading();
-			getCORS(ipaddress+'getData.php?action=getStates&cID='+$(this).val(), null, populateStates);
+			getCORS(ipaddress+'getData?action=getStates&cID='+$(this).val(), null, populateStates);
 	});
 
 	//Load states on change of country dropdown in Edit Profile.
 	$("#txt_country").change(function(){
 			showLoading();
-			getCORS(ipaddress+'getData.php?action=getStates&cID='+$(this).val(), null, populateStates_edit);
+			getCORS(ipaddress+'getData?action=getStates&cID='+$(this).val(), null, populateStates_edit);
 	});
 
 	$(document).on("click", "#Login", function() {
