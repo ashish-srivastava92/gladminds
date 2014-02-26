@@ -46,6 +46,9 @@ def main(request):
         data =  method(request)
         resp_str = json.dumps(data)
         return HttpResponse(resp_str)
+    
+    return HttpResponse()
+    
 
 @csrf_exempt      
 def fnc_create_item(request):
@@ -104,6 +107,7 @@ def fnc_item_purchase_interest(request):
 
 @csrf_exempt
 def fnc_warranty_extend(request):
+    resp = {}
     data = {}
     unique_id = request.GET.get('unique_id')
     data['item'] = request.GET.get('item')
@@ -159,15 +163,15 @@ def fnc_get_profile(request):
     resp = {}
     unique_id=request.GET.get('unique_id')
     try:
-        user=common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
+        user_profile=common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
         resp['name']=user_profile.user.username
         resp['email']=user_profile.user.email
         resp['mobile']=user_profile.phone_number
         resp['address']=user_profile.address
         resp['country']=user_profile.country
         resp['state']=user_profile.state
-        resp['dob'] = user.date_of_birth
-        resp['gender'] = user.gender
+        resp['dob'] = user_profile.date_of_birth
+        resp['gender'] = user_profile.gender
     except Exception as ex:
         resp['status'] = '0'
         logger.info("[Exception fnc_get_profile]: {0}".format(ex))
@@ -251,12 +255,12 @@ def fnc_get_record(request):
     data = None
     try:
         product = common.ProductData.objects.get(vin = item_id)
-        data = {'status': status, "userid":product.customer_phone_number.phone_number,"pr_name" :product.product_type.product_name,"m_id":product.product_type.brand_id.brand_id, 'item_num':product.product_id, 'pur_date':product.product_purchase_date, 'purchased_from':product.purchased_from,
+        data = {'status': '1', "userid":product.customer_phone_number.phone_number,"pr_name" :product.product_type.product_name,"m_id":product.product_type.brand_id.brand_id, 'item_num':product.product_id, 'pur_date':product.product_purchase_date, 'purchased_from':product.purchased_from,
                 'seller_email':product.seller_email, 'seller_phone':product.seller_phone, 'warranty_yrs':product.warranty_yrs, 'insurance_yrs':product.insurance_yrs, 'invoice_URL':product.invoice_loc, 
                 'warranty_URL':product.warranty_loc, 'insurance_URL':product.insurance_loc, 
                 }
     except Exception as ex:
-        data = {'status':0}
+        data = {'status':'0'}
     return data
     
 @csrf_exempt
@@ -281,12 +285,12 @@ def fnc_check_login(request):
             user_profile=common.GladMindUsers.objects.get(user=user)
             unique_id=user_profile.gladmind_customer_id
             id=user_profile.user_id
-            data = {'status': 1,'id':id,'username':user_name,'unique_id':unique_id}
+            data = {'status': '1','id':id,'username':user_name,'unique_id':unique_id}
         else:
-            data = {'status': 0}
+            data = {'status': '0'}
     else:
-       data = {'status': 0}
-    return response
+       data = {'status': '0'}
+    return data
 
 @csrf_exempt
 def fnc_update_user_details(request):
