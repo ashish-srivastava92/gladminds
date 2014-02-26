@@ -139,19 +139,18 @@ class ProductData(models.Model):
     product_id=models.AutoField(primary_key=True)
     vin=models.CharField(max_length=215, null=False, unique=True)
     customer_phone_number = models.ForeignKey(GladMindUsers, null=True, blank=True)
-    product_type= models.ForeignKey(ProductTypeData, null=False)
+    product_type= models.ForeignKey(ProductTypeData, null=True, blank=True)
     sap_customer_id = models.CharField(max_length=215, null=True, blank=True)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
     invoice_date=models.DateTimeField(null=True, blank=True)
     dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
     
     #Added below column for after buy application
-    user_id = models.OneToOneField(User, null=True, blank=True)
     purchased_from=models.CharField(max_length=255, null=True, blank=True)
     seller_email=models.EmailField(max_length=255, null=True, blank=True)
     seller_phone=models.CharField(max_length=255, null=True, blank=True)
-    warranty_yrs=models.IntegerField(null=True,blank=True)
-    insurance_yrs=models.IntegerField(null=True, blank=True)
+    warranty_yrs=models.FloatField(null=True,blank=True)
+    insurance_yrs=models.FloatField(null=True, blank=True)
     
     invoice_loc=models.FileField(upload_to=settings.AFTERBUY_PRODUCT_INVOICE_LOC, blank=True)
     warranty_loc=models.FileField(upload_to=settings.AFTERBUY_PRODUCT_WARRENTY_LOC, blank=True)
