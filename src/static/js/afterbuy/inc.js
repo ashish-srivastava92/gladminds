@@ -1,7 +1,7 @@
-var ipaddress = "http://rkarthik.in/mobile/gm/";
-//var ipaddress = "http://localhost/gm/";
+//var ipaddress = "http://rkarthik.in/mobile/gm/";
+var ipaddress = "http://localhost:8000/app/";
 var loader = new Image(); 
-loader.src="/static/img/afterbuy/ajax-loader.gif";
+loader.src="images/ajax-loader.gif";
 
 function showLoading(){
     $("#loading").show();
@@ -41,6 +41,7 @@ mycallback = function(jsonObj){
 };
 
 regCallBack = function(jsonObj){
+
 	data = $.parseJSON(jsonObj);
 	hideLoading();
 	if(data.status=="0" || data.status=="2"){
@@ -69,8 +70,7 @@ regCallBack = function(jsonObj){
 function testPost(form,cbfunction)
 {
 	// console.log($(form).serialize())
-    // postCORS(ipaddress+'loginCheck.php', $(form).serialize(), cbfunction);
-    postCORS('app/login', $(form).serialize(), cbfunction);
+    postCORS(ipaddress+'app/login', $(form).serialize(), cbfunction);
 } 
 
 function testGet(str,cbfunction){
@@ -117,10 +117,11 @@ function populateProfile(data){
 }
 
 function populate_edit(data){
+	
 	populateStates_edit(data);
 	showLoading();
 
-	getCORS('app/getData?action=getProfile&unique_id='+localStorage.getItem("unique_id"), null, showEditSettings);
+	getCORS(ipaddress+'getData?action=getProfile&unique_id='+localStorage.getItem("unique_id"), null, showEditSettings);
 }
 
 function populateStates_edit(data){
@@ -159,6 +160,7 @@ editReturn = function(jsonObj){
 
 function showEditSettings(data){
 	
+
 	if(!data==""){
 		data = $.parseJSON(data);
 		$("#editForm #userID").val(localStorage.getItem("userid"));
@@ -295,7 +297,6 @@ $(document).ready(function() {
 
 			if(data.status=="1"){
 				hideLoading();
-				
 				$.mobile.changePage( '#profile-page', {transition: 'slide'});
 			}
 			else
@@ -411,7 +412,8 @@ $(document).ready(function() {
 				showLoading();
 		        localStorage.setItem("thumbURL", data.thumbURL);
 		        localStorage.setItem("sourceURL", data.sourceURL);
-				$.mobile.changePage( '#myprofile', {transition: 'slide' }); 
+
+				$.mobile.changePage( '#myprofile', {transition: 'slide'});
 				//document.location.href="index.php";
 			}
 
@@ -483,7 +485,7 @@ $(document).ready(function() {
 	//Load states on change of country dropdown in registerpage.
 	$("#txtCountry").change(function(){
 			showLoading();
-			getCORS('app/getData?action=getStates&cID='+$(this).val(), null, populateStates);
+			getCORS(ipaddress+'getData.php?action=getStates&cID='+$(this).val(), null, populateStates);
 	});
 
 	//Load states on change of country dropdown in Edit Profile.
@@ -621,7 +623,7 @@ function confirmLogout(){
 	z = confirm("Do you really want to logout?");
 	if(z){
 		showLoading();
-		getCORS('app/logout?action=getProfile&unique_id='+localStorage.getItem("unique_id"), null, redirectToLogin);
+		getCORS(ipaddress+'logout?action=getProfile&unique_id='+localStorage.getItem("unique_id"), null, redirectToLogin);
 
 	}
 }
@@ -711,6 +713,7 @@ $('#item-insurance-check').on('pagebeforeshow',function(event, ui)
 $('#profile-page').on('pagebeforeshow',function(event, ui)
 {
 	showLoading();
+
    	$("#profile-page .sp_username").html(localStorage.getItem("username"));
 	$("#profile-page .sp_unique_id").html(localStorage.getItem("unique_id"));
 	getCORS(ipaddress+'getData.php?action=getmyItems&unique_id='+localStorage.getItem("unique_id"), null, listMyItems);
@@ -803,7 +806,7 @@ function editItem(obj){
 	showLoading();
 	$("#edit-adding-item-form")[0].reset();
 	if(navigator.onLine){
-		alert("111111111111111")
+		
 		getCORS(ipaddress+'getData.php?action=getProducts', null, function(data){
 			//alert(isAdded_editmyItem)
 			if(!(isAdded_editmyItem)){
@@ -902,7 +905,7 @@ function editItem(obj){
 
 
 
-//////////////////////////////////////warranty//////////////////////////////
+
 
 $('#item-warranty-check').on('pagebeforeshow',function(event, ui)
 {
@@ -1026,7 +1029,8 @@ $('#myprofile').on('pagebeforeshow',function(event, ui)
 	$("#myprofile .profile").attr("src",ipaddress+localStorage.getItem("thumbURL"));
 	$("#myprofile #span_username_profile").html(localStorage.getItem("username"));
 	$("#myprofile #span_unique_id_profile").html(localStorage.getItem("unique_id"));
-	getCORS('app/getData?action=getProfile&unique_id='+localStorage.getItem("unique_id"), null, populateProfile);
+
+	getCORS(ipaddress+'getData?action=getProfile&unique_id='+localStorage.getItem("unique_id"), null, populateProfile);
 
 
 });
@@ -1086,7 +1090,7 @@ $('#adding-item').on('pagebeforeshow',function(event, ui){
 	$("#adding-item .sp_unique_id").html(localStorage.getItem("unique_id"));
 
 	if(navigator.onLine && !(isAdded_myItem)){
-		getCORS('app/getData?action=getProducts', null, function(data){
+		getCORS(ipaddress+'getData?action=getProducts', null, function(data){
 
 			data = $.parseJSON(data);
 			prdData = data.Products;
@@ -1117,11 +1121,13 @@ $('#adding-item').on('pagebeforeshow',function(event, ui){
 });
 
 $('#user-settings').on('pagebeforeshow',function(event, ui){
+
 	showLoading();
 	$("#editForm")[0].reset();
 	$(".epthumbnail img").attr("src",ipaddress+localStorage.getItem("sourceURL"));
 	$("#txt_country").val("india");
-	getCORS('app/getData?action=getStates&cID=india', null, populate_edit);
+
+	getCORS(ipaddress+'getData?action=getStates&cID=india', null, populate_edit);
 });
 
 //SideBar Pages
