@@ -58,7 +58,7 @@ def fnc_create_item(request):
         post_data = request.POST
         user_id = post_data['addnewitem_userID']
         product_name = post_data['ai_txtProduct']
-        brand_name = post_data['ai_txtManufacturer']
+        brand_id = post_data['ai_txtManufacturer']
         product_id = post_data['ai_txtitem-no']
         purchase_date = post_data.get('ai_txtpur-date', None)
         purchased_from = post_data.get('ai_txtpurchased-from', None)
@@ -70,11 +70,15 @@ def fnc_create_item(request):
         warranty_file = request.FILES.get('warranty_file', None)
         insurance_file = request.FILES.get('insurance_file', None)
         user_obj = common.GladMindUsers.objects.get(user = User.objects.get(id=user_id))
+        brand_obj = common.BrandData.objects.get(brand_id = brand_id)
+        product_type_obj = common.ProductTypeData(brand_id = brand_obj, product_name = product_name, product_type = brand_id+'_'+product_name)
+        product_type_obj.save()
         item_obj = common.ProductData(vin = product_id, customer_phone_number = user_obj,
                                       product_purchase_date = purchase_date, purchased_from = purchased_from, 
                                       seller_email = seller_email, warranty_yrs = warranty_yrs,
                                       insurance_yrs = insurance_yrs, invoice_loc = File(insurance_file),
-                                      warranty_loc = File(warranty_file), insurance_loc = File(warranty_file))
+                                      warranty_loc = File(warranty_file), insurance_loc = File(warranty_file),
+                                      product_type = product_type_obj, seller_phone = seller_phone)
         item_obj.save()
         
         data = {"status": "1","message":"Success!","id":item_obj.vin}
@@ -208,11 +212,11 @@ def fnc_get_user_items(request):
     items = common.ProductData.objects.filter(customer_phone_number__user_id = user_data.user, isActive=True)
     myitems = []
     for item in items:
-#         product_type = item.product_type.product_type or ""
-#         brand_image_loc = item.product_type.brand_id.brand_image_loc or "images/default.png"
-#         brand_name = item.product_type.brand_id.brand_name
+        product_type = item.product_type.product_type
+        brand_image_loc = "images/default.png"
+        brand_name = item.product_type.brand_id.brand_name
         item_id = item.vin
-        myitems.append({"id": item_id, "manufacturer": 'IITA', "Product":'PRODUCT001', "image":'images/default.png    '})
+        myitems.append({"id": item_id, "manufacturer": brand_name, "Product":item_id, "image":'brand_image_loc'})
     return {'myitems':myitems}
 
 @csrf_exempt
