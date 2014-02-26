@@ -32,3 +32,47 @@ def feed_report(feed_data = None):
     except Exception as ex:
         logger.info("[Exception feed_report]: {0}".format(ex))
         
+def item_purchase_interest(data = None, receiver = None, subject = None):
+    from gladminds import mail
+    try:
+        file_stream = open(settings.TEMPLATE_DIR+'/purchase_interest_mail.html')
+        item = file_stream.read()
+        template = Template(item)
+        context = Context({"user": data})
+        body = template.render(context)
+        mail.send_email(sender = data['email_id'],receiver = receiver, 
+                   subject = subject, body = body, 
+                   smtp_server = settings.MAIL_SERVER)
+    except Exception as ex:
+        logger.info("[Exception item purchase report]: {0}".format(ex))
+
+def warrenty_extend(data = None, receiver = None, subject = None):
+    from gladminds import mail
+    try:
+        file_stream = open(settings.TEMPLATE_DIR+'/warrenty_extend_mail.html')
+        item = file_stream.read()
+        template = Template(item)
+        context = Context({"user": data})
+        body = template.render(context)
+        mail.send_email(sender = data['email_id'],receiver = receiver, 
+                   subject = subject, body = body, 
+                   smtp_server = settings.MAIL_SERVER)
+    except Exception as ex:
+        logger.info("[Exception item warrenty extend]: {0}".format(ex))
+
+def insurance_extend(data = None, receiver = None, subject = None):
+    from gladminds import mail
+    try:
+        file_stream = open(settings.TEMPLATE_DIR+'/insurance_extend_mail.html')
+        item = file_stream.read()
+        template = Template(item)
+        context = Context({"user": data})
+        body = template.render(context)
+        mail.send_email(sender = data['email_id'],receiver = receiver, 
+                   subject = subject, body = body, 
+                   smtp_server = settings.MAIL_SERVER)
+    except Exception as ex:
+        logger.info("[Exception item insurance extend]: {0}".format(ex))
+        
+
+    

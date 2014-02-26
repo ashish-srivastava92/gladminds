@@ -343,7 +343,7 @@
 				<h3 class="page-title">Create your AfterBuy Account</h3>
 				
 			</div>
-			<form action="/app/create-account" method="post" id="frmRegister" enctype="multipart/form-data">
+			<form action="http://localhost:8000/app/create-account" method="post" id="frmRegister" enctype="multipart/form-data">
 				<input type="hidden" name="action" value="newRegister"/>
 				<div class="row-fluid">
 					<div>
@@ -572,7 +572,7 @@
 			<a href="#" class="btn-dropdown pull-right" data-role="none"><img src="/static/img/afterbuy/dropdown-btn.png" alt=""></a>
 		</header>
 		<div data-role="content" class="pagesContent">
-			<form id="editForm" action="/app/login" method="post" enctype="multipart/form-data">
+			<form id="editForm" action="http://localhost:8000/app/login" method="post" enctype="multipart/form-data">
 				<div data-role="content-header" class="content-header fixed-top" data-fix="clearfix">
 					<a href="#dashboard" id="home" data-role="none" class="pull-left" data-rel="back" data-direction="reverse" data-transition="slide">
 						<img src="/static/img/afterbuy/home-icon.png" alt="Homepage">
@@ -874,7 +874,7 @@
 			<div class="margin-large-top"></div>
 			<div id="wrapper3">
 				<div id="scroller3">
-					<form action="http://www.rkarthik.in/mobile/gm/loginCheck.php" method="post" class="edit-adding-item-form" id="edit-adding-item-form" enctype="multipart/form-data">
+					<form action="http://localhost:8000/app/login" method="post" class="edit-adding-item-form" id="edit-adding-item-form" enctype="multipart/form-data">
 						<input type="hidden" name="action" value="edit-addingItem"/>
 						<input type="hidden" name="edit-addnewitem_ID" id="edit-addnewitem_ID" value=""/>
 						<ul class="unstyled" data-fix="clearfix">
@@ -1016,7 +1016,7 @@
 			<div class="margin-large-top"></div>
 				<div id="wrapper2">
 					<div id="scroller2">
-						<form id="adding-item-form" class="adding-item-form" action="/app/login" method="post" enctype="multipart/form-data">
+						<form id="adding-item-form" class="adding-item-form" action="http://localhost:8000/app/login" method="post" enctype="multipart/form-data">
 							<input type="hidden" name="action" value="addingItem"/>
 							<input type="hidden" name="addnewitem_userID" id="addnewitem_userID" value=""/>
 							<ul class="unstyled" data-fix="clearfix">
@@ -1315,7 +1315,7 @@
 			</div>
 			<div class="margin-large-top"></div>
 			<h4>Questionnaire</h4>
-			<form id="feedbackForm" class="feedbackForm" action="app/login" method="post" >
+			<form id="feedbackForm" class="feedbackForm" action="http://localhost:8000/app/login" method="post" >
 
 				<input type="hidden" name="action" value="feedback"/>
 				<input type="hidden" name="userID" class="userID" value=""/>

@@ -14,17 +14,15 @@ from django.conf import settings
 from django.template.context import RequestContext
 from django.contrib.auth.models import User 
 import logging
+from django.core.files import File
 
 logger = logging.getLogger("gladminds")
 
 
 @csrf_exempt
-def test(request):
-    return render_to_response('afterbuy/test.html')
-
-@csrf_exempt
 def home(request):
     return render_to_response('afterbuy/index.html')
+
 
 '''
  method for login
@@ -41,6 +39,31 @@ def my_login(request):
         return create_item(request)
     else:
         return HttpResponse()
+    
+       
+@csrf_exempt
+def get_data(request):
+    action= request.GET.get('action')
+    if action=='getProfile':
+        unique_id=request.GET.get('unique_id')
+        user_profile=common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
+        name=user_profile.customer_name
+        email=user_profile.user.email
+        mobile=user_profile.phone_number
+        address=user_profile.address
+        country=user_profile.country
+        state=user_profile.state
+        return HttpResponse(json.dumps({'name':name,'email':email,'mobile':mobile,'address':address,
+                                        'country':country,'state':state,'dob':'','gender':'',
+                                        'Interests':''}))
+    elif action=='getStates':
+        if request.GET.get('cID')=='india':
+            return get_states() 
+        else:
+            return HttpResponse()  
+    
+    elif action=='getProducts':
+        return HttpResponse()   
     
 
 @csrf_exempt
@@ -77,23 +100,21 @@ def update_user_details(request):
         user_address=request.POST.get('txt_address', None)
         user_gender=request.POST.get('txt_gender', None)
         try:
-#             user_object=common.GladMindUsers.objects.get(user_id=user_id)
-#             print "user_object is",user_object
-# #                         update(customer_name=user_name,
-# #                         email_id=user_email,
-# #                         phone_number=user_mobile_number,
-# #                         address=user_address,
-# #                         country=user_country,
-# #                         state=user_state,
-# #                         dob=user_dob,
-# #                         gender=user_gender)
-#             user_object.user.username=user_name
-#             user_object.user.email=user_email
-#             unique_id=user_object.gladmind_customer_id
-#             user_object.save()
-
+            user_object=common.GladMindUsers.objects.get(user_id=user_id)
+            user_object.customer_name=user_name
+            user_object.email_id=user_email
+            user_object.phone_number=user_mobile_number
+            user_object.address=user_address
+            user_object.country=user_country
+            user_object .state=user_state
+            user_object.dob=user_dob
+            user_object.gender=user_gender
+            user_object.user.username=user_name
+            user_object.user.email=user_email
+            unique_id=user_object.gladmind_customer_id
+            user_object.save()
             response=json.dumps({'status':" 1",'thumbURL':'','sourceURL':''})
-        except:
+        except Exception as ex:
             response=json.dumps({'status': 0})
     else:
         response=json.dumps({'status': 0})
@@ -111,29 +132,7 @@ def app_logout(request):
     logout(request)
     return HttpResponse('logged out')
 
-@csrf_exempt
-def get_data(request):
-    action= request.GET.get('action')
-    if action=='getProfile':
-        unique_id=request.GET.get('unique_id')
-        user_profile=common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
-        name=user_profile.user.username
-        email=user_profile.user.email
-        mobile=user_profile.phone_number
-        address=user_profile.address
-        country=user_profile.country
-        state=user_profile.state
-        return HttpResponse(json.dumps({'name':name,'email':email,'mobile':mobile,'address':address,
-                                        'country':country,'state':state,'dob':'','gender':'',
-                                        'Interests':''}))
-    elif action=='getStates':
-        if request.GET.get('cID')=='india':
-            return get_states() 
-        else:
-            return HttpResponse()  
-    
-    elif action=='getProducts':
-        pass    
+ 
     
 
 @csrf_exempt
@@ -154,7 +153,9 @@ def get_states():
 method for creating new user and checking user 
 is already exists or not
 '''
+import os
 from datetime import datetime
+import time
 @csrf_exempt
 def create_account(request):
     user_name=request.POST.get('txtName', None)
@@ -165,10 +166,17 @@ def create_account(request):
     user_mobile_number=request.POST.get('txtMobile', None)
     user_address=request.POST.get('txtAddress',None)
     unique_id=''
+        
     if check_email_id_exists(user_email):
-        response= HttpResponse(json.dumps({'status': 2,'message':'Email already exists'}))
+        return HttpResponse(json.dumps({'status': 2,'message':'Email already exists'}))
     else:
         try:
+            image_url=''
+#             if request.FILES:
+#                 profile_pic=request.FILES.get('profilePIC') 
+# #                 image_url=save_image(profile_pic)
+# #                 image_directory = os.path.join(settings.STATIC_DIR,
+# #                                    "img/afterbuy/user/%s",(image_url))
             unique_id='GMS17_'+str(utils.generate_unique_customer_id())
             gladmind_user=common.GladMindUsers(user=User.objects.create_user(user_name,user_email,user_password),
                                                country=user_country,
@@ -179,18 +187,35 @@ def create_account(request):
                                                phone_number=user_mobile_number,
                                                registration_date=datetime.now(),
                                                address=user_address)
+#                                                thumb_url=File(profile_pic))
             gladmind_user.save();
+            user_obj=common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
             send_registration_mail(gladmind_user)
             response=HttpResponse(json.dumps({'status': 1,'message':'Success!','unique_id':unique_id,
-                                              'username':user_name,'id':'',
+                                              'username':user_name,'id':user_obj.user_id,
                                               'sourceURL':'','thumbURL':''}))
+             
             return HttpResponse(json.dumps({'status': 1,'message':'Success!','unique_id':unique_id,
-                                              'username':user_name,'id':'',
+                                              'username':user_name,'id':user_obj.user_id,
                                               'sourceURL':'','thumbURL':''}))
-        except :
-            pass
+        except Exception as ex:
+            return HttpResponse(json.dumps({'status':0}))
     return response
 
+
+def save_image(profile_pic):
+    image_name = profile_pic._get_name()
+    image_directory = os.path.join(settings.STATIC_DIR,
+                                   "img/afterbuy/user")
+    if os.path.isdir(image_directory):
+        pass
+    else:
+        os.makedirs(image_directory)
+        fd = open('%s/%s' % (image_directory, str(image_name)), 'wb')
+        for chunk in profile_pic.chunks():
+            fd.write(chunk)
+        fd.close()
+    return image_name
 
 def send_registration_mail(user_detail):
     unique_id= user_detail.gladmind_customer_id

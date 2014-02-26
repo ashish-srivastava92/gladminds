@@ -130,11 +130,13 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     #'gladminds.middleware.GladmindsMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+CORS_ORIGIN_ALLOW_ALL = True
 ROOT_URLCONF = 'gladminds.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
@@ -162,6 +164,7 @@ INSTALLED_APPS = (
     'gladminds.afterbuy',
     'gladminds',
     'djcelery',
+    'corsheaders',
     
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
