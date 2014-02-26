@@ -38,9 +38,10 @@ def main(request):
           'getInsurance':fnc_get_insurance,
           'deleteRec':fnc_delete_record,
           'fetchRec':fnc_get_record,
+          'newRegister':fnc_create_new_user,
     }
     
-    action = request.POST.get('action', None)
+    action = request.POST.get('action', None) or request.GET.get('action', None)
     if action and action in action_to_method.keys():
         method = action_to_method[action]
         data =  method(request)
@@ -202,16 +203,16 @@ def fnc_get_products(request):
 @csrf_exempt
 def fnc_get_user_items(request):
     unique_id = request.GET.get('unique_id')
-    user = common.GladMindUsers.objects.get(gladmind_customer_id = unique_id)
-    phone_number = user.phone_number
-    items = common.ProductData.objects,filter(customer_phone_number = phone_number, isActive=True)
+    user_data = common.GladMindUsers.objects.get(gladmind_customer_id = unique_id)
+
+    items = common.ProductData.objects.filter(customer_phone_number__user_id = user_data.user, isActive=True)
     myitems = []
     for item in items:
-        product_type = item.product_type.product_type
-        brand_image_loc = item.product_type.brand_id.brand_image_loc or "images/default.png"
-        brand_name = item.product_type.brand_id.brand_name
+#         product_type = item.product_type.product_type or ""
+#         brand_image_loc = item.product_type.brand_id.brand_image_loc or "images/default.png"
+#         brand_name = item.product_type.brand_id.brand_name
         item_id = item.vin
-        myitems.append({"id": item_id, "manufacturer": brand_name, "Product":product_type, "image":brand_image_loc})
+        myitems.append({"id": item_id, "manufacturer": 'IITA', "Product":'PRODUCT001', "image":'images/default.png    '})
     return {'myitems':myitems}
 
 @csrf_exempt
@@ -220,7 +221,7 @@ def fnc_get_warrenty(request):
     data = None
     try:
         product = common.ProductData.objects.get(vin = item_id)
-        data = {'status':'1', 'purchaseDate':product.product_purchase_date, 'waranteeYear':product.warranty_yrs}
+        data = {'status':'1', 'purchaseDate':str(product.product_purchase_date), 'waranteeYear':product.warranty_yrs}
     except Exception as ex:
         data = {'status':'0'}
     
@@ -233,7 +234,7 @@ def fnc_get_insurance(request):
     data = None
     try:
         product = common.ProductData.objects.get(vin = item_id)
-        data = {'status':1, 'purchaseDate':product.product_purchase_date, 'insuranceYear':product.insurance_yrs}
+        data = {'status':1, 'purchaseDate':str(product.product_purchase_date), 'insuranceYear':product.insurance_yrs}
     except Exception as ex:
         data = {'status':0}
     return data
@@ -255,11 +256,13 @@ def fnc_get_record(request):
     data = None
     try:
         product = common.ProductData.objects.get(vin = item_id)
-        data = {'status': '1', "userid":product.customer_phone_number.phone_number,"pr_name" :product.product_type.product_name,"m_id":product.product_type.brand_id.brand_id, 'item_num':product.product_id, 'pur_date':product.product_purchase_date, 'purchased_from':product.purchased_from,
-                'seller_email':product.seller_email, 'seller_phone':product.seller_phone, 'warranty_yrs':product.warranty_yrs, 'insurance_yrs':product.insurance_yrs, 'invoice_URL':product.invoice_loc, 
-                'warranty_URL':product.warranty_loc, 'insurance_URL':product.insurance_loc, 
+        print product.__dict__
+        data = {'status': '1', "userid":product.customer_phone_number.user_id,"pr_name" :'',"m_id":'', 'item_num':product.product_id, 'pur_date':str(product.product_purchase_date), 'purchased_from':product.purchased_from,
+                'seller_email':product.seller_email, 'seller_phone':product.seller_phone, 'warranty_yrs':product.warranty_yrs, 'insurance_yrs':product.insurance_yrs, 'invoice_URL':'product.invoice_loc', 
+                'warranty_URL':'product.warranty_loc', 'insurance_URL':'', 
                 }
     except Exception as ex:
+        logger.info("[Exception fnc_get_record]: {0}".format(ex))
         data = {'status':'0'}
     return data
     
@@ -347,7 +350,8 @@ is already exists or not
 '''
 from datetime import datetime
 @csrf_exempt
-def create_account(request):
+def fnc_create_new_user(request):
+    data = {}
     user_name=request.POST.get('txtName', None)
     user_email=request.POST.get('txtEmail', None)
     user_password= request.POST.get('txtPassword', None)
@@ -357,7 +361,7 @@ def create_account(request):
     user_address=request.POST.get('txtAddress',None)
     unique_id=''
     if check_email_id_exists(user_email):
-        response= HttpResponse(json.dumps({'status': 2,'message':'Email already exists'}))
+        data = {'status': 2,'message':'Email already exists'}
     else:
         try:
             unique_id='GMS17_'+str(utils.generate_unique_customer_id())
@@ -371,16 +375,14 @@ def create_account(request):
                                                registration_date=datetime.now(),
                                                address=user_address)
             gladmind_user.save();
+            user_obj=common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
             send_registration_mail(gladmind_user)
-            response=HttpResponse(json.dumps({'status': 1,'message':'Success!','unique_id':unique_id,
-                                              'username':user_name,'id':'',
-                                              'sourceURL':'','thumbURL':''}))
-            return HttpResponse(json.dumps({'status': 1,'message':'Success!','unique_id':unique_id,
-                                              'username':user_name,'id':'',
-                                              'sourceURL':'','thumbURL':''}))
+            data = {'status': 1,'message':'Success!','unique_id':unique_id,
+                                              'username':user_name,'id':user_obj.user_id,
+                                              'sourceURL':'','thumbURL':''}
         except :
-            pass
-    return response
+            data={'status':0}
+    return data
 
 
 def send_registration_mail(user_detail):
