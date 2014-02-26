@@ -103,7 +103,7 @@ Gladmindusers have auto generated glamind customer id,
 and unique phone numner
 '''
 class GladMindUsers(models.Model):
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, null=True, blank=True)
     gladmind_customer_id = models.CharField(max_length=215,unique=True, null=True)
     customer_name = models.CharField(max_length=215)
     email_id = models.EmailField(max_length=215, null=True, blank=True)

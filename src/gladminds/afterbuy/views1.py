@@ -194,8 +194,8 @@ def fnc_get_products(request):
         for brand in brands:
             brand_data = {'id': brand.brand_id, 'manufacturer': brand.brand_name}
             resp_brand.append(brand_data)
-        
-        resp = {'manufacturers':[''.join(resp_brand)], "Products": ','.join(product_name)}
+        resp = {'manufacturers':resp_brand, "Products": ','.join(product_name)}
+    
     except Exception as ex:
         logger.info("[Exception fnc_get_products]:{0}".format(ex))
     return resp
