@@ -20,12 +20,9 @@ logger = logging.getLogger("gladminds")
 
 
 @csrf_exempt
-def test(request):
-    return render_to_response('afterbuy/test.html')
-
-@csrf_exempt
 def home(request):
     return render_to_response('afterbuy/index.html')
+
 
 '''
  method for login
@@ -42,6 +39,31 @@ def my_login(request):
         return create_item(request)
     else:
         return HttpResponse()
+    
+       
+@csrf_exempt
+def get_data(request):
+    action= request.GET.get('action')
+    if action=='getProfile':
+        unique_id=request.GET.get('unique_id')
+        user_profile=common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
+        name=user_profile.customer_name
+        email=user_profile.user.email
+        mobile=user_profile.phone_number
+        address=user_profile.address
+        country=user_profile.country
+        state=user_profile.state
+        return HttpResponse(json.dumps({'name':name,'email':email,'mobile':mobile,'address':address,
+                                        'country':country,'state':state,'dob':'','gender':'',
+                                        'Interests':''}))
+    elif action=='getStates':
+        if request.GET.get('cID')=='india':
+            return get_states() 
+        else:
+            return HttpResponse()  
+    
+    elif action=='getProducts':
+        return HttpResponse()   
     
 
 @csrf_exempt
@@ -110,29 +132,7 @@ def app_logout(request):
     logout(request)
     return HttpResponse('logged out')
 
-@csrf_exempt
-def get_data(request):
-    action= request.GET.get('action')
-    if action=='getProfile':
-        unique_id=request.GET.get('unique_id')
-        user_profile=common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
-        name=user_profile.customer_name
-        email=user_profile.user.email
-        mobile=user_profile.phone_number
-        address=user_profile.address
-        country=user_profile.country
-        state=user_profile.state
-        return HttpResponse(json.dumps({'name':name,'email':email,'mobile':mobile,'address':address,
-                                        'country':country,'state':state,'dob':'','gender':'',
-                                        'Interests':''}))
-    elif action=='getStates':
-        if request.GET.get('cID')=='india':
-            return get_states() 
-        else:
-            return HttpResponse()  
-    
-    elif action=='getProducts':
-        pass    
+ 
     
 
 @csrf_exempt
