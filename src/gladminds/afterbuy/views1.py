@@ -269,6 +269,7 @@ def home(request):
         
 @csrf_exempt
 def fnc_check_login(request):
+    data = None
     username = request.POST.get('txtUsername')
     password = request.POST.get('txtPassword')
     user = authenticate(username=username, password=password)
@@ -280,15 +281,16 @@ def fnc_check_login(request):
             user_profile=common.GladMindUsers.objects.get(user=user)
             unique_id=user_profile.gladmind_customer_id
             id=user_profile.user_id
-            response=HttpResponse(json.dumps({'status': 1,'id':id,'username':user_name,'unique_id':unique_id}))
+            data = {'status': 1,'id':id,'username':user_name,'unique_id':unique_id}
         else:
-            response=HttpResponse(json.dumps({'status': 0}))
+            data = {'status': 0}
     else:
-       response=HttpResponse(json.dumps({'status': 0}))
+       data = {'status': 0}
     return response
 
 @csrf_exempt
 def fnc_update_user_details(request):
+    data = None
     user_id=request.POST.get('userID')
     if user_id:
         user_name=request.POST.get('txt_name', None)
@@ -316,18 +318,18 @@ def fnc_update_user_details(request):
 #             unique_id=user_object.gladmind_customer_id
 #             user_object.save()
 
-            response=json.dumps({'status':" 1",'thumbURL':'','sourceURL':''})
+            data = {'status':" 1",'thumbURL':'','sourceURL':''}
         except:
-            response=json.dumps({'status': 0})
+            data = {'status': 0}
     else:
-        response=json.dumps({'status': 0})
-    return response
+        data = {'status': 0}
+    return data
         
 @csrf_exempt
 def send_feedback_response(request):
     #FIXME not saving feed back just sending the response
     user_id=request.POST.get('userID')
-    return HttpResponse(json.dumps({"status":"1","message":"Success!","id":user_id}))   
+    return {"status":"1","message":"Success!","id":user_id} 
     
     
 @csrf_exempt
