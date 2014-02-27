@@ -8,6 +8,7 @@ from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.serializers import Serializer
 from tastypie.http import HttpBadRequest, HttpUnauthorized
 from django.db import connection, models
+from django.contrib.auth.models import User
 from gladminds import smsparser, utils, audit, message_template as templates
 from gladminds.models import common,afterbuy_models
 from gladminds.tasks import send_registration_detail, send_service_detail, \
@@ -30,7 +31,7 @@ class GladmindsResources(Resource):
 
     def base_urls(self):
         return [
-            url(r"^messages$", self.wrap_view('dispatch_gladminds'))
+            url(r"^messages", self.wrap_view('dispatch_gladminds'))
         ]
 
     def dispatch_gladminds(self, request, **kwargs):
@@ -38,6 +39,9 @@ class GladmindsResources(Resource):
         if request.POST.get('text'):
             message = request.POST.get('text')
             phone_number = request.POST.get('phoneNumber')
+        if request.GET.get('cli'):
+             message=request.GET.get('msg')
+             phone_number=request.GET.get('cli')
         else:
             data = json.loads(request.body)
             message = data['text']
