@@ -165,6 +165,7 @@ INSTALLED_APPS = (
     'gladminds',
     'djcelery',
     'corsheaders',
+    'storages',
     
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',

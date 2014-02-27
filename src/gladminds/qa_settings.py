@@ -53,3 +53,8 @@ SMS_CLIENT_DETAIL = {
             }
 
 FEED_TYPE = 'CSV'
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+AWS_ACCESS_KEY_ID = 'AKIAIL7IDCSTNCG2R6JA'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 'afterbuy.s3-website-us-east-1.amazonaws.com'
