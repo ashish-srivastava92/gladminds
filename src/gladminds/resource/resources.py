@@ -17,7 +17,10 @@ from gladminds.tasks import send_registration_detail, send_service_detail, \
 from src.gladminds.tasks import send_coupon_close_message
 from tastypie.resources import Resource, ModelResource
 from tastypie import fields
+import logging
+logger = logging.getLogger('gladminds')
 json = utils.import_json()
+
 
 
 __all__ = ['GladmindsTaskManager']
@@ -39,13 +42,11 @@ class GladmindsResources(Resource):
         if request.POST.get('text'):
             message = request.POST.get('text')
             phone_number = request.POST.get('phoneNumber')
-        if request.GET.get('cli'):
+            print message, phone_number
+        elif request.GET.get('cli'):
              message=request.GET.get('msg')
              phone_number=request.GET.get('cli')
-        else:
-            data = json.loads(request.body)
-            message = data['text']
-            phone_number = data['phoneNumber']
+        logger.info('Recieved Message from phone number: {0} and message: {1}'.format(message, phone_number))
         try:
             sms_dict = smsparser.sms_parser(message=message)
         except smsparser.InvalidKeyWord as ink:
