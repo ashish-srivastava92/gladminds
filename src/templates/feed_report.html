@@ -1,3 +1,6 @@
+Hello,<br/><br/>
+{% if feed_logs %}
+The summary of the feeds received /sent on {{yesterday}} are as below:<br/>
 <table border=1px style="width: 60%">
 	<tbody>
 		<tr>
@@ -20,3 +23,9 @@
 	   {% endfor %}
 	</tbody>
 </table>
+{% else %}
+No feeds received on {{yesterday}}.
+{% endif %}
+<br/>
+Thanks<br/>
+GCP Bajaj Data Feeds Team

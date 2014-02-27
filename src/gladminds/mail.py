@@ -3,7 +3,7 @@ from django.template import Context, Template
 
 import smtplib
 from email.mime.text import MIMEText
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 
 logger = logging.getLogger("gladminds")
@@ -12,7 +12,7 @@ def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER
     msg = MIMEText(body, 'html', _charset='utf-8')
     msg['Subject'] = subject
     msg['To'] = receiver
-    msg['From'] = "Gladminds<%s>" % sender
+    msg['From'] = "GCP_Bajaj_FSC_Feeds<%s>" % sender
     mail = smtplib.SMTP(smtp_server)
     mail.sendmail(sender, receiver, msg.as_string())
     mail.quit()
@@ -20,10 +20,11 @@ def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER
 def feed_report(feed_data = None):
     from gladminds import mail
     try:
+        yesterday = datetime.now().date() - timedelta(days=1)
         file_stream = open(settings.TEMPLATE_DIR+'/feed_report.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
-        context = Context({"feed_logs": feed_data})
+        context = Context({"feed_logs": feed_data, "yesterday": yesterday})
         body = template.render(context)
         mail_detail = settings.MAIL_DETAIL
         mail.send_email(sender = mail_detail['sender'], receiver = mail_detail['reciever'], 
