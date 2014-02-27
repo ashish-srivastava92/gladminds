@@ -27,14 +27,14 @@ urlpatterns = patterns('gladminds',
     url(r'^api/v1/bajaj/purchase-feed/$', 'webservice.purchase_service'),
     url(r'^api/v1/bajaj/redeem-feed/$', 'superadmin.views.views_coupon_redeem_wsdl', {'document_root': settings.WSDL_COUPON_REDEEM_LOC}),
     
-    url(r'^app/create-account', 'afterbuy.views.create_account', name='create_account'),
-    url(r'^app/login', 'afterbuy.views.my_login', name='my_login'),
     url(r'^app/logout', 'afterbuy.views.app_logout', name='app_logout'),
-    url(r'^app/getData', 'afterbuy.views.get_data', name='get_data'),
     url(r'^app', 'afterbuy.views.home', name='home'),
-    url(r'^gm', 'afterbuy.views1.main', name='main'),
+    url(r'^gm', 'afterbuy.views.main', name='main'),
     
     # Examples:
+#     url(r'^app/create-account', 'afterbuy.views.create_account', name='create_account'),
+#     url(r'^app/login', 'afterbuy.views.my_login', name='my_login'),
+#     url(r'^app/getData', 'afterbuy.views.get_data', name='get_data'),
     # url(r'^$', 'gladminds.views.home', name='home'),
     # url(r'^gladminds/', include('gladminds.foo.urls')),
 

@@ -162,8 +162,9 @@ def fnc_get_states(request):
                 "Manipur", "Nagaland", "Goa", "Arunachal Pradesh", "Mizoram","Sikkim", "Delhi", "Puducherry", 
                 "Chandigarh", "Andaman and Nicobar Islands", "Dadra and Nagar Haveli", "Daman and Diu", 
                 "Lakshadweep"]
-    
-    states=','.join(state_list)
+    states= {}
+    if request.GET.get('cID',None)=='india':
+        states=','.join(state_list)
     return states
 
 @csrf_exempt
@@ -317,21 +318,19 @@ def fnc_update_user_details(request):
         user_address=request.POST.get('txt_address', None)
         user_gender=request.POST.get('txt_gender', None)
         try:
-#             user_object=common.GladMindUsers.objects.get(user_id=user_id)
-#             print "user_object is",user_object
-# #                         update(customer_name=user_name,
-# #                         email_id=user_email,
-# #                         phone_number=user_mobile_number,
-# #                         address=user_address,
-# #                         country=user_country,
-# #                         state=user_state,
-# #                         dob=user_dob,
-# #                         gender=user_gender)
-#             user_object.user.username=user_name
-#             user_object.user.email=user_email
-#             unique_id=user_object.gladmind_customer_id
-#             user_object.save()
-
+            user_object=common.GladMindUsers.objects.get(user_id=user_id)
+            user_object.customer_name=user_name
+            user_object.email_id=user_email
+            user_object.phone_number=user_mobile_number
+            user_object.address=user_address
+            user_object.country=user_country
+            user_object .state=user_state
+            user_object.dob=user_dob
+            user_object.gender=user_gender
+            user_object.user.username=user_name
+            user_object.user.email=user_email
+            unique_id=user_object.gladmind_customer_id
+            user_object.save()
             data = {'status':" 1",'thumbURL':'','sourceURL':''}
         except:
             data = {'status': 0}
@@ -345,11 +344,7 @@ def fnc_feedback(request):
     user_id=request.POST.get('userID')
     return {"status":"1","message":"Success!","id":user_id} 
     
-    
-@csrf_exempt
-def app_logout(request):
-    logout(request)
-    return HttpResponse('logged out')
+
 
 '''
 method for creating new user and checking user 
@@ -427,3 +422,31 @@ def check_email_id_exists(email_id):
     except:
         email_exists=False
     return email_exists
+
+def save_image(profile_pic):
+    import os
+    image_name = profile_pic._get_name()
+    image_directory = os.path.join(settings.STATIC_DIR,
+                                   "img/afterbuy/user")
+    if os.path.isdir(image_directory):
+        pass
+    else:
+        os.makedirs(image_directory)
+        fd = open('%s/%s' % (image_directory, str(image_name)), 'wb')
+        for chunk in profile_pic.chunks():
+            fd.write(chunk)
+        fd.close()
+    return image_name
+
+
+
+@csrf_exempt
+def app_logout(request):
+    logout(request)
+    return HttpResponse('logged out')
+
+
+
+@csrf_exempt
+def home(request):
+    return render_to_response('afterbuy/index.html')

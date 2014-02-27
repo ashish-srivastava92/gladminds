@@ -13,61 +13,307 @@ import json
 from django.conf import settings
 from django.template.context import RequestContext
 from django.contrib.auth.models import User 
+from datetime import datetime
+from gladminds import mail
 import logging
-from django.core.files import File
+import uuid
 
 logger = logging.getLogger("gladminds")
+GLADMINDS_ADMIN_MAIL = 'admin@gladminds.co'
 
+_get_unique_id = lambda: str(uuid.uuid4())
 
 @csrf_exempt
-def home(request):
-    return render_to_response('afterbuy/index.html')
-
-
-'''
- method for login
-'''
-@csrf_exempt
-def my_login(request):
-    if request.POST.get('action')=='checkLogin':
-        return check_login(request)
-    elif request.POST.get('action')=='editSettings' :
-        return HttpResponse(update_user_details(request))
-    elif request.POST.get('action')=='feedback' :
-        return send_feedback_response(request)
-    elif request.POST.get('action')=='addingItem':
-        return create_item(request)
-    else:
-        return HttpResponse()
+def main(request):
+    action_to_method = {
+          'checkLogin':fnc_check_login,
+          'editSettings':fnc_update_user_details,
+          'feedback':fnc_feedback,
+          'addingItem':fnc_create_item,
+          'edit-addingItem':fnc_edit_adding_item,
+          'itemPurchaseInterest':fnc_item_purchase_interest,
+          'waranteeExtend':fnc_warranty_extend,
+          'insuranceExtend':fnc_insurance_extend,
+          'getStates':fnc_get_states,
+          'getProfile':fnc_get_profile,
+          'getProducts':fnc_get_products,
+          'getmyItems':fnc_get_user_items,
+          'getWarantee':fnc_get_warrenty,
+          'getInsurance':fnc_get_insurance,
+          'deleteRec':fnc_delete_record,
+          'fetchRec':fnc_get_record,
+          'newRegister':fnc_create_new_user,
+    }
     
-       
+    action = request.POST.get('action', None) or request.GET.get('action', None)
+    if action and action in action_to_method.keys():
+        method = action_to_method[action]
+        data =  method(request)
+        resp_str = json.dumps(data)
+        return HttpResponse(resp_str)
+    
+    return HttpResponse()
+    
+
+@csrf_exempt      
+def fnc_create_item(request):
+    data = None
+    try:
+        post_data = request.POST
+        user_id = post_data['addnewitem_userID']
+        product_name = post_data['ai_txtProduct']
+        brand_id = post_data['ai_txtManufacturer']
+        product_id = post_data['ai_txtitem-no']
+        purchase_date = post_data.get('ai_txtpur-date', None)
+        purchased_from = post_data.get('ai_txtpurchased-from', None)
+        seller_email = post_data.get('ai_txtseller-email', None)
+        seller_phone = post_data.get('ai_txtseller-phone', None)
+        warranty_yrs = post_data.get('ai_txtwarranty', None)
+        insurance_yrs = post_data.get('ai_txtinsurance', None)
+        invoice_file = request.FILES.get('invoice_file', None)
+        warranty_file = request.FILES.get('warranty_file', None)
+        insurance_file = request.FILES.get('insurance_file', None)
+        user_obj = common.GladMindUsers.objects.get(user = User.objects.get(id=user_id))
+        brand_obj = common.BrandData.objects.get(brand_id = brand_id)
+        product_type_obj = common.ProductTypeData(brand_id = brand_obj, product_name = product_name, product_type = _get_unique_id())
+        product_type_obj.save()
+        item_obj = common.ProductData(customer_product_number = product_id, customer_phone_number = user_obj,
+                                      product_purchase_date = purchase_date, purchased_from = purchased_from, 
+                                      seller_email = seller_email, warranty_yrs = warranty_yrs,
+                                      insurance_yrs = insurance_yrs, invoice_loc = File(insurance_file),
+                                      warranty_loc = File(warranty_file), insurance_loc = File(warranty_file),
+                                      product_type = product_type_obj, seller_phone = seller_phone)
+        item_obj.save()
+        
+        data = {"status": "1","message":"Success!","id":item_obj.customer_product_number}
+    except Exception as ex:
+        logger.info('[Exception fnc_create_item]: {0}'.format(ex))
+        data = {"status": "1","message":"Success!","id":1}
+    return data
+
+
 @csrf_exempt
-def get_data(request):
-    action= request.GET.get('action')
-    if action=='getProfile':
-        unique_id=request.GET.get('unique_id')
+def fnc_edit_adding_item(request):
+    data = None
+    try:
+        post_data = request.POST
+        product_id = post_data['ai_txtitem-no']
+        product_name = post_data['ai_txtProduct']
+        brand_id = post_data['ai_txtManufacturer']
+        edit_product_id = post_data['edit-addnewitem_ID']
+        purchase_date = post_data.get('ai_txtpur-date', None)
+        purchased_from = post_data.get('ai_txtpurchased-from', None)
+        seller_email = post_data.get('ai_txtseller-email', None)
+        seller_phone = post_data.get('ai_txtseller-phone', None)
+        warranty_yrs = post_data.get('ai_txtwarranty', None)
+        insurance_yrs = post_data.get('ai_txtinsurance', None)
+        invoice_file = request.FILES.get('invoice_file', None)
+        warranty_file = request.FILES.get('warranty_file', None)
+        insurance_file = request.FILES.get('insurance_file', None)
+
+        brand_obj = common.BrandData.objects.get(brand_id = brand_id)
+        product_type_obj = common.ProductTypeData(brand_id = brand_obj, product_name = product_name, product_type = _get_unique_id())
+        product_type_obj.save()
+        item_obj = common.ProductData.objects.filter(customer_product_number = edit_product_id ).update(customer_product_number = product_id, 
+                                      product_purchase_date = purchase_date, purchased_from = purchased_from, 
+                                      seller_email = seller_email, warranty_yrs = warranty_yrs,
+                                      insurance_yrs = insurance_yrs, invoice_loc = File(insurance_file),
+                                      warranty_loc = File(warranty_file), insurance_loc = File(warranty_file),
+                                      product_type = product_type_obj, seller_phone = seller_phone)
+        
+        data = {"status": "1","message":"Success!","id":item_obj.customer_product_number}
+    except Exception as ex:
+        logger.info('[Exception fnc_create_item]: {0}'.format(ex))
+        data = {"status": "1","message":"Success!","id":1}
+    return data
+
+
+@csrf_exempt
+def fnc_item_purchase_interest(request):
+    resp = {}
+    data = {}
+    unique_id = request.GET.get('unique_id')
+    subject = '"Item Purchase Interest'
+    try:
+        user = common.GladMindUsers.objects.get(gladmind_customer_id = unique_id)
+        data['item'] = request.GET.get('item')
+        data['email_id'] = user.email_id
+        data['user_name'] =user.customer_name
+        data['phone_number'] = user.phone_number
+        data['address'] = user.address
+        data['country'] = user.country
+        data['state'] = user.state
+        data['timestamp'] = datetime.now()
+        resp['status'] = '1'
+        mail.item_purchase_interest(data = data, receiver = GLADMINDS_ADMIN_MAIL, subject = subject)
+    except Exception as ex:
+        resp['status'] = '0'
+        logger.info("[Exception: fnc_item_purchase_interest]: {0}".format(ex))
+    return resp
+
+@csrf_exempt
+def fnc_warranty_extend(request):
+    resp = {}
+    data = {}
+    unique_id = request.GET.get('unique_id')
+    data['item'] = request.GET.get('item')
+    subject = 'Warranty Extend Request'
+    try:
+        user = common.GladMindUsers.objects.get(gladmind_customer_id = unique_id)
+        data['email_id'] = user.email_id
+        data['user_name'] =user.customer_name
+        data['phone_number'] = user.phone_number
+        data['timestamp'] = datetime.now()
+        resp['status'] = '1'
+        mail.warrenty_extend(data = data, receiver = GLADMINDS_ADMIN_MAIL, subject = subject)
+    except Exception as ex:
+        resp['status'] = '0'
+        logger.info("[Exception: fnc_item_purchase_interest]: {0}".format(ex))
+    return resp
+
+@csrf_exempt
+def fnc_insurance_extend(request):
+    data = {}
+    resp = {}
+    unique_id = request.GET.get('unique_id')
+    data['item'] = request.GET.get('item')
+    subject = 'Insurance Purchase Request'
+    try:
+        user = common.GladMindUsers.objects.get(gladmind_customer_id = unique_id)
+        data['email_id'] = user.email_id
+        data['user_name'] =user.customer_name
+        data['phone_number'] = user.phone_number
+        data['timestamp'] = datetime.now()
+        resp['status'] = '1'
+        mail.insurance_extend(data = data, receiver = GLADMINDS_ADMIN_MAIL, subject = subject)
+    except Exception as ex:
+        resp['status'] = '0'
+        logger.info("[Exception: fnc_item_purchase_interest]: {0}".format(ex))
+    return resp
+
+@csrf_exempt
+def fnc_get_states(request):
+    state_list=[
+                "Uttar Pradesh", "Maharashtra", "Bihar", "West Bengal", "Andhra Pradesh", "Madhya Pradesh",
+                "Tamil Nadu", "Rajasthan", "Karnataka", "Gujarat", "Odisha", "Kerala", "Jharkhand", "Assam", "Punjab",
+                "Haryana","Chhattisgarh", "Jammu and Kashmir","Uttarakhand","Himachal Pradesh", "Tripura", "Meghalaya", 
+                "Manipur", "Nagaland", "Goa", "Arunachal Pradesh", "Mizoram","Sikkim", "Delhi", "Puducherry", 
+                "Chandigarh", "Andaman and Nicobar Islands", "Dadra and Nagar Haveli", "Daman and Diu", 
+                "Lakshadweep"]
+    states= {}
+    if request.GET.get('cID',None)=='india':
+        states=','.join(state_list)
+    return states
+
+@csrf_exempt
+def fnc_get_profile(request):
+    resp = {}
+    unique_id=request.GET.get('unique_id')
+    try:
         user_profile=common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
-        name=user_profile.customer_name
-        email=user_profile.user.email
-        mobile=user_profile.phone_number
-        address=user_profile.address
-        country=user_profile.country
-        state=user_profile.state
-        return HttpResponse(json.dumps({'name':name,'email':email,'mobile':mobile,'address':address,
-                                        'country':country,'state':state,'dob':'','gender':'',
-                                        'Interests':''}))
-    elif action=='getStates':
-        if request.GET.get('cID')=='india':
-            return get_states() 
-        else:
-            return HttpResponse()  
-    
-    elif action=='getProducts':
-        return HttpResponse()   
-    
+        resp['name']=user_profile.customer_name
+        resp['email']=user_profile.email_id
+        resp['mobile']=user_profile.phone_number
+        resp['address']=user_profile.address
+        resp['country']=user_profile.country
+        resp['state']=user_profile.state
+        resp['dob'] = user_profile.date_of_birth
+        resp['gender'] = user_profile.gender
+    except Exception as ex:
+        resp['status'] = '0'
+        logger.info("[Exception fnc_get_profile]: {0}".format(ex))
+    return resp
 
 @csrf_exempt
-def check_login(request):
+def fnc_get_products(request):
+    resp = {}
+    resp_product_type = []
+    resp_brand = []
+    try:
+        product_types = common.ProductTypeData.objects.filter(isActive = True)
+        product_name = []
+        for product_type in product_types:
+            product_name.append(product_type.product_name)
+        resp_product_type = {"Products":','.join(product_name)}
+        brands = common.BrandData.objects.filter(isActive = True)
+        
+        for brand in brands:
+            brand_data = {'id': brand.brand_id, 'manufacturer': brand.brand_name}
+            resp_brand.append(brand_data)
+        resp = {'manufacturers':resp_brand, "Products": ','.join(product_name)}
+    
+    except Exception as ex:
+        logger.info("[Exception fnc_get_products]:{0}".format(ex))
+    return resp
+        
+@csrf_exempt
+def fnc_get_user_items(request):
+    unique_id = request.GET.get('unique_id')
+    user_data = common.GladMindUsers.objects.get(gladmind_customer_id = unique_id)
+
+    items = common.ProductData.objects.filter(customer_phone_number__user_id = user_data.user, isActive=True)
+    myitems = []
+    for item in items:
+        product_type = item.product_type.product_type
+        brand_image_loc = "images/default.png"
+        brand_name = item.product_type.brand_id.brand_name
+        item_id = item.customer_product_number
+        myitems.append({"id": item_id, "manufacturer": brand_name, "Product":item_id, "image":'brand_image_loc'})
+    return {'myitems':myitems}
+
+@csrf_exempt
+def fnc_get_warrenty(request):
+    item_id = request.GET.get('itemID')
+    data = None
+    try:
+        product = common.ProductData.objects.get(customer_product_number = item_id)
+        data = {'status':'1', 'purchaseDate':str(product.product_purchase_date), 'waranteeYear':product.warranty_yrs}
+    except Exception as ex:
+        data = {'status':'0'}
+    
+    return data
+    
+    
+@csrf_exempt
+def fnc_get_insurance(request):
+    item_id = request.GET.get('itemID')
+    data = None
+    try:
+        product = common.ProductData.objects.get(customer_product_number = item_id)
+        data = {'status':1, 'purchaseDate':str(product.product_purchase_date), 'insuranceYear':product.insurance_yrs}
+    except Exception as ex:
+        data = {'status':0}
+    return data
+
+@csrf_exempt
+def fnc_delete_record(request):
+    item_id = request.GET.get('itemID')
+    data = None
+    try:
+        result = common.ProductData.objects.get(customer_product_number = item_id).delete()
+        data = {'status':1}
+    except Exception as ex:
+        data = {'status':0}
+    return data
+
+@csrf_exempt
+def fnc_get_record(request):
+    item_id = request.GET.get('itemID')
+    data = None
+    try:
+        product = common.ProductData.objects.get(customer_product_number = item_id)
+        data = {'status': '1', "userid":product.customer_phone_number.user_id,"pr_name" :product.product_type.product_name,"m_id":product.product_type.brand_id.brand_id, 'item_num':product.customer_product_number, 'pur_date':str(product.product_purchase_date), 'purchased_from':product.purchased_from,
+                'seller_email':product.seller_email, 'seller_phone':product.seller_phone, 'warranty_yrs':product.warranty_yrs, 'insurance_yrs':product.insurance_yrs, 'invoice_URL':'product.invoice_loc', 
+                'warranty_URL':'product.warranty_loc', 'insurance_URL':'', 
+                }
+    except Exception as ex:
+        logger.info("[Exception fnc_get_record]: {0}".format(ex))
+        data = {'status':'0'}
+    return data
+    
+@csrf_exempt
+def fnc_check_login(request):
+    data = None
     username = request.POST.get('txtUsername')
     password = request.POST.get('txtPassword')
     user = authenticate(username=username, password=password)
@@ -79,15 +325,16 @@ def check_login(request):
             user_profile=common.GladMindUsers.objects.get(user=user)
             unique_id=user_profile.gladmind_customer_id
             id=user_profile.user_id
-            response=HttpResponse(json.dumps({'status': 1,'id':id,'username':user_name,'unique_id':unique_id}))
+            data = {'status': '1','id':id,'username':user_name,'unique_id':unique_id}
         else:
-            response=HttpResponse(json.dumps({'status': 0}))
+            data = {'status': '0'}
     else:
-       response=HttpResponse(json.dumps({'status': 0}))
-    return response
+       data = {'status': '0'}
+    return data
 
 @csrf_exempt
-def update_user_details(request):
+def fnc_update_user_details(request):
+    data = None
     user_id=request.POST.get('userID')
     if user_id:
         user_name=request.POST.get('txt_name', None)
@@ -113,51 +360,29 @@ def update_user_details(request):
             user_object.user.email=user_email
             unique_id=user_object.gladmind_customer_id
             user_object.save()
-            response=json.dumps({'status':" 1",'thumbURL':'','sourceURL':''})
-        except Exception as ex:
-            response=json.dumps({'status': 0})
+            data = {'status':" 1",'thumbURL':'','sourceURL':''}
+        except:
+            data = {'status': 0}
     else:
-        response=json.dumps({'status': 0})
-    return response
+        data = {'status': 0}
+    return data
         
 @csrf_exempt
-def send_feedback_response(request):
+def fnc_feedback(request):
     #FIXME not saving feed back just sending the response
     user_id=request.POST.get('userID')
-    return HttpResponse(json.dumps({"status":"1","message":"Success!","id":user_id}))   
+    return {"status":"1","message":"Success!","id":user_id} 
     
-    
-@csrf_exempt
-def app_logout(request):
-    logout(request)
-    return HttpResponse('logged out')
-
- 
-    
-
-@csrf_exempt
-def get_states():
-    state_list=["Uttar Pradesh", "Maharashtra", 
-          "Bihar", "West Bengal", "Andhra Pradesh", "Madhya Pradesh",
-           "Tamil Nadu", "Rajasthan", "Karnataka", "Gujarat", "Odisha",
-            "Kerala", "Jharkhand", "Assam", "Punjab","Haryana","Chhattisgarh",
-            "Jammu and Kashmir","Uttarakhand","Himachal Pradesh", "Tripura", "Meghalaya", 
-            "Manipur", "Nagaland", "Goa", "Arunachal Pradesh", "Mizoram","Sikkim", 
-            "Delhi", "Puducherry", "Chandigarh", "Andaman and Nicobar Islands",
-             "Dadra and Nagar Haveli", "Daman and Diu", "Lakshadweep"]
-    states=','.join(state_list)
-    return HttpResponse(states)
 
 
 '''
 method for creating new user and checking user 
 is already exists or not
 '''
-import os
 from datetime import datetime
-import time
 @csrf_exempt
-def create_account(request):
+def fnc_create_new_user(request):
+    data = {}
     user_name=request.POST.get('txtName', None)
     user_email=request.POST.get('txtEmail', None)
     user_password= request.POST.get('txtPassword', None)
@@ -166,17 +391,10 @@ def create_account(request):
     user_mobile_number=request.POST.get('txtMobile', None)
     user_address=request.POST.get('txtAddress',None)
     unique_id=''
-        
     if check_email_id_exists(user_email):
-        return HttpResponse(json.dumps({'status': 2,'message':'Email already exists'}))
+        data = {'status': 2,'message':'Email already exists'}
     else:
         try:
-            image_url=''
-#             if request.FILES:
-#                 profile_pic=request.FILES.get('profilePIC') 
-# #                 image_url=save_image(profile_pic)
-# #                 image_directory = os.path.join(settings.STATIC_DIR,
-# #                                    "img/afterbuy/user/%s",(image_url))
             unique_id='GMS17_'+str(utils.generate_unique_customer_id())
             gladmind_user=common.GladMindUsers(user=User.objects.create_user(user_name,user_email,user_password),
                                                country=user_country,
@@ -187,35 +405,16 @@ def create_account(request):
                                                phone_number=user_mobile_number,
                                                registration_date=datetime.now(),
                                                address=user_address)
-#                                                thumb_url=File(profile_pic))
             gladmind_user.save();
             user_obj=common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
             send_registration_mail(gladmind_user)
-            response=HttpResponse(json.dumps({'status': 1,'message':'Success!','unique_id':unique_id,
+            data = {'status': 1,'message':'Success!','unique_id':unique_id,
                                               'username':user_name,'id':user_obj.user_id,
-                                              'sourceURL':'','thumbURL':''}))
-             
-            return HttpResponse(json.dumps({'status': 1,'message':'Success!','unique_id':unique_id,
-                                              'username':user_name,'id':user_obj.user_id,
-                                              'sourceURL':'','thumbURL':''}))
-        except Exception as ex:
-            return HttpResponse(json.dumps({'status':0}))
-    return response
+                                              'sourceURL':'','thumbURL':''}
+        except :
+            data={'status':0}
+    return data
 
-
-def save_image(profile_pic):
-    image_name = profile_pic._get_name()
-    image_directory = os.path.join(settings.STATIC_DIR,
-                                   "img/afterbuy/user")
-    if os.path.isdir(image_directory):
-        pass
-    else:
-        os.makedirs(image_directory)
-        fd = open('%s/%s' % (image_directory, str(image_name)), 'wb')
-        for chunk in profile_pic.chunks():
-            fd.write(chunk)
-        fd.close()
-    return image_name
 
 def send_registration_mail(user_detail):
     unique_id= user_detail.gladmind_customer_id
@@ -252,34 +451,27 @@ def check_email_id_exists(email_id):
     except:
         email_exists=False
     return email_exists
-  
-@csrf_exempt      
-def create_item(request):
-    try:
-        post_data = request.POST
-        user_id = post_data['addnewitem_userID']
-        product_name = post_data['ai_txtProduct']
-        brand_name = post_data['ai_txtManufacturer']
-        product_id = post_data['ai_txtitem-no']
-        purchase_date = post_data.get('ai_txtpur-date', None)
-        purchased_from = post_data.get('ai_txtpurchased-from', None)
-        seller_email = post_data.get('ai_txtseller-email', None)
-        seller_phone = post_data.get('ai_txtseller-phone', None)
-        warranty_yrs = post_data.get('ai_txtwarranty', None)
-        insurance_yrs = post_data.get('ai_txtinsurance', None)
-        invoice_file = request.FILES.get('invoice_file', None)
-        warranty_file = request.FILES.get('warranty_file', None)
-        insurance_file = request.FILES.get('insurance_file', None)
-        user_obj = common.GladMindUsers.objects.get(user = User.objects.get(id=user_id))
-        item_obj = common.ProductData(vin = product_id, customer_phone_number = user_obj,
-                                      product_purchase_date = purchase_date, purchased_from = purchased_from, 
-                                      seller_email = seller_email, warranty_yrs = warranty_yrs,
-                                      insurance_yrs = insurance_yrs, invoice_loc = File(insurance_file),
-                                      warranty_loc = File(warranty_file), insurance_loc = File(warranty_file))
-        item_obj.save()
-        
-        return HttpResponse({"status": "1","message":"Success!","id":item_obj.vin})
-    except Exception as ex:
-        print ex
-        return HttpResponse({"status": "1","message":"Success!","id":1})
-    
+
+def save_image(profile_pic):
+    import os
+    image_name = profile_pic._get_name()
+    image_directory = os.path.join(settings.STATIC_DIR,
+                                   "img/afterbuy/user")
+    if os.path.isdir(image_directory):
+        pass
+    else:
+        os.makedirs(image_directory)
+        fd = open('%s/%s' % (image_directory, str(image_name)), 'wb')
+        for chunk in profile_pic.chunks():
+            fd.write(chunk)
+        fd.close()
+    return image_name
+
+@csrf_exempt
+def app_logout(request):
+    logout(request)
+    return HttpResponse('logged out')
+
+@csrf_exempt
+def home(request):
+    return render_to_response('afterbuy/index.html')
