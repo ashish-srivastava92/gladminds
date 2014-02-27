@@ -10,7 +10,7 @@ from tastypie.http import HttpBadRequest, HttpUnauthorized
 from django.db import connection, models
 from django.contrib.auth.models import User
 from gladminds import smsparser, utils, audit, message_template as templates
-from gladminds.models import common,afterbuy_models
+from gladminds.models import common
 from gladminds.tasks import send_registration_detail, send_service_detail, \
     send_reminder_message, send_coupon_close_message, send_coupon_detail_customer, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message

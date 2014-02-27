@@ -4,7 +4,7 @@ from django.http.response import HttpResponse
 from django.core.context_processors import csrf
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate ,login
-from gladminds.models import common,afterbuy_models
+from gladminds.models import common
 from gladminds import utils,mail
 from django.template import Context, Template
 from django.contrib.auth import logout
