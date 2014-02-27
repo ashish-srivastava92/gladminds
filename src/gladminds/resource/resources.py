@@ -47,6 +47,7 @@ class GladmindsResources(Resource):
              message=request.GET.get('msg')
              phone_number=request.GET.get('cli')
              phone_number = '+{0}'.format(phone_number)
+        audit.audit_log(action='RECIEVED', sender=phone_number, reciever='+1 574-212-0423', message=message, status='success')
         logger.info('Recieved Message from phone number: {0} and message: {1}'.format(message, phone_number))
         try:
             sms_dict = smsparser.sms_parser(message=message)
