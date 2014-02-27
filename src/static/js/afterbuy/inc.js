@@ -1,5 +1,6 @@
 //var ipaddress = "http://rkarthik.in/mobile/gm/";
-var ipaddress = "http://localhost:8000/app/";
+// var ipaddress = "http://localhost:8000/app/";
+var ipaddress="http://api-qa.gladmindsplatform.co/"
 var loader = new Image(); 
 loader.src="images/ajax-loader.gif";
 
