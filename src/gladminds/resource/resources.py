@@ -1,22 +1,22 @@
 from datetime import datetime
 from django.conf.urls import url
-from tastypie.utils.urls import trailing_slash
-from django.db import transaction
-from django.core.exceptions import ObjectDoesNotExist
-from django.forms.models import model_to_dict
-from tastypie.exceptions import ImmediateHttpResponse
-from tastypie.serializers import Serializer
-from tastypie.http import HttpBadRequest, HttpUnauthorized
-from django.db import connection, models
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import connection, models, transaction
+from django.forms.models import model_to_dict
 from gladminds import smsparser, utils, audit, message_template as templates
 from gladminds.models import common
 from gladminds.tasks import send_registration_detail, send_service_detail, \
     send_reminder_message, send_coupon_close_message, send_coupon_detail_customer, \
-    send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message,send_coupon
+    send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message, \
+    send_coupon
 from src.gladminds.tasks import send_coupon_close_message
-from tastypie.resources import Resource, ModelResource
 from tastypie import fields
+from tastypie.exceptions import ImmediateHttpResponse
+from tastypie.http import HttpBadRequest, HttpUnauthorized
+from tastypie.resources import Resource, ModelResource
+from tastypie.serializers import Serializer
+from tastypie.utils.urls import trailing_slash
 import logging
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -132,9 +132,17 @@ class GladmindsResources(Resource):
         customer_message = None
         try:
             dealer_data = self.validate_dealer(phone_number)
-            valid_coupon = common.CouponData.objects.select_for_update().filter(vin__vin=vin, valid_kms__gte = actual_kms, status=1).select_related ('vin','customer_phone_number__phone_number').order_by('service_type')[0]
+            valid_coupon = common.CouponData.objects.select_for_update().filter(vin__vin=vin, valid_kms__gte = actual_kms,status=1).select_related ('vin','customer_phone_number__phone_number').order_by('service_type')[0]
+            all_coupon = common.CouponData.objects.select_for_update().filter(vin__vin=vin, valid_kms__gte = actual_kms).select_related ('vin','customer_phone_number__phone_number').order_by('service_type')
+            in_progress_coupon=[]
+            for coupon in all_coupon:
+                if coupon.status==4:
+                    in_progress_coupon.append(coupon)
             customer_phone_number = valid_coupon.vin.customer_phone_number.phone_number
-            if valid_coupon.service_type == int(service_type):
+            if len(in_progress_coupon)>0 :
+                dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=in_progress_coupon[0].service_type)
+                customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=in_progress_coupon[0].unique_service_coupon, service_type=in_progress_coupon[0].service_type)
+            elif valid_coupon.service_type == int(service_type):
                 valid_coupon.actual_kms = actual_kms
                 valid_coupon.actual_service_date = datetime.now()
                 valid_coupon.status = 4
