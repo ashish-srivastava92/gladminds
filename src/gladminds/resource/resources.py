@@ -13,7 +13,7 @@ from gladminds import smsparser, utils, audit, message_template as templates
 from gladminds.models import common
 from gladminds.tasks import send_registration_detail, send_service_detail, \
     send_reminder_message, send_coupon_close_message, send_coupon_detail_customer, \
-    send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
+    send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message,send_coupon
 from src.gladminds.tasks import send_coupon_close_message
 from tastypie.resources import Resource, ModelResource
 from tastypie import fields
@@ -97,8 +97,19 @@ class GladmindsResources(Resource):
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         message = None
         try:
-            customer_product_data = common.CouponData.objects.select_related('vin','customer_phone_number__phone_number').filter(vin__customer_phone_number__phone_number = phone_number, status = 1, vin__sap_customer_id = sap_customer_id).order_by('vin', 'valid_days') if sap_customer_id else common.CouponData.objects.select_related('vin','customer_phone_number__phone_number').filter(vin__customer_phone_number__phone_number = phone_number, status = 1).order_by('vin', 'valid_days')
-            service_list = map(lambda object: {'vin': object.vin.vin, 'usc': object.unique_service_coupon, 'valid_days': object.valid_days, 'valid_kms':object.valid_kms}, customer_product_data)
+            customer_product_data = common.CouponData.objects.select_related \
+                                        ('vin','customer_phone_number__phone_number').\
+                                        filter(vin__customer_phone_number__phone_number = phone_number,\
+                                        vin__sap_customer_id = sap_customer_id).\
+                                        order_by('vin', 'valid_days') if sap_customer_id else \
+                                        common.CouponData.objects.select_related('vin','customer_phone_number__phone_number').\
+                                        filter(vin__customer_phone_number__phone_number = phone_number).\
+                                        order_by('vin', 'valid_days')
+            valid_product_data=[]
+            for data in customer_product_data:
+                if data.status==1 or data.status==4:
+                    valid_product_data.append(data)
+            service_list = map(lambda object: {'vin': object.vin.vin, 'usc': object.unique_service_coupon, 'valid_days': object.valid_days, 'valid_kms':object.valid_kms},valid_product_data)
             template = templates.get_template('SEND_CUSTOMER_SERVICE_DETAIL')
             msg_list=[template.format(**key_args) for key_args in service_list]
             if not msg_list:
@@ -169,7 +180,7 @@ class GladmindsResources(Resource):
         except Exception as ex:
             message = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
-            send_coupon_close_message.delay(phone_number=phone_number, message=message)
+            send_coupon.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             transaction.commit()
         return True
