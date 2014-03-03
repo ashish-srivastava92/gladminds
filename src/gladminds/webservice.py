@@ -166,7 +166,7 @@ class ProductPurchaseService(ServiceBase):
                 product_purchase_list.append({
                         'vin' : product.CHASSIS,
                         'sap_customer_id' : product.CUSTOMER_ID,
-                        'customer_phone_number' : product.CUST_MOBILE,
+                        'customer_phone_number' :'+91'+product.CUST_MOBILE,
                         'customer_name' : product.CUSTOMER_NAME,
                         'city' : product.CITY,
                         'state' : product.STATE,

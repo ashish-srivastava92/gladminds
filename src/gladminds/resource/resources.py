@@ -109,7 +109,8 @@ class GladmindsResources(Resource):
             for data in customer_product_data:
                 if data.status==1 or data.status==4:
                     valid_product_data.append(data)
-            service_list = map(lambda object: {'vin': object.vin.vin, 'usc': object.unique_service_coupon, 'valid_days': object.valid_days, 'valid_kms':object.valid_kms},valid_product_data)
+            valdata=[valid_product_data[0]]
+            service_list = map(lambda object: {'vin': object.vin.vin, 'usc': object.unique_service_coupon, 'valid_days': object.valid_days, 'valid_kms':object.valid_kms},valdata)
             template = templates.get_template('SEND_CUSTOMER_SERVICE_DETAIL')
             msg_list=[template.format(**key_args) for key_args in service_list]
             if not msg_list:
