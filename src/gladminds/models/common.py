@@ -114,8 +114,8 @@ class GladMindUsers(models.Model):
     state=models.CharField(max_length=255, null=True, blank=True)
     date_of_birth=models.CharField(max_length=255, null=True, blank=True)
     gender=models.IntegerField(max_length=50, null=True, blank=True)
-    img_url=models.FileField(upload_to=settings.AFTERBUY_USER_LOC, blank=True)
-    thumb_url=models.FileField(upload_to=settings.AFTERBUY_USER_LOC, blank=True)
+    img_url=models.FileField(upload_to="users", blank=True)
+    thumb_url=models.FileField(upload_to="users", blank=True)
     isActive = models.BooleanField(default=True)
 
     class Meta:
@@ -127,6 +127,7 @@ class GladMindUsers(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None):
         return super(GladMindUsers, self).save(force_insert, force_update, using)
+    
     
     
 '''
@@ -153,9 +154,9 @@ class ProductData(models.Model):
     warranty_yrs=models.FloatField(null=True,blank=True)
     insurance_yrs=models.FloatField(null=True, blank=True)
     
-    invoice_loc=models.FileField(upload_to=settings.AFTERBUY_PRODUCT_INVOICE_LOC, blank=True)
-    warranty_loc=models.FileField(upload_to=settings.AFTERBUY_PRODUCT_WARRENTY_LOC, blank=True)
-    insurance_loc=models.FileField(upload_to=settings.AFTERBUY_PRODUCT_INSURANCE_LOC, blank=True)
+    invoice_loc=models.FileField(upload_to='invoice', blank=True)
+    warranty_loc=models.FileField(upload_to='warrenty', blank=True)
+    insurance_loc=models.FileField(upload_to='insurance', blank=True)
     
     last_modified=models.DateTimeField(null=False,default=datetime.now())
     created_on=models.DateTimeField(null=True, default=datetime.now())

@@ -124,7 +124,7 @@ class DealerService(ServiceBase):
                     'address' : dealer.ADDRESS,
                     'service_advisor_id' : dealer.SER_ADV_ID,
                     'name' : dealer.SER_ADV_NAME,
-                    'phone_number': dealer.SER_ADV_MOBILE
+                    'phone_number': '+91'+dealer.SER_ADV_MOBILE
                 })
             save_to_db(feed_type = 'dealer', data_source = dealer_list)
             return success
@@ -166,7 +166,7 @@ class ProductPurchaseService(ServiceBase):
                 product_purchase_list.append({
                         'vin' : product.CHASSIS,
                         'sap_customer_id' : product.CUSTOMER_ID,
-                        'customer_phone_number' : product.CUST_MOBILE,
+                        'customer_phone_number' :'+91'+product.CUST_MOBILE,
                         'customer_name' : product.CUSTOMER_NAME,
                         'city' : product.CITY,
                         'state' : product.STATE,

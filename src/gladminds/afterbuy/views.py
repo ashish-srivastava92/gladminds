@@ -15,7 +15,10 @@ from django.template.context import RequestContext
 from django.contrib.auth.models import User 
 from datetime import datetime
 from gladminds import mail
+from gladminds.afterbuy.auth import authentication_required
 import logging
+from datetime import timedelta
+from django.contrib.auth.decorators import login_required
 import uuid
 
 logger = logging.getLogger("gladminds")
@@ -50,6 +53,8 @@ def main(request):
     if action and action in action_to_method.keys():
         method = action_to_method[action]
         data =  method(request)
+        if data =='log out':
+            app_logout(request)
         resp_str = json.dumps(data)
         return HttpResponse(resp_str)
     
@@ -249,6 +254,7 @@ def fnc_insurance_extend(request):
         logger.info("[Exception: fnc_item_purchase_interest]: {0}".format(ex))
     return resp
 
+
 @csrf_exempt
 def fnc_get_states(request):
     state_list=[
@@ -263,6 +269,8 @@ def fnc_get_states(request):
         states=','.join(state_list)
     return states
 
+
+@authentication_required
 @csrf_exempt
 def fnc_get_profile(request):
     resp = {}
@@ -404,6 +412,7 @@ def fnc_update_user_details(request):
         user_interest=request.POST.get('txt_interest', None)
         user_address=request.POST.get('txt_address', None)
         user_gender=request.POST.get('txt_gender', None)
+        user_image=request.FILES.get('profilePIC_edit',None)
         try:
             user_object=common.GladMindUsers.objects.get(user_id=user_id)
             user_object.customer_name=user_name
@@ -417,6 +426,7 @@ def fnc_update_user_details(request):
             user_object.user.username=user_name
             user_object.user.email=user_email
             unique_id=user_object.gladmind_customer_id
+            user_object.img_url=File(user_image)
             user_object.save()
             data = {'status':" 1",'thumbURL':'','sourceURL':''}
         except:
@@ -453,7 +463,8 @@ def fnc_create_new_user(request):
         data = {'status': 2,'message':'Email already exists'}
     else:
         try:
-            unique_id='GMS17_'+str(utils.generate_unique_customer_id())
+            time_stamp=datetime.now()
+            unique_id='GMS17'+str(time_stamp)
             gladmind_user=common.GladMindUsers(user=User.objects.create_user(user_name,user_email,user_password),
                                                country=user_country,
                                                state=user_state,
