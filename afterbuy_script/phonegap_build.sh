@@ -9,8 +9,6 @@ cd afterbuy
 #add a command to work with
 cd ../
 zip -r afterbuy afterbuy
-pip install requests
-pip install json
 python publish_adobe.py
 cd ../
 exit 0
