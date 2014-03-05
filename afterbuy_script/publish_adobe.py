@@ -57,10 +57,10 @@ while not r or r.status_code > 299:
                  + str(app_id) + "/android/?auth_token=" + token
     r = requests.get(url=url)
 if form_url == "https://api-qa.gladmindsplatform.co/gm/":
-    app_name = "qa_afterbuy"
+    app_name = "qa_afterbuy.apk"
 else:
     app_name = "prod_afterbuy"
-s = open('%s.apk' % app_name, 'w')
+s = open('%s' % app_name, 'w')
 s.write(r.content)
 
 
@@ -71,4 +71,4 @@ c = S3Connection('AKIAIL7IDCSTNCG2R6JA', \
 b = c.get_bucket('afterbuy')
 k = Key(b)
 k.key = app_name
-k.set_contents_from_filename('afterbuy.apk', policy='public-read')
+k.set_contents_from_filename(app_name, policy='public-read')
