@@ -5,6 +5,7 @@ import sys
 
 form_url = sys.argv[1]
 
+
 def user_apps(token):
     url = 'https://build.phonegap.com/api/v1/me/?auth_token=%s' % token
     r = requests.get(url)
