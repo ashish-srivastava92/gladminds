@@ -342,13 +342,6 @@ def fnc_get_user_items(request):
             myitems.append({"id": item_id, "manufacturer": brand_name, "Product":item_id, "image":'brand_image_loc'})
         return {'myitems':myitems}
     except:
-        items = common.ProductData.objects.all()
-        for item in items:
-            product_type = item.product_type.product_type
-            brand_image_loc = "images/default.png"
-            brand_name = item.product_type.brand_id.brand_name
-            item_id = item.customer_product_number
-            myitems.append({"id": item_id, "manufacturer": brand_name, "Product":item_id, "image":'brand_image_loc'})
         return {'myitems':myitems}
         
 
@@ -438,10 +431,11 @@ def fnc_update_user_details(request):
         user_address=request.POST.get('txt_address', None)
         user_gender=request.POST.get('txt_gender', None)
         user_image=request.FILES.get('profilePIC_edit',None)
-        file_name=str(uuid.uuid4())+str(datetime.now())
-        user_image.name=file_name
+        if user_image:
+            file_name=str(uuid.uuid4())+str(datetime.now())
+            user_image.name=file_name
         try:
-            user_object=common.GladMindUsers.objects.get(user_id=user_id)
+            user_object=common.GladMindUsers.objects.get(gladmind_customer_id=user_id)
             user_object.customer_name=user_name
             user_object.email_id=user_email
             user_object.phone_number=user_mobile_number
@@ -458,7 +452,8 @@ def fnc_update_user_details(request):
             user_object.save()
             user_obj=common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
             data = {'status':" 1",'thumbURL':str(user_obj.img_url),'sourceURL':str(user_obj.img_url)}
-        except:
+        except Exception as ex:
+            logger.info("[Exception fnc_update_user_details: {0}".format(ex))
             data = {'status': 0}
     else:
         data = {'status': 0}
