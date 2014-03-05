@@ -148,17 +148,17 @@ def fnc_edit_adding_item(request):
         data = {"status": "1","message":"Success!","id":1}
     return data
 
-
+@csrf_exempt
 def __datetime(date_str):
     return datetime.strptime(date_str, '%Y-%m-%d')
 
-
+@csrf_exempt
 def check_days_difference(days, months):
     if days < months * 30 < days + 7:
         return True
     return False
 
-
+@csrf_exempt
 def enable_notification(days, years_limit):
     days = days * -1
     if years_limit > 1:
@@ -169,7 +169,7 @@ def enable_notification(days, years_limit):
         return  check_days_difference(days, 6)
     return  False
 
-
+@csrf_exempt
 def get_product_notification(item, notification_type):
     data = []
     today = __datetime(datetime.now().strftime('%Y-%m-%d'))
@@ -518,7 +518,7 @@ def fnc_create_new_user(request):
             data={'status':0,'message':ex}
     return data
 
-
+@csrf_exempt
 def send_registration_mail(user_detail):
     unique_id= user_detail.gladmind_customer_id
     user_name=user_detail.customer_name
