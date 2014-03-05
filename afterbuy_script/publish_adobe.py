@@ -24,7 +24,6 @@ def delete_other_apps(token):
 def get_phonegap_token(auth):
     url = 'https://build.phonegap.com/token'
     r = requests.post(url, auth=auth)
-    print "r.status_code", r.status_code
     if r.status_code < '300':
         return json.loads(r.content).get("token", None)
     return None
@@ -36,7 +35,7 @@ def get_app_id(app_path, auth):
             "com.alunny.apiv1", "version": "0.1.0", "title": "API V1 App"})
     url = 'https://build.phonegap.com/api/v1/apps/'
     r = requests.post(url, files=files, auth=auth, data={'data': data})
-    #os.remove(app_path)
+    os.remove(app_path)
     if r.status_code < '300':
         return json.loads(r.content)["id"]
 
@@ -64,8 +63,6 @@ from boto.s3.key import Key
 c = S3Connection('AKIAIL7IDCSTNCG2R6JA', \
                  '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A')
 b = c.get_bucket('afterbuy')
-for i in b.list():
-    print i
 k = Key(b)
 k.key = 'afterbuy_apk'
 k.set_contents_from_filename('afterbuy.apk', policy='public-read')
