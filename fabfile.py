@@ -1,5 +1,6 @@
 from fabric.api import task, run, local
 import os
+from subprocess import Popen
 
 COVERAGE_ENABLED = False
 PROJECT_PACKGE = 'gladminds'
@@ -27,6 +28,15 @@ def uml_gen():
 def runserver():
     '''Runs Django Server on port 8000'''
     local("bin/django runserver 0.0.0.0:8000")
+
+
+@task()
+def create_android_build(ip_address, form_url):
+    '''Runs Django Server on port 8000'''
+    process = Popen('./afterbuy_script/phonegap_build.sh %s %s' % \
+                                        (ip_address, form_url), shell=True)
+    process.wait()
+
 
 @task()
 def lint_py():
