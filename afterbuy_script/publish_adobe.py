@@ -56,7 +56,7 @@ while not r or r.status_code > 299:
     url = "https://build.phonegap.com/api/v1/apps/"\
                  + str(app_id) + "/android/?auth_token=" + token
     r = requests.get(url=url)
-if form_url == "https://api-qa.gladmindsplatform.co/":
+if form_url == "https://api-qa.gladmindsplatform.co/gm":
     app_name = "qa_afterbuy"
 else:
     app_name = "prod_afterbuy"
