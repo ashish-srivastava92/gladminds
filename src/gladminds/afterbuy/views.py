@@ -46,6 +46,7 @@ def main(request):
           'deleteRec':fnc_delete_record,
           'fetchRec':fnc_get_record,
           'newRegister':fnc_create_new_user,
+          'notification':fnc_get_notification
     }
     
     action = request.POST.get('action', None) or request.GET.get('action', None)
@@ -146,6 +147,63 @@ def fnc_edit_adding_item(request):
         logger.info('[Exception fnc_edit_adding_item]: {0}'.format(ex))
         data = {"status": "1","message":"Success!","id":1}
     return data
+
+
+def __datetime(date_str):
+    return datetime.strptime(date_str, '%Y-%m-%d')
+
+
+def check_days_difference(days, months):
+    if days < months * 30 < days + 7:
+        return True
+    return False
+
+
+def enable_notification(days, years_limit):
+    days = days * -1
+    if years_limit > 1:
+        return  check_days_difference(days, int(years_limit) * 12)
+    elif years_limit == 0.3:
+        return  check_days_difference(days, 3)
+    elif years_limit == 0.6:
+        return  check_days_difference(days, 6)
+    return  False
+
+
+def get_product_notification(item, notification_type):
+    data = []
+    today = __datetime(datetime.now().strftime('%Y-%m-%d'))
+    purchase_date = __datetime(item.product_purchase_date.strftime('%Y-%m-%d'))
+    diff = purchase_date - today
+    if notification_type == 'insurance':
+        years_limit = item.warranty_yrs
+    else:
+        years_limit = item.insurance_yrs
+    if enable_notification(diff.days, years_limit):
+        data = [{"item_id": item.vin, "item_type": item.product_type,\
+                    "type": notification_type,\
+                     "message": "Project will be expired in 7 months"}]
+    return  data
+
+
+@csrf_exempt
+def fnc_get_notification(request):
+    resp = []
+    try:
+        unique_id = request.GET.get('unique_id')
+        user = common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
+        phone_num = user.phone_number
+        items = common.ProductData.objects.all()
+        for item in items:
+            if item.customer_phone_number.phone_number == phone_num:
+                insurance_notification = get_product_notification(item, "insurance")
+                resp.extend(insurance_notification)
+                warranty_notification = get_product_notification(item, "warranty")
+                resp.extend(warranty_notification)
+
+    except Exception as ex:
+            logger.info("[Exception: fnc_get_notification]: {0}".format(ex))
+    return resp
 
 
 @csrf_exempt
