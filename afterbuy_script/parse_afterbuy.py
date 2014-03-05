@@ -4,7 +4,6 @@ import sys
 form_url = sys.argv[1]
 ip_address = sys.argv[1]
 
-print "$$$$$$$$$$$$$$$", sys.argv
 ip_address = 'var ipaddress = "%s";' % ip_address
 form_url = 'action="%s"' % form_url
 
