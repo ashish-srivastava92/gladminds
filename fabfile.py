@@ -31,10 +31,10 @@ def runserver():
 
 
 @task()
-def create_android_build(ip_address, form_url):
+def create_android_build(ip_address):
     '''Runs Django Server on port 8000'''
-    process = Popen('./afterbuy_script/phonegap_build.sh %s %s' % \
-                                        (ip_address, form_url), shell=True)
+    process = Popen('./afterbuy_script/phonegap_build.sh %s' % \
+                                        (ip_address), shell=True)
     process.wait()
 
 
