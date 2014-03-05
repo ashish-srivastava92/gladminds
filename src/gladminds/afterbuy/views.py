@@ -52,8 +52,6 @@ def main(request):
     if action and action in action_to_method.keys():
         method = action_to_method[action]
         data =  method(request)
-        if data =='log out':
-            app_logout(request)
         resp_str = json.dumps(data)
         return HttpResponse(resp_str)
     
@@ -78,7 +76,16 @@ def fnc_create_item(request):
         invoice_file = request.FILES.get('invoice_file', None)
         warranty_file = request.FILES.get('warranty_file', None)
         insurance_file = request.FILES.get('insurance_file', None)
-        user_obj = common.GladMindUsers.objects.get(user = User.objects.get(id=user_id))
+        if invoice_file:
+            file_name=str(uuid.uuid4())+str(datetime.now())
+            invoice_file.name=file_name
+        if warranty_file:
+            file_name=str(uuid.uuid4())+str(datetime.now())
+            warranty_file.name=file_name
+        if insurance_file:
+            file_name=str(uuid.uuid4())+str(datetime.now())
+            insurance_file.name=file_name
+        user_obj = common.GladMindUsers.objects.get(gladmind_customer_id=user_id)
         brand_obj = common.BrandData.objects.get(brand_id = brand_id)
         product_type_obj = common.ProductTypeData(brand_id = brand_obj, product_name = product_name, product_type = _get_unique_id())
         product_type_obj.save()
@@ -102,10 +109,10 @@ def fnc_edit_adding_item(request):
     data = None
     try:
         post_data = request.POST
-        product_id = post_data['ai_txtitem-no']
-        product_name = post_data['ai_txtProduct']
-        brand_id = post_data['ai_txtManufacturer']
-        edit_product_id = post_data['edit-addnewitem_ID']
+        product_id = post_data.get('ai_txtitem-no',None)
+        product_name = post_data.get('ai_txtProduct',None)
+        brand_id = post_data.get('ai_txtManufacturer',None)
+        edit_product_id =post_data.get('edit-addnewitem_ID',None)
         purchase_date = post_data.get('ai_txtpur-date', None)
         purchased_from = post_data.get('ai_txtpurchased-from', None)
         seller_email = post_data.get('ai_txtseller-email', None)
@@ -115,8 +122,16 @@ def fnc_edit_adding_item(request):
         invoice_file = request.FILES.get('invoice_file', None)
         warranty_file = request.FILES.get('warranty_file', None)
         insurance_file = request.FILES.get('insurance_file', None)
-
         brand_obj = common.BrandData.objects.get(brand_id = brand_id)
+        if invoice_file:
+            file_name=str(uuid.uuid4())+str(datetime.now())
+            invoice_file.name=file_name
+        if warranty_file:
+            file_name=str(uuid.uuid4())+str(datetime.now())
+            warranty_file.name=file_name
+        if insurance_file:
+            file_name=str(uuid.uuid4())+str(datetime.now())
+            insurance_file.name=file_name
         product_type_obj = common.ProductTypeData(brand_id = brand_obj, product_name = product_name, product_type = _get_unique_id())
         product_type_obj.save()
         item_obj = common.ProductData.objects.filter(customer_product_number = edit_product_id ).update(customer_product_number = product_id, 
@@ -126,9 +141,9 @@ def fnc_edit_adding_item(request):
                                       warranty_loc = File(warranty_file), insurance_loc = File(warranty_file),
                                       product_type = product_type_obj, seller_phone = seller_phone)
         
-        data = {"status": "1","message":"Success!","id":item_obj.customer_product_number}
+        data = {"status": "1","message":"Success!","id":product_id}
     except Exception as ex:
-        logger.info('[Exception fnc_create_item]: {0}'.format(ex))
+        logger.info('[Exception fnc_edit_adding_item]: {0}'.format(ex))
         data = {"status": "1","message":"Success!","id":1}
     return data
 
@@ -212,7 +227,7 @@ def fnc_get_states(request):
     return states
 
 
-@authentication_required
+
 @csrf_exempt
 def fnc_get_profile(request):
     resp = {}
@@ -257,17 +272,27 @@ def fnc_get_products(request):
 @csrf_exempt
 def fnc_get_user_items(request):
     unique_id = request.GET.get('unique_id')
-    user_data = common.GladMindUsers.objects.get(gladmind_customer_id = unique_id)
-
-    items = common.ProductData.objects.filter(customer_phone_number__user_id = user_data.user, isActive=True)
     myitems = []
-    for item in items:
-        product_type = item.product_type.product_type
-        brand_image_loc = "images/default.png"
-        brand_name = item.product_type.brand_id.brand_name
-        item_id = item.customer_product_number
-        myitems.append({"id": item_id, "manufacturer": brand_name, "Product":item_id, "image":'brand_image_loc'})
-    return {'myitems':myitems}
+    try:
+        user_data = common.GladMindUsers.objects.get(gladmind_customer_id = unique_id)
+        items = common.ProductData.objects.filter(customer_phone_number__gladmind_customer_id = unique_id, isActive=True)
+        for item in items:
+            product_type = item.product_type.product_type
+            brand_image_loc = "images/default.png"
+            brand_name = item.product_type.brand_id.brand_name
+            item_id = item.customer_product_number
+            myitems.append({"id": item_id, "manufacturer": brand_name, "Product":item_id, "image":'brand_image_loc'})
+        return {'myitems':myitems}
+    except:
+        items = common.ProductData.objects.all()
+        for item in items:
+            product_type = item.product_type.product_type
+            brand_image_loc = "images/default.png"
+            brand_name = item.product_type.brand_id.brand_name
+            item_id = item.customer_product_number
+            myitems.append({"id": item_id, "manufacturer": brand_name, "Product":item_id, "image":'brand_image_loc'})
+        return {'myitems':myitems}
+        
 
 @csrf_exempt
 def fnc_get_warrenty(request):
@@ -310,9 +335,9 @@ def fnc_get_record(request):
     data = None
     try:
         product = common.ProductData.objects.get(customer_product_number = item_id)
-        data = {'status': '1', "userid":product.customer_phone_number.user_id,"pr_name" :product.product_type.product_name,"m_id":product.product_type.brand_id.brand_id, 'item_num':product.customer_product_number, 'pur_date':str(product.product_purchase_date), 'purchased_from':product.purchased_from,
-                'seller_email':product.seller_email, 'seller_phone':product.seller_phone, 'warranty_yrs':product.warranty_yrs, 'insurance_yrs':product.insurance_yrs, 'invoice_URL':'product.invoice_loc', 
-                'warranty_URL':'product.warranty_loc', 'insurance_URL':'', 
+        data = {'status': '1', "userid":'',"pr_name" :product.product_type.product_name,"m_id":product.product_type.brand_id.brand_id, 'item_num':product.customer_product_number, 'pur_date':str(product.product_purchase_date), 'purchased_from':product.purchased_from,
+                'seller_email':product.seller_email, 'seller_phone':product.seller_phone, 'warranty_yrs':product.warranty_yrs, 'insurance_yrs':product.insurance_yrs, 'invoice_URL':str(product.invoice_loc), 
+                'warranty_URL':str(product.warranty_loc), 'insurance_URL':str(product.insurance_loc), 
                 }
     except Exception as ex:
         logger.info("[Exception fnc_get_record]: {0}".format(ex))
@@ -355,6 +380,8 @@ def fnc_update_user_details(request):
         user_address=request.POST.get('txt_address', None)
         user_gender=request.POST.get('txt_gender', None)
         user_image=request.FILES.get('profilePIC_edit',None)
+        file_name=str(uuid.uuid4())+str(datetime.now())
+        user_image.name=file_name
         try:
             user_object=common.GladMindUsers.objects.get(user_id=user_id)
             user_object.customer_name=user_name
@@ -362,15 +389,17 @@ def fnc_update_user_details(request):
             user_object.phone_number=user_mobile_number
             user_object.address=user_address
             user_object.country=user_country
-            user_object .state=user_state
+            user_object.state=user_state
             user_object.dob=user_dob
             user_object.gender=user_gender
             user_object.user.username=user_name
             user_object.user.email=user_email
             unique_id=user_object.gladmind_customer_id
             user_object.img_url=File(user_image)
+            user_object.img_url=File(user_image)
             user_object.save()
-            data = {'status':" 1",'thumbURL':'','sourceURL':''}
+            user_obj=common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
+            data = {'status':" 1",'thumbURL':str(user_obj.img_url),'sourceURL':str(user_obj.img_url)}
         except:
             data = {'status': 0}
     else:
@@ -400,6 +429,10 @@ def fnc_create_new_user(request):
     user_state=request.POST.get('txtState', None)
     user_mobile_number=request.POST.get('txtMobile', None)
     user_address=request.POST.get('txtAddress',None)
+    user_image=request.FILES.get('profilePIC',None)
+    if user_image:
+        file_name=str(uuid.uuid4())+str(datetime.now())
+        user_image.name=file_name
     unique_id=''
     if check_email_id_exists(user_email):
         data = {'status': 2,'message':'Email already exists'}
@@ -415,15 +448,16 @@ def fnc_create_new_user(request):
                                                email_id=user_email,
                                                phone_number=user_mobile_number,
                                                registration_date=datetime.now(),
-                                               address=user_address)
+                                               address=user_address,
+                                               img_url=File(user_image))
             gladmind_user.save();
             user_obj=common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
             send_registration_mail(gladmind_user)
             data = {'status': 1,'message':'Success!','unique_id':unique_id,
-                                              'username':user_name,'id':user_obj.user_id,
-                                              'sourceURL':'','thumbURL':''}
-        except :
-            data={'status':0}
+                                              'username':user_name,'id':unique_id,
+                                              'sourceURL':str(user_obj.img_url),'thumbURL':str(user_obj.img_url)}
+        except Exception as ex:
+            data={'status':0,'message':ex}
     return data
 
 

@@ -115,7 +115,7 @@ class GladMindUsers(models.Model):
     date_of_birth=models.CharField(max_length=255, null=True, blank=True)
     gender=models.IntegerField(max_length=50, null=True, blank=True)
     img_url=models.FileField(upload_to="users", blank=True)
-    thumb_url=models.FileField(upload_to="users", blank=True)
+    thumb_url=models.FileField(upload_to="users" , blank=True)
     isActive = models.BooleanField(default=True)
 
     class Meta:
