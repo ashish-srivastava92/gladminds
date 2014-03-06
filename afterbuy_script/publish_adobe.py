@@ -43,7 +43,7 @@ def get_app_id(app_path, auth):
         return json.loads(r.content)["id"]
 
 
-app_path = '%s.zip' % 'afterbuy'
+app_path = 'afterbuy_script/afterbuy.zip'
 auth = ('support@gladminds.co', 'gladminds123')
 token = get_phonegap_token(auth)
 delete_other_apps(token)
