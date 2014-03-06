@@ -1,6 +1,7 @@
 #!/bin/sh
 # Script to create phonegap app
 
+source gladminds/bin/activate
 cd afterbuy_script
 phonegap create afterbuy -n afterbuy -i com.gladminds.afterbuy
 cp -r new/* afterbuy/www 
@@ -11,4 +12,5 @@ cd ../
 zip -r afterbuy afterbuy
 python publish_adobe.py $1
 cd ../
+deactivate
 exit 0
