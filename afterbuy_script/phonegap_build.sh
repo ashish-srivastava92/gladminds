@@ -9,8 +9,9 @@ cd afterbuy
 #add a command to work with
 cd ../
 zip -r afterbuy afterbuy
-sudo easy_install requests
-sudo easy_install json
+sudo  yum -y install python-pip
+pip install requests
+pip install json
 python publish_adobe.py $1
 cd ../
 exit 0
