@@ -5,7 +5,7 @@ phonegap create afterbuy -n afterbuy -i com.gladminds.afterbuy
 cp -r new/* afterbuy/www 
 python parse_afterbuy.py $1  
 cd afterbuy 
-#add a command to work with
+phonegap -V build android
 cd ../
 zip -r afterbuy afterbuy
 cd ../
