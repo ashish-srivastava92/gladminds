@@ -1,6 +1,5 @@
 #!/bin/sh
 # Script to create phonegap app
-npm install phonegap
 
 cd afterbuy_script
 phonegap create afterbuy -n afterbuy -i com.gladminds.afterbuy
