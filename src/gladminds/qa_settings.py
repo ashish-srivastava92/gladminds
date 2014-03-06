@@ -12,6 +12,8 @@ OUT_DIR = os.path.join(BASE_DIR, "out")
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -54,6 +56,20 @@ SMS_CLIENT_DETAIL = {
 
 FEED_TYPE = 'CSV'
 
+#AfterBuy File Upload location configuration
+AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
+AFTERBUY_USER_LOC = os.path.join(AFTERBUY_LOC, "users")
+AFTERBUY_PRODUCT_LOC = os.path.join(AFTERBUY_LOC, "products")
+AFTERBUY_BRAND_LOC = os.path.join(AFTERBUY_LOC, "brands")
+AFTERBUY_PRODUCT_TYPE_LOC = os.path.join(AFTERBUY_LOC, "productType")
+AFTERBUY_PRODUCT_WARRENTY_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "warrenty")
+AFTERBUY_PRODUCT_INSURANCE_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "insurance")
+AFTERBUY_PRODUCT_INVOICE_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "invoice")
+MEDIA_ROOT = AFTERBUY_LOC
+MEDIA_URL = '/media/'
+
+
+#S3 Configuration
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 AWS_ACCESS_KEY_ID = 'AKIAIL7IDCSTNCG2R6JA'
 AWS_SECRET_ACCESS_KEY = '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'
