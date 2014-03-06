@@ -8,6 +8,6 @@ cd afterbuy
 #add a command to work with
 cd ../
 zip -r afterbuy afterbuy
-cd ../   
-bin/python  afterbuy_script/publish_adobe.py $1
+python publish_adobe.py $1
+cd ../
 exit 0
