@@ -1,6 +1,9 @@
 import requests
 import json
 import os
+import sys
+
+form_url = sys.argv[1]
 
 
 def user_apps(token):
@@ -54,7 +57,11 @@ while not r or r.status_code > 299:
     url = "https://build.phonegap.com/api/v1/apps/"\
                  + str(app_id) + "/android/?auth_token=" + token
     r = requests.get(url=url)
-s = open('%s.apk' % "afterbuy", 'w')
+if form_url == "https://api-qa.gladmindsplatform.co/gm/":
+    app_name = "qa_afterbuy.apk"
+else:
+    app_name = "prod_afterbuy"
+s = open('%s' % app_name, 'w')
 s.write(r.content)
 
 
@@ -64,5 +71,5 @@ c = S3Connection('AKIAIL7IDCSTNCG2R6JA', \
                  '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A')
 b = c.get_bucket('afterbuy')
 k = Key(b)
-k.key = 'afterbuy_apk'
-k.set_contents_from_filename('afterbuy.apk', policy='public-read')
+k.key = app_name
+k.set_contents_from_filename(app_name, policy='public-read')
