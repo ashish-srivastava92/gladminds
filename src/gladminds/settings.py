@@ -127,7 +127,7 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-#     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -238,7 +238,7 @@ WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR+'/coupon_redeem.wsdl'
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
                   "sender":"feed-report@gladminds.co",
-                  "reciever": "gladminds@hashedin.com",
+                  "reciever": "gladminds@hashedin.com,naveen.shankar@gladminds.co",
                   "subject":"Gladminds Feed Report",
                   "body": """""",
               }
