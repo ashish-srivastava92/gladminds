@@ -43,7 +43,7 @@ def get_app_id(app_path, auth):
         return json.loads(r.content)["id"]
 
 
-app_path = '%s.zip' % 'afterbuy'
+app_path = 'afterbuy_script/afterbuy.zip'
 auth = ('support@gladminds.co', 'gladminds123')
 token = get_phonegap_token(auth)
 delete_other_apps(token)
@@ -58,18 +58,12 @@ while not r or r.status_code > 299:
                  + str(app_id) + "/android/?auth_token=" + token
     r = requests.get(url=url)
 if form_url == "https://api-qa.gladmindsplatform.co/gm/":
-    app_name = "qa_afterbuy.apk"
+    app_name = "afterbuy_script/qa_afterbuy.apk"
 else:
-    app_name = "prod_afterbuy"
-s = open('%s' % app_name, 'w')
+    app_name = "afterbuy_script/prod_afterbuy.apk"
+
+if os.path.isfile(app_name):
+    os.remove(app_name)
+
+s = open(app_name, 'w')
 s.write(r.content)
-
-
-from boto.s3.connection import S3Connection
-from boto.s3.key import Key
-c = S3Connection('AKIAIL7IDCSTNCG2R6JA', \
-                 '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A')
-b = c.get_bucket('afterbuy')
-k = Key(b)
-k.key = app_name
-k.set_contents_from_filename(app_name, policy='public-read')
