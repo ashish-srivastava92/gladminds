@@ -285,7 +285,6 @@ def fnc_get_states(request):
     return states
 
 
-
 @csrf_exempt
 def fnc_get_profile(request):
     resp = {}
@@ -419,8 +418,8 @@ def fnc_check_login(request):
 @csrf_exempt
 def fnc_update_user_details(request):
     data = None
-    user_id=request.POST.get('userID')
-    if user_id:
+    customer_id=request.POST.get('userID')
+    if customer_id:
         user_name=request.POST.get('txt_name', None)
         user_email=request.POST.get('txt_email', None)
         user_country=request.POST.get('txt_country', None)
@@ -435,7 +434,10 @@ def fnc_update_user_details(request):
             file_name=str(uuid.uuid4())+str(datetime.now())
             user_image.name=file_name
         try:
-            user_object=common.GladMindUsers.objects.get(gladmind_customer_id=user_id)
+            user_object=common.GladMindUsers.objects.get(gladmind_customer_id=customer_id)
+            user=User.objects.get(id=user_object.user_id)
+            user.username=user_name
+            user.save()
             user_object.customer_name=user_name
             user_object.email_id=user_email
             user_object.phone_number=user_mobile_number
