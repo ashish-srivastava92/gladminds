@@ -2,9 +2,10 @@ import os
 import boto
 from boto.s3.key import Key
 import sys
+from subprocess import Popen
+
 
 failed = open('failers', 'w')
-
 machine = sys.argv[1]
 
 
@@ -15,7 +16,7 @@ def uploadResultToS3(awsid, awskey, bucket, source_folder):
     for path, dir, files in os.walk(source_folder):
         for upload_file in files:
             relpath = os.path.relpath(os.path.join(path, upload_file))
-            continue
+            print "sending files to s3"
             if not b.get_key(relpath):
                 k.key = relpath
                 k.set_contents_from_filename(relpath)
@@ -28,8 +29,8 @@ def uploadResultToS3(awsid, awskey, bucket, source_folder):
 if os.path.isfile('afterbuy_script/%s' % machine):
     os.remove('afterbuy_script/%s' % machine)
 
-
-os.rename('afterbuy_script/afterbuy', 'afterbuy_script/%s' % machine)
-
+process = Popen('cp -r afterbuy_script/afterbuy  afterbuy_script/{0}'\
+                                .format(machine), shell=True)
+process.wait()
 uploadResultToS3('AKIAIL7IDCSTNCG2R6JA', '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A',\
                   "afterbuy", 'afterbuy_script/afterbuy')

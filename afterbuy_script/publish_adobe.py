@@ -55,7 +55,6 @@ r = None
 counter = 0 
 while not r or r.status_code > 299 or counter < 50:
     print "getting file from buildserver"
-    print counter
     counter = counter + 1
     url = "https://build.phonegap.com/api/v1/apps/"\
                  + str(app_id) + "/android/?auth_token=" + token
