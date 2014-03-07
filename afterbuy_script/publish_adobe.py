@@ -52,8 +52,10 @@ if os.path.isfile(app_path) and token:
     app_id = get_app_id(app_path, auth)
 
 r = None
-while not r or r.status_code > 299:
+counter = 0 
+while not r or r.status_code > 299 or counter < 50:
     print "getting file from buildserver"
+    counter = counter + 1
     url = "https://build.phonegap.com/api/v1/apps/"\
                  + str(app_id) + "/android/?auth_token=" + token
     r = requests.get(url=url)
