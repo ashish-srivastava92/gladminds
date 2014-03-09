@@ -11,6 +11,7 @@ from gladminds.tasks import send_registration_detail, send_service_detail, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message, \
     send_coupon
 from src.gladminds.tasks import send_coupon_close_message
+from src.gladminds.resource.valid import AfterBuyAuthentication
 from tastypie import fields
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpBadRequest, HttpUnauthorized
@@ -250,6 +251,7 @@ class UserResources(GladmindsBaseResource):
     class Meta:
         queryset = common.GladMindUsers.objects.all()
         resource_name = 'users'
+        authentication = AfterBuyAuthentication()
     
     def prepend_urls(self):
         return [

@@ -284,7 +284,7 @@ def fnc_get_states(request):
         states=','.join(state_list)
     return states
 
-
+@authentication_required
 @csrf_exempt
 def fnc_get_profile(request):
     resp = {}
@@ -405,8 +405,11 @@ def fnc_check_login(request):
             login(request, user)
             user_obj=User.objects.get(username=username)
             user_name=user_obj.username
+            time_stamp=datetime.now()
+            unique_id='GMS17'+str(time_stamp)
             user_profile=common.GladMindUsers.objects.get(user=user)
-            unique_id=user_profile.gladmind_customer_id
+            user_profile.gladmind_customer_id=unique_id
+            user_profile.save()
             id=user_profile.user_id
             data = {'status': '1','id':id,'username':user_name,'unique_id':unique_id}
         else:
