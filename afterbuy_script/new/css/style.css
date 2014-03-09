@@ -2004,7 +2004,7 @@ div[data-role="content-header"] + .content-padding {
 }
 /*** patch for jquerymobile page flicker that was happending ***/
 body{
-	background: #000000 url(images/loader.gif) center center no-repeat;
+	background: #000000 url(../images/loader.gif) center center no-repeat;
 }
 .ui-page {
 	-webkit-backface-visibility: hidden;
