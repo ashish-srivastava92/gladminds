@@ -18,6 +18,8 @@ from tastypie.http import HttpBadRequest, HttpUnauthorized
 from tastypie.resources import Resource, ModelResource
 from tastypie.serializers import Serializer
 from tastypie.utils.urls import trailing_slash
+from tastypie import http
+from tastypie.exceptions import ImmediateHttpResponse, BadRequest
 import logging
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -255,12 +257,23 @@ class UserResources(GladmindsBaseResource):
     
     def prepend_urls(self):
         return [
-            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/products%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_products'), name="api_get_products"),
-        ]
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/products%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_products'), name="api_get_products"),
+        ]    
+        
+    def obj_get(self, bundle, **kwargs):
+        request = bundle.request
+        customer_id=kwargs['pk']
+        try:
+            customer_detail=common.GladMindUsers.objects.get(gladmind_customer_id=customer_id)
+            return customer_detail
+        except:
+            raise ImmediateHttpResponse(response=http.HttpBadRequest())
+    
+    
     
     def get_products(self, request, **kwargs):
         user_id = kwargs['pk']
-        products = common.ProductData.objects.filter(customer_phone_number__id = user_id).select_related('customer_phone_number')
+        products = common.ProductData.objects.filter(customer_phone_number__gladmind_customer_id = user_id).select_related('customer_phone_number')
         products = [model_to_dict(product) for product in products]
         to_be_serialized = {"products": products}
         return self.create_response(request, data=to_be_serialized)
