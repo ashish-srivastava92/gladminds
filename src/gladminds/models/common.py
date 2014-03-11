@@ -154,9 +154,9 @@ class ProductData(models.Model):
     warranty_yrs=models.FloatField(null=True,blank=True)
     insurance_yrs=models.FloatField(null=True, blank=True)
     
-    invoice_loc=models.FileField(upload_to='invoice', blank=True)
-    warranty_loc=models.FileField(upload_to='warrenty', blank=True)
-    insurance_loc=models.FileField(upload_to='insurance', blank=True)
+    invoice_loc=models.FileField(upload_to="invoice", blank=True)
+    warranty_loc=models.FileField(upload_to="warrenty", blank=True)
+    insurance_loc=models.FileField(upload_to="insurance", blank=True)
     
     last_modified=models.DateTimeField(null=False,default=datetime.now())
     created_on=models.DateTimeField(null=True, default=datetime.now())

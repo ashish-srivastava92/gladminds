@@ -138,9 +138,18 @@ def fnc_edit_adding_item(request):
         item_obj = common.ProductData.objects.filter(customer_product_number = edit_product_id ).update(customer_product_number = product_id, 
                                       product_purchase_date = purchase_date, purchased_from = purchased_from, 
                                       seller_email = seller_email, warranty_yrs = warranty_yrs,
-                                      insurance_yrs = insurance_yrs, invoice_loc = File(insurance_file),
-                                      warranty_loc = File(warranty_file), insurance_loc = File(warranty_file),
+                                      insurance_yrs = insurance_yrs, 
                                       product_type = product_type_obj, seller_phone = seller_phone)
+        if invoice_file:
+            item_obj = common.ProductData.objects.filter(customer_product_number = edit_product_id )\
+                    .update(invoice_loc = File(invoice_file))
+        if warranty_file:
+            item_obj = common.ProductData.objects.filter(customer_product_number = edit_product_id )\
+                    .update(warranty_loc = File(warranty_file))
+        if insurance_file:
+            item_obj = common.ProductData.objects.filter(customer_product_number = edit_product_id )\
+                    .update(insurance_loc = File(insurance_file))
+            
         
         data = {"status": "1","message":"Success!","id":product_id}
     except Exception as ex:
@@ -284,7 +293,6 @@ def fnc_get_states(request):
         states=','.join(state_list)
     return states
 
-@authentication_required
 @csrf_exempt
 def fnc_get_profile(request):
     resp = {}
@@ -408,10 +416,10 @@ def fnc_check_login(request):
             time_stamp=datetime.now()
             unique_id='GMS17'+str(time_stamp)
             user_profile=common.GladMindUsers.objects.get(user=user)
-            user_profile.gladmind_customer_id=unique_id
-            user_profile.save()
+            unique_id=user_profile.gladmind_customer_id
+#             user_profile.save()
             id=user_profile.user_id
-            data = {'status': '1','id':id,'username':user_name,'unique_id':unique_id}
+            data = {'status': '1','id':unique_id,'username':user_name,'unique_id':unique_id}
         else:
             data = {'status': '0'}
     else:
@@ -451,11 +459,10 @@ def fnc_update_user_details(request):
             user_object.gender=user_gender
             user_object.user.username=user_name
             user_object.user.email=user_email
-            unique_id=user_object.gladmind_customer_id
-            user_object.img_url=File(user_image)
-            user_object.img_url=File(user_image)
+            if user_image:
+                user_object.img_url=File(user_image)
             user_object.save()
-            user_obj=common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
+            user_obj=common.GladMindUsers.objects.get(gladmind_customer_id=customer_id)
             data = {'status':" 1",'thumbURL':str(user_obj.img_url),'sourceURL':str(user_obj.img_url)}
         except Exception as ex:
             logger.info("[Exception fnc_update_user_details: {0}".format(ex))
@@ -497,7 +504,7 @@ def fnc_create_new_user(request):
     else:
         try:
             time_stamp=datetime.now()
-            unique_id='GMS17'+str(time_stamp)
+            unique_id='GMS17'+utils.generate_unique_customer_id()
             gladmind_user=common.GladMindUsers(user=User.objects.create_user(user_name,user_email,user_password),
                                                country=user_country,
                                                state=user_state,
