@@ -16,7 +16,8 @@ def uploadResultToS3(awsid, awskey, bucket, source_folder):
     for path, dir, files in os.walk(source_folder):
         for upload_file in files:
             relpath = os.path.relpath(os.path.join(path, upload_file))
-            print "sending files to s3"
+            print relpath
+            #print "sending :", path, dir, files
             if not b.get_key(relpath):
                 k.key = relpath
                 k.set_contents_from_filename(relpath)
@@ -26,11 +27,8 @@ def uploadResultToS3(awsid, awskey, bucket, source_folder):
                     failed.write(relpath + ', ')
     failed.close()
 
-if os.path.isfile('afterbuy_script/%s' % machine):
-    os.remove('afterbuy_script/%s' % machine)
+if os.path.isfile('%s' % machine):
+    os.remove('%s' % machine)
 
-process = Popen('cp -r afterbuy_script/afterbuy  afterbuy_script/{0}'\
-                                .format(machine), shell=True)
-process.wait()
 uploadResultToS3('AKIAIL7IDCSTNCG2R6JA', '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A',\
-                  "afterbuy", 'afterbuy_script/afterbuy')
+                  "afterbuy", '%s' % machine)
