@@ -23,10 +23,19 @@ class ExportCouponRedeemFeed(BaseExportFeed):
         logger.info("Export coupon data: Items:{0} and Item_batch: {1}".format(items, item_batch))
         client = self.get_client()
         result = client.service.MI_GCP_UCN_Sync(ITEM=items, ITEM_BATCH=item_batch)
+        if result[1]['I_STATUS']=='SUCCESS':
+            export_status=True
+        else:
+            total_failed=total_failed+1
+            export_status=False
+        
+        if len(items)==0:
+            total_failed = 0
+            export_status=True
         logger.info("Response from SAP: {0}".format(result))
         feed_log(feed_type = 'Coupon Redeem Feed', total_data_count = len(items), 
                  failed_data_count = total_failed, success_data_count = len(items) - total_failed, 
-                 action = 'Sent', status = True)
+                 action = 'Sent', status = export_status)
         
         
         
