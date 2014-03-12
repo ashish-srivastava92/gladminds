@@ -27,6 +27,7 @@ def uploadResultToS3(awsid, awskey, bucket, source_folder):
                 except:
                     failed.write(relpath + ', ')
     failed.close()
+print machine
 
 uploadResultToS3('AKIAIL7IDCSTNCG2R6JA', '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A',\
                   "afterbuy", '%s' % machine)
