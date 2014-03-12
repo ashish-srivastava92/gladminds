@@ -13,10 +13,10 @@ def uploadResultToS3(awsid, awskey, bucket, source_folder):
     c = boto.connect_s3(awsid, awskey)
     b = c.get_bucket(bucket)
     k = Key(b)
-    
+
+    for key in b.list('qa_afterbuy/'):
+        key.delete()
     for path, dir, files in os.walk(source_folder):
-        print "sending :", path, 
-        print dir, files
         for upload_file in files:
             relpath = os.path.relpath(os.path.join(path, upload_file))
             if not b.get_key(relpath):

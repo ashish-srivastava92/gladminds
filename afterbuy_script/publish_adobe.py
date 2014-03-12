@@ -43,29 +43,43 @@ def get_app_id(app_path, auth):
         return json.loads(r.content)["id"]
 
 
+def get_build_file(app_id, build, token):
+    r = None
+    counter = 0
+    while not r or r.status_code > 299 or counter < 50:
+        print "getting {0} exec from build server".format(build)
+        counter = counter + 1
+        url = "https://build.phonegap.com/api/v1/apps/{0}/{1}/?auth_token={2}"\
+                                                .format(app_id, build, token)
+        r = requests.get(url=url)
+    return r
+
+
+def create_build_file(response, app_name):
+    if os.path.isfile(app_name):
+        os.remove(app_name)
+    s = open(app_name, 'w')
+    s.write(r.content)
+
+
+if form_url == "https://api-qa.gladmindsplatform.co/gm/":
+    auth = ('support@gladminds.com', 'gladminds123')
+    key_prefix = "qa"
+else:
+    auth = ('support@gladminds.co', 'gladminds123')
+    key_prefix = "prod"
+
+
 app_path = 'afterbuy_script/afterbuy.zip'
-auth = ('support@gladminds.co', 'gladminds123')
 token = get_phonegap_token(auth)
 delete_other_apps(token)
 
 if os.path.isfile(app_path) and token:
     app_id = get_app_id(app_path, auth)
+    r = get_build_file(app_id, "android", token)
+    create_build_file(r, "afterbuy_script/{0}_{1}_afterbuy.apk"\
+                                        .format(key_prefix, "android"))
 
-r = None
-counter = 0 
-while not r or r.status_code > 299 or counter < 50:
-    print "getting file from buildserver"
-    counter = counter + 1
-    url = "https://build.phonegap.com/api/v1/apps/"\
-                 + str(app_id) + "/android/?auth_token=" + token
-    r = requests.get(url=url)
-if form_url == "https://api-qa.gladmindsplatform.co/gm/":
-    app_name = "afterbuy_script/qa_afterbuy.apk"
-else:
-    app_name = "afterbuy_script/prod_afterbuy.apk"
-
-if os.path.isfile(app_name):
-    os.remove(app_name)
-
-s = open(app_name, 'w')
-s.write(r.content)
+    r = get_build_file(app_id, "ios", token)
+    create_build_file(r, "afterbuy_script/{0}_{1}_afterbuy.apk"\
+                                        .format(key_prefix, "ios"))
