@@ -81,5 +81,5 @@ if os.path.isfile(app_path) and token:
                                         .format(key_prefix, "android"))
 
     r = get_build_file(app_id, "ios", token)
-    create_build_file(r, "afterbuy_script/{0}_{1}_afterbuy.apk"\
+    create_build_file(r, "afterbuy_script/{0}_{1}_afterbuy.ipa"\
                                         .format(key_prefix, "ios"))
