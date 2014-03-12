@@ -33,8 +33,8 @@ class SmsClientBaseObject(object):
     
     def __init__(self, *args, **kwargs):
         """Set username and password"""
-        self.username = kwargs['username']
-        self.password = kwargs['password']
+        self.login = kwargs['login']
+        self.password = kwargs['pass']
         self.authenticate_url = kwargs['authenticate_url']
         self.message_url = kwargs['message_url']
         self.session_id = None
@@ -74,29 +74,29 @@ class AirtelSmsClient(SmsClientBaseObject):
         SmsClientBaseObject.__init__(self, *args, **kwargs)
     
     def authenticate(self):
-        params = {'login':self.username, 'pass': self.password}
-        return self.send_request(url = self.authenticate_url, params = parama)
+        params = {'login':self.login, 'pass': self.password}
+        return self.send_request(url = self.authenticate_url, params = params)
 
     def send_stateless(self, **kwargs):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
         session_id = self._get_session_id()
-        params = {'mob_no' : phone_number, 'text' : message, 'username' : self.username, 'password': self.password}
-        return self.send_request(url = self.message_url, params = parama)
+        params = {'mob_no' : phone_number, 'text' : message, 'login' : self.login, 'pass': self.password}
+        return self.send_request(url = self.message_url, params = params)
     
     def send_stateful(self, **kwargs):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
         session_id = self._get_session_id()
         params = {'mob_no' : phone_number, 'text' : message, 'sessionID' : session_id}
-        return self.send_request(url = self.message_url, params = parama)
+        return self.send_request(url = self.message_url, params = params)
     
     def send_request(self, url, params):
         resp = requests.get(url = url, params = params)
         assert resp.status_code==200
-        json = import_json()
-        data = resp.content
-        return json.loads(data)
+#         json = import_json()
+#         data = resp.content
+        return resp.status_code
 
 class MockSmsClient(SmsClientBaseObject):
     
