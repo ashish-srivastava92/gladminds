@@ -46,7 +46,7 @@ def get_app_id(app_path, auth):
 def get_build_file(app_id, build, token):
     r = None
     counter = 0
-    while not r or r.status_code > 299 or counter < 50:
+    while not r or r.status_code > 299 or counter < 200:
         print "getting {0} exec from build server".format(build)
         counter = counter + 1
         url = "https://build.phonegap.com/api/v1/apps/{0}/{1}/?auth_token={2}"\
