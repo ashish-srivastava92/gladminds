@@ -37,8 +37,3 @@ class ExportCouponRedeemFeed(BaseExportFeed):
                  failed_data_count = total_failed, success_data_count = len(items) - total_failed, 
                  action = 'Sent', status = export_status)
         
-        
-        
-        
-        
-         
