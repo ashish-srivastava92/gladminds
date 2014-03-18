@@ -1,6 +1,7 @@
 import unittest
 from django.core import management
 
+
 class GladmindsUnitTestCase(unittest.TestCase):
     def setUp(self):
         super(GladmindsUnitTestCase, self).setUp()
