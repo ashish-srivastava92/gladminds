@@ -129,7 +129,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 dealer_data.save()
             
             try:
-                service_advisor = common.ServiceAdvisor(dealer_id = dealer_data, service_advisor_id = dealer['service_advisor_id'], name = dealer['name'], phone_number = dealer['phone_number'])
+                service_advisor = common.ServiceAdvisor(dealer_id = dealer_data, service_advisor_id = dealer['service_advisor_id'], name = dealer['name'], phone_number = dealer['phone_number'], status = dealer['status'])
                 service_advisor.save()
             except Exception as ex:
                 total_failed+=1
