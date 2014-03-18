@@ -87,7 +87,6 @@ class ProductPurchaseModel(ComplexModel):
     VEH_SL_DT = Date
     VEH_REG_NO = Unicode
     VEH_SL_DLR = Unicode
-    #ENGINE = Unicode
     KUNNR = Unicode
     TIMESTAMP = Unicode(pattern = pattern)
 
@@ -152,8 +151,7 @@ class ProductDispatchService(ServiceBase):
                         'valid_days' : product.DAYS_LIMIT_TO,
                         'valid_kms' : product.KMS_TO,
                         'service_type' : product.SERVICE_TYPE,
-                        #'engine' : "DTS-i" 
-                        #'engine' : product.ENGINE
+                        'engine' : product.ENGINE
                     })
             save_to_db(feed_type = 'dispatch', data_source = product_dispatch_list)
             return success

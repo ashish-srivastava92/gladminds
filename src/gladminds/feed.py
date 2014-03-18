@@ -152,7 +152,7 @@ class ProductDispatchFeed(BaseFeed):
                     self.get_or_create_product_type(product_type = product['product_type'])
                     producttype_data = common.ProductTypeData.objects.get(product_type = product['product_type'])
                     invoice_date = product['invoice_date']
-                    product_data = common.ProductData(vin = product['vin'], product_type = producttype_data, invoice_date = invoice_date, dealer_id = dealer_data)
+                    product_data = common.ProductData(vin = product['vin'], product_type = producttype_data, invoice_date = invoice_date, dealer_id = dealer_data, engine=product['engine'])
                     product_data.save()
                 except Exception as ex:
                     logger.info('[Exception: ProductDispatchFeed_product_data_save]: {0}'.format(ex))
