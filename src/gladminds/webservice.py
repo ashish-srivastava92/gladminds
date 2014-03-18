@@ -15,6 +15,7 @@ from spyne.util.wsgi_wrapper import WsgiMounter
 from gladminds.feed import SAPFeed
 from gladminds.soap_authentication import AuthenticationService
 import logging
+from gladminds import settings
 
 logger = logging.getLogger("gladminds")
 
@@ -125,7 +126,7 @@ class DealerService(ServiceBase):
                     'address' : dealer.ADDRESS,
                     'service_advisor_id' : dealer.SER_ADV_ID,
                     'name' : dealer.SER_ADV_NAME,
-                    'phone_number': '+91'+dealer.SER_ADV_MOBILE,
+                    'phone_number': '{0}{1}'.format(settings.MOBILE_NUM_FORMAT, dealer.SER_ADV_MOBILE),
                     'status': dealer.SER_ADV_STATUS
                 })
             save_to_db(feed_type = 'dealer', data_source = dealer_list)

@@ -64,9 +64,9 @@ class ProductTypeDataAdmin(ModelAdmin):
     list_filter = ('product_type',)
     list_display = ('vin', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
 
-    def brand(self, obj):
-        return u'<a href="/gladminds/branddata/%s/">%s</a>' %(obj.brand_id.pk,obj.brand_id)
-    brand.allow_tags=True
+#     def brand(self, obj):
+#         return u'<a href="/gladminds/branddata/%s/">%s</a>' %(obj.brand_id.pk,obj.brand_id)
+#     brand.allow_tags=True
 
     def get_product_data_obj(self, product_type_id):
         return ProductData.objects.get(product_type=product_type_id)
