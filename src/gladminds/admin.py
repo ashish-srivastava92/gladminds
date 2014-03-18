@@ -110,7 +110,7 @@ class DealerAdmin(ModelAdmin):
     
 class ServiceAdvisorAdmin(ModelAdmin):
     search_fields = ('service_advisor_id','phone_number','name','dealer_id__dealer_id')
-    list_display=('service_advisor_id','dealer','name','phone_number') 
+    list_display=('dealer','name','service_advisor_id','phone_number',"status") 
     exclude = ('order',)
     
     def dealer(self,obj):
@@ -178,8 +178,8 @@ class CouponAdmin(ExportMixin,ModelAdmin):
     resource_class = CouponResource
     search_fields = ('unique_service_coupon','vin__vin','valid_days','valid_kms')
     list_filter = ('status',('closed_date', DateFieldListFilter))
-    list_display = ('vin','unique_service_coupon','service_type','valid_days','valid_kms',
-                    'closed_date','status')
+    list_display = ('vin','unique_service_coupon',"actual_service_date",'service_type','valid_days','valid_kms'
+                    ,'status')
     exclude = ('order',)
      
          
