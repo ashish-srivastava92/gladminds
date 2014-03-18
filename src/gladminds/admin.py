@@ -2,7 +2,7 @@ from django.contrib import admin
 from models.common import RegisteredDealer
 from models.common import GladMindUsers,ProductTypeData,RegisteredDealer,\
                 ServiceAdvisor,BrandData,ProductData,CouponData, MessageTemplate,UploadProductCSV
-from models.logs import AuditLog 
+from models.logs import AuditLog, DataFeedLog
 from suit.widgets import NumberInput
 from suit.admin import SortableModelAdmin
 from django.forms import ModelForm, TextInput
@@ -17,7 +17,7 @@ from import_export import resources
 from django.contrib.admin import DateFieldListFilter
 import tablib
 import datetime  
-
+from models import logs
 
 
 ############################BRAND AND PRODUCT ADMIN##########################
@@ -148,7 +148,7 @@ class Couponline(SortableTabularInline):
 class ProductDataAdmin(ModelAdmin):
     search_fields = ('vin','sap_customer_id','customer_phone_number__phone_number','product_type__product_type','dealer_id__dealer_id')
     list_filter = ('invoice_date',)
-    list_display = ('vin','customer_phone_number','product_type','dealer_id','invoice_date')
+    list_display = ('vin','product_type','dealer_id','invoice_date')
     inlines=(Couponline,)
     exclude = ('order',)
 
@@ -178,8 +178,7 @@ class CouponAdmin(ExportMixin,ModelAdmin):
     resource_class = CouponResource
     search_fields = ('unique_service_coupon','vin__vin','valid_days','valid_kms')
     list_filter = ('status',('closed_date', DateFieldListFilter))
-    list_display = ('vin','unique_service_coupon',"actual_service_date",'service_type','valid_days','valid_kms'
-                    ,'status')
+    list_display = ('vin','unique_service_coupon',"closed_date",'actual_kms','valid_days','valid_kms','status')
     exclude = ('order',)
      
          
@@ -213,7 +212,7 @@ class AuditLogAdmin(ModelAdmin):
         if css_class:
             return {'class': css_class}
 ##############################################################
- 
+
 ######################Message Template#############################
 class MessageTemplateAdmin(ModelAdmin):
     search_fields = ('template_key','template')
@@ -221,12 +220,35 @@ class MessageTemplateAdmin(ModelAdmin):
     readonly_fields=('template_key',)
 ###################################################################
 
-############################################
+
+###########################AUDIT ADMIN########################
+
+class FeedLogAdmin(ModelAdmin):
+    list_filter = ('feed_type','status')
+    search_fields = ('status','data_feed_id','action')
+    list_display = ('timestamp','feed_type','action','status')
+
+    
+    def has_add_permission(self, request):
+        return False
+
+    def suit_row_attributes(self, obj):
+        class_map = {
+            'success': 'success',
+            'failed': 'error',
+        }
+        css_class = class_map.get(str(obj.status))
+        if css_class:
+            return {'class': css_class}
+##############################################################
+
+
 admin.site.register(BrandData,BrandAdmin)
 admin.site.register(ProductTypeData,ProductTypeDataAdmin)
 admin.site.register(ServiceAdvisor,ServiceAdvisorAdmin)
 admin.site.register(RegisteredDealer,DealerAdmin)
 admin.site.register(AuditLog,AuditLogAdmin)
+admin.site.register(DataFeedLog, FeedLogAdmin)
 admin.site.register(GladMindUsers,GladMindUserAdmin)
 admin.site.register(ProductData,ProductDataAdmin)
 admin.site.register(CouponData,CouponAdmin)
