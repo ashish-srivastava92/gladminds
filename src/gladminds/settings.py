@@ -32,8 +32,9 @@ SUIT_CONFIG = {
     'LIST_PER_PAGE': 20,
     'SHOW_REQUIRED_ASTERISK': True,
     'MENU': ({'app':'gladminds','label':'Data','icon':' icon-folder-open',
-               'models': ({'model':'auditlog','label': 'Audit Log'},'uploadproductcsv', 'producttypedata','serviceadvisor',
-                          'gladmindusers','productdata','coupondata','messagetemplate')},
+               'models': ('serviceadvisor','productdata','producttypedata','coupondata',{'model':'auditlog','label': 'Audit Log'}, 
+                          {'model':'datafeedlog','label': 'Feed Log'}, 'uploadproductcsv', 
+                          'messagetemplate','gladmindusers')},
                 {'app':'djcelery','label':'Job Management','icon':'icon-tasks'})
 }
 
