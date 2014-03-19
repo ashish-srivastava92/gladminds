@@ -140,7 +140,7 @@ class ProductData(models.Model):
     vin=models.CharField(max_length=215, null=True, unique=True, blank=True)
     customer_phone_number = models.ForeignKey(GladMindUsers, null=True, blank=True)
     product_type= models.ForeignKey(ProductTypeData, null=True, blank=True)
-    sap_customer_id = models.CharField(max_length=215, null=True, blank=True)
+    sap_customer_id = models.CharField(max_length=215, null=True, blank=True, unique=True)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
     invoice_date=models.DateTimeField(null=True, blank=True)
     dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)

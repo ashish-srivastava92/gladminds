@@ -69,30 +69,34 @@ class ProductTypeDataAdmin(ModelAdmin):
 #     brand.allow_tags=True
 
     def get_product_data_obj(self, product_type_id):
-        return ProductData.objects.get(product_type=product_type_id)
+        return ProductData.objects.filter(product_type=product_type_id)
 
     def vin(self, obj):
         product_data_obj = self.get_product_data_obj(obj)
-        return product_data_obj.vin
+        return ' | '.join(str(vin) for vin in product_data_obj) 
     vin.allow_tags = True
 
     def UCN(self, obj):
         product_data_obj = self.get_product_data_obj(obj)
-        return CouponData.objects.get(vin=product_data_obj).unique_service_coupon
+        ucn_list = []
+        for ele in  product_data_obj:
+            for coupon in CouponData.objects.filter(vin=ele.id):
+                ucn_list.append(coupon.unique_service_coupon)
+        return ' | '.join([str(ucn) for ucn in ucn_list])
     UCN.allow_tags = True
 
     def engine(self, obj):
         product_data_obj = self.get_product_data_obj(obj)
-        return product_data_obj.engine
+        return " | ".join([ str(obj.engine) for obj in product_data_obj])
 
-    def dealer_id(self,obj):
+    def dealer_id(self, obj):
         product_data_obj = self.get_product_data_obj(obj)
-        return product_data_obj.dealer_id
+        return " | ".join([ str(obj.dealer_id) for obj in product_data_obj])
         #return u'<a href="/gladminds/registereddealer/%s/">%s</a>' %(product_data_obj.dealer_id.pk, product_data_obj.dealer_id)
 
     def invoice_date(self, obj):
         product_data_obj = self.get_product_data_obj(obj)
-        return product_data_obj.invoice_date
+        return " | ".join([ str(obj.invoice_date) for obj in product_data_obj])
 
 #######################################################################
  
@@ -188,10 +192,10 @@ class ProductDataAdmin(ModelAdmin):
     customer_name.allow_tags = True
 
     def service_type(self, obj):
-        gm_coupon_data_obj = CouponData.objects.get(vin=obj.id)
+        gm_coupon_data_obj = CouponData.objects.filter(vin = obj.id)
         coupon_service_type = ''
         if gm_coupon_data_obj:
-            coupon_service_type = gm_coupon_data_obj.service_type
+            coupon_service_type = " | ".join([ str(obj.service_type) for obj in gm_coupon_data_obj])
         return coupon_service_type
 
 
