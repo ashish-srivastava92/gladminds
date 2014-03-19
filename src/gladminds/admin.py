@@ -2,7 +2,7 @@ from django.contrib import admin
 from models.common import RegisteredDealer
 from models.common import GladMindUsers,ProductTypeData,RegisteredDealer,\
                 ServiceAdvisor,BrandData,ProductData,CouponData, MessageTemplate,UploadProductCSV
-from models.logs import AuditLog 
+from models.logs import AuditLog, DataFeedLog
 from suit.widgets import NumberInput
 from suit.admin import SortableModelAdmin
 from django.forms import ModelForm, TextInput
@@ -17,7 +17,7 @@ from import_export import resources
 from django.contrib.admin import DateFieldListFilter
 import tablib
 import datetime  
-
+from models import logs
 
 
 ############################BRAND AND PRODUCT ADMIN##########################
@@ -56,19 +56,44 @@ class BrandAdmin(ModelAdmin):
     
     def products(self, obj):
         return len(obj.producttypedata_set.all())
-    
+
+
 class ProductTypeDataAdmin(ModelAdmin):
     readonly_fields = ('order',)
-    search_fields =('product_type','product_name','brand_id__brand_id')
+    search_fields = ('product_type', 'product_name', 'dealer_id', 'engine')
     list_filter = ('product_type',)
-    list_display = ('product_type','brand','product_name')
-    
-    def brand(self,obj):
-        return u'<a href="/gladminds/branddata/%s/">%s</a>' %(obj.brand_id.pk,obj.brand_id)
-    brand.allow_tags=True
-     
- 
- 
+    list_display = ('vin', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
+
+#     def brand(self, obj):
+#         return u'<a href="/gladminds/branddata/%s/">%s</a>' %(obj.brand_id.pk,obj.brand_id)
+#     brand.allow_tags=True
+
+    def get_product_data_obj(self, product_type_id):
+        return ProductData.objects.get(product_type=product_type_id)
+
+    def vin(self, obj):
+        product_data_obj = self.get_product_data_obj(obj)
+        return product_data_obj.vin
+    vin.allow_tags = True
+
+    def UCN(self, obj):
+        product_data_obj = self.get_product_data_obj(obj)
+        return CouponData.objects.get(vin=product_data_obj).unique_service_coupon
+    UCN.allow_tags = True
+
+    def engine(self, obj):
+        product_data_obj = self.get_product_data_obj(obj)
+        return product_data_obj.engine
+
+    def dealer_id(self,obj):
+        product_data_obj = self.get_product_data_obj(obj)
+        return product_data_obj.dealer_id
+        #return u'<a href="/gladminds/registereddealer/%s/">%s</a>' %(product_data_obj.dealer_id.pk, product_data_obj.dealer_id)
+
+    def invoice_date(self, obj):
+        product_data_obj = self.get_product_data_obj(obj)
+        return product_data_obj.invoice_date
+
 #######################################################################
  
 ##########################DEALER AND SA ADMIN###########################
@@ -138,6 +163,7 @@ class GladMindUserAdmin(ModelAdmin):
     def date_of_registration(self, obj):
         return obj.registration_date.strftime("%d %b %Y")
 
+
 class Couponline(SortableTabularInline):
     model = CouponData
     fields = ('unique_service_coupon','valid_days','valid_kms','status','service_type','sa_phone_number')
@@ -145,12 +171,28 @@ class Couponline(SortableTabularInline):
     max_num=0
     readonly_fields=('unique_service_coupon','valid_days','valid_kms','status','service_type','sa_phone_number')
 
+
 class ProductDataAdmin(ModelAdmin):
-    search_fields = ('vin','sap_customer_id','customer_phone_number__phone_number','product_type__product_type','dealer_id__dealer_id')
+    search_fields = ('vin','sap_customer_id','customer_phone_number__phone_number')
     list_filter = ('invoice_date',)
-    list_display = ('vin','customer_phone_number','product_type','dealer_id','invoice_date')
+    list_display = ('sap_customer_id', 'customer_name', 'customer_phone_number', 'vin', 'service_type','product_purchase_date')
     inlines=(Couponline,)
     exclude = ('order',)
+
+    def customer_name(self,obj):
+        gm_user_obj = GladMindUsers.objects.get(phone_number=obj.customer_phone_number)
+        name = ''
+        if gm_user_obj:
+            name = gm_user_obj.customer_name
+        return name
+    customer_name.allow_tags = True
+
+    def service_type(self, obj):
+        gm_coupon_data_obj = CouponData.objects.get(vin=obj.id)
+        coupon_service_type = ''
+        if gm_coupon_data_obj:
+            coupon_service_type = gm_coupon_data_obj.service_type
+        return coupon_service_type
 
 
 class CouponResource(resources.ModelResource):
@@ -173,16 +215,15 @@ class CouponResource(resources.ModelResource):
 
     class Meta:
         model = CouponData
-        
+
+
 class CouponAdmin(ExportMixin,ModelAdmin):
     resource_class = CouponResource
     search_fields = ('unique_service_coupon','vin__vin','valid_days','valid_kms')
-    list_filter = ('status',('closed_date', DateFieldListFilter))
-    list_display = ('vin','unique_service_coupon',"actual_service_date",'service_type','valid_days','valid_kms'
-                    ,'status')
+    list_filter = ('status',('actual_service_date', DateFieldListFilter))
+    list_display = ('vin','unique_service_coupon', "actual_service_date",'actual_kms','valid_days','valid_kms','status')
     exclude = ('order',)
-     
-         
+
     def suit_row_attributes(self, obj):
         class_map = {
             '1': 'success',
@@ -213,7 +254,7 @@ class AuditLogAdmin(ModelAdmin):
         if css_class:
             return {'class': css_class}
 ##############################################################
- 
+
 ######################Message Template#############################
 class MessageTemplateAdmin(ModelAdmin):
     search_fields = ('template_key','template')
@@ -221,12 +262,35 @@ class MessageTemplateAdmin(ModelAdmin):
     readonly_fields=('template_key',)
 ###################################################################
 
-############################################
+
+###########################AUDIT ADMIN########################
+
+class FeedLogAdmin(ModelAdmin):
+    list_filter = ('feed_type','status')
+    search_fields = ('status','data_feed_id','action')
+    list_display = ('timestamp','feed_type','action','status')
+
+    
+    def has_add_permission(self, request):
+        return False
+
+    def suit_row_attributes(self, obj):
+        class_map = {
+            'success': 'success',
+            'failed': 'error',
+        }
+        css_class = class_map.get(str(obj.status))
+        if css_class:
+            return {'class': css_class}
+##############################################################
+
+
 admin.site.register(BrandData,BrandAdmin)
 admin.site.register(ProductTypeData,ProductTypeDataAdmin)
 admin.site.register(ServiceAdvisor,ServiceAdvisorAdmin)
 admin.site.register(RegisteredDealer,DealerAdmin)
 admin.site.register(AuditLog,AuditLogAdmin)
+admin.site.register(DataFeedLog, FeedLogAdmin)
 admin.site.register(GladMindUsers,GladMindUserAdmin)
 admin.site.register(ProductData,ProductDataAdmin)
 admin.site.register(CouponData,CouponAdmin)

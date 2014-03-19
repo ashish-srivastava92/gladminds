@@ -32,8 +32,9 @@ SUIT_CONFIG = {
     'LIST_PER_PAGE': 20,
     'SHOW_REQUIRED_ASTERISK': True,
     'MENU': ({'app':'gladminds','label':'Data','icon':' icon-folder-open',
-               'models': ({'model':'auditlog','label': 'Audit Log'},'uploadproductcsv', 'producttypedata','serviceadvisor',
-                          'gladmindusers','productdata','coupondata','messagetemplate')},
+               'models': ('serviceadvisor','productdata','producttypedata','coupondata',{'model':'auditlog','label': 'Audit Log'}, 
+                          {'model':'datafeedlog','label': 'Feed Log'}, 'uploadproductcsv', 
+                          'messagetemplate','gladmindusers')},
                 {'app':'djcelery','label':'Job Management','icon':'icon-tasks'})
 }
 
@@ -43,7 +44,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'gladminds.db',                      # Or path to database file if using sqlite3.
+        'NAME': 'gladminds.db',                  # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -262,3 +263,6 @@ AWS_ACCESS_KEY_ID = 'AKIAIL7IDCSTNCG2R6JA'
 AWS_SECRET_ACCESS_KEY = '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'
 AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 # S3_URL = 'http://%s.s3-website-us-east-1.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+
+
+MOBILE_NUM_FORMAT = "+91"

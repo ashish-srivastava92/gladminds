@@ -129,7 +129,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 dealer_data.save()
             
             try:
-                service_advisor = common.ServiceAdvisor(dealer_id = dealer_data, service_advisor_id = dealer['service_advisor_id'], name = dealer['name'], phone_number = dealer['phone_number'])
+                service_advisor = common.ServiceAdvisor(dealer_id = dealer_data, service_advisor_id = dealer['service_advisor_id'], name = dealer['name'], phone_number = dealer['phone_number'], status = dealer['status'])
                 service_advisor.save()
             except Exception as ex:
                 total_failed+=1
@@ -152,7 +152,7 @@ class ProductDispatchFeed(BaseFeed):
                     self.get_or_create_product_type(product_type = product['product_type'])
                     producttype_data = common.ProductTypeData.objects.get(product_type = product['product_type'])
                     invoice_date = product['invoice_date']
-                    product_data = common.ProductData(vin = product['vin'], product_type = producttype_data, invoice_date = invoice_date, dealer_id = dealer_data)
+                    product_data = common.ProductData(vin = product['vin'], product_type = producttype_data, invoice_date = invoice_date, dealer_id = dealer_data, engine=product['engine'])
                     product_data.save()
                 except Exception as ex:
                     logger.info('[Exception: ProductDispatchFeed_product_data_save]: {0}'.format(ex))

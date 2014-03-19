@@ -10,8 +10,8 @@ from gladminds.tasks import send_registration_detail, send_service_detail, \
     send_reminder_message, send_coupon_close_message, send_coupon_detail_customer, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message, \
     send_coupon
-from src.gladminds.tasks import send_coupon_close_message
-from src.gladminds.resource.valid import AfterBuyAuthentication
+from gladminds.tasks import send_coupon_close_message
+from gladminds.resource.valid import AfterBuyAuthentication
 from tastypie import fields
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpBadRequest, HttpUnauthorized

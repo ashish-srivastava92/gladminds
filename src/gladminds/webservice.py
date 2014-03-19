@@ -15,6 +15,7 @@ from spyne.util.wsgi_wrapper import WsgiMounter
 from gladminds.feed import SAPFeed
 from gladminds.soap_authentication import AuthenticationService
 import logging
+from gladminds import settings
 
 logger = logging.getLogger("gladminds")
 
@@ -49,6 +50,7 @@ class DealerModel(ComplexModel):
     SER_ADV_ID = Unicode
     SER_ADV_NAME = Unicode
     SER_ADV_MOBILE = Unicode
+    SER_ADV_STATUS = Unicode
     TIMESTAMP = Unicode(pattern = pattern)
 
 class DealerModelList(ComplexModel):
@@ -67,6 +69,7 @@ class ProductDispatchModel(ComplexModel):
     KMS_FROM = Decimal
     KMS_TO = Decimal
     SERVICE_TYPE = Unicode
+    ENGINE = Unicode
     TIMESTAMP = Unicode(pattern = pattern)
 
 class ProductDispatchModelList(ComplexModel):
@@ -85,7 +88,6 @@ class ProductPurchaseModel(ComplexModel):
     VEH_SL_DT = Date
     VEH_REG_NO = Unicode
     VEH_SL_DLR = Unicode
-    ENGINE = Unicode
     KUNNR = Unicode
     TIMESTAMP = Unicode(pattern = pattern)
 
@@ -124,7 +126,8 @@ class DealerService(ServiceBase):
                     'address' : dealer.ADDRESS,
                     'service_advisor_id' : dealer.SER_ADV_ID,
                     'name' : dealer.SER_ADV_NAME,
-                    'phone_number': '+91'+dealer.SER_ADV_MOBILE
+                    'phone_number': '{0}{1}'.format(settings.MOBILE_NUM_FORMAT, dealer.SER_ADV_MOBILE),
+                    'status': dealer.SER_ADV_STATUS
                 })
             save_to_db(feed_type = 'dealer', data_source = dealer_list)
             return success
@@ -148,7 +151,8 @@ class ProductDispatchService(ServiceBase):
                         'unique_service_coupon' : product.UCN_NO,
                         'valid_days' : product.DAYS_LIMIT_TO,
                         'valid_kms' : product.KMS_TO,
-                        'service_type' : product.SERVICE_TYPE
+                        'service_type' : product.SERVICE_TYPE,
+                        'engine' : product.ENGINE
                     })
             save_to_db(feed_type = 'dispatch', data_source = product_dispatch_list)
             return success

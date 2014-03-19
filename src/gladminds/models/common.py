@@ -83,10 +83,11 @@ class RegisteredDealer(models.Model):
 
 class ServiceAdvisor(models.Model):
     dealer_id = models.ForeignKey(RegisteredDealer, null=False)
-    service_advisor_id=models.CharField(max_length=15, blank=False,unique=True, null=False)
+    service_advisor_id = models.CharField(max_length=15, blank=False,unique=True, null=False)
     name = models.CharField(max_length=25, blank=False, null=False)
     phone_number = models.CharField(max_length=15, blank=False, null=False, unique=True)
     order = models.PositiveIntegerField(default=0)
+    status = models.CharField(max_length=10, blank=False, null=False)
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Service Advisor Data"
@@ -128,8 +129,6 @@ class GladMindUsers(models.Model):
     def save(self, force_insert=False, force_update=False, using=None):
         return super(GladMindUsers, self).save(force_insert, force_update, using)
     
-    
-    
 '''
 CustomerData contains info about
 which customer bought which product and
@@ -145,6 +144,7 @@ class ProductData(models.Model):
     product_purchase_date = models.DateTimeField(null=True, blank=True)
     invoice_date=models.DateTimeField(null=True, blank=True)
     dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
+    engine = models.CharField(max_length=255, null=True, blank=True)
     
     #Added below column for after buy application
     customer_product_number = models.CharField(max_length=255, null=True, blank=True)
@@ -171,10 +171,10 @@ class ProductData(models.Model):
     
 ####################################################################
 
-STATUS_CHOICES = ((1, 'Open'), (2, 'Closed'), (3, 'Expired'),(4,'In Progress'))
+STATUS_CHOICES = ((1, 'Unused'), (2, 'Closed'), (3, 'Expired'),(4,'In Progress'))
 
 class CouponData(models.Model):
-    vin=models.ForeignKey(ProductData, null=False)
+    vin = models.ForeignKey(ProductData, null=False)
     unique_service_coupon = models.CharField(max_length=215, unique=True, null=False)
     valid_days = models.IntegerField(max_length=10,null=False)
     valid_kms = models.IntegerField(max_length=10,null=False)
