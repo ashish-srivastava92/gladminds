@@ -1,27 +1,35 @@
 import logging
-logger = logging.getLogger("gladminds")
-from base_integration import GladmindsResourceTestCase
-from gladminds.models import common
-from suds.client import Client
-import xml.etree.ElementTree as ET
+import os
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.test import TestCase
+from gladminds.models.common import RegisteredDealer, ServiceAdvisor
 
-class FeedsResourceTest(GladmindsResourceTestCase):
+logger = logging.getLogger('gladminds')
+
+
+class FeedsResourceTest(TestCase):
 
     def setUp(self):
-        super(FeedsResourceTest, self).setUp()
+        TestCase.setUp(self)
 
     def test_service_advisor_feed(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        user = User.objects.create_user('gladminds', 'gladminds@gladminds.co', 'gladminds')
+        user.save()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
 
-        #url = '/api/v1/bajaj/feed/?wsdl'
-        #client = Client(url)
-        #result = Client.service.MI_GCP_UCN_Sync(ITEM=items, ITEM_BATCH=item_batch)
+        if response.status_code != 200:
+            print response.content
 
-        #tree = ET.parse('service_advisor_feed.xml')
-        wsdl = open('service_advisor_feed.xml','r').read()
-
-        self.assertHttpCreated(self.api_client.post(uri='/api/v1/bajaj/feed/?wsdl', data=wsdl))
-#         dealer_data = common.GladMindUsers.objects(dealer_id='dealer12')
-#         service_advisor_obj = common.ServiceAdvisor.objects.get(dealer_id=dealer_data, service_advisor_id="2231311")
-#         self.assertEquals(service_advisor_obj.status, "active", "Service Advisor status should be active")
+        self.assertEqual(200, response.status_code)
+        self.assertEquals(1, RegisteredDealer.objects.count())
+        dealer_data = RegisteredDealer.objects.all()[0]
+        self.assertEquals(u"GMDEALER001", dealer_data.dealer_id)
+        service_advisors = ServiceAdvisor.objects.filter(dealer_id=dealer_data)
+        self.assertEquals(1, len(service_advisors))
+        self.assertEquals(u"GMDEALER001SA01", service_advisors[0].service_advisor_id)
+        self.assertEquals(service_advisors[0].status, "Y", "Service Advisor status should be active")
 
 
