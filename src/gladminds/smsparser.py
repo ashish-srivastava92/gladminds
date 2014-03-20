@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger('gladminds')
 from parse import *
 from gladminds import utils, message_template as templates
 
@@ -27,9 +29,10 @@ def sms_parser(*args, **kwargs):
     lower_keyword = keyword.lower()
     if lower_keyword in template_mapper.keys():
         key_args = parse(template_mapper[lower_keyword]['receive'], parse_message['message'])
+        logging.info("valid message format")
         if not key_args:
             raise InvalidFormat(message = 'invalid message format', template = keyword+' '+template_mapper[lower_keyword]['receive'])
-        
+
         #Added the Message keyword and handler in return dictionary
         key_args.named['keyword'] = lower_keyword
         key_args.named['handler'] = template_mapper[lower_keyword]['handler']
@@ -37,6 +40,7 @@ def sms_parser(*args, **kwargs):
         return key_args.named
     else:
         raise InvalidKeyWord(message = 'invalid keyword' , template = templates.get_template('SEND_CUSTOMER_SUPPORTED_KEYWORD'))
+
 
 def render_sms_template(keyword=None, status = None, template = None, *args, **kwargs):
     keyword = keyword

@@ -40,7 +40,6 @@ class GladmindsResources(Resource):
         if request.POST.get('text'):
             message = request.POST.get('text')
             phone_number = request.POST.get('phoneNumber')
-            print message, phone_number
         elif request.GET.get('cli'):
              message = request.GET.get('msg')
              phone_number = request.GET.get('cli')
@@ -64,7 +63,6 @@ class GladmindsResources(Resource):
             send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpBadRequest(inf.message))
-
         handler = getattr(self, sms_dict['handler'], None)
         to_be_serialized = handler(sms_dict, phone_number)
         to_be_serialized = {"status": to_be_serialized}
@@ -87,12 +85,14 @@ class GladmindsResources(Resource):
             customer.save()
         # Please update the template variable before updating the keyword-argument
         message = smsparser.render_sms_template(status='send', keyword=sms_dict['keyword'], customer_name=customer_name, customer_id=gladmind_customer_id)
+        logging.info("customer is registered with message %s" % message)
         send_registration_detail.delay(phone_number=phone_number, message=message)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
     def customer_service_detail(self, sms_dict, phone_number):
         sap_customer_id = sms_dict.get('sap_customer_id', None)
+        phone_number = self.get_phone_number_format(phone_number)
         message = None
         try:
             customer_product_data = common.CouponData.objects.select_related \
@@ -116,18 +116,26 @@ class GladmindsResources(Resource):
             message = ', '.join(msg_list)
         except Exception as ex:
             message = smsparser.render_sms_template(status='invalid', keyword=sms_dict['keyword'], sap_customer_id=sap_customer_id)
+        logging.info("Send Service detail %s" % message)
         send_service_detail.delay(phone_number=phone_number, message=message)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
-    
+
     @transaction.commit_manually()
     def validate_coupon(self, sms_dict, phone_number):
-        vin = sms_dict['vin']
         actual_kms = int(sms_dict['kms'])
         service_type = sms_dict['service_type']
         dealer_message = None
         customer_phone_number = None
         customer_message = None
+        sap_customer_id = sms_dict.get('sap_customer_id', None)
+        phone_number = self.get_phone_number_format(phone_number)
+        customer_product_data = common.CouponData.objects.select_related \
+                                        ('vin', 'customer_phone_number__phone_number').\
+                                        filter(vin__customer_phone_number__phone_number=phone_number, \
+                                        vin__sap_customer_id=sap_customer_id).order_by('vin', 'valid_days')
+
+        vin = customer_product_data[0].vin.vin
         try:
             dealer_data = self.validate_dealer(phone_number)
             valid_coupon = common.CouponData.objects.select_for_update().filter(vin__vin=vin, valid_kms__gte=actual_kms, status=1).select_related ('vin', 'customer_phone_number__phone_number').order_by('service_type')[0]
@@ -162,17 +170,27 @@ class GladmindsResources(Resource):
         except Exception as ex:
             dealer_message = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
+            logging.info("validate message send to SA %s" % dealer_message)
             send_service_detail.delay(phone_number=phone_number, message=dealer_message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=dealer_message)
             transaction.commit()
         return True
-                
+
+    def get_phone_number_format(self, phone_number):
+        return phone_number[-10:]
+
     @transaction.commit_manually()
     def close_coupon(self, sms_dict, phone_number):
         sa_object = self.validate_dealer(phone_number)
-        vin = sms_dict['vin']
         unique_service_coupon = sms_dict['usc']
         message = None
+        sap_customer_id = sms_dict.get('sap_customer_id', None)
+        phone_number = self.get_phone_number_format(phone_number)
+        customer_product_data = common.CouponData.objects.select_related \
+                                        ('vin', 'customer_phone_number__phone_number').\
+                                        filter(vin__customer_phone_number__phone_number=phone_number, \
+                                        vin__sap_customer_id=sap_customer_id).order_by('vin', 'valid_days')
+        vin = customer_product_data[0].vin.vin
         try:
             coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
             customer_phone_number = coupon_object.vin.customer_phone_number.phone_number
@@ -187,6 +205,7 @@ class GladmindsResources(Resource):
         except Exception as ex:
             message = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
+            logging.info("Close coupon with message %s" % message)
             send_coupon.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             transaction.commit()
