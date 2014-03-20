@@ -6,13 +6,14 @@ OUT_DIR = os.path.join(BASE_DIR, "out")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/testdata")
 
 DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
-DATABASES['default']['NAME'] = os.path.join(OUT_DIR, 'test.db')
+DATABASES['default']['NAME'] = os.path.join(OUT_DIR, 'test.db')#"/tmp/test.db"
 SECRET_KEY = 'testsecretkeyshouldntbeusedinproduction'
 
 INSTALLED_APPS = INSTALLED_APPS + ('django_nose',)
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 SMS_CLIENT = "MOCK"
+TNS = "/api/v1/bajaj/feed/"
 
 SMS_CLIENT_DETAIL = {
                      'OTP_TWILIO_ACCOUNT' : 'MOCK_ACCOUNT',
