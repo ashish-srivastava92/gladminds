@@ -13,7 +13,7 @@
     "pk": 2,
     "fields": {
       "template_key":"SEND_CUSTOMER_SERVICE_DETAIL",
-      "template":"VIN: {vin} Coupon: {usc} Valid days: {valid_days} Valid kms: {valid_kms}",
+      "template":"VIN: {vin} Coupon: {usc} Valid days: {valid_days} Valid kms: {valid_kms}. Please Provide the UCN# to the Service_Advisor at the time of vehicle Delivery Only.",
       "description":"Send customer service detail with product and valid coupon id"
     }
   },
@@ -58,7 +58,7 @@
     "pk": 23,
     "fields": {
       "template_key":"SEND_INVALID_VIN_OR_FSC",
-      "template":"Invalid VIN or No Free service coupon available for this product"
+      "template":"Invalid ID or No Free service coupon available for this product"
     }
   },
   {
@@ -177,7 +177,7 @@
     "pk": 18,
     "fields": {
       "template_key":"RCV_SA_COUPON_VALIDATION",
-      "template":"{vin} {kms} {service_type}",
+      "template":"{sap_customer_id} {kms} {service_type}",
       "description":"Receive this message when SA send to check the coupon status"
     }
   },
@@ -187,7 +187,7 @@
     "pk": 19,
     "fields": {
       "template_key":"RCV_SA_COUPON_COMPLETE",
-      "template":"{vin} {usc}",
+      "template":"{sap_customer_id} {usc}",
       "description":"Receive this message from SA for coupon close"
     }
   },
