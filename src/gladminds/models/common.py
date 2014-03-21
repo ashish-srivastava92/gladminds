@@ -87,7 +87,7 @@ class ServiceAdvisor(models.Model):
     name = models.CharField(max_length=25, blank=False, null=False)
     phone_number = models.CharField(max_length=15, blank=False, null=False, unique=True)
     order = models.PositiveIntegerField(default=0)
-    status = models.CharField(max_length=10, blank=False, null=False)
+    status = models.CharField(max_length=10, blank=True, null=True)
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Service Advisor Data"
