@@ -32,8 +32,8 @@ SUIT_CONFIG = {
     'LIST_PER_PAGE': 20,
     'SHOW_REQUIRED_ASTERISK': True,
     'MENU': ({'app':'gladminds','label':'Data','icon':' icon-folder-open',
-               'models': ({'model':'serviceadvisor','label': 'Feed -> Service Advisor'}, {'model':'productdata','label': 'Feed -> Product Dispatch'},
-                          {'model':'producttypedata','label': 'Feed -> Product Purchase'},{'model':'coupondata','label': 'Feed -> Coupon Redemption'} ,{'model':'auditlog','label': 'Audit Log'}, 
+               'models': ({'model':'serviceadvisor','label': 'Feed -> Service Advisor'}, {'model':'producttypedata','label': 'Feed -> Product Dispatch'},
+                          {'model':'productdata','label': 'Feed -> Product Purchase'},{'model':'coupondata','label': 'Feed -> Coupon Redemption'} ,{'model':'auditlog','label': 'Audit Log'}, 
                           {'model':'datafeedlog','label': 'Feed Log'}, 'uploadproductcsv', 
                           'messagetemplate','gladmindusers')},
                 {'app':'djcelery','label':'Job Management','icon':'icon-tasks'})
@@ -182,7 +182,7 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 # more details on how to customize your logging configuration.
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'formatters': {
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
@@ -226,6 +226,10 @@ LOGGING = {
             'handlers': ['gladminds_logs'],
             'level': 'DEBUG',
             'propagate': True,
+        },'spyne': {
+            'handlers': ['gladminds_logs'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
         'afterbuy': {
             'handlers': ['afterbuy_logs'],
