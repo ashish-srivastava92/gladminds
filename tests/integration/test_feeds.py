@@ -3,7 +3,8 @@ import os
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
-from gladminds.models.common import RegisteredDealer, ServiceAdvisor
+from gladminds.models.common import RegisteredDealer, ServiceAdvisor,\
+    ProductData, CouponData
 
 logger = logging.getLogger('gladminds')
 
@@ -36,7 +37,21 @@ class FeedsResourceTest(TestCase):
         self.assertEqual(200, response.status_code)
 
     def test_product_dispatch(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
         xml_data = open(file_path, 'r').read()
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(200, response.status_code)
+
+        self.assertEquals(1, ProductData.objects.count())
+        product_data = ProductData.objects.all()[0]
+        self.assertEquals(u"XXXXXXXXXX", product_data.vin)
+
+        self.assertEquals(1, CouponData.objects.count())
+        coupon_data = CouponData.objects.all()[0]
+        self.assertEquals(u"UUUUUUU", coupon_data.unique_service_coupon) 
+
