@@ -12,16 +12,13 @@ class FeedsResourceTest(TestCase):
 
     def setUp(self):
         TestCase.setUp(self)
+        user = User.objects.create_user('gladminds', 'gladminds@gladminds.co', 'gladminds')
+        user.save()
 
     def test_service_advisor_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
         xml_data = open(file_path, 'r').read()
-        user = User.objects.create_user('gladminds', 'gladminds@gladminds.co', 'gladminds')
-        user.save()
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
-
-        if response.status_code != 200:
-            print response.content
 
         self.assertEqual(200, response.status_code)
         self.assertEquals(1, RegisteredDealer.objects.count())
@@ -32,4 +29,14 @@ class FeedsResourceTest(TestCase):
         self.assertEquals(u"GMDEALER001SA01", service_advisors[0].service_advisor_id)
         self.assertEquals(service_advisors[0].status, "Y", "Service Advisor status should be active")
 
+    def test_product_purchase(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        self.assertEqual(200, response.status_code)
 
+    def test_product_dispatch(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        self.assertEqual(200, response.status_code)

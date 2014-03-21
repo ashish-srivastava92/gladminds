@@ -13,7 +13,7 @@ INSTALLED_APPS = INSTALLED_APPS + ('django_nose',)
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 SMS_CLIENT = "MOCK"
-TNS = "/api/v1/bajaj/feed/"
+
 
 SMS_CLIENT_DETAIL = {
                      'OTP_TWILIO_ACCOUNT' : 'MOCK_ACCOUNT',

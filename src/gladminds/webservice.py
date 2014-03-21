@@ -17,6 +17,7 @@ from gladminds.soap_authentication import AuthenticationService
 import logging
 from gladminds import settings
 
+
 logger = logging.getLogger("gladminds")
 
 
@@ -113,9 +114,11 @@ class BrandService(ServiceBase):
         except Exception as ex:
             print "BrandService: {0}".format(ex)
             return failed
-            
+
+
 class DealerService(ServiceBase):
     __namespace__ = tns
+
     @srpc(DealerModelList, AuthenticationModel,_returns=Unicode)
     def postDealer(ObjectList,Credential):
         try:
@@ -200,7 +203,7 @@ DealerService.event_manager.add_listener('method_call', _on_method_call)
 ProductDispatchService.event_manager.add_listener('method_call', _on_method_call)
 ProductPurchaseService.event_manager.add_listener('method_call', _on_method_call)
 
-all_app = Application([BrandService, DealerService,ProductDispatchService, ProductPurchaseService],
+all_app = Application([BrandService, DealerService, ProductDispatchService, ProductPurchaseService],
     tns=tns,
     in_protocol=Soap11(validator='lxml'),
     out_protocol=Soap11()
