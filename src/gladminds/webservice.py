@@ -51,7 +51,7 @@ class DealerModel(ComplexModel):
     SER_ADV_ID = Unicode
     SER_ADV_NAME = Unicode
     SER_ADV_MOBILE = Unicode
-    SER_ADV_STATUS = Unicode
+    ACTIVE_FLAG = Unicode
     TIMESTAMP = Unicode(pattern = pattern)
 
 class DealerModelList(ComplexModel):
@@ -130,7 +130,7 @@ class DealerService(ServiceBase):
                     'service_advisor_id' : dealer.SER_ADV_ID,
                     'name' : dealer.SER_ADV_NAME,
                     'phone_number': '{0}{1}'.format(settings.MOBILE_NUM_FORMAT, dealer.SER_ADV_MOBILE),
-                    'status': dealer.SER_ADV_STATUS
+                    'status': dealer.ACTIVE_FLAG
                 })
             save_to_db(feed_type = 'dealer', data_source = dealer_list)
             return success
