@@ -136,7 +136,6 @@ class GladmindsResources(Resource):
                                         vin__sap_customer_id=sap_customer_id).order_by('vin', 'valid_days')
 
         logger.info(customer_product_data)
-        logger.info(sap_customer_id)
         vin = customer_product_data[0].vin.vin
         try:
             dealer_data = self.validate_dealer(phone_number)
