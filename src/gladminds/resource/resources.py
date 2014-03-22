@@ -131,10 +131,12 @@ class GladmindsResources(Resource):
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         phone_number = self.get_phone_number_format(phone_number)
         customer_product_data = common.CouponData.objects.select_related \
-                                        ('vin', 'customer_phone_number__phone_number').\
-                                        filter(vin__customer_phone_number__phone_number=phone_number, \
+                                        ('vin', 'sa_phone_number__phone_number').\
+                                        filter(sa_phone_number__phone_number=phone_number, \
                                         vin__sap_customer_id=sap_customer_id).order_by('vin', 'valid_days')
 
+        logger.info(customer_product_data)
+        logger.info(sap_customer_id)
         vin = customer_product_data[0].vin.vin
         try:
             dealer_data = self.validate_dealer(phone_number)
@@ -158,7 +160,8 @@ class GladmindsResources(Resource):
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=valid_coupon.unique_service_coupon, service_type=valid_coupon.service_type)
             else:
                 requested_coupon = common.CouponData.objects.get(vin__vin=vin, service_type=service_type)
-                update_coupon = common.CouponData.objects.filter(vin__vin=vin, valid_kms__lt=actual_kms, status=1).update(status=3)
+                common.CouponData.objects.filter(vin__vin=vin, valid_kms__lt=actual_kms, status=1).update(status=3)
+                common.CouponData.objects.filter(vin__vin=vin, valid_kms__lt=actual_kms, status=4).update(status=3)
                 dealer_message = templates.get_template('SEND_SA_EXPIRED_COUPON').format(next_service_type=valid_coupon.service_type, service_type=requested_coupon.service_type)
                 customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(service_coupon=requested_coupon.unique_service_coupon, service_type=requested_coupon.service_type, next_coupon=valid_coupon.unique_service_coupon, next_service_type=valid_coupon.service_type)
             send_coupon_detail_customer.delay(phone_number=customer_phone_number, message=customer_message)
@@ -187,8 +190,8 @@ class GladmindsResources(Resource):
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         phone_number = self.get_phone_number_format(phone_number)
         customer_product_data = common.CouponData.objects.select_related \
-                                        ('vin', 'customer_phone_number__phone_number').\
-                                        filter(vin__customer_phone_number__phone_number=phone_number, \
+                                        ('vin', 'sa_phone_number__phone_number').\
+                                        filter(sa_phone_number__phone_number=phone_number, \
                                         vin__sap_customer_id=sap_customer_id).order_by('vin', 'valid_days')
         vin = customer_product_data[0].vin.vin
         try:
