@@ -5,7 +5,6 @@
       <ns1:ObjectList>
         <ns1:ProductDispatchData>
           <ns1:ProductDispatchModel>
-            <ns1:ENGINE>DSEWWE32</ns1:ENGINE>
             <ns1:PRODUCT_TYPE>Bike</ns1:PRODUCT_TYPE>
             <ns1:KMS_TO>500</ns1:KMS_TO>
             <ns1:TIMESTAMP>2005-08-01000000</ns1:TIMESTAMP>

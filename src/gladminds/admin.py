@@ -137,12 +137,12 @@ class DealerAdmin(ModelAdmin):
     
 class ServiceAdvisorAdmin(ModelAdmin):
     search_fields = ('service_advisor_id','phone_number','name','dealer_id__dealer_id')
-    list_display=('dealer','name','service_advisor_id','phone_number',"status") 
+    list_display=('dealer_id','name','service_advisor_id','phone_number', "status") 
     exclude = ('order',)
     
-    def dealer(self,obj):
+    def dealer_id(self,obj):
         return u'<a href="/gladminds/registereddealer/%s/">%s</a>' %(obj.dealer_id.pk,obj.dealer_id)
-    dealer.allow_tags=True
+    dealer_id.allow_tags=True
 
         
       

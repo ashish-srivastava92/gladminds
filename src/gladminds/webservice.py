@@ -16,6 +16,7 @@ from gladminds.feed import SAPFeed
 from gladminds.soap_authentication import AuthenticationService
 import logging
 from gladminds import settings
+import json
 
 
 logger = logging.getLogger("gladminds")
@@ -25,7 +26,7 @@ logger = logging.getLogger("gladminds")
 pattern = r'(\d{4})-(\d{2})-(\d{2})(\d{2})(\d{2})(\d{2})'
 tns = "http://api.gladmindsplatform.co/api/v1/bajaj/feed/"
 success = "SUCCESS"
-failed = "FAILURE"
+failed = "Feeds are not in valid format"
 
 class AuthenticationModel(ComplexModel):
     __namespace__ = tns
@@ -132,11 +133,11 @@ class DealerService(ServiceBase):
                     'phone_number': '{0}{1}'.format(settings.MOBILE_NUM_FORMAT, dealer.SER_ADV_MOBILE),
                     'status': dealer.ACTIVE_FLAG
                 })
-            save_to_db(feed_type = 'dealer', data_source = dealer_list)
-            return success
+            response = save_to_db(feed_type = 'dealer', data_source = dealer_list)
+            return json.dumps(get_response(response))
         except Exception as ex:
-            print "DealerService: {0}".format(ex)
-            return failed 
+            logging.error("DealerService: {0}  Error on Validating ".format(ex))
+            return failed
 
 
 class ProductDispatchService(ServiceBase):
@@ -156,11 +157,16 @@ class ProductDispatchService(ServiceBase):
                         'valid_kms' : product.KMS_TO,
                         'service_type' : product.SERVICE_TYPE,
                     })
-            save_to_db(feed_type = 'dispatch', data_source = product_dispatch_list)
-            return success
+            response = save_to_db(feed_type = 'dispatch', data_source = product_dispatch_list)
+            return json.dumps(get_response(response))
         except Exception as ex:
-            print "ProductDispatchService: {0}".format(ex)
+            logger.info("ProductDispatchService: {0}  Error on Validating ".format(ex))
             return failed
+
+
+def get_response(response):
+    return response
+
 
 class ProductPurchaseService(ServiceBase):
     __namespace__ = tns
@@ -180,15 +186,17 @@ class ProductPurchaseService(ServiceBase):
                         'product_purchase_date' : product.VEH_SL_DT,
                         'engine' : product.ENGINE
                 })
-            save_to_db(feed_type = 'purchase', data_source = product_purchase_list)
-            return success
+            response = save_to_db(feed_type = 'purchase', data_source = product_purchase_list)
+            return json.dumps(get_response(response))
         except Exception as ex:
-            print "ProductPurchaseService: {0}".format(ex)
+            logger.info("ProductPurchaseService: {0}  Error on Validating ".format(ex))
             return  failed
+
 
 def save_to_db(feed_type = None, data_source = []):
     sap_obj = SAPFeed()
-    sap_obj.import_to_db(feed_type = feed_type, data_source = data_source)
+    return sap_obj.import_to_db(feed_type = feed_type, data_source = data_source)
+
 
 def _on_method_call(ctx):
     print "Getting feed data: %s" % ctx.in_object
