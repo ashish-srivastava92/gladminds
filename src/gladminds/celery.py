@@ -44,7 +44,7 @@ app.conf.CELERYBEAT_SCHEDULE= {
         'task': 'gladminds.tasks.export_close_coupon_data',
         'schedule': crontab(minute=0, hour=0),
     },
-    #Job to export coupon redeem feed to SAP CRM                    
+    #Job to export coupon redeem feed to SAP CRM
     'cronjob-export-coupon-redeem_to_sap': {
         'task': 'gladminds.tasks.export_coupon_redeem_to_sap',
         'schedule': crontab(minute=0, hour=0),
