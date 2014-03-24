@@ -185,7 +185,7 @@ class ProductDispatchFeed(BaseFeed):
                         product_type=product['product_type'])
                     invoice_date = product['invoice_date']
                     product_data = common.ProductData(
-                        vin=product['vin'], product_type=producttype_data, invoice_date=invoice_date, dealer_id=dealer_data, engine=product['engine'])
+                        vin=product['vin'], product_type=producttype_data, invoice_date=invoice_date, dealer_id=dealer_data)
                     product_data.save()
                 except Exception as ex:
                     total_failed += 1
@@ -237,22 +237,33 @@ class ProductPurchaseFeed(BaseFeed):
                     customer_data = common.GladMindUsers(gladmind_customer_id=gladmind_customer_id, phone_number=product[
                                                          'customer_phone_number'], registration_date=datetime.now(), customer_name=product['customer_name'])
                     customer_data.save()
-
                 if not product_data.sap_customer_id:
                     product_purchase_date = product['product_purchase_date']
                     product_data.sap_customer_id = product['sap_customer_id']
                     product_data.customer_phone_number = customer_data
                     product_data.product_purchase_date = product_purchase_date
                     product_data.save()
+                self.update_engine_number(product)
             except Exception as ex:
                 total_failed += 1
                 logger.info(
                     '[Exception: ProductPurchaseFeed_product_data]: {0}'.format(ex))
                 continue
+
         feed_log(feed_type='Purchase Feed', total_data_count=len(self.data_source),
                  failed_data_count=total_failed, success_data_count=len(
                      self.data_source) - total_failed,
                  action='Recieved', status=True)
+
+    def update_engine_number(self, product):
+        try:
+            product_data_obj = common.ProductData.objects.filter(vin=product["vin"])[0]
+            product_data_obj.engine = product["engine"]
+            product_data_obj.save()
+        except ObjectDoesNotExist as odne:
+                    print "on product purchase", odne
+                    logger.info(
+                        '[Exception: ProductPurchaseFeed_customer_data]: {0} Engine is not updated'.format(odne))
 
 
 class ProductServiceFeed(BaseFeed):
