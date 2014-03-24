@@ -130,10 +130,7 @@ class GladmindsResources(Resource):
         customer_message = None
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         customer_product_data = common.CouponData.objects.select_related \
-                                        ('vin', 'sa_phone_number__phone_number').\
-                                        filter(sa_phone_number__phone_number=phone_number, \
-                                        vin__sap_customer_id=sap_customer_id).order_by('vin', 'valid_days')
-
+                                        ('vin').filter(vin__sap_customer_id=sap_customer_id).order_by('vin', 'valid_days')
         vin = customer_product_data[0].vin.vin
         try:
             dealer_data = self.validate_dealer(phone_number)
@@ -187,9 +184,7 @@ class GladmindsResources(Resource):
         message = None
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         customer_product_data = common.CouponData.objects.select_related \
-                                        ('vin', 'sa_phone_number__phone_number').\
-                                        filter(sa_phone_number__phone_number=phone_number, \
-                                        vin__sap_customer_id=sap_customer_id).order_by('vin', 'valid_days')
+                                        ('vin').filter(vin__sap_customer_id=sap_customer_id).order_by('vin', 'valid_days')
         vin = customer_product_data[0].vin.vin
         try:
             coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
