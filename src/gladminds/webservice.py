@@ -26,7 +26,7 @@ logger = logging.getLogger("gladminds")
 pattern = r'(\d{4})-(\d{2})-(\d{2})(\d{2})(\d{2})(\d{2})'
 tns = "http://api.gladmindsplatform.co/api/v1/bajaj/feed/"
 success = "SUCCESS"
-failed = "Feeds are not in valid format"
+failed = "FAILURE"
 
 class AuthenticationModel(ComplexModel):
     __namespace__ = tns
@@ -165,7 +165,8 @@ class ProductDispatchService(ServiceBase):
 
 
 def get_response(response):
-    return response
+    failed_feed = response[1]['Failed']
+    return  failed if failed_feed > 0 else success
 
 
 class ProductPurchaseService(ServiceBase):
