@@ -73,8 +73,7 @@ class ProductTypeDataAdmin(ModelAdmin):
 
     def vin(self, obj):
         product_data_obj = self.get_product_data_obj(obj)
-        return ' | '.join(str(vin) for vin in product_data_obj) 
-    vin.allow_tags = True
+        return ' | '.join(str(vin) for vin in product_data_obj)
 
     def UCN(self, obj):
         product_data_obj = self.get_product_data_obj(obj)
@@ -83,7 +82,6 @@ class ProductTypeDataAdmin(ModelAdmin):
             for coupon in CouponData.objects.filter(vin=ele.id):
                 ucn_list.append(coupon.unique_service_coupon)
         return ' | '.join([str(ucn) for ucn in ucn_list])
-    UCN.allow_tags = True
 
     def engine(self, obj):
         product_data_obj = self.get_product_data_obj(obj)
