@@ -89,16 +89,16 @@ class SAPFeed(object):
     def import_to_db(self, feed_type=None, data_source=[]):
         if feed_type == 'brand':
             brand_obj = BrandProductTypeFeed(data_source=data_source)
-            brand_obj.import_data()
+            return brand_obj.import_data()
         elif feed_type == 'dealer':
             dealer_obj = DealerAndServiceAdvisorFeed(data_source=data_source)
-            dealer_obj.import_data()
+            return dealer_obj.import_data()
         elif feed_type == 'dispatch':
             dispatch_obj = ProductDispatchFeed(data_source=data_source)
-            dispatch_obj.import_data()
+            return dispatch_obj.import_data()
         elif feed_type == 'purchase':
             purchase_obj = ProductPurchaseFeed(data_source=data_source)
-            purchase_obj.import_data()
+            return purchase_obj.import_data()
 
 
 class BaseFeed(object):
@@ -163,6 +163,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                  failed_data_count=total_failed, success_data_count=len(
                      self.data_source) - total_failed,
                  action='Recieved', status=True)
+        return get_feed_status(len(self.data_source), total_failed)
 
 
 class ProductDispatchFeed(BaseFeed):
@@ -206,6 +207,7 @@ class ProductDispatchFeed(BaseFeed):
                  failed_data_count=total_failed, success_data_count=len(
                      self.data_source) - total_failed,
                  action='Recieved', status=True)
+        return get_feed_status(len(self.data_source), total_failed)
 
     def get_or_create_product_type(self, product_type=None):
         brand_list = [{
@@ -254,6 +256,7 @@ class ProductPurchaseFeed(BaseFeed):
                  failed_data_count=total_failed, success_data_count=len(
                      self.data_source) - total_failed,
                  action='Recieved', status=True)
+        return get_feed_status(len(self.data_source), total_failed)
 
     def update_engine_number(self, product):
         try:
@@ -305,6 +308,12 @@ class CouponRedeemFeedToSAP(BaseFeed):
                                                           'username'], password=settings.SAP_CRM_DETAIL['password'], wsdl_url=settings.COUPON_WSDL_URL)
         coupon_redeem.export(items=items, item_batch=item_batch)
 
+
+def get_feed_status(total_feeds, failed_feeds):
+    return [{
+            "Passed": total_feeds - failed_feeds},
+            {"Failed": failed_feeds}
+           ]
 
 def update_coupon_data(sender, **kwargs):
     from gladminds.tasks import send_on_product_purchase
