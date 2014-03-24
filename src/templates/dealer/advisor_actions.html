@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block body %}
+<form role="form" action="/dealers/{{ username }}" method="post">
+  <div class="row">
+    <div class="col-md-4 form-group">
+      <label for="advisorMobile">Mobile Number</label>
+      <input type="text" class="form-control" id="advisorMobile" placeholder="Mobile number">
+    </div>
+    <div class="col-md-4 form-group">
+      <label for="customerId">Customer Id</label>
+      <input type="text" class="form-control" id="customerId" placeholder="Customer Id">
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-3 form-group">
+      <input type="radio" name="actionSelect" value="">
+      <label>Validate USC:CHECK</label>
+    </div>
+    <div class="col-md-3 form-group">
+      <label for="odoRead">Actual Kilometers</label>
+      <input type="text" class="form-control" id="odoRead" placeholder="Odometer Read">
+    </div>
+    <div class="col-md-3 form-group">
+      <label for="serviceType">Service Type</label>
+      <input type="text" class="form-control" id="serviceType" placeholder="Service Type">
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-3 form-group">
+      <input type="radio" name="actionSelect">
+      <label>Close USC:CLOSE</label>
+    </div>
+    <div class="col-md-3 form-group">
+      <label for="ucn">UCN</label>
+      <input type="text" class="form-control" id="ucn" placeholder="UCN">
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-4 form-group">
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block dependency %}
+<script src="/static/js/dealer/main.js"></script>
+{% endblock dependency %}
