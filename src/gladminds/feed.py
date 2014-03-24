@@ -188,6 +188,7 @@ class ProductDispatchFeed(BaseFeed):
                         vin=product['vin'], product_type=producttype_data, invoice_date=invoice_date, dealer_id=dealer_data, engine=product['engine'])
                     product_data.save()
                 except Exception as ex:
+                    total_failed += 1
                     logger.info(
                         '[Exception: ProductDispatchFeed_product_data_save]: {0}'.format(ex))
                     continue
@@ -195,7 +196,7 @@ class ProductDispatchFeed(BaseFeed):
             try:
                 status = 1
                 coupon_data = common.CouponData(unique_service_coupon=product['unique_service_coupon'],
-                                                vin=product_data, valid_days=product['valid_days'], valid_days_from=product['valid_days_from'], valid_kms=product['valid_kms'], valid_kms_from=product['valid_kms_from'], service_type=product['service_type'], status=status)
+                                                vin=product_data, valid_days=product['valid_days'], valid_kms=product['valid_kms'], service_type=product['service_type'], status=status)
                 coupon_data.save()
             except Exception as ex:
                 total_failed += 1
