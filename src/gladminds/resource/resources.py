@@ -129,13 +129,11 @@ class GladmindsResources(Resource):
         customer_phone_number = None
         customer_message = None
         sap_customer_id = sms_dict.get('sap_customer_id', None)
-        phone_number = self.get_phone_number_format(phone_number)
         customer_product_data = common.CouponData.objects.select_related \
                                         ('vin', 'sa_phone_number__phone_number').\
                                         filter(sa_phone_number__phone_number=phone_number, \
                                         vin__sap_customer_id=sap_customer_id).order_by('vin', 'valid_days')
 
-        logger.info(customer_product_data)
         vin = customer_product_data[0].vin.vin
         try:
             dealer_data = self.validate_dealer(phone_number)
@@ -163,7 +161,7 @@ class GladmindsResources(Resource):
                 common.CouponData.objects.filter(vin__vin=vin, valid_kms__lt=actual_kms, status=4).update(status=3)
                 dealer_message = templates.get_template('SEND_SA_EXPIRED_COUPON').format(next_service_type=valid_coupon.service_type, service_type=requested_coupon.service_type)
                 customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(service_coupon=requested_coupon.unique_service_coupon, service_type=requested_coupon.service_type, next_coupon=valid_coupon.unique_service_coupon, next_service_type=valid_coupon.service_type)
-            send_coupon_detail_customer.delay(phone_number=customer_phone_number, message=customer_message)
+            send_coupon_detail_customer.delay(phone_number=self.get_phone_number_format(customer_phone_number), message=customer_message)
             audit.audit_log(reciever=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
         except IndexError as ie:
             dealer_message = templates.get_template('SEND_INVALID_VIN_OR_FSC')
@@ -173,6 +171,7 @@ class GladmindsResources(Resource):
             dealer_message = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
             logging.info("validate message send to SA %s" % dealer_message)
+            phone_number = self.get_phone_number_format(phone_number)
             send_service_detail.delay(phone_number=phone_number, message=dealer_message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=dealer_message)
             transaction.commit()
@@ -187,7 +186,6 @@ class GladmindsResources(Resource):
         unique_service_coupon = sms_dict['usc']
         message = None
         sap_customer_id = sms_dict.get('sap_customer_id', None)
-        phone_number = self.get_phone_number_format(phone_number)
         customer_product_data = common.CouponData.objects.select_related \
                                         ('vin', 'sa_phone_number__phone_number').\
                                         filter(sa_phone_number__phone_number=phone_number, \
@@ -202,12 +200,14 @@ class GladmindsResources(Resource):
             all_previous_coupon = common.CouponData.objects.filter(vin__vin=vin, service_type__lt=coupon_object.service_type, status=1).update(status=3)
             message = templates.get_template('SEND_SA_CLOSE_COUPON')
             customer_message = templates.get_template('SEND_CUSTOMER_CLOSE_COUPON').format(vin=vin, sa_name=sa_object.name, sa_phone_number=phone_number)
+            phone_number = self.get_phone_number_format(phone_number)
             send_close_sms_customer.delay(phone_number=customer_phone_number, message=customer_message)
             audit.audit_log(reciever=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
         except Exception as ex:
             message = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
             logging.info("Close coupon with message %s" % message)
+            phone_number = self.get_phone_number_format(phone_number)
             send_coupon.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             transaction.commit()
