@@ -178,8 +178,12 @@ class ProductDispatchFeed(BaseFeed):
                 logger.info(
                     '[Exception: ProductDispatchFeed_product_data]: {0}'.format(odne))
                 try:
-                    dealer_data = common.RegisteredDealer.objects.get(
-                        dealer_id=product['dealer_id'])
+                    try:
+                        dealer_data = common.RegisteredDealer.objects.get(
+                            dealer_id=product['dealer_id'])
+                    except Exception as ex:
+                        dealer_data = common.RegisteredDealer(dealer_id=product['dealer_id'])
+                        dealer_data.save()
                     self.get_or_create_product_type(
                         product_type=product['product_type'])
                     producttype_data = common.ProductTypeData.objects.get(
@@ -314,6 +318,7 @@ def get_feed_status(total_feeds, failed_feeds):
             "Passed": total_feeds - failed_feeds},
             {"Failed": failed_feeds}
            ]
+
 
 def update_coupon_data(sender, **kwargs):
     from gladminds.tasks import send_on_product_purchase
