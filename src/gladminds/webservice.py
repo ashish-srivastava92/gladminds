@@ -70,7 +70,6 @@ class ProductDispatchModel(ComplexModel):
     KMS_FROM = Decimal
     KMS_TO = Decimal
     SERVICE_TYPE = Unicode
-    ENGINE = Unicode
     TIMESTAMP = Unicode(pattern = pattern)
 
 class ProductDispatchModelList(ComplexModel):
@@ -91,6 +90,7 @@ class ProductPurchaseModel(ComplexModel):
     VEH_SL_DLR = Unicode
     KUNNR = Unicode
     TIMESTAMP = Unicode(pattern = pattern)
+    ENGINE = Unicode
 
 class ProductPurchaseModelList(ComplexModel):
     __namespace__ = tns
@@ -155,7 +155,6 @@ class ProductDispatchService(ServiceBase):
                         'valid_days' : product.DAYS_LIMIT_TO,
                         'valid_kms' : product.KMS_TO,
                         'service_type' : product.SERVICE_TYPE,
-                        'engine' : product.ENGINE
                     })
             save_to_db(feed_type = 'dispatch', data_source = product_dispatch_list)
             return success
@@ -179,6 +178,7 @@ class ProductPurchaseService(ServiceBase):
                         'state' : product.STATE,
                         'pin_no' : product.PIN_NO,
                         'product_purchase_date' : product.VEH_SL_DT,
+                        'engine' : product.ENGINE
                 })
             save_to_db(feed_type = 'purchase', data_source = product_purchase_list)
             return success
