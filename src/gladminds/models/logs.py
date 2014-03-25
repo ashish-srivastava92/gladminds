@@ -19,6 +19,6 @@ class DataFeedLog(models.Model):
     success_data_count = models.IntegerField(null=False)
     action = models.CharField(max_length=50, null=False)
     status = models.BooleanField(null=False)
-    timestamp = models.DateTimeField(default=datetime.now())
+    timestamp = models.DateTimeField(default=datetime.now)
     class Meta:
         app_label="gladminds"
