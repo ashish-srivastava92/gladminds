@@ -7,11 +7,9 @@
         disabledInputs = actionSet.find("input[type='text']")
         activeInputs = sibblingActionSet.find("input[type='text']");
 
-        activeInputs.attr("disabled", "disabled");
-        disabledInputs.removeAttr("disabled");
+        activeInputs.attr("disabled", "disabled").removeAttr("required");
+        disabledInputs.removeAttr("disabled").attr("required", "required");
   });
-
-  
 
   $(document).ready(function() {
     
