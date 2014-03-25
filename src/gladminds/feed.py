@@ -89,16 +89,16 @@ class SAPFeed(object):
     def import_to_db(self, feed_type=None, data_source=[]):
         if feed_type == 'brand':
             brand_obj = BrandProductTypeFeed(data_source=data_source)
-            brand_obj.import_data()
+            return brand_obj.import_data()
         elif feed_type == 'dealer':
             dealer_obj = DealerAndServiceAdvisorFeed(data_source=data_source)
-            dealer_obj.import_data()
+            return dealer_obj.import_data()
         elif feed_type == 'dispatch':
             dispatch_obj = ProductDispatchFeed(data_source=data_source)
-            dispatch_obj.import_data()
+            return dispatch_obj.import_data()
         elif feed_type == 'purchase':
             purchase_obj = ProductPurchaseFeed(data_source=data_source)
-            purchase_obj.import_data()
+            return purchase_obj.import_data()
 
 
 class BaseFeed(object):
@@ -163,6 +163,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                  failed_data_count=total_failed, success_data_count=len(
                      self.data_source) - total_failed,
                  action='Recieved', status=True)
+        return get_feed_status(len(self.data_source), total_failed)
 
 
 class ProductDispatchFeed(BaseFeed):
@@ -177,17 +178,22 @@ class ProductDispatchFeed(BaseFeed):
                 logger.info(
                     '[Exception: ProductDispatchFeed_product_data]: {0}'.format(odne))
                 try:
-                    dealer_data = common.RegisteredDealer.objects.get(
-                        dealer_id=product['dealer_id'])
+                    try:
+                        dealer_data = common.RegisteredDealer.objects.get(
+                            dealer_id=product['dealer_id'])
+                    except Exception as ex:
+                        dealer_data = common.RegisteredDealer(dealer_id=product['dealer_id'])
+                        dealer_data.save()
                     self.get_or_create_product_type(
                         product_type=product['product_type'])
                     producttype_data = common.ProductTypeData.objects.get(
                         product_type=product['product_type'])
                     invoice_date = product['invoice_date']
                     product_data = common.ProductData(
-                        vin=product['vin'], product_type=producttype_data, invoice_date=invoice_date, dealer_id=dealer_data, engine=product['engine'])
+                        vin=product['vin'], product_type=producttype_data, invoice_date=invoice_date, dealer_id=dealer_data)
                     product_data.save()
                 except Exception as ex:
+                    total_failed += 1
                     logger.info(
                         '[Exception: ProductDispatchFeed_product_data_save]: {0}'.format(ex))
                     continue
@@ -195,7 +201,7 @@ class ProductDispatchFeed(BaseFeed):
             try:
                 status = 1
                 coupon_data = common.CouponData(unique_service_coupon=product['unique_service_coupon'],
-                                                vin=product_data, valid_days=product['valid_days'], valid_days_from=product['valid_days_from'], valid_kms=product['valid_kms'], valid_kms_from=product['valid_kms_from'], service_type=product['service_type'], status=status)
+                                                vin=product_data, valid_days=product['valid_days'], valid_kms=product['valid_kms'], service_type=product['service_type'], status=status)
                 coupon_data.save()
             except Exception as ex:
                 total_failed += 1
@@ -205,6 +211,7 @@ class ProductDispatchFeed(BaseFeed):
                  failed_data_count=total_failed, success_data_count=len(
                      self.data_source) - total_failed,
                  action='Recieved', status=True)
+        return get_feed_status(len(self.data_source), total_failed)
 
     def get_or_create_product_type(self, product_type=None):
         brand_list = [{
@@ -236,22 +243,34 @@ class ProductPurchaseFeed(BaseFeed):
                     customer_data = common.GladMindUsers(gladmind_customer_id=gladmind_customer_id, phone_number=product[
                                                          'customer_phone_number'], registration_date=datetime.now(), customer_name=product['customer_name'])
                     customer_data.save()
-
                 if not product_data.sap_customer_id:
                     product_purchase_date = product['product_purchase_date']
                     product_data.sap_customer_id = product['sap_customer_id']
                     product_data.customer_phone_number = customer_data
                     product_data.product_purchase_date = product_purchase_date
                     product_data.save()
+                self.update_engine_number(product)
             except Exception as ex:
                 total_failed += 1
                 logger.info(
                     '[Exception: ProductPurchaseFeed_product_data]: {0}'.format(ex))
                 continue
+
         feed_log(feed_type='Purchase Feed', total_data_count=len(self.data_source),
                  failed_data_count=total_failed, success_data_count=len(
                      self.data_source) - total_failed,
                  action='Recieved', status=True)
+        return get_feed_status(len(self.data_source), total_failed)
+
+    def update_engine_number(self, product):
+        try:
+            product_data_obj = common.ProductData.objects.filter(vin=product["vin"])[0]
+            product_data_obj.engine = product["engine"]
+            product_data_obj.save()
+        except ObjectDoesNotExist as odne:
+                    print "on product purchase", odne
+                    logger.info(
+                        '[Exception: ProductPurchaseFeed_customer_data]: {0} Engine is not updated'.format(odne))
 
 
 class ProductServiceFeed(BaseFeed):
@@ -292,6 +311,13 @@ class CouponRedeemFeedToSAP(BaseFeed):
         coupon_redeem = exportfeed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
                                                           'username'], password=settings.SAP_CRM_DETAIL['password'], wsdl_url=settings.COUPON_WSDL_URL)
         coupon_redeem.export(items=items, item_batch=item_batch)
+
+
+def get_feed_status(total_feeds, failed_feeds):
+    return [{
+            "Passed": total_feeds - failed_feeds},
+            {"Failed": failed_feeds}
+           ]
 
 
 def update_coupon_data(sender, **kwargs):

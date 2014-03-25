@@ -62,7 +62,7 @@ class ProductTypeDataAdmin(ModelAdmin):
     readonly_fields = ('order',)
     search_fields = ('product_type', 'product_name', 'dealer_id', 'engine')
     list_filter = ('product_type',)
-    list_display = ('vin', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
+    list_display = ('product_type', 'vin', 'engine', 'UCN', 'dealer_id', "invoice_date")
 
 #     def brand(self, obj):
 #         return u'<a href="/gladminds/branddata/%s/">%s</a>' %(obj.brand_id.pk,obj.brand_id)
@@ -73,8 +73,7 @@ class ProductTypeDataAdmin(ModelAdmin):
 
     def vin(self, obj):
         product_data_obj = self.get_product_data_obj(obj)
-        return ' | '.join(str(vin) for vin in product_data_obj) 
-    vin.allow_tags = True
+        return ' | '.join(str(vin) for vin in product_data_obj)
 
     def UCN(self, obj):
         product_data_obj = self.get_product_data_obj(obj)
@@ -83,7 +82,6 @@ class ProductTypeDataAdmin(ModelAdmin):
             for coupon in CouponData.objects.filter(vin=ele.id):
                 ucn_list.append(coupon.unique_service_coupon)
         return ' | '.join([str(ucn) for ucn in ucn_list])
-    UCN.allow_tags = True
 
     def engine(self, obj):
         product_data_obj = self.get_product_data_obj(obj)
@@ -139,12 +137,12 @@ class DealerAdmin(ModelAdmin):
     
 class ServiceAdvisorAdmin(ModelAdmin):
     search_fields = ('service_advisor_id','phone_number','name','dealer_id__dealer_id')
-    list_display=('dealer','name','service_advisor_id','phone_number',"status") 
+    list_display=('dealer_id','name','service_advisor_id','phone_number', "status") 
     exclude = ('order',)
     
-    def dealer(self,obj):
+    def dealer_id(self,obj):
         return u'<a href="/gladminds/registereddealer/%s/">%s</a>' %(obj.dealer_id.pk,obj.dealer_id)
-    dealer.allow_tags=True
+    dealer_id.allow_tags=True
 
         
       
@@ -177,13 +175,19 @@ class Couponline(SortableTabularInline):
 
 
 class ProductDataAdmin(ModelAdmin):
-    search_fields = ('vin','sap_customer_id','customer_phone_number__phone_number')
+    search_fields = ('vin', 'customer_phone_number__phone_number')
     list_filter = ('invoice_date',)
-    list_display = ('sap_customer_id', 'customer_name', 'customer_phone_number', 'vin', 'service_type','product_purchase_date')
+    list_display = ('vin', 'sap_customer_id', "UCN", 'customer_name', 'customer_phone_number', 'product_purchase_date')
     inlines=(Couponline,)
     exclude = ('order',)
 
-    def customer_name(self,obj):
+    def UCN(self, obj):
+        ucn_list = []
+        for coupon in CouponData.objects.filter(vin=obj.id):
+            ucn_list.append(coupon.unique_service_coupon)
+        return ' | '.join([str(ucn) for ucn in ucn_list])
+
+    def customer_name(self, obj):
         gm_user_obj = GladMindUsers.objects.get(phone_number=obj.customer_phone_number)
         name = ''
         if gm_user_obj:
@@ -225,7 +229,7 @@ class CouponAdmin(ExportMixin,ModelAdmin):
     resource_class = CouponResource
     search_fields = ('unique_service_coupon','vin__vin','valid_days','valid_kms')
     list_filter = ('status',('actual_service_date', DateFieldListFilter))
-    list_display = ('vin','unique_service_coupon', "actual_service_date",'actual_kms','valid_days','valid_kms','status')
+    list_display = ('vin','unique_service_coupon', "actual_service_date",'actual_kms','valid_days','valid_kms','status', "service_type")
     exclude = ('order',)
 
     def suit_row_attributes(self, obj):
