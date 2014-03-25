@@ -82,12 +82,9 @@ AWS_ACCESS_KEY_ID = 'AKIAIL7IDCSTNCG2R6JA'
 AWS_SECRET_ACCESS_KEY = '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'
 AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 
+SAP_CRM_DETAIL = {
+                  'username':'pisuper',
+                  'password':'welcome123'
+                  }
 
-#prod settings
-# SAP_CRM_DETAIL = {
-#                   'username':'pisuper',
-#                   'password':'welcome123'
-#                   }
-# 
-# 
-# COUPON_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl"
+COUPON_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl"
