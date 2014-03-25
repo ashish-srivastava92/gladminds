@@ -87,4 +87,4 @@ SAP_CRM_DETAIL = {
                   'password':'welcome123'
                   }
 
-COUPON_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl"
+COUPON_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl&v0"

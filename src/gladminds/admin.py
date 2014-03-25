@@ -276,9 +276,8 @@ class MessageTemplateAdmin(ModelAdmin):
 class FeedLogAdmin(ModelAdmin):
     list_filter = ('feed_type','status')
     search_fields = ('status','data_feed_id','action')
-    list_display = ('timestamp','feed_type','action','status', 'total_data_count', 'success_data_count', 'failed_data_count')
+    list_display = ('timestamp','feed_type','action', 'total_data_count', 'success_data_count', 'failed_data_count')
 
-    
     def has_add_permission(self, request):
         return False
 
