@@ -15,15 +15,16 @@ from tastypie.resources import Resource, ModelResource
 from tastypie.utils.urls import trailing_slash
 from tastypie import http
 from tastypie.exceptions import ImmediateHttpResponse
+from django.db.models import Q
 import logging
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
 
 
-
 __all__ = ['GladmindsTaskManager']
 AUDIT_ACTION = 'SEND TO QUEUE'
 angular_format = lambda x: x.replace('{', '<').replace('}', '>')
+
 
 class GladmindsResources(Resource):
 
@@ -41,9 +42,9 @@ class GladmindsResources(Resource):
             message = request.POST.get('text')
             phone_number = request.POST.get('phoneNumber')
         elif request.GET.get('cli'):
-             message = request.GET.get('msg')
-             phone_number = request.GET.get('cli')
-             phone_number = '+{0}'.format(phone_number)
+            message = request.GET.get('msg')
+            phone_number = request.GET.get('cli')
+            phone_number = '+{0}'.format(phone_number)
         audit.audit_log(action='RECIEVED', sender=phone_number, reciever='+1 469-513-9856', message=message, status='success')
         logger.info('Recieved Message from phone number: {0} and message: {1}'.format(message, phone_number))
         try:
@@ -92,7 +93,6 @@ class GladmindsResources(Resource):
 
     def customer_service_detail(self, sms_dict, phone_number):
         sap_customer_id = sms_dict.get('sap_customer_id', None)
-        phone_number = self.get_phone_number_format(phone_number)
         message = None
         try:
             customer_product_data = common.CouponData.objects.select_related \
@@ -103,6 +103,7 @@ class GladmindsResources(Resource):
                                         common.CouponData.objects.select_related('vin', 'customer_phone_number__phone_number').\
                                         filter(vin__customer_phone_number__phone_number=phone_number).\
                                         order_by('vin', 'valid_days')
+            logger.info(customer_product_data)
             valid_product_data = []
             for data in customer_product_data:
                 if data.status == 1 or data.status == 4:
@@ -117,9 +118,35 @@ class GladmindsResources(Resource):
         except Exception as ex:
             message = smsparser.render_sms_template(status='invalid', keyword=sms_dict['keyword'], sap_customer_id=sap_customer_id)
         logging.info("Send Service detail %s" % message)
+        phone_number = self.get_phone_number_format(phone_number)
         send_service_detail.delay(phone_number=phone_number, message=message)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
+
+    def get_customer_phone_number_from_vin(self, vin):
+        print common.ProductData.objects.filter(vin=vin).select_related('customer_phone_number__phone_number')
+        logger.info(common.ProductData.objects.filter(vin=vin).select_related('customer_phone_number__phone_number'))
+        product_obj = common.ProductData.objects.filter(vin=vin).select_related('customer_phone_number__phone_number')
+        return product_obj[0].customer_phone_number.phone_number
+
+    def expire_or_close_less_kms_coupon(self, actual_kms, vin, action=3):
+        '''
+            Expire those coupon whose kms limit is small then actual kms limit
+        '''
+        if action == 3:
+            expire_coupon = common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, valid_kms__lt=actual_kms).update(status=3)
+            logger.info("%s are expired" % expire_coupon)
+        else:
+            expire_coupon = common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, valid_kms__lt=actual_kms).update(status=3)
+            logger.info("%s are closed" % expire_coupon)
+
+    def get_vin(self, sap_customer_id):
+        try:
+            customer_product_data = common.CouponData.objects.select_related \
+                                            ('vin').filter(vin__sap_customer_id=sap_customer_id).order_by('vin', 'valid_days')
+            return customer_product_data[0].vin.vin
+        except Exception as ax:
+            logger.error("Vin is not in customer_product_data Error %s " % ax)
 
     @transaction.commit_manually()
     def validate_coupon(self, sms_dict, phone_number):
@@ -129,22 +156,30 @@ class GladmindsResources(Resource):
         customer_phone_number = None
         customer_message = None
         sap_customer_id = sms_dict.get('sap_customer_id', None)
-        customer_product_data = common.CouponData.objects.select_related \
-                                        ('vin').filter(vin__sap_customer_id=sap_customer_id).order_by('vin', 'valid_days')
-        vin = customer_product_data[0].vin.vin
         try:
+            vin = self.get_vin(sap_customer_id)
             dealer_data = self.validate_dealer(phone_number)
-            valid_coupon = common.CouponData.objects.select_for_update().filter(vin__vin=vin, valid_kms__gte=actual_kms, status=1).select_related ('vin', 'customer_phone_number__phone_number').order_by('service_type')[0]
+            valid_coupon = common.CouponData.objects.select_for_update().filter(Q(status=1) |  Q(status=4), vin__vin=vin, valid_kms__gte=actual_kms).select_related ('vin', 'customer_phone_number__phone_number').order_by('service_type')
+            if len(valid_coupon):
+                valid_coupon = valid_coupon[0]
+
             all_coupon = common.CouponData.objects.select_for_update().filter(vin__vin=vin, valid_kms__gte=actual_kms).select_related ('vin', 'customer_phone_number__phone_number').order_by('service_type')
+            self.expire_less_kms_coupon(actual_kms, vin)
             in_progress_coupon = []
             for coupon in all_coupon:
                 if coupon.status == 4:
                     in_progress_coupon.append(coupon)
-            customer_phone_number = valid_coupon.vin.customer_phone_number.phone_number
-            if len(in_progress_coupon) > 0 :
+            try:
+                customer_phone_number = self.get_customer_phone_number_from_vin(vin) 
+            except Exception as ax:
+                logger.error('Customer Phone Number is not entered %s' % ax)
+            logger.info(valid_coupon.service_type)
+            if len(in_progress_coupon) > 0:
+                logger.info("Validate_coupon: in_progress_coupon")
                 dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=in_progress_coupon[0].service_type)
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=in_progress_coupon[0].unique_service_coupon, service_type=in_progress_coupon[0].service_type)
             elif valid_coupon.service_type == int(service_type):
+                logger.info("Validate_coupon: valid_coupon.service_type")
                 valid_coupon.actual_kms = actual_kms
                 valid_coupon.actual_service_date = datetime.now()
                 valid_coupon.status = 4
@@ -153,9 +188,8 @@ class GladmindsResources(Resource):
                 dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=valid_coupon.service_type)
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=valid_coupon.unique_service_coupon, service_type=valid_coupon.service_type)
             else:
+                logger.info("Validate_coupon: ELSE PART")
                 requested_coupon = common.CouponData.objects.get(vin__vin=vin, service_type=service_type)
-                common.CouponData.objects.filter(vin__vin=vin, valid_kms__lt=actual_kms, status=1).update(status=3)
-                common.CouponData.objects.filter(vin__vin=vin, valid_kms__lt=actual_kms, status=4).update(status=3)
                 dealer_message = templates.get_template('SEND_SA_EXPIRED_COUPON').format(next_service_type=valid_coupon.service_type, service_type=requested_coupon.service_type)
                 customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(service_coupon=requested_coupon.unique_service_coupon, service_type=requested_coupon.service_type, next_coupon=valid_coupon.unique_service_coupon, next_service_type=valid_coupon.service_type)
             send_coupon_detail_customer.delay(phone_number=self.get_phone_number_format(customer_phone_number), message=customer_message)
@@ -183,16 +217,14 @@ class GladmindsResources(Resource):
         unique_service_coupon = sms_dict['usc']
         message = None
         sap_customer_id = sms_dict.get('sap_customer_id', None)
-        customer_product_data = common.CouponData.objects.select_related \
-                                        ('vin').filter(vin__sap_customer_id=sap_customer_id).order_by('vin', 'valid_days')
-        vin = customer_product_data[0].vin.vin
         try:
+            vin = self.get_vin(sap_customer_id)
             coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
             customer_phone_number = coupon_object.vin.customer_phone_number.phone_number
             coupon_object.status = 2
             coupon_object.closed_date = datetime.now()
             coupon_object.save()
-            all_previous_coupon = common.CouponData.objects.filter(vin__vin=vin, service_type__lt=coupon_object.service_type, status=1).update(status=3)
+            common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, service_type__lt=coupon_object.service_type).update(status=3)
             message = templates.get_template('SEND_SA_CLOSE_COUPON')
             customer_message = templates.get_template('SEND_CUSTOMER_CLOSE_COUPON').format(vin=vin, sa_name=sa_object.name, sa_phone_number=phone_number)
             phone_number = self.get_phone_number_format(phone_number)

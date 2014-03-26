@@ -7,11 +7,12 @@ from gladminds.models.common import RegisteredDealer, ServiceAdvisor,\
     ProductData, CouponData
 from gladminds import feed, exportfeed
 from datetime import datetime, timedelta
+from integration.base_integration import GladmindsResourceTestCase
 
 logger = logging.getLogger('gladminds')
 
 
-class FeedsResourceTest(TestCase):
+class FeedsResourceTest(GladmindsResourceTestCase):
 
     def setUp(self):
         TestCase.setUp(self)
