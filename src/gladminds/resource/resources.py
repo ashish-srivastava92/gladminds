@@ -37,15 +37,13 @@ class GladmindsResources(Resource):
 
     def dispatch_gladminds(self, request, **kwargs):
         sms_dict = {}
-        message = ''
-        phone_number = ''
         if request.POST.get('text'):
             message = request.POST.get('text')
             phone_number = request.POST.get('phoneNumber')
         elif request.GET.get('cli'):
-             message = request.GET.get('msg')
-             phone_number = request.GET.get('cli')
-             phone_number = '+{0}'.format(phone_number)
+            message = request.GET.get('msg')
+            phone_number = request.GET.get('cli')
+            phone_number = '+{0}'.format(phone_number)
         elif request.POST.get("advisorMobile"):
             phone_number = request.POST.get('advisorMobile')
             customer_id = request.POST.get('customerId')
