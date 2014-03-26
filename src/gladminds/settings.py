@@ -217,16 +217,20 @@ LOGGING = {
             'filename':'/var/log/gladminds/app/afterbuy.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
+        },'test_case_logs': {
+            'level': 'INFO',
+            'filename':'/var/log/gladminds/app/test_case.log',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
         }
     },
-           
+
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
-        },
-      'gladminds': {
+        },'gladminds': {
             'handlers': ['gladminds_logs'],
             'level': 'DEBUG',
             'propagate': True,
@@ -234,9 +238,12 @@ LOGGING = {
             'handlers': ['gladminds_logs'],
             'level': 'DEBUG',
             'propagate': False,
-        },
-        'afterbuy': {
+        },'afterbuy': {
             'handlers': ['afterbuy_logs'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },'test_case': {
+            'handlers': ['test_case_logs'],
             'level': 'DEBUG',
             'propagate': True,
         }
