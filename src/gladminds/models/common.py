@@ -174,7 +174,7 @@ class ProductData(models.Model):
 STATUS_CHOICES = ((1, 'Unused'), (2, 'Closed'), (3, 'Expired'),(4,'In Progress'))
 
 class CouponData(models.Model):
-    vin = models.ForeignKey(ProductData, null=False)
+    vin = models.ForeignKey(ProductData, null=False, editable=False)
     unique_service_coupon = models.CharField(max_length=215, unique=True, null=False)
     valid_days = models.IntegerField(max_length=10,null=False)
     valid_kms = models.IntegerField(max_length=10,null=False)
