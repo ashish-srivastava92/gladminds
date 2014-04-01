@@ -58,9 +58,6 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(200, response.status_code)
 
-    def test_feed_log(self):
-        pass
-
     def test_coupon_redamption_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
         xml_data = open(file_path, 'r').read()
@@ -77,11 +74,20 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(200, response.status_code)
 
+        self.assertEqual(CouponData.objects.count(), 2, "Two coupon created")
+
+        coupon_data = CouponData.objects.filter(unique_service_coupon='USC001')[0]
+        self.assertEquals(u"USC001", coupon_data.unique_service_coupon)
+        coupon_data.status = 2
+        coupon_data.closed_date = datetime.now()
+        coupon_data.actual_service_date = datetime.now()
+        coupon_data.save()
+
         today = datetime.now()
         start_date = today - timedelta(days=1)
         end_date = today
-        #redeem_obj = feed.CouponRedeemFeedToSAP()
-        #items, item_batch = redeem_obj.export_data(start_date=start_date, end_date=end_date)
+        redeem_obj = feed.CouponRedeemFeedToSAP()
+        feed_export_data = redeem_obj.export_data(start_date=start_date, end_date=end_date)
 
-        #coupon_redeem = exportfeed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL['username'], password = settings.SAP_CRM_DETAIL['password'], wsdl_url = settings.COUPON_WSDL_URL)
-        #coupon_redeem.export(items=items, item_batch=item_batch)
+        self.assertEqual(len(feed_export_data[0]), 1, "Not accurate length of feeds log")
+        self.assertEqual(feed_export_data[0][0]["GCP_UCN_NO"], u'USC001', "Not accurate UCN")

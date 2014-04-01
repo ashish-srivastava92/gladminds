@@ -3,9 +3,11 @@ from celery import shared_task
 from django.conf import settings
 from gladminds.audit import audit_log
 from gladminds.dao.smsclient import load_gateway, MessageSentFailed
-from gladminds import taskmanager, feed,export_file
+from gladminds import taskmanager, feed,export_file, exportfeed
 from datetime import datetime, timedelta
 from gladminds import mail
+import logging
+logger = logging.getLogger("gladminds")
 
 sms_client = load_gateway()
 
@@ -225,7 +227,13 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
     start_date = today-timedelta(days=1)
     end_date = today
     redeem_obj = feed.CouponRedeemFeedToSAP()
-    redeem_obj.export_data(start_date = start_date, end_date = end_date)
+    feed_export_data = redeem_obj.export_data(start_date = start_date, end_date = end_date)
+    if len(feed_export_data[0]) > 0:
+        coupon_redeem = exportfeed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
+                                                              'username'], password=settings.SAP_CRM_DETAIL['password'], wsdl_url=settings.COUPON_WSDL_URL)
+        coupon_redeem.export(items=feed_export_data[0], item_batch=feed_export_data[1], feed_export_data[2])
+    else:
+        logger.info("tasks.py: No Coupon closed during last day")
 
 '''
 Cron Job to send report email for data feed

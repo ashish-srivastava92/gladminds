@@ -17,6 +17,7 @@ def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER
     mail.sendmail(sender, receiver, msg.as_string())
     mail.quit()
 
+
 def feed_report(feed_data = None):
     from gladminds import mail
     try:

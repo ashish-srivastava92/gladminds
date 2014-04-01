@@ -17,6 +17,7 @@ from gladminds.soap_authentication import AuthenticationService
 import logging
 from gladminds import settings
 import json
+from gladminds import utils
 
 
 logger = logging.getLogger("gladminds")
@@ -130,7 +131,7 @@ class DealerService(ServiceBase):
                     'address' : dealer.ADDRESS,
                     'service_advisor_id' : dealer.SER_ADV_ID,
                     'name' : dealer.SER_ADV_NAME,
-                    'phone_number': '{0}{1}'.format(settings.MOBILE_NUM_FORMAT, dealer.SER_ADV_MOBILE),
+                    'phone_number': utils.mobile_format(dealer.SER_ADV_MOBILE),
                     'status': dealer.ACTIVE_FLAG
                 })
             response = save_to_db(feed_type = 'dealer', data_source = dealer_list)
@@ -179,7 +180,7 @@ class ProductPurchaseService(ServiceBase):
                 product_purchase_list.append({
                         'vin' : product.CHASSIS,
                         'sap_customer_id' : product.CUSTOMER_ID,
-                        'customer_phone_number' :'+91'+product.CUST_MOBILE,
+                        'customer_phone_number' : utils.mobile_format(product.CUST_MOBILE),
                         'customer_name' : product.CUSTOMER_NAME,
                         'city' : product.CITY,
                         'state' : product.STATE,

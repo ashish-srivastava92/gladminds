@@ -13,7 +13,7 @@
     "pk": 2,
     "fields": {
       "template_key":"SEND_CUSTOMER_SERVICE_DETAIL",
-      "template":"VIN: {vin} Coupon: {usc} Valid days: {valid_days} Valid kms: {valid_kms}. Please Provide the UCN# to the Service_Advisor at the time of vehicle Delivery Only.",
+      "template":"VIN: {vin} Coupon: {usc} Valid days: {valid_days} Valid kms: {valid_kms}. Please provide the UCN# to the service advisor at the time of vehicle delivery only.",
       "description":"Send customer service detail with product and valid coupon id"
     }
   },
