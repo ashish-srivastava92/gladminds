@@ -15,10 +15,10 @@
           </ns1:DealerModel>
           <ns1:DealerModel>
             <ns1:ACTIVE_FLAG>Y</ns1:ACTIVE_FLAG>
-            <ns1:TIMESTAMP>2006-08-01000000</ns1:TIMESTAMP>
+            <ns1:TIMESTAMP>2006-09-01000000</ns1:TIMESTAMP>
             <ns1:SER_ADV_MOBILE>44444</ns1:SER_ADV_MOBILE>
             <ns1:SER_ADV_ID>GMDEALER001SA11</ns1:SER_ADV_ID>
-            <ns1:ADDRESS>HSR LAYOUT</ns1:ADDRESS>
+            <ns1:ADDRESS>HBR LAYOUT</ns1:ADDRESS>
             <ns1:SER_ADV_NAME>TestUser11</ns1:SER_ADV_NAME>
             <ns1:KUNNR>GMDEALER0011</ns1:KUNNR>
           </ns1:DealerModel>

@@ -25,7 +25,7 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
         
         self.assertEqual(200, response.status_code)
-        self.assertEquals(1, RegisteredDealer.objects.count())
+        self.assertEquals(2, RegisteredDealer.objects.count())
         dealer_data = RegisteredDealer.objects.all()[0]
         self.assertEquals(u"GMDEALER001", dealer_data.dealer_id)
         service_advisors = ServiceAdvisor.objects.filter(dealer_id=dealer_data)
