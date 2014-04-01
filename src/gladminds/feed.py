@@ -307,10 +307,7 @@ class CouponRedeemFeedToSAP(BaseFeed):
                 "SER_AVL_DT": redeem.actual_service_date.date().strftime("%Y-%m-%d"),
             }
             items.append(item)
-
-        coupon_redeem = exportfeed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
-                                                          'username'], password=settings.SAP_CRM_DETAIL['password'], wsdl_url=settings.COUPON_WSDL_URL)
-        coupon_redeem.export(items=items, item_batch=item_batch)
+        return items, item_batch
 
 
 def get_feed_status(total_feeds, failed_feeds):
