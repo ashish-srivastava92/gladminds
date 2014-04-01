@@ -294,20 +294,25 @@ class CouponRedeemFeedToSAP(BaseFeed):
         results = common.CouponData.objects.filter(closed_date__range=(
             start_date, end_date), status=2).select_related('vin', 'customer_phone_number__phone_number')
         items = []
+        total_failed = 0
         item_batch = {
             'TIMESTAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
         for redeem in results:
-            item = {
-                "CHASSIS": redeem.vin.vin,
-                "GCP_KMS": redeem.actual_kms,
-                "GCP_KUNNR": redeem.vin.dealer_id.dealer_id,
-                "GCP_UCN_NO": redeem.unique_service_coupon,
-                "PRODUCT_TYPE": redeem.vin.product_type.product_type,
-                "SERVICE_TYPE": str(redeem.service_type),
-                "SER_AVL_DT": redeem.actual_service_date.date().strftime("%Y-%m-%d"),
-            }
-            items.append(item)
-        return items, item_batch
+            try:
+                item = {
+                    "CHASSIS": redeem.vin.vin,
+                    "GCP_KMS": redeem.actual_kms,
+                    "GCP_KUNNR": redeem.vin.dealer_id.dealer_id,
+                    "GCP_UCN_NO": redeem.unique_service_coupon,
+                    "PRODUCT_TYPE": redeem.vin.product_type.product_type,
+                    "SERVICE_TYPE": str(redeem.service_type),
+                    "SER_AVL_DT": redeem.actual_service_date.date().strftime("%Y-%m-%d"),
+                }
+                items.append(item)
+            except Exception as ex:
+                logger.error("error on data coupon data from db %s" % str(ex))
+                total_failed = total_failed + 1
+        return items, item_batch, total_failed
 
 
 def get_feed_status(total_feeds, failed_feeds):

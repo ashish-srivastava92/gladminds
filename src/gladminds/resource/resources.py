@@ -44,7 +44,8 @@ class GladmindsResources(Resource):
         elif request.GET.get('cli'):
             message = request.GET.get('msg')
             phone_number = request.GET.get('cli')
-            phone_number = '+{0}'.format(phone_number)
+            phone_number = utils.mobile_format(phone_number)
+            
         audit.audit_log(action='RECIEVED', sender=phone_number, reciever='+1 469-513-9856', message=message, status='success')
         logger.info('Recieved Message from phone number: {0} and message: {1}'.format(message, phone_number))
         try:
@@ -86,7 +87,7 @@ class GladmindsResources(Resource):
             customer.save()
         # Please update the template variable before updating the keyword-argument
         message = smsparser.render_sms_template(status='send', keyword=sms_dict['keyword'], customer_name=customer_name, customer_id=gladmind_customer_id)
-        phone_number = self.get_phone_number_format(phone_number)
+        phone_number = utils.get_phone_number_format(phone_number)
         logging.info("customer is registered with message %s" % message)
         send_registration_detail.delay(phone_number=phone_number, message=message)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
@@ -119,7 +120,7 @@ class GladmindsResources(Resource):
         except Exception as ex:
             message = smsparser.render_sms_template(status='invalid', keyword=sms_dict['keyword'], sap_customer_id=sap_customer_id)
         logging.info("Send Service detail %s" % message)
-        phone_number = self.get_phone_number_format(phone_number)
+        phone_number = utils.get_phone_number_format(phone_number)
         send_service_detail.delay(phone_number=phone_number, message=message)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
@@ -192,7 +193,7 @@ class GladmindsResources(Resource):
                 requested_coupon = common.CouponData.objects.get(vin__vin=vin, service_type=service_type)
                 dealer_message = templates.get_template('SEND_SA_EXPIRED_COUPON').format(next_service_type=valid_coupon.service_type, service_type=requested_coupon.service_type)
                 customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(service_coupon=requested_coupon.unique_service_coupon, service_type=requested_coupon.service_type, next_coupon=valid_coupon.unique_service_coupon, next_service_type=valid_coupon.service_type)
-            send_coupon_detail_customer.delay(phone_number=self.get_phone_number_format(customer_phone_number), message=customer_message)
+            send_coupon_detail_customer.delay(phone_number=utils.get_phone_number_format(customer_phone_number), message=customer_message)
             audit.audit_log(reciever=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
         except IndexError as ie:
             dealer_message = templates.get_template('SEND_INVALID_VIN_OR_FSC')
@@ -202,7 +203,7 @@ class GladmindsResources(Resource):
             dealer_message = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
             logging.info("validate message send to SA %s" % dealer_message)
-            phone_number = self.get_phone_number_format(phone_number)
+            phone_number = utils.get_phone_number_format(phone_number)
             send_service_detail.delay(phone_number=phone_number, message=dealer_message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=dealer_message)
             transaction.commit()
@@ -227,14 +228,14 @@ class GladmindsResources(Resource):
             common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, service_type__lt=coupon_object.service_type).update(status=3)
             message = templates.get_template('SEND_SA_CLOSE_COUPON')
             customer_message = templates.get_template('SEND_CUSTOMER_CLOSE_COUPON').format(vin=vin, sa_name=sa_object.name, sa_phone_number=phone_number)
-            phone_number = self.get_phone_number_format(phone_number)
+            phone_number = utils.get_phone_number_format(phone_number)
             send_close_sms_customer.delay(phone_number=customer_phone_number, message=customer_message)
             audit.audit_log(reciever=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
         except Exception as ex:
             message = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
             logging.info("Close coupon with message %s" % message)
-            phone_number = self.get_phone_number_format(phone_number)
+            phone_number = utils.get_phone_number_format(phone_number)
             send_coupon.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             transaction.commit()

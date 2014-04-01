@@ -231,9 +231,9 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
     if len(feed_export_data[0]) > 0:
         coupon_redeem = exportfeed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
                                                               'username'], password=settings.SAP_CRM_DETAIL['password'], wsdl_url=settings.COUPON_WSDL_URL)
-        coupon_redeem.export(items=feed_export_data[0], item_batch=feed_export_data[1])
+        coupon_redeem.export(items=feed_export_data[0], item_batch=feed_export_data[1], feed_export_data[2])
     else:
-        logger.info("tasks.py: No Feed closed during last day")
+        logger.info("tasks.py: No Coupon closed during last day")
 
 '''
 Cron Job to send report email for data feed
