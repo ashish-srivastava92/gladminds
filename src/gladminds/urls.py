@@ -15,7 +15,7 @@ api_v1.register(r.UserResources())
 
 urlpatterns = patterns('',
   url(r'^dealers/$', 'django.contrib.auth.views.login', {'template_name': 'dealer/login.html'}),
-  url(r'^dealers/logout$', 'django.contrib.auth.views.logout', {'template_name': 'dealer/logout.html'}),
+  url(r'^dealers/logout$', 'django.contrib.auth.views.logout', {'template_name': 'dealer/login.html'}),
 )
 
 urlpatterns += patterns('gladminds',
@@ -48,6 +48,7 @@ urlpatterns += patterns('gladminds',
 
     # Uncomment the next line to enable the admin:
     url(r'^sms/','superadmin.views.send_sms', name='send_sms'),
+    url(r'^dealers/getUrl', 'views.redirect', name='redirect'),
     url(r'^dealers/([a-zA-Z0-9]+)', 'views.action', name='actions'),
     url(r'^', include(admin.site.urls)),
 )

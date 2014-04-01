@@ -1,47 +1,56 @@
 {% extends "base.html" %}
 
 {% block body %}
-<form role="form" action="/v1/messages" method="post">
-  <div class="row">
-    <div class="col-md-3 form-group">
-      <label for="advisorMobile">Service Advisor Mobile Number</label>
-      <input type="input" class="form-control" name="advisorMobile" id="advisorMobile" placeholder="10 digit mobile number" required maxlength="10">
-    </div>
-    <div class="col-md-3 form-group">
-      <label for="customerId">Customer Id</label>
-      <input type="text" class="form-control" name="customerId" id="customerId" placeholder="Customer Id" required>
-    </div>
+<div class="row">
+  <div class="col-md-12 col-md-offset-8">
+    <a href="/dealers/logout">Logout</a>
   </div>
-  <div class="row advisor-action-item">
-    <div class="col-md-3 form-group">
-      <input type="radio" name="action" value="validate" checked="checked" class="advisor-action checked" required>
-      <label>Validate USC:CHECK</label>
-    </div>
-    <div class="col-md-3 form-group">
-      <label for="odoRead">Actual Kilometers</label>
-      <input type="text" class="form-control" name="odoRead" id="odoRead" placeholder="Odometer Read" required>
-    </div>
-    <div class="col-md-3 form-group">
-      <label for="serviceType">Service Type</label>
-      <input type="text" class="form-control" name="serviceType" id="serviceType" placeholder="Service Type" required>
-    </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <form role="form" action="/v1/messages" method="post">
+      <div class="row">
+        <div class="col-md-3 form-group">
+          <label for="advisorMobile">Service Advisor Mobile Number</label>
+          <input type="input" class="form-control" name="advisorMobile" id="advisorMobile" placeholder="10 digit mobile number" required maxlength="10">
+        </div>
+        <div class="col-md-3 form-group">
+          <label for="customerId">Customer Id</label>
+          <input type="text" class="form-control" name="customerId" id="customerId" placeholder="Customer Id" required>
+        </div>
+      </div>
+      <div class="row advisor-action-item">
+        <div class="col-md-3 form-group">
+          <input type="radio" name="action" value="validate" checked="checked" class="advisor-action checked" required>
+          <label>Validate USC:CHECK</label>
+        </div>
+        <div class="col-md-3 form-group">
+          <label for="odoRead">Actual Kilometers</label>
+          <input type="text" class="form-control" name="odoRead" id="odoRead" placeholder="Odometer Read" required>
+        </div>
+        <div class="col-md-3 form-group">
+          <label for="serviceType">Service Type</label>
+          <input type="text" class="form-control" name="serviceType" id="serviceType" placeholder="Service Type" required>
+        </div>
+      </div>
+      <div class="row advisor-action-item">
+        <div class="col-md-3 form-group">
+          <input type="radio" name="action" value="terminate" class="advisor-action">
+          <label>Close USC:CLOSE</label>
+        </div>
+        <div class="col-md-3 form-group">
+          <label for="ucn">UCN</label>
+          <input type="text" class="form-control" name="ucn" disabled="true" id="ucn" placeholder="UCN">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4 form-group">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </div>
+    </form>
   </div>
-  <div class="row advisor-action-item">
-    <div class="col-md-3 form-group">
-      <input type="radio" name="action" value="terminate" class="advisor-action">
-      <label>Close USC:CLOSE</label>
-    </div>
-    <div class="col-md-3 form-group">
-      <label for="ucn">UCN</label>
-      <input type="text" class="form-control" name="ucn" disabled="true" id="ucn" placeholder="UCN">
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-md-4 form-group">
-      <button type="submit" class="btn btn-primary">Submit</button>
-    </div>
-  </div>
-</form>
+</div>
 {% endblock %}
 
 {% block dependency %}

@@ -176,7 +176,7 @@ INSTALLED_APPS = (
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
 
-LOGIN_REDIRECT_URL = '/dealers/123'
+LOGIN_REDIRECT_URL = '/dealers/getUrl'
 
 
 # A sample logging configuration. The only tangible logging

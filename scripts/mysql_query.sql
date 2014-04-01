@@ -3,6 +3,7 @@ use gladmindsdb;
 
 
 mysqldump -u gladminds -p gladmindsdb -r gladmindsdb.sql
+mysqldump -u gladminds -pgladminds123 gladmindsdb > gladmindsdb_dump.sql
 
 mysql -u gladminds -pgladminds123;
 
