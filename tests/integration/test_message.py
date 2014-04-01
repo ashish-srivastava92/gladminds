@@ -4,6 +4,8 @@ from base_integration import GladmindsResourceTestCase
 from gladminds.resource.resources import GladmindsResources
 from gladminds.models import common
 from django.contrib.auth.models import User
+import logging
+logger = logging.getLogger('gladminds')
 
 
 class CustomerRegistrationTest(GladmindsResourceTestCase):
@@ -83,6 +85,10 @@ class CustomerServiceTest(GladmindsResourceTestCase):
 class CouponCheckAndClosure(GladmindsResourceTestCase):
 
     def setUp(self):
+        '''
+            Test Case Checking coupon validation can be done only from 
+            registered dealer's number
+        '''
         super(CouponCheckAndClosure, self).setUp()
         user = User.objects.create_user('gladminds', 'gladminds@gladminds.co', 'gladminds')
         user.save()
@@ -90,7 +96,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         product_type_obj = self.get_product_type_obj(brand_id=brand_obj, product_name='DISCO120', product_type='BIKE')
         dealer_obj = self.get_delear_obj(dealer_id='DEALER001')
         customer_obj = self.get_customer_obj(phone_number='9999999')
-        product_obj = self.get_product_obj(vin="VINXXX001", producttype_data=product_type_obj, dealer_data = dealer_obj, customer_phone_number = customer_obj, sap_customer_id='')
+        product_obj = self.get_product_obj(vin="VINXXX001", producttype_data=product_type_obj, dealer_data = dealer_obj, customer_phone_number = customer_obj, sap_customer_id='SAP001')
         self.get_coupon_obj(unique_service_coupon='USC001', product_data=product_obj, valid_days=30, valid_kms=500, service_type=1)
 
         self.get_service_advisor_obj(dealer_data=dealer_obj, service_advisor_id='DEALER001SA001', name="SA001", phone_number='9999999', status= 'Y')
@@ -107,18 +113,16 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
             'text': self.VALID_COUPON, 'phoneNumber': self.PHONE_NUMBER}
         self.CLOSE_COUPON = {
             'text': 'CLOSE TESTVECHILEID00002 COUPON005', 'phoneNumber': self.PHONE_NUMBER}
-    '''
-    Test Case Checking coupon validation can be done only from 
-    registered dealer's number
-    '''
 
-    def test_check_coupon(self):
-        #self.create_product_data()
+    def test_simple_inprogress_from_unused(self):
         phone_number = "9999999"
-        print common.ServiceAdvisor.objects.get(phone_number=phone_number)
+        self.assertEqual(common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
         obj = GladmindsResources()
         sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'SAP001'}
         obj.validate_coupon(sms_dict, phone_number)
+
+        in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC001')
+        self.assertEqual(in_progess_coupon.status, 4, "in_progess_coupon status should be 4")
 
     def test_check_coupon_sa(self):
         resp = self.api_client.post(
