@@ -23,7 +23,7 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
         xml_data = open(file_path, 'r').read()
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
-
+        
         self.assertEqual(200, response.status_code)
         self.assertEquals(1, RegisteredDealer.objects.count())
         dealer_data = RegisteredDealer.objects.all()[0]
