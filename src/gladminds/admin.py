@@ -289,11 +289,30 @@ class FeedLogAdmin(ModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
+
 ##############################################################
+##################Custom Model Defined########################
+
+class DispatchedProducts(ProductData):
+    class Meta:
+        proxy = True
+        
+class ListDispatchedProducts(ModelAdmin):
+    search_fields = ('vin', 'customer_phone_number__phone_number')
+    list_filter = ('vin', )
+    list_display = ('product_type', 'vin', 'engine', 'UCN', 'dealer_id', "invoice_date")
+    exclude = ('order',)
+
+    def UCN(self, obj):
+        print obj
+        ucn_list = []
+        for coupon in CouponData.objects.filter(vin=obj.id):
+            ucn_list.append(coupon.unique_service_coupon)
+        return ' | '.join([str(ucn) for ucn in ucn_list])
 
 
 admin.site.register(BrandData,BrandAdmin)
-admin.site.register(ProductTypeData,ProductTypeDataAdmin)
+admin.site.register(DispatchedProducts, ListDispatchedProducts)
 admin.site.register(ServiceAdvisor,ServiceAdvisorAdmin)
 admin.site.register(RegisteredDealer,DealerAdmin)
 admin.site.register(AuditLog,AuditLogAdmin)
