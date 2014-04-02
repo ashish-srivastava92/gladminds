@@ -47,7 +47,7 @@ class GladmindsResourceTestCase(ResourceTestCase):
 
     def get_product_obj(self, **kwargs):
         product_data = common.ProductData(
-                    vin=kwargs['vin'], product_type=kwargs['producttype_data'], dealer_id=kwargs['dealer_data'], customer_phone_number=kwargs['customer_phone_number'])
+                    vin=kwargs['vin'], product_type=kwargs['producttype_data'], dealer_id=kwargs['dealer_data'], customer_phone_number=kwargs['customer_phone_number'], sap_customer_id=kwargs['sap_customer_id'])
         product_data.save()
         return product_data
 
