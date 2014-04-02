@@ -115,7 +115,7 @@ class BaseFeed(object):
         logger.info('New Dealer Registration with id - ' + username)
         if username:
             user = User(username=username, first_name=first_name, last_name=last_name, email=email)
-            password = username + str(randint(1000, 9999))
+            password = username + '@123'
             user.set_password(password)
             user.save()
             logger.info('Dealer {0} registered successfully'.format(username))
