@@ -60,7 +60,7 @@ class GladmindsResources(Resource):
                 message = 'CLOSE {0} {1}'.format(customer_id, ucn)
                 logger.info('Message to send: ' + message)
         audit.audit_log(action='RECIEVED', sender=phone_number, reciever='+1 469-513-9856', message=message, status='success')
-        logger.info('Recieved Message from phone number: {0} and message: {1}'.format(message, phone_number))
+        logger.info('Recieved Message from phone number: {0} and message: {1}'.format(phone_number, message))
         try:
             sms_dict = smsparser.sms_parser(message=message)
         except smsparser.InvalidKeyWord as ink:
