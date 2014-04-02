@@ -58,46 +58,6 @@ class BrandAdmin(ModelAdmin):
         return len(obj.producttypedata_set.all())
 
 
-class ProductTypeDataAdmin(ModelAdmin):
-    readonly_fields = ('order',)
-    search_fields = ('product_type', 'product_name', 'dealer_id', 'engine')
-    list_filter = ('product_type',)
-    list_display = ('vin', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
-
-#     def brand(self, obj):
-#         return u'<a href="/gladminds/branddata/%s/">%s</a>' %(obj.brand_id.pk,obj.brand_id)
-#     brand.allow_tags=True
-
-    def get_product_data_obj(self, product_type_id):
-        return ProductData.objects.filter(product_type=product_type_id)
-
-    def vin(self, obj):
-        product_data_obj = self.get_product_data_obj(obj)
-        return ' | '.join(str(vin) for vin in product_data_obj) 
-    vin.allow_tags = True
-
-    def UCN(self, obj):
-        product_data_obj = self.get_product_data_obj(obj)
-        ucn_list = []
-        for ele in  product_data_obj:
-            for coupon in CouponData.objects.filter(vin=ele.id):
-                ucn_list.append(coupon.unique_service_coupon)
-        return ' | '.join([str(ucn) for ucn in ucn_list])
-    UCN.allow_tags = True
-
-    def engine(self, obj):
-        product_data_obj = self.get_product_data_obj(obj)
-        return " | ".join([ str(obj.engine) for obj in product_data_obj])
-
-    def dealer_id(self, obj):
-        product_data_obj = self.get_product_data_obj(obj)
-        return " | ".join([ str(obj.dealer_id) for obj in product_data_obj])
-        #return u'<a href="/gladminds/registereddealer/%s/">%s</a>' %(product_data_obj.dealer_id.pk, product_data_obj.dealer_id)
-
-    def invoice_date(self, obj):
-        product_data_obj = self.get_product_data_obj(obj)
-        return " | ".join([ str(obj.invoice_date) for obj in product_data_obj])
-
 #######################################################################
  
 ##########################DEALER AND SA ADMIN###########################
@@ -286,11 +246,32 @@ class FeedLogAdmin(ModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
-##############################################################
 
+
+##############################################################
+##################Custom Model Defined########################
+
+class DispatchedProducts(ProductData):
+    class Meta:
+        proxy = True
+        
+class ListDispatchedProducts(ModelAdmin):
+    search_fields = ('vin', 'customer_phone_number__phone_number')
+    list_filter = ('vin', )
+    list_display = ('product_type', 'vin', 'engine', 'UCN', 'dealer_id', "invoice_date")
+    exclude = ('order',)
+
+    def UCN(self, obj):
+        print obj
+        ucn_list = []
+        for coupon in CouponData.objects.filter(vin=obj.id):
+            ucn_list.append(coupon.unique_service_coupon)
+        return ' | '.join([str(ucn) for ucn in ucn_list])
+  
+  
 
 admin.site.register(BrandData,BrandAdmin)
-admin.site.register(ProductTypeData,ProductTypeDataAdmin)
+admin.site.register(DispatchedProducts, ListDispatchedProducts)
 admin.site.register(ServiceAdvisor,ServiceAdvisorAdmin)
 admin.site.register(RegisteredDealer,DealerAdmin)
 admin.site.register(AuditLog,AuditLogAdmin)
