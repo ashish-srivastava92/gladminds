@@ -262,7 +262,7 @@ class DispatchedProducts(ProductData):
         
 class ListDispatchedProducts(ModelAdmin):
     search_fields = ('vin', 'customer_phone_number__phone_number')
-    list_filter = ('vin', )
+    list_filter = ('invoice_date', )
     list_display = ('product_type', 'vin', 'engine', 'UCN', 'dealer_id', "invoice_date")
     exclude = ('order',)
 
