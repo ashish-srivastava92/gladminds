@@ -99,7 +99,8 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         product_obj = self.get_product_obj(vin="VINXXX001", producttype_data=product_type_obj, dealer_data = dealer_obj, customer_phone_number = customer_obj, sap_customer_id='SAP001')
         self.get_coupon_obj(unique_service_coupon='USC001', product_data=product_obj, valid_days=30, valid_kms=500, service_type=1)
 
-        self.get_service_advisor_obj(dealer_data=dealer_obj, service_advisor_id='DEALER001SA001', name="SA001", phone_number='9999999', status= 'Y')
+        sa_obj = self.get_service_advisor_obj(service_advisor_id='DEALER001SA001', name="SA001", phone_number='9999999')
+        self.get_dealer_service_advisor_obj(dealer_data=dealer_obj, service_advisor_id=sa_obj, status='Y')
 
         self.MSG_CHECK_COUPON = "CHECK TESTVECHILEID00002 50 2"
         self.PHONE_NUMBER = "+SA0000000000"
@@ -123,6 +124,13 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
 
         in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC001')
         self.assertEqual(in_progess_coupon.status, 4, "in_progess_coupon status should be 4")
+
+    def test_validate_dealer(self):
+        phone_number = "9999999"
+        self.assertEqual(common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
+        obj = GladmindsResources()
+        #Update this test cases
+        self.assertEqual(obj.validate_dealer(phone_number).phone_number, 4, "validate dealer")
 
     def test_check_coupon_sa(self):
         resp = self.api_client.post(

@@ -4,8 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
 from gladminds.models.common import RegisteredDealer, ServiceAdvisor,\
-    ProductData, CouponData
-from gladminds import feed, exportfeed
+    ProductData, CouponData, ServiceAdvisorDealerRelationship
 from datetime import datetime, timedelta
 from integration.base_integration import GladmindsResourceTestCase
 
@@ -23,15 +22,62 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
         xml_data = open(file_path, 'r').read()
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
-        
+
         self.assertEqual(200, response.status_code)
-        self.assertEquals(2, RegisteredDealer.objects.count())
+        self.assertEquals(3, RegisteredDealer.objects.count())
         dealer_data = RegisteredDealer.objects.all()[0]
         self.assertEquals(u"GMDEALER001", dealer_data.dealer_id)
-        service_advisors = ServiceAdvisor.objects.filter(dealer_id=dealer_data)
+        service_advisors = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
         self.assertEquals(1, len(service_advisors))
         self.assertEquals(u"GMDEALER001SA01", service_advisors[0].service_advisor_id)
-        self.assertEquals(service_advisors[0].status, "Y", "Service Advisor status should be active")
+
+    def test_service_advisor_dealer_relationship(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+        sa_dealer_rel_data = ServiceAdvisorDealerRelationship.objects.all()
+
+        self.assertEquals(3, len(sa_dealer_rel_data))
+
+        self.assertEquals(3, ServiceAdvisor.objects.count())
+
+        sa_obj_1 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
+
+        dealer_obj_1 = RegisteredDealer.objects.filter(dealer_id='GMDEALER001')
+        sa_dealer_rel_obj_1 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_1[0], dealer_id=dealer_obj_1[0])
+        self.assertEquals('Y', sa_dealer_rel_obj_1.status)
+
+        sa_obj_2 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA02')
+
+        dealer_obj_2 = RegisteredDealer.objects.filter(dealer_id='GMDEALER002')
+        sa_dealer_rel_obj_2 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_2[0], dealer_id=dealer_obj_2[0])
+        self.assertEquals('Y', sa_dealer_rel_obj_2.status)
+
+        '''
+            Checking out with new feed to change the status of service advisor
+        '''
+
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed_2.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+
+        sa_obj_1 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
+
+        dealer_obj_1 = RegisteredDealer.objects.filter(dealer_id='GMDEALER001')
+        sa_dealer_rel_obj_1 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_1[0], dealer_id=dealer_obj_1[0])
+        self.assertEquals('N', sa_dealer_rel_obj_1.status)
+
+        sa_obj_2 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA02')
+
+        dealer_obj_2 = RegisteredDealer.objects.filter(dealer_id='GMDEALER002')
+        sa_dealer_rel_obj_2 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_2[0], dealer_id=dealer_obj_2[0])
+        self.assertEquals('N', sa_dealer_rel_obj_2.status)
+
+        dealer_obj_3 = RegisteredDealer.objects.filter(dealer_id='GMDEALER003')
+        sa_dealer_rel_obj_2 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_2[0], dealer_id=dealer_obj_3[0])
+        self.assertEquals('Y', sa_dealer_rel_obj_2.status)
 
     def test_product_dispatch(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
@@ -57,9 +103,6 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         xml_data = open(file_path, 'r').read()
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(200, response.status_code)
-
-    def test_feed_log(self):
-        pass
 
     def test_coupon_redamption_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')

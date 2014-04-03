@@ -7,6 +7,7 @@ from datetime import datetime
 BrandData contains brand related information
 '''
 
+
 class UploadProductCSV(models.Model):
     file_location=settings.PROJECT_DIR+'/data/'
     upload_brand_feed= models.FileField(upload_to=file_location, blank=True)
@@ -69,6 +70,7 @@ class ProductTypeData(models.Model):
 
 ######################DEALER-SA MODELS#############################    
 
+
 class RegisteredDealer(models.Model):
     dealer_id = models.CharField(max_length=25, blank=False, null=False, unique=True, help_text="Dealer Code must be unique")
     address = models.TextField(blank=True, null=True)
@@ -82,20 +84,36 @@ class RegisteredDealer(models.Model):
 
 
 class ServiceAdvisor(models.Model):
-    dealer_id = models.ForeignKey(RegisteredDealer, null=False)
-    service_advisor_id = models.CharField(max_length=15, blank=False,unique=True, null=False)
+    service_advisor_id = models.CharField(max_length=15, blank=False, unique=True, null=False)
     name = models.CharField(max_length=25, blank=False, null=False)
     phone_number = models.CharField(max_length=15, blank=False, null=False, unique=True)
     order = models.PositiveIntegerField(default=0)
-    status = models.CharField(max_length=10, blank=True, null=True)
+
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Service Advisor Data"
-        
+
     def __unicode__(self):
         return self.phone_number
-        
-##################################################################  
+
+##################################################################
+#############Service Advisor and Registered Relationship MODEL####
+
+
+class ServiceAdvisorDealerRelationship(models.Model):
+    dealer_id = models.ForeignKey(RegisteredDealer, null=False)
+    service_advisor_id = models.ForeignKey(ServiceAdvisor, null=False)
+    status = models.CharField(max_length=10, blank=False, null=False)
+    id = models.AutoField(primary_key=True)
+
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "Service Advisor And Dealer Relationship"
+
+    def __unicode__(self):
+        return self.id
+
+##################################################################
 
 #############GLADMINDUSER & CUSTOMERDATA MODEL####################
 

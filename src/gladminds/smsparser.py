@@ -16,7 +16,9 @@ class InvalidFormat(SmsException): {}
 
 def sms_parser(*args, **kwargs):
     message = kwargs['message']
+
     parse_message = parse(templates.RCV_MESSAGE_FORMAT, message)
+
     keyword = None
     try:
         keyword = parse_message['key']
@@ -32,7 +34,6 @@ def sms_parser(*args, **kwargs):
         logging.info("valid message format")
         if not key_args:
             raise InvalidFormat(message = 'invalid message format', template = keyword+' '+template_mapper[lower_keyword]['receive'])
-
         #Added the Message keyword and handler in return dictionary
         key_args.named['keyword'] = lower_keyword
         key_args.named['handler'] = template_mapper[lower_keyword]['handler']

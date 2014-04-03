@@ -138,8 +138,6 @@ class GladmindsResources(Resource):
         return True
 
     def get_customer_phone_number_from_vin(self, vin):
-        print common.ProductData.objects.filter(vin=vin).select_related('customer_phone_number__phone_number')
-        logger.info(common.ProductData.objects.filter(vin=vin).select_related('customer_phone_number__phone_number'))
         product_obj = common.ProductData.objects.filter(vin=vin).select_related('customer_phone_number__phone_number')
         return product_obj[0].customer_phone_number.phone_number
 
@@ -256,13 +254,16 @@ class GladmindsResources(Resource):
 
     def validate_dealer(self, phone_number):
         try:
-            service_advisor_object = common.ServiceAdvisor.objects.get(phone_number=phone_number)
+            service_advisor_obj = common.ServiceAdvisor.objects.get(phone_number=phone_number)
+            all_sa_dealer_obj = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = service_advisor_obj, status = u'Y')
+            if len(all_sa_dealer_obj) > 0:
+                raise
         except:
             message = 'You are not an authorised user to avail this service'
             send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpUnauthorized("Not an authorised user"))
-        return service_advisor_object
+        return service_advisor_obj
 
     def get_brand_data(self, sms_dict, phone_number):
         brand_id = sms_dict['brand_id']
