@@ -5,7 +5,6 @@
 .pydevproject
 .pydevproject.bak
 .installed.cfg
-src/gladminds/dev_settings.py
 .coverage
 bin
 out
