@@ -256,7 +256,7 @@ class GladmindsResources(Resource):
         try:
             service_advisor_obj = common.ServiceAdvisor.objects.get(phone_number=phone_number)
             all_sa_dealer_obj = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = service_advisor_obj, status = u'Y')
-            if len(all_sa_dealer_obj) > 0:
+            if len(all_sa_dealer_obj) == 0:
                 raise
         except:
             message = 'You are not an authorised user to avail this service'

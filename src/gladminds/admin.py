@@ -86,16 +86,17 @@ class DealerForm(ModelForm):
                                         attrs={'class': 'input-small'}),
             'address': AutosizedTextarea,
         }    
- 
+
 class DealerAdmin(ModelAdmin):
     form = DealerForm
     search_fields = ('dealer_id',)
     list_filter = ('dealer_id',)
-    list_display = ('dealer_id','address','serviceadvisor')
-    inlines = (SAInline,)
-     
-    def serviceadvisor(self, obj):
-        return len(obj.serviceadvisor_set.all())
+    list_display = ('dealer_id', 'address')
+#    list_display = ('dealer_id', 'address', 'service_advisor_id')
+#     inlines = (SAInline,)
+# 
+#     def serviceadvisor(self, obj):
+#         return len(obj.serviceadvisor_set.all())
 
 
 class ServiceAdvisorAdmin(ModelAdmin):
@@ -109,7 +110,7 @@ class ServiceAdvisorAdmin(ModelAdmin):
 
 
 class ServiceAdvisorDealerAdmin(ModelAdmin):
-    search_fields = ('service_advisor_id','phone_number','name','dealer_id__dealer_id')
+    search_fields = ('service_advisor_id__service_advisor_id', 'phone_number','name', 'dealer_id__dealer_id')
     list_display=('dealer_id','name','service_advisor_ids','phone_number','status') 
 
     def dealer_id(self,obj):
@@ -303,7 +304,7 @@ admin.site.register(BrandData,BrandAdmin)
 admin.site.register(DispatchedProducts, ListDispatchedProducts)
 admin.site.register(ServiceAdvisor,ServiceAdvisorAdmin)
 admin.site.register(ServiceAdvisorDealerRelationship, ServiceAdvisorDealerAdmin)
-admin.site.register(RegisteredDealer,DealerAdmin)
+admin.site.register(RegisteredDealer, DealerAdmin)
 admin.site.register(AuditLog,AuditLogAdmin)
 admin.site.register(DataFeedLog, FeedLogAdmin)
 admin.site.register(GladMindUsers,GladMindUserAdmin)
