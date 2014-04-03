@@ -151,19 +151,42 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 dealer_data.save()
 
             try:
-                service_advisor = common.ServiceAdvisor(dealer_id=dealer_data, service_advisor_id=dealer[
-                                                        'service_advisor_id'], name=dealer['name'], phone_number=dealer['phone_number'], status=dealer['status'])
-                service_advisor.save()
+                service_advisor = common.ServiceAdvisor.objects.filter(service_advisor_id=dealer['service_advisor_id'])
+                if len(service_advisor) > 0:
+                    service_advisor = service_advisor[0]
+                else:
+                    service_advisor = common.ServiceAdvisor(service_advisor_id=dealer['service_advisor_id'], 
+                                                        name=dealer['name'], phone_number=dealer['phone_number'])
+                    service_advisor.save()
             except Exception as ex:
                 total_failed += 1
-                logger.info(
+                logger.error(
                     "[Exception: DealerAndServiceAdvisorFeed_sa]: {0}".format(ex))
                 continue
+            try:
+                service_advisor_dealer = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=service_advisor, dealer_id=dealer_data)
+                self.update_other_dealer_sa_relationship(service_advisor, dealer['status'])
+                if len(service_advisor_dealer) == 0:
+                    sa_dealer_rel = common.ServiceAdvisorDealerRelationship(dealer_id=dealer_data, service_advisor_id=service_advisor, status=dealer['status'])
+                    sa_dealer_rel.save()
+                else:
+                    service_advisor_dealer[0].status=unicode(dealer['status'])
+                    service_advisor_dealer[0].save()
+            except Exception as ex:
+                total_failed += 1
+                logger.error(
+                    "[Exception: Service Advisor and dealer relation is not created]: {0}".format(ex))
+                continue
+
         feed_log(feed_type='Dealer Feed', total_data_count=len(self.data_source),
                  failed_data_count=total_failed, success_data_count=len(
                      self.data_source) - total_failed,
                  action='Recieved', status=True)
         return get_feed_status(len(self.data_source), total_failed)
+
+    def update_other_dealer_sa_relationship(self, service_advisor, status):
+        if status == 'Y':
+            common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=service_advisor).update(status='N')
 
 
 class ProductDispatchFeed(BaseFeed):

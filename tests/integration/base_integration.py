@@ -68,10 +68,16 @@ class GladmindsResourceTestCase(ResourceTestCase):
         return brand_obj
 
     def get_service_advisor_obj(self, **kwargs):
-        service_advisor_obj = common.ServiceAdvisor(dealer_id=kwargs['dealer_data'], service_advisor_id=kwargs[
-                                    'service_advisor_id'], name=kwargs['name'], phone_number=kwargs['phone_number'], status=kwargs['status'])
+        service_advisor_obj = common.ServiceAdvisor(service_advisor_id=kwargs[
+                                    'service_advisor_id'], name=kwargs['name'], phone_number=kwargs['phone_number'])
         service_advisor_obj.save()
         return service_advisor_obj
+
+    def get_dealer_service_advisor_obj(self, **kwargs):
+        dealer_service_advisor_obj = common.ServiceAdvisorDealerRelationship(dealer_id=kwargs['dealer_data'], service_advisor_id=kwargs[
+                                    'service_advisor_id'], status=kwargs['status'])
+        dealer_service_advisor_obj.save()
+        return dealer_service_advisor_obj
 
     def get_customer_obj(self, **kwargs):
         customer_obj = common.GladMindUsers(phone_number=kwargs['phone_number'])
