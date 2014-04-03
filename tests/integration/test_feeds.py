@@ -22,9 +22,9 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
         xml_data = open(file_path, 'r').read()
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
-        
+
         self.assertEqual(200, response.status_code)
-        self.assertEquals(2, RegisteredDealer.objects.count())
+        self.assertEquals(3, RegisteredDealer.objects.count())
         dealer_data = RegisteredDealer.objects.all()[0]
         self.assertEquals(u"GMDEALER001", dealer_data.dealer_id)
         service_advisors = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
@@ -38,9 +38,9 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         self.assertEqual(200, response.status_code)
         sa_dealer_rel_data = ServiceAdvisorDealerRelationship.objects.all()
 
-        self.assertEquals(2, len(sa_dealer_rel_data))
+        self.assertEquals(3, len(sa_dealer_rel_data))
 
-        self.assertEquals(2, ServiceAdvisor.objects.count())
+        self.assertEquals(3, ServiceAdvisor.objects.count())
 
         sa_obj_1 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
 
