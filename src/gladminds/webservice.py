@@ -97,7 +97,8 @@ class ProductPurchaseModel(ComplexModel):
 class ProductPurchaseModelList(ComplexModel):
     __namespace__ = tns
     ProductPurchaseData = Array(ProductPurchaseModel)
-    
+
+
 class BrandService(ServiceBase):
     __namespace__ = tns
     @srpc(BrandModelList, AuthenticationModel,  _returns=Unicode)

@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save
+from django.contrib.auth.models import User
+from random import randint
 import logging
 import os
 import time
@@ -108,6 +110,18 @@ class BaseFeed(object):
 
     def import_data(self):
         pass
+    
+    def registerNewDealer(self, username=None, first_name='', last_name='', email=''):
+        logger.info('New Dealer Registration with id - ' + username)
+        if username:
+            user = User(username=username, first_name=first_name, last_name=last_name, email=email)
+            password = username + '@123'
+            user.set_password(password)
+            user.save()
+            logger.info('Dealer {0} registered successfully'.format(username))
+        else:
+            logger.info('Dealer id is not provided.')
+            raise Exception('Dealer id is not provided.')
 
 
 class BrandProductTypeFeed(BaseFeed):
@@ -149,21 +163,45 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 dealer_data = common.RegisteredDealer(
                     dealer_id=dealer['dealer_id'], address=dealer['address'])
                 dealer_data.save()
+                self.registerNewDealer(username = dealer['dealer_id'])
 
             try:
-                service_advisor = common.ServiceAdvisor(dealer_id=dealer_data, service_advisor_id=dealer[
-                                                        'service_advisor_id'], name=dealer['name'], phone_number=dealer['phone_number'], status=dealer['status'])
-                service_advisor.save()
+                service_advisor = common.ServiceAdvisor.objects.filter(service_advisor_id=dealer['service_advisor_id'])
+                if len(service_advisor) > 0:
+                    service_advisor = service_advisor[0]
+                else:
+                    service_advisor = common.ServiceAdvisor(service_advisor_id=dealer['service_advisor_id'], 
+                                                        name=dealer['name'], phone_number=dealer['phone_number'])
+                    service_advisor.save()
             except Exception as ex:
                 total_failed += 1
-                logger.info(
+                logger.error(
                     "[Exception: DealerAndServiceAdvisorFeed_sa]: {0}".format(ex))
                 continue
+            try:
+                service_advisor_dealer = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=service_advisor, dealer_id=dealer_data)
+                self.update_other_dealer_sa_relationship(service_advisor, dealer['status'])
+                if len(service_advisor_dealer) == 0:
+                    sa_dealer_rel = common.ServiceAdvisorDealerRelationship(dealer_id=dealer_data, service_advisor_id=service_advisor, status=dealer['status'])
+                    sa_dealer_rel.save()
+                else:
+                    service_advisor_dealer[0].status=unicode(dealer['status'])
+                    service_advisor_dealer[0].save()
+            except Exception as ex:
+                total_failed += 1
+                logger.error(
+                    "[Exception: Service Advisor and dealer relation is not created]: {0}".format(ex))
+                continue
+
         feed_log(feed_type='Dealer Feed', total_data_count=len(self.data_source),
                  failed_data_count=total_failed, success_data_count=len(
                      self.data_source) - total_failed,
                  action='Recieved', status=True)
         return get_feed_status(len(self.data_source), total_failed)
+
+    def update_other_dealer_sa_relationship(self, service_advisor, status):
+        if status == 'Y':
+            common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=service_advisor).update(status='N')
 
 
 class ProductDispatchFeed(BaseFeed):
@@ -184,6 +222,7 @@ class ProductDispatchFeed(BaseFeed):
                     except Exception as ex:
                         dealer_data = common.RegisteredDealer(dealer_id=product['dealer_id'])
                         dealer_data.save()
+                        self.registerNewDealer(username = product['dealer_id'])
                     self.get_or_create_product_type(
                         product_type=product['product_type'])
                     producttype_data = common.ProductTypeData.objects.get(

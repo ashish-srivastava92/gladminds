@@ -32,7 +32,7 @@ SUIT_CONFIG = {
     'LIST_PER_PAGE': 20,
     'SHOW_REQUIRED_ASTERISK': True,
     'MENU': ({'app':'gladminds','label':'Data','icon':' icon-folder-open',
-               'models': ({'model':'serviceadvisor','label': 'Feed -> Service Advisor'}, {'model':'producttypedata','label': 'Feed -> Product Dispatch'},
+               'models': ({'model':'serviceadvisordealerrelationship','label': 'Feed -> Service Advisor'}, {'model':'dispatchedproducts','label': 'Feed -> Product Dispatch'},
                           {'model':'productdata','label': 'Feed -> Product Purchase'},{'model':'coupondata','label': 'Feed -> Coupon Redemption'} ,{'model':'auditlog','label': 'Audit Log'}, 
                           {'model':'datafeedlog','label': 'Feed Log'}, 'uploadproductcsv', 
                           'messagetemplate','gladmindusers')},
@@ -176,6 +176,10 @@ INSTALLED_APPS = (
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
+
+LOGIN_REDIRECT_URL = '/dealers/getUrl'
+
+
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.
@@ -214,16 +218,20 @@ LOGGING = {
             'filename':'/var/log/gladminds/app/afterbuy.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
+        },'test_case_logs': {
+            'level': 'INFO',
+            'filename':'/var/log/gladminds/app/test_case.log',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
         }
     },
-           
+
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
-        },
-      'gladminds': {
+        },'gladminds': {
             'handlers': ['gladminds_logs'],
             'level': 'DEBUG',
             'propagate': True,
@@ -231,9 +239,12 @@ LOGGING = {
             'handlers': ['gladminds_logs'],
             'level': 'DEBUG',
             'propagate': False,
-        },
-        'afterbuy': {
+        },'afterbuy': {
             'handlers': ['afterbuy_logs'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },'test_case': {
+            'handlers': ['test_case_logs'],
             'level': 'DEBUG',
             'propagate': True,
         }
