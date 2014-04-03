@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save
+from django.contrib.auth.models import User
+from random import randint
 import logging
 import os
 import time
@@ -108,6 +110,18 @@ class BaseFeed(object):
 
     def import_data(self):
         pass
+    
+    def registerNewDealer(self, username=None, first_name='', last_name='', email=''):
+        logger.info('New Dealer Registration with id - ' + username)
+        if username:
+            user = User(username=username, first_name=first_name, last_name=last_name, email=email)
+            password = username + '@123'
+            user.set_password(password)
+            user.save()
+            logger.info('Dealer {0} registered successfully'.format(username))
+        else:
+            logger.info('Dealer id is not provided.')
+            raise Exception('Dealer id is not provided.')
 
 
 class BrandProductTypeFeed(BaseFeed):
@@ -149,6 +163,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 dealer_data = common.RegisteredDealer(
                     dealer_id=dealer['dealer_id'], address=dealer['address'])
                 dealer_data.save()
+                self.registerNewDealer(username = dealer['dealer_id'])
 
             try:
                 service_advisor = common.ServiceAdvisor.objects.filter(service_advisor_id=dealer['service_advisor_id'])
@@ -207,6 +222,7 @@ class ProductDispatchFeed(BaseFeed):
                     except Exception as ex:
                         dealer_data = common.RegisteredDealer(dealer_id=product['dealer_id'])
                         dealer_data.save()
+                        self.registerNewDealer(username = product['dealer_id'])
                     self.get_or_create_product_type(
                         product_type=product['product_type'])
                     producttype_data = common.ProductTypeData.objects.get(

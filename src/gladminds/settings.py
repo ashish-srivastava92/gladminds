@@ -32,7 +32,7 @@ SUIT_CONFIG = {
     'LIST_PER_PAGE': 20,
     'SHOW_REQUIRED_ASTERISK': True,
     'MENU': ({'app':'gladminds','label':'Data','icon':' icon-folder-open',
-               'models': ({'model':'serviceadvisordealerrelationship','label': 'Feed -> Service Advisor'}, {'model':'producttypedata','label': 'Feed -> Product Dispatch'},
+               'models': ({'model':'serviceadvisordealerrelationship','label': 'Feed -> Service Advisor'}, {'model':'dispatchedproducts','label': 'Feed -> Product Dispatch'},
                           {'model':'productdata','label': 'Feed -> Product Purchase'},{'model':'coupondata','label': 'Feed -> Coupon Redemption'} ,{'model':'auditlog','label': 'Audit Log'}, 
                           {'model':'datafeedlog','label': 'Feed Log'}, 'uploadproductcsv', 
                           'messagetemplate','gladmindusers')},
@@ -174,6 +174,10 @@ INSTALLED_APPS = (
 )
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
+
+
+LOGIN_REDIRECT_URL = '/dealers/getUrl'
+
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
