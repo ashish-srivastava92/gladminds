@@ -42,7 +42,17 @@ use gladmindsdb;
 select  * from  gladminds_serviceadvisor;
 
 ALTER TABLE gladminds_serviceadvisor DROP status;
+show create table gladminds_serviceadvisor; 
+ALTER TABLE gladminds_serviceadvisor DROP FOREIGN KEY fk_symbol;
 ALTER TABLE gladminds_serviceadvisor DROP dealer_id_id;
+
+
+CREATE TABLE gladminds_serviceadvisordealerrelationship(
+    status CHAR(10) NOT NULL
+);
+
+
+ALTER TABLE gladminds_serviceadvisordealerrelationship ADD FOREIGN KEY (`dealer_id`) REFERENCES gladminds_registereddealer(`dealer_id`);
 
 
 ----------------Migration Script for 1.2 ----------------------------
