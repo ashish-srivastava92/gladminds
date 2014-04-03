@@ -58,7 +58,8 @@
     "pk": 23,
     "fields": {
       "template_key":"SEND_INVALID_VIN_OR_FSC",
-      "template":"Invalid ID or No Free service coupon available for this product"
+      "template":"Invalid ID or No Free service coupon available for this product",
+      "description":""
     }
   },
   {
@@ -66,7 +67,8 @@
     "pk": 24,
     "fields": {
       "template_key":"SEND_INVALID_SERVICE_TYPE",
-      "template":"Invalid service type: {service_type}"
+      "template":"Invalid service type: {service_type}",
+      "description":""
     }
   },
     {
