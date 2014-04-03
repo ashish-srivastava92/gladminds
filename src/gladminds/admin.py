@@ -280,13 +280,14 @@ class FeedLogAdmin(ModelAdmin):
         if css_class:
             return {'class': css_class}
 
+
 ##############################################################
 ##################Custom Model Defined########################
 
 class DispatchedProducts(ProductData):
     class Meta:
         proxy = True
-        
+
 class ListDispatchedProducts(ModelAdmin):
     search_fields = ('vin', 'customer_phone_number__phone_number')
     list_filter = ('vin', )
