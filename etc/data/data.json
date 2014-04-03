@@ -1,0 +1,22 @@
+{
+  "data" : {
+    "export" : {
+      "dealer" : {
+        "id" : "111111",
+        "address" : "MP"
+      },
+      "serviceAdvisor" : {
+        "dealerId" : "111111",
+        "id" : "SA001Test",
+        "name" : "Moto123",
+        "phone" : "9844861060",
+        "status" : "Y"
+      }
+    },
+    
+    "messages" : [
+      "CHECK SAP001T 500 1 ",
+      "CLOSE CUP001Test"
+    ]
+  }
+}
