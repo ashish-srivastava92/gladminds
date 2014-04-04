@@ -7,6 +7,7 @@ from gladminds.models.common import RegisteredDealer, ServiceAdvisor,\
     ProductData, CouponData, ServiceAdvisorDealerRelationship
 from datetime import datetime, timedelta
 from integration.base_integration import GladmindsResourceTestCase
+from gladminds import feed
 
 logger = logging.getLogger('gladminds')
 
@@ -94,9 +95,9 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         product_data = ProductData.objects.all()[0]
         self.assertEquals(u"XXXXXXXXXX", product_data.vin)
 
-        self.assertEquals(1, CouponData.objects.count())
+        self.assertEquals(2, CouponData.objects.count())
         coupon_data = CouponData.objects.all()[0]
-        self.assertEquals(u"UUUUUUU", coupon_data.unique_service_coupon) 
+        self.assertEquals(u"USC001", coupon_data.unique_service_coupon) 
 
     def test_product_purchase(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
