@@ -17,7 +17,7 @@ MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gladmindsdb_copy_1',
+        'NAME': 'gladmindsdb',
         'USER': 'gladminds',
         'PASSWORD': 'gladminds123',
         'HOST': '127.0.0.1',

@@ -11,7 +11,7 @@ mysqldump -u gladminds -p gladmindsdb -r gladmindsdb.sql
 mysqldump -u gladminds -pgladminds123 gladmindsdb > gladmindsdb_dump.sql
 mysql -u gladminds -pgladminds123;
 
-CREATE DATABASE gladmindsdb_copy;
+CREATE DATABASE gladmindsdb_4apr;
 
 USE gladmindsdb_copy;
 
