@@ -292,6 +292,10 @@ class ListDispatchedProducts(ModelAdmin):
     list_display = ('product_type', 'vin', 'engine', 'UCN', 'dealer_id', "invoice_date")
     exclude = ('order',)
 
+    def queryset(self, request):
+        qs = DispatchedProducts.objects.extra(where=['invoice_date is not NULL'])
+        return qs
+
     def UCN(self, obj):
         ucn_list = []
         for coupon in CouponData.objects.filter(vin=obj.id):
