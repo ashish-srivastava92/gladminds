@@ -24,6 +24,7 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
                                            , customer_phone_number = customer_obj, sap_customer_id='SAP001')
         service_advisor = self.get_service_advisor_obj(dealer_data = dealer_obj, service_advisor_id = 'SA001Test'\
                                                  ,name='UMOTO', phone_number='4444861111', status='Y')
+        advisor_dealer_rel_obj = self.get_dealer_service_advisor_obj(dealer_data=dealer_obj, service_advisor_id=service_advisor, status='Y')
         
     def test_dispatch_gladminds(self):
         result = client.post('/v1/messages', data = {'text':'CHECK SAP001 500 1', 'phoneNumber' : '4444861111'})
