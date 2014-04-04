@@ -171,6 +171,10 @@ class ProductDataAdmin(ModelAdmin):
     inlines=(Couponline,)
     exclude = ('order',)
 
+    def queryset(self, request):
+        qs = ProductData.objects.extra(where=['product_purchase_date is not NULL'])
+        return qs
+    
     def UCN(self, obj):
         ucn_list = []
         for coupon in CouponData.objects.filter(vin=obj.id):
