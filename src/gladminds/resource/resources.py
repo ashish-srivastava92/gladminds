@@ -17,6 +17,7 @@ from tastypie import http
 from tastypie.exceptions import ImmediateHttpResponse
 from django.db.models import Q
 import logging
+from gladminds.utils import mobile_format
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
 
@@ -44,7 +45,6 @@ class GladmindsResources(Resource):
         elif request.GET.get('cli'):
             message = request.GET.get('msg')
             phone_number = request.GET.get('cli')
-            phone_number = utils.mobile_format(phone_number)
         elif request.POST.get("advisorMobile"):
             phone_number = request.POST.get('advisorMobile')
             customer_id = request.POST.get('customerId')
@@ -59,7 +59,7 @@ class GladmindsResources(Resource):
                 logger.info('Terminating the service coupon {0}'.format(ucn))
                 message = 'CLOSE {0} {1}'.format(customer_id, ucn)
                 logger.info('Message to send: ' + message)
-
+        phone_number = mobile_format(phone_number)
         audit.audit_log(action='RECIEVED', sender=phone_number, reciever='+1 469-513-9856', message=message, status='success')
         logger.info('Recieved Message from phone number: {0} and message: {1}'.format(phone_number, message))
         try:
