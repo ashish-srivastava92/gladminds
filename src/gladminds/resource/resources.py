@@ -174,7 +174,7 @@ class GladmindsResources(Resource):
             valid_coupon = common.CouponData.objects.select_for_update().filter(Q(status=1) |  Q(status=4), vin__vin=vin, valid_kms__gte=actual_kms).select_related ('vin', 'customer_phone_number__phone_number').order_by('service_type')
             if len(valid_coupon):
                 valid_coupon = valid_coupon[0]
-
+            
             all_coupon = common.CouponData.objects.select_for_update().filter(vin__vin=vin, valid_kms__gte=actual_kms).select_related ('vin', 'customer_phone_number__phone_number').order_by('service_type')
             self.expire_or_close_less_kms_coupon(actual_kms, vin)
             in_progress_coupon = []
