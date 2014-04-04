@@ -104,14 +104,11 @@ class ServiceAdvisorDealerRelationship(models.Model):
     dealer_id = models.ForeignKey(RegisteredDealer, null=False)
     service_advisor_id = models.ForeignKey(ServiceAdvisor, null=False)
     status = models.CharField(max_length=10, blank=False, null=False)
-    id = models.AutoField(primary_key=True)
 
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Service Advisor And Dealer Relationship"
 
-    def __unicode__(self):
-        return self.id
 
 ##################################################################
 

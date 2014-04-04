@@ -255,8 +255,7 @@ class GladmindsResources(Resource):
     def validate_dealer(self, phone_number):
         try:
             service_advisor_obj = common.ServiceAdvisor.objects.get(phone_number=phone_number)
-            all_sa_dealer_obj = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = service_advisor_obj)
-
+            all_sa_dealer_obj = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = service_advisor_obj, status = u'Y')
             if len(all_sa_dealer_obj) == 0:
                 raise
         except:
