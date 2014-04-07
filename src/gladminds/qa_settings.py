@@ -9,7 +9,7 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
@@ -60,6 +60,13 @@ SMS_CLIENT_DETAIL={
                    'authenticate_url':'http://117.99.128.32:80/login/pushsms.php' ,
                    'message_url': 'http://117.99.128.32:80/login/pushsms.php'                  
                    }
+MAIL_SERVER = 'localhost'
+MAIL_DETAIL = {
+                  "sender": "feed-report@gladminds.co",
+                  "reciever": "gladminds@hashedin.com,naveen.shankar@gladminds.co",
+                  "subject": "Gladminds Feed Report For QA",
+                  "body": """""",
+              }
 
 FEED_TYPE = 'CSV'
 
@@ -88,3 +95,5 @@ SAP_CRM_DETAIL = {
                   }
 
 COUPON_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl&v0"
+
+
