@@ -273,7 +273,8 @@ class GladmindsResources(Resource):
     def is_sa_initiator(self, coupon_id, phone_sa):
         coupon_data = common.CouponData.objects.filter(unique_service_coupon = coupon_id)
         if coupon_data:
-            return phone_sa == coupon_data[0].sa_phone_number
+            coupon_initiator = common.ServiceAdvisor.objects.filter(phone_number = coupon_data[0].sa_phone_number)
+            return phone_sa == coupon_initiator[0].phone_number
         return False
 
     def get_brand_data(self, sms_dict, phone_number):
