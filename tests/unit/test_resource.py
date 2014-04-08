@@ -35,18 +35,31 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         result = client.post('/v1/messages', data = {'text':'CHECK SAP001 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
-        result = client.post('/v1/messages', data = {'text':'   CHECK    SAP001   500   1    ', 'phoneNumber' : '4444861111'})
-        self.assertHttpOK(result)
-        self.assertTrue('true' in result.content)
-        result = client.post('/v1/messages', data = {'text':'CLOSE SAP001 COUPON005', 'phoneNumber' : '9999999999'})
-        self.assertTrue('false' in result.content)
-        self.assertHttpOK(result)
-        result = client.post('/v1/messages', data = {'text':'CLOSE SAP001 COUPON005', 'phoneNumber' : '4444861111'})
-        self.assertTrue('true' in result.content)
-        self.assertHttpOK(result)
         result = client.post('/v1/messages', data = {'text':'CHECK SAP001 500', 'phoneNumber' : '4444861111'})
         self.assertHttpBadRequest(result)
         result = client.post('/v1/messages', data = {'text':'CLOSE TESTVECHILEID00002', 'phoneNumber' : '4444861111'})
         self.assertHttpBadRequest(result)
+        
+    def test_too_many_spaces(self):
+        result = client.post('/v1/messages', data = {'text':'   CHECK    SAP001   500   1    ', 'phoneNumber' : '4444861111'})
+        self.assertHttpOK(result)
+        self.assertTrue('true' in result.content)
+        
+    def test_coupon_close(self):
+        '''
+            Coupon has been initiated by dealer - UMOTO
+            Only UMOTO is allowed to close the coupon
+        '''
+        result = client.post('/v1/messages', data = {'text':'CHECK SAP001 500 1', 'phoneNumber' : '4444861111'})
+        self.assertHttpOK(result)
+        self.assertTrue('true' in result.content)
+#       Below Dealer will not be able to close the coupon
+        result = client.post('/v1/messages', data = {'text':'CLOSE SAP001 COUPON005', 'phoneNumber' : '9999999999'})
+        self.assertTrue('false' in result.content)
+        self.assertHttpOK(result)
+#       Below is the initiator and the coupon will be closed
+        result = client.post('/v1/messages', data = {'text':'CLOSE SAP001 COUPON005', 'phoneNumber' : '4444861111'})
+        self.assertTrue('true' in result.content)
+        self.assertHttpOK(result)
         
         
