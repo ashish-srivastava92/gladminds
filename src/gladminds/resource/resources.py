@@ -229,6 +229,9 @@ class GladmindsResources(Resource):
     def close_coupon(self, sms_dict, phone_number):
         sa_object = self.validate_dealer(phone_number)
         unique_service_coupon = sms_dict['usc']
+        if not self.is_sa_initiator(unique_service_coupon, phone_number):
+            transaction.commit()
+            return False
         message = None
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         try:
@@ -262,10 +265,15 @@ class GladmindsResources(Resource):
                 raise
         except:
             message = 'You are not an authorised user to avail this service'
-            send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpUnauthorized("Not an authorised user"))
         return service_advisor_obj
+
+    def is_sa_initiator(self, coupon_id, phone_sa):
+        coupon_data = common.CouponData.objects.filter(unique_service_coupon = coupon_id)
+        if coupon_data:
+            return phone_sa == coupon_data[0].sa_phone_number
+        return False
 
     def get_brand_data(self, sms_dict, phone_number):
         brand_id = sms_dict['brand_id']
