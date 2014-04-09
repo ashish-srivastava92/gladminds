@@ -17,7 +17,7 @@ from tastypie import http
 from tastypie.exceptions import ImmediateHttpResponse
 from django.db.models import Q
 import logging
-from gladminds.utils import mobile_format
+from gladminds.utils import mobile_format, format_message
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
 
@@ -60,6 +60,7 @@ class GladmindsResources(Resource):
                 message = 'CLOSE {0} {1}'.format(customer_id, ucn)
                 logger.info('Message to send: ' + message)
         phone_number = mobile_format(phone_number)
+        message = format_message(message)
         audit.audit_log(action='RECIEVED', sender=phone_number, reciever='+1 469-513-9856', message=message, status='success')
         logger.info('Recieved Message from phone number: {0} and message: {1}'.format(phone_number, message))
         try:
@@ -229,6 +230,9 @@ class GladmindsResources(Resource):
     def close_coupon(self, sms_dict, phone_number):
         sa_object = self.validate_dealer(phone_number)
         unique_service_coupon = sms_dict['usc']
+        if not self.is_sa_initiator(unique_service_coupon, phone_number):
+            transaction.commit()
+            return False
         message = None
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         try:
@@ -262,10 +266,16 @@ class GladmindsResources(Resource):
                 raise
         except:
             message = 'You are not an authorised user to avail this service'
-            send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpUnauthorized("Not an authorised user"))
         return service_advisor_obj
+
+    def is_sa_initiator(self, coupon_id, phone_sa):
+        coupon_data = common.CouponData.objects.filter(unique_service_coupon = coupon_id)
+        if coupon_data:
+            coupon_initiator = common.ServiceAdvisor.objects.filter(phone_number = coupon_data[0].sa_phone_number)
+            return phone_sa == coupon_initiator[0].phone_number
+        return False
 
     def get_brand_data(self, sms_dict, phone_number):
         brand_id = sms_dict['brand_id']

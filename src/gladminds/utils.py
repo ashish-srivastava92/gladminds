@@ -32,6 +32,13 @@ def mobile_format(phone_number):
     '''
     return '+91' + phone_number[-10:]
 
+def format_message(message):
+    '''
+        This function removes extra spaces from message
+    '''
+    keywords = message.split(' ')
+    return ' '.join([keyword for keyword in keywords if keyword])
+
 
 def get_phone_number_format(phone_number):
     '''
