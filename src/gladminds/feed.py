@@ -266,19 +266,17 @@ class ProductDispatchFeed(BaseFeed):
 
 class ProductPurchaseFeed(BaseFeed):
 
-    def update_customer_number(self, product_data, product):
+    def update_customer_number(self, product_data, phone_number):
         try:
             if not product_data.customer_phone_number:
                 return False
             else:
                 customer_ph_num = product_data.customer_phone_number.phone_number
-                logging.info(customer_ph_num)
-                print product_data.sap_customer_id and not customer_ph_num == product['customer_phone_number']
-            if product_data.sap_customer_id and not customer_ph_num == product['customer_phone_number']:
+            if product_data.sap_customer_id and not customer_ph_num == phone_number:
                 try:
                     customer_data = common.GladMindUsers.objects.get(
                                 phone_number=customer_ph_num)
-                    customer_data.phone_number = product['customer_phone_number']
+                    customer_data.phone_number = phone_number
                     customer_data.save()
                     post_save.disconnect(update_coupon_data, sender=common.ProductData)
                     product_data.customer_phone_number = customer_data
@@ -300,7 +298,7 @@ class ProductPurchaseFeed(BaseFeed):
                 product_data = common.ProductData.objects.get(
                     vin=product['vin'])
 
-                if self.update_customer_number(product_data, product):
+                if self.update_customer_number(product_data, product['customer_phone_number']):
                     continue
                 try:
                     customer_data = common.GladMindUsers.objects.get(
