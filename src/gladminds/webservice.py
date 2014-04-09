@@ -115,7 +115,6 @@ class BrandService(ServiceBase):
             save_to_db(feed_type = 'brand', data_source = brand_list)
             return success
         except Exception as ex:
-            print "BrandService: {0}".format(ex)
             return failed
 
 
@@ -202,7 +201,6 @@ def save_to_db(feed_type = None, data_source = []):
 
 
 def _on_method_call(ctx):
-    print "Getting feed data: %s" % ctx.in_object
     logger.info("Getting feed data: %s" % ctx.in_object)
     if ctx.in_object is None:
         raise ArgumentError("Request doesn't contain data")

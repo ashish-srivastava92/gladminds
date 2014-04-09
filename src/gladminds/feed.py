@@ -14,6 +14,7 @@ from gladminds import utils
 from gladminds.models import common
 from gladminds import exportfeed
 from gladminds.audit import feed_log
+from django.db.models import signals
 
 
 logger = logging.getLogger("gladminds")
@@ -265,30 +266,59 @@ class ProductDispatchFeed(BaseFeed):
 
 class ProductPurchaseFeed(BaseFeed):
 
+    def update_customer_number(self, product_data, phone_number):
+        try:
+            if not product_data.customer_phone_number:
+                return False
+            else:
+                customer_ph_num = product_data.customer_phone_number.phone_number
+            if product_data.sap_customer_id and not customer_ph_num == phone_number:
+                try:
+                    customer_data = common.GladMindUsers.objects.get(
+                                phone_number=customer_ph_num)
+                    customer_data.phone_number = phone_number
+                    customer_data.save()
+                    post_save.disconnect(update_coupon_data, sender=common.ProductData)
+                    product_data.customer_phone_number = customer_data
+                    product_data.save()
+                    post_save.connect(update_coupon_data, sender=common.ProductData)
+                    product_data.save()
+                except Exception as ex: 
+                    logging.info("Expection: New Number of customer is not updated %s" % ex)
+                return True
+        except Exception as ex:
+            logger.info(
+                        '[Exception: New Customer Added]: {0}'.format(ex))
+            return False
+
     def import_data(self):
         total_failed = 0
         for product in self.data_source:
             try:
                 product_data = common.ProductData.objects.get(
                     vin=product['vin'])
+
+                if self.update_customer_number(product_data, product['customer_phone_number']):
+                    continue
                 try:
                     customer_data = common.GladMindUsers.objects.get(
                         phone_number=product['customer_phone_number'])
                 except ObjectDoesNotExist as odne:
                     logger.info(
                         '[Exception: ProductPurchaseFeed_customer_data]: {0}'.format(odne))
-                    # Register this customer
+                    #Register this customer
                     gladmind_customer_id = utils.generate_unique_customer_id()
                     customer_data = common.GladMindUsers(gladmind_customer_id=gladmind_customer_id, phone_number=product[
                                                          'customer_phone_number'], registration_date=datetime.now(), customer_name=product['customer_name'])
                     customer_data.save()
+
                 if not product_data.sap_customer_id:
                     product_purchase_date = product['product_purchase_date']
                     product_data.sap_customer_id = product['sap_customer_id']
                     product_data.customer_phone_number = customer_data
                     product_data.product_purchase_date = product_purchase_date
+                    product_data.engine = product["engine"]
                     product_data.save()
-                self.update_engine_number(product)
             except Exception as ex:
                 total_failed += 1
                 logger.info(
@@ -300,16 +330,6 @@ class ProductPurchaseFeed(BaseFeed):
                      self.data_source) - total_failed,
                  action='Recieved', status=True)
         return get_feed_status(len(self.data_source), total_failed)
-
-    def update_engine_number(self, product):
-        try:
-            product_data_obj = common.ProductData.objects.filter(vin=product["vin"])[0]
-            product_data_obj.engine = product["engine"]
-            product_data_obj.save()
-        except ObjectDoesNotExist as odne:
-                    print "on product purchase", odne
-                    logger.info(
-                        '[Exception: ProductPurchaseFeed_customer_data]: {0} Engine is not updated'.format(odne))
 
 
 class ProductServiceFeed(BaseFeed):
@@ -364,6 +384,7 @@ def get_feed_status(total_feeds, failed_feeds):
 def update_coupon_data(sender, **kwargs):
     from gladminds.tasks import send_on_product_purchase
     instance = kwargs['instance']
+    logging.info("triggered update_coupon_data")
     if instance.customer_phone_number:
         product_purchase_date = instance.product_purchase_date
         vin = instance.vin
@@ -386,6 +407,6 @@ def update_coupon_data(sender, **kwargs):
             audit.audit_log(
                 reciever=instance.customer_phone_number, action='SEND TO QUEUE', message=message)
         except Exception as ex:
-            logger.info("[Exception]: Signal-In Update Coupon Data")
+            logger.info("[Exception]: Signal-In Update Coupon Data %s" % ex)
 
 post_save.connect(update_coupon_data, sender=common.ProductData)
