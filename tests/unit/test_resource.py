@@ -30,6 +30,11 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         advisor_dealer_rel_obj = self.get_dealer_service_advisor_obj(dealer_data=dealer_obj, service_advisor_id=service_advisor1, status='Y')
         coupon_obj = self.get_coupon_obj(unique_service_coupon='COUPON005', product_data=product_obj, valid_days=30\
                                          , valid_kms=500, service_type = 1)
+        customer_obj1 = self.get_customer_obj(phone_number='8888888')
+        product_obj1 = self.get_product_obj(vin="VINXXX002", producttype_data=product_type_obj, dealer_data = dealer_obj\
+                                           , customer_phone_number = customer_obj1, sap_customer_id='SAP002')
+        coupon_obj1 = self.get_coupon_obj(unique_service_coupon='COUPON004', product_data=product_obj1, valid_days=30\
+                                         , valid_kms=500, service_type = 1)
         
     def test_dispatch_gladminds(self):
         result = client.post('/v1/messages', data = {'text':'CHECK SAP001 500 1', 'phoneNumber' : '4444861111'})
@@ -40,12 +45,12 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         result = client.post('/v1/messages', data = {'text':'CLOSE TESTVECHILEID00002', 'phoneNumber' : '4444861111'})
         self.assertHttpBadRequest(result)
         
-    def test_too_many_spaces(self):
+    def test_format_message(self):
         result = client.post('/v1/messages', data = {'text':'   CHECK    SAP001   500   1    ', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
         
-    def test_coupon_close(self):
+    def test_close_coupon(self):
         '''
             Coupon has been initiated by dealer - UMOTO
             Only UMOTO is allowed to close the coupon
@@ -62,4 +67,17 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         self.assertTrue('true' in result.content)
         self.assertHttpOK(result)
         
+    def test_is_valid_data(self):
+        result = client.post('/v1/messages', data = {'text':'CHECK SAP001 500 1', 'phoneNumber' : '4444861111'})
+        self.assertHttpOK(result)
+        self.assertTrue('true' in result.content)
+        result = client.post('/v1/messages', data = {'text':'CHECK SAP002 500 1', 'phoneNumber' : '4444861111'})
+        self.assertHttpOK(result)
+        self.assertTrue('true' in result.content)
+        result = client.post('/v1/messages', data = {'text':'CLOSE SAP002 COUPON005', 'phoneNumber' : '4444861111'})
+        self.assertTrue('false' in result.content)
+        self.assertHttpOK(result)
+        result = client.post('/v1/messages', data = {'text':'CLOSE SAP001 COUPON004', 'phoneNumber' : '4444861111'})
+        self.assertTrue('false' in result.content)
+        self.assertHttpOK(result)
         

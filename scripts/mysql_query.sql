@@ -25,7 +25,7 @@ ALTER TABLE gladminds_serviceadvisor ADD status CHAR(10) NOT NULL DEFAULT 'y';
 ALTER TABLE gladminds_productdata ADD engine CHAR(255);
 desc gladminds_productdata;
 
-
+Create Index vin_idx on gladminds_coupondata(vin_id);
 Create Index closed_date_vin_idx on gladminds_coupondata(closed_date, vin_id);
 
 -------------------------other changes---------------------------
