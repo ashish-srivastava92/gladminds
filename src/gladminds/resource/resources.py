@@ -144,7 +144,7 @@ class GladmindsResources(Resource):
         product_obj = common.ProductData.objects.filter(vin=vin).select_related('customer_phone_number__phone_number')
         return product_obj[0].customer_phone_number.phone_number
 
-    def expire_less_kms_coupon(self, actual_kms, vin, action=3):
+    def expire_less_kms_coupon(self, actual_kms, vin):
         '''
             Expire those coupon whose kms limit is small then actual kms limit
         '''
@@ -159,10 +159,10 @@ class GladmindsResources(Resource):
         except Exception as ax:
             logger.error("Vin is not in customer_product_data Error %s " % ax)
 
-    def update_valid_coupon(self, valid_coupon, actual_kms, dealer_data):
+    def update_coupon(self, valid_coupon, actual_kms, dealer_data, status, update_time=datetime.now()):
         valid_coupon.actual_kms = actual_kms
-        valid_coupon.actual_service_date = datetime.now()
-        valid_coupon.status = 4
+        valid_coupon.actual_service_date = update_time
+        valid_coupon.status = status
         valid_coupon.sa_phone_number = dealer_data
         valid_coupon.save()
 
@@ -196,7 +196,7 @@ class GladmindsResources(Resource):
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=in_progress_coupon[0].unique_service_coupon, service_type=in_progress_coupon[0].service_type)
             if valid_coupon:
                 logger.info("Validate_coupon: valid_coupon.service_type")
-                self.update_valid_coupon(valid_coupon, actual_kms, dealer_data)
+                self.update_coupon(valid_coupon, actual_kms, dealer_data, 4)
                 dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=valid_coupon.service_type)
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=valid_coupon.unique_service_coupon, service_type=valid_coupon.service_type)
             else:

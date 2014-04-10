@@ -5,6 +5,7 @@ from gladminds.resource.resources import GladmindsResources
 from gladminds.models import common
 from django.contrib.auth.models import User
 import logging
+from tastypie.exceptions import ImmediateHttpResponse
 logger = logging.getLogger('gladminds')
 
 
@@ -144,10 +145,8 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         sa_dealer_rel.status = 'N'
         sa_dealer_rel.save()
 
-        try:
+        with self.assertRaises(ImmediateHttpResponse):
             obj.validate_dealer("9999999")
-        except Exception as ex:
-            self.assertEqual(type(ex).__name__, "ImmediateHttpResponse", "Error is not correct format")
 
     def test_forward_logic_1(self):
         '''
