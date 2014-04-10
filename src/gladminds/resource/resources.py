@@ -144,16 +144,12 @@ class GladmindsResources(Resource):
         product_obj = common.ProductData.objects.filter(vin=vin).select_related('customer_phone_number__phone_number')
         return product_obj[0].customer_phone_number.phone_number
 
-    def expire_or_close_less_kms_coupon(self, actual_kms, vin, action=3):
+    def expire_less_kms_coupon(self, actual_kms, vin):
         '''
             Expire those coupon whose kms limit is small then actual kms limit
         '''
-        if action == 3:
-            expire_coupon = common.CouponData.objects.filter(status=1, vin__vin=vin, valid_kms__lt=actual_kms).update(status=3)
-            logger.info("%s are expired" % expire_coupon)
-        else:
-            expire_coupon = common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, valid_kms__lt=actual_kms).update(status=3)
-            logger.info("%s are closed" % expire_coupon)
+        expire_coupon = common.CouponData.objects.filter(status=1, vin__vin=vin, valid_kms__lt=actual_kms).update(status=3)
+        logger.info("%s are expired" % expire_coupon)
 
     def get_vin(self, sap_customer_id):
         try:
@@ -162,6 +158,13 @@ class GladmindsResources(Resource):
             return customer_product_data[0].vin.vin
         except Exception as ax:
             logger.error("Vin is not in customer_product_data Error %s " % ax)
+
+    def update_coupon(self, valid_coupon, actual_kms, dealer_data, status, update_time=datetime.now()):
+        valid_coupon.actual_kms = actual_kms
+        valid_coupon.actual_service_date = update_time
+        valid_coupon.status = status
+        valid_coupon.sa_phone_number = dealer_data
+        valid_coupon.save()
 
     @transaction.commit_manually()
     def validate_coupon(self, sms_dict, phone_number):
@@ -180,30 +183,22 @@ class GladmindsResources(Resource):
             if len(valid_coupon):
                 valid_coupon = valid_coupon[0]
 
-            all_coupon = common.CouponData.objects.select_for_update().filter(vin__vin=vin, valid_kms__gte=actual_kms).select_related ('vin', 'customer_phone_number__phone_number').order_by('service_type')
-            self.expire_or_close_less_kms_coupon(actual_kms, vin)
-            in_progress_coupon = []
-            for coupon in all_coupon:
-                if coupon.status == 4:
-                    in_progress_coupon.append(coupon)
+            in_progress_coupon = common.CouponData.objects.select_for_update().filter(vin__vin=vin, valid_kms__gte=actual_kms, status=4).select_related ('vin', 'customer_phone_number__phone_number').order_by('service_type')
+            self.expire_less_kms_coupon(actual_kms, vin)
             try:
                 customer_phone_number = self.get_customer_phone_number_from_vin(vin) 
             except Exception as ax:
-                logger.error('Customer Phone Number is not entered %s' % ax)
+                logger.error('Customer Phone Number is not stored in DB %s' % ax)
             logger.info(valid_coupon.service_type)
             if len(in_progress_coupon) > 0:
                 logger.info("Validate_coupon: in_progress_coupon")
                 dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=in_progress_coupon[0].service_type, customer_id=sap_customer_id)
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=in_progress_coupon[0].unique_service_coupon, service_type=in_progress_coupon[0].service_type)
-            elif valid_coupon.service_type == int(service_type):
+            if valid_coupon:
                 logger.info("Validate_coupon: valid_coupon.service_type")
-                valid_coupon.actual_kms = actual_kms
-                valid_coupon.actual_service_date = datetime.now()
-                valid_coupon.status = 4
-                valid_coupon.sa_phone_number = dealer_data
-                valid_coupon.save()
-                dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=valid_coupon.service_type, customer_id=sap_customer_id)
-                customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=valid_coupon.unique_service_coupon, service_type=service_type)
+                self.update_coupon(valid_coupon, actual_kms, dealer_data, 4)
+                dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=valid_coupon.service_type)
+                customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=valid_coupon.unique_service_coupon, service_type=valid_coupon.service_type)
             else:
                 logger.info("Validate_coupon: ELSE PART")
                 requested_coupon = common.CouponData.objects.get(vin__vin=vin, service_type=service_type)
