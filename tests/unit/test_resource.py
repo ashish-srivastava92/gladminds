@@ -94,6 +94,8 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         #The coupon for service 2 should have been expired.
         coupon_obj = self.filter_coupon_obj(coupon_id='COUPON006')
         self.assertEqual(coupon_obj.status, 3)
+        coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
+        self.assertEqual(coupon_obj.status, 3)
         #The 3rd service coupon should be in progress.
         coupon_obj = self.filter_coupon_obj(coupon_id='COUPON007')
         self.assertEqual(coupon_obj.status, 4)
