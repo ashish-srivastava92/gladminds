@@ -17,7 +17,7 @@ class GladmindsResourceTestCase(ResourceTestCase):
             temp_obj = common.MessageTemplate(template_key=fields['template_key']\
                        , template=fields['template'], description=fields['description'])
             temp_obj.save()
-
+        self.MESSAGE_URL = "/v1/messages"
 
         #old implementation of test case;
         #new implementation do not use this
@@ -83,6 +83,10 @@ class GladmindsResourceTestCase(ResourceTestCase):
         customer_obj = common.GladMindUsers(phone_number=kwargs['phone_number'])
         customer_obj.save()
         return customer_obj
+    
+    def filter_coupon_obj(self, coupon_id=None):
+        coupon_obj = common.CouponData.objects.filter(unique_service_coupon=coupon_id)
+        return coupon_obj[0]
         
         
         

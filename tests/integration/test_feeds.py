@@ -4,9 +4,11 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
 from gladminds.models.common import RegisteredDealer, ServiceAdvisor,\
-    ProductData, CouponData, ServiceAdvisorDealerRelationship
+    ProductData, CouponData, ServiceAdvisorDealerRelationship, GladMindUsers
 from datetime import datetime, timedelta
 from integration.base_integration import GladmindsResourceTestCase
+from gladminds import feed
+import xml.etree.ElementTree as ET
 
 logger = logging.getLogger('gladminds')
 
@@ -94,9 +96,9 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         product_data = ProductData.objects.all()[0]
         self.assertEquals(u"XXXXXXXXXX", product_data.vin)
 
-        self.assertEquals(1, CouponData.objects.count())
+        self.assertEquals(2, CouponData.objects.count())
         coupon_data = CouponData.objects.all()[0]
-        self.assertEquals(u"UUUUUUU", coupon_data.unique_service_coupon) 
+        self.assertEquals(u"USC001", coupon_data.unique_service_coupon) 
 
     def test_product_purchase(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
@@ -137,3 +139,36 @@ class FeedsResourceTest(GladmindsResourceTestCase):
 
         self.assertEqual(len(feed_export_data[0]), 1, "Not accurate length of feeds log")
         self.assertEqual(feed_export_data[0][0]["GCP_UCN_NO"], u'USC001', "Not accurate UCN")
+
+    def test_partial_fail(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/without_sa_id_sa_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+
+        response_content = response.content
+        xml_parser = ET.fromstring(response_content)
+
+        status = xml_parser.findall('*//{http://api.gladmindsplatform.co/api/v1/bajaj/feed/}postDealerResult')[0].text
+        self.assertEqual(status, '"FAILURE"')
+
+    def test_update_customer_number(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+        gm_user = GladMindUsers.objects.all()
+        self.assertEqual(1, len(gm_user))
+
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/purchase_feed_with_diff_cust_num.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+        gm_user = GladMindUsers.objects.all()
+        self.assertEqual(gm_user[0].phone_number, "+919845340297", "Customer Phone Number is not updated")
+        self.assertEqual(GladMindUsers.objects.count(), 1, "Total GM User")
