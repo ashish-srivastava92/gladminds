@@ -17,7 +17,7 @@ from tastypie import http
 from tastypie.exceptions import ImmediateHttpResponse
 from django.db.models import Q
 import logging
-from gladminds.utils import mobile_format
+from gladminds.utils import mobile_format, format_message
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
 
@@ -60,6 +60,7 @@ class GladmindsResources(Resource):
                 message = 'CLOSE {0} {1}'.format(customer_id, ucn)
                 logger.info('Message to send: ' + message)
         phone_number = mobile_format(phone_number)
+        message = format_message(message)
         audit.audit_log(action='RECIEVED', sender=phone_number, reciever='+1 469-513-9856', message=message, status='success')
         logger.info('Recieved Message from phone number: {0} and message: {1}'.format(phone_number, message))
         try:
@@ -100,7 +101,7 @@ class GladmindsResources(Resource):
                 registration_date=registration_date)
             customer.save()
         # Please update the template variable before updating the keyword-argument
-        message = smsparser.render_sms_template(status='send', keyword=sms_dict['keyword'], customer_name=customer_name, customer_id=gladmind_customer_id)
+        message = smsparser.render_sms_template(status='send', keyword=sms_dict['keyword'], customer_id=gladmind_customer_id)
         phone_number = utils.get_phone_number_format(phone_number)
         logging.info("customer is registered with message %s" % message)
         send_registration_detail.delay(phone_number=phone_number, message=message)
@@ -173,6 +174,8 @@ class GladmindsResources(Resource):
         customer_phone_number = None
         customer_message = None
         sap_customer_id = sms_dict.get('sap_customer_id', None)
+        if not self.is_valid_data(customer_id=sap_customer_id, sa_phone=phone_number):
+            return False
         try:
             vin = self.get_vin(sap_customer_id)
             dealer_data = self.validate_dealer(phone_number)
@@ -189,7 +192,7 @@ class GladmindsResources(Resource):
             logger.info(valid_coupon.service_type)
             if len(in_progress_coupon) > 0:
                 logger.info("Validate_coupon: in_progress_coupon")
-                dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=in_progress_coupon[0].service_type)
+                dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=in_progress_coupon[0].service_type, customer_id=sap_customer_id)
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=in_progress_coupon[0].unique_service_coupon, service_type=in_progress_coupon[0].service_type)
             if valid_coupon:
                 logger.info("Validate_coupon: valid_coupon.service_type")
@@ -199,8 +202,8 @@ class GladmindsResources(Resource):
             else:
                 logger.info("Validate_coupon: ELSE PART")
                 requested_coupon = common.CouponData.objects.get(vin__vin=vin, service_type=service_type)
-                dealer_message = templates.get_template('SEND_SA_EXPIRED_COUPON').format(next_service_type=valid_coupon.service_type, service_type=requested_coupon.service_type)
-                customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(service_coupon=requested_coupon.unique_service_coupon, service_type=requested_coupon.service_type, next_coupon=valid_coupon.unique_service_coupon, next_service_type=valid_coupon.service_type)
+                dealer_message = templates.get_template('SEND_SA_EXPIRED_COUPON').format(service_type=requested_coupon.service_type, customer_id=sap_customer_id)
+                customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(service_type=requested_coupon.service_type)
             send_coupon_detail_customer.delay(phone_number=utils.get_phone_number_format(customer_phone_number), message=customer_message)
             audit.audit_log(reciever=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
         except IndexError as ie:
@@ -224,8 +227,13 @@ class GladmindsResources(Resource):
     def close_coupon(self, sms_dict, phone_number):
         sa_object = self.validate_dealer(phone_number)
         unique_service_coupon = sms_dict['usc']
-        message = None
         sap_customer_id = sms_dict.get('sap_customer_id', None)
+        message = None
+        if not self.is_valid_data(customer_id=sap_customer_id, coupon=unique_service_coupon, sa_phone=phone_number):
+            return False
+        if not self.is_sa_initiator(unique_service_coupon, phone_number):
+            transaction.commit()
+            return False
         try:
             vin = self.get_vin(sap_customer_id)
             coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
@@ -234,11 +242,7 @@ class GladmindsResources(Resource):
             coupon_object.closed_date = datetime.now()
             coupon_object.save()
             common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, service_type__lt=coupon_object.service_type).update(status=3)
-            message = templates.get_template('SEND_SA_CLOSE_COUPON')
-            customer_message = templates.get_template('SEND_CUSTOMER_CLOSE_COUPON').format(vin=vin, sa_name=sa_object.name, sa_phone_number=phone_number)
-            phone_number = utils.get_phone_number_format(phone_number)
-            send_close_sms_customer.delay(phone_number=customer_phone_number, message=customer_message)
-            audit.audit_log(reciever=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
+            message = templates.get_template('SEND_SA_CLOSE_COUPON').format(customer_id=sap_customer_id, usc=unique_service_coupon)
         except Exception as ex:
             message = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
@@ -257,10 +261,43 @@ class GladmindsResources(Resource):
                 raise
         except:
             message = 'You are not an authorised user to avail this service'
-            send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpUnauthorized("Not an authorised user"))
         return service_advisor_obj
+
+    def is_sa_initiator(self, coupon_id, phone_sa):
+        coupon_data = common.CouponData.objects.filter(unique_service_coupon = coupon_id)
+        if coupon_data:
+            coupon_initiator = common.ServiceAdvisor.objects.filter(phone_number = coupon_data[0].sa_phone_number)
+            return phone_sa == coupon_initiator[0].phone_number
+        return False
+    
+    def is_valid_data(self, customer_id=None, coupon=None, sa_phone=None):
+        '''
+            Error During wrong entry of Customer ID or UCN (message to the service advisor)
+            -    "Wrong Customer ID; please check"
+            -    "Wrong UCN; please check"
+            -    "Wrong Customer ID and wrong UCN; please check"
+        '''
+        coupon_obj = customer_obj = message = None
+        if coupon: coupon_obj = common.CouponData.objects.filter(unique_service_coupon=coupon)
+        if customer_id: customer_obj = common.ProductData.objects.filter(sap_customer_id=customer_id)
+        
+        if ((customer_id and customer_obj) and (coupon and coupon_obj) and coupon_obj[0].vin.vin != customer_obj[0].vin) or\
+            ((customer_id and not customer_obj) and (coupon and not coupon_obj)):
+            message=templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')
+        elif customer_id and not customer_obj:
+            message=templates.get_template('SEND_SA_WRONG_CUSTOMER')
+        elif coupon and not coupon_obj:
+            message=templates.get_template('SEND_SA_WRONG_UCN')
+
+        if message:
+            send_invalid_keyword_message.delay(phone_number=sa_phone, message=message)
+            audit.audit_log(reciever=sa_phone, action=AUDIT_ACTION, message=message)
+            logger.info("Message sent to SA : " + message)
+            return False
+        return True
+
 
     def get_brand_data(self, sms_dict, phone_number):
         brand_id = sms_dict['brand_id']
