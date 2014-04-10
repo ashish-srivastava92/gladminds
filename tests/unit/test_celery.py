@@ -11,3 +11,8 @@ class TestCelery(GladmindsResourceTestCase):
     def test_send_sms(self):
         result = send_service_detail.delay(phone_number='99999999', message='Test Message')
         self.assertTrue(result.successful())
+        
+    @override_settings(SMS_CLIENT = "MOCK_FAIL")
+    def test_send_sms_fail(self):
+        result = send_service_detail.delay(phone_number='99999999', message='Test Message')
+        self.assertFalse(result.successful())
