@@ -242,7 +242,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC002')
         self.assertEqual(in_progess_coupon.status, 3, "Coupon should be in unused State")
 
-    def _test_check_coupon_sa(self):
+    def test_check_coupon_sa(self):
         resp = self.api_client.post(
             uri=self.MESSAGE_URL, data=self.CHECK_COUPON)
         self.assertHttpOK(resp)
@@ -250,12 +250,12 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
             uri=self.MESSAGE_URL, data=self.CHECK_INVALID_COUPON)
         self.assertHttpUnauthorized(resp)
 
-    def _test_valid_coupon(self):
+    def test_valid_coupon(self):
         resp = self.api_client.post(
             uri=self.MESSAGE_URL, data=self.CHECK_VALID_COUPON)
         self.assertHttpOK(resp)
 
-    def _test_close_coupon(self):
+    def test_close_coupon(self):
         resp = self.api_client.post(
             uri=self.MESSAGE_URL, data=self.CLOSE_COUPON)
         self.assertHttpOK(resp)
