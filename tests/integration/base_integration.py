@@ -83,6 +83,10 @@ class GladmindsResourceTestCase(ResourceTestCase):
         customer_obj = common.GladMindUsers(phone_number=kwargs['phone_number'])
         customer_obj.save()
         return customer_obj
+    
+    def filter_coupon_obj(self, coupon_id=None):
+        coupon_obj = common.CouponData.objects.filter(unique_service_coupon=coupon_id)
+        return coupon_obj[0]
         
         
         
