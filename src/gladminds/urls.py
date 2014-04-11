@@ -16,6 +16,7 @@ api_v1.register(r.UserResources())
 urlpatterns = patterns('',
   url(r'^dealers/$', 'django.contrib.auth.views.login', {'template_name': 'dealer/login.html'}),
   url(r'^dealers/logout$', 'django.contrib.auth.views.logout', {'template_name': 'dealer/login.html'}),
+  url(r'api/doc/', include('tastypie_swagger.urls', namespace='tastypie_swagger')),
 )
 
 urlpatterns += patterns('gladminds',
