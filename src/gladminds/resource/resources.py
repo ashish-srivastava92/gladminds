@@ -345,7 +345,6 @@ class UserResources(GladmindsBaseResource):
     class Meta:
         queryset = common.GladMindUsers.objects.all()
         resource_name = 'users'
-        authentication = AfterBuyAuthentication()
     
     def prepend_urls(self):
         return [
