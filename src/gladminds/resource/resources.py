@@ -174,11 +174,11 @@ class GladmindsResources(Resource):
         customer_phone_number = None
         customer_message = None
         sap_customer_id = sms_dict.get('sap_customer_id', None)
+        dealer_data = self.validate_dealer(phone_number)
         if not self.is_valid_data(customer_id=sap_customer_id, sa_phone=phone_number):
             return False
         try:
             vin = self.get_vin(sap_customer_id)
-            dealer_data = self.validate_dealer(phone_number)
             valid_coupon = common.CouponData.objects.select_for_update().filter(Q(status=1) |  Q(status=4), vin__vin=vin, valid_kms__gte=actual_kms).select_related ('vin', 'customer_phone_number__phone_number').order_by('service_type')
             if len(valid_coupon):
                 valid_coupon = valid_coupon[0]
@@ -194,10 +194,10 @@ class GladmindsResources(Resource):
                 logger.info("Validate_coupon: in_progress_coupon")
                 dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=in_progress_coupon[0].service_type, customer_id=sap_customer_id)
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=in_progress_coupon[0].unique_service_coupon, service_type=in_progress_coupon[0].service_type)
-            if valid_coupon:
+            elif valid_coupon:
                 logger.info("Validate_coupon: valid_coupon.service_type")
                 self.update_coupon(valid_coupon, actual_kms, dealer_data, 4)
-                dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=valid_coupon.service_type)
+                dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=valid_coupon.service_type, customer_id=sap_customer_id)
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=valid_coupon.unique_service_coupon, service_type=valid_coupon.service_type)
             else:
                 logger.info("Validate_coupon: ELSE PART")
@@ -345,7 +345,6 @@ class UserResources(GladmindsBaseResource):
     class Meta:
         queryset = common.GladMindUsers.objects.all()
         resource_name = 'users'
-        authentication = AfterBuyAuthentication()
     
     def prepend_urls(self):
         return [
