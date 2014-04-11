@@ -15,6 +15,7 @@ fp = open('afterbuy/www/index.html', 'w')
 fp.write(file_content)
 fp.close()
 
+
 fp = open('afterbuy/www/js/inc.js', 'r')
 file_content = fp.read().replace('var ipaddress = "http://localhost:8000/gm/";', ip_address)
 file_content = file_content.replace('http://', 'https://')
