@@ -169,7 +169,7 @@ INSTALLED_APPS = (
     'djcelery',
     'corsheaders',
     'storages',
-    
+    'tastypie_swagger',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
@@ -179,6 +179,7 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
 LOGIN_REDIRECT_URL = '/dealers/getUrl'
 
+TASTYPIE_SWAGGER_API_MODULE = 'gladminds.urls.api_v1'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
