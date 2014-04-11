@@ -194,10 +194,10 @@ class GladmindsResources(Resource):
                 logger.info("Validate_coupon: in_progress_coupon")
                 dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=in_progress_coupon[0].service_type, customer_id=sap_customer_id)
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=in_progress_coupon[0].unique_service_coupon, service_type=in_progress_coupon[0].service_type)
-            if valid_coupon:
+            elif valid_coupon:
                 logger.info("Validate_coupon: valid_coupon.service_type")
                 self.update_coupon(valid_coupon, actual_kms, dealer_data, 4)
-                dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=valid_coupon.service_type)
+                dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=valid_coupon.service_type, customer_id=sap_customer_id)
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=valid_coupon.unique_service_coupon, service_type=valid_coupon.service_type)
             else:
                 logger.info("Validate_coupon: ELSE PART")
