@@ -278,13 +278,12 @@ class ProductPurchaseFeed(BaseFeed):
                                 phone_number=customer_ph_num)
                     customer_data.phone_number = phone_number
                     customer_data.save()
-                    post_save.disconnect(update_coupon_data, sender=common.ProductData)
                     product_data.customer_phone_number = customer_data
+                    post_save.disconnect(update_coupon_data, sender=common.ProductData)
                     product_data.save()
                     post_save.connect(update_coupon_data, sender=common.ProductData)
-                    product_data.save()
                 except Exception as ex: 
-                    logging.info("Expection: New Number of customer is not updated %s" % ex)
+                    logger.info("Expection: New Number of customer is not updated %s" % ex)
                 return True
         except Exception as ex:
             logger.info(
@@ -299,6 +298,7 @@ class ProductPurchaseFeed(BaseFeed):
                     vin=product['vin'])
 
                 if self.update_customer_number(product_data, product['customer_phone_number']):
+                    logger.info("Update Customer Number")
                     continue
                 try:
                     customer_data = common.GladMindUsers.objects.get(
@@ -384,7 +384,7 @@ def get_feed_status(total_feeds, failed_feeds):
 def update_coupon_data(sender, **kwargs):
     from gladminds.tasks import send_on_product_purchase
     instance = kwargs['instance']
-    logging.info("triggered update_coupon_data")
+    logger.info("triggered update_coupon_data")
     if instance.customer_phone_number:
         product_purchase_date = instance.product_purchase_date
         vin = instance.vin
