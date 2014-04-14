@@ -3,8 +3,8 @@
 cd afterbuy_script
 sudo rm -r afterbuy
 sudo rm -r afterbuy-ui
+git clone git@git.labs.hashedin.com:gladminds-afterbuy/afterbuyui.git afterbuy-ui
 phonegap create afterbuy -n afterbuy -i com.gladminds.afterbuy
-git clone git@git.labs.hashedin.com:gladminds/afterbuy.git afterbuy-ui
 sudo cp -r afterbuy-ui/* afterbuy/www 
 sudo python parse_afterbuy.py $1  
 cd afterbuy 
