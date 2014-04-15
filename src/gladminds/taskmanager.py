@@ -1,8 +1,9 @@
-from datetime import datetime
 from django.db import models, transaction
 from gladminds import audit, utils, message_template as templates
 from gladminds.models import common, logs
 from datetime import datetime, timedelta
+from gladminds.models.common import CouponData
+from django.utils import timezone
 
 AUDIT_ACTION = "SENT TO QUEUE"
 
@@ -48,8 +49,21 @@ def get_customers_to_send_reminder_by_admin(*args, **kwargs):
     transaction.commit()
 
 def expire_service_coupon(*args, **kwargs):
-    today = datetime.now()
-    common.CouponData.objects.filter(mark_expired_on__lt = today.date()).update(status=3)
+    today = timezone.now()
+    threat_coupons = CouponData.objects.filter(mark_expired_on__lt = today.date())
+    for coupon in threat_coupons:
+        #If the coupon was initiated, it will expire if initiated more than 30days ago.
+        if coupon.status == 4:
+            print coupon.unique_service_coupon, coupon.actual_service_date, "==========#######"
+            extended_date = coupon.actual_service_date + timedelta(days=30)
+            if extended_date < today:
+                coupon.status = 3
+                coupon.save()
+        #If the coupon is unused and crossed the days limit, it will expire.
+        else:
+            print coupon.unique_service_coupon, coupon.actual_service_date, "==================="
+            coupon.status = 3
+            coupon.save()
 
 def import_data_from_sap(*args, **kwargs):
     pass
