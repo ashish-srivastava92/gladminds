@@ -9,13 +9,13 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gladmindsdb',
+        'NAME': 'gladmindsdb_copy',
         'USER': 'gladminds',
         'PASSWORD': 'gladminds123',
         'HOST': 'gladminds-qa.chnnvvffqwop.us-east-1.rds.amazonaws.com',
