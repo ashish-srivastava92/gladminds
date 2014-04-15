@@ -7,7 +7,7 @@ from gladminds.models import common
 @login_required(login_url='/dealers/')
 def action(request, params):
     if request.method == 'GET':
-        service_advisors = common.ServiceAdvisorDealerRelationship.objects.filter(dealer_id=request.user)
+        service_advisors = common.ServiceAdvisorDealerRelationship.objects.filter(dealer_id=request.user, status='Y')
         sa_phone_list = []
         for service_advisor in service_advisors:
             sa_phone_list.append(service_advisor.service_advisor_id)

@@ -57,7 +57,6 @@ class CSVFeedByFile(GladmindsUnitTestCase):
         from os.path import isfile, join
         file_path = settings.DATA_CSV_PATH
         only_file = [f for f in listdir(file_path) if isfile(join(file_path, f))]
-        print only_file
         for filename in only_file:
             actual_file_name = filename.split('-')
             current_file_path = file_path + "/" + filename
