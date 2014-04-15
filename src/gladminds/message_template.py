@@ -23,14 +23,14 @@ def get_message_template_mapper():
                            'handler':'customer_service_detail',
                            'auth_rule': ['customer']
                            },
-                'check':{
+                'a':{
                          'receive': get_template('RCV_SA_COUPON_VALIDATION'),
                          'send':get_template('SEND_SA_VALID_COUPON'),
                          'invalid':get_template('SEND_SA_EXPIRED_COUPON'),
                          'handler':'validate_coupon',
                          'auth_rule': ['sa']
                          },
-                'close':{
+                'c':{
                             'receive': get_template('RCV_SA_COUPON_COMPLETE'),
                             'send':get_template('SEND_SA_CLOSE_COUPON'),
                             'invalid':get_template('SEND_INVALID_MESSAGE'),

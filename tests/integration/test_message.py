@@ -103,18 +103,18 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         sa_obj = self.get_service_advisor_obj(service_advisor_id='DEALER001SA001', name="SA001", phone_number='9999999')
         self.get_dealer_service_advisor_obj(dealer_data=self.dealer_obj, service_advisor_id=sa_obj, status='Y')
 
-        self.MSG_CHECK_COUPON = "CHECK TESTVECHILEID00002 50 2"
+        self.MSG_CHECK_COUPON = "A TESTVECHILEID00002 50 2"
         self.PHONE_NUMBER = "+SA0000000000"
         self.CHECK_COUPON = {
             'text': self.MSG_CHECK_COUPON, 'phoneNumber': self.PHONE_NUMBER}
         self.INVALID_PHONE_NUMBER = "+0000000000"
         self.CHECK_INVALID_COUPON = {'text': self.MSG_CHECK_COUPON,
                                      'phoneNumber': self.INVALID_PHONE_NUMBER}
-        self.VALID_COUPON = "CHECK TESTVECHILEID00002 50 3"
+        self.VALID_COUPON = "A TESTVECHILEID00002 50 3"
         self.CHECK_VALID_COUPON = {
             'text': self.VALID_COUPON, 'phoneNumber': self.PHONE_NUMBER}
         self.CLOSE_COUPON = {
-            'text': 'CLOSE TESTVECHILEID00002 COUPON005', 'phoneNumber': self.PHONE_NUMBER}
+            'text': 'C TESTVECHILEID00002 COUPON005', 'phoneNumber': self.PHONE_NUMBER}
 
     def test_simple_inprogress_from_unused(self):
         phone_number = "9999999"
@@ -122,7 +122,6 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         obj = GladmindsResources()
         sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'SAP001'}
         obj.validate_coupon(sms_dict, phone_number)
-
         in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC001')
         self.assertEqual(in_progess_coupon.status, 4, "in_progess_coupon status should be 4")
 

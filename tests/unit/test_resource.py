@@ -39,16 +39,16 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
                                          , valid_kms=6000, service_type = 3)
         
     def test_dispatch_gladminds(self):
-        result = client.post('/v1/messages', data = {'text':'CHECK SAP001 500 1', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
-        result = client.post('/v1/messages', data = {'text':'CHECK SAP001 500', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data = {'text':'A SAP001 500', 'phoneNumber' : '4444861111'})
         self.assertHttpBadRequest(result)
-        result = client.post('/v1/messages', data = {'text':'CLOSE TESTVECHILEID00002', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data = {'text':'C TESTVECHILEID00002', 'phoneNumber' : '4444861111'})
         self.assertHttpBadRequest(result)
         
     def test_format_message(self):
-        result = client.post('/v1/messages', data = {'text':'   CHECK    SAP001   500   1    ', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data = {'text':'   A    SAP001   500   1    ', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
         
@@ -57,38 +57,38 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
             Coupon has been initiated by dealer - UMOTO
             Only UMOTO is allowed to close the coupon
         '''
-        result = client.post('/v1/messages', data = {'text':'CHECK SAP001 500 1', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
 #       Below Dealer will not be able to close the coupon
-        result = client.post('/v1/messages', data = {'text':'CLOSE SAP001 COUPON005', 'phoneNumber' : '9999999999'})
+        result = client.post('/v1/messages', data = {'text':'C SAP001 COUPON005', 'phoneNumber' : '9999999999'})
         self.assertTrue('false' in result.content)
         self.assertHttpOK(result)
 #       Below is the initiator and the coupon will be closed
-        result = client.post('/v1/messages', data = {'text':'CLOSE SAP001 COUPON005', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data = {'text':'C SAP001 COUPON005', 'phoneNumber' : '4444861111'})
         self.assertTrue('true' in result.content)
         self.assertHttpOK(result)
         
     def test_is_valid_data(self):
-        result = client.post('/v1/messages', data = {'text':'CHECK SAP001 500 1', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
-        result = client.post('/v1/messages', data = {'text':'CHECK SAP002 500 1', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data = {'text':'A SAP002 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
-        result = client.post('/v1/messages', data = {'text':'CLOSE SAP002 COUPON005', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data = {'text':'C SAP002 COUPON005', 'phoneNumber' : '4444861111'})
         self.assertTrue('false' in result.content)
         self.assertHttpOK(result)
-        result = client.post('/v1/messages', data = {'text':'CLOSE SAP001 COUPON004', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data = {'text':'C SAP001 COUPON004', 'phoneNumber' : '4444861111'})
         self.assertTrue('false' in result.content)
         self.assertHttpOK(result)
         
     def test_expire_or_close_less_kms_coupon(self):
-        result = client.post('/v1/messages', data = {'text':'CHECK SAP001 500 1', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
         #Coupon validation is tested for 3rd service coupon "COUPON007" with coupon for service 2 "COUPON006" unused.
-        result = client.post('/v1/messages', data = {'text':'CHECK SAP001 5500 3', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data = {'text':'A SAP001 5500 3', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
         #The coupon for service 2 should have been expired.
