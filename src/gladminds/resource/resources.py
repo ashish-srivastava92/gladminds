@@ -52,12 +52,12 @@ class GladmindsResources(Resource):
                 logger.info('Validating the service coupon for customer {0}'.format(customer_id))
                 odo_read = request.POST.get('odoRead')
                 service_type = request.POST.get('serviceType')
-                message = 'CHECK {0} {1} {2}'.format(customer_id, odo_read, service_type)
+                message = 'A {0} {1} {2}'.format(customer_id, odo_read, service_type)
                 logger.info('Message to send: ' + message)
             else:
                 ucn = request.POST.get('ucn')
                 logger.info('Terminating the service coupon {0}'.format(ucn))
-                message = 'CLOSE {0} {1}'.format(customer_id, ucn)
+                message = 'C {0} {1}'.format(customer_id, ucn)
                 logger.info('Message to send: ' + message)
         phone_number = mobile_format(phone_number)
         message = format_message(message)
@@ -234,6 +234,7 @@ class GladmindsResources(Resource):
         if not self.is_valid_data(customer_id=sap_customer_id, coupon=unique_service_coupon, sa_phone=phone_number):
             return False
         if not self.is_sa_initiator(unique_service_coupon, phone_number):
+            logger.info("SA is not the coupon initiator.")
             transaction.commit()
             return False
         try:
@@ -347,6 +348,7 @@ class UserResources(GladmindsBaseResource):
     class Meta:
         queryset = common.GladMindUsers.objects.all()
         resource_name = 'users'
+#        authentication = AfterBuyAuthentication()
     
     def prepend_urls(self):
         return [

@@ -90,6 +90,8 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         #Coupon validation is tested for 3rd service coupon "COUPON007" with coupon for service 2 "COUPON006" unused.
         result = client.post('/v1/messages', data = {'text':'A SAP001 5500 3', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
+        result = client.post('/v1/messages', data = {'customerId': 'SAP001', 'action' : 'validate', 'odoRead' : 5500, 'serviceType' : 3, 'advisorMobile' : '4444861111'})
+        self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
         #The coupon for service 2 should have been expired.
         coupon_obj = self.filter_coupon_obj(coupon_id='COUPON006')
