@@ -18,6 +18,7 @@ from tastypie.exceptions import ImmediateHttpResponse
 from django.db.models import Q
 import logging
 from gladminds.utils import mobile_format, format_message
+from django.conf import settings
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
 
@@ -173,7 +174,7 @@ class GladmindsResources(Resource):
         dealer_message = None
         customer_phone_number = None
         customer_message = None
-        customer_message_countdown = 1800
+        customer_message_countdown = settings.DELAY_IN_CUSTOMER_UCN_MESSAGE
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         dealer_data = self.validate_dealer(phone_number)
         if not self.is_valid_data(customer_id=sap_customer_id, sa_phone=phone_number):
