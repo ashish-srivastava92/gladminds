@@ -4,6 +4,7 @@ from django.test.client import Client
 from django.conf import settings
 from django.contrib.auth.models import User
 from integration.base_integration import GladmindsResourceTestCase
+from datetime import datetime, timedelta
 
 client = Client()
 
@@ -26,18 +27,23 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         service_advisor1 = self.get_service_advisor_obj(dealer_data = dealer_obj, service_advisor_id = 'SA002Test'\
                                                  ,name='UMOTOR', phone_number='+919999999999', status='Y')
         self.get_dealer_service_advisor_obj(dealer_data=dealer_obj, service_advisor_id=service_advisor1, status='Y')
-        self.get_coupon_obj(unique_service_coupon='COUPON005', product_data=product_obj, valid_days=30\
-                                         , valid_kms=500, service_type = 1)
+        self.get_coupon_obj(unique_service_coupon='COUPON005', vin=product_obj, valid_days=30, valid_kms=500\
+                            , service_type = 1, status=1, mark_expired_on=datetime.now()-timedelta(days=2)\
+                            , actual_service_date=datetime.now()-timedelta(days=20))
         customer_obj1 = self.get_customer_obj(phone_number='8888888')
         product_obj1 = self.get_product_obj(vin="VINXXX002", producttype_data=product_type_obj, dealer_data = dealer_obj\
                                            , customer_phone_number = customer_obj1, sap_customer_id='SAP002')
-        self.get_coupon_obj(unique_service_coupon='COUPON004', product_data=product_obj1, valid_days=30\
-                                         , valid_kms=500, service_type = 1)
-        self.get_coupon_obj(unique_service_coupon='COUPON006', product_data=product_obj, valid_days=30\
-                                         , valid_kms=3000, service_type = 2)
-        self.get_coupon_obj(unique_service_coupon='COUPON007', product_data=product_obj, valid_days=30\
-                                         , valid_kms=6000, service_type = 3)
+        self.get_coupon_obj(unique_service_coupon='COUPON004', vin=product_obj1, valid_days=30, valid_kms=500\
+                            , service_type = 1, status=1, mark_expired_on=datetime.now()-timedelta(days=2)\
+                            , actual_service_date=datetime.now()-timedelta(days=20))
+        self.get_coupon_obj(unique_service_coupon='COUPON006', vin=product_obj, valid_days=30, valid_kms=3000\
+                            , service_type = 2, status=1, mark_expired_on=datetime.now()+timedelta(days=30)\
+                            , actual_service_date=datetime.now()-timedelta(days=20))
+        self.get_coupon_obj(unique_service_coupon='COUPON007', vin=product_obj, valid_days=30, valid_kms=6000\
+                            , service_type = 3, status=1, mark_expired_on=datetime.now()+timedelta(days=60)\
+                            , actual_service_date=datetime.now()-timedelta(days=20))
         
+                
     def test_dispatch_gladminds(self):
         result = client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
@@ -99,4 +105,14 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         #The 3rd service coupon should be in progress.
         coupon_obj = self.filter_coupon_obj(coupon_id='COUPON007')
         self.assertEqual(coupon_obj.status, 4)
+        
+    def test_inprogress_coupon(self):
+        result = client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
+        self.assertHttpOK(result)
+        self.assertTrue('true' in result.content)
+        coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
+        result = client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
+        self.assertHttpOK(result)
+        self.assertTrue('true' in result.content)
+        
         

@@ -40,8 +40,7 @@ class GladmindsResourceTestCase(ResourceTestCase):
                                and resp.status_code <= 299, msg)
 
     def get_coupon_obj(self, **kwargs):
-        coupon_obj = common.CouponData(unique_service_coupon=kwargs['unique_service_coupon'],
-                                vin=kwargs['product_data'], valid_days=kwargs['valid_days'], valid_kms=kwargs['valid_kms'], service_type=kwargs['service_type'], status='1')
+        coupon_obj = common.CouponData(**kwargs)
         coupon_obj.save()
         return coupon_obj
 
