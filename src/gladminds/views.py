@@ -3,7 +3,6 @@ from django.contrib.auth.views import login_required
 from django.template.context import RequestContext
 from django.http.response import HttpResponseRedirect
 from gladminds.models import common
-from reportlab.graphics.shapes import NotImplementedError
 
 @login_required(login_url='/dealers/')
 def action(request, params):
@@ -15,7 +14,7 @@ def action(request, params):
         return render_to_response('dealer/advisor_actions.html', {'phones' : sa_phone_list}\
                                   , context_instance=RequestContext(request))
     elif request.method == 'POST':
-        NotImplementedError()
+        raise NotImplementedError()
     
 @login_required(login_url='/dealers/')
 def redirect(request):
