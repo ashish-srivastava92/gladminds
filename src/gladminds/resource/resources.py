@@ -168,9 +168,9 @@ class GladmindsResources(Resource):
         valid_coupon.save()
 
     def update_inprogress_coupon(self, coupon, actual_kms, dealer_data):
-        validity_date = coupon.mark_expired_on
+        validity_date = coupon.mark_expired_on.date()
         today = timezone.now()
-        if validity_date >= today:
+        if validity_date >= today.date():
             self.update_coupon(coupon, actual_kms, dealer_data, 4, today)
         else:
             coupon.sa_phone_number = dealer_data

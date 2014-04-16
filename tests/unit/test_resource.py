@@ -108,18 +108,25 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         self.assertEqual(coupon_obj.status, 4)
         
     def test_inprogress_coupon(self):
-        result = client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
-        self.assertHttpOK(result)
-        self.assertTrue('true' in result.content)
-        #Change the expiry date.
+        client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
+        #Change the expiry date and check for new service date.
         coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
         coupon_obj.actual_service_date = datetime.now()-timedelta(days=20)
         coupon_obj.mark_expired_on = datetime.now()+timedelta(days=2)
         coupon_obj.save()
-        result = client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
-        self.assertHttpOK(result)
-        self.assertTrue('true' in result.content)
+        client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '9999999999'})
         coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
         self.assertEqual(coupon_obj.actual_service_date.date(), datetime.now().date())
+        self.assertEqual(coupon_obj.sa_phone_number.phone_number, '+919999999999')
+        #Change the expiry date and actual service date to check new dealer assigned only.
+        coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
+        coupon_obj.actual_service_date = datetime.now()-timedelta(days=20)
+        coupon_obj.mark_expired_on = datetime.now()-timedelta(days=2)
+        coupon_obj.save()
+        client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
+        coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
+        self.assertEqual(coupon_obj.sa_phone_number.phone_number, '+914444861111')
+        self.assertEqual(coupon_obj.actual_service_date.date(), datetime.now().date()-timedelta(days=20))
+        
         
         
