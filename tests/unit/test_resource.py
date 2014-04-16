@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from integration.base_integration import GladmindsResourceTestCase
 from datetime import datetime, timedelta
+from django.utils import timezone
 
 client = Client()
 
@@ -110,9 +111,15 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         result = client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
+        #Change the expiry date.
         coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
+        coupon_obj.actual_service_date = datetime.now()-timedelta(days=20)
+        coupon_obj.mark_expired_on = datetime.now()+timedelta(days=2)
+        coupon_obj.save()
         result = client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
+        coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
+        self.assertEqual(coupon_obj.actual_service_date.date(), datetime.now().date())
         
         

@@ -18,6 +18,7 @@ from tastypie.exceptions import ImmediateHttpResponse
 from django.db.models import Q
 import logging
 from gladminds.utils import mobile_format, format_message
+from django.utils import timezone
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
 
@@ -168,7 +169,7 @@ class GladmindsResources(Resource):
 
     def update_inprogress_coupon(self, coupon, actual_kms, dealer_data):
         validity_date = coupon.mark_expired_on
-        today = datetime.now()
+        today = timezone.now()
         if validity_date >= today:
             self.update_coupon(coupon, actual_kms, dealer_data, 4, today)
         else:
