@@ -104,7 +104,7 @@ class GladmindsResources(Resource):
         # Please update the template variable before updating the keyword-argument
         message = smsparser.render_sms_template(status='send', keyword=sms_dict['keyword'], customer_id=gladmind_customer_id)
         phone_number = utils.get_phone_number_format(phone_number)
-        logging.info("customer is registered with message %s" % message)
+        logger.info("customer is registered with message %s" % message)
         send_registration_detail.delay(phone_number=phone_number, message=message)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
@@ -135,7 +135,7 @@ class GladmindsResources(Resource):
             message = ', '.join(msg_list)
         except Exception as ex:
             message = smsparser.render_sms_template(status='invalid', keyword=sms_dict['keyword'], sap_customer_id=sap_customer_id)
-        logging.info("Send Service detail %s" % message)
+        logger.info("Send Service detail %s" % message)
         phone_number = utils.get_phone_number_format(phone_number)
         send_service_detail.delay(phone_number=phone_number, message=message)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
@@ -145,12 +145,25 @@ class GladmindsResources(Resource):
         product_obj = common.ProductData.objects.filter(vin=vin).select_related('customer_phone_number__phone_number')
         return product_obj[0].customer_phone_number.phone_number
 
-    def expire_less_kms_coupon(self, actual_kms, vin):
+    def update_higher_range_coupon(self, kms, vin):
         '''
-            Expire those coupon whose kms limit is small then actual kms limit
+            Update those coupon have higher value than the least in progress
+            coupon. These case existed because some time user add higher value
+            of kilometer.
         '''
-        expire_coupon = common.CouponData.objects.filter(status=1, vin__vin=vin, valid_kms__lt=actual_kms).update(status=3)
-        logger.info("%s are expired" % expire_coupon)
+        updated_coupon = common.CouponData.objects\
+                        .filter(Q(status=4) | Q(status=5), vin__vin=vin, valid_kms__gt=kms)\
+                        .update(status=1)
+        logger.info("%s have higher KMS range" % updated_coupon)
+
+    def update_exceed_limit_coupon(self, actual_kms, vin):
+        '''
+            Exceed Limit those coupon whose kms limit is small then actual kms limit
+        '''
+        exceed_limit_coupon = common.CouponData.objects\
+            .filter(Q(status=1) | Q(status=4), vin__vin=vin, valid_kms__lt=actual_kms)\
+            .update(status=5)
+        logger.info("%s are exceed limit coupon" % exceed_limit_coupon)
 
     def get_vin(self, sap_customer_id):
         try:
@@ -160,7 +173,8 @@ class GladmindsResources(Resource):
         except Exception as ax:
             logger.error("Vin is not in customer_product_data Error %s " % ax)
 
-    def update_coupon(self, valid_coupon, actual_kms, dealer_data, status, update_time=datetime.now()):
+    def update_coupon(self, valid_coupon, actual_kms, dealer_data, status,\
+                                                 update_time=datetime.now()):
         valid_coupon.actual_kms = actual_kms
         valid_coupon.actual_service_date = update_time
         valid_coupon.status = status
@@ -181,23 +195,31 @@ class GladmindsResources(Resource):
             return False
         try:
             vin = self.get_vin(sap_customer_id)
-            valid_coupon = common.CouponData.objects.select_for_update().filter(Q(status=1) |  Q(status=4), vin__vin=vin, valid_kms__gte=actual_kms).select_related ('vin', 'customer_phone_number__phone_number').order_by('service_type')
-            if len(valid_coupon):
+            self.update_exceed_limit_coupon(actual_kms, vin)
+            valid_coupon = common.CouponData.objects.select_for_update()\
+                           .filter(Q(status=1) | Q(status=4) | Q(status=5), vin__vin=vin, valid_kms__gte=actual_kms) \
+                           .select_related('vin', 'customer_phone_number__phone_number').order_by('service_type')
+
+            if len(valid_coupon) > 1:
+                self.update_higher_range_coupon(valid_coupon[0].valid_kms, vin)
+                valid_coupon = valid_coupon[0]
+            elif len(valid_coupon) > 0:
                 valid_coupon = valid_coupon[0]
 
-            in_progress_coupon = common.CouponData.objects.select_for_update().filter(vin__vin=vin, valid_kms__gte=actual_kms, status=4).select_related ('vin', 'customer_phone_number__phone_number').order_by('service_type')
-            self.expire_less_kms_coupon(actual_kms, vin)
+            in_progress_coupon = common.CouponData.objects.select_for_update()\
+                                 .filter(vin__vin=vin, valid_kms__gte=actual_kms, status=4) \
+                                 .select_related ('vin', 'customer_phone_number__phone_number') \
+                                 .order_by('service_type')
             try:
                 customer_phone_number = self.get_customer_phone_number_from_vin(vin) 
             except Exception as ax:
                 logger.error('Customer Phone Number is not stored in DB %s' % ax)
-            logger.info(valid_coupon.service_type)
             if len(in_progress_coupon) > 0:
                 logger.info("Validate_coupon: in_progress_coupon")
                 dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=in_progress_coupon[0].service_type, customer_id=sap_customer_id)
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=in_progress_coupon[0].unique_service_coupon, service_type=in_progress_coupon[0].service_type)
             elif valid_coupon:
-                logger.info("Validate_coupon: valid_coupon.service_type")
+                logger.info("Validate_coupon: valid_coupon")
                 self.update_coupon(valid_coupon, actual_kms, dealer_data, 4)
                 dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=valid_coupon.service_type, customer_id=sap_customer_id)
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=valid_coupon.unique_service_coupon, service_type=valid_coupon.service_type)
@@ -216,15 +238,12 @@ class GladmindsResources(Resource):
         except Exception as ex:
             dealer_message = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
-            logging.info("validate message send to SA %s" % dealer_message)
+            logger.info("validate message send to SA %s" % dealer_message)
             phone_number = utils.get_phone_number_format(phone_number)
             send_service_detail.delay(phone_number=phone_number, message=dealer_message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=dealer_message)
             transaction.commit()
         return True
-
-    def get_phone_number_format(self, phone_number):
-        return phone_number[-10:]
 
     @transaction.commit_manually()
     def close_coupon(self, sms_dict, phone_number):
@@ -249,7 +268,7 @@ class GladmindsResources(Resource):
         except Exception as ex:
             message = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
-            logging.info("Close coupon with message %s" % message)
+            logger.info("Close coupon with message %s" % message)
             phone_number = utils.get_phone_number_format(phone_number)
             send_coupon.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
