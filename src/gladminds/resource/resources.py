@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.conf.urls import url
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, transaction
@@ -18,7 +18,9 @@ from tastypie.exceptions import ImmediateHttpResponse
 from django.db.models import Q
 import logging
 from gladminds.utils import mobile_format, format_message
+from django.utils import timezone
 from django.conf import settings
+
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
 
@@ -53,12 +55,12 @@ class GladmindsResources(Resource):
                 logger.info('Validating the service coupon for customer {0}'.format(customer_id))
                 odo_read = request.POST.get('odoRead')
                 service_type = request.POST.get('serviceType')
-                message = 'CHECK {0} {1} {2}'.format(customer_id, odo_read, service_type)
+                message = 'A {0} {1} {2}'.format(customer_id, odo_read, service_type)
                 logger.info('Message to send: ' + message)
             else:
                 ucn = request.POST.get('ucn')
                 logger.info('Terminating the service coupon {0}'.format(ucn))
-                message = 'CLOSE {0} {1}'.format(customer_id, ucn)
+                message = 'C {0} {1}'.format(customer_id, ucn)
                 logger.info('Message to send: ' + message)
         phone_number = mobile_format(phone_number)
         message = format_message(message)
@@ -181,6 +183,15 @@ class GladmindsResources(Resource):
         valid_coupon.sa_phone_number = dealer_data
         valid_coupon.save()
 
+    def update_inprogress_coupon(self, coupon, actual_kms, dealer_data):
+        validity_date = coupon.mark_expired_on.date()
+        today = timezone.now()
+        if validity_date >= today.date():
+            self.update_coupon(coupon, actual_kms, dealer_data, 4, today)
+        else:
+            coupon.sa_phone_number = dealer_data
+            coupon.save()
+        
     @transaction.commit_manually()
     def validate_coupon(self, sms_dict, phone_number):
         actual_kms = int(sms_dict['kms'])
@@ -215,6 +226,7 @@ class GladmindsResources(Resource):
             except Exception as ax:
                 logger.error('Customer Phone Number is not stored in DB %s' % ax)
             if len(in_progress_coupon) > 0:
+                self.update_inprogress_coupon(in_progress_coupon[0], actual_kms, dealer_data)
                 logger.info("Validate_coupon: in_progress_coupon")
                 dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=in_progress_coupon[0].service_type, customer_id=sap_customer_id)
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=in_progress_coupon[0].unique_service_coupon, service_type=in_progress_coupon[0].service_type)
@@ -254,6 +266,7 @@ class GladmindsResources(Resource):
         if not self.is_valid_data(customer_id=sap_customer_id, coupon=unique_service_coupon, sa_phone=phone_number):
             return False
         if not self.is_sa_initiator(unique_service_coupon, phone_number):
+            logger.info("SA is not the coupon initiator.")
             transaction.commit()
             return False
         try:
@@ -367,6 +380,7 @@ class UserResources(GladmindsBaseResource):
     class Meta:
         queryset = common.GladMindUsers.objects.all()
         resource_name = 'users'
+#        authentication = AfterBuyAuthentication()
     
     def prepend_urls(self):
         return [

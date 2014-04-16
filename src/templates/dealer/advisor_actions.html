@@ -21,7 +21,11 @@
               <label for="advisorMobile">Service Advisor Mobile Number</label>
             </div>
             <div class="col-md-3 form-group">
-              <input type="input" class="form-control" name="advisorMobile" id="advisorMobile" placeholder="10 digit mobile number" required maxlength="10">
+              <select class="form-control" name="advisorMobile" id="advisorMobile">
+                {% for phone in phones %}
+                <option>{{phone}}</option>
+                {% endfor %}
+              </select>
             </div>
           </div>
           <div class="row">

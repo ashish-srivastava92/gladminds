@@ -17,6 +17,15 @@ ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
+#Update below constants for status of coupon
+COUPON_STATUS = {
+                 'unused' : 1,
+                 'closed' : 2,
+                 'expired' : 3,
+                 'inprogress' : 4
+                 }
+
+
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 
 TEMPLATE_CONTEXT_PROCESSORS = TCP + (
