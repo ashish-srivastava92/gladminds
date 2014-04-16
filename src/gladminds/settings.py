@@ -283,4 +283,5 @@ AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 # S3_URL = 'http://%s.s3-website-us-east-1.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 
 
-MOBILE_NUM_FORMAT = "+91"
+DELAY_IN_CUSTOMER_UCN_MESSAGE = 1800
+
