@@ -97,3 +97,19 @@ SAP_CRM_DETAIL = {
 COUPON_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl&v0"
 
 
+AFTER_BUY_CONSTANTS = {
+                       "username": 'support@gladminds.com',
+                       "password": 'gladminds123',
+                       "key_prefix": 'qa',
+                       "app_path": 'afterbuy_script/afterbuy.zip',
+                       "phonegap_build_url": 'https://build.phonegap.com/',
+                       "try_count": 300,
+                       "android_apk_loc": "afterbuy_script/qa_android_afterbuy.apk",
+                       "ios_apk_loc": "afterbuy_script/qa_ios_afterbuy.ipa",
+                       "create_method": "file",
+                       "package": "com.gladminds.afterbuyv1",
+                       "version": "0.1.0", 
+                       "title": "Afterbuy V1 App"
+                       }
+
+

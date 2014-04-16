@@ -19,6 +19,8 @@ from django.db.models import Q
 import logging
 from gladminds.utils import mobile_format, format_message
 from django.utils import timezone
+from django.conf import settings
+
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
 
@@ -183,6 +185,7 @@ class GladmindsResources(Resource):
         dealer_message = None
         customer_phone_number = None
         customer_message = None
+        customer_message_countdown = settings.DELAY_IN_CUSTOMER_UCN_MESSAGE
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         dealer_data = self.validate_dealer(phone_number)
         if not self.is_valid_data(customer_id=sap_customer_id, sa_phone=phone_number):
@@ -212,10 +215,11 @@ class GladmindsResources(Resource):
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=valid_coupon.unique_service_coupon, service_type=valid_coupon.service_type)
             else:
                 logger.info("Validate_coupon: ELSE PART")
+                customer_message_countdown = 10
                 requested_coupon = common.CouponData.objects.get(vin__vin=vin, service_type=service_type)
                 dealer_message = templates.get_template('SEND_SA_EXPIRED_COUPON').format(service_type=requested_coupon.service_type, customer_id=sap_customer_id)
                 customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(service_type=requested_coupon.service_type)
-            send_coupon_detail_customer.delay(phone_number=utils.get_phone_number_format(customer_phone_number), message=customer_message)
+            send_coupon_detail_customer.apply_async( kwargs={ 'phone_number': utils.get_phone_number_format(customer_phone_number), 'message':customer_message}, countdown=customer_message_countdown)
             audit.audit_log(reciever=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
         except IndexError as ie:
             dealer_message = templates.get_template('SEND_INVALID_VIN_OR_FSC')
