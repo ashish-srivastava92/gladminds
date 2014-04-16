@@ -4,6 +4,8 @@ from subprocess import Popen
 
 COVERAGE_ENABLED = False
 PROJECT_PACKGE = 'gladminds'
+NEVER_FAIL = False
+CAPTURE = False
 
 def _ensure_dir(path):
     if not os.path.exists(path):
@@ -76,12 +78,26 @@ def test_unit():
 
 
 def test(package=''):
-    '''Run Tests for the given package'''
+    '''Run Tests for the given package bin/fab test:<package>'''
     options = ['--with-progressive']
+    options.append('--with-xunit')
+    options.append('--xunit-file=out/xunit.xml')
 
     if COVERAGE_ENABLED:
         options.append('--with-coverage')
+        options.append('--cover-html')
+        options.append('--cover-xml')
+        options.append('--cover-xml-file=out/coverage.xml')
+        options.append('--cover-erase')
+        options.append('--cover-html-dir=out/coverage')
         options.append('--cover-package=%s' % PROJECT_PACKGE)
         options.append('--cover-min-percentage=80')
 
-    local('bin/test test {0} {1}'.format(package, ' '.join(options)))
+    return _execute('bin/test test {0} {1}'.format(package, ' '.join(options)))
+
+
+def _execute(cmd):
+    if NEVER_FAIL:
+        cmd = '%s; echo "Done"' % cmd
+
+    return local(cmd, capture=CAPTURE)
