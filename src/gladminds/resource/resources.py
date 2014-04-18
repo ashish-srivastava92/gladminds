@@ -155,7 +155,7 @@ class GladmindsResources(Resource):
         '''
         updated_coupon = common.CouponData.objects\
                         .filter(Q(status=4) | Q(status=5), vin__vin=vin, valid_kms__gt=kms)\
-                        .update(status=1, sa_phone_number=None, actual_kms=None, actual_service_date=None)
+                        .update(status=1)
         logger.info("%s have higher KMS range" % updated_coupon)
 
     def update_exceed_limit_coupon(self, actual_kms, vin):
@@ -164,7 +164,7 @@ class GladmindsResources(Resource):
         '''
         exceed_limit_coupon = common.CouponData.objects\
             .filter(Q(status=1) | Q(status=4), vin__vin=vin, valid_kms__lt=actual_kms)\
-            .update(status=5, sa_phone_number=None, actual_kms=None, actual_service_date=None)
+            .update(status=5)
         logger.info("%s are exceed limit coupon" % exceed_limit_coupon)
 
     def get_vin(self, sap_customer_id):
