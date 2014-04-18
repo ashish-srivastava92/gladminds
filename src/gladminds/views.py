@@ -12,13 +12,15 @@ def action(request, params):
         try:
             dealer = common.RegisteredDealer.objects.filter(dealer_id = request.user)[0]
             service_advisors = common.ServiceAdvisorDealerRelationship.objects.filter(dealer_id=dealer, status='Y')
+            sa_phone_list = []
+            for service_advisor in service_advisors:
+                sa_phone_list.append(service_advisor.service_advisor_id)
+            return render_to_response('dealer/advisor_actions.html', {'phones' : sa_phone_list}\
+                                      , context_instance=RequestContext(request))
         except:
             logger.info('No service advisor for dealer %s found active'%request.user)
-        sa_phone_list = []
-        for service_advisor in service_advisors:
-            sa_phone_list.append(service_advisor.service_advisor_id)
-        return render_to_response('dealer/advisor_actions.html', {'phones' : sa_phone_list}\
-                                  , context_instance=RequestContext(request))
+            raise
+        
     elif request.method == 'POST':
         raise NotImplementedError()
     
