@@ -17,6 +17,7 @@ This task send sms to customer on customer registration
 @shared_task
 def send_registration_detail(*args, **kwargs):
     status = "success"
+    logger.info("message addded")
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
@@ -279,6 +280,7 @@ _tasks_map = { "send_registration_detail": send_registration_detail,
                "export_close_coupon_data": export_close_coupon_data,
 
                "export_coupon_redeem_to_sap": export_coupon_redeem_to_sap,
+
                "send_report_mail_for_feed": send_report_mail_for_feed,
 
 }
