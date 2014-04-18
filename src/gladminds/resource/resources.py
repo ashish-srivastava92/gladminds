@@ -310,23 +310,15 @@ class GladmindsResources(Resource):
     def is_valid_data(self, customer_id=None, coupon=None, sa_phone=None):
         '''
             Error During wrong entry of Customer ID or UCN (message to the service advisor)
-            -    "Wrong Customer ID; please check"
-            -    "Wrong UCN; please check"
-            -    "Wrong Customer ID and wrong UCN; please check"
+            -    "Wrong Customer ID or UCN"
         '''
         coupon_obj = customer_obj = message = None
         if coupon: coupon_obj = common.CouponData.objects.filter(unique_service_coupon=coupon)
         if customer_id: customer_obj = common.ProductData.objects.filter(sap_customer_id=customer_id)
         
-        if ((customer_id and customer_obj) and (coupon and coupon_obj) and coupon_obj[0].vin.vin != customer_obj[0].vin) or\
-            ((customer_id and not customer_obj) and (coupon and not coupon_obj)):
+        if ((customer_obj and coupon_obj and coupon_obj[0].vin.vin != customer_obj[0].vin) or\
+            (not customer_obj and not coupon_obj)):
             message=templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')
-        elif customer_id and not customer_obj:
-            message=templates.get_template('SEND_SA_WRONG_CUSTOMER')
-        elif coupon and not coupon_obj:
-            message=templates.get_template('SEND_SA_WRONG_UCN')
-
-        if message:
             send_invalid_keyword_message.delay(phone_number=sa_phone, message=message)
             audit.audit_log(reciever=sa_phone, action=AUDIT_ACTION, message=message)
             logger.info("Message sent to SA : " + message)
