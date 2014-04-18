@@ -1,0 +1,6 @@
+include requirements.txt
+recursive-include src *
+recursive-include scripts *
+recursive-include .ebextensions *
+include src/manage.py
+recursive-exclude src *.pyc
