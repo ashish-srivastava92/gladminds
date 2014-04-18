@@ -17,7 +17,7 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         brand_obj = self.get_brand_obj(brand_id='brand001', brand_name='bajaj')
         product_type_obj = self.get_product_type_obj(brand_id=brand_obj, product_name='DISCO120', product_type='BIKE')
         dealer_obj = self.get_delear_obj(dealer_id='DEALER001')
-        customer_obj = self.get_customer_obj(phone_number='9999999')
+        customer_obj = self.get_customer_obj(phone_number='+919999999')
         product_obj = self.get_product_obj(vin="VINXXX001", producttype_data=product_type_obj, dealer_data = dealer_obj\
                                            , customer_phone_number = customer_obj, sap_customer_id='SAP001')
         service_advisor = self.get_service_advisor_obj(dealer_data = dealer_obj, service_advisor_id = 'SA001Test'\
@@ -73,10 +73,14 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         result = client.post('/v1/messages', data = {'text':'CHECK SAP001 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
+        result = client.post('/v1/messages', data={'advisorMobile':'4444861111', 'customerId':'SAP001'\
+                                                   , 'action':'validate', 'odoRead':500, 'serviceType':1})
+        self.assertHttpOK(result)
         result = client.post('/v1/messages', data = {'text':'CHECK SAP002 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
-        result = client.post('/v1/messages', data = {'text':'CLOSE SAP002 COUPON005', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data = {'advisorMobile':'4444861111', 'customerId':'SAP002'\
+                                                     ,'ucn':'COUPON005'})
         self.assertTrue('false' in result.content)
         self.assertHttpOK(result)
         result = client.post('/v1/messages', data = {'text':'CLOSE SAP001 COUPON004', 'phoneNumber' : '4444861111'})
@@ -97,4 +101,18 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         #The 3rd service coupon should be in progress.
         coupon_obj = self.filter_coupon_obj(coupon_id='COUPON007')
         self.assertEqual(coupon_obj.status, 4)
+        
+    def test_register_customer(self):
+        result = client.post('/v1/messages', data = {'text':'GCP_REG email@email.com customer1', 'phoneNumber' : '4444861111'})
+        self.assertHttpOK(result)
+        #Customer already exist.
+        result = client.post('/v1/messages', data = {'text':'GCP_REG email@email.com customer1', 'phoneNumber' : '4444866666'})
+        self.assertHttpOK(result)
+
+    def test_customer_service_detail(self):
+        #Register customer
+        result = client.post('/v1/messages', data = {'text':'GCP_REG email@email.com customer1', 'phoneNumber' : '9999999'})
+        self.assertHttpOK(result)
+        result = client.post('/v1/messages', data = {'text':'service SAP001', 'phoneNumber' : '9999999'})
+        self.assertHttpOK(result)
         
