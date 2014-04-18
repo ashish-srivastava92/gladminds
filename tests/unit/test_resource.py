@@ -11,7 +11,7 @@ client = Client()
 class GladmindsResourcesTest(GladmindsResourceTestCase):
     def setUp(self):
         super(GladmindsResourcesTest, self).setUp()
-        
+
         file_path = os.path.join(settings.BASE_DIR, 'etc/data/data.json')
         self.data = json.load(open(file_path))['data']
         file_path = os.path.join(settings.BASE_DIR, 'etc/data/template.json')
@@ -86,7 +86,7 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         result = client.post('/v1/messages', data = {'text':'C SAP001 COUPON004', 'phoneNumber' : '4444861111'})
         self.assertTrue('false' in result.content)
         self.assertHttpOK(result)
-        
+
     def test_expire_or_close_less_kms_coupon(self):
         result = client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
@@ -97,9 +97,14 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         result = client.post('/v1/messages', data = {'customerId': 'SAP001', 'action' : 'validate', 'odoRead' : 5500, 'serviceType' : 3, 'advisorMobile' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
+        #The coupon for service 1 should have been expired.
+        coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
+        self.assertEqual(coupon_obj.status, 5)
+
         #The coupon for service 2 should have been expired.
         coupon_obj = self.filter_coupon_obj(coupon_id='COUPON006')
-        self.assertEqual(coupon_obj.status, 3)
+        self.assertEqual(coupon_obj.status, 5)
+
         #The 3rd service coupon should be in progress.
         coupon_obj = self.filter_coupon_obj(coupon_id='COUPON007')
         self.assertEqual(coupon_obj.status, 4)

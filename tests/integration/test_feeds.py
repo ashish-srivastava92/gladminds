@@ -172,3 +172,13 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         gm_user = GladMindUsers.objects.all()
         self.assertEqual(gm_user[0].phone_number, "+919845340297", "Customer Phone Number is not updated")
         self.assertEqual(GladMindUsers.objects.count(), 1, "Total GM User")
+
+    def test_authentication(self):
+        user = User.objects.create_user('testuser', 'testuserpassword@gladminds.co', 'testuserpassword')
+        user.save()
+
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/feeds_for_testing_auth.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+

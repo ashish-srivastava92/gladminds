@@ -97,11 +97,11 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         self.product_type_obj = self.get_product_type_obj(brand_id=self.brand_obj, product_name='DISCO120', product_type='BIKE')
         self.dealer_obj = self.get_delear_obj(dealer_id='DEALER001')
         self.customer_obj = self.get_customer_obj(phone_number='9999999')
-        self.product_obj = self.get_product_obj(vin="VINXXX001", producttype_data=self.product_type_obj, dealer_data = self.dealer_obj, customer_phone_number = self.customer_obj, sap_customer_id='SAP001')
-        self.get_coupon_obj(unique_service_coupon='USC001', product_data=self.product_obj, valid_days=30, valid_kms=500, service_type=1)
+        self.product_obj = self.get_product_obj(vin="VINXXX001", product_type=self.product_type_obj, dealer_id = self.dealer_obj, customer_phone_number = self.customer_obj, sap_customer_id='SAP001')
+        self.get_coupon_obj(unique_service_coupon='USC001', vin=self.product_obj, valid_days=30, valid_kms=500, service_type=1)
 
         sa_obj = self.get_service_advisor_obj(service_advisor_id='DEALER001SA001', name="SA001", phone_number='9999999')
-        self.get_dealer_service_advisor_obj(dealer_data=self.dealer_obj, service_advisor_id=sa_obj, status='Y')
+        self.get_dealer_service_advisor_obj(dealer_id=self.dealer_obj, service_advisor_id=sa_obj, status='Y')
 
         self.MSG_CHECK_COUPON = "A TESTVECHILEID00002 50 2"
         self.PHONE_NUMBER = "+SA0000000000"
@@ -125,16 +125,6 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC001')
         self.assertEqual(in_progess_coupon.status, 4, "in_progess_coupon status should be 4")
 
-    def test_coupon_expiry(self):
-        self.get_coupon_obj(unique_service_coupon='USC002', product_data=self.product_obj, valid_days=30, valid_kms=2000, service_type=2)
-        self.get_coupon_obj(unique_service_coupon='USC003', product_data=self.product_obj, valid_days=30, valid_kms=5000, service_type=3)
-        obj = GladmindsResources()
-        sms_dict = {'kms': 2050, 'service_type': 3, 'sap_customer_id': 'SAP001'}
-        obj.validate_coupon(sms_dict, '9999999')
-        self.assertEquals(3, common.CouponData.objects.filter(unique_service_coupon='USC001')[0].status)
-        self.assertEquals(3, common.CouponData.objects.filter(unique_service_coupon='USC002')[0].status)
-        self.assertEquals(4, common.CouponData.objects.filter(unique_service_coupon='USC003')[0].status)
-
     def test_validate_dealer(self):
         self.assertEqual(common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
         obj = GladmindsResources()
@@ -147,14 +137,24 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         with self.assertRaises(ImmediateHttpResponse):
             obj.validate_dealer("9999999")
 
+    def test_coupon_expiry(self):
+        self.get_coupon_obj(unique_service_coupon='USC002', vin=self.product_obj, valid_days=30, valid_kms=2000, service_type=2)
+        self.get_coupon_obj(unique_service_coupon='USC003', vin=self.product_obj, valid_days=30, valid_kms=5000, service_type=3)
+        obj = GladmindsResources()
+        sms_dict = {'kms': 2050, 'service_type': 3, 'sap_customer_id': 'SAP001'}
+        obj.validate_coupon(sms_dict, '9999999')
+        self.assertEquals(5, common.CouponData.objects.filter(unique_service_coupon='USC001')[0].status)
+        self.assertEquals(5, common.CouponData.objects.filter(unique_service_coupon='USC002')[0].status)
+        self.assertEquals(4, common.CouponData.objects.filter(unique_service_coupon='USC003')[0].status)
+
     def test_forward_logic_1(self):
         '''
-            If we have check coupon with this message
             check SAP001 450 2
+            If we have check coupon with this message
             and 1 service is unused.
             Then then 1 is in-progress and 2 is in unused state
         '''
-        self.get_coupon_obj(unique_service_coupon='USC002', product_data=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
+        self.get_coupon_obj(unique_service_coupon='USC002', vin=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
         phone_number = "9999999"
         self.assertEqual(common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
         obj = GladmindsResources()
@@ -174,7 +174,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
             and 1 service is in-progress.
             Then then 1 is in-progress and 2 is in unused state
         '''
-        self.get_coupon_obj(unique_service_coupon='USC002', product_data=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
+        self.get_coupon_obj(unique_service_coupon='USC002', vin=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
         phone_number = "9999999"
         self.assertEqual(common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
         obj = GladmindsResources()
@@ -194,12 +194,12 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
             coupon 2 is in unused and valid in b/w (900 - 1000)
             If we have check coupon with this message
             check SAP001 1100 2
-            Mark 1 service as expired if it not used yet
+            Mark 1 service as exceed limit if it not used yet
             or nothing happen to coupon 1 if it is in-progress
-            And make 2 service as expired
+            And make 2 service as exceed limit
         '''
 
-        self.get_coupon_obj(unique_service_coupon='USC002', product_data=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
+        self.get_coupon_obj(unique_service_coupon='USC002', vin=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
         phone_number = "9999999"
         self.assertEqual(common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
         obj = GladmindsResources()
@@ -207,10 +207,10 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         obj.validate_coupon(sms_dict, phone_number)
 
         in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC001')
-        self.assertEqual(in_progess_coupon.status, 3, "in_progess_coupon status should be 4")
+        self.assertEqual(in_progess_coupon.status, 5, "in_progess_coupon status should be 4")
 
         in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC002')
-        self.assertEqual(in_progess_coupon.status, 3, "Coupon should be in unused State")
+        self.assertEqual(in_progess_coupon.status, 5, "Coupon should be in unused State")
 
     def test_forward_logic_4(self):
         '''
@@ -219,12 +219,12 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
             coupon 2 is in unused and valid in b/w (900 - 1000)
             If we have check coupon with this message
             check SAP001 1100 2
-            Mark 1 service as expired if it not used yet
+            Mark 1 service as exceed limit if it not used yet
             or nothing happen to coupon 1 if it is in-progress
-            And make 2 service as expired
+            And make 2 service as exceed limit
         '''
 
-        self.get_coupon_obj(unique_service_coupon='USC002', product_data=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
+        self.get_coupon_obj(unique_service_coupon='USC002', vin=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
         phone_number = "9999999"
         self.assertEqual(common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
         obj = GladmindsResources()
@@ -236,28 +236,70 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         obj.validate_coupon(sms_dict, phone_number)
 
         in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC001')
-        self.assertEqual(in_progess_coupon.status, 4, "in_progess_coupon status should be 4")
+        self.assertEqual(in_progess_coupon.status, 5, "in_progess_coupon status should be 4")
 
         in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC002')
-        self.assertEqual(in_progess_coupon.status, 3, "Coupon should be in unused State")
+        self.assertEqual(in_progess_coupon.status, 5, "Coupon should be in unused State")
 
-    def test_check_coupon_sa(self):
-        resp = self.api_client.post(
-            uri=self.MESSAGE_URL, data=self.CHECK_COUPON)
-        self.assertHttpOK(resp)
-        resp = self.api_client.post(
-            uri=self.MESSAGE_URL, data=self.CHECK_INVALID_COUPON)
-        self.assertHttpUnauthorized(resp)
+    def test_forward_logic_5(self):
+        '''
+            Initial state
+            coupon 1 is in unused and valid in b/w (400 - 500)
+            coupon 2 is in unused and valid in b/w (900 - 1000)
+            coupon 3 is in unused and valid in b/w (1400 - 1500)
+            If we have check coupon with this message
+            check SAP001 1100 1
+            Mark 1 as exceed limit
+            Mark 2 as exceed limit
+            Mark 3 as in progress
 
-    def test_valid_coupon(self):
-        resp = self.api_client.post(
-            uri=self.MESSAGE_URL, data=self.CHECK_VALID_COUPON)
-        self.assertHttpOK(resp)
+            check SAP001 450 1
+            Mark 1 as in progress
+            Mark 2 as unused
+            Mark 3 as unused
+        '''
+        phone_number = "9999999"
+        self.get_coupon_obj(unique_service_coupon='USC002', vin=self.product_obj, valid_days=60, valid_kms=1000, service_type=2)
+        self.get_coupon_obj(unique_service_coupon='USC003', vin=self.product_obj, valid_days=90, valid_kms=1500, service_type=3)
 
-    def test_close_coupon(self):
-        resp = self.api_client.post(
-            uri=self.MESSAGE_URL, data=self.CLOSE_COUPON)
-        self.assertHttpOK(resp)
+        sms_dict = {'kms': 1100, 'service_type': 2, 'sap_customer_id': 'SAP001'}
+        obj = GladmindsResources()
+        obj.validate_coupon(sms_dict, phone_number)
+
+        self.assertCouponStatus('USC001', 5)
+        self.assertCouponStatus('USC002', 5)
+        self.assertCouponStatus('USC003', 4)
+
+        sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'SAP001'}
+        obj.validate_coupon(sms_dict, phone_number)
+
+        self.assertCouponStatus('USC001', 4)
+        self.assertCouponStatus('USC002', 1)
+        self.assertCouponStatus('USC003', 1)
+
+        '''
+            Initial state
+            coupon 1 is in progress
+            coupon 2 is in unused and valid in b/w (900 - 1000)
+            coupon 3 is in unused and valid in b/w (1400 - 1500)
+            If we have check coupon with this message
+            check SAP001 1550 1
+            Mark 1 as exceed limit
+            Mark 2 as exceed limit
+            Mark 3 as exceed limit
+        '''
+        sms_dict = {'kms': 1550, 'service_type': 3, 'sap_customer_id': 'SAP001'}
+        obj.validate_coupon(sms_dict, phone_number)
+
+        self.assertCouponStatus('USC001', 5)
+        self.assertCouponStatus('USC002', 5)
+        self.assertCouponStatus('USC003', 5)
+
+    def assertCouponStatus(self, coupon_id, status):
+        coupon_obj = common.CouponData.objects\
+                        .get(unique_service_coupon=coupon_id)
+        self.assertEqual(coupon_obj.status, status, \
+          "Coupon Status should be %s. It is %s" % (status, coupon_obj.status))
 
 
 class BrandData(GladmindsResourceTestCase):
