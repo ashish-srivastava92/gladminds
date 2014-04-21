@@ -3,7 +3,7 @@ from django.test.utils import override_settings
 from gladminds.tasks import send_service_detail, expire_service_coupon
 from datetime import datetime, timedelta
 from unit.base_unit import GladmindsUnitTestCase
-from gladminds.settings import COUPON_STATUS
+from gladminds.utils import COUPON_STATUS
 
 
 class TestCelery(GladmindsResourceTestCase):
@@ -42,24 +42,24 @@ class TestCronjobs(GladmindsUnitTestCase):
         self.get_dealer_service_advisor_obj(
             dealer_id=dealer_obj, service_advisor_id=service_advisor1, status='Y')
         self.get_coupon_obj(unique_service_coupon='COUPON005', vin=product_obj, valid_days=30, valid_kms=500,
-                            service_type=1, mark_expired_on=datetime.now() + timedelta(days=1), status=COUPON_STATUS['unused'])
+                            service_type=1, mark_expired_on=datetime.now() + timedelta(days=1), status=COUPON_STATUS['Unused'])
         customer_obj1 = self.get_customer_obj(phone_number='8888888')
         product_obj1 = self.get_product_obj(vin="VINXXX002", product_type=product_type_obj,
                                             dealer_id=dealer_obj, customer_phone_number=customer_obj1, sap_customer_id='SAP002')
         self.get_coupon_obj(unique_service_coupon='COUPON004', actual_service_date=datetime.now() - timedelta(days=10), vin=product_obj1,
-                            valid_days=30, valid_kms=500, service_type=1, mark_expired_on=datetime.now() - timedelta(days=1), status=COUPON_STATUS['inprogress'])
+                            valid_days=30, valid_kms=500, service_type=1, mark_expired_on=datetime.now() - timedelta(days=1), status=COUPON_STATUS['In Progress'])
         self.get_coupon_obj(unique_service_coupon='COUPON006', actual_service_date=datetime.now() - timedelta(days=40), vin=product_obj,
-                            valid_days=30, valid_kms=3000, service_type=2, mark_expired_on=datetime.now() - timedelta(days=1), status=COUPON_STATUS['inprogress'])
+                            valid_days=30, valid_kms=3000, service_type=2, mark_expired_on=datetime.now() - timedelta(days=1), status=COUPON_STATUS['In Progress'])
         self.get_coupon_obj(unique_service_coupon='COUPON007', vin=product_obj, valid_days=30, valid_kms=6000,
-                            service_type=3, mark_expired_on=datetime.now() - timedelta(days=1), status=COUPON_STATUS['unused'])
+                            service_type=3, mark_expired_on=datetime.now() - timedelta(days=1), status=COUPON_STATUS['Unused'])
 
     def test_expire_service_coupon(self):
         expire_service_coupon()
         self.assertEqual(
-            self.filter_coupon_obj('COUPON004').status, COUPON_STATUS['inprogress'])
+            self.filter_coupon_obj('COUPON004').status, COUPON_STATUS['In Progress'])
         self.assertEqual(
-            self.filter_coupon_obj('COUPON005').status, COUPON_STATUS['unused'])
+            self.filter_coupon_obj('COUPON005').status, COUPON_STATUS['Unused'])
         self.assertEqual(
-            self.filter_coupon_obj('COUPON006').status, COUPON_STATUS['expired'])
+            self.filter_coupon_obj('COUPON006').status, COUPON_STATUS['Expired'])
         self.assertEqual(
-            self.filter_coupon_obj('COUPON007').status, COUPON_STATUS['expired'])
+            self.filter_coupon_obj('COUPON007').status, COUPON_STATUS['Expired'])
