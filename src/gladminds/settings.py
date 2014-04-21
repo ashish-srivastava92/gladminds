@@ -24,7 +24,7 @@ COUPON_STATUS = {
                  'expired' : 3,
                  'inprogress' : 4
                  }
-
+COUPON_VALID_DAYS = 30
 
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 
