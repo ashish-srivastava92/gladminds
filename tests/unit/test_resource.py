@@ -143,3 +143,8 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         self.assertHttpOK(result)
         result = client.post('/v1/messages', data = {'text':'service SAP001', 'phoneNumber' : '9999999'})
         self.assertHttpOK(result)
+        
+class GladmindsUrlsTest(GladmindsResourceTestCase):
+    def setUp(self):
+        super(GladmindsUrlsTest, self).setUp()
+
