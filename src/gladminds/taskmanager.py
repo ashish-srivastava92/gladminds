@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from gladminds.models.common import CouponData
 from django.utils import timezone
 from gladminds.settings import COUPON_STATUS
+from django.db.models import Q
 
 AUDIT_ACTION = "SENT TO QUEUE"
 
@@ -51,11 +52,11 @@ def get_customers_to_send_reminder_by_admin(*args, **kwargs):
 
 def expire_service_coupon(*args, **kwargs):
     today = timezone.now()
-    threat_coupons = CouponData.objects.filter(mark_expired_on__lt = today.date())
+    threat_coupons = CouponData.objects.filter(mark_expired_on__lt = today.date()).exclude(status=2)
     for coupon in threat_coupons:
         #If the coupon was initiated, it will expire if initiated more than 30days ago.
         if coupon.status == COUPON_STATUS['inprogress']:
-            extended_date = coupon.actual_service_date + timedelta(days=30)
+            extended_date = coupon.actual_service_date + timedelta(days=coupon.valid_days)
             if extended_date < today:
                 coupon.status = COUPON_STATUS['expired']
                 coupon.save()
