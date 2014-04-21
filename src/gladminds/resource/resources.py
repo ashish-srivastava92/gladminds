@@ -20,6 +20,7 @@ import logging
 from gladminds.utils import mobile_format, format_message
 from django.utils import timezone
 from django.conf import settings
+from gladminds.sqs_tasks import get_task_queue 
 
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -107,7 +108,9 @@ class GladmindsResources(Resource):
         message = smsparser.render_sms_template(status='send', keyword=sms_dict['keyword'], customer_id=gladmind_customer_id)
         phone_number = utils.get_phone_number_format(phone_number)
         logger.info("customer is registered with message %s" % message)
-        send_registration_detail.delay(phone_number=phone_number, message=message)
+        #send_registration_detail.delay(phone_number=phone_number, message=message)
+        task_queue = get_task_queue()
+        task_queue.add("send_registration_detail", {"phone_number":phone_number, "message":message})
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 

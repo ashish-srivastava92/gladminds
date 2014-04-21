@@ -7,9 +7,15 @@ from gladminds import taskmanager, feed,export_file, exportfeed
 from datetime import datetime, timedelta
 from gladminds import mail
 import logging
+from gladminds.taskqueue import SqsTaskQueue
 logger = logging.getLogger("gladminds")
 
 sms_client = load_gateway()
+
+
+def get_task_queue():
+    queue_name = "gladminds-prod"
+    return SqsTaskQueue(queue_name)
 
 """
 This task send sms to customer on customer registration
