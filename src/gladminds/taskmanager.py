@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from gladminds.models.common import CouponData
 from django.utils import timezone
 from gladminds.settings import COUPON_STATUS
-from django.db.models import Q
 
 AUDIT_ACTION = "SENT TO QUEUE"
 
