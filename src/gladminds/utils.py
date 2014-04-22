@@ -2,6 +2,9 @@ import os
 import hashlib
 from tastypie.serializers import Serializer
 from datetime import datetime
+from gladminds.models.common import STATUS_CHOICES
+
+COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 
 
 def generate_unique_customer_id():
@@ -45,3 +48,4 @@ def get_phone_number_format(phone_number):
         This is used when we are sending message through sms client
     '''
     return phone_number[-10:]
+

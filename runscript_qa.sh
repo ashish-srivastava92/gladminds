@@ -8,6 +8,8 @@ export DJANGO_SETTINGS_MODULE=gladminds.qa_settings
 #git pull origin master
 
 # Run buildout
+rm -rf out
+mkdir out
 bin/buildout
 
 # Synchromize database
