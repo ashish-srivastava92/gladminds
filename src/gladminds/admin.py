@@ -231,7 +231,8 @@ class CouponAdmin(ExportMixin,ModelAdmin):
             '1': 'success',
             '2': 'warning',
             '3': 'error',
-            '4':'info'
+            '4': 'info',
+            '5': 'error'
         }
         css_class = class_map.get(str(obj.status))
         if css_class:

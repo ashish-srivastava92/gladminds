@@ -12,16 +12,13 @@ SECRET_KEY = 'testsecretkeyshouldntbeusedinproduction'
 INSTALLED_APPS = INSTALLED_APPS + ('django_nose',)
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
-SMS_CLIENT = "MOCK"
-
-
-SMS_CLIENT_DETAIL = {
-                     'OTP_TWILIO_ACCOUNT' : 'MOCK_ACCOUNT',
-                     'OTP_TWILIO_AUTH' : 'MOCK_AUTH',
-                     'OTP_TWILIO_FROM' : 'MOCK_PHONE',
-                     'OTP_TWILIO_URI' : 'MOCK_URI'
-            }
-
+SMS_CLIENT = "AIRTEL"
+SMS_CLIENT_DETAIL={
+                    'login':'bajajauto',
+                    'pass':'bajaj',
+                    'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',
+                    'message_url': 'http://117.99.128.32:80/login/pushsms.php'
+                    }
 BROKER_URL= 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
 

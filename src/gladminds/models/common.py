@@ -186,16 +186,17 @@ class ProductData(models.Model):
     
 ####################################################################
 
-STATUS_CHOICES = ((1, 'Unused'), (2, 'Closed'), (3, 'Expired'),(4,'In Progress'))
+STATUS_CHOICES = ((1, 'Unused'), (2, 'Closed'), (3, 'Expired'),(4,'In Progress'), (5,'Exceeds Limit'))
+
 
 class CouponData(models.Model):
     vin = models.ForeignKey(ProductData, null=False, editable=False)
     unique_service_coupon = models.CharField(max_length=215, unique=True, null=False)
     valid_days = models.IntegerField(max_length=10,null=False)
     valid_kms = models.IntegerField(max_length=10,null=False)
-    service_type=models.IntegerField(max_length=10,null=False)
+    service_type = models.IntegerField(max_length=10,null=False)
     sa_phone_number = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
-    status= models.SmallIntegerField(choices=STATUS_CHOICES, default=1)
+    status = models.SmallIntegerField(choices=STATUS_CHOICES, default=1)
     closed_date = models.DateTimeField(null=True, blank=True)
     mark_expired_on = models.DateTimeField(null=True, blank=True)
     actual_service_date = models.DateTimeField(null=True, blank=True)
