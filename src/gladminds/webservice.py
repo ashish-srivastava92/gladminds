@@ -63,7 +63,7 @@ class DealerModelList(ComplexModel):
 class ProductDispatchModel(ComplexModel):
     __namespace__ = tns
     CHASSIS = Unicode
-    PRODUCT_TYPE = Unicode 
+    PRODUCT_TYPE = Unicode
     VEC_DIS_DT = Date
     KUNNR = Unicode
     UCN_NO = Unicode
@@ -72,7 +72,8 @@ class ProductDispatchModel(ComplexModel):
     KMS_FROM = Decimal
     KMS_TO = Decimal
     SERVICE_TYPE = Unicode
-    TIMESTAMP = Unicode(pattern = pattern)
+    Status = Decimal(default=1)
+    TIMESTAMP = Unicode(pattern=pattern)
 
 class ProductDispatchModelList(ComplexModel):
     __namespace__ = tns
