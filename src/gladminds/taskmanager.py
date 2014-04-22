@@ -2,11 +2,14 @@ from django.db import models, transaction
 from gladminds import audit, utils, message_template as templates
 from gladminds.models import common, logs
 from datetime import datetime, timedelta
-from gladminds.models.common import CouponData
+from gladminds.models.common import CouponData, STATUS_CHOICES
 from django.utils import timezone
-from gladminds.settings import COUPON_STATUS
+from django.db.models import Q
+from gladminds.utils import COUPON_STATUS
+from django.conf import settings
 
 AUDIT_ACTION = "SENT TO QUEUE"
+
 
 @transaction.commit_manually()
 def get_customers_to_send_reminder(*args, **kwargs):
@@ -51,17 +54,17 @@ def get_customers_to_send_reminder_by_admin(*args, **kwargs):
 
 def expire_service_coupon(*args, **kwargs):
     today = timezone.now()
-    threat_coupons = CouponData.objects.filter(mark_expired_on__lt = today.date())
+    threat_coupons = CouponData.objects.filter(mark_expired_on__lte = today.date()).exclude(Q(status=2) | Q(status=3))
     for coupon in threat_coupons:
         #If the coupon was initiated, it will expire if initiated more than 30days ago.
-        if coupon.status == COUPON_STATUS['inprogress']:
-            extended_date = coupon.actual_service_date + timedelta(days=30)
+        if coupon.status == COUPON_STATUS['In Progress']:
+            extended_date = coupon.actual_service_date + timedelta(days=settings.COUPON_VALID_DAYS)
             if extended_date < today:
-                coupon.status = COUPON_STATUS['expired']
+                coupon.status = COUPON_STATUS['Expired']
                 coupon.save()
         #If the coupon is unused and crossed the days limit, it will expire.
         else:
-            coupon.status = COUPON_STATUS['expired']
+            coupon.status = COUPON_STATUS['Expired']
             coupon.save()
 
 def import_data_from_sap(*args, **kwargs):

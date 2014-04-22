@@ -18,7 +18,7 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         brand_obj = self.get_brand_obj(brand_id='brand001', brand_name='bajaj')
         product_type_obj = self.get_product_type_obj(brand_id=brand_obj, product_name='DISCO120', product_type='BIKE')
         dealer_obj = self.get_delear_obj(dealer_id='DEALER001')
-        customer_obj = self.get_customer_obj(phone_number='9999999')
+        customer_obj = self.get_customer_obj(phone_number='+919999999')
         product_obj = self.get_product_obj(vin="VINXXX001", product_type=product_type_obj, dealer_id = dealer_obj\
                                            , customer_phone_number = customer_obj, sap_customer_id='SAP001')
         service_advisor = self.get_service_advisor_obj(service_advisor_id = 'SA001Test', name='UMOTO', phone_number='+914444861111')
@@ -130,5 +130,21 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         self.assertEqual(coupon_obj.sa_phone_number.phone_number, '+914444861111')
         self.assertEqual(coupon_obj.actual_service_date.date(), datetime.now().date()-timedelta(days=20))
         
+    def test_register_customer(self):
+        result = client.post('/v1/messages', data = {'text':'GCP_REG email@email.com customer1', 'phoneNumber' : '4444861111'})
+        self.assertHttpOK(result)
+        #Customer already exist.
+        result = client.post('/v1/messages', data = {'text':'GCP_REG email@email.com customer1', 'phoneNumber' : '4444866666'})
+        self.assertHttpOK(result)
+
+    def test_customer_service_detail(self):
+        #Register customer
+        result = client.post('/v1/messages', data = {'text':'GCP_REG email@email.com customer1', 'phoneNumber' : '9999999'})
+        self.assertHttpOK(result)
+        result = client.post('/v1/messages', data = {'text':'service SAP001', 'phoneNumber' : '9999999'})
+        self.assertHttpOK(result)
         
-        
+class GladmindsUrlsTest(GladmindsResourceTestCase):
+    def setUp(self):
+        super(GladmindsUrlsTest, self).setUp()
+
