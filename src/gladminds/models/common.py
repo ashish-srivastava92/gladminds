@@ -204,6 +204,7 @@ class CouponData(models.Model):
     last_reminder_date = models.DateTimeField(null=True, blank=True)
     schedule_reminder_date = models.DateTimeField(null=True, blank=True)
     order = models.PositiveIntegerField(default=0)
+    extended_date = models.DateTimeField(null=True, blank=True)
     class Meta:
         app_label = "gladminds"
         ordering = ['service_type',]

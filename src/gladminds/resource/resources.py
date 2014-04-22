@@ -20,6 +20,7 @@ import logging
 from gladminds.utils import mobile_format, format_message
 from django.utils import timezone
 from django.conf import settings
+from gladminds.settings import COUPON_VALID_DAYS
 
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -184,12 +185,18 @@ class GladmindsResources(Resource):
         valid_coupon.save()
 
     def update_inprogress_coupon(self, coupon, actual_kms, dealer_data):
-        validity_date = coupon.mark_expired_on.date()
+        expiry_date = coupon.mark_expired_on
+        if coupon.extended_date < expiry_date:
+            coupon.extended_date = expiry_date
+            coupon.save()
+        
+        validity_date = coupon.extended_date
         today = timezone.now()
-        if validity_date >= today.date():
+        if expiry_date >= today:
+            coupon.extended_date = datetime.now() + timedelta(days=COUPON_VALID_DAYS)
             self.update_coupon(coupon, actual_kms, dealer_data, 4, today)
-        else:
-            coupon.sa_phone_number = dealer_data
+        elif validity_date >= today and expiry_date < today:
+            coupon.actual_service_date = datetime.now()
             coupon.save()
         
     @transaction.commit_manually()

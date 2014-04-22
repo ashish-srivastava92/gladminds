@@ -58,8 +58,8 @@ def expire_service_coupon(*args, **kwargs):
     for coupon in threat_coupons:
         #If the coupon was initiated, it will expire if initiated more than 30days ago.
         if coupon.status == COUPON_STATUS['In Progress']:
-            extended_date = coupon.actual_service_date + timedelta(days=settings.COUPON_VALID_DAYS)
-            if extended_date < today:
+            extended_date = coupon.extended_date.date()
+            if extended_date < today.date():
                 coupon.status = COUPON_STATUS['Expired']
                 coupon.save()
         #If the coupon is unused and crossed the days limit, it will expire.

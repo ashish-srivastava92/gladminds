@@ -58,8 +58,8 @@ CREATE TABLE gladminds_serviceadvisordealerrelationship(
 ALTER TABLE gladminds_serviceadvisordealerrelationship ADD FOREIGN KEY (`dealer_id`) REFERENCES gladminds_registereddealer(`dealer_id`);
 
 
-----------------Migration Script for 1.2 ----------------------------
-
+----------------Migration Script for 1.3 ----------------------------
+ALTER TABLE gladminds_coupondata ADD extended_date DATETIME DEFAULT NULL;
 
 -------------------create slow query log------------------
 
