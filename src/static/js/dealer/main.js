@@ -13,6 +13,7 @@
   
   $(".query-form").on("submit", function(e) {
     var messageBlock = $(".user-message .message");
+    $(this).find("input[type='text']").val('');
     var jqXHR = $.ajax({
       url: "/v1/messages",
       data: $("form.query-form").serializeArray(),
