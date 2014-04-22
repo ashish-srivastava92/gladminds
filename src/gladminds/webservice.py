@@ -72,7 +72,7 @@ class ProductDispatchModel(ComplexModel):
     KMS_FROM = Decimal
     KMS_TO = Decimal
     SERVICE_TYPE = Unicode
-    Status = Decimal(default=1)
+    UCN_Status = Decimal(default=1)
     TIMESTAMP = Unicode(pattern=pattern)
 
 class ProductDispatchModelList(ComplexModel):
@@ -158,6 +158,7 @@ class ProductDispatchService(ServiceBase):
                         'valid_days' : product.DAYS_LIMIT_TO,
                         'valid_kms' : product.KMS_TO,
                         'service_type' : product.SERVICE_TYPE,
+                        'coupon_status' : product.UCN_Status,
                     })
             response = save_to_db(feed_type = 'dispatch', data_source = product_dispatch_list)
             return json.dumps(get_response(response))

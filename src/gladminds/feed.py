@@ -239,9 +239,10 @@ class ProductDispatchFeed(BaseFeed):
                     continue
 
             try:
-                status = 1
                 coupon_data = common.CouponData(unique_service_coupon=product['unique_service_coupon'],
-                                                vin=product_data, valid_days=product['valid_days'], valid_kms=product['valid_kms'], service_type=product['service_type'], status=status)
+                            vin=product_data, valid_days=product['valid_days'],
+                            valid_kms=product['valid_kms'], service_type=product['service_type'],
+                            status=product['coupon_status'])
                 coupon_data.save()
             except Exception as ex:
                 total_failed += 1
