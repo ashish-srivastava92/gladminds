@@ -388,7 +388,17 @@ class UserResources(GladmindsBaseResource):
         except:
             raise ImmediateHttpResponse(response=http.HttpBadRequest())
     
-    
+    def obj_create(self, bundle, **kwargs):
+        """
+        A ORM-specific implementation of ``obj_create``.
+        """
+#        bundle.obj = self._meta.object_class()
+#        for key, value in kwargs.items():
+#            setattr(bundle.obj, key, value)
+#
+#        bundle = self.full_hydrate(bundle)
+#        return self.save(bundle)
+        return bundle
     
     def get_products(self, request, **kwargs):
         user_id = kwargs['pk']
