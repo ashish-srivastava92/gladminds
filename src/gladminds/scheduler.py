@@ -32,6 +32,6 @@ taskqueue = SqsTaskQueue(QUEUE_NAME)
 
 if __name__ == '__main__':
     task_name = sys.argv[0]
-    task_params = sys.argv[1]
+    task_params = {"time": sys.argv[1]}
     #task_params = {"trigger_time":int(time.time())}
     taskqueue.add(task_name, task_params)
