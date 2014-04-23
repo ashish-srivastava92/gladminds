@@ -12,6 +12,28 @@ class TaskQueue:
         pass
 
 
+task_info = {
+             "expire_service_coupon": {
+                                       "time_taken": 0
+                                      },
+             "export_coupon_redeem_to_sap": {
+                                       "time_taken": 0
+                                      },
+             "send_report_mail_for_feed": {
+                                       "day_duration": 1
+                                      },
+             "send_reminder": {
+                                    "reminder_day": 7
+                              },
+             "import_data": {
+                            "time_taken": 0
+                           },
+             "send_schedule_reminder": {
+                            "time_taken": 0
+                           }
+             }
+
+
 class SqsTaskQueue(TaskQueue):
     def __init__(self, sqs_name):
         self._conn = SQSConnection(ACCESS_KEY, SECRET_KEY)
@@ -21,10 +43,10 @@ class SqsTaskQueue(TaskQueue):
         task_params = task_params or {}
         payload = {
                 "task_name": task_name,
-                "params": task_params
+                "params": task_info[task_name]
             }
         payload_as_str = json.dumps(payload)
-        self._conn.send_message(self._q,payload_as_str)
+        self._conn.send_message(self._q, payload_as_str)
 
 
 QUEUE_NAME = "gladminds-prod"
@@ -32,6 +54,6 @@ taskqueue = SqsTaskQueue(QUEUE_NAME)
 
 if __name__ == '__main__':
     task_name = sys.argv[0]
-    task_params = {"time": sys.argv[1]}
-    #task_params = {"trigger_time":int(time.time())}
+    # task_params = {"time": sys.argv[1]}
+    # task_params = {"trigger_time":int(time.time())}
     taskqueue.add(task_name, task_params)
