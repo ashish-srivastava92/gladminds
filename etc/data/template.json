@@ -216,7 +216,7 @@
     "pk": 25,
     "fields": {
       "template_key": "SEND_SA_WRONG_CUSTOMER_UCN",
-      "template": "Wrong Customer ID orUCN",
+      "template": "Incorrect Customer ID or UCN",
       "description": "Send message to SA reg wrong Customer-Id or wrong UCN"
     }
   }
