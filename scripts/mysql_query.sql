@@ -49,18 +49,18 @@ show create table gladminds_serviceadvisor;
 ALTER TABLE gladminds_serviceadvisor DROP FOREIGN KEY fk_symbol;
 ALTER TABLE gladminds_serviceadvisor DROP dealer_id_id;
 
-
-CREATE TABLE gladminds_serviceadvisordealerrelationship(
-    status CHAR(10) NOT NULL
-);
-
-
-ALTER TABLE gladminds_serviceadvisordealerrelationship ADD FOREIGN KEY (`dealer_id`) REFERENCES gladminds_registereddealer(`dealer_id`);
-
-
 ----------------Migration Script for 1.3 ----------------------------
 ALTER TABLE gladminds_coupondata ADD extended_date DATETIME DEFAULT NULL;
-
+CREATE TABLE `gladminds_serviceadvisorcouponrelationship` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `unique_service_coupon_id` int(11) NOT NULL,
+  `service_advisor_phone_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `gladminds_serviceadvisorcouponrelationship_49ac3df4` (`unique_service_coupon_id`),
+  KEY `gladminds_serviceadvisorcouponrelationship_85d2f9c5` (`service_advisor_phone_id`),
+  CONSTRAINT `service_advisor_phone_id_refs_id_ff3268c1` FOREIGN KEY (`service_advisor_phone_id`) REFERENCES `gladminds_serviceadvisor` (`id`),
+  CONSTRAINT `unique_service_coupon_id_refs_id_862689b3` FOREIGN KEY (`unique_service_coupon_id`) REFERENCES `gladminds_coupondata` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 -------------------create slow query log------------------
 
 mkdir /var/log/mysql

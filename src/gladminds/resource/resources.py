@@ -223,6 +223,13 @@ class GladmindsResources(Resource):
                 valid_coupon = valid_coupon[0]
             elif len(valid_coupon) > 0:
                 valid_coupon = valid_coupon[0]
+            
+            coupon_sa_obj = common.ServiceAdvisorCouponRelationship.objects.filter(unique_service_coupon=valid_coupon\
+                                                                                   ,service_advisor_phone=dealer_data)
+            if not len(coupon_sa_obj):
+                coupon_sa_obj = common.ServiceAdvisorCouponRelationship(unique_service_coupon=valid_coupon\
+                                                                        ,service_advisor_phone=dealer_data)
+                coupon_sa_obj.save()
 
             in_progress_coupon = common.CouponData.objects.select_for_update()\
                                  .filter(vin__vin=vin, valid_kms__gte=actual_kms, status=4) \
@@ -272,7 +279,7 @@ class GladmindsResources(Resource):
         message = None
         if not self.is_valid_data(customer_id=sap_customer_id, coupon=unique_service_coupon, sa_phone=phone_number):
             return False
-        if not self.is_sa_initiator(unique_service_coupon, phone_number):
+        if not self.is_sa_initiator(unique_service_coupon, sa_object):
             logger.info("SA is not the coupon initiator.")
             transaction.commit()
             return False
@@ -281,6 +288,7 @@ class GladmindsResources(Resource):
             coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
             customer_phone_number = coupon_object.vin.customer_phone_number.phone_number
             coupon_object.status = 2
+            coupon_object.sa_phone_number=sa_object
             coupon_object.closed_date = datetime.now()
             coupon_object.save()
             common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, service_type__lt=coupon_object.service_type).update(status=3)
@@ -307,12 +315,12 @@ class GladmindsResources(Resource):
             raise ImmediateHttpResponse(HttpUnauthorized("Not an authorised user"))
         return service_advisor_obj
 
-    def is_sa_initiator(self, coupon_id, phone_sa):
+    def is_sa_initiator(self, coupon_id, sa_object):
         coupon_data = common.CouponData.objects.filter(unique_service_coupon = coupon_id)
-        if coupon_data:
-            coupon_initiator = common.ServiceAdvisor.objects.filter(phone_number = coupon_data[0].sa_phone_number)
-            return phone_sa == coupon_initiator[0].phone_number
-        return False
+        coupon_sa_obj = common.ServiceAdvisorCouponRelationship.objects.filter(unique_service_coupon=coupon_data\
+                                                                                   ,service_advisor_phone=sa_object)
+        return len(coupon_sa_obj)>0
+        
     
     def is_valid_data(self, customer_id=None, coupon=None, sa_phone=None):
         '''

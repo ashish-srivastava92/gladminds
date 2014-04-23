@@ -209,6 +209,23 @@ class CouponData(models.Model):
         app_label = "gladminds"
         ordering = ['service_type',]
         verbose_name_plural = "Coupon Information"
+    
+    def __unicode__(self):
+        return self.unique_service_coupon
+
+##################################################################
+#############Service Advisor and Coupon Relationship MODEL########
+
+class ServiceAdvisorCouponRelationship(models.Model):
+    unique_service_coupon = models.ForeignKey(CouponData, null=False)
+    service_advisor_phone = models.ForeignKey(ServiceAdvisor, null=False)
+
+    class Meta:
+        app_label = 'gladminds'
+        verbose_name_plural = 'Service Advisor And Coupon Relationship'
+
+##################################################################
+####################Message Template DB Storage###################
 
 class MessageTemplate(models.Model):
     template_key = models.CharField(max_length=255, unique=True, null=False)

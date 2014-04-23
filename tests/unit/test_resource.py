@@ -148,6 +148,16 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         self.assertHttpOK(result)
         result = client.post('/v1/messages', data = {'text':'service SAP001', 'phoneNumber' : '9999999'})
         self.assertHttpOK(result)
+    
+    def test_coupon_initiators(self):
+        client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
+        client.post('/v1/messages', data = {'text':'A SAP001 500 1', 'phoneNumber' : '9999999999'})
+        coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
+        self.assertEqual(coupon_obj.status, 4)
+        client.post('/v1/messages', data = {'text':'C SAP001 COUPON005', 'phoneNumber' : '4444861111'})
+        coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
+        self.assertEqual(coupon_obj.status, 2)
+        
         
 class GladmindsUrlsTest(GladmindsResourceTestCase):
     def setUp(self):
