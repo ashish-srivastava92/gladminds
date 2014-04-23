@@ -49,6 +49,7 @@ def get_customers_to_send_reminder_by_admin(*args, **kwargs):
         reminder.save()
     transaction.commit()
 
+
 def expire_service_coupon(*args, **kwargs):
     today = timezone.now()
     threat_coupons = CouponData.objects.filter(mark_expired_on__lt = today.date())

@@ -19,7 +19,7 @@ class SqsTaskQueue(TaskQueue):
         task_params = task_params or {}
         payload = {
                 "task_name": task_name,
-                "params" : task_params
+                "params": task_params
             }
         payload_as_str = json.dumps(payload)
         self._conn.send_message(self._q,payload_as_str)
@@ -32,5 +32,4 @@ if __name__ == '__main__':
     task_name = sys.argv[1]
     task_params = sys.argv[2]
     #task_params = {"trigger_time":int(time.time())}
-    taskqueue.add(task_name,task_params)
-
+    taskqueue.add(task_name, task_params)
