@@ -209,6 +209,9 @@ class GladmindsResources(Resource):
         customer_message_countdown = settings.DELAY_IN_CUSTOMER_UCN_MESSAGE
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         dealer_data = self.validate_dealer(phone_number)
+        if not dealer_data:
+            transaction.commit()
+            return False
         if not self.is_valid_data(customer_id=sap_customer_id, sa_phone=phone_number):
             return False
         try:
@@ -277,6 +280,9 @@ class GladmindsResources(Resource):
         unique_service_coupon = sms_dict['usc']
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         message = None
+        if not sa_object:
+            transaction.commit()
+            return False
         if not self.is_valid_data(customer_id=sap_customer_id, coupon=unique_service_coupon, sa_phone=phone_number):
             return False
         if not self.is_sa_initiator(unique_service_coupon, sa_object):
@@ -312,7 +318,8 @@ class GladmindsResources(Resource):
         except:
             message = 'Not an authorised user to avail this service. Phone number - {0}'.format(phone_number)
             logger.error(message)
-            raise ImmediateHttpResponse(HttpUnauthorized("Not an authorised user"))
+            audit.audit_log(action='failure', sender=phone_number, reciever="", message=message, status='warning')
+            return None
         return service_advisor_obj
 
     def is_sa_initiator(self, coupon_id, sa_object):
