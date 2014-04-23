@@ -66,14 +66,14 @@ class SqsTaskQueue(TaskQueue):
         self._conn = SQSConnection()
         self._q = self._conn.get_queue(sqs_name)
 
-    def add(self, task_name, task_params=None, **kwargs):
+    def add(self, task_name, task_params=None, delay_seconds=None, **kwargs):
         task_params = task_params or {}
         payload = {
                 "task_name": task_name,
                 "params" : task_params
             }
         payload_as_str = json.dumps(payload)
-        self._conn.send_message(self._q,payload_as_str)
+        self._conn.send_message(self._q, payload_as_str, delay_seconds=delay_seconds)
 
 class MultiProcessQueue(TaskQueue):
     """ A simple implementation of a background jobs, FOR DEVELOPMENT USE ONLY
