@@ -48,11 +48,9 @@ urlpatterns += patterns('gladminds',
     # url(r'^$', 'gladminds.views.home', name='home'),
     # url(r'^gladminds/', include('gladminds.foo.urls')),
 
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
-    # Uncomment the next line to enable the admin:
-    url(r'^sms/','superadmin.views.send_sms', name='send_sms'),
+    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    url(r'^sms/', 'superadmin.views.send_sms', name='send_sms'),
     url(r'^dealers/getUrl', 'views.redirect', name='redirect'),
     url(r'^dealers/([a-zA-Z0-9]+)', 'views.action', name='actions'),
     url(r'^', include(admin.site.urls)),

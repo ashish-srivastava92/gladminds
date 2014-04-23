@@ -265,7 +265,7 @@ class GladmindsResources(Resource):
                 customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(service_type=requested_coupon.service_type)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_coupon_detail_customer", {"phone_number":utils.get_phone_number_format(customer_phone_number), "message":customer_message})
+                task_queue.add("send_coupon_detail_customer", {"phone_number":utils.get_phone_number_format(customer_phone_number), "message":customer_message}, delay_seconds=customer_message_countdown)
             else:
                 send_coupon_detail_customer.apply_async( kwargs={ 'phone_number': utils.get_phone_number_format(customer_phone_number), 'message':customer_message}, countdown=customer_message_countdown)
             audit.audit_log(reciever=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
