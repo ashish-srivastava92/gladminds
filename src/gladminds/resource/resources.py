@@ -310,8 +310,8 @@ class GladmindsResources(Resource):
             if len(all_sa_dealer_obj) == 0:
                 raise
         except:
-            message = 'You are not an authorised user to avail this service'
-            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+            message = 'Not an authorised user to avail this service. Phone number - {0}'.format(phone_number)
+            logger.error(message)
             raise ImmediateHttpResponse(HttpUnauthorized("Not an authorised user"))
         return service_advisor_obj
 
