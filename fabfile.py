@@ -13,7 +13,7 @@ BUCKET_NAME='gladminds' #Replace this with the correct bucket alloted for your p
 FILE_NAME = 'build.zip'
 version = "build_"+str(int(time.time()))
 APPLICATION_NAME = 'Gladminds' #Replace this with the elastic beanstalk application, ask from admin
-ENVIRONMENT_NAME = 'gladminds-worker-prod'#Replace this with the elastic beanstalk dev environment name, ask from admin
+ENVIRONMENT_NAME = 'gladminds-web-prod'#Replace this with the elastic beanstalk dev environment name, ask from admin
 ACCESS_KEY = 'AKIAIL7IDCSTNCG2R6JA'
 SECRET_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
 
