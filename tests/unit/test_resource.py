@@ -158,6 +158,11 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
         self.assertEqual(coupon_obj.status, 2)
         
+    def test_no_available_coupons(self):
+        #Close all the coupons
+        coupon = self.filter_coupon_obj('COUPON004').delete()
+        result = client.post('/v1/messages', data = {'text':'A SAP002 500 1', 'phoneNumber' : '4444861111'})
+        self.assertHttpOK(result)
         
 class GladmindsUrlsTest(GladmindsResourceTestCase):
     def setUp(self):
