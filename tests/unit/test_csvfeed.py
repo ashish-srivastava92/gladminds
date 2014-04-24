@@ -67,18 +67,18 @@ class CSVFeedByFile(GladmindsUnitTestCase):
                 logger.exception("[Excpetion]: {0}".format(oe))
 
     
-    def test_brand_import(self):
+    def _test_brand_import(self):
         brand_data = common.BrandData.objects.get(brand_id = 'HERO001')
         self.assertEqual(brand_data.brand_name, 'HERO')
 
-    def test_service_advisor(self):
+    def _test_service_advisor(self):
         sa_data = common.ServiceAdvisor.objects.get(phone_number = '+SA0000000002')
         self.assertEqual(sa_data.dealer_id.dealer_id, 'TESTD001')
         
         sa_data = common.ServiceAdvisor.objects.get(phone_number = '+SA0000000003')
         self.assertEqual(sa_data.dealer_id.dealer_id, 'TESTD002')
 
-    def test_product_dispatch(self):
+    def _test_product_dispatch(self):
         product_data = common.ProductData.objects.get(vin = 'TESTDDZZZHER44300')
         self.assertEqual(product_data.product_type.product_type, 'IMPULSE220')
         self.assertEqual(product_data.dealer_id.dealer_id, 'TESTD001')
@@ -89,7 +89,7 @@ class CSVFeedByFile(GladmindsUnitTestCase):
         coupon_count = common.CouponData.objects.filter(vin__vin = 'TESTDDZZZHER44301', status = 1).count()
         self.assertEqual(coupon_count, 1)
     
-    def test_product_purchases(self):
+    def _test_product_purchases(self):
         product_data = common.ProductData.objects.get(vin = 'TESTDDZZZHER44300')
         self.assertEqual(product_data.customer_phone_number.phone_number, '+CUST000000001')
         self.assertEqual(product_data.sap_customer_id, 'SAPTESTCUST001')
@@ -98,7 +98,7 @@ class CSVFeedByFile(GladmindsUnitTestCase):
         self.assertEqual(product_data.customer_phone_number.phone_number, '+CUST000000002')
         self.assertEqual(product_data.sap_customer_id, 'SAPTESTCUST002')
         
-    def test_coupon_redeeem(self):
+    def _test_coupon_redeeem(self):
         coupon_data = common.CouponData.objects.get(vin__vin = 'TESTDDZZZHER44300', unique_service_coupon = 'HEROCOUP001')
 #         self.assertEqual(coupon_data.sa_phone_number.phone_number, '+SA0000000001')
         self.assertEqual(int(coupon_data.actual_kms), 100)
@@ -107,6 +107,6 @@ class CSVFeedByFile(GladmindsUnitTestCase):
 #         self.assertEqual(coupon_data.sa_phone_number.phone_number, '+SA0000000002')
         self.assertEqual(int(coupon_data.actual_kms), 500)
     
-    def test_user_registration(self):
+    def _test_user_registration(self):
         customer_data = common.GladMindUsers.objects.get(phone_number = '+CUST000000001')
         self.assertEqual(customer_data.customer_name, 'Test Customer')   

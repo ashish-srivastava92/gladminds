@@ -1,0 +1,22 @@
+.dealer-logout {
+  float: right;
+}
+
+.user-message {
+  right: 0;
+  left: 0;
+  text-align: center;
+  position: absolute;
+}
+
+.user-message .message {
+  max-width: 250px;
+  background: #ddd;
+  border-radius: 10px;
+  margin: 0 auto;
+  display: none;
+}
+
+.query-form {
+  margin-top: 10px;
+}

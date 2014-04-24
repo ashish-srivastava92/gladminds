@@ -395,6 +395,7 @@ def update_coupon_data(sender, **kwargs):
             coupon_object = common.CouponData.objects.get(
                 vin=instance, unique_service_coupon=coupon.unique_service_coupon)
             coupon_object.mark_expired_on = mark_expired_on
+            coupon_object.extended_date = mark_expired_on
             coupon_object.save()
 
         try:
