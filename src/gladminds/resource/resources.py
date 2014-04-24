@@ -226,6 +226,10 @@ class GladmindsResources(Resource):
                 valid_coupon = valid_coupon[0]
             elif len(valid_coupon) > 0:
                 valid_coupon = valid_coupon[0]
+            else:
+                dealer_message = templates.get_template('SEND_SA_NO_VALID_COUPON').format(sap_customer_id)
+                logger.info(dealer_message)
+                return False
             
             coupon_sa_obj = common.ServiceAdvisorCouponRelationship.objects.filter(unique_service_coupon=valid_coupon\
                                                                                    ,service_advisor_phone=dealer_data)

@@ -35,7 +35,7 @@
       "description":"Send on if customer id is not valid"
     }
   },
-    {
+  {
     "model": "gladminds.messagetemplate",
     "pk": 5,
     "fields": {
@@ -218,6 +218,15 @@
       "template_key": "SEND_SA_WRONG_CUSTOMER_UCN",
       "template": "Incorrect Customer ID or UCN",
       "description": "Send message to SA reg wrong Customer-Id or wrong UCN"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 26,
+    "fields": {
+      "template_key":"SEND_SA_NO_VALID_COUPON",
+      "template":"No Digitised FSC available for Customer ID {0}",
+      "description":"Send when there is no UCN or all UCN are closed"
     }
   }
 ]
