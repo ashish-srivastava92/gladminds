@@ -20,7 +20,7 @@ import logging
 from gladminds.utils import mobile_format, format_message
 from django.utils import timezone
 from django.conf import settings
-from gladminds.sqs_tasks import get_task_queue
+from gladminds.utils import get_task_queue
 from gladminds.settings import COUPON_VALID_DAYS
 
 

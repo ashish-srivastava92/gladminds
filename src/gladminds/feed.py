@@ -15,7 +15,7 @@ from gladminds.models import common
 from gladminds import exportfeed
 from gladminds.audit import feed_log
 from django.db.models import signals
-from gladminds.sqs_tasks import get_task_queue
+from gladminds.utils import get_task_queue
 
 
 logger = logging.getLogger("gladminds")
