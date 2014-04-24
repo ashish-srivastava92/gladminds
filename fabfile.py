@@ -13,7 +13,7 @@ BUCKET_NAME='gladminds' #Replace this with the correct bucket alloted for your p
 FILE_NAME = 'build.zip'
 version = "build_"+str(int(time.time()))
 APPLICATION_NAME = 'Gladminds' #Replace this with the elastic beanstalk application, ask from admin
-ENVIRONMENT_NAME = 'gladminds-web-prod'#Replace this with the elastic beanstalk dev environment name, ask from admin
+ENVIRONMENT_NAME = 'gladminds-worker-prod'#Replace this with the elastic beanstalk dev environment name, ask from admin
 ACCESS_KEY = 'AKIAIL7IDCSTNCG2R6JA'
 SECRET_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
 
@@ -109,7 +109,7 @@ def test(package=''):
         options.append('--cover-min-percentage=80')
 
 
-    local('bin/test test {0} {1}'.format(package, ' '.join(options)))
+    return _execute('bin/test test {0} {1}'.format(package, ' '.join(options)))
     
 
 #Include new commands for deployment to elastic beanstalk
@@ -140,8 +140,6 @@ def create_version(application, version):
 def update_environment(environment, version):
     beanstalk = boto.connect_beanstalk(ACCESS_KEY, SECRET_KEY)
     beanstalk.update_environment(environment_name=environment,version_label=version)
-
-    return _execute('bin/test test {0} {1}'.format(package, ' '.join(options)))
 
 
 def _execute(cmd):
