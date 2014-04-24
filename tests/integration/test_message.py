@@ -134,8 +134,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         sa_dealer_rel.status = 'N'
         sa_dealer_rel.save()
 
-        with self.assertRaises(ImmediateHttpResponse):
-            obj.validate_dealer("9999999")
+        self.assertEqual(obj.validate_dealer("9999999"), None)
 
     def test_coupon_expiry(self):
         self.get_coupon_obj(unique_service_coupon='USC002', vin=self.product_obj, valid_days=30, valid_kms=2000, service_type=2)
