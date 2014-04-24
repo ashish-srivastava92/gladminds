@@ -239,6 +239,8 @@ class ProductDispatchFeed(BaseFeed):
                     continue
 
             try:
+                if not product['unique_service_coupon']:
+                    continue
                 coupon_data = common.CouponData(unique_service_coupon=product['unique_service_coupon'],
                             vin=product_data, valid_days=product['valid_days'],
                             valid_kms=product['valid_kms'], service_type=product['service_type'],

@@ -66,7 +66,7 @@ class ProductDispatchModel(ComplexModel):
     PRODUCT_TYPE = Unicode
     VEC_DIS_DT = Date
     KUNNR = Unicode
-    UCN_NO = Unicode
+    UCN_NO = Unicode(default=None)
     DAYS_LIMIT_FROM = Decimal
     DAYS_LIMIT_TO = Decimal
     KMS_FROM = Decimal
@@ -74,6 +74,7 @@ class ProductDispatchModel(ComplexModel):
     SERVICE_TYPE = Unicode
     UCN_Status = Decimal(default=1)
     TIMESTAMP = Unicode(pattern=pattern)
+
 
 class ProductDispatchModelList(ComplexModel):
     __namespace__ = tns
