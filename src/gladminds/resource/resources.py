@@ -21,6 +21,8 @@ from gladminds.utils import mobile_format, format_message
 from django.utils import timezone
 from django.conf import settings
 from gladminds.sqs_tasks import get_task_queue
+from gladminds.settings import COUPON_VALID_DAYS
+
 
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -206,12 +208,18 @@ class GladmindsResources(Resource):
         valid_coupon.save()
 
     def update_inprogress_coupon(self, coupon, actual_kms, dealer_data):
-        validity_date = coupon.mark_expired_on.date()
+        expiry_date = coupon.mark_expired_on
+        if coupon.extended_date < expiry_date:
+            coupon.extended_date = expiry_date
+            coupon.save()
+        
+        validity_date = coupon.extended_date
         today = timezone.now()
-        if validity_date >= today.date():
+        if expiry_date >= today:
+            coupon.extended_date = datetime.now() + timedelta(days=COUPON_VALID_DAYS)
             self.update_coupon(coupon, actual_kms, dealer_data, 4, today)
-        else:
-            coupon.sa_phone_number = dealer_data
+        elif validity_date >= today and expiry_date < today:
+            coupon.actual_service_date = datetime.now()
             coupon.save()
         
     @transaction.commit_manually()
@@ -224,6 +232,9 @@ class GladmindsResources(Resource):
         customer_message_countdown = settings.DELAY_IN_CUSTOMER_UCN_MESSAGE
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         dealer_data = self.validate_dealer(phone_number)
+        if not dealer_data:
+            transaction.commit()
+            return False
         if not self.is_valid_data(customer_id=sap_customer_id, sa_phone=phone_number):
             return False
         try:
@@ -238,6 +249,17 @@ class GladmindsResources(Resource):
                 valid_coupon = valid_coupon[0]
             elif len(valid_coupon) > 0:
                 valid_coupon = valid_coupon[0]
+            else:
+                dealer_message = templates.get_template('SEND_SA_NO_VALID_COUPON').format(sap_customer_id)
+                logger.info(dealer_message)
+                return False
+            
+            coupon_sa_obj = common.ServiceAdvisorCouponRelationship.objects.filter(unique_service_coupon=valid_coupon\
+                                                                                   ,service_advisor_phone=dealer_data)
+            if not len(coupon_sa_obj):
+                coupon_sa_obj = common.ServiceAdvisorCouponRelationship(unique_service_coupon=valid_coupon\
+                                                                        ,service_advisor_phone=dealer_data)
+                coupon_sa_obj.save()
 
             in_progress_coupon = common.CouponData.objects.select_for_update()\
                                  .filter(vin__vin=vin, valid_kms__gte=actual_kms, status=4) \
@@ -293,9 +315,12 @@ class GladmindsResources(Resource):
         unique_service_coupon = sms_dict['usc']
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         message = None
+        if not sa_object:
+            transaction.commit()
+            return False
         if not self.is_valid_data(customer_id=sap_customer_id, coupon=unique_service_coupon, sa_phone=phone_number):
             return False
-        if not self.is_sa_initiator(unique_service_coupon, phone_number):
+        if not self.is_sa_initiator(unique_service_coupon, sa_object):
             logger.info("SA is not the coupon initiator.")
             transaction.commit()
             return False
@@ -304,6 +329,7 @@ class GladmindsResources(Resource):
             coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
             customer_phone_number = coupon_object.vin.customer_phone_number.phone_number
             coupon_object.status = 2
+            coupon_object.sa_phone_number=sa_object
             coupon_object.closed_date = datetime.now()
             coupon_object.save()
             common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, service_type__lt=coupon_object.service_type).update(status=3)
@@ -329,32 +355,32 @@ class GladmindsResources(Resource):
             if len(all_sa_dealer_obj) == 0:
                 raise
         except:
-            message = 'You are not an authorised user to avail this service'
-            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
-            raise ImmediateHttpResponse(HttpUnauthorized("Not an authorised user"))
+            message = 'Not an authorised user to avail this service. Phone number - {0}'.format(phone_number)
+            logger.error(message)
+            audit.audit_log(action='failure', sender=phone_number, reciever="", message=message, status='warning')
+            return None
         return service_advisor_obj
 
-    def is_sa_initiator(self, coupon_id, phone_sa):
+    def is_sa_initiator(self, coupon_id, sa_object):
         coupon_data = common.CouponData.objects.filter(unique_service_coupon = coupon_id)
-        if coupon_data:
-            coupon_initiator = common.ServiceAdvisor.objects.filter(phone_number = coupon_data[0].sa_phone_number)
-            return phone_sa == coupon_initiator[0].phone_number
-        return False
+        coupon_sa_obj = common.ServiceAdvisorCouponRelationship.objects.filter(unique_service_coupon=coupon_data\
+                                                                                   ,service_advisor_phone=sa_object)
+        return len(coupon_sa_obj)>0
+        
     
     def is_valid_data(self, customer_id=None, coupon=None, sa_phone=None):
         '''
             Error During wrong entry of Customer ID or UCN (message to the service advisor)
-            -    "Wrong Customer ID; please check"
-            -    "Wrong UCN; please check"
-            -    "Wrong Customer ID and wrong UCN; please check"
+            -    "Wrong Customer ID or UCN"
         '''
         coupon_obj = customer_obj = message = None
         if coupon: coupon_obj = common.CouponData.objects.filter(unique_service_coupon=coupon)
         if customer_id: customer_obj = common.ProductData.objects.filter(sap_customer_id=customer_id)
-        
-        if ((customer_id and customer_obj) and (coupon and coupon_obj) and coupon_obj[0].vin.vin != customer_obj[0].vin) or\
-            ((customer_id and not customer_obj) and (coupon and not coupon_obj)):
+
+        if ((customer_obj and coupon_obj and coupon_obj[0].vin.vin != customer_obj[0].vin) or\
+            (not customer_obj and not coupon_obj)):
             message=templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')
+
         elif customer_id and not customer_obj:
             message=templates.get_template('SEND_SA_WRONG_CUSTOMER')
         elif coupon and not coupon_obj:
@@ -434,7 +460,17 @@ class UserResources(GladmindsBaseResource):
         except:
             raise ImmediateHttpResponse(response=http.HttpBadRequest())
     
-    
+    def obj_create(self, bundle, **kwargs):
+        """
+        A ORM-specific implementation of ``obj_create``.
+        """
+#        bundle.obj = self._meta.object_class()
+#        for key, value in kwargs.items():
+#            setattr(bundle.obj, key, value)
+#
+#        bundle = self.full_hydrate(bundle)
+#        return self.save(bundle)
+        return bundle
     
     def get_products(self, request, **kwargs):
         user_id = kwargs['pk']

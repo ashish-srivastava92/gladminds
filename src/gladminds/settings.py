@@ -17,14 +17,8 @@ ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
-#Update below constants for status of coupon
-COUPON_STATUS = {
-                 'unused' : 1,
-                 'closed' : 2,
-                 'expired' : 3,
-                 'inprogress' : 4
-                 }
 
+COUPON_VALID_DAYS = 30
 
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 
@@ -291,7 +285,6 @@ AWS_SECRET_ACCESS_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
 AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 # S3_URL = 'http://%s.s3-website-us-east-1.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 
-
-DELAY_IN_CUSTOMER_UCN_MESSAGE = 1800
+DELAY_IN_CUSTOMER_UCN_MESSAGE = 180
 ENABLE_AMAZON_SQS = False
 

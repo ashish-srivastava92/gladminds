@@ -1,5 +1,5 @@
-from datetime import datetime
 from django.conf import settings
+from django.utils import timezone
 
 from models import logs
 
@@ -23,7 +23,7 @@ def audit_log(action='SENT', sender='+1 469-513-9856', reciever=None, message=No
                     'status':status
                 }
 
-    action_log = logs.AuditLog(date=datetime.now(), action=action, sender=sender, reciever=reciever, status=status, message=message)
+    action_log = logs.AuditLog(date=timezone.now(), action=action, sender=sender, reciever=reciever, status=status, message=message)
     action_log.save()
 
 
