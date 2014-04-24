@@ -9,6 +9,7 @@
             <ns1:KMS_TO>500</ns1:KMS_TO>
             <ns1:TIMESTAMP>2005-08-01000000</ns1:TIMESTAMP>
             <ns1:VEC_DIS_DT>2014-03-20</ns1:VEC_DIS_DT>
+            <ns1:UCN_Status>2</ns1:UCN_Status>
             <ns1:DAYS_LIMIT_FROM>25</ns1:DAYS_LIMIT_FROM>
             <ns1:CHASSIS>XXXXXXXXXX</ns1:CHASSIS>
             <ns1:DAYS_LIMIT_TO>30</ns1:DAYS_LIMIT_TO>
