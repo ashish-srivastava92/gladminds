@@ -8,33 +8,35 @@ SECRET_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
 
 
 class TaskQueue:
+
     def add(self, task_name, task_params=None, **kwargs):
         pass
 
 
 task_info = {
-             "expire_service_coupon": {
-                                       "time_taken": 0
-                                      },
-             "export_coupon_redeem_to_sap": {
-                                       "time_taken": 0
-                                      },
-             "send_report_mail_for_feed": {
-                                       "day_duration": 1
-                                      },
-             "send_reminder": {
-                                    "reminder_day": 7
-                              },
-             "import_data": {
-                            "time_taken": 0
-                           },
-             "send_schedule_reminder": {
-                            "time_taken": 0
-                           }
-             }
+    "expire_service_coupon": {
+        "time_taken": 0
+    },
+    "export_coupon_redeem_to_sap": {
+        "time_taken": 0
+    },
+    "send_report_mail_for_feed": {
+        "day_duration": 1
+    },
+    "send_reminder": {
+        "reminder_day": 7
+    },
+    "import_data": {
+        "time_taken": 0
+    },
+    "send_schedule_reminder": {
+        "time_taken": 0
+    }
+}
 
 
 class SqsTaskQueue(TaskQueue):
+
     def __init__(self, sqs_name):
         self._conn = SQSConnection(ACCESS_KEY, SECRET_KEY)
         self._q = self._conn.get_queue(sqs_name)
@@ -42,9 +44,9 @@ class SqsTaskQueue(TaskQueue):
     def add(self, task_name, task_params=None, **kwargs):
         task_params = task_info[task_name] or {}
         payload = {
-                "task_name": task_name,
-                "params": task_params
-            }
+            "task_name": task_name,
+            "params": task_params
+        }
         payload_as_str = json.dumps(payload)
         self._conn.send_message(self._q, payload_as_str)
 
