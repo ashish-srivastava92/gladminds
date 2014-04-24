@@ -14,13 +14,13 @@ class TestCelery(GladmindsResourceTestCase):
     @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
                        CELERY_ALWAYS_EAGER=True,
                        BROKER_BACKEND='django')
-    def _test_send_sms(self):
+    def test_send_sms(self):
         result = send_service_detail.delay(
             phone_number='99999999', message='Test Message')
         self.assertTrue(result.successful())
 
     @override_settings(SMS_CLIENT="MOCK_FAIL")
-    def _test_send_sms_fail(self):
+    def test_send_sms_fail(self):
         result = send_service_detail.delay(
             phone_number='99999999', message='Test Message')
         self.assertFalse(result.successful())

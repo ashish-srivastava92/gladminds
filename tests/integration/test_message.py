@@ -4,16 +4,18 @@ from base_integration import GladmindsResourceTestCase
 from gladminds.resource.resources import GladmindsResources
 from gladminds.models import common
 from django.contrib.auth.models import User
+from django.test.client import Client
 import logging
 from tastypie.exceptions import ImmediateHttpResponse
 logger = logging.getLogger('gladminds')
 
+client=Client()
 
 class CustomerRegistrationTest(GladmindsResourceTestCase):
 
     def setUp(self):
         super(CustomerRegistrationTest, self).setUp()
-        MSG_CUST_REG = "GCP_REG test.user@test.com Test User"
+        MSG_CUST_REG = "GCP_REG test.user@test.com TestUser"
         PHONE_NUMBER = "+TS{0}".format(int(time.time()))
         self.CUST_REG = {'text': MSG_CUST_REG, 'phoneNumber': PHONE_NUMBER}
 
@@ -23,7 +25,7 @@ class CustomerRegistrationTest(GladmindsResourceTestCase):
             'text': MSG_INVALID_CUST_REG, 'phoneNumber': PHONE_NUMBER}
 
         # INVALID KEYWORD
-        MSG_INVALID_CUST_REG_KEY = "REG test.user@test.com Test User"
+        MSG_INVALID_CUST_REG_KEY = "REG test.user@test.com TestUser"
         self.INVALID_CUST_REG_KEY = {
             'text': MSG_INVALID_CUST_REG_KEY, 'phoneNumber': PHONE_NUMBER}
 
@@ -32,22 +34,21 @@ class CustomerRegistrationTest(GladmindsResourceTestCase):
         self.ALREADY_CUST_REG = {
             'text': MSG_ALREADY_CUST_REG, 'phoneNumber': '+TS0000000001'}
 
-    def _test_customer_registration(self):
-        resp = self.api_client.post(uri=self.MESSAGE_URL, data=self.CUST_REG)
+    def test_customer_registration(self):
+        resp = client.post(self.MESSAGE_URL, data=self.CUST_REG)
         self.assertHttpOK(resp)
 
-    def _test_invalid_message(self):
-        resp = self.api_client.post(
-            uri=self.MESSAGE_URL, data=self.INVALID_CUST_REG)
+    def test_invalid_message(self):
+        resp = client.post(self.MESSAGE_URL, data=self.INVALID_CUST_REG)
         self.assertHttpBadRequest(resp)
 
-        resp = self.api_client.post(
-            uri=self.MESSAGE_URL, data=self.INVALID_CUST_REG_KEY)
+        resp = client.post(
+            self.MESSAGE_URL, data=self.INVALID_CUST_REG_KEY)
         self.assertHttpBadRequest(resp)
 
-    def _test_already_registered_customer(self):
-        resp = self.api_client.post(
-            uri=self.MESSAGE_URL, data=self.ALREADY_CUST_REG)
+    def test_already_registered_customer(self):
+        resp = client.post(
+            self.MESSAGE_URL, data=self.ALREADY_CUST_REG)
         self.assertHttpOK(resp)
 
 
@@ -70,16 +71,16 @@ class CustomerServiceTest(GladmindsResourceTestCase):
         self.IN_PH_MSG_SVC = {
             'text': VALID_MSG_SERVICE, 'phoneNumber': INVALID_PHONE_NUMBER}
 
-    def _test_valid_service(self):
-        resp = self.api_client.post(uri=self.MESSAGE_URL, data=self.MSG_SVC)
+    def test_valid_service(self):
+        resp = client.post(self.MESSAGE_URL, data=self.MSG_SVC)
         self.assertHttpOK(resp)
 
-    def _test_invalid_service(self):
-        resp = self.api_client.post(uri=self.MESSAGE_URL, data=self.IN_MSG_SVC)
+    def test_invalid_service(self):
+        resp = client.post(self.MESSAGE_URL, data=self.IN_MSG_SVC)
         self.assertHttpOK(resp)
 
-        resp = self.api_client.post(
-            uri=self.MESSAGE_URL, data=self.IN_PH_MSG_SVC)
+        resp = client.post(
+            self.MESSAGE_URL, data=self.IN_PH_MSG_SVC)
         self.assertHttpOK(resp)
 
 
@@ -134,8 +135,6 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         sa_dealer_rel.status = 'N'
         sa_dealer_rel.save()
 
-        with self.assertRaises(ImmediateHttpResponse):
-            obj.validate_dealer("9999999")
 
     def test_coupon_expiry(self):
         self.get_coupon_obj(unique_service_coupon='USC002', vin=self.product_obj, valid_days=30, valid_kms=2000, service_type=2)
@@ -316,12 +315,12 @@ class BrandData(GladmindsResourceTestCase):
     TestCase for getting all products associated with the brand for a customer
     '''
 
-    def _test_get_all_products_of_a_brand(self):
-        resp = self.api_client.post(
-            uri=self.MESSAGE_URL, data=self.VALID_BRAND_ID)
+    def test_get_all_products_of_a_brand(self):
+        resp = client.post(
+            self.MESSAGE_URL, data=self.VALID_BRAND_ID)
         self.assertHttpOK(resp)
 
-    def _test_get_all_brand(self):
-        resp = self.api_client.post(
-            uri=self.MESSAGE_URL, data=self.INVALID_BRAND_ID)
+    def test_get_all_brand(self):
+        resp = client.post(
+            self.MESSAGE_URL, data=self.INVALID_BRAND_ID)
         self.assertHttpOK(resp)
