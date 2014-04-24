@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from integration.base_integration import GladmindsResourceTestCase
 from gladminds import feed
 import xml.etree.ElementTree as ET
+from django.utils import unittest
 
 logger = logging.getLogger('gladminds')
 
@@ -182,6 +183,7 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(200, response.status_code)
 
+    @unittest.skip("Skipping Adding this functionalty in future")
     def test_coupon_status_on_dispatch_feed(self):
         '''
             Test for testing out coupon status on dispatch feed
@@ -200,3 +202,16 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         coupon_data = CouponData.objects.all()[1]
         self.assertEquals(u"USC002", coupon_data.unique_service_coupon)
         self.assertEquals(1, coupon_data.status, 'Default value should be 1')
+
+    def test_coupon_status_without_ucn(self):
+        '''
+            Test for testing out dispatch feed without_ucn
+        '''
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed_without_ucn.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+
+        self.assertEquals(1, CouponData.objects.count())
+        coupon_data = CouponData.objects.all()[0]
+        self.assertEquals(u"USC002", coupon_data.unique_service_coupon)
