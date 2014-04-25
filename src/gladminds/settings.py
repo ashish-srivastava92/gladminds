@@ -222,11 +222,6 @@ LOGGING = {
             'filename':'/var/log/gladminds/app/afterbuy.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
-        },'test_case_logs': {
-            'level': 'INFO',
-            'filename':'/var/log/gladminds/app/test_case.log',
-            'class': 'logging.FileHandler',
-            'formatter': 'verbose',
         }
     },
 
@@ -245,10 +240,6 @@ LOGGING = {
             'propagate': False,
         },'afterbuy': {
             'handlers': ['afterbuy_logs'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },'test_case': {
-            'handlers': ['test_case_logs'],
             'level': 'DEBUG',
             'propagate': True,
         }
