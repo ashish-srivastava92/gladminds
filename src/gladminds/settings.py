@@ -213,13 +213,13 @@ LOGGING = {
         },
         'gladminds_logs': {
             'level': 'INFO',
-            'filename':'/var/log/gladminds/app/gladminds.log',
+            'filename': '/var/log/gladminds/app/gladminds.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         },
         'afterbuy_logs': {
             'level': 'INFO',
-            'filename':'/var/log/gladminds/app/afterbuy.log',
+            'filename': '/var/log/gladminds/app/afterbuy.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         }
@@ -230,14 +230,16 @@ LOGGING = {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
-        },'gladminds': {
+        },
+        'gladminds': {
             'handlers': ['gladminds_logs'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
-        },'spyne': {
+        },
+        'spyne': {
             'handlers': ['gladminds_logs'],
-            'level': 'DEBUG',
-            'propagate': False,
+            'level': 'WARN',
+            'propagate': True,
         },'afterbuy': {
             'handlers': ['afterbuy_logs'],
             'level': 'DEBUG',

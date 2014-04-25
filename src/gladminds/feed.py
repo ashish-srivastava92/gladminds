@@ -159,7 +159,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 dealer_data = common.RegisteredDealer.objects.get(
                     dealer_id=dealer['dealer_id'])
             except ObjectDoesNotExist as odne:
-                logger.info(
+                logger.debug(
                     "[Exception: DealerAndServiceAdvisorFeed_dealer_data]: {0}".format(odne))
                 dealer_data = common.RegisteredDealer(
                     dealer_id=dealer['dealer_id'], address=dealer['address'])
