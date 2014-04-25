@@ -316,9 +316,9 @@ class ListDispatchedProducts(ModelAdmin):
         query_set = self.model._default_manager.get_query_set()
         query_set = query_set.filter(invoice_date__isnull=False)
         # TODO: this should be handled by some parameter to the ChangeList.
-        ordering = self.get_ordering(request)
-        if ordering:
-            query_set = query_set.order_by(*ordering)
+#        ordering = self.get_ordering(request)
+#        if ordering:
+#            query_set = query_set.order_by(*ordering)
         return query_set
 
     def UCN(self, obj):
