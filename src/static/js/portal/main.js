@@ -35,14 +35,10 @@
     });
 
     $("#submit-asc").click(function(e) {
-        e.preventDefault();
-        // var name = $("#name").val();
-        // var last_name = $("#last_name").val();
-        // var dataString = 'name=' + name + '&last_name=' + last_name;
-        $.ajax({
+        var jqXHR = $.ajax({
             type : 'POST',
-            data : "fadsfs" | '',
-            url : '/save-asc/',
+            data : $("form.asc-form").serializeArray(),
+            url : '/save/',
             success : function(data) {
                 alert(data);
             }

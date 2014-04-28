@@ -1,9 +1,10 @@
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.contrib.auth.views import login_required
-from django.template.context import RequestContext
-from django.http.response import HttpResponseRedirect
+from django.template import RequestContext
+from django.http.response import HttpResponseRedirect, HttpResponse
 from gladminds.models import common
 import logging
+from django.views.decorators.csrf import csrf_exempt
 logger = logging.getLogger('gladminds')
 
 @login_required(login_url='/dealers/')
@@ -31,10 +32,11 @@ def redirect(request):
 
 
 def register(request, user=None):
-    return render_to_response('gladminds/asc_registration.html',\
-                              {}, context_instance=RequestContext(request))
+    return render(request, 'portal/asc_registration.html')
+#     return render_to_response('gladminds/asc_registration.html',\
+#                               {}, context_instance=RequestContext(request))
 
 
-def register_user(request):
-    print request.POST
+def register_user(request, user=None):
 
+    return HttpResponse("Do something")

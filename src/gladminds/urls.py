@@ -22,7 +22,7 @@ urlpatterns = patterns('',
     url(r'api/doc/', include('tastypie_swagger.urls', namespace='tastypie_swagger')),
 
     url(r'^register/(?P<user>[a-zA-Z0-9]+)$', 'gladminds.views.register'),
-    url(r'^save$', 'gladminds.views.register_user'),
+    url(r'^save/(?P<user>[a-zA-Z0-9]+)$', 'gladminds.views.register_user'),
 )
 
 urlpatterns += patterns('gladminds',

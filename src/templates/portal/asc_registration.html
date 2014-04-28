@@ -1,0 +1,97 @@
+{% extends "base_template.html" %}
+
+{% block body %}
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <a class="brand" href="#"><img src="/static/img/bajaj_logo.jpg" height=50px width=209px></a>
+    </div>
+</div>
+<div class="well">
+    <div class="user-message">
+        <div class="message"></div>
+    </div>
+    <div id="wrapper">
+        <div class="row">
+            <div class="col-md-3 .col-md-offset-1">
+                {% include "portal/base_portal.html" %}
+            </div>
+            <div class="col-md-8">
+                <div class="row portal-form-heading">
+                    <div class="col-md-10">
+                        <h3 class="text-center"> ASC Registration </h3>
+                    </div>
+                </div>
+                <form class="asc-form" role="form">
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label class="control-label">ASC Name*:</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <input type="text" class="form-control" name="name"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label class="control-label">PWD*:</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <input type="text" class="form-control" name="pwd"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label class="control-label">Retype PWD*:</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <input type="text" class="form-control" name="re_pwd"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label class="control-label">ASC Mobile Number*:</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <input type="text" class="form-control" name="mobile_number"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label class="control-label">Email:</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <input type="text" class="form-control" name="email"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label class="control-label">PinCode:</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <input type="text" class="form-control" name="pincode"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label class="control-label">Address:</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <input type="text" class="form-control" name="address"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8 form-group">
+                            <button type="submit" class="btn btn-primary pull-right" id="submit-asc">
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block dependency %}
+<script src="/static/js/portal/main.js"></script>
+{% endblock dependency %}
