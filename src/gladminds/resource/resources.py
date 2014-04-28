@@ -442,16 +442,26 @@ class UserResources(GladmindsBaseResource):
         return bundle
     
     def process_otp(self, bundle, **kwargs):
-        if bundle.GET.get('otp', None):
-            return self.create_response(bundle, response_class=HttpResponse, data={'status':True})
+        if bundle.GET.get('otp', None) and bundle.GET.get('user_id', None):
+            try:
+                customer_phone = common.ProductData.objects.filter(sap_customer_id=bundle.GET['user_id'])[0]
+                http_class=HttpResponse
+                data={'status':True}
+            except:
+                http_class=HttpResponseBadRequest
+                data={'message':'User does not exist.'}
         elif bundle.GET.get('user_id', None):
             try:
                 #TODO: Implement real API
-                customer_phone = common.ProductData.objects.filter(sap_customer_id=bundle.GET['user_id'])
+                customer_phone = common.ProductData.objects.filter(sap_customer_id=bundle.GET['user_id'])[0]
+                http_class=HttpResponse
+                data={'message':'OTP has been sent to user mobile.'}
             except:
-                return self.create_response(bundle, response_class=HttpResponseBadRequest, data={'message':'User does not exist.'})
-            return self.create_response(bundle, response_class=HttpResponse, data={'message':'OTP has been sent to user mobile.'})
+                http_class=HttpResponseBadRequest
+                data={'message':'User does not exist.'}
         else:
-            return self.create_response(bundle, response_class=HttpResponseBadRequest, data={'message': 'Invalid OTP or User.'})
+            http_class=HttpResponseBadRequest
+            data={'message': 'Invalid OTP or User.'}
         
+        return self.create_response(bundle, response_class=http_class, data=data)
         
