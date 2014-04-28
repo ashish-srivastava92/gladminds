@@ -21,6 +21,8 @@ from gladminds.utils import mobile_format, format_message
 from django.utils import timezone
 from django.conf import settings
 from gladminds.settings import COUPON_VALID_DAYS
+from django.http.response import HttpResponse, HttpResponseBadRequest
+from django.contrib.auth.models import User
 
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -402,6 +404,7 @@ class UserResources(GladmindsBaseResource):
     
     def prepend_urls(self):
         return [
+            url(r"^(?P<resource_name>%s)/otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('process_otp'), name="validate_otp"),
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/products%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_products'), name="api_get_products"),
         ]    
         
@@ -437,4 +440,18 @@ class UserResources(GladmindsBaseResource):
         products = common.ProductData.objects.filter(customer_phone_number__id=bundle.data['id']).select_related('customer_phone_number')
         bundle.data['products'] = [model_to_dict(product) for product in products]
         return bundle
+    
+    def process_otp(self, bundle, **kwargs):
+        if bundle.GET.get('otp', None):
+            return self.create_response(bundle, response_class=HttpResponse, data={'status':True})
+        elif bundle.GET.get('user_id', None):
+            try:
+                #TODO: Implement real API
+                customer_phone = common.ProductData.objects.filter(sap_customer_id=bundle.GET['user_id'])
+            except:
+                return self.create_response(bundle, response_class=HttpResponseBadRequest, data={'message':'User does not exist.'})
+            return self.create_response(bundle, response_class=HttpResponse, data={'message':'OTP has been sent to user mobile.'})
+        else:
+            return self.create_response(bundle, response_class=HttpResponseBadRequest, data={'message': 'Invalid OTP or User.'})
+        
         
