@@ -61,6 +61,24 @@ CREATE TABLE `gladminds_serviceadvisorcouponrelationship` (
   CONSTRAINT `service_advisor_phone_id_refs_id_ff3268c1` FOREIGN KEY (`service_advisor_phone_id`) REFERENCES `gladminds_serviceadvisor` (`id`),
   CONSTRAINT `unique_service_coupon_id_refs_id_862689b3` FOREIGN KEY (`unique_service_coupon_id`) REFERENCES `gladminds_coupondata` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-------------------Migration Script for 1.3.1 ------------------
+--
+-- Table structure for table `auth_group`
+--
+DROP TABLE IF EXISTS `auth_group`;
+CREATE TABLE `auth_group` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(80) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+
+LOCK TABLES `auth_group` WRITE;
+INSERT INTO `auth_group` VALUES (4,'ascs'),(3,'customer'),(1,'dealers'),(2,'sas');
+UNLOCK TABLES;
+
+
 -------------------create slow query log------------------
 
 mkdir /var/log/mysql
