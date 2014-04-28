@@ -135,6 +135,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     #'gladminds.middleware.GladmindsMiddleware'
@@ -173,6 +174,7 @@ INSTALLED_APPS = (
     'corsheaders',
     'storages',
     'tastypie_swagger',
+    'django_otp',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
