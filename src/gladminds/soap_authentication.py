@@ -1,6 +1,9 @@
 import base64
 from django.contrib import auth
 from spyne.model.fault import Fault
+import logging
+
+logger = logging.getLogger("gladminds")
 
 class AuthenticationError(Fault):
     __namespace__ = 'gladminds.webservice.authentication'
@@ -33,5 +36,6 @@ class AuthenticationService(object):
     def authenticate(self):
         user = auth.authenticate(username=self.username, password=self.password)
         if user is None:
+            logger.error("Credential wrong for this user %s" % self.username)
             raise AuthenticationError(self.username)
         return True

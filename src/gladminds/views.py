@@ -1,16 +1,17 @@
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.contrib.auth.views import login_required
-from django.template.context import RequestContext
-from django.http.response import HttpResponseRedirect
+from django.template import RequestContext
+from django.http.response import HttpResponseRedirect, HttpResponse
 from gladminds.models import common
 import logging
+from django.views.decorators.csrf import csrf_exempt
 logger = logging.getLogger('gladminds')
 
 @login_required(login_url='/dealers/')
 def action(request, params):
     if request.method == 'GET':
         try:
-            dealer = common.RegisteredDealer.objects.filter(dealer_id = request.user)[0]
+            dealer = common.RegisteredDealer.objects.filter(dealer_id=request.user)[0]
             service_advisors = common.ServiceAdvisorDealerRelationship.objects.filter(dealer_id=dealer, status='Y')
             sa_phone_list = []
             for service_advisor in service_advisors:
@@ -18,12 +19,24 @@ def action(request, params):
             return render_to_response('dealer/advisor_actions.html', {'phones' : sa_phone_list}\
                                       , context_instance=RequestContext(request))
         except:
-            logger.info('No service advisor for dealer %s found active'%request.user)
+            logger.info('No service advisor for dealer %s found active' % request.user)
             raise
-        
+
     elif request.method == 'POST':
         raise NotImplementedError()
-    
+
+
 @login_required(login_url='/dealers/')
 def redirect(request):
     return HttpResponseRedirect('/dealers/' + str(request.user))
+
+
+def register(request, user=None):
+    return render(request, 'portal/asc_registration.html')
+#     return render_to_response('gladminds/asc_registration.html',\
+#                               {}, context_instance=RequestContext(request))
+
+
+def register_user(request, user=None):
+
+    return HttpResponse("Do something")

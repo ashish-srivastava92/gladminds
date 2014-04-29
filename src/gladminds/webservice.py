@@ -140,6 +140,8 @@ class DealerService(ServiceBase):
             return json.dumps(get_response(response))
         except Exception as ex:
             logging.error("DealerService: {0}  Error on Validating ".format(ex))
+            logger.debug("DealerService: Object List is "\
+                         .format(ObjectList.DealerData))
             return failed
 
 
@@ -164,7 +166,9 @@ class ProductDispatchService(ServiceBase):
             response = save_to_db(feed_type = 'dispatch', data_source = product_dispatch_list)
             return json.dumps(get_response(response))
         except Exception as ex:
-            logger.info("ProductDispatchService: {0}  Error on Validating ".format(ex))
+            logger.error("ProductDispatchService: {0}  Error on Validating ".format(ex))
+            logger.debug("ProductDispatchService: Object List is "
+                         .format(ObjectList.ProductDispatchData))
             return failed
 
 
@@ -194,7 +198,9 @@ class ProductPurchaseService(ServiceBase):
             response = save_to_db(feed_type = 'purchase', data_source = product_purchase_list)
             return json.dumps(get_response(response))
         except Exception as ex:
-            logger.info("ProductPurchaseService: {0}  Error on Validating ".format(ex))
+            logger.error("ProductPurchaseService: {0}  Error on Validating ".format(ex))
+            logger.debug("ProductPurchaseService: Object List is "\
+                         .format(ObjectList.ProductPurchaseData))
             return  failed
 
 
@@ -204,7 +210,6 @@ def save_to_db(feed_type = None, data_source = []):
 
 
 def _on_method_call(ctx):
-    logger.info("Getting feed data: %s" % ctx.in_object)
     if ctx.in_object is None:
         raise ArgumentError("Request doesn't contain data")
     auth_obj = AuthenticationService(username = ctx.in_object.Credential.UserName, password = ctx.in_object.Credential.Password)
