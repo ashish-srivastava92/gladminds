@@ -98,7 +98,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = os.path.join(PROJECT_DIR, "gladminds", 'collected')
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -133,7 +133,7 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -215,18 +215,13 @@ LOGGING = {
         },
         'gladminds_logs': {
             'level': 'INFO',
-            'filename':'/var/log/gladminds/app/gladminds.log',
+            'filename': '/var/log/gladminds/app/gladminds.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         },
         'afterbuy_logs': {
             'level': 'INFO',
-            'filename':'/var/log/gladminds/app/afterbuy.log',
-            'class': 'logging.FileHandler',
-            'formatter': 'verbose',
-        },'test_case_logs': {
-            'level': 'INFO',
-            'filename':'/var/log/gladminds/app/test_case.log',
+            'filename': '/var/log/gladminds/app/afterbuy.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         }
@@ -237,20 +232,18 @@ LOGGING = {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
-        },'gladminds': {
+        },
+        'gladminds': {
             'handlers': ['gladminds_logs'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True,
-        },'spyne': {
+        },
+        'spyne': {
             'handlers': ['gladminds_logs'],
-            'level': 'DEBUG',
-            'propagate': False,
+            'level': 'WARN',
+            'propagate': True,
         },'afterbuy': {
             'handlers': ['afterbuy_logs'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },'test_case': {
-            'handlers': ['test_case_logs'],
             'level': 'DEBUG',
             'propagate': True,
         }
@@ -288,5 +281,7 @@ AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 # S3_URL = 'http://%s.s3-website-us-east-1.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 
 
-DELAY_IN_CUSTOMER_UCN_MESSAGE = 60
 DEFAULT_COUPON_STATUS = 1
+DELAY_IN_CUSTOMER_UCN_MESSAGE = 180
+ENABLE_AMAZON_SQS = False
+
