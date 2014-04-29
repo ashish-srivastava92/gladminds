@@ -1,6 +1,6 @@
 import unittest
 from django.core import management
-from gladminds.models import common 
+from gladminds.models import common , logs
 
 
 class GladmindsUnitTestCase(unittest.TestCase):
@@ -58,4 +58,9 @@ class GladmindsUnitTestCase(unittest.TestCase):
     def filter_coupon_obj(self, coupon_id=None):
         coupon_obj = common.CouponData.objects.filter(unique_service_coupon=coupon_id)
         return coupon_obj[0]
+    
+    def get_datafeed_log(self, **kwargs):
+        feed_log = logs.DataFeedLog(**kwargs)
+        feed_log.save()
+        return feed_log
         
