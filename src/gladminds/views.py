@@ -7,19 +7,22 @@ import logging
 from django.views.decorators.csrf import csrf_exempt
 logger = logging.getLogger('gladminds')
 
+
 @login_required(login_url='/dealers/')
 def action(request, params):
     if request.method == 'GET':
         try:
-            dealer = common.RegisteredDealer.objects.filter(dealer_id=request.user)[0]
-            service_advisors = common.ServiceAdvisorDealerRelationship.objects.filter(dealer_id=dealer, status='Y')
+            dealer = common.RegisteredDealer.objects.filter(
+                dealer_id=request.user)[0]
+            service_advisors = common.ServiceAdvisorDealerRelationship.objects.filter(
+                dealer_id=dealer, status='Y')
             sa_phone_list = []
             for service_advisor in service_advisors:
                 sa_phone_list.append(service_advisor.service_advisor_id)
-            return render_to_response('dealer/advisor_actions.html', {'phones' : sa_phone_list}\
-                                      , context_instance=RequestContext(request))
+            return render_to_response('dealer/advisor_actions.html', {'phones': sa_phone_list}, context_instance=RequestContext(request))
         except:
-            logger.info('No service advisor for dealer %s found active' % request.user)
+            logger.info(
+                'No service advisor for dealer %s found active' % request.user)
             raise
 
     elif request.method == 'POST':
@@ -33,11 +36,27 @@ def redirect(request):
 
 def register(request, user=None):
     template_mapping = {
-                        "asc": "portal/asc_registration.html",
-                        }
+        "asc": "portal/asc_registration.html",
+    }
     return render(request, template_mapping[user])
+
+
+def save_asc_registeration(data):
+    reject_keys = ['csrfmiddlewaretoken']
+    data = {key: val for key, val in data.iteritems() \
+                                    if key not in reject_keys}
+    #asc_obj = common.ASCTemporaryRegisteration(data)
+    #asc_obj.save()
+    #print common.ASCTemporaryRegisteration.objects.all()
+    pass
 
 
 def register_user(request, user=None):
     status = "fail"
+    save_user = {
+        'asc': save_asc_registeration
+    }
+    save_user[user](request.POST)
     return HttpResponse({"status": status}, content_type="application/json")
+
+

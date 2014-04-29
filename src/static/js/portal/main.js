@@ -39,7 +39,7 @@
         var jqXHR = $.ajax({
             type : 'POST',
             data : $(".asc-form").serializeArray(),
-            url : '/save/',
+            url : '/save/asc',
             success : function(data) {
                 alert(data);
             }
