@@ -1,3 +1,11 @@
+.portal-form-label{
+    padding-top: 15px;   
+}
+
+.portal-form-heading{
+    margin-bottom: 3%;
+}
+
 .dealer-logout {
   float: right;
 }

@@ -2,23 +2,26 @@
 
 {% block body %}
 <label><h2>Welcome Dealer</h2></label>
-<form role="form" action="/dealers/" method="post" >{% csrf_token %}
-  <div class="row">
-    <div class="col-md-3">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" class="form-control" id="username" name="username" placeholder="Username">
-      </div>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" class="form-control" id="password" name="password" placeholder="password">
-      </div>
+<form role="form" action="/dealers/" method="post" >
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="Username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="password">
+            </div>
+        </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-md-4 form-group">
-      <button type="submit" class="btn btn-primary">Submit</button>
+    <div class="row">
+        <div class="col-md-4 form-group">
+            <button type="submit" class="btn btn-primary">
+                Submit
+            </button>
+        </div>
     </div>
-  </div>
 </form>
 {% endblock %}
