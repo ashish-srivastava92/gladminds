@@ -25,7 +25,7 @@ class AfterBuyIntegrationTests(ResourceTestCase):
         response=self.api_client.get(uri, format='json')
         self.assertValidJSONResponse(response)
         
-    def _test_brands(self):
+    def test_brands(self):
         uri='/v1/brands/'
         response=self.api_client.get(uri, format='json')
         self.assertValidJSONResponse(response)

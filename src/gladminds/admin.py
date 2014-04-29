@@ -172,8 +172,17 @@ class ProductDataAdmin(ModelAdmin):
     exclude = ('order',)
 
     def queryset(self, request):
-        qs = ProductData.objects.extra(where=['product_purchase_date is not NULL'])
-        return qs
+        """
+        Returns a QuerySet of all model instances that can be edited by the
+        admin site. This is used by changelist_view.
+        """
+        query_set = self.model._default_manager.get_query_set()
+        query_set = query_set.filter(product_purchase_date__isnull=False)
+        # TODO: this should be handled by some parameter to the ChangeList.
+        ordering = self.get_ordering(request)
+        if ordering:
+            query_set = query_set.order_by(*ordering)
+        return query_set
     
     def UCN(self, obj):
         ucn_list = []
@@ -300,8 +309,17 @@ class ListDispatchedProducts(ModelAdmin):
     exclude = ('order',)
 
     def queryset(self, request):
-        qs = DispatchedProducts.objects.extra(where=['invoice_date is not NULL'])
-        return qs
+        """
+        Returns a QuerySet of all model instances that can be edited by the
+        admin site. This is used by changelist_view.
+        """
+        query_set = self.model._default_manager.get_query_set()
+        query_set = query_set.filter(invoice_date__isnull=False)
+        # TODO: this should be handled by some parameter to the ChangeList.
+#        ordering = self.get_ordering(request)
+#        if ordering:
+#            query_set = query_set.order_by(*ordering)
+        return query_set
 
     def UCN(self, obj):
         ucn_list = []
