@@ -34,10 +34,11 @@
         return false;
     });
 
-    $("#submit-asc").click(function(e) {
+    $(".asc-form").on("submit", function(e) {
+        alert();
         var jqXHR = $.ajax({
             type : 'POST',
-            data : $("form.asc-form").serializeArray(),
+            data : $(".asc-form").serializeArray(),
             url : '/save/',
             success : function(data) {
                 alert(data);

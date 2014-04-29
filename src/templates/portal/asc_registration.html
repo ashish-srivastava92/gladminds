@@ -27,7 +27,7 @@
                             <label class="control-label">ASC Name*:</label>
                         </div>
                         <div class="col-md-4 form-group">
-                            <input type="text" class="form-control" name="name"/>
+                            <input type="text" class="form-control" name="name" required autofocus/>
                         </div>
                     </div>
                     <div class="row">
@@ -35,15 +35,15 @@
                             <label class="control-label">PWD*:</label>
                         </div>
                         <div class="col-md-4 form-group">
-                            <input type="text" class="form-control" name="pwd"/>
+                            <input type="password" class="form-control" name="pwd" required/>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-4 form-group">
-                            <label class="control-label">Retype PWD*:</label>
+                            <label  class="control-label">Retype PWD*:</label>
                         </div>
                         <div class="col-md-4 form-group">
-                            <input type="text" class="form-control" name="re_pwd"/>
+                            <input type="password" class="form-control" name="re_pwd" required />
                         </div>
                     </div>
                     <div class="row">
@@ -51,7 +51,7 @@
                             <label class="control-label">ASC Mobile Number*:</label>
                         </div>
                         <div class="col-md-4 form-group">
-                            <input type="text" class="form-control" name="mobile_number"/>
+                            <input type="text" class="form-control" name="mobile_number" required/>
                         </div>
                     </div>
                     <div class="row">
@@ -59,7 +59,7 @@
                             <label class="control-label">Email:</label>
                         </div>
                         <div class="col-md-4 form-group">
-                            <input type="text" class="form-control" name="email"/>
+                            <input type="email" class="form-control" name="email"/>
                         </div>
                     </div>
                     <div class="row">
@@ -80,7 +80,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-8 form-group">
-                            <button type="submit" class="btn btn-primary pull-right" id="submit-asc">
+                            <button type="submit" value="Submit" class="btn btn-primary pull-right">
                                 Submit
                             </button>
                         </div>
