@@ -32,11 +32,12 @@ def redirect(request):
 
 
 def register(request, user=None):
-    return render(request, 'portal/asc_registration.html')
-#     return render_to_response('gladminds/asc_registration.html',\
-#                               {}, context_instance=RequestContext(request))
+    template_mapping = {
+                        "asc": "portal/asc_registration.html",
+                        }
+    return render(request, template_mapping[user])
 
 
 def register_user(request, user=None):
-
-    return HttpResponse("Do something")
+    status = "fail"
+    return HttpResponse({"status": status}, content_type="application/json")
