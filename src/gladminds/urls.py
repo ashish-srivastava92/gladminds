@@ -4,6 +4,7 @@ from tastypie.api import Api
 from gladminds.resource import resources as r
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
+from django_otp.forms import OTPAuthenticationForm
 admin.autodiscover()
 
 api_v1 = Api(api_name="v1")
@@ -23,6 +24,8 @@ urlpatterns = patterns('',
 
     url(r'^register/(?P<user>[a-zA-Z0-9]+)$', 'gladminds.views.register'),
     url(r'^save/(?P<user>[a-zA-Z0-9]+)$', 'gladminds.views.register_user'),
+    url(r'^users/otp/generate$', 'gladminds.views.generate_otp', name='generate_otp'),
+    url(r'^users/otp/validate', 'gladminds.views.validate_otp', name='validate_otp'),
 )
 
 urlpatterns += patterns('gladminds',

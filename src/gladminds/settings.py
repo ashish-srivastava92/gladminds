@@ -175,6 +175,7 @@ INSTALLED_APPS = (
     'storages',
     'tastypie_swagger',
     'django_otp',
+    'django_otp.plugins.otp_totp',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
@@ -271,7 +272,7 @@ AFTERBUY_PRODUCT_INSURANCE_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "insurance")
 AFTERBUY_PRODUCT_INVOICE_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "invoice")
 MEDIA_ROOT = AFTERBUY_LOC
 MEDIA_URL = '/media/'
-
+TOTP_SECRET_KEY = '93424'
 
 #S3 Configuration
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'

@@ -234,3 +234,19 @@ class MessageTemplate(models.Model):
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Message Template"
+        
+####################################################################
+########################TOTP Details################################
+
+class OTPToken(models.Model):
+    phone_number = models.ForeignKey(GladMindUsers, null=True, blank=True)
+    token = models.CharField(max_length=16, null=False)
+    request_date = models.DateTimeField(null=True, blank=True)
+    email = models.CharField(max_length=50, null=False)
+    
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "OTPs"
+    
+    
+    

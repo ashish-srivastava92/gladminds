@@ -228,5 +228,14 @@
       "template":"No Digitised FSC available for Customer ID {0}",
       "description":"Send when there is no UCN or all UCN are closed"
     }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 27,
+    "fields": {
+      "template_key":"SEND_OTP",
+      "template":"Your one time use password is {0}",
+      "description":"Send OTP"
+    }
   }
 ]
