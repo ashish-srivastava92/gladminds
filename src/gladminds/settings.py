@@ -39,7 +39,7 @@ SUIT_CONFIG = {
 
                           {'model':'productdata','label': 'Feed -> Product Purchase'},{'model':'coupondata','label': 'Feed -> Coupon Redemption'} ,{'model':'auditlog','label': 'Audit Log'}, 
                           {'model':'datafeedlog','label': 'Feed Log'}, 'uploadproductcsv', 
-                          'messagetemplate','gladmindusers')},
+                          'messagetemplate','emailtemplate','gladmindusers',)},
                 {'app':'djcelery','label':'Job Management','icon':'icon-tasks'})
 }
 
@@ -98,7 +98,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = os.path.join(PROJECT_DIR, "gladminds", 'collected')
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -133,7 +133,7 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -273,6 +273,7 @@ AFTERBUY_PRODUCT_INVOICE_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "invoice")
 MEDIA_ROOT = AFTERBUY_LOC
 MEDIA_URL = '/media/'
 TOTP_SECRET_KEY = '93424'
+OTP_VALIDITY = 120
 
 #S3 Configuration
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
@@ -282,5 +283,7 @@ AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 # S3_URL = 'http://%s.s3-website-us-east-1.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 
 
-DELAY_IN_CUSTOMER_UCN_MESSAGE = 60
 DEFAULT_COUPON_STATUS = 1
+DELAY_IN_CUSTOMER_UCN_MESSAGE = 180
+ENABLE_AMAZON_SQS = False
+

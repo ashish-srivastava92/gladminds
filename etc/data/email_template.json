@@ -1,0 +1,14 @@
+[
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 1,
+        "fields": {
+            "template_key": "MOCK_KEY",
+            "sender": "feed-report@gladminds.co",
+            "reciever": "gladminds@hashedin.com,naveen.shankar@gladminds.co",
+            "subject": "Gladminds ASC Registeration Passed",
+            "body": "Mock Key for testing out the email templates",
+            "description": "Mock Key for testing out the email templates"
+        }
+    }
+]

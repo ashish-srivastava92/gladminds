@@ -1,9 +1,7 @@
 (function() {
 
     $("input.advisor-action").click(function() {
-        var actionSet = $(this).parents(".advisor-action-item"), postAction = $(this).val(), sibblingActionSet = actionSet.siblings(".advisor-action-item")
-        disabledInputs = actionSet.find("input[type='text']")
-        activeInputs = sibblingActionSet.find("input[type='text']");
+        var actionSet = $(this).parents(".advisor-action-item"), postAction = $(this).val(), sibblingActionSet = actionSet.siblings(".advisor-action-item"), disabledInputs = actionSet.find("input[type='text']"), activeInputs = sibblingActionSet.find("input[type='text']");
 
         activeInputs.attr("disabled", "disabled").removeAttr("required");
         disabledInputs.removeAttr("disabled").attr("required", "required");
@@ -34,11 +32,19 @@
         return false;
     });
 
-    $("#submit-asc").click(function(e) {
+    $(".asc-form").on("submit", function(e) {
+        var data = $(".asc-form").serializeArray();
+        $(".asc-form").serializeArray().map(function(x) {
+            data[x.name] = x.value;
+        });
+        
+        if (data["pwd"] != data["re-pwd"]){
+            return;             
+        }
         var jqXHR = $.ajax({
             type : 'POST',
-            data : $("form.asc-form").serializeArray(),
-            url : '/save/',
+            data : data,
+            url : '/save/asc',
             success : function(data) {
                 alert(data);
             }

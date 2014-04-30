@@ -11,8 +11,7 @@ from gladminds.tasks import send_otp
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import login
 from django.contrib.auth.models import User
-from gladminds.settings import TOTP_SECRET_KEY
-from gladminds import utils
+from gladminds import utils, message_template
 logger = logging.getLogger('gladminds')
 
 
@@ -21,26 +20,53 @@ def generate_otp(request):
         try:
             phone_number = request.POST['mobile']
             email = request.POST.get('email', '')
-            utils.get_token(phone_number, email)
+            token = utils.get_token(phone_number, email=email)
+            message = message_template.get_template('SEND_OTP').format(token)
+            send_otp.delay(phone_number=phone_number, message=message)
+            return render_to_response('portal/validate_otp.html', {'phone': phone_number}, context_instance=RequestContext(request))
         except:
-            return HttpResponse('No')
+            return HttpResponse('Invalid Details')
     elif request.method == 'GET':
         return render_to_response('portal/get_otp.html', context_instance=RequestContext(request))
 
+def validate_otp(request):
+    if request.method == 'GET':
+        return render_to_response('portal/validate_otp.html', context_instance=RequestContext(request))
+    elif request.method == 'POST':
+        try:
+            otp = request.POST['otp']
+            phone_number = request.POST['phone']
+            utils.validate_otp(otp, phone_number)
+            return render_to_response('portal/reset_pass.html', {'otp': otp}, context_instance=RequestContext(request))
+        except:
+            return HttpResponse('Invalid Token')
+
+def update_pass(request):
+    try:
+        otp=request.POST['otp']
+        password=request.POST['password']
+        utils.update_pass(otp, password)
+        return HttpResponse('OK')
+    except:
+        return HttpResponse('Invalid Data')
 
 @login_required(login_url='/dealers/')
 def action(request, params):
     if request.method == 'GET':
         try:
-            dealer = common.RegisteredDealer.objects.filter(dealer_id=request.user)[0]
-            service_advisors = common.ServiceAdvisorDealerRelationship.objects.filter(dealer_id=dealer, status='Y')
+            dealer = common.RegisteredDealer.objects.filter(
+                dealer_id=request.user)[0]
+            service_advisors = common.ServiceAdvisorDealerRelationship.objects\
+                                        .filter(dealer_id=dealer, status='Y')
             sa_phone_list = []
             for service_advisor in service_advisors:
                 sa_phone_list.append(service_advisor.service_advisor_id)
-            return render_to_response('dealer/advisor_actions.html', {'phones' : sa_phone_list}\
-                                      , context_instance=RequestContext(request))
+            return render_to_response('dealer/advisor_actions.html',
+                  {'phones': sa_phone_list},
+                  context_instance=RequestContext(request))
         except:
-            logger.info('No service advisor for dealer %s found active' % request.user)
+            logger.info(
+                'No service advisor for dealer %s found active' % request.user)
             raise
 
     elif request.method == 'POST':
@@ -51,14 +77,10 @@ def redirect(request):
     return HttpResponseRedirect('/dealers/' + str(request.user))
 
 def register(request, user=None):
-    return render(request, 'portal/asc_registration.html')
-#     return render_to_response('gladminds/asc_registration.html',\
-#                               {}, context_instance=RequestContext(request))
-
-
-def register_user(request, user=None):
-
-    return HttpResponse("Do something")
+    template_mapping = {
+        "asc": "portal/asc_registration.html",
+    }
+    return render(request, template_mapping[user])
 
 def reset(request):
     if request.method=='GET':
@@ -67,14 +89,28 @@ def reset(request):
         print "hello"
 
 
-#def change_password(request):
-#    old_password = request.POST.get('old_pwd')
-#    new_password = request.POST.get('new_pwd')
-#    user = User.objects.get(username=request.user)
-#    if(check_password(old_password, user.password)):
-#        user.set_password(new_password)
-#        user.save()
-#        return HttpResponse('success')
-#    else:
-#        return HttpResponse('password change failed')
+PASSED_MESSAGE = "Registration is complete"
+def save_asc_registeration(data):
+    reject_keys = ['csrfmiddlewaretoken']
+    data = {key: val for key, val in data.iteritems() \
+                                    if key not in reject_keys}
+    try:
+        asc_obj = common.ASCSaveForm(name=data['name'],
+                 address=data['address'], password=data['password'],
+                 phone_number=data['phone_number'], email=data['email'],
+                 pincode=data['pincode'])
+        asc_obj.save()
+
+    except KeyError:
+        return {"message": "Key error"}
+    return {"message": PASSED_MESSAGE}
+
+
+def register_user(request, user=None):
+    save_user = {
+        'asc': save_asc_registeration
+    }
+    status = save_user[user](request.POST)
+    return HttpResponseRedirect("/register/asc/")
+    return HttpResponse({"status": status}, content_type="application/json")
 

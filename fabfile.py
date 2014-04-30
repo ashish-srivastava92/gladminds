@@ -1,11 +1,26 @@
 from fabric.api import task, run, local
 import os
 from subprocess import Popen
+import boto
+import time
+from boto.s3.key import Key
+import json
 
 COVERAGE_ENABLED = False
 PROJECT_PACKGE = 'gladminds'
+
+BUCKET_NAME='gladminds' #Replace this with the correct bucket alloted for your project, ask from admin
+FILE_NAME = 'build.zip'
+version = "build_"+str(int(time.time()))
+APPLICATION_NAME = 'Gladminds' #Replace this with the elastic beanstalk application, ask from admin
+ENVIRONMENT_NAME = 'gladminds-web-prod'#Replace this with the elastic beanstalk dev environment name, ask from admin
+ACCESS_KEY = 'AKIAIL7IDCSTNCG2R6JA'
+SECRET_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
+
+
 NEVER_FAIL = False
 CAPTURE = False
+
 
 def _ensure_dir(path):
     if not os.path.exists(path):
@@ -93,6 +108,39 @@ def test(package=''):
         options.append('--cover-package=%s' % PROJECT_PACKGE)
         options.append('--cover-min-percentage=80')
 
+
+    local('bin/test test {0} {1}'.format(package, ' '.join(options)))
+    
+
+#Include new commands for deployment to elastic beanstalk
+@task()
+def deploy_to_dev_environment():
+    version = "build_"+str(int(time.time()))
+    upload_to_s3(BUCKET_NAME,version,FILE_NAME)
+    create_version(APPLICATION_NAME,version)
+    update_environment(ENVIRONMENT_NAME,version)
+
+@task()
+def create_new_version(version):
+    upload_to_s3(BUCKET_NAME,version,FILE_NAME)
+    create_version(APPLICATION_NAME,version)
+
+def upload_to_s3(bucket_name, key, file_name):
+    conn = boto.connect_s3(ACCESS_KEY, SECRET_KEY)
+    bucket = conn.get_bucket(bucket_name)
+    k = Key(bucket)
+    k.key = key
+    k.set_contents_from_filename(file_name)
+
+
+def create_version(application, version):
+    beanstalk = boto.connect_beanstalk(ACCESS_KEY, SECRET_KEY)
+    beanstalk.create_application_version(application, version, s3_bucket=BUCKET_NAME, s3_key=version)
+
+def update_environment(environment, version):
+    beanstalk = boto.connect_beanstalk(ACCESS_KEY, SECRET_KEY)
+    beanstalk.update_environment(environment_name=environment,version_label=version)
+
     return _execute('bin/test test {0} {1}'.format(package, ' '.join(options)))
 
 
@@ -101,3 +149,4 @@ def _execute(cmd):
         cmd = '%s; echo "Done"' % cmd
 
     return local(cmd, capture=CAPTURE)
+

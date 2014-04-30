@@ -183,7 +183,7 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(200, response.status_code)
 
-    @unittest.skip("Skipping Adding this functionalty in future")
+    @unittest.skip("Skipping Adding this functionality in future")
     def test_coupon_status_on_dispatch_feed(self):
         '''
             Test for testing out coupon status on dispatch feed
