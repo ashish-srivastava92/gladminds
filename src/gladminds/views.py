@@ -4,9 +4,6 @@ from django.template import RequestContext
 from django.http.response import HttpResponseRedirect, HttpResponse
 from gladminds.models import common
 import logging
-from django.views.decorators.csrf import csrf_exempt
-from django_otp.forms import OTPAuthenticationForm, OTPTokenForm
-from functools import partial
 from gladminds.tasks import send_otp
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import login

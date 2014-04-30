@@ -6,7 +6,6 @@ from gladminds.sqs_tasks import _tasks_map
 from gladminds.taskqueue import SqsHandler
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
-from django_otp.forms import OTPAuthenticationForm
 admin.autodiscover()
 
 api_v1 = Api(api_name="v1")
