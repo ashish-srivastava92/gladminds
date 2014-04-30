@@ -4,7 +4,7 @@ from django.template import RequestContext
 from django.http.response import HttpResponseRedirect, HttpResponse
 from gladminds.models import common
 import logging
-from django.views.decorators.csrf import csrf_exempt
+
 logger = logging.getLogger('gladminds')
 
 
@@ -14,12 +14,14 @@ def action(request, params):
         try:
             dealer = common.RegisteredDealer.objects.filter(
                 dealer_id=request.user)[0]
-            service_advisors = common.ServiceAdvisorDealerRelationship.objects.filter(
-                dealer_id=dealer, status='Y')
+            service_advisors = common.ServiceAdvisorDealerRelationship.objects\
+                                        .filter(dealer_id=dealer, status='Y')
             sa_phone_list = []
             for service_advisor in service_advisors:
                 sa_phone_list.append(service_advisor.service_advisor_id)
-            return render_to_response('dealer/advisor_actions.html', {'phones': sa_phone_list}, context_instance=RequestContext(request))
+            return render_to_response('dealer/advisor_actions.html',
+                  {'phones': sa_phone_list},
+                  context_instance=RequestContext(request))
         except:
             logger.info(
                 'No service advisor for dealer %s found active' % request.user)
@@ -40,23 +42,29 @@ def register(request, user=None):
     }
     return render(request, template_mapping[user])
 
+PASSED_MESSAGE = "Registration is complete"
+
 
 def save_asc_registeration(data):
     reject_keys = ['csrfmiddlewaretoken']
     data = {key: val for key, val in data.iteritems() \
                                     if key not in reject_keys}
-    #asc_obj = common.ASCTemporaryRegisteration(data)
-    #asc_obj.save()
-    #print common.ASCTemporaryRegisteration.objects.all()
-    pass
+    try:
+        asc_obj = common.ASCSaveForm(name=data['name'],
+                 address=data['address'], password=data['password'],
+                 phone_number=data['phone_number'], email=data['email'],
+                 pincode=data['pincode'])
+        asc_obj.save()
+
+    except KeyError:
+        return {"message": "Key error"}
+    return {"message": PASSED_MESSAGE}
 
 
 def register_user(request, user=None):
-    status = "fail"
     save_user = {
         'asc': save_asc_registeration
     }
-    save_user[user](request.POST)
+    status = save_user[user](request.POST)
+    return HttpResponseRedirect("/register/asc/")
     return HttpResponse({"status": status}, content_type="application/json")
-
-

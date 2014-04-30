@@ -263,20 +263,39 @@ class MessageTemplate(models.Model):
         app_label = "gladminds"
         verbose_name_plural = "Message Template"
 
+##################################################################
+####################Message Template DB Storage###################
+
+
+class EmailTemplate(models.Model):
+    template_key = models.CharField(max_length=255, unique=True, null=False)
+    sender = models.CharField(max_length=512, null=False)
+    reciever = models.CharField(max_length=512, null=False)
+    subject = models.CharField(max_length=512, null=False)
+    body = models.CharField(max_length=512, null=False)
+    description = models.CharField(max_length=512, null=True)
+
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "Email Template"
 
 ##########################################################################
-############# Temporary ASC Registration Storage #########################
-class ASCTemporaryRegisteration(models.Model):
+########################## ASC Save Form #########################
+ASC_STATUS_CHOICES = ((1, 'In Progress'), (2, 'Failed'))
+
+
+class ASCSaveForm(models.Model):
     name = models.CharField(max_length=255, null=False)
     password = models.CharField(max_length=255, null=False)
-    mobile_number = models.CharField(max_length=255, null=False, blank=False,\
+    phone_number = models.CharField(max_length=255, null=False, blank=False,
                                                          unique=True)
     email = models.CharField(max_length=255, null=False, blank=False)
     pincode = models.CharField(max_length=255, null=False, blank=False)
     address = models.CharField(max_length=255, null=False, blank=False)
-    status = models.CharField(max_length=255, null=False, blank=False)
+    status = models.SmallIntegerField(choices=ASC_STATUS_CHOICES, default=1)
+    timestamp = models.DateTimeField(default=datetime.now)
 
     class Meta:
         app_label = "gladminds"
-        verbose_name_plural = "ASC Temporary Registeration"
+        verbose_name_plural = "ASC Save Form"
 ##########################################################################
