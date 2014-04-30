@@ -263,6 +263,21 @@ class MessageTemplate(models.Model):
         app_label = "gladminds"
         verbose_name_plural = "Message Template"
 
+        
+####################################################################
+########################TOTP Details################################
+
+class OTPToken(models.Model):
+    user = models.ForeignKey(User, null=True, blank=True)
+    token = models.CharField(max_length=256, null=False)
+    request_date = models.DateTimeField(null=True, blank=True)
+    email = models.CharField(max_length=50, null=False)
+    
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "OTPs"
+
+
 ##################################################################
 ####################Message Template DB Storage###################
 
@@ -287,7 +302,7 @@ ASC_STATUS_CHOICES = ((1, 'In Progress'), (2, 'Failed'))
 class ASCSaveForm(models.Model):
     name = models.CharField(max_length=255, null=False)
     password = models.CharField(max_length=255, null=False)
-    phone_number = models.CharField(max_length=255, null=False, blank=False,
+    phone_number = models.CharField(max_length=15, null=False, blank=False,
                                                          unique=True)
     email = models.CharField(max_length=255, null=False, blank=False)
     pincode = models.CharField(max_length=255, null=False, blank=False)
@@ -298,4 +313,19 @@ class ASCSaveForm(models.Model):
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "ASC Save Form"
-##########################################################################
+        
+class RegisteredASC(models.Model):
+    user = models.OneToOneField(User, null=True, blank=True)
+    phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)
+    asc_name = models.CharField(max_length=215)
+    email_id = models.EmailField(max_length=215, null=True, blank=True)
+    registration_date = models.DateTimeField(default=datetime.now())
+    address = models.CharField(max_length=255, null=True, blank=True)
+    country = models.CharField(max_length=255, null=True, blank=True)
+    state = models.CharField(max_length=255, null=True, blank=True)
+    img_url = models.FileField(upload_to="users", blank=True)
+    isActive = models.BooleanField(default=True)
+    
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "Registered ASC Form"

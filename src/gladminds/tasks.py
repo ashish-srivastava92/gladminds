@@ -182,7 +182,23 @@ def send_on_product_purchase(*args, **kwargs):
         send_on_product_purchase.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         audit_log(status = status, reciever=phone_number, message=message)
-        
+
+"""
+Send OTP
+"""
+@shared_task
+def send_otp(*args, **kwargs):
+    status = "success"
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        respone_data = sms_client.send_stateless(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        send_on_product_purchase.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        audit_log(status = status, reciever=phone_number, message=message)
+  
 """
 Crontab to send reminder sms to customer 
 """
