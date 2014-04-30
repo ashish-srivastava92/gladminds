@@ -4,7 +4,6 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
-from random import randint
 import logging
 import os
 import time
@@ -12,10 +11,7 @@ import time
 from gladminds import audit, message_template as templates
 from gladminds import utils
 from gladminds.models import common
-from gladminds import exportfeed
 from gladminds.audit import feed_log
-from django.db.models import signals
-
 
 logger = logging.getLogger("gladminds")
 

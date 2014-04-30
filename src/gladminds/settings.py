@@ -39,7 +39,7 @@ SUIT_CONFIG = {
 
                           {'model':'productdata','label': 'Feed -> Product Purchase'},{'model':'coupondata','label': 'Feed -> Coupon Redemption'} ,{'model':'auditlog','label': 'Audit Log'}, 
                           {'model':'datafeedlog','label': 'Feed Log'}, 'uploadproductcsv', 
-                          'messagetemplate','gladmindusers')},
+                          'messagetemplate','emailtemplate','gladmindusers',)},
                 {'app':'djcelery','label':'Job Management','icon':'icon-tasks'})
 }
 
