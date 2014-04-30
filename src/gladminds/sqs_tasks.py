@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from celery import shared_task
 from django.conf import settings
-from gladminds.audit import audit_log
+from gladminds.audit import audit_log, feed_log
 from gladminds.dao.smsclient import load_gateway, MessageSentFailed
 from gladminds import taskmanager, feed, export_file, exportfeed
 from datetime import datetime, timedelta
@@ -300,6 +300,34 @@ def send_report_mail_for_feed(*args, **kwargs):
         start_date=start_date, end_date=end_date)
     mail.feed_report(feed_data=feed_data)
 
+'''
+Cron Job to send ASC Registeration to BAJAJ
+'''
+
+
+@shared_task
+def export_asc_registeration_to_sap(*args, **kwargs):
+    phone_number = kwargs['phone_number']
+    asc_registeration_data = feed.ASCRegistrationToSAP()
+    feed_export_data = asc_registeration_data.export_data(phone_number)
+    status = "success"
+    try:
+        export_obj = exportfeed.ExportCouponRedeemFeed(
+               username=settings.SAP_CRM_DETAIL['username'], password=settings
+               .SAP_CRM_DETAIL['password'], wsdl_url=settings.ASC_WSDL_URL)
+        export_obj.export(items=feed_export_data['item'], item_batch=feed_export_data[
+             'item_batch'])
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        send_reminder_message.retry(
+            exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        export_status = False if status == "failed" else True
+        total_failed = 1 if status == "failed" else 0
+        feed_log(feed_type="ASC Registration Feed", total_data_count=1,
+         failed_data_count=total_failed, success_data_count=1 - total_failed,
+                 action='Sent', status=export_status)
+
 
 _tasks_map = {"send_registration_detail": send_registration_detail,
 
@@ -335,4 +363,6 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
 
               "send_report_mail_for_feed": send_report_mail_for_feed,
 
+              "export_asc_registeration_to_sap":
+                                            export_asc_registeration_to_sap
               }
