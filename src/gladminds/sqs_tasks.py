@@ -310,6 +310,7 @@ def export_asc_registeration_to_sap(*args, **kwargs):
     phone_number = kwargs['phone_number']
     asc_registeration_data = feed.ASCRegistrationToSAP()
     feed_export_data = asc_registeration_data.export_data(phone_number)
+
     status = "success"
     try:
         export_obj = exportfeed.ExportCouponRedeemFeed(

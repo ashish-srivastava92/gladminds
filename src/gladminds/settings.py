@@ -34,7 +34,7 @@ SUIT_CONFIG = {
      'MENU_OPEN_FIRST_CHILD': True,
     'LIST_PER_PAGE': 20,
     'SHOW_REQUIRED_ASTERISK': True,
-    'MENU': ({'app':'gladminds','label':'Data','icon':' icon-folder-open',
+    'MENU': ({'app':'gladminds/bajaj/','label':'Data','icon':' icon-folder-open',
                 'models': ({'model':'serviceadvisordealerrelationship','label': 'Feed -> Service Advisor'}, {'model':'dispatchedproducts','label': 'Feed -> Product Dispatch'},
 
                           {'model':'productdata','label': 'Feed -> Product Purchase'},{'model':'coupondata','label': 'Feed -> Coupon Redemption'} ,{'model':'auditlog','label': 'Audit Log'}, 
