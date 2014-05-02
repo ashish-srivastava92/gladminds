@@ -7,6 +7,7 @@ from gladminds import taskmanager, feed, export_file, exportfeed
 from datetime import datetime, timedelta
 from gladminds import mail
 import logging
+from gladminds.models import common
 logger = logging.getLogger("gladminds")
 
 sms_client = load_gateway()
@@ -250,6 +251,13 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
         coupon_redeem.export(items=feed_export_data[0], item_batch=feed_export_data[1], total_failed_on_feed=feed_export_data[2])
     else:
         logger.info("tasks.py: No Coupon closed during last day")
+
+
+'''
+Delete the all the generated otp by end of day.
+'''
+def delete_unused_otp(*args, **kwargs):
+    common.OTPToken.objects.all().delete()
 
 '''
 Cron Job to send report email for data feed
