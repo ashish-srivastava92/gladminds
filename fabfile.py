@@ -109,7 +109,7 @@ def test(package=''):
         options.append('--cover-min-percentage=80')
 
 
-    local('bin/test test {0} {1}'.format(package, ' '.join(options)))
+    return _execute('bin/test test {0} {1}'.format(package, ' '.join(options)))
     
 
 #Include new commands for deployment to elastic beanstalk
@@ -140,8 +140,6 @@ def create_version(application, version):
 def update_environment(environment, version):
     beanstalk = boto.connect_beanstalk(ACCESS_KEY, SECRET_KEY)
     beanstalk.update_environment(environment_name=environment,version_label=version)
-
-    return _execute('bin/test test {0} {1}'.format(package, ' '.join(options)))
 
 
 def _execute(cmd):

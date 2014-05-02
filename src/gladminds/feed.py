@@ -15,6 +15,7 @@ from gladminds.models import common
 from gladminds import exportfeed
 from gladminds.audit import feed_log
 from django.db.models import signals
+from gladminds.utils import get_task_queue
 
 
 logger = logging.getLogger("gladminds")
@@ -406,7 +407,11 @@ def update_coupon_data(sender, **kwargs):
                 phone_number=instance.customer_phone_number)
             message = templates.get_template('SEND_CUSTOMER_ON_PRODUCT_PURCHASE').format(
                 customer_name=customer_data.customer_name, sap_customer_id=instance.sap_customer_id)
-            send_on_product_purchase.delay(
+            if settings.ENABLE_AMAZON_SQS:
+                task_queue = get_task_queue()
+                task_queue.add("send_on_product_purchase", {"phone_number": instance.customer_phone_number, "message":message})
+            else:
+                send_on_product_purchase.delay(
                 phone_number=instance.customer_phone_number, message=message)
             audit.audit_log(
                 reciever=instance.customer_phone_number, action='SEND TO QUEUE', message=message)

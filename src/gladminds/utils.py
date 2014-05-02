@@ -1,9 +1,7 @@
 import os
 import hashlib
-from tastypie.serializers import Serializer
-from datetime import datetime
 from gladminds.models.common import STATUS_CHOICES
-
+from gladminds.taskqueue import SqsTaskQueue
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 
 
@@ -49,3 +47,7 @@ def get_phone_number_format(phone_number):
     '''
     return phone_number[-10:]
 
+
+def get_task_queue():
+    queue_name = "gladminds-prod"
+    return SqsTaskQueue(queue_name)
