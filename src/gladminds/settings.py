@@ -34,7 +34,7 @@ SUIT_CONFIG = {
      'MENU_OPEN_FIRST_CHILD': True,
     'LIST_PER_PAGE': 20,
     'SHOW_REQUIRED_ASTERISK': True,
-    'MENU': ({'app':'gladminds/bajaj/','label':'Data','icon':' icon-folder-open',
+    'MENU': ({'app':'gladminds','label':'Data','icon':' icon-folder-open',
                 'models': ({'model':'serviceadvisordealerrelationship','label': 'Feed -> Service Advisor'}, {'model':'dispatchedproducts','label': 'Feed -> Product Dispatch'},
 
                           {'model':'productdata','label': 'Feed -> Product Purchase'},{'model':'coupondata','label': 'Feed -> Coupon Redemption'} ,{'model':'auditlog','label': 'Audit Log'}, 
@@ -283,7 +283,7 @@ AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 # S3_URL = 'http://%s.s3-website-us-east-1.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 
 
+
 DEFAULT_COUPON_STATUS = 1
 DELAY_IN_CUSTOMER_UCN_MESSAGE = 180
 ENABLE_AMAZON_SQS = False
-

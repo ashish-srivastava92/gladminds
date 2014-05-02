@@ -20,7 +20,7 @@ import logging
 from gladminds.utils import mobile_format, format_message
 from django.utils import timezone
 from django.conf import settings
-from gladminds.sqs_tasks import get_task_queue
+from gladminds.utils import get_task_queue
 from gladminds.settings import COUPON_VALID_DAYS
 from django.http.response import HttpResponse, HttpResponseBadRequest
 from django.contrib.auth.models import User
@@ -181,7 +181,7 @@ class GladmindsResources(Resource):
         '''
         updated_coupon = common.CouponData.objects\
                         .filter(Q(status=4) | Q(status=5), vin__vin=vin, valid_kms__gt=kms)\
-                        .update(status=1)
+                        .update(status=1, sa_phone_number=None, actual_kms=None, actual_service_date=None)
         logger.info("%s have higher KMS range" % updated_coupon)
 
     def update_exceed_limit_coupon(self, actual_kms, vin):
