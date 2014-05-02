@@ -9,6 +9,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import login
 from django.contrib.auth.models import User
 from gladminds import utils, message_template
+from django.conf import settings
+from gladminds.sqs_tasks import export_asc_registeration_to_sap
 logger = logging.getLogger('gladminds')
 
 
@@ -81,17 +83,21 @@ def register(request, user=None):
 
 
 PASSED_MESSAGE = "Registration is complete"
+
+
 def save_asc_registeration(data):
-    reject_keys = ['csrfmiddlewaretoken']
-    data = {key: val for key, val in data.iteritems() \
-                                    if key not in reject_keys}
     try:
         asc_obj = common.ASCSaveForm(name=data['name'],
                  address=data['address'], password=data['password'],
                  phone_number=data['phone_number'], email=data['email'],
                  pincode=data['pincode'])
         asc_obj.save()
-
+        if settings.ENABLE_AMAZON_SQS:
+            task_queue = utils.get_task_queue()
+            task_queue.add("export_asc_registeration_to_sap", \
+                   {"phone_number": data['phone_number']})
+        else:
+            export_asc_registeration_to_sap.delay(data['phone_number'])
     except KeyError:
         return {"message": "Key error"}
     return {"message": PASSED_MESSAGE}
@@ -104,4 +110,3 @@ def register_user(request, user=None):
     status = save_user[user](request.POST)
     return HttpResponseRedirect("/register/asc/")
     return HttpResponse({"status": status}, content_type="application/json")
-

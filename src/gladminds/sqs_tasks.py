@@ -321,6 +321,9 @@ def export_asc_registeration_to_sap(*args, **kwargs):
     finally:
         export_status = False if status == "failed" else True
         total_failed = 1 if status == "failed" else 0
+        if status == "failed":
+            feed_data = 'ASC Registration for this %s is failing ' % phone_number
+            mail.send_registration_failure(feed_data=feed_data)
         feed_log(feed_type="ASC Registration Feed", total_data_count=1,
          failed_data_count=total_failed, success_data_count=1 - total_failed,
                  action='Sent', status=export_status)
