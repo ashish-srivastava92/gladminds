@@ -24,17 +24,17 @@ def generate_otp(request):
         except:
             return HttpResponseRedirect('/users/otp/generate?details=invalid')
     elif request.method == 'GET':
-        return render_to_response('portal/get_otp.html', context_instance=RequestContext(request))
+        return render(request, 'portal/get_otp.html')
 
 def validate_otp(request):
     if request.method == 'GET':
-        return render_to_response('portal/validate_otp.html', context_instance=RequestContext(request))
+        return render(request, 'portal/validate_otp.html')
     elif request.method == 'POST':
         try:
             otp = request.POST['otp']
             phone_number = request.POST['phone']
             utils.validate_otp(otp, phone_number)
-            return render_to_response('portal/reset_pass.html', {'otp': otp}, context_instance=RequestContext(request))
+            return render(request, 'portal/reset_pass.html', {'otp': otp})
         except:
             return HttpResponseRedirect('/users/otp/generate?token=invalid')
 

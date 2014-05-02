@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 
+{% block style %}
+<link href="/static/css/portal.css" rel="stylesheet">
+{% endblock %}
+
 {% block body %}
+<div class="user-message"><div class="message"></div></div>
 <label><h2>Reset Password</h2></label>
 <form role="form" action="/users/otp/update_pass" method="post" class="pass-reset-form">
     {% csrf_token %}

@@ -77,6 +77,8 @@ def validate_otp(otp, phone):
     token_obj = common.OTPToken.objects.filter(user=asc)[0]
     if otp == token_obj.token and (timezone.now()-token_obj.request_date).seconds <= OTP_VALIDITY:
         return True
+    elif (timezone.now()-token_obj.request_date).seconds > OTP_VALIDITY:
+        token_obj.delete()
     raise
 
 def update_pass(otp, password):
