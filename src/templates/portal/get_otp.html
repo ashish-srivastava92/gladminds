@@ -2,12 +2,12 @@
 
 {% block body %}
 <label><h2>Gladminds</h2></label>
-<form role="form" action="/users/otp/generate" method="post" >
+<form role="form" action="/users/otp/generate" method="post" class="get-otp">
     {% csrf_token %}
     <div class="row">
         <div class="col-md-3">
             <div class="form-group">
-                <input type="text" class="form-control" id="mobile" name="mobile" placeholder="10 Digit Mobile Number...">
+                <input type="text" class="form-control" id="mobile" name="mobile" placeholder="10 Digit Mobile Number..." required>
             </div>
             <div class="form-group">
                 <input type="text" class="form-control" id="email" name="email" placeholder="email">

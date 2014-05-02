@@ -79,12 +79,6 @@ def register(request, user=None):
     }
     return render(request, template_mapping[user])
 
-def reset(request):
-    if request.method=='GET':
-        return render_to_response('reset_pass.html', context_instance=RequestContext(request))
-    else:
-        print "hello"
-
 
 PASSED_MESSAGE = "Registration is complete"
 def save_asc_registeration(data):
