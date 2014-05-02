@@ -2,7 +2,7 @@
 
 {% block body %}
 <label><h2>Enter OTP</h2></label>
-<form role="form" action="/users/otp/update_pass" method="post">
+<form role="form" action="/users/otp/update_pass" method="post" class="reset-pass">
     {% csrf_token %}
     <div class="row">
         <div class="col-md-3">
@@ -26,3 +26,7 @@
     </div>
 </form>
 {% endblock %}
+
+{% block dependency %}
+<script src="/static/js/portal/reset.js"></script>
+{% endblock dependency %}
