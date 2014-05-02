@@ -15,7 +15,7 @@ from spyne.util.wsgi_wrapper import WsgiMounter
 from gladminds.feed import SAPFeed
 from gladminds.soap_authentication import AuthenticationService
 import logging
-from gladminds import settings
+from django.conf import settings
 import json
 from gladminds import utils
 
@@ -63,16 +63,18 @@ class DealerModelList(ComplexModel):
 class ProductDispatchModel(ComplexModel):
     __namespace__ = tns
     CHASSIS = Unicode
-    PRODUCT_TYPE = Unicode 
+    PRODUCT_TYPE = Unicode
     VEC_DIS_DT = Date
     KUNNR = Unicode
-    UCN_NO = Unicode
+    UCN_NO = Unicode(default=None)
     DAYS_LIMIT_FROM = Decimal
     DAYS_LIMIT_TO = Decimal
     KMS_FROM = Decimal
     KMS_TO = Decimal
     SERVICE_TYPE = Unicode
-    TIMESTAMP = Unicode(pattern = pattern)
+    #UCN_Status = Unicode
+    TIMESTAMP = Unicode(pattern=pattern)
+
 
 class ProductDispatchModelList(ComplexModel):
     __namespace__ = tns
@@ -157,6 +159,7 @@ class ProductDispatchService(ServiceBase):
                         'valid_days' : product.DAYS_LIMIT_TO,
                         'valid_kms' : product.KMS_TO,
                         'service_type' : product.SERVICE_TYPE,
+                        'coupon_status' : settings.DEFAULT_COUPON_STATUS,
                     })
             response = save_to_db(feed_type = 'dispatch', data_source = product_dispatch_list)
             return json.dumps(get_response(response))

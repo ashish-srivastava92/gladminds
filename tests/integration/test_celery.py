@@ -4,8 +4,7 @@
 from celery.app.task import Task
 import logging
 from gladminds.resource.resources import GladmindsResources
-from gladminds.models import common
-from gladminds.tasks import send_coupon_detail_customer
+from django.conf import settings 
 logger = logging.getLogger('gladminds')
 from integration.base_integration import GladmindsResourceTestCase
 
@@ -42,7 +41,7 @@ class CeleryTestCaseBase(GladmindsResourceTestCase):
         obj.validate_coupon(sms_dict, phone_number)
 
         customer_message_task_info = self.applied_tasks[1]
-        self.assertEqual(customer_message_task_info['options']["countdown"], 1800, 'Set delay in celery job')
+        self.assertEqual(customer_message_task_info['options']["countdown"], settings.DELAY_IN_CUSTOMER_UCN_MESSAGE, 'Set delay in celery job')
         self.assertEqual(customer_message_task_info['kwargs']["phone_number"], "232323232", 'Customer phone number should be correct')
 
         self.applied_tasks = []
