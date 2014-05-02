@@ -3,19 +3,15 @@ from celery import shared_task
 from django.conf import settings
 from gladminds.audit import audit_log, feed_log
 from gladminds.dao.smsclient import load_gateway, MessageSentFailed
-from gladminds import taskmanager, feed, export_file, exportfeed
 from datetime import datetime, timedelta
 from gladminds import mail
 import logging
-from gladminds.taskqueue import SqsTaskQueue
+from gladminds import taskmanager, feed, export_file, exportfeed
+
 logger = logging.getLogger("gladminds")
 
 sms_client = load_gateway()
 
-
-def get_task_queue():
-    queue_name = "gladminds-prod"
-    return SqsTaskQueue(queue_name)
 
 """
 This task send sms to customer on customer registration
@@ -310,6 +306,7 @@ def export_asc_registeration_to_sap(*args, **kwargs):
     phone_number = kwargs['phone_number']
     asc_registeration_data = feed.ASCRegistrationToSAP()
     feed_export_data = asc_registeration_data.export_data(phone_number)
+
     status = "success"
     try:
         export_obj = exportfeed.ExportCouponRedeemFeed(

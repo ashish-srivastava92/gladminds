@@ -1,13 +1,14 @@
 import os
-from tastypie.serializers import Serializer
 from datetime import datetime
 from gladminds.models.common import STATUS_CHOICES
 from gladminds.models import common
 from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY
 from random import randint
-from gladminds import message_template
+
 import hashlib
+
+from gladminds.taskqueue import SqsTaskQueue
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 
@@ -54,6 +55,7 @@ def get_phone_number_format(phone_number):
     '''
     return phone_number[-10:]
 
+
 def save_otp(token, phone_number, email):
     user = common.RegisteredASC.objects.filter(phone_number=mobile_format(phone_number))[0].user
     if email and user.email_id != email:
@@ -83,4 +85,9 @@ def update_pass(otp, password):
     user.set_password(password)
     user.save()
     return True
-    
+
+
+def get_task_queue():
+    queue_name = "gladminds-prod"
+    return SqsTaskQueue(queue_name)
+
