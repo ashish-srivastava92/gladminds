@@ -46,3 +46,18 @@ class ExportCouponRedeemFeed(BaseExportFeed):
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) - total_failed,\
                  action='Sent', status=export_status)
+
+
+class ExportASCRegistrationFeed(BaseExportFeed):
+
+    def export(self, item=None, item_batch=None):
+        logger.info(
+            "Export {3}: Item:{0} and Item_batch: {1}"\
+            .format(item, item_batch, self.feed_type))
+        client = self.get_client()
+
+        result = client.service.MI_GCP_UCN_Sync(
+            ITEM=[item], ITEM_BATCH=item_batch)
+        if not result[1]['I_STATUS'] == 'SUCCESS':
+            raise
+        return

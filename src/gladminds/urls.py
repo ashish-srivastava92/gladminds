@@ -32,6 +32,8 @@ urlpatterns = patterns('',
 
 urlpatterns += patterns('gladminds',
     (r'', include(api_v1.urls)),
+    url(r'^api/v1/bajaj/mock-feed/$', 'webservice.mock_service'),
+    url(r'^api/v1/bajaj/mock-feed/\?wsdl$', 'webservice.mock_service'),
     url(r'^api/v1/bajaj/feed/\?wsdl$', 'webservice.all_service'),
     url(r'^api/v1/bajaj/feed/$', 'webservice.all_service'),
     url(r'^api/v1/bajaj/brand-feed/\?wsdl$', 'webservice.brand_service'),
@@ -50,6 +52,7 @@ urlpatterns += patterns('gladminds',
 
     url(r'^tasks/', SqsHandler.as_view(task_map=_tasks_map)),
 
+    
 #     url(r'^app/create-account', 'afterbuy.views.create_account', name='create_account'),
 #     url(r'^app/login', 'afterbuy.views.my_login', name='my_login'),
 #     url(r'^app/getData', 'afterbuy.views.get_data', name='get_data'),
