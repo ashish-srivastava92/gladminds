@@ -30,7 +30,7 @@ $(function() {
     }
   }
   
-  var populateInfo = function() {
+  var populateFields = function() {
     var splittedUrl = window.location.href.split('?');
     if(splittedUrl.length > 1) {
       if(splittedUrl[1].indexOf("phone")>=0){
@@ -43,7 +43,7 @@ $(function() {
 
   $(document).ready(function() {
     userMessage();
-    populateInfo();
+    populateFields();
   });
   
 });
