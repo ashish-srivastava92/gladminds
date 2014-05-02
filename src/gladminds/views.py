@@ -45,7 +45,7 @@ def update_pass(request):
         utils.update_pass(otp, password)
         return HttpResponseRedirect('/dealers/?update=true')
     except:
-        return HttpResponse('Please Try again later.')
+        return HttpResponseRedirect('/dealers/?error=true')
 
 @login_required(login_url='/dealers/')
 def action(request, params):

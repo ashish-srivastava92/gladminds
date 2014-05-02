@@ -10,7 +10,10 @@ $(function() {
   $("a.otp-redirect").click(function(event) {
     if(!$("#mobile").val()) {
       event.preventDefault();
-      alert("Enter Mobile Number");
+      var messageBlock = $(".user-message .message");
+      messageBlock.text("Enter Mobile Number");
+      messageBlock.stop().fadeOut(0);
+      messageBlock.fadeIn(1000).fadeOut(7000);
     }
   });
   
@@ -25,6 +28,8 @@ $(function() {
         messageBlock.text("Invalid Token");
       } else if(splittedUrl[1].indexOf("update=true")>=0){
         messageBlock.text("Your password has been updated. Please Login.");
+      } else if(splittedUrl[1].indexOf("error=true")>=0){
+        messageBlock.text("Password cannot be updated. Please try again Later");
       }
       messageBlock.fadeIn(1000).fadeOut(7000);
     }
