@@ -5,6 +5,7 @@ import boto
 import time
 from boto.s3.key import Key
 import json
+from fabric import state
 
 COVERAGE_ENABLED = False
 PROJECT_PACKGE = 'gladminds'
@@ -58,13 +59,19 @@ def create_android_build(ip_address):
 @task()
 def lint_py():
     '''Reports Pylint Errors & Warnings for Python files'''
-    local('bin/pylint --rcfile=etc/lint.rc %s' % PROJECT_PACKGE)
+    return _execute('bin/pylint --rcfile=etc/lint.rc --output-format={0} {1}'
+                    .format(format, PROJECT_PACKGE))
 
 
 @task()
 def lint_js():
     '''Reports Pylint Errors & Warnings for Python files'''
-    local('bin/jshint --config=etc/jshint.json src/static/js')
+    return _execute('bin/jshint --config=etc/jshint.json src/static/js')
+
+@task()
+def lint_css():
+    '''Reports CSSLint Errors & Warnings for CSS files'''
+    _execute('bin/csslint src/static/css')  # TODO: Add option to specify csslint.json
 
 
 @task()
