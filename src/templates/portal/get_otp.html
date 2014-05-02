@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 
+{% block style %}
+<link href="/static/css/portal.css" rel="stylesheet">
+{% endblock %}
+
 {% block body %}
-<label><h2>Gladminds</h2></label>
+
+<div class="user-message"><div class="message"></div></div>
+<label><h2>Enter Details</h2></label>
 <form role="form" action="/users/otp/generate" method="post" class="get-otp">
     {% csrf_token %}
     <div class="row">
@@ -19,10 +25,14 @@
             <button type="submit" class="btn btn-primary">
                 Generate OTP
             </button>
-            <button class="btn btn-primary otp-submit">
+            <a href="/users/otp/validate" class="btn btn-primary otp-redirect">
                 Enter OTP
-            </button>
+            </a>
         </div>
     </div>
 </form>
 {% endblock %}
+
+{% block dependency %}
+<script src="/static/js/portal/reset.js"></script>
+{% endblock dependency %}

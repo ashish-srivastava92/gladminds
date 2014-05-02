@@ -20,9 +20,9 @@ def generate_otp(request):
             token = utils.get_token(phone_number, email=email)
             message = message_template.get_template('SEND_OTP').format(token)
             send_otp.delay(phone_number=phone_number, message=message)
-            return render_to_response('portal/validate_otp.html', {'phone': phone_number}, context_instance=RequestContext(request))
+            return HttpResponseRedirect('/users/otp/validate?phone='+phone_number)
         except:
-            return HttpResponse('Invalid Details')
+            return HttpResponseRedirect('/users/otp/generate?details=invalid')
     elif request.method == 'GET':
         return render_to_response('portal/get_otp.html', context_instance=RequestContext(request))
 
@@ -30,22 +30,22 @@ def validate_otp(request):
     if request.method == 'GET':
         return render_to_response('portal/validate_otp.html', context_instance=RequestContext(request))
     elif request.method == 'POST':
-        try:
-            otp = request.POST['otp']
-            phone_number = request.POST['phone']
-            utils.validate_otp(otp, phone_number)
-            return render_to_response('portal/reset_pass.html', {'otp': otp}, context_instance=RequestContext(request))
-        except:
-            return HttpResponse('Invalid Token')
+#        try:
+        otp = request.POST['otp']
+        phone_number = request.POST['phone']
+        utils.validate_otp(otp, phone_number)
+        return render_to_response('portal/reset_pass.html', {'otp': otp}, context_instance=RequestContext(request))
+#        except:
+#            return HttpResponseRedirect('/users/otp/generate?token=invalid')
 
 def update_pass(request):
     try:
         otp=request.POST['otp']
         password=request.POST['password']
         utils.update_pass(otp, password)
-        return HttpResponse('OK')
+        return HttpResponseRedirect('/dealers/?update=true')
     except:
-        return HttpResponse('Invalid Data')
+        return HttpResponse('Please Try again later.')
 
 @login_required(login_url='/dealers/')
 def action(request, params):
