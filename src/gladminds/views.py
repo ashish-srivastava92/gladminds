@@ -9,6 +9,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import login
 from django.contrib.auth.models import User
 from gladminds import utils, message_template
+from django.conf import settings
+from gladminds.utils import get_task_queue
 logger = logging.getLogger('gladminds')
 
 
@@ -19,7 +21,11 @@ def generate_otp(request):
             email = request.POST.get('email', '')
             token = utils.get_token(phone_number, email=email)
             message = message_template.get_template('SEND_OTP').format(token)
-            send_otp.delay(phone_number=phone_number, message=message)
+            if settings.ENABLE_AMAZON_SQS:
+                task_queue = get_task_queue()
+                task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message})
+            else:
+                send_otp.delay(phone_number=phone_number, message=message)
             return HttpResponseRedirect('/users/otp/validate?phone='+phone_number)
         except:
             return HttpResponseRedirect('/users/otp/generate?details=invalid')
