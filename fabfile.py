@@ -171,17 +171,17 @@ def check():
     js_lint = lint_js().split('\n')
     py_lint = lint_py().split('\n')
     css_lint = lint_css()
-    coverage = ET.parse(open('out/coverage.xml')).getroot().attrib
-    tests = ET.parse(open('out/xunit.xml')).getroot().attrib
-
+#     coverage = ET.parse(open('out/coverage.xml')).getroot().attrib
+#     tests = ET.parse(open('out/xunit.xml')).getroot().attrib
+# 
     summary = {'8. Py Errors': len(py_lint),
                '7. JS Errors': len(js_lint),
                '6. CSS Errors': len(css_lint.split('\n')) if css_lint else 'N/A',
-               '5. Coverage': coverage.get('line-rate', '0'),
-               '1. Tests': tests.get('tests', 'NA'),
-               '2. Errors': tests.get('errors', 'NA'),
-               '3. Failures': tests.get('failures', 'NA'),
-               '4. Skip': tests.get('skip', 'NA'),
+#                '5. Coverage': coverage.get('line-rate', '0'),
+#                '1. Tests': tests.get('tests', 'NA'),
+#                '2. Errors': tests.get('errors', 'NA'),
+#                '3. Failures': tests.get('failures', 'NA'),
+#                '4. Skip': tests.get('skip', 'NA'),
                }
     print json.dumps(summary, indent=4)
 
