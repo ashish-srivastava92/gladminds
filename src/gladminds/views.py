@@ -23,7 +23,7 @@ def generate_otp(request):
             message = message_template.get_template('SEND_OTP').format(token)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message})
+                task_queue.add("send_otp", {"phone_number":phone_number, "message":message})
             else:
                 send_otp.delay(phone_number=phone_number, message=message)
             return HttpResponseRedirect('/users/otp/validate?phone='+phone_number)
