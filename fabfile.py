@@ -148,3 +148,47 @@ def _execute(cmd):
 
     return local(cmd, capture=CAPTURE)
 
+@task()
+def check():
+    '''Runs all checks and reports as JSON and out/summary.html. Useful for CI.'''
+    import xml.etree.ElementTree as ET
+    state.output.everything = False
+    global CAPTURE
+    global NEVER_FAIL
+    global COVERAGE_ENABLED
+    COVERAGE_ENABLED = True
+    CAPTURE = True
+    NEVER_FAIL = True
+
+    test_all()
+    js_lint = lint_js().split('\n')
+    py_lint = lint_py().split('\n')
+    css_lint = lint_css()
+    coverage = ET.parse(open('out/coverage.xml')).getroot().attrib
+    tests = ET.parse(open('out/xunit.xml')).getroot().attrib
+
+    summary = {'8. Py Errors': len(py_lint),
+               '7. JS Errors': len(js_lint),
+               '6. CSS Errors': len(css_lint.split('\n')) if css_lint else 'N/A',
+               '5. Coverage': coverage.get('line-rate', '0'),
+               '1. Tests': tests.get('tests', 'NA'),
+               '2. Errors': tests.get('errors', 'NA'),
+               '3. Failures': tests.get('failures', 'NA'),
+               '4. Skip': tests.get('skip', 'NA'),
+               }
+    print json.dumps(summary, indent=4)
+
+    ROW_MAPPER = lambda x: "<tr><td>{0}</td><td>{1}</td></tr>".format(x[0], x[1])
+    rows = sorted(map(ROW_MAPPER, summary.items()))
+
+    summary_file = open('out/summary.html', 'w')
+    summary_file.write('''
+        <h4 style="color:red;">Checks Failed. Please Fix.</h4>
+        <table style="text-align:left; width:200px;" border="1">
+            <tr><td><b>Metric</b></td><td><b>Value</b></td></tr>
+            {0}
+        </table>
+    '''.format("\n".join(rows)))
+
+    summary_file.close()
+
