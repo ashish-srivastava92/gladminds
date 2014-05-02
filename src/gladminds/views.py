@@ -30,13 +30,13 @@ def validate_otp(request):
     if request.method == 'GET':
         return render_to_response('portal/validate_otp.html', context_instance=RequestContext(request))
     elif request.method == 'POST':
-#        try:
-        otp = request.POST['otp']
-        phone_number = request.POST['phone']
-        utils.validate_otp(otp, phone_number)
-        return render_to_response('portal/reset_pass.html', {'otp': otp}, context_instance=RequestContext(request))
-#        except:
-#            return HttpResponseRedirect('/users/otp/generate?token=invalid')
+        try:
+            otp = request.POST['otp']
+            phone_number = request.POST['phone']
+            utils.validate_otp(otp, phone_number)
+            return render_to_response('portal/reset_pass.html', {'otp': otp}, context_instance=RequestContext(request))
+        except:
+            return HttpResponseRedirect('/users/otp/generate?token=invalid')
 
 def update_pass(request):
     try:
