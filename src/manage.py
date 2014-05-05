@@ -11,7 +11,7 @@ if __name__ == "__main__":
     #Change the app_name to your app_name 
     #Example lithium.settings
 
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app_name.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gladminds.settings")
   
     from django.core.management import execute_from_command_line
     print os.environ["DJANGO_SETTINGS_MODULE"]
