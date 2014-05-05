@@ -10,3 +10,5 @@ src/*.egg-info
 lib/buildout
 eggs
 dlcache
+out
+.coverage
