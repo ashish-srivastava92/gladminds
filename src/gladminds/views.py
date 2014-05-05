@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from gladminds import utils, message_template
 from django.conf import settings
 from gladminds.utils import get_task_queue
+from gladminds.mail import sent_otp_email
 logger = logging.getLogger('gladminds')
 
 
@@ -23,9 +24,12 @@ def generate_otp(request):
             message = message_template.get_template('SEND_OTP').format(token)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_otp", {"phone_number":phone_number, "message":message})
+                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
             else:
                 send_otp.delay(phone_number=phone_number, message=message)
+            #Send email if email address exist
+            if email:
+                sent_otp_email(data=token, receiver=email, subject='Forgot Password')
             return HttpResponseRedirect('/users/otp/validate?phone='+phone_number)
         except:
             return HttpResponseRedirect('/users/otp/generate?details=invalid')

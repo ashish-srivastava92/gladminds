@@ -77,4 +77,21 @@ def insurance_extend(data = None, receiver = None, subject = None):
         logger.info("[Exception item insurance extend]: {0}".format(ex))
         
 
+def sent_otp_email(data=None, receiver=None, subject=None):
+    from gladminds import mail
+    try:
+        date = datetime.now().date()
+        file_stream = open(settings.TEMPLATE_DIR+'/otp_email.html')
+        feed_temp = file_stream.read()
+        template = Template(feed_temp)
+        context = Context({"otp": data})
+        body = template.render(context)
+        mail_detail = settings.OTP_MAIL
+        
+        mail.send_email(sender = mail_detail['sender'], receiver = mail_detail['reciever'], 
+                   subject = mail_detail['subject'], body = body, 
+                   smtp_server = settings.MAIL_SERVER)
+    except Exception as ex:
+        logger.info("[Exception otp email]: {0}".format(ex))
+    
     

@@ -264,6 +264,12 @@ MAIL_DETAIL = {
                   "body": """""",
               }
 
+OTP_MAIL = {
+                  "sender":"support@gladminds.co",
+                  "subject":"Reset Password",
+                  "body": """""",
+              }
+
 #AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
 AFTERBUY_USER_LOC = os.path.join(AFTERBUY_LOC, "users")
