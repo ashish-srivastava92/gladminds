@@ -86,11 +86,15 @@ PASSED_MESSAGE = "Registration is complete"
 
 
 def save_asc_registeration(data, brand='bajaj'):
+    if common.RegisteredASC.objects.filter(phone_number=data['phone_number'])\
+        or common.ASCSaveForm.objects.filter(phone_number=data['phone_number']):
+        return {"message": "Already Registered Number"}
+
     try:
         asc_obj = common.ASCSaveForm(name=data['name'],
                  address=data['address'], password=data['password'],
                  phone_number=data['phone_number'], email=data['email'],
-                 pincode=data['pincode'])
+                 pincode=data['pincode'], status=1)
         asc_obj.save()
         if settings.ENABLE_AMAZON_SQS:
             task_queue = utils.get_task_queue()

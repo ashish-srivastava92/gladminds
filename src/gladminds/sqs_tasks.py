@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from gladminds import mail
 import logging
 from gladminds import taskmanager, feed, export_file, exportfeed
+from gladminds.models import common
 
 logger = logging.getLogger("gladminds")
 
@@ -320,7 +321,7 @@ def export_asc_registeration_to_sap(*args, **kwargs):
         status = "failed"
         config = settings.REGISTRATION_CONFIG[
                                          brand][feed_type]
-        send_reminder_message.retry(
+        export_asc_registeration_to_sap.retry(
             exc=ex, countdown=config["retry_time"], kwargs=kwargs,
             max_retries=config["num_of_retry"])
     finally:
@@ -328,6 +329,8 @@ def export_asc_registeration_to_sap(*args, **kwargs):
         total_failed = 1 if status == "failed" else 0
         if status == "failed":
             feed_data = 'ASC Registration for this %s is failing' % phone_number
+            common.ASCSaveForm.objects.filter(phone_number=phone_number)\
+                                      .update(status=2)
             mail.send_registration_failure(feed_data=feed_data)
         feed_log(feed_type="ASC Registration Feed", total_data_count=1,
          failed_data_count=total_failed, success_data_count=1 - total_failed,

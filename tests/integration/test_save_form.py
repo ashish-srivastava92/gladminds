@@ -26,4 +26,16 @@ class TestSaveFormRegistration(GladmindsResourceTestCase):
                           data['phone_number'])
 
     def test_fail_registration_mail(self):
-        pass
+        data = {
+                    u'name': u'TestASCUser',
+                    u'address': u'TestASCUser Address',
+                    u'pincode': u'111111',
+                    u'password': u'password',
+                    u'phone_number': u'9999999999',
+                    u'email': u'TestASCUser@TestASCUser.com'
+                }
+
+        response = self.client.post('/save/asc', data=data)
+        self.assertEqual(response.status_code, 200)
+        
+        
