@@ -20,3 +20,4 @@ django-cors-headers
 django-storages
 boto
 django-tastypie-swagger
+django_otp
