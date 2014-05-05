@@ -85,7 +85,7 @@ def register(request, user=None):
 PASSED_MESSAGE = "Registration is complete"
 
 
-def save_asc_registeration(data):
+def save_asc_registeration(data, brand='bajaj'):
     try:
         asc_obj = common.ASCSaveForm(name=data['name'],
                  address=data['address'], password=data['password'],
@@ -95,9 +95,10 @@ def save_asc_registeration(data):
         if settings.ENABLE_AMAZON_SQS:
             task_queue = utils.get_task_queue()
             task_queue.add("export_asc_registeration_to_sap", \
-                   {"phone_number": data['phone_number']})
+               {"phone_number": data['phone_number'], "brand": brand})
         else:
-            export_asc_registeration_to_sap.delay(data['phone_number'])
+            export_asc_registeration_to_sap.delay(phone_number=data[
+                                        'phone_number'], brand=brand)
     except KeyError:
         return {"message": "Key error"}
     return {"message": PASSED_MESSAGE}

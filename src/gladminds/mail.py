@@ -31,7 +31,7 @@ def feed_report(feed_data=None):
         body = template.render(context)
         mail_detail = settings.MAIL_DETAIL
         mail.send_email(sender=mail_detail['sender'],
-            receiver=mail_detail['reciever'], subject=mail_detail['subject'],
+            receiver=mail_detail['receiver'], subject=mail_detail['subject'],
             body=body, smtp_server=settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception feed_report]: {0}".format(ex))
@@ -41,18 +41,21 @@ def send_registration_failure(feed_data=None,
                               feed_type=None, brand=None):
     try:
         # yesterday = datetime.now().date() - timedelta(days=1)
-        file_stream = open(settings.TEMPLATE_DIR + '/feed_report.html')
-        feed_temp = file_stream.read()
-        template = Template(feed_temp)
-        context = Context({"feed_type": feed_type,
-                           "feed_logs": feed_data})
-        body = template.render(context)
-        mail_detail = settings.MAIL_DETAIL
-        send_email(sender=mail_detail['sender'], receiver=mail_detail['reciever'],
-                        subject=mail_detail['subject'], body=body,
-                        smtp_server=settings.MAIL_SERVER)
+        pass
     except Exception as ex:
         logger.info("[Exception feed_report]: {0}".format(ex))
+    file_stream = open(settings.TEMPLATE_DIR +
+                            '/portal/registration_failure_report.html')
+    feed_temp = file_stream.read()
+    template = Template(feed_temp)
+    context = Context({"feed_type": feed_type,
+                       "feed_logs": feed_data})
+    body = template.render(context)
+    mail_detail = settings.REGISTRATION_CONFIG[brand][feed_type][
+                                                     'fail_mail_detail']
+    send_email(sender=mail_detail['sender'], receiver=mail_detail[
+          'receiver'], subject=mail_detail['subject'], body=body,
+               smtp_server=settings.MAIL_SERVER)
 
 
 def item_purchase_interest(data=None, receiver=None, subject=None):

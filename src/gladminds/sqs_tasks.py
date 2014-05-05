@@ -304,25 +304,30 @@ Cron Job to send ASC Registeration to BAJAJ
 @shared_task
 def export_asc_registeration_to_sap(*args, **kwargs):
     phone_number = kwargs['phone_number']
-    asc_registeration_data = feed.ASCRegistrationToSAP()
-    feed_export_data = asc_registeration_data.export_data(phone_number)
+    brand = kwargs['brand']
+    feed_type = "ASC Registration Feed"
 
     status = "success"
     try:
+        asc_registeration_data = feed.ASCRegistrationToSAP()
+        feed_export_data = asc_registeration_data.export_data(phone_number)
         export_obj = exportfeed.ExportCouponRedeemFeed(
                username=settings.SAP_CRM_DETAIL['username'], password=settings
                .SAP_CRM_DETAIL['password'], wsdl_url=settings.ASC_WSDL_URL)
-        export_obj.export(items=feed_export_data['item'], item_batch=feed_export_data[
-             'item_batch'])
+        export_obj.export(items=feed_export_data['item'],
+                          item_batch=feed_export_data['item_batch'])
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
+        config = settings.REGISTRATION_CONFIG[
+                                         brand][feed_type]
         send_reminder_message.retry(
-            exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+            exc=ex, countdown=config["retry_time"], kwargs=kwargs,
+            max_retries=config["num_of_retry"])
     finally:
         export_status = False if status == "failed" else True
         total_failed = 1 if status == "failed" else 0
         if status == "failed":
-            feed_data = 'ASC Registration for this %s is failing ' % phone_number
+            feed_data = 'ASC Registration for this %s is failing' % phone_number
             mail.send_registration_failure(feed_data=feed_data)
         feed_log(feed_type="ASC Registration Feed", total_data_count=1,
          failed_data_count=total_failed, success_data_count=1 - total_failed,

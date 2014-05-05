@@ -3,13 +3,13 @@ from django.test.client import Client
 from gladminds.models import common
 
 
-class TestRegisteration(GladmindsResourceTestCase):
+class TestSaveFormRegistration(GladmindsResourceTestCase):
 
     def setUp(self):
         self.client = Client()
         pass
 
-    def test_asc_registeration(self):
+    def _test_asc_registration(self):
         data = {
                     u'name': u'TestASCUser',
                     u'address': u'TestASCUser Address',
@@ -24,3 +24,6 @@ class TestRegisteration(GladmindsResourceTestCase):
         self.assertEqual(common.ASCSaveForm.objects.count(), 1)
         self.assertEqual(common.ASCSaveForm.objects.all()[0].phone_number,
                           data['phone_number'])
+
+    def test_fail_registration_mail(self):
+        pass
