@@ -10,11 +10,11 @@ from fabric import state
 COVERAGE_ENABLED = False
 PROJECT_PACKGE = 'gladminds'
 
-BUCKET_NAME='gladminds' #Replace this with the correct bucket alloted for your project, ask from admin
+BUCKET_NAME = 'gladminds'  # Replace this with the correct bucket alloted for your project, ask from admin
 FILE_NAME = 'build.zip'
-version = "build_"+str(int(time.time()))
-APPLICATION_NAME = 'Gladminds' #Replace this with the elastic beanstalk application, ask from admin
-ENVIRONMENT_NAME = 'gladminds-web-prod'#Replace this with the elastic beanstalk dev environment name, ask from admin
+version = "build_" + str(int(time.time()))
+APPLICATION_NAME = 'Gladminds'  # Replace this with the elastic beanstalk application, ask from admin
+ENVIRONMENT_NAME = 'gladminds-web-prod'  # Replace this with the elastic beanstalk dev environment name, ask from admin
 ACCESS_KEY = 'AKIAIL7IDCSTNCG2R6JA'
 SECRET_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
 
@@ -119,18 +119,18 @@ def test(package=''):
     return _execute('bin/test test {0} {1}'.format(package, ' '.join(options)))
     
 
-#Include new commands for deployment to elastic beanstalk
+# Include new commands for deployment to elastic beanstalk
 @task()
 def deploy_to_dev_environment():
-    version = "build_"+str(int(time.time()))
-    upload_to_s3(BUCKET_NAME,version,FILE_NAME)
-    create_version(APPLICATION_NAME,version)
-    update_environment(ENVIRONMENT_NAME,version)
+    version = "build_" + str(int(time.time()))
+    upload_to_s3(BUCKET_NAME, version, FILE_NAME)
+    create_version(APPLICATION_NAME, version)
+    update_environment(ENVIRONMENT_NAME, version)
 
 @task()
 def create_new_version(version):
-    upload_to_s3(BUCKET_NAME,version,FILE_NAME)
-    create_version(APPLICATION_NAME,version)
+    upload_to_s3(BUCKET_NAME, version, FILE_NAME)
+    create_version(APPLICATION_NAME, version)
 
 def upload_to_s3(bucket_name, key, file_name):
     conn = boto.connect_s3(ACCESS_KEY, SECRET_KEY)
@@ -146,7 +146,7 @@ def create_version(application, version):
 
 def update_environment(environment, version):
     beanstalk = boto.connect_beanstalk(ACCESS_KEY, SECRET_KEY)
-    beanstalk.update_environment(environment_name=environment,version_label=version)
+    beanstalk.update_environment(environment_name=environment, version_label=version)
 
 
 def _execute(cmd):
@@ -171,17 +171,17 @@ def check():
     js_lint = lint_js().split('\n')
     py_lint = lint_py().split('\n')
     css_lint = lint_css()
-#     coverage = ET.parse(open('out/coverage.xml')).getroot().attrib
-#     tests = ET.parse(open('out/xunit.xml')).getroot().attrib
-# 
+    coverage = ET.parse(open('out/coverage.xml')).getroot().attrib
+    tests = ET.parse(open('out/xunit.xml')).getroot().attrib
+ 
     summary = {'8. Py Errors': len(py_lint),
                '7. JS Errors': len(js_lint),
                '6. CSS Errors': len(css_lint.split('\n')) if css_lint else 'N/A',
-#                '5. Coverage': coverage.get('line-rate', '0'),
-#                '1. Tests': tests.get('tests', 'NA'),
-#                '2. Errors': tests.get('errors', 'NA'),
-#                '3. Failures': tests.get('failures', 'NA'),
-#                '4. Skip': tests.get('skip', 'NA'),
+                '5. Coverage': coverage.get('line-rate', '0'),
+                '1. Tests': tests.get('tests', 'NA'),
+                '2. Errors': tests.get('errors', 'NA'),
+                '3. Failures': tests.get('failures', 'NA'),
+                '4. Skip': tests.get('skip', 'NA'),
                }
     print json.dumps(summary, indent=4)
 
