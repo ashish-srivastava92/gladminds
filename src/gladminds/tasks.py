@@ -7,6 +7,7 @@ from gladminds import taskmanager, feed, export_file, exportfeed
 from datetime import datetime, timedelta
 from gladminds import mail
 import logging
+from gladminds.models import common
 logger = logging.getLogger("gladminds")
 
 sms_client = load_gateway()
@@ -251,6 +252,13 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
     else:
         logger.info("tasks.py: No Coupon closed during last day")
 
+
+'''
+Delete the all the generated otp by end of day.
+'''
+def delete_unused_otp(*args, **kwargs):
+    common.OTPToken.objects.all().delete()
+
 '''
 Cron Job to send report email for data feed
 '''
@@ -279,11 +287,11 @@ def export_asc_registeration_to_sap(*args, **kwargs):
                .SAP_CRM_DETAIL['password'], wsdl_url=settings.ASC_WSDL_URL)
         export_obj.export(items=feed_export_data['item'],
                           item_batch=feed_export_data['item_batch'])
-    except (Exception, MessageSentFailed) as ex:
+    except Exception as ex:
         status = "failed"
         config = settings.REGISTRATION_CONFIG[
                                          brand][feed_type]
-        send_reminder_message.retry(
+        export_asc_registeration_to_sap.retry(
             exc=ex, countdown=config["retry_time"], kwargs=kwargs,
             max_retries=config["num_of_retry"])
     finally:
@@ -291,7 +299,8 @@ def export_asc_registeration_to_sap(*args, **kwargs):
         total_failed = 1 if status == "failed" else 0
         if status == "failed":
             feed_data = 'ASC Registration for this %s is failing' % phone_number
-            mail.send_registration_failure(feed_data=feed_data)
+            mail.send_registration_failure(feed_data=feed_data,
+                               feed_type="ASC Registration Feed", brand=brand)
         feed_log(feed_type="ASC Registration Feed", total_data_count=1,
          failed_data_count=total_failed, success_data_count=1 - total_failed,
                  action='Sent', status=export_status)

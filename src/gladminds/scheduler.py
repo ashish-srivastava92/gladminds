@@ -31,6 +31,8 @@ task_info = {
     },
     "send_schedule_reminder": {
         "time_taken": 0
+    },
+    "delete_unused_otp": {
     }
 }
 

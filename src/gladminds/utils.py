@@ -3,10 +3,11 @@ from datetime import datetime
 from gladminds.models.common import STATUS_CHOICES
 from gladminds.models import common
 from django_otp.oath import TOTP
-from gladminds.settings import TOTP_SECRET_KEY
+from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from random import randint
 
 import hashlib
+from django.utils import timezone
 
 from gladminds.taskqueue import SqsTaskQueue
 
@@ -60,9 +61,9 @@ def save_otp(token, phone_number, email):
     user = common.RegisteredASC.objects.filter(phone_number=mobile_format(phone_number))[0].user
     if email and user.email_id != email:
         raise
-    if not common.OTPToken.objects.filter(user=user):
-        token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=email)
-        token_obj.save()
+    common.OTPToken.objects.filter(user=user).delete()
+    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=email)
+    token_obj.save()
 
 def get_token(phone_number, email=''):
     totp=TOTP(TOTP_SECRET_KEY+str(randint(10000,99999))+str(phone_number))
@@ -74,8 +75,10 @@ def get_token(phone_number, email=''):
 def validate_otp(otp, phone):
     asc = common.RegisteredASC.objects.filter(phone_number=mobile_format(phone))[0].user
     token_obj = common.OTPToken.objects.filter(user=asc)[0]
-    if otp == token_obj.token:
+    if otp == token_obj.token and (timezone.now()-token_obj.request_date).seconds <= OTP_VALIDITY:
         return True
+    elif (timezone.now()-token_obj.request_date).seconds > OTP_VALIDITY:
+        token_obj.delete()
     raise
 
 def update_pass(otp, password):

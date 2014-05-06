@@ -55,6 +55,11 @@ app.conf.CELERYBEAT_SCHEDULE= {
         'schedule': crontab(minute=0, hour=0),
         'kwargs': {'day_duration':1}
     },
+    #Job to delete all the unused OTPs
+    'cronjob-delete-unused-otp': {
+        'task': 'gladminds.tasks.delete_unused_otp',
+        'schedule': crontab(minute=0, hour=0)
+    },
 }
 app.conf.update(
     CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend',

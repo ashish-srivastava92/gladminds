@@ -131,6 +131,23 @@ def send_coupon_close_message(*args, **kwargs):
         audit_log(status=status, reciever=phone_number, message=message)
 
 
+"""
+Send OTP
+"""
+@shared_task
+def send_otp(*args, **kwargs):
+    status = "success"
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        respone_data = sms_client.send_stateless(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        send_on_product_purchase.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        audit_log(status = status, reciever=phone_number, message=message)
+
+
 @shared_task
 def send_coupon(*args, **kwargs):
     status = "success"
@@ -317,7 +334,7 @@ def export_asc_registeration_to_sap(*args, **kwargs):
                .SAP_CRM_DETAIL['password'], wsdl_url=settings.ASC_WSDL_URL)
         export_obj.export(items=feed_export_data['item'],
                           item_batch=feed_export_data['item_batch'])
-    except (Exception, MessageSentFailed) as ex:
+    except Exception as ex:
         status = "failed"
         config = settings.REGISTRATION_CONFIG[
                                          brand][feed_type]
@@ -329,9 +346,8 @@ def export_asc_registeration_to_sap(*args, **kwargs):
         total_failed = 1 if status == "failed" else 0
         if status == "failed":
             feed_data = 'ASC Registration for this %s is failing' % phone_number
-            common.ASCSaveForm.objects.filter(phone_number=phone_number)\
-                                      .update(status=2)
-            mail.send_registration_failure(feed_data=feed_data)
+            mail.send_registration_failure(feed_data=feed_data,
+                               feed_type="ASC Registration Feed", brand=brand)
         feed_log(feed_type="ASC Registration Feed", total_data_count=1,
          failed_data_count=total_failed, success_data_count=1 - total_failed,
                  action='Sent', status=export_status)
@@ -371,6 +387,7 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
 
               "send_report_mail_for_feed": send_report_mail_for_feed,
 
-              "export_asc_registeration_to_sap":
-                                            export_asc_registeration_to_sap
+              "export_asc_registeration_to_sap": export_asc_registeration_to_sap,
+              
+              "send_otp": send_otp
               }
