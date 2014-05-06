@@ -86,16 +86,22 @@ PASSED_MESSAGE = "Registration is complete"
 
 
 def save_asc_registeration(data, brand='bajaj'):
-    if common.RegisteredASC.objects.filter(phone_number=data['phone_number'])\
-        or common.ASCSaveForm.objects.filter(phone_number=data['phone_number']):
+    if common.RegisteredASC.objects.filter(phone_number=data['mobile_number'])\
+        or common.ASCSaveForm.objects.filter(phone_number=data['mobile_number']):
         return {"message": "Already Registered Number"}
 
     try:
+        dealer_data = common.RegisteredDealer.objects.\
+                                            filter(dealer_id=data["dealer_id"])
+        dealer_data = dealer_data if dealer_data else None
+        print "###########",
+        print data['name']
         asc_obj = common.ASCSaveForm(name=data['name'],
                  address=data['address'], password=data['password'],
-                 phone_number=data['phone_number'], email=data['email'],
-                 pincode=data['pincode'], status=1)
+                 phone_number=data['mobile_number'], email=data['email'],
+                 pincode=data['pincode'], status=1, dealer_id=dealer_data)
         asc_obj.save()
+        print "@@@@@@@"
         if settings.ENABLE_AMAZON_SQS:
             task_queue = utils.get_task_queue()
             task_queue.add("export_asc_registeration_to_sap", \
@@ -103,8 +109,11 @@ def save_asc_registeration(data, brand='bajaj'):
         else:
             export_asc_registeration_to_sap.delay(phone_number=data[
                                         'phone_number'], brand=brand)
-    except KeyError:
-        return {"message": "Key error"}
+        print "$$$$$$$$$$$$"
+#     except KeyError:
+#         return {"message": "Key error"}
+    except Exception as ex:
+        logger.info(ex)
     return {"message": PASSED_MESSAGE}
 
 
