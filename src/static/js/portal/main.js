@@ -38,20 +38,37 @@
             data[x.name] = x.value;
         });
         
-        if (data["pwd"] != data["re-pwd"]){
-            return;             
+        if (data["password"] != data["re-password"]){
+            return;          
         }
         var jqXHR = $.ajax({
             type : 'POST',
             data : data,
-            url : '/save/asc',
+            url : '/register/asc',
             success : function(data) {
                 alert(data);
             }
         });
         return false;
     });
-
+    
+    $(".sa-form").on("submit", function(event) {
+      var data = $(".sa-form").serializeArray();
+      $(".sa-form").serializeArray().map(function(x) {
+          data[x.name] = x.value;
+      });
+      
+      var jqXHR = $.ajax({
+          type : 'POST',
+          data : data,
+          url : '/register/sa',
+          success : function(data) {
+              alert(data);
+          }
+      });
+      return false;
+    });
+    
     $(document).ready(function() {
 
     });

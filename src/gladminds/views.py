@@ -1,7 +1,8 @@
 from django.shortcuts import render_to_response, render
 from django.contrib.auth.views import login_required
 from django.template import RequestContext
-from django.http.response import HttpResponseRedirect, HttpResponse
+from django.http.response import HttpResponseRedirect, HttpResponse,\
+    HttpResponseBadRequest
 from gladminds.models import common
 import logging
 from gladminds.tasks import send_otp
@@ -92,13 +93,22 @@ def redirect(request):
     return HttpResponseRedirect('/dealers/' + str(request.user))
 
 def register(request, user=None):
-    template_mapping = {
-        "asc": "portal/asc_registration.html",
-    }
-    return render(request, template_mapping[user])
+    if request.method == 'GET':
+        template_mapping = {
+            'asc': {'template': 'portal/asc_registration.html', 'active_menu': 'register_asc'},
+            'sa': {'template': 'portal/sa_registration.html', 'active_menu': 'register_sa'},
+        }
+        return render(request, template_mapping[user]['template'], {'active_menu' : template_mapping[user]['active_menu']})
+    elif request.method == 'POST':
+        save_user = {
+            'asc': save_asc_registeration,
+            'sa': save_sa_registration
+        }
+        status = save_user[user](request.POST)
+        return HttpResponse({"status": status}, content_type="application/json")
 
 
-PASSED_MESSAGE = "Registration is complete"
+SUCCESS_MESSAGE = "Registration is complete"
 def save_asc_registeration(data):
     reject_keys = ['csrfmiddlewaretoken']
     data = {key: val for key, val in data.iteritems() \
@@ -106,20 +116,23 @@ def save_asc_registeration(data):
     try:
         asc_obj = common.ASCSaveForm(name=data['name'],
                  address=data['address'], password=data['password'],
-                 phone_number=data['phone_number'], email=data['email'],
+                 phone_number=data['phone-number'], email=data['email'],
                  pincode=data['pincode'])
         asc_obj.save()
 
     except KeyError:
-        return {"message": "Key error"}
-    return {"message": PASSED_MESSAGE}
+        return HttpResponseBadRequest()
+    return {"message": SUCCESS_MESSAGE}
 
+def save_sa_registration(data):
+    data= {key: val for key, val in data.iteritems()}
+    try:
+        asc_obj = common.SASaveForm(name=data['name'],
+                 phone_number=data['phone-number'], status=data['status'])
+        asc_obj.save()
 
-def register_user(request, user=None):
-    save_user = {
-        'asc': save_asc_registeration
-    }
-    status = save_user[user](request.POST)
-    return HttpResponseRedirect("/register/asc/")
-    return HttpResponse({"status": status}, content_type="application/json")
+    except KeyError:
+        return HttpResponseBadRequest()
+    return {"message": SUCCESS_MESSAGE}
+
 

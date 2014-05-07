@@ -18,13 +18,13 @@
             <div class="col-md-8">
                 <div class="row portal-form-heading">
                     <div class="col-md-10">
-                        <h3 class="text-center"> ASC Registration </h3>
+                        <h3 class="text-center">Service Advisor Registration</h3>
                     </div>
                 </div>
-                <form class="asc-form" role="form">{% csrf_token %}
+                <form class="sa-form" role="form">{% csrf_token %}
                     <div class="row">
                         <div class="col-md-4 form-group">
-                            <label class="control-label">ASC Name*:</label>
+                            <label class="control-label">Service Advisor Name*:</label>
                         </div>
                         <div class="col-md-4 form-group">
                             <input type="text" class="form-control" name="name" required autofocus/>
@@ -32,23 +32,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-4 form-group">
-                            <label class="control-label">PWD*:</label>
-                        </div>
-                        <div class="col-md-4 form-group">
-                            <input type="password" class="form-control" name="password" required/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 form-group">
-                            <label  class="control-label">Retype PWD*:</label>
-                        </div>
-                        <div class="col-md-4 form-group">
-                            <input type="password" class="form-control" name="re-password" required />
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 form-group">
-                            <label class="control-label">ASC Mobile Number*:</label>
+                            <label class="control-label">Service Advisor Mobile#*:</label>
                         </div>
                         <div class="col-md-4 form-group">
                             <input type="text" class="form-control" name="phone-number" required/>
@@ -56,26 +40,14 @@
                     </div>
                     <div class="row">
                         <div class="col-md-4 form-group">
-                            <label class="control-label">Email:</label>
+                            <label  class="control-label">Activity Status*:</label>
                         </div>
                         <div class="col-md-4 form-group">
-                            <input type="email" class="form-control" name="email"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 form-group">
-                            <label class="control-label">PinCode:</label>
-                        </div>
-                        <div class="col-md-4 form-group">
-                            <input type="text" class="form-control" name="pincode"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 form-group">
-                            <label class="control-label">Address:</label>
-                        </div>
-                        <div class="col-md-4 form-group">
-                            <input type="text" class="form-control" name="address"/>
+                            <select class="form-control" name="status" required>
+                              <option value="">Select status</option>
+                              <option value="Y">Y</option>
+                              <option value="N">N</option>
+                            </select>
                         </div>
                     </div>
                     <div class="row">

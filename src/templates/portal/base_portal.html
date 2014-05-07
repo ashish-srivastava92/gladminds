@@ -1,8 +1,8 @@
 <link href="/static/css/portal.css" rel="stylesheet">
 <label>Registeration</label>
 <div class="list-group">
-    <a tabindex="1" href="/register/asc" class="list-group-item active">ASC Registeration</a>
-    <a href="#" class="list-group-item">Service Advisor Registeration</a>
+    <a tabindex="1" href="/register/asc" class="list-group-item{% if active_menu == 'register_asc' %} active {% endif %}">ASC Registeration</a>
+    <a href="/register/sa" class="list-group-item{% if active_menu == 'register_sa' %} active {% endif %}">Service Advisor Registeration</a>
     <a href="#" class="list-group-item">Customer Registeration</a>
 </div>
 
