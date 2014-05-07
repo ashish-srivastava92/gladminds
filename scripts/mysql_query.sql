@@ -90,3 +90,11 @@ set global slow_query_log_file = '/var/log/mysql/log-slow-queries.log';
 show variables like '%slow%';
 
 -------------------create slow query log------------------
+
+
+
+------------------------create user in mysql---------------------
++CREATE USER 'gladminds'@'localhost' IDENTIFIED BY 'gladmindsRocks';
++GRANT ALL PRIVILEGES ON gladminds.* TO 'gladminds'@'localhost';
+----------------------------------------------------------
+
