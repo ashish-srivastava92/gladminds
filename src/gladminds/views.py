@@ -4,14 +4,14 @@ from django.template import RequestContext
 from django.http.response import HttpResponseRedirect, HttpResponse,\
     HttpResponseBadRequest
 from gladminds.models import common
-import logging
+import logging, json
 from gladminds.tasks import send_otp
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import login
 from django.contrib.auth.models import User
 from gladminds import utils, message_template
 from django.conf import settings
-from gladminds.utils import get_task_queue
+from gladminds.utils import get_task_queue, get_customer_info
 from gladminds.mail import sent_otp_email
 logger = logging.getLogger('gladminds')
 
@@ -107,6 +107,23 @@ def register(request, user=None):
         status = save_user[user](request.POST)
         return HttpResponse({"status": status}, content_type="application/json")
 
+def exceptions(request, exception=None):
+    if request.method == 'GET':
+        template_mapping = {
+            'customer' : {'template':'portal/exception.html', 'active_menu': 'customer'}
+        }
+        template = template_mapping[exception]
+        return render(request, template['template'], {'active_menu' : template['active_menu']})
+    elif request.method == 'POST':
+        function_mapping = {
+            'customer' : get_customer_info
+        }
+        try:
+            data = function_mapping[exception](request.POST)
+            return HttpResponse(content=json.dumps(data),  content_type='application/json')
+        except:
+            return HttpResponseBadRequest()
+        
 
 SUCCESS_MESSAGE = "Registration is complete"
 def save_asc_registeration(data):

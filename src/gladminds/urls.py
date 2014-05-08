@@ -24,6 +24,7 @@ urlpatterns = patterns('',
     url(r'api/doc/', include('tastypie_swagger.urls', namespace='tastypie_swagger')),
 
     url(r'^register/(?P<user>[a-zA-Z0-9]+)$', 'gladminds.views.register'),
+    url(r'^exceptions/(?P<exception>[a-zA-Z0-9]+)$', 'gladminds.views.exceptions'),
     url(r'^users/otp/generate$', 'gladminds.views.generate_otp', name='generate_otp'),
     url(r'^users/otp/validate', 'gladminds.views.validate_otp', name='validate_otp'),
     url(r'^users/otp/update_pass', 'gladminds.views.update_pass', name='update_pass'),

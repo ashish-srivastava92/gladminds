@@ -69,6 +69,24 @@
       return false;
     });
     
+    $(".vin-form").on("submit", function() {
+      var vin = $("#srch-vin").val();
+      var jqXHR = $.ajax({
+        type: "POST",
+        url: "/exceptions/customer",
+        data: {"vin": vin, "action": "customer"},
+        success: function(data){
+          $(".customer-phone").val(data['customer_phone']);
+          $(".customer-id").val(data["customer_id"]);
+        },
+        error: function() {
+          $(".customer-phone").val("Not Found");
+          $(".customer-id").val("Not Found")
+        }
+      });
+      return false;
+    });
+    
     $(document).ready(function() {
 
     });

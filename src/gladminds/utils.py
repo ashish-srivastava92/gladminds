@@ -94,3 +94,6 @@ def get_task_queue():
     queue_name = "gladminds-prod"
     return SqsTaskQueue(queue_name)
 
+def get_customer_info(data):
+    product_obj = common.ProductData.objects.filter(vin=data['vin'])[0]
+    return {'customer_phone': str(product_obj.customer_phone_number), 'customer_id': product_obj.sap_customer_id}
