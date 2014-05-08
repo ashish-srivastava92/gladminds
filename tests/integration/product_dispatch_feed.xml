@@ -5,36 +5,85 @@
       <ns1:ObjectList>
         <ns1:ProductDispatchData>
           <ns1:ProductDispatchModel>
-            <ns1:PRODUCT_TYPE>Bike</ns1:PRODUCT_TYPE>
-            <ns1:KMS_TO>500</ns1:KMS_TO>
-            <ns1:TIMESTAMP>2005-08-01000000</ns1:TIMESTAMP>
-            <ns1:VEC_DIS_DT>2014-03-20</ns1:VEC_DIS_DT>
-            <ns1:DAYS_LIMIT_FROM>25</ns1:DAYS_LIMIT_FROM>
-            <ns1:CHASSIS>XXXXXXXXXX</ns1:CHASSIS>
+            <ns1:PRODUCT_TYPE>3700DHFS</ns1:PRODUCT_TYPE>
+            <ns1:KMS_TO>0000000500</ns1:KMS_TO>
+            <ns1:TIMESTAMP>2014-17-22041748</ns1:TIMESTAMP>
+            <ns1:VEC_DIS_DT>2013-07-01</ns1:VEC_DIS_DT>
+            <ns1:DAYS_LIMIT_FROM>00030</ns1:DAYS_LIMIT_FROM>
+            <ns1:CHASSIS>MD2A11CZ1DCC09539</ns1:CHASSIS>
             <ns1:DAYS_LIMIT_TO>30</ns1:DAYS_LIMIT_TO>
-            <ns1:KMS_FROM>400</ns1:KMS_FROM>
+            <ns1:KMS_FROM>0000000500</ns1:KMS_FROM>
             <ns1:SERVICE_TYPE>1</ns1:SERVICE_TYPE>
-            <ns1:UCN_NO>USC001</ns1:UCN_NO>
-            <ns1:KUNNR>GMDEALER001</ns1:KUNNR>
+            <ns1:UCN_NO>AB00250</ns1:UCN_NO>
+            <ns1:KUNNR>HIDealer001</ns1:KUNNR>
           </ns1:ProductDispatchModel>
           <ns1:ProductDispatchModel>
-            <ns1:PRODUCT_TYPE>Bike</ns1:PRODUCT_TYPE>
-            <ns1:KMS_TO>500</ns1:KMS_TO>
-            <ns1:TIMESTAMP>2005-08-01000000</ns1:TIMESTAMP>
-            <ns1:VEC_DIS_DT>2014-03-20</ns1:VEC_DIS_DT>
-            <ns1:DAYS_LIMIT_FROM>25</ns1:DAYS_LIMIT_FROM>
-            <ns1:CHASSIS>XXXXXXXXXX</ns1:CHASSIS>
-            <ns1:DAYS_LIMIT_TO>30</ns1:DAYS_LIMIT_TO>
-            <ns1:KMS_FROM>400</ns1:KMS_FROM>
+            <ns1:PRODUCT_TYPE>3700DHFS</ns1:PRODUCT_TYPE>
+            <ns1:KMS_TO>00000001000</ns1:KMS_TO>
+            <ns1:TIMESTAMP>2014-17-22041748</ns1:TIMESTAMP>
+            <ns1:VEC_DIS_DT>2013-07-01</ns1:VEC_DIS_DT>
+            <ns1:DAYS_LIMIT_FROM>00060</ns1:DAYS_LIMIT_FROM>
+            <ns1:CHASSIS>MD2A11CZ1DCC09539</ns1:CHASSIS>
+            <ns1:DAYS_LIMIT_TO>90</ns1:DAYS_LIMIT_TO>
+            <ns1:KMS_FROM>0000000600</ns1:KMS_FROM>
             <ns1:SERVICE_TYPE>2</ns1:SERVICE_TYPE>
-            <ns1:UCN_NO>USC002</ns1:UCN_NO>
-            <ns1:KUNNR>GMDEALER001</ns1:KUNNR>
+            <ns1:UCN_NO>AB00252</ns1:UCN_NO>
+            <ns1:KUNNR>HIDealer001</ns1:KUNNR>
+          </ns1:ProductDispatchModel>
+          <ns1:ProductDispatchModel>
+            <ns1:PRODUCT_TYPE>3700DHFS</ns1:PRODUCT_TYPE>
+            <ns1:KMS_TO>00000001500</ns1:KMS_TO>
+            <ns1:TIMESTAMP>2014-17-22041748</ns1:TIMESTAMP>
+            <ns1:VEC_DIS_DT>2013-07-01</ns1:VEC_DIS_DT>
+            <ns1:DAYS_LIMIT_FROM>000120</ns1:DAYS_LIMIT_FROM>
+            <ns1:CHASSIS>MD2A11CZ1DCC09539</ns1:CHASSIS>
+            <ns1:DAYS_LIMIT_TO>150</ns1:DAYS_LIMIT_TO>
+            <ns1:KMS_FROM>00000001100</ns1:KMS_FROM>
+            <ns1:SERVICE_TYPE>3</ns1:SERVICE_TYPE>
+            <ns1:UCN_NO>AB00255</ns1:UCN_NO>
+            <ns1:KUNNR>HIDealer001</ns1:KUNNR>
+          </ns1:ProductDispatchModel>
+          <ns1:ProductDispatchModel>
+            <ns1:PRODUCT_TYPE>3700DHFS</ns1:PRODUCT_TYPE>
+            <ns1:KMS_TO>000000500</ns1:KMS_TO>
+            <ns1:VEC_DIS_DT>2013-07-01</ns1:VEC_DIS_DT>
+            <ns1:DAYS_LIMIT_FROM>00030</ns1:DAYS_LIMIT_FROM>
+            <ns1:CHASSIS>MD2A11CZ7DCD10326</ns1:CHASSIS>
+            <ns1:DAYS_LIMIT_TO>0040</ns1:DAYS_LIMIT_TO>
+            <ns1:KMS_FROM>000000400</ns1:KMS_FROM>
+            <ns1:SERVICE_TYPE>1</ns1:SERVICE_TYPE>
+            <ns1:UCN_NO>AA01046</ns1:UCN_NO>
+            <ns1:KUNNR>HIDealer002</ns1:KUNNR>
+          </ns1:ProductDispatchModel>
+          <ns1:ProductDispatchModel>
+            <ns1:PRODUCT_TYPE>3700DHFS</ns1:PRODUCT_TYPE>
+            <ns1:KMS_TO>0000001000</ns1:KMS_TO>
+            <ns1:VEC_DIS_DT>2014-05-01</ns1:VEC_DIS_DT>
+            <ns1:DAYS_LIMIT_FROM>00060</ns1:DAYS_LIMIT_FROM>
+            <ns1:CHASSIS>MD2A11CZ7DCD10326</ns1:CHASSIS>
+            <ns1:DAYS_LIMIT_TO>0070</ns1:DAYS_LIMIT_TO>
+            <ns1:KMS_FROM>000000900</ns1:KMS_FROM>
+            <ns1:SERVICE_TYPE>2</ns1:SERVICE_TYPE>
+            <ns1:UCN_NO>AA01050</ns1:UCN_NO>
+            <ns1:KUNNR>HIDealer002</ns1:KUNNR>
+          </ns1:ProductDispatchModel>
+          <ns1:ProductDispatchModel>
+            <ns1:PRODUCT_TYPE>3700DHFS</ns1:PRODUCT_TYPE>
+            <ns1:KMS_TO>0000001500</ns1:KMS_TO>
+            <ns1:VEC_DIS_DT>2014-07-01</ns1:VEC_DIS_DT>
+            <ns1:DAYS_LIMIT_FROM>00090</ns1:DAYS_LIMIT_FROM>
+            <ns1:CHASSIS>MD2A11CZ7DCD10326</ns1:CHASSIS>
+            <ns1:DAYS_LIMIT_TO>00100</ns1:DAYS_LIMIT_TO>
+            <ns1:KMS_FROM>0000001400</ns1:KMS_FROM>
+            <ns1:SERVICE_TYPE>3</ns1:SERVICE_TYPE>
+            <ns1:UCN_NO>AA01052</ns1:UCN_NO>
+            <ns1:KUNNR>HIDealer002</ns1:KUNNR>
           </ns1:ProductDispatchModel>
         </ns1:ProductDispatchData>
       </ns1:ObjectList>
       <ns1:Credential>
-        <ns1:UserName>gladminds</ns1:UserName>
-        <ns1:Password>gladminds</ns1:Password>
+        <ns1:UserName>bajaj001</ns1:UserName>
+        <ns1:Password>bajaj001</ns1:Password>
       </ns1:Credential>
     </ns1:postProductDispatch>
   </SOAP-ENV:Body>
