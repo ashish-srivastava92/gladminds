@@ -11,7 +11,8 @@ from django.contrib.auth.views import login
 from django.contrib.auth.models import User
 from gladminds import utils, message_template
 from django.conf import settings
-from gladminds.utils import get_task_queue, get_customer_info
+from gladminds.utils import get_task_queue, get_customer_info,\
+    get_sa_list, get_coupon_info
 from gladminds.mail import sent_otp_email
 logger = logging.getLogger('gladminds')
 
@@ -66,32 +67,8 @@ def update_pass(request):
         logger.error('Password update failed.')
         return HttpResponseRedirect('/dealers/?error=true')
 
-@login_required(login_url='/dealers/')
-def action(request, params):
-    if request.method == 'GET':
-        try:
-            dealer = common.RegisteredDealer.objects.filter(
-                dealer_id=request.user)[0]
-            service_advisors = common.ServiceAdvisorDealerRelationship.objects\
-                                        .filter(dealer_id=dealer, status='Y')
-            sa_phone_list = []
-            for service_advisor in service_advisors:
-                sa_phone_list.append(service_advisor.service_advisor_id)
-            return render_to_response('dealer/advisor_actions.html',
-                  {'phones': sa_phone_list},
-                  context_instance=RequestContext(request))
-        except:
-            logger.info(
-                'No service advisor for dealer %s found active' % request.user)
-            raise
 
-    elif request.method == 'POST':
-        raise NotImplementedError()
-
-@login_required(login_url='/dealers/')
-def redirect(request):
-    return HttpResponseRedirect('/dealers/' + str(request.user))
-
+@login_required(login_url='/user/login/')
 def register(request, user=None):
     if request.method == 'GET':
         template_mapping = {
@@ -106,23 +83,36 @@ def register(request, user=None):
         }
         status = save_user[user](request.POST)
         return HttpResponse({"status": status}, content_type="application/json")
+    else:
+        return HttpResponseBadRequest()
 
+@login_required(login_url='/user/login/')
 def exceptions(request, exception=None):
     if request.method == 'GET':
-        template_mapping = {
-            'customer' : {'template':'portal/exception.html', 'active_menu': 'customer'}
-        }
-        template = template_mapping[exception]
-        return render(request, template['template'], {'active_menu' : template['active_menu']})
-    elif request.method == 'POST':
-        function_mapping = {
-            'customer' : get_customer_info
+        template = 'portal/exception.html'
+        data=None
+        data_mapping = {
+            'close' : get_sa_list,
+            'check' : get_sa_list
         }
         try:
-            data = function_mapping[exception](request.POST)
+            data = data_mapping[exception](request)
+        except:
+            #It is acceptable if there is no data_mapping defined for a function
+            pass
+        return render(request, template, {'active_menu' : exception, "data" : data})
+    elif request.method == 'POST':
+        function_mapping = {
+            'customer' : get_customer_info,
+            'recover' : get_coupon_info
+        }
+        try:
+            data = function_mapping[exception](request)
             return HttpResponse(content=json.dumps(data),  content_type='application/json')
         except:
             return HttpResponseBadRequest()
+    else:
+        return HttpResponseBadRequest()
         
 
 SUCCESS_MESSAGE = "Registration is complete"
