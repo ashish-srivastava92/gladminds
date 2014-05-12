@@ -5,27 +5,29 @@
 {% endblock %}
 
 {% block body %}
-<div class="user-message"><div class="message" style="display: block;"></div></div>
-<label><h2>Welcome Dealer</h2></label>
-<form role="form" action="/dealers/" method="post" >
+
+<div class="user-message"><div class="message"></div></div>
+<label><h2>Enter Details</h2></label>
+<form role="form" action="/users/otp/generate" method="post" class="get-otp">
     {% csrf_token %}
     <div class="row">
         <div class="col-md-3">
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" class="form-control" id="username" name="username" placeholder="Username">
+                <input type="text" class="form-control" id="mobile" name="mobile" placeholder="10 Digit Mobile Number..." required>
             </div>
             <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" class="form-control" id="password" name="password" placeholder="password">
+                <input type="text" class="form-control" id="email" name="email" placeholder="email">
             </div>
         </div>
     </div>
     <div class="row">
         <div class="col-md-4 form-group">
             <button type="submit" class="btn btn-primary">
-                Submit
+                Generate OTP
             </button>
+            <a href="/users/otp/validate" class="btn btn-primary otp-redirect">
+                Enter OTP
+            </a>
         </div>
     </div>
 </form>

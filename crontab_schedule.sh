@@ -5,4 +5,4 @@ sudo crontab -l | (cat;echo "0 0 * * *  python /opt/app/gladminds/src/gladminds/
 sudo crontab -l | (cat;echo "0 0 * * *  python /opt/app/gladminds/src/gladminds/scheduler.py  send_reminder") | sudo crontab
 sudo crontab -l | (cat;echo "0 0 * * *  python /opt/app/gladminds/src/gladminds/scheduler.py  import_data") | sudo crontab
 sudo crontab -l | (cat;echo "0 0 * * *  python /opt/app/gladminds/src/gladminds/scheduler.py send_schedule_reminder") | sudo crontab
-
+sudo crontab -l | (cat;echo "0 0 * * *  python /opt/app/gladminds/src/gladminds/scheduler.py delete_unused_otp") | sudo crontab

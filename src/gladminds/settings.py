@@ -20,6 +20,9 @@ ADMINS = (
 
 COUPON_VALID_DAYS = 30
 
+TOTP_SECRET_KEY = '93424'
+OTP_VALIDITY = 120
+
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 
 TEMPLATE_CONTEXT_PROCESSORS = TCP + (
@@ -39,7 +42,7 @@ SUIT_CONFIG = {
 
                           {'model':'productdata','label': 'Feed -> Product Purchase'},{'model':'coupondata','label': 'Feed -> Coupon Redemption'} ,{'model':'auditlog','label': 'Audit Log'}, 
                           {'model':'datafeedlog','label': 'Feed Log'}, 'uploadproductcsv', 
-                          'messagetemplate','gladmindusers')},
+                          'messagetemplate','emailtemplate','gladmindusers',)},
                 {'app':'djcelery','label':'Job Management','icon':'icon-tasks'})
 }
 
@@ -175,6 +178,7 @@ INSTALLED_APPS = (
     'storages',
     'tastypie_swagger',
     'django_otp',
+    'django_otp.plugins.otp_totp',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
@@ -255,8 +259,14 @@ WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR+'/coupon_redeem.wsdl'
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
                   "sender":"feed-report@gladminds.co",
-                  "reciever": "gladminds@hashedin.com,naveen.shankar@gladminds.co",
+                  "receiver": "gladminds@hashedin.com,naveen.shankar@gladminds.co",
                   "subject":"Gladminds Feed Report",
+                  "body": """""",
+              }
+
+OTP_MAIL = {
+                  "sender":"support@gladminds.co",
+                  "subject":"Reset Password",
                   "body": """""",
               }
 
@@ -272,7 +282,6 @@ AFTERBUY_PRODUCT_INVOICE_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "invoice")
 MEDIA_ROOT = AFTERBUY_LOC
 MEDIA_URL = '/media/'
 
-
 #S3 Configuration
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 AWS_ACCESS_KEY_ID = 'AKIAIL7IDCSTNCG2R6JA'
@@ -281,7 +290,25 @@ AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 # S3_URL = 'http://%s.s3-website-us-east-1.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 
 
-
 DEFAULT_COUPON_STATUS = 1
 DELAY_IN_CUSTOMER_UCN_MESSAGE = 180
 ENABLE_AMAZON_SQS = False
+
+#################Registration Configuration#################################
+REGISTRATION_CONFIG = {
+                                "bajaj": {
+                                    "ASC Registration Feed": {
+                                        "retry_time": 180,
+                                        "num_of_retry": 2,
+                                        "delay": 180,
+                                        "fail_mail_detail": {
+                                            "sender": "feed-report@gladminds.co",
+                                            "receiver": "sourabh.gupta@hashedin.com",
+                                            "subject": "Gladminds ASC Registration Fail",
+                                            "body": """"""
+                                        }
+                                    }
+                                }
+                             }
+###########################################################################
+###########################################################################

@@ -1,12 +1,13 @@
 from __future__ import absolute_import
 from celery import shared_task
 from django.conf import settings
-from gladminds.audit import audit_log
+from gladminds.audit import audit_log, feed_log
 from gladminds.dao.smsclient import load_gateway, MessageSentFailed
 from gladminds import taskmanager, feed, export_file, exportfeed
 from datetime import datetime, timedelta
 from gladminds import mail
 import logging
+from gladminds.models import common
 logger = logging.getLogger("gladminds")
 
 sms_client = load_gateway()
@@ -182,7 +183,23 @@ def send_on_product_purchase(*args, **kwargs):
         send_on_product_purchase.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         audit_log(status = status, reciever=phone_number, message=message)
-        
+
+"""
+Send OTP
+"""
+@shared_task
+def send_otp(*args, **kwargs):
+    status = "success"
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        respone_data = sms_client.send_stateless(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        send_on_product_purchase.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        audit_log(status = status, reciever=phone_number, message=message)
+  
 """
 Crontab to send reminder sms to customer 
 """
@@ -235,6 +252,13 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
     else:
         logger.info("tasks.py: No Coupon closed during last day")
 
+
+'''
+Delete the all the generated otp by end of day.
+'''
+def delete_unused_otp(*args, **kwargs):
+    common.OTPToken.objects.all().delete()
+
 '''
 Cron Job to send report email for data feed
 '''
@@ -246,3 +270,37 @@ def send_report_mail_for_feed(*args, **kwargs):
     end_date = today+timedelta(days = 1)
     feed_data = taskmanager.get_data_feed_log_detail(start_date = start_date, end_date = end_date)
     mail.feed_report(feed_data = feed_data)
+
+
+@shared_task
+def export_asc_registeration_to_sap(*args, **kwargs):
+    phone_number = kwargs['phone_number']
+    brand = kwargs['brand']
+    feed_type = "ASC Registration Feed"
+
+    status = "success"
+    try:
+        asc_registeration_data = feed.ASCRegistrationToSAP()
+        feed_export_data = asc_registeration_data.export_data(phone_number)
+        export_obj = exportfeed.ExportCouponRedeemFeed(
+               username=settings.SAP_CRM_DETAIL['username'], password=settings
+               .SAP_CRM_DETAIL['password'], wsdl_url=settings.ASC_WSDL_URL)
+        export_obj.export(items=feed_export_data['item'],
+                          item_batch=feed_export_data['item_batch'])
+    except Exception as ex:
+        status = "failed"
+        config = settings.REGISTRATION_CONFIG[
+                                         brand][feed_type]
+        export_asc_registeration_to_sap.retry(
+            exc=ex, countdown=config["retry_time"], kwargs=kwargs,
+            max_retries=config["num_of_retry"])
+    finally:
+        export_status = False if status == "failed" else True
+        total_failed = 1 if status == "failed" else 0
+        if status == "failed":
+            feed_data = 'ASC Registration for this %s is failing' % phone_number
+            mail.send_registration_failure(feed_data=feed_data,
+                               feed_type="ASC Registration Feed", brand=brand)
+        feed_log(feed_type="ASC Registration Feed", total_data_count=1,
+         failed_data_count=total_failed, success_data_count=1 - total_failed,
+                 action='Sent', status=export_status)

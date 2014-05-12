@@ -4,7 +4,6 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
-from random import randint
 import logging
 import os
 import time
@@ -12,11 +11,9 @@ import time
 from gladminds import audit, message_template as templates
 from gladminds import utils
 from gladminds.models import common
-from gladminds import exportfeed
 from gladminds.audit import feed_log
 from django.db.models import signals
 from gladminds.utils import get_task_queue
-
 
 logger = logging.getLogger("gladminds")
 
@@ -376,6 +373,26 @@ class CouponRedeemFeedToSAP(BaseFeed):
                 logger.error("error on data coupon data from db %s" % str(ex))
                 total_failed = total_failed + 1
         return items, item_batch, total_failed
+
+
+class ASCRegistrationToSAP(BaseFeed):
+
+    def export_data(self, asc_phone_number=None):
+        asc_form_obj = common.ASCSaveForm.objects\
+                        .get(phone_number=asc_phone_number, status=1)
+
+        item_batch = {
+            'TIMESTAMP': asc_form_obj.timestamp.strftime("%Y-%m-%dT%H:%M:%S")}
+
+        item = {
+            "ASC_NAME": asc_form_obj.name,
+            "ASC_MOBILE": asc_form_obj.phone_number,
+            "ASC_EMAIL": asc_form_obj.email,
+            "ASC_ADDRESS": asc_form_obj.address,
+            "ASC_ADDRESS_PINCODE": asc_form_obj.pincode,
+            "KUNNAR": "hardcoded",
+        }
+        return {"item": item, "item_batch": item_batch}
 
 
 def get_feed_status(total_feeds, failed_feeds):

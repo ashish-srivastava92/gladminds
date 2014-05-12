@@ -95,6 +95,7 @@ SAP_CRM_DETAIL = {
                   }
 
 COUPON_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl&v0"
+ASC_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/asc-feed/?wsdl&v0"
 
 
 AFTER_BUY_CONSTANTS = {

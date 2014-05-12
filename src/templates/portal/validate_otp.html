@@ -6,18 +6,16 @@
 
 {% block body %}
 <div class="user-message"><div class="message" style="display: block;"></div></div>
-<label><h2>Welcome Dealer</h2></label>
-<form role="form" action="/dealers/" method="post" >
+<label><h2>Enter OTP</h2></label>
+<form role="form" action="/users/otp/validate" method="post" class="otp-validation-form" >
     {% csrf_token %}
     <div class="row">
         <div class="col-md-3">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" class="form-control" id="username" name="username" placeholder="Username">
+            <div class="form-group" hidden>
+                <input type="text" class="form-control" id="phone" name="phone">
             </div>
             <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" class="form-control" id="password" name="password" placeholder="password">
+                <input type="text" class="form-control" id="otp" name="otp" placeholder="otp">
             </div>
         </div>
     </div>
