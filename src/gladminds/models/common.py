@@ -301,19 +301,21 @@ ASC_STATUS_CHOICES = ((1, 'In Progress'), (2, 'Failed'))
 
 class ASCSaveForm(models.Model):
     name = models.CharField(max_length=255, null=False)
-    password = models.CharField(max_length=255, null=False)
+    password = models.CharField(max_length=255, null=False, blank=False)
     phone_number = models.CharField(max_length=15, null=False, blank=False,
                                                          unique=True)
-    email = models.CharField(max_length=255, null=False, blank=False)
-    pincode = models.CharField(max_length=255, null=False, blank=False)
-    address = models.CharField(max_length=255, null=False, blank=False)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    pincode = models.CharField(max_length=255, null=True, blank=True)
+    address = models.CharField(max_length=255, null=True, blank=True)
     status = models.SmallIntegerField(choices=ASC_STATUS_CHOICES, default=1)
     timestamp = models.DateTimeField(default=datetime.now)
+    dealer_id = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "ASC Save Form"
-        
+
+
 class RegisteredASC(models.Model):
     user = models.OneToOneField(User, null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)

@@ -1,17 +1,17 @@
 from django.shortcuts import render_to_response, render
-from django.contrib.auth.views import login_required
 from django.template import RequestContext
 from django.http.response import HttpResponseRedirect, HttpResponse
 from gladminds.models import common
 import logging
 from gladminds.tasks import send_otp
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import login
-from django.contrib.auth.models import User
 from gladminds import utils, message_template
 from django.conf import settings
+from gladminds.tasks import export_asc_registeration_to_sap
 from gladminds.utils import get_task_queue
+import json
 from gladminds.mail import sent_otp_email
+
 logger = logging.getLogger('gladminds')
 
 
@@ -99,19 +99,35 @@ def register(request, user=None):
 
 
 PASSED_MESSAGE = "Registration is complete"
-def save_asc_registeration(data):
-    reject_keys = ['csrfmiddlewaretoken']
-    data = {key: val for key, val in data.iteritems() \
-                                    if key not in reject_keys}
+
+
+def save_asc_registeration(data, brand='bajaj'):
+    if common.RegisteredASC.objects.filter(phone_number=data['mobile_number'])\
+        or common.ASCSaveForm.objects.filter(phone_number=data['mobile_number']):
+        return {"message": "Already Registered Number"}
+
     try:
+        dealer_data = common.RegisteredDealer.objects.\
+                                            filter(dealer_id=data["dealer_id"])
+        dealer_data = dealer_data if dealer_data else None
+
         asc_obj = common.ASCSaveForm(name=data['name'],
-                 address=data['address'], password=data['password'],
-                 phone_number=data['phone_number'], email=data['email'],
-                 pincode=data['pincode'])
+                 address=data['address'], password=data['pwd'],
+                 phone_number=data['mobile_number'], email=data['email'],
+                 pincode=data['pincode'], status=1)
+
         asc_obj.save()
 
-    except KeyError:
-        return {"message": "Key error"}
+        if settings.ENABLE_AMAZON_SQS:
+            task_queue = utils.get_task_queue()
+            task_queue.add("export_asc_registeration_to_sap", \
+               {"phone_number": data['mobile_number'], "brand": brand})
+        else:
+            export_asc_registeration_to_sap.delay(phone_number=data[
+                                        'mobile_number'], brand=brand)
+
+    except Exception as ex:
+        logger.info(ex)
     return {"message": PASSED_MESSAGE}
 
 
@@ -120,6 +136,5 @@ def register_user(request, user=None):
         'asc': save_asc_registeration
     }
     status = save_user[user](request.POST)
-    return HttpResponseRedirect("/register/asc/")
-    return HttpResponse({"status": status}, content_type="application/json")
 
+    return HttpResponse(json.dumps(status), mimetype="application/json")

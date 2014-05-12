@@ -39,14 +39,18 @@
         });
         
         if (data["pwd"] != data["re-pwd"]){
-            return;             
+            alert("Password should be same");
+            return false;             
         }
         var jqXHR = $.ajax({
             type : 'POST',
             data : data,
             url : '/save/asc',
-            success : function(data) {
-                alert(data);
+            success : function(data, status, jqxhr) {
+                alert("Successfully registered");
+            },
+            error : function(data, status, jqxhr) {
+                alert("error on saving Please retry");
             }
         });
         return false;
