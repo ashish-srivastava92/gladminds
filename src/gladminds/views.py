@@ -10,6 +10,8 @@ from django.conf import settings
 from gladminds.tasks import export_asc_registeration_to_sap
 from gladminds.utils import get_task_queue
 import json
+from gladminds.mail import sent_otp_email
+
 logger = logging.getLogger('gladminds')
 
 
@@ -18,15 +20,21 @@ def generate_otp(request):
         try:
             phone_number = request.POST['mobile']
             email = request.POST.get('email', '')
+            logger.info('OTP request received. Mobile: {0}'.format(phone_number))
             token = utils.get_token(phone_number, email=email)
             message = message_template.get_template('SEND_OTP').format(token)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_otp", {"phone_number":phone_number, "message":message})
+                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
             else:
                 send_otp.delay(phone_number=phone_number, message=message)
+            logger.info('OTP sent to mobile {0}'.format(phone_number))
+            #Send email if email address exist
+            if email:
+                sent_otp_email(data=token, receiver=email, subject='Forgot Password')
             return HttpResponseRedirect('/users/otp/validate?phone='+phone_number)
         except:
+            logger.error('Invalid details, mobile {0}'.format(request.POST.get('mobile', '')))
             return HttpResponseRedirect('/users/otp/generate?details=invalid')
     elif request.method == 'GET':
         return render(request, 'portal/get_otp.html')
@@ -38,9 +46,12 @@ def validate_otp(request):
         try:
             otp = request.POST['otp']
             phone_number = request.POST['phone']
+            logger.info('OTP {0} recieved for validation. Mobile {1}'.format(otp, phone_number))
             utils.validate_otp(otp, phone_number)
+            logger.info('OTP validated for mobile number {0}'.format(phone_number))
             return render(request, 'portal/reset_pass.html', {'otp': otp})
         except:
+            logger.error('OTP validation failed for mobile number {0}'.format(phone_number))
             return HttpResponseRedirect('/users/otp/generate?token=invalid')
 
 def update_pass(request):
@@ -48,8 +59,10 @@ def update_pass(request):
         otp=request.POST['otp']
         password=request.POST['password']
         utils.update_pass(otp, password)
+        logger.info('Password has been updated.')
         return HttpResponseRedirect('/dealers/?update=true')
     except:
+        logger.error('Password update failed.')
         return HttpResponseRedirect('/dealers/?error=true')
 
 @login_required(login_url='/dealers/')
