@@ -1,4 +1,4 @@
-import os
+import os, logging
 from datetime import datetime
 from gladminds.models.common import STATUS_CHOICES
 from gladminds.models import common
@@ -17,7 +17,7 @@ from django.conf import settings
 import mimetypes
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
-
+logger = logging.getLogger('gladminds')
 
 def generate_unique_customer_id():
     bytes_str = os.urandom(24)
@@ -122,18 +122,20 @@ def recover_coupon_info(request):
 def get_coupon_info(request):
     data=request.POST
     customer_id = data['customerId']
-    product_data = common.ProductData.objects.filter(sap_customer_id=customer_id)
+    logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, request.user))
+    product_data = common.ProductData.objects.filter(sap_customer_id=customer_id)[0]
     coupon_data = common.CouponData.objects.filter(vin=product_data, status=4)[0]
-    message = message_template.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=coupon_data.unique_service_coupon, service_type=coupon_data.service_type)
+    message = 'UCN for customer {0} is {1}.'.format(product_data.sap_customer_id, coupon_data.unique_service_coupon)
     return {'status': True, 'message': message}
 
 def upload_file(request):
     file_obj = request.FILES['jobCard']
+    file_obj.name = str(datetime.now()) + file_obj.name
     destination = settings.JOBCARD_DIR
     uploadFileToS3(destination=destination, file_obj=file_obj)
     
 def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=settings.JOBCARD_BUCKET,
-                   destination=None, file_obj=None):
+                   destination='', file_obj=None):
     '''
     The function uploads the file-object to S3 bucket.
     '''
@@ -141,8 +143,7 @@ def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=settings
     s3_bucket = connection.get_bucket(bucket)
     s3_key = Key(s3_bucket)
     s3_key.content_type = mimetypes.guess_type(file_obj.name)[0]
-    s3_key.key = file_obj.name
+    s3_key.key = destination+file_obj.name
     s3_key.set_contents_from_string(file_obj.read())
-    
-    
+    logger.info('Jobcard: {0} has been uploaded'.format(s3_key.key))
     

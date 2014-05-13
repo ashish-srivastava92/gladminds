@@ -38,7 +38,7 @@ TNS = "http://api.gladmindsplatform.co/api/v1/bajaj/feed/"
 BROKER_URL= 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
 
-JOBCARD_DIR = '/jobcards/dev'
+JOBCARD_DIR = '/jobcards/dev/'
 
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
