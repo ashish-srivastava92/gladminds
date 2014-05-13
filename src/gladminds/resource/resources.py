@@ -320,12 +320,12 @@ class GladmindsResources(Resource):
             transaction.commit()
             return False
         if not self.is_valid_data(customer_id=sap_customer_id, coupon=unique_service_coupon, sa_phone=phone_number):
-            return {'status': True, 'message': templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')}
+            return {'status': False, 'message': templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')}
         if not self.is_sa_initiator(unique_service_coupon, sa_object):
             message="SA is not the coupon initiator."
             logger.info(message)
             transaction.commit()
-            return {'status': True, 'message': message}
+            return {'status': False, 'message': message}
         try:
             vin = self.get_vin(sap_customer_id)
             coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
