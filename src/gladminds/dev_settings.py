@@ -8,15 +8,14 @@ STATIC_DIR = os.path.join(BASE_DIR, "src/static")
 TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
 #         'NAME': 'gladminds',
-#         'USER': 'gladminds',
-#         'PASSWORD': 'gladmindsRocks',
+#         'USER': 'root',
+#         'PASSWORD': 'fanoosrazi',
 #         'HOST': '127.0.0.1',
 #         'PORT': '3306',
 #     }
@@ -24,12 +23,13 @@ TEMPLATE_DEBUG = DEBUG
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gladminds',
-        'USER': 'gladminds',
-        'PASSWORD': 'gladmindsRocks',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'gladminds.db',                  # Or path to database file if using sqlite3.
+        # The following settings are not used with sqlite3:
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '',                      # Set to empty string for default.
     }
 }
 
