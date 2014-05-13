@@ -29,10 +29,18 @@
                 <form class="asc-form" role="form">{% csrf_token %}
                     <div class="row">
                         <div class="col-md-4 form-group">
+                            <label class="control-label">Dealer ID:</label>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <input type="text" class="form-control" name="dealer_id" required autofocus/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 form-group">
                             <label class="control-label">ASC Name*:</label>
                         </div>
                         <div class="col-md-4 form-group">
-                            <input type="text" class="form-control" name="name" required autofocus/>
+                            <input type="text" class="form-control" name="name" required/>
                         </div>
                     </div>
                     <div class="row">

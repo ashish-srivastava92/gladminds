@@ -36,3 +36,4 @@ class TestSQSTasks(base_integration.GladmindsResourceTestCase):
         result = client.post('/tasks/', data=json.dumps(data), \
                              content_type='application/json')
         self.assertEqual(result.status_code, 200, "Task Not Excecuted")
+

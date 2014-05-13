@@ -1,0 +1,11 @@
+Hello,<br/><br/>
+{% if feed_logs %}
+The {feed_type } sent and it is failed<br/>
+{feed_logs }<br/>
+
+{% else %}
+No feeds received on {{yesterday}}.
+{% endif %}
+<br/><br/>
+Thanks<br/>
+GCP Bajaj Data Feeds Team

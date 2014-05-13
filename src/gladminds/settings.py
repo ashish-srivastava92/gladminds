@@ -259,7 +259,7 @@ WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR+'/coupon_redeem.wsdl'
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
                   "sender":"feed-report@gladminds.co",
-                  "reciever": "gladminds@hashedin.com,naveen.shankar@gladminds.co",
+                  "receiver": "gladminds@hashedin.com,naveen.shankar@gladminds.co",
                   "subject":"Gladminds Feed Report",
                   "body": """""",
               }
@@ -290,7 +290,25 @@ AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 # S3_URL = 'http://%s.s3-website-us-east-1.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 
 
-
 DEFAULT_COUPON_STATUS = 1
 DELAY_IN_CUSTOMER_UCN_MESSAGE = 180
 ENABLE_AMAZON_SQS = False
+
+#################Registration Configuration#################################
+REGISTRATION_CONFIG = {
+                                "bajaj": {
+                                    "ASC Registration Feed": {
+                                        "retry_time": 180,
+                                        "num_of_retry": 2,
+                                        "delay": 180,
+                                        "fail_mail_detail": {
+                                            "sender": "feed-report@gladminds.co",
+                                            "receiver": "sourabh.gupta@hashedin.com",
+                                            "subject": "Gladminds ASC Registration Fail",
+                                            "body": """"""
+                                        }
+                                    }
+                                }
+                             }
+###########################################################################
+###########################################################################

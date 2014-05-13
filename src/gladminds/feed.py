@@ -379,19 +379,18 @@ class ASCRegistrationToSAP(BaseFeed):
 
     def export_data(self, asc_phone_number=None):
         asc_form_obj = common.ASCSaveForm.objects\
-                        .filter(phone_number=asc_phone_number, status=1)
+                        .get(phone_number=asc_phone_number, status=1)
 
         item_batch = {
             'TIMESTAMP': asc_form_obj.timestamp.strftime("%Y-%m-%dT%H:%M:%S")}
 
         item = {
-            "CHASSIS": asc_form_obj.name,
-            "GCP_KMS": asc_form_obj.actual_kms,
-            "GCP_KUNNR": asc_form_obj.vin.dealer_id.dealer_id,
-            "GCP_UCN_NO": asc_form_obj.unique_service_coupon,
-            "PRODUCT_TYPE": asc_form_obj.vin.product_type.product_type,
-            "SERVICE_TYPE": str(asc_form_obj.service_type),
-            "SER_AVL_DT": asc_form_obj.actual_service_date.date().strftime("%Y-%m-%d"),
+            "ASC_NAME": asc_form_obj.name,
+            "ASC_MOBILE": asc_form_obj.phone_number,
+            "ASC_EMAIL": asc_form_obj.email,
+            "ASC_ADDRESS": asc_form_obj.address,
+            "ASC_ADDRESS_PINCODE": asc_form_obj.pincode,
+            "KUNNAR": "hardcoded",
         }
         return {"item": item, "item_batch": item_batch}
 
