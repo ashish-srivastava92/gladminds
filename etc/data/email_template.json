@@ -19,7 +19,7 @@
             "sender": "alerts@gladminds.co",
             "reciever": "gladminds@hashedin.com",
             "subject": "UCN Request",
-            "body": "User {0} has requested UCN for customer {1}.\nReason: {2}.\n\n jobcard Uploaded",
+            "body": "User {0} has requested UCN for customer {1}.\nReason: {2}.\n\n jobcard Uploaded {3}",
             "description": "UCN request Alert"
         }
     }
