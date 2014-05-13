@@ -283,7 +283,8 @@ class OTPToken(models.Model):
 
 
 class EmailTemplate(models.Model):
-    template_key = models.CharField(max_length=255, unique=True, null=False)
+    template_key = models.CharField(max_length=255, unique=True, null=False,\
+                                     blank=False)
     sender = models.CharField(max_length=512, null=False)
     reciever = models.CharField(max_length=512, null=False)
     subject = models.CharField(max_length=512, null=False)
