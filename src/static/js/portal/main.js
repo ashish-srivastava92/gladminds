@@ -88,6 +88,7 @@
       var formData = new FormData($(this).get(0));
       var messageModal = $(".modal.message-modal"),
           messageBlock = $(".modal-body", messageModal),
+          waitingModal = $(".modal.waiting-dialog"),
           jqXHR = $.ajax({
           type: "POST",
           url: "/exceptions/recover",
@@ -97,13 +98,16 @@
           contentType: false,
           beforeSend: function(){
             $(this).find("input[type='text']").val('');
+            waitingModal.modal("show");
           },
           success: function(data){
             messageBlock.text(data.message);
+            waitingModal.modal("hide");
             messageModal.modal("show");
           },
           error: function() {
             messageBlock.text("Invalid Data");
+            waitingModal.modal("hide");
             messageModal.modal("show");
           }
         });

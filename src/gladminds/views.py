@@ -115,8 +115,6 @@ def exceptions(request, exception=None):
         
 
 PASSED_MESSAGE = "Registration is complete"
-
-
 def save_asc_registeration(data, brand='bajaj'):
     if common.RegisteredASC.objects.filter(phone_number=data['mobile_number'])\
         or common.ASCSaveForm.objects.filter(phone_number=data['mobile_number']):

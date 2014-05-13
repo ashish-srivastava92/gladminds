@@ -13,7 +13,7 @@ def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER
     msg = MIMEText(body, 'html', _charset='utf-8')
     msg['Subject'] = subject
     msg['To'] = receiver
-    msg['From'] = "GCP_Bajaj_FSC_Feeds<%s>" % sender
+    msg['From'] = sender
     mail = smtplib.SMTP(smtp_server)
     mail.sendmail(sender, receiver, msg.as_string())
     mail.quit()
@@ -30,7 +30,8 @@ def feed_report(feed_data=None):
         context = Context({"feed_logs": feed_data, "yesterday": yesterday})
         body = template.render(context)
         mail_detail = settings.MAIL_DETAIL
-        mail.send_email(sender=mail_detail['sender'],
+        sender = "GCP_Bajaj_FSC_Feeds<%s>" % mail_detail['sender']
+        mail.send_email(sender=sender,
             receiver=mail_detail['receiver'], subject=mail_detail['subject'],
             body=body, smtp_server=settings.MAIL_SERVER)
     except Exception as ex:
@@ -119,9 +120,27 @@ def sent_otp_email(data=None, receiver=None, subject=None):
         body = template.render(context)
         mail_detail = settings.OTP_MAIL
         
-        mail.send_email(sender = mail_detail['sender'], receiver = mail_detail['reciever'], 
+        mail.send_email(sender = mail_detail['sender'], receiver = receiver, 
                    subject = mail_detail['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception otp email]: {0}".format(ex))
     
+def send_ucn_request_alert(data=None):
+    from gladminds import mail
+    try:
+        date = datetime.now().date()
+        file_stream = open(settings.TEMPLATE_DIR+'/ucn_request_email.html')
+        feed_temp = file_stream.read()
+        template = Template(feed_temp)
+        context = Context({"content": data})
+        body = template.render(context)
+        mail_detail = settings.UCN_RECOVERY_MAIL
+        
+        mail.send_email(sender = mail_detail['sender'], receiver = mail_detail['reciever'], 
+                   subject = mail_detail['subject'], body = body, 
+                   smtp_server = settings.MAIL_SERVER)
+    except Exception as ex:
+        logger.info("[Exception ucn request email]: {0}".format(ex))
+    
+

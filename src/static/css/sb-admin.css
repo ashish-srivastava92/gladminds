@@ -89,6 +89,18 @@ table.tablesorter thead tr th:hover {
   height: 100%;
 }
 
+.modal.waiting-dialog {
+  width: 35px;
+  height: 35px;
+  margin: auto;
+  border: none;
+  background: transparent;
+  overflow: hidden;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
 /* Edit Below to Customize Widths > 768px */
 @media (min-width:768px) {
 

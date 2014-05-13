@@ -23,7 +23,7 @@ COUPON_VALID_DAYS = 30
 TOTP_SECRET_KEY = '93424'
 OTP_VALIDITY = 120
 
-JOBCARD_DIR = '/jobcards/prod'
+JOBCARD_DIR = '/jobcards/prod/'
 JOBCARD_BUCKET = 'gladminds'
 S3_ID = 'AKIAIL7IDCSTNCG2R6JA'
 S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
@@ -270,10 +270,17 @@ MAIL_DETAIL = {
               }
 
 OTP_MAIL = {
-                  "sender":"support@gladminds.co",
+                  "sender":"Gladminds support",
                   "subject":"Reset Password",
                   "body": """""",
+                  "receiver" : "gladminds@hashedin.com",
               }
+UCN_RECOVERY_MAIL = {
+                     "sender" : "Gladminds Alert",
+                     "subject" : "UCN Request",
+                     "body" : "",
+                     "receiver" : "gladminds@hashedin.com"
+                     }
 
 #AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
