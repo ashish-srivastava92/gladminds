@@ -38,9 +38,3 @@ class TestUtils(GladmindsUnitTestCase):
         customer = get_customer_info(request)
         self.assertEquals(customer.keys(), ['customer_phone', 'customer_id'])
     
-    
-    
-    
-    
-    
-    
