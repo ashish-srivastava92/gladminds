@@ -12,6 +12,11 @@
     </div>
     <div id="wrapper">
         <div class="row">
+          <div class="col-md-offset-8 col-md-2">
+            <a class="logout" href="/user/logout">Logout</a>
+          </div>
+        </div>
+        <div class="row">
             <div class="col-md-3 .col-md-offset-1">
                 {% include "portal/base_portal.html" %}
             </div>
@@ -43,7 +48,7 @@
                             <label class="control-label">PWD*:</label>
                         </div>
                         <div class="col-md-4 form-group">
-                            <input type="password" class="form-control" name="pwd" required/>
+                            <input type="password" class="form-control" name="password" required/>
                         </div>
                     </div>
                     <div class="row">
@@ -51,7 +56,7 @@
                             <label  class="control-label">Retype PWD*:</label>
                         </div>
                         <div class="col-md-4 form-group">
-                            <input type="password" class="form-control" name="re-pwd" required />
+                            <input type="password" class="form-control" name="re-password" required />
                         </div>
                     </div>
                     <div class="row">
@@ -59,7 +64,7 @@
                             <label class="control-label">ASC Mobile Number*:</label>
                         </div>
                         <div class="col-md-4 form-group">
-                            <input type="text" class="form-control" name="mobile_number" required/>
+                            <input type="text" class="form-control" name="phone-number" required/>
                         </div>
                     </div>
                     <div class="row">

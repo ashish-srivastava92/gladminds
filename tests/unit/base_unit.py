@@ -63,4 +63,18 @@ class GladmindsUnitTestCase(unittest.TestCase):
         feed_log = logs.DataFeedLog(**kwargs)
         feed_log.save()
         return feed_log
+    
+    def get_message_template(self, **kwargs):
+        msg_template = common.MessageTemplate(**kwargs)
+        msg_template.save()
+        return msg_template
+
+class RequestObject(object):
+    '''
+    This class creates a request type of object.
+    '''
+    def __init__(self, user=None, data=None, file=None):
+        self.user = user
+        self.POST = data
+        self.FILES = file
         

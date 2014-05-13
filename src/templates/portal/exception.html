@@ -1,0 +1,229 @@
+{% extends "base_template.html" %}
+
+{% block body %}
+<div class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <a class="brand" href="#"><img src="/static/img/bajaj_logo.jpg" height=50px width=209px></a>
+  </div>
+</div>
+<div class="well">
+    <div class="user-message">
+      <div class="message"></div>
+    </div>
+    <div id="wrapper">
+        <div class="row">
+          <div class="col-md-offset-8 col-md-2">
+            <a class="logout" href="/user/logout">Logout</a>
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 .col-md-offset-1">
+                {% include "portal/base_portal.html" %}
+            </div>
+            <div class="col-md-8">
+              {% if active_menu == 'customer' %}
+              <div class="row portal-form-heading">
+                  <div class="col-md-10">
+                      <h3 class="text-center">Search by Vin#</h3>
+                  </div>
+              </div>
+              <form class="vin-form" role="search">
+                <div class="row">
+                  <div class="col-md-2 form-group">
+                    <label class="control-label">VIN#:</label>
+                  </div>
+                  <div class="col-md-6 input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="srch-vin" id="srch-vin">
+                    <div class="input-group-btn">
+                      <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+              <div class="row portal-form-heading">
+                <div class="col-md-10">
+                  <h3 class="text-center">Customer Details</h3>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4 form-group">
+                    <label class="control-label">Customer Phone:</label>
+                </div>
+                <div class="col-md-4 form-group">
+                    <input type="text" class="form-control customer-phone"/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4 form-group">
+                    <label class="control-label">Customer Id:</label>
+                </div>
+                <div class="col-md-4 form-group">
+                    <input type="text" class="form-control customer-id"/>
+                </div>
+              </div>
+              {% endif %}
+              {% if active_menu == 'close' %}
+              <div class="row portal-form-heading">
+                <div class="col-md-10">
+                    <h3 class="text-center">Close Free Service</h3>
+                </div>
+              </div>
+              <form class="coupon-close-form" role="search">
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">Service Advisor*:</label>
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <select class="form-control" name="advisorMobile" id="advisorMobile" required>
+                      <option value="">Select mobile number</option>
+                      {% for phone in data %}
+                      <option value="{{phone}}">{{phone}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">Customer ID*:</label>
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <input type="text" class="form-control" name="customerId" id="customerId" required>
+                  </div>
+                  <input type="text" class="form-control hidden" name="action" value="close" id="action" hidden required>
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">UCN*:</label>
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <input type="text" class="form-control" name="ucn" id="ucn" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-8 form-group">
+                    <button type="submit" value="Submit" class="btn btn-primary pull-right">
+                      Submit
+                    </button>
+                  </div>
+                </div>
+              </form>
+              {% include "portal/modal.html" %}
+              {% endif %}
+              
+              {% if active_menu == 'check' %}
+              <div class="row portal-form-heading">
+                <div class="col-md-10">
+                    <h3 class="text-center">Check for Free Service</h3>
+                </div>
+              </div>
+              <form class="coupon-check-form" role="search">
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">Service Advisor*:</label>
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <select class="form-control" name="advisorMobile" id="advisorMobile" required>
+                      <option value="">Select mobile number</option>
+                      {% for phone in data %}
+                      <option value="{{phone}}">{{phone}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">Customer ID*:</label>
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <input type="text" class="form-control" name="customerId" id="customerId" required>
+                  </div>
+                  
+                  <input type="text" class="form-control hidden" name="action" value="validate" id="action" hidden required>
+                  
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">KMS*:</label>
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <input type="text" class="form-control" name="odoRead" id="odoRead" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">Service Type*:</label>
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <input type="text" class="form-control" name="serviceType" id="serviceType" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-8 form-group">
+                    <button type="submit" value="Submit" class="btn btn-primary pull-right">
+                      Submit
+                    </button>
+                  </div>
+                </div>
+              </form>
+              {% include "portal/modal.html" %}
+              {% endif %}
+              
+              {% if active_menu == 'recover' %}
+              <div class="row portal-form-heading">
+                  <div class="col-md-10">
+                      <h3 class="text-center">UCN Recovery</h3>
+                  </div>
+              </div>
+              <form class="ucn-recovery-form" role="search">
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">Customer ID*:</label>
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <input type="text" class="form-control" name="customerId" id="customerId" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">Reason(For Special Approval)*:</label>
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <textarea class="form-control" name="reason" id="reason" required></textarea>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">Upload Job Card*:</label>
+                    <label class="control-label"><small>allowed format (.jpg, .tiff, .pdf)</small></label>
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <input type="file" id="jobCard" name="jobCard" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-8 form-group">
+                    <button type="submit" value="Submit" class="btn btn-primary pull-right">
+                      Submit
+                    </button>
+                  </div>
+                </div>
+              </form>
+              {% include "portal/modal.html" %}
+              {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% include "portal/waiting_modal.html" %}
+{% endblock %}
+
+{% block dependency %}
+{% if active_menu == 'recover' %}
+  <script>
+  var jobCardFileData = null;
+  </script>
+{% endif %}
+<script src="/static/js/portal/main.js"></script>
+{% endblock dependency %}

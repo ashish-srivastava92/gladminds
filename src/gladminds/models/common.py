@@ -316,14 +316,24 @@ class ASCSaveForm(models.Model):
         app_label = "gladminds"
         verbose_name_plural = "ASC Save Form"
 
-
+        
+class SASaveForm(models.Model):
+    name = models.CharField(max_length=255, null=False)
+    phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)
+    status = models.CharField(max_length=10, blank=False, null=False)
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "SA Save Form"
+        
 class RegisteredASC(models.Model):
     user = models.OneToOneField(User, null=True, blank=True)
+    dealer_id = models.ForeignKey(RegisteredDealer, null=False)
     phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)
     asc_name = models.CharField(max_length=215)
     email_id = models.EmailField(max_length=215, null=True, blank=True)
     registration_date = models.DateTimeField(default=datetime.now())
     address = models.CharField(max_length=255, null=True, blank=True)
+    city = models.CharField(max_length=255, null=True, blank=True)
     country = models.CharField(max_length=255, null=True, blank=True)
     state = models.CharField(max_length=255, null=True, blank=True)
     img_url = models.FileField(upload_to="users", blank=True)
@@ -332,3 +342,14 @@ class RegisteredASC(models.Model):
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Registered ASC Form"
+
+class UCNRecovery(models.Model):
+    reason = models.TextField(null=False)
+    user = models.ForeignKey(User)
+    sap_customer_id = models.CharField(max_length=215, null=True, blank=True)
+    file_location = models.CharField(max_length=215, null=True, blank=True)
+    
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "UCN recovery logs"
+    
