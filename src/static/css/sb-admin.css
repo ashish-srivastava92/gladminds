@@ -49,6 +49,12 @@ body {
   font-size: 12px;
 }
 
+/* Modals */
+.modal .modal-content{
+  width: 70%;
+  margin: auto;
+}
+
 
 /* Nav Announcements */
 

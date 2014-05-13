@@ -1,15 +1,16 @@
 from django.shortcuts import render_to_response, render
 from django.template import RequestContext
-from django.http.response import HttpResponseRedirect, HttpResponse
+from django.http.response import HttpResponseRedirect, HttpResponse,\
+    HttpResponseBadRequest
 from gladminds.models import common
-import logging
+import logging, json
 from gladminds.tasks import send_otp
 from django.contrib.auth.decorators import login_required
 from gladminds import utils, message_template
 from django.conf import settings
+from gladminds.utils import get_task_queue, get_customer_info,\
+    get_sa_list, recover_coupon_info
 from gladminds.tasks import export_asc_registeration_to_sap
-from gladminds.utils import get_task_queue
-import json
 from gladminds.mail import sent_otp_email
 
 logger = logging.getLogger('gladminds')
@@ -65,38 +66,53 @@ def update_pass(request):
         logger.error('Password update failed.')
         return HttpResponseRedirect('/dealers/?error=true')
 
-@login_required(login_url='/dealers/')
-def action(request, params):
-    if request.method == 'GET':
-        try:
-            dealer = common.RegisteredDealer.objects.filter(
-                dealer_id=request.user)[0]
-            service_advisors = common.ServiceAdvisorDealerRelationship.objects\
-                                        .filter(dealer_id=dealer, status='Y')
-            sa_phone_list = []
-            for service_advisor in service_advisors:
-                sa_phone_list.append(service_advisor.service_advisor_id)
-            return render_to_response('dealer/advisor_actions.html',
-                  {'phones': sa_phone_list},
-                  context_instance=RequestContext(request))
-        except:
-            logger.info(
-                'No service advisor for dealer %s found active' % request.user)
-            raise
 
-    elif request.method == 'POST':
-        raise NotImplementedError()
-
-@login_required(login_url='/dealers/')
-def redirect(request):
-    return HttpResponseRedirect('/dealers/' + str(request.user))
-
+@login_required(login_url='/user/login/')
 def register(request, user=None):
-    template_mapping = {
-        "asc": "portal/asc_registration.html",
-    }
-    return render(request, template_mapping[user])
+    if request.method == 'GET':
+        template_mapping = {
+            'asc': {'template': 'portal/asc_registration.html', 'active_menu': 'register_asc'},
+            'sa': {'template': 'portal/sa_registration.html', 'active_menu': 'register_sa'},
+        }
+        return render(request, template_mapping[user]['template'], {'active_menu' : template_mapping[user]['active_menu']})
+    elif request.method == 'POST':
+        save_user = {
+            'asc': save_asc_registeration,
+            'sa': save_sa_registration
+        }
+        status = save_user[user](request.POST)
+        return HttpResponse({"status": status}, content_type="application/json")
+    else:
+        return HttpResponseBadRequest()
 
+@login_required(login_url='/user/login/')
+def exceptions(request, exception=None):
+    if request.method == 'GET':
+        template = 'portal/exception.html'
+        data=None
+        data_mapping = {
+            'close' : get_sa_list,
+            'check' : get_sa_list
+        }
+        try:
+            data = data_mapping[exception](request)
+        except:
+            #It is acceptable if there is no data_mapping defined for a function
+            pass
+        return render(request, template, {'active_menu' : exception, "data" : data})
+    elif request.method == 'POST':
+        function_mapping = {
+            'customer' : get_customer_info,
+            'recover' : recover_coupon_info
+        }
+        try:
+            data = function_mapping[exception](request)
+            return HttpResponse(content=json.dumps(data),  content_type='application/json')
+        except:
+            return HttpResponseBadRequest()
+    else:
+        return HttpResponseBadRequest()
+        
 
 PASSED_MESSAGE = "Registration is complete"
 
@@ -130,6 +146,16 @@ def save_asc_registeration(data, brand='bajaj'):
         logger.info(ex)
     return {"message": PASSED_MESSAGE}
 
+def save_sa_registration(data):
+    data= {key: val for key, val in data.iteritems()}
+    try:
+        asc_obj = common.SASaveForm(name=data['name'],
+                 phone_number=data['phone-number'], status=data['status'])
+        asc_obj.save()
+
+    except KeyError:
+        return HttpResponseBadRequest()
+    return {"message": PASSED_MESSAGE}
 
 def register_user(request, user=None):
     save_user = {

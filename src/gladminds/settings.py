@@ -23,6 +23,11 @@ COUPON_VALID_DAYS = 30
 TOTP_SECRET_KEY = '93424'
 OTP_VALIDITY = 120
 
+JOBCARD_DIR = '/jobcards/prod'
+JOBCARD_BUCKET = 'gladminds'
+S3_ID = 'AKIAIL7IDCSTNCG2R6JA'
+S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
+
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 
 TEMPLATE_CONTEXT_PROCESSORS = TCP + (
@@ -186,7 +191,7 @@ INSTALLED_APPS = (
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
 
-LOGIN_REDIRECT_URL = '/dealers/getUrl'
+LOGIN_REDIRECT_URL = '/register/asc'
 
 TASTYPIE_SWAGGER_API_MODULE = 'gladminds.urls.api_v1'
 
