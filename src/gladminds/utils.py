@@ -15,6 +15,8 @@ import boto
 from boto.s3.key import Key
 from django.conf import settings
 import mimetypes
+from gladminds.mail import send_ucn_request_alert
+from django.contrib.auth.models import User
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 logger = logging.getLogger('gladminds')
@@ -117,6 +119,7 @@ def get_sa_list(request):
 def recover_coupon_info(request):
     coupon_info = get_coupon_info(request)
     upload_file(request)
+    send_email_to_admin(request)
     return coupon_info
     
 def get_coupon_info(request):
@@ -130,10 +133,26 @@ def get_coupon_info(request):
 
 def upload_file(request):
     file_obj = request.FILES['jobCard']
-    file_obj.name = str(datetime.now()) + file_obj.name
+    customer_id = request.POST['customerId']
+    ext = file_obj.name.split('.')[-1]
+    file_obj.name = str(datetime.now().date())+customer_id+'.'+ext
     destination = settings.JOBCARD_DIR
     uploadFileToS3(destination=destination, file_obj=file_obj)
-    
+
+def send_email_to_admin(request):
+    data = request.POST
+    file_obj = request.FILES['jobCard']
+    customer_id = data['customerId']
+    reason = data['reason']
+    user = str(request.user)
+    ext = file_obj.name.split('.')[-1]
+    user_obj = User.objects.filter(username=user)[0]
+    filename = settings.JOBCARD_DIR+str(datetime.now().date())+customer_id+'.'+ext
+    data = get_email_template('UCN_REQUEST_ALERT').body.format(request.user, customer_id, reason, filename)
+    ucn_recovery_obj = common.UCNRecovery(reason=reason, user=user_obj, sap_customer_id=customer_id, file_location=filename)
+    ucn_recovery_obj.save()
+    send_ucn_request_alert(data=data)
+
 def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=settings.JOBCARD_BUCKET,
                    destination='', file_obj=None):
     '''
@@ -146,4 +165,8 @@ def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=settings
     s3_key.key = destination+file_obj.name
     s3_key.set_contents_from_string(file_obj.read())
     logger.info('Jobcard: {0} has been uploaded'.format(s3_key.key))
+    
+def get_email_template(key):
+    template_object = common.EmailTemplate.objects.get(template_key = key)
+    return template_object
     

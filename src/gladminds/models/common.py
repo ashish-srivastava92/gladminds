@@ -341,3 +341,14 @@ class RegisteredASC(models.Model):
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Registered ASC Form"
+
+class UCNRecovery(models.Model):
+    reason = models.TextField(null=False)
+    user = models.ForeignKey(User)
+    sap_customer_id = models.CharField(max_length=215, null=True, blank=True)
+    file_location = models.CharField(max_length=215, null=True, blank=True)
+    
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "UCN recovery logs"
+    
