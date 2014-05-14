@@ -13,10 +13,10 @@ DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
 
 ALLOWED_HOSTS = ['*']
 
+ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service': 'service', 'check': 'a', 'close': 'c', 'brand': 'brand'}
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
-
 
 COUPON_VALID_DAYS = 30
 

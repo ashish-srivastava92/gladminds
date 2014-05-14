@@ -60,12 +60,12 @@ class GladmindsResources(Resource):
                 logger.info('Validating the service coupon for customer {0}'.format(customer_id))
                 odo_read = request.POST.get('odoRead')
                 service_type = request.POST.get('serviceType')
-                message = 'A {0} {1} {2}'.format(customer_id, odo_read, service_type)
+                message = '{3} {0} {1} {2}'.format(customer_id, odo_read, service_type, settings.ALLOWED_KEYWORDS['check'].upper())
                 logger.info('Message to send: ' + message)
             else:
                 ucn = request.POST.get('ucn')
                 logger.info('Terminating the service coupon {0}'.format(ucn))
-                message = 'C {0} {1}'.format(customer_id, ucn)
+                message = '{2} {0} {1}'.format(customer_id, ucn, settings.ALLOWED_KEYWORDS['close'].upper())
                 logger.info('Message to send: ' + message)
         phone_number = mobile_format(phone_number)
         message = format_message(message)
@@ -320,12 +320,12 @@ class GladmindsResources(Resource):
             transaction.commit()
             return False
         if not self.is_valid_data(customer_id=sap_customer_id, coupon=unique_service_coupon, sa_phone=phone_number):
-            return {'status': True, 'message': templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')}
+            return {'status': False, 'message': templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')}
         if not self.is_sa_initiator(unique_service_coupon, sa_object):
             message="SA is not the coupon initiator."
             logger.info(message)
             transaction.commit()
-            return {'status': True, 'message': message}
+            return {'status': False, 'message': message}
         try:
             vin = self.get_vin(sap_customer_id)
             coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
