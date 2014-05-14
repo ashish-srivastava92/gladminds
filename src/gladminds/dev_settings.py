@@ -10,28 +10,28 @@ OUT_DIR = os.path.join(BASE_DIR, "out")
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'gladminds',
-#         'USER': 'root',
-#         'PASSWORD': 'gladminds',
-#         'HOST': '127.0.0.1',
-#         'PORT': '3306',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'gladminds.db',                  # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'gladminds',
+        'USER': 'gladminds',
+        'PASSWORD': 'gladmindsRocks',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+#         'NAME': 'gladminds.db',                  # Or path to database file if using sqlite3.
+#         # The following settings are not used with sqlite3:
+#         'USER': '',
+#         'PASSWORD': '',
+#         'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+#         'PORT': '',                      # Set to empty string for default.
+#     }
+# }
 
 TNS = "http://api.gladmindsplatform.co/api/v1/bajaj/feed/"
 
