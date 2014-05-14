@@ -12,6 +12,7 @@ from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info
 from gladminds.tasks import export_asc_registeration_to_sap
 from gladminds.mail import sent_otp_email
+from django.contrib.auth.models import User, Group
 
 logger = logging.getLogger('gladminds')
 
@@ -66,21 +67,32 @@ def update_pass(request):
         logger.error('Password update failed.')
         return HttpResponseRedirect('/dealers/?error=true')
 
+def redirect_user(request):
+    asc_group = Group.objects.filter(name='ascs')[0]
+    logged_in_user = User.objects.filter(username=str(request.user))[0]
+    if asc_group in logged_in_user.groups.all():
+        return HttpResponseRedirect('/register/sa')
+    return HttpResponseRedirect('/register/asc')
 
 @login_required(login_url='/user/login/')
-def register(request, user=None):
+def register(request, menu=None):
+    logged_in_user = User.objects.filter(username=str(request.user))[0]
+    groups = []
+    for group in logged_in_user.groups.all():
+        groups.append(str(group.name))
     if request.method == 'GET':
         template_mapping = {
             'asc': {'template': 'portal/asc_registration.html', 'active_menu': 'register_asc'},
             'sa': {'template': 'portal/sa_registration.html', 'active_menu': 'register_sa'},
         }
-        return render(request, template_mapping[user]['template'], {'active_menu' : template_mapping[user]['active_menu']})
+        return render(request, template_mapping[menu]['template'], {'active_menu' : template_mapping[menu]['active_menu']\
+                                                                    , 'groups': groups})
     elif request.method == 'POST':
         save_user = {
             'asc': save_asc_registeration,
             'sa': save_sa_registration
         }
-        status = save_user[user](request.POST)
+        status = save_user[menu](request, groups)
         return HttpResponse({"status": status}, content_type="application/json")
     else:
         return HttpResponseBadRequest()
@@ -114,8 +126,10 @@ def exceptions(request, exception=None):
         return HttpResponseBadRequest()
         
 
-PASSED_MESSAGE = "Registration is complete"
-def save_asc_registeration(data, brand='bajaj'):
+SUCCESS_MESSAGE = "Registration is complete"
+def save_asc_registeration(data, groups, brand='bajaj'):
+    if 'dealers' not in groups:
+        raise
     if common.RegisteredASC.objects.filter(phone_number=data['mobile_number'])\
         or common.ASCSaveForm.objects.filter(phone_number=data['mobile_number']):
         return {"message": "Already Registered Number"}
@@ -142,9 +156,11 @@ def save_asc_registeration(data, brand='bajaj'):
 
     except Exception as ex:
         logger.info(ex)
-    return {"message": PASSED_MESSAGE}
+    return {"message": SUCCESS_MESSAGE}
 
-def save_sa_registration(data):
+def save_sa_registration(data, groups):
+    if not ('dealers' in groups or 'ascs' in groups):
+        raise
     data= {key: val for key, val in data.iteritems()}
     try:
         asc_obj = common.SASaveForm(name=data['name'],
@@ -153,12 +169,4 @@ def save_sa_registration(data):
 
     except KeyError:
         return HttpResponseBadRequest()
-    return {"message": PASSED_MESSAGE}
-
-def register_user(request, user=None):
-    save_user = {
-        'asc': save_asc_registeration
-    }
-    status = save_user[user](request.POST)
-
-    return HttpResponse(json.dumps(status), mimetype="application/json")
+    return {"message": SUCCESS_MESSAGE}

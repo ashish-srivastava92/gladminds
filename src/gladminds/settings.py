@@ -191,7 +191,7 @@ INSTALLED_APPS = (
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
 
-LOGIN_REDIRECT_URL = '/register/asc'
+LOGIN_REDIRECT_URL = '/register/redirect'
 
 TASTYPIE_SWAGGER_API_MODULE = 'gladminds.urls.api_v1'
 

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 import logging
 import os
 import time
@@ -116,6 +116,8 @@ class BaseFeed(object):
             user = User(username=username, first_name=first_name, last_name=last_name, email=email)
             password = username + '@123'
             user.set_password(password)
+            dealer_group = Group.objects.filter(name='dealers')
+            user.groups.add(dealer_group[0])
             user.save()
             logger.info('Dealer {0} registered successfully'.format(username))
         else:
