@@ -25,8 +25,8 @@ logger = logging.getLogger("gladminds")
 
 pattern = r'(\d{4})-(\d{2})-(\d{2})(\d{2})(\d{2})(\d{2})'
 tns = "http://api.gladmindsplatform.co/api/v1/bajaj/feed/"
-success = "SUCCESS"
-failed = "FAILURE"
+SUCCESS = "SUCCESS"
+FAILED = "FAILURE"
 
 
 class AuthenticationModel(ComplexModel):
@@ -199,9 +199,9 @@ class BrandService(ServiceBase):
                     'product_name': brand.PRODUCT_NAME,
                 })
             save_to_db(feed_type='brand', data_source=brand_list)
-            return success
+            return SUCCESS
         except Exception as ex:
-            return failed
+            return FAILED
 
 
 class DealerService(ServiceBase):
@@ -221,13 +221,13 @@ class DealerService(ServiceBase):
                     'status': dealer.ACTIVE_FLAG
                 })
             response = save_to_db(feed_type='dealer', data_source=dealer_list)
-            return json.dumps(get_response(response))
+            return get_response(response)
         except Exception as ex:
             logging.error(
                 "DealerService: {0}  Error on Validating ".format(ex))
             logger.debug("DealerService: Object List is "
                          .format(ObjectList.DealerData))
-            return failed
+            return FAILED
 
 
 class ProductDispatchService(ServiceBase):
@@ -251,18 +251,18 @@ class ProductDispatchService(ServiceBase):
                 })
             response = save_to_db(
                 feed_type='dispatch', data_source=product_dispatch_list)
-            return json.dumps(get_response(response))
+            return get_response(response)
         except Exception as ex:
             logger.error(
                 "ProductDispatchService: {0}  Error on Validating ".format(ex))
             logger.debug("ProductDispatchService: Object List is "
                          .format(ObjectList.ProductDispatchData))
-            return failed
+            return FAILED
 
 
 def get_response(response):
     failed_feed = response[1]['Failed']
-    return failed if failed_feed > 0 else success
+    return FAILED if failed_feed > 0 else SUCCESS
 
 
 class ProductPurchaseService(ServiceBase):
@@ -286,13 +286,13 @@ class ProductPurchaseService(ServiceBase):
                 })
             response = save_to_db(
                 feed_type='purchase', data_source=product_purchase_list)
-            return json.dumps(get_response(response))
+            return get_response(response)
         except Exception as ex:
             logger.error(
                 "ProductPurchaseService: {0}  Error on Validating ".format(ex))
             logger.debug("ProductPurchaseService: Object List is "
                          .format(ObjectList.ProductPurchaseData))
-            return failed
+            return FAILED
 
 
 def save_to_db(feed_type=None, data_source=[]):
