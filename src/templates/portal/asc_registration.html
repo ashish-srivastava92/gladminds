@@ -30,12 +30,8 @@
                         <h3 class="text-center"> ASC Registration </h3>
                     </div>
                 </div>
-                {% if not asc_registration %}
-                  <form class="asc-form" role="form">{% csrf_token %}
-                {% else %}
-                  <form class="asc-self-form" role="form">{% csrf_token %}
-                 {% endif %}
                     {% if not asc_registration %}
+                    <form class="asc-form" role="form">{% csrf_token %}
                     <div class="row">
                         <div class="col-md-4 form-group">
                             <label class="control-label">Dealer ID:</label>
@@ -44,7 +40,9 @@
                             <input type="text" class="form-control" name="dealer_id" required autofocus/>
                         </div>
                     </div>
-                    {% endif %}
+                  {% else %}
+                  <form class="asc-self-form" role="form">{% csrf_token %}
+                 {% endif %}
                     <div class="row">
                         <div class="col-md-4 form-group">
                             <label class="control-label">ASC Name*:</label>
