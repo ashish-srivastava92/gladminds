@@ -304,7 +304,8 @@ def _on_method_call(ctx):
     if ctx.in_object is None:
         raise ArgumentError("Request doesn't contain data")
     auth_obj = AuthenticationService(
-        username=ctx.in_object.Credential.UserName, password=ctx.in_object.Credential.Password)
+                                username=ctx.in_object.Credential.UserName,
+                                password=ctx.in_object.Credential.Password)
     auth_obj.authenticate()
 
 BrandService.event_manager.add_listener('method_call', _on_method_call)
