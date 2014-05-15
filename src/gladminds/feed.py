@@ -113,12 +113,12 @@ class BaseFeed(object):
     def registerNewDealer(self, username=None, first_name='', last_name='', email=''):
         logger.info('New Dealer Registration with id - ' + username)
         if username:
-            user = User(username=username, first_name=first_name, last_name=last_name, email=email)
+            dealer = User(username=username, first_name=first_name, last_name=last_name, email=email)
             password = username + '@123'
-            user.set_password(password)
+            dealer.set_password(password)
+            dealer.save()
             dealer_group = Group.objects.get(name='dealers')
-            user.groups.add(dealer_group)
-            user.save()
+            dealer.groups.add(dealer_group)
             logger.info('Dealer {0} registered successfully'.format(username))
         else:
             logger.info('Dealer id is not provided.')

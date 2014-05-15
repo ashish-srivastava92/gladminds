@@ -26,6 +26,8 @@ urlpatterns = patterns('',
     url(r'^users/otp/generate$', 'gladminds.views.generate_otp', name='generate_otp'),
     url(r'^users/otp/validate', 'gladminds.views.validate_otp', name='validate_otp'),
     url(r'^users/otp/update_pass', 'gladminds.views.update_pass', name='update_pass'),
+    
+    url(r'^asc/self-register/$', 'gladminds.views.asc_registration'),
 )
 
 urlpatterns += patterns('gladminds',

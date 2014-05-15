@@ -90,10 +90,21 @@ def register(request, menu):
             'asc': save_asc_registeration,
             'sa': save_sa_registration
         }
-        status = save_user[menu](request, groups)
-        return HttpResponse({"status": status}, content_type="application/json")
+
+        response_object = save_user[menu](request.POST, groups)
+        return HttpResponse(response_object, content_type="application/json")
     else:
         return HttpResponseBadRequest()
+
+def asc_registration(request):
+    if request.method == 'GET':
+        return render(request, 'portal/asc_registration.html', {'asc_registration': True})
+    elif request.method == 'POST':
+        save_user = {
+            'asc': save_asc_registeration,
+        }
+        response_object = save_user['asc'](request.POST, ['self'])
+        return HttpResponse(response_object, content_type="application/json")       
 
 @login_required(login_url='/user/login/')
 def exceptions(request, exception=None):
@@ -127,38 +138,42 @@ def exceptions(request, exception=None):
         return HttpResponseBadRequest()
         
 
-SUCCESS_MESSAGE = "Registration is complete"
-def save_asc_registeration(data, groups, brand='bajaj'):
+SUCCESS_MESSAGE = 'Registration is complete'
+EXCEPTION_INVALID_DEALER = 'The dealer-id provided is not registered'
+ALREADY_REGISTERED = 'Already Registered Number'
+def save_asc_registeration(data, groups=[], brand='bajaj'):
     #TODO: Remove the brand parameter and pass it inside request.POST
-    if 'dealers' not in groups:
+    if not ('dealers' in groups or 'self' in groups):
         raise
-    if common.RegisteredASC.objects.filter(phone_number=data['mobile_number'])\
-        or common.ASCSaveForm.objects.filter(phone_number=data['mobile_number']):
-        return {"message": "Already Registered Number"}
+    if common.RegisteredASC.objects.filter(phone_number=data['phone-number'])\
+        or common.ASCSaveForm.objects.filter(phone_number=data['phone-number']):
+        return json.dumps({'message': ALREADY_REGISTERED})
 
     try:
-        dealer_data = common.RegisteredDealer.objects.\
-                                            filter(dealer_id=data["dealer_id"])
-        dealer_data = dealer_data if dealer_data else None
-
+        dealer_data = None
+        if "dealer_id" in data:
+            dealer_data = common.RegisteredDealer.objects.\
+                                            get(dealer_id=data["dealer_id"])
+            dealer_data = dealer_data.dealer_id if dealer_data else None
+        
         asc_obj = common.ASCSaveForm(name=data['name'],
-                 address=data['address'], password=data['pwd'],
-                 phone_number=data['mobile_number'], email=data['email'],
-                 pincode=data['pincode'], status=1)
-
+                 address=data['address'], password=data['password'],
+                 phone_number=data['phone-number'], email=data['email'],
+                 pincode=data['pincode'], status=1, dealer_id=dealer_data)
+        
         asc_obj.save()
-
         if settings.ENABLE_AMAZON_SQS:
             task_queue = utils.get_task_queue()
             task_queue.add("export_asc_registeration_to_sap", \
-               {"phone_number": data['mobile_number'], "brand": brand})
+               {"phone_number": data['phone-number'], "brand": brand})
         else:
             export_asc_registeration_to_sap.delay(phone_number=data[
-                                        'mobile_number'], brand=brand)
+                                        'phone-number'], brand=brand)
 
     except Exception as ex:
         logger.info(ex)
-    return {"message": SUCCESS_MESSAGE}
+        return json.dumps({"message": EXCEPTION_INVALID_DEALER})
+    return json.dumps({"message": SUCCESS_MESSAGE})
 
 def save_sa_registration(data, groups):
     if not ('dealers' in groups or 'ascs' in groups):
