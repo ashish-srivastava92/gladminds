@@ -18,7 +18,9 @@ USE gladmindsdb_copy;
 SOURCE gladmindsdb.sql;
 -------------------------create copy-------------------------------
 
+mysqldump -uroot -prootpassword > gmdbcopy5may.sql
 
+-------------------------create copy-------------------------------
 -------------------------other changes---------------------------
 
 ALTER TABLE gladminds_serviceadvisor ADD status CHAR(10) NOT NULL DEFAULT 'y';
