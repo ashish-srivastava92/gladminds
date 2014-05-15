@@ -102,22 +102,53 @@
     });
     
     $(".vin-form").on("submit", function() {
-      var vin = $("#srch-vin").val(),
-          jqXHR = $.ajax({
+      var vin = $("#srch-vin").val();
+      $(".customer-vin").val(vin);
+      var jqXHR = $.ajax({
             type: "POST",
             url: "/exceptions/customer",
             data: {"vin": vin},
             success: function(data){
               $(".customer-phone").val(data['customer_phone']);
-              $(".customer-id").val(data["customer_id"]);
+              $(".customer-name").val(data["customer_name"])
+              $(".name-readonly").attr('disabled', true);
+              $(".purchase-date").val(data["purchase_date"]).attr('disabled', true);
             },
             error: function() {
-              $(".customer-phone").val("Not Found");
-              $(".customer-id").val("Not Found")
+              $(".customer-phone").val("Not Found").attr('disabled', false);;
+              $(".customer-name").val("Not Found").attr('disabled', false);;
+              $(".purchase-date").val("Not Found");
             }
           });
       return false;
     });
+
+    $(".customer-form").on("submit", function(e) {
+        var data = $(".customer-form").serializeArray(),
+            vin = $("#srch-vin").val();
+            messageModal = $(".modal.message-modal"),
+            messageBlock = $(".modal-body", messageModal);
+        $(".customer-form").serializeArray().map(function(x) {
+            data[x.name] = x.value;
+        });
+        data['vin'] = vin;
+    	console.log('data', data);
+        var jqXHR = $.ajax({
+              type: "POST",
+              url: "/customer/register",
+              data: data,
+              success: function(data){
+                  messageBlock.text(data.message);
+                  messageModal.modal("show");
+            	  e.preventDefault();
+              },
+              error: function(data) {
+                  messageBlock.text('Invalid data');
+                  messageModal.modal("show");
+              }
+            });
+        return false;
+      });    
     
     $(".ucn-recovery-form").on("submit", function() {
       var formData = new FormData($(this).get(0));

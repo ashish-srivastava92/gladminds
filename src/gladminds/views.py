@@ -82,6 +82,7 @@ def register(request, menu):
         template_mapping = {
             'asc': {'template': 'portal/asc_registration.html', 'active_menu': 'register_asc'},
             'sa': {'template': 'portal/sa_registration.html', 'active_menu': 'register_sa'},
+            'customer': {'template': 'portal/customer_registration.html', 'active_menu': 'register_customer'},
         }
         return render(request, template_mapping[menu]['template'], {'active_menu' : template_mapping[menu]['active_menu']\
                                                                     , 'groups': groups})
@@ -133,6 +134,22 @@ def exceptions(request, exception=None):
             data = function_mapping[exception](request)
             return HttpResponse(content=json.dumps(data),  content_type='application/json')
         except:
+            return HttpResponseBadRequest()
+    else:
+        return HttpResponseBadRequest()
+    
+@login_required(login_url='/user/login/')
+def register_customer(request):
+    if 'customer-name' not in request.POST:
+        data = request.POST
+        try:
+            product_obj = common.ProductData.objects.get(vin=data['customer-vin'])
+            product_obj.customer_phone_number.phone_number = data['customer-phone']
+            product_obj.customer_phone_number.save()
+            return HttpResponse(json.dumps({'message': 'Updated customer details'}),  content_type='application/json')
+        #TODO : will have to add more scenarios then we could give proper error messages for exception
+        except Exception as ex:
+            logger.info(ex)
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
