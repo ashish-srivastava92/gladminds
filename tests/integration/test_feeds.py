@@ -151,7 +151,7 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         xml_parser = ET.fromstring(response_content)
 
         status = xml_parser.findall('*//{http://api.gladmindsplatform.co/api/v1/bajaj/feed/}postDealerResult')[0].text
-        self.assertEqual(status, '"FAILURE"')
+        self.assertEqual(status, 'FAILURE')
 
     def test_update_customer_number(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
