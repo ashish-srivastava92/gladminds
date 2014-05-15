@@ -79,19 +79,20 @@ def register(request, menu):
     for group in request.user.groups.all():
         groups.append(str(group.name))
     if request.method == 'GET':
+        user_id = request.user
         template_mapping = {
             'asc': {'template': 'portal/asc_registration.html', 'active_menu': 'register_asc'},
             'sa': {'template': 'portal/sa_registration.html', 'active_menu': 'register_sa'},
         }
         return render(request, template_mapping[menu]['template'], {'active_menu' : template_mapping[menu]['active_menu']\
-                                                                    , 'groups': groups})
+                                                                    , 'groups': groups, 'user_id' : user_id})
     elif request.method == 'POST':
         save_user = {
             'asc': save_asc_registeration,
             'sa': save_sa_registration
         }
 
-        response_object = save_user[menu](request.POST, groups)
+        response_object = save_user[menu](request, groups)
         return HttpResponse(response_object, content_type="application/json")
     else:
         return HttpResponseBadRequest()
@@ -103,7 +104,7 @@ def asc_registration(request):
         save_user = {
             'asc': save_asc_registeration,
         }
-        response_object = save_user['asc'](request.POST, ['self'])
+        response_object = save_user['asc'](request, ['self'])
         return HttpResponse(response_object, content_type="application/json")       
 
 @login_required(login_url='/user/login/')
@@ -141,8 +142,9 @@ def exceptions(request, exception=None):
 SUCCESS_MESSAGE = 'Registration is complete'
 EXCEPTION_INVALID_DEALER = 'The dealer-id provided is not registered'
 ALREADY_REGISTERED = 'Already Registered Number'
-def save_asc_registeration(data, groups=[], brand='bajaj'):
+def save_asc_registeration(request, groups=[], brand='bajaj'):
     #TODO: Remove the brand parameter and pass it inside request.POST
+    data = request.POST
     if not ('dealers' in groups or 'self' in groups):
         raise
     if common.RegisteredASC.objects.filter(phone_number=data['phone-number'])\
@@ -175,7 +177,8 @@ def save_asc_registeration(data, groups=[], brand='bajaj'):
         return json.dumps({"message": EXCEPTION_INVALID_DEALER})
     return json.dumps({"message": SUCCESS_MESSAGE})
 
-def save_sa_registration(data, groups):
+def save_sa_registration(request, groups):
+    data = request.POST
     if not ('dealers' in groups or 'ascs' in groups):
         raise
     data= {key: val for key, val in data.iteritems()}
