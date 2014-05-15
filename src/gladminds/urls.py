@@ -16,8 +16,10 @@ api_v1.register(r.ProductResources())
 api_v1.register(r.UserResources())
 
 urlpatterns = patterns('',
-    url(r'^user/login/$', 'django.contrib.auth.views.login', {'template_name': 'dealer/login.html'}),
-    url(r'^user/logout$', 'django.contrib.auth.views.logout', {'next_page': '/user/login/'}),
+    url(r'^dealer/login/$', 'django.contrib.auth.views.login', {'template_name': 'dealer/login.html'}),
+    url(r'^asc/login/$', 'django.contrib.auth.views.login', {'template_name': 'asc/login.html'}),
+    url(r'^dealer/logout$', 'django.contrib.auth.views.logout', {'next_page': '/dealer/login/'}),
+    url(r'^asc/logout$', 'django.contrib.auth.views.logout', {'next_page': '/asc/login/'}),
     url(r'api/doc/', include('tastypie_swagger.urls', namespace='tastypie_swagger')),
     url(r'^register/redirect$', 'gladminds.views.redirect_user'),
 
