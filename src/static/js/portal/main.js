@@ -45,7 +45,7 @@
                 data : data,
                 url : '/register/asc',
                 success : function(data) {
-                    messageBlock.text(data.status.message);
+                    messageBlock.text(data.message);
                     messageModal.modal("show");
                     e.preventDefault();
                 },
@@ -73,7 +73,7 @@
             data : data,
             url : '/asc/self-register/',
             success : function(data) {
-                messageBlock.text(data.status.message);
+                messageBlock.text(data.message);
                 messageModal.modal("show");
             },
             error : function() {
