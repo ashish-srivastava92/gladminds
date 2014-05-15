@@ -78,6 +78,8 @@ def register(request, menu):
     groups = []
     for group in request.user.groups.all():
         groups.append(str(group.name))
+    if not ('ascs' in groups or 'dealers' in groups):
+        return HttpResponseBadRequest()
     if request.method == 'GET':
         user_id = request.user
         template_mapping = {
@@ -112,6 +114,9 @@ def exceptions(request, exception=None):
     groups = []
     for group in request.user.groups.all():
         groups.append(str(group.name))
+    
+    if not ('ascs' in groups or 'dealers' in groups):
+        return HttpResponseBadRequest()
     if request.method == 'GET':
         template = 'portal/exception.html'
         data=None
