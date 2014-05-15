@@ -17,6 +17,8 @@ from django.conf import settings
 import mimetypes
 from gladminds.mail import send_ucn_request_alert
 from django.contrib.auth.models import User
+from django.http.response import HttpResponse
+import json
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 logger = logging.getLogger('gladminds')
@@ -169,4 +171,7 @@ def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=settings
 def get_email_template(key):
     template_object = common.EmailTemplate.objects.get(template_key = key)
     return template_object
+
+def format_return_message(data):
+    return HttpResponse(json.dumps({"status": data}), content_type="application/json")
     

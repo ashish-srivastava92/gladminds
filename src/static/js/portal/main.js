@@ -38,13 +38,48 @@
         if (data["password"] != data["re-password"]){
             return;          
         }
+        var messageModal = $(".modal.message-modal"),
+            messageBlock = $(".modal-body", messageModal),
+            jqXHR = $.ajax({
+                type : 'POST',
+                data : data,
+                url : '/register/asc',
+                success : function(data) {
+                    messageBlock.text(data.message);
+                    messageModal.modal("show");
+                    e.preventDefault();
+                },
+                error : function() {
+                    messageBlock.text("Invalid Data");
+                    messageModal.modal("show");
+              }
+            });
+        return false;
+    });
+    
+    $(".asc-self-form").on("submit", function(e) {
+        var data = $(".asc-self-form").serializeArray();
+        $(".asc-self-form").serializeArray().map(function(x) {
+            data[x.name] = x.value;
+        });
+        
+        if (data["password"] != data["re-password"]){
+            return;          
+        }
+        var messageModal = $(".modal.message-modal"),
+            messageBlock = $(".modal-body", messageModal);
         var jqXHR = $.ajax({
             type : 'POST',
             data : data,
-            url : '/register/asc',
+            url : '/asc/self-register/',
             success : function(data) {
-                alert(data);
-            }
+                messageBlock.text(data.message);
+                messageModal.modal("show");
+            },
+            error : function() {
+                messageBlock.text("Invalid Data");
+                messageModal.modal("show");
+          }
         });
         return false;
     });

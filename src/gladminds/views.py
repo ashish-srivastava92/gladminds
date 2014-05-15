@@ -3,7 +3,6 @@ from django.template import RequestContext
 from django.http.response import HttpResponseRedirect, HttpResponse,\
     HttpResponseBadRequest
 from gladminds.models import common
-import logging, json
 from gladminds.tasks import send_otp
 from django.contrib.auth.decorators import login_required
 from gladminds import utils, message_template
@@ -12,6 +11,8 @@ from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info
 from gladminds.tasks import export_asc_registeration_to_sap
 from gladminds.mail import sent_otp_email
+from django.contrib.auth.models import Group
+import logging, json
 
 logger = logging.getLogger('gladminds')
 
@@ -66,27 +67,56 @@ def update_pass(request):
         logger.error('Password update failed.')
         return HttpResponseRedirect('/dealers/?error=true')
 
+def redirect_user(request):
+    asc_group = Group.objects.get(name='ascs')
+    if asc_group in request.user.groups.all():
+        return HttpResponseRedirect('/register/sa')
+    return HttpResponseRedirect('/register/asc')
 
 @login_required(login_url='/user/login/')
-def register(request, user=None):
+def register(request, menu):
+    groups = []
+    for group in request.user.groups.all():
+        groups.append(str(group.name))
+    if not ('ascs' in groups or 'dealers' in groups):
+        return HttpResponseBadRequest()
     if request.method == 'GET':
+        user_id = request.user
         template_mapping = {
             'asc': {'template': 'portal/asc_registration.html', 'active_menu': 'register_asc'},
             'sa': {'template': 'portal/sa_registration.html', 'active_menu': 'register_sa'},
         }
-        return render(request, template_mapping[user]['template'], {'active_menu' : template_mapping[user]['active_menu']})
+        return render(request, template_mapping[menu]['template'], {'active_menu' : template_mapping[menu]['active_menu']\
+                                                                    , 'groups': groups, 'user_id' : user_id})
     elif request.method == 'POST':
         save_user = {
             'asc': save_asc_registeration,
             'sa': save_sa_registration
         }
-        status = save_user[user](request.POST)
-        return HttpResponse({"status": status}, content_type="application/json")
+
+        response_object = save_user[menu](request, groups)
+        return HttpResponse(response_object, content_type="application/json")
     else:
         return HttpResponseBadRequest()
 
+def asc_registration(request):
+    if request.method == 'GET':
+        return render(request, 'portal/asc_registration.html', {'asc_registration': True})
+    elif request.method == 'POST':
+        save_user = {
+            'asc': save_asc_registeration,
+        }
+        response_object = save_user['asc'](request, ['self'])
+        return HttpResponse(response_object, content_type="application/json")       
+
 @login_required(login_url='/user/login/')
 def exceptions(request, exception=None):
+    groups = []
+    for group in request.user.groups.all():
+        groups.append(str(group.name))
+    
+    if not ('ascs' in groups or 'dealers' in groups):
+        return HttpResponseBadRequest()
     if request.method == 'GET':
         template = 'portal/exception.html'
         data=None
@@ -99,7 +129,7 @@ def exceptions(request, exception=None):
         except:
             #It is acceptable if there is no data_mapping defined for a function
             pass
-        return render(request, template, {'active_menu' : exception, "data" : data})
+        return render(request, template, {'active_menu' : exception, "data" : data, 'groups': groups})
     elif request.method == 'POST':
         function_mapping = {
             'customer' : get_customer_info,
@@ -114,37 +144,48 @@ def exceptions(request, exception=None):
         return HttpResponseBadRequest()
         
 
-PASSED_MESSAGE = "Registration is complete"
-def save_asc_registeration(data, brand='bajaj'):
-    if common.RegisteredASC.objects.filter(phone_number=data['mobile_number'])\
-        or common.ASCSaveForm.objects.filter(phone_number=data['mobile_number']):
-        return {"message": "Already Registered Number"}
+SUCCESS_MESSAGE = 'Registration is complete'
+EXCEPTION_INVALID_DEALER = 'The dealer-id provided is not registered'
+ALREADY_REGISTERED = 'Already Registered Number'
+def save_asc_registeration(request, groups=[], brand='bajaj'):
+    #TODO: Remove the brand parameter and pass it inside request.POST
+    data = request.POST
+    if not ('dealers' in groups or 'self' in groups):
+        raise
+    if common.RegisteredASC.objects.filter(phone_number=data['phone-number'])\
+        or common.ASCSaveForm.objects.filter(phone_number=data['phone-number']):
+        return json.dumps({'message': ALREADY_REGISTERED})
 
     try:
-        dealer_data = common.RegisteredDealer.objects.\
-                                            filter(dealer_id=data["dealer_id"])
-        dealer_data = dealer_data if dealer_data else None
-
+        dealer_data = None
+        if "dealer_id" in data:
+            dealer_data = common.RegisteredDealer.objects.\
+                                            get(dealer_id=data["dealer_id"])
+            dealer_data = dealer_data.dealer_id if dealer_data else None
+        
         asc_obj = common.ASCSaveForm(name=data['name'],
-                 address=data['address'], password=data['pwd'],
-                 phone_number=data['mobile_number'], email=data['email'],
-                 pincode=data['pincode'], status=1)
-
+                 address=data['address'], password=data['password'],
+                 phone_number=data['phone-number'], email=data['email'],
+                 pincode=data['pincode'], status=1, dealer_id=dealer_data)
+        
         asc_obj.save()
-
         if settings.ENABLE_AMAZON_SQS:
             task_queue = utils.get_task_queue()
             task_queue.add("export_asc_registeration_to_sap", \
-               {"phone_number": data['mobile_number'], "brand": brand})
+               {"phone_number": data['phone-number'], "brand": brand})
         else:
             export_asc_registeration_to_sap.delay(phone_number=data[
-                                        'mobile_number'], brand=brand)
+                                        'phone-number'], brand=brand)
 
     except Exception as ex:
         logger.info(ex)
-    return {"message": PASSED_MESSAGE}
+        return json.dumps({"message": EXCEPTION_INVALID_DEALER})
+    return json.dumps({"message": SUCCESS_MESSAGE})
 
-def save_sa_registration(data):
+def save_sa_registration(request, groups):
+    data = request.POST
+    if not ('dealers' in groups or 'ascs' in groups):
+        raise
     data= {key: val for key, val in data.iteritems()}
     try:
         asc_obj = common.SASaveForm(name=data['name'],
@@ -153,12 +194,4 @@ def save_sa_registration(data):
 
     except KeyError:
         return HttpResponseBadRequest()
-    return {"message": PASSED_MESSAGE}
-
-def register_user(request, user=None):
-    save_user = {
-        'asc': save_asc_registeration
-    }
-    status = save_user[user](request.POST)
-
-    return HttpResponse(json.dumps(status), mimetype="application/json")
+    return {"message": SUCCESS_MESSAGE}

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 import logging
 import os
 import time
@@ -113,10 +113,12 @@ class BaseFeed(object):
     def registerNewDealer(self, username=None, first_name='', last_name='', email=''):
         logger.info('New Dealer Registration with id - ' + username)
         if username:
-            user = User(username=username, first_name=first_name, last_name=last_name, email=email)
+            dealer = User(username=username, first_name=first_name, last_name=last_name, email=email)
             password = username + '@123'
-            user.set_password(password)
-            user.save()
+            dealer.set_password(password)
+            dealer.save()
+            dealer_group = Group.objects.get(name='dealers')
+            dealer.groups.add(dealer_group)
             logger.info('Dealer {0} registered successfully'.format(username))
         else:
             logger.info('Dealer id is not provided.')

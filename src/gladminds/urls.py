@@ -16,15 +16,20 @@ api_v1.register(r.ProductResources())
 api_v1.register(r.UserResources())
 
 urlpatterns = patterns('',
-    url(r'^user/login/$', 'django.contrib.auth.views.login', {'template_name': 'dealer/login.html'}),
-    url(r'^user/logout$', 'django.contrib.auth.views.logout', {'next_page': '/user/login/'}),
+    url(r'^dealer/login/$', 'django.contrib.auth.views.login', {'template_name': 'dealer/login.html'}),
+    url(r'^asc/login/$', 'django.contrib.auth.views.login', {'template_name': 'asc/login.html'}),
+    url(r'^dealer/logout$', 'django.contrib.auth.views.logout', {'next_page': '/dealer/login/'}),
+    url(r'^asc/logout$', 'django.contrib.auth.views.logout', {'next_page': '/asc/login/'}),
     url(r'api/doc/', include('tastypie_swagger.urls', namespace='tastypie_swagger')),
+    url(r'^register/redirect$', 'gladminds.views.redirect_user'),
 
-    url(r'^register/(?P<user>[a-zA-Z0-9]+)$', 'gladminds.views.register'),
+    url(r'^register/(?P<menu>[a-zA-Z0-9]+)$', 'gladminds.views.register'),
     url(r'^exceptions/(?P<exception>[a-zA-Z0-9]+)$', 'gladminds.views.exceptions'),
     url(r'^users/otp/generate$', 'gladminds.views.generate_otp', name='generate_otp'),
     url(r'^users/otp/validate', 'gladminds.views.validate_otp', name='validate_otp'),
     url(r'^users/otp/update_pass', 'gladminds.views.update_pass', name='update_pass'),
+    
+    url(r'^asc/self-register/$', 'gladminds.views.asc_registration'),
 )
 
 urlpatterns += patterns('gladminds',

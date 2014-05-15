@@ -327,7 +327,7 @@ class SASaveForm(models.Model):
         
 class RegisteredASC(models.Model):
     user = models.OneToOneField(User, null=True, blank=True)
-    dealer_id = models.ForeignKey(RegisteredDealer, null=False)
+    dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)
     asc_name = models.CharField(max_length=215)
     email_id = models.EmailField(max_length=215, null=True, blank=True)
