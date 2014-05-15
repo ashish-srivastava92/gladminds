@@ -232,7 +232,7 @@ class CouponData(models.Model):
 
     class Meta:
         app_label = "gladminds"
-        ordering = ['service_type', ]
+        ordering = []
         verbose_name_plural = "Coupon Information"
 
     def __unicode__(self):

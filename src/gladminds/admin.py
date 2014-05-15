@@ -252,11 +252,12 @@ class CouponResource(resources.ModelResource):
         model = CouponData
 
 
-class CouponAdmin(ExportMixin, ModelAdmin):
-    resource_class = CouponResource
+#class CouponAdmin(ExportMixin, ModelAdmin):
+class CouponAdmin(ModelAdmin):
+    #resource_class = CouponResource
     search_fields = (
         'unique_service_coupon', 'vin__vin', 'valid_days', 'valid_kms')
-    list_filter = ('status', ('actual_service_date', DateFieldListFilter))
+    #list_filter = ('status', ('actual_service_date', DateFieldListFilter))
     list_display = ('vin', 'unique_service_coupon', "actual_service_date",
                     'actual_kms', 'valid_days', 'valid_kms', 'status', "service_type")
     exclude = ('order',)
