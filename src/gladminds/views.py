@@ -92,7 +92,8 @@ def register(request, menu):
     elif request.method == 'POST':
         save_user = {
             'asc': save_asc_registeration,
-            'sa': save_sa_registration
+            'sa': save_sa_registration,
+            'customer': register_customer
         }
 
         response_object = save_user[menu](request, groups)
@@ -144,8 +145,7 @@ def exceptions(request, exception=None):
     else:
         return HttpResponseBadRequest()
     
-@login_required(login_url='/user/login/')
-def register_customer(request):
+def register_customer(request, group=None):
     if 'customer-name' not in request.POST:
         data = request.POST
         try:

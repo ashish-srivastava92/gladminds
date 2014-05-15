@@ -135,7 +135,7 @@
     	console.log('data', data);
         var jqXHR = $.ajax({
               type: "POST",
-              url: "/customer/register",
+              url: '/register/customer',
               data: data,
               success: function(data){
                   messageBlock.text(data.message);
