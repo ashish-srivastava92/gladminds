@@ -151,7 +151,7 @@ def create_new_qa_version(version):
     ENVIRONMENT_NAME = 'gladminds-worker-qa'
     update_environment(ENVIRONMENT_NAME, version)
     
-    ENVIRONMENT_NAME = 'gladminds-web-qa'
+    ENVIRONMENT_NAME = 'gladminds-webserver-qa'
     update_environment(ENVIRONMENT_NAME, version)
 
 def upload_to_s3(bucket_name, key, file_name):
