@@ -316,7 +316,7 @@ class ASCSaveForm(models.Model):
         app_label = "gladminds"
         verbose_name_plural = "ASC Save Form"
 
-        
+
 class SASaveForm(models.Model):
     name = models.CharField(max_length=255, null=False)
     phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)

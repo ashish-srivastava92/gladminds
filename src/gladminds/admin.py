@@ -19,7 +19,7 @@ from django.contrib.admin import DateFieldListFilter
 import tablib
 import datetime
 from models import logs
-from gladminds.models.common import EmailTemplate
+from gladminds.models.common import EmailTemplate, ASCSaveForm
 
 
 ############################BRAND AND PRODUCT ADMIN##########################
@@ -376,6 +376,28 @@ class ListDispatchedProducts(ModelAdmin):
             ucn_list.append(coupon.unique_service_coupon)
         return ' | '.join([str(ucn) for ucn in ucn_list])
 
+##############################################################
+#########################ASCSaveForm#########################
+
+
+class ASCSaveFormAdmin(ModelAdmin):
+    search_fields = (
+        'name', 'phone_number', 'email', 'pincode',
+        'address', 'status', 'timestamp', 'dealer_id')
+
+    list_display = (
+        'name', 'phone_number', 'email', 'status', 'timestamp')
+
+    def suit_row_attributes(self, obj):
+        class_map = {
+            '1': 'success',
+            '2': 'error'
+        }
+        css_class = class_map.get(str(obj.status))
+        if css_class:
+            return {'class': css_class}
+##############################################################
+
 
 admin.site.register(BrandData, BrandAdmin)
 admin.site.register(DispatchedProducts, ListDispatchedProducts)
@@ -390,4 +412,5 @@ admin.site.register(ProductData, ProductDataAdmin)
 admin.site.register(CouponData, CouponAdmin)
 admin.site.register(MessageTemplate, MessageTemplateAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
+admin.site.register(ASCSaveForm, ASCSaveFormAdmin)
 admin.site.register(UploadProductCSV)
