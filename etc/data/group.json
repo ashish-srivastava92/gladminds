@@ -1,0 +1,9 @@
+[
+    {
+        "model": "auth_group",
+        "pk": 1,
+        "fields": {
+            (4,'ascs'),(3,'customer'),(1,'dealers'),(2,'sas')
+        }
+    }
+]
