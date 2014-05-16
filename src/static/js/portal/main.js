@@ -115,9 +115,10 @@
               $(".purchase-date").val(data["purchase_date"]).attr('disabled', true);
             },
             error: function() {
-              $(".customer-phone").val("Not Found").attr('disabled', false);;
-              $(".customer-name").val("Not Found").attr('disabled', false);;
-              $(".purchase-date").val("Not Found");
+              var errorMessage = "Not Found"
+              $(".customer-phone").val(errorMessage).attr('disabled', false);;
+              $(".customer-name").val(errorMessage).attr('disabled', false);;
+              $(".purchase-date").val(errorMessage);
             }
           });
       return false;
