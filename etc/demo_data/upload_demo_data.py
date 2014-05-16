@@ -10,6 +10,7 @@ def main():
         data = open(file, 'r')
         response = h.request(POST_URL, method="POST", body=str(data.read()))
         data.close()
+    print 'Success installed the data.'
 
 if __name__ == '__main__':
     main()
