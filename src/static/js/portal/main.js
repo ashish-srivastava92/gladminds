@@ -116,9 +116,9 @@
             },
             error: function() {
               var errorMessage = "Not Found"
-              $(".customer-phone").val(errorMessage).attr('disabled', false);;
-              $(".customer-name").val(errorMessage).attr('disabled', false);;
-              $(".purchase-date").val(errorMessage);
+              $(".customer-phone").val(errorMessage).attr('disabled', false);
+              $(".customer-name").val(errorMessage).attr('disabled', false);
+              $(".purchase-date").val(errorMessage).attr('disabled', false);
             }
           });
       return false;
