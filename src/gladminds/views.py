@@ -95,9 +95,11 @@ def register(request, menu):
             'sa': save_sa_registration,
             'customer': register_customer
         }
-
-        response_object = save_user[menu](request, groups)
-        return HttpResponse(response_object, content_type="application/json")
+        try:
+            response_object = save_user[menu](request, groups)
+            return HttpResponse(response_object, content_type="application/json")
+        except:
+            return HttpResponseBadRequest() 
     else:
         return HttpResponseBadRequest()
 
@@ -152,13 +154,13 @@ def register_customer(request, group=None):
             product_obj = common.ProductData.objects.get(vin=data['customer-vin'])
             product_obj.customer_phone_number.phone_number = data['customer-phone']
             product_obj.customer_phone_number.save()
-            return HttpResponse(json.dumps({'message': 'Updated customer details'}),  content_type='application/json')
+            return json.dumps({'message': 'Updated customer details'})
         #TODO : will have to add more scenarios then we could give proper error messages for exception
         except Exception as ex:
             logger.info(ex)
-            return HttpResponseBadRequest()
+            raise
     else:
-        return HttpResponseBadRequest()
+        raise
         
 
 SUCCESS_MESSAGE = 'Registration is complete'
