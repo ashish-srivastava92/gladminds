@@ -73,7 +73,7 @@ def redirect_user(request):
         return HttpResponseRedirect('/register/sa')
     return HttpResponseRedirect('/register/asc')
 
-@login_required()
+@login_required(login_url='/dealer/login')
 def register(request, menu):
     groups = []
     for group in request.user.groups.all():
@@ -121,7 +121,7 @@ def asc_registration(request):
         asc_user.groups.add(asc_group)
         return HttpResponse(json.dumps({'message': 'Registration is complete'}), content_type='application/json')
 
-@login_required()
+@login_required(login_url='/dealer/login')
 def exceptions(request, exception=None):
     groups = []
     for group in request.user.groups.all():
