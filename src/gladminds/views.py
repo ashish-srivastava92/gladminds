@@ -85,17 +85,21 @@ def register(request, menu):
         template_mapping = {
             'asc': {'template': 'portal/asc_registration.html', 'active_menu': 'register_asc'},
             'sa': {'template': 'portal/sa_registration.html', 'active_menu': 'register_sa'},
+            'customer': {'template': 'portal/customer_registration.html', 'active_menu': 'register_customer'},
         }
         return render(request, template_mapping[menu]['template'], {'active_menu' : template_mapping[menu]['active_menu']\
                                                                     , 'groups': groups, 'user_id' : user_id})
     elif request.method == 'POST':
         save_user = {
             'asc': save_asc_registeration,
-            'sa': save_sa_registration
+            'sa': save_sa_registration,
+            'customer': register_customer
         }
-
-        response_object = save_user[menu](request, groups)
-        return HttpResponse(response_object, content_type="application/json")
+        try:
+            response_object = save_user[menu](request, groups)
+            return HttpResponse(response_object, content_type="application/json")
+        except:
+            return HttpResponseBadRequest() 
     else:
         return HttpResponseBadRequest()
 
@@ -150,6 +154,21 @@ def exceptions(request, exception=None):
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
+    
+def register_customer(request, group=None):
+    if 'customer-name' not in request.POST:
+        data = request.POST
+        try:
+            product_obj = common.ProductData.objects.get(vin=data['customer-vin'])
+            product_obj.customer_phone_number.phone_number = data['customer-phone']
+            product_obj.customer_phone_number.save()
+            return json.dumps({'message': 'Updated customer details'})
+        #TODO : will have to add more scenarios then we could give proper error messages for exception
+        except Exception as ex:
+            logger.info(ex)
+            raise
+    else:
+        raise
         
 
 SUCCESS_MESSAGE = 'Registration is complete'
