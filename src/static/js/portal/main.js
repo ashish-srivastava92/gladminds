@@ -8,98 +8,37 @@
     });
 
     $("form.coupon-check-form, form.coupon-close-form").on("submit", function(e) {
-        var messageModal = $(".modal.message-modal"),
-            messageBlock = $(".modal-body", messageModal),
-            jqXHR = $.ajax({
-            url : "/v1/messages",
-            data : $(this).serializeArray(),
-            type : "POST",
-            beforeSend : function() {
-              $(this).find("input[type='text']").val('');
-            },
-            success : function(data) {
-              messageBlock.text(data.message);
-              messageModal.modal("show");
-            },
-            error : function() {
-              messageBlock.text("Invalid Data");
-              messageModal.modal("show");
-            }
-        });
+    	var data = $(this).serializeArray();
+    	Utils.submitForm(e, data, '/v1/messages');
         return false;
     });
 
     $(".asc-form").on("submit", function(e) {
-        var data = $(".asc-form").serializeArray();
-        $(".asc-form").serializeArray().map(function(x) {
-            data[x.name] = x.value;
-        });
-        
-        if (data["password"] != data["re-password"]){
-            return;          
-        }
-        var messageModal = $(".modal.message-modal"),
-            messageBlock = $(".modal-body", messageModal),
-            jqXHR = $.ajax({
-                type : 'POST',
-                data : data,
-                url : '/register/asc',
-                success : function(data) {
-                    messageBlock.text(data.message);
-                    messageModal.modal("show");
-                    e.preventDefault();
-                },
-                error : function() {
-                    messageBlock.text("Invalid Data");
-                    messageModal.modal("show");
-              }
-            });
+        var data = Utils.getFormData(".asc-form")
+        Utils.submitForm(e, data, '/register/asc');
         return false;
     });
     
     $(".asc-self-form").on("submit", function(e) {
-        var data = $(".asc-self-form").serializeArray();
-        $(".asc-self-form").serializeArray().map(function(x) {
-            data[x.name] = x.value;
-        });
-        
-        if (data["password"] != data["re-password"]){
-            return;          
-        }
-        var messageModal = $(".modal.message-modal"),
-            messageBlock = $(".modal-body", messageModal);
-        var jqXHR = $.ajax({
-            type : 'POST',
-            data : data,
-            url : '/asc/self-register/',
-            success : function(data) {
-                messageBlock.text(data.message);
-                messageModal.modal("show");
-            },
-            error : function() {
-                messageBlock.text("Invalid Data");
-                messageModal.modal("show");
-          }
-        });
+        var data = Utils.getFormData(".asc-self-form");
+        Utils.submitForm(e, data, '/asc/self-register/');
         return false;
     });
     
     $(".sa-form").on("submit", function(event) {
-      var data = $(".sa-form").serializeArray();
-      $(".sa-form").serializeArray().map(function(x) {
-          data[x.name] = x.value;
-      });
-      
-      var jqXHR = $.ajax({
-          type : 'POST',
-          data : data,
-          url : '/register/sa',
-          success : function(data) {
-              alert(data);
-          }
-      });
-      return false;
+        var data = Utils.getFormData(".sa-form");
+        Utils.submitForm(event, data, '/register/sa');
+        return false;
     });
+    
+
+    $(".customer-form").on("submit", function(e) {
+    	var data = Utils.getFormData(".customer-form"),
+            vin = $("#srch-vin").val();
+    	data['vin'] = vin;
+    	Utils.submitForm(e, data, '/register/customer');
+        return false;
+      });
     
     $(".vin-form").on("submit", function() {
       var vin = $("#srch-vin").val();
@@ -123,33 +62,6 @@
           });
       return false;
     });
-
-    $(".customer-form").on("submit", function(e) {
-        var data = $(".customer-form").serializeArray(),
-            vin = $("#srch-vin").val();
-            messageModal = $(".modal.message-modal"),
-            messageBlock = $(".modal-body", messageModal);
-        $(".customer-form").serializeArray().map(function(x) {
-            data[x.name] = x.value;
-        });
-        data['vin'] = vin;
-    	console.log('data', data);
-        var jqXHR = $.ajax({
-              type: "POST",
-              url: '/register/customer',
-              data: data,
-              success: function(data){
-                  messageBlock.text(data.message);
-                  messageModal.modal("show");
-            	  e.preventDefault();
-              },
-              error: function(data) {
-                  messageBlock.text('Invalid data');
-                  messageModal.modal("show");
-              }
-            });
-        return false;
-      });    
     
     $(".ucn-recovery-form").on("submit", function() {
       var formData = new FormData($(this).get(0));

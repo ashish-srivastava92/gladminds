@@ -210,7 +210,7 @@ def save_sa_registration(request, groups):
         asc_obj = common.SASaveForm(name=data['name'],
                  phone_number=data['phone-number'], status=data['status'])
         asc_obj.save()
-
-    except KeyError:
-        return HttpResponseBadRequest()
-    return {"message": SUCCESS_MESSAGE}
+    except Exception as ex:
+        logger.info(ex)
+        return json.dumps({"message": ALREADY_REGISTERED})
+    return json.dumps({"message": SUCCESS_MESSAGE})
