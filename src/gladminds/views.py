@@ -119,6 +119,11 @@ def asc_registration(request):
         asc_user.save()
         asc_group = Group.objects.get(name='ascs')
         asc_user.groups.add(asc_group)
+        try:
+            asc = common.RegisteredASC(user=asc_user, phone_number=request.POST['phone-number'], asc_name=username)
+            asc.save()
+        except:
+            return HttpResponse(json.dumps({'message': 'Already Registered'}), content_type='application/json')
         return HttpResponse(json.dumps({'message': 'Registration is complete'}), content_type='application/json')
 
 @login_required(login_url='/dealer/login')
@@ -214,11 +219,9 @@ def save_sa_registration(request, groups):
     if not ('dealers' in groups or 'ascs' in groups):
         raise
     data= {key: val for key, val in data.iteritems()}
-    try:
-        asc_obj = common.SASaveForm(name=data['name'],
-                 phone_number=data['phone-number'], status=data['status'])
-        asc_obj.save()
-
-    except KeyError:
-        return HttpResponseBadRequest()
-    return {"message": SUCCESS_MESSAGE}
+    if common.SASaveForm.objects.filter(phone_number=data['phone-number']):
+        return json.dumps({'message': ALREADY_REGISTERED})
+    asc_obj = common.SASaveForm(name=data['name'],
+             phone_number=data['phone-number'], status=data['status'])
+    asc_obj.save()
+    return json.dumps({'message': SUCCESS_MESSAGE})
