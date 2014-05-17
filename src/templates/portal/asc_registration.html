@@ -112,8 +112,10 @@
     </div>
 </div>
 {% include "portal/modal.html" %}
+{% include "portal/waiting_modal.html" %}
 {% endblock %}
 
 {% block dependency %}
+<script src="/static/js/portal/utils.js"></script>
 <script src="/static/js/portal/main.js"></script>
 {% endblock dependency %}
