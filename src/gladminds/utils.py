@@ -84,7 +84,7 @@ def get_token(phone_number, email=''):
 def validate_otp(otp, phone):
     asc = common.RegisteredASC.objects.filter(phone_number=mobile_format(phone))[0].user
     token_obj = common.OTPToken.objects.filter(user=asc)[0]
-    if otp == token_obj.token and (timezone.now()-token_obj.request_date).seconds <= OTP_VALIDITY:
+    if int(otp) == int(token_obj.token) and (timezone.now()-token_obj.request_date).seconds <= OTP_VALIDITY:
         return True
     elif (timezone.now()-token_obj.request_date).seconds > OTP_VALIDITY:
         token_obj.delete()
