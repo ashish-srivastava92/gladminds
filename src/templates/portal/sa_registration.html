@@ -28,7 +28,7 @@
                 </div>
                 <form class="sa-form" role="form">{% csrf_token %}
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label class="control-label">Service Advisor Name*:</label>
                         </div>
                         <div class="col-md-4 form-group">
@@ -36,15 +36,15 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label class="control-label">Service Advisor Mobile#*:</label>
                         </div>
                         <div class="col-md-4 form-group">
-                            <input type="text" class="form-control" name="phone-number" required/>
+                            <input type="text" class="form-control" name="phone-number" required maxlength="10" placeholder="10 digits"/>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label  class="control-label">Activity Status*:</label>
                         </div>
                         <div class="col-md-4 form-group">
@@ -56,7 +56,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-8 form-group">
+                        <div class="col-md-7 form-group">
                             <button type="submit" value="Submit" class="btn btn-primary pull-right asc-submit">
                                 Submit
                             </button>
@@ -67,6 +67,7 @@
         </div>
     </div>
 </div>
+{% include "portal/modal.html" %}
 {% endblock %}
 
 {% block dependency %}

@@ -85,7 +85,9 @@
     });
     
     $(".sa-form").on("submit", function(event) {
-      var data = $(".sa-form").serializeArray();
+      var data = $(".sa-form").serializeArray(),
+          messageModal = $(".modal.message-modal"),
+          messageBlock = $(".modal-body", messageModal);
       $(".sa-form").serializeArray().map(function(x) {
           data[x.name] = x.value;
       });
@@ -95,7 +97,12 @@
           data : data,
           url : '/register/sa',
           success : function(data) {
-              alert(data);
+            messageBlock.text(data.message);
+            messageModal.modal("show");
+          },
+          error : function() {
+            messageBlock.text("Invalid Data");
+            messageModal.modal("show");
           }
       });
       return false;
