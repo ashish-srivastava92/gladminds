@@ -11,7 +11,7 @@ from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info
 from gladminds.tasks import export_asc_registeration_to_sap
 from gladminds.mail import sent_otp_email
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 import logging, json
 
 logger = logging.getLogger('gladminds')
@@ -73,7 +73,7 @@ def redirect_user(request):
         return HttpResponseRedirect('/register/sa')
     return HttpResponseRedirect('/register/asc')
 
-@login_required(login_url='/user/login/')
+@login_required(login_url='/dealer/login')
 def register(request, menu):
     groups = []
     for group in request.user.groups.all():
@@ -107,13 +107,21 @@ def asc_registration(request):
     if request.method == 'GET':
         return render(request, 'portal/asc_registration.html', {'asc_registration': True})
     elif request.method == 'POST':
-        save_user = {
-            'asc': save_asc_registeration,
-        }
-        response_object = save_user['asc'](request, ['self'])
-        return HttpResponse(response_object, content_type="application/json")       
+#        save_user = {
+#            'asc': save_asc_registeration,
+#        }
+#        response_object = save_user['asc'](request, ['self'])
+#        return HttpResponse(response_object, content_type="application/json")
+        username = request.POST['name']
+        password = request.POST['password']
+        asc_user = User(username=username)
+        asc_user.set_password(password)
+        asc_user.save()
+        asc_group = Group.objects.get(name='ascs')
+        asc_user.groups.add(asc_group)
+        return HttpResponse(json.dumps({'message': 'Registration is complete'}), content_type='application/json')
 
-@login_required(login_url='/user/login/')
+@login_required(login_url='/dealer/login')
 def exceptions(request, exception=None):
     groups = []
     for group in request.user.groups.all():

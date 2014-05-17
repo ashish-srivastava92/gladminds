@@ -18,7 +18,9 @@ USE gladmindsdb_copy;
 SOURCE gladmindsdb.sql;
 -------------------------create copy-------------------------------
 
+mysqldump -uroot -prootpassword > gmdbcopy5may.sql
 
+-------------------------create copy-------------------------------
 -------------------------other changes---------------------------
 
 ALTER TABLE gladminds_serviceadvisor ADD status CHAR(10) NOT NULL DEFAULT 'y';
@@ -98,3 +100,10 @@ show variables like '%slow%';
 +GRANT ALL PRIVILEGES ON gladminds.* TO 'gladminds'@'localhost';
 ----------------------------------------------------------
 
+
+-------------------- DB size in MB --------------------------------
+SELECT table_schema  gladmindsdb, 
+   Round(Sum(data_length + index_length) / 1024 / 1024, 1) "DB Size in MB" 
+FROM   information_schema.tables 
+GROUP  BY table_schema;
+------------------------------------------------------------------------

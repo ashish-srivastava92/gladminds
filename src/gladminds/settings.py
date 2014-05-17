@@ -45,7 +45,9 @@ SUIT_CONFIG = {
     'MENU': ({'app':'gladminds','label':'Data','icon':' icon-folder-open',
                 'models': ({'model':'serviceadvisordealerrelationship','label': 'Feed -> Service Advisor'}, {'model':'dispatchedproducts','label': 'Feed -> Product Dispatch'},
 
-                          {'model':'productdata','label': 'Feed -> Product Purchase'},{'model':'coupondata','label': 'Feed -> Coupon Redemption'} ,{'model':'auditlog','label': 'Audit Log'}, 
+                          {'model':'productdata','label': 'Feed -> Product Purchase'},{'model':'coupondata','label': 'Feed -> Coupon Redemption'} ,
+                          {'model':'ascsaveform','label': 'Save Form -> ASC'},
+                          {'model':'auditlog','label': 'Audit Log'}, 
                           {'model':'datafeedlog','label': 'Feed Log'}, 'uploadproductcsv', 
                           'messagetemplate','emailtemplate','gladmindusers',)},
                 {'app':'djcelery','label':'Job Management','icon':'icon-tasks'})
@@ -224,13 +226,13 @@ LOGGING = {
         },
         'gladminds_logs': {
             'level': 'INFO',
-            'filename': '/var/log/gladminds/app/gladminds.log',
+            'filename': 'log/gladminds/app/gladminds.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         },
         'afterbuy_logs': {
             'level': 'INFO',
-            'filename': '/var/log/gladminds/app/afterbuy.log',
+            'filename': 'log/gladminds/app/afterbuy.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         }

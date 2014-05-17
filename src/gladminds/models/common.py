@@ -232,7 +232,7 @@ class CouponData(models.Model):
 
     class Meta:
         app_label = "gladminds"
-        ordering = ['service_type', ]
+        ordering = []
         verbose_name_plural = "Coupon Information"
 
     def __unicode__(self):
@@ -316,7 +316,7 @@ class ASCSaveForm(models.Model):
         app_label = "gladminds"
         verbose_name_plural = "ASC Save Form"
 
-        
+
 class SASaveForm(models.Model):
     name = models.CharField(max_length=255, null=False)
     phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)
