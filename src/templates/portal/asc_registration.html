@@ -33,7 +33,7 @@
                     {% if not asc_registration %}
                     <form class="asc-form" role="form">{% csrf_token %}
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label class="control-label">Dealer ID:</label>
                         </div>
                         <div class="col-md-4 form-group">
@@ -44,7 +44,7 @@
                   <form class="asc-self-form" role="form">{% csrf_token %}
                  {% endif %}
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label class="control-label">ASC Name*:</label>
                         </div>
                         <div class="col-md-4 form-group">
@@ -52,7 +52,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label class="control-label">PWD*:</label>
                         </div>
                         <div class="col-md-4 form-group">
@@ -60,7 +60,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label  class="control-label">Retype PWD*:</label>
                         </div>
                         <div class="col-md-4 form-group">
@@ -68,15 +68,15 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label class="control-label">ASC Mobile Number*:</label>
                         </div>
                         <div class="col-md-4 form-group">
-                            <input type="text" class="form-control" name="phone-number" required/>
+                            <input type="text" class="form-control" name="phone-number" required maxlength="10" placeholder="10 digits"/>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label class="control-label">Email:</label>
                         </div>
                         <div class="col-md-4 form-group">
@@ -84,7 +84,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label class="control-label">PinCode:</label>
                         </div>
                         <div class="col-md-4 form-group">
@@ -92,7 +92,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label class="control-label">Address:</label>
                         </div>
                         <div class="col-md-4 form-group">
@@ -100,7 +100,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-8 form-group">
+                        <div class="col-md-7 form-group">
                             <button type="submit" value="Submit" class="btn btn-primary pull-right asc-submit">
                                 Submit
                             </button>

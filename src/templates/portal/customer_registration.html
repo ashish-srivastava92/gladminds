@@ -32,7 +32,7 @@
                     <label class="control-label">VIN#:</label>
                   </div>
                   <div class="col-md-6 input-group">
-                    <input type="text" class="form-control" placeholder="Search" name="srch-vin" id="srch-vin">
+                    <input type="text" class="form-control" placeholder="Search" name="srch-vin" id="srch-vin" required>
                     <div class="input-group-btn">
                       <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"></span></button>
                     </div>
@@ -46,7 +46,7 @@
               </div>
              <form class="customer-form" role="form">
               <div class="row hide">
-                <div class="col-md-4 form-group">
+                <div class="col-md-3 form-group">
                     <label class="control-label">VIN:</label>
                 </div>
                 <div class="col-md-4 form-group">
@@ -54,7 +54,7 @@
                 </div>
               </div>
                <div class="row">
-                <div class="col-md-4 form-group">
+                <div class="col-md-3 form-group">
                     <label class="control-label">Customer Name:</label>
                 </div>
                 <div class="col-md-4 form-group">
@@ -62,24 +62,23 @@
                 </div>
               </div>
               <div class="row">
-                <div class="col-md-4 form-group">
+                <div class="col-md-3 form-group">
                     <label class="control-label">Customer Phone:</label>
                 </div>
                 <div class="col-md-4 form-group">
-                    <input type="text" name='customer-phone' class="form-control customer-phone"/>
+                    <input type="text" name='customer-phone' class="form-control customer-phone" maxlength="10" placeholder="10 digits"/>
                 </div>
               </div>
               <div class="row">
-                <div class="col-md-4 form-group">
+                <div class="col-md-3 form-group">
                     <label class="control-label">Product purchase Date:</label>
                 </div>
                 <div class="col-md-4 form-group">
-                    <input type="text" name='purchase-date' class="form-control purchase-date"/>
+                    <input type="text" name='purchase-date' class="form-control purchase-date" placeholder="dd/mm/yyyy"/>
                 </div>
-                <p>Enter date in "dd/mm/yyyy" format</p>
               </div>
               <div class="row">
-                  <div class="col-md-8 form-group">
+                  <div class="col-md-7 form-group">
                       <button type="submit" value="Submit" class="btn btn-primary pull-right customer-submit">
                           Submit
                       </button>
