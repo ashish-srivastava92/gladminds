@@ -20,6 +20,7 @@ import tablib
 import datetime
 from models import logs
 from gladminds.models.common import EmailTemplate, ASCSaveForm
+import json
 
 
 ############################BRAND AND PRODUCT ADMIN##########################
@@ -326,7 +327,16 @@ class FeedLogAdmin(ModelAdmin):
     list_filter = ('feed_type', 'status')
     search_fields = ('status', 'data_feed_id', 'action')
     list_display = ('timestamp', 'feed_type', 'action',
-                    'total_data_count', 'success_data_count', 'failed_data_count')
+                    'total_data_count', 'success_data_count',
+                    'failed_data_count', 'feed_remarks')
+
+    def feed_remarks(self, obj):
+        remarks = json.loads(obj.remarks)
+        update_remark = ''
+        for remark, occurence in remarks.iteritems():
+            update_remark = "{0} : {1}#######".format(remark, occurence)
+
+        return update_remark
 
     def has_add_permission(self, request):
         return False

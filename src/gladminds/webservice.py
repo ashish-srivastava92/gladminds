@@ -18,6 +18,7 @@ import logging
 from django.conf import settings
 import json
 from gladminds import utils
+from gladminds.audit import FeedLogWithRemark
 
 
 logger = logging.getLogger("gladminds")
@@ -209,9 +210,13 @@ class DealerService(ServiceBase):
 
     @srpc(DealerModelList, AuthenticationModel, _returns=Unicode)
     def postDealer(ObjectList, Credential):
-        try:
-            dealer_list = []
-            for dealer in ObjectList.DealerData:
+        dealer_list = []
+        feed_remark = FeedLogWithRemark(len(ObjectList.DealerData),
+                                        feed_type='Dealer Feed',
+                                        action='Recieved', status=True)
+        print ObjectList.DealerData
+        for dealer in ObjectList.DealerData:
+            try:
                 dealer_list.append({
                     'dealer_id': dealer.KUNNR,
                     'address': dealer.ADDRESS,
@@ -220,14 +225,17 @@ class DealerService(ServiceBase):
                     'phone_number': utils.mobile_format(dealer.SER_ADV_MOBILE),
                     'status': dealer.ACTIVE_FLAG
                 })
-            response = save_to_db(feed_type='dealer', data_source=dealer_list)
-            return get_response(response)
-        except Exception as ex:
-            logging.error(
-                "DealerService: {0}  Error on Validating ".format(ex))
-            logger.debug("DealerService: Object List is "
-                         .format(ObjectList.DealerData))
-            return FAILED
+            except Exception as ex:
+                ex = "DealerService: {0}  Error on Validating ".format(ex)
+                logger.error("DealerService: {0} Object list element is {1}"
+                             .format(ex, dealer))
+                logger.error(dealer)
+                feed_remark.fail_remarks(ex)
+        feed_remark = save_to_db(feed_type='dealer', data_source=dealer_list,
+                              feed_remark=feed_remark)
+
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
 
 
 class ProductDispatchService(ServiceBase):
@@ -235,9 +243,12 @@ class ProductDispatchService(ServiceBase):
 
     @srpc(ProductDispatchModelList, AuthenticationModel, _returns=Unicode)
     def postProductDispatch(ObjectList, Credential):
-        try:
-            product_dispatch_list = []
-            for product in ObjectList.ProductDispatchData:
+        feed_remark = FeedLogWithRemark(len(ObjectList.ProductDispatchData),
+                                        feed_type='Dispatch Feed',
+                                        action='Recieved', status=True)
+        product_dispatch_list = []
+        for product in ObjectList.ProductDispatchData:
+            try:
                 product_dispatch_list.append({
                     'vin': product.CHASSIS,
                     'product_type': product.PRODUCT_TYPE,
@@ -249,20 +260,18 @@ class ProductDispatchService(ServiceBase):
                     'service_type': product.SERVICE_TYPE,
                     'coupon_status': settings.DEFAULT_COUPON_STATUS,
                 })
-            response = save_to_db(
-                feed_type='dispatch', data_source=product_dispatch_list)
-            return get_response(response)
-        except Exception as ex:
-            logger.error(
-                "ProductDispatchService: {0}  Error on Validating ".format(ex))
-            logger.debug("ProductDispatchService: Object List is "
-                         .format(ObjectList.ProductDispatchData))
-            return FAILED
+            except Exception as ex:
+                ex = "ProductDispatchService: {0}  Error on Validating"\
+                                                        .format(ex)
+                feed_remark.fail_remarks(ex)
+                logger.error("ProductDispatchService: {0} Object List is {1}"
+                             .format(ex, product))
 
-
-def get_response(response):
-    failed_feed = response[1]['Failed']
-    return FAILED if failed_feed > 0 else SUCCESS
+        feed_remark = save_to_db(
+            feed_type='dispatch', data_source=product_dispatch_list,
+                                        feed_remark=feed_remark)
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
 
 
 class ProductPurchaseService(ServiceBase):
@@ -270,9 +279,12 @@ class ProductPurchaseService(ServiceBase):
 
     @srpc(ProductPurchaseModelList, AuthenticationModel, _returns=Unicode)
     def postProductPurchase(ObjectList, Credential):
-        try:
-            product_purchase_list = []
-            for product in ObjectList.ProductPurchaseData:
+        feed_remark = FeedLogWithRemark(len(ObjectList.ProductPurchaseData),
+                                        feed_type='Purchase Feed',
+                                        action='Recieved', status=True)
+        product_purchase_list = []
+        for product in ObjectList.ProductPurchaseData:
+            try:
                 product_purchase_list.append({
                     'vin': product.CHASSIS,
                     'sap_customer_id': product.CUSTOMER_ID,
@@ -284,20 +296,28 @@ class ProductPurchaseService(ServiceBase):
                     'product_purchase_date': product.VEH_SL_DT,
                     'engine': product.ENGINE
                 })
-            response = save_to_db(
-                feed_type='purchase', data_source=product_purchase_list)
-            return get_response(response)
-        except Exception as ex:
-            logger.error(
-                "ProductPurchaseService: {0}  Error on Validating ".format(ex))
-            logger.debug("ProductPurchaseService: Object List is "
-                         .format(ObjectList.ProductPurchaseData))
-            return FAILED
+            except Exception as ex:
+                ex = "ProductPurchaseService: {0}  Error on Validating "\
+                                                            .format(ex)
+                logger.error("ProductPurchaseService: {0} Object List is {1}"
+                             .format(ex, product))
+                feed_remark.fail_remarks(ex)
+
+        feed_remark = save_to_db(
+            feed_type='purchase', data_source=product_purchase_list,
+                                                 feed_remark=feed_remark)
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
 
 
-def save_to_db(feed_type=None, data_source=[]):
+def get_response(feed_remark):
+    return FAILED if feed_remark.failed_feeds > 0 else SUCCESS
+
+
+def save_to_db(feed_type=None, data_source=[], feed_remark=None):
     sap_obj = SAPFeed()
-    return sap_obj.import_to_db(feed_type=feed_type, data_source=data_source)
+    return sap_obj.import_to_db(feed_type=feed_type, data_source=data_source,
+                                 feed_remark=feed_remark)
 
 
 def _on_method_call(ctx):
