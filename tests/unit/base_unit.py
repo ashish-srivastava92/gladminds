@@ -51,6 +51,11 @@ class GladmindsUnitTestCase(unittest.TestCase):
     def get_customer_obj(self, **kwargs):
         return self._get_model_obj(common.GladMindUsers(**kwargs))
     
+    def get_asc_obj(self, **kwargs):
+        asc_obj = common.RegisteredASC(**kwargs)
+        asc_obj.save()
+        return asc_obj
+        
     def _get_model_obj(self, model):
         model_obj = model.save()
         return model_obj

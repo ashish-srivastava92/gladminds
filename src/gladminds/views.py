@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from gladminds import utils, message_template
 from django.conf import settings
 from gladminds.utils import get_task_queue, get_customer_info,\
-    get_sa_list, recover_coupon_info
+    get_sa_list, recover_coupon_info, mobile_format
 from gladminds.tasks import export_asc_registeration_to_sap
 from gladminds.mail import sent_otp_email
 from django.contrib.auth.models import Group, User
@@ -62,10 +62,10 @@ def update_pass(request):
         password=request.POST['password']
         utils.update_pass(otp, password)
         logger.info('Password has been updated.')
-        return HttpResponseRedirect('/dealers/?update=true')
+        return HttpResponseRedirect('/asc/login?update=true')
     except:
         logger.error('Password update failed.')
-        return HttpResponseRedirect('/dealers/?error=true')
+        return HttpResponseRedirect('/asc/login?error=true')
 
 def redirect_user(request):
     asc_group = Group.objects.get(name='ascs')
@@ -114,11 +114,16 @@ def asc_registration(request):
 #        return HttpResponse(response_object, content_type="application/json")
         username = request.POST['name']
         password = request.POST['password']
-        asc_user = User(username=username)
-        asc_user.set_password(password)
-        asc_user.save()
-        asc_group = Group.objects.get(name='ascs')
-        asc_user.groups.add(asc_group)
+        try:
+            asc_user = User(username=username)
+            asc_user.set_password(password)
+            asc_user.save()
+            asc_group = Group.objects.get(name='ascs')
+            asc_user.groups.add(asc_group)
+            asc = common.RegisteredASC(user=asc_user, phone_number=request.POST['phone-number'], asc_name=username)
+            asc.save()
+        except:
+            return HttpResponse(json.dumps({'message': 'Already Registered'}), content_type='application/json')
         return HttpResponse(json.dumps({'message': 'Registration is complete'}), content_type='application/json')
 
 @login_required(login_url='/dealer/login')
@@ -177,10 +182,11 @@ ALREADY_REGISTERED = 'Already Registered Number'
 def save_asc_registeration(request, groups=[], brand='bajaj'):
     #TODO: Remove the brand parameter and pass it inside request.POST
     data = request.POST
+    phone_number = mobile_format(str(data['phone-number']))
     if not ('dealers' in groups or 'self' in groups):
         raise
-    if common.RegisteredASC.objects.filter(phone_number=data['phone-number'])\
-        or common.ASCSaveForm.objects.filter(phone_number=data['phone-number']):
+    if common.RegisteredASC.objects.filter(phone_number=phone_number)\
+        or common.ASCSaveForm.objects.filter(phone_number=phone_number):
         return json.dumps({'message': ALREADY_REGISTERED})
 
     try:
@@ -192,14 +198,14 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
         
         asc_obj = common.ASCSaveForm(name=data['name'],
                  address=data['address'], password=data['password'],
-                 phone_number=data['phone-number'], email=data['email'],
+                 phone_number=phone_number, email=data['email'],
                  pincode=data['pincode'], status=1, dealer_id=dealer_data)
         
         asc_obj.save()
         if settings.ENABLE_AMAZON_SQS:
             task_queue = utils.get_task_queue()
             task_queue.add("export_asc_registeration_to_sap", \
-               {"phone_number": data['phone-number'], "brand": brand})
+               {"phone_number": phone_number, "brand": brand})
         else:
             export_asc_registeration_to_sap.delay(phone_number=data[
                                         'phone-number'], brand=brand)
@@ -214,11 +220,10 @@ def save_sa_registration(request, groups):
     if not ('dealers' in groups or 'ascs' in groups):
         raise
     data= {key: val for key, val in data.iteritems()}
-    try:
-        asc_obj = common.SASaveForm(name=data['name'],
-                 phone_number=data['phone-number'], status=data['status'])
-        asc_obj.save()
-
-    except KeyError:
-        return HttpResponseBadRequest()
-    return {"message": SUCCESS_MESSAGE}
+    phone_number = mobile_format(str(data['phone-number']))
+    if common.SASaveForm.objects.filter(phone_number=phone_number):
+        return json.dumps({'message': ALREADY_REGISTERED})
+    asc_obj = common.SASaveForm(name=data['name'],
+             phone_number=phone_number, status=data['status'])
+    asc_obj.save()
+    return json.dumps({'message': SUCCESS_MESSAGE})

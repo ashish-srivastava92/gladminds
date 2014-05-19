@@ -1,6 +1,6 @@
 from unittest import TestCase
 from datetime import datetime, timedelta
-from gladminds.utils import get_sa_list, get_coupon_info, get_customer_info
+from gladminds.utils import get_sa_list, get_coupon_info, get_customer_info, get_token, validate_otp
 from unit.base_unit import RequestObject, GladmindsUnitTestCase
 from django.conf import settings
 import os
@@ -27,17 +27,22 @@ class TestUtils(GladmindsUnitTestCase):
         product_type_obj = self.get_product_type_obj(
             brand_id=brand_obj, product_name='DISCO120', product_type='BIKE')
         dealer_obj = self.get_delear_obj(dealer_id='DEALER001')
-        customer_obj = self.get_customer_obj(phone_number='+919999999')
-        product_obj = self.get_product_obj(vin="VINXXX001", product_type=product_type_obj,
-                                           dealer_id=dealer_obj, customer_phone_number=customer_obj, sap_customer_id='SAP001')
-        service_advisor = self.get_service_advisor_obj(
-            service_advisor_id='SA001Test', name='UMOTO', phone_number='+914444861111')
-        self.get_dealer_service_advisor_obj(
-            dealer_id=dealer_obj, service_advisor_id=service_advisor, status='Y')
-        self.get_coupon_obj(unique_service_coupon='COUPON005', vin=product_obj, valid_days=30, valid_kms=500, service_type=1, status=4, mark_expired_on=datetime.now(
-        ) - timedelta(days=2), actual_service_date=datetime.now() - timedelta(days=20), extended_date=datetime.now() - timedelta(days=2))
-        self.get_message_template(template_key='SEND_CUSTOMER_VALID_COUPON',
-                                  template='Service Type {service_type}. UCN {coupon}.', description='Desc')
+        customer_obj = self.get_customer_obj(phone_number='+919999999', customer_name='TestCustomer')
+        product_obj = self.get_product_obj(vin="VINXXX001", product_type=product_type_obj, dealer_id=dealer_obj\
+                                           , customer_phone_number=customer_obj, sap_customer_id='SAP001'\
+                                           , product_purchase_date=datetime.now())
+        service_advisor = self.get_service_advisor_obj(service_advisor_id='SA001Test', name='UMOTO', phone_number='+914444861111')
+        self.get_dealer_service_advisor_obj(dealer_id=dealer_obj, service_advisor_id=service_advisor, status='Y')
+        self.get_coupon_obj(unique_service_coupon='COUPON005', vin=product_obj, valid_days=30, valid_kms=500\
+                            , service_type=1, status=4, mark_expired_on=datetime.now() - timedelta(days=2)\
+                            , actual_service_date=datetime.now() - timedelta(days=20), extended_date=datetime.now() - timedelta(days=2))
+        self.get_message_template(template_key='SEND_CUSTOMER_VALID_COUPON'\
+                                  , template='Service Type {service_type}. UCN {coupon}.', description='Desc')
+        asc_user = User(username='ASC001')
+        asc_user.set_password('123')
+        asc_user.save()
+        self.get_asc_obj(user=asc_user, phone_number="+911234567890")
+
 
     def test_get_sa_list(self):
         request = RequestObject(user='DEALER001', data={
@@ -48,6 +53,12 @@ class TestUtils(GladmindsUnitTestCase):
         self.assertEqual(coupon_info.keys(), ['status', 'message'])
         customer = get_customer_info(request)
         self.assertEquals(customer.keys(), ['customer_phone', 'customer_id'])
+
+    def test_otp(self):
+        phone_number = '1234567890'
+        token = get_token(phone_number)
+        self.assertTrue(isinstance(token, int))
+        self.assertTrue(validate_otp(token, phone_number))
 
 
 class TestFeedLogWithRemark(ResourceTestCase):
@@ -71,4 +82,3 @@ class TestFeedLogWithRemark(ResourceTestCase):
         self.assertEqual(len(feed_logs_obj), 1)
         remark = json.loads(feed_logs_obj[0].remarks)
         self.assertEqual(len(remark), 1)
-        

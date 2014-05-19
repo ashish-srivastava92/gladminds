@@ -84,7 +84,7 @@ def get_token(phone_number, email=''):
 def validate_otp(otp, phone):
     asc = common.RegisteredASC.objects.filter(phone_number=mobile_format(phone))[0].user
     token_obj = common.OTPToken.objects.filter(user=asc)[0]
-    if otp == token_obj.token and (timezone.now()-token_obj.request_date).seconds <= OTP_VALIDITY:
+    if int(otp) == int(token_obj.token) and (timezone.now()-token_obj.request_date).seconds <= OTP_VALIDITY:
         return True
     elif (timezone.now()-token_obj.request_date).seconds > OTP_VALIDITY:
         token_obj.delete()
@@ -107,7 +107,7 @@ def get_customer_info(data):
     data=data.POST
     product_obj = common.ProductData.objects.filter(vin=data['vin'])[0]
     purchase_date = product_obj.product_purchase_date.strftime('%d/%m/%Y')
-    return {'customer_phone': str(product_obj.customer_phone_number), 'customer_name': product_obj.customer_phone_number.customer_name, 'purchase_date': purchase_date}
+    return {'customer_phone': get_phone_number_format(str(product_obj.customer_phone_number)), 'customer_name': product_obj.customer_phone_number.customer_name, 'purchase_date': purchase_date}
 
 def get_sa_list(request):
     dealer = common.RegisteredDealer.objects.filter(

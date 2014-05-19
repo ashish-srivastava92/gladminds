@@ -33,7 +33,7 @@
                     <label class="control-label">VIN#:</label>
                   </div>
                   <div class="col-md-6 input-group">
-                    <input type="text" class="form-control" placeholder="Search" name="srch-vin" id="srch-vin">
+                    <input type="text" class="form-control" placeholder="Search" name="srch-vin" id="srch-vin" required>
                     <div class="input-group-btn">
                       <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"></span></button>
                     </div>
@@ -46,7 +46,7 @@
                 </div>
               </div>
               <div class="row">
-                <div class="col-md-4 form-group">
+                <div class="col-md-3 form-group">
                     <label class="control-label">Customer Phone:</label>
                 </div>
                 <div class="col-md-4 form-group">
@@ -54,7 +54,7 @@
                 </div>
               </div>
               <div class="row">
-                <div class="col-md-4 form-group">
+                <div class="col-md-3 form-group">
                     <label class="control-label">Customer Name:</label>
                 </div>
                 <div class="col-md-4 form-group">
@@ -225,5 +225,6 @@
   var jobCardFileData = null;
   </script>
 {% endif %}
+<script src="/static/js/portal/utils.js"></script>
 <script src="/static/js/portal/main.js"></script>
 {% endblock dependency %}
