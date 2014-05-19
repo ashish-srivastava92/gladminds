@@ -8,14 +8,52 @@ from django.contrib.auth.decorators import login_required
 from gladminds import utils, message_template
 from django.conf import settings
 from gladminds.utils import get_task_queue, get_customer_info,\
-    get_sa_list, recover_coupon_info, mobile_format
+    get_sa_list, recover_coupon_info, mobile_format, stringify_groups
 from gladminds.tasks import export_asc_registeration_to_sap
 from gladminds.mail import sent_otp_email
 from django.contrib.auth.models import Group, User
+from django.contrib.auth import authenticate, login, logout
 import logging, json
 
 logger = logging.getLogger('gladminds')
 
+
+def auth_login(request, brand, provider):
+    if request.method == 'GET':
+        #TODO: Implement brand Restrictions also.
+        provider_mapping = {
+                            'asc': {'template_name': 'asc/login.html'},
+                            'dasc': {'template_name': 'asc/login.html'},
+                            'dealer': {'template_name': 'dealer/login.html'}
+                            }
+        return render(request, provider_mapping[provider]['template_name'])
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                return HttpResponseRedirect('/provider/redirect')
+    return HttpResponseRedirect(request.path_info+'?auth_error=true')
+
+def user_logout(request):
+    if request.method == 'GET':
+        #TODO: Implement brand restrictions.
+        groups = stringify_groups(request.user)
+        if 'dealers' in groups:
+            logout(request)
+            return HttpResponseRedirect('/bajaj/dealer/login')
+        elif 'ascs' in groups:
+            logout(request)
+            return HttpResponseRedirect('/bajaj/asc/login')
+        #TODO: Implement Dependent ASCs
+        elif 'dascs' in groups:
+            logout(request)
+            return HttpResponseRedirect('/bajaj/dasc/login')
+    return HttpResponseBadRequest('Not Allowed')
+    
+    
 
 def generate_otp(request):
     if request.method == 'POST':
@@ -73,11 +111,9 @@ def redirect_user(request):
         return HttpResponseRedirect('/register/sa')
     return HttpResponseRedirect('/register/asc')
 
-@login_required(login_url='/dealer/login')
+@login_required(login_url='/bajaj/dealer/login')
 def register(request, menu):
-    groups = []
-    for group in request.user.groups.all():
-        groups.append(str(group.name))
+    groups = stringify_groups(request.user)
     if not ('ascs' in groups or 'dealers' in groups):
         return HttpResponseBadRequest()
     if request.method == 'GET':
@@ -126,12 +162,9 @@ def asc_registration(request):
             return HttpResponse(json.dumps({'message': 'Already Registered'}), content_type='application/json')
         return HttpResponse(json.dumps({'message': 'Registration is complete'}), content_type='application/json')
 
-@login_required(login_url='/dealer/login')
+@login_required(login_url='/bajaj/dealer/login')
 def exceptions(request, exception=None):
-    groups = []
-    for group in request.user.groups.all():
-        groups.append(str(group.name))
-    
+    groups = stringify_groups(request.user)
     if not ('ascs' in groups or 'dealers' in groups):
         return HttpResponseBadRequest()
     if request.method == 'GET':
