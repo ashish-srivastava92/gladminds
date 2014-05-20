@@ -213,7 +213,7 @@ class DealerService(ServiceBase):
         dealer_list = []
         feed_remark = FeedLogWithRemark(len(ObjectList.DealerData),
                                         feed_type='Dealer Feed',
-                                        action='Recieved', status=True)
+                                        action='Received', status=True)
         print ObjectList.DealerData
         for dealer in ObjectList.DealerData:
             try:
@@ -245,7 +245,7 @@ class ProductDispatchService(ServiceBase):
     def postProductDispatch(ObjectList, Credential):
         feed_remark = FeedLogWithRemark(len(ObjectList.ProductDispatchData),
                                         feed_type='Dispatch Feed',
-                                        action='Recieved', status=True)
+                                        action='Received', status=True)
         product_dispatch_list = []
         for product in ObjectList.ProductDispatchData:
             try:
@@ -281,7 +281,7 @@ class ProductPurchaseService(ServiceBase):
     def postProductPurchase(ObjectList, Credential):
         feed_remark = FeedLogWithRemark(len(ObjectList.ProductPurchaseData),
                                         feed_type='Purchase Feed',
-                                        action='Recieved', status=True)
+                                        action='Received', status=True)
         product_purchase_list = []
         for product in ObjectList.ProductPurchaseData:
             try:

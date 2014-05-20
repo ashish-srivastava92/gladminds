@@ -121,7 +121,7 @@ class BaseFeed(object):
         if username:
             dealer = User(
                 username=username, first_name=first_name, last_name=last_name, email=email)
-            password = username + '@123'
+            password = username + settings.PASSWORD_POSTFIX
             dealer.set_password(password)
             dealer.save()
             if not Group.objects.all():
