@@ -348,6 +348,7 @@ class UCNRecovery(models.Model):
     user = models.ForeignKey(User)
     sap_customer_id = models.CharField(max_length=215, null=True, blank=True)
     file_location = models.CharField(max_length=215, null=True, blank=True)
+    request_date = models.DateTimeField(default=datetime.now())
     
     class Meta:
         app_label = "gladminds"
