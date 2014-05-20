@@ -161,6 +161,8 @@ def exceptions(request, exception=None):
     else:
         return HttpResponseBadRequest()
     
+UPDATE_SUCCESS = 'Customer Update failed!'
+UPDATE_FAIL = 'Updated customer details'
 def register_customer(request, group=None):
     data = request.POST
     product_obj = common.ProductData.objects.filter(vin=data['customer-vin'])
@@ -171,8 +173,8 @@ def register_customer(request, group=None):
         customer_obj.save()
     except Exception as ex:
         logger.info(ex)
-        return json.dumps({"message": "Customer Update failed!"})
-    return json.dumps({'message': 'Updated customer details'})
+        return json.dumps({"message": UPDATE_SUCCESS})
+    return json.dumps({'message': UPDATE_FAIL})
         
 
 SUCCESS_MESSAGE = 'Registration is complete'
