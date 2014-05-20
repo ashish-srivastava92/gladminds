@@ -1,6 +1,7 @@
 from django.shortcuts import render_to_response, render
 from django.template import RequestContext
-from django.http.response import HttpResponseRedirect, HttpResponse
+from django.http.response import HttpResponseRedirect, HttpResponse,\
+    HttpResponseBadRequest
 from gladminds.models import common
 import logging
 from gladminds.tasks import send_otp
@@ -8,9 +9,12 @@ from django.contrib.auth.decorators import login_required
 from gladminds import utils, message_template
 from django.conf import settings
 from gladminds.tasks import export_asc_registeration_to_sap
-from gladminds.utils import get_task_queue
+from gladminds.utils import get_task_queue, mobile_format
 import json
 from gladminds.mail import sent_otp_email
+from django.contrib.auth.models import Group, User
+from django.contrib.auth import authenticate, login, logout
+import logging, json, csv, os
 
 logger = logging.getLogger('gladminds')
 
@@ -138,3 +142,29 @@ def register_user(request, user=None):
     status = save_user[user](request.POST)
 
     return HttpResponse(json.dumps(status), mimetype="application/json")
+
+
+def delete_purchase(request):
+    if request.GET.urlencode() != 'token=gm123':
+        return HttpResponseBadRequest('Not allowed')
+    details_file = os.path.realpath('purchase_details.csv')
+    vin_list = []
+    with open(details_file, 'rb') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        for row in spamreader:
+            vin_list.append(row[0].split(',')[1])
+        
+    try:
+        for vin in vin_list:
+            product_data = common.ProductData.objects.filter(vin=vin)
+            if product_data:
+                product_data = product_data[0]
+                product_data.customer_phone_number.delete()
+                product_data.customer_phone_number = None
+                product_data.sap_customer_id = None
+                product_data.product_purchase_date = None
+                product_data.save()
+    except Exception as ex:
+        logger.error('[Exception: Purchase data delete]: {0}'.format(ex))
+        return HttpResponseBadRequest('Error: Already performed.')
+    return HttpResponse('Task Accomplished')
