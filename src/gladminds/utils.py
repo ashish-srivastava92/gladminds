@@ -139,7 +139,6 @@ def upload_file(request):
     file_obj = request.FILES['jobCard']
     customer_id = data['customerId']
     reason = data['reason']
-    file_obj = request.FILES['jobCard']
     customer_id = request.POST['customerId']
     file_obj.name = get_file_name(request, file_obj)
     filename = settings.JOBCARD_DIR + file_obj.name

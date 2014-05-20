@@ -111,7 +111,7 @@ def redirect_user(request):
         return HttpResponseRedirect('/register/sa')
     return HttpResponseRedirect('/register/asc')
 
-@login_required(login_url='/bajaj/dealer/login')
+@login_required()
 def register(request, menu):
     groups = stringify_groups(request.user)
     if not ('ascs' in groups or 'dealers' in groups):
@@ -162,7 +162,7 @@ def asc_registration(request):
             return HttpResponse(json.dumps({'message': 'Already Registered'}), content_type='application/json')
         return HttpResponse(json.dumps({'message': 'Registration is complete'}), content_type='application/json')
 
-@login_required(login_url='/bajaj/dealer/login')
+@login_required()
 def exceptions(request, exception=None):
     groups = stringify_groups(request.user)
     if not ('ascs' in groups or 'dealers' in groups):
