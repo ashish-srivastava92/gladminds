@@ -245,6 +245,9 @@ class ProductDispatchFeed(BaseFeed):
                             status=product['coupon_status'])
                 coupon_data.save()
             except Exception as ex:
+                logger.info(
+                        '[Exception: ProductDispatchFeed_coupon_data_save]: {0}'\
+                                            .format(ex))
                 total_failed += 1
                 continue
 
