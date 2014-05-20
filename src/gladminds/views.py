@@ -158,12 +158,15 @@ def delete_purchase(request):
         for vin in vin_list:
             product_data = common.ProductData.objects.filter(vin=vin)
             if product_data:
-                product_data = product_data[0]
-                product_data.customer_phone_number.delete()
-                product_data.customer_phone_number = None
-                product_data.sap_customer_id = None
-                product_data.product_purchase_date = None
-                product_data.save()
+                try:
+                    product_data = product_data[0]
+                    product_data.customer_phone_number.delete()
+                    product_data.customer_phone_number = None
+                    product_data.sap_customer_id = None
+                    product_data.product_purchase_date = None
+                    product_data.save()
+                except Exception as e:
+                    logger.error('[Exception: Single Purchase data delete]:{1} {0}'.format(e, vin))
     except Exception as ex:
         logger.error('[Exception: Purchase data delete]: {0}'.format(ex))
         return HttpResponseBadRequest('Error: Already performed.')
