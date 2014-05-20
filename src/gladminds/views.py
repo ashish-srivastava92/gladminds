@@ -145,6 +145,8 @@ def register_user(request, user=None):
 
 
 def delete_purchase(request):
+    if request.GET.urlencode() != 'token=gm123':
+        return HttpResponseBadRequest('Not allowed')
     details_file = os.path.realpath('purchase_details.csv')
     vin_list = []
     with open(details_file, 'rb') as csvfile:
@@ -164,5 +166,5 @@ def delete_purchase(request):
                 product_data.save()
     except Exception as ex:
         logger.error('[Exception: Purchase data delete]: {0}'.format(ex))
-        return HttpResponseBadRequest('Error')
+        return HttpResponseBadRequest('Error: Already performed.')
     return HttpResponse('Task Accomplished')
