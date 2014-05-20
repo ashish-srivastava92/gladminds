@@ -1,6 +1,7 @@
 from django.shortcuts import render_to_response, render
 from django.template import RequestContext
-from django.http.response import HttpResponseRedirect, HttpResponse
+from django.http.response import HttpResponseRedirect, HttpResponse,\
+    HttpResponseBadRequest
 from gladminds.models import common
 import logging
 from gladminds.tasks import send_otp
@@ -147,20 +148,21 @@ def delete_purchase(request):
     details_file = os.path.realpath('purchase_details.csv')
     vin_list = []
     with open(details_file, 'rb') as csvfile:
-        
         spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
         for row in spamreader:
             vin_list.append(row[0].split(',')[1])
         
-        print vin_list
-        
-    for vin in vin_list:
-        try:
-            product_data = common.ProductData.objects.get(vin=vin)
-            product_data.customer_phone_number.delete()
-            product_data.customer_phone_number = None
-            product_data.sap_customer_id = None
-            product_data.product_purchase_date = None
-            product_data.save()
-        except Exception as ex:
-            logger.error('[Exception: Purchase data delete]: {0}'.format(ex))
+    try:
+        for vin in vin_list:
+            product_data = common.ProductData.objects.filter(vin=vin)
+            if product_data:
+                product_data = product_data[0]
+                product_data.customer_phone_number.delete()
+                product_data.customer_phone_number = None
+                product_data.sap_customer_id = None
+                product_data.product_purchase_date = None
+                product_data.save()
+    except Exception as ex:
+        logger.error('[Exception: Purchase data delete]: {0}'.format(ex))
+        return HttpResponseBadRequest('Error')
+    return HttpResponse('Task Accomplished')
