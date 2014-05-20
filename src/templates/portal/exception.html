@@ -108,7 +108,6 @@
                   </div>
                 </div>
               </form>
-              {% include "portal/modal.html" %}
               {% endif %}
               
               {% if active_menu == 'check' %}
@@ -167,7 +166,6 @@
                   </div>
                 </div>
               </form>
-              {% include "portal/modal.html" %}
               {% endif %}
               
               {% if active_menu == 'recover' %}
@@ -210,12 +208,12 @@
                   </div>
                 </div>
               </form>
-              {% include "portal/modal.html" %}
               {% endif %}
             </div>
         </div>
     </div>
 </div>
+{% include "portal/modal.html" %}
 {% include "portal/waiting_modal.html" %}
 {% endblock %}
 

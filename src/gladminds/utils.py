@@ -105,7 +105,12 @@ def get_task_queue():
 
 def get_customer_info(data):
     data=data.POST
-    product_obj = common.ProductData.objects.filter(vin=data['vin'])[0]
+    try:
+        product_obj = common.ProductData.objects.get(vin=data['vin'])
+    except Exception as ex:
+        logger.info(ex)
+        message = '''VIN '{0}' does not exist in our records'''.format(data['vin'])
+        return {'message': message}
     purchase_date = product_obj.product_purchase_date.strftime('%d/%m/%Y')
     return {'customer_phone': get_phone_number_format(str(product_obj.customer_phone_number)), 'customer_name': product_obj.customer_phone_number.customer_name, 'purchase_date': purchase_date}
 

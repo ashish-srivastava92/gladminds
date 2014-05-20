@@ -352,4 +352,16 @@ class UCNRecovery(models.Model):
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "UCN recovery logs"
+
+class CustomerUpdatedInfo(models.Model):    
+    product_data = models.ForeignKey(ProductData, null=True, blank=True)
+    new_customer_name = models.CharField(max_length=50, null=True, blank=True)
+    new_number = models.CharField(max_length=15, unique=True)
+    product_purchase_date = models.DateTimeField(null=True, blank=True)
     
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "Customer update info"
+    
+    def __unicode__(self):
+        return self.new_customer_name
