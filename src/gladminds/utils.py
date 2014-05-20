@@ -100,7 +100,7 @@ def update_pass(otp, password):
 
 
 def get_task_queue():
-    queue_name = "gladminds-prod"
+    queue_name = settings.SQS_QUEUE_NAME
     return SqsTaskQueue(queue_name)
 
 def get_customer_info(data):

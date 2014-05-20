@@ -1,25 +1,27 @@
+import tablib
+import datetime
+import json
 from django.contrib import admin
+from suit.admin import SortableTabularInline, SortableModelAdmin
+from suit.widgets import SuitDateWidget, SuitSplitDateTimeWidget, \
+    EnclosedInput, LinkedSelect, AutosizedTextarea
+from suit.widgets import NumberInput
+from suit.admin import SortableModelAdmin
+from django.forms import ModelForm, TextInput
+from django.contrib.admin import ModelAdmin
+from django.contrib.admin import DateFieldListFilter
+from django.contrib.admin import ModelAdmin, SimpleListFilter
 from models.common import RegisteredDealer
 from models.common import GladMindUsers, ProductTypeData, RegisteredDealer,\
     ServiceAdvisor, BrandData, ProductData, CouponData, MessageTemplate,\
     UploadProductCSV, ServiceAdvisorDealerRelationship
 from models.logs import AuditLog, DataFeedLog
-from suit.widgets import NumberInput
-from suit.admin import SortableModelAdmin
-from django.forms import ModelForm, TextInput
-from django.contrib.admin import ModelAdmin
-from suit.admin import SortableTabularInline, SortableModelAdmin
-from suit.widgets import SuitDateWidget, SuitSplitDateTimeWidget, \
-    EnclosedInput, LinkedSelect, AutosizedTextarea
-from django.contrib.admin import ModelAdmin, SimpleListFilter
 from import_export.admin import ImportExportModelAdmin, ExportMixin
 from import_export import fields, widgets
 from import_export import resources
-from django.contrib.admin import DateFieldListFilter
-import tablib
-import datetime
 from models import logs
 from gladminds.models.common import EmailTemplate, ASCSaveForm
+
 
 
 ############################BRAND AND PRODUCT ADMIN##########################
@@ -326,7 +328,16 @@ class FeedLogAdmin(ModelAdmin):
     list_filter = ('feed_type', 'status')
     search_fields = ('status', 'data_feed_id', 'action')
     list_display = ('timestamp', 'feed_type', 'action',
-                    'total_data_count', 'success_data_count', 'failed_data_count')
+                    'total_data_count', 'success_data_count',
+                    'failed_data_count', 'feed_remarks')
+
+    def feed_remarks(self, obj):
+        remarks = json.loads(obj.remarks)
+        update_remark = ''
+        for remark, occurence in remarks.iteritems():
+            update_remark = "{0} : {1}#######".format(remark, occurence)
+
+        return update_remark
 
     def has_add_permission(self, request):
         return False
