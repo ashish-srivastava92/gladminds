@@ -8,9 +8,12 @@ from django.contrib.auth.decorators import login_required
 from gladminds import utils, message_template
 from django.conf import settings
 from gladminds.tasks import export_asc_registeration_to_sap
-from gladminds.utils import get_task_queue
+from gladminds.utils import get_task_queue, mobile_format
 import json
 from gladminds.mail import sent_otp_email
+from django.contrib.auth.models import Group, User
+from django.contrib.auth import authenticate, login, logout
+import logging, json, csv, os
 
 logger = logging.getLogger('gladminds')
 
@@ -138,3 +141,20 @@ def register_user(request, user=None):
     status = save_user[user](request.POST)
 
     return HttpResponse(json.dumps(status), mimetype="application/json")
+
+
+def delete_purchase(request):
+    details_file = os.path.realpath('purchase_details.csv')
+    vin_list = []
+    with open(details_file, 'rb') as csvfile:
+        
+        spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        for row in spamreader:
+            vin_list.append(row[0].split(',')[1])
+        
+        print vin_list
+        
+#    for vin in vin_list:
+#        product_data = common.ProductData.objects.get(vin=vin)
+#        print product_data
+#        pass
