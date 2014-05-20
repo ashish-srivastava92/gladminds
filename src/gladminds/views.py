@@ -154,7 +154,13 @@ def delete_purchase(request):
         
         print vin_list
         
-#    for vin in vin_list:
-#        product_data = common.ProductData.objects.get(vin=vin)
-#        print product_data
-#        pass
+    for vin in vin_list:
+        try:
+            product_data = common.ProductData.objects.get(vin=vin)
+            product_data.customer_phone_number.delete()
+            product_data.customer_phone_number = None
+            product_data.sap_customer_id = None
+            product_data.product_purchase_date = None
+            product_data.save()
+        except Exception as ex:
+            logger.error('[Exception: Purchase data delete]: {0}'.format(ex))
