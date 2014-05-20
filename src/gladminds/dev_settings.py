@@ -14,12 +14,12 @@ TEMPLATE_DEBUG = DEBUG
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'gladminds.db',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'gladminds',
+        'USER': 'gladminds',
+        'PASSWORD': 'gladmindsRocks',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
     }
 }
 
