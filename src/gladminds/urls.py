@@ -25,7 +25,6 @@ urlpatterns = patterns('',
 
     url(r'^register/(?P<user>[a-zA-Z0-9]+)$', 'gladminds.views.register'),
     url(r'^save/(?P<user>[a-zA-Z0-9]+)$', 'gladminds.views.register_user'),
-    url(r'^reset/purchase', 'gladminds.views.delete_purchase'),
     url(r'^users/otp/generate$', 'gladminds.views.generate_otp', name='generate_otp'),
     url(r'^users/otp/validate', 'gladminds.views.validate_otp', name='validate_otp'),
     url(r'^users/otp/update_pass', 'gladminds.views.update_pass', name='update_pass'),
