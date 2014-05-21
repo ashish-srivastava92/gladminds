@@ -73,5 +73,5 @@ ENABLE_AMAZON_SQS = True
 
 
 ########################SQS Queue Name##################################
-SQS_QUEUE_NAME = "gladminds-prod"
+SQS_QUEUE_NAME = "gladminds-qa"
 ########################################################################
