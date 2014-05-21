@@ -18,7 +18,7 @@ import mimetypes
 from gladminds.mail import send_ucn_request_alert
 from django.contrib.auth.models import User
 from django.http.response import HttpResponse
-import json
+import json, uuid
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 logger = logging.getLogger('gladminds')
@@ -141,8 +141,8 @@ def upload_file(request):
     reason = data['reason']
     customer_id = request.POST['customerId']
     file_obj.name = get_file_name(request, file_obj)
-    filename = settings.JOBCARD_DIR + file_obj.name
-    destination = settings.JOBCARD_DIR
+    #TODO: Include Facility to get brand name here
+    destination = settings.JOBCARD_DIR.format('bajaj')
     path = uploadFileToS3(destination=destination, file_obj=file_obj)
     ucn_recovery_obj = common.UCNRecovery(reason=reason, user=user_obj, sap_customer_id=customer_id, file_location=path)
     ucn_recovery_obj.save()
@@ -155,7 +155,7 @@ def get_file_name(request, file_obj):
     else:
         #TODO: Implement dealerId in prefix when we have Dealer and ASC relationship
         filename_prefix = requester
-    filename_suffix = str(datetime.now())
+    filename_suffix = str(uuid.uuid4())
     ext = file_obj.name.split('.')[-1]
     customer_id = request.POST['customerId']
     return str(filename_prefix)+'_'+customer_id+'_'+filename_suffix+'.'+ext
