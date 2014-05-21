@@ -17,8 +17,7 @@ from django.conf import settings
 import mimetypes
 from gladminds.mail import send_ucn_request_alert
 from django.contrib.auth.models import User
-from django.http.response import HttpResponse
-import json
+import time, datetime
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 logger = logging.getLogger('gladminds')
@@ -178,6 +177,7 @@ def get_email_template(key):
     template_object = common.EmailTemplate.objects.get(template_key = key)
     return template_object
 
-def format_return_message(data):
-    return HttpResponse(json.dumps({"status": data}), content_type="application/json")
+def format_date_string(date_sting):
+    date = datetime.datetime.fromtimestamp(time.mktime(time.strptime(date_sting, "%d/%m/%Y")))
+    return date
     

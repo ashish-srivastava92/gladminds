@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from gladminds import utils, message_template
 from django.conf import settings
 from gladminds.utils import get_task_queue, get_customer_info,\
-    get_sa_list, recover_coupon_info, mobile_format
+    get_sa_list, recover_coupon_info, mobile_format, format_date_string
 from gladminds.tasks import export_asc_registeration_to_sap
 from gladminds.mail import sent_otp_email
 from django.contrib.auth.models import Group, User
@@ -166,7 +166,7 @@ UPDATE_FAIL = 'Updated customer details'
 def register_customer(request, group=None):
     data = request.POST
     product_obj = common.ProductData.objects.filter(vin=data['customer-vin'])
-    purchase_date = datetime.datetime.fromtimestamp(time.mktime(time.strptime(data['purchase-date'], "%d/%m/%Y")))
+    purchase_date = format_date_string(data['purchase-date'])
     try:
         customer_obj = common.CustomerUpdatedInfo(product_data=product_obj[0], new_customer_name = data['customer-name'],
              new_number=data['customer-phone'],product_purchase_date = purchase_date)

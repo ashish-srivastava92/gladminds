@@ -59,8 +59,12 @@
                   $('.customer-submit').attr('disabled', false);
               }	
               else{
-                messageBlock.text(data.message);
-                messageModal.modal('show');
+                  $('.customer-phone').val(data['customer_phone']);
+            	  $('.customer-name').val('')
+                  $('.name-readonly').attr('readOnly', false);
+                  $('.purchase-date').val('').attr('readOnly', false);  
+                  messageBlock.text(data.message);
+                  messageModal.modal('show');
               }
             },
             error: function() {
