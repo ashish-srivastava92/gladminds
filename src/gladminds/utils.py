@@ -193,10 +193,11 @@ def get_email_template(key):
     template_object = common.EmailTemplate.objects.get(template_key = key)
     return template_object
 
-def format_date_string(date_string):
+def format_date_string(date_string, date_format='%d/%m/%Y'):
     '''
     This function converts the date from string to datetime format
     '''
-    date = datetime.fromtimestamp(time.mktime(time.strptime(date_string, "%d/%m/%Y")))
+    date = datetime.strptime(date_string, date_format)
+    print date
     return date
     
