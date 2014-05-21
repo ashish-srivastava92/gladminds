@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from gladminds import utils, message_template
 from django.conf import settings
 from gladminds.utils import get_task_queue, get_customer_info,\
-    get_sa_list, recover_coupon_info, mobile_format, stringify_groups
+    get_sa_list, recover_coupon_info, mobile_format, format_date_string, stringify_groups
 from gladminds.tasks import export_asc_registeration_to_sap
 from gladminds.mail import sent_otp_email
 from django.contrib.auth.models import Group, User
@@ -193,20 +193,20 @@ def exceptions(request, exception=None):
     else:
         return HttpResponseBadRequest()
     
+UPDATE_SUCCESS = 'Customer Update failed!'
+UPDATE_FAIL = 'Updated customer details'
 def register_customer(request, group=None):
-    if 'customer-name' not in request.POST:
-        data = request.POST
-        try:
-            product_obj = common.ProductData.objects.get(vin=data['customer-vin'])
-            product_obj.customer_phone_number.phone_number = data['customer-phone']
-            product_obj.customer_phone_number.save()
-            return json.dumps({'message': 'Updated customer details'})
-        #TODO : will have to add more scenarios then we could give proper error messages for exception
-        except Exception as ex:
-            logger.info(ex)
-            raise
-    else:
-        raise
+    data = request.POST
+    product_obj = common.ProductData.objects.filter(vin=data['customer-vin'])
+    purchase_date = format_date_string(data['purchase-date'])
+    try:
+        customer_obj = common.CustomerUpdatedInfo(product_data=product_obj[0], new_customer_name = data['customer-name'],
+             new_number=data['customer-phone'],product_purchase_date = purchase_date)
+        customer_obj.save()
+    except Exception as ex:
+        logger.info(ex)
+        return json.dumps({"message": UPDATE_SUCCESS})
+    return json.dumps({'message': UPDATE_FAIL})
         
 
 SUCCESS_MESSAGE = 'Registration is complete'

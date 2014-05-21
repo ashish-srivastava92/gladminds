@@ -1,24 +1,18 @@
-import os, logging
+import os, logging, time, hashlib, uuid, mimetypes
 from datetime import datetime
+from random import randint
+from django.utils import timezone
+from django.conf import settings
+from django.contrib.auth.models import User
+import boto
+from boto.s3.key import Key
 from gladminds.models.common import STATUS_CHOICES
 from gladminds.models import common
 from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
-from random import randint
-
-import hashlib
-from django.utils import timezone
-
 from gladminds.taskqueue import SqsTaskQueue
 from gladminds import message_template
-import boto
-from boto.s3.key import Key
-from django.conf import settings
-import mimetypes
 from gladminds.mail import send_ucn_request_alert
-from django.contrib.auth.models import User
-from django.http.response import HttpResponse
-import json, uuid
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 logger = logging.getLogger('gladminds')
@@ -105,7 +99,12 @@ def get_task_queue():
 
 def get_customer_info(data):
     data=data.POST
-    product_obj = common.ProductData.objects.filter(vin=data['vin'])[0]
+    try:
+        product_obj = common.ProductData.objects.get(vin=data['vin'])
+    except Exception as ex:
+        logger.info(ex)
+        message = '''VIN '{0}' does not exist in our records'''.format(data['vin'])
+        return {'message': message}
     purchase_date = product_obj.product_purchase_date.strftime('%d/%m/%Y')
     return {'customer_phone': get_phone_number_format(str(product_obj.customer_phone_number)), 'customer_name': product_obj.customer_phone_number.customer_name, 'purchase_date': purchase_date}
 
@@ -194,6 +193,10 @@ def get_email_template(key):
     template_object = common.EmailTemplate.objects.get(template_key = key)
     return template_object
 
-def format_return_message(data):
-    return HttpResponse(json.dumps({"status": data}), content_type="application/json")
+def format_date_string(date_string, date_format='%d/%m/%Y'):
+    '''
+    This function converts the date from string to datetime format
+    '''
+    date = datetime.strptime(date_string, date_format)
+    return date
     

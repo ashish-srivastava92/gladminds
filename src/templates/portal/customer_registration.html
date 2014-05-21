@@ -74,12 +74,12 @@
                     <label class="control-label">Product purchase Date:</label>
                 </div>
                 <div class="col-md-4 form-group">
-                    <input type="text" name='purchase-date' class="form-control purchase-date" placeholder="dd/mm/yyyy"/>
+                    <input type="text" name='purchase-date' class="form-control purchase-date" placeholder="dd/mm/yyyy" pattern="^(\d{1,2})\/(\d{1,2})\/(\d{4})$"/>
                 </div>
               </div>
               <div class="row">
                   <div class="col-md-7 form-group">
-                      <button type="submit" value="Submit" class="btn btn-primary pull-right customer-submit">
+                      <button type="submit" value="Submit" class="btn btn-primary pull-right customer-submit" disabled>
                           Submit
                       </button>
                   </div>
