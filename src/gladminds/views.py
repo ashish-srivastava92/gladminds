@@ -14,7 +14,6 @@ from gladminds.mail import sent_otp_email
 from django.contrib.auth.models import Group, User
 from django.contrib.auth import authenticate, login, logout
 import logging, json
-import time, datetime
 
 logger = logging.getLogger('gladminds')
 
