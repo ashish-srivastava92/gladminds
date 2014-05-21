@@ -27,7 +27,7 @@ BROKER_URL= 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
 
 
-JOBCARD_DIR = '{0}/jobcards/dev/'
+JOBCARD_DIR = '/jobcards/dev/'
 
 MAIL_SERVER = 'localhost'
 
