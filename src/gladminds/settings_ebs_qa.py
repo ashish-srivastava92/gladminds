@@ -71,6 +71,7 @@ COUPON_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsd
 
 ENABLE_AMAZON_SQS = True
 
+
 ########################SQS Queue Name##################################
 SQS_QUEUE_NAME = "gladminds-prod"
 ########################################################################

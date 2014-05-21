@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import sys
 import json
-
+from django.conf import settings
 from boto.sqs.connection import SQSConnection
 ACCESS_KEY = 'AKIAIL7IDCSTNCG2R6JA'
 SECRET_KEY = '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'
@@ -53,7 +53,7 @@ class SqsTaskQueue(TaskQueue):
         self._conn.send_message(self._q, payload_as_str)
 
 
-QUEUE_NAME = "gladminds-prod"
+QUEUE_NAME = settings.SQS_QUEUE_NAME
 taskqueue = SqsTaskQueue(QUEUE_NAME)
 
 if __name__ == '__main__':
