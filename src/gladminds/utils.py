@@ -200,7 +200,7 @@ def get_email_template(key):
     template_object = common.EmailTemplate.objects.get(template_key = key)
     return template_object
 
-def format_date_string(date_sting):
-    date = datetime.datetime.fromtimestamp(time.mktime(time.strptime(date_sting, "%d/%m/%Y")))
+def format_date_string(date_string):
+    date = datetime.datetime.fromtimestamp(time.mktime(time.strptime(date_string, "%d/%m/%Y")))
     return date
     
