@@ -1,7 +1,6 @@
 from django.shortcuts import render_to_response, render
 from django.template import RequestContext
-from django.http.response import HttpResponseRedirect, HttpResponse,\
-    HttpResponseBadRequest
+from django.http.response import HttpResponseRedirect, HttpResponse
 from gladminds.models import common
 from gladminds.tasks import send_otp
 from django.contrib.auth.decorators import login_required
@@ -11,8 +10,6 @@ from gladminds.tasks import export_asc_registeration_to_sap
 from gladminds.utils import get_task_queue
 from gladminds.mail import sent_otp_email
 import logging, json
-import os
-import csv
 
 logger = logging.getLogger('gladminds')
 
@@ -140,23 +137,4 @@ def register_user(request, user=None):
     status = save_user[user](request.POST)
 
     return HttpResponse(json.dumps(status), mimetype="application/json")
-
-def delete_purchase(request):
-    if request.GET.urlencode() != 'token=gm123':
-        return HttpResponseBadRequest('Not allowed')
-    list = []
-    with open('product_list.csv', 'wb') as csvfile:
-        spamwriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        vin_objs = common.ProductData.objects.raw("""select gp.* from gladminds_productdata gp join gladminds_coupondata gc on gp.id = gc.vin_id  group by gc.vin_id having count(*)>3""")
-        for vin_obj in vin_objs:
-            spamwriter.writerow(str(vin_obj.vin))
-    with open('product_list.csv', 'rb') as csvfile:
-        spamreader = csv.reader(csvfile, delimiter='.', quotechar='|')
-        for row in spamreader:
-            list.append(row[0].replace(' ', ''))
-#            if product.customer_phone_number:
-#                product.customer_phone_number.delete()
-#            product.delete()
-
-    return HttpResponse(str(len(list))+str(list[0]))
         
