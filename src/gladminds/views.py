@@ -144,25 +144,18 @@ def register_user(request, user=None):
 def delete_purchase(request):
     if request.GET.urlencode() != 'token=gm123':
         return HttpResponseBadRequest('Not allowed')
-    
+    list = []
     with open('product_list.csv', 'wb') as csvfile:
-        spamwriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        for product in common.ProductData.objects.all():
-            coupon_data = common.CouponData.objects.filter(vin=product)
-            if len(coupon_data) > 3:
-                spamwriter.writerow(str(product.vin))
-#                if product.customer_phone_number:
-#                    product.customer_phone_number.delete()
-#                product.delete()
-
-    with open('product_list.csv', 'wb') as csvfile:
-        spamwriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        vin_objs = common.ProductData.objects.raw("""select gp.* from gladminds_productdata gp join gladminds_coupondata gc on gp.id = gc.vin_id  group by gc.vin_id having count(*)>3""")
-        for vin_obj in vin_objs:
-            spamwriter.writerow(str(vin_obj.vin))
+        spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        for row in spamreader:
+            list.append(spamreader)
+#        spamwriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+#        vin_objs = common.ProductData.objects.raw("""select gp.* from gladminds_productdata gp join gladminds_coupondata gc on gp.id = gc.vin_id  group by gc.vin_id having count(*)>3""")
+#        for vin_obj in vin_objs:
+#            spamwriter.writerow(str(vin_obj.vin))
 #            if product.customer_phone_number:
 #                product.customer_phone_number.delete()
 #            product.delete()
 
-    return HttpResponse(len(vin_objs))
+    return HttpResponse(str(len(list))+list[0])
         
