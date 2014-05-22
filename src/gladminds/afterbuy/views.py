@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response
 from django.core.files import File
-from django.http.response import HttpResponse
+from django.http.response import HttpResponse, HttpResponseBadRequest
 from django.core.context_processors import csrf
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate ,login
@@ -9,17 +9,16 @@ from gladminds import utils,mail
 from django.template import Context, Template
 from django.contrib.auth import logout
 from django.views.decorators.csrf import csrf_exempt
-import json
 from django.conf import settings
 from django.template.context import RequestContext
 from django.contrib.auth.models import User 
 from datetime import datetime
 from gladminds import mail
 from gladminds.afterbuy.auth import authentication_required
-import logging
 from datetime import timedelta
 from django.contrib.auth.decorators import login_required
-import uuid
+from provider.oauth2.models import Client
+import urllib, urllib2, uuid, logging, json
 
 logger = logging.getLogger("gladminds")
 GLADMINDS_ADMIN_MAIL = 'admin@gladminds.co'
@@ -585,3 +584,34 @@ def app_logout(request):
 @csrf_exempt
 def home(request):
     return render_to_response('afterbuy/index.html')
+
+
+@csrf_exempt
+def get_access_token(request):
+    print request
+    username = request.POST['username']
+    password = request.POST['password']
+    
+    user_auth = authenticate(username=username, password=password)
+    if user_auth is None:
+        return HttpResponseBadRequest(json.dumps({'message': 'Invalid Credentials.'}), status=401\
+                                      , mimetype="application/json")
+    
+    secret_cli = Client(user=user_auth, name='client', client_type=1, url='')
+    secret_cli.save()
+    client_id = secret_cli.client_id
+    client_secret = secret_cli.client_secret
+    page = request.META['HTTP_HOST'] + '/oauth2/access_token'
+    if not 'http://' in page:
+        page = 'http://' + page
+    raw_params = {'client_id': client_id,
+                  'client_secret': client_secret,
+                  'grant_type': 'password',
+                  'username': username,
+                  'password': password,
+                  'scope': 'write'
+    }
+    params = urllib.urlencode(raw_params)
+    oath_request = urllib2.Request(page, params)
+    response = urllib2.urlopen(oath_request)
+    return HttpResponse(response.read(), mimetype="application/json")

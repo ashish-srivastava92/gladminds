@@ -179,6 +179,8 @@ INSTALLED_APPS = (
     'tastypie_swagger',
     'django_otp',
     'django_otp.plugins.otp_totp',
+    'provider',
+    'provider.oauth2',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )

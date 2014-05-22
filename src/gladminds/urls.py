@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.conf import settings
 from tastypie.api import Api
-from gladminds.resource import resources as r 
+from gladminds.resource import resources as r
 from gladminds.sqs_tasks import _tasks_map
 from gladminds.taskqueue import SqsHandler
 # Uncomment the next two lines to enable the admin:
@@ -25,10 +25,12 @@ urlpatterns = patterns('',
 
     url(r'^register/(?P<user>[a-zA-Z0-9]+)$', 'gladminds.views.register'),
     url(r'^save/(?P<user>[a-zA-Z0-9]+)$', 'gladminds.views.register_user'),
-    url(r'^reset/purchase', 'gladminds.views.delete_purchase'),
     url(r'^users/otp/generate$', 'gladminds.views.generate_otp', name='generate_otp'),
     url(r'^users/otp/validate', 'gladminds.views.validate_otp', name='validate_otp'),
     url(r'^users/otp/update_pass', 'gladminds.views.update_pass', name='update_pass'),
+    
+    #Afterbuy accesstoken URL.
+    url(r'^oauth2/', include('provider.oauth2.urls', namespace = 'oauth2')),
 )
 
 urlpatterns += patterns('gladminds',
@@ -50,6 +52,7 @@ urlpatterns += patterns('gladminds',
     url(r'^app/logout', 'afterbuy.views.app_logout', name='app_logout'),
     url(r'^app', 'afterbuy.views.home', name='home'),
     url(r'^gm', 'afterbuy.views.main', name='main'),
+    url(r'^v1/api/users/auth', 'afterbuy.views.get_access_token'),
 
     url(r'^tasks/', SqsHandler.as_view(task_map=_tasks_map)),
 
