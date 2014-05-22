@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from django.conf import settings
 from gladminds.models.common import STATUS_CHOICES
 from gladminds.models import common
 from django_otp.oath import TOTP
@@ -91,6 +92,6 @@ def update_pass(otp, password):
 
 
 def get_task_queue():
-    queue_name = "gladminds-prod"
+    queue_name = settings.SQS_QUEUE_NAME
     return SqsTaskQueue(queue_name)
 
