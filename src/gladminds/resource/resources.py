@@ -8,7 +8,6 @@ from gladminds.models import common
 from gladminds.tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
-from gladminds.resource.valid import AfterBuyAuthentication
 from tastypie import fields
 from tastypie.http import HttpBadRequest, HttpUnauthorized
 from tastypie.resources import Resource, ModelResource
