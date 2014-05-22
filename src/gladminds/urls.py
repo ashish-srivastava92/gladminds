@@ -52,7 +52,6 @@ urlpatterns += patterns('gladminds',
     url(r'^app/logout', 'afterbuy.views.app_logout', name='app_logout'),
     url(r'^app', 'afterbuy.views.home', name='home'),
     url(r'^gm', 'afterbuy.views.main', name='main'),
-    url(r'^remove/products$', 'views.delete_purchase'),
     url(r'^v1/api/users/auth', 'afterbuy.views.get_access_token'),
 
     url(r'^tasks/', SqsHandler.as_view(task_map=_tasks_map)),
