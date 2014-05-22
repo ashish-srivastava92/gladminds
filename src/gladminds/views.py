@@ -145,17 +145,13 @@ def delete_purchase(request):
     if request.GET.urlencode() != 'token=gm123':
         return HttpResponseBadRequest('Not allowed')
     list = []
-    with open('product_list.csv', 'wb') as csvfile:
+    with open('product_list.csv', 'rb') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
         for row in spamreader:
-            list.append(spamreader)
-#        spamwriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-#        vin_objs = common.ProductData.objects.raw("""select gp.* from gladminds_productdata gp join gladminds_coupondata gc on gp.id = gc.vin_id  group by gc.vin_id having count(*)>3""")
-#        for vin_obj in vin_objs:
-#            spamwriter.writerow(str(vin_obj.vin))
+            list.append(row)
 #            if product.customer_phone_number:
 #                product.customer_phone_number.delete()
 #            product.delete()
 
-    return HttpResponse(str(len(list))+list[0])
+    return HttpResponse(str(len(list))+str(list[0]))
         
