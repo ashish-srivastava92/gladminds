@@ -148,7 +148,7 @@ def delete_purchase(request):
     with open('product_list.csv', 'rb') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
         for row in spamreader:
-            list.append(row)
+            list.append(row.replace(' ', ''))
 #            if product.customer_phone_number:
 #                product.customer_phone_number.delete()
 #            product.delete()
