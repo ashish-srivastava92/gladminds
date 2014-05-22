@@ -1,6 +1,7 @@
 from django.shortcuts import render_to_response, render
 from django.template import RequestContext
-from django.http.response import HttpResponseRedirect, HttpResponse
+from django.http.response import HttpResponseRedirect, HttpResponse,\
+    HttpResponseBadRequest
 from gladminds.models import common
 from gladminds.tasks import send_otp
 from django.contrib.auth.decorators import login_required
@@ -10,6 +11,8 @@ from gladminds.tasks import export_asc_registeration_to_sap
 from gladminds.utils import get_task_queue
 from gladminds.mail import sent_otp_email
 import logging, json
+import os
+import csv
 
 logger = logging.getLogger('gladminds')
 
@@ -137,3 +140,20 @@ def register_user(request, user=None):
     status = save_user[user](request.POST)
 
     return HttpResponse(json.dumps(status), mimetype="application/json")
+
+def delete_purchase(request):
+    if request.GET.urlencode() != 'token=gm123':
+        return HttpResponseBadRequest('Not allowed')
+    
+    with open('product_list.csv', 'wb') as csvfile:
+        spamwriter = csv.writer(csvfile, delimiter=' ',
+                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        for product in common.ProductData.objects.all():
+            coupon_data = common.CouponData.objects.filter(vin=product)
+            if len(coupon_data) > 3:
+                spamwriter.writerow(str(product.vin))
+#                if product.customer_phone_number:
+#                    product.customer_phone_number.delete()
+#                product.delete()
+    return HttpResponse("OK")
+        
