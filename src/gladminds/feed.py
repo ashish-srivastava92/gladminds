@@ -233,7 +233,7 @@ class ProductDispatchFeed(BaseFeed):
                 except Exception as ex:
                     total_failed += 1
                     logger.info(
-                        '[Exception: ProductDispatchFeed_product_data_save]: {0}'.format(ex))
+                        '[Exception: ProductDispatchFeed_product_data_save]: {0} VIN - {1}'.format(ex, product['vin']))
                     continue
 
             try:
@@ -245,6 +245,7 @@ class ProductDispatchFeed(BaseFeed):
                             status=product['coupon_status'])
                 coupon_data.save()
             except Exception as ex:
+                logger.error('Coupon Save error : {0} VIN - {1}'.format(ex, product['vin']))
                 total_failed += 1
                 continue
 
@@ -288,7 +289,7 @@ class ProductPurchaseFeed(BaseFeed):
                 return True
         except Exception as ex:
             logger.info(
-                        '[Exception: New Customer Added]: {0}'.format(ex))
+                        '[Exception: New Customer Added]: {0} Phone {1}'.format(ex, phone_number))
             return False
 
     def import_data(self):
@@ -323,7 +324,7 @@ class ProductPurchaseFeed(BaseFeed):
             except Exception as ex:
                 total_failed += 1
                 logger.info(
-                    '[Exception: ProductPurchaseFeed_product_data]: {0}'.format(ex))
+                    '[Exception: ProductPurchaseFeed_product_data]: {0} VIN - {1}'.format(ex, product['vin']))
                 continue
 
         feed_log(feed_type='Purchase Feed', total_data_count=len(self.data_source),
