@@ -12,7 +12,9 @@ from gladminds.utils import get_task_queue, get_customer_info,\
 from gladminds.tasks import export_asc_registeration_to_sap
 from gladminds.mail import sent_otp_email
 from django.contrib.auth.models import Group, User
+from gladminds.utils import get_task_queue
 from django.contrib.auth import authenticate, login, logout
+
 import logging, json
 
 logger = logging.getLogger('gladminds')
@@ -248,6 +250,7 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
         return json.dumps({"message": EXCEPTION_INVALID_DEALER})
     return json.dumps({"message": SUCCESS_MESSAGE})
 
+
 def save_sa_registration(request, groups):
     data = request.POST
     if not ('dealers' in groups or 'ascs' in groups):
@@ -260,3 +263,13 @@ def save_sa_registration(request, groups):
              phone_number=phone_number, status=data['status'])
     asc_obj.save()
     return json.dumps({'message': SUCCESS_MESSAGE})
+
+
+def register_user(request, user=None):
+    save_user = {
+        'asc': save_asc_registeration
+    }
+    status = save_user[user](request.POST)
+
+    return HttpResponse(json.dumps(status), mimetype="application/json")
+        

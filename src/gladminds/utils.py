@@ -1,11 +1,15 @@
 import os, logging, time, hashlib, uuid, mimetypes
 from datetime import datetime
+
+from django.conf import settings
+
 from random import randint
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import User
 import boto
 from boto.s3.key import Key
+import json
 from gladminds.models.common import STATUS_CHOICES
 from gladminds.models import common
 from django_otp.oath import TOTP
@@ -188,10 +192,11 @@ def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=settings
     path = s3_key.generate_url(expires_in=0, query_auth=False)
     logger.info('Jobcard: {0} has been uploaded'.format(s3_key.key))
     return path
-    
+
 def get_email_template(key):
     template_object = common.EmailTemplate.objects.get(template_key = key)
     return template_object
+
 
 def format_date_string(date_string, date_format='%d/%m/%Y'):
     '''
@@ -199,4 +204,3 @@ def format_date_string(date_string, date_format='%d/%m/%Y'):
     '''
     date = datetime.strptime(date_string, date_format)
     return date
-    

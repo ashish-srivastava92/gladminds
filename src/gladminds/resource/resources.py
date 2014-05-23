@@ -8,7 +8,6 @@ from gladminds.models import common
 from gladminds.tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
-from gladminds.resource.valid import AfterBuyAuthentication
 from tastypie import fields
 from tastypie.http import HttpBadRequest, HttpUnauthorized
 from tastypie.resources import Resource, ModelResource
@@ -24,6 +23,7 @@ from gladminds.utils import get_task_queue
 from gladminds.settings import COUPON_VALID_DAYS
 from django.http.response import HttpResponse, HttpResponseBadRequest
 from django.contrib.auth.models import User
+from authentication import AccessTokenAuthentication
 
 
 logger = logging.getLogger('gladminds')
@@ -430,23 +430,26 @@ class BrandResources(GladmindsBaseResource):
     class Meta:
         queryset = common.BrandData.objects.all()
         resource_name = 'brands'
+        authentication = AccessTokenAuthentication()
 
 class ProductTypeResources(GladmindsBaseResource):
     class Meta:
         queryset = common.ProductTypeData.objects.all()
         resource_name = 'product-type'
+        authentication = AccessTokenAuthentication()
         
 class ProductResources(GladmindsBaseResource):
     class Meta:
         queryset = common.ProductData.objects.all()
         resource_name = 'products'
+        authentication = AccessTokenAuthentication()
 
 class UserResources(GladmindsBaseResource):
     products = fields.ListField()
     class Meta:
         queryset = common.GladMindUsers.objects.all()
         resource_name = 'users'
-#        authentication = AfterBuyAuthentication()
+        authentication = AccessTokenAuthentication()
     
     def prepend_urls(self):
         return [
