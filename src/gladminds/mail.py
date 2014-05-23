@@ -19,20 +19,20 @@ def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER
     mail.quit()
 
 
-def feed_report(feed_data=None):
+def feed_report(feed_data = None):
     from gladminds import mail
     try:
         yesterday = datetime.now().date() - timedelta(days=1)
-        file_stream = open(settings.TEMPLATE_DIR + \
-                            '/registration_failure_report.html')
+        file_stream = open(settings.TEMPLATE_DIR+'/feed_report.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
         context = Context({"feed_logs": feed_data, "yesterday": yesterday})
         body = template.render(context)
         mail_detail = settings.MAIL_DETAIL
         mail.send_email(sender=mail_detail['sender'],
-            receiver=mail_detail['receiver'], subject=mail_detail['subject'],
-            body=body, smtp_server=settings.MAIL_SERVER)
+                   receiver=mail_detail['reciever'],
+                   subject=mail_detail['subject'], body=body,
+                   smtp_server=settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception feed_report]: {0}".format(ex))
 
