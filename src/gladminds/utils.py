@@ -1,25 +1,22 @@
-import os, logging
+import os, logging, time, hashlib, uuid, mimetypes
 from datetime import datetime
+
 from django.conf import settings
+
+from random import randint
+from django.utils import timezone
+from django.conf import settings
+from django.contrib.auth.models import User
+import boto
+from boto.s3.key import Key
+import json
 from gladminds.models.common import STATUS_CHOICES
 from gladminds.models import common
 from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
-from random import randint
-
-import hashlib
-from django.utils import timezone
-
 from gladminds.taskqueue import SqsTaskQueue
 from gladminds import message_template
-import boto
-from boto.s3.key import Key
-from django.conf import settings
-import mimetypes
 from gladminds.mail import send_ucn_request_alert
-from django.contrib.auth.models import User
-from django.http.response import HttpResponse
-import json
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 logger = logging.getLogger('gladminds')
@@ -106,7 +103,12 @@ def get_task_queue():
 
 def get_customer_info(data):
     data=data.POST
-    product_obj = common.ProductData.objects.filter(vin=data['vin'])[0]
+    try:
+        product_obj = common.ProductData.objects.get(vin=data['vin'])
+    except Exception as ex:
+        logger.info(ex)
+        message = '''VIN '{0}' does not exist in our records'''.format(data['vin'])
+        return {'message': message}
     purchase_date = product_obj.product_purchase_date.strftime('%d/%m/%Y')
     return {'customer_phone': get_phone_number_format(str(product_obj.customer_phone_number)), 'customer_name': product_obj.customer_phone_number.customer_name, 'purchase_date': purchase_date}
 
@@ -123,7 +125,6 @@ def get_sa_list(request):
 def recover_coupon_info(request):
     coupon_info = get_coupon_info(request)
     upload_file(request)
-    send_email_to_admin(request)
     return coupon_info
     
 def get_coupon_info(request):
@@ -136,25 +137,44 @@ def get_coupon_info(request):
     return {'status': True, 'message': message}
 
 def upload_file(request):
-    file_obj = request.FILES['jobCard']
-    customer_id = request.POST['customerId']
-    ext = file_obj.name.split('.')[-1]
-    file_obj.name = str(datetime.now().date())+customer_id+'.'+ext
-    destination = settings.JOBCARD_DIR
-    uploadFileToS3(destination=destination, file_obj=file_obj)
-
-def send_email_to_admin(request):
     data = request.POST
+    user_obj = request.user
     file_obj = request.FILES['jobCard']
     customer_id = data['customerId']
     reason = data['reason']
-    user = str(request.user)
-    ext = file_obj.name.split('.')[-1]
-    user_obj = User.objects.filter(username=user)[0]
-    filename = settings.JOBCARD_DIR+str(datetime.now().date())+customer_id+'.'+ext
-    data = get_email_template('UCN_REQUEST_ALERT').body.format(request.user, customer_id, reason, filename)
-    ucn_recovery_obj = common.UCNRecovery(reason=reason, user=user_obj, sap_customer_id=customer_id, file_location=filename)
+    customer_id = request.POST['customerId']
+    file_obj.name = get_file_name(request, file_obj)
+    #TODO: Include Facility to get brand name here
+    destination = settings.JOBCARD_DIR.format('bajaj')
+    path = uploadFileToS3(destination=destination, file_obj=file_obj)
+    ucn_recovery_obj = common.UCNRecovery(reason=reason, user=user_obj, sap_customer_id=customer_id, file_location=path)
     ucn_recovery_obj.save()
+    send_recovery_email_to_admin(ucn_recovery_obj)
+
+def get_file_name(request, file_obj):
+    requester = request.user
+    if 'dealers' in requester.groups.all():
+        filename_prefix = requester
+    else:
+        #TODO: Implement dealerId in prefix when we have Dealer and ASC relationship
+        filename_prefix = requester
+    filename_suffix = str(uuid.uuid4())
+    ext = file_obj.name.split('.')[-1]
+    customer_id = request.POST['customerId']
+    return str(filename_prefix)+'_'+customer_id+'_'+filename_suffix+'.'+ext
+    
+def stringify_groups(user):
+    groups = []
+    for group in user.groups.all():
+        groups.append(str(group.name))
+    return groups
+
+def send_recovery_email_to_admin(file_obj):
+    file_location = file_obj.file_location
+    reason = file_obj.reason
+    customer_id = file_obj.sap_customer_id
+    requester = str(file_obj.user)
+    data = get_email_template('UCN_REQUEST_ALERT').body.format(requester, customer_id, reason, file_location)
     send_ucn_request_alert(data=data)
 
 def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=settings.JOBCARD_BUCKET,
@@ -168,12 +188,19 @@ def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=settings
     s3_key.content_type = mimetypes.guess_type(file_obj.name)[0]
     s3_key.key = destination+file_obj.name
     s3_key.set_contents_from_string(file_obj.read())
+    s3_key.set_acl('public-read')
+    path = s3_key.generate_url(expires_in=0, query_auth=False)
     logger.info('Jobcard: {0} has been uploaded'.format(s3_key.key))
-    
+    return path
+
 def get_email_template(key):
     template_object = common.EmailTemplate.objects.get(template_key = key)
     return template_object
 
-def format_return_message(data):
-    return HttpResponse(json.dumps({"status": data}), content_type="application/json")
-    
+
+def format_date_string(date_string, date_format='%d/%m/%Y'):
+    '''
+    This function converts the date from string to datetime format
+    '''
+    date = datetime.strptime(date_string, date_format)
+    return date

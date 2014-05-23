@@ -30,7 +30,7 @@ DATABASES = {
 BROKER_URL= 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
 
-JOBCARD_DIR = '/jobcards/qa/'
+JOBCARD_DIR = '{0}/jobcards/qa/'
 
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
