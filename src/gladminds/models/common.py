@@ -247,7 +247,7 @@ class MessageTemplate(models.Model):
         app_label = "gladminds"
         verbose_name_plural = "Message Template"
 
-        
+
 ####################################################################
 ########################TOTP Details################################
 
@@ -256,7 +256,7 @@ class OTPToken(models.Model):
     token = models.CharField(max_length=256, null=False)
     request_date = models.DateTimeField(null=True, blank=True)
     email = models.CharField(max_length=50, null=False)
-    
+
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "OTPs"
@@ -308,15 +308,16 @@ class RegisteredASC(models.Model):
         app_label = "gladminds"
         verbose_name_plural = "Registered ASC Form"
 
-class CustomerUpdatedInfo(models.Model):    
+
+class CustomerUpdatedInfo(models.Model):
     product_data = models.ForeignKey(ProductData, null=True, blank=True)
     new_customer_name = models.CharField(max_length=50, null=True, blank=True)
     new_number = models.CharField(max_length=15, unique=True)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
-    
+
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Customer update info"
-    
+
     def __unicode__(self):
         return self.new_customer_name

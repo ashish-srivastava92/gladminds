@@ -17,14 +17,12 @@ from models.common import GladMindUsers, ProductTypeData, RegisteredDealer,\
     ServiceAdvisor, BrandData, ProductData, CouponData, MessageTemplate,\
     ServiceAdvisorDealerRelationship
 
-from models.logs import AuditLog, DataFeedLog
+from gladminds.aftersell.models.logs import AuditLog, DataFeedLog
 from import_export.admin import ImportExportModelAdmin, ExportMixin
 from import_export import fields, widgets
 from import_export import resources
-from models import logs
-from gladminds.models.common import EmailTemplate, ASCSaveForm
+from gladminds.models.common import EmailTemplate
 from gladminds.aftersell.models.common import ASCSaveForm
-
 
 
 ############################BRAND AND PRODUCT ADMIN##########################

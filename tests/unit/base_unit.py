@@ -1,6 +1,7 @@
 import unittest
 from django.core import management
-from gladminds.models import common , logs
+from gladminds.models import common
+from gladminds.aftersell.models import logs
 
 
 class GladmindsUnitTestCase(unittest.TestCase):
