@@ -247,7 +247,8 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
     feed_export_data = redeem_obj.export_data(start_date = start_date, end_date = end_date)
     if len(feed_export_data[0]) > 0:
         coupon_redeem = exportfeed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
-                                                              'username'], password=settings.SAP_CRM_DETAIL['password'], wsdl_url=settings.COUPON_WSDL_URL)
+                      'username'], password=settings.SAP_CRM_DETAIL['password'],
+                       wsdl_url=settings.COUPON_WSDL_URL, feed_type='Coupon Redeem Feed')
         coupon_redeem.export(items=feed_export_data[0], item_batch=feed_export_data[1], total_failed_on_feed=feed_export_data[2])
     else:
         logger.info("tasks.py: No Coupon closed during last day")
