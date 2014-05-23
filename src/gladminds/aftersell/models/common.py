@@ -38,7 +38,7 @@ class ASCSaveForm(models.Model):
     dealer_id = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
-        app_label = "gladminds"
+        app_label = "aftersell"
         verbose_name_plural = "ASC Save Form"
 
 
@@ -50,7 +50,7 @@ class UCNRecovery(models.Model):
     request_date = models.DateTimeField(default=datetime.now())
 
     class Meta:
-        app_label = "gladminds"
+        app_label = "aftersell"
         verbose_name_plural = "UCN recovery logs"
 
 
