@@ -58,7 +58,7 @@ SUIT_CONFIG = {
                     {'model': 'datafeedlog',
                      'label': 'Feed Log'}, 'uploadproductcsv',
                     'messagetemplate', 'emailtemplate', 'gladmindusers',)},
-        {'app': 'aftersell', 'label': 'Data', 'icon': ' icon-folder-open',
+        {'app': 'aftersell', 'label': 'AfterSell', 'icon': ' icon-folder-open',
          'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
                     {'model': 'dispatchedproducts',
                      'label': 'Feed -> Product Dispatch'},

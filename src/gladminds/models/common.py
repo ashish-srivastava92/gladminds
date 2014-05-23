@@ -279,36 +279,17 @@ class EmailTemplate(models.Model):
         app_label = "gladminds"
         verbose_name_plural = "Email Template"
 
-##########################################################################
-########################## ASC Save Form #########################
-ASC_STATUS_CHOICES = ((1, 'In Progress'), (2, 'Failed'))
-
-
-class ASCSaveForm(models.Model):
-    name = models.CharField(max_length=255, null=False)
-    password = models.CharField(max_length=255, null=False, blank=False)
-    phone_number = models.CharField(max_length=15, null=False, blank=False,
-                                                         unique=True)
-    email = models.CharField(max_length=255, null=True, blank=True)
-    pincode = models.CharField(max_length=255, null=True, blank=True)
-    address = models.CharField(max_length=255, null=True, blank=True)
-    status = models.SmallIntegerField(choices=ASC_STATUS_CHOICES, default=1)
-    timestamp = models.DateTimeField(default=datetime.now)
-    dealer_id = models.CharField(max_length=255, null=True, blank=True)
-
-    class Meta:
-        app_label = "gladminds"
-        verbose_name_plural = "ASC Save Form"
-
 
 class SASaveForm(models.Model):
     name = models.CharField(max_length=255, null=False)
     phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)
     status = models.CharField(max_length=10, blank=False, null=False)
+
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "SA Save Form"
-        
+
+
 class RegisteredASC(models.Model):
     user = models.OneToOneField(User, null=True, blank=True)
     dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
@@ -322,21 +303,10 @@ class RegisteredASC(models.Model):
     state = models.CharField(max_length=255, null=True, blank=True)
     img_url = models.FileField(upload_to="users", blank=True)
     isActive = models.BooleanField(default=True)
-    
+
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Registered ASC Form"
-
-class UCNRecovery(models.Model):
-    reason = models.TextField(null=False)
-    user = models.ForeignKey(User)
-    sap_customer_id = models.CharField(max_length=215, null=True, blank=True)
-    file_location = models.CharField(max_length=215, null=True, blank=True)
-    request_date = models.DateTimeField(default=datetime.now())
-    
-    class Meta:
-        app_label = "gladminds"
-        verbose_name_plural = "UCN recovery logs"
 
 class CustomerUpdatedInfo(models.Model):    
     product_data = models.ForeignKey(ProductData, null=True, blank=True)
