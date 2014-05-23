@@ -256,6 +256,7 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
 '''
 Delete the all the generated otp by end of day.
 '''
+@shared_task
 def delete_unused_otp(*args, **kwargs):
     common.OTPToken.objects.all().delete()
 
