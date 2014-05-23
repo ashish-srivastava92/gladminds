@@ -23,6 +23,7 @@ from import_export import fields, widgets
 from import_export import resources
 from models import logs
 from gladminds.models.common import EmailTemplate, ASCSaveForm
+from gladminds.aftersell.models.common import ASCSaveForm
 
 
 

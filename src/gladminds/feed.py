@@ -11,6 +11,7 @@ import time
 from gladminds import audit, message_template as templates
 from gladminds import utils
 from gladminds.models import common
+from gladminds.aftersell.models import common as afterbuy_common
 from gladminds.audit import feed_log
 from django.db.models import signals
 from gladminds.utils import get_task_queue
@@ -409,7 +410,7 @@ class CouponRedeemFeedToSAP(BaseFeed):
 class ASCRegistrationToSAP(BaseFeed):
 
     def export_data(self, asc_phone_number=None):
-        asc_form_obj = common.ASCSaveForm.objects\
+        asc_form_obj = afterbuy_common.ASCSaveForm.objects\
             .get(phone_number=asc_phone_number, status=1)
 
         item_batch = {
