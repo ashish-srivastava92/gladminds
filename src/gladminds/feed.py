@@ -256,8 +256,9 @@ class ProductDispatchFeed(BaseFeed):
                         vin=product['vin'], product_type=producttype_data, invoice_date=invoice_date, dealer_id=dealer_data)
                     product_data.save()
                 except Exception as ex:
-                    ex = '[Exception: ProductDispatchFeed_product_data_save]: {0}'\
-                        .format(ex)
+
+                    ex = '''[Exception: ProductDispatchFeed_product_data_save]:
+                         {0} VIN - {1}'''.format(ex, product['vin'])
                     self.feed_remark.fail_remarks(ex)
                     logger.error(ex)
                     continue
@@ -273,8 +274,9 @@ class ProductDispatchFeed(BaseFeed):
                                                 status=product['coupon_status'])
                 coupon_data.save()
             except Exception as ex:
-                ex = '[Exception: ProductDispatchFeed Coupon Data Save : ]:{0}'\
-                    .format(ex)
+
+                ex = '''[Exception: Coupon Save error :
+                        {0} VIN - {1}'''.format(ex, product['vin'])
                 self.feed_remark.fail_remarks(ex)
                 logger.error(ex)
                 continue
@@ -317,8 +319,9 @@ class ProductPurchaseFeed(BaseFeed):
                         "Expection: New Number of customer is not updated %s" % ex)
                 return True
         except Exception as ex:
-            logger.info(
-                '[Exception: New Customer Added]: {0}'.format(ex))
+            logger.info('''[Exception: New Customer Added]: {0} Phone {1}'''
+                        .format(ex, phone_number))
+
             return False
 
     def import_data(self):
@@ -351,8 +354,9 @@ class ProductPurchaseFeed(BaseFeed):
                     product_data.engine = product["engine"]
                     product_data.save()
             except Exception as ex:
-                ex = '[Exception: ProductPurchaseFeed_product_data]:'\
-                    .format(ex)
+
+                ex = '''[Exception: ProductPurchaseFeed_product_data]:
+                         {0} VIN - {1}'''.format(ex, product['vin'])
                 self.feed_remark.fail_remarks(ex)
                 logger.error(ex)
                 continue

@@ -28,7 +28,7 @@ class ExportCouponRedeemFeed(BaseExportFeed):
 
     def export(self, items=None, item_batch=None, total_failed_on_feed=0):
         logger.info(
-            "Export {3}: Items:{0} and Item_batch: {1}"\
+            "Export {2}: Items:{0} and Item_batch: {1}"\
             .format(items, item_batch, self.feed_type))
         client = self.get_client()
         total_failed = total_failed_on_feed
@@ -52,7 +52,7 @@ class ExportASCRegistrationFeed(BaseExportFeed):
 
     def export(self, item=None, item_batch=None):
         logger.info(
-            "Export {3}: Item:{0} and Item_batch: {1}"\
+            "Export {2}: Item:{0} and Item_batch: {1}"\
             .format(item, item_batch, self.feed_type))
         client = self.get_client()
 
