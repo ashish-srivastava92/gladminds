@@ -1,6 +1,7 @@
 from tastypie.test import ResourceTestCase
 from django.core import management
 from gladminds.models import common
+from gladminds.aftersell.models import common as afterbuy_common
 import os
 from django.conf import settings
 import json
@@ -50,7 +51,7 @@ class GladmindsResourceTestCase(ResourceTestCase):
         return product_data
 
     def get_delear_obj(self, **kwargs):
-        delear_data = common.RegisteredDealer(**kwargs)
+        delear_data = afterbuy_common.RegisteredDealer(**kwargs)
         delear_data.save()
         return delear_data
 

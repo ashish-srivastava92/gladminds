@@ -11,12 +11,10 @@ from django.forms import ModelForm, TextInput
 from django.contrib.admin import ModelAdmin
 from django.contrib.admin import DateFieldListFilter
 from django.contrib.admin import ModelAdmin, SimpleListFilter
-from models.common import RegisteredDealer
-from aftersell.models.common import UploadProductCSV 
-from models.common import GladMindUsers, ProductTypeData, RegisteredDealer,\
+from models.common import GladMindUsers, ProductTypeData, \
     ServiceAdvisor, BrandData, ProductData, CouponData, MessageTemplate,\
-    ServiceAdvisorDealerRelationship
-
+    ServiceAdvisorDealerRelationship, UploadProductCSV
+from gladminds.aftersell.models.common import RegisteredDealer
 from gladminds.aftersell.models.logs import AuditLog, DataFeedLog
 from import_export.admin import ImportExportModelAdmin, ExportMixin
 from import_export import fields, widgets

@@ -4,22 +4,6 @@ from datetime import datetime
 from django.contrib.auth.models import User
 
 
-class UploadProductCSV(models.Model):
-    file_location = settings.PROJECT_DIR + '/data/'
-    upload_brand_feed = models.FileField(upload_to=file_location, blank=True)
-    upload_dealer_feed = models.FileField(upload_to=file_location, blank=True)
-    upload_product_dispatch_feed = models.FileField(
-        upload_to=file_location, blank=True)
-    upload_product_purchase_feed = models.FileField(
-        upload_to=file_location, blank=True)
-    upload_coupon_redeem_feed = models.FileField(
-        upload_to=file_location, blank=True)
-
-    class Meta:
-        app_label = "aftersell"
-        verbose_name_plural = "Upload Product Data"
-
-
 ##########################################################################
 ########################## ASC Save Form #########################
 ASC_STATUS_CHOICES = ((1, 'In Progress'), (2, 'Failed'))
@@ -53,4 +37,38 @@ class UCNRecovery(models.Model):
         app_label = "aftersell"
         verbose_name_plural = "UCN recovery logs"
 
+###################################################################
 
+######################DEALER-SA MODELS#############################
+
+
+class RegisteredDealer(models.Model):
+    dealer_id = models.CharField(
+        max_length=25, blank=False, null=False, unique=True, help_text="Dealer Code must be unique")
+    address = models.TextField(blank=True, null=True)
+
+    class Meta:
+        app_label = "aftersell"
+        verbose_name_plural = "Dealer Data"
+
+    def __unicode__(self):
+        return self.dealer_id
+
+
+class RegisteredASC(models.Model):
+    user = models.OneToOneField(User, null=True, blank=True)
+    dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
+    phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)
+    asc_name = models.CharField(max_length=215)
+    email_id = models.EmailField(max_length=215, null=True, blank=True)
+    registration_date = models.DateTimeField(default=datetime.now())
+    address = models.CharField(max_length=255, null=True, blank=True)
+    city = models.CharField(max_length=255, null=True, blank=True)
+    country = models.CharField(max_length=255, null=True, blank=True)
+    state = models.CharField(max_length=255, null=True, blank=True)
+    img_url = models.FileField(upload_to="users", blank=True)
+    isActive = models.BooleanField(default=True)
+
+    class Meta:
+        app_label = "aftersell"
+        verbose_name_plural = "Registered ASC Form"

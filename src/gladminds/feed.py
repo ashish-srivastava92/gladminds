@@ -167,13 +167,13 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
     def import_data(self):
         for dealer in self.data_source:
             try:
-                dealer_data = common.RegisteredDealer.objects.get(
+                dealer_data = afterbuy_common.RegisteredDealer.objects.get(
                     dealer_id=dealer['dealer_id'])
             except ObjectDoesNotExist as odne:
                 logger.debug(
                     "[Exception: DealerAndServiceAdvisorFeed_dealer_data]: {0}"
                     .format(odne))
-                dealer_data = common.RegisteredDealer(
+                dealer_data = afterbuy_common.RegisteredDealer(
                     dealer_id=dealer['dealer_id'], address=dealer['address'])
                 dealer_data.save()
                 self.registerNewDealer(username=dealer['dealer_id'])
@@ -241,10 +241,10 @@ class ProductDispatchFeed(BaseFeed):
                     .format(odne))
                 try:
                     try:
-                        dealer_data = common.RegisteredDealer.objects.get(
+                        dealer_data = afterbuy_common.RegisteredDealer.objects.get(
                             dealer_id=product['dealer_id'])
                     except Exception as ex:
-                        dealer_data = common.RegisteredDealer(
+                        dealer_data = afterbuy_common.RegisteredDealer(
                             dealer_id=product['dealer_id'])
                         dealer_data.save()
                         self.registerNewDealer(username=product['dealer_id'])

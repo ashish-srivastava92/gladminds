@@ -159,7 +159,7 @@ def asc_registration(request):
             asc_user.save()
             asc_group = Group.objects.get(name='ascs')
             asc_user.groups.add(asc_group)
-            asc = common.RegisteredASC(user=asc_user, phone_number=request.POST['phone-number'], asc_name=username)
+            asc = afterbuy_common.RegisteredASC(user=asc_user, phone_number=request.POST['phone-number'], asc_name=username)
             asc.save()
         except:
             return HttpResponse(json.dumps({'message': 'Already Registered'}), content_type='application/json')
@@ -221,14 +221,14 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
     phone_number = mobile_format(str(data['phone-number']))
     if not ('dealers' in groups or 'self' in groups):
         raise
-    if common.RegisteredASC.objects.filter(phone_number=phone_number)\
+    if afterbuy_common.RegisteredASC.objects.filter(phone_number=phone_number)\
         or afterbuy_common.ASCSaveForm.objects.filter(phone_number=phone_number):
         return json.dumps({'message': ALREADY_REGISTERED})
 
     try:
         dealer_data = None
         if "dealer_id" in data:
-            dealer_data = common.RegisteredDealer.objects.\
+            dealer_data = afterbuy_common.RegisteredDealer.objects.\
                                             get(dealer_id=data["dealer_id"])
             dealer_data = dealer_data.dealer_id if dealer_data else None
 

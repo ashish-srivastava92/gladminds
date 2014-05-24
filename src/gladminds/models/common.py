@@ -8,6 +8,22 @@ BrandData contains brand related information
 '''
 
 
+class UploadProductCSV(models.Model):
+    file_location = settings.PROJECT_DIR + '/data/'
+    upload_brand_feed = models.FileField(upload_to=file_location, blank=True)
+    upload_dealer_feed = models.FileField(upload_to=file_location, blank=True)
+    upload_product_dispatch_feed = models.FileField(
+        upload_to=file_location, blank=True)
+    upload_product_purchase_feed = models.FileField(
+        upload_to=file_location, blank=True)
+    upload_coupon_redeem_feed = models.FileField(
+        upload_to=file_location, blank=True)
+
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "Upload Product Data"
+
+
 class BrandData(models.Model):
     pk_brand_id = models.AutoField(primary_key=True)
     brand_id = models.CharField(
@@ -61,23 +77,6 @@ class ProductTypeData(models.Model):
     def __unicode__(self):
         return self.product_type
 
-###################################################################
-
-######################DEALER-SA MODELS#############################
-
-
-class RegisteredDealer(models.Model):
-    dealer_id = models.CharField(
-        max_length=25, blank=False, null=False, unique=True, help_text="Dealer Code must be unique")
-    address = models.TextField(blank=True, null=True)
-
-    class Meta:
-        app_label = "gladminds"
-        verbose_name_plural = "Dealer Data"
-
-    def __unicode__(self):
-        return self.dealer_id
-
 
 class ServiceAdvisor(models.Model):
     service_advisor_id = models.CharField(
@@ -99,7 +98,7 @@ class ServiceAdvisor(models.Model):
 
 
 class ServiceAdvisorDealerRelationship(models.Model):
-    dealer_id = models.ForeignKey(RegisteredDealer, null=False)
+    dealer_id = models.ForeignKey('aftersell.RegisteredDealer', null=False)
     service_advisor_id = models.ForeignKey(ServiceAdvisor, null=False)
     status = models.CharField(max_length=10, blank=False, null=False)
 
@@ -162,7 +161,7 @@ class ProductData(models.Model):
         max_length=215, null=True, blank=True, unique=True)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
     invoice_date = models.DateTimeField(null=True, blank=True)
-    dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
+    dealer_id = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
     engine = models.CharField(max_length=255, null=True, blank=True)
 
     # Added below column for after buy application
@@ -288,25 +287,6 @@ class SASaveForm(models.Model):
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "SA Save Form"
-
-
-class RegisteredASC(models.Model):
-    user = models.OneToOneField(User, null=True, blank=True)
-    dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
-    phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)
-    asc_name = models.CharField(max_length=215)
-    email_id = models.EmailField(max_length=215, null=True, blank=True)
-    registration_date = models.DateTimeField(default=datetime.now())
-    address = models.CharField(max_length=255, null=True, blank=True)
-    city = models.CharField(max_length=255, null=True, blank=True)
-    country = models.CharField(max_length=255, null=True, blank=True)
-    state = models.CharField(max_length=255, null=True, blank=True)
-    img_url = models.FileField(upload_to="users", blank=True)
-    isActive = models.BooleanField(default=True)
-
-    class Meta:
-        app_label = "gladminds"
-        verbose_name_plural = "Registered ASC Form"
 
 
 class CustomerUpdatedInfo(models.Model):

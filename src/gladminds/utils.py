@@ -12,11 +12,13 @@ from boto.s3.key import Key
 import json
 from gladminds.models.common import STATUS_CHOICES
 from gladminds.models import common
+from gladminds.models import common as afterbuy_common
 from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from gladminds.taskqueue import SqsTaskQueue
 from gladminds import message_template
 from gladminds.mail import send_ucn_request_alert
+
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 logger = logging.getLogger('gladminds')
@@ -65,7 +67,7 @@ def get_phone_number_format(phone_number):
 
 
 def save_otp(token, phone_number, email):
-    user = common.RegisteredASC.objects.filter(phone_number=mobile_format(phone_number))[0].user
+    user = afterbuy_common.RegisteredASC.objects.filter(phone_number=mobile_format(phone_number))[0].user
     if email and user.email_id != email:
         raise
     common.OTPToken.objects.filter(user=user).delete()
@@ -80,7 +82,7 @@ def get_token(phone_number, email=''):
     return token
 
 def validate_otp(otp, phone):
-    asc = common.RegisteredASC.objects.filter(phone_number=mobile_format(phone))[0].user
+    asc = afterbuy_common.RegisteredASC.objects.filter(phone_number=mobile_format(phone))[0].user
     token_obj = common.OTPToken.objects.filter(user=asc)[0]
     if int(otp) == int(token_obj.token) and (timezone.now()-token_obj.request_date).seconds <= OTP_VALIDITY:
         return True
@@ -113,7 +115,7 @@ def get_customer_info(data):
     return {'customer_phone': get_phone_number_format(str(product_obj.customer_phone_number)), 'customer_name': product_obj.customer_phone_number.customer_name, 'purchase_date': purchase_date}
 
 def get_sa_list(request):
-    dealer = common.RegisteredDealer.objects.filter(
+    dealer = afterbuy_common.RegisteredDealer.objects.filter(
                 dealer_id=request.user)[0]
     service_advisors = common.ServiceAdvisorDealerRelationship.objects\
                                 .filter(dealer_id=dealer, status='Y')
@@ -147,7 +149,7 @@ def upload_file(request):
     #TODO: Include Facility to get brand name here
     destination = settings.JOBCARD_DIR.format('bajaj')
     path = uploadFileToS3(destination=destination, file_obj=file_obj)
-    ucn_recovery_obj = common.UCNRecovery(reason=reason, user=user_obj, sap_customer_id=customer_id, file_location=path)
+    ucn_recovery_obj = afterbuy_common.UCNRecovery(reason=reason, user=user_obj, sap_customer_id=customer_id, file_location=path)
     ucn_recovery_obj.save()
     send_recovery_email_to_admin(ucn_recovery_obj)
 
