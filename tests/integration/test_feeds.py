@@ -3,10 +3,11 @@ import os
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
-from gladminds.models.common import ServiceAdvisor,\
-    ProductData, CouponData, ServiceAdvisorDealerRelationship, GladMindUsers
+from gladminds.models.common import \
+    ProductData, CouponData, GladMindUsers
 
-from gladminds.aftersell.models.common import RegisteredDealer
+from gladminds.aftersell.models.common import RegisteredDealer,\
+    ServiceAdvisorDealerRelationship, ServiceAdvisor
 from datetime import datetime, timedelta
 from integration.base_integration import GladmindsResourceTestCase
 from gladminds import feed

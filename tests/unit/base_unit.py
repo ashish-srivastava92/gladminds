@@ -1,7 +1,7 @@
 import unittest
 from django.core import management
 from gladminds.models import common
-from gladminds.aftersell.models import common as afterbuy_common
+from gladminds.aftersell.models import common as aftersell_common
 from gladminds.aftersell.models import logs
 
 
@@ -28,7 +28,7 @@ class GladmindsUnitTestCase(unittest.TestCase):
 
     #TODO: Using _get_model_obj() does not work on below function
     def get_delear_obj(self, **kwargs):
-        delear_data = afterbuy_common.RegisteredDealer(**kwargs)
+        delear_data = aftersell_common.RegisteredDealer(**kwargs)
         delear_data.save()
         return delear_data
 
@@ -43,18 +43,18 @@ class GladmindsUnitTestCase(unittest.TestCase):
 
     #TODO: Using _get_model_obj() does not work on below function
     def get_service_advisor_obj(self, **kwargs):
-        service_advisor_obj = common.ServiceAdvisor(**kwargs)
+        service_advisor_obj = aftersell_common.ServiceAdvisor(**kwargs)
         service_advisor_obj.save()
         return service_advisor_obj
 
     def get_dealer_service_advisor_obj(self, **kwargs):
-        return self._get_model_obj(common.ServiceAdvisorDealerRelationship(**kwargs))
+        return self._get_model_obj(aftersell_common.ServiceAdvisorDealerRelationship(**kwargs))
 
     def get_customer_obj(self, **kwargs):
         return self._get_model_obj(common.GladMindUsers(**kwargs))
     
     def get_asc_obj(self, **kwargs):
-        asc_obj = afterbuy_common.RegisteredASC(**kwargs)
+        asc_obj = aftersell_common.RegisteredASC(**kwargs)
         asc_obj.save()
         return asc_obj
         

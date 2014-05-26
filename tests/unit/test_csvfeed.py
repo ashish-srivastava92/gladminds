@@ -4,6 +4,7 @@ import time
 from base_unit import GladmindsUnitTestCase
 from gladminds import feed
 from gladminds.models import common
+from gladminds.aftersell.models import common as aftersell_common
 
 
 class CSVFeedTest(GladmindsUnitTestCase):
@@ -72,10 +73,10 @@ class CSVFeedByFile(GladmindsUnitTestCase):
         self.assertEqual(brand_data.brand_name, 'HERO')
 
     def _test_service_advisor(self):
-        sa_data = common.ServiceAdvisor.objects.get(phone_number = '+SA0000000002')
+        sa_data = aftersell_common.ServiceAdvisor.objects.get(phone_number = '+SA0000000002')
         self.assertEqual(sa_data.dealer_id.dealer_id, 'TESTD001')
         
-        sa_data = common.ServiceAdvisor.objects.get(phone_number = '+SA0000000003')
+        sa_data = aftersell_common.ServiceAdvisor.objects.get(phone_number = '+SA0000000003')
         self.assertEqual(sa_data.dealer_id.dealer_id, 'TESTD002')
 
     def _test_product_dispatch(self):

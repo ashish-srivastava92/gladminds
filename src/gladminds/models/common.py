@@ -78,33 +78,6 @@ class ProductTypeData(models.Model):
         return self.product_type
 
 
-class ServiceAdvisor(models.Model):
-    service_advisor_id = models.CharField(
-        max_length=15, blank=False, unique=True, null=False)
-    name = models.CharField(max_length=25, blank=False, null=False)
-    phone_number = models.CharField(
-        max_length=15, blank=False, null=False, unique=True)
-    order = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        app_label = "gladminds"
-        verbose_name_plural = "Service Advisor Data"
-
-    def __unicode__(self):
-        return self.phone_number
-
-##################################################################
-#############Service Advisor and Registered Relationship MODEL####
-
-
-class ServiceAdvisorDealerRelationship(models.Model):
-    dealer_id = models.ForeignKey('aftersell.RegisteredDealer', null=False)
-    service_advisor_id = models.ForeignKey(ServiceAdvisor, null=False)
-    status = models.CharField(max_length=10, blank=False, null=False)
-
-    class Meta:
-        app_label = "gladminds"
-        verbose_name_plural = "Service Advisor And Dealer Relationship"
 
 
 ##################################################################
@@ -202,7 +175,7 @@ class CouponData(models.Model):
     valid_days = models.IntegerField(max_length=10, null=False)
     valid_kms = models.IntegerField(max_length=10, null=False)
     service_type = models.IntegerField(max_length=10, null=False)
-    sa_phone_number = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
+    sa_phone_number = models.ForeignKey('aftersell.ServiceAdvisor', null=True, blank=True)
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=1)
     closed_date = models.DateTimeField(null=True, blank=True)
     mark_expired_on = models.DateTimeField(null=True, blank=True)
@@ -227,7 +200,7 @@ class CouponData(models.Model):
 
 class ServiceAdvisorCouponRelationship(models.Model):
     unique_service_coupon = models.ForeignKey(CouponData, null=False)
-    service_advisor_phone = models.ForeignKey(ServiceAdvisor, null=False)
+    service_advisor_phone = models.ForeignKey('aftersell.ServiceAdvisor', null=False)
 
     class Meta:
         app_label = 'gladminds'

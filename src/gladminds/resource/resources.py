@@ -5,6 +5,7 @@ from django.db import models, transaction
 from django.forms.models import model_to_dict
 from gladminds import smsparser, utils, audit, message_template as templates
 from gladminds.models import common
+from gladminds.aftersell.models import common as aftersell_common
 from gladminds.tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
@@ -352,8 +353,8 @@ class GladmindsResources(Resource):
 
     def validate_dealer(self, phone_number):
         try:
-            service_advisor_obj = common.ServiceAdvisor.objects.get(phone_number=phone_number)
-            all_sa_dealer_obj = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = service_advisor_obj, status = u'Y')
+            service_advisor_obj = aftersell_common.ServiceAdvisor.objects.get(phone_number=phone_number)
+            all_sa_dealer_obj = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = service_advisor_obj, status = u'Y')
             if len(all_sa_dealer_obj) == 0:
                 raise
         except:

@@ -55,6 +55,36 @@ class RegisteredDealer(models.Model):
         return self.dealer_id
 
 
+class ServiceAdvisor(models.Model):
+    service_advisor_id = models.CharField(
+        max_length=15, blank=False, unique=True, null=False)
+    name = models.CharField(max_length=25, blank=False, null=False)
+    phone_number = models.CharField(
+        max_length=15, blank=False, null=False, unique=True)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        app_label = "aftersell"
+        verbose_name_plural = "Service Advisor Data"
+
+    def __unicode__(self):
+        return self.phone_number
+
+
+##################################################################
+#############Service Advisor and Registered Relationship MODEL####
+
+
+class ServiceAdvisorDealerRelationship(models.Model):
+    dealer_id = models.ForeignKey('aftersell.RegisteredDealer', null=False)
+    service_advisor_id = models.ForeignKey(ServiceAdvisor, null=False)
+    status = models.CharField(max_length=10, blank=False, null=False)
+
+    class Meta:
+        app_label = "aftersell"
+        verbose_name_plural = "Service Advisor And Dealer Relationship"
+
+
 class RegisteredASC(models.Model):
     user = models.OneToOneField(User, null=True, blank=True)
     dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
@@ -72,3 +102,5 @@ class RegisteredASC(models.Model):
     class Meta:
         app_label = "aftersell"
         verbose_name_plural = "Registered ASC Form"
+        
+    
