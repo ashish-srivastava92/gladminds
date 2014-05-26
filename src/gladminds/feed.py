@@ -239,11 +239,17 @@ class ProductDispatchFeed(BaseFeed):
             try:
                 if not product['unique_service_coupon']:
                     continue
-                coupon_data = common.CouponData(unique_service_coupon=product['unique_service_coupon'],
+                valid_coupon = common.CouponData.objects.filter(unique_service_coupon=product['unique_service_coupon'])
+                if not valid_coupon:
+                    coupon_data = common.CouponData(unique_service_coupon=product['unique_service_coupon'],
                             vin=product_data, valid_days=product['valid_days'],
                             valid_kms=product['valid_kms'], service_type=product['service_type'],
                             status=product['coupon_status'])
-                coupon_data.save()
+                    coupon_data.save()
+                elif valid_coupon[0].vin.vin == product['vin'] and str(valid_coupon[0].service_type) == str(product['service_type']):
+                    continue
+                else:
+                    raise
             except Exception as ex:
                 logger.error('Coupon Save error : {0} VIN - {1}'.format(ex, product['vin']))
                 total_failed += 1
