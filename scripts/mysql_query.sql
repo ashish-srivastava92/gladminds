@@ -88,9 +88,9 @@ UNLOCK TABLES;
 
 -------------------create slow query log------------------
 
-mkdir /var/log/mysql
-touch /var/log/mysql/log-slow-queries.log
-chown mysql.mysql -R /var/log/mysql
+sudo mkdir /var/log/mysql
+sudo touch /var/log/mysql/log-slow-queries.log
+sudo chown mysql.mysql -R /var/log/mysql
 
 set global slow_query_log = 'ON';
 set global slow_query_log_file = '/var/log/mysql/log-slow-queries.log';
