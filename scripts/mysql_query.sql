@@ -21,6 +21,11 @@ SOURCE gladmindsdb.sql;
 mysqldump -uroot -prootpassword > gmdbcopy5may.sql
 
 -------------------------create copy-------------------------------
+
+----------------------------RDS Data Import-----------------------
+mysqldump -h gladminds-qa.chnnvvffqwop.us-east-1.rds.amazonaws.com  -u gladminds -pgladminds123 gladmindsdbqa > gladminds_db.sql 
+
+--------------------------------------------------------------------
 -------------------------other changes---------------------------
 
 ALTER TABLE gladminds_serviceadvisor ADD status CHAR(10) NOT NULL DEFAULT 'y';
