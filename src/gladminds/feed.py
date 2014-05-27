@@ -231,6 +231,7 @@ class ProductDispatchFeed(BaseFeed):
                     product_data = common.ProductData(
                         vin=product['vin'], product_type=producttype_data, invoice_date=invoice_date, dealer_id=dealer_data)
                     product_data.save()
+                    logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN - {0}'.format(product['vin'], product['unique_service_coupon']))
                 except Exception as ex:
                     total_failed += 1
                     logger.info(
@@ -247,7 +248,10 @@ class ProductDispatchFeed(BaseFeed):
                             valid_kms=product['valid_kms'], service_type=product['service_type'],
                             status=product['coupon_status'])
                     coupon_data.save()
+                    logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN - {0} UCN - {1}'.format(product['vin'], product['unique_service_coupon']))
+                    
                 elif valid_coupon[0].vin.vin == product['vin'] and str(valid_coupon[0].service_type) == str(product['service_type']):
+                    logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN - {0} UCN - {1}'.format(product['vin'], product['unique_service_coupon']))
                     continue
                 else:
                     raise ValueError()
