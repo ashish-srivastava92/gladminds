@@ -207,6 +207,7 @@ class ProductDispatchFeed(BaseFeed):
 
     def import_data(self):
         total_failed = 0
+        time_stamp = datetime.now()
         for product in self.data_source:
             try:
                 product_data = common.ProductData.objects.get(
@@ -249,9 +250,9 @@ class ProductDispatchFeed(BaseFeed):
                 elif valid_coupon[0].vin.vin == product['vin'] and str(valid_coupon[0].service_type) == str(product['service_type']):
                     continue
                 else:
-                    raise
+                    raise ValueError()
             except Exception as ex:
-                logger.error('Coupon Save error : {0} VIN - {1}'.format(ex, product['vin']))
+                logger.error('Coupon {2} Already registered for another VIN! {0} VIN - {1} Timestamp - {3}'.format(ex, product['vin'], product['unique_service_coupon'], time_stamp))
                 total_failed += 1
                 continue
 
