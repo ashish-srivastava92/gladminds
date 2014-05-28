@@ -269,6 +269,7 @@ MAIL_DETAIL = {
 OTP_MAIL = {
                   "sender":"support@gladminds.co",
                   "subject":"Reset Password",
+                  "receiver": [""],
                   "body": """""",
               }
 
