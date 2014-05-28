@@ -13,7 +13,7 @@ def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER
     msg = MIMEText(body, 'html', _charset='utf-8')
     subject = 'Subject: {0}\n'.format(subject)
     header = "To:{0}\nFrom:{1}\n{2}".format(", ".join(receiver),sender, subject)
-    msg = "{0}\n{1}\n\n ".format(header, body)
+    msg = "{0}\n{1}\n\n ".format(header, msg)
     
     mail = smtplib.SMTP(smtp_server)
     mail.sendmail(from_addr=sender, to_addrs=receiver, msg=msg)
