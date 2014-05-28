@@ -92,6 +92,9 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         xml_data = open(file_path, 'r').read()
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(200, response.status_code)
+        
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        self.assertEqual(200, response.status_code)        
 
         self.assertEquals(1, ProductData.objects.count())
         product_data = ProductData.objects.all()[0]
@@ -99,8 +102,8 @@ class FeedsResourceTest(GladmindsResourceTestCase):
 
         self.assertEquals(2, CouponData.objects.count())
         coupon_data = CouponData.objects.all()[0]
-        self.assertEquals(u"USC001", coupon_data.unique_service_coupon) 
-
+        self.assertEquals(u"USC001", coupon_data.unique_service_coupon)
+        
     def test_product_purchase(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
         xml_data = open(file_path, 'r').read()
