@@ -11,12 +11,14 @@ logger = logging.getLogger("gladminds")
 
 def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER):
     msg = MIMEText(body, 'html', _charset='utf-8')
-    subject = 'Subject: {0}\n'.format(subject)
-    header = "To:{0}\nFrom:{1}\n{2}".format(", ".join(receiver),sender, subject)
-    msg = "{0}\n{1}\n\n ".format(header, msg)
-    
+#   subject = 'Subject: {0}\n'.format(subject)
+#   header = "To:{0}\nFrom:{1}\n{2}".format(", ".join(receiver),sender, subject)
+#   msg = "{0}\n{1}\n\n ".format(header, msg)
+    msg['Subject'] = subject
+    msg['To'] = ", ".join(receiver)
+    msg['From'] = "GCP_Bajaj_FSC_Feeds<%s>" % sender
     mail = smtplib.SMTP(smtp_server)
-    mail.sendmail(from_addr=sender, to_addrs=receiver, msg=msg)
+    mail.sendmail(from_addr=sender, to_addrs=receiver, msg=msg.as_string())
     mail.quit()
 
 
