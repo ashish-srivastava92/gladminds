@@ -168,7 +168,6 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 mobile_number_active = self.check_mobile_active(dealer, dealer_data)
                 service_advisor = common.ServiceAdvisor.objects.filter(service_advisor_id=dealer['service_advisor_id'])
                 if not mobile_number_active:
-                    service_advisor = common.ServiceAdvisor.objects.filter(service_advisor_id=dealer['service_advisor_id'])
                     if len(service_advisor) > 0:
                         if dealer['phone_number'] != service_advisor[0].phone_number:
                             service_advisor[0].phone_number = dealer['phone_number']
