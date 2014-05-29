@@ -3,6 +3,7 @@ from django.core import management
 from base_integration import GladmindsResourceTestCase
 from gladminds.resource.resources import GladmindsResources
 from gladminds.models import common
+from gladminds.aftersell.models import common as aftersell_common 
 from django.contrib.auth.models import User
 from django.test.client import Client
 import logging
@@ -119,7 +120,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
 
     def test_simple_inprogress_from_unused(self):
         phone_number = "9999999"
-        self.assertEqual(common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
+        self.assertEqual(aftersell_common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
         obj = GladmindsResources()
         sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'SAP001'}
         obj.validate_coupon(sms_dict, phone_number)
@@ -127,11 +128,11 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         self.assertEqual(in_progess_coupon.status, 4, "in_progess_coupon status should be 4")
 
     def test_validate_dealer(self):
-        self.assertEqual(common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
+        self.assertEqual(aftersell_common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
         obj = GladmindsResources()
         self.assertEqual(obj.validate_dealer("9999999").phone_number, u"9999999", "validate dealer")
-        sa_obj = common.ServiceAdvisor.objects.filter(service_advisor_id='DEALER001SA001')
-        sa_dealer_rel = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = sa_obj[0])[0]
+        sa_obj = aftersell_common.ServiceAdvisor.objects.filter(service_advisor_id='DEALER001SA001')
+        sa_dealer_rel = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = sa_obj[0])[0]
         sa_dealer_rel.status = 'N'
         sa_dealer_rel.save()
 
@@ -155,7 +156,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         '''
         self.get_coupon_obj(unique_service_coupon='USC002', vin=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
         phone_number = "9999999"
-        self.assertEqual(common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
+        self.assertEqual(aftersell_common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
         obj = GladmindsResources()
         sms_dict = {'kms': 450, 'service_type': 2, 'sap_customer_id': 'SAP001'}
         obj.validate_coupon(sms_dict, phone_number)
@@ -175,7 +176,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         '''
         self.get_coupon_obj(unique_service_coupon='USC002', vin=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
         phone_number = "9999999"
-        self.assertEqual(common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
+        self.assertEqual(aftersell_common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
         obj = GladmindsResources()
         sms_dict = {'kms': 450, 'service_type': 2, 'sap_customer_id': 'SAP001'}
         obj.validate_coupon(sms_dict, phone_number)
@@ -200,7 +201,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
 
         self.get_coupon_obj(unique_service_coupon='USC002', vin=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
         phone_number = "9999999"
-        self.assertEqual(common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
+        self.assertEqual(aftersell_common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
         obj = GladmindsResources()
         sms_dict = {'kms': 1100, 'service_type': 2, 'sap_customer_id': 'SAP001'}
         obj.validate_coupon(sms_dict, phone_number)
@@ -225,7 +226,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
 
         self.get_coupon_obj(unique_service_coupon='USC002', vin=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
         phone_number = "9999999"
-        self.assertEqual(common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
+        self.assertEqual(aftersell_common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
         obj = GladmindsResources()
 
         sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'SAP001'}

@@ -11,7 +11,7 @@ class AuditLog(models.Model):
     status = models.CharField(max_length=250)
 
     class Meta:
-        app_label = "gladminds"
+        app_label = "aftersell"
 
 
 class DataFeedLog(models.Model):
@@ -26,4 +26,4 @@ class DataFeedLog(models.Model):
     remarks = models.CharField(max_length=2048, null=True, blank=True)
 
     class Meta:
-        app_label = "gladminds"
+        app_label = "aftersell"

@@ -11,6 +11,7 @@ import time
 from gladminds import audit, message_template as templates
 from gladminds import utils
 from gladminds.models import common
+from gladminds.aftersell.models import common as aftersell_common
 from gladminds.audit import feed_log
 from django.db.models import signals
 from gladminds.utils import get_task_queue
@@ -166,24 +167,24 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
     def import_data(self):
         for dealer in self.data_source:
             try:
-                dealer_data = common.RegisteredDealer.objects.get(
+                dealer_data = aftersell_common.RegisteredDealer.objects.get(
                     dealer_id=dealer['dealer_id'])
             except ObjectDoesNotExist as odne:
                 logger.debug(
                     "[Exception: DealerAndServiceAdvisorFeed_dealer_data]: {0}"
                     .format(odne))
-                dealer_data = common.RegisteredDealer(
+                dealer_data = aftersell_common.RegisteredDealer(
                     dealer_id=dealer['dealer_id'], address=dealer['address'])
                 dealer_data.save()
                 self.registerNewDealer(username=dealer['dealer_id'])
 
             try:
-                service_advisor = common.ServiceAdvisor.objects.filter(
+                service_advisor = aftersell_common.ServiceAdvisor.objects.filter(
                     service_advisor_id=dealer['service_advisor_id'])
                 if len(service_advisor) > 0:
                     service_advisor = service_advisor[0]
                 else:
-                    service_advisor = common.ServiceAdvisor(
+                    service_advisor = aftersell_common.ServiceAdvisor(
                         service_advisor_id=dealer['service_advisor_id'],
                         name=dealer['name'],
                         phone_number=dealer['phone_number'])
@@ -196,14 +197,14 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 continue
 
             try:
-                service_advisor_dealer = common\
+                service_advisor_dealer = aftersell_common\
                     .ServiceAdvisorDealerRelationship.objects.filter(
                         service_advisor_id=service_advisor,
                         dealer_id=dealer_data)
                 self.update_other_dealer_sa_relationship(service_advisor,
                                                          dealer['status'])
                 if len(service_advisor_dealer) == 0:
-                    sa_dealer_rel = common.ServiceAdvisorDealerRelationship(
+                    sa_dealer_rel = aftersell_common.ServiceAdvisorDealerRelationship(
                         dealer_id=dealer_data,
                         service_advisor_id=service_advisor,
                         status=dealer['status'])
@@ -223,7 +224,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
 
     def update_other_dealer_sa_relationship(self, service_advisor, status):
         if status == 'Y':
-            common.ServiceAdvisorDealerRelationship.objects\
+            aftersell_common.ServiceAdvisorDealerRelationship.objects\
                 .filter(service_advisor_id=service_advisor).update(status='N')
 
 
@@ -240,10 +241,10 @@ class ProductDispatchFeed(BaseFeed):
                     .format(odne))
                 try:
                     try:
-                        dealer_data = common.RegisteredDealer.objects.get(
+                        dealer_data = aftersell_common.RegisteredDealer.objects.get(
                             dealer_id=product['dealer_id'])
                     except Exception as ex:
-                        dealer_data = common.RegisteredDealer(
+                        dealer_data = aftersell_common.RegisteredDealer(
                             dealer_id=product['dealer_id'])
                         dealer_data.save()
                         self.registerNewDealer(username=product['dealer_id'])
@@ -409,7 +410,7 @@ class CouponRedeemFeedToSAP(BaseFeed):
 class ASCRegistrationToSAP(BaseFeed):
 
     def export_data(self, asc_phone_number=None):
-        asc_form_obj = common.ASCSaveForm.objects\
+        asc_form_obj = aftersell_common.ASCSaveForm.objects\
             .get(phone_number=asc_phone_number, status=1)
 
         item_batch = {

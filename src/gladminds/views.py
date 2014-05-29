@@ -14,8 +14,9 @@ from gladminds.mail import sent_otp_email
 from django.contrib.auth.models import Group, User
 from gladminds.utils import get_task_queue
 from django.contrib.auth import authenticate, login, logout
-
-import logging, json
+import logging
+import json
+from gladminds.aftersell.models import common as afterbuy_common
 
 logger = logging.getLogger('gladminds')
 
@@ -158,7 +159,7 @@ def asc_registration(request):
             asc_user.save()
             asc_group = Group.objects.get(name='ascs')
             asc_user.groups.add(asc_group)
-            asc = common.RegisteredASC(user=asc_user, phone_number=request.POST['phone-number'], asc_name=username)
+            asc = afterbuy_common.RegisteredASC(user=asc_user, phone_number=request.POST['phone-number'], asc_name=username)
             asc.save()
         except:
             return HttpResponse(json.dumps({'message': 'Already Registered'}), content_type='application/json')
@@ -220,22 +221,21 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
     phone_number = mobile_format(str(data['phone-number']))
     if not ('dealers' in groups or 'self' in groups):
         raise
-    if common.RegisteredASC.objects.filter(phone_number=phone_number)\
-        or common.ASCSaveForm.objects.filter(phone_number=phone_number):
+    if afterbuy_common.RegisteredASC.objects.filter(phone_number=phone_number)\
+        or afterbuy_common.ASCSaveForm.objects.filter(phone_number=phone_number):
         return json.dumps({'message': ALREADY_REGISTERED})
 
     try:
         dealer_data = None
         if "dealer_id" in data:
-            dealer_data = common.RegisteredDealer.objects.\
+            dealer_data = afterbuy_common.RegisteredDealer.objects.\
                                             get(dealer_id=data["dealer_id"])
             dealer_data = dealer_data.dealer_id if dealer_data else None
-        
-        asc_obj = common.ASCSaveForm(name=data['name'],
+
+        asc_obj = afterbuy_common.ASCSaveForm(name=data['name'],
                  address=data['address'], password=data['password'],
                  phone_number=phone_number, email=data['email'],
                  pincode=data['pincode'], status=1, dealer_id=dealer_data)
-        
         asc_obj.save()
         if settings.ENABLE_AMAZON_SQS:
             task_queue = utils.get_task_queue()

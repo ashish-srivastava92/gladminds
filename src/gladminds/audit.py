@@ -1,6 +1,6 @@
 from django.utils import timezone
 
-from models import logs
+from gladminds.aftersell.models import logs
 from collections import Counter
 import json
 

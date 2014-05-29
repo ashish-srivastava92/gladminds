@@ -13,7 +13,7 @@ TEMPLATE_DEBUG = DEBUG
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'gladminds',
         'USER': 'gladminds',
         'PASSWORD': 'gladmindsRocks',

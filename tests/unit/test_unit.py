@@ -7,7 +7,8 @@ from datetime import datetime, timedelta
 from unit.base_unit import RequestObject, GladmindsUnitTestCase
 from django.conf import settings
 from gladminds.utils import get_sa_list, get_coupon_info, get_customer_info, get_token, validate_otp
-from gladminds.models import common, logs
+from gladminds.models import common
+from gladminds.aftersell.models import logs
 
 
 class TestAssertWorks(TestCase):
