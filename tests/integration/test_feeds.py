@@ -58,7 +58,10 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         self.assertEquals('Y', sa_dealer_rel_obj_2.status)
 
         '''
-            Checking out with new feed to change the status of service advisor
+            Checking out with new feed to 
+            1. update the phone number and status
+            2. Try to register an active SA through other dealer
+            3. Try to register an SA through with active mobile number
         '''
 
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed_2.xml')
@@ -67,20 +70,21 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         self.assertEqual(200, response.status_code)
 
         sa_obj_1 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
-
+        self.assertEquals('+9112345', sa_obj_1[0].phone_number)
         dealer_obj_1 = RegisteredDealer.objects.filter(dealer_id='GMDEALER001')
         sa_dealer_rel_obj_1 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_1[0], dealer_id=dealer_obj_1[0])
         self.assertEquals('N', sa_dealer_rel_obj_1.status)
 
         sa_obj_2 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA02')
-
         dealer_obj_2 = RegisteredDealer.objects.filter(dealer_id='GMDEALER002')
         sa_dealer_rel_obj_2 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_2[0], dealer_id=dealer_obj_2[0])
-        self.assertEquals('N', sa_dealer_rel_obj_2.status)
-
-        dealer_obj_3 = RegisteredDealer.objects.filter(dealer_id='GMDEALER003')
-        sa_dealer_rel_obj_2 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_2[0], dealer_id=dealer_obj_3[0])
         self.assertEquals('Y', sa_dealer_rel_obj_2.status)
+        dealer_obj_3 = RegisteredDealer.objects.filter(dealer_id='GMDEALER003')
+        sa_dealer_rel_obj_2 = ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=sa_obj_2[0], dealer_id=dealer_obj_3[0])
+        self.assertEquals(0, len(sa_dealer_rel_obj_2))
+        
+        sa_obj_2 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA03')
+        self.assertEquals(0, len(sa_obj_2))
 
     def test_product_dispatch(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
