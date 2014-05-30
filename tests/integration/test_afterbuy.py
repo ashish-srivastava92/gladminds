@@ -41,7 +41,7 @@ class TestAfterbuy(GladmindsResourceTestCase):
             'profilePIC': '',
             'txtName': 'testuser'
         }
-        response = client.post('/gm/', data=data)
+        response = client.post('/afterbuy/', data=data)
         print "%%%%%%%%",response.status_code, response.content
         print common.GladMindUsers.objects.all()
         
@@ -54,14 +54,15 @@ class TestAfterbuy(GladmindsResourceTestCase):
                     'txtUsername': 'testuser'
                 }
         response = client.post(
-            '/gm/', data =data)
+            '/afterbuy/', data =data)
 
         print response
+        raise
     
     
     def test_product_details(self):
-        client.get('/gm/', data={'action': 'getProducts'})
+        client.get('/afterbuy/', data={'action': 'getProducts'})
         
 
     def test_create_item(self):
-        client.get('/gm/', data={'action': 'addingItem'})
+        client.get('/afterbuy/', data={'action': 'addingItem'})
