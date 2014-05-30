@@ -48,6 +48,8 @@ urlpatterns += patterns('gladminds',
     url(r'^api/v1/bajaj/dispatch-feed/$', 'webservice.dispatch_service'),
     url(r'^api/v1/bajaj/purchase-feed/\?wsdl$', 'webservice.purchase_service'),
     url(r'^api/v1/bajaj/purchase-feed/$', 'webservice.purchase_service'),
+    url(r'^api/v1/bajaj/asc-feed/\?wsdl$', 'webservice.asc_service'),
+    url(r'^api/v1/bajaj/asc-feed/$', 'webservice.asc_service'),    
     url(r'^api/v1/bajaj/redeem-feed/$', 'superadmin.views.views_coupon_redeem_wsdl', {'document_root': settings.WSDL_COUPON_REDEEM_LOC}),
 
     url(r'^app/logout', 'afterbuy.views.app_logout', name='app_logout'),

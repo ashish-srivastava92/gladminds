@@ -140,6 +140,21 @@ class DealerModel(ComplexModel):
 class DealerModelList(ComplexModel):
     __namespace__ = tns
     DealerData = Array(DealerModel)
+    
+class ASCModel(ComplexModel):
+    __namespace__ = tns
+    ASC_ID = Unicode
+    ASC_NAME = Unicode
+    ASC_MOBILE = Unicode
+    ASC_EMAIL = Unicode
+    ASC_ADDRESS = Unicode
+    ASC_ADDRESS_PINCODE = Unicode
+    KUNNAR = Unicode
+
+
+class ASCModelList(ComplexModel):
+    __namespace__ = tns
+    ASCData = Array(ASCModel)    
 
 
 class ProductDispatchModel(ComplexModel):
@@ -236,6 +251,39 @@ class DealerService(ServiceBase):
 
         feed_remark.save_to_feed_log()
         return get_response(feed_remark)
+    
+class ASCService(ServiceBase):
+    __namespace__ = tns
+
+    @srpc(ASCModelList, AuthenticationModel, _returns=Unicode)
+    def postASC(ObjectList, Credential):
+        asc_list = []
+        feed_remark = FeedLogWithRemark(len(ObjectList.ascData),
+                                        feed_type='ASC Feed',
+                                        action='Received', status=True)
+        print ObjectList.ascData
+        for asc_element in ObjectList.ascData:
+            try:
+                asc_list.append({
+                    'asc_id': asc_element.ASC_ID,
+                    'name': asc_element.ASC_NAME,
+                    'phone_number': utils.mobile_format(asc_element.ASC_MOBILE),
+                    'address': asc_element.ASC_ADDRESS,
+                    'email': asc_element.ASC_EMAIL,
+                    'pincode': asc_element.ASC_ADDRESS_PINCODE,
+                    'dealer_id': asc_element.KUNNR
+                })
+            except Exception as ex:
+                ex = "ASCService: {0}  Error on Validating ".format(ex)
+                logger.error("DealerService: {0} Object list element is {1}"
+                             .format(ex, asc_element))
+                logger.error(asc_element)
+                feed_remark.fail_remarks(ex)
+        feed_remark = save_to_db(feed_type='ASC', data_source=asc_list,
+                              feed_remark=feed_remark)
+
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)    
 
 
 class ProductDispatchService(ServiceBase):
@@ -335,7 +383,7 @@ ProductDispatchService.event_manager.add_listener(
 ProductPurchaseService.event_manager.add_listener(
     'method_call', _on_method_call)
 
-all_app = Application([BrandService, DealerService, ProductDispatchService, ProductPurchaseService],
+all_app = Application([BrandService, DealerService, ProductDispatchService, ProductPurchaseService, ASCService],
                       tns=tns,
                       in_protocol=Soap11(validator='lxml'),
                       out_protocol=Soap11()
@@ -348,6 +396,12 @@ brand_app = Application([BrandService],
                         )
 
 dealer_app = Application([DealerService],
+                         tns=tns,
+                         in_protocol=Soap11(validator='lxml'),
+                         out_protocol=Soap11()
+                         )
+
+asc_app = Application([ASCService],
                          tns=tns,
                          in_protocol=Soap11(validator='lxml'),
                          out_protocol=Soap11()
@@ -368,5 +422,6 @@ purchase_app = Application([ProductPurchaseService],
 all_service = csrf_exempt(DjangoApplication(all_app))
 brand_service = csrf_exempt(DjangoApplication(brand_app))
 dealer_service = csrf_exempt(DjangoApplication(dealer_app))
+asc_service = csrf_exempt(DjangoApplication(asc_app))
 dispatch_service = csrf_exempt(DjangoApplication(dispatch_app))
 purchase_service = csrf_exempt(DjangoApplication(purchase_app))
