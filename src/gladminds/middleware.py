@@ -1,5 +1,6 @@
 from django.conf import settings
 from gladminds.models import common
+from gladminds.aftersell.models import common as aftersell_common
 from django.http import HttpResponseBadRequest
 from gladminds import utils
 from gladminds import smsparser
@@ -41,10 +42,10 @@ class GladmindsMiddleware(object):
             
             elif 'sa' in auth_rule:
                 try:
-                    common.ServiceAdvisor.objects.get(phone_number=phone_number)
+                    aftersell_common.ServiceAdvisor.objects.get(phone_number=phone_number)
                     request.user['role'] = 'SA'
                     request.user['phone_number'] = phone_number
-                except common.ServiceAdvisor.DoesNotExist:
+                except aftersell_common.ServiceAdvisor.DoesNotExist:
                     raise HttpResponseBadRequest() 
                 
             elif 'customer' in auth_rule:

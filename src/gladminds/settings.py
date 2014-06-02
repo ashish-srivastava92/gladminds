@@ -13,15 +13,21 @@ DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
 
 ALLOWED_HOSTS = ['*']
 
+ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
+                    'service', 'check': 'a', 'close': 'c', 'brand': 'brand'}
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
-
 
 COUPON_VALID_DAYS = 30
 
 TOTP_SECRET_KEY = '93424'
 OTP_VALIDITY = 120
+
+JOBCARD_DIR = '{0}/jobcards/prod/'
+JOBCARD_BUCKET = 'gladminds'
+S3_ID = 'AKIAIL7IDCSTNCG2R6JA'
+S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
 
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 
@@ -33,17 +39,40 @@ SUIT_CONFIG = {
     'ADMIN_NAME': 'GladMinds',
     'CONFIRM_UNSAVED_CHANGES': True,
     'SEARCH_URL': '',
-     'MENU_EXCLUDE': ('auth.group', 'auth','sites'),
-     'MENU_OPEN_FIRST_CHILD': True,
+    'MENU_EXCLUDE': ('auth.group', 'auth', 'sites'),
+    'MENU_OPEN_FIRST_CHILD': True,
     'LIST_PER_PAGE': 20,
     'SHOW_REQUIRED_ASTERISK': True,
-    'MENU': ({'app':'gladminds','label':'Data','icon':' icon-folder-open',
-                'models': ({'model':'serviceadvisordealerrelationship','label': 'Feed -> Service Advisor'}, {'model':'dispatchedproducts','label': 'Feed -> Product Dispatch'},
-
-                          {'model':'productdata','label': 'Feed -> Product Purchase'},{'model':'coupondata','label': 'Feed -> Coupon Redemption'} ,{'model':'auditlog','label': 'Audit Log'}, 
-                          {'model':'datafeedlog','label': 'Feed Log'}, 'uploadproductcsv', 
-                          'messagetemplate','emailtemplate','gladmindusers',)},
-                {'app':'djcelery','label':'Job Management','icon':'icon-tasks'})
+    'MENU': (
+        {'app': 'gladminds', 'label': 'Data', 'icon': ' icon-folder-open',
+         'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
+                    {'model': 'dispatchedproducts',
+                     'label': 'Feed -> Product Dispatch'},
+                    {'model': 'productdata',
+                     'label': 'Feed -> Product Purchase'},
+                    {'model': 'coupondata',
+                     'label': 'Feed -> Coupon Redemption'},
+                    {'model': 'ascsaveform',
+                     'label': 'Save Form -> ASC'},
+                    {'model': 'auditlog', 'label': 'Audit Log'},
+                    {'model': 'datafeedlog',
+                     'label': 'Feed Log'}, 'uploadproductcsv',
+                    'messagetemplate', 'emailtemplate', 'gladmindusers',)},
+        {'app': 'aftersell', 'label': 'AfterSell', 'icon': ' icon-folder-open',
+         'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
+                    {'model': 'dispatchedproducts',
+                     'label': 'Feed -> Product Dispatch'},
+                    {'model': 'productdata',
+                     'label': 'Feed -> Product Purchase'},
+                    {'model': 'coupondata',
+                     'label': 'Feed -> Coupon Redemption'},
+                    {'model': 'ascsaveform',
+                     'label': 'Save Form -> ASC'},
+                    {'model': 'auditlog', 'label': 'Audit Log'},
+                    {'model': 'datafeedlog',
+                     'label': 'Feed Log'}, 'uploadproductcsv',
+                    'messagetemplate', 'emailtemplate', 'gladmindusers',)},
+        {'app': 'djcelery', 'label': 'Job Management', 'icon': 'icon-tasks'})
 }
 
 
@@ -51,12 +80,16 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'gladminds.db',                  # Or path to database file if using sqlite3.
+        # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.sqlite3',
+        # Or path to database file if using sqlite3.
+        'NAME': 'gladminds.db',
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
-        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        # Empty for localhost through domain sockets or '127.0.0.1' for
+        # localhost through TCP.
+        'HOST': '',
         'PORT': '',                      # Set to empty string for default.
     }
 }
@@ -109,7 +142,7 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-                    STATIC_DIR,
+    STATIC_DIR,
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -120,7 +153,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -130,7 +163,7 @@ SECRET_KEY = 'bbu7*-yvup0-*laxug+n5tf^lga_bwtrxu%y4ilb#$lv8%zw0m'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    #     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -153,7 +186,7 @@ ROOT_URLCONF = 'gladminds.urls'
 WSGI_APPLICATION = 'gladminds.wsgi.application'
 
 TEMPLATE_DIRS = (
-                 TEMPLATE_DIR,
+    TEMPLATE_DIR,
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -172,6 +205,7 @@ INSTALLED_APPS = (
     'gladminds.models',
     'gladminds.superadmin',
     'gladminds.afterbuy',
+    'gladminds.aftersell',
     'gladminds',
     'djcelery',
     'corsheaders',
@@ -188,7 +222,7 @@ INSTALLED_APPS = (
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
 
-LOGIN_REDIRECT_URL = '/dealers/getUrl'
+LOGIN_REDIRECT_URL = '/register/redirect'
 
 TASTYPIE_SWAGGER_API_MODULE = 'gladminds.urls.api_v1'
 
@@ -248,7 +282,7 @@ LOGGING = {
             'handlers': ['gladminds_logs'],
             'level': 'WARN',
             'propagate': True,
-        },'afterbuy': {
+        }, 'afterbuy': {
             'handlers': ['afterbuy_logs'],
             'level': 'DEBUG',
             'propagate': True,
@@ -256,15 +290,23 @@ LOGGING = {
     }
 }
 
-WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR+'/coupon_redeem.wsdl'
+WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR + '/coupon_redeem.wsdl'
 
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
-                  "sender":"feed-report@gladminds.co",
-                  "receiver": ["sourabh.gupta@hashedin.com", "sourabh5588gupta@gmail.com"],
-                  "subject":"Gladminds Feed Report",
-                  "body": """""",
-              }
+
+    "sender": "feed-report@gladminds.co",
+    "receiver": "gladminds@hashedin.com,naveen.shankar@gladminds.co",
+    "subject": "Gladminds Feed Report",
+    "body": """""",
+}
+
+UCN_RECOVERY_MAIL = {
+    "sender": "Gladminds Alert",
+    "subject": "UCN Request",
+    "body": "",
+    "receiver": "gladminds@hashedin.com"
+}
 
 OTP_MAIL = {
                   "sender":"support@gladminds.co",
@@ -273,19 +315,21 @@ OTP_MAIL = {
                   "body": """""",
               }
 
-#AfterBuy File Upload location configuration
+
+# AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
 AFTERBUY_USER_LOC = os.path.join(AFTERBUY_LOC, "users")
 AFTERBUY_PRODUCT_LOC = os.path.join(AFTERBUY_LOC, "products")
 AFTERBUY_BRAND_LOC = os.path.join(AFTERBUY_LOC, "brands")
 AFTERBUY_PRODUCT_TYPE_LOC = os.path.join(AFTERBUY_LOC, "productType")
 AFTERBUY_PRODUCT_WARRENTY_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "warrenty")
-AFTERBUY_PRODUCT_INSURANCE_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "insurance")
+AFTERBUY_PRODUCT_INSURANCE_LOC = os.path.join(
+    AFTERBUY_PRODUCT_LOC, "insurance")
 AFTERBUY_PRODUCT_INVOICE_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "invoice")
 MEDIA_ROOT = AFTERBUY_LOC
 MEDIA_URL = '/media/'
 
-#S3 Configuration
+# S3 Configuration
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 AWS_ACCESS_KEY_ID = 'AKIAIL7IDCSTNCG2R6JA'
 AWS_SECRET_ACCESS_KEY = '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'
@@ -299,19 +343,21 @@ ENABLE_AMAZON_SQS = False
 
 #################Registration Configuration#################################
 REGISTRATION_CONFIG = {
-                                "bajaj": {
-                                    "ASC Registration Feed": {
-                                        "retry_time": 180,
-                                        "num_of_retry": 2,
-                                        "delay": 180,
-                                        "fail_mail_detail": {
-                                            "sender": "feed-report@gladminds.co",
-                                            "receiver": "sourabh.gupta@hashedin.com",
-                                            "subject": "Gladminds ASC Registration Fail",
-                                            "body": """"""
-                                        }
-                                    }
-                                }
-                             }
+    "bajaj": {
+        "ASC Registration Feed": {
+            "retry_time": 180,
+            "num_of_retry": 2,
+            "delay": 180,
+            "fail_mail_detail": {
+                "sender": "feed-report@gladminds.co",
+                "receiver": "sourabh.gupta@hashedin.com",
+                "subject": "Gladminds ASC Registration Fail",
+                "body": """"""
+            }
+        }
+    }
+}
 ###########################################################################
+########################Password Postfix for dealers######################
+PASSWORD_POSTFIX = '@123'
 ###########################################################################

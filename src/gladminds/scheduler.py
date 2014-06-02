@@ -53,6 +53,7 @@ class SqsTaskQueue(TaskQueue):
 
 
 QUEUE_NAME = sys.argv[2]
+
 taskqueue = SqsTaskQueue(QUEUE_NAME)
 
 if __name__ == '__main__':

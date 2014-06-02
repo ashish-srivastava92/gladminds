@@ -8,16 +8,15 @@ STATIC_DIR = os.path.join(BASE_DIR, "src/static")
 TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gladminds',
+        'NAME': 'gladmindsdb',
         'USER': 'gladminds',
-        'PASSWORD': 'gladmindsRocks',
+        'PASSWORD': 'gladminds123',
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }
@@ -26,7 +25,12 @@ DATABASES = {
 
 BROKER_URL= 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
+
+
+JOBCARD_DIR = '{0}/jobcards/dev/'
+
 MAIL_SERVER = 'localhost'
+
 
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".

@@ -11,27 +11,40 @@
         <div class="message"></div>
     </div>
     <div id="wrapper">
+        {% if not asc_registration %}
         <div class="row">
+          <div class="col-md-offset-8 col-md-2">
+            <a class="logout" href="/provider/logout">Logout</a>
+          </div>
+        </div>
+        {% endif %}
+        <div class="row">
+            {% if not asc_registration %}
             <div class="col-md-3 .col-md-offset-1">
                 {% include "portal/base_portal.html" %}
             </div>
+            {% endif %}
             <div class="col-md-8">
                 <div class="row portal-form-heading">
                     <div class="col-md-10">
                         <h3 class="text-center"> ASC Registration </h3>
                     </div>
                 </div>
-                <form class="asc-form" role="form">{% csrf_token %}
+                    {% if not asc_registration %}
+                    <form class="asc-form" role="form">{% csrf_token %}
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label class="control-label">Dealer ID:</label>
                         </div>
                         <div class="col-md-4 form-group">
-                            <input type="text" class="form-control" name="dealer_id" required autofocus/>
+                            <input disabled type="text" class="form-control" name="dealer_id" value="{{ user_id }}" required autofocus/>
                         </div>
                     </div>
+                  {% else %}
+                  <form class="asc-self-form" role="form">{% csrf_token %}
+                 {% endif %}
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label class="control-label">ASC Name*:</label>
                         </div>
                         <div class="col-md-4 form-group">
@@ -39,31 +52,31 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label class="control-label">PWD*:</label>
                         </div>
                         <div class="col-md-4 form-group">
-                            <input type="password" class="form-control" name="pwd" required/>
+                            <input type="password" class="form-control" name="password" required/>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label  class="control-label">Retype PWD*:</label>
                         </div>
                         <div class="col-md-4 form-group">
-                            <input type="password" class="form-control" name="re-pwd" required />
+                            <input type="password" class="form-control" name="re-password" required />
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label class="control-label">ASC Mobile Number*:</label>
                         </div>
                         <div class="col-md-4 form-group">
-                            <input type="text" class="form-control" name="mobile_number" required/>
+                            <input type="text" class="form-control" name="phone-number" required maxlength="10" placeholder="10 digits"/>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label class="control-label">Email:</label>
                         </div>
                         <div class="col-md-4 form-group">
@@ -71,7 +84,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label class="control-label">PinCode:</label>
                         </div>
                         <div class="col-md-4 form-group">
@@ -79,7 +92,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-3 form-group">
                             <label class="control-label">Address:</label>
                         </div>
                         <div class="col-md-4 form-group">
@@ -87,7 +100,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-8 form-group">
+                        <div class="col-md-7 form-group">
                             <button type="submit" value="Submit" class="btn btn-primary pull-right asc-submit">
                                 Submit
                             </button>
@@ -98,8 +111,11 @@
         </div>
     </div>
 </div>
+{% include "portal/modal.html" %}
+{% include "portal/waiting_modal.html" %}
 {% endblock %}
 
 {% block dependency %}
+<script src="/static/js/portal/utils.js"></script>
 <script src="/static/js/portal/main.js"></script>
 {% endblock dependency %}

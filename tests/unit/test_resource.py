@@ -13,9 +13,6 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
     def setUp(self):
         super(GladmindsResourcesTest, self).setUp()
 
-        file_path = os.path.join(settings.BASE_DIR, 'etc/data/data.json')
-        self.data = json.load(open(file_path))['data']
-        file_path = os.path.join(settings.BASE_DIR, 'etc/data/template.json')
         brand_obj = self.get_brand_obj(brand_id='brand001', brand_name='bajaj')
         product_type_obj = self.get_product_type_obj(brand_id=brand_obj, product_name='DISCO120', product_type='BIKE')
         dealer_obj = self.get_delear_obj(dealer_id='DEALER001')
@@ -44,16 +41,16 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         
                 
     def test_dispatch_gladminds(self):
-        result = client.post('/v1/messages', data={'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP001 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
-        result = client.post('/v1/messages', data={'text':'A SAP001 500', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP001 500', 'phoneNumber' : '4444861111'})
         self.assertHttpBadRequest(result)
-        result = client.post('/v1/messages', data={'text':'C TESTVECHILEID00002', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['close'] + ' TESTVECHILEID00002', 'phoneNumber' : '4444861111'})
         self.assertHttpBadRequest(result)
         
     def test_format_message(self):
-        result = client.post('/v1/messages', data={'text':'   A    SAP001   500   1    ', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data={'text':'   ' + settings.ALLOWED_KEYWORDS['check'] + '    SAP001   500   1    ', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
         
@@ -62,38 +59,38 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
             Coupon has been initiated by dealer - UMOTO
             Only UMOTO is allowed to close the coupon
         '''
-        result = client.post('/v1/messages', data={'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP001 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
 #       Below Dealer will not be able to close the coupon
-        result = client.post('/v1/messages', data={'text':'C SAP001 COUPON005', 'phoneNumber' : '9999999999'})
+        result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['close'] + ' SAP001 COUPON005', 'phoneNumber' : '9999999999'})
         self.assertTrue('false' in result.content)
         self.assertHttpOK(result)
 #       Below is the initiator and the coupon will be closed
-        result = client.post('/v1/messages', data={'text':'C SAP001 COUPON005', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['close'] + ' SAP001 COUPON005', 'phoneNumber' : '4444861111'})
         self.assertTrue('true' in result.content)
         self.assertHttpOK(result)
         
     def test_is_valid_data(self):
-        result = client.post('/v1/messages', data={'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP001 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
-        result = client.post('/v1/messages', data={'text':'A SAP002 500 1', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP002 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
-        result = client.post('/v1/messages', data={'text':'C SAP002 COUPON005', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['close'] + ' SAP002 COUPON005', 'phoneNumber' : '4444861111'})
         self.assertTrue('false' in result.content)
         self.assertHttpOK(result)
-        result = client.post('/v1/messages', data={'text':'C SAP001 COUPON004', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['close'] + ' SAP001 COUPON004', 'phoneNumber' : '4444861111'})
         self.assertTrue('false' in result.content)
         self.assertHttpOK(result)
 
     def test_expire_or_close_less_kms_coupon(self):
-        result = client.post('/v1/messages', data={'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP001 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         self.assertTrue('true' in result.content)
         # Coupon validation is tested for 3rd service coupon "COUPON007" with coupon for service 2 "COUPON006" unused.
-        result = client.post('/v1/messages', data={'text':'A SAP001 5500 3', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP001 5500 3', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         result = client.post('/v1/messages', data={'customerId': 'SAP001', 'action' : 'validate', 'odoRead' : 5500, 'serviceType' : 3, 'advisorMobile' : '4444861111'})
         self.assertHttpOK(result)
@@ -111,13 +108,13 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         self.assertEqual(coupon_obj.status, 4)
         
     def test_inprogress_coupon(self):
-        client.post('/v1/messages', data={'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
+        client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP001 500 1', 'phoneNumber' : '4444861111'})
         # Change the expiry date and check for new service date.
         coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
         coupon_obj.actual_service_date = datetime.now() - timedelta(days=20)
         coupon_obj.mark_expired_on = datetime.now() + timedelta(days=2)
         coupon_obj.save()
-        client.post('/v1/messages', data={'text':'A SAP001 500 1', 'phoneNumber' : '9999999999'})
+        client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP001 500 1', 'phoneNumber' : '9999999999'})
         coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
         self.assertEqual(coupon_obj.actual_service_date.date(), datetime.now().date())
         self.assertEqual(coupon_obj.extended_date.date(), datetime.now().date() + timedelta(days=COUPON_VALID_DAYS))
@@ -129,39 +126,39 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         coupon_obj.mark_expired_on = datetime.now() - timedelta(days=2)
         expiry_date = coupon_obj.extended_date
         coupon_obj.save()
-        client.post('/v1/messages', data={'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
+        client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP001 500 1', 'phoneNumber' : '4444861111'})
         coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
         self.assertEqual(coupon_obj.sa_phone_number.phone_number, '+919999999999')
         self.assertEqual(coupon_obj.actual_service_date.date(), datetime.now().date())
         self.assertEqual(coupon_obj.extended_date.date(), expiry_date.date())
         
     def test_register_customer(self):
-        result = client.post('/v1/messages', data={'text':'GCP_REG email@email.com customer1', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data={'text': settings.ALLOWED_KEYWORDS['register']+ ' email@email.com customer1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         # Customer already exist.
-        result = client.post('/v1/messages', data={'text':'GCP_REG email@email.com customer1', 'phoneNumber' : '4444866666'})
+        result = client.post('/v1/messages', data={'text': settings.ALLOWED_KEYWORDS['register']+ ' email@email.com customer1', 'phoneNumber' : '4444866666'})
         self.assertHttpOK(result)
 
     def test_customer_service_detail(self):
         # Register customer
-        result = client.post('/v1/messages', data={'text':'GCP_REG email@email.com customer1', 'phoneNumber' : '9999999'})
+        result = client.post('/v1/messages', data={'text': settings.ALLOWED_KEYWORDS['register']+ ' email@email.com customer1', 'phoneNumber' : '9999999'})
         self.assertHttpOK(result)
-        result = client.post('/v1/messages', data={'text':'service SAP001', 'phoneNumber' : '9999999'})
+        result = client.post('/v1/messages', data={'text': settings.ALLOWED_KEYWORDS['service']+ ' SAP001', 'phoneNumber' : '9999999'})
         self.assertHttpOK(result)
     
     def test_coupon_initiators(self):
-        client.post('/v1/messages', data={'text':'A SAP001 500 1', 'phoneNumber' : '4444861111'})
-        client.post('/v1/messages', data={'text':'A SAP001 500 1', 'phoneNumber' : '9999999999'})
+        client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP001 500 1', 'phoneNumber' : '4444861111'})
+        client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP001 500 1', 'phoneNumber' : '9999999999'})
         coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
         self.assertEqual(coupon_obj.status, 4)
-        client.post('/v1/messages', data={'text':'C SAP001 COUPON005', 'phoneNumber' : '4444861111'})
+        client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['close'] + ' SAP001 COUPON005', 'phoneNumber' : '4444861111'})
         coupon_obj = self.filter_coupon_obj(coupon_id='COUPON005')
         self.assertEqual(coupon_obj.status, 2)
         
     def test_no_available_coupons(self):
         # Close all the coupons
         coupon = self.filter_coupon_obj('COUPON004').delete()
-        result = client.post('/v1/messages', data={'text':'A SAP002 500 1', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP002 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         
 class GladmindsUrlsTest(GladmindsResourceTestCase):

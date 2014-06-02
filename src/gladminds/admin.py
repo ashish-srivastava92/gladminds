@@ -1,25 +1,27 @@
+import tablib
+import datetime
+import json
 from django.contrib import admin
-from models.common import RegisteredDealer
-from models.common import GladMindUsers, ProductTypeData, RegisteredDealer,\
-    ServiceAdvisor, BrandData, ProductData, CouponData, MessageTemplate,\
-    UploadProductCSV, ServiceAdvisorDealerRelationship
-from models.logs import AuditLog, DataFeedLog
+from suit.admin import SortableTabularInline, SortableModelAdmin
+from suit.widgets import SuitDateWidget, SuitSplitDateTimeWidget, \
+    EnclosedInput, LinkedSelect, AutosizedTextarea
 from suit.widgets import NumberInput
 from suit.admin import SortableModelAdmin
 from django.forms import ModelForm, TextInput
 from django.contrib.admin import ModelAdmin
-from suit.admin import SortableTabularInline, SortableModelAdmin
-from suit.widgets import SuitDateWidget, SuitSplitDateTimeWidget, \
-    EnclosedInput, LinkedSelect, AutosizedTextarea
+from django.contrib.admin import DateFieldListFilter
 from django.contrib.admin import ModelAdmin, SimpleListFilter
+from models.common import GladMindUsers, ProductTypeData, \
+    BrandData, ProductData, CouponData, MessageTemplate,\
+    UploadProductCSV
+from gladminds.aftersell.models.common import \
+    RegisteredDealer,ServiceAdvisorDealerRelationship, ServiceAdvisor
+from gladminds.aftersell.models.logs import AuditLog, DataFeedLog
 from import_export.admin import ImportExportModelAdmin, ExportMixin
 from import_export import fields, widgets
 from import_export import resources
-from django.contrib.admin import DateFieldListFilter
-import tablib
-import datetime
-from models import logs
 from gladminds.models.common import EmailTemplate
+from gladminds.aftersell.models.common import ASCSaveForm
 
 
 ############################BRAND AND PRODUCT ADMIN##########################
@@ -326,7 +328,16 @@ class FeedLogAdmin(ModelAdmin):
     list_filter = ('feed_type', 'status')
     search_fields = ('status', 'data_feed_id', 'action')
     list_display = ('timestamp', 'feed_type', 'action',
-                    'total_data_count', 'success_data_count', 'failed_data_count')
+                    'total_data_count', 'success_data_count',
+                    'failed_data_count', 'feed_remarks')
+
+    def feed_remarks(self, obj):
+        remarks = json.loads(obj.remarks)
+        update_remark = ''
+        for remark, occurence in remarks.iteritems():
+            update_remark = "{0} : {1}#######".format(remark, occurence)
+
+        return update_remark
 
     def has_add_permission(self, request):
         return False
@@ -376,6 +387,28 @@ class ListDispatchedProducts(ModelAdmin):
             ucn_list.append(coupon.unique_service_coupon)
         return ' | '.join([str(ucn) for ucn in ucn_list])
 
+##############################################################
+#########################ASCSaveForm#########################
+
+
+class ASCSaveFormAdmin(ModelAdmin):
+    search_fields = (
+        'name', 'phone_number', 'email', 'pincode',
+        'address', 'status', 'timestamp', 'dealer_id')
+
+    list_display = (
+        'name', 'phone_number', 'email', 'status', 'timestamp')
+
+    def suit_row_attributes(self, obj):
+        class_map = {
+            '1': 'success',
+            '2': 'error'
+        }
+        css_class = class_map.get(str(obj.status))
+        if css_class:
+            return {'class': css_class}
+##############################################################
+
 
 admin.site.register(BrandData, BrandAdmin)
 admin.site.register(DispatchedProducts, ListDispatchedProducts)
@@ -390,4 +423,5 @@ admin.site.register(ProductData, ProductDataAdmin)
 admin.site.register(CouponData, CouponAdmin)
 admin.site.register(MessageTemplate, MessageTemplateAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
+admin.site.register(ASCSaveForm, ASCSaveFormAdmin)
 admin.site.register(UploadProductCSV)
