@@ -306,3 +306,13 @@ def export_asc_registeration_to_sap(*args, **kwargs):
         feed_log(feed_type="ASC Registration Feed", total_data_count=1,
          failed_data_count=total_failed, success_data_count=1 - total_failed,
                  action='Sent', status=export_status)
+
+
+'''
+Cron Job to send report email for data feed
+'''
+@shared_task
+def send_report_mail_for_feed_failure(*args, **kwargs):
+    remarks = kwargs['remarks']
+    feed_type = kwargs['feed_type']
+    mail.feed_report_failure(remarks = remarks, feed_type=feed_type)

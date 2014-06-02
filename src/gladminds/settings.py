@@ -296,7 +296,7 @@ MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
 
     "sender": "feed-report@gladminds.co",
-    "receiver": "gladminds@hashedin.com,naveen.shankar@gladminds.co",
+    "receiver": ["sourabh.gupta@hashedin.com","sourabh5588gupta@gmail.com"],
     "subject": "Gladminds Feed Report",
     "body": """""",
 }
