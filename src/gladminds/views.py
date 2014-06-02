@@ -21,9 +21,9 @@ from gladminds.aftersell.models import common as afterbuy_common
 logger = logging.getLogger('gladminds')
 
 
-def auth_login(request, brand, provider):
+def auth_login(request, provider):
     if request.method == 'GET':
-        #TODO: Implement brand Restrictions also.
+        
         provider_mapping = {
                             'asc': {'template_name': 'asc/login.html'},
                             'dasc': {'template_name': 'asc/login.html'},
@@ -37,7 +37,7 @@ def auth_login(request, brand, provider):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                return HttpResponseRedirect('/provider/redirect')
+                return HttpResponseRedirect('/aftersell/provider/redirect')
     return HttpResponseRedirect(request.path_info+'?auth_error=true')
 
 def user_logout(request):
@@ -75,14 +75,15 @@ def generate_otp(request):
             #Send email if email address exist
             if email:
                 sent_otp_email(data=token, receiver=email, subject='Forgot Password')
-            return HttpResponseRedirect('/users/otp/validate?phone='+phone_number)
+            return HttpResponseRedirect('/aftersell/users/otp/validate?phone='+phone_number)
         except:
             logger.error('Invalid details, mobile {0}'.format(request.POST.get('mobile', '')))
-            return HttpResponseRedirect('/users/otp/generate?details=invalid')
+            return HttpResponseRedirect('/aftersell/users/otp/generate?details=invalid')
     elif request.method == 'GET':
         return render(request, 'portal/get_otp.html')
 
 def validate_otp(request):
+    print "here"
     if request.method == 'GET':
         return render(request, 'portal/validate_otp.html')
     elif request.method == 'POST':
@@ -95,7 +96,7 @@ def validate_otp(request):
             return render(request, 'portal/reset_pass.html', {'otp': otp})
         except:
             logger.error('OTP validation failed for mobile number {0}'.format(phone_number))
-            return HttpResponseRedirect('/users/otp/generate?token=invalid')
+            return HttpResponseRedirect('/aftersell/users/otp/generate?token=invalid')
 
 def update_pass(request):
     try:
@@ -103,16 +104,16 @@ def update_pass(request):
         password=request.POST['password']
         utils.update_pass(otp, password)
         logger.info('Password has been updated.')
-        return HttpResponseRedirect('/asc/login?update=true')
+        return HttpResponseRedirect('/aftersell/asc/login?update=true')
     except:
         logger.error('Password update failed.')
-        return HttpResponseRedirect('/asc/login?error=true')
+        return HttpResponseRedirect('/aftersell//asc/login?error=true')
 
 def redirect_user(request):
     asc_group = Group.objects.get(name='ascs')
     if asc_group in request.user.groups.all():
-        return HttpResponseRedirect('/register/sa')
-    return HttpResponseRedirect('/register/asc')
+        return HttpResponseRedirect('/aftersell/register/sa')
+    return HttpResponseRedirect('/aftersell/register/asc')
 
 @login_required()
 def register(request, menu):
