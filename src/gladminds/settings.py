@@ -294,24 +294,27 @@ WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR + '/coupon_redeem.wsdl'
 
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
+
     "sender": "feed-report@gladminds.co",
     "receiver": "gladminds@hashedin.com,naveen.shankar@gladminds.co",
     "subject": "Gladminds Feed Report",
     "body": """""",
 }
 
-OTP_MAIL = {
-    "sender": "Gladminds support",
-    "subject": "Reset Password",
-    "body": """""",
-    "receiver": "gladminds@hashedin.com",
-}
 UCN_RECOVERY_MAIL = {
     "sender": "Gladminds Alert",
     "subject": "UCN Request",
     "body": "",
     "receiver": "gladminds@hashedin.com"
 }
+
+OTP_MAIL = {
+                  "sender":"support@gladminds.co",
+                  "subject":"Reset Password",
+                  "receiver": [""],
+                  "body": """""",
+              }
+
 
 # AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")

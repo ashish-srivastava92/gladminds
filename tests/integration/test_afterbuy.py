@@ -2,6 +2,7 @@
 '''
 
 from integration.base_integration import GladmindsResourceTestCase
+
 from django.test.client import Client
 from gladminds.models import common
 
@@ -13,7 +14,6 @@ class TestAfterbuy(GladmindsResourceTestCase):
     def setUp(self):
         pass
         
-
     def test_create_new_user(self):
         '''
             Response of Api Status :

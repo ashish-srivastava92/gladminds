@@ -21,6 +21,11 @@ SOURCE gladmindsdb.sql;
 mysqldump -uroot -prootpassword > gmdbcopy5may.sql
 
 -------------------------create copy-------------------------------
+
+----------------------------RDS Data Import-----------------------
+mysqldump -h gladminds-qa.chnnvvffqwop.us-east-1.rds.amazonaws.com  -u gladminds -pgladminds123 gladmindsdbqa > gladminds_db.sql 
+
+--------------------------------------------------------------------
 -------------------------other changes---------------------------
 
 ALTER TABLE gladminds_serviceadvisor ADD status CHAR(10) NOT NULL DEFAULT 'y';
@@ -83,9 +88,9 @@ UNLOCK TABLES;
 
 -------------------create slow query log------------------
 
-mkdir /var/log/mysql
-touch /var/log/mysql/log-slow-queries.log
-chown mysql.mysql -R /var/log/mysql
+sudo mkdir /var/log/mysql
+sudo touch /var/log/mysql/log-slow-queries.log
+sudo chown mysql.mysql -R /var/log/mysql
 
 set global slow_query_log = 'ON';
 set global slow_query_log_file = '/var/log/mysql/log-slow-queries.log';
