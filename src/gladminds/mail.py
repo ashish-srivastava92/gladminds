@@ -30,7 +30,7 @@ def feed_report(feed_data = None):
         body = template.render(context)
         mail_detail = settings.MAIL_DETAIL
         mail.send_email(sender=mail_detail['sender'],
-                   receiver=mail_detail['reciever'],
+                   receiver=mail_detail['receiver'],
                    subject=mail_detail['subject'], body=body,
                    smtp_server=settings.MAIL_SERVER)
 
@@ -48,7 +48,7 @@ def feed_report_failure(remarks = None, feed_type=None):
         body = template.render(context)
         mail_detail = settings.MAIL_DETAIL
         send_email(sender=mail_detail['sender'],
-                   receiver=mail_detail['reciever'],
+                   receiver=mail_detail['receiver'],
                    subject=mail_detail['subject'], body=body,
                    smtp_server=settings.MAIL_SERVER)
 
