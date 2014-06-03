@@ -213,7 +213,7 @@ class ProductDispatchFeed(BaseFeed):
                     vin=product['vin'])
             except ObjectDoesNotExist as odne:
                 logger.info(
-                    '[Exception: ProductDispatchFeed_product_data]: {0}'.format(odne))
+                    '[Info: ProductDispatchFeed_product_data]: {0}'.format(odne))
                 try:
                     try:
                         dealer_data = common.RegisteredDealer.objects.get(

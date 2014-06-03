@@ -102,7 +102,7 @@ show variables like '%slow%';
 
 ------------------------create user in mysql---------------------
 +CREATE USER 'gladminds'@'localhost' IDENTIFIED BY 'gladmindsRocks';
-+GRANT ALL PRIVILEGES ON gladminds.* TO 'gladminds'@'localhost';
++GRANT ALL PRIVILEGES ON *.* TO 'gladminds'@'localhost';
 ----------------------------------------------------------
 
 
