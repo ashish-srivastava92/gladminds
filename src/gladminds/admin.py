@@ -346,7 +346,7 @@ class FeedLogAdmin(ModelAdmin):
 ##############################################################
 ##################Custom Model Defined########################
 
-class DispatchedProduct(ProductData):
+class DispatchedProducts(ProductData):
 
     class Meta:
         proxy = True
