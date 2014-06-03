@@ -70,6 +70,8 @@ CREATE TABLE `gladminds_serviceadvisorcouponrelationship` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -------------------Migration Script for 1.3.1 ------------------
+alter table gladminds_registeredasc add asc_id char(20) not null;
+alter table gladminds_registeredasc add constraint unique(asc_id);
 --
 -- Table structure for table `auth_group`
 --
@@ -84,7 +86,6 @@ CREATE TABLE `auth_group` (
 LOCK TABLES `auth_group` WRITE;
 INSERT INTO `auth_group` VALUES (4,'ascs'),(3,'customer'),(1,'dealers'),(2,'sas');
 UNLOCK TABLES;
-
 
 -------------------create slow query log------------------
 
