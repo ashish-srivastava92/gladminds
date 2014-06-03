@@ -16,18 +16,18 @@ api_v1.register(r.ProductResources())
 api_v1.register(r.UserResources())
 
 urlpatterns = patterns('',
-    url(r'^(?P<brand>[a-zA-Z0-9]+)/(?P<provider>[a-zA-Z]+)/login/$', 'gladminds.views.auth_login', name='user_login'),
-    url(r'^provider/logout$', 'gladminds.views.user_logout', name='user_logout'),
+    url(r'^aftersell/(?P<provider>[a-zA-Z]+)/login/$', 'gladminds.views.auth_login', name='user_login'),
+    url(r'^aftersell/provider/logout$', 'gladminds.views.user_logout', name='user_logout'),
     url(r'api/doc/', include('tastypie_swagger.urls', namespace='tastypie_swagger')),
-    url(r'^provider/redirect$', 'gladminds.views.redirect_user'),
+    url(r'^aftersell/provider/redirect$', 'gladminds.views.redirect_user'),
 
-    url(r'^register/(?P<menu>[a-zA-Z0-9]+)$', 'gladminds.views.register'),
-    url(r'^exceptions/(?P<exception>[a-zA-Z0-9]+)$', 'gladminds.views.exceptions'),
-    url(r'^users/otp/generate$', 'gladminds.views.generate_otp', name='generate_otp'),
-    url(r'^users/otp/validate', 'gladminds.views.validate_otp', name='validate_otp'),
-    url(r'^users/otp/update_pass', 'gladminds.views.update_pass', name='update_pass'),
+    url(r'^aftersell/register/(?P<menu>[a-zA-Z0-9]+)$', 'gladminds.views.register'),
+    url(r'^aftersell/exceptions/(?P<exception>[a-zA-Z0-9]+)$', 'gladminds.views.exceptions'),
+    url(r'^aftersell/users/otp/generate$', 'gladminds.views.generate_otp', name='generate_otp'),
+    url(r'^aftersell/users/otp/validate', 'gladminds.views.validate_otp', name='validate_otp'),
+    url(r'^aftersell/users/otp/update_pass', 'gladminds.views.update_pass', name='update_pass'),
 
-    url(r'^asc/self-register/$', 'gladminds.views.asc_registration'),
+    url(r'^aftersell/asc/self-register/$', 'gladminds.views.asc_registration'),
 
     #Afterbuy accesstoken URL.
     url(r'^oauth2/', include('provider.oauth2.urls', namespace = 'oauth2')),
@@ -54,7 +54,7 @@ urlpatterns += patterns('gladminds',
 
     url(r'^app/logout', 'afterbuy.views.app_logout', name='app_logout'),
     url(r'^app', 'afterbuy.views.home', name='home'),
-    url(r'^gm', 'afterbuy.views.main', name='main'),
+    url(r'^afterbuy', 'afterbuy.views.main', name='main'),
     url(r'^v1/api/users/auth', 'afterbuy.views.get_access_token'),
 
     url(r'^tasks/', SqsHandler.as_view(task_map=_tasks_map)),

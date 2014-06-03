@@ -46,7 +46,7 @@ $(function() {
         messageBlock.fadeIn(1000).fadeOut(7000);
       }
     }
-  }
+  };
   
   var populateFields = function() {
     var splittedUrl = window.location.href.split('?');
@@ -57,7 +57,7 @@ $(function() {
         $(".otp-validation-form #phone").val(phone);
       }
     }
-  }
+  };
 
   $(document).ready(function() {
     userMessage();
