@@ -143,7 +143,7 @@ def send_otp(*args, **kwargs):
         respone_data = sms_client.send_stateless(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
-        send_on_product_purchase.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+        send_otp.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         audit_log(status = status, reciever=phone_number, message=message)
 
