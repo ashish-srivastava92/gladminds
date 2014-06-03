@@ -473,10 +473,10 @@ class ASCFeed(BaseFeed):
             try:
                 dealer_data = aftersell_common.RegisteredDealer.objects.get(
                     dealer_id=dealer['dealer_id'])
-            except ObjectDoesNotExist as done:
+            except ObjectDoesNotExist as ex:
                 logger.debug(
                     "[Exception: ASCFeed_dealer_data]: {0}"
-                    .format(done))
+                    .format(ex))
                 dealer_data = aftersell_common.RegisteredDealer(
                     dealer_id=dealer['dealer_id'], address=dealer['address'])
                 dealer_data.save()
@@ -484,10 +484,10 @@ class ASCFeed(BaseFeed):
             try:
                 asc_data = aftersell_common.RegisteredASC.objects.get(
                     asc_id=dealer['asc_id'])
-            except ObjectDoesNotExist as done:
+            except ObjectDoesNotExist as ex:
                 logger.debug(
                     "[Exception: ASCFeed_dealer_data]: {0}"
-                    .format(done))
+                    .format(ex))
                 asc_data = aftersell_common.RegisteredASC(
                     asc_id=dealer['asc_id'], dealer_id=dealer_data, asc_name=dealer['name'],
                     phone_number=dealer['phone_number'],address=dealer['address'],
