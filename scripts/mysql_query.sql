@@ -114,3 +114,14 @@ SELECT table_schema  gladmindsdb,
 FROM   information_schema.tables 
 GROUP  BY table_schema;
 ------------------------------------------------------------------------
+
+
+----------------------------Mysql data fetch query---------------------
+
+SELECT gladminds_productdata.vin, gladminds_productdata.sap_customer_id, gladminds_gladmindusers.phone_number, gladminds_gladmindusers.customer_name
+FROM gladminds_productdata
+INNER JOIN gladminds_gladmindusers
+ON gladminds_productdata.customer_phone_number_id=gladminds_gladmindusers.id;
+
+ 
+----------------------------------------------------------------------
