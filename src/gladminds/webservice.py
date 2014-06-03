@@ -278,7 +278,6 @@ class ASCService(ServiceBase):
                 feed_remark.fail_remarks(ex)
         feed_remark = save_to_db(feed_type='ASC', data_source=asc_list,
                               feed_remark=feed_remark)
-        print "################", feed_remark
         feed_remark.save_to_feed_log()
         return get_response(feed_remark)    
 
