@@ -105,6 +105,10 @@ class SAPFeed(object):
             purchase_obj = ProductPurchaseFeed(data_source=data_source,
                                                feed_remark=feed_remark)
             return purchase_obj.import_data()
+        elif feed_type == 'ASC':
+            asc_obj = ASCFeed(data_source=data_source,
+                                               feed_remark=feed_remark)
+            return asc_obj.import_data()
 
 
 class BaseFeed(object):
@@ -462,3 +466,31 @@ def update_coupon_data(sender, **kwargs):
             logger.info("[Exception]: Signal-In Update Coupon Data %s" % ex)
 
 post_save.connect(update_coupon_data, sender=common.ProductData)
+
+class ASCFeed(BaseFeed):
+    def import_data(self):
+        for dealer in self.data_source:
+            try:
+                dealer_data = aftersell_common.RegisteredDealer.objects.get(
+                    dealer_id=dealer['dealer_id'])
+            except ObjectDoesNotExist as ex:
+                logger.debug(
+                    "[Exception: ASCFeed_dealer_data]: {0}"
+                    .format(ex))
+                dealer_data = aftersell_common.RegisteredDealer(
+                    dealer_id=dealer['dealer_id'], address=dealer['address'])
+                dealer_data.save()
+                self.registerNewDealer(username=dealer['dealer_id'])
+            try:
+                asc_data = aftersell_common.RegisteredASC.objects.get(
+                    asc_id=dealer['asc_id'])
+            except ObjectDoesNotExist as ex:
+                logger.debug(
+                    "[Exception: ASCFeed_dealer_data]: {0}"
+                    .format(ex))
+                asc_data = aftersell_common.RegisteredASC(
+                    asc_id=dealer['asc_id'], dealer_id=dealer_data, asc_name=dealer['name'],
+                    phone_number=dealer['phone_number'],address=dealer['address'],
+                    email_id=dealer['email'], registration_date=datetime.now())
+                asc_data.save()
+        return self.feed_remark
