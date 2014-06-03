@@ -87,6 +87,8 @@ class ServiceAdvisorDealerRelationship(models.Model):
 
 class RegisteredASC(models.Model):
     user = models.OneToOneField(User, null=True, blank=True)
+    asc_id = models.CharField(
+        max_length=20, blank=False, unique=True, null=False)
     dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)
     asc_name = models.CharField(max_length=215)

@@ -7,7 +7,7 @@ from gladminds.models.common import \
     ProductData, CouponData, GladMindUsers
 
 from gladminds.aftersell.models.common import RegisteredDealer,\
-    ServiceAdvisorDealerRelationship, ServiceAdvisor
+    ServiceAdvisorDealerRelationship, ServiceAdvisor, RegisteredASC
 from datetime import datetime, timedelta
 from integration.base_integration import GladmindsResourceTestCase
 from gladminds import feed
@@ -218,3 +218,15 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         self.assertEquals(1, CouponData.objects.count())
         coupon_data = CouponData.objects.all()[0]
         self.assertEquals(u"USC002", coupon_data.unique_service_coupon)
+
+       
+    def test_asc_feed(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/asc_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+        
+        dealer_obj_1 = RegisteredDealer.objects.filter(dealer_id='GMDEALER001')
+        asc_obj_1 = RegisteredASC.objects.get(asc_id='ASC001')
+        self.assertEquals('xyz', asc_obj_1.asc_name)
+        

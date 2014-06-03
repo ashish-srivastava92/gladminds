@@ -80,6 +80,8 @@ LOCK TABLES `auth_group` WRITE;
 INSERT INTO `auth_group` VALUES (4,'ascs'),(3,'customer'),(1,'dealers'),(2,'sas');
 UNLOCK TABLES;
 
+alter table gladminds_registeredasc add asc_id char(20) not null;
+alter table gladminds_registeredasc add constraint unique(asc_id);
 
 -------------------create slow query log------------------
 

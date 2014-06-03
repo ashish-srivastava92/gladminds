@@ -148,7 +148,6 @@ class ASCModel(ComplexModel):
     ASC_MOBILE = Unicode
     ASC_EMAIL = Unicode
     ASC_ADDRESS = Unicode
-    ASC_ADDRESS_PINCODE = Unicode
     KUNNAR = Unicode
 
 
@@ -258,10 +257,10 @@ class ASCService(ServiceBase):
     @srpc(ASCModelList, AuthenticationModel, _returns=Unicode)
     def postASC(ObjectList, Credential):
         asc_list = []
-        feed_remark = FeedLogWithRemark(len(ObjectList.ascData),
+        feed_remark = FeedLogWithRemark(len(ObjectList.ASCData),
                                         feed_type='ASC Feed',
                                         action='Received', status=True)
-        for asc_element in ObjectList.ascData:
+        for asc_element in ObjectList.ASCData:
             try:
                 asc_list.append({
                     'asc_id': asc_element.ASC_ID,
@@ -269,8 +268,7 @@ class ASCService(ServiceBase):
                     'phone_number': utils.mobile_format(asc_element.ASC_MOBILE),
                     'address': asc_element.ASC_ADDRESS,
                     'email': asc_element.ASC_EMAIL,
-                    'pincode': asc_element.ASC_ADDRESS_PINCODE,
-                    'dealer_id': asc_element.KUNNR
+                    'dealer_id': asc_element.KUNNAR
                 })
             except Exception as ex:
                 ex = "ASCService: {0}  Error on Validating ".format(ex)
@@ -280,7 +278,7 @@ class ASCService(ServiceBase):
                 feed_remark.fail_remarks(ex)
         feed_remark = save_to_db(feed_type='ASC', data_source=asc_list,
                               feed_remark=feed_remark)
-
+        print "################", feed_remark
         feed_remark.save_to_feed_log()
         return get_response(feed_remark)    
 
