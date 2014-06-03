@@ -226,7 +226,7 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(200, response.status_code)
         
-        dealer_obj_1 = RegisteredDealer.objects.filter(dealer_id='GMDEALER001')
-        asc_obj_1 = RegisteredASC.objects.get(asc_id='ASC001')
-        self.assertEquals('xyz', asc_obj_1.asc_name)
+        dealer = RegisteredDealer.objects.filter(dealer_id='GMDEALER001')
+        asc = RegisteredASC.objects.get(asc_id='ASC001')
+        self.assertEquals('xyz', asc.asc_name)
         
