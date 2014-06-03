@@ -261,7 +261,6 @@ class ASCService(ServiceBase):
         feed_remark = FeedLogWithRemark(len(ObjectList.ascData),
                                         feed_type='ASC Feed',
                                         action='Received', status=True)
-        print ObjectList.ascData
         for asc_element in ObjectList.ascData:
             try:
                 asc_list.append({
