@@ -5,7 +5,7 @@ from django.db import models, transaction
 from django.forms.models import model_to_dict
 from gladminds import smsparser, utils, audit, message_template as templates
 from gladminds.models import common
-from gladminds.tasks import send_registration_detail, send_service_detail, \
+from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
 from tastypie import fields
