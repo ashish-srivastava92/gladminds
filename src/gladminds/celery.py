@@ -17,47 +17,47 @@ app.conf.CELERY_TIMEZONE = 'UTC'
 app.conf.CELERYBEAT_SCHEDULE= {
     # Send a reminder message to customer on service coupon expiry.
     'cronjob-send-reminder-daily-midnight': {
-        'task': 'gladminds.tasks.send_reminder',
+        'task': 'gladminds.sqs_tasks.send_reminder',
         'schedule': crontab(minute=0, hour=0),
         'kwargs': {'reminder_day':7}
     },
     
     # Import data from SAP CRM to MySQL
     'cronjob-import_sap_data_to_db': {
-        'task': 'gladminds.tasks.import_data',
+        'task': 'gladminds.sqs_tasks.import_data',
         'schedule': crontab(minute=0, hour=0),
     },
     
     #Job to send reminder message schedule by admin
     'cronjob-reminder_message_schedule_by_admin': {
-        'task': 'gladminds.tasks.send_schedule_reminder',
+        'task': 'gladminds.sqs_tasks.send_schedule_reminder',
         'schedule': crontab(minute=0, hour=0),
     },
                                
     #Job to set expire status=True for all service coupon which expire 
     'cronjob-set-expiry-status-to-service-coupon': {
-        'task': 'gladminds.tasks.expire_service_coupon',
+        'task': 'gladminds.sqs_tasks.expire_service_coupon',
         'schedule': crontab(minute=0, hour=0),
     },  
     #Job to set expire status=True for all service coupon which expire 
     'cronjob-export-csv-file': {
-        'task': 'gladminds.tasks.export_close_coupon_data',
+        'task': 'gladminds.sqs_tasks.export_close_coupon_data',
         'schedule': crontab(minute=0, hour=0),
     },
     #Job to export coupon redeem feed to SAP CRM
     'cronjob-export-coupon-redeem_to_sap': {
-        'task': 'gladminds.tasks.export_coupon_redeem_to_sap',
+        'task': 'gladminds.sqs_tasks.export_coupon_redeem_to_sap',
         'schedule': crontab(minute=0, hour=0),
     },
     #Job to send daily mail about data feed
     'cronjob-send-report-mail-on-data-feed': {
-        'task': 'gladminds.tasks.send_report_mail_for_feed',
+        'task': 'gladminds.sqs_tasks.send_report_mail_for_feed',
         'schedule': crontab(minute=0, hour=0),
         'kwargs': {'day_duration':1}
     },
     #Job to delete all the unused OTPs
     'cronjob-delete-unused-otp': {
-        'task': 'gladminds.tasks.delete_unused_otp',
+        'task': 'gladminds.sqs_tasks.delete_unused_otp',
         'schedule': crontab(minute=0, hour=0)
     },
 }

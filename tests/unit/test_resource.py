@@ -13,9 +13,7 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
     def setUp(self):
         super(GladmindsResourcesTest, self).setUp()
 
-        file_path = os.path.join(settings.BASE_DIR, 'etc/data/data.json')
-        self.data = json.load(open(file_path))['data']
-        file_path = os.path.join(settings.BASE_DIR, 'etc/data/template.json')
+        
         brand_obj = self.get_brand_obj(brand_id='brand001', brand_name='bajaj')
         product_type_obj = self.get_product_type_obj(brand_id=brand_obj, product_name='DISCO120', product_type='BIKE')
         dealer_obj = self.get_delear_obj(dealer_id='DEALER001')
