@@ -1,9 +1,9 @@
 <link href="/static/css/portal.css" rel="stylesheet">
 <label>Registration</label>
 <div class="list-group">
-    {% if 'dealers' in groups %}<a tabindex="1" href="/register/asc" class="list-group-item {% if active_menu == 'register_asc' %} active {% endif %}">ASC Registration</a>{% endif %}
-    <a href="/register/sa" class="list-group-item{% if active_menu == 'register_sa' %} active {% endif %}">Service Advisor Registration</a>
-    <a href="/register/customer" class="list-group-item{% if active_menu == 'register_customer' %} active {% endif %}">Customer Registration</a>
+    {% if 'dealers' in groups %}<a tabindex="1" href="/aftersell/register/asc" class="list-group-item {% if active_menu == 'register_asc' %} active {% endif %}">ASC Registration</a>{% endif %}
+    <a href="/aftersell/register/sa" class="list-group-item{% if active_menu == 'register_sa' %} active {% endif %}">Service Advisor Registration</a>
+    <a href="/aftersell/register/customer" class="list-group-item{% if active_menu == 'register_customer' %} active {% endif %}">Customer Registration</a>
 </div>
 
 <label>Users</label>
@@ -14,8 +14,8 @@
 
 <label>Exceptions</label>
 <div class="list-group">
-  <a href="/exceptions/customer" class="list-group-item{% if active_menu == 'customer' %} active{% endif %}">Search Customer ID</a>
-  <a href="/exceptions/check" class="list-group-item{% if active_menu == 'check' %} active{% endif %}">CHECK Free Service</a>
-  <a href="/exceptions/close" class="list-group-item{% if active_menu == 'close' %} active{% endif %}">CLOSE Free Service</a>
-  <a href="/exceptions/recover" class="list-group-item{% if active_menu == 'recover' %} active{% endif %}">UCN Recovery</a>
+  <a href="/aftersell/exceptions/customer" class="list-group-item{% if active_menu == 'customer' %} active{% endif %}">Search Customer ID</a>
+  <a href="/aftersell/exceptions/check" class="list-group-item{% if active_menu == 'check' %} active{% endif %}">CHECK Free Service</a>
+  <a href="/aftersell/exceptions/close" class="list-group-item{% if active_menu == 'close' %} active{% endif %}">CLOSE Free Service</a>
+  <a href="/aftersell/exceptions/recover" class="list-group-item{% if active_menu == 'recover' %} active{% endif %}">UCN Recovery</a>
 </div>
