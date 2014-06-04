@@ -15,19 +15,19 @@
 
     $('.asc-form').on('submit', function(e) {
         var data = Utils.getFormData('.asc-form')
-        Utils.submitForm(e, data, '/register/asc');
+        Utils.submitForm(e, data, '/aftersell/register/asc');
         return false;
     });
     
     $('.asc-self-form').on('submit', function(e) {
         var data = Utils.getFormData('.asc-self-form');
-        Utils.submitForm(e, data, '/asc/self-register/');
+        Utils.submitForm(e, data, '/aftersell/asc/self-register/');
         return false;
     });
     
     $('.sa-form').on('submit', function(event) {
         var data = Utils.getFormData('.sa-form');
-        Utils.submitForm(event, data, '/register/sa');
+        Utils.submitForm(event, data, '/aftersell/register/sa');
         return false;
     });
     
@@ -36,7 +36,7 @@
     	var data = Utils.getFormData('.customer-form'),
             vin = $('#srch-vin').val();
     	data['vin'] = vin;
-    	Utils.submitForm(e, data, '/register/customer');
+    	Utils.submitForm(e, data, '/aftersell/register/customer');
         return false;
       });
     
@@ -48,7 +48,7 @@
       
       var jqXHR = $.ajax({
             type: 'POST',
-            url: '/exceptions/customer',
+            url: '/aftersell/exceptions/customer',
             data: {'vin': vin},
             success: function(data){
               if(data['customer_phone']){
@@ -82,7 +82,7 @@
           waitingModal = $('.modal.waiting-dialog'),
           jqXHR = $.ajax({
           type: 'POST',
-          url: '/exceptions/recover',
+          url: '/aftersell/exceptions/recover',
           data: formData,
           cache: false,
           processData: false,

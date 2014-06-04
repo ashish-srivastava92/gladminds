@@ -12,7 +12,7 @@ from boto.s3.key import Key
 import json
 from gladminds.models.common import STATUS_CHOICES
 from gladminds.models import common
-from gladminds.models import common as aftersell_common
+from gladminds.aftersell.models import common as aftersell_common
 from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from gladminds.taskqueue import SqsTaskQueue

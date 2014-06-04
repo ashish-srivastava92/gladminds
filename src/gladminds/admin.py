@@ -135,7 +135,7 @@ class ServiceAdvisorDealerAdmin(ModelAdmin):
     def service_advisor_ids(self, obj):
         sa_obj = ServiceAdvisor.objects.filter(
             service_advisor_id=obj.service_advisor_id.service_advisor_id)
-        return u'<a href="/gladminds/serviceadvisor/%s/">%s</a>' % (obj.service_advisor_id.pk, sa_obj[0].service_advisor_id)
+        return u'<a href="/aftersell/serviceadvisor/%s/">%s</a>' % (obj.service_advisor_id.pk, sa_obj[0].service_advisor_id)
     service_advisor_ids.allow_tags = True
 
     def name(self, obj):
