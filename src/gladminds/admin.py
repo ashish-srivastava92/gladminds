@@ -329,7 +329,7 @@ class FeedLogAdmin(ModelAdmin):
     list_filter = ('feed_type', 'status')
     search_fields = ('status', 'data_feed_id', 'action')
     list_display = ('timestamp', 'feed_type', 'action',
-                    'total_data_count', 'success_data_count', 'failed_data_count', 'status')
+                    'total_data_count', 'success_data_count', 'failed_data_count')
 
     def has_add_permission(self, request):
         return False
@@ -356,7 +356,7 @@ class DispatchedProducts(ProductData):
 class ListDispatchedProducts(ModelAdmin):
     list_filter = ('engine', 'product_type', ('invoice_date', DateFieldListFilter))
     search_fields = ('vin', 'engine' , 'customer_phone_number__phone_number', 
-                     'dealer_id__dealer_id', 'product_type__product_type', "invoice_date")
+                     'dealer_id__dealer_id', 'product_type__product_type')
     
     list_display = (
         'vin', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
