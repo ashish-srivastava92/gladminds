@@ -303,15 +303,15 @@ MAIL_DETAIL = {
 FEED_FAILURE_MAIL_DETAIL = {
 
     "sender": "feed-report@gladminds.co",
-    "receiver": ["sourabh.gupta@hashedin.com","sourabh5588gupta@gmail.com"],
-    "subject": "Gladminds Feed Report",
+    "receiver": ["gladminds@hashedin.com"],
+    "subject": "Gladminds Feed Failure Mail",
     "body": """""",
 }
 
 UCN_RECOVERY_MAIL_DETAIL = {
     "sender": "feed-report@gladminds.co",
-    "receiver": ["sourabh.gupta@hashedin.com","sourabh5588gupta@gmail.com"],
-    "subject": "Gladminds Feed Report",
+    "receiver": ["gladminds@hashedin.com"],
+    "subject": "Gladminds UCN Recovery Mail",
     "body": """""",
 } 
 

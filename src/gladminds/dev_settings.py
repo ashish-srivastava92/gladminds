@@ -64,3 +64,6 @@ SMS_CLIENT_DETAIL={
 
 FEED_TYPE = 'CSV'
 FEED_FAILURE_MAIL_ENABLED = True
+
+FEED_FAILURE_MAIL_DETAIL["subject"] = "Gladminds Feed Failure Mail DEV"
+UCN_RECOVERY_MAIL_DETAIL["subject"] = "Gladminds UCN Recovery Mail DEV"
