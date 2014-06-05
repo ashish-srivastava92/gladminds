@@ -149,7 +149,6 @@ def sent_otp_email(data=None, receiver=None, subject=None):
 def send_ucn_request_alert(data=None):
     from gladminds import mail
     try:
-        date = datetime.now().date()
         file_stream = open(settings.TEMPLATE_DIR+'/ucn_request_email.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
@@ -157,7 +156,7 @@ def send_ucn_request_alert(data=None):
         body = template.render(context)
         mail_detail = settings.UCN_RECOVERY_MAIL_DETAIL
         
-        mail.send_email(sender = mail_detail['sender'], receiver = mail_detail['reciever'], 
+        mail.send_email(sender = mail_detail['sender'], receiver = mail_detail['receiver'], 
                    subject = mail_detail['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
