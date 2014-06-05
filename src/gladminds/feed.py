@@ -120,10 +120,11 @@ class BaseFeed(object):
     def import_data(self):
         pass
 
-    def registerNewUser(self, user, username=None, first_name='', last_name='',
+    def registerNewUser(self, user, group=None, username=None, first_name='', last_name='',
                           email=''):
         logger.info('New {0} Registration with id - {1}'.format(user, username))
-        group = USER_GROUP[user]
+        if not group:
+            group = USER_GROUP[user]
         if username:
             new_user = User(
                 username=username, first_name=first_name, last_name=last_name, email=email)
