@@ -433,7 +433,7 @@ def get_feed_status(total_feeds, failed_feeds):
 
 
 def update_coupon_data(sender, **kwargs):
-    from gladminds.tasks import send_on_product_purchase
+    from gladminds.sqs_tasks import send_on_product_purchase
     instance = kwargs['instance']
     logger.info("triggered update_coupon_data")
     if instance.customer_phone_number:

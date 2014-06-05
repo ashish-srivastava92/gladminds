@@ -261,7 +261,7 @@ WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR+'/coupon_redeem.wsdl'
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
                   "sender":"feed-report@gladminds.co",
-                  "receiver": ["sourabh.gupta@hashedin.com", "sourabh5588gupta@gmail.com"],
+                  "receiver": ["gladminds@hashedin.com", "naveen.shankar@gladminds.co"],
                   "subject":"Gladminds Feed Report",
                   "body": """""",
               }
