@@ -9,7 +9,6 @@ bin/django shell --settings=gladminds.dev_settings
 from django.contrib.sites.models import Site
 Site.objects.create(name='example.com', domain='example.com')
 
-
-
-
-
+bin/django loaddata  etc/data/template.json
+bin/django loaddata  etc/data/email_template.json
+INSERT INTO `auth_group` VALUES (4,'ascs'),(3,'customer'),(1,'dealers'),(2,'sas');
