@@ -308,12 +308,12 @@ FEED_FAILURE_MAIL_DETAIL = {
     "body": """""",
 }
 
-UCN_RECOVERY_MAIL = {
-    "sender": "Gladminds Alert",
-    "subject": "UCN Request",
-    "body": "",
-    "receiver": "gladminds@hashedin.com"
-}
+UCN_RECOVERY_MAIL_DETAIL = {
+    "sender": "feed-report@gladminds.co",
+    "receiver": ["sourabh.gupta@hashedin.com","sourabh5588gupta@gmail.com"],
+    "subject": "Gladminds Feed Report",
+    "body": """""",
+} 
 
 OTP_MAIL = {
                   "sender":"support@gladminds.co",
