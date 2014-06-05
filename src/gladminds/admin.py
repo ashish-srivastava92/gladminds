@@ -123,8 +123,9 @@ class ServiceAdvisorAdmin(ModelAdmin):
 
 
 class ServiceAdvisorDealerAdmin(ModelAdmin):
-    search_fields = ('service_advisor_id__service_advisor_id',
-                     'phone_number', 'name', 'dealer_id__dealer_id')
+    search_fields = ('dealer_id__dealer_id', 'service_advisor_id__service_advisor_id', 
+                     'service_advisor_id__name', 'service_advisor_id__phone_number')
+    
     list_display = (
         'dealer_id', 'name', 'service_advisor_ids', 'phone_number', 'status')
 
@@ -188,8 +189,9 @@ class Couponline(SortableTabularInline):
 
 
 class ProductDataAdmin(ModelAdmin):
-    search_fields = ('vin', 'customer_phone_number__phone_number')
-#    list_filter = ('invoice_date',)
+    search_fields = ('vin', 'sap_customer_id', 'customer_phone_number__customer_name',
+                     'customer_phone_number__phone_number')
+    list_filter = (('product_purchase_date', DateFieldListFilter),)
     list_display = ('vin', 'sap_customer_id', "UCN", 'customer_name',
                     'customer_phone_number', 'product_purchase_date')
     inlines = (Couponline,)
@@ -258,8 +260,9 @@ class CouponResource(resources.ModelResource):
 class CouponAdmin(ModelAdmin):
     #resource_class = CouponResource
     search_fields = (
-        'unique_service_coupon', 'vin__vin', 'valid_days', 'valid_kms')
-    #list_filter = ('status', ('actual_service_date', DateFieldListFilter))
+        'unique_service_coupon', 'vin__vin', 'valid_days', 'valid_kms', 'status', 
+        "service_type")
+    list_filter = ('status', ('actual_service_date', DateFieldListFilter))
     list_display = ('vin', 'unique_service_coupon', "actual_service_date",
                     'actual_kms', 'valid_days', 'valid_kms', 'status', "service_type")
     exclude = ('order',)
@@ -281,7 +284,7 @@ class CouponAdmin(ModelAdmin):
 
 
 class AuditLogAdmin(ModelAdmin):
-    list_filter = ('date', 'status')
+    list_filter = ('date', 'status', 'action')
     search_fields = ('status', 'sender', 'reciever', 'action')
     list_display = (
         'date', 'action', 'message', 'sender', 'reciever', 'status')
@@ -362,10 +365,12 @@ class DispatchedProducts(ProductData):
 
 
 class ListDispatchedProducts(ModelAdmin):
-    search_fields = ('vin', 'customer_phone_number__phone_number')
-#    list_filter = ('vin', )
+    list_filter = ('engine', 'product_type', ('invoice_date', DateFieldListFilter))
+    search_fields = ('vin', 'engine' , 'customer_phone_number__phone_number', 
+                     'dealer_id__dealer_id', 'product_type__product_type')
+    
     list_display = (
-        'product_type', 'vin', 'engine', 'UCN', 'dealer_id', "invoice_date")
+        'vin', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
     exclude = ('order',)
 
     def queryset(self, request):

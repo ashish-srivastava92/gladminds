@@ -63,3 +63,4 @@ SMS_CLIENT_DETAIL={
                    }
 
 FEED_TYPE = 'CSV'
+FEED_FAILURE_MAIL_ENABLED = False

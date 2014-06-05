@@ -294,6 +294,13 @@ WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR + '/coupon_redeem.wsdl'
 
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
+    "sender": "feed-report@gladminds.co",
+    "receiver": ["gladminds@hashedin.com", "naveen.shankar@gladminds.co"],
+    "subject": "Gladminds Feed Report",
+    "body": """""",
+}
+
+FEED_FAILURE_MAIL_DETAIL = {
 
     "sender": "feed-report@gladminds.co",
     "receiver": ["sourabh.gupta@hashedin.com","sourabh5588gupta@gmail.com"],
@@ -361,3 +368,7 @@ REGISTRATION_CONFIG = {
 ########################Password Postfix for dealers######################
 PASSWORD_POSTFIX = '@123'
 ###########################################################################
+
+########################Feed Failure Mail enabled ######################
+FEED_FAILURE_MAIL_ENABLED = True
+##########################################################################

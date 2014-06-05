@@ -143,7 +143,7 @@ def send_otp(*args, **kwargs):
         respone_data = sms_client.send_stateless(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
-        send_on_product_purchase.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+        send_otp.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         audit_log(status = status, reciever=phone_number, message=message)
 
@@ -293,7 +293,8 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
         start_date=start_date, end_date=end_date)
     if len(feed_export_data[0]) > 0:
         coupon_redeem = exportfeed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
-            'username'], password=settings.SAP_CRM_DETAIL['password'], wsdl_url=settings.COUPON_WSDL_URL)
+                       'username'], password=settings.SAP_CRM_DETAIL['password'],
+                      wsdl_url=settings.COUPON_WSDL_URL, feed_type='Coupon Redeem Feed')
         coupon_redeem.export(items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:
@@ -352,7 +353,22 @@ def export_asc_registeration_to_sap(*args, **kwargs):
          failed_data_count=total_failed, success_data_count=1 - total_failed,
                  action='Sent', status=export_status)
 
+'''
+Delete the all the generated otp by end of day.
+'''
+@shared_task
+def delete_unused_otp(*args, **kwargs):
+    common.OTPToken.objects.all().delete()
 
+'''
+Cron Job to send report email for data feed
+'''
+@shared_task
+def send_report_mail_for_feed_failure(*args, **kwargs):
+    remarks = kwargs['remarks']
+    feed_type = kwargs['feed_type']
+    mail.feed_failure_report(remarks = remarks, feed_type=feed_type)
+    
 _tasks_map = {"send_registration_detail": send_registration_detail,
 
               "send_service_detail": send_service_detail,
@@ -389,5 +405,7 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
 
               "export_asc_registeration_to_sap": export_asc_registeration_to_sap,
               
-              "send_otp": send_otp
+              "send_otp": send_otp,
+              
+              "delete_unused_otp" : delete_unused_otp,
               }

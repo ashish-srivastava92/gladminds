@@ -241,8 +241,7 @@ class ProductDispatchFeed(BaseFeed):
                     vin=product['vin'])
             except ObjectDoesNotExist as odne:
                 logger.info(
-                    '[Exception: ProductDispatchFeed_product_data]: {0}'
-                    .format(odne))
+                    '[Info: ProductDispatchFeed_product_data]: {0}'.format(odne))
                 try:
                     try:
                         dealer_data = aftersell_common.RegisteredDealer.objects.get(
@@ -441,7 +440,7 @@ class ASCRegistrationToSAP(BaseFeed):
 
 
 def update_coupon_data(sender, **kwargs):
-    from gladminds.tasks import send_on_product_purchase
+    from gladminds.sqs_tasks import send_on_product_purchase
     instance = kwargs['instance']
     logger.info("triggered update_coupon_data")
     if instance.customer_phone_number:
@@ -464,11 +463,12 @@ def update_coupon_data(sender, **kwargs):
                 customer_name=customer_data.customer_name, sap_customer_id=instance.sap_customer_id)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_on_product_purchase", {
-                               "phone_number": instance.customer_phone_number, "message": message})
+                task_queue.add("send_on_product_purchase", {"phone_number": 
+                                instance.customer_phone_number.phone_number, "message":message})
             else:
                 send_on_product_purchase.delay(
-                    phone_number=instance.customer_phone_number, message=message)
+                phone_number=instance.customer_phone_number.phone_number, message=message)
+
             audit.audit_log(
                 reciever=instance.customer_phone_number, action='SEND TO QUEUE', message=message)
         except Exception as ex:

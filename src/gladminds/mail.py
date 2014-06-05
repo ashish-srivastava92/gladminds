@@ -41,15 +41,14 @@ def feed_report(feed_data = None):
         logger.info("[Exception feed_report]: {0}".format(ex))
 
 
-def feed_report_failure(remarks = None, feed_type=None):
+def feed_failure_report(remarks = None, feed_type=None):
     try:
-        yesterday = datetime.now().date() - timedelta(days=1)
         file_stream = open(settings.TEMPLATE_DIR+'/feed_failure_report.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
         context = Context({"remarks": remarks, "feed_type": feed_type})
         body = template.render(context)
-        mail_detail = settings.MAIL_DETAIL
+        mail_detail = settings.FEED_FAILURE_MAIL_DETAIL
         send_email(sender=mail_detail['sender'],
                    receiver=mail_detail['receiver'],
                    subject=mail_detail['subject'], body=body,

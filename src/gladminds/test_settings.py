@@ -26,3 +26,5 @@ FEED_TYPE = 'CSV'
 
 LOGGING['handlers']['gladminds_logs']['filename'] = 'log/gladminds/app/test_case.log'
 LOGGING['handlers']['afterbuy_logs']['filename'] = 'log/gladminds/app/test_case.log'
+
+FEED_FAILURE_MAIL_ENABLED = False
