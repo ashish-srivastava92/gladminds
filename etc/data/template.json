@@ -237,5 +237,14 @@
       "template":"Your one time use password is {0}",
       "description":"Send OTP"
     }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 28,
+    "fields": {
+      "template_key": "SEND_SA_WRONG_UCN",
+      "template": "Incorrect UCN",
+      "description": "Send message to SA reg wrong UCN"
+    }
   }
 ]

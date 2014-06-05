@@ -1,6 +1,6 @@
 from collections import Counter
 import json
-from gladminds.tasks import send_report_mail_for_feed_failure
+from gladminds.sqs_tasks import send_report_mail_for_feed_failure
 from gladminds.audit import feed_log
 from django.conf import settings
 

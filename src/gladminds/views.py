@@ -3,13 +3,17 @@ from django.template import RequestContext
 from django.http.response import HttpResponseRedirect, HttpResponse,\
     HttpResponseBadRequest
 from gladminds.models import common
-from gladminds.tasks import send_otp
+from gladminds.sqs_tasks import send_otp
 from django.contrib.auth.decorators import login_required
 from gladminds import utils, message_template
 from django.conf import settings
 from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format, format_date_string, stringify_groups
-from gladminds.tasks import export_asc_registeration_to_sap
+from gladminds.sqs_tasks import export_asc_registeration_to_sap
+from gladminds.utils import get_task_queue
+
+
+
 from gladminds.mail import sent_otp_email
 from django.contrib.auth.models import Group, User
 from gladminds.utils import get_task_queue
