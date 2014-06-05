@@ -55,9 +55,8 @@ class TestAfterbuy(GladmindsResourceTestCase):
                 }
         response = client.post(
             '/afterbuy/', data =data)
-
         print response
-        raise
+        
     
     
     def test_product_details(self):

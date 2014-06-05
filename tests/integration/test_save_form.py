@@ -10,7 +10,7 @@ class TestSaveFormRegistration(GladmindsResourceTestCase):
         self.client = Client()
         pass
 
-    def _test_asc_registration(self):
+    def test_asc_registration(self):
         data = {
                     u'name': u'TestASCUser',
                     u'address': u'TestASCUser Address',
@@ -20,7 +20,7 @@ class TestSaveFormRegistration(GladmindsResourceTestCase):
                     u'email': u'TestASCUser@TestASCUser.com'
                 }
 
-        response = self.client.post('/save/asc', data=data)
+        response = self.client.post('/aftersell/register/asc', data=data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(afterbuy_common.ASCSaveForm.objects.count(), 1)
         self.assertEqual(afterbuy_common
@@ -37,7 +37,7 @@ class TestSaveFormRegistration(GladmindsResourceTestCase):
                     u'email': u'TestASCUser@TestASCUser.com'
                 }
 
-        response = self.client.post('/save/asc', data=data)
+        response = self.client.post('/aftersell/register/asc', data=data)
         self.assertEqual(response.status_code, 200)
         
         

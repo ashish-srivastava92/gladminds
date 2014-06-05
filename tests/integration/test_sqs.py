@@ -13,7 +13,7 @@ class TestSQSTasks(base_integration.GladmindsResourceTestCase):
     def setUp(self):
         pass
 
-    def test_send_registration_detail(self):
+    def _test_send_registration_detail(self):
         data = {
             "task_name": "send_registration_detail",
             "params": {
@@ -25,7 +25,7 @@ class TestSQSTasks(base_integration.GladmindsResourceTestCase):
                              content_type='application/json')
         self.assertEqual(result.status_code, 200, "Task Not Excecuted")
 
-    def test_send_service_detail(self):
+    def _test_send_service_detail(self):
         data = {
             "task_name": "send_service_detail",
             "params": {
