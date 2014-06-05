@@ -315,4 +315,4 @@ Cron Job to send report email for data feed
 def send_report_mail_for_feed_failure(*args, **kwargs):
     remarks = kwargs['remarks']
     feed_type = kwargs['feed_type']
-    mail.feed_report_failure(remarks = remarks, feed_type=feed_type)
+    mail.feed_failure_report(remarks = remarks, feed_type=feed_type)

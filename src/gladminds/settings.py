@@ -301,6 +301,14 @@ MAIL_DETAIL = {
     "body": """""",
 }
 
+FEED_FAILURE_MAIL_DETAIL = {
+
+    "sender": "feed-report@gladminds.co",
+    "receiver": ["sourabh.gupta@hashedin.com","sourabh5588gupta@gmail.com"],
+    "subject": "Gladminds Feed Report",
+    "body": """""",
+}
+
 UCN_RECOVERY_MAIL = {
     "sender": "Gladminds Alert",
     "subject": "UCN Request",
@@ -361,3 +369,7 @@ REGISTRATION_CONFIG = {
 ########################Password Postfix for dealers######################
 PASSWORD_POSTFIX = '@123'
 ###########################################################################
+
+########################Feed Failure Mail enabled ######################
+FEED_FAILURE_MAIL_ENABLED = True
+##########################################################################
