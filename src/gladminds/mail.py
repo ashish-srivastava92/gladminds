@@ -155,7 +155,7 @@ def send_ucn_request_alert(data=None):
         template = Template(feed_temp)
         context = Context({"content": data})
         body = template.render(context)
-        mail_detail = settings.UCN_RECOVERY_MAIL
+        mail_detail = settings.UCN_RECOVERY_MAIL_DETAIL
         
         mail.send_email(sender = mail_detail['sender'], receiver = mail_detail['reciever'], 
                    subject = mail_detail['subject'], body = body, 
