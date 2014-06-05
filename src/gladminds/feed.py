@@ -120,9 +120,9 @@ class BaseFeed(object):
     def import_data(self):
         pass
 
-    def registerNewDealer(self, username=None, first_name='', last_name='',
+    def registerNewUser(self, user, group, username=None, first_name='', last_name='',
                           email=''):
-        logger.info('New Dealer Registration with id - ' + username)
+        logger.info('New ' + user + ' Registration with id - ' + username)
         if username:
             dealer = User(
                 username=username, first_name=first_name, last_name=last_name, email=email)
@@ -130,15 +130,15 @@ class BaseFeed(object):
             dealer.set_password(password)
             dealer.save()
             if not Group.objects.all():
-                gr_obj = Group.objects.create(name='dealers')
+                gr_obj = Group.objects.create(name=group)
                 gr_obj.save()
 
-            dealer_group = Group.objects.get(name='dealers')
-            dealer.groups.add(dealer_group)
-            logger.info('Dealer {0} registered successfully'.format(username))
+            user_group = Group.objects.get(name=group)
+            dealer.groups.add(user_group)
+            logger.info(user + ' {0} registered successfully'.format(username))
         else:
-            logger.info('Dealer id is not provided.')
-            raise Exception('Dealer id is not provided.')
+            logger.info(user + ' id is not provided.')
+            raise Exception(user + ' id is not provided.')
 
 
 class BrandProductTypeFeed(BaseFeed):
@@ -180,7 +180,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 dealer_data = aftersell_common.RegisteredDealer(
                     dealer_id=dealer['dealer_id'], address=dealer['address'])
                 dealer_data.save()
-                self.registerNewDealer(username=dealer['dealer_id'])
+                self.registerNewUser('dealer', 'dealers', username=dealer['dealer_id'])
 
             try:
                 service_advisor = aftersell_common.ServiceAdvisor.objects.filter(
@@ -250,7 +250,7 @@ class ProductDispatchFeed(BaseFeed):
                         dealer_data = aftersell_common.RegisteredDealer(
                             dealer_id=product['dealer_id'])
                         dealer_data.save()
-                        self.registerNewDealer(username=product['dealer_id'])
+                        self.registerNewUser('dealer', 'dealers', username=product['dealer_id'])
                     self.get_or_create_product_type(
                         product_type=product['product_type'])
                     producttype_data = common.ProductTypeData.objects.get(
@@ -489,17 +489,20 @@ class ASCFeed(BaseFeed):
                 dealer_data = aftersell_common.RegisteredDealer(
                     dealer_id=dealer['dealer_id'], address=dealer['address'])
                 dealer_data.save()
-                self.registerNewDealer(username=dealer['dealer_id'])
-            try:
-                asc_data = aftersell_common.RegisteredASC.objects.get(
+                self.registerNewUser('dealer', 'dealers', username=dealer['dealer_id'])
+            asc_data = aftersell_common.RegisteredASC.objects.filter(
                     asc_id=dealer['asc_id'])
-            except ObjectDoesNotExist as ex:
-                logger.debug(
+            if len(asc_data) < 1:
+                try:
+                    asc_data = aftersell_common.RegisteredASC(
+                        asc_id=dealer['asc_id'], dealer_id=dealer_data, asc_name=dealer['name'],
+                        phone_number=dealer['phone_number'],address=dealer['address'],
+                        email_id=dealer['email'], registration_date=datetime.now())
+                    asc_data.save()
+                    self.registerNewUser('ASC', 'ascs', username=dealer['asc_id'])
+                except Exception as ex:
+                    logger.debug(
                     "[Exception: ASCFeed_dealer_data]: {0}"
                     .format(ex))
-                asc_data = aftersell_common.RegisteredASC(
-                    asc_id=dealer['asc_id'], dealer_id=dealer_data, asc_name=dealer['name'],
-                    phone_number=dealer['phone_number'],address=dealer['address'],
-                    email_id=dealer['email'], registration_date=datetime.now())
-                asc_data.save()
+                    raise
         return self.feed_remark
