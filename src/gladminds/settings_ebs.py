@@ -74,3 +74,6 @@ ENABLE_AMAZON_SQS = True
 ########################SQS Queue Name##################################
 SQS_QUEUE_NAME = "gladminds-prod"
 ########################################################################
+
+FEED_FAILURE_MAIL_DETAIL["subject"] = "Gladminds Feed Failure Mail"
+UCN_RECOVERY_MAIL_DETAIL["subject"] = "Gladminds UCN Recovery Mail"
