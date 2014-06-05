@@ -50,14 +50,14 @@ def user_logout(request):
         groups = stringify_groups(request.user)
         if 'dealers' in groups:
             logout(request)
-            return HttpResponseRedirect('/bajaj/dealer/login')
+            return HttpResponseRedirect('/aftersell/dealer/login')
         elif 'ascs' in groups:
             logout(request)
-            return HttpResponseRedirect('/bajaj/asc/login')
+            return HttpResponseRedirect('/aftersell/asc/login')
         #TODO: Implement Dependent ASCs
         elif 'dascs' in groups:
             logout(request)
-            return HttpResponseRedirect('/bajaj/dasc/login')
+            return HttpResponseRedirect('/aftersell/dasc/login')
     return HttpResponseBadRequest('Not Allowed')
     
     
