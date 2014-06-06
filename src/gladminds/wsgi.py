@@ -16,12 +16,9 @@ framework.
 import os
 import sys
 import newrelic.agent
-from django.conf import settings
-NEW_RELIC = os.environ.get('NEW_RELIC')
-
-newrelic.agent.initialize(settings.NEW_RELIC_FILE_LOCATION)
 PROJECT_DIR = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 sys.path.append(PROJECT_DIR)
+
 
 # We defer to a DJANGO_SETTINGS_MODULE already in the environment. This breaks
 # if running multiple sites in the same mod_wsgi process. To fix this, use
@@ -30,6 +27,10 @@ sys.path.append(PROJECT_DIR)
 
 #Change the app_name.settings to your app_name, for example lithium.settings
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gladminds.settings")
+
+NEW_RELIC = os.environ.get('NEW_RELIC')
+from django.conf import settings
+newrelic.agent.initialize(settings.NEW_RELIC_FILE_LOCATION)
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
