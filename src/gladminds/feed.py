@@ -253,7 +253,7 @@ class ProductDispatchFeed(BaseFeed):
                     logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN - {0} UCN - {1}'.format(product['vin'], product['unique_service_coupon']))
                     continue
                 else:
-                    logger.error('Coupon {2} Already registered for another VIN! {0} VIN - {1}'.format(ex, product['vin'], product['unique_service_coupon']))
+                    logger.error('Coupon Already registered for another VIN! {0} VIN - {1}'.format(product['vin'], product['unique_service_coupon']))
                     raise ValueError()
             except Exception as ex:
                 logger.error('Coupon: {2} Save error! {0} VIN - {1}'.format(ex, product['vin'], product['unique_service_coupon']))
