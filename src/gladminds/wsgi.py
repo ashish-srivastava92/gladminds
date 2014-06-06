@@ -15,7 +15,9 @@ framework.
 """
 import os
 import sys
-
+import newrelic.agent
+NEW_RELIC = os.environ.get('NEW_RELIC')
+newrelic.agent.initialize('./src/newrelic.ini')
 PROJECT_DIR = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 sys.path.append(PROJECT_DIR)
 
@@ -32,7 +34,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gladminds.settings")
 # setting points here.
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
-
+application = newrelic.agent.WSGIApplicationWrapper(application)
 # Apply WSGI middleware here.
 # from helloworld.wsgi import HelloWorldApplication
 # application = HelloWorldApplication(application)
