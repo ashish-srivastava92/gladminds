@@ -16,8 +16,10 @@ framework.
 import os
 import sys
 import newrelic.agent
+from django.conf import settings
 NEW_RELIC = os.environ.get('NEW_RELIC')
-newrelic.agent.initialize('./src/newrelic.ini')
+
+newrelic.agent.initialize(settings.NEW_RELIC_FILE_LOCATION)
 PROJECT_DIR = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 sys.path.append(PROJECT_DIR)
 
