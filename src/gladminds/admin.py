@@ -257,6 +257,7 @@ class CouponResource(resources.ModelResource):
 #class CouponAdmin(ExportMixin, ModelAdmin):
 class CouponAdmin(ModelAdmin):
     #resource_class = CouponResource
+    raw_id_fields = ("vin__vin",)
     search_fields = (
         'unique_service_coupon', 'vin__vin', 'valid_days', 'valid_kms', 'status', 
         "service_type")
