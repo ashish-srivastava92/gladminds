@@ -112,5 +112,5 @@ SQS_QUEUE_NAME = "gladminds-qa"
 ########################################################################
 ###################Change Mail Subject on QA##########################
 MAIL_DETAIL["subject"]= "Gladminds Feed Report QA"
-MAIL_DETAIL["receiver"] = ["gladminds@hashedin.com"]
+MAIL_DETAIL["receiver"] = ["sourabh.gupta@hashedin.com"]
 #######################################################################
