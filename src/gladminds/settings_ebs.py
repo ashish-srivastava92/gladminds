@@ -77,3 +77,6 @@ SQS_QUEUE_NAME = "gladminds-prod"
 #########################New relic file location########################
 NEW_RELIC_FILE_LOCATION = './src/newrelic.ini'
 ########################################################################
+###################Change Mail Subject on Prod##########################
+MAIL_DETAIL["subject"]= "Gladminds Feed Report"
+#######################################################################
