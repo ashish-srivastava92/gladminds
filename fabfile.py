@@ -24,10 +24,16 @@ SECRET_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
 NEVER_FAIL = False
 CAPTURE = False
 
+def _execute(cmd):
+    if NEVER_FAIL:
+        cmd = '%s; echo "Done"' % cmd
+
+    return local(cmd, capture=CAPTURE)
 
 def _ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
+
 
 @task()
 def docs_gen():
@@ -51,15 +57,7 @@ def runserver():
 
 
 @task()
-def create_android_build(ip_address):
-    '''Runs Django Server on port 8000'''
-    process = Popen('./afterbuy_script/phonegap_build.sh %s' % \
-                                        (ip_address), shell=True)
-    process.wait()
-
-
-@task()
-def lint_py():
+def lint_py(format="text"):
     '''Reports Pylint Errors & Warnings for Python files'''
     return _execute('bin/pylint --rcfile=etc/lint.rc --output-format={0} {1}'
                     .format(format, PROJECT_PACKGE))
@@ -101,24 +99,6 @@ def test_unit():
     test('unit')
 
 
-def test(package=''):
-    '''Run Tests for the given package bin/fab test:<package>'''
-    options = ['--with-progressive']
-    options.append('--with-xunit')
-    options.append('--xunit-file=out/xunit.xml')
-
-    if COVERAGE_ENABLED:
-        options.append('--with-coverage')
-        options.append('--cover-html')
-        options.append('--cover-xml')
-        options.append('--cover-xml-file=out/coverage.xml')
-        options.append('--cover-erase')
-        options.append('--cover-html-dir=out/coverage')
-        options.append('--cover-package=%s' % PROJECT_PACKGE)
-        options.append('--cover-min-percentage=80')
-
-
-    return _execute('bin/test test {0} {1}'.format(package, ' '.join(options)))
     
 
 # Include new commands for deployment to elastic beanstalk
@@ -171,11 +151,6 @@ def update_environment(environment, version):
     beanstalk.update_environment(environment_name=environment, version_label=version)
 
 
-def _execute(cmd):
-    if NEVER_FAIL:
-        cmd = '%s; echo "Done"' % cmd
-
-    return local(cmd, capture=CAPTURE)
 
 @task()
 def check():
@@ -221,3 +196,29 @@ def check():
 
     summary_file.close()
 
+
+@task
+def test(package=''):
+    '''Run Tests for the given package bin/fab test:<package>'''
+    options = ['--with-progressive']
+    options.append('--with-xunit')
+    options.append('--xunit-file=out/xunit.xml')
+
+    if COVERAGE_ENABLED:
+        options.append('--with-coverage')
+        options.append('--cover-html')
+        options.append('--cover-xml')
+        options.append('--cover-xml-file=out/coverage.xml')
+        options.append('--cover-erase')
+        options.append('--cover-html-dir=out/coverage')
+        options.append('--cover-package=%s' % PROJECT_PACKGE)
+        options.append('--cover-min-percentage=80')
+
+    return _execute('bin/test test {0} {1}'.format(package, ' '.join(options)))
+
+@task()
+def create_android_build(ip_address):
+    '''Runs Django Server on port 8000'''
+    process = Popen('./afterbuy_script/phonegap_build.sh %s' % \
+                                        (ip_address), shell=True)
+    process.wait()
