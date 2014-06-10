@@ -1,3 +1,4 @@
+from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib import admin
 from models.common import RegisteredDealer
 from models.common import GladMindUsers, ProductTypeData, RegisteredDealer,\
@@ -288,20 +289,42 @@ class CouponAdmin(ModelAdmin):
             This if condition only for landing page
         '''
         if not request.GET and not request.POST and request.path == "/gladminds/coupondata/":
-            pass
+            qs = qs.filter(status=4)
         return qs
     
     def get_changelist(self, request, **kwargs):
             return CouponChangeList
 
 
-from django.contrib.admin.views.main import ChangeList
-
-
 class CouponChangeList(ChangeList):
 
     def get_ordering(self, request, queryset):
-        return []
+        '''
+            This remove default ordering of django admin
+            default ordering of django admin is primary key
+        '''
+        params = self.params
+        ordering = list(self.model_admin.get_ordering(request)
+                        or self._get_default_ordering())
+        
+        if ORDER_VAR in params:
+            # Clear ordering and used params
+            ordering = []
+            order_params = params[ORDER_VAR].split('.')
+            for p in order_params:
+                try:
+                    none, pfx, idx = p.rpartition('-')
+                    field_name = self.list_display[int(idx)]
+                    order_field = self.get_ordering_field(field_name)
+                    if not order_field:
+                        continue # No 'admin_order_field', skip it
+                    ordering.append(pfx + order_field)
+                except (IndexError, ValueError):
+                    continue # Invalid ordering specified, skip it.
+
+        ordering.extend(queryset.query.order_by)
+
+        return ordering
 
 ####################################################################
 
