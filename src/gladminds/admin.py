@@ -255,9 +255,9 @@ class CouponResource(resources.ModelResource):
         model = CouponData
 
 
-class CouponAdmin(ExportMixin, ModelAdmin):
-#class CouponAdmin(ModelAdmin):
-    resource_class = CouponResource
+#class CouponAdmin(ExportMixin, ModelAdmin):
+class CouponAdmin(ModelAdmin):
+#    resource_class = CouponResource
     search_fields = (
         'unique_service_coupon', 'vin__vin', 'valid_days', 'valid_kms', 'status', 
         "service_type")
@@ -284,8 +284,25 @@ class CouponAdmin(ExportMixin, ModelAdmin):
         admin site. This is used by changelist_view.
         """
         qs = self.model._default_manager.get_query_set()
+        '''
+            This if condition only for landing page
+        '''
+        if not request.GET and not request.POST and request.path == "/gladminds/coupondata/":
+            pass
         return qs
     
+    def get_changelist(self, request, **kwargs):
+            return CouponChangeList
+
+
+from django.contrib.admin.views.main import ChangeList
+
+
+class CouponChangeList(ChangeList):
+
+    def get_ordering(self, request, queryset):
+        return []
+
 ####################################################################
 
 ###########################AUDIT ADMIN########################
