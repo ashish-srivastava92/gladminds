@@ -245,6 +245,7 @@ class CouponResource(resources.ModelResource):
         for obj in queryset.iterator():
             vin_number = str(obj.vin)
             obj.vin = ProductData(vin_number)
+            print obj.vin
             #sa_phone_number = str(obj.sa_phone_number)
             #obj.sa_phone_number = ServiceAdvisor(sa_phone_number)
             data.append(self.export_resource(obj))
