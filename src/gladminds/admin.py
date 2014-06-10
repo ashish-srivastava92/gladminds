@@ -245,8 +245,8 @@ class CouponResource(resources.ModelResource):
         for obj in queryset.iterator():
             vin_number = str(obj.vin)
             obj.vin = ProductData(vin_number)
-            sa_phone_number = str(obj.sa_phone_number)
-            obj.sa_phone_number = ServiceAdvisor(sa_phone_number)
+            #sa_phone_number = str(obj.sa_phone_number)
+            #obj.sa_phone_number = ServiceAdvisor(sa_phone_number)
             data.append(self.export_resource(obj))
         return data
 
@@ -254,15 +254,14 @@ class CouponResource(resources.ModelResource):
         model = CouponData
 
 
-#class CouponAdmin(ExportMixin, ModelAdmin):
-class CouponAdmin(ModelAdmin):
-    #resource_class = CouponResource
-    #raw_id_fields = ("vin__vin",)
+class CouponAdmin(ExportMixin, ModelAdmin):
+#class CouponAdmin(ModelAdmin):
+    resource_class = CouponResource
     search_fields = (
         'unique_service_coupon', 'vin__vin', 'valid_days', 'valid_kms', 'status', 
         "service_type")
     list_filter = ('status', ('actual_service_date', DateFieldListFilter))
-    list_display = ('vin', 'unique_service_coupon', "actual_service_date",
+    list_display = ('unique_service_coupon', 'vin', 'actual_service_date',
                     'actual_kms', 'valid_days', 'valid_kms', 'status', "service_type")
     exclude = ('order',)
 
@@ -277,6 +276,15 @@ class CouponAdmin(ModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
+    
+    def queryset(self, request):
+        """
+        Returns a QuerySet of all model instances that can be edited by the
+        admin site. This is used by changelist_view.
+        """
+        qs = self.model._default_manager.get_query_set()
+        return qs
+    
 ####################################################################
 
 ###########################AUDIT ADMIN########################
