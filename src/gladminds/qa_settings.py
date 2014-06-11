@@ -17,7 +17,7 @@ MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gladmindsdbqa',
+        'NAME': 'gladmindsdb',
         'USER': 'gladminds',
         'PASSWORD': 'gladminds123',
         'HOST': 'gladminds-qa.chnnvvffqwop.us-east-1.rds.amazonaws.com',
@@ -45,8 +45,8 @@ TEMPLATE_DIRS = (
     TEMPLATE_DIR,
 )
 
-SMS_CLIENT = "AIRTEL"
-
+# SMS_CLIENT = "TWILIO"
+# 
 # SMS_CLIENT_DETAIL = {
 #                      'OTP_TWILIO_ACCOUNT' : 'ACbb8cb45f6113b8f2f6243c8eaa5ff971',
 #                      'OTP_TWILIO_AUTH' : 'aa445a4f0a7e651738e89810601f8860',
@@ -54,20 +54,13 @@ SMS_CLIENT = "AIRTEL"
 #                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/Messages.json'
 #                 }
 
+SMS_CLIENT = "AIRTEL"
 SMS_CLIENT_DETAIL={
                    'login':'bajajauto',
                    'pass':'bajaj',
                    'authenticate_url':'http://117.99.128.32:80/login/pushsms.php' ,
                    'message_url': 'http://117.99.128.32:80/login/pushsms.php'                  
                    }
-MAIL_SERVER = 'localhost'
-MAIL_DETAIL = {
-                  "sender": "feed-report@gladminds.co",
-                  "reciever": "gladminds@hashedin.com,naveen.shankar@gladminds.co",
-                  "subject": "Gladminds Feed Report For QA",
-                  "body": """""",
-              }
-
 FEED_TYPE = 'CSV'
 
 #AfterBuy File Upload location configuration
@@ -97,6 +90,7 @@ SAP_CRM_DETAIL = {
 COUPON_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl&v0"
 ASC_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/asc-feed/?wsdl&v0"
 
+ENABLE_AMAZON_SQS = True
 
 AFTER_BUY_CONSTANTS = {
                        "username": 'support@gladminds.com',
@@ -113,4 +107,10 @@ AFTER_BUY_CONSTANTS = {
                        "title": "Afterbuy V1 App"
                        }
 
-
+########################SQS Queue Name##################################
+SQS_QUEUE_NAME = "gladminds-qa"
+########################################################################
+###################Change Mail Subject on QA##########################
+MAIL_DETAIL["subject"]= "GladMinds Feed Report QA"
+MAIL_DETAIL["receiver"] = ["sourabh.gupta@hashedin.com"]
+#######################################################################

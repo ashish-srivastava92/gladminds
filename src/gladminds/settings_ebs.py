@@ -9,7 +9,7 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 
@@ -78,5 +78,5 @@ SQS_QUEUE_NAME = "gladminds-prod"
 NEW_RELIC_FILE_LOCATION = './src/newrelic.ini'
 ########################################################################
 ###################Change Mail Subject on Prod##########################
-MAIL_DETAIL["subject"]= "Gladminds Feed Report"
+MAIL_DETAIL["subject"]= "GladMinds Feed Report"
 #######################################################################
