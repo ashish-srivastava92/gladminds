@@ -68,7 +68,6 @@ def update_pass(request):
 def action(request, params):
     if request.method == 'GET':
         try:
-            print request.user
             dealer = common.RegisteredDealer.objects.filter(
                 dealer_id=request.user)[0]
             service_advisors = common.ServiceAdvisorDealerRelationship.objects\
