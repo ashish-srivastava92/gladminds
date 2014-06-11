@@ -15,7 +15,7 @@ TEMPLATE_DEBUG = DEBUG
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gladmindsdb',
+        'NAME': 'gladmindsdb1',
         'USER': 'gladminds',
         'PASSWORD': 'gladminds123',
         'HOST': '127.0.0.1',

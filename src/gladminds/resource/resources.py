@@ -60,8 +60,10 @@ class GladmindsResources(Resource):
                 logger.info('Validating the service coupon for customer {0}'.format(customer_id))
                 odo_read = request.POST.get('odoRead')
                 service_type = request.POST.get('serviceType')
+                print request.POST
                 message = 'A {0} {1} {2}'.format(customer_id, odo_read, service_type)
                 logger.info('Message to send: ' + message)
+                print "fdsaf", message
             else:
                 ucn = request.POST.get('ucn')
                 logger.info('Terminating the service coupon {0}'.format(ucn))
@@ -69,6 +71,7 @@ class GladmindsResources(Resource):
                 logger.info('Message to send: ' + message)
         phone_number = mobile_format(phone_number)
         message = format_message(message)
+        print "fasdadfas", message 
         audit.audit_log(action='RECIEVED', sender=phone_number, reciever='+1 469-513-9856', message=message, status='success')
         logger.info('Recieved Message from phone number: {0} and message: {1}'.format(phone_number, message))
         try:
