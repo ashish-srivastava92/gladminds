@@ -28,3 +28,7 @@
 .query-form {
   margin-top: 10px;
 }
+
+.no-wrapping{
+  white-space: nowrap;
+}
