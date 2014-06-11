@@ -357,8 +357,14 @@ class GladmindsResources(Resource):
             if len(all_sa_dealer_obj) == 0:
                 raise
         except:
+            sms_message = 'Not an authorised user to avail this service.'
             message = 'Not an authorised user to avail this service. Phone number - {0}'.format(phone_number)
             logger.error(message)
+            if settings.ENABLE_AMAZON_SQS:
+                task_queue = get_task_queue()
+                task_queue.add("send_coupon", {"phone_number":phone_number, "message": sms_message})
+            else:
+                send_coupon.delay(phone_number=phone_number, message=sms_message)
             audit.audit_log(action='failure', sender=phone_number, reciever="", message=message, status='warning')
             return None
         return service_advisor_obj
