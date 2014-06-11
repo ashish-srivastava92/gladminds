@@ -9,10 +9,11 @@
 
     $(".query-form").on("submit", function(e) {
         var messageBlock = $(".user-message .message");
+        var formData = $("form.query-form").serializeArray();
         $(this).find("input[type='text']").val('');
         var jqXHR = $.ajax({
             url : "/v1/messages",
-            data : $("form.query-form").serializeArray(),
+            data : formData,
             type : "POST",
             beforeSend : function() {
                 messageBlock.stop().fadeOut(0);
