@@ -11,6 +11,7 @@ OUT_DIR = os.path.join(BASE_DIR, "out")
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
+ALLOWED_HOSTS = ['*']
 
 
 DATABASES = {
