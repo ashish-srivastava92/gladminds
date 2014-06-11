@@ -26,28 +26,29 @@
                         <h3 class="text-center">Service Advisor Registration</h3>
                     </div>
                 </div>
-                <form class="sa-form" role="form">{% csrf_token %}
+                <form class="sa-form row" role="form">{% csrf_token %}
+                <div class="col-md-offset-2"> 
                     <div class="row">
-                        <div class="col-md-3 form-group">
+                        <div class="col-md-4 form-group">
                             <label class="control-label">Service Advisor Name*:</label>
                         </div>
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-5 form-group">
                             <input type="text" class="form-control" name="name" required autofocus/>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-3 form-group">
+                        <div class="col-md-4 form-group">
                             <label class="control-label">Service Advisor Mobile#*:</label>
                         </div>
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-5 form-group">
                             <input type="text" class="form-control" name="phone-number" required maxlength="10" placeholder="10 digits"/>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-3 form-group">
+                        <div class="col-md-4 form-group">
                             <label  class="control-label">Activity Status*:</label>
                         </div>
-                        <div class="col-md-4 form-group">
+                        <div class="col-md-5 form-group">
                             <select class="form-control" name="status" required>
                               <option value="">Select status</option>
                               <option value="Y">Y</option>
@@ -56,11 +57,12 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-7 form-group">
+                        <div class="col-md-9 form-group">
                             <button type="submit" value="Submit" class="btn btn-primary pull-right asc-submit">
                                 Submit
                             </button>
                         </div>
+                    </div>
                     </div>
                 </form>
             </div>

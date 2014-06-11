@@ -28,16 +28,18 @@
                   </div>
               </div>
               <form class="vin-form" role="search">
+              <div class="col-md-offset-2">
                 <div class="row">
                   <div class="col-md-2 form-group">
                     <label class="control-label">VIN#:</label>
                   </div>
-                  <div class="col-md-6 input-group">
+                  <div class="col-md-7 input-group">
                     <input type="text" class="form-control" placeholder="Search" name="srch-vin" id="srch-vin" required>
                     <div class="input-group-btn">
                       <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"></span></button>
                     </div>
                   </div>
+                </div>
                 </div>
               </form>
               <div class="row portal-form-heading">
@@ -45,30 +47,43 @@
                   <h3 class="text-center">Customer Details</h3>
                 </div>
               </div>
-              <div class="row">
-                <div class="col-md-3 form-group">
-                    <label class="control-label">Customer Phone:</label>
-                </div>
-                <div class="col-md-4 form-group">
-                    <input type="text" class="form-control customer-phone"/>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-md-3 form-group">
-                    <label class="control-label">Customer Name:</label>
-                </div>
-                <div class="col-md-4 form-group">
-                    <input type="text" class="form-control customer-name"/>
-                </div>
-              </div>
-              {% endif %}
+				<div class="row">
+					<div class="col-md-offset-2">
+						<div class="row">
+							<div class="col-md-4 form-group">
+								<label class="control-label">Customer ID:</label>
+							</div>
+							<div class="col-md-5 form-group">
+								<input type="text" class="form-control customer-id" />
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-4 form-group">
+								<label class="control-label">Customer Mobile number:</label>
+							</div>
+							<div class="col-md-5 form-group">
+								<input type="text" class="form-control customer-phone" />
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-4 form-group">
+								<label class="control-label">Customer Name:</label>
+							</div>
+							<div class="col-md-5 form-group">
+								<input type="text" class="form-control customer-name" />
+							</div>
+						</div>
+					</div>
+				</div>
+				{% endif %}
               {% if active_menu == 'close' %}
               <div class="row portal-form-heading">
                 <div class="col-md-10">
                     <h3 class="text-center">Close Free Service</h3>
                 </div>
               </div>
-              <form class="coupon-close-form" role="search">
+              <form class="coupon-close-form row" role="search">
+              <div class="col-md-offset-2">
                 <div class="row">
                   <div class="col-md-3 form-group">
                     <label class="control-label">Service Advisor*:</label>
@@ -107,6 +122,7 @@
                     </button>
                   </div>
                 </div>
+                </div>
               </form>
               {% endif %}
               
@@ -117,6 +133,7 @@
                 </div>
               </div>
               <form class="coupon-check-form" role="search">
+              <div class="col-md-offset-2">
                 <div class="row">
                   <div class="col-md-3 form-group">
                     <label class="control-label">Service Advisor*:</label>
@@ -165,6 +182,7 @@
                     </button>
                   </div>
                 </div>
+                </div>
               </form>
               {% endif %}
               
@@ -175,8 +193,9 @@
                   </div>
               </div>
               <form class="ucn-recovery-form" role="search">
+              <div class="col-md-offset-2">
                 <div class="row">
-                  <div class="col-md-3 form-group">
+                  <div class="col-md-4 form-group">
                     <label class="control-label">Customer ID*:</label>
                   </div>
                   <div class="col-md-5 form-group">
@@ -184,28 +203,30 @@
                   </div>
                 </div>
                 <div class="row">
-                  <div class="col-md-3 form-group">
-                    <label class="control-label">Reason(For Special Approval)*:</label>
+                  <div class="col-md-4 form-group">
+                    <label class="control-label">Reason*:</label>
+                    <label class="control-label"><small><i>For Special Approval</i></small></label>
                   </div>
                   <div class="col-md-5 form-group">
                     <textarea class="form-control" name="reason" id="reason" required></textarea>
                   </div>
                 </div>
                 <div class="row">
-                  <div class="col-md-3 form-group">
+                  <div class="col-md-4 form-group">
                     <label class="control-label">Upload Job Card*:</label>
-                    <label class="control-label"><small>allowed format (.jpg, .tiff, .pdf)</small></label>
+                    <label class="control-label"><small><i>allowed format .jpg, .tiff, .pdf</i></small></label>
                   </div>
                   <div class="col-md-5 form-group">
                     <input type="file" id="jobCard" name="jobCard" required>
                   </div>
                 </div>
                 <div class="row">
-                  <div class="col-md-8 form-group">
+                  <div class="col-md-9 form-group">
                     <button type="submit" value="Submit" class="btn btn-primary pull-right">
                       Submit
                     </button>
                   </div>
+                </div>
                 </div>
               </form>
               {% endif %}

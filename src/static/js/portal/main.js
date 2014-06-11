@@ -56,13 +56,15 @@
                   $('.customer-name').val(data['customer_name'])
                   $('.name-readonly').attr('readOnly', true);
                   $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
+                  $('.customer-id').val(data['customer_id']).attr('readOnly', true);
                   $('.customer-submit').attr('disabled', false);
               }	
               else{
                   $('.customer-phone').val(data['customer_phone']);
             	  $('.customer-name').val('')
                   $('.name-readonly').attr('readOnly', false);
-                  $('.purchase-date').val('').attr('readOnly', false);  
+                  $('.purchase-date').val('').attr('readOnly', false);
+                  $('.customer-id').val('').attr('readOnly', false);  
                   messageBlock.text(data.message);
                   messageModal.modal('show');
               }
