@@ -73,6 +73,9 @@
           {% endblock %}
 
           {% block search %}{% search_form cl %}{% endblock %}
+          {% if searchable_fields or cl.search_fields%}
+          <p><i>Note: searchable fields are {% if searchable_fields %}{{searchable_fields}}{% else %}{{cl.search_fields}}{% endif %}</i></p>
+          {% endif %}
         </div>
 
         {% block date_hierarchy %}
