@@ -57,7 +57,6 @@ class BrandForm(ModelForm):
 class BrandAdmin(ModelAdmin):
     form = BrandForm
     search_fields = ('brand_id', 'brand_name')
-    list_filter = ('brand_name',)
     list_display = ('image_tag', 'brand_id', 'brand_name', 'products')
     inlines = (ProductTypeDataInline,)
 #     readonly_fields = ('image_tag',)
@@ -102,7 +101,6 @@ class DealerForm(ModelForm):
 class DealerAdmin(ModelAdmin):
     form = DealerForm
     search_fields = ('dealer_id',)
-    list_filter = ('dealer_id',)
     list_display = ('dealer_id', 'address')
 #    list_display = ('dealer_id', 'address', 'service_advisor_id')
 #     inlines = (SAInline,)
@@ -172,7 +170,6 @@ class GladMindUserAdmin(ModelAdmin):
         'gladmind_customer_id', 'customer_name', 'phone_number', 'email_id')
     list_display = ('gladmind_customer_id', 'customer_name',
                     'email_id', 'phone_number', 'date_of_registration')
-    list_filter = ('registration_date',)
 
     def date_of_registration(self, obj):
         return obj.registration_date.strftime("%d %b %Y")
@@ -191,7 +188,6 @@ class Couponline(SortableTabularInline):
 class ProductDataAdmin(ModelAdmin):
     search_fields = ('vin', 'sap_customer_id', 'customer_phone_number__customer_name',
                      'customer_phone_number__phone_number')
-    list_filter = (('product_purchase_date', DateFieldListFilter),)
     list_display = ('vin', 'sap_customer_id', "UCN", 'customer_name',
                     'customer_phone_number', 'product_purchase_date')
     inlines = (Couponline,)
@@ -232,7 +228,10 @@ class ProductDataAdmin(ModelAdmin):
             coupon_service_type = " | ".join(
                 [str(obj.service_type) for obj in gm_coupon_data_obj])
         return coupon_service_type
-
+    
+    def changelist_view(self, request, extra_context=None):
+        extra_context = {'searchable_fields':"('vin', 'sap_customer_id', 'customer_phone_number', 'customer_name')"}
+        return super(ProductDataAdmin, self).changelist_view(request, extra_context=extra_context)
 
 class CouponResource(resources.ModelResource):
 #     def get_export_headers(self):
@@ -262,7 +261,6 @@ class CouponAdmin(ModelAdmin):
     search_fields = (
         'unique_service_coupon', 'vin__vin', 'valid_days', 'valid_kms', 'status', 
         "service_type")
-    list_filter = ('status', ('actual_service_date', DateFieldListFilter))
     list_display = ('vin', 'unique_service_coupon', "actual_service_date",
                     'actual_kms', 'valid_days', 'valid_kms', 'status', "service_type")
     exclude = ('order',)
@@ -284,7 +282,6 @@ class CouponAdmin(ModelAdmin):
 
 
 class AuditLogAdmin(ModelAdmin):
-    list_filter = ('date', 'status', 'action')
     search_fields = ('status', 'sender', 'reciever', 'action')
     list_display = (
         'date', 'action', 'message', 'sender', 'reciever', 'status')
@@ -328,7 +325,6 @@ class EmailTemplateAdmin(ModelAdmin):
 
 
 class FeedLogAdmin(ModelAdmin):
-    list_filter = ('feed_type', 'status')
     search_fields = ('status', 'data_feed_id', 'action')
     list_display = ('timestamp', 'feed_type', 'action',
                     'total_data_count', 'success_data_count',
@@ -365,7 +361,6 @@ class DispatchedProducts(ProductData):
 
 
 class ListDispatchedProducts(ModelAdmin):
-    list_filter = ('engine', 'product_type', ('invoice_date', DateFieldListFilter))
     search_fields = ('vin', 'engine' , 'customer_phone_number__phone_number', 
                      'dealer_id__dealer_id', 'product_type__product_type')
     
@@ -392,6 +387,9 @@ class ListDispatchedProducts(ModelAdmin):
             ucn_list.append(coupon.unique_service_coupon)
         return ' | '.join([str(ucn) for ucn in ucn_list])
 
+    def changelist_view(self, request, extra_context=None):
+        extra_context = {'searchable_fields':"('vin', 'engine', 'customer_phone_number', 'dealer_id', 'product_type')"}
+        return super(ListDispatchedProducts, self).changelist_view(request, extra_context=extra_context)
 ##############################################################
 #########################ASCSaveForm#########################
 

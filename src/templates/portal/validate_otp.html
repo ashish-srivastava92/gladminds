@@ -7,7 +7,7 @@
 {% block body %}
 <div class="user-message"><div class="message" style="display: block;"></div></div>
 <label><h2>Enter OTP</h2></label>
-<form role="form" action="/users/otp/validate" method="post" class="otp-validation-form" >
+<form role="form" action="/aftersell/users/otp/validate" method="post" class="otp-validation-form" >
     {% csrf_token %}
     <div class="row">
         <div class="col-md-3">

@@ -141,6 +141,7 @@ class BaseFeed(object):
                 user_group.save()
             new_user.groups.add(user_group)
             logger.info(user + ' {0} registered successfully'.format(username))
+            return new_user
         else:
             logger.info('{0} id is not provided.'.format(user))
             raise Exception('{0} id is not provided.'.format(user))
@@ -495,19 +496,17 @@ class ASCFeed(BaseFeed):
                     dealer_id=dealer['dealer_id'], address=dealer['address'])
                 dealer_data.save()
                 self.registerNewUser('dealer', username=dealer['dealer_id'])
-            asc_data = aftersell_common.RegisteredASC.objects.filter(
-                    asc_id=dealer['asc_id'])
-            if not asc_data:
-                try:
-                    asc_data = aftersell_common.RegisteredASC(
-                        asc_id=dealer['asc_id'], dealer_id=dealer_data, asc_name=dealer['name'],
-                        phone_number=dealer['phone_number'],address=dealer['address'],
-                        email_id=dealer['email'], registration_date=datetime.now())
-                    asc_data.save()
-                    self.registerNewUser('ASC', username=dealer['asc_id'])
-                except Exception as ex:
-                    logger.error(
-                    "[Exception: ASCFeed_dealer_data]: {0}"
-                    .format(ex))
-                    self.feed_remark.fail_remarks(ex)
+            try:
+                asc_data = aftersell_common.RegisteredASC(
+                    asc_id=dealer['asc_id'], dealer_id=dealer_data, asc_name=dealer['name'],
+                    phone_number=dealer['phone_number'],address=dealer['address'],
+                    email_id=dealer['email'], registration_date=datetime.now())
+                user_obj = self.registerNewUser('ASC', username=dealer['asc_id'])
+                asc_data.user = user_obj
+                asc_data.save()
+            except Exception as ex:
+                logger.error(
+                "[Exception: ASCFeed_dealer_data]: {0}"
+                .format(ex))
+                self.feed_remark.fail_remarks(ex)
         return self.feed_remark
