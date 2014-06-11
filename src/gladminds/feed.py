@@ -140,8 +140,8 @@ class BaseFeed(object):
                 user_group = Group.objects.create(name=group)
                 user_group.save()
             new_user.groups.add(user_group)
-            return new_user
             logger.info(user + ' {0} registered successfully'.format(username))
+            return new_user
         else:
             logger.info('{0} id is not provided.'.format(user))
             raise Exception('{0} id is not provided.'.format(user))
