@@ -72,6 +72,8 @@ CREATE TABLE `gladminds_serviceadvisorcouponrelationship` (
 -------------------Migration Script for 1.3.1 ------------------
 alter table aftersell_registeredasc add asc_id char(20) not null;
 alter table aftersell_registeredasc add constraint unique(asc_id);
+
+DROP INDEX phone_number ON gladminds_serviceadvisor;
 --
 -- Table structure for table `auth_group`
 --

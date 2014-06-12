@@ -1,6 +1,7 @@
 import tablib
 import datetime
 import json
+from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib import admin
 from suit.admin import SortableTabularInline, SortableModelAdmin
 from suit.widgets import SuitDateWidget, SuitSplitDateTimeWidget, \
@@ -246,8 +247,9 @@ class CouponResource(resources.ModelResource):
         for obj in queryset.iterator():
             vin_number = str(obj.vin)
             obj.vin = ProductData(vin_number)
-            sa_phone_number = str(obj.sa_phone_number)
-            obj.sa_phone_number = ServiceAdvisor(sa_phone_number)
+            print obj.vin
+            #sa_phone_number = str(obj.sa_phone_number)
+            #obj.sa_phone_number = ServiceAdvisor(sa_phone_number)
             data.append(self.export_resource(obj))
         return data
 
@@ -257,7 +259,7 @@ class CouponResource(resources.ModelResource):
 
 #class CouponAdmin(ExportMixin, ModelAdmin):
 class CouponAdmin(ModelAdmin):
-    #resource_class = CouponResource
+#    resource_class = CouponResource
     search_fields = (
         'unique_service_coupon', 'vin__vin', 'valid_days', 'valid_kms', 'status', 
         "service_type")
@@ -276,6 +278,54 @@ class CouponAdmin(ModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
+    
+    def queryset(self, request):
+        """
+        Returns a QuerySet of all model instances that can be edited by the
+        admin site. This is used by changelist_view.
+        """
+        qs = self.model._default_manager.get_query_set()
+        '''
+            This if condition only for landing page
+        '''
+        if not request.GET and not request.POST and request.path == "/gladminds/coupondata/":
+            qs = qs.filter(status=4)
+        return qs
+    
+    def get_changelist(self, request, **kwargs):
+            return CouponChangeList
+
+
+class CouponChangeList(ChangeList):
+
+    def get_ordering(self, request, queryset):
+        '''
+            This remove default ordering of django admin
+            default ordering of django admin is primary key
+        '''
+        params = self.params
+        ordering = list(self.model_admin.get_ordering(request)
+                        or self._get_default_ordering())
+        
+        if ORDER_VAR in params:
+            # Clear ordering and used params
+            ordering = []
+            order_params = params[ORDER_VAR].split('.')
+            for p in order_params:
+                try:
+                    none, pfx, idx = p.rpartition('-')
+                    field_name = self.list_display[int(idx)]
+                    order_field = self.get_ordering_field(field_name)
+                    if not order_field:
+                        continue # No 'admin_order_field', skip it
+                    ordering.append(pfx + order_field)
+                except (IndexError, ValueError):
+                    continue # Invalid ordering specified, skip it.
+
+        ordering.extend(queryset.query.order_by)
+
+        return ordering
+
 ####################################################################
 
 ###########################AUDIT ADMIN########################
