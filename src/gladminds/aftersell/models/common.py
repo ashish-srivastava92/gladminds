@@ -87,9 +87,6 @@ class ServiceAdvisorDealerRelationship(models.Model):
 
 class RegisteredASC(models.Model):
     user = models.OneToOneField(User, null=True, blank=True)
-    asc_id = models.CharField(
-        max_length=20, blank=False, unique=True, null=False)
-    dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)
     asc_name = models.CharField(max_length=215)
     email_id = models.EmailField(max_length=215, null=True, blank=True)
@@ -100,6 +97,9 @@ class RegisteredASC(models.Model):
     state = models.CharField(max_length=255, null=True, blank=True)
     img_url = models.FileField(upload_to="users", blank=True)
     isActive = models.BooleanField(default=True)
+    asc_id = models.CharField(
+        max_length=20, blank=False, unique=True, null=False)
+    dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
 
     class Meta:
         app_label = "aftersell"

@@ -381,12 +381,12 @@ class FeedLogAdmin(ModelAdmin):
                     'failed_data_count', 'feed_remarks')
 
     def feed_remarks(self, obj):
-        remarks = json.loads(obj.remarks)
-        update_remark = ''
-        for remark, occurence in remarks.iteritems():
-            update_remark = "{0} : {1}#######".format(remark, occurence)
-
-        return update_remark
+        if obj.remarks:
+            remarks = json.loads(obj.remarks)
+            update_remark = ''
+            for remark, occurence in remarks.iteritems():
+                update_remark = "{0} : {1}#######".format(remark, occurence)
+            return update_remark
 
     def has_add_permission(self, request):
         return False
