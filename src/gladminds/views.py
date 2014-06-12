@@ -74,7 +74,7 @@ def action(request, params):
                                         .filter(dealer_id=dealer, status='Y')
             sa_phone_list = []
             for service_advisor in service_advisors:
-                sa_phone_list.append(service_advisor.service_advisor_id)
+                sa_phone_list.append(service_advisor.service_advisor_id.phone_number)
             return render_to_response('dealer/advisor_actions.html',
                   {'phones': sa_phone_list},
                   context_instance=RequestContext(request))
