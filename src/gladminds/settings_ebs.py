@@ -9,8 +9,9 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
+ALLOWED_HOSTS = ['*']
 
 
 DATABASES = {
@@ -74,6 +75,11 @@ ENABLE_AMAZON_SQS = True
 ########################SQS Queue Name##################################
 SQS_QUEUE_NAME = "gladminds-prod"
 ########################################################################
-
 FEED_FAILURE_MAIL_DETAIL["subject"] = "Gladminds Feed Failure Mail"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "Gladminds UCN Recovery Mail"
+#########################New relic file location########################
+NEW_RELIC_FILE_LOCATION = './src/newrelic.ini'
+########################################################################
+###################Change Mail Subject on Prod##########################
+MAIL_DETAIL["subject"]= "GladMinds Feed Report"
+#######################################################################

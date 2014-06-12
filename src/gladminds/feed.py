@@ -175,6 +175,7 @@ class BrandProductTypeFeed(BaseFeed):
 class DealerAndServiceAdvisorFeed(BaseFeed):
 
     def import_data(self):
+        total_failed = 0
         for dealer in self.data_source:
             try:
                 dealer_data = aftersell_common.RegisteredDealer.objects.get(
@@ -189,35 +190,36 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 self.registerNewUser('dealer', username=dealer['dealer_id'])
 
             try:
-                service_advisor = aftersell_common.ServiceAdvisor.objects.filter(
-                    service_advisor_id=dealer['service_advisor_id'])
-                if len(service_advisor) > 0:
+                mobile_number_active = self.check_mobile_active(dealer, dealer_data)
+                service_advisor = common.ServiceAdvisor.objects.filter(service_advisor_id=dealer['service_advisor_id'])
+                if not mobile_number_active:
+                    if len(service_advisor) > 0:
+                        if dealer['phone_number'] != service_advisor[0].phone_number:
+                            service_advisor[0].phone_number = dealer['phone_number']
+                            service_advisor[0].save()
+                            logger.info("[Info: DealerAndServiceAdvisorFeed_sa]: Updated phone number for {0}".format(dealer['service_advisor_id']))
+                        service_advisor = service_advisor[0]
+                    else:
+                        service_advisor = common.ServiceAdvisor(service_advisor_id=dealer['service_advisor_id'], 
+                                                            name=dealer['name'], phone_number=dealer['phone_number'])
+                        service_advisor.save()
+                elif dealer['status']=='N':
                     service_advisor = service_advisor[0]
                 else:
-                    service_advisor = aftersell_common.ServiceAdvisor(
-                        service_advisor_id=dealer['service_advisor_id'],
-                        name=dealer['name'],
-                        phone_number=dealer['phone_number'])
-                    service_advisor.save()
+                    raise
             except Exception as ex:
-                ex = "[Exception: DealerAndServiceAdvisorFeed_sa]: {0}"\
-                    .format(ex)
-                self.feed_remark.fail_remarks(ex)
-                logger.error(ex)
+                total_failed += 1
+                logger.error(
+                        "[Exception: DealerAndServiceAdvisorFeed_sa]: {0}".format(ex))
                 continue
 
             try:
-                service_advisor_dealer = aftersell_common\
-                    .ServiceAdvisorDealerRelationship.objects.filter(
-                        service_advisor_id=service_advisor,
-                        dealer_id=dealer_data)
-                self.update_other_dealer_sa_relationship(service_advisor,
-                                                         dealer['status'])
-                if len(service_advisor_dealer) == 0:
-                    sa_dealer_rel = aftersell_common.ServiceAdvisorDealerRelationship(
-                        dealer_id=dealer_data,
-                        service_advisor_id=service_advisor,
-                        status=dealer['status'])
+                mobile_number_active = self.check_mobile_active(dealer, dealer_data)
+                service_advisor_dealer = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=service_advisor, dealer_id=dealer_data)
+                if dealer['status']=='Y' and mobile_number_active:
+                    raise
+                elif len(service_advisor_dealer) == 0:
+                    sa_dealer_rel = common.ServiceAdvisorDealerRelationship(dealer_id=dealer_data, service_advisor_id=service_advisor, status=dealer['status'])
                     sa_dealer_rel.save()
                 else:
                     service_advisor_dealer[
@@ -237,6 +239,12 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
             aftersell_common.ServiceAdvisorDealerRelationship.objects\
                 .filter(service_advisor_id=service_advisor).update(status='N')
 
+    def check_mobile_active(self, dealer, dealer_data):
+        list_mobile = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id__phone_number=dealer['phone_number'], status='Y')
+        list_active_mobile = list_mobile.exclude(dealer_id=dealer_data, service_advisor_id__service_advisor_id=dealer['service_advisor_id'], )
+        if list_active_mobile:
+            return True
+        return False
 
 class ProductDispatchFeed(BaseFeed):
 
@@ -290,7 +298,7 @@ class ProductDispatchFeed(BaseFeed):
                     logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN - {0} UCN - {1}'.format(product['vin'], product['unique_service_coupon']))
                     continue
                 else:
-                    logger.error('Coupon: Already registered for another VIN! {0} VIN - {1}'.format(product['vin'], product['unique_service_coupon']))
+                    logger.error('Coupon Already registered for another VIN! {0} VIN - {1}'.format(product['vin'], product['unique_service_coupon']))
                     raise ValueError()
             except Exception as ex:
                 

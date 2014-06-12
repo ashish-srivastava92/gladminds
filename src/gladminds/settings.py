@@ -161,9 +161,14 @@ SECRET_KEY = 'bbu7*-yvup0-*laxug+n5tf^lga_bwtrxu%y4ilb#$lv8%zw0m'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-    #     'django.template.loaders.eggs.Loader',
+# for performance enable cached templates 
+     ('django.template.loaders.cached.Loader', (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )),
+#     'django.template.loaders.filesystem.Loader',
+#     'django.template.loaders.app_directories.Loader',
+#     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -215,6 +220,7 @@ INSTALLED_APPS = (
     'django_otp.plugins.otp_totp',
     'provider',
     'provider.oauth2',
+    'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
@@ -368,7 +374,9 @@ REGISTRATION_CONFIG = {
 ########################Password Postfix for dealers######################
 PASSWORD_POSTFIX = '@123'
 ###########################################################################
-
 ########################Feed Failure Mail enabled ######################
 FEED_FAILURE_MAIL_ENABLED = True
 ##########################################################################
+#########################New relic file location########################
+NEW_RELIC_FILE_LOCATION = './src/newrelic_qa.ini'
+########################################################################

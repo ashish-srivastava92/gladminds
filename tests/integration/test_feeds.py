@@ -61,7 +61,7 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         self.assertEquals('Y', sa_dealer_rel_obj_2.status)
 
         '''
-            Checking out with new feed to change the status of service advisor
+           Checking out with new feed to change the status of service advisor
         '''
 
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed_2.xml')
@@ -70,20 +70,52 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         self.assertEqual(200, response.status_code)
 
         sa_obj_1 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
-
+        self.assertEquals('+9155555', sa_obj_1[0].phone_number)
         dealer_obj_1 = RegisteredDealer.objects.filter(dealer_id='GMDEALER001')
         sa_dealer_rel_obj_1 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_1[0], dealer_id=dealer_obj_1[0])
         self.assertEquals('N', sa_dealer_rel_obj_1.status)
 
         sa_obj_2 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA02')
-
         dealer_obj_2 = RegisteredDealer.objects.filter(dealer_id='GMDEALER002')
         sa_dealer_rel_obj_2 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_2[0], dealer_id=dealer_obj_2[0])
-        self.assertEquals('N', sa_dealer_rel_obj_2.status)
-
-        dealer_obj_3 = RegisteredDealer.objects.filter(dealer_id='GMDEALER003')
-        sa_dealer_rel_obj_2 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_2[0], dealer_id=dealer_obj_3[0])
         self.assertEquals('Y', sa_dealer_rel_obj_2.status)
+        
+    def test_service_advisor_phone_number_updation_logic(self):
+        '''
+           Checking out with new feed to change the status of service advisor
+            Checking out with new feed to 
+            1. update to a new unregistered/inactive phone number should pass
+            2. updating with an active mobile number should fail
+            3. Try to register a new SA with an active mobile number should fail
+        '''
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+        sa_obj_1 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
+        self.assertEquals('+9155555', sa_obj_1[0].phone_number)
+        sa_obj_2 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA02')
+        self.assertEquals('+91555551', sa_obj_2[0].phone_number)
+        
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/SA_mobile_update_data/SA_update_mobile_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+        
+        sa_obj_1 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
+        dealer_obj_1 = RegisteredDealer.objects.filter(dealer_id='GMDEALER001')
+        self.assertEquals('+9112345', sa_obj_1[0].phone_number)
+        sa_dealer_rel_obj_2 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_1[0], dealer_id=dealer_obj_1[0])
+        self.assertEquals('N', sa_dealer_rel_obj_2.status)
+        
+        sa_obj_2 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA02')
+        dealer_obj_2 = RegisteredDealer.objects.filter(dealer_id='GMDEALER002')
+        self.assertEquals('+91555551', sa_obj_2[0].phone_number)
+        
+        dealer_obj_3 = RegisteredDealer.objects.filter(dealer_id='GMDEALER003')
+        sa_obj_3 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA03')
+        self.assertEquals(0, len(sa_obj_3))
+        self.assertEquals(0, len(dealer_obj_3))
 
     def test_product_dispatch(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')

@@ -78,6 +78,49 @@ class ProductTypeData(models.Model):
         return self.product_type
 
 
+######################DEALER-SA MODELS#############################
+
+
+class RegisteredDealer(models.Model):
+    dealer_id = models.CharField(
+        max_length=25, blank=False, null=False, unique=True, help_text="Dealer Code must be unique")
+    address = models.TextField(blank=True, null=True)
+
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "Dealer Data"
+
+    def __unicode__(self):
+        return self.dealer_id
+
+
+class ServiceAdvisor(models.Model):
+    service_advisor_id = models.CharField(
+        max_length=15, blank=False, unique=True, null=False)
+    name = models.CharField(max_length=25, blank=False, null=False)
+    phone_number = models.CharField(
+        max_length=15, blank=False, null=False)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "Service Advisor Data"
+
+    def __unicode__(self):
+        return self.service_advisor_id
+
+##################################################################
+#############Service Advisor and Registered Relationship MODEL####
+
+
+class ServiceAdvisorDealerRelationship(models.Model):
+    dealer_id = models.ForeignKey(RegisteredDealer, null=False)
+    service_advisor_id = models.ForeignKey(ServiceAdvisor, null=False)
+    status = models.CharField(max_length=10, blank=False, null=False)
+
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "Service Advisor And Dealer Relationship"
 
 
 ##################################################################
@@ -188,7 +231,6 @@ class CouponData(models.Model):
 
     class Meta:
         app_label = "gladminds"
-        ordering = []
         verbose_name_plural = "Coupon Information"
 
     def __unicode__(self):
