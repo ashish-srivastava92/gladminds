@@ -1,9 +1,7 @@
 mysql -u gladminds -pgladminds123;
+drop database gladmindsdb1;
+create  database gladmindsdb1;
 
-drop database gladmindsdb;
-create  database gladmindsdb;
-
-kill -9 id
 bin/django syncdb --settings=gladminds.dev_settings
 bin/django shell --settings=gladminds.dev_settings
 from django.contrib.sites.models import Site
@@ -11,4 +9,8 @@ Site.objects.create(name='example.com', domain='example.com')
 
 bin/django loaddata  etc/data/template.json
 bin/django loaddata  etc/data/email_template.json
+
+mysql -ugladminds -pgladminds123
+use gladmindsdb1;
 INSERT INTO `auth_group` VALUES (4,'ascs'),(3,'customer'),(1,'dealers'),(2,'sas');
+
