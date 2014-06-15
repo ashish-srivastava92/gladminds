@@ -1,14 +1,15 @@
 import os
 import json
+
+from django.conf import settings
 from django.contrib.auth.models import User
 from tastypie.test import ResourceTestCase
 from unittest import TestCase
 from datetime import datetime, timedelta
 from unit.base_unit import RequestObject, GladmindsUnitTestCase
-from django.conf import settings
 from gladminds.utils import get_sa_list, get_coupon_info, get_customer_info, get_token, validate_otp
-from gladminds.models import common
 from gladminds.aftersell.models import logs
+import boto
 
 
 class TestAssertWorks(TestCase):
@@ -83,3 +84,19 @@ class TestFeedLogWithRemark(ResourceTestCase):
         self.assertEqual(len(feed_logs_obj), 1)
         remark = json.loads(feed_logs_obj[0].remarks)
         self.assertEqual(len(remark), 1)
+        file_name = feed_logs_obj[0].file_location.split("/")[-1]
+        
+        
+        self.assertEqual(os.path.isfile("{0}/{1}".format(settings.BASE_DIR, file_name)), 
+                         False, 'File should be deleted from local dir')
+                             
+        connection = boto.connect_s3(settings.S3_ID, settings.S3_KEY)
+        s3_bucket = connection.get_bucket('gladminds')
+                             
+        file_uploaded_on_s3 = False
+        for key in s3_bucket.list('aftersell/bajaj/feed-logs/dev'):
+            uploaded_file = key.name.split("/")[-1]
+            if uploaded_file == file_name:
+                file_uploaded_on_s3=True 
+        self.assertEqual(file_uploaded_on_s3, True, 'File is not Uploaded On S3')    
+            

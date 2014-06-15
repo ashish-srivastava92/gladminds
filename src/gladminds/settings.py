@@ -26,6 +26,10 @@ OTP_VALIDITY = 120
 
 JOBCARD_DIR = '{0}/jobcards/prod/'
 JOBCARD_BUCKET = 'gladminds'
+
+FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/qa/'
+FEED_FAILURE_BUCKET = 'gladminds'
+
 S3_ID = 'AKIAIL7IDCSTNCG2R6JA'
 S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
 

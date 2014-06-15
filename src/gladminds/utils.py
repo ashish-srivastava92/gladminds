@@ -1,22 +1,17 @@
-import os, logging, time, hashlib, uuid, mimetypes
+import os, logging, hashlib, uuid, mimetypes
+import boto
+from boto.s3.key import Key
 from datetime import datetime
-
-from django.conf import settings
-
 from random import randint
 from django.utils import timezone
 from django.conf import settings
-from django.contrib.auth.models import User
-import boto
-from boto.s3.key import Key
-import json
+
 from gladminds.models.common import STATUS_CHOICES
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
 from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from gladminds.taskqueue import SqsTaskQueue
-from gladminds import message_template
 from gladminds.mail import send_ucn_request_alert
 
 
@@ -151,7 +146,8 @@ def upload_file(request):
     file_obj.name = get_file_name(request, file_obj)
     #TODO: Include Facility to get brand name here
     destination = settings.JOBCARD_DIR.format('bajaj')
-    path = uploadFileToS3(destination=destination, file_obj=file_obj)
+    path = uploadFileToS3(destination=destination, file_obj=file_obj, 
+                          bucket=settings.JOBCARD_BUCKET, logger_msg="JobCard")
     ucn_recovery_obj = aftersell_common.UCNRecovery(reason=reason, user=user_obj, sap_customer_id=customer_id, file_location=path)
     ucn_recovery_obj.save()
     send_recovery_email_to_admin(ucn_recovery_obj)
@@ -182,20 +178,26 @@ def send_recovery_email_to_admin(file_obj):
     data = get_email_template('UCN_REQUEST_ALERT').body.format(requester, customer_id, reason, file_location)
     send_ucn_request_alert(data=data)
 
-def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=settings.JOBCARD_BUCKET,
-                   destination='', file_obj=None):
+def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=None,
+                   destination='', file_obj=None, logger_msg=None, file_mimetype=None):
     '''
     The function uploads the file-object to S3 bucket.
     '''
+    
     connection = boto.connect_s3(awsid, awskey)
     s3_bucket = connection.get_bucket(bucket)
     s3_key = Key(s3_bucket)
-    s3_key.content_type = mimetypes.guess_type(file_obj.name)[0]
+    if file_mimetype:
+        s3_key.content_type = file_mimetype
+        
+    else:
+        s3_key.content_type = mimetypes.guess_type(file_obj.name)[0]
+    
     s3_key.key = destination+file_obj.name
     s3_key.set_contents_from_string(file_obj.read())
     s3_key.set_acl('public-read')
     path = s3_key.generate_url(expires_in=0, query_auth=False)
-    logger.info('Jobcard: {0} has been uploaded'.format(s3_key.key))
+    logger.info('{1}: {0} has been uploaded'.format(s3_key.key, logger_msg))
     return path
 
 def get_email_template(key):

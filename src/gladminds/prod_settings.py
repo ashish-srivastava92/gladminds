@@ -116,4 +116,7 @@ NEW_RELIC_FILE_LOCATION = './src/newrelic.ini'
 ########################################################################
 ###################Change Mail Subject on Prod##########################
 MAIL_DETAIL["subject"]= "GladMinds Feed Report"
+#######################Feed Fail Failure Info###########################
+FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/dev/'
+FEED_FAILURE_BUCKET = 'gladminds'
 #######################################################################
