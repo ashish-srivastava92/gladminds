@@ -76,7 +76,7 @@ class ServiceAdvisor(models.Model):
 
 
 class ServiceAdvisorDealerRelationship(models.Model):
-    dealer_id = models.ForeignKey('aftersell.RegisteredDealer', null=False)
+    dealer_id = models.ForeignKey(RegisteredDealer, null=False)
     service_advisor_id = models.ForeignKey(ServiceAdvisor, null=False)
     status = models.CharField(max_length=10, blank=False, null=False)
 

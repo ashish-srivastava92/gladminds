@@ -28,3 +28,7 @@ LOGGING['handlers']['gladminds_logs']['filename'] = 'log/gladminds/app/test_case
 LOGGING['handlers']['afterbuy_logs']['filename'] = 'log/gladminds/app/test_case.log'
 
 FEED_FAILURE_MAIL_ENABLED = False
+
+FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/dev/'
+FEED_FAILURE_BUCKET = 'gladminds'
+JOBCARD_DIR = '{0}/jobcards/dev/'

@@ -80,7 +80,13 @@ DROP INDEX phone_number ON gladminds_serviceadvisor;
 LOCK TABLES `auth_group` WRITE;
 INSERT INTO `auth_group` VALUES (4,'ascs'),(3,'customer'),(1,'dealers'),(2,'sas');
 UNLOCK TABLES;
+-------------------Migration Script for 1.3.1 ------------------
 
+-------------------Migration Script for prod_1.3.1 ------------------
+
+ALTER TABLE aftersell_datafeedlog  ADD file_location  VARCHAR(215);
+
+-------------------Migration Script for prod_1.3.1 ------------------
 -------------------create slow query log------------------
 
 sudo mkdir /var/log/mysql
