@@ -260,6 +260,7 @@ class GladmindsResources(Resource):
             
             coupon_sa_obj = common.ServiceAdvisorCouponRelationship.objects.filter(unique_service_coupon=valid_coupon\
                                                                                    ,service_advisor_phone=dealer_data)
+            logger.info('Coupon_sa_obj: %s' % coupon_sa_obj)
             if not len(coupon_sa_obj):
                 coupon_sa_obj = common.ServiceAdvisorCouponRelationship(unique_service_coupon=valid_coupon\
                                                                         ,service_advisor_phone=dealer_data)
@@ -301,6 +302,7 @@ class GladmindsResources(Resource):
         except ObjectDoesNotExist as odne:
             dealer_message = templates.get_template('SEND_INVALID_SERVICE_TYPE').format(service_type=service_type)
         except Exception as ex:
+            logger.info(ex)
             dealer_message = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
             logger.info("validate message send to SA %s" % dealer_message)
