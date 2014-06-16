@@ -86,7 +86,7 @@ class RegisteredDealer(models.Model):
     address = models.TextField(blank=True, null=True)
 
     class Meta:
-        app_label = "aftersell"
+        app_label = "gladminds"
         verbose_name_plural = "Dealer Data"
 
     def __unicode__(self):
@@ -102,7 +102,7 @@ class ServiceAdvisor(models.Model):
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
-        app_label = "aftersell"
+        app_label = "gladminds"
         verbose_name_plural = "Service Advisor Data"
 
     def __unicode__(self):
@@ -119,7 +119,7 @@ class ServiceAdvisorDealerRelationship(models.Model):
     status = models.CharField(max_length=10, blank=False, null=False)
 
     class Meta:
-        app_label = "aftersell"
+        app_label = "gladminds"
         verbose_name_plural = "Service Advisor And Dealer Relationship"
 
 ##################################################################
