@@ -79,7 +79,7 @@ class GladmindsResources(Resource):
                 task_queue = get_task_queue()
                 task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message})
             else:
-                send_invalid_keyword_message(phone_number=phone_number, message=message)
+                send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
 
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpBadRequest(ink.message))
@@ -89,7 +89,7 @@ class GladmindsResources(Resource):
                 task_queue = get_task_queue()
                 task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message})
             else:
-                send_invalid_keyword_message(phone_number=phone_number, message=message)
+                send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpBadRequest(inm.message))
         except smsparser.InvalidFormat as inf:
@@ -98,7 +98,7 @@ class GladmindsResources(Resource):
                 task_queue = get_task_queue()
                 task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message})
             else:
-                send_invalid_keyword_message(phone_number=phone_number, message=message)
+                send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpBadRequest(inf.message))
         handler = getattr(self, sms_dict['handler'], None)
@@ -224,6 +224,7 @@ class GladmindsResources(Resource):
             coupon.actual_service_date = datetime.now()
             coupon.save()
         
+    @transaction.commit_manually()
     def validate_coupon(self, sms_dict, phone_number):
         actual_kms = int(sms_dict['kms'])
         service_type = sms_dict['service_type']
@@ -234,6 +235,7 @@ class GladmindsResources(Resource):
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         dealer_data = self.validate_dealer(phone_number)
         if not dealer_data:
+            transaction.commit()
             return False
         if not self.is_valid_data(customer_id=sap_customer_id, sa_phone=phone_number):
             return False
@@ -306,19 +308,23 @@ class GladmindsResources(Resource):
             else:
                 send_service_detail.delay(phone_number=phone_number, message=dealer_message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=dealer_message)
+        transaction.commit()
         return True
 
+    @transaction.commit_manually()
     def close_coupon(self, sms_dict, phone_number):
         sa_object = self.validate_dealer(phone_number)
         unique_service_coupon = sms_dict['usc']
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         message = None
         if not sa_object:
+            transaction.commit()
             return False
         if not self.is_valid_data(customer_id=sap_customer_id, coupon=unique_service_coupon, sa_phone=phone_number):
             return False
         if not self.is_sa_initiator(unique_service_coupon, sa_object):
             logger.info("SA is not the coupon initiator.")
+            transaction.commit()
             return False
         try:
             vin = self.get_vin(sap_customer_id)
@@ -339,7 +345,7 @@ class GladmindsResources(Resource):
                 task_queue = get_task_queue()
                 task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
             else:
-                send_coupon(phone_number=phone_number, message=message)
+                send_coupon.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             transaction.commit()
         return True
@@ -358,7 +364,7 @@ class GladmindsResources(Resource):
                 task_queue = get_task_queue()
                 task_queue.add("send_coupon", {"phone_number":phone_number, "message": sms_message})
             else:
-                send_coupon(phone_number=phone_number, message=sms_message)
+                send_coupon.delay(phone_number=phone_number, message=sms_message)
             audit.audit_log(action='failure', sender=phone_number, reciever="", message=message, status='warning')
             return None
         return service_advisor_obj
