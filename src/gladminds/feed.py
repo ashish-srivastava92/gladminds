@@ -240,7 +240,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 .filter(service_advisor_id=service_advisor).update(status='N')
 
     def check_mobile_active(self, dealer, dealer_data):
-        list_mobile = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id__phone_number=dealer['phone_number'], status='Y')
+        list_mobile = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id__phone_number=dealer['phone_number'], status='Y')
         list_active_mobile = list_mobile.exclude(dealer_id=dealer_data, service_advisor_id__service_advisor_id=dealer['service_advisor_id'], )
         if list_active_mobile:
             return True

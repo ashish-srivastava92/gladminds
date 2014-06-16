@@ -24,6 +24,7 @@ class DataFeedLog(models.Model):
     status = models.BooleanField(null=False)
     timestamp = models.DateTimeField(default=datetime.now)
     remarks = models.CharField(max_length=2048, null=True, blank=True)
+    file_location = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
         app_label = "aftersell"

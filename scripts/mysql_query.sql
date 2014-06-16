@@ -80,22 +80,11 @@ DROP INDEX phone_number ON gladminds_serviceadvisor;
 LOCK TABLES `auth_group` WRITE;
 INSERT INTO `auth_group` VALUES (4,'ascs'),(3,'customer'),(1,'dealers'),(2,'sas');
 UNLOCK TABLES;
+-------------------Migration Script for 1.3.1 ------------------
 
--------------script for prod_1_3_1----------------
-insert into aftersell_ascsaveform (select * from gladminds_ascsaveform);
-insert into aftersell_auditlog (select * from gladminds_auditlog);
+-------------------Migration Script for prod_1.3.1 ------------------
 
-alter table gladminds_datafeedlog  add remarks varchar(2048) null;
-insert into aftersell_datafeedlog (select * from gladminds_datafeedlog);
-
-drop table gladminds_registeredasc; --syncdb will add new registeredasc table
-
-insert into aftersell_registereddealer (select * from gladminds_registereddealer);
-insert into aftersell_serviceadvisor (select * from gladminds_serviceadvisor);
-insert into aftersell_serviceadvisordealerrelationship (select * from gladminds_serviceadvisordealerrelationship);
-
-
-
+ALTER TABLE aftersell_datafeedlog  ADD file_location  VARCHAR(215);
 
 -------------------create slow query log------------------
 
