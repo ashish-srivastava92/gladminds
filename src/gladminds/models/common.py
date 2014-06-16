@@ -77,6 +77,7 @@ class ProductTypeData(models.Model):
     def __unicode__(self):
         return self.product_type
 
+
 ######################DEALER-SA MODELS#############################
 
 
@@ -98,7 +99,7 @@ class ServiceAdvisor(models.Model):
         max_length=15, blank=False, unique=True, null=False)
     name = models.CharField(max_length=25, blank=False, null=False)
     phone_number = models.CharField(
-        max_length=15, blank=False, null=False, unique=True)
+        max_length=15, blank=False, null=False)
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
@@ -121,6 +122,7 @@ class ServiceAdvisorDealerRelationship(models.Model):
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Service Advisor And Dealer Relationship"
+
 
 ##################################################################
 
