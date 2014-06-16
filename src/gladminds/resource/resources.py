@@ -210,7 +210,8 @@ class GladmindsResources(Resource):
         valid_coupon.save()
 
     def update_inprogress_coupon(self, coupon, actual_kms, dealer_data):
-        logger.info("update in progress coupon %s %s" % coupon.mark_expired_on, coupon.extended_date)
+        logger.info("Expired on %s" % coupon.mark_expired_on)
+        logger.info("Extended on %s" % coupon.extended_date)
         expiry_date = coupon.mark_expired_on
         if coupon.extended_date < expiry_date:
             coupon.extended_date = expiry_date
