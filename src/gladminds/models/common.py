@@ -107,7 +107,8 @@ class ServiceAdvisor(models.Model):
         verbose_name_plural = "Service Advisor Data"
 
     def __unicode__(self):
-        return self.service_advisor_id
+        return self.phone_number
+
 
 ##################################################################
 #############Service Advisor and Registered Relationship MODEL####

@@ -86,7 +86,7 @@ UNLOCK TABLES;
 
 ALTER TABLE aftersell_datafeedlog  ADD file_location  VARCHAR(215);
 
--------------------Migration Script for prod_1.3.1 ------------------
+--------------------Migration Script for prod_1.3.1 ------------------
 -------------------create slow query log------------------
 
 sudo mkdir /var/log/mysql
