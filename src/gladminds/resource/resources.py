@@ -249,8 +249,10 @@ class GladmindsResources(Resource):
             if len(valid_coupon) > 1:
                 self.update_higher_range_coupon(valid_coupon[0].valid_kms, vin)
                 valid_coupon = valid_coupon[0]
+                logger.info('valid Coupon: %s' % valid_coupon)
             elif len(valid_coupon) > 0:
                 valid_coupon = valid_coupon[0]
+                logger.info('valid coupon: %s' % valid_coupon)
             else:
                 dealer_message = templates.get_template('SEND_SA_NO_VALID_COUPON').format(sap_customer_id)
                 logger.info(dealer_message)
@@ -262,6 +264,7 @@ class GladmindsResources(Resource):
                 coupon_sa_obj = common.ServiceAdvisorCouponRelationship(unique_service_coupon=valid_coupon\
                                                                         ,service_advisor_phone=dealer_data)
                 coupon_sa_obj.save()
+                logger.info('Coupon obj: %s' % coupon_sa_obj)
 
             in_progress_coupon = common.CouponData.objects.select_for_update()\
                                  .filter(vin__vin=vin, valid_kms__gte=actual_kms, status=4) \
