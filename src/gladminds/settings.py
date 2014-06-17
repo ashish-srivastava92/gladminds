@@ -312,7 +312,7 @@ REGISTRATION_CONFIG = {
                                         "delay": 180,
                                         "fail_mail_detail": {
                                             "sender": "feed-report@gladminds.co",
-                                            "receiver": "sourabh.gupta@hashedin.com",
+                                            "receiver": "naureen.razi@hashedin.com",
                                             "subject": "Gladminds ASC Registration Fail",
                                             "body": """"""
                                         }
