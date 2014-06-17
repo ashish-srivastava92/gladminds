@@ -5,7 +5,6 @@ import logging
 import json
 logger = logging.getLogger('test_case')
 from gladminds.models import common
-from gladminds.resource.resources import GladmindsResources
 from tastypie.test import ResourceTestCase
 
 

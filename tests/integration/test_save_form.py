@@ -16,7 +16,7 @@ class TestSaveFormRegistration(GladmindsResourceTestCase):
                     u'address': u'TestASCUser Address',
                     u'pincode': u'111111',
                     u'password': u'password',
-                    u'phone_number': u'9999999999',
+                    u'mobile_number': u'9999999999',
                     u'email': u'TestASCUser@TestASCUser.com'
                 }
 
@@ -33,7 +33,7 @@ class TestSaveFormRegistration(GladmindsResourceTestCase):
                     u'address': u'TestASCUser Address',
                     u'pincode': u'111111',
                     u'password': u'password',
-                    u'phone_number': u'9999999999',
+                    u'mobile_number': u'9999999999',
                     u'email': u'TestASCUser@TestASCUser.com'
                 }
 
