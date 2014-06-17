@@ -44,7 +44,7 @@ class CSVFeedTest(GladmindsUnitTestCase):
         #Check Duplicate
         brand_data = common.BrandData.objects.get(brand_id = 'BRAND002_'+tmp)
         producttype_data = common.ProductTypeData.objects.filter(brand_id = brand_data, product_type = 'PRODUCTTYPE002_'+tmp)
-        self.assertEqual(len(producttype_data), 0)
+        self.assertEqual(len(producttype_data), 1)
 
 class CSVFeedByFile(GladmindsUnitTestCase):
     def setUp(self):

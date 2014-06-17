@@ -156,16 +156,13 @@ def asc_registration(request):
 #        }
 #        response_object = save_user['asc'](request, ['self'])
 #        return HttpResponse(response_object, content_type="application/json")
-        username = request.POST['name']
-        password = request.POST['password']
+        data = request.POST
         try:
-            asc_user = User(username=username)
-            asc_user.set_password(password)
-            asc_user.save()
-            asc_group = Group.objects.get(name='ascs')
-            asc_user.groups.add(asc_group)
-            asc = afterbuy_common.RegisteredASC(user=asc_user, phone_number=request.POST['phone-number'], asc_name=username)
-            asc.save()
+            asc_obj = afterbuy_common.ASCSaveForm(name=data['name'],
+                 address=data['address'], password=data['password'],
+                 phone_number=data['phone-number'], email=data['email'],
+                 pincode=data['pincode'], status=1)
+            asc_obj.save()
         except:
             return HttpResponse(json.dumps({'message': 'Already Registered'}), content_type='application/json')
         return HttpResponse(json.dumps({'message': 'Registration is complete'}), content_type='application/json')
