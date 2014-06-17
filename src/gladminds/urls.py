@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.conf import settings
 from tastypie.api import Api
-from gladminds.resource import resources as r
+from gladminds.resource import resources
 from gladminds.sqs_tasks import _tasks_map
 from gladminds.taskqueue import SqsHandler
 # Uncomment the next two lines to enable the admin:
@@ -9,11 +9,11 @@ from django.contrib import admin
 admin.autodiscover()
 
 api_v1 = Api(api_name="v1")
-api_v1.register(r.GladmindsResources())
-api_v1.register(r.BrandResources())
-api_v1.register(r.ProductTypeResources())
-api_v1.register(r.ProductResources())
-api_v1.register(r.UserResources())
+api_v1.register(resources.GladmindsResources())
+api_v1.register(resources.BrandResources())
+api_v1.register(resources.ProductTypeResources())
+api_v1.register(resources.ProductResources())
+api_v1.register(resources.UserResources())
 
 urlpatterns = patterns('',
     url(r'^aftersell/(?P<provider>[a-zA-Z]+)/login/$', 'gladminds.views.auth_login', name='user_login'),

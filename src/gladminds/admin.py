@@ -381,14 +381,15 @@ class FeedLogAdmin(ModelAdmin):
                     'failed_data_count', 'feed_remarks')
 
     def feed_remarks(self, obj):
-        remarks = json.loads(obj.remarks)
-        update_remark = ''
-        for remark, occurence in remarks.iteritems():
-            update_remark = "[ {0} : {1} ].  ".format(remark, occurence)
-
-        update_remark = update_remark[:100] + u'<a href="{0}">{1}</a>'.\
-                                        format(obj.file_location, " For More...")
-        return update_remark
+        if obj.remarks:
+            remarks = json.loads(obj.remarks)
+            update_remark = ''
+            for remark, occurence in remarks.iteritems():
+                update_remark = "[ {0} : {1} ].  ".format(remark, occurence)
+    
+            update_remark = update_remark[:100] + u'<a href="{0}">{1}</a>'.\
+                                            format(obj.file_location, " For More...")
+            return update_remark
     feed_remarks.allow_tags = True
 
     def has_add_permission(self, request):
@@ -407,13 +408,13 @@ class FeedLogAdmin(ModelAdmin):
 ##############################################################
 ##################Custom Model Defined########################
 
-class DispatchedProducts(ProductData):
+class DispatchedProduct(ProductData):
 
     class Meta:
         proxy = True
 
-
-class ListDispatchedProducts(ModelAdmin):
+class ListDispatchedProduct(ModelAdmin):
+    list_filter = ('engine', 'product_type', ('invoice_date', DateFieldListFilter))
     search_fields = ('vin', 'engine' , 'customer_phone_number__phone_number', 
                      'dealer_id__dealer_id', 'product_type__product_type')
     
@@ -442,7 +443,7 @@ class ListDispatchedProducts(ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         extra_context = {'searchable_fields':"('vin', 'engine', 'customer_phone_number', 'dealer_id', 'product_type')"}
-        return super(ListDispatchedProducts, self).changelist_view(request, extra_context=extra_context)
+        return super(ListDispatchedProduct, self).changelist_view(request, extra_context=extra_context)
 ##############################################################
 #########################ASCSaveForm#########################
 
@@ -467,7 +468,7 @@ class ASCSaveFormAdmin(ModelAdmin):
 
 
 admin.site.register(BrandData, BrandAdmin)
-admin.site.register(DispatchedProducts, ListDispatchedProducts)
+admin.site.register(DispatchedProduct, ListDispatchedProduct)
 admin.site.register(ServiceAdvisor, ServiceAdvisorAdmin)
 admin.site.register(
     ServiceAdvisorDealerRelationship, ServiceAdvisorDealerAdmin)
