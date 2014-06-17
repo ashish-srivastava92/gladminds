@@ -363,9 +363,11 @@ class GladmindsResources(Resource):
             all_sa_dealer_obj = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = service_advisor_obj, status = u'Y')
             if len(all_sa_dealer_obj) == 0:
                 raise
-        except:
+
+        except Exception as ex:
             sms_message = 'Not an authorised user to avail this service.'
             message = 'Not an authorised user to avail this service. Phone number - {0}'.format(phone_number)
+            logger.error(ex)
             logger.error(message)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()

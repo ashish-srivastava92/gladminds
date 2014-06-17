@@ -1,14 +1,10 @@
 mysql -u gladminds -pgladminds123;
-drop database gladmindsdb_name;
-create  database gladmindsdb_name;
+drop database gladmindsdb;
+create  database gladmindsdb;
 
 kill -9 id
-bin/django syncdb --settings=gladminds.qa_settings
-bin/django shell --settings=gladminds.qa_settings
+bin/django syncdb --settings=gladminds.dev_settings
+bin/django shell --settings=gladminds.dev_settings
 from django.contrib.sites.models import Site
 Site.objects.create(name='example.com', domain='example.com')
-
-
-
-
 
