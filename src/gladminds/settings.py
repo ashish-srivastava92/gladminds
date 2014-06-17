@@ -360,20 +360,20 @@ ENABLE_AMAZON_SQS = False
 
 #################Registration Configuration#################################
 REGISTRATION_CONFIG = {
-    "bajaj": {
-        "ASC Registration Feed": {
-            "retry_time": 180,
-            "num_of_retry": 2,
-            "delay": 180,
-            "fail_mail_detail": {
-                "sender": "feed-report@gladminds.co",
-                "receiver": "sourabh.gupta@hashedin.com",
-                "subject": "Gladminds ASC Registration Fail",
-                "body": """"""
-            }
-        }
-    }
-}
+                        "bajaj": {
+                            "ASC Registration Feed": {
+                                "retry_time": 180,
+                                "num_of_retry": 2,
+                                "delay": 180,
+                                "fail_mail_detail": {
+                                    "sender": "feed-report@gladminds.co",
+                                    "receiver": "naureen.razi@hashedin.com",
+                                    "subject": "Gladminds ASC Registration Fail",
+                                    "body": """"""
+                                }
+                            }
+                        }
+                     }
 ###########################################################################
 ########################Password Postfix for dealers######################
 PASSWORD_POSTFIX = '@123'
