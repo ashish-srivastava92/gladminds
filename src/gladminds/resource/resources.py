@@ -210,6 +210,8 @@ class GladmindsResources(Resource):
         valid_coupon.save()
 
     def update_inprogress_coupon(self, coupon, actual_kms, dealer_data):
+        logger.info("Expired on %s" % coupon.mark_expired_on)
+        logger.info("Extended on %s" % coupon.extended_date)
         expiry_date = coupon.mark_expired_on
         if coupon.extended_date < expiry_date:
             coupon.extended_date = expiry_date
@@ -249,8 +251,10 @@ class GladmindsResources(Resource):
             if len(valid_coupon) > 1:
                 self.update_higher_range_coupon(valid_coupon[0].valid_kms, vin)
                 valid_coupon = valid_coupon[0]
+                logger.info('valid Coupon: %s' % valid_coupon)
             elif len(valid_coupon) > 0:
                 valid_coupon = valid_coupon[0]
+                logger.info('valid coupon: %s' % valid_coupon)
             else:
                 dealer_message = templates.get_template('SEND_SA_NO_VALID_COUPON').format(sap_customer_id)
                 logger.info(dealer_message)
@@ -258,10 +262,12 @@ class GladmindsResources(Resource):
             
             coupon_sa_obj = common.ServiceAdvisorCouponRelationship.objects.filter(unique_service_coupon=valid_coupon\
                                                                                    ,service_advisor_phone=dealer_data)
+            logger.info('Coupon_sa_obj: %s' % coupon_sa_obj)
             if not len(coupon_sa_obj):
                 coupon_sa_obj = common.ServiceAdvisorCouponRelationship(unique_service_coupon=valid_coupon\
                                                                         ,service_advisor_phone=dealer_data)
                 coupon_sa_obj.save()
+                logger.info('Coupon obj: %s' % coupon_sa_obj)
 
             in_progress_coupon = common.CouponData.objects.select_for_update()\
                                  .filter(vin__vin=vin, valid_kms__gte=actual_kms, status=4) \
@@ -298,6 +304,7 @@ class GladmindsResources(Resource):
         except ObjectDoesNotExist as odne:
             dealer_message = templates.get_template('SEND_INVALID_SERVICE_TYPE').format(service_type=service_type)
         except Exception as ex:
+            logger.info(ex)
             dealer_message = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
             logger.info("validate message send to SA %s" % dealer_message)
@@ -308,7 +315,7 @@ class GladmindsResources(Resource):
             else:
                 send_service_detail.delay(phone_number=phone_number, message=dealer_message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=dealer_message)
-            transaction.commit()
+        transaction.commit()
         return True
 
     @transaction.commit_manually()
@@ -356,10 +363,17 @@ class GladmindsResources(Resource):
             all_sa_dealer_obj = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = service_advisor_obj, status = u'Y')
             if len(all_sa_dealer_obj) == 0:
                 raise
+
         except Exception as ex:
+            sms_message = 'Not an authorised user to avail this service.'
             message = 'Not an authorised user to avail this service. Phone number - {0}'.format(phone_number)
             logger.error(ex)
             logger.error(message)
+            if settings.ENABLE_AMAZON_SQS:
+                task_queue = get_task_queue()
+                task_queue.add("send_coupon", {"phone_number":phone_number, "message": sms_message})
+            else:
+                send_coupon.delay(phone_number=phone_number, message=sms_message)
             audit.audit_log(action='failure', sender=phone_number, reciever="", message=message, status='warning')
             return None
         return service_advisor_obj

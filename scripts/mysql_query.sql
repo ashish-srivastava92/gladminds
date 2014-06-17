@@ -70,6 +70,9 @@ CREATE TABLE `gladminds_serviceadvisorcouponrelationship` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -------------------Migration Script for 1.3.1 ------------------
+
+DROP INDEX phone_number ON gladminds_serviceadvisor;
+
 --
 -- Table structure for table `auth_group`
 --
@@ -84,7 +87,6 @@ CREATE TABLE `auth_group` (
 LOCK TABLES `auth_group` WRITE;
 INSERT INTO `auth_group` VALUES (4,'ascs'),(3,'customer'),(1,'dealers'),(2,'sas');
 UNLOCK TABLES;
-
 
 -------------------create slow query log------------------
 
