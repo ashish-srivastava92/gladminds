@@ -85,7 +85,7 @@ class TestCronjobs(GladmindsUnitTestCase):
     
     def test_get_data_feed_log_detail(self):
         obj = self.get_datafeed_log(feed_type="Dispatch Feed",total_data_count=4,failed_data_count=0\
-                                    ,success_data_count=4,timestamp=datetime.now(),action='Recieved')
+                                    ,success_data_count=4,timestamp=datetime.now(),action='Recieved', status='success')
         feeds = get_data_feed_log_detail(start_date=datetime.now()-timedelta(days=1), end_date=datetime.now()+timedelta(days=1))
         self.assertEqual(len(feeds), 1)
     
