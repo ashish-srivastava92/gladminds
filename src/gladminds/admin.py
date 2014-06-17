@@ -397,13 +397,13 @@ class FeedLogAdmin(ModelAdmin):
 ##############################################################
 ##################Custom Model Defined########################
 
-class DispatchedProducts(ProductData):
+class DispatchedProduct(ProductData):
 
     class Meta:
         proxy = True
 
 
-class ListDispatchedProducts(ModelAdmin):
+class ListDispatchedProduct(ModelAdmin):
     list_filter = ('engine', 'product_type', ('invoice_date', DateFieldListFilter))
     search_fields = ('vin', 'engine' , 'customer_phone_number__phone_number', 
                      'dealer_id__dealer_id', 'product_type__product_type')
@@ -433,7 +433,7 @@ class ListDispatchedProducts(ModelAdmin):
 
 
 admin.site.register(BrandData, BrandAdmin)
-admin.site.register(DispatchedProducts, ListDispatchedProducts)
+admin.site.register(DispatchedProduct, ListDispatchedProduct)
 admin.site.register(ServiceAdvisor, ServiceAdvisorAdmin)
 admin.site.register(
     ServiceAdvisorDealerRelationship, ServiceAdvisorDealerAdmin)
