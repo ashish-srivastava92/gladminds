@@ -246,5 +246,14 @@
       "template": "Incorrect UCN",
       "description": "Send message to SA reg wrong UCN"
     }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 29,
+    "fields": {
+      "template_key": "SEND_SA_WRONG_CUSTOMER",
+      "template": "Incorrect Customer ID",
+      "description": "Send message to SA reg wrong Customer-Id"
+    }
   }
 ]

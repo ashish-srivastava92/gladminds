@@ -400,4 +400,6 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               "send_otp": send_otp,
               
               "delete_unused_otp" : delete_unused_otp,
+              
+              "send_invalid_keyword_message" : send_invalid_keyword_message 
               }

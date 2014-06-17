@@ -356,8 +356,9 @@ class GladmindsResources(Resource):
             all_sa_dealer_obj = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = service_advisor_obj, status = u'Y')
             if len(all_sa_dealer_obj) == 0:
                 raise
-        except:
+        except Exception as ex:
             message = 'Not an authorised user to avail this service. Phone number - {0}'.format(phone_number)
+            logger.error(ex)
             logger.error(message)
             audit.audit_log(action='failure', sender=phone_number, reciever="", message=message, status='warning')
             return None
