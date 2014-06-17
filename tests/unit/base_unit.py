@@ -1,11 +1,11 @@
-import unittest
+import django.test
 from django.core import management
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.aftersell.models import logs
 
 
-class GladmindsUnitTestCase(unittest.TestCase):
+class GladmindsUnitTestCase(django.test.TestCase):
     def setUp(self):
         super(GladmindsUnitTestCase, self).setUp()
 #        management.call_command('loaddata', 'etc/testdata/template.json', verbosity=0)
@@ -60,7 +60,7 @@ class GladmindsUnitTestCase(unittest.TestCase):
         
     def _get_model_obj(self, model):
         model_obj = model.save()
-        return model_obj
+        return model
     
     def filter_coupon_obj(self, coupon_id=None):
         coupon_obj = common.CouponData.objects.filter(unique_service_coupon=coupon_id)

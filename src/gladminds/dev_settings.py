@@ -69,5 +69,5 @@ FEED_TYPE = 'CSV'
 FEED_FAILURE_MAIL_ENABLED = True
 
 FEED_FAILURE_MAIL_DETAIL["subject"] = "Gladminds Feed Failure Mail DEV"
-FEED_FAILURE_MAIL_DETAIL["receiver"] = ["sourabh.gupta@hashedin.com", "nureen.razi@hashedin.com"]
+FEED_FAILURE_MAIL_DETAIL["receiver"] = ["sourabh.gupta@hashedin.com", "naureen.razi@hashedin.com"]
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "Gladminds UCN Recovery Mail DEV"

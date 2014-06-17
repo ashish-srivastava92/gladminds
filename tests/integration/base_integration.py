@@ -78,6 +78,7 @@ class GladmindsResourceTestCase(ResourceTestCase):
     def get_customer_obj(self, **kwargs):
         customer_obj = common.GladMindUsers(**kwargs)
         customer_obj.save()
+        print "$%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#", customer_obj
         return customer_obj
     
     def filter_coupon_obj(self, coupon_id=None):

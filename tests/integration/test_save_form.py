@@ -16,16 +16,16 @@ class TestSaveFormRegistration(GladmindsResourceTestCase):
                     u'address': u'TestASCUser Address',
                     u'pincode': u'111111',
                     u'password': u'password',
-                    u'phone_number': u'9999999999',
+                    u'phone-number': u'9999999999',
                     u'email': u'TestASCUser@TestASCUser.com'
                 }
 
-        response = self.client.post('/aftersell/register/asc', data=data)
+        response = self.client.post('/aftersell/asc/self-register/', data=data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(afterbuy_common.ASCSaveForm.objects.count(), 1)
         self.assertEqual(afterbuy_common
                          .ASCSaveForm.objects.all()[0].phone_number,
-                          data['phone_number'])
+                          data['phone-number'])
 
     def test_fail_registration_mail(self):
         data = {
@@ -33,11 +33,11 @@ class TestSaveFormRegistration(GladmindsResourceTestCase):
                     u'address': u'TestASCUser Address',
                     u'pincode': u'111111',
                     u'password': u'password',
-                    u'phone_number': u'9999999999',
+                    u'phone-number': u'9999999999',
                     u'email': u'TestASCUser@TestASCUser.com'
                 }
 
-        response = self.client.post('/aftersell/register/asc', data=data)
+        response = self.client.post('/aftersell/asc/self-register/', data=data)
         self.assertEqual(response.status_code, 200)
         
         

@@ -3,10 +3,11 @@
 '''
 from celery.app.task import Task
 import logging
-from gladminds.resource.resources import GladmindsResources
 from django.conf import settings 
+from django.test.client import Client
 logger = logging.getLogger('gladminds')
 from integration.base_integration import GladmindsResourceTestCase
+client=Client()
 
 
 class CeleryTestCaseBase(GladmindsResourceTestCase):
@@ -23,7 +24,12 @@ class CeleryTestCaseBase(GladmindsResourceTestCase):
                     link=None, link_error=None, **options):
         self.applied_tasks.append({"kwargs":kwargs, "options":options})
         return kwargs
-
+    
+    def validate_coupon(self, data, phone_number):
+        data = 'A {1} {0} {2}'.format(data['kms'], data['sap_customer_id'], data['service_type'])
+        result = client.post('/v1/messages', data={'text': data, 'phoneNumber' : phone_number})
+        self.assertHttpOK(result)
+        
     def test_delay_message(self):
         self.brand_obj = self.get_brand_obj(brand_id='brand001', brand_name='bajaj')
         product_type_obj = self.get_product_type_obj(brand_id=self.brand_obj, product_name='DISCO120', product_type='BIKE')
@@ -32,13 +38,12 @@ class CeleryTestCaseBase(GladmindsResourceTestCase):
         self.product_obj = self.get_product_obj(vin="VINXXX001", product_type=product_type_obj, dealer_id = self.dealer_obj, customer_phone_number = self.customer_obj, sap_customer_id='SAP001')
         self.get_coupon_obj(unique_service_coupon='USC001', vin=self.product_obj, valid_days=30, valid_kms=500, service_type=1)
 
-        sa_obj = self.get_service_advisor_obj(service_advisor_id='DEALER001SA001', name="SA001", phone_number='9999999')
+        sa_obj = self.get_service_advisor_obj(service_advisor_id='DEALER001SA001', name="SA001", phone_number='+919999999')
         self.get_dealer_service_advisor_obj(dealer_id=self.dealer_obj, service_advisor_id=sa_obj, status='Y')
 
         phone_number = "9999999"
-        obj = GladmindsResources()
         sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'SAP001'}
-        obj.validate_coupon(sms_dict, phone_number)
+        self.validate_coupon(sms_dict, phone_number)
 
         customer_message_task_info = self.applied_tasks[1]
         self.assertEqual(customer_message_task_info['options']["countdown"], settings.DELAY_IN_CUSTOMER_UCN_MESSAGE, 'Set delay in celery job')
