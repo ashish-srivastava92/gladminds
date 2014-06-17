@@ -50,7 +50,7 @@ SUIT_CONFIG = {
     'MENU': (
         {'app': 'gladminds', 'label': 'Data', 'icon': ' icon-folder-open',
          'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
-                    {'model': 'dispatchedproducts',
+                    {'model': 'dispatchedproduct',
                      'label': 'Feed -> Product Dispatch'},
                     {'model': 'productdata',
                      'label': 'Feed -> Product Purchase'},
@@ -64,7 +64,7 @@ SUIT_CONFIG = {
                     'messagetemplate', 'emailtemplate', 'gladmindusers',)},
         {'app': 'aftersell', 'label': 'AfterSell', 'icon': ' icon-folder-open',
          'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
-                    {'model': 'dispatchedproducts',
+                    {'model': 'dispatchedproduct',
                      'label': 'Feed -> Product Dispatch'},
                     {'model': 'productdata',
                      'label': 'Feed -> Product Purchase'},
