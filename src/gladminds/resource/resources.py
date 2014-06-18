@@ -340,7 +340,9 @@ class GladmindsResources(Resource):
             coupon_object.status = 2
             coupon_object.sa_phone_number=sa_object
             coupon_object.closed_date = datetime.now()
+            logger.info("object before save %s" % coupon_object)
             coupon_object.save()
+            logger.info("object after save %s" % coupon_object)
             common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, service_type__lt=coupon_object.service_type).update(status=3)
             message = templates.get_template('SEND_SA_CLOSE_COUPON').format(customer_id=sap_customer_id, usc=unique_service_coupon)
         except Exception as ex:
