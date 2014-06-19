@@ -145,12 +145,17 @@ def register_user(request, user=None):
     return HttpResponse(json.dumps(status), mimetype="application/json")
     
     
-def sqs_tasks_view(request, task=None):
-    taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
-    taskqueue.add(task)
+def sqs_tasks_view(request):
     return render_to_response('trigger-sqs-tasks.html')
 
-def trigger_sqs_tasks(request, task=None):
+def trigger_sqs_tasks(request):
+    sqs_tasks = {
+        'send-feed-mail' : 'send_report_mail_for_feed',
+        'export_coupon_redeem' : 'export_coupon_redeem_to_sap',
+        'expire-service-coupon': 'expire_service_coupon',
+        'send-reminder': 'send_reminder',
+    }
+    
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
-    taskqueue.add(task)
-    return HttpResponse({})
+    taskqueue.add(sqs_tasks[request.POST['task']])
+    return HttpResponse()

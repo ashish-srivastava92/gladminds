@@ -1,19 +1,69 @@
 {% extends "base_template.html" %}
 
-{% block body %}
+{% block style %}
+<link href="/static/css/portal.css" rel="stylesheet">
+{% endblock %}
 
-<div class="row">
-	<form class="form-horizontal" >
-		<div class="form-group">
-			<label class="col-sm-3 control-label">Send Report Mail For Feed</label>
-			<div class="col-sm-6">
-				<button type="button" class="btn btn-primary">Primary</button>
-			</div>
-		</div>
-	</form>
+{% block body %}
+<div class="navbar navbar-fixed-top">
+	<div class="navbar-inner">
+		<a class="brand" href="#"><img src="/static/img/bajaj_logo.jpg" height=50px width=209px></a>
+	</div>
 </div>
-{% endblock body %}
+
+<div class="user-message">
+	<div class="message"></div>
+</div>
+
+<div class="well">
+	<div class="row">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Tasks</th>
+					<th>Handler</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>1</td>
+					<td>Send Feed Mail</td>
+					<td class="send-feed-mail">
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>
+				<tr>
+					<td>2</td>
+					<td>Export Coupon Redeem To Sap</td>
+					<td class="export-coupon-redeem">
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>
+				<tr>
+					<td>3</td>
+					<td>Expire Service Coupon</td>
+					<td class="expire-service-coupon">
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>
+				<tr>
+					<td>4</td>
+					<td>Send Reminder</td>
+					<td class="send-reminder">
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}
 
 {% block dependency%}
-
+<script src="/static/js/triggerSQSTasks.js"></script>
 {% endblock dependency %}
