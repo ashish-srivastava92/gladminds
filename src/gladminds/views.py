@@ -11,6 +11,12 @@ from gladminds.utils import get_task_queue
 from gladminds.mail import sent_otp_email
 import logging, json
 
+from django.contrib.auth.models import Group, User
+from gladminds.utils import get_task_queue
+from django.contrib.auth import authenticate, login, logout
+from gladminds.scheduler import SqsTaskQueue
+
+
 logger = logging.getLogger('gladminds')
 
 
@@ -137,4 +143,14 @@ def register_user(request, user=None):
     status = save_user[user](request.POST)
 
     return HttpResponse(json.dumps(status), mimetype="application/json")
-        
+    
+    
+def sqs_tasks_view(request, task=None):
+    taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
+    taskqueue.add(task)
+    return render_to_response('trigger-sqs-tasks.html')
+
+def trigger_sqs_tasks(request, task=None):
+    taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
+    taskqueue.add(task)
+    return HttpResponse({})
