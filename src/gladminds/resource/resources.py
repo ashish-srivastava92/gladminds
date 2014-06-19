@@ -226,6 +226,7 @@ class GladmindsResources(Resource):
             coupon.actual_service_date = datetime.now()
             coupon.save()
         
+    @transaction.commit_manually()
     def validate_coupon(self, sms_dict, phone_number):
         actual_kms = int(sms_dict['kms'])
         service_type = sms_dict['service_type']
@@ -236,6 +237,7 @@ class GladmindsResources(Resource):
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         dealer_data = self.validate_dealer(phone_number)
         if not dealer_data:
+            transaction.commit()
             return False
         if not self.is_valid_data(customer_id=sap_customer_id, sa_phone=phone_number):
             return {'status': False, 'message': templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')}
@@ -313,20 +315,24 @@ class GladmindsResources(Resource):
             else:
                 send_service_detail.delay(phone_number=phone_number, message=dealer_message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=dealer_message)
+            transaction.commit()
         return {'status': True, 'message': dealer_message}
 
+    @transaction.commit_manually()
     def close_coupon(self, sms_dict, phone_number):
         sa_object = self.validate_dealer(phone_number)
         unique_service_coupon = sms_dict['usc']
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         message = None
         if not sa_object:
+            transaction.commit()
             return False
         if not self.is_valid_data(customer_id=sap_customer_id, coupon=unique_service_coupon, sa_phone=phone_number):
             return {'status': False, 'message': templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')}
         if not self.is_sa_initiator(unique_service_coupon, sa_object):
             message="SA is not the coupon initiator."
             logger.info(message)
+            transaction.commit()
             return {'status': False, 'message': message}
         try:
             vin = self.get_vin(sap_customer_id)
@@ -335,8 +341,11 @@ class GladmindsResources(Resource):
             coupon_object.status = 2
             coupon_object.sa_phone_number=sa_object
             coupon_object.closed_date = datetime.now()
+            logger.info("object before save %s" % coupon_object)
             coupon_object.save()
+            logger.info("object after save %s" % coupon_object)
             common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, service_type__lt=coupon_object.service_type).update(status=3)
+            transaction.commit()
             message = templates.get_template('SEND_SA_CLOSE_COUPON').format(customer_id=sap_customer_id, usc=unique_service_coupon)
         except Exception as ex:
             message = templates.get_template('SEND_INVALID_MESSAGE')
