@@ -75,8 +75,8 @@ ENABLE_AMAZON_SQS = True
 ########################SQS Queue Name##################################
 SQS_QUEUE_NAME = "gladminds-prod"
 ########################################################################
-FEED_FAILURE_MAIL_DETAIL["subject"] = "Gladminds Feed Failure Mail"
-UCN_RECOVERY_MAIL_DETAIL["subject"] = "Gladminds UCN Recovery Mail"
+FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail"
+UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail"
 #########################New relic file location########################
 NEW_RELIC_FILE_LOCATION = './src/newrelic.ini'
 ########################################################################
