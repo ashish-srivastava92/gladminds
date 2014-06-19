@@ -68,6 +68,9 @@ SMS_CLIENT_DETAIL={
 FEED_TYPE = 'CSV'
 FEED_FAILURE_MAIL_ENABLED = True
 
-FEED_FAILURE_MAIL_DETAIL["subject"] = "Gladminds Feed Failure Mail DEV"
-FEED_FAILURE_MAIL_DETAIL["receiver"] = ["sourabh.gupta@hashedin.com", "naureen.razi@hashedin.com"]
-UCN_RECOVERY_MAIL_DETAIL["subject"] = "Gladminds UCN Recovery Mail DEV"
+MAIL_DETAIL["subject"]= "GladMinds Feed Report DEV"
+MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
+
+FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail DEV"
+FEED_FAILURE_MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
+UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail DEV"
