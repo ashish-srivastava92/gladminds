@@ -259,7 +259,11 @@ class ProductDispatchFeed(BaseFeed):
                 if not product['unique_service_coupon']:
                     continue
                 valid_coupon = common.CouponData.objects.filter(unique_service_coupon=product['unique_service_coupon'])
-                if not valid_coupon:
+                service_type_exists = common.CouponData.objects.filter(vin__vin=product['vin'], service_type=str(product['service_type']))
+                if service_type_exists and not valid_coupon:
+                    logger.error('VIN already has coupon of this service type {0} VIN - {1}'.format(product['vin'], product['unique_service_coupon']))
+                    raise ValueError()
+                elif not valid_coupon:
                     coupon_data = common.CouponData(unique_service_coupon=product['unique_service_coupon'],
                             vin=product_data, valid_days=product['valid_days'],
                             valid_kms=product['valid_kms'], service_type=product['service_type'],
@@ -268,13 +272,13 @@ class ProductDispatchFeed(BaseFeed):
                     logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN - {0} UCN - {1}'.format(product['vin'], product['unique_service_coupon']))
                     
                 elif valid_coupon[0].vin.vin == product['vin'] and str(valid_coupon[0].service_type) == str(product['service_type']):
-                    logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN - {0} UCN - {1}'.format(product['vin'], product['unique_service_coupon']))
+                    logger.info('UCN is already saved in database. VIN - {0} UCN - {1}'.format(product['vin'], product['unique_service_coupon']))
                     continue
                 else:
-                    logger.error('Coupon Already registered for another VIN! {0} VIN - {1}'.format(product['vin'], product['unique_service_coupon']))
+                    logger.error('Coupon Already registered for a VIN! VIN {0}  - UCN {1}'.format(product['vin'], product['unique_service_coupon']))
                     raise ValueError()
             except Exception as ex:
-                logger.error('Coupon: {2} Save error! {0} VIN - {1}'.format(ex, product['vin'], product['unique_service_coupon']))
+                logger.error('Coupon: {2} Save error! VIN {0}  - UCN {1}'.format(ex, product['vin'], product['unique_service_coupon']))
                 total_failed += 1
                 continue
 
