@@ -59,3 +59,7 @@ SMS_CLIENT_DETAIL={
                    }
 
 FEED_TYPE = 'CSV'
+
+########################SQS Queue Name
+SQS_QUEUE_NAME = "gladminds-dev"
+######################################

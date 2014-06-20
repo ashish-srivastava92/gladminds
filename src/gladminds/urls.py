@@ -53,7 +53,8 @@ urlpatterns += patterns('gladminds',
     url(r'^app', 'afterbuy.views.home', name='home'),
     url(r'^gm', 'afterbuy.views.main', name='main'),
     url(r'^v1/api/users/auth', 'afterbuy.views.get_access_token'),
-
+    url(r'^tasks-view', 'views.sqs_tasks_view'),
+    url(r'^trigger-tasks', 'views.trigger_sqs_tasks'),
     url(r'^tasks/', SqsHandler.as_view(task_map=_tasks_map)),
 
     
