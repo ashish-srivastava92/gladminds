@@ -60,7 +60,7 @@ class ServiceAdvisor(models.Model):
         max_length=15, blank=False, unique=True, null=False)
     name = models.CharField(max_length=25, blank=False, null=False)
     phone_number = models.CharField(
-        max_length=15, blank=False, null=False, unique=True)
+        max_length=15, blank=False, null=False)
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
