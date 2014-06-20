@@ -65,6 +65,10 @@ SMS_CLIENT_DETAIL={
                    'message_url': 'http://117.99.128.32:80/login/pushsms.php'                  
                    }
 
+########################SQS Queue Name
+SQS_QUEUE_NAME = "gladminds-dev"
+######################################
+
 FEED_TYPE = 'CSV'
 FEED_FAILURE_MAIL_ENABLED = True
 

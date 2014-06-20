@@ -108,9 +108,9 @@ AFTER_BUY_CONSTANTS = {
                        "title": "Afterbuy V1 App"
                        }
 
-########################SQS Queue Name##################################
+########################SQS Queue Name
 SQS_QUEUE_NAME = "gladminds-qa"
-########################################################################
+######################################
 ###################Change Mail Subject on QA##########################
 MAIL_DETAIL["subject"]= "GladMinds Feed Report QA"
 

@@ -22,6 +22,12 @@ import logging
 import json
 from gladminds.aftersell.models import common as afterbuy_common
 
+from django.contrib.auth.models import Group, User
+from gladminds.utils import get_task_queue
+from django.contrib.auth import authenticate, login, logout
+from gladminds.scheduler import SqsTaskQueue
+
+
 logger = logging.getLogger('gladminds')
 
 
@@ -274,4 +280,19 @@ def register_user(request, user=None):
     status = save_user[user](request.POST)
 
     return HttpResponse(json.dumps(status), mimetype="application/json")
-        
+    
+    
+def sqs_tasks_view(request):
+    return render_to_response('trigger-sqs-tasks.html')
+
+def trigger_sqs_tasks(request):
+    sqs_tasks = {
+        'send-feed-mail' : 'send_report_mail_for_feed',
+        'export_coupon_redeem' : 'export_coupon_redeem_to_sap',
+        'expire-service-coupon': 'expire_service_coupon',
+        'send-reminder': 'send_reminder',
+    }
+    
+    taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
+    taskqueue.add(sqs_tasks[request.POST['task']])
+    return HttpResponse()
