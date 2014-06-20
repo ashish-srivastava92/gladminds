@@ -14,7 +14,7 @@ import logging, json
 from django.contrib.auth.models import Group, User
 from gladminds.utils import get_task_queue
 from django.contrib.auth import authenticate, login, logout
-from gladminds.scheduler import SqsTaskQueue
+# from gladminds.scheduler import SqsTaskQueue
 
 
 logger = logging.getLogger('gladminds')
