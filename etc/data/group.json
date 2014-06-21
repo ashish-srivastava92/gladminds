@@ -1,18 +1,34 @@
 [
   {
-    "model": "gladminds.branddata",
+    "model": "auth_group",
     "pk": 1,
     "fields": {
-      "brand_id":"BRAND001",
-      "brand_name":"bajaj"
+      "id":"1",
+      "name":"dealers"
     }
   },
   {
-    "model": "gladminds.branddata",
+    "model": "auth_group",
     "pk": 2,
     "fields": {
-      "brand_id":"BRAND003",
-      "brand_name":"honda"
+      "id":"2",
+      "name":"sas"
+    }
+  },
+   {
+    "model": "auth_group",
+    "pk": 3,
+    "fields": {
+      "id":"3",
+      "name":"customer"
+    }
+  },
+   {
+    "model": "auth_group",
+    "pk": 4,
+    "fields": {
+      "id":"4",
+      "name":"ascs"
     }
   }
 ]
