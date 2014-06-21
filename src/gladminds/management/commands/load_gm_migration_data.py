@@ -9,6 +9,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.add_group()
         self.add_sms_template()
+        self.add_email_template()
         
     def add_group(self):
         from django.contrib.auth.models import Group
@@ -16,7 +17,6 @@ class Command(BaseCommand):
         email_templates = json.loads(open(file_path).read())
         Group.objects.all().delete()
         for email_temp in email_templates:
-            print email_temp
             group = Group(name=email_temp['fields']["name"])
             group.save()
         
@@ -30,4 +30,16 @@ class Command(BaseCommand):
             fields = message_temp['fields']
             temp_obj = common.MessageTemplate(template_key=fields['template_key']\
                        , template=fields['template'], description=fields['description'])
+            temp_obj.save()
+            
+    def add_email_template(self):
+        file_path = os.path.join(settings.BASE_DIR, 'etc/data/email_template.json')
+        email_templates = json.loads(open(file_path).read())
+        common.EmailTemplate.objects.all().delete()
+        for email_temp in email_templates:
+            fields = email_temp['fields']
+            temp_obj = common.EmailTemplate(template_key=fields['template_key']\
+                       , sender=fields['sender'], subject=fields['subject'],
+                         reciever=fields['reciever'], body=fields['body'],
+                         description=fields['description'])
             temp_obj.save()
