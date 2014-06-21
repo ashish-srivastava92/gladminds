@@ -52,12 +52,11 @@ class SqsTaskQueue(TaskQueue):
         self._conn.send_message(self._q, payload_as_str)
 
 
-QUEUE_NAME = sys.argv[2]
-
-taskqueue = SqsTaskQueue(QUEUE_NAME)
-
-if __name__ == '__main__':
-    task_name = sys.argv[1]
-    # task_params = {"time": sys.argv[1]}
-    # task_params = {"trigger_time":int(time.time())}
-    taskqueue.add(task_name)
+# QUEUE_NAME = sys.argv[2]
+# taskqueue = SqsTaskQueue(QUEUE_NAME)
+# 
+# if __name__ == '__main__':
+#     task_name = sys.argv[1]
+#     # task_params = {"time": sys.argv[1]}
+#     # task_params = {"trigger_time":int(time.time())}
+#     taskqueue.add(task_name)
