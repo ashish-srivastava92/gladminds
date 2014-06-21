@@ -16,7 +16,7 @@ sudo crontab -l | (cat;echo "00 00 * * *  python /opt/app/gladminds/src/gladmind
 sudo crontab -l | (cat;echo "00 00 * * *  python /opt/app/gladminds/src/gladminds/trigger_sqs_tasks.py send_schedule_reminder gladminds-prod") | sudo crontab
 sudo crontab -l | (cat;echo "00 00 * * *  python /opt/app/gladminds/src/gladminds/trigger_sqs_tasks.py delete_unused_otp gladminds-prod") | sudo crontab
 
-
+#Remove All Below jobs after commit to Prod Server
 sudo crontab -l | (cat;echo "00 00 * * *  python /opt/app/gladminds/src/gladminds/scheduler.py expire_service_coupon gladminds-prod") | sudo  crontab
 sudo crontab -l | (cat;echo "00 00 * * *  python /opt/app/gladminds/src/gladminds/scheduler.py export_coupon_redeem_to_sap gladminds-prod") | sudo  crontab
 sudo crontab -l | (cat;echo "00 00 * * *  python /opt/app/gladminds/src/gladminds/scheduler.py  send_report_mail_for_feed gladminds-prod") | sudo crontab
