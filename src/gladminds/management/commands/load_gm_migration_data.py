@@ -48,4 +48,4 @@ class Command(BaseCommand):
                         subject=fields['subject'], body=fields['body'],\
                         description=fields['description'])
             temp_obj.save()
-        print "Loaded email template..."        
+        print "Loaded email template..."   
