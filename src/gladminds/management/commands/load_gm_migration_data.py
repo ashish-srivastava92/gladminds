@@ -14,7 +14,7 @@ class Command(BaseCommand):
         
     def add_group(self):
         print "Loading groups..."
-        file_path = os.path.join(settings.BASE_DIR, 'etc/data/group.json')
+        file_path = os.path.join(settings.PROJECT_DIR, 'template_data/group.json')
         groups = json.loads(open(file_path).read())
         Group.objects.all().delete()
         for group in groups:
@@ -26,7 +26,7 @@ class Command(BaseCommand):
     
     def add_sms_template(self):
         print "Loading sms template..."
-        file_path = os.path.join(settings.BASE_DIR, 'etc/data/template.json')
+        file_path = os.path.join(settings.PROJECT_DIR, 'template_data/template.json')
         message_templates = json.loads(open(file_path).read())
         common.MessageTemplate.objects.all().delete()
         for message_temp in message_templates:
@@ -38,7 +38,7 @@ class Command(BaseCommand):
     
     def add_email_template(self):
         print "Loading email template..."
-        file_path = os.path.join(settings.BASE_DIR, 'etc/data/email_template.json')
+        file_path = os.path.join(settings.PROJECT_DIR, 'template_data/email_template.json')
         email_templates = json.loads(open(file_path).read())
         common.EmailTemplate.objects.all().delete()
         for email_temp in email_templates:
