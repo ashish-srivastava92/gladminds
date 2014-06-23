@@ -1,7 +1,7 @@
 mysql -u gladminds -pgladminds123;
 
-drop database gladmindsdb1;
-create  database gladmindsdb1;
+drop database gladmindsdb;
+create  database gladmindsdb;
 
 kill -9 id
 
