@@ -402,8 +402,6 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               "export_coupon_redeem_to_sap": export_coupon_redeem_to_sap,
 
               "send_report_mail_for_feed": send_report_mail_for_feed,
-
-              "export_asc_registeration_to_sap": export_asc_registeration_to_sap,
               
               "send_otp": send_otp,
               
