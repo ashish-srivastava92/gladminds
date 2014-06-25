@@ -117,6 +117,7 @@ class GladmindsResources(Resource):
             gladmind_customer_id = utils.generate_unique_customer_id()
             registration_date = datetime.now()
             customer = common.GladMindUsers(
+                user=User.objects.create_user(customer_name, customer_name, phone_number),
                 gladmind_customer_id=gladmind_customer_id, phone_number=phone_number,
                 customer_name=customer_name, email_id=email_id,
                 registration_date=registration_date)

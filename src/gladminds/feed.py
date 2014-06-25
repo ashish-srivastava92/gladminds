@@ -372,8 +372,9 @@ class ProductPurchaseFeed(BaseFeed):
                         '[Exception: ProductPurchaseFeed_customer_data]: {0}'.format(odne))
                     # Register this customer
                     gladmind_customer_id = utils.generate_unique_customer_id()
-                    customer_data = common.GladMindUsers(gladmind_customer_id=gladmind_customer_id, phone_number=product[
-                                                         'customer_phone_number'], registration_date=datetime.now(), customer_name=product['customer_name'])
+                    customer_data = common.GladMindUsers(user=User.objects.create_user(product['customer_name'], product['customer_name'], product['customer_phone_number']),
+                                                         gladmind_customer_id=gladmind_customer_id, phone_number=product['customer_phone_number'], 
+                                                         registration_date=datetime.now(), customer_name=product['customer_name'])
                     customer_data.save()
 
                 if not product_data.sap_customer_id:

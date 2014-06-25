@@ -11,9 +11,7 @@ from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format, format_date_string, stringify_groups
 from gladminds.sqs_tasks import export_asc_registeration_to_sap
 from gladminds.utils import get_task_queue
-
-
-
+from gladminds.aftersell.models import common as aftersell_common
 from gladminds.mail import sent_otp_email
 from django.contrib.auth.models import Group, User
 from gladminds.utils import get_task_queue
@@ -74,7 +72,8 @@ def generate_otp(request):
             phone_number = request.POST['mobile']
             email = request.POST.get('email', '')
             logger.info('OTP request received. Mobile: {0}'.format(phone_number))
-            token = utils.get_token(phone_number, email=email)
+            user = aftersell_common.RegisteredASC.objects.filter(phone_number=mobile_format(phone_number))[0].user
+            token = utils.get_token(user, phone_number, email=email)
             message = message_template.get_template('SEND_OTP').format(token)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
@@ -101,7 +100,8 @@ def validate_otp(request):
             otp = request.POST['otp']
             phone_number = request.POST['phone']
             logger.info('OTP {0} recieved for validation. Mobile {1}'.format(otp, phone_number))
-            utils.validate_otp(otp, phone_number)
+            user = aftersell_common.RegisteredASC.objects.filter(phone_number=mobile_format(phone_number))[0].user
+            utils.validate_otp(user, otp, phone_number)
             logger.info('OTP validated for mobile number {0}'.format(phone_number))
             return render(request, 'portal/reset_pass.html', {'otp': otp})
         except:

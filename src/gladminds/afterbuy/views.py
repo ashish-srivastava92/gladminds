@@ -1,6 +1,6 @@
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.core.files import File
-from django.http.response import HttpResponse, HttpResponseBadRequest
+from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.contrib.auth import authenticate, login
 from gladminds.models import common
 from gladminds import utils
@@ -12,6 +12,11 @@ from django.contrib.auth.models import User
 from datetime import datetime
 from gladminds import mail
 from gladminds.afterbuy.auth import authentication_required
+from gladminds.utils import mobile_format
+from gladminds.sqs_tasks import send_otp
+from gladminds import message_template
+from gladminds.utils import get_task_queue
+from gladminds.mail import sent_otp_email
 from datetime import timedelta
 from provider.oauth2.models import Client
 import urllib
@@ -664,3 +669,41 @@ def get_access_token(request):
     oath_request = urllib2.Request(page, params)
     response = urllib2.urlopen(oath_request)
     return HttpResponse(response.read(), mimetype="application/json")
+
+def generate_otp(request):
+    if request.method == 'POST':
+        try:
+            phone_number = request.POST['mobile']
+            email = request.POST.get('email', '')
+            logger.info('OTP request received. Mobile: {0}'.format(phone_number))
+            user = common.GladMindUsers.objects.filter(phone_number=mobile_format(phone_number))[0].user
+            token = utils.get_token(user, phone_number, email=email)
+            message = message_template.get_template('SEND_OTP').format(token)
+            if settings.ENABLE_AMAZON_SQS:
+                task_queue = get_task_queue()
+                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
+            else:
+                send_otp.delay(phone_number=phone_number, message=message)
+            log_message = 'OTP sent to mobile {0}'.format(phone_number)
+            logger.info(log_message)
+            return HttpResponse(log_message)
+        except:
+            log_message = 'Invalid details, mobile {0}'.format(request.POST.get('mobile', ''))
+            logger.error(log_message)
+            return HttpResponse(log_message)
+
+def validate_otp(request):
+    if request.method == 'POST':
+        try:
+            otp = request.POST['otp']
+            phone_number = request.POST['mobile']
+            logger.info('OTP {0} recieved for validation. Mobile {1}'.format(otp, phone_number))
+            user = common.GladMindUsers.objects.filter(phone_number=mobile_format(phone_number))[0].user
+            utils.validate_otp(user, otp, phone_number)
+            log_message = 'OTP validated for mobile number {0}'.format(phone_number)
+            logger.info(log_message)
+            return HttpResponse(log_message)
+        except:
+            log_message = 'OTP validation failed for mobile number {0}'.format(phone_number)
+            logger.info(log_message)
+            return HttpResponse(log_message)
