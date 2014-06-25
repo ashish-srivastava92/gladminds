@@ -51,27 +51,29 @@ TEMPLATE_DIRS = (
 
 
 ######################################################
-#ADDED AWS SETTINGS TO TEST CAPSYSTEM ON DEV ENV
+#ADDED SETTINGS TO TEST CAPSYSTEM ON DEV ENV
 ###########################################################
-ENABLE_AMAZON_SQS = True
+ENABLE_AMAZON_SQS = False
 
-#S3 Configuration
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_ACCESS_KEY_ID = 'AKIAIL7IDCSTNCG2R6JA'
-AWS_SECRET_ACCESS_KEY = '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'
-AWS_STORAGE_BUCKET_NAME = 'afterbuy'
-
-SMS_CLIENT = "KAPSYSTEM"
+SMS_CLIENT = "AIRTEL"
+  
+# SMS_CLIENT_DETAIL = {
+#                      'OTP_TWILIO_ACCOUNT' : 'ACbb8cb45f6113b8f2f6243c8eaa5ff971',
+#                      'OTP_TWILIO_AUTH' : 'aa445a4f0a7e651738e89810601f8860',
+#                      'OTP_TWILIO_FROM' : '+1 469-513-9856',
+#                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/Messages.json'
+#                 }
 
 
 SMS_CLIENT_DETAIL={
-                   'login':'GladMinds1',
-                   'pass':'kap@user!23',
-                   'authenticate_url':'http://trans.kapsystem.com/credits.php' ,
-                   'message_url': 'http://trans.kapsystem.com/web2sms.php'                  
-                   }
+                    'login':'bajajauto',
+                    'pass':'bajaj',
+                    'authenticate_url':'http://117.99.128.32:80/login/pushsms.php' ,
+                    'message_url': 'http://117.99.128.32:80/login/pushsms.php'   
+                    }
 
-SQS_QUEUE_NAME = "gladminds-qa"
+########################SQS Queue Name
+SQS_QUEUE_NAME = "gladminds-dev"
 ######################################
 
 FEED_TYPE = 'CSV'
