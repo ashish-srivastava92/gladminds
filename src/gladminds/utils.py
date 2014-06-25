@@ -211,3 +211,16 @@ def format_date_string(date_string, date_format='%d/%m/%Y'):
     '''
     date = datetime.strptime(date_string, date_format)
     return date
+
+import datetime
+from dateutil import tz
+
+def get_dict_from_object(object):
+    temp_dict = {}
+    for key in object:
+        if isinstance(object[key], datetime.datetime):
+            temp_dict[key] = object[key].astimezone(tz.tzutc()).strftime('%Y-%m-%dT%H:%M:%SZ')
+        else:
+            temp_dict[key] = object[key]
+    return temp_dict
+
