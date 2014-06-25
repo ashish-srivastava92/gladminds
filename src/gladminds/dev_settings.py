@@ -49,12 +49,6 @@ TEMPLATE_DIRS = (
     TEMPLATE_DIR,
 )
 
-
-######################################################
-#ADDED SETTINGS TO TEST CAPSYSTEM ON DEV ENV
-###########################################################
-ENABLE_AMAZON_SQS = False
-
 SMS_CLIENT = "AIRTEL"
   
 # SMS_CLIENT_DETAIL = {
