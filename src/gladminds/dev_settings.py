@@ -49,8 +49,14 @@ TEMPLATE_DIRS = (
     TEMPLATE_DIR,
 )
 
-SMS_CLIENT = "AIRTEL"
 
+######################################################
+#ADDED SETTINGS TO TEST CAPSYSTEM ON DEV ENV
+###########################################################
+ENABLE_AMAZON_SQS = False
+
+SMS_CLIENT = "AIRTEL"
+  
 # SMS_CLIENT_DETAIL = {
 #                      'OTP_TWILIO_ACCOUNT' : 'ACbb8cb45f6113b8f2f6243c8eaa5ff971',
 #                      'OTP_TWILIO_AUTH' : 'aa445a4f0a7e651738e89810601f8860',
@@ -58,12 +64,13 @@ SMS_CLIENT = "AIRTEL"
 #                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/Messages.json'
 #                 }
 
+
 SMS_CLIENT_DETAIL={
-                   'login':'bajajauto',
-                   'pass':'bajaj',
-                   'authenticate_url':'http://117.99.128.32:80/login/pushsms.php' ,
-                   'message_url': 'http://117.99.128.32:80/login/pushsms.php'                  
-                   }
+                    'login':'bajajauto',
+                    'pass':'bajaj',
+                    'authenticate_url':'http://117.99.128.32:80/login/pushsms.php' ,
+                    'message_url': 'http://117.99.128.32:80/login/pushsms.php'   
+                    }
 
 ########################SQS Queue Name
 SQS_QUEUE_NAME = "gladminds-dev"
