@@ -19,7 +19,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gladmindsdb',
         'USER': 'gladminds',
-        'PASSWORD': 'gladminds123',
+        'PASSWORD': 'GmqaHash123',
         'HOST': 'gladminds-qa.chnnvvffqwop.us-east-1.rds.amazonaws.com',
         'PORT': '3306',
     }
@@ -111,6 +111,8 @@ AFTER_BUY_CONSTANTS = {
 ########################SQS Queue Name
 SQS_QUEUE_NAME = "gladminds-qa"
 ######################################
+FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail QA"
+UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail QA"
 ###################Change Mail Subject on QA##########################
 MAIL_DETAIL["subject"]= "GladMinds Feed Report QA"
 MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com", 'sourabh.gupta@hashedin.com']
