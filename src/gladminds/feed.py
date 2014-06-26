@@ -144,6 +144,7 @@ class BaseFeed(object):
                     username=username, first_name=first_name, last_name=last_name, email=email)
                 password = username + settings.PASSWORD_POSTFIX
                 new_user.set_password(password)
+                new_user.save()
             new_user.groups.add(user_group)
             new_user.save()
             logger.info(user + ' {0} registered successfully'.format(username))
