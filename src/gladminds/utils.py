@@ -219,7 +219,7 @@ def get_dict_from_object(object):
     temp_dict = {}
     for key in object:
         if isinstance(object[key], datetime.datetime):
-            temp_dict[key] = object[key].astimezone(tz.tzutc()).strftime('%Y-%m-%dT%H:%M:%SZ')
+            temp_dict[key] = object[key].astimezone(tz.tzutc()).strftime('%Y-%m-%dT%H:%M:%S')
         else:
             temp_dict[key] = object[key]
     return temp_dict

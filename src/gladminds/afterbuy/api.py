@@ -1,21 +1,20 @@
 from gladminds.models import common
+from gladminds import utils
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import HttpResponse
-from gladminds import utils
+from tastypie.http import HttpBadRequest
 
 import json
 import logging
-from tastypie.http import HttpBadRequest
 
 logger = logging.getLogger("gladminds")
-
 
 @csrf_exempt
 def fnc_get_product_coupons(request):
     resp = {}
-    vin = request.POST.get('vin', None)
+    vin = request.POST.get('vin')
     if not vin:
-        vin = "TestChasis_23_3";
+        return HttpBadRequest("Vin is required.")
     try:
         product_object = common.ProductData.objects.filter(vin = vin)[0]
         product_id = product_object.id
@@ -28,9 +27,9 @@ def fnc_get_product_coupons(request):
 @csrf_exempt
 def fnc_get_product_purchase_information(request):
     resp = {}
-    product_type_id = request.POST.get("product_type_id", None)
+    product_type_id = request.POST.get("product_type_id")
     if not product_type_id:
-        product_type_id = "991735";
+        return HttpBadRequest("product_type_id is required.")
     try:
         product_info = common.ProductTypeData.objects.filter(product_type_id = product_type_id).values()[0]
         if not product_info:
@@ -45,9 +44,9 @@ def fnc_get_product_purchase_information(request):
 @csrf_exempt
 def fnc_get_product_information(request):
     resp = {}
-    vin = request.POST.get('vin', None)
+    vin = request.POST.get('vin')
     if not vin:
-        vin = "TestChasis_23_3";
+        return HttpBadRequest("Vin is required.")
     try:
         product_info = common.ProductData.objects.filter(vin=vin).values()[0]
         if not product_info:
