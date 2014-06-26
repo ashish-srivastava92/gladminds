@@ -18,7 +18,7 @@ from gladminds.audit import feed_log
 from gladminds.utils import get_task_queue
 
 logger = logging.getLogger("gladminds")
-USER_GROUP = {'dealer': 'dealers', 'ASC': 'ascs', 'SA': 'sas', 'customer': 'customer'}
+USER_GROUP = {'dealer': 'dealers', 'ASC': 'ascs', 'SA':'sas', 'customer':"customer"}
 
 def load_feed():
     FEED_TYPE = settings.FEED_TYPE
@@ -124,35 +124,33 @@ class BaseFeed(object):
     def registerNewUser(self, user, group=None, username=None, first_name='', last_name='',
                           email=''):
         logger.info('New {0} Registration with id - {1}'.format(user, username))
-        if not group:
-            group = USER_GROUP[user]
-        try:
-            user_group = Group.objects.get(name=group)
-        except ObjectDoesNotExist as ex:
-            logger.info(
-                "[Exception: new_ registration]: {0}"
-                .format(ex))
-            user_group = Group.objects.create(name=group)
-            user_group.save()
-                
         if username:
             try:
-                new_user = User.objects.get(username=username, groups=user_group)
-                logger.info(
-                    "[new_ registration]: User already exists")
-                return new_user
+                new_user = User.objects.get(username=username)
             except ObjectDoesNotExist as ex:
+                logger.info(
+                    "[Exception: new_ registration]: {0}"
+                    .format(ex))    
                 new_user = User(
                     username=username, first_name=first_name, last_name=last_name, email=email)
                 password = username + settings.PASSWORD_POSTFIX
                 new_user.set_password(password)
                 new_user.save()
-            new_user.groups.add(user_group)
-            logger.info(user + ' {0} registered new user successfully'.format(username))
+            
+                try:
+                    user_group = Group.objects.get(name=group)
+                except ObjectDoesNotExist as ex:
+                    logger.info(
+                        "[Exception: new_ registration]: {0}"
+                        .format(ex))
+                    user_group = Group.objects.create(name=group)
+                    user_group.save()
+                new_user.groups.add(user_group)
+                logger.info(user + ' {0} registered successfully'.format(username))
             return new_user
         else:
             logger.info('{0} id is not provided.'.format(user))
-            raise Exception('{0} id is not provided.'.format(user))
+            raise Exception('{0} id is not provided.'.format(user))    
 
 
 class BrandProductTypeFeed(BaseFeed):
@@ -526,8 +524,7 @@ class ASCFeed(BaseFeed):
                 asc_data.user = user_obj
                 asc_data.save()
             except Exception as ex:
-                logger.error(
-                "[Exception: ASCFeed_dealer_data]: {0}"
-                .format(ex))
+                ex = "[Exception: ASCFeed_dealer_data]: {0}".format(ex)
+                logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         return self.feed_remark
