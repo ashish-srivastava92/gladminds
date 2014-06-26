@@ -516,8 +516,7 @@ class ASCFeed(BaseFeed):
                 asc_data.user = user_obj
                 asc_data.save()
             except Exception as ex:
-                logger.error(
-                "[Exception: ASCFeed_dealer_data]: {0}"
-                .format(ex))
+                ex = "[Exception: ASCFeed_dealer_data]: {0}".format(ex)
+                logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         return self.feed_remark
