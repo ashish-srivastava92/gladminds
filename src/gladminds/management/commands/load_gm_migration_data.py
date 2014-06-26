@@ -4,13 +4,18 @@ import os
 from django.conf import settings
 import json
 from gladminds.models import common
+from gladminds import feed
+
+BASIC_FEED = feed.BaseFeed()
 
 class Command(BaseCommand):
     
     def handle(self, *args, **options):
-        self.add_group()
-        self.add_sms_template()
-        self.add_email_template()
+#        self.add_group()
+#        self.add_sms_template()
+#        self.add_email_template()
+        self.add_user_for_existing_dealer()
+#        self.add_user_in_gladminds_table()
         
     def add_group(self):
         print "Loading groups..."
@@ -49,3 +54,19 @@ class Command(BaseCommand):
                         description=fields['description'])
             temp_obj.save()
         print "Loaded email template..."   
+        
+    def add_user_for_existing_dealer(self):
+        print "Loading users for existing dealer...."
+        all_dealers = common.RegisteredDealer.objects.all()
+        for dealer in all_dealers:
+            BASIC_FEED.registerNewUser('dealer', username=dealer.dealer_id)
+        print "Loaded users for existing dealer...."
+        
+    def add_user_in_gladminds_table(self):
+        print "Adding users in ...."
+        all_gladminds_users = common.GladMindUsers.objects.all()
+        for gladminds_user in all_gladminds_users:
+            user = BASIC_FEED.registerNewUser('customer', username=gladminds_user.gladmind_customer_id)
+            gladminds_user.user = user
+            gladminds_user.save()
+        print "Loading users for existing dealer...."

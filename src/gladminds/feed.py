@@ -17,7 +17,7 @@ from django.db.models import signals
 from gladminds.utils import get_task_queue
 
 logger = logging.getLogger("gladminds")
-USER_GROUP = {'dealer': 'dealers', 'ASC': 'ascs'}
+USER_GROUP = {'dealer': 'dealers', 'ASC': 'ascs', 'SA':'sas', 'customer':"customer"}
 
 def load_feed():
     FEED_TYPE = settings.FEED_TYPE
@@ -126,25 +126,32 @@ class BaseFeed(object):
         if not group:
             group = USER_GROUP[user]
         if username:
-            new_user = User(
-                username=username, first_name=first_name, last_name=last_name, email=email)
-            password = username + settings.PASSWORD_POSTFIX
-            new_user.set_password(password)
-            new_user.save()
             try:
-                user_group = Group.objects.get(name=group)
+                new_user = User.objects.get(username=username)
             except ObjectDoesNotExist as ex:
                 logger.info(
                     "[Exception: new_ registration]: {0}"
-                    .format(ex))
-                user_group = Group.objects.create(name=group)
-                user_group.save()
-            new_user.groups.add(user_group)
-            logger.info(user + ' {0} registered successfully'.format(username))
+                    .format(ex))    
+                new_user = User(
+                    username=username, first_name=first_name, last_name=last_name, email=email)
+                password = username + settings.PASSWORD_POSTFIX
+                new_user.set_password(password)
+                new_user.save()
+            
+                try:
+                    user_group = Group.objects.get(name=group)
+                except ObjectDoesNotExist as ex:
+                    logger.info(
+                        "[Exception: new_ registration]: {0}"
+                        .format(ex))
+                    user_group = Group.objects.create(name=group)
+                    user_group.save()
+                new_user.groups.add(user_group)
+                logger.info(user + ' {0} registered successfully'.format(username))
             return new_user
         else:
             logger.info('{0} id is not provided.'.format(user))
-            raise Exception('{0} id is not provided.'.format(user))
+            raise Exception('{0} id is not provided.'.format(user))    
 
 
 class BrandProductTypeFeed(BaseFeed):
