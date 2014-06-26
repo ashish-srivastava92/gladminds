@@ -5,6 +5,7 @@ from django.db import models, transaction
 from django.forms.models import model_to_dict
 from gladminds import smsparser, utils, audit, message_template as templates
 from gladminds.models import common
+from gladminds.feed import BaseFeed
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
@@ -116,8 +117,9 @@ class GladmindsResources(Resource):
         except ObjectDoesNotExist as odne:
             gladmind_customer_id = utils.generate_unique_customer_id()
             registration_date = datetime.now()
+            user = BaseFeed.registerNewUser('customer', username=gladmind_customer_id)
             customer = common.GladMindUsers(
-                gladmind_customer_id=gladmind_customer_id, phone_number=phone_number,
+                user=user, gladmind_customer_id=gladmind_customer_id, phone_number=phone_number,
                 customer_name=customer_name, email_id=email_id,
                 registration_date=registration_date)
             customer.save()
