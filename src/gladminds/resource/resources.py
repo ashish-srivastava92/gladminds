@@ -1,31 +1,33 @@
+import logging
 from datetime import datetime, timedelta
+from authentication import AccessTokenAuthentication
+
 from django.conf.urls import url
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, transaction
 from django.forms.models import model_to_dict
-from gladminds import smsparser, utils, audit, message_template as templates
-from gladminds.models import common
-from gladminds.aftersell.models import common as aftersell_common
-from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
-    send_coupon_detail_customer, send_coupon, \
-    send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
+from django.http.response import HttpResponse, HttpResponseBadRequest
+from django.contrib.auth.models import User
+from django.utils import timezone
+from django.conf import settings
+from django.db.models import Q
+
 from tastypie import fields
 from tastypie.http import HttpBadRequest, HttpUnauthorized
 from tastypie.resources import Resource, ModelResource
 from tastypie.utils.urls import trailing_slash
 from tastypie import http
 from tastypie.exceptions import ImmediateHttpResponse
-from django.db.models import Q
-import logging
-from gladminds.utils import mobile_format, format_message
-from django.utils import timezone
-from django.conf import settings
-from gladminds.utils import get_task_queue
-from gladminds.settings import COUPON_VALID_DAYS
-from django.http.response import HttpResponse, HttpResponseBadRequest
-from django.contrib.auth.models import User
-from authentication import AccessTokenAuthentication
 
+from gladminds import smsparser, utils, audit, message_template as templates
+from gladminds.models import common
+from gladminds.aftersell.models import common as aftersell_common
+from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
+    send_coupon_detail_customer, send_coupon, \
+    send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
+from gladminds.utils import mobile_format, format_message, get_task_queue
+from gladminds.feed import BaseFeed
+from gladminds.settings import COUPON_VALID_DAYS
 
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -116,9 +118,9 @@ class GladmindsResources(Resource):
         except ObjectDoesNotExist as odne:
             gladmind_customer_id = utils.generate_unique_customer_id()
             registration_date = datetime.now()
+            user = BaseFeed.registerNewUser('customer', username=gladmind_customer_id)
             customer = common.GladMindUsers(
-                user=User.objects.create_user(customer_name, customer_name, phone_number),
-                gladmind_customer_id=gladmind_customer_id, phone_number=phone_number,
+                user=user, gladmind_customer_id=gladmind_customer_id, phone_number=phone_number,
                 customer_name=customer_name, email_id=email_id,
                 registration_date=registration_date)
             customer.save()
