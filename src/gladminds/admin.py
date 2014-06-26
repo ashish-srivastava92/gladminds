@@ -12,6 +12,8 @@ from django.forms import ModelForm, TextInput
 from django.contrib.admin import ModelAdmin
 from django.contrib.admin import DateFieldListFilter
 from django.contrib.admin import ModelAdmin, SimpleListFilter
+from django.db import connections
+from django.db import models
 from models.common import GladMindUsers, ProductTypeData, \
     BrandData, ProductData, CouponData, MessageTemplate,\
     UploadProductCSV

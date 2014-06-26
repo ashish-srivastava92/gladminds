@@ -125,6 +125,14 @@ class BaseFeed(object):
         logger.info('New {0} Registration with id - {1}'.format(user, username))
         if not group:
             group = USER_GROUP[user]
+        try:
+            user_group = Group.objects.get(name=group)
+        except ObjectDoesNotExist as ex:
+            logger.info(
+                "[Exception: new_ registration]: {0}"
+                .format(ex))
+            user_group = Group.objects.create(name=group)
+            user_group.save()
         if username:
             try:
                 new_user = User.objects.get(username=username)
@@ -136,18 +144,9 @@ class BaseFeed(object):
                     username=username, first_name=first_name, last_name=last_name, email=email)
                 password = username + settings.PASSWORD_POSTFIX
                 new_user.set_password(password)
-                new_user.save()
-            
-                try:
-                    user_group = Group.objects.get(name=group)
-                except ObjectDoesNotExist as ex:
-                    logger.info(
-                        "[Exception: new_ registration]: {0}"
-                        .format(ex))
-                    user_group = Group.objects.create(name=group)
-                    user_group.save()
-                new_user.groups.add(user_group)
-                logger.info(user + ' {0} registered successfully'.format(username))
+            new_user.groups.add(user_group)
+            new_user.save()
+            logger.info(user + ' {0} registered successfully'.format(username))
             return new_user
         else:
             logger.info('{0} id is not provided.'.format(user))
