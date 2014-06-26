@@ -210,6 +210,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                         service_advisor = aftersell_common.ServiceAdvisor(service_advisor_id=dealer['service_advisor_id'], 
                                                             name=dealer['name'], phone_number=dealer['phone_number'])
                         service_advisor.save()
+                        self.registerNewUser('SA', username=dealer['service_advisor_id'])
                 elif dealer['status']=='N':
                     service_advisor = service_advisor[0]
                 else:
@@ -379,7 +380,8 @@ class ProductPurchaseFeed(BaseFeed):
                         '[Exception: ProductPurchaseFeed_customer_data]: {0}'.format(odne))
                     # Register this customer
                     gladmind_customer_id = utils.generate_unique_customer_id()
-                    customer_data = common.GladMindUsers(gladmind_customer_id=gladmind_customer_id, phone_number=product[
+                    user=self.registerNewUser('customer', username=gladmind_customer_id)
+                    customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, phone_number=product[
                                                          'customer_phone_number'], registration_date=datetime.now(), customer_name=product['customer_name'])
                     customer_data.save()
 
