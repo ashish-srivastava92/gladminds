@@ -1,23 +1,24 @@
 import csv
+import logging
+import os
+import time
 from datetime import datetime, timedelta
+
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User, Group
-import logging
-import os
-import time
+from django.db.models import signals
 
 from gladminds import audit, message_template as templates
 from gladminds import utils
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.audit import feed_log
-from django.db.models import signals
 from gladminds.utils import get_task_queue
 
 logger = logging.getLogger("gladminds")
-USER_GROUP = {'dealer': 'dealers', 'ASC': 'ascs'}
+USER_GROUP = {'dealer': 'dealers', 'ASC': 'ascs', 'SA': 'sas', 'customer': 'customer'}
 
 def load_feed():
     FEED_TYPE = settings.FEED_TYPE
@@ -125,22 +126,29 @@ class BaseFeed(object):
         logger.info('New {0} Registration with id - {1}'.format(user, username))
         if not group:
             group = USER_GROUP[user]
+        try:
+            user_group = Group.objects.get(name=group)
+        except ObjectDoesNotExist as ex:
+            logger.info(
+                "[Exception: new_ registration]: {0}"
+                .format(ex))
+            user_group = Group.objects.create(name=group)
+            user_group.save()
+                
         if username:
-            new_user = User(
-                username=username, first_name=first_name, last_name=last_name, email=email)
-            password = username + settings.PASSWORD_POSTFIX
-            new_user.set_password(password)
-            new_user.save()
             try:
-                user_group = Group.objects.get(name=group)
-            except ObjectDoesNotExist as ex:
+                new_user = User.objects.get(username=username, groups=user_group)
                 logger.info(
-                    "[Exception: new_ registration]: {0}"
-                    .format(ex))
-                user_group = Group.objects.create(name=group)
-                user_group.save()
+                    "[new_ registration]: User already exists")
+                return new_user
+            except ObjectDoesNotExist as ex:
+                new_user = User(
+                    username=username, first_name=first_name, last_name=last_name, email=email)
+                password = username + settings.PASSWORD_POSTFIX
+                new_user.set_password(password)
+                new_user.save()
             new_user.groups.add(user_group)
-            logger.info(user + ' {0} registered successfully'.format(username))
+            logger.info(user + ' {0} registered new user successfully'.format(username))
             return new_user
         else:
             logger.info('{0} id is not provided.'.format(user))
@@ -202,6 +210,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                     else:
                         service_advisor = aftersell_common.ServiceAdvisor(service_advisor_id=dealer['service_advisor_id'], 
                                                             name=dealer['name'], phone_number=dealer['phone_number'])
+                        self.registerNewUser('SA', username=dealer['service_advisor_id'])
                         service_advisor.save()
                 elif dealer['status']=='N':
                     service_advisor = service_advisor[0]
@@ -372,8 +381,9 @@ class ProductPurchaseFeed(BaseFeed):
                         '[Exception: ProductPurchaseFeed_customer_data]: {0}'.format(odne))
                     # Register this customer
                     gladmind_customer_id = utils.generate_unique_customer_id()
-                    customer_data = common.GladMindUsers(gladmind_customer_id=gladmind_customer_id, phone_number=product[
-                                                         'customer_phone_number'], registration_date=datetime.now(), customer_name=product['customer_name'])
+                    user=self.registerNewUser('customer', username=gladmind_customer_id)
+                    customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, phone_number=product['customer_phone_number'], 
+                                                         registration_date=datetime.now(), customer_name=product['customer_name'])
                     customer_data.save()
 
                 if not product_data.sap_customer_id:
