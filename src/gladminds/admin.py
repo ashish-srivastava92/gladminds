@@ -25,7 +25,6 @@ from import_export import fields, widgets
 from import_export import resources
 from gladminds.models.common import EmailTemplate
 from gladminds.aftersell.models.common import ASCSaveForm
-from django.contrib.admin.models import LogEntry
 
 
 ############################BRAND AND PRODUCT ADMIN##########################
@@ -468,7 +467,7 @@ class ASCSaveFormAdmin(ModelAdmin):
             return {'class': css_class}
 ##############################################################
 
-admin.site.register(LogEntry)
+
 admin.site.register(BrandData, BrandAdmin)
 admin.site.register(DispatchedProduct, ListDispatchedProduct)
 admin.site.register(ServiceAdvisor, ServiceAdvisorAdmin)

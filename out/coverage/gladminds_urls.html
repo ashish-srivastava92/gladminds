@@ -136,11 +136,10 @@
 <p id='n73' class='pln'><a href='#n73'>73</a></p>
 <p id='n74' class='pln'><a href='#n74'>74</a></p>
 <p id='n75' class='pln'><a href='#n75'>75</a></p>
-<p id='n76' class='pln'><a href='#n76'>76</a></p>
-<p id='n77' class='stm run hide_run'><a href='#n77'>77</a></p>
-<p id='n78' class='stm mis'><a href='#n78'>78</a></p>
+<p id='n76' class='stm run hide_run'><a href='#n76'>76</a></p>
+<p id='n77' class='stm mis'><a href='#n77'>77</a></p>
+<p id='n78' class='pln'><a href='#n78'>78</a></p>
 <p id='n79' class='pln'><a href='#n79'>79</a></p>
-<p id='n80' class='pln'><a href='#n80'>80</a></p>
                 
             </td>
             <td class='text' valign='top'>
@@ -202,28 +201,27 @@
 <p id='t56' class='pln'>&nbsp; &nbsp; <span class='nam'>url</span><span class='op'>(</span><span class='str'>r&#39;^app&#39;</span><span class='op'>,</span> <span class='str'>&#39;afterbuy.views.home&#39;</span><span class='op'>,</span> <span class='nam'>name</span><span class='op'>=</span><span class='str'>&#39;home&#39;</span><span class='op'>)</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
 <p id='t57' class='pln'>&nbsp; &nbsp; <span class='nam'>url</span><span class='op'>(</span><span class='str'>r&#39;^afterbuy&#39;</span><span class='op'>,</span> <span class='str'>&#39;afterbuy.views.main&#39;</span><span class='op'>,</span> <span class='nam'>name</span><span class='op'>=</span><span class='str'>&#39;main&#39;</span><span class='op'>)</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
 <p id='t58' class='pln'>&nbsp; &nbsp; <span class='nam'>url</span><span class='op'>(</span><span class='str'>r&#39;^v1/api/users/auth&#39;</span><span class='op'>,</span> <span class='str'>&#39;afterbuy.views.get_access_token&#39;</span><span class='op'>)</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
-<p id='t59' class='pln'>&nbsp; &nbsp; <span class='nam'>url</span><span class='op'>(</span><span class='str'>r&#39;^tasks-view&#39;</span><span class='op'>,</span> <span class='str'>&#39;views.sqs_tasks_view&#39;</span><span class='op'>)</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
-<p id='t60' class='pln'>&nbsp; &nbsp; <span class='nam'>url</span><span class='op'>(</span><span class='str'>r&#39;^trigger-tasks&#39;</span><span class='op'>,</span> <span class='str'>&#39;views.trigger_sqs_tasks&#39;</span><span class='op'>)</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
-<p id='t61' class='pln'>&nbsp; &nbsp; <span class='nam'>url</span><span class='op'>(</span><span class='str'>r&#39;^tasks/&#39;</span><span class='op'>,</span> <span class='nam'>SqsHandler</span><span class='op'>.</span><span class='nam'>as_view</span><span class='op'>(</span><span class='nam'>task_map</span><span class='op'>=</span><span class='nam'>_tasks_map</span><span class='op'>)</span><span class='op'>)</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
+<p id='t59' class='pln'><span class='strut'>&nbsp;</span></p>
+<p id='t60' class='pln'>&nbsp; &nbsp; <span class='nam'>url</span><span class='op'>(</span><span class='str'>r&#39;^tasks/&#39;</span><span class='op'>,</span> <span class='nam'>SqsHandler</span><span class='op'>.</span><span class='nam'>as_view</span><span class='op'>(</span><span class='nam'>task_map</span><span class='op'>=</span><span class='nam'>_tasks_map</span><span class='op'>)</span><span class='op'>)</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
+<p id='t61' class='pln'><span class='strut'>&nbsp;</span></p>
 <p id='t62' class='pln'><span class='strut'>&nbsp;</span></p>
-<p id='t63' class='pln'><span class='strut'>&nbsp;</span></p>
-<p id='t64' class='pln'><span class='com'>#&nbsp; &nbsp;&nbsp; url(r&#39;^app/create-account&#39;, &#39;afterbuy.views.create_account&#39;, name=&#39;create_account&#39;),</span><span class='strut'>&nbsp;</span></p>
-<p id='t65' class='pln'><span class='com'>#&nbsp; &nbsp;&nbsp; url(r&#39;^app/login&#39;, &#39;afterbuy.views.my_login&#39;, name=&#39;my_login&#39;),</span><span class='strut'>&nbsp;</span></p>
-<p id='t66' class='pln'><span class='com'>#&nbsp; &nbsp;&nbsp; url(r&#39;^app/getData&#39;, &#39;afterbuy.views.get_data&#39;, name=&#39;get_data&#39;),</span><span class='strut'>&nbsp;</span></p>
-<p id='t67' class='pln'>&nbsp; &nbsp; <span class='com'># url(r&#39;^$&#39;, &#39;gladminds.views.home&#39;, name=&#39;home&#39;),</span><span class='strut'>&nbsp;</span></p>
-<p id='t68' class='pln'>&nbsp; &nbsp; <span class='com'># url(r&#39;^gladminds/&#39;, include(&#39;gladminds.foo.urls&#39;)),</span><span class='strut'>&nbsp;</span></p>
-<p id='t69' class='pln'><span class='strut'>&nbsp;</span></p>
-<p id='t70' class='pln'>&nbsp; &nbsp; <span class='com'># url(r&#39;^admin/doc/&#39;, include(&#39;django.contrib.admindocs.urls&#39;)),</span><span class='strut'>&nbsp;</span></p>
-<p id='t71' class='pln'>&nbsp; &nbsp; <span class='nam'>url</span><span class='op'>(</span><span class='str'>r&#39;^sms/&#39;</span><span class='op'>,</span><span class='str'>&#39;superadmin.views.send_sms&#39;</span><span class='op'>,</span> <span class='nam'>name</span><span class='op'>=</span><span class='str'>&#39;send_sms&#39;</span><span class='op'>)</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
-<p id='t72' class='pln'>&nbsp; &nbsp; <span class='com'># url(r&#39;^admin/doc/&#39;, include(&#39;django.contrib.admindocs.urls&#39;)),</span><span class='strut'>&nbsp;</span></p>
-<p id='t73' class='pln'>&nbsp; &nbsp; <span class='nam'>url</span><span class='op'>(</span><span class='str'>r&#39;^&#39;</span><span class='op'>,</span> <span class='nam'>include</span><span class='op'>(</span><span class='nam'>admin</span><span class='op'>.</span><span class='nam'>site</span><span class='op'>.</span><span class='nam'>urls</span><span class='op'>)</span><span class='op'>)</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
-<p id='t74' class='pln'><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t63' class='pln'><span class='com'>#&nbsp; &nbsp;&nbsp; url(r&#39;^app/create-account&#39;, &#39;afterbuy.views.create_account&#39;, name=&#39;create_account&#39;),</span><span class='strut'>&nbsp;</span></p>
+<p id='t64' class='pln'><span class='com'>#&nbsp; &nbsp;&nbsp; url(r&#39;^app/login&#39;, &#39;afterbuy.views.my_login&#39;, name=&#39;my_login&#39;),</span><span class='strut'>&nbsp;</span></p>
+<p id='t65' class='pln'><span class='com'>#&nbsp; &nbsp;&nbsp; url(r&#39;^app/getData&#39;, &#39;afterbuy.views.get_data&#39;, name=&#39;get_data&#39;),</span><span class='strut'>&nbsp;</span></p>
+<p id='t66' class='pln'>&nbsp; &nbsp; <span class='com'># url(r&#39;^$&#39;, &#39;gladminds.views.home&#39;, name=&#39;home&#39;),</span><span class='strut'>&nbsp;</span></p>
+<p id='t67' class='pln'>&nbsp; &nbsp; <span class='com'># url(r&#39;^gladminds/&#39;, include(&#39;gladminds.foo.urls&#39;)),</span><span class='strut'>&nbsp;</span></p>
+<p id='t68' class='pln'><span class='strut'>&nbsp;</span></p>
+<p id='t69' class='pln'>&nbsp; &nbsp; <span class='com'># url(r&#39;^admin/doc/&#39;, include(&#39;django.contrib.admindocs.urls&#39;)),</span><span class='strut'>&nbsp;</span></p>
+<p id='t70' class='pln'>&nbsp; &nbsp; <span class='nam'>url</span><span class='op'>(</span><span class='str'>r&#39;^sms/&#39;</span><span class='op'>,</span><span class='str'>&#39;superadmin.views.send_sms&#39;</span><span class='op'>,</span> <span class='nam'>name</span><span class='op'>=</span><span class='str'>&#39;send_sms&#39;</span><span class='op'>)</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
+<p id='t71' class='pln'>&nbsp; &nbsp; <span class='com'># url(r&#39;^admin/doc/&#39;, include(&#39;django.contrib.admindocs.urls&#39;)),</span><span class='strut'>&nbsp;</span></p>
+<p id='t72' class='pln'>&nbsp; &nbsp; <span class='nam'>url</span><span class='op'>(</span><span class='str'>r&#39;^&#39;</span><span class='op'>,</span> <span class='nam'>include</span><span class='op'>(</span><span class='nam'>admin</span><span class='op'>.</span><span class='nam'>site</span><span class='op'>.</span><span class='nam'>urls</span><span class='op'>)</span><span class='op'>)</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
+<p id='t73' class='pln'><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t74' class='pln'><span class='strut'>&nbsp;</span></p>
 <p id='t75' class='pln'><span class='strut'>&nbsp;</span></p>
-<p id='t76' class='pln'><span class='strut'>&nbsp;</span></p>
-<p id='t77' class='stm run hide_run'><span class='key'>if</span> <span class='nam'>settings</span><span class='op'>.</span><span class='nam'>DEBUG</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t78' class='stm mis'>&nbsp; &nbsp; <span class='nam'>urlpatterns</span> <span class='op'>+=</span> <span class='nam'>patterns</span><span class='op'>(</span><span class='str'>&#39;&#39;</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
-<p id='t79' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='op'>(</span><span class='str'>r&#39;^media/(?P&lt;path&gt;.*)$&#39;</span><span class='op'>,</span> <span class='str'>&#39;django.views.static.serve&#39;</span><span class='op'>,</span> <span class='op'>{</span><span class='strut'>&nbsp;</span></p>
-<p id='t80' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='str'>&#39;document_root&#39;</span><span class='op'>:</span> <span class='nam'>settings</span><span class='op'>.</span><span class='nam'>MEDIA_ROOT</span><span class='op'>}</span><span class='op'>)</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t76' class='stm run hide_run'><span class='key'>if</span> <span class='nam'>settings</span><span class='op'>.</span><span class='nam'>DEBUG</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
+<p id='t77' class='stm mis'>&nbsp; &nbsp; <span class='nam'>urlpatterns</span> <span class='op'>+=</span> <span class='nam'>patterns</span><span class='op'>(</span><span class='str'>&#39;&#39;</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
+<p id='t78' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='op'>(</span><span class='str'>r&#39;^media/(?P&lt;path&gt;.*)$&#39;</span><span class='op'>,</span> <span class='str'>&#39;django.views.static.serve&#39;</span><span class='op'>,</span> <span class='op'>{</span><span class='strut'>&nbsp;</span></p>
+<p id='t79' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='str'>&#39;document_root&#39;</span><span class='op'>:</span> <span class='nam'>settings</span><span class='op'>.</span><span class='nam'>MEDIA_ROOT</span><span class='op'>}</span><span class='op'>)</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
                 
             </td>
         </tr>

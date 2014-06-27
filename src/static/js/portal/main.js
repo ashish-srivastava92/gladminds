@@ -1,12 +1,7 @@
-"use strict"
 (function() {
 
     $('input.advisor-action').click(function() {
-        var actionSet = $(this).parents('.advisor-action-item'), 
-            postAction = $(this).val(), 
-            sibblingActionSet = actionSet.siblings('.advisor-action-item'), 
-            disabledInputs = actionSet.find('input[type="text"]'), 
-            activeInputs = sibblingActionSet.find('input[type="text"]');
+        var actionSet = $(this).parents('.advisor-action-item'), postAction = $(this).val(), sibblingActionSet = actionSet.siblings('.advisor-action-item'), disabledInputs = actionSet.find('input[type="text"]'), activeInputs = sibblingActionSet.find('input[type="text"]');
 
         activeInputs.attr('disabled', 'disabled').removeAttr('required');
         disabledInputs.removeAttr('disabled').attr('required', 'required');
@@ -19,7 +14,7 @@
     });
 
     $('.asc-form').on('submit', function(e) {
-        var data = Utils.getFormData('.asc-form');
+        var data = Utils.getFormData('.asc-form')
         Utils.submitForm(e, data, '/aftersell/register/asc');
         return false;
     });
@@ -40,14 +35,14 @@
     $('.customer-form').on('submit', function(e) {
     	var data = Utils.getFormData('.customer-form'),
             vin = $('#srch-vin').val();
-    	data.vin = vin;
+    	data['vin'] = vin;
     	Utils.submitForm(e, data, '/aftersell/register/customer');
         return false;
       });
     
     $('.vin-form').on('submit', function() {
       var vin = $('#srch-vin').val(),
-          messageModal = $('.modal.message-modal');
+          messageModal = $('.modal.message-modal'),
           messageBlock = $('.modal-body', messageModal);
       $('.customer-vin').val(vin);
       
@@ -56,17 +51,17 @@
             url: '/aftersell/exceptions/customer',
             data: {'vin': vin},
             success: function(data){
-              if(data.customer_phone){
-                  $('.customer-phone').val(data.customer_phone);
-                  $('.customer-name').val(data.customer_name);
+              if(data['customer_phone']){
+                  $('.customer-phone').val(data['customer_phone']);
+                  $('.customer-name').val(data['customer_name'])
                   $('.name-readonly').attr('readOnly', true);
-                  $('.purchase-date').val(data.purchase_date).attr('readOnly', true);
-                  $('.customer-id').val(data.customer_id).attr('readOnly', true);
+                  $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
+                  $('.customer-id').val(data['customer_id']).attr('readOnly', true);
                   $('.customer-submit').attr('disabled', false);
               }	
               else{
-                  $('.customer-phone').val(data.customer_phone);
-            	  $('.customer-name').val('');
+                  $('.customer-phone').val(data['customer_phone']);
+            	  $('.customer-name').val('')
                   $('.name-readonly').attr('readOnly', false);
                   $('.purchase-date').val('').attr('readOnly', false);
                   $('.customer-id').val('').attr('readOnly', false);  
@@ -115,7 +110,7 @@
     $('#jobCard').on('change', function() {
       var fileInput = $(this),
           ext = fileInput.val().split('.').pop().toLowerCase();
-      if($.inArray(ext, ['pdf','tiff','jpg']) === -1) {
+      if($.inArray(ext, ['pdf','tiff','jpg']) == -1) {
           alert('Invalid file type!');
           fileInput.replaceWith(fileInput=fileInput.clone(true));
       }

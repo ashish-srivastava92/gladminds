@@ -25,9 +25,9 @@
         </h1>
         <img id='keyboard_icon' src='keybd_closed.png'>
         <h2 class='stats'>
-            456 statements &nbsp;
+            457 statements &nbsp;
             <span class='run hide_run shortkey_r button_toggle_run'>139 run</span>
-            <span class='mis shortkey_m button_toggle_mis'>317 missing</span>
+            <span class='mis shortkey_m button_toggle_mis'>318 missing</span>
             <span class='exc shortkey_x button_toggle_exc'>0 excluded</span>
             
         </h2>
@@ -703,12 +703,12 @@
 <p id='n640' class='pln'><a href='#n640'>640</a></p>
 <p id='n641' class='stm mis'><a href='#n641'>641</a></p>
 <p id='n642' class='stm mis'><a href='#n642'>642</a></p>
-<p id='n643' class='pln'><a href='#n643'>643</a></p>
-<p id='n644' class='stm mis'><a href='#n644'>644</a></p>
+<p id='n643' class='stm mis'><a href='#n643'>643</a></p>
+<p id='n644' class='pln'><a href='#n644'>644</a></p>
 <p id='n645' class='stm mis'><a href='#n645'>645</a></p>
 <p id='n646' class='stm mis'><a href='#n646'>646</a></p>
-<p id='n647' class='pln'><a href='#n647'>647</a></p>
-<p id='n648' class='stm mis'><a href='#n648'>648</a></p>
+<p id='n647' class='stm mis'><a href='#n647'>647</a></p>
+<p id='n648' class='pln'><a href='#n648'>648</a></p>
 <p id='n649' class='stm mis'><a href='#n649'>649</a></p>
 <p id='n650' class='stm mis'><a href='#n650'>650</a></p>
 <p id='n651' class='stm mis'><a href='#n651'>651</a></p>
@@ -716,16 +716,17 @@
 <p id='n653' class='stm mis'><a href='#n653'>653</a></p>
 <p id='n654' class='stm mis'><a href='#n654'>654</a></p>
 <p id='n655' class='stm mis'><a href='#n655'>655</a></p>
-<p id='n656' class='pln'><a href='#n656'>656</a></p>
+<p id='n656' class='stm mis'><a href='#n656'>656</a></p>
 <p id='n657' class='pln'><a href='#n657'>657</a></p>
 <p id='n658' class='pln'><a href='#n658'>658</a></p>
 <p id='n659' class='pln'><a href='#n659'>659</a></p>
 <p id='n660' class='pln'><a href='#n660'>660</a></p>
 <p id='n661' class='pln'><a href='#n661'>661</a></p>
-<p id='n662' class='stm mis'><a href='#n662'>662</a></p>
+<p id='n662' class='pln'><a href='#n662'>662</a></p>
 <p id='n663' class='stm mis'><a href='#n663'>663</a></p>
 <p id='n664' class='stm mis'><a href='#n664'>664</a></p>
 <p id='n665' class='stm mis'><a href='#n665'>665</a></p>
+<p id='n666' class='stm mis'><a href='#n666'>666</a></p>
                 
             </td>
             <td class='text' valign='top'>
@@ -1369,31 +1370,32 @@
 <p id='t638' class='pln'><span class='strut'>&nbsp;</span></p>
 <p id='t639' class='stm run hide_run'><span class='op'>@</span><span class='nam'>csrf_exempt</span><span class='strut'>&nbsp;</span></p>
 <p id='t640' class='pln'><span class='key'>def</span> <span class='nam'>get_access_token</span><span class='op'>(</span><span class='nam'>request</span><span class='op'>)</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t641' class='stm mis'>&nbsp; &nbsp; <span class='nam'>username</span> <span class='op'>=</span> <span class='nam'>request</span><span class='op'>.</span><span class='nam'>POST</span><span class='op'>[</span><span class='str'>&#39;username&#39;</span><span class='op'>]</span><span class='strut'>&nbsp;</span></p>
-<p id='t642' class='stm mis'>&nbsp; &nbsp; <span class='nam'>password</span> <span class='op'>=</span> <span class='nam'>request</span><span class='op'>.</span><span class='nam'>POST</span><span class='op'>[</span><span class='str'>&#39;password&#39;</span><span class='op'>]</span><span class='strut'>&nbsp;</span></p>
-<p id='t643' class='pln'><span class='strut'>&nbsp;</span></p>
-<p id='t644' class='stm mis'>&nbsp; &nbsp; <span class='nam'>user_auth</span> <span class='op'>=</span> <span class='nam'>authenticate</span><span class='op'>(</span><span class='nam'>username</span><span class='op'>=</span><span class='nam'>username</span><span class='op'>,</span> <span class='nam'>password</span><span class='op'>=</span><span class='nam'>password</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t645' class='stm mis'>&nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>user_auth</span> <span class='key'>is</span> <span class='nam'>None</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t646' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>return</span> <span class='nam'>HttpResponseBadRequest</span><span class='op'>(</span><span class='nam'>json</span><span class='op'>.</span><span class='nam'>dumps</span><span class='op'>(</span><span class='op'>{</span><span class='str'>&#39;message&#39;</span><span class='op'>:</span> <span class='str'>&#39;Invalid Credentials.&#39;</span><span class='op'>}</span><span class='op'>)</span><span class='op'>,</span> <span class='nam'>status</span><span class='op'>=</span><span class='num'>401</span><span class='op'>,</span> <span class='nam'>mimetype</span><span class='op'>=</span><span class='str'>&quot;application/json&quot;</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t647' class='pln'><span class='strut'>&nbsp;</span></p>
-<p id='t648' class='stm mis'>&nbsp; &nbsp; <span class='nam'>secret_cli</span> <span class='op'>=</span> <span class='nam'>Client</span><span class='op'>(</span><span class='nam'>user</span><span class='op'>=</span><span class='nam'>user_auth</span><span class='op'>,</span> <span class='nam'>name</span><span class='op'>=</span><span class='str'>&#39;client&#39;</span><span class='op'>,</span> <span class='nam'>client_type</span><span class='op'>=</span><span class='num'>1</span><span class='op'>,</span> <span class='nam'>url</span><span class='op'>=</span><span class='str'>&#39;&#39;</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t649' class='stm mis'>&nbsp; &nbsp; <span class='nam'>secret_cli</span><span class='op'>.</span><span class='nam'>save</span><span class='op'>(</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t650' class='stm mis'>&nbsp; &nbsp; <span class='nam'>client_id</span> <span class='op'>=</span> <span class='nam'>secret_cli</span><span class='op'>.</span><span class='nam'>client_id</span><span class='strut'>&nbsp;</span></p>
-<p id='t651' class='stm mis'>&nbsp; &nbsp; <span class='nam'>client_secret</span> <span class='op'>=</span> <span class='nam'>secret_cli</span><span class='op'>.</span><span class='nam'>client_secret</span><span class='strut'>&nbsp;</span></p>
-<p id='t652' class='stm mis'>&nbsp; &nbsp; <span class='nam'>page</span> <span class='op'>=</span> <span class='nam'>request</span><span class='op'>.</span><span class='nam'>META</span><span class='op'>[</span><span class='str'>&#39;HTTP_HOST&#39;</span><span class='op'>]</span> <span class='op'>+</span> <span class='str'>&#39;/oauth2/access_token&#39;</span><span class='strut'>&nbsp;</span></p>
-<p id='t653' class='stm mis'>&nbsp; &nbsp; <span class='key'>if</span> <span class='key'>not</span> <span class='str'>&#39;http://&#39;</span> <span class='key'>in</span> <span class='nam'>page</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
-<p id='t654' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>page</span> <span class='op'>=</span> <span class='str'>&#39;http://&#39;</span> <span class='op'>+</span> <span class='nam'>page</span><span class='strut'>&nbsp;</span></p>
-<p id='t655' class='stm mis'>&nbsp; &nbsp; <span class='nam'>raw_params</span> <span class='op'>=</span> <span class='op'>{</span><span class='str'>&#39;client_id&#39;</span><span class='op'>:</span> <span class='nam'>client_id</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
-<p id='t656' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='str'>&#39;client_secret&#39;</span><span class='op'>:</span> <span class='nam'>client_secret</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
-<p id='t657' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='str'>&#39;grant_type&#39;</span><span class='op'>:</span> <span class='str'>&#39;password&#39;</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
-<p id='t658' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='str'>&#39;username&#39;</span><span class='op'>:</span> <span class='nam'>username</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
-<p id='t659' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='str'>&#39;password&#39;</span><span class='op'>:</span> <span class='nam'>password</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
-<p id='t660' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='str'>&#39;scope&#39;</span><span class='op'>:</span> <span class='str'>&#39;write&#39;</span><span class='strut'>&nbsp;</span></p>
-<p id='t661' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='op'>}</span><span class='strut'>&nbsp;</span></p>
-<p id='t662' class='stm mis'>&nbsp; &nbsp; <span class='nam'>params</span> <span class='op'>=</span> <span class='nam'>urllib</span><span class='op'>.</span><span class='nam'>urlencode</span><span class='op'>(</span><span class='nam'>raw_params</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t663' class='stm mis'>&nbsp; &nbsp; <span class='nam'>oath_request</span> <span class='op'>=</span> <span class='nam'>urllib2</span><span class='op'>.</span><span class='nam'>Request</span><span class='op'>(</span><span class='nam'>page</span><span class='op'>,</span> <span class='nam'>params</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t664' class='stm mis'>&nbsp; &nbsp; <span class='nam'>response</span> <span class='op'>=</span> <span class='nam'>urllib2</span><span class='op'>.</span><span class='nam'>urlopen</span><span class='op'>(</span><span class='nam'>oath_request</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
-<p id='t665' class='stm mis'>&nbsp; &nbsp; <span class='key'>return</span> <span class='nam'>HttpResponse</span><span class='op'>(</span><span class='nam'>response</span><span class='op'>.</span><span class='nam'>read</span><span class='op'>(</span><span class='op'>)</span><span class='op'>,</span> <span class='nam'>mimetype</span><span class='op'>=</span><span class='str'>&quot;application/json&quot;</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t641' class='stm mis'>&nbsp; &nbsp; <span class='key'>print</span> <span class='nam'>request</span><span class='strut'>&nbsp;</span></p>
+<p id='t642' class='stm mis'>&nbsp; &nbsp; <span class='nam'>username</span> <span class='op'>=</span> <span class='nam'>request</span><span class='op'>.</span><span class='nam'>POST</span><span class='op'>[</span><span class='str'>&#39;username&#39;</span><span class='op'>]</span><span class='strut'>&nbsp;</span></p>
+<p id='t643' class='stm mis'>&nbsp; &nbsp; <span class='nam'>password</span> <span class='op'>=</span> <span class='nam'>request</span><span class='op'>.</span><span class='nam'>POST</span><span class='op'>[</span><span class='str'>&#39;password&#39;</span><span class='op'>]</span><span class='strut'>&nbsp;</span></p>
+<p id='t644' class='pln'><span class='strut'>&nbsp;</span></p>
+<p id='t645' class='stm mis'>&nbsp; &nbsp; <span class='nam'>user_auth</span> <span class='op'>=</span> <span class='nam'>authenticate</span><span class='op'>(</span><span class='nam'>username</span><span class='op'>=</span><span class='nam'>username</span><span class='op'>,</span> <span class='nam'>password</span><span class='op'>=</span><span class='nam'>password</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t646' class='stm mis'>&nbsp; &nbsp; <span class='key'>if</span> <span class='nam'>user_auth</span> <span class='key'>is</span> <span class='nam'>None</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
+<p id='t647' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='key'>return</span> <span class='nam'>HttpResponseBadRequest</span><span class='op'>(</span><span class='nam'>json</span><span class='op'>.</span><span class='nam'>dumps</span><span class='op'>(</span><span class='op'>{</span><span class='str'>&#39;message&#39;</span><span class='op'>:</span> <span class='str'>&#39;Invalid Credentials.&#39;</span><span class='op'>}</span><span class='op'>)</span><span class='op'>,</span> <span class='nam'>status</span><span class='op'>=</span><span class='num'>401</span><span class='op'>,</span> <span class='nam'>mimetype</span><span class='op'>=</span><span class='str'>&quot;application/json&quot;</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t648' class='pln'><span class='strut'>&nbsp;</span></p>
+<p id='t649' class='stm mis'>&nbsp; &nbsp; <span class='nam'>secret_cli</span> <span class='op'>=</span> <span class='nam'>Client</span><span class='op'>(</span><span class='nam'>user</span><span class='op'>=</span><span class='nam'>user_auth</span><span class='op'>,</span> <span class='nam'>name</span><span class='op'>=</span><span class='str'>&#39;client&#39;</span><span class='op'>,</span> <span class='nam'>client_type</span><span class='op'>=</span><span class='num'>1</span><span class='op'>,</span> <span class='nam'>url</span><span class='op'>=</span><span class='str'>&#39;&#39;</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t650' class='stm mis'>&nbsp; &nbsp; <span class='nam'>secret_cli</span><span class='op'>.</span><span class='nam'>save</span><span class='op'>(</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t651' class='stm mis'>&nbsp; &nbsp; <span class='nam'>client_id</span> <span class='op'>=</span> <span class='nam'>secret_cli</span><span class='op'>.</span><span class='nam'>client_id</span><span class='strut'>&nbsp;</span></p>
+<p id='t652' class='stm mis'>&nbsp; &nbsp; <span class='nam'>client_secret</span> <span class='op'>=</span> <span class='nam'>secret_cli</span><span class='op'>.</span><span class='nam'>client_secret</span><span class='strut'>&nbsp;</span></p>
+<p id='t653' class='stm mis'>&nbsp; &nbsp; <span class='nam'>page</span> <span class='op'>=</span> <span class='nam'>request</span><span class='op'>.</span><span class='nam'>META</span><span class='op'>[</span><span class='str'>&#39;HTTP_HOST&#39;</span><span class='op'>]</span> <span class='op'>+</span> <span class='str'>&#39;/oauth2/access_token&#39;</span><span class='strut'>&nbsp;</span></p>
+<p id='t654' class='stm mis'>&nbsp; &nbsp; <span class='key'>if</span> <span class='key'>not</span> <span class='str'>&#39;http://&#39;</span> <span class='key'>in</span> <span class='nam'>page</span><span class='op'>:</span><span class='strut'>&nbsp;</span></p>
+<p id='t655' class='stm mis'>&nbsp; &nbsp; &nbsp; &nbsp; <span class='nam'>page</span> <span class='op'>=</span> <span class='str'>&#39;http://&#39;</span> <span class='op'>+</span> <span class='nam'>page</span><span class='strut'>&nbsp;</span></p>
+<p id='t656' class='stm mis'>&nbsp; &nbsp; <span class='nam'>raw_params</span> <span class='op'>=</span> <span class='op'>{</span><span class='str'>&#39;client_id&#39;</span><span class='op'>:</span> <span class='nam'>client_id</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
+<p id='t657' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='str'>&#39;client_secret&#39;</span><span class='op'>:</span> <span class='nam'>client_secret</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
+<p id='t658' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='str'>&#39;grant_type&#39;</span><span class='op'>:</span> <span class='str'>&#39;password&#39;</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
+<p id='t659' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='str'>&#39;username&#39;</span><span class='op'>:</span> <span class='nam'>username</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
+<p id='t660' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='str'>&#39;password&#39;</span><span class='op'>:</span> <span class='nam'>password</span><span class='op'>,</span><span class='strut'>&nbsp;</span></p>
+<p id='t661' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='str'>&#39;scope&#39;</span><span class='op'>:</span> <span class='str'>&#39;write&#39;</span><span class='strut'>&nbsp;</span></p>
+<p id='t662' class='pln'>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span class='op'>}</span><span class='strut'>&nbsp;</span></p>
+<p id='t663' class='stm mis'>&nbsp; &nbsp; <span class='nam'>params</span> <span class='op'>=</span> <span class='nam'>urllib</span><span class='op'>.</span><span class='nam'>urlencode</span><span class='op'>(</span><span class='nam'>raw_params</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t664' class='stm mis'>&nbsp; &nbsp; <span class='nam'>oath_request</span> <span class='op'>=</span> <span class='nam'>urllib2</span><span class='op'>.</span><span class='nam'>Request</span><span class='op'>(</span><span class='nam'>page</span><span class='op'>,</span> <span class='nam'>params</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t665' class='stm mis'>&nbsp; &nbsp; <span class='nam'>response</span> <span class='op'>=</span> <span class='nam'>urllib2</span><span class='op'>.</span><span class='nam'>urlopen</span><span class='op'>(</span><span class='nam'>oath_request</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
+<p id='t666' class='stm mis'>&nbsp; &nbsp; <span class='key'>return</span> <span class='nam'>HttpResponse</span><span class='op'>(</span><span class='nam'>response</span><span class='op'>.</span><span class='nam'>read</span><span class='op'>(</span><span class='op'>)</span><span class='op'>,</span> <span class='nam'>mimetype</span><span class='op'>=</span><span class='str'>&quot;application/json&quot;</span><span class='op'>)</span><span class='strut'>&nbsp;</span></p>
                 
             </td>
         </tr>
