@@ -54,9 +54,15 @@ urlpatterns += patterns('gladminds',
 
     url(r'^app/logout', 'afterbuy.views.app_logout', name='app_logout'),
     url(r'^app', 'afterbuy.views.home', name='home'),
+    url(r'^afterbuy/$', 'afterbuy.views.main', name='main'),
+    
+    # After buy API
+    url(r'^afterbuy/product/coupons/$', 'afterbuy.api.fnc_get_product_coupons', name='fnc_get_product_coupons'),
+    url(r'^afterbuy/product/purchase-info/$', 'afterbuy.api.fnc_get_product_purchase_information', name='fnc_get_product_purchase_information'),
+    url(r'^afterbuy/product/info/$', 'afterbuy.api.fnc_get_product_information', name='fnc_get_product_information'),
+    
     url(r'^afterbuy/otp-generate/', 'afterbuy.views.generate_otp'),
     url(r'^afterbuy/otp-validate/', 'afterbuy.views.validate_otp'),
-    url(r'^afterbuy$', 'afterbuy.views.main', name='main'),
     url(r'^v1/api/users/auth', 'afterbuy.views.get_access_token'),
     url(r'^tasks-view', 'views.sqs_tasks_view'),
     url(r'^trigger-tasks', 'views.trigger_sqs_tasks'),
