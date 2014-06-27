@@ -77,7 +77,6 @@ class ProductTypeData(models.Model):
     def __unicode__(self):
         return self.product_type
 
-###################################################################
 
 ######################DEALER-SA MODELS#############################
 
@@ -108,7 +107,8 @@ class ServiceAdvisor(models.Model):
         verbose_name_plural = "Service Advisor Data"
 
     def __unicode__(self):
-        return self.service_advisor_id
+        return self.phone_number
+
 
 ##################################################################
 #############Service Advisor and Registered Relationship MODEL####
@@ -178,7 +178,7 @@ class ProductData(models.Model):
         max_length=215, null=True, blank=True, unique=True)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
     invoice_date = models.DateTimeField(null=True, blank=True)
-    dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
+    dealer_id = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
     engine = models.CharField(max_length=255, null=True, blank=True)
 
     # Added below column for after buy application
@@ -219,7 +219,7 @@ class CouponData(models.Model):
     valid_days = models.IntegerField(max_length=10, null=False)
     valid_kms = models.IntegerField(max_length=10, null=False)
     service_type = models.IntegerField(max_length=10, null=False)
-    sa_phone_number = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
+    sa_phone_number = models.ForeignKey('aftersell.ServiceAdvisor', null=True, blank=True)
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=1)
     closed_date = models.DateTimeField(null=True, blank=True)
     mark_expired_on = models.DateTimeField(null=True, blank=True)
@@ -243,7 +243,7 @@ class CouponData(models.Model):
 
 class ServiceAdvisorCouponRelationship(models.Model):
     unique_service_coupon = models.ForeignKey(CouponData, null=False)
-    service_advisor_phone = models.ForeignKey(ServiceAdvisor, null=False)
+    service_advisor_phone = models.ForeignKey('aftersell.ServiceAdvisor', null=False)
 
     class Meta:
         app_label = 'gladminds'
@@ -262,7 +262,7 @@ class MessageTemplate(models.Model):
         app_label = "gladminds"
         verbose_name_plural = "Message Template"
 
-        
+
 ####################################################################
 ########################TOTP Details################################
 
@@ -271,7 +271,7 @@ class OTPToken(models.Model):
     token = models.CharField(max_length=256, null=False)
     request_date = models.DateTimeField(null=True, blank=True)
     email = models.CharField(max_length=50, null=False)
-    
+
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "OTPs"
@@ -282,7 +282,8 @@ class OTPToken(models.Model):
 
 
 class EmailTemplate(models.Model):
-    template_key = models.CharField(max_length=255, unique=True, null=False)
+    template_key = models.CharField(max_length=255, unique=True, null=False,\
+                                     blank=False)
     sender = models.CharField(max_length=512, null=False)
     reciever = models.CharField(max_length=512, null=False)
     subject = models.CharField(max_length=512, null=False)
@@ -293,40 +294,26 @@ class EmailTemplate(models.Model):
         app_label = "gladminds"
         verbose_name_plural = "Email Template"
 
-##########################################################################
-########################## ASC Save Form #########################
-ASC_STATUS_CHOICES = ((1, 'In Progress'), (2, 'Failed'))
 
-
-class ASCSaveForm(models.Model):
+class SASaveForm(models.Model):
     name = models.CharField(max_length=255, null=False)
-    password = models.CharField(max_length=255, null=False, blank=False)
-    phone_number = models.CharField(max_length=15, null=False, blank=False,
-                                                         unique=True)
-    email = models.CharField(max_length=255, null=True, blank=True)
-    pincode = models.CharField(max_length=255, null=True, blank=True)
-    address = models.CharField(max_length=255, null=True, blank=True)
-    status = models.SmallIntegerField(choices=ASC_STATUS_CHOICES, default=1)
-    timestamp = models.DateTimeField(default=datetime.now)
-    dealer_id = models.CharField(max_length=255, null=True, blank=True)
-
-    class Meta:
-        app_label = "gladminds"
-        verbose_name_plural = "ASC Save Form"
-
-
-class RegisteredASC(models.Model):
-    user = models.OneToOneField(User, null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)
-    asc_name = models.CharField(max_length=215)
-    email_id = models.EmailField(max_length=215, null=True, blank=True)
-    registration_date = models.DateTimeField(default=datetime.now())
-    address = models.CharField(max_length=255, null=True, blank=True)
-    country = models.CharField(max_length=255, null=True, blank=True)
-    state = models.CharField(max_length=255, null=True, blank=True)
-    img_url = models.FileField(upload_to="users", blank=True)
-    isActive = models.BooleanField(default=True)
-    
+    status = models.CharField(max_length=10, blank=False, null=False)
+
     class Meta:
         app_label = "gladminds"
-        verbose_name_plural = "Registered ASC Form"
+        verbose_name_plural = "SA Save Form"
+
+
+class CustomerUpdatedInfo(models.Model):
+    product_data = models.ForeignKey(ProductData, null=True, blank=True)
+    new_customer_name = models.CharField(max_length=50, null=True, blank=True)
+    new_number = models.CharField(max_length=15, unique=True)
+    product_purchase_date = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "Customer update info"
+
+    def __unicode__(self):
+        return self.new_customer_name

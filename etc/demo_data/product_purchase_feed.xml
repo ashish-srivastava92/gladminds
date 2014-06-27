@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://api.gladmindsplatform.co/api/v1/bajaj/feed/">
+  <SOAP-ENV:Body>
+    <ns1:postProductPurchase>
+      <ns1:ObjectList>
+        <ns1:ProductPurchaseData>
+          <ns1:ProductPurchaseModel>
+            <ns1:PIN_NO>111111</ns1:PIN_NO>
+            <ns1:CUST_MOBILE>+919845350297</ns1:CUST_MOBILE>
+            <ns1:VEH_SL_DLR>2012-02-12</ns1:VEH_SL_DLR>
+            <ns1:KUNNR>HIDealer002</ns1:KUNNR>
+            <ns1:ENGINE>DSEWWE32</ns1:ENGINE>
+            <ns1:CITY>Bagalore</ns1:CITY>
+            <ns1:TIMESTAMP>2014-02-01000000</ns1:TIMESTAMP>
+            <ns1:VEH_REG_NO>423423</ns1:VEH_REG_NO>
+            <ns1:STATE>Karnataka</ns1:STATE>
+            <ns1:CHASSIS>MD2A11CZ7DCD10326</ns1:CHASSIS>
+            <ns1:VEH_SL_DT>2014-02-01</ns1:VEH_SL_DT>
+            <ns1:CUSTOMER_ID>SAP001</ns1:CUSTOMER_ID>
+            <ns1:CUSTOMER_NAME>Sourabh</ns1:CUSTOMER_NAME>
+          </ns1:ProductPurchaseModel>
+        </ns1:ProductPurchaseData>
+      </ns1:ObjectList>
+      <ns1:Credential>
+        <ns1:UserName>bajaj001</ns1:UserName>
+        <ns1:Password>bajaj001</ns1:Password>
+      </ns1:Credential>
+    </ns1:postProductPurchase>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

@@ -18,6 +18,7 @@ import logging
 from django.conf import settings
 import json
 from gladminds import utils
+from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
 
 
 logger = logging.getLogger("gladminds")
@@ -139,6 +140,20 @@ class DealerModel(ComplexModel):
 class DealerModelList(ComplexModel):
     __namespace__ = tns
     DealerData = Array(DealerModel)
+    
+class ASCModel(ComplexModel):
+    __namespace__ = tns
+    ASC_ID = Unicode
+    ASC_NAME = Unicode
+    ASC_MOBILE = Unicode
+    ASC_EMAIL = Unicode
+    ASC_ADDRESS = Unicode
+    KUNNAR = Unicode
+
+
+class ASCModelList(ComplexModel):
+    __namespace__ = tns
+    ASCData = Array(ASCModel)    
 
 
 class ProductDispatchModel(ComplexModel):
@@ -209,9 +224,13 @@ class DealerService(ServiceBase):
 
     @srpc(DealerModelList, AuthenticationModel, _returns=Unicode)
     def postDealer(ObjectList, Credential):
-        try:
-            dealer_list = []
-            for dealer in ObjectList.DealerData:
+        dealer_list = []
+        feed_remark = FeedLogWithRemark(len(ObjectList.DealerData),
+                                        feed_type='Dealer Feed',
+                                        action='Received', status=True)
+        print ObjectList.DealerData
+        for dealer in ObjectList.DealerData:
+            try:
                 dealer_list.append({
                     'dealer_id': dealer.KUNNR,
                     'address': dealer.ADDRESS,
@@ -220,14 +239,47 @@ class DealerService(ServiceBase):
                     'phone_number': utils.mobile_format(dealer.SER_ADV_MOBILE),
                     'status': dealer.ACTIVE_FLAG
                 })
-            response = save_to_db(feed_type='dealer', data_source=dealer_list)
-            return get_response(response)
-        except Exception as ex:
-            logging.error(
-                "DealerService: {0}  Error on Validating ".format(ex))
-            logger.debug("DealerService: Object List is "
-                         .format(ObjectList.DealerData))
-            return FAILED
+            except Exception as ex:
+                ex = "DealerService: {0}  Error on Validating ".format(ex)
+                logger.error("DealerService: {0} Object list element is {1}"
+                             .format(ex, dealer))
+                logger.error(dealer)
+                feed_remark.fail_remarks(ex)
+        feed_remark = save_to_db(feed_type='dealer', data_source=dealer_list,
+                              feed_remark=feed_remark)
+
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
+    
+class ASCService(ServiceBase):
+    __namespace__ = tns
+
+    @srpc(ASCModelList, AuthenticationModel, _returns=Unicode)
+    def postASC(ObjectList, Credential):
+        asc_list = []
+        feed_remark = FeedLogWithRemark(len(ObjectList.ASCData),
+                                        feed_type='ASC Feed',
+                                        action='Received', status=True)
+        for asc_element in ObjectList.ASCData:
+            try:
+                asc_list.append({
+                    'asc_id': asc_element.ASC_ID,
+                    'name': asc_element.ASC_NAME,
+                    'phone_number': utils.mobile_format(asc_element.ASC_MOBILE),
+                    'address': asc_element.ASC_ADDRESS,
+                    'email': asc_element.ASC_EMAIL,
+                    'dealer_id': asc_element.KUNNAR
+                })
+            except Exception as ex:
+                ex = "ASCService: {0}  Error on Validating ".format(ex)
+                logger.error("DealerService: {0} Object list element is {1}"
+                             .format(ex, asc_element))
+                logger.error(asc_element)
+                feed_remark.fail_remarks(ex)
+        feed_remark = save_to_db(feed_type='ASC', data_source=asc_list,
+                              feed_remark=feed_remark)
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)    
 
 
 class ProductDispatchService(ServiceBase):
@@ -235,9 +287,12 @@ class ProductDispatchService(ServiceBase):
 
     @srpc(ProductDispatchModelList, AuthenticationModel, _returns=Unicode)
     def postProductDispatch(ObjectList, Credential):
-        try:
-            product_dispatch_list = []
-            for product in ObjectList.ProductDispatchData:
+        feed_remark = FeedLogWithRemark(len(ObjectList.ProductDispatchData),
+                                        feed_type='Dispatch Feed',
+                                        action='Received', status=True)
+        product_dispatch_list = []
+        for product in ObjectList.ProductDispatchData:
+            try:
                 product_dispatch_list.append({
                     'vin': product.CHASSIS,
                     'product_type': product.PRODUCT_TYPE,
@@ -249,20 +304,18 @@ class ProductDispatchService(ServiceBase):
                     'service_type': product.SERVICE_TYPE,
                     'coupon_status': settings.DEFAULT_COUPON_STATUS,
                 })
-            response = save_to_db(
-                feed_type='dispatch', data_source=product_dispatch_list)
-            return get_response(response)
-        except Exception as ex:
-            logger.error(
-                "ProductDispatchService: {0}  Error on Validating ".format(ex))
-            logger.debug("ProductDispatchService: Object List is "
-                         .format(ObjectList.ProductDispatchData))
-            return FAILED
+            except Exception as ex:
+                ex = "ProductDispatchService: {0}  Error on Validating"\
+                                                        .format(ex)
+                feed_remark.fail_remarks(ex)
+                logger.error("ProductDispatchService: {0} Object List is {1}"
+                             .format(ex, product))
 
-
-def get_response(response):
-    failed_feed = response[1]['Failed']
-    return FAILED if failed_feed > 0 else SUCCESS
+        feed_remark = save_to_db(
+            feed_type='dispatch', data_source=product_dispatch_list,
+                                        feed_remark=feed_remark)
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
 
 
 class ProductPurchaseService(ServiceBase):
@@ -270,9 +323,12 @@ class ProductPurchaseService(ServiceBase):
 
     @srpc(ProductPurchaseModelList, AuthenticationModel, _returns=Unicode)
     def postProductPurchase(ObjectList, Credential):
-        try:
-            product_purchase_list = []
-            for product in ObjectList.ProductPurchaseData:
+        feed_remark = FeedLogWithRemark(len(ObjectList.ProductPurchaseData),
+                                        feed_type='Purchase Feed',
+                                        action='Received', status=True)
+        product_purchase_list = []
+        for product in ObjectList.ProductPurchaseData:
+            try:
                 product_purchase_list.append({
                     'vin': product.CHASSIS,
                     'sap_customer_id': product.CUSTOMER_ID,
@@ -284,27 +340,36 @@ class ProductPurchaseService(ServiceBase):
                     'product_purchase_date': product.VEH_SL_DT,
                     'engine': product.ENGINE
                 })
-            response = save_to_db(
-                feed_type='purchase', data_source=product_purchase_list)
-            return get_response(response)
-        except Exception as ex:
-            logger.error(
-                "ProductPurchaseService: {0}  Error on Validating ".format(ex))
-            logger.debug("ProductPurchaseService: Object List is "
-                         .format(ObjectList.ProductPurchaseData))
-            return FAILED
+            except Exception as ex:
+                ex = "ProductPurchaseService: {0}  Error on Validating "\
+                                                            .format(ex)
+                logger.error("ProductPurchaseService: {0} Object List is {1}"
+                             .format(ex, product))
+                feed_remark.fail_remarks(ex)
+
+        feed_remark = save_to_db(
+            feed_type='purchase', data_source=product_purchase_list,
+                                                 feed_remark=feed_remark)
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
 
 
-def save_to_db(feed_type=None, data_source=[]):
+def get_response(feed_remark):
+    return FAILED if feed_remark.failed_feeds > 0 else SUCCESS
+
+
+def save_to_db(feed_type=None, data_source=[], feed_remark=None):
     sap_obj = SAPFeed()
-    return sap_obj.import_to_db(feed_type=feed_type, data_source=data_source)
+    return sap_obj.import_to_db(feed_type=feed_type, data_source=data_source,
+                                 feed_remark=feed_remark)
 
 
 def _on_method_call(ctx):
     if ctx.in_object is None:
         raise ArgumentError("Request doesn't contain data")
     auth_obj = AuthenticationService(
-        username=ctx.in_object.Credential.UserName, password=ctx.in_object.Credential.Password)
+                                username=ctx.in_object.Credential.UserName,
+                                password=ctx.in_object.Credential.Password)
     auth_obj.authenticate()
 
 BrandService.event_manager.add_listener('method_call', _on_method_call)
@@ -314,7 +379,7 @@ ProductDispatchService.event_manager.add_listener(
 ProductPurchaseService.event_manager.add_listener(
     'method_call', _on_method_call)
 
-all_app = Application([BrandService, DealerService, ProductDispatchService, ProductPurchaseService],
+all_app = Application([BrandService, DealerService, ProductDispatchService, ProductPurchaseService, ASCService],
                       tns=tns,
                       in_protocol=Soap11(validator='lxml'),
                       out_protocol=Soap11()
@@ -327,6 +392,12 @@ brand_app = Application([BrandService],
                         )
 
 dealer_app = Application([DealerService],
+                         tns=tns,
+                         in_protocol=Soap11(validator='lxml'),
+                         out_protocol=Soap11()
+                         )
+
+asc_app = Application([ASCService],
                          tns=tns,
                          in_protocol=Soap11(validator='lxml'),
                          out_protocol=Soap11()
@@ -347,5 +418,6 @@ purchase_app = Application([ProductPurchaseService],
 all_service = csrf_exempt(DjangoApplication(all_app))
 brand_service = csrf_exempt(DjangoApplication(brand_app))
 dealer_service = csrf_exempt(DjangoApplication(dealer_app))
+asc_service = csrf_exempt(DjangoApplication(asc_app))
 dispatch_service = csrf_exempt(DjangoApplication(dispatch_app))
 purchase_service = csrf_exempt(DjangoApplication(purchase_app))

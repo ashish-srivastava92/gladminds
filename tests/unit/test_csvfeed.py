@@ -4,6 +4,7 @@ import time
 from base_unit import GladmindsUnitTestCase
 from gladminds import feed
 from gladminds.models import common
+from gladminds.aftersell.models import common as aftersell_common
 
 
 class CSVFeedTest(GladmindsUnitTestCase):
@@ -43,7 +44,7 @@ class CSVFeedTest(GladmindsUnitTestCase):
         #Check Duplicate
         brand_data = common.BrandData.objects.get(brand_id = 'BRAND002_'+tmp)
         producttype_data = common.ProductTypeData.objects.filter(brand_id = brand_data, product_type = 'PRODUCTTYPE002_'+tmp)
-        self.assertEqual(len(producttype_data), 0)
+        self.assertEqual(len(producttype_data), 1)
 
 class CSVFeedByFile(GladmindsUnitTestCase):
     def setUp(self):
@@ -72,10 +73,10 @@ class CSVFeedByFile(GladmindsUnitTestCase):
         self.assertEqual(brand_data.brand_name, 'HERO')
 
     def _test_service_advisor(self):
-        sa_data = common.ServiceAdvisor.objects.get(phone_number = '+SA0000000002')
+        sa_data = aftersell_common.ServiceAdvisor.objects.get(phone_number = '+SA0000000002')
         self.assertEqual(sa_data.dealer_id.dealer_id, 'TESTD001')
         
-        sa_data = common.ServiceAdvisor.objects.get(phone_number = '+SA0000000003')
+        sa_data = aftersell_common.ServiceAdvisor.objects.get(phone_number = '+SA0000000003')
         self.assertEqual(sa_data.dealer_id.dealer_id, 'TESTD002')
 
     def _test_product_dispatch(self):

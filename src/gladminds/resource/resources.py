@@ -5,6 +5,8 @@ from django.db import models, transaction
 from django.forms.models import model_to_dict
 from gladminds import smsparser, utils, audit, message_template as templates
 from gladminds.models import common
+from gladminds.feed import BaseFeed
+from gladminds.aftersell.models import common as aftersell_common
 from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
@@ -60,12 +62,12 @@ class GladmindsResources(Resource):
                 logger.info('Validating the service coupon for customer {0}'.format(customer_id))
                 odo_read = request.POST.get('odoRead')
                 service_type = request.POST.get('serviceType')
-                message = 'A {0} {1} {2}'.format(customer_id, odo_read, service_type)
+                message = '{3} {0} {1} {2}'.format(customer_id, odo_read, service_type, settings.ALLOWED_KEYWORDS['check'].upper())
                 logger.info('Message to send: ' + message)
             else:
                 ucn = request.POST.get('ucn')
                 logger.info('Terminating the service coupon {0}'.format(ucn))
-                message = 'C {0} {1}'.format(customer_id, ucn)
+                message = '{2} {0} {1}'.format(customer_id, ucn, settings.ALLOWED_KEYWORDS['close'].upper())
                 logger.info('Message to send: ' + message)
         phone_number = mobile_format(phone_number)
         message = format_message(message)
@@ -103,7 +105,6 @@ class GladmindsResources(Resource):
             raise ImmediateHttpResponse(HttpBadRequest(inf.message))
         handler = getattr(self, sms_dict['handler'], None)
         to_be_serialized = handler(sms_dict, phone_number)
-        to_be_serialized = {"status": to_be_serialized}
         return self.create_response(request, data=to_be_serialized)
 
     def register_customer(self, sms_dict, phone_number):
@@ -116,8 +117,9 @@ class GladmindsResources(Resource):
         except ObjectDoesNotExist as odne:
             gladmind_customer_id = utils.generate_unique_customer_id()
             registration_date = datetime.now()
+            user = BaseFeed.registerNewUser('customer', username=gladmind_customer_id)
             customer = common.GladMindUsers(
-                gladmind_customer_id=gladmind_customer_id, phone_number=phone_number,
+                user=user, gladmind_customer_id=gladmind_customer_id, phone_number=phone_number,
                 customer_name=customer_name, email_id=email_id,
                 registration_date=registration_date)
             customer.save()
@@ -240,7 +242,7 @@ class GladmindsResources(Resource):
             transaction.commit()
             return False
         if not self.is_valid_data(customer_id=sap_customer_id, sa_phone=phone_number):
-            return False
+            return {'status': False, 'message': templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')}
         try:
             vin = self.get_vin(sap_customer_id)
             self.update_exceed_limit_coupon(actual_kms, vin)
@@ -258,7 +260,7 @@ class GladmindsResources(Resource):
             else:
                 dealer_message = templates.get_template('SEND_SA_NO_VALID_COUPON').format(sap_customer_id)
                 logger.info(dealer_message)
-                return False
+                return {'status': False, 'message': dealer_message}
             
             coupon_sa_obj = common.ServiceAdvisorCouponRelationship.objects.filter(unique_service_coupon=valid_coupon\
                                                                                    ,service_advisor_phone=dealer_data)
@@ -316,7 +318,7 @@ class GladmindsResources(Resource):
                 send_service_detail.delay(phone_number=phone_number, message=dealer_message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=dealer_message)
             transaction.commit()
-        return True
+        return {'status': True, 'message': dealer_message}
 
     @transaction.commit_manually()
     def close_coupon(self, sms_dict, phone_number):
@@ -328,11 +330,12 @@ class GladmindsResources(Resource):
             transaction.commit()
             return False
         if not self.is_valid_data(customer_id=sap_customer_id, coupon=unique_service_coupon, sa_phone=phone_number):
-            return False
+            return {'status': False, 'message': templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')}
         if not self.is_sa_initiator(unique_service_coupon, sa_object):
-            logger.info("SA is not the coupon initiator.")
+            message="SA is not the coupon initiator."
+            logger.info(message)
             transaction.commit()
-            return False
+            return {'status': False, 'message': message}
         try:
             vin = self.get_vin(sap_customer_id)
             coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
@@ -357,12 +360,12 @@ class GladmindsResources(Resource):
             else:
                 send_coupon.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
-        return True
+        return {'status': True, 'message': message}
 
     def validate_dealer(self, phone_number):
         try:
-            service_advisor_obj = common.ServiceAdvisor.objects.get(phone_number=phone_number)
-            all_sa_dealer_obj = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = service_advisor_obj, status = u'Y')
+            service_advisor_obj = aftersell_common.ServiceAdvisor.objects.get(phone_number=phone_number)
+            all_sa_dealer_obj = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = service_advisor_obj, status = u'Y')
             if len(all_sa_dealer_obj) == 0:
                 raise
 
@@ -401,9 +404,9 @@ class GladmindsResources(Resource):
             message=templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')
 
         elif customer_id and not customer_obj:
-            message=templates.get_template('SEND_SA_WRONG_CUSTOMER')
+            message=templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')
         elif coupon and not coupon_obj:
-            message=templates.get_template('SEND_SA_WRONG_UCN')
+            message=templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')
 
         if message:
             if settings.ENABLE_AMAZON_SQS:

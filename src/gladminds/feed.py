@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 import logging
 import os
 import time
@@ -11,12 +11,13 @@ import time
 from gladminds import audit, message_template as templates
 from gladminds import utils
 from gladminds.models import common
+from gladminds.aftersell.models import common as aftersell_common
 from gladminds.audit import feed_log
 from django.db.models import signals
 from gladminds.utils import get_task_queue
 
 logger = logging.getLogger("gladminds")
-
+USER_GROUP = {'dealer': 'dealers', 'ASC': 'ascs', 'SA':'sas', 'customer':"customer"}
 
 def load_feed():
     FEED_TYPE = settings.FEED_TYPE
@@ -87,40 +88,70 @@ class CSVFeed(object):
 
 class SAPFeed(object):
 
-    def import_to_db(self, feed_type=None, data_source=[]):
+    def import_to_db(self, feed_type=None, data_source=[], feed_remark=None):
         if feed_type == 'brand':
-            brand_obj = BrandProductTypeFeed(data_source=data_source)
+            brand_obj = BrandProductTypeFeed(data_source=data_source,
+                                             feed_remark=feed_remark)
             return brand_obj.import_data()
         elif feed_type == 'dealer':
-            dealer_obj = DealerAndServiceAdvisorFeed(data_source=data_source)
+            dealer_obj = DealerAndServiceAdvisorFeed(data_source=data_source,
+                                                     feed_remark=feed_remark)
             return dealer_obj.import_data()
         elif feed_type == 'dispatch':
-            dispatch_obj = ProductDispatchFeed(data_source=data_source)
+            dispatch_obj = ProductDispatchFeed(data_source=data_source,
+                                               feed_remark=feed_remark)
             return dispatch_obj.import_data()
         elif feed_type == 'purchase':
-            purchase_obj = ProductPurchaseFeed(data_source=data_source)
+            purchase_obj = ProductPurchaseFeed(data_source=data_source,
+                                               feed_remark=feed_remark)
             return purchase_obj.import_data()
+        elif feed_type == 'ASC':
+            asc_obj = ASCFeed(data_source=data_source,
+                                               feed_remark=feed_remark)
+            return asc_obj.import_data()
 
 
 class BaseFeed(object):
 
-    def __init__(self, data_source=None):
+    def __init__(self, data_source=None, feed_remark=None):
         self.data_source = data_source
+        self.feed_remark = feed_remark
 
     def import_data(self):
         pass
-    
-    def registerNewDealer(self, username=None, first_name='', last_name='', email=''):
-        logger.info('New Dealer Registration with id - ' + username)
+
+    def registerNewUser(self, user, group=None, username=None, first_name='', last_name='',
+                          email=''):
+        logger.info('New {0} Registration with id - {1}'.format(user, username))
+        if not group:
+            group = USER_GROUP[user]
+        try:
+            user_group = Group.objects.get(name=group)
+        except ObjectDoesNotExist as ex:
+            logger.info(
+                "[Exception: new_ registration]: {0}"
+                .format(ex))
+            user_group = Group.objects.create(name=group)
+            user_group.save()
         if username:
-            user = User(username=username, first_name=first_name, last_name=last_name, email=email)
-            password = username + '@123'
-            user.set_password(password)
-            user.save()
-            logger.info('Dealer {0} registered successfully'.format(username))
+            try:
+                new_user = User.objects.get(username=username)
+            except ObjectDoesNotExist as ex:
+                logger.info(
+                    "[Exception: new_ registration]: {0}"
+                    .format(ex))    
+                new_user = User(
+                    username=username, first_name=first_name, last_name=last_name, email=email)
+                password = username + settings.PASSWORD_POSTFIX
+                new_user.set_password(password)
+                new_user.save()
+            new_user.groups.add(user_group)
+            new_user.save()
+            logger.info(user + ' {0} registered successfully'.format(username))
+            return new_user
         else:
-            logger.info('Dealer id is not provided.')
-            raise Exception('Dealer id is not provided.')
+            logger.info('{0} id is not provided.'.format(user))
+            raise Exception('{0} id is not provided.'.format(user))    
 
 
 class BrandProductTypeFeed(BaseFeed):
@@ -133,7 +164,7 @@ class BrandProductTypeFeed(BaseFeed):
             except ObjectDoesNotExist as odne:
                 logger.info(
                     "[Exception: BrandProductTypeFeed_brand_data]: {0}"
-                                                        .format(odne))
+                    .format(odne))
                 brand_data = common.BrandData(
                     brand_id=brand['brand_id'], brand_name=brand['brand_name'])
                 brand_data.save()
@@ -154,19 +185,20 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
         total_failed = 0
         for dealer in self.data_source:
             try:
-                dealer_data = common.RegisteredDealer.objects.get(
+                dealer_data = aftersell_common.RegisteredDealer.objects.get(
                     dealer_id=dealer['dealer_id'])
             except ObjectDoesNotExist as odne:
                 logger.debug(
-                    "[Exception: DealerAndServiceAdvisorFeed_dealer_data]: {0}".format(odne))
-                dealer_data = common.RegisteredDealer(
+                    "[Exception: DealerAndServiceAdvisorFeed_dealer_data]: {0}"
+                    .format(odne))
+                dealer_data = aftersell_common.RegisteredDealer(
                     dealer_id=dealer['dealer_id'], address=dealer['address'])
                 dealer_data.save()
-                self.registerNewDealer(username = dealer['dealer_id'])
+                self.registerNewUser('dealer', username=dealer['dealer_id'])
 
             try:
                 mobile_number_active = self.check_mobile_active(dealer, dealer_data)
-                service_advisor = common.ServiceAdvisor.objects.filter(service_advisor_id=dealer['service_advisor_id'])
+                service_advisor = aftersell_common.ServiceAdvisor.objects.filter(service_advisor_id=dealer['service_advisor_id'])
                 if not mobile_number_active:
                     if len(service_advisor) > 0:
                         if dealer['phone_number'] != service_advisor[0].phone_number:
@@ -175,9 +207,10 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                             logger.info("[Info: DealerAndServiceAdvisorFeed_sa]: Updated phone number for {0}".format(dealer['service_advisor_id']))
                         service_advisor = service_advisor[0]
                     else:
-                        service_advisor = common.ServiceAdvisor(service_advisor_id=dealer['service_advisor_id'], 
+                        service_advisor = aftersell_common.ServiceAdvisor(service_advisor_id=dealer['service_advisor_id'], 
                                                             name=dealer['name'], phone_number=dealer['phone_number'])
                         service_advisor.save()
+                        self.registerNewUser('SA', username=dealer['service_advisor_id'])
                 elif dealer['status']=='N':
                     service_advisor = service_advisor[0]
                 else:
@@ -187,35 +220,35 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 logger.error(
                         "[Exception: DealerAndServiceAdvisorFeed_sa]: {0}".format(ex))
                 continue
+
             try:
                 mobile_number_active = self.check_mobile_active(dealer, dealer_data)
-                service_advisor_dealer = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=service_advisor, dealer_id=dealer_data)
+                service_advisor_dealer = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=service_advisor, dealer_id=dealer_data)
                 if dealer['status']=='Y' and mobile_number_active:
                     raise
                 elif len(service_advisor_dealer) == 0:
-                    sa_dealer_rel = common.ServiceAdvisorDealerRelationship(dealer_id=dealer_data, service_advisor_id=service_advisor, status=dealer['status'])
+                    sa_dealer_rel = aftersell_common.ServiceAdvisorDealerRelationship(dealer_id=dealer_data, service_advisor_id=service_advisor, status=dealer['status'])
                     sa_dealer_rel.save()
                 else:
-                    service_advisor_dealer[0].status=unicode(dealer['status'])
+                    service_advisor_dealer[
+                        0].status = unicode(dealer['status'])
                     service_advisor_dealer[0].save()
             except Exception as ex:
-                total_failed += 1
-                logger.error(
-                    "[Exception: Service Advisor and dealer relation is not created]: {0}".format(ex))
+                ex = "[Exception: Service Advisor and dealer relation is not created]: {0}"\
+                    .format(ex)
+                self.feed_remark.fail_remarks(ex)
+                logger.error(ex)
                 continue
 
-        feed_log(feed_type='Dealer Feed', total_data_count=len(self.data_source),
-                 failed_data_count=total_failed, success_data_count=len(
-                     self.data_source) - total_failed,
-                 action='Recieved', status=True)
-        return get_feed_status(len(self.data_source), total_failed)
+        return self.feed_remark
 
     def update_other_dealer_sa_relationship(self, service_advisor, status):
         if status == 'Y':
-            common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=service_advisor).update(status='N')
+            aftersell_common.ServiceAdvisorDealerRelationship.objects\
+                .filter(service_advisor_id=service_advisor).update(status='N')
 
     def check_mobile_active(self, dealer, dealer_data):
-        list_mobile = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id__phone_number=dealer['phone_number'], status='Y')
+        list_mobile = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id__phone_number=dealer['phone_number'], status='Y')
         list_active_mobile = list_mobile.exclude(dealer_id=dealer_data, service_advisor_id__service_advisor_id=dealer['service_advisor_id'], )
         if list_active_mobile:
             return True
@@ -224,7 +257,6 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
 class ProductDispatchFeed(BaseFeed):
 
     def import_data(self):
-        total_failed = 0
         for product in self.data_source:
             try:
                 product_data = common.ProductData.objects.get(
@@ -234,12 +266,13 @@ class ProductDispatchFeed(BaseFeed):
                     '[Info: ProductDispatchFeed_product_data]: {0}'.format(odne))
                 try:
                     try:
-                        dealer_data = common.RegisteredDealer.objects.get(
+                        dealer_data = aftersell_common.RegisteredDealer.objects.get(
                             dealer_id=product['dealer_id'])
                     except Exception as ex:
-                        dealer_data = common.RegisteredDealer(dealer_id=product['dealer_id'])
+                        dealer_data = aftersell_common.RegisteredDealer(
+                            dealer_id=product['dealer_id'])
                         dealer_data.save()
-                        self.registerNewDealer(username = product['dealer_id'])
+                        self.registerNewUser('dealer', username=product['dealer_id'])
                     self.get_or_create_product_type(
                         product_type=product['product_type'])
                     producttype_data = common.ProductTypeData.objects.get(
@@ -250,9 +283,11 @@ class ProductDispatchFeed(BaseFeed):
                     product_data.save()
                     logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN - {0}'.format(product['vin'], product['unique_service_coupon']))
                 except Exception as ex:
-                    total_failed += 1
-                    logger.info(
-                        '[Exception: ProductDispatchFeed_product_data_save]: {0} VIN - {1}'.format(ex, product['vin']))
+
+                    ex = '''[Exception: ProductDispatchFeed_product_data_save]:
+                         {0} VIN - {1}'''.format(ex, product['vin'])
+                    self.feed_remark.fail_remarks(ex)
+                    logger.error(ex)
                     continue
 
             try:
@@ -277,16 +312,14 @@ class ProductDispatchFeed(BaseFeed):
                 else:
                     logger.error('Coupon Already registered for a VIN! VIN {0}  - UCN {1}'.format(product['vin'], product['unique_service_coupon']))
                     raise ValueError()
-            except Exception as ex:
-                logger.error('Coupon: {2} Save error! VIN {0}  - UCN {1}'.format(ex, product['vin'], product['unique_service_coupon']))
-                total_failed += 1
+            except Exception as ex:   
+                ex = '''Coupon: {2} Save error! {0}
+                         VIN - {1}'''.format(ex, product['vin'], product['unique_service_coupon'])
+                self.feed_remark.fail_remarks(ex)
+                logger.error(ex)
                 continue
 
-        feed_log(feed_type='Dispatch Feed', total_data_count=len(self.data_source),
-                 failed_data_count=total_failed, success_data_count=len(
-                     self.data_source) - total_failed,
-                 action='Recieved', status=True)
-        return get_feed_status(len(self.data_source), total_failed)
+        return self.feed_remark
 
     def get_or_create_product_type(self, product_type=None):
         brand_list = [{
@@ -310,23 +343,27 @@ class ProductPurchaseFeed(BaseFeed):
             if product_data.sap_customer_id and not customer_ph_num == phone_number:
                 try:
                     customer_data = common.GladMindUsers.objects.get(
-                                phone_number=customer_ph_num)
+                        phone_number=customer_ph_num)
                     customer_data.phone_number = phone_number
                     customer_data.save()
                     product_data.customer_phone_number = customer_data
-                    post_save.disconnect(update_coupon_data, sender=common.ProductData)
+                    post_save.disconnect(
+                        update_coupon_data, sender=common.ProductData)
                     product_data.save()
-                    post_save.connect(update_coupon_data, sender=common.ProductData)
-                except Exception as ex: 
-                    logger.info("Expection: New Number of customer is not updated %s" % ex)
+                    post_save.connect(
+                        update_coupon_data, sender=common.ProductData)
+                except Exception as ex:
+                    logger.info(
+                        "Expection: New Number of customer is not updated %s" % ex)
                 return True
         except Exception as ex:
-            logger.info(
-                        '[Exception: New Customer Added]: {0} Phone {1}'.format(ex, phone_number))
+            logger.info('''[Exception: New Customer Added]: {0} Phone {1}'''
+                        .format(ex, phone_number))
+
             return False
 
     def import_data(self):
-        total_failed = 0
+
         for product in self.data_source:
             try:
                 product_data = common.ProductData.objects.get(
@@ -341,9 +378,10 @@ class ProductPurchaseFeed(BaseFeed):
                 except ObjectDoesNotExist as odne:
                     logger.info(
                         '[Exception: ProductPurchaseFeed_customer_data]: {0}'.format(odne))
-                    #Register this customer
+                    # Register this customer
                     gladmind_customer_id = utils.generate_unique_customer_id()
-                    customer_data = common.GladMindUsers(gladmind_customer_id=gladmind_customer_id, phone_number=product[
+                    user=self.registerNewUser('customer', username=gladmind_customer_id)
+                    customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, phone_number=product[
                                                          'customer_phone_number'], registration_date=datetime.now(), customer_name=product['customer_name'])
                     customer_data.save()
 
@@ -355,16 +393,14 @@ class ProductPurchaseFeed(BaseFeed):
                     product_data.engine = product["engine"]
                     product_data.save()
             except Exception as ex:
-                total_failed += 1
-                logger.info(
-                    '[Exception: ProductPurchaseFeed_product_data]: {0} VIN - {1}'.format(ex, product['vin']))
+
+                ex = '''[Exception: ProductPurchaseFeed_product_data]:
+                         {0} VIN - {1}'''.format(ex, product['vin'])
+                self.feed_remark.fail_remarks(ex)
+                logger.error(ex)
                 continue
 
-        feed_log(feed_type='Purchase Feed', total_data_count=len(self.data_source),
-                 failed_data_count=total_failed, success_data_count=len(
-                     self.data_source) - total_failed,
-                 action='Recieved', status=True)
-        return get_feed_status(len(self.data_source), total_failed)
+        return self.feed_remark
 
 
 class ProductServiceFeed(BaseFeed):
@@ -412,8 +448,8 @@ class CouponRedeemFeedToSAP(BaseFeed):
 class ASCRegistrationToSAP(BaseFeed):
 
     def export_data(self, asc_phone_number=None):
-        asc_form_obj = common.ASCSaveForm.objects\
-                        .get(phone_number=asc_phone_number, status=1)
+        asc_form_obj = aftersell_common.ASCSaveForm.objects\
+            .get(phone_number=asc_phone_number, status=1)
 
         item_batch = {
             'TIMESTAMP': asc_form_obj.timestamp.strftime("%Y-%m-%dT%H:%M:%S")}
@@ -427,13 +463,6 @@ class ASCRegistrationToSAP(BaseFeed):
             "KUNNAR": "hardcoded",
         }
         return {"item": item, "item_batch": item_batch}
-
-
-def get_feed_status(total_feeds, failed_feeds):
-    return [{
-            "Passed": total_feeds - failed_feeds},
-            {"Failed": failed_feeds}
-           ]
 
 
 def update_coupon_data(sender, **kwargs):
@@ -465,9 +494,38 @@ def update_coupon_data(sender, **kwargs):
             else:
                 send_on_product_purchase.delay(
                 phone_number=instance.customer_phone_number.phone_number, message=message)
+
             audit.audit_log(
                 reciever=instance.customer_phone_number, action='SEND TO QUEUE', message=message)
         except Exception as ex:
             logger.info("[Exception]: Signal-In Update Coupon Data %s" % ex)
 
 post_save.connect(update_coupon_data, sender=common.ProductData)
+
+class ASCFeed(BaseFeed):
+    def import_data(self):
+        for dealer in self.data_source:
+            try:
+                dealer_data = aftersell_common.RegisteredDealer.objects.get(
+                    dealer_id=dealer['dealer_id'])
+            except ObjectDoesNotExist as ex:
+                logger.debug(
+                    "[Exception: ASCFeed_dealer_data]: {0}"
+                    .format(ex))
+                dealer_data = aftersell_common.RegisteredDealer(
+                    dealer_id=dealer['dealer_id'], address=dealer['address'])
+                dealer_data.save()
+                self.registerNewUser('dealer', username=dealer['dealer_id'])
+            try:
+                asc_data = aftersell_common.RegisteredASC(
+                    asc_id=dealer['asc_id'], dealer_id=dealer_data, asc_name=dealer['name'],
+                    phone_number=dealer['phone_number'],address=dealer['address'],
+                    email_id=dealer['email'], registration_date=datetime.now())
+                user_obj = self.registerNewUser('ASC', username=dealer['asc_id'])
+                asc_data.user = user_obj
+                asc_data.save()
+            except Exception as ex:
+                ex = "[Exception: ASCFeed_dealer_data]: {0}".format(ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+        return self.feed_remark

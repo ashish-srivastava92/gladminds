@@ -1,26 +1,30 @@
+import tablib
+import datetime
+import json
 from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib import admin
-from models.common import RegisteredDealer
-from models.common import GladMindUsers, ProductTypeData, RegisteredDealer,\
-    ServiceAdvisor, BrandData, ProductData, CouponData, MessageTemplate,\
-    UploadProductCSV, ServiceAdvisorDealerRelationship
-from models.logs import AuditLog, DataFeedLog
+from suit.admin import SortableTabularInline, SortableModelAdmin
+from suit.widgets import SuitDateWidget, SuitSplitDateTimeWidget, \
+    EnclosedInput, LinkedSelect, AutosizedTextarea
 from suit.widgets import NumberInput
 from suit.admin import SortableModelAdmin
 from django.forms import ModelForm, TextInput
 from django.contrib.admin import ModelAdmin
-from suit.admin import SortableTabularInline, SortableModelAdmin
-from suit.widgets import SuitDateWidget, SuitSplitDateTimeWidget, \
-    EnclosedInput, LinkedSelect, AutosizedTextarea
+from django.contrib.admin import DateFieldListFilter
 from django.contrib.admin import ModelAdmin, SimpleListFilter
+from django.db import connections
+from django.db import models
+from models.common import GladMindUsers, ProductTypeData, \
+    BrandData, ProductData, CouponData, MessageTemplate,\
+    UploadProductCSV
+from gladminds.aftersell.models.common import \
+    RegisteredDealer,ServiceAdvisorDealerRelationship, ServiceAdvisor
+from gladminds.aftersell.models.logs import AuditLog, DataFeedLog
 from import_export.admin import ImportExportModelAdmin, ExportMixin
 from import_export import fields, widgets
 from import_export import resources
-from django.contrib.admin import DateFieldListFilter
-import tablib
-import datetime
-from models import logs
 from gladminds.models.common import EmailTemplate
+from gladminds.aftersell.models.common import ASCSaveForm
 
 
 ############################BRAND AND PRODUCT ADMIN##########################
@@ -56,7 +60,6 @@ class BrandForm(ModelForm):
 class BrandAdmin(ModelAdmin):
     form = BrandForm
     search_fields = ('brand_id', 'brand_name')
-    list_filter = ('brand_name',)
     list_display = ('image_tag', 'brand_id', 'brand_name', 'products')
     inlines = (ProductTypeDataInline,)
 #     readonly_fields = ('image_tag',)
@@ -101,7 +104,6 @@ class DealerForm(ModelForm):
 class DealerAdmin(ModelAdmin):
     form = DealerForm
     search_fields = ('dealer_id',)
-    list_filter = ('dealer_id',)
     list_display = ('dealer_id', 'address')
 #    list_display = ('dealer_id', 'address', 'service_advisor_id')
 #     inlines = (SAInline,)
@@ -135,7 +137,7 @@ class ServiceAdvisorDealerAdmin(ModelAdmin):
     def service_advisor_ids(self, obj):
         sa_obj = ServiceAdvisor.objects.filter(
             service_advisor_id=obj.service_advisor_id.service_advisor_id)
-        return u'<a href="/gladminds/serviceadvisor/%s/">%s</a>' % (obj.service_advisor_id.pk, sa_obj[0].service_advisor_id)
+        return u'<a href="/aftersell/serviceadvisor/%s/">%s</a>' % (obj.service_advisor_id.pk, sa_obj[0].service_advisor_id)
     service_advisor_ids.allow_tags = True
 
     def name(self, obj):
@@ -171,7 +173,6 @@ class GladMindUserAdmin(ModelAdmin):
         'gladmind_customer_id', 'customer_name', 'phone_number', 'email_id')
     list_display = ('gladmind_customer_id', 'customer_name',
                     'email_id', 'phone_number', 'date_of_registration')
-    list_filter = ('registration_date',)
 
     def date_of_registration(self, obj):
         return obj.registration_date.strftime("%d %b %Y")
@@ -190,7 +191,6 @@ class Couponline(SortableTabularInline):
 class ProductDataAdmin(ModelAdmin):
     search_fields = ('vin', 'sap_customer_id', 'customer_phone_number__customer_name',
                      'customer_phone_number__phone_number')
-    list_filter = (('product_purchase_date', DateFieldListFilter),)
     list_display = ('vin', 'sap_customer_id', "UCN", 'customer_name',
                     'customer_phone_number', 'product_purchase_date')
     inlines = (Couponline,)
@@ -231,7 +231,10 @@ class ProductDataAdmin(ModelAdmin):
             coupon_service_type = " | ".join(
                 [str(obj.service_type) for obj in gm_coupon_data_obj])
         return coupon_service_type
-
+    
+    def changelist_view(self, request, extra_context=None):
+        extra_context = {'searchable_fields':"('vin', 'sap_customer_id', 'customer_phone_number', 'customer_name')"}
+        return super(ProductDataAdmin, self).changelist_view(request, extra_context=extra_context)
 
 class CouponResource(resources.ModelResource):
 #     def get_export_headers(self):
@@ -262,8 +265,7 @@ class CouponAdmin(ModelAdmin):
     search_fields = (
         'unique_service_coupon', 'vin__vin', 'valid_days', 'valid_kms', 'status', 
         "service_type")
-    list_filter = ('status', ('actual_service_date', DateFieldListFilter))
-    list_display = ('unique_service_coupon', 'vin', 'actual_service_date',
+    list_display = ('vin', 'unique_service_coupon', "actual_service_date",
                     'actual_kms', 'valid_days', 'valid_kms', 'status', "service_type")
     exclude = ('order',)
 
@@ -332,7 +334,6 @@ class CouponChangeList(ChangeList):
 
 
 class AuditLogAdmin(ModelAdmin):
-    list_filter = ('date', 'status', 'action')
     search_fields = ('status', 'sender', 'reciever', 'action')
     list_display = (
         'date', 'action', 'message', 'sender', 'reciever', 'status')
@@ -376,10 +377,22 @@ class EmailTemplateAdmin(ModelAdmin):
 
 
 class FeedLogAdmin(ModelAdmin):
-    list_filter = ('feed_type', 'status')
     search_fields = ('status', 'data_feed_id', 'action')
     list_display = ('timestamp', 'feed_type', 'action',
-                    'total_data_count', 'success_data_count', 'failed_data_count')
+                    'total_data_count', 'success_data_count',
+                    'failed_data_count', 'feed_remarks')
+
+    def feed_remarks(self, obj):
+        if obj.remarks:
+            remarks = json.loads(obj.remarks)
+            update_remark = ''
+            for remark, occurence in remarks.iteritems():
+                update_remark = "[ {0} : {1} ].  ".format(remark, occurence)
+    
+            update_remark = update_remark[:100] + u'<a href="{0}">{1}</a>'.\
+                                            format(obj.file_location, " For More...")
+            return update_remark
+    feed_remarks.allow_tags = True
 
     def has_add_permission(self, request):
         return False
@@ -402,9 +415,7 @@ class DispatchedProduct(ProductData):
     class Meta:
         proxy = True
 
-
 class ListDispatchedProduct(ModelAdmin):
-    list_filter = ('engine', 'product_type', ('invoice_date', DateFieldListFilter))
     search_fields = ('vin', 'engine' , 'customer_phone_number__phone_number', 
                      'dealer_id__dealer_id', 'product_type__product_type')
     
@@ -431,6 +442,31 @@ class ListDispatchedProduct(ModelAdmin):
             ucn_list.append(coupon.unique_service_coupon)
         return ' | '.join([str(ucn) for ucn in ucn_list])
 
+    def changelist_view(self, request, extra_context=None):
+        extra_context = {'searchable_fields':"('vin', 'engine', 'customer_phone_number', 'dealer_id', 'product_type')"}
+        return super(ListDispatchedProduct, self).changelist_view(request, extra_context=extra_context)
+##############################################################
+#########################ASCSaveForm#########################
+
+
+class ASCSaveFormAdmin(ModelAdmin):
+    search_fields = (
+        'name', 'phone_number', 'email', 'pincode',
+        'address', 'status', 'timestamp', 'dealer_id')
+
+    list_display = (
+        'name', 'phone_number', 'email', 'status', 'timestamp')
+
+    def suit_row_attributes(self, obj):
+        class_map = {
+            '1': 'success',
+            '2': 'error'
+        }
+        css_class = class_map.get(str(obj.status))
+        if css_class:
+            return {'class': css_class}
+##############################################################
+
 
 admin.site.register(BrandData, BrandAdmin)
 admin.site.register(DispatchedProduct, ListDispatchedProduct)
@@ -445,4 +481,5 @@ admin.site.register(ProductData, ProductDataAdmin)
 admin.site.register(CouponData, CouponAdmin)
 admin.site.register(MessageTemplate, MessageTemplateAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
+admin.site.register(ASCSaveForm, ASCSaveFormAdmin)
 admin.site.register(UploadProductCSV)

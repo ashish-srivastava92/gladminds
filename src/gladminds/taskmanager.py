@@ -1,6 +1,7 @@
 from django.db import models, transaction
 from gladminds import audit, utils, message_template as templates
-from gladminds.models import common, logs
+from gladminds.aftersell.models import logs
+from gladminds.models import common
 from datetime import datetime, timedelta
 from gladminds.models.common import CouponData, STATUS_CHOICES
 from django.utils import timezone

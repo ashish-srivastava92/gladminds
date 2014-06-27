@@ -20,7 +20,7 @@ DATABASES = {
         'NAME': 'gladmindsdb',
         'USER': 'gladminds',
         'PASSWORD': 'gladminds123',
-        'HOST': 'gladminds-prod.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'HOST': 'gladminds-production.chnnvvffqwop.us-east-1.rds.amazonaws.com',
         'PORT': '3306',
     }
 }
@@ -75,9 +75,15 @@ ENABLE_AMAZON_SQS = True
 ########################SQS Queue Name##################################
 SQS_QUEUE_NAME = "gladminds-prod"
 ########################################################################
+FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail"
+UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail"
 #########################New relic file location########################
 NEW_RELIC_FILE_LOCATION = './src/newrelic.ini'
 ########################################################################
 ###################Change Mail Subject on Prod##########################
 MAIL_DETAIL["subject"]= "GladMinds Feed Report"
+#######################################################################
+#######################Feed Fail Failure Info###########################
+FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/dev/'
+FEED_FAILURE_BUCKET = 'gladminds'
 #######################################################################

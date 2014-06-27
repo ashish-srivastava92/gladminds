@@ -70,24 +70,23 @@ CREATE TABLE `gladminds_serviceadvisorcouponrelationship` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -------------------Migration Script for 1.3.1 ------------------
+alter table aftersell_registeredasc add asc_id char(20) not null;
+alter table aftersell_registeredasc add constraint unique(asc_id);
 
 DROP INDEX phone_number ON gladminds_serviceadvisor;
-
 --
 -- Table structure for table `auth_group`
 --
-DROP TABLE IF EXISTS `auth_group`;
-CREATE TABLE `auth_group` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(80) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
-
 LOCK TABLES `auth_group` WRITE;
 INSERT INTO `auth_group` VALUES (4,'ascs'),(3,'customer'),(1,'dealers'),(2,'sas');
 UNLOCK TABLES;
+-------------------Migration Script for 1.3.1 ------------------
 
+-------------------Migration Script for prod_1.3.1 ------------------
+
+ALTER TABLE aftersell_datafeedlog  ADD file_location  VARCHAR(215);
+
+--------------------Migration Script for prod_1.3.1 ------------------
 -------------------create slow query log------------------
 
 sudo mkdir /var/log/mysql

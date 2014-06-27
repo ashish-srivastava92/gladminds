@@ -8,7 +8,6 @@ STATIC_DIR = os.path.join(BASE_DIR, "src/static")
 TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -26,7 +25,15 @@ DATABASES = {
 
 BROKER_URL= 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
+
+
+JOBCARD_DIR = '{0}/jobcards/dev/'
+
+FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/dev/'
+FEED_FAILURE_BUCKET = 'gladminds'
+
 MAIL_SERVER = 'localhost'
+
 
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
@@ -42,8 +49,14 @@ TEMPLATE_DIRS = (
     TEMPLATE_DIR,
 )
 
-SMS_CLIENT = "AIRTEL"
 
+######################################################
+#ADDED SETTINGS TO TEST CAPSYSTEM ON DEV ENV
+###########################################################
+ENABLE_AMAZON_SQS = False
+
+SMS_CLIENT = "AIRTEL"
+  
 # SMS_CLIENT_DETAIL = {
 #                      'OTP_TWILIO_ACCOUNT' : 'ACbb8cb45f6113b8f2f6243c8eaa5ff971',
 #                      'OTP_TWILIO_AUTH' : 'aa445a4f0a7e651738e89810601f8860',
@@ -51,15 +64,24 @@ SMS_CLIENT = "AIRTEL"
 #                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/Messages.json'
 #                 }
 
-SMS_CLIENT_DETAIL={
-                   'login':'bajajauto',
-                   'pass':'bajaj',
-                   'authenticate_url':'http://117.99.128.32:80/login/pushsms.php' ,
-                   'message_url': 'http://117.99.128.32:80/login/pushsms.php'                  
-                   }
 
-FEED_TYPE = 'CSV'
+SMS_CLIENT_DETAIL={
+                    'login':'bajajauto',
+                    'pass':'bajaj',
+                    'authenticate_url':'http://117.99.128.32:80/login/pushsms.php' ,
+                    'message_url': 'http://117.99.128.32:80/login/pushsms.php'   
+                    }
 
 ########################SQS Queue Name
 SQS_QUEUE_NAME = "gladminds-dev"
 ######################################
+
+FEED_TYPE = 'CSV'
+FEED_FAILURE_MAIL_ENABLED = True
+
+MAIL_DETAIL["subject"]= "GladMinds Feed Report DEV"
+MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
+
+FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail DEV"
+FEED_FAILURE_MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
+UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail DEV"

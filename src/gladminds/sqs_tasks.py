@@ -360,7 +360,15 @@ Delete the all the generated otp by end of day.
 def delete_unused_otp(*args, **kwargs):
     common.OTPToken.objects.all().delete()
 
-
+'''
+Cron Job to send report email for data feed
+'''
+@shared_task
+def send_report_mail_for_feed_failure(*args, **kwargs):
+    remarks = kwargs['remarks']
+    feed_type = kwargs['feed_type']
+    mail.feed_failure_report(remarks = remarks, feed_type=feed_type)
+    
 _tasks_map = {"send_registration_detail": send_registration_detail,
 
               "send_service_detail": send_service_detail,
@@ -394,8 +402,6 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               "export_coupon_redeem_to_sap": export_coupon_redeem_to_sap,
 
               "send_report_mail_for_feed": send_report_mail_for_feed,
-
-              "export_asc_registeration_to_sap": export_asc_registeration_to_sap,
               
               "send_otp": send_otp,
               

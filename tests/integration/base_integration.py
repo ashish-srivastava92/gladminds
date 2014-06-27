@@ -1,6 +1,7 @@
 from tastypie.test import ResourceTestCase
 from django.core import management
 from gladminds.models import common
+from gladminds.aftersell.models import common as aftersell_common
 import os
 from django.conf import settings
 import json
@@ -50,7 +51,7 @@ class GladmindsResourceTestCase(ResourceTestCase):
         return product_data
 
     def get_delear_obj(self, **kwargs):
-        delear_data = common.RegisteredDealer(**kwargs)
+        delear_data = aftersell_common.RegisteredDealer(**kwargs)
         delear_data.save()
         return delear_data
 
@@ -65,18 +66,19 @@ class GladmindsResourceTestCase(ResourceTestCase):
         return brand_obj
 
     def get_service_advisor_obj(self, **kwargs):
-        service_advisor_obj = common.ServiceAdvisor(**kwargs)
+        service_advisor_obj = aftersell_common.ServiceAdvisor(**kwargs)
         service_advisor_obj.save()
         return service_advisor_obj
 
     def get_dealer_service_advisor_obj(self, **kwargs):
-        dealer_service_advisor_obj = common.ServiceAdvisorDealerRelationship(**kwargs)
+        dealer_service_advisor_obj = aftersell_common.ServiceAdvisorDealerRelationship(**kwargs)
         dealer_service_advisor_obj.save()
         return dealer_service_advisor_obj
 
     def get_customer_obj(self, **kwargs):
         customer_obj = common.GladMindUsers(**kwargs)
         customer_obj.save()
+        print "$%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#", customer_obj
         return customer_obj
     
     def filter_coupon_obj(self, coupon_id=None):

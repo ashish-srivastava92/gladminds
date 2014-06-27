@@ -1,62 +1,121 @@
 (function() {
 
-    $("input.advisor-action").click(function() {
-        var actionSet = $(this).parents(".advisor-action-item"), postAction = $(this).val(), sibblingActionSet = actionSet.siblings(".advisor-action-item"), disabledInputs = actionSet.find("input[type='text']"), activeInputs = sibblingActionSet.find("input[type='text']");
+    $('input.advisor-action').click(function() {
+        var actionSet = $(this).parents('.advisor-action-item'), postAction = $(this).val(), sibblingActionSet = actionSet.siblings('.advisor-action-item'), disabledInputs = actionSet.find('input[type="text"]'), activeInputs = sibblingActionSet.find('input[type="text"]');
 
-        activeInputs.attr("disabled", "disabled").removeAttr("required");
-        disabledInputs.removeAttr("disabled").attr("required", "required");
+        activeInputs.attr('disabled', 'disabled').removeAttr('required');
+        disabledInputs.removeAttr('disabled').attr('required', 'required');
     });
 
-    $(".query-form").on("submit", function(e) {
-        var messageBlock = $(".user-message .message");
-        var formData = $("form.query-form").serializeArray();
-        $(this).find("input[type='text']").val('');
-        var jqXHR = $.ajax({
-            url : "/v1/messages",
-            data : formData,
-            type : "POST",
-            beforeSend : function() {
-                messageBlock.stop().fadeOut(0);
-                $(".query-submit").prop("disabled", true);
-            },
-            success : function() {
-                messageBlock.text("Query has been submitted");
-                messageBlock.fadeIn(1000).fadeOut(5000);
-                $(".query-submit").prop("disabled", false);
-            },
-            error : function() {
-                messageBlock.text("Invalid Data. Please Check");
-                messageBlock.fadeIn(1000).fadeOut(5000);
-                $(".query-submit").prop("disabled", false);
-            }
-        });
+    $('form.coupon-check-form, form.coupon-close-form').on('submit', function(e) {
+    	var data = $(this).serializeArray();
+    	Utils.submitForm(e, data, '/v1/messages');
         return false;
     });
 
-    $(".asc-form").on("submit", function(e) {
-        var data = $(".asc-form").serializeArray();
-        $(".asc-form").serializeArray().map(function(x) {
-            data[x.name] = x.value;
-        });
-        
-        if (data["pwd"] != data["re-pwd"]){
-            alert("Password should be same");
-            return false;             
-        }
-        var jqXHR = $.ajax({
-            type : 'POST',
-            data : data,
-            url : '/save/asc',
-            success : function(data, status, jqxhr) {
-                alert("Successfully registered");
-            },
-            error : function(data, status, jqxhr) {
-                alert("error on saving Please retry");
-            }
-        });
+    $('.asc-form').on('submit', function(e) {
+        var data = Utils.getFormData('.asc-form')
+        Utils.submitForm(e, data, '/aftersell/register/asc');
         return false;
     });
+    
+    $('.asc-self-form').on('submit', function(e) {
+        var data = Utils.getFormData('.asc-self-form');
+        Utils.submitForm(e, data, '/aftersell/asc/self-register/');
+        return false;
+    });
+    
+    $('.sa-form').on('submit', function(event) {
+        var data = Utils.getFormData('.sa-form');
+        Utils.submitForm(event, data, '/aftersell/register/sa');
+        return false;
+    });
+    
 
+    $('.customer-form').on('submit', function(e) {
+    	var data = Utils.getFormData('.customer-form'),
+            vin = $('#srch-vin').val();
+    	data['vin'] = vin;
+    	Utils.submitForm(e, data, '/aftersell/register/customer');
+        return false;
+      });
+    
+    $('.vin-form').on('submit', function() {
+      var vin = $('#srch-vin').val(),
+          messageModal = $('.modal.message-modal'),
+          messageBlock = $('.modal-body', messageModal);
+      $('.customer-vin').val(vin);
+      
+      var jqXHR = $.ajax({
+            type: 'POST',
+            url: '/aftersell/exceptions/customer',
+            data: {'vin': vin},
+            success: function(data){
+              if(data['customer_phone']){
+                  $('.customer-phone').val(data['customer_phone']);
+                  $('.customer-name').val(data['customer_name'])
+                  $('.name-readonly').attr('readOnly', true);
+                  $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
+                  $('.customer-id').val(data['customer_id']).attr('readOnly', true);
+                  $('.customer-submit').attr('disabled', false);
+              }	
+              else{
+                  $('.customer-phone').val(data['customer_phone']);
+            	  $('.customer-name').val('')
+                  $('.name-readonly').attr('readOnly', false);
+                  $('.purchase-date').val('').attr('readOnly', false);
+                  $('.customer-id').val('').attr('readOnly', false);  
+                  messageBlock.text(data.message);
+                  messageModal.modal('show');
+              }
+            },
+            error: function() {
+            	messageBlock.text('Oops! Some error occurred!');
+                messageModal.modal('show');
+            }
+          });
+      return false;
+    });
+    
+    $('.ucn-recovery-form').on('submit', function() {
+      var formData = new FormData($(this).get(0));
+      var messageModal = $('.modal.message-modal'),
+          messageBlock = $('.modal-body', messageModal),
+          waitingModal = $('.modal.waiting-dialog'),
+          jqXHR = $.ajax({
+          type: 'POST',
+          url: '/aftersell/exceptions/recover',
+          data: formData,
+          cache: false,
+          processData: false,
+          contentType: false,
+          beforeSend: function(){
+            $(this).find('input[type="text"]').val('');
+            waitingModal.modal('show');
+          },
+          success: function(data){
+            messageBlock.text(data.message);
+            waitingModal.modal('hide');
+            messageModal.modal('show');
+          },
+          error: function() {
+            messageBlock.text('Invalid Data');
+            waitingModal.modal('hide');
+            messageModal.modal('show');
+          }
+        });
+      return false;
+    });
+    
+    $('#jobCard').on('change', function() {
+      var fileInput = $(this),
+          ext = fileInput.val().split('.').pop().toLowerCase();
+      if($.inArray(ext, ['pdf','tiff','jpg']) == -1) {
+          alert('Invalid file type!');
+          fileInput.replaceWith(fileInput=fileInput.clone(true));
+      }
+    });
+    
     $(document).ready(function() {
 
     });

@@ -7,6 +7,7 @@ from unit.base_unit import GladmindsUnitTestCase
 from gladminds.utils import COUPON_STATUS
 from gladminds.taskmanager import get_data_feed_log_detail
 from gladminds.models import common
+from gladminds.aftersell.models import common as aftersell_common
 from django.db.models import Q
 import time
 
@@ -66,9 +67,9 @@ class TestCronjobs(GladmindsUnitTestCase):
     
     def tearDown(self):
         common.BrandData.objects.filter(brand_id='brand001').delete()
-        common.RegisteredDealer.objects.filter(dealer_id='DEALER001').delete()
+        aftersell_common.RegisteredDealer.objects.filter(dealer_id='DEALER001').delete()
         common.GladMindUsers.objects.filter(Q(phone_number='9999999')|Q(phone_number='8888888')).delete()
-        common.ServiceAdvisor.objects.filter(Q(service_advisor_id='SA001Test')|Q(service_advisor_id='SA002Test')).delete()
+        aftersell_common.ServiceAdvisor.objects.filter(Q(service_advisor_id='SA001Test')|Q(service_advisor_id='SA002Test')).delete()
 
     def test_expire_service_coupon(self):
         expire_service_coupon()

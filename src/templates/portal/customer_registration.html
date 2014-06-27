@@ -1,0 +1,111 @@
+{% extends "base_template.html" %}
+
+{% block body %}
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <a class="brand" href="#"><img src="/static/img/bajaj_logo.jpg" height=50px width=209px></a>
+    </div>
+</div>
+<div class="well">
+    <div class="user-message">
+        <div class="message"></div>
+    </div>
+    <div id="wrapper">
+        <div class="row">
+          <div class="col-md-offset-8 col-md-2">
+            <a class="logout" href="/aftersell/provider/logout">Logout</a>
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 .col-md-offset-1">
+                {% include "portal/base_portal.html" %}
+            </div>
+            <div class="col-md-8">
+                          <div class="row portal-form-heading">
+                  <div class="col-md-10">
+                      <h3 class="text-center">Search by Vin#</h3>
+                  </div>
+              </div>
+              <form class="vin-form row" role="search">
+              <div class="col-md-offset-2"> 
+                <div class="row">
+                  <div class="col-md-2 form-group">
+                    <label class="control-label">VIN#:</label>
+                  </div>
+                  <div class="col-md-7 input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="srch-vin" id="srch-vin" required>
+                    <div class="input-group-btn">
+                      <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+                    </div>
+                  </div>
+                </div>
+                </div>
+              </form>
+              <div class="row portal-form-heading">
+                <div class="col-md-10">
+                  <h3 class="text-center">Customer Registration</h3>
+                </div>
+              </div>
+             <form class="customer-form row" role="form">
+             <div class="col-md-offset-2"> 
+              <div class="row hide">
+                <div class="col-md-3 form-group">
+                    <label class="control-label">VIN:</label>
+                </div>
+                <div class="col-md-4 form-group">
+                    <input type="text" name='customer-vin' class="form-control customer-vin"/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4 form-group">
+                    <label class="control-label">Customer ID:</label>
+                </div>
+                <div class="col-md-5 form-group">
+                    <input type="text" class="form-control customer-id"/>
+                </div>
+              </div>
+               <div class="row">
+                <div class="col-md-4 form-group">
+                    <label class="control-label">Customer Name:</label>
+                </div>
+                <div class="col-md-5 form-group">
+                    <input type="text" name='customer-name' class="form-control customer-name name-readonly"/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4 form-group">
+                    <label class="control-label">Customer Phone:</label>
+                </div>
+                <div class="col-md-5 form-group">
+                    <input type="text" name='customer-phone' class="form-control customer-phone" maxlength="10" placeholder="10 digits"/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4 form-group">
+                    <label class="control-label">Product purchase Date:</label>
+                </div>
+                <div class="col-md-5 form-group">
+                    <input type="text" name='purchase-date' class="form-control purchase-date" placeholder="dd/mm/yyyy" pattern="^(\d{1,2})\/(\d{1,2})\/(\d{4})$"/>
+                </div>
+              </div>
+              <div class="row">
+                  <div class="col-md-9 form-group">
+                      <button type="submit" value="Submit" class="btn btn-primary pull-right customer-submit" disabled>
+                          Submit
+                      </button>
+                  </div>
+              </div>
+              </div>             
+             </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% include "portal/modal.html" %}
+{% include "portal/waiting_modal.html" %}
+{% endblock %}
+
+{% block dependency %}
+<script src="/static/js/portal/utils.js"></script>
+<script src="/static/js/portal/main.js"></script>
+{% endblock dependency %}

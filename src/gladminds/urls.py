@@ -16,21 +16,22 @@ api_v1.register(resources.ProductResources())
 api_v1.register(resources.UserResources())
 
 urlpatterns = patterns('',
-    url(r'^dealers/$', 'django.contrib.auth.views.login', {'template_name': 'dealer/login.html'}),
-    url(r'^dealers/logout$', 'django.contrib.auth.views.logout', {'template_name': 'dealer/login.html'}),
-    url(r'^dealers/getUrl', 'gladminds.views.redirect', name='redirect'),
-    url(r'^dealers/([a-zA-Z0-9]+)', 'gladminds.views.action', name='actions'),
-
+    url(r'^aftersell/(?P<provider>[a-zA-Z]+)/login/$', 'gladminds.views.auth_login', name='user_login'),
+    url(r'^aftersell/provider/logout$', 'gladminds.views.user_logout', name='user_logout'),
     url(r'api/doc/', include('tastypie_swagger.urls', namespace='tastypie_swagger')),
+    url(r'^aftersell/provider/redirect$', 'gladminds.views.redirect_user'),
 
-    url(r'^register/(?P<user>[a-zA-Z0-9]+)$', 'gladminds.views.register'),
-    url(r'^save/(?P<user>[a-zA-Z0-9]+)$', 'gladminds.views.register_user'),
-    url(r'^users/otp/generate$', 'gladminds.views.generate_otp', name='generate_otp'),
-    url(r'^users/otp/validate', 'gladminds.views.validate_otp', name='validate_otp'),
-    url(r'^users/otp/update_pass', 'gladminds.views.update_pass', name='update_pass'),
-    
+    url(r'^aftersell/register/(?P<menu>[a-zA-Z0-9]+)$', 'gladminds.views.register'),
+    url(r'^aftersell/exceptions/(?P<exception>[a-zA-Z0-9]+)$', 'gladminds.views.exceptions'),
+    url(r'^aftersell/users/otp/generate$', 'gladminds.views.generate_otp', name='generate_otp'),
+    url(r'^aftersell/users/otp/validate', 'gladminds.views.validate_otp', name='validate_otp'),
+    url(r'^aftersell/users/otp/update_pass', 'gladminds.views.update_pass', name='update_pass'),
+
+    url(r'^aftersell/asc/self-register/$', 'gladminds.views.asc_registration'),
+
     #Afterbuy accesstoken URL.
     url(r'^oauth2/', include('provider.oauth2.urls', namespace = 'oauth2')),
+
 )
 
 urlpatterns += patterns('gladminds',
@@ -47,11 +48,13 @@ urlpatterns += patterns('gladminds',
     url(r'^api/v1/bajaj/dispatch-feed/$', 'webservice.dispatch_service'),
     url(r'^api/v1/bajaj/purchase-feed/\?wsdl$', 'webservice.purchase_service'),
     url(r'^api/v1/bajaj/purchase-feed/$', 'webservice.purchase_service'),
+    url(r'^api/v1/bajaj/asc-feed/\?wsdl$', 'webservice.asc_service'),
+    url(r'^api/v1/bajaj/asc-feed/$', 'webservice.asc_service'),    
     url(r'^api/v1/bajaj/redeem-feed/$', 'superadmin.views.views_coupon_redeem_wsdl', {'document_root': settings.WSDL_COUPON_REDEEM_LOC}),
 
     url(r'^app/logout', 'afterbuy.views.app_logout', name='app_logout'),
     url(r'^app', 'afterbuy.views.home', name='home'),
-    url(r'^gm', 'afterbuy.views.main', name='main'),
+    url(r'^afterbuy', 'afterbuy.views.main', name='main'),
     url(r'^v1/api/users/auth', 'afterbuy.views.get_access_token'),
     url(r'^tasks-view', 'views.sqs_tasks_view'),
     url(r'^trigger-tasks', 'views.trigger_sqs_tasks'),

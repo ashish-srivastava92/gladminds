@@ -309,3 +309,4 @@
 #         feed_log(feed_type="ASC Registration Feed", total_data_count=1,
 #          failed_data_count=total_failed, success_data_count=1 - total_failed,
 #                  action='Sent', status=export_status)
+
