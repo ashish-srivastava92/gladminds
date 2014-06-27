@@ -1,4 +1,3 @@
-"use strict"
 (function() {
 
     $('input.advisor-action').click(function() {
