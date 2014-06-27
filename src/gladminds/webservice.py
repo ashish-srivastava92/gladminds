@@ -228,7 +228,6 @@ class DealerService(ServiceBase):
         feed_remark = FeedLogWithRemark(len(ObjectList.DealerData),
                                         feed_type='Dealer Feed',
                                         action='Received', status=True)
-        print ObjectList.DealerData
         for dealer in ObjectList.DealerData:
             try:
                 dealer_list.append({

@@ -13,6 +13,7 @@ from integration.base_integration import GladmindsResourceTestCase
 from gladminds import feed
 import xml.etree.ElementTree as ET
 from django.utils import unittest
+from django.db import transaction
 
 logger = logging.getLogger('gladminds')
 
@@ -182,14 +183,14 @@ class FeedsResourceTest(GladmindsResourceTestCase):
     def test_partial_fail(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/without_sa_id_sa_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
-        self.assertEqual(200, response.status_code)
-
+        with transaction.atomic():
+            response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+            self.assertEqual(200, response.status_code)
         response_content = response.content
         xml_parser = ET.fromstring(response_content)
-
-        status = xml_parser.findall('*//{http://api.gladmindsplatform.co/api/v1/bajaj/feed/}postDealerResult')[0].text
-        self.assertEqual(status, 'SUCCESS')
+        with transaction.atomic():
+            status = xml_parser.findall('*//{http://api.gladmindsplatform.co/api/v1/bajaj/feed/}postDealerResult')[0].text
+            self.assertEqual(status, 'SUCCESS')
 
     def test_update_customer_number(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
