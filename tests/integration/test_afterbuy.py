@@ -42,8 +42,6 @@ class TestAfterbuy(GladmindsResourceTestCase):
             'txtName': 'testuser'
         }
         response = client.post('/afterbuy/', data=data)
-        print "%%%%%%%%",response.status_code, response.content
-        print common.GladMindUsers.objects.all()
         
 
     def test_check_login(self):
@@ -54,9 +52,7 @@ class TestAfterbuy(GladmindsResourceTestCase):
                     'txtUsername': 'testuser'
                 }
         response = client.post(
-            '/afterbuy/', data =data)
-        print response
-        
+            '/afterbuy/', data =data)        
     
     
     def test_product_details(self):
