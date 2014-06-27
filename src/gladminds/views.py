@@ -93,6 +93,7 @@ def generate_otp(request):
         return render(request, 'portal/get_otp.html')
 
 def validate_otp(request):
+    print "here"
     if request.method == 'GET':
         return render(request, 'portal/validate_otp.html')
     elif request.method == 'POST':

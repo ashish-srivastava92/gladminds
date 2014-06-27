@@ -119,6 +119,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         self.validate_coupon(sms_dict, phone_number)
         
         in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC001')
+        print "fdsads", common.CouponData.objects.all()[0].status
         self.assertEqual(in_progess_coupon.status, 4, "in_progess_coupon status should be 4")
 
 #     Need to find out how to write this test case because it creates cyclic dependency.

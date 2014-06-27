@@ -1,6 +1,6 @@
 from gladminds import smsparser
 import os
-from gladminds.settings import PROJECT_DIR
+from gladminds.settings import BASE_DIR
 import logging
 import json
 logger = logging.getLogger('test_case')
@@ -12,7 +12,7 @@ class SmsParserTest(ResourceTestCase):
 
     def setUp(self):
         super(SmsParserTest, self).setUp()
-        file_path = os.path.join(PROJECT_DIR, 'template_data/template.json')
+        file_path = os.path.join(BASE_DIR, 'etc/data/template.json')
         message_templates = json.loads(open(file_path).read())
         for message_temp in message_templates:
             fields = message_temp['fields']

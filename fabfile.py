@@ -66,7 +66,7 @@ def lint_py(format="text"):
 @task()
 def lint_js():
     '''Reports Pylint Errors & Warnings for Python files'''
-    return _execute('bin/jshint --config=etc/jshint.json src/static/js/portal')
+    return _execute('bin/jshint --config=etc/jshint.json src/static/js')
 
 @task()
 def lint_css():
