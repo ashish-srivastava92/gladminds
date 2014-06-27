@@ -638,7 +638,6 @@ def home(request):
 
 @csrf_exempt
 def get_access_token(request):
-    print request
     username = request.POST['username']
     password = request.POST['password']
 

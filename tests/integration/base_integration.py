@@ -11,7 +11,7 @@ class GladmindsResourceTestCase(ResourceTestCase):
 
     def setUp(self):
         super(GladmindsResourceTestCase, self).setUp()
-        file_path = os.path.join(settings.BASE_DIR, 'etc/data/template.json')
+        file_path = os.path.join(settings.PROJECT_DIR, 'template_data/template.json')
         message_templates = json.loads(open(file_path).read())
         for message_temp in message_templates:
             fields = message_temp['fields']
@@ -78,7 +78,6 @@ class GladmindsResourceTestCase(ResourceTestCase):
     def get_customer_obj(self, **kwargs):
         customer_obj = common.GladMindUsers(**kwargs)
         customer_obj.save()
-        print "$%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#", customer_obj
         return customer_obj
     
     def filter_coupon_obj(self, coupon_id=None):

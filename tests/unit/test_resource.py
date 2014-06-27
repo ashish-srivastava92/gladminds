@@ -134,17 +134,17 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         self.assertEqual(coupon_obj.extended_date.date(), expiry_date.date())
         
     def test_register_customer(self):
-        result = client.post('/v1/messages', data={'text': settings.ALLOWED_KEYWORDS['register']+ ' email@email.com customer1', 'phoneNumber' : '4444861111'})
+        result = client.post('/v1/messages', data={'text': settings.ALLOWED_KEYWORDS['register'] + ' email@email.com customer1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
         # Customer already exist.
-        result = client.post('/v1/messages', data={'text': settings.ALLOWED_KEYWORDS['register']+ ' email@email.com customer1', 'phoneNumber' : '4444866666'})
+        result = client.post('/v1/messages', data={'text': settings.ALLOWED_KEYWORDS['register'] + ' email@email.com customer1', 'phoneNumber' : '4444866666'})
         self.assertHttpOK(result)
 
     def test_customer_service_detail(self):
         # Register customer
-        result = client.post('/v1/messages', data={'text': settings.ALLOWED_KEYWORDS['register']+ ' email@email.com customer1', 'phoneNumber' : '9999999'})
+        result = client.post('/v1/messages', data={'text': settings.ALLOWED_KEYWORDS['register'] + ' email@email.com customer1', 'phoneNumber' : '9999999'})
         self.assertHttpOK(result)
-        result = client.post('/v1/messages', data={'text': settings.ALLOWED_KEYWORDS['service']+ ' SAP001', 'phoneNumber' : '9999999'})
+        result = client.post('/v1/messages', data={'text': settings.ALLOWED_KEYWORDS['service'] + ' SAP001', 'phoneNumber' : '9999999'})
         self.assertHttpOK(result)
     
     def test_coupon_initiators(self):
