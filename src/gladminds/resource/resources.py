@@ -364,11 +364,11 @@ class GladmindsResources(Resource):
 
     def validate_dealer(self, phone_number):
         try:
-            service_advisor_obj = aftersell_common.ServiceAdvisor.objects.get(phone_number=phone_number)
-            all_sa_dealer_obj = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = service_advisor_obj, status = u'Y')
-            if len(all_sa_dealer_obj) == 0:
-                raise
-
+            service_advisor_objects = aftersell_common.ServiceAdvisor.objects.filter(phone_number=phone_number)
+            for service_advisor_obj in service_advisor_objects:
+                all_sa_dealer_obj = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = service_advisor_obj, status = u'Y')
+                if len(all_sa_dealer_obj) > 0:
+                    return service_advisor_obj
         except Exception as ex:
             sms_message = 'Not an authorised user to avail this service.'
             message = 'Not an authorised user to avail this service. Phone number - {0}'.format(phone_number)
@@ -381,7 +381,6 @@ class GladmindsResources(Resource):
                 send_coupon.delay(phone_number=phone_number, message=sms_message)
             audit.audit_log(action='failure', sender=phone_number, reciever="", message=message, status='warning')
             return None
-        return service_advisor_obj
 
     def is_sa_initiator(self, coupon_id, sa_object):
         coupon_data = common.CouponData.objects.filter(unique_service_coupon = coupon_id)
