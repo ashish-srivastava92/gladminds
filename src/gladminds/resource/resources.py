@@ -11,7 +11,6 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.conf import settings
 from django.db.models import Q
-
 from tastypie import fields
 from tastypie.http import HttpBadRequest, HttpUnauthorized
 from tastypie.resources import Resource, ModelResource

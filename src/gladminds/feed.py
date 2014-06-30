@@ -124,6 +124,16 @@ class BaseFeed(object):
     def registerNewUser(self, user, group=None, username=None, first_name='', last_name='',
                           email=''):
         logger.info('New {0} Registration with id - {1}'.format(user, username))
+        if not group:
+            group = USER_GROUP[user]
+        try:
+            user_group = Group.objects.get(name=group)
+        except ObjectDoesNotExist as ex:
+            logger.info(
+                "[Exception: new_ registration]: {0}"
+                .format(ex))
+            user_group = Group.objects.create(name=group)
+            user_group.save()
         if username:
             try:
                 new_user = User.objects.get(username=username)
@@ -136,17 +146,9 @@ class BaseFeed(object):
                 password = username + settings.PASSWORD_POSTFIX
                 new_user.set_password(password)
                 new_user.save()
-            
-                try:
-                    user_group = Group.objects.get(name=group)
-                except ObjectDoesNotExist as ex:
-                    logger.info(
-                        "[Exception: new_ registration]: {0}"
-                        .format(ex))
-                    user_group = Group.objects.create(name=group)
-                    user_group.save()
-                new_user.groups.add(user_group)
-                logger.info(user + ' {0} registered successfully'.format(username))
+            new_user.groups.add(user_group)
+            new_user.save()
+            logger.info(user + ' {0} registered successfully'.format(username))
             return new_user
         else:
             logger.info('{0} id is not provided.'.format(user))
@@ -210,6 +212,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                                                             name=dealer['name'], phone_number=dealer['phone_number'])
                         self.registerNewUser('SA', username=dealer['service_advisor_id'])
                         service_advisor.save()
+                        self.registerNewUser('SA', username=dealer['service_advisor_id'])
                 elif dealer['status']=='N':
                     service_advisor = service_advisor[0]
                 else:
@@ -380,8 +383,8 @@ class ProductPurchaseFeed(BaseFeed):
                     # Register this customer
                     gladmind_customer_id = utils.generate_unique_customer_id()
                     user=self.registerNewUser('customer', username=gladmind_customer_id)
-                    customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, phone_number=product['customer_phone_number'], 
-                                                         registration_date=datetime.now(), customer_name=product['customer_name'])
+                    customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, phone_number=product[
+                                                         'customer_phone_number'], registration_date=datetime.now(), customer_name=product['customer_name'])
                     customer_data.save()
 
                 if not product_data.sap_customer_id:
