@@ -14,6 +14,7 @@ from django.contrib.admin import DateFieldListFilter
 from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.db import connections
 from django.db import models
+from django.contrib.admin.models import LogEntry
 from models.common import GladMindUsers, ProductTypeData, \
     BrandData, ProductData, CouponData, MessageTemplate,\
     UploadProductCSV
@@ -483,3 +484,4 @@ admin.site.register(MessageTemplate, MessageTemplateAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(ASCSaveForm, ASCSaveFormAdmin)
 admin.site.register(UploadProductCSV)
+admin.site.register(LogEntry)
