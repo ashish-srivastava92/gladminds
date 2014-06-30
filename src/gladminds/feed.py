@@ -210,7 +210,6 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                     else:
                         service_advisor = aftersell_common.ServiceAdvisor(service_advisor_id=dealer['service_advisor_id'], 
                                                             name=dealer['name'], phone_number=dealer['phone_number'])
-                        self.registerNewUser('SA', username=dealer['service_advisor_id'])
                         service_advisor.save()
                         self.registerNewUser('SA', username=dealer['service_advisor_id'])
                 elif dealer['status']=='N':
