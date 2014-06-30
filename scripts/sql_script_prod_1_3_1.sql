@@ -29,3 +29,14 @@ show create table gladminds_productdata;
 alter table gladminds_productdata drop foreign key  dealer_id_id_refs_id_a8be2be4; 
 
 drop table gladminds_registereddealer;
+
+
+alter table gladminds_serviceadvisorcouponrelationship  add foreign key (service_advisor_phone_id) references aftersell_serviceadvisor(id);
+show create table gladminds_serviceadvisorcouponrelationship;
+alter table gladminds_serviceadvisorcouponrelationship drop foreign key service_advisor_phone_id_refs_id_ff3268c1;
+
+
+alter table gladminds_coupondata  add foreign key (sa_phone_number_id) references aftersell_serviceadvisor(id);
+show create table gladminds_coupondata;
+alter table gladminds_coupondata drop foreign key sa_phone_number_id_refs_id_add685cd;
+drop table gladminds_serviceadvisor;
