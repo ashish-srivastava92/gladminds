@@ -154,6 +154,11 @@ class ServiceAdvisorDealerAdmin(ModelAdmin):
         if len(sa_obj) > 0:
             return sa_obj[0].phone_number
         return None
+    
+    def changelist_view(self, request, extra_context=None):
+        extra_context = {'searchable_fields':"('dealer_id', 'service_advisor_id', 'service_advisor__name', 'service_advisor_phone_number')"}
+        return super(ServiceAdvisorDealerAdmin, self).changelist_view(request, extra_context=extra_context)
+
 
 
 ##############CUSTMERDATA AND GLADMINDS USER ADMIN###################
@@ -190,8 +195,8 @@ class Couponline(SortableTabularInline):
 
 
 class ProductDataAdmin(ModelAdmin):
-    search_fields = ('vin', 'sap_customer_id', 'customer_phone_number__customer_name',
-                     'customer_phone_number__phone_number')
+    search_fields = ('^vin', '^sap_customer_id', '^customer_phone_number__customer_name',
+                     '^customer_phone_number__phone_number')
     list_display = ('vin', 'sap_customer_id', "UCN", 'customer_name',
                     'customer_phone_number', 'product_purchase_date')
     inlines = (Couponline,)
@@ -203,7 +208,8 @@ class ProductDataAdmin(ModelAdmin):
         admin site. This is used by changelist_view.
         """
         query_set = self.model._default_manager.get_query_set()
-        query_set = query_set.filter(product_purchase_date__isnull=False)
+        query_set = query_set.select_related('').prefetch_related('customer_phone_number')
+#         query_set = query_set.filter(product_purchase_date__isnull=False)
         # TODO: this should be handled by some parameter to the ChangeList.
         ordering = self.get_ordering(request)
         if ordering:
@@ -264,8 +270,7 @@ class CouponResource(resources.ModelResource):
 class CouponAdmin(ModelAdmin):
 #    resource_class = CouponResource
     search_fields = (
-        'unique_service_coupon', 'vin__vin', 'valid_days', 'valid_kms', 'status', 
-        "service_type")
+        '^unique_service_coupon', '^vin__vin', '^status', "^service_type")
     list_display = ('vin', 'unique_service_coupon', "actual_service_date",
                     'actual_kms', 'valid_days', 'valid_kms', 'status', "service_type")
     exclude = ('order',)
@@ -288,6 +293,7 @@ class CouponAdmin(ModelAdmin):
         admin site. This is used by changelist_view.
         """
         qs = self.model._default_manager.get_query_set()
+        qs = qs.select_related('').prefetch_related('vin')
         '''
             This if condition only for landing page
         '''
@@ -297,6 +303,10 @@ class CouponAdmin(ModelAdmin):
     
     def get_changelist(self, request, **kwargs):
             return CouponChangeList
+    
+    def changelist_view(self, request, extra_context=None):
+        extra_context = {'searchable_fields':"('vin', 'unique_service_coupon', 'status', 'service_type')"}
+        return super(CouponAdmin, self).changelist_view(request, extra_context=extra_context)
 
 
 class CouponChangeList(ChangeList):
@@ -417,8 +427,8 @@ class DispatchedProduct(ProductData):
         proxy = True
 
 class ListDispatchedProduct(ModelAdmin):
-    search_fields = ('vin', 'engine' , 'customer_phone_number__phone_number', 
-                     'dealer_id__dealer_id', 'product_type__product_type')
+    search_fields = ('^vin', '^engine', '^customer_phone_number__phone_number', 
+                     '^dealer_id__dealer_id', '^product_type__product_type')
     
     list_display = (
         'vin', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
@@ -430,7 +440,9 @@ class ListDispatchedProduct(ModelAdmin):
         admin site. This is used by changelist_view.
         """
         query_set = self.model._default_manager.get_query_set()
-        query_set = query_set.filter(invoice_date__isnull=False)
+        
+        query_set = query_set.select_related('').prefetch_related('customer_phone_number', 'dealer_id', 'product_type')
+#         query_set = query_set.filter(invoice_date__isnull=False)
         # TODO: this should be handled by some parameter to the ChangeList.
 #        ordering = self.get_ordering(request)
 #        if ordering:
@@ -444,7 +456,7 @@ class ListDispatchedProduct(ModelAdmin):
         return ' | '.join([str(ucn) for ucn in ucn_list])
 
     def changelist_view(self, request, extra_context=None):
-        extra_context = {'searchable_fields':"('vin', 'engine', 'customer_phone_number', 'dealer_id', 'product_type')"}
+        extra_context = {'searchable_fields':"('vin', 'engine', 'dealer_id', 'product_type')"}
         return super(ListDispatchedProduct, self).changelist_view(request, extra_context=extra_context)
 ##############################################################
 #########################ASCSaveForm#########################
