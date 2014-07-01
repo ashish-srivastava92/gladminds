@@ -201,6 +201,7 @@ class ProductDataAdmin(ModelAdmin):
                     'customer_phone_number', 'product_purchase_date')
     inlines = (Couponline,)
     exclude = ('order',)
+    list_per_page = 50
 
     def queryset(self, request):
         """
@@ -209,7 +210,7 @@ class ProductDataAdmin(ModelAdmin):
         """
         query_set = self.model._default_manager.get_query_set()
         query_set = query_set.select_related('').prefetch_related('customer_phone_number')
-#         query_set = query_set.filter(product_purchase_date__isnull=False)
+        query_set = query_set.filter(product_purchase_date__isnull=False)
         # TODO: this should be handled by some parameter to the ChangeList.
         ordering = self.get_ordering(request)
         if ordering:
@@ -433,6 +434,7 @@ class ListDispatchedProduct(ModelAdmin):
     list_display = (
         'vin', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
     exclude = ('order',)
+    list_per_page = 50
 
     def queryset(self, request):
         """
