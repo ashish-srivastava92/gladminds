@@ -674,7 +674,8 @@ def get_access_token(request):
     return HttpResponse(response.read(), mimetype="application/json")
 
 def generate_otp(request):
-    if request.method != 'POST' or not request.POST['mobile']:
+    print request.method != 'POST' or not request.POST.get('mobile')
+    if request.method != 'POST' or not request.POST.get('mobile'):
         log_message = 'Expecting a mobile number'
         logger.error(log_message)
         return HttpResponse(log_message)
