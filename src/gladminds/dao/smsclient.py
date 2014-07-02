@@ -13,6 +13,8 @@ def load_gateway():
         return AirtelSmsClient(**client)
     elif settings.SMS_CLIENT is 'TWILIO':
         return TwilioSmsClient(**client)
+    elif settings.SMS_CLIENT is 'KAP':
+        return KapSmsClient(**client)
         
 class SmsClientExcetion(Exception):
     
@@ -67,6 +69,39 @@ class SmsClientBaseObject(object):
     
     def _set_session_id(self, session_id):
         self.session_id = session_id
+        
+class KapSmsClient(SmsClientBaseObject):
+    
+    def __init__(self, *args, **kwargs):
+        self.working_key  = kwargs['working_key']
+        self.sender_id = kwargs['sender_id']
+        self.login = kwargs['login']
+        self.password = kwargs['pass']
+        self.message_url = kwargs['message_url']
+        
+    def authenticate(self):
+        return    
+    
+    def send_stateless(self, **kwargs):
+        phone_number = kwargs['phone_number']
+        message = kwargs['message']
+#         session_id = self._get_session_id()
+        params = {'to' : phone_number, 'message' : message, 'workingkey' : self.working_key, 'sender': self.sender_id}
+        return self.send_request(url = self.message_url, params = params)
+        
+    def send_stateful(self, **kwargs):
+        phone_number = kwargs['phone_number']
+        message = kwargs['message']
+#         session_id = self._get_session_id()
+        params = {'to' : phone_number, 'message' : message, 'workingkey' : self.working_key, 'sender': self.sender_id}
+        return self.send_request(url = self.message_url, params = params)
+    
+    def send_request(self, url, params):
+        resp = requests.get(url = url, params = params)
+        assert resp.status_code==200
+#         json = import_json()
+#         data = resp.content
+        return resp.status_code  
 
 class AirtelSmsClient(SmsClientBaseObject):
     

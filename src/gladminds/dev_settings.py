@@ -49,25 +49,22 @@ TEMPLATE_DIRS = (
     TEMPLATE_DIR,
 )
 
-SMS_CLIENT = "AIRTEL"
-  
-# SMS_CLIENT_DETAIL = {
-#                      'OTP_TWILIO_ACCOUNT' : 'ACbb8cb45f6113b8f2f6243c8eaa5ff971',
-#                      'OTP_TWILIO_AUTH' : 'aa445a4f0a7e651738e89810601f8860',
-#                      'OTP_TWILIO_FROM' : '+1 469-513-9856',
-#                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/Messages.json'
-#                 }
+ENABLE_AMAZON_SQS = True
 
-
+SMS_CLIENT = "KAP"
 SMS_CLIENT_DETAIL={
-                    'login':'bajajauto',
-                    'pass':'bajaj',
-                    'authenticate_url':'http://117.99.128.32:80/login/pushsms.php' ,
-                    'message_url': 'http://117.99.128.32:80/login/pushsms.php'   
-                    }
+                   'login':'GladMinds1',
+                   'pass':'kap@user!23',
+                   'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
+                   'working_key': '1486415t035t8052c7pc',
+                   'sender_id': 'GLADMS'     
+                   }
+
 
 ########################SQS Queue Name
-SQS_QUEUE_NAME = "gladminds-dev"
+AWS_ACCESS_KEY_ID = 'AKIAIL7IDCSTNCG2R6JA'
+AWS_SECRET_ACCESS_KEY = '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'
+SQS_QUEUE_NAME = "gladminds-qa"
 ######################################
 
 FEED_TYPE = 'CSV'

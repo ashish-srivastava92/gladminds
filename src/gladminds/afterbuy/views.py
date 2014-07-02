@@ -15,6 +15,7 @@ from django.contrib.auth import logout
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 
 from gladminds.models import common
 from gladminds import utils
@@ -25,6 +26,7 @@ from gladminds.sqs_tasks import send_otp
 from gladminds import message_template
 from gladminds.utils import get_task_queue
 from gladminds.mail import sent_otp_email
+from gladminds.afterbuy import utils as afterbuy_utils
 
 logger = logging.getLogger("gladminds")
 GLADMINDS_ADMIN_MAIL = 'admin@gladminds.co'
@@ -672,29 +674,34 @@ def get_access_token(request):
     return HttpResponse(response.read(), mimetype="application/json")
 
 def generate_otp(request):
-    if request.method != 'POST':
+    if request.method != 'POST' or not request.POST['mobile']:
         log_message = 'Expecting a mobile number'
         logger.error(log_message)
         return HttpResponse(log_message)
+    phone_number = request.POST['mobile']
+    email = request.POST.get('email', '')
+    logger.info('OTP request received. Mobile: {0}'.format(phone_number))
     try:
-        phone_number = request.POST['mobile']
-        email = request.POST.get('email', '')
-        logger.info('OTP request received. Mobile: {0}'.format(phone_number))
-        user = common.GladMindUsers.objects.filter(phone_number=mobile_format(phone_number))[0].user
-        token = utils.get_token(user, phone_number, email=email)
-        message = message_template.get_template('SEND_OTP').format(token)
-        if settings.ENABLE_AMAZON_SQS:
-            task_queue = get_task_queue()
-            task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
-        else:
-            send_otp.delay(phone_number=phone_number, message=message)
-        log_message = 'OTP sent to mobile {0}'.format(phone_number)
-        logger.info(log_message)
-        return HttpResponse(log_message)
-    except:
-        log_message = 'Invalid details, mobile {0}'.format(request.POST.get('mobile', ''))
-        logger.error(log_message)
-        return HttpResponse(log_message)
+        customer_data = common.GladMindUsers.objects.get(phone_number=phone_number)
+    except ObjectDoesNotExist as odne:
+        logger.info(
+            '[Exception: New_customer_data]: {0}'.format(odne))
+        # Register this customer
+        gladmind_customer_id = utils.generate_unique_customer_id()
+        customer_data = common.GladMindUsers(gladmind_customer_id=gladmind_customer_id, 
+                                             phone_number=phone_number, 
+                                             registration_date=datetime.now())
+        customer_data.save()
+    token = afterbuy_utils.get_token(customer_data, phone_number, email=email)
+    message = message_template.get_template('SEND_OTP').format(token)
+    if settings.ENABLE_AMAZON_SQS:
+        task_queue = get_task_queue()
+        task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
+    else:
+        send_otp.delay(phone_number=phone_number, message=message)
+    log_message = 'OTP sent to mobile {0}'.format(phone_number)
+    logger.info(log_message)
+    return HttpResponse(log_message)
 
 def validate_otp(request):
     if request.method != 'POST':
@@ -705,8 +712,8 @@ def validate_otp(request):
         otp = request.POST['otp']
         phone_number = request.POST['mobile']
         logger.info('OTP {0} recieved for validation. Mobile {1}'.format(otp, phone_number))
-        user = common.GladMindUsers.objects.filter(phone_number=mobile_format(phone_number))[0].user
-        utils.validate_otp(user, otp, phone_number)
+        user = common.GladMindUsers.objects.filter(phone_number=mobile_format(phone_number))
+        afterbuy_utils.validate_otp(user[0], otp, phone_number)
         log_message = 'OTP validated for mobile number {0}'.format(phone_number)
         logger.info(log_message)
         return HttpResponse(log_message)
