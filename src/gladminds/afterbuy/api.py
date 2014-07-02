@@ -12,7 +12,7 @@ logger = logging.getLogger("gladminds")
 @csrf_exempt
 def fnc_get_product_coupons(request):
     resp = {}
-    vin = request.POST.get('vin')
+    vin = request.GET.get('vin')
     if not vin:
         return HttpBadRequest("Vin is required.")
     try:
@@ -27,7 +27,7 @@ def fnc_get_product_coupons(request):
 @csrf_exempt
 def fnc_get_product_purchase_information(request):
     resp = {}
-    product_type_id = request.POST.get("product_type_id")
+    product_type_id = request.GET.get("product_type_id")
     if not product_type_id:
         return HttpBadRequest("product_type_id is required.")
     try:
@@ -44,7 +44,7 @@ def fnc_get_product_purchase_information(request):
 @csrf_exempt
 def fnc_get_product_information(request):
     resp = {}
-    vin = request.POST.get('vin')
+    vin = request.GET.get('vin')
     if not vin:
         return HttpBadRequest("Vin is required.")
     try:
@@ -61,7 +61,7 @@ def fnc_get_product_information(request):
 @csrf_exempt
 def fnc_get_product_warranty(request):
     resp = {}
-    vin = request.POST.get('vin')
+    vin = request.GET.get('vin')
     if not vin:
         return HttpBadRequest("vin is required.")
     try:
@@ -86,7 +86,7 @@ def fnc_get_product_warranty(request):
 @csrf_exempt
 def fnc_get_product_insurance(request):
     resp = {}
-    vin = request.POST.get('vin')
+    vin = request.GET.get('vin')
     if not vin:
         return HttpBadRequest("vin is required.")
     try:
