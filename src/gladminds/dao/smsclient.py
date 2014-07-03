@@ -98,7 +98,7 @@ class KapSmsClient(SmsClientBaseObject):
         message = kwargs['message']
         logger.info(
             '[INFO]: sending message{0} to {1} through kap'.format(message, phone_number))
-        params = {'to' : phone_number, 'message' : message, 'workingkey' : self.working_key, 'sender': self.sender_id}
+        params = {'workingkey' : self.working_key, 'sender': self.sender_id, 'to' : phone_number, 'message' : message}
         return self.send_request(url = self.message_url, params = params)
     
     def send_request(self, url, params):
@@ -106,7 +106,7 @@ class KapSmsClient(SmsClientBaseObject):
             '[INFO]: sending message to KAP url {0}'.format(url))        
         resp = requests.get(url = url, params = params)
         logger.info(
-            '[INFO]: Response from KAP url {0}'.format(resp))          
+            '[INFO]: Response from KAP url {0} {1}'.format(resp.content, resp.status_code))          
         assert resp.status_code==200
 #         json = import_json()
 #         data = resp.content
