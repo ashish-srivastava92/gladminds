@@ -710,7 +710,7 @@ def validate_otp(request):
         return HttpResponse(log_message)
     try:
         otp = request.POST['otp']
-        phone_number= '+'+request.POST['mobile']
+        phone_number= request.POST['mobile']
         logger.info('OTP {0} recieved for validation. Mobile {1}'.format(otp, phone_number))
         user = common.GladMindUsers.objects.filter(phone_number=mobile_format(phone_number))
         afterbuy_utils.validate_otp(user[0], otp, phone_number)
