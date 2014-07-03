@@ -1,7 +1,10 @@
 from django.conf import settings
 from gladminds.utils import import_json
 import json
+import logging
 import requests
+
+logger = logging.getLogger("gladminds")
 
 __all__ = ['KapSmsClient', 'AirtelSmsClient', 'TwilioSmsClient']
 
@@ -85,16 +88,22 @@ class KapSmsClient(SmsClientBaseObject):
     def send_stateless(self, **kwargs):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
+        logger.info(
+            '[INFO]: sending message{0} to {1} through kap'.format(message, phone_number))
         params = {'to' : phone_number, 'message' : message, 'workingkey' : self.working_key, 'sender': self.sender_id}
         return self.send_request(url = self.message_url, params = params)
         
     def send_stateful(self, **kwargs):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
+        logger.info(
+            '[INFO]: sending message{0} to {1} through kap'.format(message, phone_number))
         params = {'to' : phone_number, 'message' : message, 'workingkey' : self.working_key, 'sender': self.sender_id}
         return self.send_request(url = self.message_url, params = params)
     
     def send_request(self, url, params):
+        logger.info(
+            '[INFO]: sending message to KAP url {0}'.format(url))        
         resp = requests.get(url = url, params = params)
         assert resp.status_code==200
 #         json = import_json()
