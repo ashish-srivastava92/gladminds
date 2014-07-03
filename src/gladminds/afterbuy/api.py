@@ -13,15 +13,15 @@ logger = logging.getLogger("gladminds")
 
 @csrf_exempt
 def get_product_coupons(request):
-    resp = {}
+    resp = []
     vin = request.GET.get('vin')
     if not vin:
         return HttpBadRequest("Vin is required.")
     try:
-        product_object = common.ProductData.objects.filter(vin = vin)[0]
-        product_id = product_object.id
-        product_coupons = common.CouponData.objects.filter(id=product_id).values()[0]
-        resp = utils.get_dict_from_object(product_coupons)
+        product_object = common.ProductData.objects.get(vin = vin)
+        product_coupons = common.CouponData.objects.filter(vin=product_object)
+        for i in map(model_to_dict, product_coupons):
+            resp.append(utils.get_dict_from_object(i))
     except Exception as ex:
         logger.info("[Exception get_product_coupons]:{0}".format(ex))
     return HttpResponse(json.dumps(resp))
