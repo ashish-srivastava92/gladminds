@@ -27,11 +27,11 @@ def get_product_coupons(request):
 @csrf_exempt
 def get_product_purchase_information(request):
     resp = {}
-    product_type_id = request.GET.get("product_type_id")
-    if not product_type_id:
-        return HttpBadRequest("product_type_id is required.")
+    vin = request.GET.get("vin")
+    if not vin:
+        return HttpBadRequest("vin is required.")
     try:
-        product_info = common.ProductTypeData.objects.filter(product_type_id = product_type_id).values()[0]
+        product_info = common.ProductData.objects.filter(vin = vin).values()[0]
         if not product_info:
             return HttpBadRequest("This product does not exist.")
         else:
