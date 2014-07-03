@@ -105,6 +105,8 @@ class KapSmsClient(SmsClientBaseObject):
         logger.info(
             '[INFO]: sending message to KAP url {0}'.format(url))        
         resp = requests.get(url = url, params = params)
+        logger.info(
+            '[INFO]: Response from KAP url {0}'.format(resp))          
         assert resp.status_code==200
 #         json = import_json()
 #         data = resp.content
