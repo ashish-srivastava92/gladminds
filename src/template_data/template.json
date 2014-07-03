@@ -234,7 +234,7 @@
     "pk": 27,
     "fields": {
       "template_key":"SEND_OTP",
-      "template":"Your one time use password is {0}",
+      "template":"Your one time password is {0}",
       "description":"Send OTP"
     }
   },
