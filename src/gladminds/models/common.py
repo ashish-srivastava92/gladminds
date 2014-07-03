@@ -69,6 +69,9 @@ class ProductTypeData(models.Model):
         upload_to=settings.AFTERBUY_PRODUCT_TYPE_LOC, blank=True)
     isActive = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
+    warranty_email = models.EmailField(max_length=215, null=True, blank=True)
+    warranty_phone = models.CharField(
+        max_length=15, blank=False, null=False)
 
     class Meta:
         app_label = "gladminds"
@@ -328,6 +331,10 @@ class ProductInsuranceInfo(models.Model):
     insurance_brand_name = models.CharField(max_length=50, null=True, blank=True)
     policy_number = models.CharField(max_length=15, unique=True, blank=True)
     premium = models.CharField(max_length=50, null=True, blank=True)
+    insurance_email = models.EmailField(max_length=215, null=True, blank=True)
+    insurance_phone = models.CharField(
+        max_length=15, blank=False, null=False)
+    image_url = models.CharField(max_length=215, null=True, blank=True)
     
     class Meta:
         app_label = "gladminds"
@@ -343,6 +350,7 @@ class ProductWarrantyInfo(models.Model):
     warranty_brand_name = models.CharField(max_length=50, null=True, blank=True)
     policy_number = models.CharField(max_length=15, unique=True, blank=True)
     premium = models.CharField(max_length=50, null=True, blank=True)
+    image_url = models.CharField(max_length=215, null=True, blank=True)
     
     class Meta:
         app_label = "gladminds"
