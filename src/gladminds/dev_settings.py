@@ -62,7 +62,7 @@ SMS_CLIENT_DETAIL={
 
 
 ########################SQS Queue Name
-SQS_QUEUE_NAME = "gladminds-qa"
+SQS_QUEUE_NAME = "gladminds-test"
 ######################################
 
 FEED_TYPE = 'CSV'
