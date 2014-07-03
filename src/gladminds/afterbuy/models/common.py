@@ -13,3 +13,13 @@ class OTPToken(models.Model):
     class Meta:
         app_label = "afterbuy"
         verbose_name_plural = "OTPs"
+        
+class UserNotification(models.Model):
+    user = models.ForeignKey(GladMindUsers, null=False, blank=False)
+    message = models.CharField(max_length=256, null=False)
+    notification_date = models.DateTimeField(null=True, blank=True)
+    notification_read = models.BooleanField(default=False)
+
+    class Meta:
+        app_label = "afterbuy"
+        verbose_name_plural = "notification"

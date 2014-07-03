@@ -2,6 +2,7 @@ import os, logging, hashlib, uuid, mimetypes
 import boto
 from boto.s3.key import Key
 from datetime import datetime
+from dateutil import tz
 from random import randint
 from django.utils import timezone
 from django.conf import settings
@@ -211,13 +212,11 @@ def format_date_string(date_string, date_format='%d/%m/%Y'):
     date = datetime.strptime(date_string, date_format)
     return date
 
-import datetime
-from dateutil import tz
 
 def get_dict_from_object(object):
     temp_dict = {}
     for key in object:
-        if isinstance(object[key], datetime.datetime):
+        if isinstance(object[key], datetime):
             temp_dict[key] = object[key].astimezone(tz.tzutc()).strftime('%Y-%m-%dT%H:%M:%S')
         elif isinstance(object[key], FieldFile):
             temp_dict[key] = None;

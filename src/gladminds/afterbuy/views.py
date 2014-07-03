@@ -678,18 +678,18 @@ def generate_otp(request):
         log_message = 'Expecting a mobile number'
         logger.error(log_message)
         return HttpResponse(log_message)
-    phone_number = request.POST['mobile']
+    phone_number= request.POST['mobile']
     email = request.POST.get('email', '')
     logger.info('OTP request received. Mobile: {0}'.format(phone_number))
     try:
-        customer_data = common.GladMindUsers.objects.get(phone_number=phone_number)
+        customer_data = common.GladMindUsers.objects.get(phone_number=mobile_format(phone_number))
     except ObjectDoesNotExist as odne:
         logger.info(
             '[Exception: New_customer_data]: {0}'.format(odne))
         # Register this customer
         gladmind_customer_id = utils.generate_unique_customer_id()
         customer_data = common.GladMindUsers(gladmind_customer_id=gladmind_customer_id, 
-                                             phone_number=phone_number, 
+                                             phone_number=mobile_format(phone_number), 
                                              registration_date=datetime.now())
         customer_data.save()
     token = afterbuy_utils.get_token(customer_data, phone_number, email=email)
@@ -710,7 +710,7 @@ def validate_otp(request):
         return HttpResponse(log_message)
     try:
         otp = request.POST['otp']
-        phone_number = request.POST['mobile']
+        phone_number= '+'+request.POST['mobile']
         logger.info('OTP {0} recieved for validation. Mobile {1}'.format(otp, phone_number))
         user = common.GladMindUsers.objects.filter(phone_number=mobile_format(phone_number))
         afterbuy_utils.validate_otp(user[0], otp, phone_number)

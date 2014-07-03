@@ -65,6 +65,8 @@ urlpatterns += patterns('gladminds',
     
     url(r'^afterbuy/otp/generate/', 'afterbuy.views.generate_otp'),
     url(r'^afterbuy/otp/validate/', 'afterbuy.views.validate_otp'),
+    url(r'^afterbuy/notification/count/', 'afterbuy.api.get_notification_count'),
+    url(r'^afterbuy/notification/list/', 'afterbuy.api.get_notification_list'),
     url(r'^v1/api/users/auth', 'afterbuy.views.get_access_token'),
     url(r'^tasks-view', 'views.sqs_tasks_view'),
     url(r'^trigger-tasks', 'views.trigger_sqs_tasks'),

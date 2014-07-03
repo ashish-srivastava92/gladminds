@@ -3,6 +3,8 @@ from gladminds import utils
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import HttpResponse
 from tastypie.http import HttpBadRequest
+
+from gladminds.afterbuy.models import common as afterbuy_common
 from gladminds.utils import mobile_format
 
 import json
@@ -99,5 +101,36 @@ def get_product_insurance(request):
         logger.info("[Exception get_product_insurance]:{0}".format(ex))
     return HttpResponse(json.dumps(resp))
         
-    
-    
+@csrf_exempt
+def get_notification_count(request):
+    resp = {}
+    phone_number = request.GET.get('mobile')
+    if not phone_number:
+        return HttpBadRequest("phone_number is required.")
+    try:
+        phone_number= mobile_format(phone_number)
+        user_info = common.GladMindUsers.objects.get(phone_number=phone_number)
+        notification_count = len(afterbuy_common.UserNotification.objects.filter(user=user_info, notification_read=0))
+        resp = {'count': notification_count}
+    except Exception as ex:
+        logger.info("[Exception get_product_insurance]:{0}".format(ex))
+    return HttpResponse(json.dumps(resp))
+
+@csrf_exempt
+def get_notification_list(request):
+    resp = []
+    phone_number = request.GET.get('mobile')
+    if not phone_number:
+        return HttpBadRequest("phone_number is required.")
+    try:
+        phone_number= mobile_format(phone_number)
+        user_info = common.GladMindUsers.objects.get(phone_number=phone_number)
+        notifications = afterbuy_common.UserNotification.objects.filter(user=user_info)
+        if not notifications:
+            return HttpResponse("No notification exist.")
+        else:
+            for i in map(model_to_dict, notifications):
+                resp.append(utils.get_dict_from_object(i))
+    except Exception as ex:
+        logger.info("[Exception get_product_insurance]:{0}".format(ex))
+    return HttpResponse(json.dumps(resp))
