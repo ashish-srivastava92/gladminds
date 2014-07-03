@@ -49,8 +49,6 @@ TEMPLATE_DIRS = (
     TEMPLATE_DIR,
 )
 
-ENABLE_AMAZON_SQS = True
-
 SMS_CLIENT = "KAP"
 SMS_CLIENT_DETAIL={
                    'login':'GladMinds1',
@@ -62,7 +60,7 @@ SMS_CLIENT_DETAIL={
 
 
 ########################SQS Queue Name
-SQS_QUEUE_NAME = "gladminds-test"
+SQS_QUEUE_NAME = "gladminds-dev"
 ######################################
 
 FEED_TYPE = 'CSV'
