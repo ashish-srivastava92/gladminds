@@ -3,9 +3,11 @@ from gladminds import utils
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import HttpResponse
 from tastypie.http import HttpBadRequest
+from gladminds.utils import mobile_format
 
 import json
 import logging
+from django.forms.models import model_to_dict
 
 logger = logging.getLogger("gladminds")
 
@@ -42,19 +44,23 @@ def get_product_purchase_information(request):
 
 
 @csrf_exempt
-def get_product_information(request):
-    resp = {}
-    vin = request.GET.get('vin')
-    if not vin:
-        return HttpBadRequest("Vin is required.")
+def get_user_product_information(request):
+    resp = []
+    mobile = request.GET.get('mobile')
+    if not mobile:
+        return HttpBadRequest("mobile is required.")
     try:
-        product_info = common.ProductData.objects.filter(vin=vin).values()[0]
+        phone_number= mobile_format(mobile)
+        
+        user_info = common.GladMindUsers.objects.get(phone_number=phone_number)
+        product_info = common.ProductData.objects.filter(customer_phone_number=user_info)
         if not product_info:
-            return HttpBadRequest("This product does not exist.")
+            return HttpResponse("No product exist.")
         else:
-            resp = utils.get_dict_from_object(product_info)
+            for i in map(model_to_dict, product_info):
+                resp.append(utils.get_dict_from_object(i))
     except Exception as ex:
-        logger.info("[Exception get_product_information]:{0}".format(ex))
+        logger.info("[Exception get_user_product_information]:{0}".format(ex))
     return HttpResponse(json.dumps(resp))
     
     
