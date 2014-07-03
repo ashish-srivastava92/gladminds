@@ -13,6 +13,7 @@ from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from gladminds.taskqueue import SqsTaskQueue
 from gladminds.mail import send_ucn_request_alert
+from django.db.models.fields.files import FieldFile
 
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
@@ -218,6 +219,8 @@ def get_dict_from_object(object):
     for key in object:
         if isinstance(object[key], datetime.datetime):
             temp_dict[key] = object[key].astimezone(tz.tzutc()).strftime('%Y-%m-%dT%H:%M:%S')
+        elif isinstance(object[key], FieldFile):
+            temp_dict[key] = None;
         else:
             temp_dict[key] = object[key]
     return temp_dict

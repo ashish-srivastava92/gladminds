@@ -61,7 +61,7 @@ urlpatterns += patterns('gladminds',
     url(r'^afterbuy/product/purchase-info/$', 'afterbuy.api.get_product_purchase_information', name='get_product_purchase_information'),
     url(r'^afterbuy/product/warranty/$', 'afterbuy.api.get_product_warranty', name='get_product_warranty'),
     url(r'^afterbuy/product/insurance/$', 'afterbuy.api.get_product_insurance', name='get_product_insurance'),
-    url(r'^afterbuy/product/info/$', 'afterbuy.api.get_product_information', name='get_product_information'),
+    url(r'^afterbuy/product/info/$', 'afterbuy.api.get_user_product_information', name='get_user_product_information'),
     
     url(r'^afterbuy/otp/generate/', 'afterbuy.views.generate_otp'),
     url(r'^afterbuy/otp/validate/', 'afterbuy.views.validate_otp'),
