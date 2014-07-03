@@ -3,7 +3,7 @@ from gladminds.utils import import_json
 import json
 import requests
 
-__all__ = ['AirtelSmsClient', 'TwilioSmsClient']
+__all__ = ['KapSmsClient', 'AirtelSmsClient', 'TwilioSmsClient']
 
 def load_gateway():
     client = settings.SMS_CLIENT_DETAIL
@@ -85,14 +85,12 @@ class KapSmsClient(SmsClientBaseObject):
     def send_stateless(self, **kwargs):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
-#         session_id = self._get_session_id()
         params = {'to' : phone_number, 'message' : message, 'workingkey' : self.working_key, 'sender': self.sender_id}
         return self.send_request(url = self.message_url, params = params)
         
     def send_stateful(self, **kwargs):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
-#         session_id = self._get_session_id()
         params = {'to' : phone_number, 'message' : message, 'workingkey' : self.working_key, 'sender': self.sender_id}
         return self.send_request(url = self.message_url, params = params)
     

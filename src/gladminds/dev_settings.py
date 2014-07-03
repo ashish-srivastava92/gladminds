@@ -62,9 +62,7 @@ SMS_CLIENT_DETAIL={
 
 
 ########################SQS Queue Name
-AWS_ACCESS_KEY_ID = 'AKIAIL7IDCSTNCG2R6JA'
-AWS_SECRET_ACCESS_KEY = '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'
-SQS_QUEUE_NAME = "gladminds-qa"
+SQS_QUEUE_NAME = "gladminds-dev"
 ######################################
 
 FEED_TYPE = 'CSV'
