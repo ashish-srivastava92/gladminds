@@ -4,13 +4,17 @@ packages:
     python-devel: []
     libxml2-devel: []
     libxslt-devel: []
-
+    gcc: []
 container_commands:
-  01_syncdb:  
+  00_make_executable:  
+    command: "chmod +x scripts/createlogger.sh"
+  01_run_executable:  
+    command: "sh scripts/createlogger.sh"
+  02_syncdb:
     command: "python src/manage.py syncdb --noinput"
     leader_only: true
-  02_get_static_files:  
-    command: "python src/manage.py collectstatic --noinput"
+  03_enable_gzip:
+    command: "cp .ebextensions/enable_mod_deflate.conf /etc/httpd/conf.d"
 
 option_settings:
  - namespace: aws:elasticbeanstalk:container:python
@@ -24,4 +28,4 @@ option_settings:
    value: 15
  - namespace: aws:elasticbeanstalk:container:python:staticfiles
    option_name: "/static/"
-   value: "src/static/" 
+   value: "src/gladminds/collected/" 
