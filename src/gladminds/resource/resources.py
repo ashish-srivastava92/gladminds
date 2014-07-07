@@ -439,24 +439,6 @@ class GladmindsResources(Resource):
 class GladmindsBaseResource(ModelResource):
     def determine_format(self, request):
         return 'application/json'
-    
-class BrandResources(GladmindsBaseResource):
-    class Meta:
-        queryset = common.BrandData.objects.all()
-        resource_name = 'brands'
-        authentication = AccessTokenAuthentication()
-
-class ProductTypeResources(GladmindsBaseResource):
-    class Meta:
-        queryset = common.ProductTypeData.objects.all()
-        resource_name = 'product-type'
-        authentication = AccessTokenAuthentication()
-        
-class ProductResources(GladmindsBaseResource):
-    class Meta:
-        queryset = common.ProductData.objects.all()
-        resource_name = 'products'
-        authentication = AccessTokenAuthentication()
 
 class UserResources(GladmindsBaseResource):
     products = fields.ListField()
