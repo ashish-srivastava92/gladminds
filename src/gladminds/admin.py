@@ -26,6 +26,7 @@ from import_export import fields, widgets
 from import_export import resources
 from gladminds.models.common import EmailTemplate
 from gladminds.aftersell.models.common import ASCSaveForm
+from gladminds.afterbuy.models.common import UserNotification
 
 
 ############################BRAND AND PRODUCT ADMIN##########################
@@ -466,6 +467,12 @@ class ASCSaveFormAdmin(ModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
+        
+class UserNotificationAdmin(ModelAdmin):
+
+    list_display = (
+        'user', 'message', 'notification_date', 'notification_read')
+
 ##############################################################
 
 
@@ -485,3 +492,4 @@ admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(ASCSaveForm, ASCSaveFormAdmin)
 admin.site.register(UploadProductCSV)
 admin.site.register(LogEntry)
+admin.site.register(UserNotification, UserNotificationAdmin)
