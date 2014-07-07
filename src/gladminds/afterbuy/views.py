@@ -26,6 +26,7 @@ from gladminds.sqs_tasks import send_otp
 from gladminds import message_template
 from gladminds.utils import get_task_queue
 from gladminds.mail import sent_otp_email
+from gladminds.feed import BaseFeed
 from gladminds.afterbuy import utils as afterbuy_utils
 
 logger = logging.getLogger("gladminds")
@@ -673,6 +674,30 @@ def get_access_token(request):
     response = urllib2.urlopen(oath_request)
     return HttpResponse(response.read(), mimetype="application/json")
 
+
+def generate_access_token(request, user):
+    password = user.username + settings.PASSWORD_POSTFIX
+    user_auth = authenticate(username=user.username, password=password)
+    print "#$$$$$$$$ user auth", user_auth
+    secret_cli = Client(user=user_auth, name='client', client_type=1, url='')
+    secret_cli.save()
+    client_id = secret_cli.client_id
+    client_secret = secret_cli.client_secret
+    page = request.META['HTTP_HOST'] + '/oauth2/access_token'
+    if not 'http://' in page:
+        page = 'http://' + page
+    raw_params = {'client_id': client_id,
+                  'client_secret': client_secret,
+                  'grant_type': 'password',
+                  'username': user.username,
+                  'password': password,
+                  'scope': 'write'
+                  }
+    params = urllib.urlencode(raw_params)
+    oath_request = urllib2.Request(page, params)
+    response = urllib2.urlopen(oath_request)
+    return response
+
 def generate_otp(request):
     if request.method != 'POST' or not request.POST.get('mobile'):
         log_message = 'Expecting a mobile number'
@@ -683,12 +708,15 @@ def generate_otp(request):
     logger.info('OTP request received. Mobile: {0}'.format(phone_number))
     try:
         customer_data = common.GladMindUsers.objects.get(phone_number=mobile_format(phone_number))
+        if not customer_data.user:
+            user = BaseFeed.registerNewUser('customer', username=customer_data.gladmind_customer_id)
     except ObjectDoesNotExist as odne:
         logger.info(
             '[Exception: New_customer_data]: {0}'.format(odne))
         # Register this customer
         gladmind_customer_id = utils.generate_unique_customer_id()
-        customer_data = common.GladMindUsers(gladmind_customer_id=gladmind_customer_id, 
+        user = BaseFeed.registerNewUser('customer', username=gladmind_customer_id)
+        customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, 
                                              phone_number=mobile_format(phone_number), 
                                              registration_date=datetime.now())
         customer_data.save()
@@ -704,7 +732,7 @@ def generate_otp(request):
     return HttpResponse(log_message)
 
 def validate_otp(request):
-    if request.method != 'POST':
+    if request.method != 'POST' or not request.POST.get('mobile'):
         log_message = 'Expecting a mobile number and OTP'
         logger.error(log_message)
         return HttpResponse(log_message)
@@ -712,12 +740,14 @@ def validate_otp(request):
         otp = request.POST['otp']
         phone_number= request.POST['mobile']
         logger.info('OTP {0} recieved for validation. Mobile {1}'.format(otp, phone_number))
-        user = common.GladMindUsers.objects.filter(phone_number=mobile_format(phone_number))
-        afterbuy_utils.validate_otp(user[0], otp, phone_number)
+        gladmind_user = common.GladMindUsers.objects.filter(phone_number=mobile_format(phone_number))
+        afterbuy_utils.validate_otp(gladmind_user[0], otp, phone_number)
         log_message = 'OTP validated for mobile number {0}'.format(phone_number)
         logger.info(log_message)
+#         response = generate_access_token(request, gladmind_user[0].user)
+#         return HttpResponse(response.read(), mimetype="application/json")
         return HttpResponse(log_message)
-    except:
-        log_message = 'OTP validation failed for mobile number {0}'.format(phone_number)
+    except Exception as ex:
+        log_message = 'OTP validation failed for mobile number {0}: {1}'.format(phone_number, ex)
         logger.info(log_message)
         return HttpResponse(log_message)

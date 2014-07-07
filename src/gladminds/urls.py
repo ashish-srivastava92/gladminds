@@ -4,16 +4,15 @@ from tastypie.api import Api
 from gladminds.resource import resources
 from gladminds.sqs_tasks import _tasks_map
 from gladminds.taskqueue import SqsHandler
+from gladminds.afterbuy import api_resource
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
 
 api_v1 = Api(api_name="v1")
 api_v1.register(resources.GladmindsResources())
-api_v1.register(resources.BrandResources())
-api_v1.register(resources.ProductTypeResources())
-api_v1.register(resources.ProductResources())
 api_v1.register(resources.UserResources())
+api_v1.register(api_resource.AfterBuyResources())
 
 urlpatterns = patterns('',
     url(r'^aftersell/(?P<provider>[a-zA-Z]+)/login/$', 'gladminds.views.auth_login', name='user_login'),
@@ -52,21 +51,13 @@ urlpatterns += patterns('gladminds',
     url(r'^api/v1/bajaj/asc-feed/$', 'webservice.asc_service'),    
     url(r'^api/v1/bajaj/redeem-feed/$', 'superadmin.views.views_coupon_redeem_wsdl', {'document_root': settings.WSDL_COUPON_REDEEM_LOC}),
 
+    url(r'^afterbuy/otp/generate/', 'afterbuy.views.generate_otp'),
+    url(r'^afterbuy/otp/validate/', 'afterbuy.views.validate_otp'),
     url(r'^app/logout', 'afterbuy.views.app_logout', name='app_logout'),
     url(r'^app', 'afterbuy.views.home', name='home'),
     
     
     # After buy API
-    url(r'^afterbuy/product/coupons/$', 'afterbuy.api.get_product_coupons', name='get_product_coupons'),
-    url(r'^afterbuy/product/purchase-info/$', 'afterbuy.api.get_product_purchase_information', name='get_product_purchase_information'),
-    url(r'^afterbuy/product/warranty/$', 'afterbuy.api.get_product_warranty', name='get_product_warranty'),
-    url(r'^afterbuy/product/insurance/$', 'afterbuy.api.get_product_insurance', name='get_product_insurance'),
-    url(r'^afterbuy/product/info/$', 'afterbuy.api.get_user_product_information', name='get_user_product_information'),
-    
-    url(r'^afterbuy/otp/generate/', 'afterbuy.views.generate_otp'),
-    url(r'^afterbuy/otp/validate/', 'afterbuy.views.validate_otp'),
-    url(r'^afterbuy/notification/count/', 'afterbuy.api.get_notification_count'),
-    url(r'^afterbuy/notification/list/', 'afterbuy.api.get_notification_list'),
     url(r'^v1/api/users/auth', 'afterbuy.views.get_access_token'),
     url(r'^tasks-view', 'views.sqs_tasks_view'),
     url(r'^trigger-tasks', 'views.trigger_sqs_tasks'),
