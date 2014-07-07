@@ -104,6 +104,7 @@ class GladMindUsers(models.Model):
     img_url = models.FileField(upload_to="users", blank=True)
     thumb_url = models.FileField(upload_to="users", blank=True)
     isActive = models.BooleanField(default=True)
+    accepted_terms = models.BooleanField(default=False)
 
     class Meta:
         app_label = "gladminds"
