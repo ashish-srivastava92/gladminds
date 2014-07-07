@@ -702,7 +702,8 @@ def generate_otp(request):
     if request.method != 'POST' or not request.POST.get('mobile'):
         log_message = 'Expecting a mobile number'
         logger.error(log_message)
-        return HttpResponse(log_message)
+        data={'status':0, 'message':log_message}
+        return HttpResponse(json.dumps(data), content_type="application/json")
     phone_number= request.POST['mobile']
     email = request.POST.get('email', '')
     logger.info('OTP request received. Mobile: {0}'.format(phone_number))
@@ -729,13 +730,15 @@ def generate_otp(request):
         send_otp.delay(phone_number=phone_number, message=message)
     log_message = 'OTP sent to mobile {0}'.format(phone_number)
     logger.info(log_message)
-    return HttpResponse(log_message)
+    data={'status':1, 'message':log_message}
+    return HttpResponse(json.dumps(data), content_type="application/json")
 
 def validate_otp(request):
     if request.method != 'POST' or not request.POST.get('mobile'):
         log_message = 'Expecting a mobile number and OTP'
         logger.error(log_message)
-        return HttpResponse(log_message)
+        data={'status':0, 'message':log_message}
+        return HttpResponse(json.dumps(data), content_type="application/json")
     try:
         otp = request.POST['otp']
         phone_number= request.POST['mobile']
@@ -744,10 +747,13 @@ def validate_otp(request):
         afterbuy_utils.validate_otp(gladmind_user[0], otp, phone_number)
         log_message = 'OTP validated for mobile number {0}'.format(phone_number)
         logger.info(log_message)
+        #TODO: send access token on successful validation of otp
 #         response = generate_access_token(request, gladmind_user[0].user)
 #         return HttpResponse(response.read(), mimetype="application/json")
-        return HttpResponse(log_message)
+        data={'status':1, 'message':log_message}
+        return HttpResponse(json.dumps(data), content_type="application/json")
     except Exception as ex:
         log_message = 'OTP validation failed for mobile number {0}: {1}'.format(phone_number, ex)
         logger.info(log_message)
-        return HttpResponse(log_message)
+        data={'status':0, 'message':log_message}
+        return HttpResponse(json.dumps(data), content_type="application/json")
