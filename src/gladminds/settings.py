@@ -76,6 +76,8 @@ SUIT_CONFIG = {
                     {'model': 'datafeedlog',
                      'label': 'Feed Log'}, 'uploadproductcsv',
                     'messagetemplate', 'emailtemplate', 'gladmindusers',)},
+        {'app': 'afterbuy', 'label': 'AfterBuy', 'icon': ' icon-folder-open',
+         'models': ({'model': 'usernotification', 'label': 'notification'},)},
         {'app': 'djcelery', 'label': 'Job Management', 'icon': 'icon-tasks'})
 }
 
