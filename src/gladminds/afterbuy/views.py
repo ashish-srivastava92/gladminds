@@ -678,7 +678,6 @@ def get_access_token(request):
 def generate_access_token(request, user):
     password = user.username + settings.PASSWORD_POSTFIX
     user_auth = authenticate(username=user.username, password=password)
-    print "#$$$$$$$$ user auth", user_auth
     secret_cli = Client(user=user_auth, name='client', client_type=1, url='')
     secret_cli.save()
     client_id = secret_cli.client_id
