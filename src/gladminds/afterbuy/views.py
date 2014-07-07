@@ -706,16 +706,17 @@ def generate_otp(request):
     phone_number= request.POST['mobile']
     email = request.POST.get('email', '')
     logger.info('OTP request received. Mobile: {0}'.format(phone_number))
+    feed = BaseFeed()
     try:
         customer_data = common.GladMindUsers.objects.get(phone_number=mobile_format(phone_number))
         if not customer_data.user:
-            user = BaseFeed.registerNewUser('customer', username=customer_data.gladmind_customer_id)
+            user = feed.registerNewUser('customer', username=customer_data.gladmind_customer_id)
     except ObjectDoesNotExist as odne:
         logger.info(
             '[Exception: New_customer_data]: {0}'.format(odne))
         # Register this customer
         gladmind_customer_id = utils.generate_unique_customer_id()
-        user = BaseFeed.registerNewUser('customer', username=gladmind_customer_id)
+        user = feed.registerNewUser('customer', username=gladmind_customer_id)
         customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, 
                                              phone_number=mobile_format(phone_number), 
                                              registration_date=datetime.now())
@@ -742,12 +743,17 @@ def validate_otp(request):
         otp = request.POST['otp']
         phone_number= request.POST['mobile']
         logger.info('OTP {0} recieved for validation. Mobile {1}'.format(otp, phone_number))
-        gladmind_user = common.GladMindUsers.objects.filter(phone_number=mobile_format(phone_number))
-        afterbuy_utils.validate_otp(gladmind_user[0], otp, phone_number)
+        gladmind_user = common.GladMindUsers.objects.get(phone_number=mobile_format(phone_number))
+        afterbuy_utils.validate_otp(gladmind_user, otp, phone_number)
         log_message = 'OTP validated for mobile number {0}'.format(phone_number)
         logger.info(log_message)
+        #For marking terms of use as accepted
+        if not gladmind_user.accepted_terms:
+            gladmind_user.accepted_terms=1
+            gladmind_user.save()
+            logger.info("Terms of use marked as accepted")
         #TODO: send access token on successful validation of otp
-#         response = generate_access_token(request, gladmind_user[0].user)
+#         response = generate_access_token(request, gladmind_user.user)
 #         return HttpResponse(response.read(), mimetype="application/json")
         data={'status':1, 'message':log_message}
         return HttpResponse(json.dumps(data), content_type="application/json")
