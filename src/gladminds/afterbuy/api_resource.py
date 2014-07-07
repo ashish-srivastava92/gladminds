@@ -53,6 +53,7 @@ class AfterBuyResources(AfterBuyBaseResource):
                 resp.append(utils.get_dict_from_object(i))
         except Exception as ex:
             logger.info("[Exception get_product_coupons]:{0}".format(ex))
+            return HttpBadRequest("Product VIN does not exists")
         return HttpResponse(json.dumps(resp))
     
     def get_product_purchase_information(self, request, **kwargs):
@@ -70,6 +71,7 @@ class AfterBuyResources(AfterBuyBaseResource):
                 resp = utils.get_dict_from_object(product_info)
         except Exception as ex:
             logger.info("[Exception get_product_purchase_information]:{0}".format(ex))
+            return HttpBadRequest("Product VIN does not exists")
         return HttpResponse(json.dumps(resp))
     
     
@@ -92,6 +94,7 @@ class AfterBuyResources(AfterBuyBaseResource):
                     resp.append(utils.get_dict_from_object(i))
         except Exception as ex:
             logger.info("[Exception get_user_product_information]:{0}".format(ex))
+            return HttpBadRequest("Not a registered number")
         return HttpResponse(json.dumps(resp))
         
         
@@ -113,6 +116,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             resp['warranty_phone'] = warranty_info.product.product_type.warranty_phone
         except Exception as ex:
             logger.info("[Exception get_product_warranty]:{0}".format(ex))
+            return HttpBadRequest("No warranty info exists")
         return HttpResponse(json.dumps(resp))
     
     
@@ -132,6 +136,7 @@ class AfterBuyResources(AfterBuyBaseResource):
                 resp[field] = getattr(insurance_info, field)
         except Exception as ex:
             logger.info("[Exception get_product_insurance]:{0}".format(ex))
+            return HttpBadRequest("No insurance info exists")
         return HttpResponse(json.dumps(resp))
             
     @csrf_exempt
@@ -150,6 +155,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             resp = {'count': notification_count}
         except Exception as ex:
             logger.info("[Exception get_product_insurance]:{0}".format(ex))
+            return HttpBadRequest("Not a registered number")
         return HttpResponse(json.dumps(resp))
     
     def get_notification_list(self, request, **kwargs):
@@ -165,10 +171,11 @@ class AfterBuyResources(AfterBuyBaseResource):
             user_info = common.GladMindUsers.objects.get(phone_number=phone_number)
             notifications = afterbuy_common.UserNotification.objects.filter(user=user_info)
             if not notifications:
-                return HttpResponse("No notification exist.")
+                return HttpResponse("No notification exists.")
             else:
                 for i in map(model_to_dict, notifications):
                     resp.append(utils.get_dict_from_object(i))
         except Exception as ex:
             logger.info("[Exception get_product_insurance]:{0}".format(ex))
+            return HttpBadRequest("Not a registered number")
         return HttpResponse(json.dumps(resp))
