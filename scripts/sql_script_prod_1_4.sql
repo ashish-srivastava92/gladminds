@@ -1,0 +1,1 @@
+alter table gladminds_gladmindusers add column accepted_terms bool default 0;
