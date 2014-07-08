@@ -114,9 +114,10 @@ class GladMindUsers(models.Model):
     GENDER_CHOICES = (
         ('M', 'Male'),
         ('F', 'Female'),
+        ('X', 'Other'),
     )
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
-    tshirt_size = models.CharField(max_length=1, choices=SIZE_CHOICES)
+    gender = models.CharField(max_length=2, choices=GENDER_CHOICES)
+    tshirt_size = models.CharField(max_length=2, choices=SIZE_CHOICES)
     pincode = models.CharField(max_length=15, null=True, blank=True)
     
 

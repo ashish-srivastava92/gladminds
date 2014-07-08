@@ -188,12 +188,12 @@ class AfterBuyResources(AfterBuyBaseResource):
         try:
             phone_number= mobile_format(phone_number)
             user_info = common.GladMindUsers.objects.get(phone_number=phone_number)
-            user_info.customer_name = request.POST.get('name', '')
-            user_info.email_id = request.POST.get('email', '')
-            user_info.gender = request.POST.get('gender', '')
-            user_info.address = request.POST.get('address', '')
-            user_info.tshirt_size = request.POST.get('size', '')
-            user_info.pincode = request.POST.get('pincode', '')
+            user_info.customer_name = request.POST.get('name', None)
+            user_info.email_id = request.POST.get('email', None)
+            user_info.gender = request.POST.get('gender', None)
+            user_info.address = request.POST.get('address', None)
+            user_info.tshirt_size = request.POST.get('size', None)
+            user_info.pincode = request.POST.get('pincode', None)
             user_info.save()
             data={'status':1, 'message':'details saved'}
         except Exception as ex:
