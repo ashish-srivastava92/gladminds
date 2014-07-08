@@ -100,11 +100,25 @@ class GladMindUsers(models.Model):
     country = models.CharField(max_length=255, null=True, blank=True)
     state = models.CharField(max_length=255, null=True, blank=True)
     date_of_birth = models.CharField(max_length=255, null=True, blank=True)
-    gender = models.IntegerField(max_length=50, null=True, blank=True)
     img_url = models.FileField(upload_to="users", blank=True)
     thumb_url = models.FileField(upload_to="users", blank=True)
     isActive = models.BooleanField(default=True)
+    #added these attributes for afterbuy application
     accepted_terms = models.BooleanField(default=False)
+    SIZE_CHOICES = (
+        ('S', 'Small'),
+        ('M', 'Medium'),
+        ('L', 'Large'),
+        ('XL', 'Extra Large'),
+    )
+    GENDER_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+    )
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    tshirt_size = models.CharField(max_length=1, choices=SIZE_CHOICES)
+    pincode = models.CharField(max_length=15, null=True, blank=True)
+    
 
     class Meta:
         app_label = "gladminds"
