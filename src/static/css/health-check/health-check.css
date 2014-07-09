@@ -1,0 +1,11 @@
+.success{
+	border: 2px; 
+	border-radius: 2px; 
+	background-color: #91E56A;
+}
+
+.error{
+	border: 2px; 
+	border-radius: 2px; 
+	background-color: #F75D59;
+}
