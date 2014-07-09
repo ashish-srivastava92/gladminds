@@ -1,30 +1,28 @@
+import logging
+from datetime import datetime, timedelta
 from django import template
 from django.conf import settings
-from django.http.response import HttpResponse
 from django.db.models import get_app, get_models
-from gladminds.aftersell.models import logs 
-import logging
-from datetime import datetime
-from datetime import timedelta
+from django.http.response import HttpResponse
+from gladminds.aftersell.models import logs
+
 logger = logging.getLogger("gladminds")
 
-
 def check_db_connection(request):
-    health_status = 'error'
+    health_status = 'success'
     reason = 'Connected to RDS'
     try:
         app_list = [get_app('gladminds'), get_app('afterbuy'), get_app('aftersell') ] 
         for every_app in app_list:
             for model in get_models(every_app):
                 model.objects.filter()
-        health_status = 'success'
     except Exception as ex:
         reason = "Error on RDS Connection : %s" % ex
         health_status = 'error'    
     return {'health_status' : health_status, 'reason' : reason}
 
 def check_sms_errors(request):
-    health_status = 'error'
+    health_status = 'success'
     reason = 'All SMS are passed'
     try:
         today = datetime.now()
@@ -32,9 +30,7 @@ def check_sms_errors(request):
         end_date = today
         audit_logs = logs.AuditLog.objects.filter(action='failure', date__range=(start_date, end_date))
         
-        if not audit_logs:
-            health_status = 'success'
-        else:
+        if audit_logs:
             health_status = 'error'
             reason = 'On last {0} hours, {1} SMS Failed'.format(
                     settings.SMS_HEALTH_CHECK_INTERVAL, len(audit_logs))
@@ -45,7 +41,7 @@ def check_sms_errors(request):
     return {'health_status' : health_status, 'reason' : reason}
 
 def check_feed_errors(request):
-    health_status = 'error'
+    health_status = 'success'
     reason = 'All Feed are passed'
     try:
         today = datetime.now()
@@ -54,9 +50,8 @@ def check_feed_errors(request):
         feeds_logs = logs.DataFeedLog.objects.filter(
                          failed_data_count__gt=0, timestamp__range=(start_date, end_date))
         
-        if not feeds_logs:
-            health_status = 'success'
-        else:
+        if feeds_logs:
+            health_status = 'error'
             failed_data_count = 0
             for failed_feed in feeds_logs:
                 failed_data_count += failed_feed.failed_data_count
@@ -79,7 +74,7 @@ def health_check_view(request):
             result[fn.__name__]
             logger.info(e)
     
-    html_template = open(settings.TEMPLATE_DIR+'/health-check/health-check.html')
+    html_template = open(settings.TEMPLATE_DIR + '/health-check/health-check.html')
     t = template.Template(html_template.read())
     c = template.Context(result)
     return HttpResponse(t.render(c))
