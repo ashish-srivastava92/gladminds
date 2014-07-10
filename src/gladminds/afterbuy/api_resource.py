@@ -37,6 +37,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             url(r"^(?P<resource_name>%s)/product/info%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_user_product_information'), name="get_user_product_information"),
             url(r"^(?P<resource_name>%s)/notification/count%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_notification_count'), name="get_notification_count"),
             url(r"^(?P<resource_name>%s)/notification/list%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_notification_list'), name="get_notification_list"),
+            url(r"^(?P<resource_name>%s)/product/spares%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_spares_list'), name="get_spares_list"),
         ]
 
     def get_product_coupons(self, request, **kwargs):
@@ -179,3 +180,24 @@ class AfterBuyResources(AfterBuyBaseResource):
             logger.info("[Exception get_product_insurance]:{0}".format(ex))
             return HttpBadRequest("Not a registered number")
         return HttpResponse(json.dumps(resp))
+    
+    def get_spares_list(self, request, **kwargs):
+        '''This API fetches all the spares of a particular 
+           product whose brand_name is provided in the request '''
+        resp = []
+        brand_name = request.GET.get('brand_name')
+        if not brand_name:
+            return HttpBadRequest("brand_name is required.")
+        try:
+            brand_info = common.BrandData.objects.get(brand_name=brand_name)
+            spares_list = common.SparesData.objects.filter(spare_brand=brand_info)
+            if not spares_list:
+                return HttpResponse("No spares exists.")
+            else:
+                for i in map(model_to_dict, spares_list):
+                    resp.append(utils.get_dict_from_object(i))
+        except Exception as ex:
+            logger.info("[Exception get_spares_list]:{0}".format(ex))
+            return HttpBadRequest("Brand name does not exist.")
+        return HttpResponse(json.dumps(resp))
+        
