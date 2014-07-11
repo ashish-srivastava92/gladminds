@@ -305,15 +305,17 @@ class SASaveForm(models.Model):
         verbose_name_plural = "SA Save Form"
 
 
-class CustomerUpdatedInfo(models.Model):
+class CustomerTempRegistration(models.Model):
     product_data = models.ForeignKey(ProductData, null=True, blank=True)
     new_customer_name = models.CharField(max_length=50, null=True, blank=True)
     new_number = models.CharField(max_length=15, unique=True)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
+    temp_customer_id = models.CharField(max_length=50, null=False, blank=False, unique=True)
+    sent_to_sap = models.BooleanField(default=True)
 
     class Meta:
         app_label = "gladminds"
-        verbose_name_plural = "Customer update info"
+        verbose_name_plural = "Customer temporary info"
 
     def __unicode__(self):
         return self.new_customer_name
