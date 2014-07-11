@@ -355,7 +355,7 @@ AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 
 
 DEFAULT_COUPON_STATUS = 1
-DELAY_IN_CUSTOMER_UCN_MESSAGE = 180
+DELAY_IN_CUSTOMER_UCN_MESSAGE = 5
 ENABLE_AMAZON_SQS = False
 
 #################Registration Configuration#################################
