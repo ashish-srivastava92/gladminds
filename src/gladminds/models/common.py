@@ -100,11 +100,26 @@ class GladMindUsers(models.Model):
     country = models.CharField(max_length=255, null=True, blank=True)
     state = models.CharField(max_length=255, null=True, blank=True)
     date_of_birth = models.CharField(max_length=255, null=True, blank=True)
-    gender = models.IntegerField(max_length=50, null=True, blank=True)
     img_url = models.FileField(upload_to="users", blank=True)
     thumb_url = models.FileField(upload_to="users", blank=True)
     isActive = models.BooleanField(default=True)
+    #added these attributes for afterbuy application
     accepted_terms = models.BooleanField(default=False)
+    SIZE_CHOICES = (
+        ('S', 'Small'),
+        ('M', 'Medium'),
+        ('L', 'Large'),
+        ('XL', 'Extra Large'),
+    )
+    GENDER_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('X', 'Other'),
+    )
+    gender = models.CharField(max_length=2, choices=GENDER_CHOICES)
+    tshirt_size = models.CharField(max_length=2, choices=SIZE_CHOICES)
+    pincode = models.CharField(max_length=15, null=True, blank=True)
+    
 
     class Meta:
         app_label = "gladminds"
@@ -311,7 +326,6 @@ class ProductWarrantyInfo(models.Model):
 ########################################################################################
 
 class SparesData(models.Model):
-    id = models.AutoField(primary_key=True)
     spare_brand = models.ForeignKey(BrandData, null=False)
     spare_name = models.CharField(max_length=50, null=True, blank=True)
     spare_contact = models.CharField(max_length=50, null=True, blank=True)
