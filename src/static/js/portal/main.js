@@ -37,6 +37,12 @@
             vin = $('#srch-vin').val();
     	data['vin'] = vin;
     	Utils.submitForm(e, data, '/aftersell/register/customer');
+    	$('.customer-phone').val('').attr('readOnly', false);
+  	    $('.customer-name').val('')
+        $('.name-readonly').attr('readOnly', false);
+        $('.purchase-date').val('').attr('readOnly', false);
+        $('.customer-id').val('').attr('readOnly', false);
+        $('.customer-submit').attr('disabled', true);
         return false;
       });
     
@@ -51,22 +57,28 @@
             url: '/aftersell/exceptions/customer',
             data: {'vin': vin},
             success: function(data){
-              if(data['customer_phone']){
-                  $('.customer-phone').val(data['customer_phone']);
-                  $('.customer-name').val(data['customer_name'])
+              if (data['customer_phone']) {
+                  $('.customer-phone').val(data['customer_phone']).attr('readOnly', true);
+                  $('.customer-name').val(data['customer_name']).attr('readOnly', true);
                   $('.name-readonly').attr('readOnly', true);
                   $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
                   $('.customer-id').val(data['customer_id']).attr('readOnly', true);
-                  $('.customer-submit').attr('disabled', false);
+                  $('.customer-submit').attr('disabled', true);
               }	
-              else{
+              else if (data['message']) {
                   $('.customer-phone').val(data['customer_phone']);
-            	  $('.customer-name').val('')
+            	  $('.customer-name').val('').attr('readOnly', false);
                   $('.name-readonly').attr('readOnly', false);
                   $('.purchase-date').val('').attr('readOnly', false);
-                  $('.customer-id').val('').attr('readOnly', false);  
+                  $('.customer-id').val('').attr('readOnly', false);
+                  $('.customer-phone').attr('readOnly', false);
+                  $('.customer-submit').attr('disabled', true);
                   messageBlock.text(data.message);
                   messageModal.modal('show');
+                  if (!data['status']) {
+                	  $('.customer-id').val('').attr('readOnly', true);
+                	  $('.customer-submit').attr('disabled', false);
+                  }
               }
             },
             error: function() {
