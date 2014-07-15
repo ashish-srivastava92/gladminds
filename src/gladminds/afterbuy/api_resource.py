@@ -48,8 +48,6 @@ class AfterBuyResources(AfterBuyBaseResource):
             return self.get_user_product_information(request, **kwargs)
         if request.method == "POST":
             return self.post_user_product_information(request, **kwargs)
-        if request.method == "PUT":
-            return self.put_user_product_information(request, **kwargs)
         if request.method == "DELETE":
             return self.delete_user_product_information(request, **kwargs)
         
@@ -91,14 +89,20 @@ class AfterBuyResources(AfterBuyBaseResource):
             
             if product_info.customer_phone_number.phone_number != phone_number:
                 data = {'status':1, 'message': 'product is assigned to other user.'}
-            
-            if product_info.is_deleted:
+            else:
+                product_info.item_name = request.POST.get('item_name', product_info.item_name)
+                product_info.product_purchase_date = request.POST.get('purchase_date', product_info.product_purchase_date)
+                product_info.purchased_from = request.POST.get('purchased_from', product_info.purchased_from)
+                product_info.seller_email = request.POST.get('seller_email', product_info.seller_email)
+                product_info.seller_phone = request.POST.get('seller_phone', product_info.seller_phone)
+                product_info.warranty_yrs = request.POST.get('warranty_yrs', product_info.warranty_yrs)
+                product_info.insurance_yrs = request.POST.get('insurance_yrs', product_info.insurance_yrs)
+                product_info.invoice_loc = request.POST.get('invoice_loc', product_info.invoice_loc)
+                product_info.warranty_loc = request.POST.get('warranty_loc', product_info.warranty_loc)
+                product_info.insurance_loc = request.POST.get('insurance_loc', product_info.insurance_loc)                
                 product_info.is_deleted = False
                 product_info.save()
-                data = {'status':1, 'message': 'product saved successfully'}
-            else:    
-                data = {'status':1, 'message': 'product already exists'}
-            
+                data = {'status':1, 'message': 'product saved successfully'}            
         except Exception as ex:
             try:
                 user_object = common.GladMindUsers.objects.get(phone_number=phone_number)
