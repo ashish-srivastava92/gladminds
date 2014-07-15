@@ -104,7 +104,11 @@ class GladmindsResources(Resource):
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpBadRequest(inf.message))
         handler = getattr(self, sms_dict['handler'], None)
-        to_be_serialized = handler(sms_dict, phone_number)
+        try:
+            with transaction.atomic():
+                to_be_serialized = handler(sms_dict, phone_number)
+        except Exception as ex:
+            logger.info("The database failed to perform {0}:{1}".format(request.POST.get('action'), ex))
         return self.create_response(request, data=to_be_serialized)
 
     def register_customer(self, sms_dict, phone_number):
@@ -228,7 +232,6 @@ class GladmindsResources(Resource):
             coupon.actual_service_date = datetime.now()
             coupon.save()
         
-    @transaction.autocommit()
     def validate_coupon(self, sms_dict, phone_number):
         actual_kms = int(sms_dict['kms'])
         service_type = sms_dict['service_type']
@@ -318,7 +321,7 @@ class GladmindsResources(Resource):
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=dealer_message)
         return {'status': True, 'message': dealer_message}
 
-    @transaction.autocommit()
+
     def close_coupon(self, sms_dict, phone_number):
         sa_object = self.validate_dealer(phone_number)
         unique_service_coupon = sms_dict['usc']

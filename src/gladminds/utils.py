@@ -104,13 +104,17 @@ def get_customer_info(data):
         product_obj = common.ProductData.objects.get(vin=data['vin'])
     except Exception as ex:
         logger.info(ex)
-        message = '''VIN '{0}' does not exist in our records'''.format(data['vin'])
+        message = '''VIN '{0}' does not exist in our records.'''.format(data['vin'])
+        return {'message': message, 'status': 'fail'}
+    if product_obj.product_purchase_date:
+        purchase_date = product_obj.product_purchase_date.strftime('%d/%m/%Y')
+        return {'customer_id': product_obj.sap_customer_id,
+                'customer_phone': get_phone_number_format(str(product_obj.customer_phone_number)), 
+                'customer_name': product_obj.customer_phone_number.customer_name, 
+                'purchase_date': purchase_date}
+    else:
+        message = '''VIN '{0}' has no associated customer.'''.format(data['vin'])
         return {'message': message}
-    purchase_date = product_obj.product_purchase_date.strftime('%d/%m/%Y')
-    return {'customer_id': product_obj.customer_phone_number.gladmind_customer_id,
-            'customer_phone': get_phone_number_format(str(product_obj.customer_phone_number)), 
-            'customer_name': product_obj.customer_phone_number.customer_name, 
-            'purchase_date': purchase_date}
 
 def get_sa_list(request):
     dealer = aftersell_common.RegisteredDealer.objects.filter(
@@ -224,3 +228,12 @@ def get_dict_from_object(object):
             temp_dict[key] = object[key]
     return temp_dict
 
+def create_feed_data(post_data, product_data, temp_customer_id):
+    data ={}
+    data['sap_customer_id'] = temp_customer_id
+    data['product_purchase_date'] = format_date_string(post_data['purchase-date'])
+    data['customer_phone_number'] = mobile_format(post_data['customer-phone'])
+    data['customer_name'] = post_data['customer-name']
+    data['engine'] = product_data.engine
+    data['vin'] = product_data.vin
+    return data
