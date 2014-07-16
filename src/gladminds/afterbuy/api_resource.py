@@ -13,7 +13,6 @@ from gladminds import utils
 from gladminds.resource.authentication import AccessTokenAuthentication
 from gladminds.afterbuy.models import common as afterbuy_common
 from gladminds.utils import mobile_format
-from django.core.context_processors import csrf
 
 
 logger = logging.getLogger("gladminds")
@@ -67,8 +66,8 @@ class AfterBuyResources(AfterBuyBaseResource):
             if not product_info:
                 return HttpResponse("No product exist.")
             else:
-                for i in map(model_to_dict, product_info):
-                    resp.append(utils.get_dict_from_object(i))
+                for product_object in map(model_to_dict, product_info):
+                    resp.append(utils.get_dict_from_object(product_object))
         except Exception as ex:
             logger.info("[Exception get_user_product_information]:{0}".format(ex))
             return HttpBadRequest("Not a registered number")
@@ -78,28 +77,26 @@ class AfterBuyResources(AfterBuyBaseResource):
         '''This API used for adding a product to a user 
            whose mobile number in provided in the request '''
         data = {}
+        product_data = {}
         vin = request.POST.get('vin')
         mobile = request.POST.get('mobile')
         if not vin and not mobile:
             return HttpBadRequest("vin and mobile are required.")
         
         phone_number = mobile_format(mobile)
+        for field in ['item_name', 'product_purchase_date', 'purchased_from', 'seller_email', 'seller_phone',
+                  'warranty_yrs', 'insurance_yrs', 'invoice_loc', 'warranty_loc', 'insurance_loc']:
+            product_data[field] = request.POST.get(field, None)
+        
         try:
             product_info = afterbuy_common.UserProducts.objects.get(vin = vin)
-            
+
             if product_info.customer_phone_number.phone_number != phone_number:
                 data = {'status':1, 'message': 'product is assigned to other user.'}
             else:
-                product_info.item_name = request.POST.get('item_name', product_info.item_name)
-                product_info.product_purchase_date = request.POST.get('purchase_date', product_info.product_purchase_date)
-                product_info.purchased_from = request.POST.get('purchased_from', product_info.purchased_from)
-                product_info.seller_email = request.POST.get('seller_email', product_info.seller_email)
-                product_info.seller_phone = request.POST.get('seller_phone', product_info.seller_phone)
-                product_info.warranty_yrs = request.POST.get('warranty_yrs', product_info.warranty_yrs)
-                product_info.insurance_yrs = request.POST.get('insurance_yrs', product_info.insurance_yrs)
-                product_info.invoice_loc = request.POST.get('invoice_loc', product_info.invoice_loc)
-                product_info.warranty_loc = request.POST.get('warranty_loc', product_info.warranty_loc)
-                product_info.insurance_loc = request.POST.get('insurance_loc', product_info.insurance_loc)                
+                for field in ['item_name', 'product_purchase_date', 'purchased_from', 'seller_email', 'seller_phone',
+                  'warranty_yrs', 'insurance_yrs', 'invoice_loc', 'warranty_loc', 'insurance_loc']:
+                    setattr(product_info, field, request.POST.get(field, getattr(product_info, field)))
                 product_info.is_deleted = False
                 product_info.save()
                 data = {'status':1, 'message': 'product saved successfully'}            
@@ -111,22 +108,12 @@ class AfterBuyResources(AfterBuyBaseResource):
                 if not product_type_list:
                     data = {'status':1, 'message': 'product name not exists'}
                 else:
-                    item_name = request.POST.get('item_name', None)
-                    product_purchase_date = request.POST.get('purchase_date', None)
-                    purchased_from = request.POST.get('purchased_from', None)
-                    seller_email = request.POST.get('seller_email', None)
-                    seller_phone = request.POST.get('seller_phone', None)
-                    warranty_yrs = request.POST.get('warranty_yrs', None)
-                    insurance_yrs = request.POST.get('insurance_yrs', None)
-                    invoice_loc = request.POST.get('invoice_loc', None)
-                    warranty_loc = request.POST.get('warranty_loc', None)
-                    insurance_loc = request.POST.get('insurance_loc', None)
                     afterbuy_product_object = afterbuy_common.UserProducts(vin=vin,
-                                            item_name = item_name, customer_phone_number=user_object,
-                                            product_type=product_type_list[0], product_purchase_date = product_purchase_date,
-                                            purchased_from = purchased_from, seller_email = seller_email, seller_phone = seller_phone,
-                                            warranty_yrs = warranty_yrs, insurance_yrs = insurance_yrs, invoice_loc = invoice_loc,
-                                            warranty_loc = warranty_loc, insurance_loc = insurance_loc, is_deleted = False
+                                            item_name = product_data['item_name'], customer_phone_number=user_object,
+                                            product_type=product_type_list[0], product_purchase_date = product_data['product_purchase_date'],
+                                            purchased_from = product_data['purchased_from'], seller_email = product_data['seller_email'], seller_phone = product_data['seller_phone'],
+                                            warranty_yrs = product_data['warranty_yrs'], insurance_yrs = product_data['insurance_yrs'], invoice_loc = product_data['invoice_loc'],
+                                            warranty_loc = product_data['warranty_loc'], insurance_loc = product_data['insurance_loc'], is_deleted = False
                                             )
                     afterbuy_product_object.save()
                     data = {'status':1, 'message': 'product added successfully'}
