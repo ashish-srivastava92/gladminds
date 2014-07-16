@@ -334,4 +334,26 @@ class SparesData(models.Model):
         app_label = "gladminds"
         verbose_name_plural = "spare info"
     
+#########################################################################################
+
+class Feedback(models.Model):
+    reporter = models.ForeignKey('aftersell.ServiceAdvisor', null=False)
+    assign_to = models.ForeignKey(User, null=True)
+    message = models.CharField(max_length=512, null=True, blank=True)
+    comments = models.CharField(max_length=512, null=True, blank=True)
+    STATUS = (
+        ('open', 'Open'),
+        ('closed', 'Closed'),
+        ('resolved', 'Resolved'),
+        ('progress', 'Progress'),
+    )
+    status = models.CharField(max_length=12, choices=STATUS)
+    created_date = models.DateTimeField(null=True, blank= False)
+    modified_date = models.DateTimeField(null=True, blank= True)
     
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "gladminds feedback info"
+        
+    def __unicode__(self):
+        return self.assign_to

@@ -434,6 +434,35 @@ class GladmindsResources(Resource):
     def determine_format(self, request):
         return 'application/json'
     
+    def get_complain_data(self, sms_dict, phone_number):
+        ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
+        try:
+            active_sa = self.validate_dealer(phone_number)
+            
+            if not active_sa:
+                message = templates.get_template('SEND_SA_UNAUTHORISED_SA')
+            else:
+                gladminds_feedback_object = common.Feedback(reporter=active_sa,
+                                                                 message=sms_dict['feedback_message'],
+                                                                 created_date=datetime.now()
+                                                                 )
+                gladminds_feedback_object.save()
+                message = templates.get_template('SEND_RCV_FEEDBACK')
+        except Exception as ex:
+            message = templates.get_template('SEND_INVALID_MESSAGE')
+        
+        finally:
+            logger.info("Send complain message received successfully with %s" % message)
+            phone_number = utils.get_phone_number_format(phone_number)
+            if settings.ENABLE_AMAZON_SQS:
+                task_queue = get_task_queue()
+                task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
+            else:
+                send_coupon.delay(phone_number=phone_number, message=message)
+            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        return {'status': True, 'message': message}
+        
+        
     
 #########################AfterBuy Resources############################################
 class GladmindsBaseResource(ModelResource):
