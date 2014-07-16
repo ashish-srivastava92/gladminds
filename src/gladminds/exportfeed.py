@@ -76,7 +76,7 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
         for item in items:
             result = client.service.SI_GCPCSTID_Sync(
                 ITEM=[item], ITEM_BATCH=item_batch)
-            if result[1]['I_STATUS'] == 'SUCCESS':
+            if result[1]['STATUS'] == 'SUCCESS':
                 common.CustomerTempRegistration.objects.filter(temp_customer_id=item['CUSTOMER_ID']).update(sent_to_sap=True)
                 export_status = True
                 logger.error("Sent the details of customer ID {0} to sap",format(item['CUSTOMER_ID']))
