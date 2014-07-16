@@ -51,6 +51,7 @@ urlpatterns += patterns('gladminds',
     url(r'^api/v1/bajaj/asc-feed/\?wsdl$', 'webservice.asc_service'),
     url(r'^api/v1/bajaj/asc-feed/$', 'webservice.asc_service'),    
     url(r'^api/v1/bajaj/redeem-feed/$', 'superadmin.views.views_coupon_redeem_wsdl', {'document_root': settings.WSDL_COUPON_REDEEM_LOC}),
+    url(r'^api/v1/bajaj/customer-feed/$', 'superadmin.views.views_customer_registration_wsdl', {'document_root': settings.WSDL_CUSTOMER_REGISTRATION_LOC}),
 
     url(r'^app/logout', 'afterbuy.views.app_logout', name='app_logout'),
     url(r'^app', 'afterbuy.views.home', name='home'),

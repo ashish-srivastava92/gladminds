@@ -369,6 +369,24 @@ def send_report_mail_for_feed_failure(*args, **kwargs):
     feed_type = kwargs['feed_type']
     mail.feed_failure_report(remarks = remarks, feed_type=feed_type)
     
+'''
+Cron Job to send info of registered customer
+'''
+
+@shared_task
+def export_customer_reg_to_sap(*args, **kwargs):
+    redeem_obj = feed.CustomerRegistationFeedToSAP()
+    feed_export_data = redeem_obj.export_data()
+    if len(feed_export_data[0]) > 0:
+        customer_registered = exportfeed.ExportCustomerRegistrationFeed(username=settings.SAP_CRM_DETAIL[
+                       'username'], password=settings.SAP_CRM_DETAIL['password'],
+                      wsdl_url=settings.CUSTOMER_REGISTRATION_WSDL_URL, feed_type='Customer Registration Feed')
+        customer_registered.export(items=feed_export_data[0], item_batch=feed_export_data[
+                             1], total_failed_on_feed=feed_export_data[2])
+    else:
+        logger.info("tasks.py: No Customer registered since last feed")
+
+    
 _tasks_map = {"send_registration_detail": send_registration_detail,
 
               "send_service_detail": send_service_detail,
@@ -407,6 +425,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "delete_unused_otp" : delete_unused_otp,
               
-              "send_invalid_keyword_message" : send_invalid_keyword_message 
+              "send_invalid_keyword_message" : send_invalid_keyword_message,
+              
+              "export_customer_reg_to_sap" : export_customer_reg_to_sap 
 
               }

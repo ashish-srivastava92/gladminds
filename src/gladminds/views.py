@@ -21,6 +21,7 @@ from gladminds.mail import sent_otp_email
 from gladminds.feed import SAPFeed
 from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
 from gladminds.aftersell.models import common as afterbuy_common
+from gladminds.scheduler import SqsTaskQueue
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
@@ -295,6 +296,7 @@ def trigger_sqs_tasks(request):
         'export_coupon_redeem' : 'export_coupon_redeem_to_sap',
         'expire-service-coupon': 'expire_service_coupon',
         'send-reminder': 'send_reminder',
+        'export-customer-registered' : 'export_customer_reg_to_sap',
     }
     
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)

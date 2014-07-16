@@ -302,6 +302,8 @@ LOGGING = {
 
 WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR + '/coupon_redeem.wsdl'
 
+WSDL_CUSTOMER_REGISTRATION_LOC = TEMPLATE_DIR + '/customer_registration.wsdl'
+
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
     "sender": "feed-report@gladminds.co",
@@ -313,7 +315,7 @@ MAIL_DETAIL = {
 FEED_FAILURE_MAIL_DETAIL = {
 
     "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds@hashedin.com"],
+    "receiver": ["gladminds+alerts@hashedin.com"],
     "subject": "Gladminds Feed Failure Mail",
     "body": """""",
 }
