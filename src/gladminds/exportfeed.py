@@ -75,17 +75,20 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
         total_failed = total_failed_on_feed
         for item in items:
             logger.info("Trying to send SAP the ID: {0}".format(item['CUSTOMER_ID']))
-            result = client.service.SI_GCPCSTID_Sync(
-                ITEM=[item], ITEM_BATCH=item_batch)
-            logger.info("Response from SAP: {0}".format(result))
-            if result[1]['STATUS'] == 'SUCCESS':
-                common.CustomerTempRegistration.objects.filter(temp_customer_id=item['CUSTOMER_ID']).update(sent_to_sap=True)
-                export_status = True
-                logger.info("Sent the details of customer ID {0} to sap",format(item['CUSTOMER_ID']))
-            else:
-                total_failed = total_failed + 1
-                export_status = False
-                logger.error("Failed to send the details of customer ID {0} to sap",format(item['CUSTOMER_ID']))
+            try:
+                result = client.service.SI_GCPCSTID_Sync(
+                    ITEM=[item], ITEM_BATCH=item_batch)
+                logger.info("Response from SAP: {0}".format(result))
+                if result[1]['STATUS'] == 'SUCCESS':
+                    common.CustomerTempRegistration.objects.filter(temp_customer_id=item['CUSTOMER_ID']).update(sent_to_sap=True)
+                    export_status = True
+                    logger.info("Sent the details of customer ID {0} to sap",format(item['CUSTOMER_ID']))
+                else:
+                    total_failed = total_failed + 1
+                    export_status = False
+                    logger.error("Failed to send the details of customer ID {0} to sap",format(item['CUSTOMER_ID']))
+            except Exception as ex:
+                logger.error("Failed to send the details to sap",format(ex))
         feed_log(feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
