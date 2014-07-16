@@ -385,7 +385,7 @@ class ProductPurchaseFeed(BaseFeed):
                                                          'customer_phone_number'], registration_date=datetime.now(), customer_name=product['customer_name'])
                     customer_data.save()
 
-                if not product_data.sap_customer_id:
+                if not product_data.sap_customer_id  or product_data.sap_customer_id.find('T') == 0:
                     product_purchase_date = product['product_purchase_date']
                     product_data.sap_customer_id = product['sap_customer_id']
                     product_data.customer_phone_number = customer_data
@@ -529,3 +529,29 @@ class ASCFeed(BaseFeed):
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         return self.feed_remark
+
+class CustomerRegistationFeedToSAP(BaseFeed):
+
+    def export_data(self, start_date=None, end_date=None):
+        results = common.CustomerTempRegistration.objects.filter(sent_to_sap=False).select_related('product_data')
+        items = []
+        total_failed = 0
+        item_batch = {
+            'TIMESTAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
+        for redeem in results:
+            try:
+                item = {
+                    "CHASSIS": redeem.product_data.vin,
+                    "KUNNR": redeem.product_data.dealer_id.dealer_id,
+                    "CUSTOMER_ID" : redeem.temp_customer_id,
+                    "ENGINE" : redeem.product_data.engine,
+                    "VEH_SL_DT": redeem.product_purchase_date.date().strftime("%Y-%m-%d"),
+                    "CUSTOMER_NAME": redeem.new_customer_name,
+                    "CUST_MOBILE": redeem.new_number,
+                    
+                }
+                items.append(item)
+            except Exception as ex:
+                logger.error("error on customer info from db %s" % str(ex))
+                total_failed = total_failed + 1
+        return items, item_batch, total_failed
