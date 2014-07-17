@@ -23,7 +23,6 @@ class UserNotification(models.Model):
     class Meta:
         app_label = "afterbuy"
         verbose_name_plural = "notification"
-<<<<<<< HEAD
         
 class UserProducts(models.Model):
     vin = models.CharField(max_length=215, null=True, unique=True, blank=True)
@@ -58,8 +57,6 @@ class UserFeedback(models.Model):
         app_label = "afterbuy"
         verbose_name_plural = "userFeedbacks"
         
-=======
-
 class UserMobileInfo(models.Model):
     user = models.ForeignKey(GladMindUsers, null=False, blank=False)
     IMEI = models.CharField(max_length=50, null=True, blank=True, unique=True)
@@ -74,4 +71,3 @@ class UserMobileInfo(models.Model):
     class Meta:
         app_label = "afterbuy"
         verbose_name_plural = "mobile info"
->>>>>>> upstream/gm_1_4

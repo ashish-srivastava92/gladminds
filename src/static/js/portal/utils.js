@@ -1,3 +1,4 @@
+'use strict';
 var Utils = {
 	getFormData : function(className) {
 		var data = $(className).serializeArray();
@@ -9,10 +10,12 @@ var Utils = {
 
 	submitForm : function(event, data, url) {
 		// Items are hidden
-		var messageModal = $(".modal.message-modal"), messageBlock = $(".modal-body", messageModal), waitingModal = $(".modal.waiting-dialog");
-		if (data["password"] && (data["password"] != data["re-password"])) {
+		var messageModal = $('.modal.message-modal'),
+            messageBlock = $('.modal-body', messageModal),
+            waitingModal = $('.modal.waiting-dialog');
+		if (data['password'] && (data['password'] !== data['re-password'])) {
 			messageBlock.text('Re-typed password does not match');
-			messageModal.modal("show");
+			messageModal.modal('show');
 			return;
 		}
 		var jqXHR = $.ajax({
@@ -20,19 +23,19 @@ var Utils = {
 			data : data,
 			url : url,
 			beforeSend : function() {
-				waitingModal.modal("show");
+				waitingModal.modal('show');
 			},
 			success : function(data) {
-				waitingModal.modal("hide");
+				waitingModal.modal('hide');
 				messageBlock.text(data.message);
-				messageModal.modal("show");
+				messageModal.modal('show');
 				event.preventDefault();
 			},
 			error : function() {
-				waitingModal.modal("hide");
-				messageBlock.text("Invalid Data");
-				messageModal.modal("show");
+				waitingModal.modal('hide');
+				messageBlock.text('Invalid Data');
+				messageModal.modal('show');
 			}
 		});
 	}
-}; 
+};
