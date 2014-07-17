@@ -198,7 +198,7 @@
   	"pk": 21,
   	"fields": {
   		"template_key": "SEND_CUSTOMER_SUPPORTED_KEYWORD",
-  		"template": "Supported keyword: 1.GCP_REG 2.SERVICE 3.BRAND 4.A 5.C",
+  		"template": "Supported keyword: 1.GCP_REG 2.SERVICE 3.BRAND 4.A 5.C 6.SD",
   		"description": "Send supported message format to customer"
   	}
   },
@@ -254,6 +254,24 @@
       "template_key": "SEND_SA_WRONG_CUSTOMER",
       "template": "Incorrect Customer ID",
       "description": "Send message to SA reg wrong Customer-Id"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 30,
+    "fields": {
+      "template_key": "SEND_RCV_FEEDBACK",
+      "template": "Thanks for providing feedback. We will get back to you soon.",
+      "description": "Send this message when service advisor files complain successfully"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 30,
+    "fields": {
+      "template_key": "RCV_USER_COMPLAINT",
+      "template": "{feedback_message}",
+      "description": "Receive this message when service advisor files complain"
     }
   }
 ]

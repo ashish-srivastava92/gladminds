@@ -44,5 +44,12 @@ def get_message_template_mapper():
                         'invalid':get_template('SEND_INVALID_MESSAGE'),
                         'handler':'get_brand_data',
                         'auth_rule': ['open']
+                         },
+                settings.ALLOWED_KEYWORDS['service_desk']:{
+                         'receive': get_template('RCV_USER_COMPLAINT'),
+                         'send':get_template('SEND_RCV_FEEDBACK'),
+                        'invalid':get_template('SEND_INVALID_MESSAGE'),
+                        'handler':'get_complain_data',
+                        'auth_rule': ['open']
                          }
             }

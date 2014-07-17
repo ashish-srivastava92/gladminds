@@ -42,10 +42,8 @@ class TestAfterbuy(GladmindsResourceTestCase):
             'txtName': 'testuser'
         }
         response = client.post('/afterbuy/', data=data)
-        print "%%%%%%%%",response.status_code, response.content
-        print common.GladMindUsers.objects.all()
+        self.assertEqual(response.status_code, 200)
         
-
     def test_check_login(self):
         self.test_create_new_user()
         data = { 
@@ -55,13 +53,13 @@ class TestAfterbuy(GladmindsResourceTestCase):
                 }
         response = client.post(
             '/afterbuy/', data =data)
-        print response
+        self.assertEqual(response.status_code, 200)
         
-    
-    
     def test_product_details(self):
-        client.get('/afterbuy/', data={'action': 'getProducts'})
-        
+        response = client.get('/afterbuy/', data={'action': 'getProducts'})
+        self.assertEqual(response.status_code, 200)
 
     def test_create_item(self):
-        client.get('/afterbuy/', data={'action': 'addingItem'})
+        response = client.get('/afterbuy/', data={'action': 'addingItem'})
+        self.assertEqual(response.status_code, 200)
+        
