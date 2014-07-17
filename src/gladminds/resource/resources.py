@@ -121,7 +121,8 @@ class GladmindsResources(Resource):
         except ObjectDoesNotExist as odne:
             gladmind_customer_id = utils.generate_unique_customer_id()
             registration_date = datetime.now()
-            user = BaseFeed.registerNewUser('customer', username=gladmind_customer_id)
+            user_feed = BaseFeed()
+            user = user_feed.registerNewUser('customer', username=gladmind_customer_id)
             customer = common.GladMindUsers(
                 user=user, gladmind_customer_id=gladmind_customer_id, phone_number=phone_number,
                 customer_name=customer_name, email_id=email_id,

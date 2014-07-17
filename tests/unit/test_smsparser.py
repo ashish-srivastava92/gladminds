@@ -6,13 +6,14 @@ import json
 logger = logging.getLogger('test_case')
 from gladminds.models import common
 from tastypie.test import ResourceTestCase
+from django.conf import settings
 
 
 class SmsParserTest(ResourceTestCase):
 
     def setUp(self):
         super(SmsParserTest, self).setUp()
-        file_path = os.path.join(BASE_DIR, 'etc/data/template.json')
+        file_path = os.path.join(settings.PROJECT_DIR, 'template_data/template.json')
         message_templates = json.loads(open(file_path).read())
         for message_temp in message_templates:
             fields = message_temp['fields']
