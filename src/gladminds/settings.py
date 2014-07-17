@@ -337,8 +337,8 @@ OTP_MAIL = {
 
 FEDBACK_MAIL_DETAIL = {
                   "sender":"feed-report@gladminds.co",
-                  "subject":"Received a feedback",
-                  "receiver": ["naureen.razi@hashedin.com"],
+                  "subject":"Feedback",
+                  "receiver": ["gladminds@hashedin.com"],
                   "body": """""",
               }
 # AfterBuy File Upload location configuration
