@@ -337,7 +337,7 @@ OTP_MAIL = {
 
 FEDBACK_MAIL_DETAIL = {
                   "sender":"feed-report@gladminds.co",
-                  "subject":"Received a feedback",
+                  "subject":"Feedback",
                   "receiver": ["gladminds-alert@hashedin.com"],
                   "body": """""",
               }
