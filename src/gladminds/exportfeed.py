@@ -76,7 +76,7 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
         for item in items:
             logger.info("Trying to send SAP the ID: {0}".format(item['CUSTOMER_ID']))
             try:
-                result = client.service.SI_GCPCSTID_Sync(
+                result = client.service.SI_GCPCstID_sync(
                     ITEM=[item], ITEM_BATCH=item_batch)
                 logger.info("Response from SAP: {0}".format(result))
                 if result[1]['STATUS'] == 'SUCCESS':
