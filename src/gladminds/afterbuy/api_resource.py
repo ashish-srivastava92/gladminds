@@ -39,11 +39,8 @@ class AfterBuyResources(AfterBuyBaseResource):
             url(r"^(?P<resource_name>%s)/product/info%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('dispatch_dict'), name="api_dispatch_dict"),
             url(r"^(?P<resource_name>%s)/notification/count%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_notification_count'), name="get_notification_count"),
             url(r"^(?P<resource_name>%s)/notification/list%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_notification_list'), name="get_notification_list"),
-<<<<<<< HEAD
             url(r"^(?P<resource_name>%s)/product/spares%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_spares_list'), name="get_spares_list"),
-=======
             url(r"^(?P<resource_name>%s)/phone-details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('save_user_phone_details'), name="save_user_phone_details"),
->>>>>>> upstream/gm_1_4
         ]
 
     def dispatch_dict(self, request, **kwargs):
@@ -309,21 +306,15 @@ class AfterBuyResources(AfterBuyBaseResource):
             logger.info(log_message)
             data={'status':0, 'message':log_message}
         return HttpResponse(json.dumps(data), content_type="application/json")
-<<<<<<< HEAD
-    
+ 
     def save_user_feedback(self, request, **kwargs):
         ''' This API used for saving user feedback  whose
             mobile number is provided in the request '''
-=======
-
-    def save_user_phone_details(self, request, **kwargs):
->>>>>>> upstream/gm_1_4
         phone_number = request.POST.get('mobile')
         if not phone_number:
             return HttpBadRequest("phone_number is required.")
         try:
             phone_number= mobile_format(phone_number)
-<<<<<<< HEAD
             user_info = common.GladMindUsers.objects.get(phone_number=phone_number)
             feedback_type = request.POST.get('feedback_type', None)
             message = request.POST.get('message', None)
@@ -336,7 +327,12 @@ class AfterBuyResources(AfterBuyBaseResource):
             data={'status':0, 'message':log_message}
         return HttpResponse(json.dumps(data), content_type="application/json")
         
-=======
+    def save_user_phone_details(self, request, **kwargs):
+        phone_number = request.POST.get('mobile')
+        if not phone_number:
+            return HttpBadRequest("phone_number is required.")
+        try:
+            phone_number= mobile_format(phone_number)
             user = common.GladMindUsers.objects.get(phone_number=phone_number)
             IMEI = request.POST.get('IMEI', None)
             ICCID = request.POST.get('ICCID', None)
@@ -357,4 +353,3 @@ class AfterBuyResources(AfterBuyBaseResource):
             logger.info(log_message)
             data={'status':0, 'message':log_message}
         return HttpResponse(json.dumps(data), content_type="application/json")    
->>>>>>> upstream/gm_1_4

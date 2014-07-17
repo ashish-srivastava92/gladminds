@@ -108,9 +108,9 @@ def get_customer_info(data):
         return {'message': message, 'status': 'fail'}
     if product_obj.product_purchase_date:
         purchase_date = product_obj.product_purchase_date.strftime('%d/%m/%Y')
-        return {'customer_id': product_obj.sap_customer_id,
-                'customer_phone': get_phone_number_format(str(product_obj.customer_phone_number)), 
-                'customer_name': product_obj.customer_phone_number.customer_name, 
+        return {'id': product_obj.sap_customer_id,
+                'phone': get_phone_number_format(str(product_obj.customer_phone_number)), 
+                'name': product_obj.customer_phone_number.customer_name, 
                 'purchase_date': purchase_date}
     else:
         message = '''VIN '{0}' has no associated customer.'''.format(data['vin'])
