@@ -23,6 +23,7 @@ class UserNotification(models.Model):
     class Meta:
         app_label = "afterbuy"
         verbose_name_plural = "notification"
+<<<<<<< HEAD
         
 class UserProducts(models.Model):
     vin = models.CharField(max_length=215, null=True, unique=True, blank=True)
@@ -57,3 +58,20 @@ class UserFeedback(models.Model):
         app_label = "afterbuy"
         verbose_name_plural = "userFeedbacks"
         
+=======
+
+class UserMobileInfo(models.Model):
+    user = models.ForeignKey(GladMindUsers, null=False, blank=False)
+    IMEI = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    ICCID = models.CharField(max_length=50, null=True, blank=True)
+    phone_name = models.CharField(max_length=100, null=True, blank=True)
+    serial_number = models.CharField(max_length=50, null=True, blank=True)
+    capacity = models.CharField(max_length=50, null=True, blank=True)
+    operating_system = models.CharField(max_length=50, null=True, blank=True)
+    version = models.CharField(max_length=50, null=True, blank=True)
+    model = models.CharField(max_length=50, null=True, blank=True)
+
+    class Meta:
+        app_label = "afterbuy"
+        verbose_name_plural = "mobile info"
+>>>>>>> upstream/gm_1_4

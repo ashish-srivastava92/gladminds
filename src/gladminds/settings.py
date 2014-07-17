@@ -356,7 +356,7 @@ AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 
 
 DEFAULT_COUPON_STATUS = 1
-DELAY_IN_CUSTOMER_UCN_MESSAGE = 180
+DELAY_IN_CUSTOMER_UCN_MESSAGE = 5
 ENABLE_AMAZON_SQS = False
 
 #################Registration Configuration#################################
@@ -378,6 +378,7 @@ REGISTRATION_CONFIG = {
 ###########################################################################
 ########################Password Postfix for dealers######################
 PASSWORD_POSTFIX = '@123'
+TEMP_ID_PREFIX = 'T'
 ###########################################################################
 ########################Feed Failure Mail enabled ######################
 FEED_FAILURE_MAIL_ENABLED = True
@@ -385,3 +386,8 @@ FEED_FAILURE_MAIL_ENABLED = True
 #########################New relic file location########################
 NEW_RELIC_FILE_LOCATION = './src/newrelic_qa.ini'
 ########################################################################
+#######################SMS_HEALTH_CHECK_INTERVAL
+SMS_HEALTH_CHECK_INTERVAL=6
+#######################FEED_HEALTH_CHECK_INTERVAL
+FEED_HEALTH_CHECK_INTERVAL=8
+################################################

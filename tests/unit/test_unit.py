@@ -41,10 +41,10 @@ class TestUtils(GladmindsUnitTestCase):
                             , actual_service_date=datetime.now() - timedelta(days=20), extended_date=datetime.now() - timedelta(days=2))
         self.get_message_template(template_key='SEND_CUSTOMER_VALID_COUPON'\
                                   , template='Service Type {service_type}. UCN {coupon}.', description='Desc')
-        asc_user = User(username='ASC001')
-        asc_user.set_password('123')
-        asc_user.save()
-        self.get_asc_obj(user=asc_user, phone_number="+911234567890")
+        self.asc_user = User(username='ASC001')
+        self.asc_user.set_password('123')
+        self.asc_user.save()
+        self.get_asc_obj(user=self.asc_user, phone_number="+911234567890")
 
 
     def test_get_sa_list(self):
@@ -59,9 +59,9 @@ class TestUtils(GladmindsUnitTestCase):
 
     def test_otp(self):
         phone_number = '1234567890'
-        token = get_token(phone_number)
+        token = get_token(self.asc_user, phone_number)
         self.assertTrue(isinstance(token, int))
-        self.assertTrue(validate_otp(token, phone_number))
+        self.assertTrue(validate_otp(self.asc_user, token, phone_number))
 
 
 class TestFeedLogWithRemark(ResourceTestCase):

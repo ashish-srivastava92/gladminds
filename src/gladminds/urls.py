@@ -62,6 +62,7 @@ urlpatterns += patterns('gladminds',
     url(r'^tasks-view', 'views.sqs_tasks_view'),
     url(r'^trigger-tasks', 'views.trigger_sqs_tasks'),
     url(r'^tasks/', SqsHandler.as_view(task_map=_tasks_map)),
+    url(r'^health-check', 'health_check.health_check_view'),
 
     url(r'^afterbuy/$', 'afterbuy.views.main', name='main'),
 #     url(r'^app/create-account', 'afterbuy.views.create_account', name='create_account'),
