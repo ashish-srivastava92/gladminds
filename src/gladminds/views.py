@@ -293,7 +293,7 @@ def sqs_tasks_view(request):
 def trigger_sqs_tasks(request):
     sqs_tasks = {
         'send-feed-mail' : 'send_report_mail_for_feed',
-        'export_coupon_redeem' : 'export_coupon_redeem_to_sap',
+        'export-coupon-redeem' : 'export_coupon_redeem_to_sap',
         'expire-service-coupon': 'expire_service_coupon',
         'send-reminder': 'send_reminder',
         'export-customer-registered' : 'export_customer_reg_to_sap',
