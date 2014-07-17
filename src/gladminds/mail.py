@@ -162,4 +162,19 @@ def send_ucn_request_alert(data=None):
     except Exception as ex:
         logger.info("[Exception ucn request email]: {0}".format(ex))
     
-
+def send_feedback_received(data=None):
+    from gladminds import mail
+    try:
+        file_stream = open(settings.TEMPLATE_DIR+'/feedback_received_mail.html')
+        feed_temp = file_stream.read()
+        template = Template(feed_temp)
+        context = Context({'message': data.message,
+                           'reporter': data.reporter,
+                           'created_date': data.created_date})
+        body = template.render(context)
+        mail_detail = settings.FEDBACK_MAIL_DETAIL
+        mail.send_email(sender = mail_detail['sender'], receiver = mail_detail['receiver'], 
+                   subject = mail_detail['subject'], body = body, 
+                   smtp_server = settings.MAIL_SERVER)
+    except Exception as ex:
+        logger.info("[Exception ucn request email]: {0}".format(ex))

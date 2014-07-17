@@ -335,7 +335,12 @@ OTP_MAIL = {
                   "body": """""",
               }
 
-
+FEDBACK_MAIL_DETAIL = {
+                  "sender":"feed-report@gladminds.co",
+                  "subject":"Received a feedback",
+                  "receiver": ["naureen.razi@hashedin.com"],
+                  "body": """""",
+              }
 # AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
 AFTERBUY_USER_LOC = os.path.join(AFTERBUY_LOC, "users")
