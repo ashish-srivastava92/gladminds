@@ -428,7 +428,7 @@ class CouponRedeemFeedToSAP(BaseFeed):
                     "KUNNR": "GMDEALERNEW",
                     "CUSTOMER_ID" : "T432476",
                     "ENGINE" : "DHZCEK89665",
-                    "VEH_SL_DT": "29.01.2014",
+                    "VEH_SL_DT": "2014-01-29",
                     "CUSTOMER_NAME": "BHARAT LALWANI",
                     "CUST_MOBILE": "+919535216081",
                     
@@ -438,7 +438,7 @@ class CouponRedeemFeedToSAP(BaseFeed):
                     "KUNNR": "GMDEALERNEW2",
                     "CUSTOMER_ID" : "T432476",
                     "ENGINE" : "DHZCEK90632",
-                    "VEH_SL_DT": "31.01.2014",
+                    "VEH_SL_DT": "2014-01-31",
                     "CUSTOMER_NAME": "RAHUL KUMAR",
                     "CUST_MOBILE": "+919886032650",
                     
@@ -448,7 +448,7 @@ class CouponRedeemFeedToSAP(BaseFeed):
                     "KUNNR": "GMDEALERNEW",
                     "CUSTOMER_ID" : "T432476",
                     "ENGINE" : "DHZCEK91061",
-                    "VEH_SL_DT": "31.01.2014",
+                    "VEH_SL_DT": "2014-01-31",
                     "CUSTOMER_NAME": "BHARAT KUMAR",
                     "CUST_MOBILE": "+919535216092",
                     
