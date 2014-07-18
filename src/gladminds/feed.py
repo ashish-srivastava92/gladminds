@@ -536,18 +536,18 @@ class CustomerRegistationFeedToSAP(BaseFeed):
 #        results = common.CustomerTempRegistration.objects.filter(sent_to_sap=False).select_related('product_data')
         results = [{
                     "CHASSIS": "MD2A11CZ0ECK08915",
-                    "KUNNR": "GMDEALERNEW",
-                    "CUSTOMER_ID" : "T432476",
+                    "KUNNR": "10222",
+                    "CUSTOMER_ID" : "T432474",
                     "ENGINE" : "DHZCEK89665",
                     "VEH_SL_DT": "2014-01-29",
                     "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919535216081",
+                    "CUST_MOBILE": "+919999999999",
                     
                 },
                 {
                     "CHASSIS": "MD2A11CZ0ECK10017",
-                    "KUNNR": "GMDEALERNEW2",
-                    "CUSTOMER_ID" : "T432476",
+                    "KUNNR": "10491",
+                    "CUSTOMER_ID" : "T432475",
                     "ENGINE" : "DHZCEK90632",
                     "VEH_SL_DT": "2014-01-31",
                     "CUSTOMER_NAME": "RAHUL KUMAR",
@@ -556,12 +556,12 @@ class CustomerRegistationFeedToSAP(BaseFeed):
                 },
                 {
                     "CHASSIS": "MD2A11CZ0ECK10020",
-                    "KUNNR": "GMDEALERNEW",
+                    "KUNNR": "10745",
                     "CUSTOMER_ID" : "T432476",
                     "ENGINE" : "DHZCEK91061",
                     "VEH_SL_DT": "2014-01-31",
                     "CUSTOMER_NAME": "BHARAT KUMAR",
-                    "CUST_MOBILE": "+919535216092",
+                    "CUST_MOBILE": "+910000000000",
                     
                 }]
         items = []
