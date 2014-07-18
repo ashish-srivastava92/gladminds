@@ -38,11 +38,11 @@ class ExportCouponRedeemFeed(BaseExportFeed):
                 ITEM=[item], ITEM_BATCH=item_batch)
             if result[1]['I_STATUS'] == 'SUCCESS':
                 export_status = True
-                logger.error("Sent the details of coupon {0} to sap",format(item['GCP_UCN_NO']))
+                logger.error("Sent the details of coupon {0} to sap".format(item['GCP_UCN_NO']))
             else:
                 total_failed = total_failed + 1
                 export_status = False
-                logger.error("Failed to send the details of coupon {0} to sap",format(item['GCP_UCN_NO']))
+                logger.error("Failed to send the details of coupon {0} to sap".format(item['GCP_UCN_NO']))
 
         logger.info("Response from SAP: {0}".format(result))
         feed_log(feed_type=self.feed_type, total_data_count=len(items)\
@@ -82,11 +82,11 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
                 if result[1]['STATUS'] == 'SUCCESS':
                     common.CustomerTempRegistration.objects.filter(temp_customer_id=item['CUSTOMER_ID']).update(sent_to_sap=True)
                     export_status = True
-                    logger.info("Sent the details of customer ID {0} to sap",format(item['CUSTOMER_ID']))
+                    logger.info("Sent the details of customer ID {0} to sap".format(item['CUSTOMER_ID']))
                 else:
                     total_failed = total_failed + 1
                     export_status = False
-                    logger.error("Failed to send the details of customer ID {0} to sap",format(item['CUSTOMER_ID']))
+                    logger.error("Failed to send the details of customer ID {0} to sap".format(item['CUSTOMER_ID']))
             except Exception as ex:
                 logger.error("Failed to send the details to sap: {0}".format(ex))
         feed_log(feed_type=self.feed_type, total_data_count=len(items)\
