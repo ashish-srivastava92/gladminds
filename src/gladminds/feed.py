@@ -421,45 +421,23 @@ class ProductServiceFeed(BaseFeed):
 class CouponRedeemFeedToSAP(BaseFeed):
 
     def export_data(self, start_date=None, end_date=None):
-#        results = common.CouponData.objects.filter(closed_date__range=(
-#            start_date, end_date), status=2).select_related('vin', 'customer_phone_number__phone_number')
-        results = [{
-                    "CHASSIS": "MD2A11CZ0ECK08915",
-                    "KUNNR": "GMDEALERNEW",
-                    "CUSTOMER_ID" : "T432476",
-                    "ENGINE" : "DHZCEK89665",
-                    "VEH_SL_DT": "2014-01-29",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919535216081",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10017",
-                    "KUNNR": "GMDEALERNEW2",
-                    "CUSTOMER_ID" : "T432476",
-                    "ENGINE" : "DHZCEK90632",
-                    "VEH_SL_DT": "2014-01-31",
-                    "CUSTOMER_NAME": "RAHUL KUMAR",
-                    "CUST_MOBILE": "+919886032650",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10020",
-                    "KUNNR": "GMDEALERNEW",
-                    "CUSTOMER_ID" : "T432476",
-                    "ENGINE" : "DHZCEK91061",
-                    "VEH_SL_DT": "2014-01-31",
-                    "CUSTOMER_NAME": "BHARAT KUMAR",
-                    "CUST_MOBILE": "+919535216092",
-                    
-                }]
+        results = common.CouponData.objects.filter(closed_date__range=(
+            start_date, end_date), status=2).select_related('vin', 'customer_phone_number__phone_number')
         items = []
         total_failed = 0
         item_batch = {
-            'TIMESTAMP': datetime.now().strftime("%Y%m%d%H%M%S")}
+            'TIMESTAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
         for redeem in results:
             try:
-                item = redeem
+                item = {
+                        "CHASSIS": redeem.vin.vin,
+                        "GCP_KMS": redeem.actual_kms,
+                        "GCP_KUNNR": redeem.vin.dealer_id.dealer_id,
+                        "GCP_UCN_NO": redeem.unique_service_coupon,
+                        "PRODUCT_TYPE": redeem.vin.product_type.product_type,
+                        "SERVICE_TYPE": str(redeem.service_type),
+                        "SER_AVL_DT": redeem.actual_service_date.date().strftime("%Y-%m-%d"),
+                    }                        
                 items.append(item)
             except Exception as ex:
                 logger.error("error on data coupon data from db %s" % str(ex))
@@ -555,23 +533,44 @@ class ASCFeed(BaseFeed):
 class CustomerRegistationFeedToSAP(BaseFeed):
 
     def export_data(self, start_date=None, end_date=None):
-        results = common.CustomerTempRegistration.objects.filter(sent_to_sap=False).select_related('product_data')
+#        results = common.CustomerTempRegistration.objects.filter(sent_to_sap=False).select_related('product_data')
+        results = [{
+                    "CHASSIS": "MD2A11CZ0ECK08915",
+                    "KUNNR": "GMDEALERNEW",
+                    "CUSTOMER_ID" : "T432476",
+                    "ENGINE" : "DHZCEK89665",
+                    "VEH_SL_DT": "2014-01-29",
+                    "CUSTOMER_NAME": "BHARAT LALWANI",
+                    "CUST_MOBILE": "+919535216081",
+                    
+                },
+                {
+                    "CHASSIS": "MD2A11CZ0ECK10017",
+                    "KUNNR": "GMDEALERNEW2",
+                    "CUSTOMER_ID" : "T432476",
+                    "ENGINE" : "DHZCEK90632",
+                    "VEH_SL_DT": "2014-01-31",
+                    "CUSTOMER_NAME": "RAHUL KUMAR",
+                    "CUST_MOBILE": "+919886032650",
+                    
+                },
+                {
+                    "CHASSIS": "MD2A11CZ0ECK10020",
+                    "KUNNR": "GMDEALERNEW",
+                    "CUSTOMER_ID" : "T432476",
+                    "ENGINE" : "DHZCEK91061",
+                    "VEH_SL_DT": "2014-01-31",
+                    "CUSTOMER_NAME": "BHARAT KUMAR",
+                    "CUST_MOBILE": "+919535216092",
+                    
+                }]
         items = []
         total_failed = 0
         item_batch = {
             'TIMESTAMP': datetime.now().strftime("%Y%m%d%H%M%S")}
         for redeem in results:
             try:
-                item = {
-                    "CHASSIS": redeem.product_data.vin,
-                    "KUNNR": redeem.product_data.dealer_id.dealer_id,
-                    "CUSTOMER_ID" : redeem.temp_customer_id,
-                    "ENGINE" : redeem.product_data.engine,
-                    "VEH_SL_DT": redeem.product_purchase_date.date().strftime("%Y-%m-%d"),
-                    "CUSTOMER_NAME": redeem.new_customer_name,
-                    "CUST_MOBILE": redeem.new_number,
-                    
-                }
+                item = redeem
                 items.append(item)
             except Exception as ex:
                 logger.error("error on customer info from db %s" % str(ex))
