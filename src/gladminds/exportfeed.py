@@ -88,7 +88,8 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
                     export_status = False
                     logger.error("Failed to send the details of customer ID {0} to sap".format(item['CUSTOMER_ID']))
             except Exception as ex:
-                logger.error("Failed to send the details to sap: " + str(ex) )
+                logger.error("Failed to send the details to sap")
+                logger.error(ex)
         feed_log(feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
