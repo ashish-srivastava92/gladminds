@@ -1,35 +1,30 @@
+import logging
+import json
+import random
+
 from django.shortcuts import render_to_response, render
 from django.template import RequestContext
 from django.http.response import HttpResponseRedirect, HttpResponse,\
     HttpResponseBadRequest
+from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from django.contrib.auth.models import Group, User
+from django.contrib.auth import authenticate, login, logout
+
 from gladminds.models import common
 from gladminds.sqs_tasks import send_otp
-from django.contrib.auth.decorators import login_required
 from gladminds import utils, message_template
-from django.conf import settings
 from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format, format_date_string, stringify_groups
 from gladminds.sqs_tasks import export_asc_registeration_to_sap
-from gladminds.utils import get_task_queue
-
-
-
 from gladminds.mail import sent_otp_email
-from django.contrib.auth.models import Group, User
-from gladminds.utils import get_task_queue
-from django.contrib.auth import authenticate, login, logout
-import logging
-import json
+from gladminds.feed import SAPFeed
+from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
 from gladminds.aftersell.models import common as afterbuy_common
-
-from django.contrib.auth.models import Group, User
-from gladminds.utils import get_task_queue
-from django.contrib.auth import authenticate, login, logout
 from gladminds.scheduler import SqsTaskQueue
 
-
 logger = logging.getLogger('gladminds')
-
+TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 
 def auth_login(request, provider):
     if request.method == 'GET':
@@ -205,20 +200,30 @@ def exceptions(request, exception=None):
         return HttpResponseBadRequest()
     
 UPDATE_FAIL = 'Phone number already registered!'
-UPDATE_SUCCESS = 'Updated customer details'
+UPDATE_SUCCESS = 'Customer has been registered with ID: '
 def register_customer(request, group=None):
-    data = request.POST
-    product_obj = common.ProductData.objects.filter(vin=data['customer-vin'])
-    purchase_date = format_date_string(data['purchase-date'])
+    post_data = request.POST
+    data_source = []
+    product_obj = common.ProductData.objects.filter(vin=post_data['customer-vin'])
+    temp_customer_id = TEMP_ID_PREFIX + str(random.randint(10**5, 10**6))
+    data_source.append(utils.create_feed_data(post_data, product_obj[0], temp_customer_id))
     try:
-        customer_obj = common.CustomerUpdatedInfo(product_data=product_obj[0], new_customer_name = data['customer-name'],
-             new_number=data['customer-phone'],product_purchase_date = purchase_date)
+        customer_obj = common.CustomerTempRegistration(product_data=product_obj[0], 
+                                                       new_customer_name = data_source[0]['customer_name'],
+                                                       new_number = data_source[0]['customer_phone_number'],
+                                                       product_purchase_date = data_source[0]['product_purchase_date'],
+                                                       temp_customer_id = temp_customer_id)
         customer_obj.save()
+        feed_remark = FeedLogWithRemark(len(data_source),
+                                        feed_type='Purchase Feed',
+                                        action='Received', status=True)
+        sap_obj = SAPFeed()
+        sap_obj.import_to_db(feed_type='purchase', data_source=data_source, feed_remark=feed_remark)
     except Exception as ex:
         logger.info(ex)
         return json.dumps({"message": UPDATE_FAIL})
-    return json.dumps({'message': UPDATE_SUCCESS})
-        
+    return json.dumps({'message': UPDATE_SUCCESS + temp_customer_id})
+      
 
 SUCCESS_MESSAGE = 'Registration is complete'
 EXCEPTION_INVALID_DEALER = 'The dealer-id provided is not registered'
@@ -288,9 +293,10 @@ def sqs_tasks_view(request):
 def trigger_sqs_tasks(request):
     sqs_tasks = {
         'send-feed-mail' : 'send_report_mail_for_feed',
-        'export_coupon_redeem' : 'export_coupon_redeem_to_sap',
+        'export-coupon-redeem' : 'export_coupon_redeem_to_sap',
         'expire-service-coupon': 'expire_service_coupon',
         'send-reminder': 'send_reminder',
+        'export-customer-registered' : 'export_customer_reg_to_sap',
     }
     
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)

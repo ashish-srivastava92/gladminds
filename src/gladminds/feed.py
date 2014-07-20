@@ -17,7 +17,7 @@ from django.db.models import signals
 from gladminds.utils import get_task_queue
 
 logger = logging.getLogger("gladminds")
-USER_GROUP = {'dealer': 'dealers', 'ASC': 'ascs'}
+USER_GROUP = {'dealer': 'dealers', 'ASC': 'ascs', 'SA':'sas', 'customer':"customer"}
 
 def load_feed():
     FEED_TYPE = settings.FEED_TYPE
@@ -125,26 +125,33 @@ class BaseFeed(object):
         logger.info('New {0} Registration with id - {1}'.format(user, username))
         if not group:
             group = USER_GROUP[user]
+        try:
+            user_group = Group.objects.get(name=group)
+        except ObjectDoesNotExist as ex:
+            logger.info(
+                "[Exception: new_ registration]: {0}"
+                .format(ex))
+            user_group = Group.objects.create(name=group)
+            user_group.save()
         if username:
-            new_user = User(
-                username=username, first_name=first_name, last_name=last_name, email=email)
-            password = username + settings.PASSWORD_POSTFIX
-            new_user.set_password(password)
-            new_user.save()
             try:
-                user_group = Group.objects.get(name=group)
+                new_user = User.objects.get(username=username)
             except ObjectDoesNotExist as ex:
                 logger.info(
                     "[Exception: new_ registration]: {0}"
-                    .format(ex))
-                user_group = Group.objects.create(name=group)
-                user_group.save()
+                    .format(ex))    
+                new_user = User(
+                    username=username, first_name=first_name, last_name=last_name, email=email)
+                password = username + settings.PASSWORD_POSTFIX
+                new_user.set_password(password)
+                new_user.save()
             new_user.groups.add(user_group)
+            new_user.save()
             logger.info(user + ' {0} registered successfully'.format(username))
             return new_user
         else:
             logger.info('{0} id is not provided.'.format(user))
-            raise Exception('{0} id is not provided.'.format(user))
+            raise Exception('{0} id is not provided.'.format(user))    
 
 
 class BrandProductTypeFeed(BaseFeed):
@@ -203,6 +210,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                         service_advisor = aftersell_common.ServiceAdvisor(service_advisor_id=dealer['service_advisor_id'], 
                                                             name=dealer['name'], phone_number=dealer['phone_number'])
                         service_advisor.save()
+                        self.registerNewUser('SA', username=dealer['service_advisor_id'])
                 elif dealer['status']=='N':
                     service_advisor = service_advisor[0]
                 else:
@@ -372,11 +380,12 @@ class ProductPurchaseFeed(BaseFeed):
                         '[Exception: ProductPurchaseFeed_customer_data]: {0}'.format(odne))
                     # Register this customer
                     gladmind_customer_id = utils.generate_unique_customer_id()
-                    customer_data = common.GladMindUsers(gladmind_customer_id=gladmind_customer_id, phone_number=product[
+                    user=self.registerNewUser('customer', username=gladmind_customer_id)
+                    customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, phone_number=product[
                                                          'customer_phone_number'], registration_date=datetime.now(), customer_name=product['customer_name'])
                     customer_data.save()
 
-                if not product_data.sap_customer_id:
+                if not product_data.sap_customer_id  or product_data.sap_customer_id.find('T') == 0:
                     product_purchase_date = product['product_purchase_date']
                     product_data.sap_customer_id = product['sap_customer_id']
                     product_data.customer_phone_number = customer_data
@@ -421,14 +430,14 @@ class CouponRedeemFeedToSAP(BaseFeed):
         for redeem in results:
             try:
                 item = {
-                    "CHASSIS": redeem.vin.vin,
-                    "GCP_KMS": redeem.actual_kms,
-                    "GCP_KUNNR": redeem.vin.dealer_id.dealer_id,
-                    "GCP_UCN_NO": redeem.unique_service_coupon,
-                    "PRODUCT_TYPE": redeem.vin.product_type.product_type,
-                    "SERVICE_TYPE": str(redeem.service_type),
-                    "SER_AVL_DT": redeem.actual_service_date.date().strftime("%Y-%m-%d"),
-                }
+                        "CHASSIS": redeem.vin.vin,
+                        "GCP_KMS": redeem.actual_kms,
+                        "GCP_KUNNR": redeem.vin.dealer_id.dealer_id,
+                        "GCP_UCN_NO": redeem.unique_service_coupon,
+                        "PRODUCT_TYPE": redeem.vin.product_type.product_type,
+                        "SERVICE_TYPE": str(redeem.service_type),
+                        "SER_AVL_DT": redeem.actual_service_date.date().strftime("%Y-%m-%d"),
+                    }                        
                 items.append(item)
             except Exception as ex:
                 logger.error("error on data coupon data from db %s" % str(ex))
@@ -516,8 +525,54 @@ class ASCFeed(BaseFeed):
                 asc_data.user = user_obj
                 asc_data.save()
             except Exception as ex:
-                logger.error(
-                "[Exception: ASCFeed_dealer_data]: {0}"
-                .format(ex))
+                ex = "[Exception: ASCFeed_dealer_data]: {0}".format(ex)
+                logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         return self.feed_remark
+
+class CustomerRegistationFeedToSAP(BaseFeed):
+
+    def export_data(self, start_date=None, end_date=None):
+#        results = common.CustomerTempRegistration.objects.filter(sent_to_sap=False).select_related('product_data')
+        results = [{
+                    "CHASSIS": "MD2A11CZ0ECK08915",
+                    "KUNNR": "10222",
+                    "CUSTOMER_ID" : "T432474",
+                    "ENGINE" : "DHZCEK89665",
+                    "VEH_SL_DT": "2014-01-29",
+                    "CUSTOMER_NAME": "BHARAT LALWANI",
+                    "CUST_MOBILE": "+919999999999",
+                    
+                },
+                {
+                    "CHASSIS": "MD2A11CZ0ECK10017",
+                    "KUNNR": "10491",
+                    "CUSTOMER_ID" : "T432475",
+                    "ENGINE" : "DHZCEK90632",
+                    "VEH_SL_DT": "2014-01-31",
+                    "CUSTOMER_NAME": "RAHUL KUMAR",
+                    "CUST_MOBILE": "+919886032650",
+                    
+                },
+                {
+                    "CHASSIS": "MD2A11CZ0ECK10020",
+                    "KUNNR": "10745",
+                    "CUSTOMER_ID" : "T432476",
+                    "ENGINE" : "DHZCEK91061",
+                    "VEH_SL_DT": "2014-01-31",
+                    "CUSTOMER_NAME": "BHARAT KUMAR",
+                    "CUST_MOBILE": "+910000000000",
+                    
+                }]
+        items = []
+        total_failed = 0
+        item_batch = {
+            'TIMESTAMP': datetime.now().strftime("%Y%m%d%H%M%S")}
+        for redeem in results:
+            try:
+                item = redeem
+                items.append(item)
+            except Exception as ex:
+                logger.error("error on customer info from db %s" % str(ex))
+                total_failed = total_failed + 1
+        return items, item_batch, total_failed

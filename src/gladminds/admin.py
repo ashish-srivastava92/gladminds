@@ -12,6 +12,8 @@ from django.forms import ModelForm, TextInput
 from django.contrib.admin import ModelAdmin
 from django.contrib.admin import DateFieldListFilter
 from django.contrib.admin import ModelAdmin, SimpleListFilter
+from django.db import connections
+from django.db import models
 from models.common import GladMindUsers, ProductTypeData, \
     BrandData, ProductData, CouponData, MessageTemplate,\
     UploadProductCSV
@@ -414,7 +416,6 @@ class DispatchedProduct(ProductData):
         proxy = True
 
 class ListDispatchedProduct(ModelAdmin):
-    list_filter = ('engine', 'product_type', ('invoice_date', DateFieldListFilter))
     search_fields = ('vin', 'engine' , 'customer_phone_number__phone_number', 
                      'dealer_id__dealer_id', 'product_type__product_type')
     

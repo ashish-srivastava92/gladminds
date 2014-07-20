@@ -302,6 +302,8 @@ LOGGING = {
 
 WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR + '/coupon_redeem.wsdl'
 
+WSDL_CUSTOMER_REGISTRATION_LOC = TEMPLATE_DIR + '/customer_registration.wsdl'
+
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
     "sender": "feed-report@gladminds.co",
@@ -313,7 +315,7 @@ MAIL_DETAIL = {
 FEED_FAILURE_MAIL_DETAIL = {
 
     "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds@hashedin.com"],
+    "receiver": ["gladminds+alerts@hashedin.com"],
     "subject": "Gladminds Feed Failure Mail",
     "body": """""",
 }
@@ -355,7 +357,7 @@ AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 
 
 DEFAULT_COUPON_STATUS = 1
-DELAY_IN_CUSTOMER_UCN_MESSAGE = 180
+DELAY_IN_CUSTOMER_UCN_MESSAGE = 5
 ENABLE_AMAZON_SQS = False
 
 #################Registration Configuration#################################
@@ -377,6 +379,7 @@ REGISTRATION_CONFIG = {
 ###########################################################################
 ########################Password Postfix for dealers######################
 PASSWORD_POSTFIX = '@123'
+TEMP_ID_PREFIX = 'T'
 ###########################################################################
 ########################Feed Failure Mail enabled ######################
 FEED_FAILURE_MAIL_ENABLED = True

@@ -89,6 +89,7 @@ SAP_CRM_DETAIL = {
                   }
 ASC_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/bajaj/asc-feed/?wsdl&v0"
 COUPON_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl&v0"
+CUSTOMER_REGISTRATION_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/bajaj/customer-feed/?wsdl&v0"
 
 
 ENABLE_AMAZON_SQS = True
@@ -111,6 +112,8 @@ AFTER_BUY_CONSTANTS = {
 ########################SQS Queue Name##################################
 SQS_QUEUE_NAME = "gladminds-prod"
 ########################################################################
+FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail"
+UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail"
 #########################New relic file location########################
 NEW_RELIC_FILE_LOCATION = './src/newrelic.ini'
 ########################################################################

@@ -5,6 +5,7 @@ from django.db import models, transaction
 from django.forms.models import model_to_dict
 from gladminds import smsparser, utils, audit, message_template as templates
 from gladminds.models import common
+from gladminds.feed import BaseFeed
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
@@ -103,7 +104,11 @@ class GladmindsResources(Resource):
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpBadRequest(inf.message))
         handler = getattr(self, sms_dict['handler'], None)
-        to_be_serialized = handler(sms_dict, phone_number)
+        try:
+            with transaction.atomic():
+                to_be_serialized = handler(sms_dict, phone_number)
+        except Exception as ex:
+            logger.info("The database failed to perform {0}:{1}".format(request.POST.get('action'), ex))
         return self.create_response(request, data=to_be_serialized)
 
     def register_customer(self, sms_dict, phone_number):
@@ -116,8 +121,9 @@ class GladmindsResources(Resource):
         except ObjectDoesNotExist as odne:
             gladmind_customer_id = utils.generate_unique_customer_id()
             registration_date = datetime.now()
+            user = BaseFeed.registerNewUser('customer', username=gladmind_customer_id)
             customer = common.GladMindUsers(
-                gladmind_customer_id=gladmind_customer_id, phone_number=phone_number,
+                user=user, gladmind_customer_id=gladmind_customer_id, phone_number=phone_number,
                 customer_name=customer_name, email_id=email_id,
                 registration_date=registration_date)
             customer.save()
@@ -226,7 +232,6 @@ class GladmindsResources(Resource):
             coupon.actual_service_date = datetime.now()
             coupon.save()
         
-    @transaction.commit_manually()
     def validate_coupon(self, sms_dict, phone_number):
         actual_kms = int(sms_dict['kms'])
         service_type = sms_dict['service_type']
@@ -237,7 +242,6 @@ class GladmindsResources(Resource):
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         dealer_data = self.validate_dealer(phone_number)
         if not dealer_data:
-            transaction.commit()
             return False
         if not self.is_valid_data(customer_id=sap_customer_id, sa_phone=phone_number):
             return {'status': False, 'message': templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')}
@@ -315,24 +319,21 @@ class GladmindsResources(Resource):
             else:
                 send_service_detail.delay(phone_number=phone_number, message=dealer_message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=dealer_message)
-            transaction.commit()
         return {'status': True, 'message': dealer_message}
 
-    @transaction.commit_manually()
+    
     def close_coupon(self, sms_dict, phone_number):
         sa_object = self.validate_dealer(phone_number)
         unique_service_coupon = sms_dict['usc']
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         message = None
         if not sa_object:
-            transaction.commit()
             return False
         if not self.is_valid_data(customer_id=sap_customer_id, coupon=unique_service_coupon, sa_phone=phone_number):
             return {'status': False, 'message': templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')}
         if not self.is_sa_initiator(unique_service_coupon, sa_object):
             message="SA is not the coupon initiator."
             logger.info(message)
-            transaction.commit()
             return {'status': False, 'message': message}
         try:
             vin = self.get_vin(sap_customer_id)
@@ -345,7 +346,6 @@ class GladmindsResources(Resource):
             coupon_object.save()
             logger.info("object after save %s" % coupon_object)
             common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, service_type__lt=coupon_object.service_type).update(status=3)
-            transaction.commit()
             message = templates.get_template('SEND_SA_CLOSE_COUPON').format(customer_id=sap_customer_id, usc=unique_service_coupon)
         except Exception as ex:
             message = templates.get_template('SEND_INVALID_MESSAGE')

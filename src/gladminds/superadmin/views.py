@@ -8,3 +8,6 @@ def send_sms(request):
 
 def views_coupon_redeem_wsdl(request, document_root, show_indexes=False):
     return render_to_response("coupon_redeem.wsdl", content_type = 'application/xml')
+
+def views_customer_registration_wsdl(request, document_root, show_indexes=False):
+    return render_to_response("customer_registration.wsdl", content_type = 'application/xml')
