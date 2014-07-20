@@ -84,6 +84,9 @@ def gt_hlth_chk(request):
 def health_check_view(request):
     result = get_health_check_res()
     
+    import socket
+    result['machine_ip'] = socket.gethostbyname(socket.gethostname()) 
+    
     html_template = open(settings.TEMPLATE_DIR + '/health-check/health-check.html')
     t = template.Template(html_template.read())
     c = template.Context(result)
