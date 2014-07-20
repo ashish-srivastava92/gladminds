@@ -56,7 +56,7 @@ class ExportASCRegistrationFeed(BaseExportFeed):
             .format(item, item_batch, self.feed_type))
         client = self.get_client()
 
-        result = client.service.MI_GCP_UCN_Sync(
+        result = client.service.postASC(
             ITEM=[item], ITEM_BATCH=item_batch)
         if not result[1]['I_STATUS'] == 'SUCCESS':
             raise
