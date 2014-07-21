@@ -567,7 +567,7 @@ class CustomerRegistationFeedToSAP(BaseFeed):
         items = []
         total_failed = 0
         item_batch = {
-            'TIMESTAMP': datetime.now().strftime("%Y%m%d%H%M%S")}
+            'TIME_STAMP': datetime.now().strftime("%Y%m%d%H%M%S")}
         for redeem in results:
             try:
                 item = redeem
