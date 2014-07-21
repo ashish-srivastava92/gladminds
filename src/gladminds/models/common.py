@@ -340,8 +340,8 @@ class SparesData(models.Model):
 
 class Feedback(models.Model):
     reporter = models.ForeignKey('aftersell.ServiceAdvisor', null=False)
-    assign_to = models.ForeignKey(User, null=True)
-    message = models.CharField(max_length=512, null=True, blank=True)
+    assign_to = models.ForeignKey(User, null=True, blank= True)
+    message = models.CharField(max_length=512, null=True, blank=False)
     comments = models.CharField(max_length=512, null=True, blank=True)
     STATUS = (
         ('open', 'Open'),
@@ -356,6 +356,5 @@ class Feedback(models.Model):
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "gladminds feedback info"
-        
-    def __unicode__(self):
-        return self.assign_to
+    
+    
