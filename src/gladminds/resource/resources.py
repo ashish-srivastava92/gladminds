@@ -448,7 +448,7 @@ class GladmindsResources(Resource):
                 message = templates.get_template('SEND_SA_UNAUTHORISED_SA')
             else:
                 gladminds_feedback_object = common.Feedback(reporter=active_sa,
-                                                                 message=sms_dict['feedback_message'],
+                                                                 message=sms_dict['feedback_message'], status="open",
                                                                  created_date=datetime.now()
                                                                  )
                 gladminds_feedback_object.save()
