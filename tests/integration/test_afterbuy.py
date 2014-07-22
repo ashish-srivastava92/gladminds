@@ -101,4 +101,3 @@ class TestAfterbuy(GladmindsResourceTestCase):
 #        resp = client.post("/afterbuy/otp/generate/", data=data)
 #        response = client.get('/v1/afterbuy/product/spares/?vin=""')
 #        self.assertEqual(response.status_code, 202)
-        

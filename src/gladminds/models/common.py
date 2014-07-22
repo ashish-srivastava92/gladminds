@@ -357,4 +357,3 @@ class Feedback(models.Model):
         app_label = "gladminds"
         verbose_name_plural = "gladminds feedback info"
     
-    
