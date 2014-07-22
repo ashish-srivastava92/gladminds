@@ -14,8 +14,8 @@ class Command(BaseCommand):
         self.add_group()
         self.add_sms_template()
         self.add_email_template()
-        self.add_user_for_existing_dealer()
-        self.add_user_in_gladminds_table()
+#         self.add_user_for_existing_dealer()
+#         self.add_user_in_gladminds_table()
         
     def add_group(self):
         print "Loading groups..."
