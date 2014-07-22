@@ -29,15 +29,15 @@ class FeedLogWithRemark():
         success_data_count = self.total_feeds - self.failed_feeds
         remarks = json.dumps(self.remarks)
 
+        path = ""
         if self.failed_feeds and settings.FEED_FAILURE_MAIL_ENABLED:
             send_report_mail_for_feed_failure(remarks=remarks, 
                                               feed_type = self.feed_type)
-        
-        try:
-            path = self.upload_file(remarks)
-        except Exception as ex :
-            path = ""
-            logger.error("Feed file not updated on s3 : %s" % ex)
+        if self.failed_feeds:
+            try:
+                path = self.upload_file(remarks)
+            except Exception as ex :
+                logger.error("Feed file not updated on s3 : %s" % ex)
         
         feed_log(feed_type=self.feed_type, total_data_count=self.total_feeds,
               failed_data_count=self.failed_feeds,

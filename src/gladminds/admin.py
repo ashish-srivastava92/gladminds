@@ -383,7 +383,7 @@ class FeedLogAdmin(ModelAdmin):
                     'failed_data_count', 'feed_remarks')
 
     def feed_remarks(self, obj):
-        if obj.remarks:
+        if obj.remarks and obj.file_location:
             remarks = json.loads(obj.remarks)
             update_remark = ''
             for remark, occurence in remarks.iteritems():
