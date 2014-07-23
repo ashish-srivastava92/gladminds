@@ -260,7 +260,7 @@
     "model": "gladminds.messagetemplate",
     "pk": 30,
     "fields": {
-      "template_key": "SEND_TEMPORAY_CUSTOMER_ID",
+      "template_key": "SEND_TEMPORARY_CUSTOMER_ID",
       "template": "Dear {customer_name}, Congrats on your purchase of Bajaj bike. Your Temporary customer id is {sap_customer_id}. Refer this id during servicing until you receive a verified customer ID",
       "description": "Send temporary customer ID to Customer"
     }
