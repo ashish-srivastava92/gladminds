@@ -308,7 +308,7 @@ class SASaveForm(models.Model):
 class CustomerTempRegistration(models.Model):
     product_data = models.ForeignKey(ProductData, null=True, blank=True)
     new_customer_name = models.CharField(max_length=50, null=True, blank=True)
-    new_number = models.CharField(max_length=15, unique=True)
+    new_number = models.CharField(max_length=15)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
     temp_customer_id = models.CharField(max_length=50, null=False, blank=False, unique=True)
     sent_to_sap = models.BooleanField(default=False)
