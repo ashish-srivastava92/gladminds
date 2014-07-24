@@ -342,9 +342,7 @@ class GladmindsResources(Resource):
             coupon_object.status = 2
             coupon_object.sa_phone_number=sa_object
             coupon_object.closed_date = datetime.now()
-            logger.info("object before save %s" % coupon_object)
             coupon_object.save()
-            logger.info("object after save %s" % coupon_object)
             common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, service_type__lt=coupon_object.service_type).update(status=3)
             message = templates.get_template('SEND_SA_CLOSE_COUPON').format(customer_id=sap_customer_id, usc=unique_service_coupon)
         except Exception as ex:
@@ -362,22 +360,19 @@ class GladmindsResources(Resource):
 
     def validate_dealer(self, phone_number):
         try:
-            service_advisor_obj = aftersell_common.ServiceAdvisor.objects.get(phone_number=phone_number)
-            all_sa_dealer_obj = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = service_advisor_obj, status = u'Y')
+            all_sa_dealer_obj = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id__phone_number = phone_number, status = u'Y')
             if len(all_sa_dealer_obj) == 0:
                 raise
-
+            service_advisor_obj = all_sa_dealer_obj[0].service_advisor_id
         except Exception as ex:
             sms_message = 'Not an authorised user to avail this service.'
-            message = 'Not an authorised user to avail this service. Phone number - {0}'.format(phone_number)
-            logger.error(ex)
-            logger.error(message)
+            logger.error('Not an authorised user to avail this service. Phone number: {0}. {1}'.format(phone_number, ex))
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
                 task_queue.add("send_coupon", {"phone_number":phone_number, "message": sms_message})
             else:
                 send_coupon.delay(phone_number=phone_number, message=sms_message)
-            audit.audit_log(action='failure', sender=phone_number, reciever="", message=message, status='warning')
+            audit.audit_log(action=AUDIT_ACTION, reciever=phone_number, message=sms_message)
             return None
         return service_advisor_obj
 
