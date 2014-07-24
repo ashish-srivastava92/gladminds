@@ -123,6 +123,36 @@
         return false;
     });
     
+    $('.help-desk-form').on('submit', function() {
+      var formData = new FormData($(this).get(0));
+      var messageModal = $('.modal.message-modal'),
+          messageBlock = $('.modal-body', messageModal),
+          waitingModal = $('.modal.waiting-dialog'),
+      jqXHR = $.ajax({
+          type: 'POST',
+          url: '/aftersell/servicedesk/helpdesk',
+          data: formData,
+          cache: false,
+          processData: false,
+          contentType: false,
+          beforeSend: function(){
+              $(this).find('input[type="text"]').val('');
+              waitingModal.modal('show');
+          },
+          success: function(data){
+              messageBlock.text(data.message);
+              waitingModal.modal('hide');
+              messageModal.modal('show');
+          },
+          error: function() {
+              messageBlock.text('Invalid Data');
+              waitingModal.modal('hide');
+              messageModal.modal('show');
+          }
+      });
+      return false;
+  });
+    
     $('#jobCard').on('change', function() {
         var fileInput = $(this),
             ext = fileInput.val().split('.').pop().toLowerCase();

@@ -490,7 +490,7 @@ class UserNotificationAdmin(ModelAdmin):
 class UserFeedback(ModelAdmin):
 
     list_display = (
-        'reporter', 'assign_to', 'message', 'comments', 'status', 'created_date', 'modified_date')
+        'reporter', 'assign_to', 'message', 'subject', 'priority', 'type', 'status', 'created_date', 'modified_date')
 
 ##############################################################
 

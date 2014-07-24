@@ -6,7 +6,25 @@ from datetime import datetime
 '''
 BrandData contains brand related information
 '''
-
+FEEDBACK_STATUS = (
+        ('Open', 'Open'),
+        ('Closed', 'Closed'),
+        ('Resolved', 'Resolved'),
+        ('Progress', 'Progress'),
+    )
+PRIORITY = (
+        ('Low', 'Low'),
+        ('High', 'High'),
+        ('Medium', 'Medium'),
+        ('Urgent', 'Urgent'),
+    )
+FEEDBACK_TYPE = (
+        ('Problem', 'Problem'),
+        ('Question', 'Question'),
+        ('Feature', 'Feature'),
+        ('Request', 'Request'),
+        ('Suggestion', 'Suggestion'),
+    )
 
 class UploadProductCSV(models.Model):
     file_location = settings.PROJECT_DIR + '/data/'
@@ -342,14 +360,10 @@ class Feedback(models.Model):
     reporter = models.ForeignKey('aftersell.ServiceAdvisor', null=False)
     assign_to = models.ForeignKey(User, null=True, blank= True)
     message = models.CharField(max_length=512, null=True, blank=False)
-    comments = models.CharField(max_length=512, null=True, blank=True)
-    STATUS = (
-        ('open', 'Open'),
-        ('closed', 'Closed'),
-        ('resolved', 'Resolved'),
-        ('progress', 'Progress'),
-    )
-    status = models.CharField(max_length=12, choices=STATUS)
+    status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
+    priority = models.CharField(max_length=12, choices=PRIORITY)
+    type = models.CharField(max_length=12, choices=FEEDBACK_TYPE)
+    subject = models.CharField(max_length=512, null=True, blank=True)
     created_date = models.DateTimeField(null=True, blank= False)
     modified_date = models.DateTimeField(null=True, blank= True)
     
