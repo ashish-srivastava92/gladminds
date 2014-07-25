@@ -485,8 +485,16 @@ def update_coupon_data(sender, **kwargs):
         try:
             customer_data = common.GladMindUsers.objects.get(
                 phone_number=instance.customer_phone_number)
-            message = templates.get_template('SEND_CUSTOMER_ON_PRODUCT_PURCHASE').format(
-                customer_name=customer_data.customer_name, sap_customer_id=instance.sap_customer_id)
+            temp_customer_data = common.CustomerTempRegistration.objects.filter(product_data__vin=vin)
+            if temp_customer_data and not temp_customer_data[0].temp_customer_id == instance.sap_customer_id:
+                message = templates.get_template('SEND_REPLACED_CUSTOMER_ID').format(
+                    customer_name=customer_data.customer_name, sap_customer_id=instance.sap_customer_id)
+            elif instance.sap_customer_id.find('T') == 0:
+                message = templates.get_template('SEND_TEMPORARY_CUSTOMER_ID').format(
+                    customer_name=customer_data.customer_name, sap_customer_id=instance.sap_customer_id)
+            else:
+                message = templates.get_template('SEND_CUSTOMER_ON_PRODUCT_PURCHASE').format(
+                    customer_name=customer_data.customer_name, sap_customer_id=instance.sap_customer_id)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
                 task_queue.add("send_on_product_purchase", {"phone_number": 
