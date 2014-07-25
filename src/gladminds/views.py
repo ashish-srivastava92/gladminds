@@ -199,7 +199,7 @@ def exceptions(request, exception=None):
     else:
         return HttpResponseBadRequest()
     
-UPDATE_FAIL = 'Phone number already registered!'
+UPDATE_FAIL = 'Some error occurred, try again later.'
 UPDATE_SUCCESS = 'Customer has been registered with ID: '
 def register_customer(request, group=None):
     post_data = request.POST
