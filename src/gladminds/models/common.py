@@ -220,7 +220,7 @@ class CouponData(models.Model):
     valid_kms = models.IntegerField(max_length=10, null=False)
     service_type = models.IntegerField(max_length=10, null=False)
     sa_phone_number = models.ForeignKey('aftersell.ServiceAdvisor', null=True, blank=True)
-    status = models.SmallIntegerField(choices=STATUS_CHOICES, default=1)
+    status = models.SmallIntegerField(choices=STATUS_CHOICES, default=1, db_index=True)
     closed_date = models.DateTimeField(null=True, blank=True)
     mark_expired_on = models.DateTimeField(null=True, blank=True)
     actual_service_date = models.DateTimeField(null=True, blank=True)
