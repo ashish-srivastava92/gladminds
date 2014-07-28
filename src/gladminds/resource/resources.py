@@ -439,7 +439,7 @@ class GladmindsResources(Resource):
     def determine_format(self, request):
         return 'application/json'
     
-    def get_complain_data(self, sms_dict, phone_number):
+    def get_complain_data(self, sms_dict, phone_number, with_detail):
         ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
         try:
             active_sa = self.validate_dealer(phone_number)
@@ -447,10 +447,17 @@ class GladmindsResources(Resource):
             if not active_sa:
                 message = templates.get_template('SEND_SA_UNAUTHORISED_SA')
             else:
-                gladminds_feedback_object = common.Feedback(reporter=active_sa,
-                                                                 message=sms_dict['feedback_message'], status="open",
-                                                                 created_date=datetime.now()
-                                                                 )
+                if with_detail:
+                    gladminds_feedback_object = common.Feedback(reporter=active_sa,
+                                                                priority=sms_dict['priority'] , type=sms_dict['type'], 
+                                                                subject=sms_dict['subject'], message=sms_dict['message'],
+                                                                status="Open", created_date=datetime.now()
+                                                                )
+                else:
+                    gladminds_feedback_object = common.Feedback(reporter=active_sa,
+                                                                message=sms_dict['message'], status="Open",
+                                                                created_date=datetime.now()
+                                                                )
                 gladminds_feedback_object.save()
                 message = templates.get_template('SEND_RCV_FEEDBACK')
         except Exception as ex:

@@ -15,7 +15,8 @@ from gladminds.models import common
 from gladminds.sqs_tasks import send_otp
 from gladminds import utils, message_template
 from gladminds.utils import get_task_queue, get_customer_info,\
-    get_sa_list, recover_coupon_info, mobile_format, format_date_string, stringify_groups
+    get_sa_list, recover_coupon_info, mobile_format, format_date_string, stringify_groups,\
+    get_list_from_set
 from gladminds.sqs_tasks import export_asc_registeration_to_sap
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.mail import sent_otp_email
@@ -23,7 +24,9 @@ from gladminds.feed import SAPFeed
 from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
 from gladminds.aftersell.models import common as afterbuy_common
 from gladminds.scheduler import SqsTaskQueue
+from gladminds.resource.resources import GladmindsResources
 
+gladmindsResources = GladmindsResources()
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 
@@ -90,7 +93,6 @@ def generate_otp(request):
         return render(request, 'portal/get_otp.html')
 
 def validate_otp(request):
-    print "here"
     if request.method == 'GET':
         return render(request, 'portal/validate_otp.html')
     elif request.method == 'POST':
@@ -202,6 +204,43 @@ def exceptions(request, exception=None):
     else:
         return HttpResponseBadRequest()
     
+@login_required()
+def servicedesk(request, servicedesk=None):
+    groups = stringify_groups(request.user)
+    if request.method == 'GET':
+        template = 'portal/help_desk.html'
+        data=None
+        data_mapping = {
+            'helpdesk' : get_sa_list
+            }
+        try:
+            data = data_mapping[servicedesk](request)
+        except:
+            #It is acceptable if there is no data_mapping defined for a function
+            pass
+        return render(request, template, {'active_menu' : servicedesk, "data" : data, 'groups': groups,
+                     "types": get_list_from_set(common.FEEDBACK_TYPE),
+                     "priorities": get_list_from_set(common.PRIORITY)})
+    elif request.method == 'POST':
+        function_mapping = {
+            'helpdesk' : save_help_desk_data
+        }
+        try:
+            data = function_mapping[servicedesk](request)
+            return HttpResponse(content=json.dumps(data),  content_type='application/json')
+        except:
+            return HttpResponseBadRequest()
+    else:
+        return HttpResponseBadRequest()
+
+
+def save_help_desk_data(request):
+    fields = ['message', 'priority', 'advisorMobile', 'type', 'subject']
+    sms_dict = {}
+    for field in fields:
+        sms_dict[field] = request.POST.get(field, None)    
+    return gladmindsResources.get_complain_data(sms_dict, sms_dict['advisorMobile'], with_detail=True)
+
 UPDATE_FAIL = 'Phone number already registered!'
 UPDATE_SUCCESS = 'Customer has been registered with ID: '
 def register_customer(request, group=None):

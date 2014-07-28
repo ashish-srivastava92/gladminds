@@ -202,6 +202,7 @@ class AfterBuyResources(AfterBuyBaseResource):
                 resp[field] = getattr(warranty_info, field)
             resp['warranty_email'] = warranty_info.product.product_type.warranty_email
             resp['warranty_phone'] = warranty_info.product.product_type.warranty_phone
+            resp = utils.get_dict_from_object(resp)
         except Exception as ex:
             logger.info("[Exception get_product_warranty]:{0}".format(ex))
             return HttpBadRequest("No warranty info exists")
@@ -222,6 +223,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             for field in ['image_url', 'issue_date', 'expiry_date', 'insurance_brand_id', 
                       'insurance_brand_name', 'policy_number', 'premium', 'insurance_phone', 'insurance_email']:
                 resp[field] = getattr(insurance_info, field)
+            resp = utils.get_dict_from_object(resp)
         except Exception as ex:
             logger.info("[Exception get_product_insurance]:{0}".format(ex))
             return HttpBadRequest("No insurance info exists")

@@ -237,3 +237,9 @@ def create_feed_data(post_data, product_data, temp_customer_id):
     data['engine'] = product_data.engine
     data['vin'] = product_data.vin
     return data
+
+def get_list_from_set(set_data):
+    created_list = []
+    for set_object in set_data:
+        created_list.append(list(set_object)[1])
+    return created_list
