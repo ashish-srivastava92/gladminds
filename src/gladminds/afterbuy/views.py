@@ -5,7 +5,6 @@ import logging
 import json
 from datetime import timedelta, datetime
 from provider.oauth2.models import Client
-
 from django.shortcuts import render_to_response, render
 from django.core.files import File
 from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
@@ -704,6 +703,7 @@ def generate_otp(request):
         data={'status':0, 'message':log_message}
         return HttpResponse(json.dumps(data), content_type="application/json")
     phone_number= request.POST['mobile']
+    print "^^^^^^^^^^^^^^^^^^^^^^^" ,phone_number
     email = request.POST.get('email', '')
     logger.info('OTP request received. Mobile: {0}'.format(phone_number))
     feed = BaseFeed()

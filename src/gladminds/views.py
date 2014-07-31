@@ -32,7 +32,6 @@ TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 
 def auth_login(request, provider):
     if request.method == 'GET':
-        
         provider_mapping = {
                             'asc': {'template_name': 'asc/login.html'},
                             'dasc': {'template_name': 'asc/login.html'},
@@ -64,8 +63,6 @@ def user_logout(request):
             logout(request)
             return HttpResponseRedirect('/aftersell/dasc/login')
     return HttpResponseBadRequest('Not Allowed')
-    
-    
 
 def generate_otp(request):
     if request.method == 'POST':
@@ -110,8 +107,8 @@ def validate_otp(request):
 
 def update_pass(request):
     try:
-        otp=request.POST['otp']
-        password=request.POST['password']
+        otp = request.POST['otp']
+        password = request.POST['password']
         utils.update_pass(otp, password)
         logger.info('Password has been updated.')
         return HttpResponseRedirect('/aftersell/asc/login?update=true')
@@ -149,7 +146,7 @@ def register(request, menu):
             response_object = save_user[menu](request, groups)
             return HttpResponse(response_object, content_type="application/json")
         except:
-            return HttpResponseBadRequest() 
+            return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
 
@@ -180,7 +177,7 @@ def exceptions(request, exception=None):
         return HttpResponseBadRequest()
     if request.method == 'GET':
         template = 'portal/exception.html'
-        data=None
+        data = None
         data_mapping = {
             'close' : get_sa_list,
             'check' : get_sa_list
@@ -198,18 +195,17 @@ def exceptions(request, exception=None):
         }
         try:
             data = function_mapping[exception](request)
-            return HttpResponse(content=json.dumps(data),  content_type='application/json')
+            return HttpResponse(content=json.dumps(data), content_type='application/json')
         except:
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
-    
 @login_required()
 def servicedesk(request, servicedesk=None):
     groups = stringify_groups(request.user)
     if request.method == 'GET':
         template = 'portal/help_desk.html'
-        data=None
+        data = None
         data_mapping = {
             'helpdesk' : get_sa_list
             }
@@ -227,7 +223,7 @@ def servicedesk(request, servicedesk=None):
         }
         try:
             data = function_mapping[servicedesk](request)
-            return HttpResponse(content=json.dumps(data),  content_type='application/json')
+            return HttpResponse(content=json.dumps(data), content_type='application/json')
         except:
             return HttpResponseBadRequest()
     else:
