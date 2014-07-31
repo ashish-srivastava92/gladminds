@@ -199,13 +199,6 @@ def exceptions(request, exception=None):
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
-
-def subtract_dates(start_date, end_date):    
-    start_date = start_date.strftime("%Y-%m-%d")
-    end_date = end_date.strftime("%Y-%m-%d")
-    start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
-    end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d") 
-    return start_date - end_date
     
 UPDATE_FAIL = 'Some error occurred, try again later.'
 UPDATE_SUCCESS = 'Customer has been registered with ID: '
@@ -216,8 +209,8 @@ def register_customer(request, group=None):
     temp_customer_id = TEMP_ID_PREFIX + str(random.randint(10**5, 10**6))
     data_source.append(utils.create_feed_data(post_data, product_obj[0], temp_customer_id))
     
-    check_with_invoice_date = subtract_dates(data_source[0]['product_purchase_date'], product_obj[0].invoice_date)    
-    check_with_today_date = subtract_dates(data_source[0]['product_purchase_date'], datetime.datetime.now())
+    check_with_invoice_date = utils.subtract_dates(data_source[0]['product_purchase_date'], product_obj[0].invoice_date)    
+    check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.datetime.now())
     
     if check_with_invoice_date.days < 0 or check_with_today_date.days > 0:
         message = "Product purchase date should be between {0} and {1}".\

@@ -225,3 +225,10 @@ def create_feed_data(post_data, product_data, temp_customer_id):
     data['engine'] = product_data.engine
     data['vin'] = product_data.vin
     return data
+
+def subtract_dates(start_date, end_date):    
+    start_date = start_date.strftime("%Y-%m-%d")
+    end_date = end_date.strftime("%Y-%m-%d")
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d") 
+    return start_date - end_date
