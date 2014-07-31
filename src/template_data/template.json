@@ -273,5 +273,23 @@
       "template": "{message}",
       "description": "Receive this message when service advisor files complain"
     }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 32,
+    "fields": {
+      "template_key": "SERVICE_DESK_FEEDBACK_INITIATOR",
+      "template": "Your {type} has been registered successfully. We will get back to you shortly.",
+      "description": "Send this message when any user file any complain, feedback, request or suggestion to initiator of this issue."
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 33,
+    "fields": {
+      "template_key": "SERVICE_DESK_FEEDBACK_OWNER",
+      "template": "{reporter} has assigned a new ticket to you.Please look into  this issue.",
+      "description": "Send this message when any user file any complain, feedback, request or suggestion to owner of this issue."
+    }
   }
 ]
