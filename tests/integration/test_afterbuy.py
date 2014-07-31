@@ -152,11 +152,9 @@ class TestAfterbuy(GladmindsResourceTestCase):
         user_info = common.GladMindUsers(phone_number='+9199999999')
         user_info.save()
         response = client.get('/v1/afterbuy/product/info/', data=data)
-        print response
         self.assertEqual(response.status_code, 200)                             
              
     def test_delete_dispatch_dict(self):
-        data={"mobile":"99999999","vin":"123465656556"}
         user_info = common.GladMindUsers(phone_number='+9199999999')
         user_info.save()
         aa = common.GladMindUsers.objects.filter(phone_number='+9199999999')
@@ -166,8 +164,3 @@ class TestAfterbuy(GladmindsResourceTestCase):
         response = client.delete(url)
         self.assertEqual(response.status_code, 200)                       
                       
-#    def test_get_product_spares(self):
-#        data = {"mobile":"99999999"}
-#        resp = client.post("/afterbuy/otp/generate/", data=data)
-#        response = client.get('/v1/afterbuy/product/spares/?vin=""')
-#        self.assertEqual(response.status_code, 202)
