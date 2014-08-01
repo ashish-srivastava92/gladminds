@@ -7,7 +7,9 @@ from tastypie.test import ResourceTestCase
 from django.test import TestCase
 from datetime import datetime, timedelta
 from unit.base_unit import RequestObject, GladmindsUnitTestCase
-from gladminds.utils import get_sa_list, get_coupon_info, get_customer_info, get_list_from_set, get_token, create_feed_data , validate_otp,recover_coupon_info, update_pass, format_date_string
+from gladminds.utils import get_sa_list, get_coupon_info, get_customer_info,\
+ get_list_from_set, get_token, create_feed_data , \
+ validate_otp,recover_coupon_info, update_pass, format_date_string
 from gladminds.aftersell.models import logs
 from django.db import connection
 from gladminds.models import common
@@ -94,7 +96,6 @@ class TestUtils(GladmindsUnitTestCase):
            
     def test_format_date_string(self):
         date=format_date_string("20/07/1992")
-        print "type" ,type(date)
         self.assertEqual(datetime, type(date)) 
         
     def test_create_feed_data(self):
