@@ -14,32 +14,29 @@ app = Celery('gladminds')
 app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 app.conf.CELERY_TIMEZONE = 'UTC'
-app.conf.CELERYBEAT_SCHEDULE= {
+app.conf.CELERYBEAT_SCHEDULE = {
     # Send a reminder message to customer on service coupon expiry.
     'cronjob-send-reminder-daily-midnight': {
         'task': 'gladminds.sqs_tasks.send_reminder',
         'schedule': crontab(minute=0, hour=0),
         'kwargs': {'reminder_day':7}
     },
-    
     # Import data from SAP CRM to MySQL
     'cronjob-import_sap_data_to_db': {
         'task': 'gladminds.sqs_tasks.import_data',
         'schedule': crontab(minute=0, hour=0),
     },
-    
     #Job to send reminder message schedule by admin
     'cronjob-reminder_message_schedule_by_admin': {
         'task': 'gladminds.sqs_tasks.send_schedule_reminder',
         'schedule': crontab(minute=0, hour=0),
     },
-                               
-    #Job to set expire status=True for all service coupon which expire 
+    #Job to set expire status=True for all service coupon which expire
     'cronjob-set-expiry-status-to-service-coupon': {
         'task': 'gladminds.sqs_tasks.expire_service_coupon',
         'schedule': crontab(minute=0, hour=0),
-    },  
-    #Job to set expire status=True for all service coupon which expire 
+    },
+    #Job to set expire status=True for all service coupon which expire
     'cronjob-export-csv-file': {
         'task': 'gladminds.sqs_tasks.export_close_coupon_data',
         'schedule': crontab(minute=0, hour=0),
@@ -67,5 +64,5 @@ app.conf.update(
 
 @app.task(bind=True)
 def debug_task(self):
-    print('Request: {0!r}'.format(self.request))
+    print 'Request: {0!r}'.format(self.request)
     

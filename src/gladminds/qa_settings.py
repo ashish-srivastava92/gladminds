@@ -27,7 +27,7 @@ DATABASES = {
 
 
 
-BROKER_URL= 'redis://localhost:6379'
+BROKER_URL = 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
 
 JOBCARD_DIR = '{0}/jobcards/qa/'
@@ -47,8 +47,7 @@ TEMPLATE_DIRS = (
 )
 
 # SMS_CLIENT = "TWILIO"
-# 
-# SMS_CLIENT_DETAIL = {
+# # SMS_CLIENT_DETAIL = {
 #                      'OTP_TWILIO_ACCOUNT' : 'ACbb8cb45f6113b8f2f6243c8eaa5ff971',
 #                      'OTP_TWILIO_AUTH' : 'aa445a4f0a7e651738e89810601f8860',
 #                      'OTP_TWILIO_FROM' : '+1 469-513-9856',
@@ -56,12 +55,12 @@ TEMPLATE_DIRS = (
 #                 }
 
 SMS_CLIENT = "AIRTEL"
-SMS_CLIENT_DETAIL={
-                   'login':'bajajauto',
-                   'pass':'bajaj',
-                   'authenticate_url':'http://117.99.128.32:80/login/pushsms.php' ,
-                   'message_url': 'http://117.99.128.32:80/login/pushsms.php'                  
-                   }
+SMS_CLIENT_DETAIL = {
+                     'login':'bajajauto',
+                     'pass':'bajaj',
+                     'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',
+                     'message_url': 'http://117.99.128.32:80/login/pushsms.php'
+                    }
 FEED_TYPE = 'CSV'
 
 #AfterBuy File Upload location configuration
@@ -104,7 +103,7 @@ AFTER_BUY_CONSTANTS = {
                        "ios_apk_loc": "afterbuy_script/qa_ios_afterbuy.ipa",
                        "create_method": "file",
                        "package": "com.gladminds.afterbuyv1",
-                       "version": "0.1.0", 
+                       "version": "0.1.0",
                        "title": "Afterbuy V1 App"
                        }
 
@@ -114,6 +113,6 @@ SQS_QUEUE_NAME = "gladminds-qa"
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail QA"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail QA"
 ###################Change Mail Subject on QA##########################
-MAIL_DETAIL["subject"]= "GladMinds Feed Report QA"
+MAIL_DETAIL["subject"] = "GladMinds Feed Report QA"
 MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com", 'sourabh.gupta@hashedin.com']
 #######################################################################

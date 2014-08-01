@@ -234,7 +234,7 @@ def save_help_desk_data(request):
     fields = ['message', 'priority', 'advisorMobile', 'type', 'subject']
     sms_dict = {}
     for field in fields:
-        sms_dict[field] = request.POST.get(field, None)    
+        sms_dict[field] = request.POST.get(field, None)
     return gladmindsResources.get_complain_data(sms_dict, sms_dict['advisorMobile'], with_detail=True)
 
 UPDATE_FAIL = 'Phone number already registered!'
@@ -246,11 +246,11 @@ def register_customer(request, group=None):
     temp_customer_id = TEMP_ID_PREFIX + str(random.randint(10**5, 10**6))
     data_source.append(utils.create_feed_data(post_data, product_obj[0], temp_customer_id))
     try:
-        customer_obj = common.CustomerTempRegistration(product_data=product_obj[0], 
-                                                       new_customer_name = data_source[0]['customer_name'],
-                                                       new_number = data_source[0]['customer_phone_number'],
-                                                       product_purchase_date = data_source[0]['product_purchase_date'],
-                                                       temp_customer_id = temp_customer_id)
+        customer_obj = common.CustomerTempRegistration(product_data=product_obj[0],
+                                                       new_customer_name=data_source[0]['customer_name'],
+                                                       new_number=data_source[0]['customer_phone_number'],
+                                                       product_purchase_date=data_source[0]['product_purchase_date'],
+                                                       temp_customer_id=temp_customer_id)
         customer_obj.save()
         feed_remark = FeedLogWithRemark(len(data_source),
                                         feed_type='Purchase Feed',
@@ -261,7 +261,6 @@ def register_customer(request, group=None):
         logger.info(ex)
         return json.dumps({"message": UPDATE_FAIL})
     return json.dumps({'message': UPDATE_SUCCESS + temp_customer_id})
-      
 
 SUCCESS_MESSAGE = 'Registration is complete'
 EXCEPTION_INVALID_DEALER = 'The dealer-id provided is not registered'
@@ -284,9 +283,9 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
             dealer_data = dealer_data.dealer_id if dealer_data else None
 
         asc_obj = afterbuy_common.ASCSaveForm(name=data['name'],
-                 address=data['address'], password=data['password'],
-                 phone_number=phone_number, email=data['email'],
-                 pincode=data['pincode'], status=1, dealer_id=dealer_data)
+                  address=data['address'], password=data['password'],
+                  phone_number=phone_number, email=data['email'],
+                  pincode=data['pincode'], status=1, dealer_id=dealer_data)
         asc_obj.save()
         if settings.ENABLE_AMAZON_SQS:
             task_queue = utils.get_task_queue()
@@ -306,12 +305,12 @@ def save_sa_registration(request, groups):
     data = request.POST
     if not ('dealers' in groups or 'ascs' in groups):
         raise
-    data= {key: val for key, val in data.iteritems()}
+    data = {key: val for key, val in data.iteritems()}
     phone_number = mobile_format(str(data['phone-number']))
     if common.SASaveForm.objects.filter(phone_number=phone_number):
         return json.dumps({'message': ALREADY_REGISTERED})
     asc_obj = common.SASaveForm(name=data['name'],
-             phone_number=phone_number, status=data['status'])
+    phone_number=phone_number, status=data['status'])
     asc_obj.save()
     return json.dumps({'message': SUCCESS_MESSAGE})
 
@@ -323,8 +322,7 @@ def register_user(request, user=None):
     status = save_user[user](request.POST)
 
     return HttpResponse(json.dumps(status), mimetype="application/json")
-    
-    
+
 def sqs_tasks_view(request):
     return render_to_response('trigger-sqs-tasks.html')
 
@@ -335,7 +333,7 @@ def trigger_sqs_tasks(request):
         'expire-service-coupon': 'expire_service_coupon',
         'send-reminder': 'send_reminder',
     }
-    
+
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
     taskqueue.add(sqs_tasks[request.POST['task']])
     return HttpResponse()
