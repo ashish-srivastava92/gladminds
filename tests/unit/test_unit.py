@@ -7,9 +7,10 @@ from tastypie.test import ResourceTestCase
 from django.test import TestCase
 from datetime import datetime, timedelta
 from unit.base_unit import RequestObject, GladmindsUnitTestCase
-from gladminds.utils import get_sa_list, get_coupon_info, get_customer_info, get_token, validate_otp
+from gladminds.utils import get_sa_list, get_coupon_info, get_customer_info, get_list_from_set, get_token, create_feed_data , validate_otp,recover_coupon_info, update_pass, format_date_string
 from gladminds.aftersell.models import logs
 from django.db import connection
+from gladminds.models import common
 import boto
 
 
@@ -62,6 +63,53 @@ class TestUtils(GladmindsUnitTestCase):
         token = get_token(self.asc_user, phone_number)
         self.assertTrue(isinstance(token, int))
         self.assertTrue(validate_otp(self.asc_user, token, phone_number))
+        
+    def test_get_customer_info(self):  
+        request=RequestObject(data={'vin':'12345678999'})
+        product_info = common.ProductData(vin = '12345678999')
+        product_info.save() 
+        result=get_customer_info(request)
+        
+        self.assertEqual("VIN '12345678999' has no associated customer.",result['message'])
+        request = RequestObject(data={'vin':'123456789'})
+        result = get_customer_info(request)
+        self.assertEqual("VIN '123456789' does not exist in our records.",result['message'])
+        self.assertEqual("fail",result['status'])
+        request = RequestObject(data={'vin':'VINXXX001'})
+        result = get_customer_info(request)
+        self.assertEqual('+919999999',result['phone'])
+        
+    def test_get_coupon_info(self):  
+        request = RequestObject(user='DEALER001', data={
+                                'customerId': 'SAP001', 'vin': 'VINXXX001'}, file={'jobCard': ''})
+        result = get_coupon_info(request)
+        self.assertEqual("UCN for customer SAP001 is COUPON005.",result['message'])
+        
+    def test_save_pass(self):
+        phone_number = '1234567890'
+        password='1234'
+        token = get_token(self.asc_user, phone_number)
+        self.assertTrue(isinstance(token, int))
+        self.assertTrue(update_pass(token, password))   
+           
+    def test_format_date_string(self):
+        date=format_date_string("20/07/1992")
+        print "type" ,type(date)
+        self.assertEqual(datetime, type(date)) 
+        
+    def test_create_feed_data(self):
+        product_objs = self.get_product_obj(vin="VINXXX0011", engine='manga')
+        post_data = {'purchase-date':'07/08/1992','customer-phone':'7760814041','customer-name':'saurav'}
+        temp_customer_id='123456'
+        data = create_feed_data(post_data, product_objs, temp_customer_id)   
+        self.assertEqual(data['vin'], 'VINXXX0011') 
+        
+    def test_get_list_from_set(self):
+        data = get_list_from_set(common.FEEDBACK_TYPE)
+        self.assertEqual(len(data), 5) 
+        data = get_list_from_set(common.PRIORITY)
+        self.assertEqual(len(data), 4) 
+         
 
 
 class TestFeedLogWithRemark(ResourceTestCase):
