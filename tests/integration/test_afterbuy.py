@@ -24,6 +24,13 @@ class TestAfterbuy(GladmindsResourceTestCase):
         secret_cli.save()
         access = AccessToken(user=user, token=self.access_token, client=secret_cli)
         access.save()
+        user_info = common.GladMindUsers(phone_number='+9199999998')
+        user_info.save()
+        user_obj = common.GladMindUsers.objects.filter(phone_number='+9199999998')
+        product_infos = afterbuy_common.UserProducts(vin = 'MD2A57BZ4EWA05472',customer_phone_number=user_obj[0])
+        product_infos.save()
+        product_info = common.ProductData(vin = 'MD2A57BZ4EWA05472')
+        product_info.save()
         
     def test_create_new_user(self):
         '''
@@ -97,70 +104,48 @@ class TestAfterbuy(GladmindsResourceTestCase):
         self.assertEqual(response.content, "No notification exists.")
     
     def test_save_user_details(self):
-        data = {"mobile":"99999999","name":"xyz","email":"xyz@gmail.com","gender":"m","address":"ccccc","size":"1","pincode":"320037"}
-        user_info = common.GladMindUsers(phone_number='+9199999999')
-        user_info.save()
+        data = {"mobile":"99999998","name":"xyz","email":"xyz@gmail.com","gender":"m","address":"ccccc"
+                ,"size":"1","pincode":"320037"}
         response = client.post("/v1/afterbuy/user/save/", data=data)
         deserialize_resp = self.deserialize(response)
         self.assertEqual('details saved', deserialize_resp['message'])
         self.assertEqual(200, response.status_code) 
            
     def test_save_user_feedback(self):
-        data = {"mobile":"99999999","feedback_type":"xyz","message":"dfdfdfdf"}
-        user_info = common.GladMindUsers(phone_number='+9199999999')
-        user_info.save()
+        data = {"mobile":"99999998","feedback_type":"xyz","message":"dfdfdfdf"}
         response = client.post("/v1/afterbuy/user/feedback/", data=data)
         deserialize_resp = self.deserialize(response)
         self.assertEqual('saved successfully', deserialize_resp['message'])
         self.assertEqual(200, response.status_code)  
         
     def test_get_product_coupons(self):
-        product_info = common.ProductData(vin = 'MD2A57BZ4EWA05472')
-        product_info.save()
         response = client.get('/v1/afterbuy/product/coupons/', data={'vin': 'MD2A57BZ4EWA05472'})
         self.assertEqual(response.status_code, 200)  
      
     def test_get_product_purchase_information(self):
-        product_info = common.ProductData(vin = 'MD2A57BZ4EWA05472')
-        product_info.save()
         response = client.get('/v1/afterbuy/product/purchase-info/', data={'vin': 'MD2A57BZ4EWA05472'})
         self.assertEqual(response.status_code, 200)  
                
-                 
     def test_save_user_phone_details(self):
-        data = {"mobile":"99999999", "IMEI":"sdsdsdsd","ICCID":"ffdfdfd", "phone_name":"sjxbsjx", "serial_number":"bdj2e2e2e2", "capacity":"2", "os":"sss","version":"11", "Model":"ww" }
-        user_info = common.GladMindUsers(phone_number='+9199999999')
-        user_info.save()
+        data = {"mobile":"99999998", "IMEI":"sdsdsdsd","ICCID":"ffdfdfd", "phone_name":"sjxbsjx",
+                 "serial_number":"bdj2e2e2e2", "capacity":"2", "os":"sss","version":"11", "Model":"ww" }
         response = client.post("/v1/afterbuy/phone-details/", data=data)
         deserialize_resp = self.deserialize(response)
         self.assertEqual('details saved', deserialize_resp[0]['message'])
         self.assertEqual(200, response.status_code)
         
-        
     def test_post_dispatch_dict(self):
-        data={"mobile":"99999999","vin":"MD2A57BZ4EWA05472"}
-        user_info = common.GladMindUsers(phone_number='+9199999999')
-        user_info.save()
-        aa = common.GladMindUsers.objects.filter(phone_number='+9199999999')
-        product_info = afterbuy_common.UserProducts(vin = 'MD2A57BZ4EWA05472',customer_phone_number=aa[0])
-        product_info.save()
+        data={"mobile":"99999998","vin":"MD2A57BZ4EWA05472"}
         response = client.post('/v1/afterbuy/product/info/', data=data)
         self.assertEqual(response.status_code, 200) 
         
     def test_get_dispatch_dict(self):
-        data={"mobile":"99999999"}
-        user_info = common.GladMindUsers(phone_number='+9199999999')
-        user_info.save()
+        data={"mobile":"99999998"}
         response = client.get('/v1/afterbuy/product/info/', data=data)
         self.assertEqual(response.status_code, 200)                             
              
     def test_delete_dispatch_dict(self):
-        user_info = common.GladMindUsers(phone_number='+9199999999')
-        user_info.save()
-        aa = common.GladMindUsers.objects.filter(phone_number='+9199999999')
-        product_info = afterbuy_common.UserProducts(vin = '123465656556',customer_phone_number=aa[0])
-        product_info.save()
-        url = '/v1/afterbuy/product/info/?mobile=99999999&vin=123465656556' 
+        url = '/v1/afterbuy/product/info/?mobile=99999998&vin=MD2A57BZ4EWA05472' 
         response = client.delete(url)
         self.assertEqual(response.status_code, 200)                       
                       
