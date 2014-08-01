@@ -104,7 +104,7 @@ class TestAfterbuy(GladmindsResourceTestCase):
         self.assertEqual(response.content, "No notification exists.")
     
     def test_save_user_details(self):
-        data = {"mobile":"99999998","name":"xyz","email":"xyz@gmail.com","gender":"m","address":"ccccc"
+        data = {"mobile":"99999998","name":"xyz","email":"xyz@gmail.com","gender":"m","address":"a-302 om complex"
                 ,"size":"1","pincode":"320037"}
         response = client.post("/v1/afterbuy/user/save/", data=data)
         deserialize_resp = self.deserialize(response)
@@ -112,7 +112,7 @@ class TestAfterbuy(GladmindsResourceTestCase):
         self.assertEqual(200, response.status_code) 
            
     def test_save_user_feedback(self):
-        data = {"mobile":"99999998","feedback_type":"xyz","message":"dfdfdfdf"}
+        data = {"mobile":"99999998","feedback_type":"xyz","message":"dummy message"}
         response = client.post("/v1/afterbuy/user/feedback/", data=data)
         deserialize_resp = self.deserialize(response)
         self.assertEqual('saved successfully', deserialize_resp['message'])
@@ -127,8 +127,8 @@ class TestAfterbuy(GladmindsResourceTestCase):
         self.assertEqual(response.status_code, 200)  
                
     def test_save_user_phone_details(self):
-        data = {"mobile":"99999998", "IMEI":"sdsdsdsd","ICCID":"ffdfdfd", "phone_name":"sjxbsjx",
-                 "serial_number":"bdj2e2e2e2", "capacity":"2", "os":"sss","version":"11", "Model":"ww" }
+        data = {"mobile":"99999998", "IMEI":"123e4","ICCID":"12ef", "phone_name":"9727071081",
+                 "serial_number":"123eee", "capacity":"2", "os":"dummyos","version":"11", "Model":"reb" }
         response = client.post("/v1/afterbuy/phone-details/", data=data)
         deserialize_resp = self.deserialize(response)
         self.assertEqual('details saved', deserialize_resp[0]['message'])
