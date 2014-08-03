@@ -279,7 +279,7 @@
     "pk": 32,
     "fields": {
       "template_key": "SERVICE_DESK_FEEDBACK_INITIATOR",
-      "template": "Your {type} has been registered successfully. We will get back to you shortly.",
+      "template": "Your {0} has been registered successfully. We will get back to you shortly.",
       "description": "Send this message when any user file any complain, feedback, request or suggestion to initiator of this issue."
     }
   },
@@ -288,7 +288,7 @@
     "pk": 33,
     "fields": {
       "template_key": "SERVICE_DESK_FEEDBACK_OWNER",
-      "template": "{reporter} has assigned a new ticket to you.Please look into  this issue.",
+      "template": "{0} has assigned a new ticket to you.",
       "description": "Send this message when any user file any complain, feedback, request or suggestion to owner of this issue."
     }
   }
