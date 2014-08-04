@@ -703,7 +703,6 @@ def generate_otp(request):
         data={'status':0, 'message':log_message}
         return HttpResponse(json.dumps(data), content_type="application/json")
     phone_number= request.POST['mobile']
-    print "^^^^^^^^^^^^^^^^^^^^^^^" ,phone_number
     email = request.POST.get('email', '')
     logger.info('OTP request received. Mobile: {0}'.format(phone_number))
     feed = BaseFeed()

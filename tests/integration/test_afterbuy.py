@@ -10,8 +10,6 @@ from django.test.client import Client
 from gladminds.models import common
 from gladminds.afterbuy.models import common as afterbuy_common
 import json
-from pydoc import cli
-
 client = Client()
 
 
@@ -24,14 +22,27 @@ class TestAfterbuy(GladmindsResourceTestCase):
         secret_cli = auth_client(user=user, name='client', client_type=1, url='')
         secret_cli.save()
         access = AccessToken(user=user, token=self.access_token, client=secret_cli)
-        access.save()
+        access.save()        
         user_info = common.GladMindUsers(phone_number='+9199999998')
         user_info.save()
         user_obj = common.GladMindUsers.objects.filter(phone_number='+9199999998')
+        testBrand = common.BrandData(brand_id='1', brand_name="test_brand")
+        testBrand.save()
+        brands = common.BrandData.objects.get(brand_name="test_brand")        
+        testProductType = common.ProductTypeData(brand_id=brands, product_name="Test", warranty_email="abc@def.com", warranty_phone="88888888")
+        testProductType.save()        
+        testProductType = common.ProductTypeData.objects.get(brand_id=brands)
         product_infos = afterbuy_common.UserProducts(vin = 'MD2A57BZ4EWA05472',customer_phone_number=user_obj[0])
         product_infos.save()
-        product_info = common.ProductData(vin = 'MD2A57BZ4EWA05472')
+        product_info = common.ProductData(vin = 'MD2A57BZ4EWA05472' , customer_phone_number=user_obj[0],product_type=testProductType)
         product_info.save()
+        testProductInsuranceInfo = common.ProductInsuranceInfo(product=product_info, issue_date='2014-07-28', expiry_date='2014-07-28', insurance_phone='1111111111')
+        testProductInsuranceInfo.save()
+        testProductWarranty = common.ProductWarrantyInfo(product=product_info, issue_date='2014-07-28', expiry_date='2014-07-28')
+        testProductWarranty.save()
+        testSpareData = common.SparesData(spare_brand=brands,spare_name="test spare")
+        testSpareData.save()
+        
         
     def test_create_new_user(self):
         '''
@@ -105,53 +116,19 @@ class TestAfterbuy(GladmindsResourceTestCase):
         self.assertEqual(response.content, "No notification exists.")
            
     def test_get_product_insurance(self):
-        self.test_create_new_user()
-        testUser = User.objects.get(username='testuser')
-        user = common.GladMindUsers.objects.get(user=testUser)
-        testProductData = common.ProductData(vin="aaaaaaaa", customer_phone_number=user)
-        testProductData.save()
-        testProductInsuranceInfo = common.ProductInsuranceInfo(product=testProductData, issue_date='2014-07-28', expiry_date='2014-07-28', insurance_phone='1111111111')
-        testProductInsuranceInfo.save()
-        response = client.get('/v1/afterbuy/product/insurance/?vin=aaaaaaaa')
+        response = client.get('/v1/afterbuy/product/insurance/?vin=MD2A57BZ4EWA05472')
         self.assertEqual(response.status_code, 200)
         response = client.get('/v1/afterbuy/product/insurance/?vin=')
         self.assertEqual(response.status_code, 400)
     
     def test_get_product_warranty(self):
-        self.test_create_new_user()
-        testUser = User.objects.get(username='testuser')
-        user = common.GladMindUsers.objects.get(user=testUser)        
-        testBrand = common.BrandData(brand_id='1', brand_name="test_brand")
-        testBrand.save()
-        brands = common.BrandData.objects.get(brand_name="test_brand")        
-        testProductType = common.ProductTypeData(brand_id=brands, product_name="Test", warranty_email="abc@def.com", warranty_phone="88888888")
-        testProductType.save()        
-        testProductType = common.ProductTypeData.objects.get(brand_id=brands)        
-        testProductData = common.ProductData(vin="aaaaaaaa", customer_phone_number=user, product_type=testProductType)
-        testProductData.save()        
-        testProductWarranty = common.ProductWarrantyInfo(product=testProductData, issue_date='2014-07-28', expiry_date='2014-07-28')
-        testProductWarranty.save()
-        response = client.get('/v1/afterbuy/product/warranty/?vin=aaaaaaaa')
+        response = client.get('/v1/afterbuy/product/warranty/?vin=MD2A57BZ4EWA05472')
         self.assertEqual(response.status_code, 200)
         response = client.get('/v1/afterbuy/product/warranty/?vin=')
         self.assertEqual(response.status_code,400)
 
     def test_get_spares_list(self):
-        self.test_create_new_user()
-        testUser = User.objects.get(username='testuser')
-        user = common.GladMindUsers.objects.get(user=testUser)        
-        testBrand = common.BrandData(brand_id='1', brand_name="test_brand")
-        testBrand.save()
-        brands = common.BrandData.objects.get(brand_name="test_brand")        
-        testProductType = common.ProductTypeData(brand_id=brands, product_name="Test", warranty_email="abc@def.com", warranty_phone="88888888")
-        testProductType.save()        
-        testProductType = common.ProductTypeData.objects.get(brand_id=brands)        
-        testProductData = common.ProductData(vin="aaaaaaaa", customer_phone_number=user, product_type=testProductType)
-        testProductData.save() 
-        testSpareData = common.SparesData(spare_brand=brands,spare_name="test spare")
-        testSpareData.save()
-        testSpareData = common.SparesData.objects.get(spare_brand=brands)
-        response = client.get('/v1/afterbuy/product/spares/?vin=aaaaaaaa')
+        response = client.get('/v1/afterbuy/product/spares/?vin=MD2A57BZ4EWA05472')
         self.assertEqual(response.status_code, 200)
         response = client.get('/v1/afterbuy/product/spares/?vin=')
         self.assertEqual(response.status_code,400)
