@@ -129,3 +129,26 @@ class TestAfterbuy(GladmindsResourceTestCase):
         self.assertEqual(response.status_code, 200)
         response = client.get('/v1/afterbuy/product/warranty/?vin=')
         self.assertEqual(response.status_code,400)
+
+    def test_get_spares_list(self):
+        self.test_create_new_user()
+        testUser = User.objects.get(username='testuser')
+        user = common.GladMindUsers.objects.get(user=testUser)        
+        testBrand = common.BrandData(brand_id='1', brand_name="test_brand")
+        testBrand.save()
+        brands = common.BrandData.objects.get(brand_name="test_brand")        
+        testProductType = common.ProductTypeData(brand_id=brands, product_name="Test", warranty_email="abc@def.com", warranty_phone="88888888")
+        testProductType.save()        
+        testProductType = common.ProductTypeData.objects.get(brand_id=brands)        
+        testProductData = common.ProductData(vin="aaaaaaaa", customer_phone_number=user, product_type=testProductType)
+        testProductData.save() 
+        testSpareData = common.SparesData(spare_brand=brands,spare_name="test spare")
+        testSpareData.save()
+        testSpareData = common.SparesData.objects.get(spare_brand=brands)
+        response = client.get('/v1/afterbuy/product/spares/?vin=aaaaaaaa')
+        self.assertEqual(response.status_code, 200)
+        response = client.get('/v1/afterbuy/product/spares/?vin=')
+        self.assertEqual(response.status_code,400)
+        
+        
+         
