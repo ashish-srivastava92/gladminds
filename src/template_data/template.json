@@ -225,7 +225,7 @@
     "pk": 25,
     "fields": {
       "template_key": "SEND_TEMPORARY_CUSTOMER_ID",
-      "template": "Dear {customer_name}, Congrats on your purchase of Bajaj bike. Your Temporary customer id is {sap_customer_id}. Refer this id during servicing until you receive a verified customer ID",
+      "template": "Dear {customer_name}, Congrats on your purchase of Bajaj bike. Your Temporary customer id is {sap_customer_id}. Refer this id during servicing till you get Permanent Customer ID",
       "description": "Send temporary customer ID to Customer"
     }
   },
@@ -234,7 +234,7 @@
     "pk": 26,
     "fields": {
       "template_key": "SEND_REPLACED_CUSTOMER_ID",
-      "template": "Dear {customer_name}, Your verified customer id is {sap_customer_id}. Refer this id during servicing",
+      "template": "Dear {customer_name}, Your Permanent customer ID is {sap_customer_id} for your Bajaj Bike. Please refer this ID during servicing of your Bike",
       "description": "Send new sap ID to Customer"
     }
   } 
