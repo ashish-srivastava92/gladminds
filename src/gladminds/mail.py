@@ -179,13 +179,13 @@ def send_feedback_received(data=None):
     except Exception as ex:
         logger.info("[Exception ucn request email]: {0}".format(ex))
         
-def send_Servicedesk_feedback(data=None):
+def send_servicedesk_feedback(feedback_details=None):
     from gladminds import mail
     try:
         file_stream = open(settings.TEMPLATE_DIR+'/servicedesk_feedback.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
-        context = Context({'type': data.type})
+        context = Context({'type': feedback_details.type})
         body = template.render(context)
         mail_detail = settings.FEDBACK_MAIL_DETAIL
         #TODO We have to remove hard code receiver
