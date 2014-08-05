@@ -541,23 +541,22 @@ class ASCFeed(BaseFeed):
 class CustomerRegistationFeedToSAP(BaseFeed):
 
     def export_data(self, start_date=None, end_date=None):
-        results = common.CustomerTempRegistration.objects.filter(sent_to_sap=False).select_related('product_data')
+#         results = common.CustomerTempRegistration.objects.filter(sent_to_sap=False).select_related('product_data')
+        results = [{"CHASSIS": "MD2A57AZ6DWF01325",
+                   "KUNNR": "10347",
+                   "CUSTOMER_ID" : "T276963",
+                   "ENGINE" : "DSEWWE32",
+                   "VEH_SL_DT": "2014-07-20",
+                   "CUSTOMER_NAME": "BHARAT LALWANI",
+                   "CUST_MOBILE": "+919999999999",
+                   }]
         items = []
         total_failed = 0
         item_batch = {
             'TIME_STAMP': datetime.now().strftime("%Y%m%d%H%M%S")}
         for redeem in results:
             try:
-                item = {
-                    "CHASSIS": redeem.product_data.vin,
-                    "KUNNR": redeem.product_data.dealer_id.dealer_id,
-                    "CUSTOMER_ID" : redeem.temp_customer_id,
-                    "ENGINE" : redeem.product_data.engine,
-                    "VEH_SL_DT": redeem.product_purchase_date.date().strftime("%Y-%m-%d"),
-                    "CUSTOMER_NAME": redeem.new_customer_name,
-                    "CUST_MOBILE": redeem.new_number,
-                    
-                }
+                item = redeem
                 items.append(item)
             except Exception as ex:
                 logger.error("error on customer info from db %s" % str(ex))
