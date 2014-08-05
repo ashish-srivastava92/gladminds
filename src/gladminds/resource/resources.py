@@ -27,7 +27,8 @@ from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
 from gladminds.utils import mobile_format, format_message, get_task_queue
 from gladminds.feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
-from gladminds.mail import send_feedback_received
+from gladminds.mail import send_feedback_received,send_Servicedesk_feedback
+from gladminds import mail
 
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -472,6 +473,7 @@ class GladmindsResources(Resource):
             else:
                 send_coupon.delay(phone_number=phone_number, message=message)
             send_feedback_received(data=gladminds_feedback_object)
+            send_Servicedesk_feedback(data=gladminds_feedback_object)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return {'status': True, 'message': message}
         
