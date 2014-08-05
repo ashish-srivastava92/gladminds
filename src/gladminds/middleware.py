@@ -10,17 +10,16 @@ logger = logging.getLogger(__name__)
 __all__ = ['GladmindsMiddleware']
 
 """
-Gladminds middleware to identify the user type (i.e Customer, Service Advisor and Admin). 
+Gladminds middleware to identify the user type (i.e Customer, Service Advisor and Admin).
 And set the it into request object
 """
-class GladmindsMiddleware(object):    
-    #If the request is come on message APIs, then it coming from SA or 
-    #Customer. Verify the customer and Dealer as per phone number and message text
+class GladmindsMiddleware(object):
+    # If the request is come on message APIs, then it coming from SA or
+    # Customer. Verify the customer and Dealer as per phone number and message text
     def process_view(self, request, view_func, view_args, view_kwargs):
-        #If user is authenticated then it's an admin user
+        # If user is authenticated then it's an admin user
         if request.user.is_authenticated():
             return
-         
         if request.path is '/v1/messages':
             message = None
             phone_number = None
@@ -28,26 +27,22 @@ class GladmindsMiddleware(object):
                 message = request.POST.get('text')
                 phone_number = request.POST.get('phoneNumber')
             else:
-                #Putting a random phone, will change once we get correct format of message
+                # Putting a random phone, will change once we get correct format of message
                 phone_number = '+91 7834671232'
                 message = request.body
-            
-            message_args= smsparser.sms_parser(message = message)
+            message_args = smsparser.sms_parser(message=message)
             auth_rule = message_args['auth_rule']
-            
             if 'open' in auth_rule:
                 request.user['role'] = 'Customer'
                 request.user['phone_number'] = phone_number
                 return
-            
             elif 'sa' in auth_rule:
                 try:
                     aftersell_common.ServiceAdvisor.objects.get(phone_number=phone_number)
                     request.user['role'] = 'SA'
                     request.user['phone_number'] = phone_number
                 except aftersell_common.ServiceAdvisor.DoesNotExist:
-                    raise HttpResponseBadRequest() 
-                
+                    raise HttpResponseBadRequest()
             elif 'customer' in auth_rule:
                 try:
                     object = common.GladMindUsers.objects.get(phone_number=phone_number)
