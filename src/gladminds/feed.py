@@ -553,7 +553,7 @@ class CustomerRegistationFeedToSAP(BaseFeed):
                     "KUNNR": redeem.product_data.dealer_id.dealer_id,
                     "CUSTOMER_ID" : redeem.temp_customer_id,
                     "ENGINE" : redeem.product_data.engine,
-                    "VEH_SL_DT": redeem.product_purchase_date.date().strftime("%d.%m.%Y"),
+                    "VEH_SL_DT": redeem.product_purchase_date.date().strftime("%Y-%m-%d"),
                     "CUSTOMER_NAME": redeem.new_customer_name,
                     "CUST_MOBILE": redeem.new_number,
                     
