@@ -102,9 +102,9 @@ class CustomerRegisterationService(ServiceBase):
         pass
 
 mock_app = Application([ASCRegisterationService, SARegisterationService, CustomerRegisterationService],
-                      tns=tns,
-                      in_protocol=Soap11(validator='lxml'),
-                      out_protocol=Soap11()
+                       tns=tns,
+                       in_protocol=Soap11(validator='lxml'),
+                       out_protocol=Soap11()
                       )
 
 mock_service = csrf_exempt(DjangoApplication(mock_app))
@@ -140,7 +140,7 @@ class DealerModel(ComplexModel):
 class DealerModelList(ComplexModel):
     __namespace__ = tns
     DealerData = Array(DealerModel)
-    
+
 class ASCModel(ComplexModel):
     __namespace__ = tns
     ASC_ID = Unicode
@@ -153,8 +153,7 @@ class ASCModel(ComplexModel):
 
 class ASCModelList(ComplexModel):
     __namespace__ = tns
-    ASCData = Array(ASCModel)    
-
+    ASCData = Array(ASCModel)
 
 class ProductDispatchModel(ComplexModel):
     __namespace__ = tns
@@ -202,7 +201,7 @@ class ProductPurchaseModelList(ComplexModel):
 class BrandService(ServiceBase):
     __namespace__ = tns
 
-    @srpc(BrandModelList, AuthenticationModel,  _returns=Unicode)
+    @srpc(BrandModelList, AuthenticationModel, _returns=Unicode)
     def postBrand(ObjectList, Credential):
         try:
             brand_list = []
@@ -246,11 +245,11 @@ class DealerService(ServiceBase):
                 logger.error(dealer)
                 feed_remark.fail_remarks(ex)
         feed_remark = save_to_db(feed_type='dealer', data_source=dealer_list,
-                              feed_remark=feed_remark)
+                                 feed_remark=feed_remark)
 
         feed_remark.save_to_feed_log()
         return get_response(feed_remark)
-    
+
 class ASCService(ServiceBase):
     __namespace__ = tns
 
@@ -277,10 +276,9 @@ class ASCService(ServiceBase):
                 logger.error(asc_element)
                 feed_remark.fail_remarks(ex)
         feed_remark = save_to_db(feed_type='ASC', data_source=asc_list,
-                              feed_remark=feed_remark)
+                                 feed_remark=feed_remark)
         feed_remark.save_to_feed_log()
-        return get_response(feed_remark)    
-
+        return get_response(feed_remark)
 
 class ProductDispatchService(ServiceBase):
     __namespace__ = tns
@@ -311,9 +309,7 @@ class ProductDispatchService(ServiceBase):
                 logger.error("ProductDispatchService: {0} Object List is {1}"
                              .format(ex, product))
 
-        feed_remark = save_to_db(
-            feed_type='dispatch', data_source=product_dispatch_list,
-                                        feed_remark=feed_remark)
+        feed_remark = save_to_db(feed_type='dispatch', data_source=product_dispatch_list, feed_remark=feed_remark)
         feed_remark.save_to_feed_log()
         return get_response(feed_remark)
 
@@ -348,8 +344,7 @@ class ProductPurchaseService(ServiceBase):
                 feed_remark.fail_remarks(ex)
 
         feed_remark = save_to_db(
-            feed_type='purchase', data_source=product_purchase_list,
-                                                 feed_remark=feed_remark)
+            feed_type='purchase', data_source=product_purchase_list, feed_remark=feed_remark)
         feed_remark.save_to_feed_log()
         return get_response(feed_remark)
 
@@ -361,15 +356,14 @@ def get_response(feed_remark):
 def save_to_db(feed_type=None, data_source=[], feed_remark=None):
     sap_obj = SAPFeed()
     return sap_obj.import_to_db(feed_type=feed_type, data_source=data_source,
-                                 feed_remark=feed_remark)
+                                feed_remark=feed_remark)
 
 
 def _on_method_call(ctx):
     if ctx.in_object is None:
         raise ArgumentError("Request doesn't contain data")
-    auth_obj = AuthenticationService(
-                                username=ctx.in_object.Credential.UserName,
-                                password=ctx.in_object.Credential.Password)
+    auth_obj = AuthenticationService(username=ctx.in_object.Credential.UserName,
+                                     password=ctx.in_object.Credential.Password)
     auth_obj.authenticate()
 
 BrandService.event_manager.add_listener('method_call', _on_method_call)
@@ -382,38 +376,35 @@ ProductPurchaseService.event_manager.add_listener(
 all_app = Application([BrandService, DealerService, ProductDispatchService, ProductPurchaseService, ASCService],
                       tns=tns,
                       in_protocol=Soap11(validator='lxml'),
-                      out_protocol=Soap11()
-                      )
-
+                      out_protocol=Soap11())
 brand_app = Application([BrandService],
                         tns=tns,
                         in_protocol=Soap11(validator='lxml'),
                         out_protocol=Soap11()
-                        )
+                       )
 
 dealer_app = Application([DealerService],
                          tns=tns,
                          in_protocol=Soap11(validator='lxml'),
                          out_protocol=Soap11()
-                         )
+                        )
 
 asc_app = Application([ASCService],
-                         tns=tns,
-                         in_protocol=Soap11(validator='lxml'),
-                         out_protocol=Soap11()
-                         )
+                      tns=tns,
+                      in_protocol=Soap11(validator='lxml'),
+                      out_protocol=Soap11()
+                     )
 
 dispatch_app = Application([ProductDispatchService],
                            tns=tns,
                            in_protocol=Soap11(validator='lxml'),
                            out_protocol=Soap11()
-                           )
-
+                          )
 purchase_app = Application([ProductPurchaseService],
                            tns=tns,
                            in_protocol=Soap11(validator='lxml'),
                            out_protocol=Soap11()
-                           )
+                          )
 
 all_service = csrf_exempt(DjangoApplication(all_app))
 brand_service = csrf_exempt(DjangoApplication(brand_app))

@@ -5,7 +5,6 @@ import logging
 import json
 from datetime import timedelta, datetime
 from provider.oauth2.models import Client
-
 from django.shortcuts import render_to_response, render
 from django.core.files import File
 from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect

@@ -7,7 +7,7 @@ logger = logging.getLogger("gladminds")
 
 class BaseExportFeed(object):
 
-    def __init__(self, username=None, password=None, wsdl_url=None,\
+    def __init__(self, username=None, password=None, wsdl_url=None, \
                                                         feed_type=None):
         self.username = username
         self.password = password
@@ -15,7 +15,7 @@ class BaseExportFeed(object):
         self.feed_type = feed_type
 
     def get_http_authenticated(self):
-        return HttpAuthenticated(username=self.username,\
+        return HttpAuthenticated(username=self.username, \
                                  password=self.password)
 
     def get_client(self):
@@ -43,8 +43,8 @@ class ExportCouponRedeemFeed(BaseExportFeed):
 
         logger.info("Response from SAP: {0}".format(result))
         feed_log(feed_type=self.feed_type, total_data_count=len(items)\
-                 + total_failed_on_feed, failed_data_count=total_failed,\
-                 success_data_count=len(items) - total_failed,\
+                 + total_failed_on_feed, failed_data_count=total_failed, \
+                 success_data_count=len(items) - total_failed, \
                  action='Sent', status=export_status)
 
 
