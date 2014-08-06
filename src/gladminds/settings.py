@@ -9,6 +9,7 @@ PROJECT_DIR = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 BASE_DIR = os.path.join(PROJECT_DIR, os.pardir)
 STATIC_DIR = os.path.join(PROJECT_DIR, "static")
 TEMPLATE_DIR = os.path.join(PROJECT_DIR, "templates")
+EMAIL_DIR = os.path.join(TEMPLATE_DIR, "email")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
 
 ALLOWED_HOSTS = ['*']
@@ -341,6 +342,12 @@ FEDBACK_MAIL_DETAIL = {
                   "sender":"feed-report@gladminds.co",
                   "subject":"Feedback",
                   "receiver": ["gladminds@hashedin.com"],
+                  "body": """""",
+              }
+SERVICEDESK_FEEDBACK_MAIL_DETAIL = {
+                  "sender":"feed-report@gladminds.co",
+                  "subject":"Thank you for feedback",
+                  "receiver": [""],
                   "body": """""",
               }
 # AfterBuy File Upload location configuration
