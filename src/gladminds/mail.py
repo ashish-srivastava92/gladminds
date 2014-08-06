@@ -26,7 +26,7 @@ def feed_report(feed_data = None):
     from gladminds import mail
     try:
         yesterday = datetime.now().date() - timedelta(days=1)
-        file_stream = open(settings.TEMPLATE_DIR+'/feed_report.html')
+        file_stream = open(settings.EMAIL_DIR+'/feed_report.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
         context = Context({"feed_logs": feed_data, "yesterday": yesterday})
@@ -43,7 +43,7 @@ def feed_report(feed_data = None):
 
 def feed_failure_report(remarks = None, feed_type=None):
     try:
-        file_stream = open(settings.TEMPLATE_DIR+'/feed_failure_report.html')
+        file_stream = open(settings.EMAIL_DIR+'/feed_failure_report.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
         context = Context({"remarks": remarks, "feed_type": feed_type})
@@ -85,7 +85,7 @@ def item_purchase_interest(data=None, receiver=None, subject=None):
     from gladminds import mail
     try:
         file_stream = open(
-            settings.TEMPLATE_DIR + '/purchase_interest_mail.html')
+            settings.EMAIL_DIR + '/purchase_interest_mail.html')
         item = file_stream.read()
         template = Template(item)
         context = Context({"user": data})
@@ -101,7 +101,7 @@ def warrenty_extend(data=None, receiver=None, subject=None):
     from gladminds import mail
     try:
         file_stream = open(
-            settings.TEMPLATE_DIR + '/warrenty_extend_mail.html')
+            settings.EMAIL_DIR + '/warrenty_extend_mail.html')
         item = file_stream.read()
         template = Template(item)
         context = Context({"user": data})
@@ -117,7 +117,7 @@ def insurance_extend(data=None, receiver=None, subject=None):
     from gladminds import mail
     try:
         file_stream = open(
-            settings.TEMPLATE_DIR + '/insurance_extend_mail.html')
+            settings.EMAIL_DIR + '/insurance_extend_mail.html')
         item = file_stream.read()
         template = Template(item)
         context = Context({"user": data})
@@ -133,7 +133,7 @@ def sent_otp_email(data=None, receiver=None, subject=None):
     from gladminds import mail
     try:
         date = datetime.now().date()
-        file_stream = open(settings.TEMPLATE_DIR+'/otp_email.html')
+        file_stream = open(settings.EMAIL_DIR+'/otp_email.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
         context = Context({"otp": data})
@@ -149,7 +149,7 @@ def sent_otp_email(data=None, receiver=None, subject=None):
 def send_ucn_request_alert(data=None):
     from gladminds import mail
     try:
-        file_stream = open(settings.TEMPLATE_DIR+'/ucn_request_email.html')
+        file_stream = open(settings.EMAIL_DIR+'/ucn_request_email.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
         context = Context({"content": data})
@@ -165,7 +165,7 @@ def send_ucn_request_alert(data=None):
 def send_feedback_received(data=None):
     from gladminds import mail
     try:
-        file_stream = open(settings.TEMPLATE_DIR+'/feedback_received_mail.html')
+        file_stream = open(settings.EMAIL_DIR+'/feedback_received_mail.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
         context = Context({'message': data.message,
@@ -182,13 +182,13 @@ def send_feedback_received(data=None):
 def send_servicedesk_feedback(feedback_details=None):
     context = Context({'type': feedback_details.type})
     mail_detail = settings.SERVICEDESK_FEEDBACK_MAIL_DETAIL
-    send_template_email("servicedesk_feedback.html",context,"Exception feedback receiver email", mail_detail,receiver="srv.sngh@gmail.com")
+    send_template_email("servicedesk_feedback_inititator.html",context,"Exception feedback receiver email", mail_detail,receiver="srv.sngh@gmail.com")
     
      
         
 def send_template_email(template_name,context,exceptionstring, mail_detail,receiver=None): 
     try:
-        file_stream = open(settings.TEMPLATE_DIR+'/'+ template_name)
+        file_stream = open(settings.EMAIL_DIR+'/'+ template_name)
         feed_temp = file_stream.read()
         template = Template(feed_temp)
         body = template.render(context)
@@ -199,6 +199,7 @@ def send_template_email(template_name,context,exceptionstring, mail_detail,recei
                    subject = mail_detail['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
         logger.info("Mail sent successfully")
+        print "yes"
         
     except Exception as ex:
         logger.info("["+ exceptionstring +"]: {0}".format(ex))   
