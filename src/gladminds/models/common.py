@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
 from datetime import datetime
+from django.db.models.signals import post_save
 ##################BRAND-PRPDUCT MODELS#######################
 '''
 BrandData contains brand related information
@@ -139,15 +140,15 @@ class GladMindUsers(models.Model):
     pincode = models.CharField(max_length=15, null=True, blank=True)
     
 
-    class Meta:
+    class Meta(object):
         app_label = "gladminds"
         verbose_name_plural = "Users"
 
     def __unicode__(self):
         return self.phone_number
 
-    def save(self, force_insert=False, force_update=False, using=None):
-        return super(GladMindUsers, self).save(force_insert, force_update, using)
+#     def save(self, force_insert=False, force_update=False, using=None):
+#         return super(GladMindUsers, self).save(force_insert, force_update, using)
 
 '''
 CustomerData contains info about
@@ -356,18 +357,3 @@ class SparesData(models.Model):
     
 #########################################################################################
 
-class Feedback(models.Model):
-    reporter = models.ForeignKey('aftersell.ServiceAdvisor', null=False)
-    assign_to = models.ForeignKey(User, null=True, blank= True)
-    message = models.CharField(max_length=512, null=True, blank=False)
-    status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
-    priority = models.CharField(max_length=12, choices=PRIORITY)
-    type = models.CharField(max_length=12, choices=FEEDBACK_TYPE)
-    subject = models.CharField(max_length=512, null=True, blank=True)
-    created_date = models.DateTimeField(null=True, blank= False)
-    modified_date = models.DateTimeField(null=True, blank= True)
-    
-    class Meta:
-        app_label = "gladminds"
-        verbose_name_plural = "gladminds feedback info"
-    

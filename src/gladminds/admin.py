@@ -17,7 +17,7 @@ from django.db import models
 from django.contrib.admin.models import LogEntry
 from models.common import GladMindUsers, ProductTypeData, \
     BrandData, ProductData, CouponData, MessageTemplate,\
-    UploadProductCSV, Feedback
+    UploadProductCSV
 from gladminds.aftersell.models.common import \
     RegisteredDealer,ServiceAdvisorDealerRelationship, ServiceAdvisor
 from gladminds.aftersell.models.logs import AuditLog, DataFeedLog
@@ -25,7 +25,7 @@ from import_export.admin import ImportExportModelAdmin, ExportMixin
 from import_export import fields, widgets
 from import_export import resources
 from gladminds.models.common import EmailTemplate
-from gladminds.aftersell.models.common import ASCSaveForm
+from gladminds.aftersell.models.common import ASCSaveForm, Feedback 
 from gladminds.afterbuy.models.common import UserNotification
 
 
