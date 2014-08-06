@@ -44,8 +44,7 @@ def mobile_format(phone_number):
     '''
         GM store numbers in +91 format
         And when airtel pull message from customer
-        or service advisor we will check that number in +91 format 
-    '''
+        or service advisor we will check that number in +91 format'''
     return '+91' + phone_number[-10:]
 
 def format_message(message):
@@ -71,8 +70,8 @@ def save_otp(user, token, email):
 def get_token(user, phone_number, email=''):
     if email and user.email_id != email:
         raise
-    totp=TOTP(TOTP_SECRET_KEY+str(randint(10000,99999))+str(phone_number))
-    totp.time=30
+    totp = TOTP(TOTP_SECRET_KEY+str(randint(10000, 99999))+str(phone_number))
+    totp.time = 30
     token = totp.token()
     save_otp(user, token, email)
     return token
@@ -99,7 +98,7 @@ def get_task_queue():
     return SqsTaskQueue(queue_name)
 
 def get_customer_info(data):
-    data=data.POST
+    data = data.POST
     try:
         product_obj = common.ProductData.objects.get(vin=data['vin'])
     except Exception as ex:
@@ -109,16 +108,15 @@ def get_customer_info(data):
     if product_obj.product_purchase_date:
         purchase_date = product_obj.product_purchase_date.strftime('%d/%m/%Y')
         return {'id': product_obj.sap_customer_id,
-                'phone': get_phone_number_format(str(product_obj.customer_phone_number)), 
-                'name': product_obj.customer_phone_number.customer_name, 
+                'phone': get_phone_number_format(str(product_obj.customer_phone_number)),
+                'name': product_obj.customer_phone_number.customer_name,
                 'purchase_date': purchase_date}
     else:
         message = '''VIN '{0}' has no associated customer.'''.format(data['vin'])
         return {'message': message}
 
 def get_sa_list(request):
-    dealer = aftersell_common.RegisteredDealer.objects.filter(
-                dealer_id=request.user)[0]
+    dealer = aftersell_common.RegisteredDealer.objects.filter(dealer_id=request.user)[0]
     service_advisors = aftersell_common.ServiceAdvisorDealerRelationship.objects\
                                 .filter(dealer_id=dealer, status='Y')
     sa_phone_list = []
@@ -130,9 +128,8 @@ def recover_coupon_info(request):
     coupon_info = get_coupon_info(request)
     upload_file(request)
     return coupon_info
-    
 def get_coupon_info(request):
-    data=request.POST
+    data = request.POST
     customer_id = data['customerId']
     logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, request.user))
     product_data = common.ProductData.objects.filter(sap_customer_id=customer_id)[0]
@@ -150,9 +147,10 @@ def upload_file(request):
     file_obj.name = get_file_name(request, file_obj)
     #TODO: Include Facility to get brand name here
     destination = settings.JOBCARD_DIR.format('bajaj')
-    path = uploadFileToS3(destination=destination, file_obj=file_obj, 
+    path = uploadFileToS3(destination=destination, file_obj=file_obj,
                           bucket=settings.JOBCARD_BUCKET, logger_msg="JobCard")
-    ucn_recovery_obj = aftersell_common.UCNRecovery(reason=reason, user=user_obj, sap_customer_id=customer_id, file_location=path)
+    ucn_recovery_obj = aftersell_common.UCNRecovery(reason=reason, user=user_obj, sap_customer_id=customer_id,
+                                                    file_location=path)
     ucn_recovery_obj.save()
     send_recovery_email_to_admin(ucn_recovery_obj)
 
@@ -167,7 +165,6 @@ def get_file_name(request, file_obj):
     ext = file_obj.name.split('.')[-1]
     customer_id = request.POST['customerId']
     return str(filename_prefix)+'_'+customer_id+'_'+filename_suffix+'.'+ext
-    
 def stringify_groups(user):
     groups = []
     for group in user.groups.all():
@@ -187,16 +184,13 @@ def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=None,
     '''
     The function uploads the file-object to S3 bucket.
     '''
-    
     connection = boto.connect_s3(awsid, awskey)
     s3_bucket = connection.get_bucket(bucket)
     s3_key = Key(s3_bucket)
     if file_mimetype:
         s3_key.content_type = file_mimetype
-        
     else:
         s3_key.content_type = mimetypes.guess_type(file_obj.name)[0]
-    
     s3_key.key = destination+file_obj.name
     s3_key.set_contents_from_string(file_obj.read())
     s3_key.set_acl('public-read')
@@ -205,7 +199,7 @@ def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=None,
     return path
 
 def get_email_template(key):
-    template_object = common.EmailTemplate.objects.get(template_key = key)
+    template_object = common.EmailTemplate.objects.get(template_key=key)
     return template_object
 
 
@@ -223,13 +217,13 @@ def get_dict_from_object(object):
         if isinstance(object[key], datetime):
             temp_dict[key] = object[key].astimezone(tz.tzutc()).strftime('%Y-%m-%dT%H:%M:%S')
         elif isinstance(object[key], FieldFile):
-            temp_dict[key] = None;
+            temp_dict[key] = None
         else:
             temp_dict[key] = object[key]
     return temp_dict
 
 def create_feed_data(post_data, product_data, temp_customer_id):
-    data ={}
+    data = {}
     data['sap_customer_id'] = temp_customer_id
     data['product_purchase_date'] = format_date_string(post_data['purchase-date'])
     data['customer_phone_number'] = mobile_format(post_data['customer-phone'])

@@ -23,7 +23,7 @@ DATABASES = {
 }
 
 
-BROKER_URL= 'redis://localhost:6379'
+BROKER_URL = 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
 
 
@@ -50,13 +50,13 @@ TEMPLATE_DIRS = (
 )
 
 SMS_CLIENT = "KAP"
-SMS_CLIENT_DETAIL={
-                   'login':'GladMinds1',
-                   'pass':'kap@user!23',
-                   'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
-                   'working_key': '1486415t035t8052c7pc',
-                   'sender_id': 'GLADMS'     
-                   }
+SMS_CLIENT_DETAIL = {
+                    'login':'GladMinds1',
+                    'pass':'kap@user!23',
+                    'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
+                    'working_key': '1486415t035t8052c7pc',
+                    'sender_id': 'GLADMS'
+                    }
 
 
 ########################SQS Queue Name
@@ -66,7 +66,7 @@ SQS_QUEUE_NAME = "gladminds-dev"
 FEED_TYPE = 'CSV'
 FEED_FAILURE_MAIL_ENABLED = True
 
-MAIL_DETAIL["subject"]= "GladMinds Feed Report DEV"
+MAIL_DETAIL["subject"] = "GladMinds Feed Report DEV"
 MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
 
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail DEV"

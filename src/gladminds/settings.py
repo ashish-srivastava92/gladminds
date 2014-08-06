@@ -9,6 +9,7 @@ PROJECT_DIR = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 BASE_DIR = os.path.join(PROJECT_DIR, os.pardir)
 STATIC_DIR = os.path.join(PROJECT_DIR, "static")
 TEMPLATE_DIR = os.path.join(PROJECT_DIR, "templates")
+EMAIL_DIR = os.path.join(TEMPLATE_DIR, "email")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
 
 ALLOWED_HOSTS = ['*']
@@ -99,7 +100,7 @@ DATABASES = {
         # Empty for localhost through domain sockets or '127.0.0.1' for
         # localhost through TCP.
         'HOST': '',
-        'PORT': '',                      # Set to empty string for default.
+        'PORT': '',  # Set to empty string for default.
     }
 }
 
@@ -170,28 +171,28 @@ SECRET_KEY = 'bbu7*-yvup0-*laxug+n5tf^lga_bwtrxu%y4ilb#$lv8%zw0m'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-# for performance enable cached templates 
-#      ('django.template.loaders.cached.Loader', (
-#         'django.template.loaders.filesystem.Loader',
-#         'django.template.loaders.app_directories.Loader',
-#     )),
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
+                    # for performance enable cached templates
+                    #      ('django.template.loaders.cached.Loader', (
+                    #         'django.template.loaders.filesystem.Loader',    
+                    #         'django.template.loaders.app_directories.Loader',
+                    #     )),
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                    #  'django.template.loaders.eggs.Loader',
+                   )
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    #'gladminds.middleware.GladmindsMiddleware'
+    # 'gladminds.middleware.GladmindsMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-)
+                     )
 
 CORS_ORIGIN_ALLOW_ALL = True
 ROOT_URLCONF = 'gladminds.urls'
@@ -324,11 +325,11 @@ FEED_FAILURE_MAIL_DETAIL = {
 }
 
 UCN_RECOVERY_MAIL_DETAIL = {
-    "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds@hashedin.com"],
-    "subject": "Gladminds UCN Recovery Mail",
-    "body": """""",
-} 
+                            "sender": "feed-report@gladminds.co",
+                            "receiver": ["gladminds@hashedin.com"],
+                            "subject": "Gladminds UCN Recovery Mail",
+                            "body": """""",
+                           } 
 
 OTP_MAIL = {
                   "sender":"support@gladminds.co",
@@ -341,6 +342,12 @@ FEDBACK_MAIL_DETAIL = {
                   "sender":"feed-report@gladminds.co",
                   "subject":"Feedback",
                   "receiver": ["gladminds@hashedin.com"],
+                  "body": """""",
+              }
+SERVICEDESK_FEEDBACK_MAIL_DETAIL = {
+                  "sender":"feed-report@gladminds.co",
+                  "subject":"Thank you for feedback",
+                  "receiver": [""],
                   "body": """""",
               }
 # AfterBuy File Upload location configuration
@@ -394,7 +401,7 @@ FEED_FAILURE_MAIL_ENABLED = True
 NEW_RELIC_FILE_LOCATION = './src/newrelic_qa.ini'
 ########################################################################
 #######################SMS_HEALTH_CHECK_INTERVAL
-SMS_HEALTH_CHECK_INTERVAL=6
+SMS_HEALTH_CHECK_INTERVAL = 6
 #######################FEED_HEALTH_CHECK_INTERVAL
-FEED_HEALTH_CHECK_INTERVAL=8
+FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
