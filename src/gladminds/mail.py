@@ -185,7 +185,18 @@ def send_servicedesk_feedback(feedback_details=None):
     send_template_email("servicedesk_feedback_inititator.html", context, 
                         "Exception feedback receiver email", mail_detail, 
                         receiver="srv.sngh@gmail.com")
-    
+
+def send_email_to_assignee(data):
+    context = Context({'type' : data.type,
+                       'reporter' : data.reporter,
+                       'message' : data.message,
+                       'created_date' : data.created_date,
+                       'assign_to' : data.assign_to}) 
+    mail_detail = settings.ASSIGNEE_FEEDBACK_MAIL_DETAIL
+    send_template_email("feedback_received_mail.html", context,
+                        "Exception feedback receiver email", mail_detail,
+                        receiver=data.assign_to.email)
+
 def send_template_email(template_name,context,exceptionstring, mail_detail,receiver=None): 
     '''generic function use for send mail for any html template'''
     try:
@@ -203,5 +214,3 @@ def send_template_email(template_name,context,exceptionstring, mail_detail,recei
         
     except Exception as ex:
         logger.info("["+ exceptionstring +"]: {0}".format(ex))   
-            
-              
