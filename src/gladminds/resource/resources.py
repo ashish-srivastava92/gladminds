@@ -28,7 +28,6 @@ from gladminds.utils import mobile_format, format_message, get_task_queue
 from gladminds.feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
 from gladminds.mail import send_feedback_received,send_servicedesk_feedback
-from gladminds import mail
 
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
