@@ -182,11 +182,12 @@ def send_feedback_received(data=None):
 def send_servicedesk_feedback(feedback_details=None):
     context = Context({'type': feedback_details.type})
     mail_detail = settings.SERVICEDESK_FEEDBACK_MAIL_DETAIL
-    send_template_email("servicedesk_feedback_inititator.html",context,"Exception feedback receiver email", mail_detail,receiver="srv.sngh@gmail.com")
+    send_template_email("servicedesk_feedback_inititator.html", context, 
+                        "Exception feedback receiver email", mail_detail, 
+                        receiver="srv.sngh@gmail.com")
     
-     
-        
 def send_template_email(template_name,context,exceptionstring, mail_detail,receiver=None): 
+    '''generic function use for send mail for any html template'''
     try:
         file_stream = open(settings.EMAIL_DIR+'/'+ template_name)
         feed_temp = file_stream.read()
@@ -199,7 +200,6 @@ def send_template_email(template_name,context,exceptionstring, mail_detail,recei
                    subject = mail_detail['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
         logger.info("Mail sent successfully")
-        print "yes"
         
     except Exception as ex:
         logger.info("["+ exceptionstring +"]: {0}".format(ex))   
