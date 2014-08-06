@@ -343,6 +343,12 @@ FEDBACK_MAIL_DETAIL = {
                   "receiver": ["gladminds@hashedin.com"],
                   "body": """""",
               }
+SERVICEDESK_FEEDBACK_MAIL_DETAIL = {
+                  "sender":"feed-report@gladminds.co",
+                  "subject":"Thank you for feedback",
+                  "receiver": [""],
+                  "body": """""",
+              }
 # AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
 AFTERBUY_USER_LOC = os.path.join(AFTERBUY_LOC, "users")

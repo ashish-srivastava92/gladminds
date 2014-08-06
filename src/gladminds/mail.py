@@ -181,22 +181,25 @@ def send_feedback_received(data=None):
         
 def send_servicedesk_feedback(feedback_details=None):
     context = Context({'type': feedback_details.type})
-    send_template_email("servicedesk_feedback.html",context,"Exception feedback receiver email")
+    mail_detail = settings.SERVICEDESK_FEEDBACK_MAIL_DETAIL
+    send_template_email("servicedesk_feedback.html",context,"Exception feedback receiver email", mail_detail,receiver="srv.sngh@gmail.com")
     
      
         
-def send_template_email(template_name,context,exceptionstring): 
+def send_template_email(template_name,context,exceptionstring, mail_detail,receiver=None): 
     try:
         file_stream = open(settings.TEMPLATE_DIR+'/'+ template_name)
         feed_temp = file_stream.read()
         template = Template(feed_temp)
         body = template.render(context)
-        mail_detail = settings.FEDBACK_MAIL_DETAIL
         #TODO We have to remove hard code receiver
-        send_email(sender = mail_detail['sender'], receiver = "srv.sngh@gmail.com", 
-                   subject ="Thank you for feedback", body = body, 
+        if receiver is None:
+            receiver = mail_detail['receiver']
+        send_email(sender = mail_detail['sender'], receiver = receiver, 
+                   subject = mail_detail['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
         logger.info("Mail sent successfully")
+        
     except Exception as ex:
         logger.info("["+ exceptionstring +"]: {0}".format(ex))   
             
