@@ -54,6 +54,7 @@ TEMPLATE_DIRS = (
 #                      'OTP_TWILIO_FROM' : '+1 469-513-9856',
 #                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/Messages.json'
 #                 }
+FILE_CACHE_DURATION = 0
 
 SMS_CLIENT = "AIRTEL"
 SMS_CLIENT_DETAIL={
