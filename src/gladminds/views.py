@@ -1,6 +1,7 @@
 import logging
 import json
 import random
+import datetime
 
 from django.shortcuts import render_to_response, render
 from django.template import RequestContext
@@ -199,7 +200,7 @@ def exceptions(request, exception=None):
     else:
         return HttpResponseBadRequest()
     
-UPDATE_FAIL = 'Phone number already registered!'
+UPDATE_FAIL = 'Some error occurred, try again later.'
 UPDATE_SUCCESS = 'Customer has been registered with ID: '
 def register_customer(request, group=None):
     post_data = request.POST
@@ -207,6 +208,16 @@ def register_customer(request, group=None):
     product_obj = common.ProductData.objects.filter(vin=post_data['customer-vin'])
     temp_customer_id = TEMP_ID_PREFIX + str(random.randint(10**5, 10**6))
     data_source.append(utils.create_feed_data(post_data, product_obj[0], temp_customer_id))
+    
+    check_with_invoice_date = utils.subtract_dates(data_source[0]['product_purchase_date'], product_obj[0].invoice_date)    
+    check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.datetime.now())
+    
+    if check_with_invoice_date.days < 0 or check_with_today_date.days > 0:
+        message = "Product purchase date should be between {0} and {1}".\
+                format((product_obj[0].invoice_date).strftime("%d-%m-%Y"),(datetime.datetime.now()).strftime("%d-%m-%Y"))
+        logger.info('{0} Entered date is: {1}'.format(message, str(data_source[0]['product_purchase_date'])))
+        return json.dumps({"message": message})
+         
     try:
         customer_obj = common.CustomerTempRegistration(product_data=product_obj[0], 
                                                        new_customer_name = data_source[0]['customer_name'],

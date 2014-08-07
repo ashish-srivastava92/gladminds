@@ -541,204 +541,23 @@ class ASCFeed(BaseFeed):
 class CustomerRegistationFeedToSAP(BaseFeed):
 
     def export_data(self, start_date=None, end_date=None):
-#        results = common.CustomerTempRegistration.objects.filter(sent_to_sap=False).select_related('product_data')
-        results = [{
-                    "CHASSIS": "MD2A11CZ0ECK08915",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432474",
-                    "ENGINE" : "DHZCEK89665",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999999",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10017",
-                    "KUNNR": "10491",
-                    "CUSTOMER_ID" : "T432475",
-                    "ENGINE" : "DHZCEK90632",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "RAHUL KUMAR",
-                    "CUST_MOBILE": "+919886032650",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10020",
-                    "KUNNR": "10745",
-                    "CUSTOMER_ID" : "T432476",
-                    "ENGINE" : "DHZCEK91061",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT KUMAR",
-                    "CUST_MOBILE": "+910000000000",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10129",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432477",
-                    "ENGINE" : "DHZCEK91165",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999990",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10230",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432478",
-                    "ENGINE" : "DHZCEK91251",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999991",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10308",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432479",
-                    "ENGINE" : "DHZCEK91327",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999992",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10387",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432480",
-                    "ENGINE" : "DHZCEK91440",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999993",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10423",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432481",
-                    "ENGINE" : "DHZCEK91477",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999994",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10664",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432482",
-                    "ENGINE" : "DHZCEK91575",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999995",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10731",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432483",
-                    "ENGINE" : "DHZCEK91715",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999996",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10888",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432484",
-                    "ENGINE" : "DHZCEK91847",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999997",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10891",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432485",
-                    "ENGINE" : "DHZCEK91852",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999998",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10938",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432486",
-                    "ENGINE" : "DHZCEK91909",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999909",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10955",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432487",
-                    "ENGINE" : "DHZCEK91930",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999919",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10969",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432488",
-                    "ENGINE" : "DHZCEK91943",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999929",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10972",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432489",
-                    "ENGINE" : "DHZCEK91944",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999939",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK10986",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432490",
-                    "ENGINE" : "DHZCEK91958",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999949",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK11006",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432491",
-                    "ENGINE" : "DHZCEK91982",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999959",
-                    
-                },
-                {
-                    "CHASSIS": "MD2A11CZ0ECK11023",
-                    "KUNNR": "10222",
-                    "CUSTOMER_ID" : "T432492",
-                    "ENGINE" : "DHZCEK92073",
-                    "VEH_SL_DT": "2014-07-20",
-                    "CUSTOMER_NAME": "BHARAT LALWANI",
-                    "CUST_MOBILE": "+919999999969",
-                    
-                }]
+        results = common.CustomerTempRegistration.objects.filter(sent_to_sap=False).select_related('product_data')
         items = []
         total_failed = 0
         item_batch = {
             'TIME_STAMP': datetime.now().strftime("%Y%m%d%H%M%S")}
         for redeem in results:
             try:
-                item = redeem
+                item = {
+                    "CHASSIS": redeem.product_data.vin,
+                    "KUNNR": redeem.product_data.dealer_id.dealer_id,
+                    "CUSTOMER_ID" : redeem.temp_customer_id,
+                    "ENGINE" : redeem.product_data.engine,
+                    "VEH_SL_DT": redeem.product_purchase_date.date().strftime("%Y-%m-%d"),
+                    "CUSTOMER_NAME": redeem.new_customer_name,
+                    "CUST_MOBILE": redeem.new_number,
+                    
+                }
                 items.append(item)
             except Exception as ex:
                 logger.error("error on customer info from db %s" % str(ex))
