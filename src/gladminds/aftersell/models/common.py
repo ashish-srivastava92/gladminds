@@ -140,7 +140,7 @@ class Feedback(models.Model):
     modified_date = models.DateTimeField(null=True, blank= True)
     
     class Meta:
-        app_label = "gladminds"
-        verbose_name_plural = "gladminds feedback info"
+        app_label = "aftersell"
+        verbose_name_plural = "aftersell feedback info"
 post_save.connect(send_sms,sender=Feedback)       
         

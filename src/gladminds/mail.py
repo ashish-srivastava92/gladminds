@@ -211,6 +211,6 @@ def send_template_email(template_name,context,exceptionstring, mail_detail,recei
                    subject = mail_detail['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
         logger.info("Mail sent successfully")
-        
+
     except Exception as ex:
         logger.info("["+ exceptionstring +"]: {0}".format(ex))   

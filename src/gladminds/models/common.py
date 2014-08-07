@@ -147,8 +147,8 @@ class GladMindUsers(models.Model):
     def __unicode__(self):
         return self.phone_number
 
-#     def save(self, force_insert=False, force_update=False, using=None):
-#         return super(GladMindUsers, self).save(force_insert, force_update, using)
+    def save(self, force_insert=False, force_update=False, using=None):
+        return super(GladMindUsers, self).save(force_insert, force_update, using)
 
 '''
 CustomerData contains info about
