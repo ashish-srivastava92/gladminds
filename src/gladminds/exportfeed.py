@@ -2,6 +2,7 @@ from suds.client import Client
 from suds.transport.http import HttpAuthenticated
 from gladminds.audit import feed_log
 from gladminds.models import common
+from django.conf import settings
 import logging
 logger = logging.getLogger("gladminds")
 
@@ -22,7 +23,9 @@ class BaseExportFeed(object):
     def get_client(self):
         transport = HttpAuthenticated(\
             username=self.username, password=self.password)
-        return Client(url=self.wsdl_url, transport=transport)
+        client = Client(url=self.wsdl_url, transport=transport)
+        client.setduration(seconds=settings.FILE_CACHE_DURATION)
+        return client
 
 
 class ExportCouponRedeemFeed(BaseExportFeed):
