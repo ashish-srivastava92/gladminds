@@ -24,7 +24,8 @@ class BaseExportFeed(object):
         transport = HttpAuthenticated(\
             username=self.username, password=self.password)
         client = Client(url=self.wsdl_url, transport=transport)
-        client.setduration(seconds=settings.FILE_CACHE_DURATION)
+        cache = client.options.cache
+        cache.setduration(seconds=settings.FILE_CACHE_DURATION)
         return client
 
 
@@ -71,6 +72,7 @@ class ExportASCRegistrationFeed(BaseExportFeed):
 class ExportCustomerRegistrationFeed(BaseExportFeed):
 
     def export(self, items=None, item_batch=None, total_failed_on_feed=0):
+        export_status = False
         logger.info(
             "Export {2}: Items:{0} and Item_batch: {1}"\
             .format(items, item_batch, self.feed_type))
