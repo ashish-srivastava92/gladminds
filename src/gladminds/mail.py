@@ -180,28 +180,30 @@ def send_feedback_received(data=None):
         logger.info("[Exception ucn request email]: {0}".format(ex))
         
 def send_servicedesk_feedback(feedback_details=None):
-    context = Context({'type': feedback_details.type})
-    mail_detail = settings.SERVICEDESK_FEEDBACK_MAIL_DETAIL
-    send_template_email("servicedesk_feedback_inititator.html", context, 
-                        "Exception feedback receiver email", mail_detail, 
-                        receiver="srv.sngh@gmail.com")
+    try:
+        context = Context({'type': feedback_details.type})
+        mail_detail = settings.SERVICEDESK_FEEDBACK_MAIL_DETAIL
+        send_template_email("servicedesk_feedback_inititator.html", context, 
+                            "Exception feedback receiver email", mail_detail, 
+                            receiver="srv.sngh@gmail.com")
+    except Exception as ex:
+        logger.info("[Exception feedback receiver email]  {0}".format(ex))
     
 def send_template_email(template_name,context,exceptionstring, mail_detail,receiver=None): 
     '''generic function use for send mail for any html template'''
-    try:
-        file_stream = open(settings.EMAIL_DIR+'/'+ template_name)
-        feed_temp = file_stream.read()
-        template = Template(feed_temp)
-        body = template.render(context)
-        #TODO We have to remove hard code receiver
-        if receiver is None:
-            receiver = mail_detail['receiver']
-        send_email(sender = mail_detail['sender'], receiver = receiver, 
-                   subject = mail_detail['subject'], body = body, 
-                   smtp_server = settings.MAIL_SERVER)
-        logger.info("Mail sent successfully")
-        
-    except Exception as ex:
-        logger.info("["+ exceptionstring +"]: {0}".format(ex))   
+    
+    file_stream = open(settings.EMAIL_DIR+'/'+ template_name)
+    feed_temp = file_stream.read()
+    template = Template(feed_temp)
+    body = template.render(context)
+    #TODO We have to remove hard code receiver
+    if receiver is None:
+        receiver = mail_detail['receiver']
+    
+    send_email(sender = mail_detail['sender'], receiver = receiver, 
+               subject = mail_detail['subject'], body = body, 
+               smtp_server = settings.MAIL_SERVER)
+    logger.info("Mail sent successfully")
+       
             
               
