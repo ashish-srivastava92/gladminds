@@ -229,6 +229,7 @@ class CouponData(models.Model):
     schedule_reminder_date = models.DateTimeField(null=True, blank=True)
     order = models.PositiveIntegerField(default=0)
     extended_date = models.DateTimeField(null=True, blank=True)
+    servicing_dealer = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
 
     class Meta:
         app_label = "gladminds"
@@ -244,6 +245,7 @@ class CouponData(models.Model):
 class ServiceAdvisorCouponRelationship(models.Model):
     unique_service_coupon = models.ForeignKey(CouponData, null=False)
     service_advisor_phone = models.ForeignKey('aftersell.ServiceAdvisor', null=False)
+    dealer_id = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
 
     class Meta:
         app_label = 'gladminds'

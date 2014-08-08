@@ -432,7 +432,7 @@ class CouponRedeemFeedToSAP(BaseFeed):
                 item = {
                         "CHASSIS": redeem.vin.vin,
                         "GCP_KMS": redeem.actual_kms,
-                        "GCP_KUNNR": redeem.vin.dealer_id.dealer_id,
+                        "GCP_KUNNR": redeem.servicing_dealer.dealer_id,
                         "GCP_UCN_NO": redeem.unique_service_coupon,
                         "PRODUCT_TYPE": redeem.vin.product_type.product_type,
                         "SERVICE_TYPE": str(redeem.service_type),
