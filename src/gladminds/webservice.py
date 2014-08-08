@@ -338,7 +338,8 @@ class ProductPurchaseService(ServiceBase):
                     'state': product.STATE,
                     'pin_no': product.PIN_NO,
                     'product_purchase_date': product.VEH_SL_DT,
-                    'engine': product.ENGINE
+                    'engine': product.ENGINE,
+                    'veh_reg_no': product.VEH_REG_NO
                 })
             except Exception as ex:
                 ex = "ProductPurchaseService: {0}  Error on Validating "\

@@ -383,6 +383,7 @@ class ProductPurchaseFeed(BaseFeed):
                     user=self.registerNewUser('customer', username=gladmind_customer_id)
                     customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, phone_number=product[
                                                          'customer_phone_number'], registration_date=datetime.now(), customer_name=product['customer_name'])
+                    customer_data.pincode =  product['pin_no']
                     customer_data.save()
 
                 if not product_data.sap_customer_id  or product_data.sap_customer_id.find('T') == 0:
@@ -391,6 +392,7 @@ class ProductPurchaseFeed(BaseFeed):
                     product_data.customer_phone_number = customer_data
                     product_data.product_purchase_date = product_purchase_date
                     product_data.engine = product["engine"]
+                    product_data.veh_reg_no =  product['veh_reg_no']
                     product_data.save()
             except Exception as ex:
 
