@@ -382,8 +382,9 @@ class ProductPurchaseFeed(BaseFeed):
                     gladmind_customer_id = utils.generate_unique_customer_id()
                     user=self.registerNewUser('customer', username=gladmind_customer_id)
                     customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, phone_number=product[
-                                                         'customer_phone_number'], registration_date=datetime.now(), customer_name=product['customer_name'])
-                    customer_data.pincode =  product['pin_no']
+                                                         'customer_phone_number'], registration_date=datetime.now(),
+                                                         customer_name=product['customer_name'], pincode=product['pin_no'],
+                                                         state=product['state'], address=product['city'])
                     customer_data.save()
 
                 if not product_data.sap_customer_id  or product_data.sap_customer_id.find('T') == 0:
