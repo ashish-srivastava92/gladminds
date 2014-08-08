@@ -92,6 +92,7 @@ SAP_CRM_DETAIL = {
 COUPON_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl&v0"
 ASC_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/asc-feed/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/customer-feed/?wsdl&v0"
+CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
 
 ENABLE_AMAZON_SQS = True
 
