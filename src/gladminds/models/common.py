@@ -314,6 +314,9 @@ class CustomerTempRegistration(models.Model):
     product_purchase_date = models.DateTimeField(null=True, blank=True)
     temp_customer_id = models.CharField(max_length=50, null=False, blank=False, unique=True)
     sent_to_sap = models.BooleanField(default=False)
+    remarks = models.CharField(max_length=500, null=True, blank=True)
+    tagged_sap_id = models.CharField(
+        max_length=215, null=True, blank=True, unique=True)
 
     class Meta:
         app_label = "gladminds"

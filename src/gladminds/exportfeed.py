@@ -2,6 +2,7 @@ from suds.client import Client
 from suds.transport.http import HttpAuthenticated
 from gladminds.audit import feed_log
 from gladminds.models import common
+from django.conf import settings
 import logging
 logger = logging.getLogger("gladminds")
 
@@ -22,7 +23,10 @@ class BaseExportFeed(object):
     def get_client(self):
         transport = HttpAuthenticated(\
             username=self.username, password=self.password)
-        return Client(url=self.wsdl_url, transport=transport)
+        client = Client(url=self.wsdl_url, transport=transport)
+        cache = client.options.cache
+        cache.setduration(seconds=settings.FILE_CACHE_DURATION)
+        return client
 
 
 class ExportCouponRedeemFeed(BaseExportFeed):
@@ -68,6 +72,7 @@ class ExportASCRegistrationFeed(BaseExportFeed):
 class ExportCustomerRegistrationFeed(BaseExportFeed):
 
     def export(self, items=None, item_batch=None, total_failed_on_feed=0):
+        export_status = False
         logger.info(
             "Export {2}: Items:{0} and Item_batch: {1}"\
             .format(items, item_batch, self.feed_type))
@@ -80,10 +85,19 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
                 result = client.service.SI_GCPCstID_sync(
                     item_custveh=[{"item": item}], item=item_batch)
                 logger.info("Response from SAP: {0}".format(result))
-                if result[0]['item'][0]['STATUS'] == 'SUCCESS':
-                    common.CustomerTempRegistration.objects.filter(temp_customer_id=item['CUSTOMER_ID']).update(sent_to_sap=True)
-                    export_status = True
-                    logger.info("Sent the details of customer ID {0} to sap".format(item['CUSTOMER_ID']))
+                if result[0][0]['item'][0]['STATUS'] == 'SUCCESS':
+                    try:
+                        temp_customer_object = common.CustomerTempRegistration.objects.get(temp_customer_id=item['CUSTOMER_ID'])
+                        temp_customer_object.sent_to_sap = True
+                        if result[2]:
+                            temp_customer_object.remarks = result[2][0]['item'][0]['REMARKS']
+                        else: 
+                            temp_customer_object.tagged_sap_id = result[1][0]['item'][0]['PARTNER']
+                        temp_customer_object.save()
+                        export_status = True
+                        logger.info("Sent the details of customer ID {0} to sap".format(item['CUSTOMER_ID']))
+                    except Exception as ex:
+                        logger.error("Customer with id {0} does not exist".format(item['CUSTOMER_ID']))
                 else:
                     total_failed = total_failed + 1
                     export_status = False

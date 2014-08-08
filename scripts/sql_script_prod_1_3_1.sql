@@ -44,3 +44,6 @@ drop table gladminds_serviceadvisor;
 ########################################
 alter table gladminds_coupondata add servicing_dealer_id integer, add constraint foreign key (servicing_dealer_id) references aftersell_registereddealer(id);
 alter table gladminds_serviceadvisorcouponrelationship add dealer_id_id integer, add constraint foreign key (dealer_id_id) references aftersell_registereddealer(id);
+
+alter table gladminds_customertempregistration add remarks VARCHAR(500) null;
+alter table gladminds_customertempregistration add tagged_sap_id VARCHAR(215) null;
