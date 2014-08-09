@@ -429,10 +429,15 @@ class CouponRedeemFeedToSAP(BaseFeed):
             'TIMESTAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
         for redeem in results:
             try:
+                #added the condition only for the previous coupons with no servicing dealer details
+                if redeem.servicing_dealer:
+                    servicing_dealer = redeem.servicing_dealer.dealer_id
+                else:
+                    servicing_dealer = redeem.vin.dealer_id.dealer_id
                 item = {
                         "CHASSIS": redeem.vin.vin,
                         "GCP_KMS": redeem.actual_kms,
-                        "GCP_KUNNR": redeem.servicing_dealer.dealer_id,
+                        "GCP_KUNNR": servicing_dealer,
                         "GCP_UCN_NO": redeem.unique_service_coupon,
                         "PRODUCT_TYPE": redeem.vin.product_type.product_type,
                         "SERVICE_TYPE": str(redeem.service_type),
