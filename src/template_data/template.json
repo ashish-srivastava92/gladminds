@@ -237,6 +237,23 @@
       "template": "Dear {customer_name}, Your Permanent customer ID is {sap_customer_id} for your Bajaj Bike. Please refer this ID during servicing of your Bike",
       "description": "Send new sap ID to Customer"
     }
-  } 
-  
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 27,
+    "fields": {
+      "template_key": "UNAUTHORISED_SA",
+      "template": "Sorry, you are not authorised to initiate this activity",
+      "description": "Send message to unauthorised SA"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 28,
+    "fields": {
+      "template_key": "COUPON_ALREADY_CLOSED",
+      "template": "The FSC is already tagged in the system",
+      "description": "Send coupon is closed message to an initiator if it has been closed by some other sa"
+    }
+  }  
 ]

@@ -382,7 +382,9 @@ class ProductPurchaseFeed(BaseFeed):
                     gladmind_customer_id = utils.generate_unique_customer_id()
                     user=self.registerNewUser('customer', username=gladmind_customer_id)
                     customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, phone_number=product[
-                                                         'customer_phone_number'], registration_date=datetime.now(), customer_name=product['customer_name'])
+                                                         'customer_phone_number'], registration_date=datetime.now(),
+                                                         customer_name=product['customer_name'], pincode=product['pin_no'],
+                                                         state=product['state'], address=product['city'])
                     customer_data.save()
 
                 if not product_data.sap_customer_id  or product_data.sap_customer_id.find('T') == 0:
@@ -391,6 +393,7 @@ class ProductPurchaseFeed(BaseFeed):
                     product_data.customer_phone_number = customer_data
                     product_data.product_purchase_date = product_purchase_date
                     product_data.engine = product["engine"]
+                    product_data.veh_reg_no =  product['veh_reg_no']
                     product_data.save()
             except Exception as ex:
 
@@ -429,10 +432,15 @@ class CouponRedeemFeedToSAP(BaseFeed):
             'TIMESTAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
         for redeem in results:
             try:
+                #added the condition only for the previous coupons with no servicing dealer details
+                if redeem.servicing_dealer:
+                    servicing_dealer = redeem.servicing_dealer.dealer_id
+                else:
+                    servicing_dealer = redeem.vin.dealer_id.dealer_id
                 item = {
                         "CHASSIS": redeem.vin.vin,
                         "GCP_KMS": redeem.actual_kms,
-                        "GCP_KUNNR": redeem.vin.dealer_id.dealer_id,
+                        "GCP_KUNNR": servicing_dealer,
                         "GCP_UCN_NO": redeem.unique_service_coupon,
                         "PRODUCT_TYPE": redeem.vin.product_type.product_type,
                         "SERVICE_TYPE": str(redeem.service_type),

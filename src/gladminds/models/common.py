@@ -150,6 +150,7 @@ class GladMindUsers(models.Model):
     img_url = models.FileField(upload_to="users", blank=True)
     thumb_url = models.FileField(upload_to="users", blank=True)
     isActive = models.BooleanField(default=True)
+    pincode = models.CharField(max_length=15, null=True, blank=True)
 
     class Meta:
         app_label = "gladminds"
@@ -198,6 +199,7 @@ class ProductData(models.Model):
     created_on = models.DateTimeField(null=True, default=datetime.now())
     isActive = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
+    veh_reg_no = models.CharField(max_length=15, null=True, blank=True)
 
     class Meta:
         app_label = "gladminds"
@@ -229,6 +231,7 @@ class CouponData(models.Model):
     schedule_reminder_date = models.DateTimeField(null=True, blank=True)
     order = models.PositiveIntegerField(default=0)
     extended_date = models.DateTimeField(null=True, blank=True)
+    servicing_dealer = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
 
     class Meta:
         app_label = "gladminds"
@@ -244,6 +247,7 @@ class CouponData(models.Model):
 class ServiceAdvisorCouponRelationship(models.Model):
     unique_service_coupon = models.ForeignKey(CouponData, null=False)
     service_advisor_phone = models.ForeignKey('aftersell.ServiceAdvisor', null=False)
+    dealer_id = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
 
     class Meta:
         app_label = 'gladminds'

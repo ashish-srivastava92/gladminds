@@ -223,7 +223,9 @@ def create_feed_data(post_data, product_data, temp_customer_id):
     data['customer_phone_number'] = mobile_format(post_data['customer-phone'])
     data['customer_name'] = post_data['customer-name']
     data['engine'] = product_data.engine
+    data['veh_reg_no'] = product_data.veh_reg_no
     data['vin'] = product_data.vin
+    data['pin_no'] = data['state'] = data['city'] = None
     return data
 
 def subtract_dates(start_date, end_date):    
