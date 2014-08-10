@@ -1,31 +1,22 @@
-from django.shortcuts import render_to_response, render
-from django.template import RequestContext
-from django.http.response import HttpResponseRedirect, HttpResponse,\
-    HttpResponseBadRequest
-from gladminds.models import common
-from gladminds.sqs_tasks import send_otp
-from django.contrib.auth.decorators import login_required
-from gladminds import utils, message_template
-from django.conf import settings
-from gladminds.utils import get_task_queue, get_customer_info,\
-    get_sa_list, recover_coupon_info, mobile_format, format_date_string, stringify_groups
-from gladminds.sqs_tasks import export_asc_registeration_to_sap
-from gladminds.utils import get_task_queue
-
-
-
-from gladminds.mail import sent_otp_email
-from django.contrib.auth.models import Group, User
-from gladminds.utils import get_task_queue
-from django.contrib.auth import authenticate, login, logout
-import logging
 import json
-from gladminds.aftersell.models import common as afterbuy_common
-
-from django.contrib.auth.models import Group, User
-from gladminds.utils import get_task_queue
+import logging
+import os
+from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
+from django.http.response import HttpResponseRedirect, HttpResponse, \
+    HttpResponseBadRequest
+from django.shortcuts import render_to_response, render
+from gladminds import utils, message_template
+from gladminds.aftersell.models import common as afterbuy_common
+from gladminds.mail import sent_otp_email
+from gladminds.models import common
 from gladminds.scheduler import SqsTaskQueue
+from gladminds.sqs_tasks import export_asc_registeration_to_sap, send_otp
+from gladminds.utils import get_task_queue, \
+    get_customer_info, get_sa_list, recover_coupon_info, \
+    mobile_format, format_date_string, stringify_groups
 
 
 logger = logging.getLogger('gladminds')
@@ -295,3 +286,18 @@ def trigger_sqs_tasks(request):
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
     taskqueue.add(sqs_tasks[request.POST['task']])
     return HttpResponse()
+
+def app_version_info():
+    file_path = os.path.join(settings.BASE_DIR, 'src/buildinfo.json')
+    app_version_data = open(file_path, 'r').read()
+    return json.loads(app_version_data)
+    
+
+def render_version_info(request):
+    from django import template
+    html_template = open(settings.TEMPLATE_DIR + '/version.html')
+    
+    t = template.Template(html_template.read())
+    c = template.Context(app_version_info())
+    
+    return HttpResponse(t.render(c))
