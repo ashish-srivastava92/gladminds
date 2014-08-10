@@ -281,11 +281,24 @@ class CouponAdmin(ModelAdmin):
         if css_class:
             return {'class': css_class}
     
+    def changelist_view(self, request, extra_context=None):
+        extra_context = {'custom_search': True, 'custom_search_fields':[
+                                                '^unique_service_coupon', '^vin__vin', 'status']}
+        return super(CouponAdmin, self).changelist_view(request, extra_context=extra_context)
+     
     def queryset(self, request):
         """
         Returns a QuerySet of all model instances that can be edited by the
         admin site. This is used by changelist_view.
         """
+        
+        if request.GET and request.path == "/gladminds/coupondata/":
+            self.search_fields = ()
+            request.GET = request.GET.copy()
+            request.GET.pop("custom_search", None)
+            request.GET.pop("val", None)
+            request.path = "/gladminds/coupondata/"
+        
         qs = self.model._default_manager.get_query_set()
         '''
             This if condition only for landing page
