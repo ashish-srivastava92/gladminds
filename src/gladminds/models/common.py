@@ -1,31 +1,13 @@
+from datetime import datetime
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
-from datetime import datetime
 from django.db.models.signals import post_save
 ##################BRAND-PRPDUCT MODELS#######################
 '''
 BrandData contains brand related information
 '''
-FEEDBACK_STATUS = (
-        ('Open', 'Open'),
-        ('Closed', 'Closed'),
-        ('Resolved', 'Resolved'),
-        ('Progress', 'Progress'),
-    )
-PRIORITY = (
-        ('Low', 'Low'),
-        ('High', 'High'),
-        ('Medium', 'Medium'),
-        ('Urgent', 'Urgent'),
-    )
-FEEDBACK_TYPE = (
-        ('Problem', 'Problem'),
-        ('Question', 'Question'),
-        ('Feature', 'Feature'),
-        ('Request', 'Request'),
-        ('Suggestion', 'Suggestion'),
-    )
+
 
 class UploadProductCSV(models.Model):
     file_location = settings.PROJECT_DIR + '/data/'

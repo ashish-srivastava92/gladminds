@@ -215,8 +215,8 @@ def servicedesk(request, servicedesk=None):
             #It is acceptable if there is no data_mapping defined for a function
             pass
         return render(request, template, {'active_menu' : servicedesk, "data" : data, 'groups': groups,
-                     "types": get_list_from_set(common.FEEDBACK_TYPE),
-                     "priorities": get_list_from_set(common.PRIORITY)})
+                     "types": get_list_from_set(aftersell_common.FEEDBACK_TYPE),
+                     "priorities": get_list_from_set(aftersell_common.PRIORITY)})
     elif request.method == 'POST':
         function_mapping = {
             'helpdesk' : save_help_desk_data

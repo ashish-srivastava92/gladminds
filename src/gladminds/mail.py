@@ -5,6 +5,7 @@ import smtplib
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 import logging
+from django.forms.models import model_to_dict
 
 logger = logging.getLogger("gladminds")
 
@@ -192,11 +193,7 @@ def send_servicedesk_feedback(feedback_details=None):
 
 def send_email_to_assignee(data):
     try:
-        context = Context({'type' : data.type,
-                           'reporter' : data.reporter,
-                           'message' : data.message,
-                           'created_date' : data.created_date,
-                           'assign_to' : data.assign_to}) 
+        context = Context(model_to_dict(data,['type','reporter','message','created_date','assign_to'])) 
         mail_detail = settings.ASSIGNEE_FEEDBACK_MAIL_DETAIL
         send_template_email("feedback_received_mail.html", context,
                              mail_detail,

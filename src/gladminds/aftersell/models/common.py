@@ -4,32 +4,11 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from gladminds.signals import send_sms
+from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE
 
 ##########################################################################
 ########################## ASC Save Form #########################
 ASC_STATUS_CHOICES = ((1, 'In Progress'), (2, 'Failed'))
-
-
-FEEDBACK_STATUS = (
-        ('Open', 'Open'),
-        ('Closed', 'Closed'),
-        ('Resolved', 'Resolved'),
-        ('Progress', 'Progress'),
-    )
-PRIORITY = (
-        ('Low', 'Low'),
-        ('High', 'High'),
-        ('Medium', 'Medium'),
-        ('Urgent', 'Urgent'),
-    )
-FEEDBACK_TYPE = (
-        ('Problem', 'Problem'),
-        ('Question', 'Question'),
-        ('Feature', 'Feature'),
-        ('Request', 'Request'),
-        ('Suggestion', 'Suggestion'),
-    )
-
 
 class ASCSaveForm(models.Model):
     name = models.CharField(max_length=255, null=False)
