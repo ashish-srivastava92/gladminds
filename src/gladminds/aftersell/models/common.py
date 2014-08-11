@@ -115,8 +115,8 @@ class Feedback(models.Model):
     priority = models.CharField(max_length=12, choices=PRIORITY)
     type = models.CharField(max_length=12, choices=FEEDBACK_TYPE)
     subject = models.CharField(max_length=512, null=True, blank=True)
-    created_date = models.DateTimeField(null=True, blank= False)
-    modified_date = models.DateTimeField(null=True, blank= True)
+    created_date = models.DateTimeField(null=True, blank= False,auto_now=True)
+    modified_date = models.DateTimeField(null=True, blank= True,auto_now=True)
     
     class Meta:
         app_label = "aftersell"
