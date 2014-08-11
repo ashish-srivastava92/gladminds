@@ -286,7 +286,7 @@ def export_close_coupon_data(*args, **kwargs):
 def export_coupon_redeem_to_sap(*args, **kwargs):
 #     today = datetime.now().date()
     today = datetime.now()
-    start_date = today - timedelta(days=2)
+    start_date = today - timedelta(days=1)
     end_date = today
     redeem_obj = feed.CouponRedeemFeedToSAP()
     feed_export_data = redeem_obj.export_data(
