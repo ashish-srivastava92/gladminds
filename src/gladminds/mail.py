@@ -180,37 +180,41 @@ def send_feedback_received(data=None):
         logger.info("[Exception ucn request email]: {0}".format(ex))
         
 def send_servicedesk_feedback(feedback_details=None):
-    context = Context({'type': feedback_details.type})
-    mail_detail = settings.SERVICEDESK_FEEDBACK_MAIL_DETAIL
-    send_template_email("servicedesk_feedback_inititator.html", context, 
-                        "Exception feedback receiver email", mail_detail, 
-                        receiver="srv.sngh@gmail.com")
+
+    try:
+        context = Context({'type': feedback_details.type})
+        mail_detail = settings.SERVICEDESK_FEEDBACK_MAIL_DETAIL
+        send_template_email("servicedesk_feedback_inititator.html", context, 
+                            mail_detail, 
+                            receiver="srv.sngh@gmail.com")
+    except Exception as ex:
+        logger.info("[Exception feedback receiver email]  {0}".format(ex))
 
 def send_email_to_assignee(data):
-    context = Context({'type' : data.type,
-                       'reporter' : data.reporter,
-                       'message' : data.message,
-                       'created_date' : data.created_date,
-                       'assign_to' : data.assign_to}) 
-    mail_detail = settings.ASSIGNEE_FEEDBACK_MAIL_DETAIL
-    send_template_email("feedback_received_mail.html", context,
-                        "Exception feedback receiver email", mail_detail,
-                        receiver=data.assign_to.email)
-
-def send_template_email(template_name,context,exceptionstring, mail_detail,receiver=None): 
-    '''generic function use for send mail for any html template'''
     try:
-        file_stream = open(settings.EMAIL_DIR+'/'+ template_name)
-        feed_temp = file_stream.read()
-        template = Template(feed_temp)
-        body = template.render(context)
-        #TODO We have to remove hard code receiver
-        if receiver is None:
-            receiver = mail_detail['receiver']
-        send_email(sender = mail_detail['sender'], receiver = receiver, 
-                   subject = mail_detail['subject'], body = body, 
-                   smtp_server = settings.MAIL_SERVER)
-        logger.info("Mail sent successfully")
-
+        context = Context({'type' : data.type,
+                           'reporter' : data.reporter,
+                           'message' : data.message,
+                           'created_date' : data.created_date,
+                           'assign_to' : data.assign_to}) 
+        mail_detail = settings.ASSIGNEE_FEEDBACK_MAIL_DETAIL
+        send_template_email("feedback_received_mail.html", context,
+                             mail_detail,
+                            receiver=data.assign_to.email)
     except Exception as ex:
-        logger.info("["+ exceptionstring +"]: {0}".format(ex))   
+        logger.info("[Exception feedback receiver email]  {0}".format(ex))   
+    
+def send_template_email(template_name, context, mail_detail,receiver=None): 
+    '''generic function use for send mail for any html template'''
+    file_stream = open(settings.EMAIL_DIR+'/'+ template_name)
+    feed_temp = file_stream.read()
+    template = Template(feed_temp)
+    body = template.render(context)
+    if receiver is None:
+        receiver = mail_detail['receiver']
+    
+    send_email(sender = mail_detail['sender'], receiver = receiver, 
+               subject = mail_detail['subject'], body = body, 
+               smtp_server = settings.MAIL_SERVER)
+    logger.info("Mail sent successfully")
+    #TODO We have to remove hard code receiver
