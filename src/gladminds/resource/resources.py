@@ -448,13 +448,13 @@ class GladmindsResources(Resource):
                 message = templates.get_template('SEND_SA_UNAUTHORISED_SA')
             else:
                 if with_detail:
-                    gladminds_feedback_object = common.Feedback(reporter=active_sa,
+                    gladminds_feedback_object = aftersell_common.Feedback(reporter=active_sa,
                                                                 priority=sms_dict['priority'] , type=sms_dict['type'], 
                                                                 subject=sms_dict['subject'], message=sms_dict['message'],
                                                                 status="Open", created_date=datetime.now()
                                                                 )
                 else:
-                    gladminds_feedback_object = common.Feedback(reporter=active_sa,
+                    gladminds_feedback_object = aftersell_common.Feedback(reporter=active_sa,
                                                                 message=sms_dict['message'], status="Open",
                                                                 created_date=datetime.now()
                                                                 )

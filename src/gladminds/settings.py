@@ -63,8 +63,7 @@ SUIT_CONFIG = {
                     {'model': 'auditlog', 'label': 'Audit Log'},
                     {'model': 'datafeedlog',
                      'label': 'Feed Log'},
-                    {'model': 'feedback',
-                     'label': 'Help Desk'}, 'uploadproductcsv',
+                     'uploadproductcsv',
                     'messagetemplate', 'emailtemplate', 'gladmindusers',)},
         {'app': 'aftersell', 'label': 'AfterSell', 'icon': ' icon-folder-open',
          'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
@@ -78,7 +77,9 @@ SUIT_CONFIG = {
                      'label': 'Save Form -> ASC'},
                     {'model': 'auditlog', 'label': 'Audit Log'},
                     {'model': 'datafeedlog',
-                     'label': 'Feed Log'}, 'uploadproductcsv',
+                     'label': 'Feed Log'},
+                    {'model': 'feedback',
+                     'label': 'Help Desk'}, 'uploadproductcsv',
                     'messagetemplate', 'emailtemplate', 'gladmindusers',)},
         {'app': 'afterbuy', 'label': 'AfterBuy', 'icon': ' icon-folder-open',
          'models': ({'model': 'usernotification', 'label': 'notification'},)},
@@ -344,12 +345,21 @@ FEDBACK_MAIL_DETAIL = {
                   "receiver": ["gladminds@hashedin.com"],
                   "body": """""",
               }
+
 SERVICEDESK_FEEDBACK_MAIL_DETAIL = {
                   "sender":"feed-report@gladminds.co",
                   "subject":"Thank you for feedback",
                   "receiver": [""],
                   "body": """""",
               }
+
+ASSIGNEE_FEEDBACK_MAIL_DETAIL = {
+                  "sender":"feed-report@gladminds.co",
+                  "subject":"Task that is assigned ",
+                  "receiver": [""],
+                  "body": """""",
+              }
+
 # AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
 AFTERBUY_USER_LOC = os.path.join(AFTERBUY_LOC, "users")

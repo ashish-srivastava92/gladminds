@@ -5,6 +5,7 @@ import smtplib
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 import logging
+from django.forms.models import model_to_dict
 
 logger = logging.getLogger("gladminds")
 
@@ -180,6 +181,7 @@ def send_feedback_received(data=None):
         logger.info("[Exception ucn request email]: {0}".format(ex))
         
 def send_servicedesk_feedback(feedback_details=None):
+
     try:
         context = Context({'type': feedback_details.type})
         mail_detail = settings.SERVICEDESK_FEEDBACK_MAIL_DETAIL
@@ -188,6 +190,16 @@ def send_servicedesk_feedback(feedback_details=None):
                             receiver="srv.sngh@gmail.com")
     except Exception as ex:
         logger.info("[Exception feedback receiver email]  {0}".format(ex))
+
+def send_email_to_assignee(data):
+    try:
+        context = Context(model_to_dict(data,['type','reporter','message','created_date','assign_to'])) 
+        mail_detail = settings.ASSIGNEE_FEEDBACK_MAIL_DETAIL
+        send_template_email("feedback_received_mail.html", context,
+                             mail_detail,
+                            receiver=data.assign_to.email)
+    except Exception as ex:
+        logger.info("[Exception feedback receiver email]  {0}".format(ex))   
     
 def send_template_email(template_name, context, mail_detail,receiver=None): 
     '''generic function use for send mail for any html template'''
@@ -195,7 +207,6 @@ def send_template_email(template_name, context, mail_detail,receiver=None):
     feed_temp = file_stream.read()
     template = Template(feed_temp)
     body = template.render(context)
-    #TODO We have to remove hard code receiver
     if receiver is None:
         receiver = mail_detail['receiver']
     
@@ -203,6 +214,4 @@ def send_template_email(template_name, context, mail_detail,receiver=None):
                subject = mail_detail['subject'], body = body, 
                smtp_server = settings.MAIL_SERVER)
     logger.info("Mail sent successfully")
-       
-            
-              
+    #TODO We have to remove hard code receiver

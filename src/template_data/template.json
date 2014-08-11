@@ -273,5 +273,14 @@
       "template": "{message}",
       "description": "Receive this message when service advisor files complain"
     }
+  },
+    {
+    "model": "gladminds.messagetemplate",
+    "pk": 31,
+    "fields": {
+      "template_key": "SEND_MSG_TO_ASSIGNEE",
+      "template": "{message}",
+      "description": "You have been assigned this task. "
+    }
   }
 ]
