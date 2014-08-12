@@ -79,9 +79,9 @@
 		        	<select data-name="status" class="auto-width cust-search-filter" style="max-width: 200px">
 		        		<option>Select Search Type</option>
 				        <option>Genric Search</option>
-		        		{% for cust_sear_fields in custom_search_fields %}
+		        		{% for key,val in custom_search_fields.items %}
 		                  &nbsp;
-		                	<option data-name={{cust_sear_fields}} value={{cust_sear_fields}}>{{cust_sear_fields}}</option>
+		                	<option data-name={{val}} value={{val}}>{{key}}</option>
 			        	{% endfor %}
 			        	
 			        </select>
@@ -94,7 +94,7 @@
 			    {
 			    	var search_text = $('#cust-searchbar').val();
 			    	
-			    	var search_type = $('.cust-search-filter :selected').text();
+			    	var search_type = $('.cust-search-filter :selected')[0].value;
 			    	var url = window.location.origin + window.location.pathname;
 			    	if (search_type == 'Genric Search' || search_type == 'Select Search Type' )
 			    	{

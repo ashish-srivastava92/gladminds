@@ -282,8 +282,12 @@ class CouponAdmin(ModelAdmin):
             return {'class': css_class}
     
     def changelist_view(self, request, extra_context=None):
-        extra_context = {'custom_search': True, 'custom_search_fields':[
-                                                '^unique_service_coupon', '^vin__vin', 'status']}
+        custom_search_mapping = {
+                                     'unique_service_coupon' : '^unique_service_coupon',
+                                     'vin': '^vin__vin',
+                                     'status': 'status' 
+                                }
+        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping}
         return super(CouponAdmin, self).changelist_view(request, extra_context=extra_context)
      
     def queryset(self, request):
@@ -292,13 +296,18 @@ class CouponAdmin(ModelAdmin):
         admin site. This is used by changelist_view.
         """
         
-        if request.GET and request.path == "/gladminds/coupondata/":
+        if 'custom_search' in request.GET and 'val' in request.GET:
             self.search_fields = ()
             request.GET = request.GET.copy()
+            self.search_fields = (request.GET['custom_search'],)
+            search_value = request.GET['val']
             request.GET.pop("custom_search", None)
             request.GET.pop("val", None)
+            
+            request.GET["q"] = search_value 
+            request.META['QUERY_STRING'] = 'q=%s'% search_value
             request.path = "/gladminds/coupondata/"
-        
+
         qs = self.model._default_manager.get_query_set()
         '''
             This if condition only for landing page
