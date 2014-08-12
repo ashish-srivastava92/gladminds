@@ -299,14 +299,11 @@ class CouponAdmin(ModelAdmin):
         if 'custom_search' in request.GET and 'val' in request.GET:
             self.search_fields = ()
             request.GET = request.GET.copy()
-            self.search_fields = (request.GET['custom_search'],)
-            search_value = request.GET['val']
-            request.GET.pop("custom_search", None)
-            request.GET.pop("val", None)
-            
+            self.search_fields = (request.GET.pop("custom_search")[0],)
+            search_value = request.GET.pop("val")[0]
             request.GET["q"] = search_value 
             request.META['QUERY_STRING'] = 'q=%s'% search_value
-            request.path = "/gladminds/coupondata/"
+            
 
         qs = self.model._default_manager.get_query_set()
         '''
