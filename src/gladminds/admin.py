@@ -189,8 +189,8 @@ class Couponline(SortableTabularInline):
 
 
 class ProductDataAdmin(ModelAdmin):
-    search_fields = ('vin', 'sap_customer_id', 'customer_phone_number__customer_name',
-                     'customer_phone_number__phone_number')
+    search_fields = ('^vin', '^sap_customer_id', '^customer_phone_number__customer_name',
+                     'c^ustomer_phone_number__phone_number')
     list_display = ('vin', 'sap_customer_id', "UCN", 'customer_name',
                     'customer_phone_number', 'product_purchase_date')
     inlines = (Couponline,)
@@ -262,9 +262,9 @@ class CouponResource(resources.ModelResource):
 #class CouponAdmin(ExportMixin, ModelAdmin):
 class CouponAdmin(ModelAdmin):
 #    resource_class = CouponResource
+    list_filter = ('status',)
     search_fields = (
-        'unique_service_coupon', 'vin__vin', 'valid_days', 'valid_kms', 'status', 
-        "service_type")
+        '^unique_service_coupon', '^vin__vin', 'status')
     list_display = ('vin', 'unique_service_coupon', "actual_service_date",
                     'actual_kms', 'valid_days', 'valid_kms', 'status', "service_type")
     exclude = ('order',)
@@ -281,17 +281,37 @@ class CouponAdmin(ModelAdmin):
         if css_class:
             return {'class': css_class}
     
+    def changelist_view(self, request, extra_context=None):
+        custom_search_mapping = {
+                                     'unique_service_coupon' : '^unique_service_coupon',
+                                     'vin': '^vin__vin',
+                                     'status': 'status' 
+                                }
+        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping}
+        return super(CouponAdmin, self).changelist_view(request, extra_context=extra_context)
+     
     def queryset(self, request):
         """
         Returns a QuerySet of all model instances that can be edited by the
         admin site. This is used by changelist_view.
         """
+        
+        if 'custom_search' in request.GET and 'val' in request.GET:
+            self.search_fields = ()
+            request.GET = request.GET.copy()
+            self.search_fields = (request.GET.pop("custom_search")[0],)
+            search_value = request.GET.pop("val")[0]
+            request.GET["q"] = search_value 
+            request.META['QUERY_STRING'] = 'q=%s'% search_value
+            
+
         qs = self.model._default_manager.get_query_set()
         '''
             This if condition only for landing page
         '''
         if not request.GET and not request.POST and request.path == "/gladminds/coupondata/":
             qs = qs.filter(status=4)
+            
         return qs
     
     def get_changelist(self, request, **kwargs):
@@ -383,7 +403,7 @@ class FeedLogAdmin(ModelAdmin):
                     'failed_data_count', 'feed_remarks')
 
     def feed_remarks(self, obj):
-        if obj.remarks:
+        if obj.remarks and obj.file_location:
             remarks = json.loads(obj.remarks)
             update_remark = ''
             for remark, occurence in remarks.iteritems():
@@ -416,8 +436,8 @@ class DispatchedProduct(ProductData):
         proxy = True
 
 class ListDispatchedProduct(ModelAdmin):
-    search_fields = ('vin', 'engine' , 'customer_phone_number__phone_number', 
-                     'dealer_id__dealer_id', 'product_type__product_type')
+    search_fields = ('^vin', '^customer_phone_number__phone_number', 
+                     '^dealer_id__dealer_id', '^product_type__product_type')
     
     list_display = (
         'vin', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
@@ -443,7 +463,7 @@ class ListDispatchedProduct(ModelAdmin):
         return ' | '.join([str(ucn) for ucn in ucn_list])
 
     def changelist_view(self, request, extra_context=None):
-        extra_context = {'searchable_fields':"('vin', 'engine', 'customer_phone_number', 'dealer_id', 'product_type')"}
+        extra_context = {'searchable_fields':"('vin', 'customer_phone_number', 'dealer_id', 'product_type')"}
         return super(ListDispatchedProduct, self).changelist_view(request, extra_context=extra_context)
 ##############################################################
 #########################ASCSaveForm#########################

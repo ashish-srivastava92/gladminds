@@ -72,7 +72,44 @@
             {% endif %}
           {% endblock %}
 
-          {% block search %}{% search_form cl %}{% endblock %}
+		  {% if custom_search %}
+			  <div class="search-container form-inline">
+	          	<input type="text" size="40" id="cust-searchbar" placeholder="Keyword">&nbsp;
+	          	<span class="search-filters">
+		        	<select data-name="status" class="auto-width cust-search-filter" style="max-width: 200px">
+		        		<option>Select Search Type</option>
+				        <option>Genric Search</option>
+		        		{% for key,val in custom_search_fields.items %}
+		                  &nbsp;
+		                	<option data-name={{val}} value={{val}}>{{key}}</option>
+			        	{% endfor %}
+			        	
+			        </select>
+						&nbsp;
+	        	</span>
+	        	<input type="submit" onClick="redirect()" class="btn btn-info"/>
+	          </div>
+	          <script type="text/javascript">
+			    function redirect(e)
+			    {
+			    	var search_text = $('#cust-searchbar').val();
+			    	
+			    	var search_type = $('.cust-search-filter :selected')[0].value;
+			    	var url = window.location.origin + window.location.pathname;
+			    	if (search_type == 'Genric Search' || search_type == 'Select Search Type' )
+			    	{
+			    		url = url + '?q=' + search_text;
+			    	}else{
+			    		url = url + '?custom_search=' + search_type + '&val=' +search_text;
+			    	}
+			    	window.location = url;
+			    }
+		      </script>
+	      {% else %}
+          	{% block search %}{% search_form cl %}{% endblock %}
+          {% endif %}	
+          
+          
           {% if searchable_fields or cl.search_fields%}
           <p><i>Note: searchable fields are {% if searchable_fields %}{{searchable_fields}}{% else %}{{cl.search_fields}}{% endif %}</i></p>
           {% endif %}
