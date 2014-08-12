@@ -33,7 +33,7 @@ class FeedLogWithRemark():
         if self.failed_feeds and settings.FEED_FAILURE_MAIL_ENABLED:
             send_report_mail_for_feed_failure(remarks=remarks, 
                                               feed_type = self.feed_type)
-        if self.failed_feeds:
+        
             try:
                 path = self.upload_file(remarks)
             except Exception as ex :
