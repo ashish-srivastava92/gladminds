@@ -196,7 +196,7 @@ class GladmindsResources(Resource):
         '''
         exceed_limit_coupon = common.CouponData.objects\
             .filter(Q(status=1) | Q(status=4), vin__vin=vin, valid_kms__lt=actual_kms)\
-            .update(status=5)
+            .update(status=5, actual_kms=actual_kms)
         logger.info("%s are exceed limit coupon" % exceed_limit_coupon)
 
     def get_vin(self, sap_customer_id):
@@ -250,7 +250,7 @@ class GladmindsResources(Resource):
             vin = self.get_vin(sap_customer_id)
             self.update_exceed_limit_coupon(actual_kms, vin)
             valid_coupon = common.CouponData.objects.select_for_update()\
-                           .filter(Q(status=1) | Q(status=4) | Q(status=5), vin__vin=vin, valid_kms__gte=actual_kms) \
+                           .filter(Q(status=1) | Q(status=4) | Q(status=5), vin__vin=vin, valid_kms__gte=actual_kms, service_type__gte=service_type) \
                            .select_related('vin', 'customer_phone_number__phone_number').order_by('service_type')
             if len(valid_coupon) > 1:
                 self.update_higher_range_coupon(valid_coupon[0].valid_kms, vin)
@@ -258,7 +258,7 @@ class GladmindsResources(Resource):
             elif len(valid_coupon) > 0:
                 valid_coupon = valid_coupon[0]
             else:
-                dealer_message = templates.get_template('SEND_SA_NO_VALID_COUPON').format(sap_customer_id)
+                dealer_message = templates.get_template('SEND_SA_NO_VALID_COUPON').format(sap_customer_id, service_type)
                 logger.info(dealer_message)
                 return {'status': False, 'message': dealer_message}
             
@@ -345,7 +345,7 @@ class GladmindsResources(Resource):
                 coupon_object.servicing_dealer=dealer_sa_object.dealer_id
                 coupon_object.closed_date = datetime.now()
                 coupon_object.save()
-                common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, service_type__lt=coupon_object.service_type).update(status=3)
+#                 common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, service_type__lt=coupon_object.service_type).update(status=3)
                 message = templates.get_template('SEND_SA_CLOSE_COUPON').format(customer_id=sap_customer_id, usc=unique_service_coupon)
         except Exception as ex:
             logger.error("[Exception_coupon_close]".format(ex))

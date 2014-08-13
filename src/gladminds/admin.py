@@ -16,7 +16,7 @@ from django.db import connections
 from django.db import models
 from models.common import GladMindUsers, ProductTypeData, \
     BrandData, ProductData, CouponData, MessageTemplate,\
-    UploadProductCSV
+    UploadProductCSV, CustomerTempRegistration
 from gladminds.aftersell.models.common import \
     RegisteredDealer,ServiceAdvisorDealerRelationship, ServiceAdvisor
 from gladminds.aftersell.models.logs import AuditLog, DataFeedLog
@@ -487,6 +487,24 @@ class ASCSaveFormAdmin(ModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
+        
+class CustomerTempRegistrationAdmin(ModelAdmin):
+    search_fields = (
+        'product_data', 'new_customer_name', 'new_number',
+        'product_purchase_date', 'temp_customer_id', 'sent_to_sap')
+
+    list_display = (
+        'product_data', 'new_customer_name', 'new_number',
+        'product_purchase_date', 'temp_customer_id', 'sent_to_sap', 'remarks')
+
+    def suit_row_attributes(self, obj):
+        class_map = {
+            '1': 'success',
+            '0': 'error'
+        }
+        css_class = class_map.get(str(obj.sent_to_sap))
+        if css_class:
+            return {'class': css_class}
 ##############################################################
 
 
@@ -504,4 +522,5 @@ admin.site.register(CouponData, CouponAdmin)
 admin.site.register(MessageTemplate, MessageTemplateAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(ASCSaveForm, ASCSaveFormAdmin)
+admin.site.register(CustomerTempRegistration, CustomerTempRegistrationAdmin)
 admin.site.register(UploadProductCSV)
