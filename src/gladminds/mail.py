@@ -193,13 +193,35 @@ def send_servicedesk_feedback(feedback_details=None):
 
 def send_email_to_assignee(data):
     try:
-        context = Context(model_to_dict(data,['type','reporter','message','created_date','assign_to'])) 
+        context = Context({'type' : data.type,
+                           'reporter' : data.reporter,
+                           'message' : data.message,
+                           'created_date' : data.created_date,
+                           'assign_to' : data.assign_to,
+                           'status' :data.status
+                           })
         mail_detail = settings.ASSIGNEE_FEEDBACK_MAIL_DETAIL
         send_template_email("feedback_received_mail.html", context,
                              mail_detail,
-                            receiver=data.assign_to.email)
+                            receiver=data.assign_to.email_id)
     except Exception as ex:
-        logger.info("[Exception feedback receiver email]  {0}".format(ex))   
+        logger.info("[Exception feedback receiver email]  {0}".format(ex))
+
+def  send_status_mail_to_assignee(data):
+    try:
+        context = Context({'type' : data.type,
+                           'reporter' : data.reporter,
+                           'message' : data.message,
+                           'created_date' : data.created_date,
+                           'assign_to' : data.assign_to,
+                           'status' :data.status
+                           })
+        mail_detail = settings.ASSIGNEE_FEEDBACK_MAIL_DETAIL
+        send_template_email("status_mail.html", context,
+                             mail_detail,
+                            receiver=data.assign_to.email_id)
+    except Exception as ex:
+        logger.info("[Exception feedback receiver email]  {0}".format(ex))
     
 def send_template_email(template_name, context, mail_detail,receiver=None): 
     '''generic function use for send mail for any html template'''
@@ -209,9 +231,10 @@ def send_template_email(template_name, context, mail_detail,receiver=None):
     body = template.render(context)
     if receiver is None:
         receiver = mail_detail['receiver']
-    
+
     send_email(sender = mail_detail['sender'], receiver = receiver, 
                subject = mail_detail['subject'], body = body, 
                smtp_server = settings.MAIL_SERVER)
     logger.info("Mail sent successfully")
+    print "Success"
     #TODO We have to remove hard code receiver
