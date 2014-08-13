@@ -207,7 +207,7 @@
     "pk": 23,
     "fields": {
       "template_key":"SEND_SA_NO_VALID_COUPON",
-      "template":"No Digitised FSC available for Customer ID {0}",
+      "template":"No Digitised FSC for the service type {1} available for Customer ID {0}",
       "description":"Send when there is no UCN or all UCN are closed"
     }
   },
