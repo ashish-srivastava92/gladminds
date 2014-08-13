@@ -337,3 +337,7 @@ def trigger_sqs_tasks(request):
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
     taskqueue.add(sqs_tasks[request.POST['task']])
     return HttpResponse()
+
+def get_all_tickets(request):
+    feedback = aftersell_common.Feedback.objects.all()
+    return render(request,'service-desk/tickets.html',{"feedback":feedback})
