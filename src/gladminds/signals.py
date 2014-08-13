@@ -5,6 +5,8 @@ from gladminds import  message_template as templates
 from gladminds.utils2 import get_task_queue , send_sms_servicedesk
 from gladminds.audit import audit_log
 from django.conf import settings
+from gladminds.mail import send_email_to_assignee, send_status_mail_to_assignee
+
 # from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
 #     send_coupon_detail_customer, send_coupon
 
@@ -15,7 +17,8 @@ angular_format = lambda x: x.replace('{', '<').replace('}', '>')
 
 def send_sms(sender, **kwargs):
     instance_object = kwargs['instance']
-    print instance_object.reporter.phone_number
+    # Reporter and assinge phone get here
+        
     if instance_object.assign_to:
         send_email_to_assignee(instance_object)
         send_email_to_initiator_after_issue_assigned(instance_object)
@@ -44,7 +47,6 @@ def send_sms(sender, **kwargs):
              send_sms_servicedesk.delay(phone_number=instance_object.reporter.phone_number, message=message)
        audit_log(reciever=instance_object.reporter.phone_number, action=AUDIT_ACTION, message=message)
        return {'status': True, 'message': message}
-  
-  
-
         
+    if instance_object.status=='Resolved':
+            send_status_mail_to_assignee(instance_object)

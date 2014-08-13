@@ -193,12 +193,13 @@ def send_servicedesk_feedback(feedback_details=None):
 
 def send_email_to_assignee(data):
     try:
-        context =  context = Context({'type' : data.type,
+        context = Context({'type' : data.type,
                            'reporter' : data.reporter,
                            'message' : data.message,
                            'created_date' : data.created_date,
-                           'assign_to' : data.assign_to})
-         
+                           'assign_to' : data.assign_to,
+                           'status' :data.status
+                           })
         mail_detail = settings.ASSIGNEE_FEEDBACK_MAIL_DETAIL
         send_template_email("feedback_received_mail.html", context,
                              mail_detail,
@@ -221,7 +222,23 @@ def send_email_to_initiator_after_issue_assigned(instance_object):
                             receiver="srv.sngh@gmail.com")
     except Exception as ex:
         logger.info("[Exception feedback receiver email]  {0}".format(ex)) 
-                  
+
+def  send_status_mail_to_assignee(data):
+    try:
+        context = Context({'type' : data.type,
+                           'reporter' : data.reporter,
+                           'message' : data.message,
+                           'created_date' : data.created_date,
+                           'assign_to' : data.assign_to,
+                           'status' :data.status
+                           })
+        mail_detail = settings.ASSIGNEE_FEEDBACK_MAIL_DETAIL
+        send_template_email("status_mail.html", context,
+                             mail_detail,
+                            receiver=data.assign_to.email_id)
+    except Exception as ex:
+        logger.info("[Exception feedback receiver email]  {0}".format(ex))
+
 def send_email_to_initiator_after_issue_resolved(instance_object):
     try:
         context = Context({'type' : data.type,
@@ -233,11 +250,8 @@ def send_email_to_initiator_after_issue_resolved(instance_object):
         send_template_email("initiator_feedback_resolved.html", context,
                              mail_detail,
                             receiver="srv.sngh@gmail.com")
-        return "success"
     except Exception as ex:
         logger.info("[Exception feedback receiver email]  {0}".format(ex))
-        return "failure" 
-          
     
 def send_template_email(template_name, context, mail_detail,receiver=None): 
     '''generic function use for send mail for any html template'''
@@ -247,7 +261,7 @@ def send_template_email(template_name, context, mail_detail,receiver=None):
     body = template.render(context)
     if receiver is None:
         receiver = mail_detail['receiver']
-    
+
     send_email(sender = mail_detail['sender'], receiver = receiver, 
                subject = mail_detail['subject'], body = body, 
                smtp_server = settings.MAIL_SERVER)

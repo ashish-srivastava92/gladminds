@@ -17,3 +17,7 @@ FEEDBACK_TYPE = (
         ('Request', 'Request'),
         ('Suggestion', 'Suggestion'),
     )
+
+USER_DESIGNATION = (('Owner','Owner'),
+                    ('Manager','Manager')
+                    )

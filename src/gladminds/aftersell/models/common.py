@@ -4,7 +4,8 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from gladminds.signals import send_sms
-from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE
+from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
+    USER_DESIGNATION
 
 ##########################################################################
 ########################## ASC Save Form #########################
@@ -107,9 +108,22 @@ class RegisteredASC(models.Model):
         verbose_name_plural = "Registered ASC Form"
         
     
+class ServiceDeskUser(models.Model):
+    user = models.OneToOneField(User, null=True, blank=True)
+    email_id = models.EmailField(max_length=215, null=True, blank=True)
+    phone_number = models.CharField(max_length=15, unique=True)
+    designation = models.CharField(max_length=10, choices = USER_DESIGNATION)
+    
+    class Meta:
+        app_label = "aftersell"
+        verbose_name_plural = "service desk users"
+    
+    def __unicode__(self):
+        return self.phone_number       
+    
 class Feedback(models.Model):
-    reporter = models.ForeignKey('aftersell.ServiceAdvisor', null=False)
-    assign_to = models.ForeignKey(User, null=True, blank= True)
+    reporter = models.CharField(max_length=15, unique=True)
+    assign_to = models.ForeignKey(ServiceDeskUser, null=True, blank= True)
     message = models.CharField(max_length=512, null=True, blank=False)
     status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
     priority = models.CharField(max_length=12, choices=PRIORITY)
