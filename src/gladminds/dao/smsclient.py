@@ -1,5 +1,5 @@
 from django.conf import settings
-from gladminds.utils import import_json
+# from gladminds.utils2 import import_json
 import json
 import logging
 import requests

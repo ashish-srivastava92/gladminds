@@ -135,5 +135,6 @@ class Feedback(models.Model):
     class Meta:
         app_label = "aftersell"
         verbose_name_plural = "aftersell feedback info"
-post_save.connect(send_sms,sender=Feedback)       
+
+# post_save.connect(send_sms,sender=Feedback)       
         
