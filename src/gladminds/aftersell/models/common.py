@@ -3,7 +3,7 @@ from django.conf import settings
 from datetime import datetime
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
-from gladminds.signals import send_sms
+#from gladminds.signals import send_sms
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     USER_DESIGNATION
 
@@ -122,7 +122,7 @@ class ServiceDeskUser(models.Model):
         return self.phone_number       
     
 class Feedback(models.Model):
-    reporter = models.CharField(max_length=15, unique=True)
+    reporter = models.CharField(max_length=15)
     assign_to = models.ForeignKey(ServiceDeskUser, null=True, blank= True)
     message = models.CharField(max_length=512, null=True, blank=False)
     status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)

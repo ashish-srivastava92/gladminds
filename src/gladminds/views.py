@@ -35,7 +35,8 @@ def auth_login(request, provider):
         provider_mapping = {
                             'asc': {'template_name': 'asc/login.html'},
                             'dasc': {'template_name': 'asc/login.html'},
-                            'dealer': {'template_name': 'dealer/login.html'}
+                            'dealer': {'template_name': 'dealer/login.html'},
+                            'servicedesk': {'template_name': 'service-desk/login.html'}
                             }
         return render(request, provider_mapping[provider]['template_name'])
     if request.method == 'POST':
@@ -62,6 +63,12 @@ def user_logout(request):
         elif 'dascs' in groups:
             logout(request)
             return HttpResponseRedirect('/aftersell/dasc/login')
+        elif 'SDM' in groups:
+            logout(request)
+            return HttpResponseRedirect('/aftersell/servicedesk/login')
+        elif 'SDO' in groups:
+            logout(request)
+            return HttpResponseRedirect('/aftersell/servicedesk/login')
     return HttpResponseBadRequest('Not Allowed')
 
 def generate_otp(request):
@@ -117,10 +124,14 @@ def update_pass(request):
         return HttpResponseRedirect('/aftersell//asc/login?error=true')
 
 def redirect_user(request):
-    asc_group = Group.objects.get(name='ascs')
-    if asc_group in request.user.groups.all():
+    group_name =  request.user.groups.all()
+    if group_name[0].name== 'dealers':
         return HttpResponseRedirect('/aftersell/register/sa')
-    return HttpResponseRedirect('/aftersell/register/asc')
+    if group_name[0].name == 'ascs':
+       return HttpResponseRedirect('/aftersell/register/asc')
+    if group_name[0].name == 'SDM' or group_name[0].name == 'SDO':
+       return HttpResponseRedirect('/aftersell/register/servi')
+     
 
 @login_required()
 def register(request, menu):
