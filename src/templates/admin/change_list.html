@@ -73,12 +73,12 @@
           {% endblock %}
 
 		  {% if custom_search %}
-			  <div class="search-container form-inline">
-	          	<input type="text" size="40" id="cust-searchbar" placeholder="Keyword">&nbsp;
+		  	  <div class="search-container form-inline">
+	          	<input type="text" size="40" id="cust-searchbar" placeholder="Keyword" value = {{cl.query}} />&nbsp;
 	          	<span class="search-filters">
 		        	<select data-name="status" class="auto-width cust-search-filter" style="max-width: 200px">
 		        		<option>Select Search Type</option>
-				        <option>Genric Search</option>
+				        <option>Generic Search</option>
 		        		{% for key,val in custom_search_fields.items %}
 		                  &nbsp;
 		                	<option data-name={{val}} value={{val}}>{{key}}</option>
@@ -96,7 +96,7 @@
 			    	
 			    	var search_type = $('.cust-search-filter :selected')[0].value;
 			    	var url = window.location.origin + window.location.pathname;
-			    	if (search_type == 'Genric Search' || search_type == 'Select Search Type' )
+			    	if (search_type == 'Generic Search' || search_type == 'Select Search Type' )
 			    	{
 			    		url = url + '?q=' + search_text;
 			    	}else{
