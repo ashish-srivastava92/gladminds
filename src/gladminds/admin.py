@@ -262,8 +262,9 @@ class CouponResource(resources.ModelResource):
 #class CouponAdmin(ExportMixin, ModelAdmin):
 class CouponAdmin(ModelAdmin):
 #    resource_class = CouponResource
-    list_filter = ('status',)
-    search_fields = ('^unique_service_coupon', '^vin__vin', 'status')
+    #list_filter = ('status',)
+    search_fields = (
+        '^unique_service_coupon', '^vin__vin', 'status')
     list_display = ('vin', 'unique_service_coupon', "actual_service_date",
                     'actual_kms', 'valid_days', 'valid_kms', 'status', "service_type")
     exclude = ('order',)
@@ -282,11 +283,13 @@ class CouponAdmin(ModelAdmin):
     
     def changelist_view(self, request, extra_context=None):
         custom_search_mapping = {
-                                     'unique_service_coupon' : '^unique_service_coupon',
-                                     'vin': '^vin__vin',
-                                     'status': 'status' 
+                                     'Unique Service Coupon' : '^unique_service_coupon',
+                                     'Vin': '^vin__vin',
+                                     'Status': 'status' 
                                 }
-        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping}
+        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping,
+                         'searchable_fields': ('^unique_service_coupon', '^vin__vin', 'status')
+                        }
         return super(CouponAdmin, self).changelist_view(request, extra_context=extra_context)
      
     def queryset(self, request):
