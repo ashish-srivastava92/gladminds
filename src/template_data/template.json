@@ -264,10 +264,10 @@
       "template": "Thanks for providing feedback. We will get back to you soon.",
       "description": "Send this message when service advisor files complain successfully"
     }
-  },
+  }, 
   {
     "model": "gladminds.messagetemplate",
-    "pk": 30,
+    "pk": 31,
     "fields": {
       "template_key": "RCV_USER_COMPLAINT",
       "template": "{message}",
@@ -276,11 +276,29 @@
   },
     {
     "model": "gladminds.messagetemplate",
-    "pk": 31,
+    "pk": 32,
     "fields": {
       "template_key": "SEND_MSG_TO_ASSIGNEE",
       "template": "{message}",
       "description": "You have been assigned this task. "
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 33,
+    "fields": {
+      "template_key": "INITIATOR_FEEDBACK_DETAILS",
+      "template": "Your {0} has been assigned to {1} and severity is {2}.",
+      "description": "Your {0} has been assigned to {1} and severity is {2}."
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 34,
+    "fields": {
+      "template_key": "INITIATOR_FEEDBACK_STATUS",
+      "template": "Your Complaint has been resolved.",
+      "description": "Your Complaint has been resolved."
     }
   }
 ]
