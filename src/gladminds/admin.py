@@ -288,7 +288,7 @@ class CouponAdmin(ModelAdmin):
                                      'Status': 'status' 
                                 }
         extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping,
-                         'searchable_fields': ('^unique_service_coupon', '^vin__vin', 'status')
+                         'searchable_fields': 'Unique Service Coupon, Vin and Status'
                         }
         return super(CouponAdmin, self).changelist_view(request, extra_context=extra_context)
      
