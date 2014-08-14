@@ -25,6 +25,8 @@ from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
 from gladminds.aftersell.models import common as afterbuy_common
 from gladminds.scheduler import SqsTaskQueue
 from gladminds.resource.resources import GladmindsResources
+from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
+    USER_DESIGNATION
 
 gladmindsResources = GladmindsResources()
 logger = logging.getLogger('gladminds')
@@ -36,7 +38,7 @@ def auth_login(request, provider):
                             'asc': {'template_name': 'asc/login.html'},
                             'dasc': {'template_name': 'asc/login.html'},
                             'dealer': {'template_name': 'dealer/login.html'},
-                            'servicedesk': {'template_name': 'service-desk/login.html'}
+                            'desk': {'template_name': 'service-desk/login.html'}
                             }
         return render(request, provider_mapping[provider]['template_name'])
     if request.method == 'POST':
@@ -65,10 +67,10 @@ def user_logout(request):
             return HttpResponseRedirect('/aftersell/dasc/login')
         elif 'SDM' in groups:
             logout(request)
-            return HttpResponseRedirect('/aftersell/servicedesk/login')
+            return HttpResponseRedirect('/aftersell/desk/login')
         elif 'SDO' in groups:
             logout(request)
-            return HttpResponseRedirect('/aftersell/servicedesk/login')
+            return HttpResponseRedirect('/aftersell/desk/login')
     return HttpResponseBadRequest('Not Allowed')
 
 def generate_otp(request):
@@ -130,7 +132,7 @@ def redirect_user(request):
     if group_name[0].name == 'ascs':
        return HttpResponseRedirect('/aftersell/register/asc')
     if group_name[0].name == 'SDM' or group_name[0].name == 'SDO':
-       return HttpResponseRedirect('/aftersell/register/servi')
+       return HttpResponseRedirect('/aftersell/servicedesk/')
      
 
 @login_required()
@@ -348,7 +350,46 @@ def trigger_sqs_tasks(request):
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
     taskqueue.add(sqs_tasks[request.POST['task']])
     return HttpResponse()
-
-def get_all_tickets(request):
-    feedback = aftersell_common.Feedback.objects.all()
-    return render(request,'service-desk/tickets.html',{"feedback":feedback})
+@login_required()
+def get_servicedesk_tickets(request):
+    group_name =  request.user.groups.all()
+    user_obj = request.user
+    if group_name[0].name == 'SDM':
+       feedback = aftersell_common.Feedback.objects.all()
+       return render(request,'service-desk/tickets.html',{"feedback":feedback})
+    if group_name[0].name == 'SDO':
+       servicedesk_obj = aftersell_common.ServiceDeskUser.objects.filter(user=user_obj)
+       feedback = aftersell_common.Feedback.objects.filter(assign_to=servicedesk_obj[0])
+       return render(request,'service-desk/tickets.html',{"feedback":feedback})
+@login_required() 
+def modify_servicedesk_tickets(request,feedbackid):
+    group_name =  request.user.groups.all()
+    status = get_list_from_set(FEEDBACK_STATUS)
+    priority = get_list_from_set(PRIORITY)
+    type = get_list_from_set(FEEDBACK_TYPE)
+    user_obj = request.user
+    if request.method == 'GET':
+        if group_name[0].name == 'SDM':
+           feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
+           servicedesk_obj = aftersell_common.ServiceDeskUser.objects.all()
+           return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj})
+        if group_name[0].name == 'SDO':
+           servicedesk_obj = aftersell_common.ServiceDeskUser.objects.filter(user=user_obj)
+           feedback = aftersell_common.Feedback.objects.filter(assign_to=servicedesk_obj[0],id = feedbackid)
+           return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name})
+    if request.method == 'POST':
+        data = request.POST  
+        if group_name[0].name == 'SDM':
+           servicedesk_obj = aftersell_common.ServiceDeskUser.objects.all()
+           servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(phone_number = data['Assign_To'])
+           feedback = aftersell_common.Feedback.objects.filter(id = feedbackid).update(assign_to = servicedesk_assign_obj[0] , status = data['status'], priority = data['Priority'])
+           feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
+           return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj})
+        if group_name[0].name == 'SDO':
+           servicedesk_obj = aftersell_common.ServiceDeskUser.objects.filter(user=user_obj)
+           feedback = aftersell_common.Feedback.objects.filter(assign_to=servicedesk_obj[0],id = feedbackid).update(status = data['status'])
+           feedback = aftersell_common.Feedback.objects.filter(assign_to=servicedesk_obj[0],id = feedbackid)
+           return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name}) 
+           
+       
+        

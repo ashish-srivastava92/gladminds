@@ -19,8 +19,14 @@
             <a class="logout" href="/aftersell/provider/logout">Logout</a>
           </div>
         </div>
-<div class="well">
+<div class="well" style="margin-left:30px;margin-right:30px">
+
 	<div class="row">
+	{% if not feedback %}
+	<div class = 'container'>
+	   <h2 align ='center'> Hi {{request.user.username}} you have not been assign any ticket yet.<h2>
+	    </div>
+	 {% elif feedback.length != 0 %}    
 		<table class="table ">
 			<thead>
 				<tr>
@@ -32,6 +38,7 @@
 					<th>Type</th>
 					<th>Status</th>
 					<th>Created Date</th>
+					<th>Edit</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -45,12 +52,20 @@
 					<td>{{feedback.type}}</td>
 					<td>{{feedback.status}}</td>
 					<td>{{feedback.created_date}}</td>
+					<td><a href="/aftersell/feedbackdetails/{{feedback.id}}/"><button type="button" class="btn btn-default btn-sm">
+  <span class="glyphicon glyphicon-edit"></span> Edit
+</button</a></td>
+					
+					
 				</tr>
 			{% endfor %}
 			</tbody>
 		</table>
+		{% endif %}
+	
 	</div>
 </div>
+
 {% endblock %}
 
 {% block dependency%}
