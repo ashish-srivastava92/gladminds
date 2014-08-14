@@ -190,7 +190,7 @@ class Couponline(SortableTabularInline):
 
 class ProductDataAdmin(ModelAdmin):
     search_fields = ('^vin', '^sap_customer_id', '^customer_phone_number__customer_name',
-                     'c^ustomer_phone_number__phone_number')
+                     '^customer_phone_number__phone_number')
     list_display = ('vin', 'sap_customer_id', "UCN", 'customer_name',
                     'customer_phone_number', 'product_purchase_date')
     inlines = (Couponline,)
