@@ -53,7 +53,7 @@ class TestUtils(GladmindsUnitTestCase):
         sa_list = get_sa_list(request)
         self.assertEqual(len(sa_list), 1)
         coupon_info = get_coupon_info(request)
-        self.assertEqual(coupon_info.keys(), ['status', 'message'])
+        self.assertEqual(coupon_info.unique_service_coupon, 'COUPON005')
         customer = get_customer_info(request)
         self.assertEquals(len(customer.keys()), 4)
 
