@@ -25,6 +25,7 @@ from import_export import fields, widgets
 from import_export import resources
 from gladminds.models.common import EmailTemplate
 from gladminds.aftersell.models.common import ASCSaveForm
+from gladminds import utils
 
 
 ############################BRAND AND PRODUCT ADMIN##########################
@@ -303,7 +304,12 @@ class CouponAdmin(ModelAdmin):
             request.GET = request.GET.copy()
             self.search_fields = (request.GET.pop("custom_search")[0],)
             search_value = request.GET.pop("val")[0]
-            request.GET["q"] = search_value 
+            if self.search_fields[0] == 'status':
+                try:
+                    search_value = str(utils.COUPON_STATUS[search_value])
+                except Exception:
+                    pass
+            request.GET["q"] = search_value
             request.META['QUERY_STRING'] = 'q=%s'% search_value
             
 
