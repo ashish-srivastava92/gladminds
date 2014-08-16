@@ -78,8 +78,7 @@
 	          	<span class="search-filters">
 		        	<select data-name="status" class="auto-width cust-search-filter" style="max-width: 200px">
 		        		<option>Select Search Type</option>
-				        <option>Generic Search</option>
-		        		{% for key,val in custom_search_fields.items %}
+				        {% for key,val in custom_search_fields.items %}
 		                  &nbsp;
 		                	<option data-name={{val}} value={{val}}>{{key}}</option>
 			        	{% endfor %}

@@ -237,3 +237,15 @@ def subtract_dates(start_date, end_date):
     start_date = datetime.strptime(start_date, "%Y-%m-%d")
     end_date = datetime.strptime(end_date, "%Y-%m-%d") 
     return start_date - end_date
+
+def get_search_query_params(request, class_self):
+    custom_search_enabled = False
+    if 'custom_search' in request.GET and 'val' in request.GET:
+        class_self.search_fields = ()
+        request.GET = request.GET.copy()
+        class_self.search_fields = (request.GET.pop("custom_search")[0],)
+        search_value = request.GET.pop("val")[0]
+        request.GET["q"] = search_value
+        request.META['QUERY_STRING'] = 'q=%s'% search_value
+        custom_search_enabled = True
+    return custom_search_enabled
