@@ -190,8 +190,8 @@ class Couponline(SortableTabularInline):
 
 
 class ProductDataAdmin(ModelAdmin):
-    search_fields = ('^vin', '^sap_customer_id', '^customer_phone_number__customer_name',
-                     'c^ustomer_phone_number__phone_number')
+    search_fields = ('^vin', '^sap_customer_id', 'customer_phone_number__customer_name',
+                     '^customer_phone_number__phone_number')
     list_display = ('vin', 'sap_customer_id', "UCN", 'customer_name',
                     'customer_phone_number', 'product_purchase_date')
     inlines = (Couponline,)
@@ -202,6 +202,8 @@ class ProductDataAdmin(ModelAdmin):
         Returns a QuerySet of all model instances that can be edited by the
         admin site. This is used by changelist_view.
         """
+        utils.get_search_query_params(request, self)
+        
         query_set = self.model._default_manager.get_query_set()
         query_set = query_set.filter(product_purchase_date__isnull=False)
         # TODO: this should be handled by some parameter to the ChangeList.
@@ -234,7 +236,17 @@ class ProductDataAdmin(ModelAdmin):
         return coupon_service_type
     
     def changelist_view(self, request, extra_context=None):
-        extra_context = {'searchable_fields':"('vin', 'sap_customer_id', 'customer_phone_number', 'customer_name')"}
+        custom_search_mapping = {
+                                     'Vin' : '^vin',
+                                     'Dealer Id': '^dealer_id__dealer_id',
+                                     'Sap Customer ID':'^sap_customer_id', 
+                                     'Customer Name': 'customer_phone_number__customer_name',
+                                     'Customer Phone Number': 'customer_phone_number__phone_number'
+                                }
+        
+        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping,
+                         'searchable_fields': 'Vin, Sap Customer Id, Customer Phone Number and Customer Name'
+                        }
         return super(ProductDataAdmin, self).changelist_view(request, extra_context=extra_context)
 
 class CouponResource(resources.ModelResource):
@@ -299,18 +311,14 @@ class CouponAdmin(ModelAdmin):
         admin site. This is used by changelist_view.
         """
         
-        if 'custom_search' in request.GET and 'val' in request.GET:
-            self.search_fields = ()
-            request.GET = request.GET.copy()
-            self.search_fields = (request.GET.pop("custom_search")[0],)
-            search_value = request.GET.pop("val")[0]
-            if self.search_fields[0] == 'status':
-                try:
-                    search_value = str(utils.COUPON_STATUS[search_value])
-                except Exception:
-                    pass
-            request.GET["q"] = search_value
-            request.META['QUERY_STRING'] = 'q=%s'% search_value
+        if utils.get_search_query_params(request, self) and self.search_fields[0] == 'status':
+            try:
+                request.GET = request.GET.copy()
+                search_value = str(utils.COUPON_STATUS[request.GET["q"]])
+                request.GET["q"] = search_value
+                request.META['QUERY_STRING'] = search_value
+            except Exception:
+                pass
             
 
         qs = self.model._default_manager.get_query_set()
@@ -444,8 +452,7 @@ class DispatchedProduct(ProductData):
         proxy = True
 
 class ListDispatchedProduct(ModelAdmin):
-    search_fields = ('^vin', '^customer_phone_number__phone_number', 
-                     '^dealer_id__dealer_id', '^product_type__product_type')
+    search_fields = ('^vin','^dealer_id__dealer_id')
     
     list_display = (
         'vin', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
@@ -456,6 +463,8 @@ class ListDispatchedProduct(ModelAdmin):
         Returns a QuerySet of all model instances that can be edited by the
         admin site. This is used by changelist_view.
         """
+        
+        utils.get_search_query_params(request, self)
         query_set = self.model._default_manager.get_query_set()
         query_set = query_set.filter(invoice_date__isnull=False)
         # TODO: this should be handled by some parameter to the ChangeList.
@@ -471,7 +480,14 @@ class ListDispatchedProduct(ModelAdmin):
         return ' | '.join([str(ucn) for ucn in ucn_list])
 
     def changelist_view(self, request, extra_context=None):
-        extra_context = {'searchable_fields':"('vin', 'customer_phone_number', 'dealer_id', 'product_type')"}
+        custom_search_mapping = {
+                                     'Vin' : '^vin',
+                                     'Dealer Id': '^dealer_id__dealer_id',
+                                }
+        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping,
+                         'searchable_fields': 'Vin and  Dealer id'
+                        }
+        
         return super(ListDispatchedProduct, self).changelist_view(request, extra_context=extra_context)
 ##############################################################
 #########################ASCSaveForm#########################
