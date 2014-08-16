@@ -127,9 +127,12 @@ def get_sa_list(request):
     return sa_phone_list
 
 def recover_coupon_info(request):
-    coupon_info = get_coupon_info(request)
-    upload_file(request)
-    return coupon_info
+    coupon_data = get_coupon_info(request)
+    ucn_recovery_obj = upload_file(request)
+    send_recovery_email_to_admin(ucn_recovery_obj, coupon_data)
+    message = 'UCN for customer {0} is {1}.'.format(coupon_data.vin.sap_customer_id,
+                                                coupon_data.unique_service_coupon) 
+    return {'status': True, 'message': message}
     
 def get_coupon_info(request):
     data=request.POST
@@ -137,8 +140,7 @@ def get_coupon_info(request):
     logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, request.user))
     product_data = common.ProductData.objects.filter(sap_customer_id=customer_id)[0]
     coupon_data = common.CouponData.objects.filter(vin=product_data, status=4)[0]
-    message = 'UCN for customer {0} is {1}.'.format(product_data.sap_customer_id, coupon_data.unique_service_coupon)
-    return {'status': True, 'message': message}
+    return coupon_data
 
 def upload_file(request):
     data = request.POST
@@ -154,7 +156,7 @@ def upload_file(request):
                           bucket=settings.JOBCARD_BUCKET, logger_msg="JobCard")
     ucn_recovery_obj = aftersell_common.UCNRecovery(reason=reason, user=user_obj, sap_customer_id=customer_id, file_location=path)
     ucn_recovery_obj.save()
-    send_recovery_email_to_admin(ucn_recovery_obj)
+    return ucn_recovery_obj
 
 def get_file_name(request, file_obj):
     requester = request.user
@@ -174,12 +176,13 @@ def stringify_groups(user):
         groups.append(str(group.name))
     return groups
 
-def send_recovery_email_to_admin(file_obj):
+def send_recovery_email_to_admin(file_obj, coupon_data):
     file_location = file_obj.file_location
     reason = file_obj.reason
     customer_id = file_obj.sap_customer_id
     requester = str(file_obj.user)
-    data = get_email_template('UCN_REQUEST_ALERT').body.format(requester, customer_id, reason, file_location)
+    data = get_email_template('UCN_REQUEST_ALERT').body.format(requester,coupon_data.service_type,
+                customer_id, coupon_data.actual_kms, reason, file_location)
     send_ucn_request_alert(data=data)
 
 def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=None,
