@@ -6,7 +6,7 @@ from dateutil import tz
 from random import randint
 from django.utils import timezone
 from django.conf import settings
-
+from django.template import Context
 from gladminds.models.common import STATUS_CHOICES
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
@@ -237,3 +237,13 @@ def get_list_from_set(set_data):
     for set_object in set_data:
         created_list.append(list(set_object)[1])
     return created_list
+
+def create_context(data):
+    print "Dddd",data.message
+    context_dict = {'type' : data.type,
+                    'reporter' : data.reporter,
+                    'message' : data.message,
+                    'created_date' : data.created_date,
+                    'assign_to' : data.assign_to,
+                    'priority' : data.priority }
+    return Context(context_dict)
