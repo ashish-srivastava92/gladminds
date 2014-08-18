@@ -1,6 +1,5 @@
 #Both SQS and RDS using sqs_tasks.py therefore these file is not required
 
-
 # from __future__ import absolute_import
 # from celery import shared_task
 # from django.conf import settings

@@ -84,7 +84,7 @@ def generate_otp(request):
                 task_queue = get_task_queue()
                 task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
             else:
-                send_otp.delay(phone_number=phone_number, message=message)
+                send_otp.delay(phone_number=phone_number, message=message)  # @UndefinedVariable
             logger.info('OTP sent to mobile {0}'.format(phone_number))
             #Send email if email address exist
             if email:

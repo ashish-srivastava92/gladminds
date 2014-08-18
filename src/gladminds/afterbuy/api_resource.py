@@ -28,7 +28,7 @@ class AfterBuyResources(AfterBuyBaseResource):
 #         queryset = common.ProductData.objects.all()
         resource_name = 'afterbuy'
         authentication = AccessTokenAuthentication()
-        
+
     def prepend_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/user/save%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('save_user_details'), name="save_user_details"),
@@ -51,18 +51,16 @@ class AfterBuyResources(AfterBuyBaseResource):
             return self.post_user_product_information(request, **kwargs)
         if request.method == "DELETE":
             return self.delete_user_product_information(request, **kwargs)
-        
-    
+
     def get_user_product_information(self, request, **kwargs):
-        '''This API fetches all the information of the products own 
-           by a particular user whose mobile is provided in the request '''
+        '''This API fetches all the information of the products own
+        by a particular user whose mobile is provided in the request '''
         resp = []
         mobile = request.GET.get('mobile')
         if not mobile:
             return HttpBadRequest("mobile is required.")
         try:
             phone_number= mobile_format(mobile)
-            
             user_info = common.GladMindUsers.objects.get(phone_number=phone_number)
             product_info = common.ProductData.objects.filter(customer_phone_number=user_info)
             if not product_info:
@@ -74,22 +72,22 @@ class AfterBuyResources(AfterBuyBaseResource):
             logger.info("[Exception get_user_product_information]:{0}".format(ex))
             return HttpBadRequest("Not a registered number")
         return HttpResponse(json.dumps(resp))
-    
+
     def post_user_product_information(self, request, **kwargs):
-        '''This API used for adding a product to a user 
-           whose mobile number in provided in the request '''
+        '''This API used for adding a product to a user
+        whose mobile number in provided in the request '''
         data = {}
         product_data = {}
         vin = request.POST.get('vin')
         mobile = request.POST.get('mobile')
         if not vin and not mobile:
             return HttpBadRequest("vin and mobile are required.")
-        
+
         phone_number = mobile_format(mobile)
         for field in ['item_name', 'product_purchase_date', 'purchased_from', 'seller_email', 'seller_phone',
                   'warranty_yrs', 'insurance_yrs', 'invoice_loc', 'warranty_loc', 'insurance_loc']:
             product_data[field] = request.POST.get(field, None)
-        
+
         try:
             product_info = afterbuy_common.UserProducts.objects.get(vin = vin)
 
@@ -101,7 +99,7 @@ class AfterBuyResources(AfterBuyBaseResource):
                     setattr(product_info, field, request.POST.get(field, getattr(product_info, field)))
                 product_info.is_deleted = False
                 product_info.save()
-                data = {'status':1, 'message': 'product saved successfully'}            
+                data = {'status':1, 'message': 'product saved successfully'}
         except Exception as ex:
             try:
                 user_object = common.GladMindUsers.objects.get(phone_number=phone_number)
@@ -112,10 +110,14 @@ class AfterBuyResources(AfterBuyBaseResource):
                 else:
                     afterbuy_product_object = afterbuy_common.UserProducts(vin=vin,
                                             item_name = product_data['item_name'], customer_phone_number=user_object,
-                                            product_type=product_type_list[0], product_purchase_date = product_data['product_purchase_date'],
-                                            purchased_from = product_data['purchased_from'], seller_email = product_data['seller_email'], seller_phone = product_data['seller_phone'],
-                                            warranty_yrs = product_data['warranty_yrs'], insurance_yrs = product_data['insurance_yrs'], invoice_loc = product_data['invoice_loc'],
-                                            warranty_loc = product_data['warranty_loc'], insurance_loc = product_data['insurance_loc'], is_deleted = False
+                                            product_type=product_type_list[0], product_purchase_date =
+                                            product_data['product_purchase_date'],
+                                            purchased_from = product_data['purchased_from'], seller_email =
+                                            product_data['seller_email'], seller_phone = product_data['seller_phone'],
+                                            warranty_yrs = product_data['warranty_yrs'], insurance_yrs =
+                                            product_data['insurance_yrs'], invoice_loc = product_data['invoice_loc'],
+                                            warranty_loc = product_data['warranty_loc'], insurance_loc =
+                                            product_data['insurance_loc'], is_deleted = False
                                             )
                     afterbuy_product_object.save()
                     data = {'status':1, 'message': 'product added successfully'}
@@ -124,10 +126,10 @@ class AfterBuyResources(AfterBuyBaseResource):
                 logger.info(log_message)
                 data={'status':0, 'message':log_message}
         return HttpResponse(json.dumps(data), content_type="application/json")
-    
+
     def delete_user_product_information(self, request, **kwargs):
-        '''This API used to delete a product from user account 
-           whose mobile number in provided in the request '''
+        '''This API used to delete a product from user account
+        whose mobile number in provided in the request '''
         vin = request.GET.get('vin')
         mobile = request.GET.get('mobile')
 
@@ -136,21 +138,20 @@ class AfterBuyResources(AfterBuyBaseResource):
         try:
             phone_number = mobile_format(mobile)
             product_info = afterbuy_common.UserProducts.objects.get(vin = vin)
-            
+
             if product_info.customer_phone_number.phone_number != phone_number:
                 return HttpResponse("You are not allowed to delete this product.")
-            
+
             product_info.is_deleted = True
             product_info.save()
-            
+
             data = data={'status':1, 'message':'product deleted'}
         except Exception as ex:
             log_message = "unable to delete product :{0}".format(ex)
             logger.info(log_message)
             data={'status':0, 'message':log_message}
         return HttpResponse(json.dumps(data), content_type="application/json")
-        
-        
+
     def get_product_coupons(self, request, **kwargs):
         '''This API fetches all the coupons for a particular product
            whose VIN is provided in the request '''
@@ -167,7 +168,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             logger.info("[Exception get_product_coupons]:{0}".format(ex))
             return HttpBadRequest("Product VIN does not exists")
         return HttpResponse(json.dumps(resp))
-    
+
     def get_product_purchase_information(self, request, **kwargs):
         '''This API fetches the purchase information for a particular product
            whose VIN is provided in the request '''
@@ -185,8 +186,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             logger.info("[Exception get_product_purchase_information]:{0}".format(ex))
             return HttpBadRequest("Product VIN does not exists")
         return HttpResponse(json.dumps(resp))
-    
-        
+
     def get_product_warranty(self, request, **kwargs):
         '''This API fetches the warranty information for a particular product
            whose VIN is provided in the request '''
@@ -198,8 +198,8 @@ class AfterBuyResources(AfterBuyBaseResource):
         try:
             product_info = common.ProductData.objects.get(vin=vin)
             warranty_info = common.ProductWarrantyInfo.objects.get(product=product_info)
-            for field in ['image_url', 'issue_date', 'expiry_date', 'warranty_brand_id', 
-                      'warranty_brand_name', 'policy_number', 'premium']:
+            for field in ['image_url', 'issue_date', 'expiry_date', 'warranty_brand_id',
+                          'warranty_brand_name', 'policy_number', 'premium']:
                 resp[field] = getattr(warranty_info, field)
             resp['warranty_email'] = warranty_info.product.product_type.warranty_email
             resp['warranty_phone'] = warranty_info.product.product_type.warranty_phone
@@ -208,8 +208,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             logger.info("[Exception get_product_warranty]:{0}".format(ex))
             return HttpBadRequest("No warranty info exists")
         return HttpResponse(json.dumps(resp))
-    
-    
+
     def get_product_insurance(self, request, **kwargs):
         '''This API fetches the insurance information for a particular product
            whose VIN is provided in the request '''
@@ -221,19 +220,19 @@ class AfterBuyResources(AfterBuyBaseResource):
         try:
             product_info = common.ProductData.objects.get(vin=vin)
             insurance_info = common.ProductInsuranceInfo.objects.get(product=product_info)
-            for field in ['image_url', 'issue_date', 'expiry_date', 'insurance_brand_id', 
-                      'insurance_brand_name', 'policy_number', 'premium', 'insurance_phone', 'insurance_email']:
+            for field in ['image_url', 'issue_date', 'expiry_date', 'insurance_brand_id',
+                          'insurance_brand_name', 'policy_number', 'premium', 'insurance_phone', 'insurance_email']:
                 resp[field] = getattr(insurance_info, field)
             resp = utils.get_dict_from_object(resp)
         except Exception as ex:
             logger.info("[Exception get_product_insurance]:{0}".format(ex))
             return HttpBadRequest("No insurance info exists")
         return HttpResponse(json.dumps(resp))
-            
+
     @csrf_exempt
     def get_notification_count(self, request, **kwargs):
-        '''This API fetches count of unread notification of a particular 
-           user whose mobile is provided in the request '''
+        '''This API fetches count of unread notification of a particular
+        user whose mobile is provided in the request '''
 
         resp = {}
         phone_number = request.GET.get('mobile')
@@ -248,10 +247,10 @@ class AfterBuyResources(AfterBuyBaseResource):
             logger.info("[Exception get_product_insurance]:{0}".format(ex))
             return HttpBadRequest("Not a registered number")
         return HttpResponse(json.dumps(resp))
-    
+
     def get_notification_list(self, request, **kwargs):
-        '''This API fetches all the notification of a particular 
-           user whose mobile is provided in the request '''
+        '''This API fetches all the notification of a particular
+        user whose mobile is provided in the request '''
 #         self.is_authenticated(request)
         resp = []
         phone_number = request.GET.get('mobile')
@@ -288,7 +287,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             logger.info("[Exception get_spares_list]:{0}".format(ex))
             return HttpBadRequest("vin does not exist.")
         return HttpResponse(json.dumps(resp))
-        
+
     def save_user_details(self, request, **kwargs):
         phone_number = request.POST.get('mobile')
         if not phone_number:
@@ -309,7 +308,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             logger.info(log_message)
             data={'status':0, 'message':log_message}
         return HttpResponse(json.dumps(data), content_type="application/json")
- 
+
     def save_user_feedback(self, request, **kwargs):
         ''' This API used for saving user feedback  whose
             mobile number is provided in the request '''
@@ -327,7 +326,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             logger.info(log_message)
             data={'status':0, 'message':log_message}
         return HttpResponse(json.dumps(data), content_type="application/json")
-        
+
     def save_user_phone_details(self, request, **kwargs):
         phone_number = request.POST.get('mobile')
         if not phone_number:
@@ -348,9 +347,9 @@ class AfterBuyResources(AfterBuyBaseResource):
                                                               capacity=capacity, operating_system=os,
                                                               version=version, model=model)
             user_mobile_info.save()
-            data={'status':1, 'message':'details saved'}, 
+            data={'status':1, 'message':'details saved'},
         except Exception as ex:
             log_message = "unable to save details :{0}".format(ex)
             logger.info(log_message)
             data={'status':0, 'message':log_message}
-        return HttpResponse(json.dumps(data), content_type="application/json")    
+        return HttpResponse(json.dumps(data), content_type="application/json")

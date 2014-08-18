@@ -2,7 +2,6 @@
 import os
 import djcelery
 djcelery.setup_loader()
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 PROJECT_DIR = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
@@ -64,7 +63,7 @@ SUIT_CONFIG = {
                     {'model': 'datafeedlog',
                      'label': 'Feed Log'},
                      'uploadproductcsv',
-                    'messagetemplate', 'emailtemplate', 'gladmindusers',)},
+                     'messagetemplate', 'emailtemplate', 'gladmindusers',)},
         {'app': 'aftersell', 'label': 'AfterSell', 'icon': ' icon-folder-open',
          'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
                     {'model': 'dispatchedproduct',
@@ -174,7 +173,7 @@ SECRET_KEY = 'bbu7*-yvup0-*laxug+n5tf^lga_bwtrxu%y4ilb#$lv8%zw0m'
 TEMPLATE_LOADERS = (
                     # for performance enable cached templates
                     #      ('django.template.loaders.cached.Loader', (
-                    #         'django.template.loaders.filesystem.Loader',    
+                    #         'django.template.loaders.filesystem.Loader',
                     #         'django.template.loaders.app_directories.Loader',
                     #     )),
                     'django.template.loaders.filesystem.Loader',
@@ -330,7 +329,7 @@ UCN_RECOVERY_MAIL_DETAIL = {
                             "receiver": ["gladminds@hashedin.com"],
                             "subject": "Gladminds UCN Recovery Mail",
                             "body": """""",
-                           } 
+                           }
 
 OTP_MAIL = {
                   "sender":"support@gladminds.co",
