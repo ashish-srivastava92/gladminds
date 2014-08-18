@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from gladminds.feed import SAPFeed
 from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
 from datetime import datetime
+from django.conf import settings
 
 import csv
 
@@ -12,7 +13,7 @@ class Command(BaseCommand):
 
     def upload_user_data(self):
         print "Started running function..."
-        with open('test_data.csv', 'r') as csvfile:
+        with open(settings.PROJECT_DIR + '/test_data.csv', 'r') as csvfile:
             spamreader = csv.reader(csvfile, delimiter=',')
             next(spamreader)
             failed_feed_vins = []
