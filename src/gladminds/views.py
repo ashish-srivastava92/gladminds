@@ -14,9 +14,10 @@ from django.contrib.auth import authenticate, login, logout
 from gladminds.models import common
 from gladminds.sqs_tasks import send_otp
 from gladminds import utils, message_template
+from gladminds import mail
 from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format, format_date_string, stringify_groups,\
-    get_list_from_set
+    get_list_from_set, create_context
 from gladminds.sqs_tasks import export_asc_registeration_to_sap
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.mail import sent_otp_email
@@ -65,10 +66,7 @@ def user_logout(request):
         elif 'dascs' in groups:
             logout(request)
             return HttpResponseRedirect('/aftersell/dasc/login')
-        elif 'SDM' in groups:
-            logout(request)
-            return HttpResponseRedirect('/aftersell/desk/login')
-        elif 'SDO' in groups:
+        elif 'SDO' in groups or 'SDM' in groups :
             logout(request)
             return HttpResponseRedirect('/aftersell/desk/login')
     return HttpResponseBadRequest('Not Allowed')
@@ -371,16 +369,13 @@ def modify_servicedesk_tickets(request,feedbackid):
     user_obj = request.user
     servicedesk_obj_all = aftersell_common.ServiceDeskUser.objects.all()
     if request.method == 'GET':
-        if group_name[0].name == 'SDM':
-           feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
-        if group_name[0].name == 'SDO':
-           servicedesk_obj = aftersell_common.ServiceDeskUser.objects.filter(user=user_obj)
-           feedback = aftersell_common.Feedback.objects.filter(assign_to=servicedesk_obj[0],id = feedbackid)
+       feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
     if request.method == 'POST':
         data = request.POST  
         servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(phone_number = data['Assign_To'])
         feedback = aftersell_common.Feedback.objects.filter(id = feedbackid).update(assign_to = servicedesk_assign_obj[0] , status = data['status'], priority = data['Priority'])
         feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
+        context = create_context(feedback[0])    
     return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj_all})
            
        

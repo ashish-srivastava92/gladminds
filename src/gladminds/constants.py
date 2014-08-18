@@ -19,6 +19,6 @@ FEEDBACK_TYPE = (
     )
 
 USER_DESIGNATION = (
-                    ('SDO','SDO'),
-                    ('SDM','SDM')
+                    ('SDO','Owner'),
+                    ('SDM','Manager')
                     )
