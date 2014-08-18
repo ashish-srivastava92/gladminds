@@ -2,8 +2,6 @@ from django.db import models
 from django.conf import settings
 from datetime import datetime
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-#from gladminds.signals import send_sms
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     USER_DESIGNATION
 
@@ -136,5 +134,4 @@ class Feedback(models.Model):
         app_label = "aftersell"
         verbose_name_plural = "aftersell feedback info"
 
-# post_save.connect(send_sms,sender=Feedback)       
         

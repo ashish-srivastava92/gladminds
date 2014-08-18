@@ -18,6 +18,7 @@ FEEDBACK_TYPE = (
         ('Suggestion', 'Suggestion'),
     )
 
-USER_DESIGNATION = (('SDO','SDO'),
+USER_DESIGNATION = (
+                    ('SDO','SDO'),
                     ('SDM','SDM')
                     )

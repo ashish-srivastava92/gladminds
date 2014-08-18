@@ -350,17 +350,18 @@ def trigger_sqs_tasks(request):
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
     taskqueue.add(sqs_tasks[request.POST['task']])
     return HttpResponse()
+
 @login_required()
 def get_servicedesk_tickets(request):
     group_name =  request.user.groups.all()
     user_obj = request.user
     if group_name[0].name == 'SDM':
        feedback = aftersell_common.Feedback.objects.all()
-       return render(request,'service-desk/tickets.html',{"feedback":feedback})
     if group_name[0].name == 'SDO':
        servicedesk_obj = aftersell_common.ServiceDeskUser.objects.filter(user=user_obj)
        feedback = aftersell_common.Feedback.objects.filter(assign_to=servicedesk_obj[0])
-       return render(request,'service-desk/tickets.html',{"feedback":feedback})
+    return render(request,'service-desk/tickets.html',{"feedback":feedback})
+
 @login_required() 
 def modify_servicedesk_tickets(request,feedbackid):
     group_name =  request.user.groups.all()
@@ -368,28 +369,19 @@ def modify_servicedesk_tickets(request,feedbackid):
     priority = get_list_from_set(PRIORITY)
     type = get_list_from_set(FEEDBACK_TYPE)
     user_obj = request.user
+    servicedesk_obj_all = aftersell_common.ServiceDeskUser.objects.all()
     if request.method == 'GET':
         if group_name[0].name == 'SDM':
            feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
-           servicedesk_obj = aftersell_common.ServiceDeskUser.objects.all()
-           return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj})
         if group_name[0].name == 'SDO':
            servicedesk_obj = aftersell_common.ServiceDeskUser.objects.filter(user=user_obj)
            feedback = aftersell_common.Feedback.objects.filter(assign_to=servicedesk_obj[0],id = feedbackid)
-           return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name})
     if request.method == 'POST':
         data = request.POST  
-        if group_name[0].name == 'SDM':
-           servicedesk_obj = aftersell_common.ServiceDeskUser.objects.all()
-           servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(phone_number = data['Assign_To'])
-           feedback = aftersell_common.Feedback.objects.filter(id = feedbackid).update(assign_to = servicedesk_assign_obj[0] , status = data['status'], priority = data['Priority'])
-           feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
-           return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj})
-        if group_name[0].name == 'SDO':
-           servicedesk_obj = aftersell_common.ServiceDeskUser.objects.filter(user=user_obj)
-           feedback = aftersell_common.Feedback.objects.filter(assign_to=servicedesk_obj[0],id = feedbackid).update(status = data['status'])
-           feedback = aftersell_common.Feedback.objects.filter(assign_to=servicedesk_obj[0],id = feedbackid)
-           return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name}) 
+        servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(phone_number = data['Assign_To'])
+        feedback = aftersell_common.Feedback.objects.filter(id = feedbackid).update(assign_to = servicedesk_assign_obj[0] , status = data['status'], priority = data['Priority'])
+        feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
+    return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj_all})
            
        
         

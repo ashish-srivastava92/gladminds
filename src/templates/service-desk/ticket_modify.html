@@ -18,7 +18,6 @@
           <div class="col-md-offset-8 col-md-2">
             <a class="logout" href="/aftersell/provider/logout">Logout</a>&nbsp;&nbsp;&nbsp;
             <a class="logout" href="/aftersell/servicedesk/">Back</a>
-            
           </div>
         </div>
         
@@ -32,85 +31,49 @@
   <div class="form-group">
     <label class="col-sm-3 control-label" for="reporter">Reporter</label>
     <div class="col-sm-9">
-    <input type="text" class="form-control" id="reporter" value={{feedback.reporter}} disabled>
+    <input type="text" class="form-control" id="reporter" value={{feedback.reporter}} {% if group == 'SDO' %} readonly {% endif %} >
     </div>
   </div>
-  {% if group == 'SDO' %}
   <div class="form-group">
     <label class="col-sm-3 control-label" for="Assign To">Assign_To</label>
     <div class="col-sm-9">
-    <input type="text" class="form-control" id="Assign To" value={{feedback.assign_to}} disabled>
-    </div>
-  </div>
-    <div class="form-group">
-    
-  <label class="col-sm-3 control-label" for="Priority">Priority</label>
-  <div class="col-sm-9">
-    <select class="form-control" name="Priority" id="Priority" disabled>
-                      <option value ={{feedback.priority}}>{{feedback.priority}}</option>
-                      {% for type in PRIORITY %}
-                      <option value="{{type}}">{{type}}</option>
-                      {% endfor %}
-                    </select>
-                    </div>
-                    </div>
-                    <div class="form-group">
-    <label class="col-sm-3 control-label" for="Status">Status</label>
-    <div class="col-sm-9">
-    <select class="form-control" name="status" id="status" >
-                      <option value ={{feedback.status}}>{{feedback.status}}</option>
-                      {% for type in FEEDBACK_STATUS %}
-                      <option value="{{type}}">{{type}}</option>
-                      {% endfor %}
-                    </select>
-                    </div>
-  </div>
- 
-  {% elif group == 'SDM' %}
-  <div class="form-group">
-    <label class="col-sm-3 control-label" for="Assign To">Assign_To</label>
-    <div class="col-sm-9">
-    <select class="form-control" name="Assign_To" id="Assign To" >
+    <select class="form-control" name="Assign_To" id="Assign To" {% if group == 'SDO' %} readonly {% endif %} >
                       <option value = {{feedback.assign_to}}>{{feedback.assign_to}}</option>
                       {% for type in servicedeskuser %}
-                      <option value="{{type}}">{{type}}</option>
+                      	<option value="{{type}}">{{type}}</option>
                       {% endfor %}
                     </select>
     </div>
   </div>
   
     <div class="form-group">
-    
   <label class="col-sm-3 control-label" for="Priority">Priority</label>
   <div class="col-sm-9">
-    <select class="form-control" name="Priority" id="Priority" >
+    <select class="form-control" name="Priority" id="Priority" readonly>
                       <option value ={{feedback.priority}}>{{feedback.priority}}</option>
                       {% for type in PRIORITY %}
-                      <option value="{{type}}">{{type}}</option>
+                      	<option value="{{type}}">{{type}}</option>
                       {% endfor %}
-                    </select>
-                    </div>
-                    </div>
-  <div class="form-group">
+    </select>
+    </div>
+      </div>
+      
+   <div class="form-group">
     <label class="col-sm-3 control-label" for="Status">Status</label>
     <div class="col-sm-9">
     <select class="form-control" name="status" id="status" >
                       <option value ={{feedback.status}}>{{feedback.status}}</option>
                       {% for type in FEEDBACK_STATUS %}
-                      <option value="{{type}}">{{type}}</option>
+                      	<option value="{{type}}">{{type}}</option>
                       {% endfor %}
-                    </select>
-                    </div>
+    </select>
+    </div>
   </div>
-  
-  {% endif %}
-
- 
+   
   <div class="form-group">
-    
    <label class="col-sm-3 control-label"for="Message">Message</label>
    <div class="col-sm-9">
-   <input type="text" class="form-control"id="Message" value={{feedback.message}} disabled>
+   <textarea  class="form-control"id="Message" value={{feedback.message}} readonly>{{feedback.message}}</textarea>
     </div>
   </div>
   
@@ -118,25 +81,27 @@
   <div class="form-group">
     <label class="col-sm-3 control-label" for="type">Type</label>
     <div class="col-sm-9">
-    <select class="form-control" name="type" id="type" disabled>
+    <select class="form-control" name="type" id="type" readonly>
                       <option value ={{feedback.type}}>{{feedback.type}}</option>
                       {% for type in FEEDBACK_TYPE %}
-                      <option value="{{type}}">{{type}}</option>
+                     	 <option value="{{type}}">{{type}}</option>
                       {% endfor %}
-                    </select>
-                    </div>
+    </select>
+    </div>
   </div>
   <div class="form-group">
     <label class="col-sm-3 control-label" for="Subject">Subject</label>
     <div class="col-sm-9">
-    <input type="textarea" class="form-control" id="subject" value={{feedback.subject}} disabled>
+    <input type="textarea" class="form-control" id="subject" value={{feedback.subject}} readonly>
     </div>
   </div>
   {% endfor %}
+  
   <div class="form-group">
     <div class="col-sm-offset-3 col-sm-9">
       <button type="submit" class="btn btn-primary">Save</button>
     </div>
+  </div>  
 </form>
 </div>
 <div class="col-md-4"></div>
