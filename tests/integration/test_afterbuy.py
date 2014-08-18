@@ -142,12 +142,12 @@ class TestAfterbuy(GladmindsResourceTestCase):
         self.assertEqual(200, response.status_code) 
            
     def test_save_user_feedback(self):
-        data = {"mobile":"99999998","feedback_type":"xyz","message":"dummy message"}
+        data = {"mobile":"99999998", "message":"dummy message"}
         response = client.post("/v1/afterbuy/user/feedback/", data=data)
         deserialize_resp = self.deserialize(response)
         self.assertEqual('saved successfully', deserialize_resp['message'])
         self.assertEqual(200, response.status_code)  
-        
+
     def test_get_product_coupons(self):
         response = client.get('/v1/afterbuy/product/coupons/', data={'vin': 'MD2A57BZ4EWA05472'})
         self.assertEqual(response.status_code, 200)  
