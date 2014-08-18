@@ -47,16 +47,7 @@ class UserProducts(models.Model):
     
     def __unicode__(self):
         return self.vin    
-        
-class UserFeedback(models.Model):
-    user = models.ForeignKey(GladMindUsers, null=False, blank=False)
-    feedback_type = models.CharField(max_length=55, null=False)
-    message = models.CharField(max_length=256, null=False)
-    
-    class Meta:
-        app_label = "afterbuy"
-        verbose_name_plural = "userFeedbacks"
-        
+       
 class UserMobileInfo(models.Model):
     user = models.ForeignKey(GladMindUsers, null=False, blank=False)
     IMEI = models.CharField(max_length=50, null=True, blank=True, unique=True)
