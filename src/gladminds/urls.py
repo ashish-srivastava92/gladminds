@@ -27,7 +27,8 @@ urlpatterns = patterns('',
     url(r'^aftersell/users/otp/validate', 'gladminds.views.validate_otp', name='validate_otp'),
     url(r'^aftersell/users/otp/update_pass', 'gladminds.views.update_pass', name='update_pass'),
     url(r'^aftersell/asc/self-register/$', 'gladminds.views.asc_registration'),
-    url(r'^aftersell/servicedesks/details/$', 'gladminds.views.get_all_tickets', name='get_all_tickets'),
+    url(r'^aftersell/servicedesk/$', 'gladminds.views.get_servicedesk_tickets', name='get_servicedesk_tickets'),
+    url(r'^aftersell/feedbackdetails/(?P<feedbackid>\d+)/$', 'gladminds.views.modify_servicedesk_tickets', name='modify_servicedesk_tickets'),
     #Afterbuy accesstoken URL.
     url(r'^oauth2/', include('provider.oauth2.urls', namespace = 'oauth2')),
 

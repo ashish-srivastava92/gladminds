@@ -18,6 +18,7 @@ FEEDBACK_TYPE = (
         ('Suggestion', 'Suggestion'),
     )
 
-USER_DESIGNATION = (('Owner','Owner'),
-                    ('Manager','Manager')
+USER_DESIGNATION = (
+                    ('SDO','Owner'),
+                    ('SDM','Manager')
                     )

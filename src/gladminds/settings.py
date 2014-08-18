@@ -358,7 +358,18 @@ ASSIGNEE_FEEDBACK_MAIL_DETAIL = {
                   "receiver": [""],
                   "body": """""",
               }
-
+INITIATOR_FEEDBACK_MAIL_DETAIL = {
+                  "sender":"feed-report@gladminds.co",
+                  "subject":"FEEDBACK STATUS",
+                  "receiver": [""],
+                  "body": """""",
+              }
+INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL = {
+                  "sender":"feed-report@gladminds.co",
+                  "subject":"FEEDBACK STATUS",
+                  "receiver": [""],
+                  "body": """""",
+              }
 # AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
 AFTERBUY_USER_LOC = os.path.join(AFTERBUY_LOC, "users")
