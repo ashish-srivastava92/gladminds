@@ -13,6 +13,7 @@ from gladminds import utils
 from gladminds.resource.authentication import AccessTokenAuthentication
 from gladminds.afterbuy.models import common as afterbuy_common
 from gladminds.utils import mobile_format
+from gladminds.aftersell.models import common as aftersell_common
 
 
 logger = logging.getLogger("gladminds")
@@ -317,10 +318,8 @@ class AfterBuyResources(AfterBuyBaseResource):
             return HttpBadRequest("phone_number is required.")
         try:
             phone_number= mobile_format(phone_number)
-            user_info = common.GladMindUsers.objects.get(phone_number=phone_number)
-            feedback_type = request.POST.get('feedback_type', None)
             message = request.POST.get('message', None)
-            user_feedback = afterbuy_common.UserFeedback(user=user_info, feedback_type = feedback_type, message = message)
+            user_feedback = aftersell_common.Feedback(reporter = phone_number, message = message)
             user_feedback.save()
             data={'status':1, 'message':"saved successfully"}
         except Exception as ex:

@@ -122,7 +122,7 @@ class ServiceDeskUser(models.Model):
         return self.phone_number       
     
 class Feedback(models.Model):
-    reporter = models.CharField(max_length=15, unique=True)
+    reporter = models.CharField(max_length=15)
     assign_to = models.ForeignKey(ServiceDeskUser, null=True, blank= True)
     message = models.CharField(max_length=512, null=True, blank=False)
     status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
