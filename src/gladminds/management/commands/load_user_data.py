@@ -1,10 +1,12 @@
-from django.core.management.base import BaseCommand
-from gladminds.feed import SAPFeed
-from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
-from datetime import datetime
-from django.conf import settings
-
 import csv
+from datetime import datetime
+
+from django.conf import settings
+from django.core.management.base import BaseCommand
+
+from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
+from gladminds.feed import SAPFeed
+
 
 class Command(BaseCommand):
     
@@ -15,13 +17,15 @@ class Command(BaseCommand):
         print "Started running function..."
         file_list = ['CustomerData_Batch1.csv', 'CustomerData_Batch2.csv', 'CustomerData_Batch3.csv']
         all_failed_vin = {}
-        for i in range(0, 3):
+        from multiprocessing.dummy import Pool
+        pool = Pool(20)
+        for i in range(0, 1):
+            data = []
+            self.failed_feed_vins = []
             with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
-                failed_feed_vins = []
                 for row_list in spamreader:
-                    data = []
                     temp ={}
                     temp['vin'] = row_list[0].strip()
                     temp['kunnr'] = row_list[1].strip()
@@ -36,15 +40,19 @@ class Command(BaseCommand):
                     temp['state'] = row_list[10].strip()
                     temp['pin_no'] = row_list[11].strip()
                     data.append(temp)
-                    feed_remark = FeedLogWithRemark(len(data),
-                                            feed_type='Purchase Feed',
-                                            action='Received', status=True)
-                    sap_obj = SAPFeed()
-                    feed_status = sap_obj.import_to_db(feed_type='purchase', data_source=data, feed_remark=feed_remark)
-                    if feed_status.failed_feeds:
-                        failed_feed_vins.append(temp['vin'])
-                                    
-            all_failed_vin[file_list[i]] = failed_feed_vins
-            print "Failed feed vin no. .. ", file_list[i], failed_feed_vins
-        print "All failed vin", all_failed_vin 
+            
+            pool.map(self.process_feed, data)
+             
+            all_failed_vin[file_list[i]] = self.failed_feed_vins
+            print "Failed feed vin no. .. ", file_list[i], self.failed_feed_vins
         print "Completed execution.."
+
+    def process_feed(self, data):
+        feed_remark = FeedLogWithRemark(1,
+                                    feed_type='Purchase Feed',
+                                    action='Received', status=True)
+        sap_obj = SAPFeed()
+        feed_status = sap_obj.import_to_db(feed_type='purchase', data_source=[data], feed_remark=feed_remark)
+        
+        if feed_status.failed_feeds:
+            self.failed_feed_vins.append(data['vin'])
