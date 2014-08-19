@@ -239,7 +239,6 @@ def get_list_from_set(set_data):
     return created_list
 
 def create_context(data):
-    print "Dddd",data.message
     context_dict = {'type' : data.type,
                     'reporter' : data.reporter,
                     'message' : data.message,

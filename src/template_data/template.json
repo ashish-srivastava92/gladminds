@@ -270,7 +270,7 @@
     "pk": 31,
     "fields": {
       "template_key": "RCV_USER_COMPLAINT",
-      "template": "{message}",
+      "template": "Receive this message when service advisor files complain}",
       "description": "Receive this message when service advisor files complain"
     }
   },
@@ -279,7 +279,7 @@
     "pk": 32,
     "fields": {
       "template_key": "SEND_MSG_TO_ASSIGNEE",
-      "template": "{message}",
+      "template": "You have been assigned this task.",
       "description": "You have been assigned this task. "
     }
   },
@@ -288,8 +288,8 @@
     "pk": 33,
     "fields": {
       "template_key": "INITIATOR_FEEDBACK_DETAILS",
-      "template": "Your {0} has been assigned to {1} and severity is {2}.",
-      "description": "Your {0} has been assigned to {1} and severity is {2}."
+      "template": "Your feedback has been assigned to one of our techincian is is looking into it.",
+      "description": "Your feedback has been assigned to one of our techincian is is looking into it."
     }
   },
   {
