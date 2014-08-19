@@ -10,11 +10,10 @@ from gladminds import taskmanager, feed, export_file, exportfeed
 from gladminds.models import common
 from gladminds import  message_template as templates
 from gladminds import utils
+
 logger = logging.getLogger("gladminds")
 __all__ = ['GladmindsTaskManager']
 AUDIT_ACTION = 'SEND TO QUEUE'
-angular_format = lambda x: x.replace('{', '<').replace('}', '>')
-
 sms_client = load_gateway()
 
 
@@ -169,7 +168,7 @@ def send_coupon(*args, **kwargs):
 This job send coupon close message to customer
 """
 
-def send_sms(template_name,phone_number):
+def send_sms(template_name, phone_number):
     try:
       message = templates.get_template(template_name)
     except Exception as ex:

@@ -270,7 +270,7 @@
     "pk": 31,
     "fields": {
       "template_key": "RCV_USER_COMPLAINT",
-      "template": "Receive this message when service advisor files complain}",
+      "template": "{message}",
       "description": "Receive this message when service advisor files complain"
     }
   },

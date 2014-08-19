@@ -367,7 +367,7 @@ def modify_servicedesk_tickets(request,feedbackid):
     priority = get_list_from_set(PRIORITY)
     type = get_list_from_set(FEEDBACK_TYPE)
     user_obj = request.user
-    flag = False
+    assign_status = False
     servicedesk_obj_all = aftersell_common.ServiceDeskUser.objects.all()
     if request.method == 'GET':
        feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
@@ -380,24 +380,27 @@ def modify_servicedesk_tickets(request,feedbackid):
            
         assign = feedback[0].assign_to
         if assign is None:
-           flag = True
+           assign_status = True
         data = request.POST
         if data['Assign_To'] == 'None': 
             aftersell_common.Feedback.objects.filter(id = feedbackid).update( status = data['status'], priority = data['Priority'])
         else:    
            servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(phone_number = data['Assign_To'])
            aftersell_common.Feedback.objects.filter(id = feedbackid).update(assign_to = servicedesk_assign_obj[0] , status = data['status'], priority = data['Priority'])
-        context = create_context(feedback[0])
         feedback_data = feedback[0]
-        if flag and feedback_data.assign_to : 
+        if assign_status and feedback_data.assign_to : 
+           context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL', feedback[0]) 
            mail.send_email_to_initiator_after_issue_assigned(context)
            send_sms('INITIATOR_FEEDBACK_DETAILS',feedback_data.reporter) 
         if feedback_data.status == 'Resolved':
+           context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL', feedback[0])
            mail.send_email_to_initiator_after_issue_resolved(context)
            send_sms('INITIATOR_FEEDBACK_STATUS',feedback_data.reporter)
-        if assign_number != feedback_data.assign_to.phone_number:    
-           mail.send_email_to_assignee(context)
-           send_sms('SEND_MSG_TO_ASSIGNEE',feedback_data.assign_to.phone_number)
+        if feedback_data.assign_to:   
+           if assign_number != feedback_data.assign_to.phone_number: 
+              context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL', feedback[0])   
+              mail.send_email_to_assignee(context, feedback[0])
+              send_sms('SEND_MSG_TO_ASSIGNEE',feedback_data.assign_to.phone_number)
     return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj_all})
            
        
