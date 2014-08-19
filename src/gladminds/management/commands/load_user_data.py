@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
     def upload_user_data(self):
         print "Started running function..."
-        file_list = ['CustomerData_Batch1.csv', 'CustomerData_Batch2.csv', 'CustomerData_Batch3.csv']
+        file_list = ['test_data.csv', 'test_data (copy).csv', 'CustomerData_Batch3.csv']
         all_failed_vin = {}
         from multiprocessing.dummy import Pool
         import time
@@ -23,7 +23,8 @@ class Command(BaseCommand):
         print "..........START TIME.........", time.time()
         pool = Pool(40)
         self.count = 0
-        for i in range(0, 3):
+        file = open("newfile.txt", "w")
+        for i in range(0, 2):
             data = []
             self.failed_feed_vins = []
             with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
@@ -49,6 +50,9 @@ class Command(BaseCommand):
              
             all_failed_vin[file_list[i]] = self.failed_feed_vins
             print "Failed feed vin no. .. ", file_list[i], self.failed_feed_vins
+            file.write(','.join(self.failed_feed_vins))
+            file.write('\n\n')
+        file.close()
         print "Completed execution.."
 
     def process_feed(self, data):
