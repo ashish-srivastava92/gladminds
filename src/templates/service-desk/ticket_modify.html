@@ -37,7 +37,7 @@
   <div class="form-group">
     <label class="col-sm-3 control-label" for="Assign To">Assign_To</label>
     <div class="col-sm-9">
-    <select class="form-control" name="Assign_To" id="Assign To" {% if group == 'SDO' %} readonly {% endif %} >
+    <select class="form-control" name="Assign_To" id="Assign To" {% if group == 'SDO' %} readonly {% endif %} required>
                       <option value = {{feedback.assign_to}}>{{feedback.assign_to}}</option>
                       {% for type in servicedeskuser %}
                       	<option value="{{type}}">{{type}}</option>

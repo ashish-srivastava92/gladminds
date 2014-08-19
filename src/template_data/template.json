@@ -279,7 +279,7 @@
     "pk": 32,
     "fields": {
       "template_key": "SEND_MSG_TO_ASSIGNEE",
-      "template": "{message}",
+      "template": "A GladMinds user has a feedback for us, which says: {message} Its has been reported by {reporter} on {created_date}. It has been assigned to you. Please address the issue as soon as possible.",
       "description": "You have been assigned this task. "
     }
   },
@@ -288,8 +288,8 @@
     "pk": 33,
     "fields": {
       "template_key": "INITIATOR_FEEDBACK_DETAILS",
-      "template": "Your {0} has been assigned to {1} and severity is {2}.",
-      "description": "Your {0} has been assigned to {1} and severity is {2}."
+      "template": "Your {type} has been assigned to one of our technician.Severity:{priority}.",
+      "description": "Your feedback has been assigned to one of our technician  is looking into it."
     }
   },
   {
@@ -297,7 +297,7 @@
     "pk": 34,
     "fields": {
       "template_key": "INITIATOR_FEEDBACK_STATUS",
-      "template": "Your Complaint has been resolved.",
+      "template": "Your {type} has been resolved.",
       "description": "Your Complaint has been resolved."
     }
   }
