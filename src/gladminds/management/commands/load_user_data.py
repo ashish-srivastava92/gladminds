@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
     def upload_user_data(self):
         print "Started running function..."
-        file_list = ['CustomerData_Batch2.csv', 'CustomerData_Batch1.csv', 'CustomerData_Batch3.csv']
+        file_list = ['test_data.csv', 'CustomerData_Batch1.csv', 'CustomerData_Batch3.csv']
         all_failed_vin = {}
         from multiprocessing.dummy import Pool
         import time
@@ -49,8 +49,6 @@ class Command(BaseCommand):
              
             all_failed_vin[file_list[i]] = self.failed_feed_vins
             print "Failed feed vin no. .. ", file_list[i], self.failed_feed_vins
-        print "..........END TIME.........", time.time()
-        print "total time...", time.time() - start_time, self.count
         print "Completed execution.."
 
     def process_feed(self, data):
