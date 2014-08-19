@@ -391,16 +391,16 @@ def modify_servicedesk_tickets(request,feedbackid):
         if assign_status and feedback_data.assign_to : 
            context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL', feedback[0]) 
            mail.send_email_to_initiator_after_issue_assigned(context)
-           send_sms('INITIATOR_FEEDBACK_DETAILS',feedback_data.reporter) 
+           send_sms('INITIATOR_FEEDBACK_DETAILS',feedback_data.reporter, feedback_data) 
         if feedback_data.status == 'Resolved':
            context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL', feedback[0])
            mail.send_email_to_initiator_after_issue_resolved(context)
-           send_sms('INITIATOR_FEEDBACK_STATUS',feedback_data.reporter)
+           send_sms('INITIATOR_FEEDBACK_STATUS', feedback_data.reporter, feedback_data)
         if feedback_data.assign_to:   
            if assign_number != feedback_data.assign_to.phone_number: 
               context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL', feedback[0])   
               mail.send_email_to_assignee(context, feedback[0])
-              send_sms('SEND_MSG_TO_ASSIGNEE',feedback_data.assign_to.phone_number)
+              send_sms('SEND_MSG_TO_ASSIGNEE', feedback_data.assign_to.phone_number, feedback_data)
     return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj_all})
            
        

@@ -168,9 +168,19 @@ def send_coupon(*args, **kwargs):
 This job send coupon close message to customer
 """
 
-def send_sms(template_name, phone_number):
+def send_sms(template_name, phone_number, feedback_obj):
     try:
-      message = templates.get_template(template_name)
+        type = feedback_obj.type
+        reporter = feedback_obj.reporter
+        message = feedback_obj.message
+        created_date = feedback_obj.created_date
+        assign_to = feedback_obj.assign_to
+        priority = feedback_obj.priority   
+        message = templates.get_template(template_name).format(type = type, 
+                                          reporter = reporter, message = message,
+                                          created_date = created_date, 
+                                          assign_to = assign_to,  
+                                          priority =  priority)
     except Exception as ex:
            message = templates.get_template('SEND_INVALID_MESSAGE')
     finally:
