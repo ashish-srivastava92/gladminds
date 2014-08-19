@@ -22,3 +22,8 @@ USER_DESIGNATION = (
                     ('SDO','Owner'),
                     ('SDM','Manager')
                     )
+RATINGS = (
+           ('1','Glad'),
+           ('2','Very Glad'),
+           ('3','Not Glad')
+        )

@@ -38,6 +38,7 @@
 					<th>Type</th>
 					<th>Status</th>
 					<th>Created Date</th>
+					<th>Due Date</th>
 					<th>Edit</th>
 				</tr>
 			</thead>
@@ -52,12 +53,11 @@
 					<td>{{feedback.type}}</td>
 					<td>{{feedback.status}}</td>
 					<td>{{feedback.created_date}}</td>
+					<td>{{feedback.due_date}}</td>
 					<td><a href="/aftersell/feedbackdetails/{{feedback.id}}/"><button
 								type="button" class="btn btn-default btn-sm">
 								<span class="glyphicon glyphicon-edit"></span> Edit
 							</button</a></td>
-
-
 				</tr>
 				{% endfor %}
 			</tbody>
