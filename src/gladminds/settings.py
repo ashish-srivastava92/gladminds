@@ -338,38 +338,7 @@ OTP_MAIL = {
                   "body": """""",
               }
 
-FEDBACK_MAIL_DETAIL = {
-                  "sender":"feed-report@gladminds.co",
-                  "subject":"Feedback",
-                  "receiver": ["gladminds@hashedin.com"],
-                  "body": """""",
-              }
 
-SERVICEDESK_FEEDBACK_MAIL_DETAIL = {
-                  "sender":"feed-report@gladminds.co",
-                  "subject":"Thank you for feedback",
-                  "receiver": [""],
-                  "body": """""",
-              }
-
-ASSIGNEE_FEEDBACK_MAIL_DETAIL = {
-                  "sender":"feed-report@gladminds.co",
-                  "subject":"Task that is assigned ",
-                  "receiver": [""],
-                  "body": """""",
-              }
-INITIATOR_FEEDBACK_MAIL_DETAIL = {
-                  "sender":"feed-report@gladminds.co",
-                  "subject":"FEEDBACK STATUS",
-                  "receiver": [""],
-                  "body": """""",
-              }
-INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL = {
-                  "sender":"feed-report@gladminds.co",
-                  "subject":"FEEDBACK STATUS",
-                  "receiver": [""],
-                  "body": """""",
-              }
 # AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
 AFTERBUY_USER_LOC = os.path.join(AFTERBUY_LOC, "users")
