@@ -373,6 +373,11 @@ def modify_servicedesk_tickets(request,feedbackid):
        feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
     if request.method == 'POST':
         feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
+        if feedback[0].assign_to:
+           assign_number = feedback[0].assign_to.phone_number
+        else:
+             assign_number = None   
+           
         assign = feedback[0].assign_to
         if assign is None:
            flag = True
@@ -390,7 +395,7 @@ def modify_servicedesk_tickets(request,feedbackid):
         if feedback_data.status == 'Resolved':
            mail.send_email_to_initiator_after_issue_resolved(context)
            send_sms('INITIATOR_FEEDBACK_STATUS',feedback_data.reporter)
-        if feedback_data.assign_to and feedback_data.status != 'Resolved':    
+        if assign_number != feedback_data.assign_to.phone_number:    
            mail.send_email_to_assignee(context)
            send_sms('SEND_MSG_TO_ASSIGNEE',feedback_data.assign_to.phone_number)
     return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj_all})

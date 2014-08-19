@@ -288,8 +288,8 @@
     "pk": 33,
     "fields": {
       "template_key": "INITIATOR_FEEDBACK_DETAILS",
-      "template": "Your feedback has been assigned to one of our techincian is is looking into it.",
-      "description": "Your feedback has been assigned to one of our techincian is is looking into it."
+      "template": "Your feedback has been assigned to one of our technician is  looking into it.",
+      "description": "Your feedback has been assigned to one of our technician  is looking into it."
     }
   },
   {
