@@ -15,10 +15,14 @@ class Command(BaseCommand):
 
     def upload_user_data(self):
         print "Started running function..."
-        file_list = ['CustomerData_Batch1.csv', 'CustomerData_Batch2.csv', 'CustomerData_Batch3.csv']
+        file_list = ['CustomerData_Batch2.csv', 'CustomerData_Batch1.csv', 'CustomerData_Batch3.csv']
         all_failed_vin = {}
         from multiprocessing.dummy import Pool
-        pool = Pool(20)
+        import time
+        start_time = time.time()
+        print "..........START TIME.........", time.time()
+        pool = Pool(40)
+        self.count = 0
         for i in range(0, 1):
             data = []
             self.failed_feed_vins = []
@@ -45,14 +49,17 @@ class Command(BaseCommand):
              
             all_failed_vin[file_list[i]] = self.failed_feed_vins
             print "Failed feed vin no. .. ", file_list[i], self.failed_feed_vins
+        print "..........END TIME.........", time.time()
+        print "total time...", time.time() - start_time, self.count
         print "Completed execution.."
 
     def process_feed(self, data):
+        self.count = self.count  + 1
         feed_remark = FeedLogWithRemark(1,
                                     feed_type='Purchase Feed',
                                     action='Received', status=True)
         sap_obj = SAPFeed()
         feed_status = sap_obj.import_to_db(feed_type='purchase', data_source=[data], feed_remark=feed_remark)
-        
+        print "cout = ", self.count
         if feed_status.failed_feeds:
             self.failed_feed_vins.append(data['vin'])
