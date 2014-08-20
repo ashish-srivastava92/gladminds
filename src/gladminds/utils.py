@@ -6,7 +6,7 @@ from dateutil import tz
 from random import randint
 from django.utils import timezone
 from django.conf import settings
-
+from django.template import Context
 from gladminds.models.common import STATUS_CHOICES
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
@@ -199,8 +199,8 @@ def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=None,
     return path
 
 def get_email_template(key):
-    template_object = common.EmailTemplate.objects.get(template_key=key)
-    return template_object
+    template_object = common.EmailTemplate.objects.filter(template_key=key).values()
+    return template_object[0]
 
 
 def format_date_string(date_string, date_format='%d/%m/%Y'):
@@ -237,3 +237,14 @@ def get_list_from_set(set_data):
     for set_object in set_data:
         created_list.append(list(set_object)[1])
     return created_list
+
+def create_context(email_template_name, feedback_obj):
+    type = feedback_obj.type
+    reporter = feedback_obj.reporter
+    message = feedback_obj.message
+    created_date = feedback_obj.created_date
+    assign_to = feedback_obj.assign_to
+    priority = feedback_obj.priority 
+    data = get_email_template(email_template_name)
+    data['content'] = data['body'].format(type = type, reporter = reporter, message = message, created_date = created_date, assign_to = assign_to,  priority =  priority)
+    return data

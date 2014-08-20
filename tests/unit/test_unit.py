@@ -13,6 +13,7 @@ from gladminds.utils import get_sa_list, get_coupon_info, get_customer_info,\
 from gladminds.aftersell.models import logs
 from django.db import connection
 from gladminds.models import common
+from gladminds.aftersell.models import common as aftersell_common
 import boto
 
 
@@ -106,9 +107,9 @@ class TestUtils(GladmindsUnitTestCase):
         self.assertEqual(data['vin'], 'VINXXX0011') 
         
     def test_get_list_from_set(self):
-        data = get_list_from_set(common.FEEDBACK_TYPE)
+        data = get_list_from_set(aftersell_common.FEEDBACK_TYPE)
         self.assertEqual(len(data), 5) 
-        data = get_list_from_set(common.PRIORITY)
+        data = get_list_from_set(aftersell_common.PRIORITY)
         self.assertEqual(len(data), 4) 
          
 

@@ -2,12 +2,12 @@ from django.db import models
 from django.conf import settings
 from datetime import datetime
 from django.contrib.auth.models import User
-
+from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
+    USER_DESIGNATION
 
 ##########################################################################
 ########################## ASC Save Form #########################
 ASC_STATUS_CHOICES = ((1, 'In Progress'), (2, 'Failed'))
-
 
 class ASCSaveForm(models.Model):
     name = models.CharField(max_length=255, null=False)
@@ -106,3 +106,32 @@ class RegisteredASC(models.Model):
         verbose_name_plural = "Registered ASC Form"
         
     
+class ServiceDeskUser(models.Model):
+    user = models.OneToOneField(User, null=True, blank=True)
+    email_id = models.EmailField(max_length=215, null=True, blank=True)
+    phone_number = models.CharField(max_length=15, unique=True)
+    designation = models.CharField(max_length=10, choices = USER_DESIGNATION)
+    
+    class Meta:
+        app_label = "aftersell"
+        verbose_name_plural = "service desk users"
+    
+    def __unicode__(self):
+        return self.phone_number       
+    
+class Feedback(models.Model):
+    reporter = models.CharField(max_length=15)
+    assign_to = models.ForeignKey(ServiceDeskUser, null=True, blank= True)
+    message = models.CharField(max_length=512, null=True, blank=False)
+    status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
+    priority = models.CharField(max_length=12, choices=PRIORITY)
+    type = models.CharField(max_length=12, choices=FEEDBACK_TYPE)
+    subject = models.CharField(max_length=512, null=True, blank=True)
+    created_date = models.DateTimeField(null=True, blank= False,auto_now=True)
+    modified_date = models.DateTimeField(null=True, blank= True,auto_now=True)
+    
+    class Meta:
+        app_label = "aftersell"
+        verbose_name_plural = "aftersell feedback info"
+
+        

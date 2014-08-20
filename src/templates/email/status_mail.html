@@ -4,10 +4,9 @@ A GladMinds user has a feedback for us, which says:<br/><br/>
 <br/><br/>
 Its has been reported by <b>{{reporter}}</b> on <b>{{created_date}}</b>.
 <br/><br/>
-{% if assign_to %}
-It is assigned to <b>{{assign_to}}</b>
+{% if status == 'Resolved' %}
+This feedback issue has been {{status}}
 {% endif %}
-Please address the issue as soon as possible.
 <br/><br/>
 Thanks<br/>
 GCP Bajaj Data Feeds Team

@@ -24,7 +24,7 @@ from gladminds.aftersell.models import common as aftersell_common
 from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
-from gladminds.utils import mobile_format, format_message, get_task_queue
+from gladminds.utils import mobile_format, format_message, get_task_queue, create_context
 from gladminds.feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
 from gladminds.mail import send_feedback_received,send_servicedesk_feedback
@@ -448,13 +448,13 @@ class GladmindsResources(Resource):
                 message = templates.get_template('SEND_SA_UNAUTHORISED_SA')
             else:
                 if with_detail:
-                    gladminds_feedback_object = common.Feedback(reporter=active_sa,
+                    gladminds_feedback_object = aftersell_common.Feedback(reporter=active_sa,
                                                                 priority=sms_dict['priority'] , type=sms_dict['type'], 
                                                                 subject=sms_dict['subject'], message=sms_dict['message'],
                                                                 status="Open", created_date=datetime.now()
                                                                 )
                 else:
-                    gladminds_feedback_object = common.Feedback(reporter=active_sa,
+                    gladminds_feedback_object = aftersell_common.Feedback(reporter=active_sa,
                                                                 message=sms_dict['message'], status="Open",
                                                                 created_date=datetime.now()
                                                                 )
@@ -471,8 +471,10 @@ class GladmindsResources(Resource):
                 task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
             else:
                 send_coupon.delay(phone_number=phone_number, message=message)
-            send_feedback_received(data=gladminds_feedback_object)
-            send_servicedesk_feedback(feedback_details=gladminds_feedback_object)
+            context = create_context('FEEDBACK_DETAIL_TO_ADIM',  gladminds_feedback_object)    
+            send_feedback_received(context)
+            context = create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)
+            send_servicedesk_feedback(context)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return {'status': True, 'message': message}
         

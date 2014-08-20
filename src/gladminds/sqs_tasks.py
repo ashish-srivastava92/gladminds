@@ -8,9 +8,12 @@ from gladminds import mail
 import logging
 from gladminds import taskmanager, feed, export_file, exportfeed
 from gladminds.models import common
+from gladminds import  message_template as templates
+from gladminds import utils
 
 logger = logging.getLogger("gladminds")
-
+__all__ = ['GladmindsTaskManager']
+AUDIT_ACTION = 'SEND TO QUEUE'
 sms_client = load_gateway()
 
 
@@ -165,6 +168,31 @@ def send_coupon(*args, **kwargs):
 This job send coupon close message to customer
 """
 
+def send_sms(template_name, phone_number, feedback_obj):
+    try:
+        type = feedback_obj.type
+        reporter = feedback_obj.reporter
+        message = feedback_obj.message
+        created_date = feedback_obj.created_date
+        assign_to = feedback_obj.assign_to
+        priority = feedback_obj.priority   
+        message = templates.get_template(template_name).format(type = type, 
+                                          reporter = reporter, message = message,
+                                          created_date = created_date, 
+                                          assign_to = assign_to,  
+                                          priority =  priority)
+    except Exception as ex:
+           message = templates.get_template('SEND_INVALID_MESSAGE')
+    finally:
+        logger.info("Send complain message received successfully with %s" % message)
+        phone_number = utils.get_phone_number_format(phone_number)
+        if settings.ENABLE_AMAZON_SQS:
+            task_queue = utils.get_task_queue()
+            task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
+        else:
+           send_coupon.delay(phone_number=phone_number, message=message)
+    audit_log(reciever = phone_number, action=AUDIT_ACTION, message=message)
+    return {'status': True, 'message': message}
 
 @shared_task
 def send_close_sms_customer(*args, **kwargs):

@@ -2,7 +2,6 @@
 import os
 import djcelery
 djcelery.setup_loader()
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 PROJECT_DIR = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
@@ -63,9 +62,8 @@ SUIT_CONFIG = {
                     {'model': 'auditlog', 'label': 'Audit Log'},
                     {'model': 'datafeedlog',
                      'label': 'Feed Log'},
-                    {'model': 'feedback',
-                     'label': 'Help Desk'}, 'uploadproductcsv',
-                    'messagetemplate', 'emailtemplate', 'gladmindusers',)},
+                     'uploadproductcsv',
+                     'messagetemplate', 'emailtemplate', 'gladmindusers',)},
         {'app': 'aftersell', 'label': 'AfterSell', 'icon': ' icon-folder-open',
          'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
                     {'model': 'dispatchedproduct',
@@ -78,7 +76,9 @@ SUIT_CONFIG = {
                      'label': 'Save Form -> ASC'},
                     {'model': 'auditlog', 'label': 'Audit Log'},
                     {'model': 'datafeedlog',
-                     'label': 'Feed Log'}, 'uploadproductcsv',
+                     'label': 'Feed Log'},
+                    {'model': 'feedback',
+                     'label': 'Help Desk'}, 'uploadproductcsv',
                     'messagetemplate', 'emailtemplate', 'gladmindusers',)},
         {'app': 'afterbuy', 'label': 'AfterBuy', 'icon': ' icon-folder-open',
          'models': ({'model': 'usernotification', 'label': 'notification'},)},
@@ -173,7 +173,7 @@ SECRET_KEY = 'bbu7*-yvup0-*laxug+n5tf^lga_bwtrxu%y4ilb#$lv8%zw0m'
 TEMPLATE_LOADERS = (
                     # for performance enable cached templates
                     #      ('django.template.loaders.cached.Loader', (
-                    #         'django.template.loaders.filesystem.Loader',    
+                    #         'django.template.loaders.filesystem.Loader',
                     #         'django.template.loaders.app_directories.Loader',
                     #     )),
                     'django.template.loaders.filesystem.Loader',
@@ -329,7 +329,7 @@ UCN_RECOVERY_MAIL_DETAIL = {
                             "receiver": ["gladminds@hashedin.com"],
                             "subject": "Gladminds UCN Recovery Mail",
                             "body": """""",
-                           } 
+                           }
 
 OTP_MAIL = {
                   "sender":"support@gladminds.co",
@@ -338,18 +338,7 @@ OTP_MAIL = {
                   "body": """""",
               }
 
-FEDBACK_MAIL_DETAIL = {
-                  "sender":"feed-report@gladminds.co",
-                  "subject":"Feedback",
-                  "receiver": ["gladminds@hashedin.com"],
-                  "body": """""",
-              }
-SERVICEDESK_FEEDBACK_MAIL_DETAIL = {
-                  "sender":"feed-report@gladminds.co",
-                  "subject":"Thank you for feedback",
-                  "receiver": [""],
-                  "body": """""",
-              }
+
 # AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
 AFTERBUY_USER_LOC = os.path.join(AFTERBUY_LOC, "users")

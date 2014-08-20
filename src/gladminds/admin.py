@@ -17,15 +17,15 @@ from django.db import models
 from django.contrib.admin.models import LogEntry
 from models.common import GladMindUsers, ProductTypeData, \
     BrandData, ProductData, CouponData, MessageTemplate,\
-    UploadProductCSV, Feedback
+    UploadProductCSV
 from gladminds.aftersell.models.common import \
-    RegisteredDealer,ServiceAdvisorDealerRelationship, ServiceAdvisor
+    RegisteredDealer, ServiceAdvisorDealerRelationship, ServiceAdvisor
 from gladminds.aftersell.models.logs import AuditLog, DataFeedLog
 from import_export.admin import ImportExportModelAdmin, ExportMixin
 from import_export import fields, widgets
 from import_export import resources
 from gladminds.models.common import EmailTemplate
-from gladminds.aftersell.models.common import ASCSaveForm
+from gladminds.aftersell.models.common import ASCSaveForm, Feedback
 from gladminds.afterbuy.models.common import UserNotification
 
 
@@ -126,9 +126,9 @@ class ServiceAdvisorAdmin(ModelAdmin):
 
 
 class ServiceAdvisorDealerAdmin(ModelAdmin):
-    search_fields = ('dealer_id__dealer_id', 'service_advisor_id__service_advisor_id', 
+    search_fields = ('dealer_id__dealer_id', 'service_advisor_id__service_advisor_id',
                      'service_advisor_id__name', 'service_advisor_id__phone_number')
-    
+
     list_display = (
         'dealer_id', 'name', 'service_advisor_ids', 'phone_number', 'status')
 
@@ -139,7 +139,8 @@ class ServiceAdvisorDealerAdmin(ModelAdmin):
     def service_advisor_ids(self, obj):
         sa_obj = ServiceAdvisor.objects.filter(
             service_advisor_id=obj.service_advisor_id.service_advisor_id)
-        return u'<a href="/aftersell/serviceadvisor/%s/">%s</a>' % (obj.service_advisor_id.pk, sa_obj[0].service_advisor_id)
+        return u'<a href="/aftersell/serviceadvisor/%s/">%s</a>' % (obj.service_advisor_id.pk,
+                                                                    sa_obj[0].service_advisor_id)
     service_advisor_ids.allow_tags = True
 
     def name(self, obj):
@@ -155,12 +156,11 @@ class ServiceAdvisorDealerAdmin(ModelAdmin):
         if len(sa_obj) > 0:
             return sa_obj[0].phone_number
         return None
-    
+
     def changelist_view(self, request, extra_context=None):
-        extra_context = {'searchable_fields':"('dealer_id', 'service_advisor_id', 'service_advisor__name', 'service_advisor_phone_number')"}
+        extra_context = {'searchable_fields':"('dealer_id', 'service_advisor_id', 'service_advisor__name',"
+        "'service_advisor_phone_number')"}
         return super(ServiceAdvisorDealerAdmin, self).changelist_view(request, extra_context=extra_context)
-
-
 
 ##############CUSTMERDATA AND GLADMINDS USER ADMIN###################
 class GladMindUserForm(ModelForm):
@@ -240,7 +240,7 @@ class ProductDataAdmin(ModelAdmin):
             coupon_service_type = " | ".join(
                 [str(obj.service_type) for obj in gm_coupon_data_obj])
         return coupon_service_type
-    
+
     def changelist_view(self, request, extra_context=None):
         extra_context = {'searchable_fields':"('vin', 'sap_customer_id', 'customer_phone_number', 'customer_name')"}
         return super(ProductDataAdmin, self).changelist_view(request, extra_context=extra_context)
@@ -288,7 +288,7 @@ class CouponAdmin(ModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
-    
+
     def queryset(self, request):
         """
         Returns a QuerySet of all model instances that can be edited by the
@@ -302,10 +302,10 @@ class CouponAdmin(ModelAdmin):
         if not request.GET and not request.POST and request.path == "/gladminds/coupondata/":
             qs = qs.filter(status=4)
         return qs
-    
+
     def get_changelist(self, request, **kwargs):
             return CouponChangeList
-    
+
     def changelist_view(self, request, extra_context=None):
         extra_context = {'searchable_fields':"('vin', 'unique_service_coupon', 'status', 'service_type')"}
         return super(CouponAdmin, self).changelist_view(request, extra_context=extra_context)
@@ -321,7 +321,7 @@ class CouponChangeList(ChangeList):
         params = self.params
         ordering = list(self.model_admin.get_ordering(request)
                         or self._get_default_ordering())
-        
+
         if ORDER_VAR in params:
             # Clear ordering and used params
             ordering = []
@@ -388,7 +388,6 @@ class EmailTemplateAdmin(ModelAdmin):
 
 ###########################AUDIT ADMIN########################
 
-
 class FeedLogAdmin(ModelAdmin):
     search_fields = ('status', 'data_feed_id', 'action')
     list_display = ('timestamp', 'feed_type', 'action',
@@ -401,7 +400,7 @@ class FeedLogAdmin(ModelAdmin):
             update_remark = ''
             for remark, occurence in remarks.iteritems():
                 update_remark = "[ {0} : {1} ].  ".format(remark, occurence)
-    
+
             update_remark = update_remark[:100] + u'<a href="{0}">{1}</a>'.\
                                             format(obj.file_location, " For More...")
             return update_remark
@@ -429,9 +428,9 @@ class DispatchedProduct(ProductData):
         proxy = True
 
 class ListDispatchedProduct(ModelAdmin):
-    search_fields = ('^vin', '^engine', '^customer_phone_number__phone_number', 
+    search_fields = ('^vin', '^engine', '^customer_phone_number__phone_number',
                      '^dealer_id__dealer_id', '^product_type__product_type')
-    
+
     list_display = (
         'vin', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
     exclude = ('order',)
@@ -443,7 +442,6 @@ class ListDispatchedProduct(ModelAdmin):
         admin site. This is used by changelist_view.
         """
         query_set = self.model._default_manager.get_query_set()
-        
         query_set = query_set.select_related('').prefetch_related('customer_phone_number', 'dealer_id', 'product_type')
 #         query_set = query_set.filter(invoice_date__isnull=False)
         # TODO: this should be handled by some parameter to the ChangeList.
@@ -481,19 +479,18 @@ class ASCSaveFormAdmin(ModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
-        
+
 class UserNotificationAdmin(ModelAdmin):
 
     list_display = (
         'user', 'message', 'notification_date', 'notification_read')
-    
+
 class UserFeedback(ModelAdmin):
 
     list_display = (
         'reporter', 'assign_to', 'message', 'subject', 'priority', 'type', 'status', 'created_date', 'modified_date')
 
 ##############################################################
-
 
 admin.site.register(BrandData, BrandAdmin)
 admin.site.register(DispatchedProduct, ListDispatchedProduct)
