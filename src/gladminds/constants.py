@@ -20,7 +20,17 @@ REDIRECT_USER ={
                     'SDO' : '/aftersell/servicedesk/',
                     'SDM' : '/aftersell/servicedesk/'
                 }
-          
+
+TEMPLATE_MAPPING = {    
+                     'asc' :'portal/asc_registration.html',
+                     'sa'  :'portal/sa_registration.html',
+                     'customer' : 'portal/customer_registration.html'
+                    }
+ACTIVE_MENU ={
+                'asc' : 'register_asc',
+                'sa' : 'register_sa',
+                'customer' : 'register_customer'
+              }
 
 FEEDBACK_STATUS = (
         ('Open', 'Open'),

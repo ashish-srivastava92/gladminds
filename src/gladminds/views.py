@@ -28,7 +28,7 @@ from gladminds.scheduler import SqsTaskQueue
 from gladminds.resource.resources import GladmindsResources
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     USER_DESIGNATION, PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
-    USER_GROUPS, REDIRECT_USER
+    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU
 
 gladmindsResources = GladmindsResources()
 logger = logging.getLogger('gladminds')
@@ -117,7 +117,6 @@ def update_pass(request):
 def redirect_user(request):
     group_name =  request.user.groups.all()
     if group_name[0].name in USER_GROUPS :
-        print group_name[0].name
         return HttpResponseRedirect(REDIRECT_USER.get(group_name[0].name))
 
 @login_required()
@@ -127,12 +126,7 @@ def register(request, menu):
         return HttpResponseBadRequest()
     if request.method == 'GET':
         user_id = request.user
-        template_mapping = {
-            'asc': {'template': 'portal/asc_registration.html', 'active_menu': 'register_asc'},
-            'sa': {'template': 'portal/sa_registration.html', 'active_menu': 'register_sa'},
-            'customer': {'template': 'portal/customer_registration.html', 'active_menu': 'register_customer'},
-        }
-        return render(request, template_mapping[menu]['template'], {'active_menu' : template_mapping[menu]['active_menu']\
+        return render(request, TEMPLATE_MAPPING.get(menu), {'active_menu' : ACTIVE_MENU.get(menu)\
                                                                     , 'groups': groups, 'user_id' : user_id})
     elif request.method == 'POST':
         save_user = {
