@@ -28,7 +28,7 @@ from gladminds.scheduler import SqsTaskQueue
 from gladminds.resource.resources import GladmindsResources
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     USER_DESIGNATION, PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
-    USER_GROUPS
+    USER_GROUPS, REDIRECT_USER
 
 gladmindsResources = GladmindsResources()
 logger = logging.getLogger('gladminds')
@@ -55,7 +55,6 @@ def user_logout(request):
         #TODO: Implement brand restrictions.
         user_groups = get_user_groups(request.user)
         for group in USER_GROUPS:
-            print group
             if group in user_groups:
                 logout(request)
                 return HttpResponseRedirect(GROUP_MAPPING.get(group))
@@ -117,13 +116,9 @@ def update_pass(request):
 
 def redirect_user(request):
     group_name =  request.user.groups.all()
-    if group_name[0].name== 'dealers':
-        return HttpResponseRedirect('/aftersell/register/sa')
-    if group_name[0].name == 'ascs':
-       return HttpResponseRedirect('/aftersell/register/asc')
-    if group_name[0].name == 'SDM' or group_name[0].name == 'SDO':
-       return HttpResponseRedirect('/aftersell/servicedesk/')
-     
+    if group_name[0].name in USER_GROUPS :
+        print group_name[0].name
+        return HttpResponseRedirect(REDIRECT_USER.get(group_name[0].name))
 
 @login_required()
 def register(request, menu):

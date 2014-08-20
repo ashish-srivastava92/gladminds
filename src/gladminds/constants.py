@@ -13,6 +13,13 @@ GROUP_MAPPING = {
                     'SDM' : '/aftersell/desk/login'
                  }
 USER_GROUPS = [ 'dealers', 'ascs', 'dascs', 'SDO', 'SDM']
+
+REDIRECT_USER ={
+                    'dealers' : '/aftersell/register/sa',
+                    'ascs' : '/aftersell/register/asc',
+                    'SDO' : '/aftersell/servicedesk/',
+                    'SDM' : '/aftersell/servicedesk/'
+                }
           
 
 FEEDBACK_STATUS = (
