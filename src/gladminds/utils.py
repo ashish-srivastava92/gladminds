@@ -165,6 +165,14 @@ def get_file_name(request, file_obj):
     ext = file_obj.name.split('.')[-1]
     customer_id = request.POST['customerId']
     return str(filename_prefix)+'_'+customer_id+'_'+filename_suffix+'.'+ext
+
+
+def get_user_groups(user):
+    groups = []
+    for group in user.groups.all():
+        groups.append(str(group.name))
+    return groups
+    
 def stringify_groups(user):
     groups = []
     for group in user.groups.all():

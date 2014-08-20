@@ -3,7 +3,7 @@ from django.conf import settings
 from datetime import datetime
 from django.contrib.auth.models import User
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
-    USER_DESIGNATION
+    USER_DESIGNATION, RATINGS
 
 ##########################################################################
 ########################## ASC Save Form #########################
@@ -129,7 +129,11 @@ class Feedback(models.Model):
     subject = models.CharField(max_length=512, null=True, blank=True)
     created_date = models.DateTimeField(null=True, blank= False,auto_now=True)
     modified_date = models.DateTimeField(null=True, blank= True,auto_now=True)
-    closed_date = models.DateTimeField(null=True, blank= True)
+    closed_date = models.DateTimeField(null=True, blank=True)
+    due_date = models.DateTimeField(null=True, blank=True)
+    remarks = models.CharField(max_length=512, null=True, blank=True)
+    ratings = models.CharField(max_length=12, choices=RATINGS)
+
     
     class Meta:
         app_label = "aftersell"
