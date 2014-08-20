@@ -490,12 +490,11 @@ class ASCSaveFormAdmin(ModelAdmin):
         
 class CustomerTempRegistrationAdmin(ModelAdmin):
     search_fields = (
-        'product_data', 'new_customer_name', 'new_number',
-        'product_purchase_date', 'temp_customer_id', 'sent_to_sap')
+        'product_data__vin', 'new_customer_name', 'new_number', 'temp_customer_id', 'sent_to_sap')
 
     list_display = (
-        'product_data', 'new_customer_name', 'new_number',
-        'product_purchase_date', 'temp_customer_id', 'sent_to_sap', 'remarks')
+        'temp_customer_id','product_data', 'new_customer_name', 'new_number',
+        'product_purchase_date', 'sent_to_sap', 'remarks')
 
     def suit_row_attributes(self, obj):
         class_map = {

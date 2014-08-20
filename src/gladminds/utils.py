@@ -98,8 +98,16 @@ def get_task_queue():
     queue_name = settings.SQS_QUEUE_NAME
     return SqsTaskQueue(queue_name)
 
-def get_customer_info(data):
-    data=data.POST
+def format_product_object(product_obj):
+    purchase_date = product_obj.product_purchase_date.strftime('%d/%m/%Y')
+    return {'id': product_obj.sap_customer_id,
+            'phone': get_phone_number_format(str(product_obj.customer_phone_number)), 
+            'name': product_obj.customer_phone_number.customer_name, 
+            'purchase_date': purchase_date,
+            'vin': product_obj.vin}
+
+def get_customer_info(request):
+    data=request.POST
     try:
         product_obj = common.ProductData.objects.get(vin=data['vin'])
     except Exception as ex:
@@ -107,11 +115,8 @@ def get_customer_info(data):
         message = '''VIN '{0}' does not exist in our records.'''.format(data['vin'])
         return {'message': message, 'status': 'fail'}
     if product_obj.product_purchase_date:
-        purchase_date = product_obj.product_purchase_date.strftime('%d/%m/%Y')
-        return {'customer_id': product_obj.sap_customer_id,
-                'customer_phone': get_phone_number_format(str(product_obj.customer_phone_number)), 
-                'customer_name': product_obj.customer_phone_number.customer_name, 
-                'purchase_date': purchase_date}
+        product_data =  format_product_object(product_obj)
+        return product_data
     else:
         message = '''VIN '{0}' has no associated customer.'''.format(data['vin'])
         return {'message': message}
@@ -237,3 +242,24 @@ def subtract_dates(start_date, end_date):
     start_date = datetime.strptime(start_date, "%Y-%m-%d")
     end_date = datetime.strptime(end_date, "%Y-%m-%d") 
     return start_date - end_date
+
+def search_details(request):
+    data = request.POST
+    kwargs = {}
+    search_results = []
+    if data.has_key('VIN'):
+        kwargs[ 'vin' ] = data['VIN']
+    elif data.has_key('Customer-ID'):
+        kwargs[ 'sap_customer_id' ] = data['Customer-ID']
+    elif data.has_key('Customer-Mobile'):
+        kwargs[ 'customer_phone_number__phone_number' ] = mobile_format(data['Customer-Mobile'])
+    product_obj = common.ProductData.objects.filter(**kwargs)
+    if not product_obj or not product_obj[0].product_purchase_date:
+        key = data.keys()
+        message = '''Customer details for {0} '{1}' not found.'''.format(key[0], data[key[0]])
+        logger.info(message)
+        return {'message': message}
+    for product in product_obj:
+        data = format_product_object(product)
+        search_results.append(data)    
+    return search_results
