@@ -116,19 +116,11 @@ def update_pass(request):
         return HttpResponseRedirect('/aftersell//asc/login?error=true')
 
 def redirect_user(request):
-    group_name =  request.user.groups.all()
-<<<<<<< HEAD
-    if group_name[0].name in USER_GROUPS :
-        return HttpResponseRedirect(REDIRECT_USER.get(group_name[0].name))
-=======
-    if group_name[0].name== 'dealers':
-        return HttpResponseRedirect('/aftersell/register/sa')
-    if group_name[0].name == 'ascs' or group_name[0].name == 'dascs':
-       return HttpResponseRedirect('/aftersell/register/asc')
-    if group_name[0].name == 'SDM' or group_name[0].name == 'SDO':
-       return HttpResponseRedirect('/aftersell/servicedesk/')
-     
->>>>>>> upstream/gm_1_4
+    user_groups = get_user_groups(request.user)
+    for group in USER_GROUPS:
+        if group in user_groups:
+            return HttpResponseRedirect(REDIRECT_USER.get(group))
+    return HttpResponseBadRequest()
 
 @login_required()
 def register(request, menu):
