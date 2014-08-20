@@ -77,10 +77,22 @@
         "fields": {
             "template_key": "FEEDBACK_DETAIL_TO_ADIM",
             "sender": "feed-report@gladminds.co",
-            "reciever": "gladminds@hashedin.com",
+            "reciever": "srv.sngh@gmail.com",
             "subject": "Feedback",
-            "body": "Your {type} has been resolved", 
+            "body": "A GladMinds user has a feedback for us, which says:\n {message} \n Its has been reported by {reporter} on {created_date}.", 
             "description": "Feedback  mail to Admin"
+        }
+    },    
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 8,
+        "fields": {
+            "template_key": "TICKET_CLOSED_DETAIL_TO_BAJAJ",
+            "sender": "feed-report@gladminds.co",
+            "reciever": "srv.sngh@gmail.com",
+            "subject": "Feedback Closed",
+            "body": "The {type} reported by {reporter} on {created_date} has been closed.\n The Feedback received by reporter is {remark}", 
+            "description": "Feedback  mail to bajaj"
         }
     }
 ]

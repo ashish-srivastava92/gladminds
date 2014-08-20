@@ -133,6 +133,7 @@ class Feedback(models.Model):
     due_date = models.DateTimeField(null=True, blank=True)
     remarks = models.CharField(max_length=512, null=True, blank=True)
     ratings = models.CharField(max_length=12, choices=RATINGS)
+
     
     class Meta:
         app_label = "aftersell"
