@@ -87,7 +87,7 @@
         "model": "gladminds.emailtemplate",
         "pk": 8,
         "fields": {
-            "template_key": "FEEDBACK_DETAIL_TO_Bajaj",
+            "template_key": "TICKET_CLOSED_DETAIL_TO_Bajaj",
             "sender": "feed-report@gladminds.co",
             "reciever": "srv.sngh@gmail.com",
             "subject": "Feedback Closed",

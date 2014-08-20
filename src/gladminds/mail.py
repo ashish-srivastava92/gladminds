@@ -230,7 +230,7 @@ def send_email_to_bajaj_after_issue_closed(data):
                              data,
                             receiver="srv.sngh@gmail.com")
     except Exception as ex:
-        logger.info("[Exception feedback receiver email]  {0}".format(ex)) 
+        logger.info("[Exception fail to send mail to bajaj]  {0}".format(ex)) 
            
 def send_template_email(template_name, context, mail_detail,receiver=None): 
     '''generic function use for send mail for any html template'''

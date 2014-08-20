@@ -45,11 +45,8 @@ def auth_login(request, provider):
         return render(request, provider_mapping[provider]['template_name'])
     if request.method == 'POST':
         username = request.POST['username']
-        print  username
-        password = request.POST['password']
-        print password  
+        password = request.POST['password'] 
         user = authenticate(username=username, password=password)
-        print user
         if user is not None:
             if user.is_active:
                 login(request, user)
@@ -129,7 +126,6 @@ def update_pass(request):
 
 def redirect_user(request):
     group_name =  request.user.groups.all()
-    print group_name
     if group_name[0].name== 'dealers':
         return HttpResponseRedirect('/aftersell/register/sa')
     if group_name[0].name == 'ascs' or group_name[0].name == 'dascs':
@@ -410,7 +406,7 @@ def modify_servicedesk_tickets(request,feedbackid):
               mail.send_email_to_assignee(context, feedback[0])
               send_sms('SEND_MSG_TO_ASSIGNEE', feedback_data.assign_to.phone_number, feedback_data)
         if feedback_data.status == 'Closed':
-           context = create_context('FEEDBACK_DETAIL_TO_Bajaj', feedback[0]) 
+           context = create_context('TICKET_CLOSED_DETAIL_TO_Bajaj', feedback[0]) 
            mail.send_email_to_bajaj_after_issue_closed(context) 
             
                  
