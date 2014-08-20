@@ -406,7 +406,7 @@ def modify_servicedesk_tickets(request,feedbackid):
               mail.send_email_to_assignee(context, feedback[0])
               send_sms('SEND_MSG_TO_ASSIGNEE', feedback_data.assign_to.phone_number, feedback_data)
         if feedback_data.status == 'Closed':
-           context = create_context('TICKET_CLOSED_DETAIL_TO_Bajaj', feedback[0]) 
+           context = create_context('TICKET_CLOSED_DETAIL_TO_BAJAJ', feedback[0]) 
            mail.send_email_to_bajaj_after_issue_closed(context) 
             
                  
