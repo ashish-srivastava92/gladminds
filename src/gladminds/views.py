@@ -2,6 +2,7 @@ import logging
 import json
 import random
 
+from datetime import datetime
 from django.shortcuts import render_to_response, render
 from django.template import RequestContext
 from django.http.response import HttpResponseRedirect, HttpResponse,\
@@ -44,8 +45,11 @@ def auth_login(request, provider):
         return render(request, provider_mapping[provider]['template_name'])
     if request.method == 'POST':
         username = request.POST['username']
+        print  username
         password = request.POST['password']
+        print password  
         user = authenticate(username=username, password=password)
+        print user
         if user is not None:
             if user.is_active:
                 login(request, user)
@@ -125,9 +129,10 @@ def update_pass(request):
 
 def redirect_user(request):
     group_name =  request.user.groups.all()
+    print group_name
     if group_name[0].name== 'dealers':
         return HttpResponseRedirect('/aftersell/register/sa')
-    if group_name[0].name == 'ascs':
+    if group_name[0].name == 'ascs' or group_name[0].name == 'dascs':
        return HttpResponseRedirect('/aftersell/register/asc')
     if group_name[0].name == 'SDM' or group_name[0].name == 'SDO':
        return HttpResponseRedirect('/aftersell/servicedesk/')
@@ -387,6 +392,9 @@ def modify_servicedesk_tickets(request,feedbackid):
         else:    
            servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(phone_number = data['Assign_To'])
            aftersell_common.Feedback.objects.filter(id = feedbackid).update(assign_to = servicedesk_assign_obj[0] , status = data['status'], priority = data['Priority'])
+        if data['status'] == 'Closed':
+           aftersell_common.Feedback.objects.filter(id = feedbackid).update(closed_date = datetime.now()) 
+               
         feedback_data = feedback[0]
         if assign_status and feedback_data.assign_to : 
            context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL', feedback[0]) 
@@ -401,6 +409,11 @@ def modify_servicedesk_tickets(request,feedbackid):
               context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL', feedback[0])   
               mail.send_email_to_assignee(context, feedback[0])
               send_sms('SEND_MSG_TO_ASSIGNEE', feedback_data.assign_to.phone_number, feedback_data)
+        if feedback_data.status == 'Closed':
+           context = create_context('FEEDBACK_DETAIL_TO_Bajaj', feedback[0]) 
+           mail.send_email_to_bajaj_after_issue_closed(context) 
+            
+                 
     return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj_all})
            
        

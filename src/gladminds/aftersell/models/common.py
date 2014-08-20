@@ -129,6 +129,7 @@ class Feedback(models.Model):
     subject = models.CharField(max_length=512, null=True, blank=True)
     created_date = models.DateTimeField(null=True, blank= False,auto_now=True)
     modified_date = models.DateTimeField(null=True, blank= True,auto_now=True)
+    closed_date = models.DateTimeField(null=True, blank= True)
     
     class Meta:
         app_label = "aftersell"

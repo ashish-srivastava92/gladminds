@@ -222,7 +222,16 @@ def send_email_to_initiator_after_issue_resolved(data):
                             receiver="srv.sngh@gmail.com")
     except Exception as ex:
         logger.info("[Exception feedback receiver email]  {0}".format(ex))
-    
+        
+def send_email_to_bajaj_after_issue_closed(data):
+    try:
+        context = Context({"content": data['content']})
+        send_template_email("base_email_template.html", context,
+                             data,
+                            receiver="srv.sngh@gmail.com")
+    except Exception as ex:
+        logger.info("[Exception feedback receiver email]  {0}".format(ex)) 
+           
 def send_template_email(template_name, context, mail_detail,receiver=None): 
     '''generic function use for send mail for any html template'''
     
