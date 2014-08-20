@@ -5,3 +5,4 @@ alter table gladminds_gladmindusers drop gender;
 alter table gladminds_gladmindusers add column gender VARCHAR(6) NULL CHECK (gender IN ('M', 'F', 'X'));
 alter table gladminds_producttypedata add warranty_email VARCHAR(215);
 alter table gladminds_producttypedata add warranty_phone VARCHAR(15);
+alter table aftersell_feedback add column closed_date datetime;
