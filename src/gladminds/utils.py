@@ -263,3 +263,15 @@ def search_details(request):
         data = format_product_object(product)
         search_results.append(data)    
     return search_results
+
+def get_search_query_params(request, class_self):
+    custom_search_enabled = False
+    if 'custom_search' in request.GET and 'val' in request.GET:
+        class_self.search_fields = ()
+        request.GET = request.GET.copy()
+        class_self.search_fields = (request.GET.pop("custom_search")[0],)
+        search_value = request.GET.pop("val")[0]
+        request.GET["q"] = search_value
+        request.META['QUERY_STRING'] = 'q=%s'% search_value
+        custom_search_enabled = True
+    return custom_search_enabled

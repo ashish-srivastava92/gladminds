@@ -475,6 +475,7 @@ class ASCRegistrationToSAP(BaseFeed):
 
 def update_coupon_data(sender, **kwargs):
     from gladminds.sqs_tasks import send_on_product_purchase
+    import inspect
     instance = kwargs['instance']
     logger.info("triggered update_coupon_data")
     if instance.customer_phone_number:
@@ -489,6 +490,10 @@ def update_coupon_data(sender, **kwargs):
             coupon_object.mark_expired_on = mark_expired_on
             coupon_object.extended_date = mark_expired_on
             coupon_object.save()
+        
+        for fr in inspect.stack():
+            if inspect.getmodulename(fr[1]) == 'load_user_data':
+                return
 
         try:
             customer_data = common.GladMindUsers.objects.get(
@@ -510,7 +515,7 @@ def update_coupon_data(sender, **kwargs):
             else:
                 send_on_product_purchase.delay(
                 phone_number=instance.customer_phone_number.phone_number, message=message)
-
+ 
             audit.audit_log(
                 reciever=instance.customer_phone_number, action='SEND TO QUEUE', message=message)
         except Exception as ex:
