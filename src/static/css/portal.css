@@ -26,9 +26,19 @@
 }
 
 .query-form {
-  margin-top: 10px;
+  	margin-top: 10px;
 }
 
 .no-wrapping{
-  white-space: nowrap;
+  	white-space: nowrap;
+}
+.bg-info {
+	background-color: #d9edf7;
+	font-size: 17px;
+}
+
+.reconciliation-report {
+	background-color: #F3F3F3;
+	margin-bottom: 20px;
+	padding: 15px 0px 0px 61px;
 }

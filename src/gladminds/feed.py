@@ -491,10 +491,6 @@ def update_coupon_data(sender, **kwargs):
             coupon_object.extended_date = mark_expired_on
             coupon_object.save()
         
-        for fr in inspect.stack():
-            if inspect.getmodulename(fr[1]) == 'load_user_data':
-                return
-
         try:
             customer_data = common.GladMindUsers.objects.get(
                 phone_number=instance.customer_phone_number)

@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.contrib.auth import authenticate, login, logout
+from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 
 from gladminds.models import common
@@ -176,6 +177,9 @@ def exceptions(request, exception=None):
     groups = stringify_groups(request.user)
     if not ('ascs' in groups or 'dealers' in groups):
         return HttpResponseBadRequest()
+    if exception == 'report':
+        report_data = create_report(request.method, request.POST, request.user)
+        return render(request, 'portal/report.html', report_data)
     if request.method == 'GET':
         template = 'portal/exception.html'
         data=None
@@ -202,7 +206,61 @@ def exceptions(request, exception=None):
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
+
+
+@login_required()
+def reports(request, report=None):
+    groups = stringify_groups(request.user)
+    if not ('ascs' in groups or 'dealers' in groups):
+        return HttpResponseBadRequest()
+    if report == 'reconciliation':
+        report_data = create_report(request.method, request.POST, request.user)
+        return render(request, 'portal/report.html', report_data)
+    else:
+        return HttpResponseBadRequest()
     
+def create_report(method, query_params, user):
+    report_data = []
+    filter = {}
+    params = {}
+    status_options = {'4': 'In Progress', '2':'Closed'}
+    user = afterbuy_common.RegisteredDealer.objects.filter(dealer_id=user)
+    filter['servicing_dealer'] = user[0]
+    params['min_date'], params['max_date'] = utils.get_min_and_max_filter_date() 
+    if method == 'POST':
+        message = "No coupon found."
+        status = query_params.get('status')
+        from_date = query_params.get('from')
+        to_date = query_params.get('to')
+        params['start_date'] = from_date
+        params['to_date'] = to_date
+        filter['closed_date__range'] = (from_date, to_date)
+        if status:
+            params['status'] = status
+            filter['status'] = status
+        all_coupon_data = common.CouponData.objects.filter(**filter)
+    elif method == 'GET':
+        message = "" 
+        all_coupon_data = {}
+    else:
+        return HttpResponseBadRequest()
+    
+    for coupon_data in all_coupon_data:
+        coupon_data_dict = {}
+        coupon_data_dict['customer_id'] = coupon_data.vin.sap_customer_id
+        coupon_data_dict['product_type'] = coupon_data.vin.product_type
+        coupon_data_dict['service_avil_date'] = datetime.datetime.now()
+        coupon_data_dict['vin'] = coupon_data.vin.vin
+        coupon_data_dict['sa_phone_name'] = coupon_data.sa_phone_number
+        coupon_data_dict['kms'] = coupon_data.actual_kms
+        coupon_data_dict['service_type'] = coupon_data.service_type
+        coupon_data_dict['service_status'] = status_options[str(coupon_data.status)]
+        coupon_data_dict['special_case'] = ''
+        report_data.append(coupon_data_dict)
+    return {"records": report_data, 'status_options': status_options, 'params': params, 
+            "message": message}
+    
+
 UPDATE_FAIL = 'Some error occurred, try again later.'
 UPDATE_SUCCESS = 'Customer phone number has been updated '
 REGISTER_SUCCESS = 'Customer has been registered with ID: '
