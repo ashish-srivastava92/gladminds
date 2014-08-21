@@ -165,6 +165,14 @@ def get_file_name(request, file_obj):
     ext = file_obj.name.split('.')[-1]
     customer_id = request.POST['customerId']
     return str(filename_prefix)+'_'+customer_id+'_'+filename_suffix+'.'+ext
+
+
+def get_user_groups(user):
+    groups = []
+    for group in user.groups.all():
+        groups.append(str(group.name))
+    return groups
+    
 def stringify_groups(user):
     groups = []
     for group in user.groups.all():
@@ -246,5 +254,7 @@ def create_context(email_template_name, feedback_obj):
     assign_to = feedback_obj.assign_to
     priority = feedback_obj.priority 
     data = get_email_template(email_template_name)
-    data['content'] = data['body'].format(type = type, reporter = reporter, message = message, created_date = created_date, assign_to = assign_to,  priority =  priority)
+    data['content'] = data['body'].format(type = type, reporter = reporter, 
+                                          message = message, created_date = created_date, 
+                                          assign_to = assign_to,  priority =  priority, remark = "")
     return data

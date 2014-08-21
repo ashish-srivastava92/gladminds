@@ -2,6 +2,7 @@ import logging
 import json
 import random
 
+from datetime import datetime
 from django.shortcuts import render_to_response, render
 from django.template import RequestContext
 from django.http.response import HttpResponseRedirect, HttpResponse,\
@@ -17,7 +18,7 @@ from gladminds import utils, message_template
 from gladminds import mail
 from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format, format_date_string, stringify_groups,\
-    get_list_from_set, create_context
+    get_list_from_set, create_context, get_user_groups
 from gladminds.sqs_tasks import export_asc_registeration_to_sap, send_sms
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.mail import sent_otp_email
@@ -27,7 +28,8 @@ from gladminds.aftersell.models import common as afterbuy_common
 from gladminds.scheduler import SqsTaskQueue
 from gladminds.resource.resources import GladmindsResources
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
-    USER_DESIGNATION
+    USER_DESIGNATION, PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
+    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU
 
 gladmindsResources = GladmindsResources()
 logger = logging.getLogger('gladminds')
@@ -35,16 +37,13 @@ TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 
 def auth_login(request, provider):
     if request.method == 'GET':
-        provider_mapping = {
-                            'asc': {'template_name': 'asc/login.html'},
-                            'dasc': {'template_name': 'asc/login.html'},
-                            'dealer': {'template_name': 'dealer/login.html'},
-                            'desk': {'template_name': 'service-desk/login.html'}
-                            }
-        return render(request, provider_mapping[provider]['template_name'])
+            if provider not in PROVIDERS:
+                return HttpResponseBadRequest()
+            return render(request, PROVIDER_MAPPING.get(provider,'asc/login.html'))
+    
     if request.method == 'POST':
         username = request.POST['username']
-        password = request.POST['password']
+        password = request.POST['password'] 
         user = authenticate(username=username, password=password)
         if user is not None:
             if user.is_active:
@@ -55,20 +54,13 @@ def auth_login(request, provider):
 def user_logout(request):
     if request.method == 'GET':
         #TODO: Implement brand restrictions.
-        groups = stringify_groups(request.user)
-        if 'dealers' in groups:
-            logout(request)
-            return HttpResponseRedirect('/aftersell/dealer/login')
-        elif 'ascs' in groups:
-            logout(request)
-            return HttpResponseRedirect('/aftersell/asc/login')
-        #TODO: Implement Dependent ASCs
-        elif 'dascs' in groups:
-            logout(request)
-            return HttpResponseRedirect('/aftersell/dasc/login')
-        elif 'SDO' in groups or 'SDM' in groups :
-            logout(request)
-            return HttpResponseRedirect('/aftersell/desk/login')
+        user_groups = get_user_groups(request.user)
+        for group in USER_GROUPS:
+            if group in user_groups:
+                logout(request)
+                return HttpResponseRedirect(GROUP_MAPPING.get(group))
+            
+        return HttpResponseBadRequest()
     return HttpResponseBadRequest('Not Allowed')
 
 def generate_otp(request):
@@ -124,14 +116,11 @@ def update_pass(request):
         return HttpResponseRedirect('/aftersell//asc/login?error=true')
 
 def redirect_user(request):
-    group_name =  request.user.groups.all()
-    if group_name[0].name== 'dealers':
-        return HttpResponseRedirect('/aftersell/register/sa')
-    if group_name[0].name == 'ascs':
-       return HttpResponseRedirect('/aftersell/register/asc')
-    if group_name[0].name == 'SDM' or group_name[0].name == 'SDO':
-       return HttpResponseRedirect('/aftersell/servicedesk/')
-     
+    user_groups = get_user_groups(request.user)
+    for group in USER_GROUPS:
+        if group in user_groups:
+            return HttpResponseRedirect(REDIRECT_USER.get(group))
+    return HttpResponseBadRequest()
 
 @login_required()
 def register(request, menu):
@@ -140,12 +129,7 @@ def register(request, menu):
         return HttpResponseBadRequest()
     if request.method == 'GET':
         user_id = request.user
-        template_mapping = {
-            'asc': {'template': 'portal/asc_registration.html', 'active_menu': 'register_asc'},
-            'sa': {'template': 'portal/sa_registration.html', 'active_menu': 'register_sa'},
-            'customer': {'template': 'portal/customer_registration.html', 'active_menu': 'register_customer'},
-        }
-        return render(request, template_mapping[menu]['template'], {'active_menu' : template_mapping[menu]['active_menu']\
+        return render(request, TEMPLATE_MAPPING.get(menu), {'active_menu' : ACTIVE_MENU.get(menu)\
                                                                     , 'groups': groups, 'user_id' : user_id})
     elif request.method == 'POST':
         save_user = {
@@ -354,10 +338,10 @@ def get_servicedesk_tickets(request):
     group_name =  request.user.groups.all()
     user_obj = request.user
     if group_name[0].name == 'SDM':
-       feedback = aftersell_common.Feedback.objects.all()
+        feedback = aftersell_common.Feedback.objects.all()
     if group_name[0].name == 'SDO':
-       servicedesk_obj = aftersell_common.ServiceDeskUser.objects.filter(user=user_obj)
-       feedback = aftersell_common.Feedback.objects.filter(assign_to=servicedesk_obj[0])
+        servicedesk_obj = aftersell_common.ServiceDeskUser.objects.filter(user=user_obj)
+        feedback = aftersell_common.Feedback.objects.filter(assign_to=servicedesk_obj[0])
     return render(request,'service-desk/tickets.html',{"feedback":feedback})
 
 @login_required() 
@@ -370,38 +354,42 @@ def modify_servicedesk_tickets(request,feedbackid):
     assign_status = False
     servicedesk_obj_all = aftersell_common.ServiceDeskUser.objects.all()
     if request.method == 'GET':
-       feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
+        feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
     if request.method == 'POST':
         feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
         if feedback[0].assign_to:
-           assign_number = feedback[0].assign_to.phone_number
+            assign_number = feedback[0].assign_to.phone_number
         else:
-             assign_number = None   
+            assign_number = None   
            
         assign = feedback[0].assign_to
         if assign is None:
-           assign_status = True
+            assign_status = True
         data = request.POST
         if data['Assign_To'] == 'None': 
             aftersell_common.Feedback.objects.filter(id = feedbackid).update( status = data['status'], priority = data['Priority'])
         else:    
-           servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(phone_number = data['Assign_To'])
-           aftersell_common.Feedback.objects.filter(id = feedbackid).update(assign_to = servicedesk_assign_obj[0] , status = data['status'], priority = data['Priority'])
+            servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(phone_number = data['Assign_To'])
+            aftersell_common.Feedback.objects.filter(id = feedbackid).update(assign_to = servicedesk_assign_obj[0] , status = data['status'], priority = data['Priority'])
+        if data['status'] == 'Closed':
+            aftersell_common.Feedback.objects.filter(id = feedbackid).update(closed_date = datetime.now()) 
         feedback_data = feedback[0]
         if assign_status and feedback_data.assign_to : 
-           context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL', feedback[0]) 
-           mail.send_email_to_initiator_after_issue_assigned(context)
-           send_sms('INITIATOR_FEEDBACK_DETAILS',feedback_data.reporter, feedback_data) 
+            context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL', feedback[0]) 
+            mail.send_email_to_initiator_after_issue_assigned(context)
+            send_sms('INITIATOR_FEEDBACK_DETAILS',feedback_data.reporter, feedback_data) 
         if feedback_data.status == 'Resolved':
-           context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL', feedback[0])
-           mail.send_email_to_initiator_after_issue_resolved(context)
-           send_sms('INITIATOR_FEEDBACK_STATUS', feedback_data.reporter, feedback_data)
+            context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL', feedback[0])
+            mail.send_email_to_initiator_after_issue_resolved(context)
+            send_sms('INITIATOR_FEEDBACK_STATUS', feedback_data.reporter, feedback_data)
         if feedback_data.assign_to:   
-           if assign_number != feedback_data.assign_to.phone_number: 
-              context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL', feedback[0])   
-              mail.send_email_to_assignee(context, feedback[0])
-              send_sms('SEND_MSG_TO_ASSIGNEE', feedback_data.assign_to.phone_number, feedback_data)
+            if assign_number != feedback_data.assign_to.phone_number: 
+                context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL', feedback[0])   
+                mail.send_email_to_assignee(context, feedback[0])
+                send_sms('SEND_MSG_TO_ASSIGNEE', feedback_data.assign_to.phone_number, feedback_data)
+        if feedback_data.status == 'Closed':
+            context = create_context('TICKET_CLOSED_DETAIL_TO_BAJAJ', feedback[0]) 
+            mail.send_email_to_bajaj_after_issue_closed(context) 
+            
+                 
     return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj_all})
-           
-       
-        
