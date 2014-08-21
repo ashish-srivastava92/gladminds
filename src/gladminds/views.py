@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.contrib.auth import authenticate, login, logout
+from django.core.exceptions import ObjectDoesNotExist
 
 from gladminds.models import common
 from gladminds.sqs_tasks import send_otp
@@ -203,30 +204,42 @@ def exceptions(request, exception=None):
         return HttpResponseBadRequest()
     
 UPDATE_FAIL = 'Some error occurred, try again later.'
-UPDATE_SUCCESS = 'Customer has been registered with ID: '
+UPDATE_SUCCESS = 'Customer phone number has been updated '
+REGISTER_SUCCESS = 'Customer has been registered with ID: '
 def register_customer(request, group=None):
     post_data = request.POST
     data_source = []
+    existing_customer = False
     product_obj = common.ProductData.objects.filter(vin=post_data['customer-vin'])
-    temp_customer_id = TEMP_ID_PREFIX + str(random.randint(10**5, 10**6))
+    if not post_data['customer-id']:
+        temp_customer_id = TEMP_ID_PREFIX + str(random.randint(10**5, 10**6))
+    else:
+        temp_customer_id = post_data['customer-id']
+        existing_customer = True
     data_source.append(utils.create_feed_data(post_data, product_obj[0], temp_customer_id))
     
     check_with_invoice_date = utils.subtract_dates(data_source[0]['product_purchase_date'], product_obj[0].invoice_date)    
     check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.datetime.now())
-    
-    if check_with_invoice_date.days < 0 or check_with_today_date.days > 0:
+
+    if not existing_customer and check_with_invoice_date.days < 0 or check_with_today_date.days > 0:
         message = "Product purchase date should be between {0} and {1}".\
                 format((product_obj[0].invoice_date).strftime("%d-%m-%Y"),(datetime.datetime.now()).strftime("%d-%m-%Y"))
         logger.info('{0} Entered date is: {1}'.format(message, str(data_source[0]['product_purchase_date'])))
         return json.dumps({"message": message})
          
     try:
+        customer_obj = common.CustomerTempRegistration.objects.get(temp_customer_id = temp_customer_id)
+        customer_obj.new_number = data_source[0]['customer_phone_number']
+        customer_obj.sent_to_sap = False
+    except ObjectDoesNotExist as ex:
+        logger.info(ex)
         customer_obj = common.CustomerTempRegistration(product_data=product_obj[0], 
                                                        new_customer_name = data_source[0]['customer_name'],
                                                        new_number = data_source[0]['customer_phone_number'],
                                                        product_purchase_date = data_source[0]['product_purchase_date'],
                                                        temp_customer_id = temp_customer_id)
-        customer_obj.save()
+    customer_obj.save()
+    try:
         feed_remark = FeedLogWithRemark(len(data_source),
                                         feed_type='Purchase Feed',
                                         action='Received', status=True)
@@ -235,7 +248,9 @@ def register_customer(request, group=None):
     except Exception as ex:
         logger.info(ex)
         return json.dumps({"message": UPDATE_FAIL})
-    return json.dumps({'message': UPDATE_SUCCESS + temp_customer_id})
+    if existing_customer:
+        return json.dumps({'message': UPDATE_SUCCESS})
+    return json.dumps({'message': REGISTER_SUCCESS + temp_customer_id})
       
 
 SUCCESS_MESSAGE = 'Registration is complete'
