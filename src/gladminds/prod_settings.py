@@ -54,6 +54,8 @@ TEMPLATE_DIRS = (
 #                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/Messages.json'
 #                 }
 
+FILE_CACHE_DURATION = 1800
+
 SMS_CLIENT = "AIRTEL"
 SMS_CLIENT_DETAIL = {
                    'login':'bajajauto',
@@ -88,7 +90,8 @@ SAP_CRM_DETAIL = {
                   }
 ASC_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/bajaj/asc-feed/?wsdl&v0"
 COUPON_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl&v0"
-
+CUSTOMER_REGISTRATION_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/bajaj/customer-feed/?wsdl&v0"
+CUSTOMER_REGISTRATION_WSDL = 'prod_customer_registration.wsdl'
 
 ENABLE_AMAZON_SQS = True
 
@@ -112,6 +115,7 @@ SQS_QUEUE_NAME = "gladminds-prod"
 ########################################################################
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail"
+UCN_RECOVERY_MAIL_DETAIL["receiver"] = ["gladminds@hashedin.com"," nvhasabnis@bajajauto.co.in","ssozarde@bajajauto.co.in","jojibabu.vege@gladminds.co","support@gladminds.co"]
 #########################New relic file location########################
 NEW_RELIC_FILE_LOCATION = './src/newrelic.ini'
 ########################################################################

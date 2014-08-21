@@ -383,15 +383,18 @@ class ProductPurchaseFeed(BaseFeed):
                     gladmind_customer_id = utils.generate_unique_customer_id()
                     user=self.registerNewUser('customer', username=gladmind_customer_id)
                     customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, phone_number=product[
-                                                         'customer_phone_number'], registration_date=datetime.now(), customer_name=product['customer_name'])
+                                                         'customer_phone_number'], registration_date=datetime.now(),
+                                                         customer_name=product['customer_name'], pincode=product['pin_no'],
+                                                         state=product['state'], address=product['city'])
                     customer_data.save()
 
-                if not product_data.sap_customer_id:
+                if not product_data.sap_customer_id  or product_data.sap_customer_id.find('T') == 0:
                     product_purchase_date = product['product_purchase_date']
                     product_data.sap_customer_id = product['sap_customer_id']
                     product_data.customer_phone_number = customer_data
                     product_data.product_purchase_date = product_purchase_date
                     product_data.engine = product["engine"]
+                    product_data.veh_reg_no =  product['veh_reg_no']
                     product_data.save()
             except Exception as ex:
 
@@ -430,15 +433,20 @@ class CouponRedeemFeedToSAP(BaseFeed):
             'TIMESTAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
         for redeem in results:
             try:
+                #added the condition only for the previous coupons with no servicing dealer details
+                if redeem.servicing_dealer:
+                    servicing_dealer = redeem.servicing_dealer.dealer_id
+                else:
+                    servicing_dealer = redeem.vin.dealer_id.dealer_id
                 item = {
-                    "CHASSIS": redeem.vin.vin,
-                    "GCP_KMS": redeem.actual_kms,
-                    "GCP_KUNNR": redeem.vin.dealer_id.dealer_id,
-                    "GCP_UCN_NO": redeem.unique_service_coupon,
-                    "PRODUCT_TYPE": redeem.vin.product_type.product_type,
-                    "SERVICE_TYPE": str(redeem.service_type),
-                    "SER_AVL_DT": redeem.actual_service_date.date().strftime("%Y-%m-%d"),
-                }
+                        "CHASSIS": redeem.vin.vin,
+                        "GCP_KMS": redeem.actual_kms,
+                        "GCP_KUNNR": servicing_dealer,
+                        "GCP_UCN_NO": redeem.unique_service_coupon,
+                        "PRODUCT_TYPE": redeem.vin.product_type.product_type,
+                        "SERVICE_TYPE": str(redeem.service_type),
+                        "SER_AVL_DT": redeem.actual_service_date.date().strftime("%Y-%m-%d"),
+                    }                        
                 items.append(item)
             except Exception as ex:
                 logger.error("error on data coupon data from db %s" % str(ex))
@@ -468,6 +476,7 @@ class ASCRegistrationToSAP(BaseFeed):
 
 def update_coupon_data(sender, **kwargs):
     from gladminds.sqs_tasks import send_on_product_purchase
+    import inspect
     instance = kwargs['instance']
     logger.info("triggered update_coupon_data")
     if instance.customer_phone_number:
@@ -482,12 +491,20 @@ def update_coupon_data(sender, **kwargs):
             coupon_object.mark_expired_on = mark_expired_on
             coupon_object.extended_date = mark_expired_on
             coupon_object.save()
-
+        
         try:
             customer_data = common.GladMindUsers.objects.get(
                 phone_number=instance.customer_phone_number)
-            message = templates.get_template('SEND_CUSTOMER_ON_PRODUCT_PURCHASE').format(
-                customer_name=customer_data.customer_name, sap_customer_id=instance.sap_customer_id)
+            temp_customer_data = common.CustomerTempRegistration.objects.filter(product_data__vin=vin)
+            if temp_customer_data and not temp_customer_data[0].temp_customer_id == instance.sap_customer_id:
+                message = templates.get_template('SEND_REPLACED_CUSTOMER_ID').format(
+                    customer_name=customer_data.customer_name, sap_customer_id=instance.sap_customer_id)
+            elif instance.sap_customer_id.find('T') == 0:
+                message = templates.get_template('SEND_TEMPORARY_CUSTOMER_ID').format(
+                    customer_name=customer_data.customer_name, sap_customer_id=instance.sap_customer_id)
+            else:
+                message = templates.get_template('SEND_CUSTOMER_ON_PRODUCT_PURCHASE').format(
+                    customer_name=customer_data.customer_name, sap_customer_id=instance.sap_customer_id)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
                 task_queue.add("send_on_product_purchase", {"phone_number": 
@@ -495,7 +512,7 @@ def update_coupon_data(sender, **kwargs):
             else:
                 send_on_product_purchase.delay(
                 phone_number=instance.customer_phone_number.phone_number, message=message)
-
+ 
             audit.audit_log(
                 reciever=instance.customer_phone_number, action='SEND TO QUEUE', message=message)
         except Exception as ex:
@@ -530,3 +547,29 @@ class ASCFeed(BaseFeed):
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         return self.feed_remark
+
+class CustomerRegistationFeedToSAP(BaseFeed):
+
+    def export_data(self, start_date=None, end_date=None):
+        results = common.CustomerTempRegistration.objects.filter(sent_to_sap=False).select_related('product_data')
+        items = []
+        total_failed = 0
+        item_batch = {
+            'TIME_STAMP': datetime.now().strftime("%Y%m%d%H%M%S")}
+        for redeem in results:
+            try:
+                item = {
+                    "CHASSIS": redeem.product_data.vin,
+                    "KUNNR": redeem.product_data.dealer_id.dealer_id,
+                    "CUSTOMER_ID" : redeem.temp_customer_id,
+                    "ENGINE" : redeem.product_data.engine,
+                    "VEH_SL_DT": redeem.product_purchase_date.date().strftime("%Y-%m-%d"),
+                    "CUSTOMER_NAME": redeem.new_customer_name,
+                    "CUST_MOBILE": redeem.new_number,
+                    
+                }
+                items.append(item)
+            except Exception as ex:
+                logger.error("error on customer info from db %s" % str(ex))
+                total_failed = total_failed + 1
+        return items, item_batch, total_failed
