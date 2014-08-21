@@ -204,7 +204,7 @@ def exceptions(request, exception=None):
         return HttpResponseBadRequest()
     
 UPDATE_FAIL = 'Some error occurred, try again later.'
-UPDATE_SUCCESS = 'Customer Phone number has been updated '
+UPDATE_SUCCESS = 'Customer phone number has been updated '
 REGITER_SUCCESS = 'Customer has been registered with ID: '
 def register_customer(request, group=None):
     post_data = request.POST
