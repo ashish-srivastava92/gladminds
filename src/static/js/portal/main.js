@@ -38,8 +38,7 @@
     	data['vin'] = vin;
     	Utils.submitForm(e, data, '/aftersell/register/customer');
     	$('.customer-phone').val('').attr('readOnly', false);
-  	    $('.customer-name').val('')
-        $('.name-readonly').attr('readOnly', false);
+  	    $('.customer-name').val('').attr('readOnly', false);
         $('.purchase-date').val('').attr('readOnly', false);
         $('.customer-id').val('').attr('readOnly', false);
         $('.customer-submit').attr('disabled', true);
