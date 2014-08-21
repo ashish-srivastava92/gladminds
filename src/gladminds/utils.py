@@ -276,7 +276,8 @@ def get_search_query_params(request, class_self):
         custom_search_enabled = True
     return custom_search_enabled
 
-import datetime
+
 def get_min_and_max_filter_date():
+    import datetime
     return (datetime.date.today() - datetime.timedelta(6*365/12)).isoformat(), (datetime.date.today()).isoformat()
             
