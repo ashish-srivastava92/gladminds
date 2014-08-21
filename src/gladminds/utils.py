@@ -275,3 +275,8 @@ def get_search_query_params(request, class_self):
         request.META['QUERY_STRING'] = 'q=%s'% search_value
         custom_search_enabled = True
     return custom_search_enabled
+
+import datetime
+def get_min_and_max_filter_date():
+    return (datetime.date.today() - datetime.timedelta(6*365/12)).isoformat(), (datetime.date.today()).isoformat()
+            

@@ -17,13 +17,13 @@
 			  	<div class="form-group col-md-3">
 			    	<label class="col-md-2 control-label">From</label>
 			    	<div class="col-md-10">
-			      		<input type="date" value="{{params.start_date}}" class="form-control" placeholder="From" name="from" required>
+			      		<input type="date" value="{{params.start_date}}" min="{{params.min_date}}" max="{{params.max_date}}" class="form-control filter-min-max" placeholder="From" name="from" required>
 			    	</div>
 			  	</div>
 			  	<div class="form-group col-md-3">
 			    	<label class="col-md-2 control-label">To</label>
 			    	<div class="col-md-10">
-			      		<input type="date" value="{{params.to_date}}" class="form-control" placeholder="To" name="to" required>
+			      		<input type="date" value="{{params.to_date}}" min="{{params.min_date}}" max="{{params.max_date}}" class="form-control filter-min-max" placeholder="To" name="to" required>
 			    	</div>
 			  	</div>
 			  	<div class="form-group col-md-3">
@@ -31,9 +31,9 @@
 			    	<div class="col-md-8">
 			      		<select placeholder="Choose Status" name="status" class="form-control chosen-select">
 							<option value=""> ...... </option>
-							{% for status_option in status_options %}
-								<option {% if params.status == status_option %} selected {% endif %} 
-								value="{{status_option}}">{{status_option}}</option>
+							{% for key,val in status_options.items %}
+								<option {% if params.status == key  %} selected {% endif %} 
+								value="{{key}}">{{val}}</option>
 							{% endfor %}
 						</select>
 			    	</div>
@@ -73,6 +73,11 @@
 			</tbody>
 			{% endfor %}
 		</table>
+		{% if not records %}
+			<div class="text-center bg-info">
+				{{message}}
+			</div>
+		{% endif %}
 	</div>
 </div>
 {% endblock %}
