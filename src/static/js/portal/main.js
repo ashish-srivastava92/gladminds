@@ -19,6 +19,13 @@
         return false;
     });
     
+    $('.report-filter').on('submit', function(e) {
+        var data = Utils.getFormData('.report-filter')
+        Utils.submitForm(e, data, '/aftersell/exceptions/report');
+        return false;
+    });
+    
+    
     $('.asc-self-form').on('submit', function(e) {
         var data = Utils.getFormData('.asc-self-form');
         Utils.submitForm(e, data, '/aftersell/asc/self-register/');
