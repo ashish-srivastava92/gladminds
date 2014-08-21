@@ -205,7 +205,7 @@ def exceptions(request, exception=None):
     
 UPDATE_FAIL = 'Some error occurred, try again later.'
 UPDATE_SUCCESS = 'Customer phone number has been updated '
-REGITER_SUCCESS = 'Customer has been registered with ID: '
+REGISTER_SUCCESS = 'Customer has been registered with ID: '
 def register_customer(request, group=None):
     post_data = request.POST
     data_source = []
@@ -250,7 +250,7 @@ def register_customer(request, group=None):
         return json.dumps({"message": UPDATE_FAIL})
     if existing_customer:
         return json.dumps({'message': UPDATE_SUCCESS})
-    return json.dumps({'message': REGITER_SUCCESS + temp_customer_id})
+    return json.dumps({'message': REGISTER_SUCCESS + temp_customer_id})
       
 
 SUCCESS_MESSAGE = 'Registration is complete'
