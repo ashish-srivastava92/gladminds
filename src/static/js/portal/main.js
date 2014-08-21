@@ -58,18 +58,17 @@
             data: {'vin': vin},
             success: function(data){
               if (data['phone']) {
-                  $('.customer-phone').val(data['phone']).attr('readOnly', true);
+                  $('.customer-phone').val(data['phone']);
                   $('.customer-name').val(data['name']).attr('readOnly', true);
                   $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
                   $('.customer-id').val(data['id']).attr('readOnly', true);
-                  $('.customer-submit').attr('disabled', true);
+                  $('.customer-submit').attr('disabled', false);
               }	
               else if (data['message']) {
-                  $('.customer-phone').val(data['customer_phone']);
+                  $('.customer-phone').val('');
             	  $('.customer-name').val('').attr('readOnly', false);
                   $('.purchase-date').val('').attr('readOnly', false);
                   $('.customer-id').val('').attr('readOnly', false);
-                  $('.customer-phone').attr('readOnly', false);
                   $('.customer-submit').attr('disabled', true);
                   messageBlock.text(data.message);
                   messageModal.modal('show');
