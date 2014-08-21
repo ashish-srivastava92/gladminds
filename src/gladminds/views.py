@@ -177,7 +177,8 @@ def exceptions(request, exception=None):
     if not ('ascs' in groups or 'dealers' in groups):
         return HttpResponseBadRequest()
     if exception == 'report':
-        return create_report(request)
+        report_data = create_report(request.method, request.POST, request.user)
+        return render(request, 'portal/report.html', report_data)
     if request.method == 'GET':
         template = 'portal/exception.html'
         data=None
@@ -204,27 +205,38 @@ def exceptions(request, exception=None):
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
+
+
+@login_required()
+def reports(request, report=None):
+    groups = stringify_groups(request.user)
+    if not ('ascs' in groups or 'dealers' in groups):
+        return HttpResponseBadRequest()
+    if report == 'reconciliation':
+        report_data = create_report(request.method, request.POST, request.user)
+        return render(request, 'portal/report.html', report_data)
+    else:
+        return HttpResponseBadRequest()
     
-def create_report(request):
+def create_report(method, query_params, user):
     report_data = []
-    kwargs = {}
+    filter = {}
     params = {}
     status_options = {'In Progress': 4, 'Closed': 2}
-    user = afterbuy_common.RegisteredDealer.objects.filter(dealer_id=request.user)
-    kwargs['servicing_dealer'] = user[0]
-    if request.method == 'POST':
-        query_params = request.POST
-        status = query_params.get('status', None)
-        from_date = query_params.get('from', None)
-        to_date = query_params.get('to', None)
+    user = afterbuy_common.RegisteredDealer.objects.filter(dealer_id=user)
+    filter['servicing_dealer'] = user[0]
+    if method == 'POST':
+        status = query_params.get('status')
+        from_date = query_params.get('from')
+        to_date = query_params.get('to')
         params['start_date'] = from_date
         params['to_date'] = to_date
-        kwargs['closed_date__range'] = (from_date, to_date)
+        filter['closed_date__range'] = (from_date, to_date)
         if status:
             params['status'] = status
-            kwargs['status'] = status_options[status]
-        all_coupon_data = common.CouponData.objects.filter(**kwargs)
-    elif request.method == 'GET': 
+            filter['status'] = status_options[status]
+        all_coupon_data = common.CouponData.objects.filter(**filter)
+    elif method == 'GET': 
         all_coupon_data = common.CouponData.objects.filter(Q(status=2) | Q(status=4), servicing_dealer=user[0])
     else:
         return HttpResponseBadRequest()
@@ -235,14 +247,13 @@ def create_report(request):
         coupon_data_dict['product_type'] = coupon_data.vin.product_type
         coupon_data_dict['service_avil_date'] = datetime.datetime.now()
         coupon_data_dict['vin'] = coupon_data.vin.vin
-        coupon_data_dict['sa_phone_name'] = coupon_data.sa_phone_number.phone_number
+        coupon_data_dict['sa_phone_name'] = coupon_data.sa_phone_number
         coupon_data_dict['kms'] = coupon_data.valid_kms
         coupon_data_dict['service_type'] = coupon_data.service_type
         coupon_data_dict['service_status'] = coupon_data.status
         coupon_data_dict['special_case'] = 'Yes'
         report_data.append(coupon_data_dict)
-    return render(request, 'portal/report.html', {"records": report_data, 
-                            'status_options': status_options, 'params': params})
+    return {"records": report_data, 'status_options': status_options, 'params': params}
     
 
 UPDATE_FAIL = 'Some error occurred, try again later.'
