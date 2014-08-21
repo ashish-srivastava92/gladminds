@@ -37,6 +37,7 @@ FEEDBACK_STATUS = (
         ('Closed', 'Closed'),
         ('Resolved', 'Resolved'),
         ('Progress', 'Progress'),
+        ('Pending','Pending')
     )
 PRIORITY = (
         ('Low', 'Low'),

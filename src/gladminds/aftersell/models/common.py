@@ -129,8 +129,10 @@ class Feedback(models.Model):
     subject = models.CharField(max_length=512, null=True, blank=True)
     created_date = models.DateTimeField(null=True, blank= False,auto_now=True)
     modified_date = models.DateTimeField(null=True, blank= True,auto_now=True)
-    closed_date = models.DateTimeField(null=True, blank=True)
+    resolved_date = models.DateTimeField(null=True, blank=True)
+    pending_start = models.DateTimeField(null=True, blank=True)
     due_date = models.DateTimeField(null=True, blank=True)
+    wait_time = models.FloatField(max_length=20, null=True, blank=True)
     remarks = models.CharField(max_length=512, null=True, blank=True)
     ratings = models.CharField(max_length=12, choices=RATINGS)
 
@@ -138,5 +140,4 @@ class Feedback(models.Model):
     class Meta:
         app_label = "aftersell"
         verbose_name_plural = "aftersell feedback info"
-
         

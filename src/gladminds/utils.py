@@ -258,3 +258,10 @@ def create_context(email_template_name, feedback_obj):
                                           message = message, created_date = created_date, 
                                           assign_to = assign_to,  priority =  priority, remark = "")
     return data
+
+def subtract_dates(start_date, end_date):    
+    start_date = start_date.strftime("%Y-%m-%d %M:%S")
+    end_date = end_date.strftime("%Y-%m-%d %M:%S")
+    start_date = datetime.strptime(start_date, "%Y-%m-%d  %M:%S")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d  %M:%S") 
+    return start_date - end_date

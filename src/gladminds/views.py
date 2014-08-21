@@ -1,6 +1,7 @@
 import logging
 import json
 import random
+import datetime
 
 from datetime import datetime
 from django.shortcuts import render_to_response, render
@@ -18,7 +19,7 @@ from gladminds import utils, message_template
 from gladminds import mail
 from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format, format_date_string, stringify_groups,\
-    get_list_from_set, create_context, get_user_groups
+    get_list_from_set, create_context, get_user_groups, subtract_dates
 from gladminds.sqs_tasks import export_asc_registeration_to_sap, send_sms
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.mail import sent_otp_email
@@ -333,6 +334,16 @@ def trigger_sqs_tasks(request):
     taskqueue.add(sqs_tasks[request.POST['task']])
     return HttpResponse()
 
+def set_wait_time(feedback_data,feedbackid):
+    start_date = feedback_data.pending_start
+    end_date = datetime.now()
+    wait = subtract_dates(start_date, end_date)
+    wait_time = float(wait.days) + float(wait.seconds) / float(86400)
+    feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
+    previous_wait = feedback[0].wait_time
+    aftersell_common.Feedback.objects.filter(id = feedbackid).update(wait_time=wait_time+previous_wait)
+        
+
 @login_required()
 def get_servicedesk_tickets(request):
     group_name =  request.user.groups.all()
@@ -352,6 +363,10 @@ def modify_servicedesk_tickets(request,feedbackid):
     type = get_list_from_set(FEEDBACK_TYPE)
     user_obj = request.user
     assign_status = False
+    pending_status=False
+    feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
+    if (feedback[0].status == 'Pending'):
+        pending_status = True
     servicedesk_obj_all = aftersell_common.ServiceDeskUser.objects.all()
     if request.method == 'GET':
         feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
@@ -360,28 +375,59 @@ def modify_servicedesk_tickets(request,feedbackid):
         if feedback[0].assign_to:
             assign_number = feedback[0].assign_to.phone_number
         else:
-            assign_number = None   
-           
+            assign_number = None
         assign = feedback[0].assign_to
         if assign is None:
             assign_status = True
+      
         data = request.POST
-        if data['Assign_To'] == 'None': 
-            aftersell_common.Feedback.objects.filter(id = feedbackid).update( status = data['status'], priority = data['Priority'])
-        else:    
+        if data['Assign_To'] == 'None':
+            aftersell_common.Feedback.objects.filter(id = feedbackid).update( status = data['status'], priority = data['Priority'], due_date=data['due_date'], resolved_date=data['resolved_date'])
+        else:
             servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(phone_number = data['Assign_To'])
-            aftersell_common.Feedback.objects.filter(id = feedbackid).update(assign_to = servicedesk_assign_obj[0] , status = data['status'], priority = data['Priority'])
-        if data['status'] == 'Closed':
-            aftersell_common.Feedback.objects.filter(id = feedbackid).update(closed_date = datetime.now()) 
+            aftersell_common.Feedback.objects.filter(id = feedbackid).update(assign_to = servicedesk_assign_obj[0] , status = data['status'], priority = data['Priority'], due_date=data['due_date'], resolved_date=data['resolved_date'])
+
+        if data['status'] == 'Pending':
+            pending_status = True
+            feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
+            aftersell_common.Feedback.objects.filter(id = feedbackid).update(pending_start = datetime.now())
+            print feedback[0].wait_time
+            
+             
         feedback_data = feedback[0]
-        if assign_status and feedback_data.assign_to : 
-            context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL', feedback[0]) 
+        if assign_status and feedback_data.assign_to :
+            context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL', feedback[0])
             mail.send_email_to_initiator_after_issue_assigned(context)
-            send_sms('INITIATOR_FEEDBACK_DETAILS',feedback_data.reporter, feedback_data) 
-        if feedback_data.status == 'Resolved':
+            send_sms('INITIATOR_FEEDBACK_DETAILS',feedback_data.reporter, feedback_data)
+            
+        if data['status'] == 'Open':
+            print pending_status
             context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL', feedback[0])
             mail.send_email_to_initiator_after_issue_resolved(context)
             send_sms('INITIATOR_FEEDBACK_STATUS', feedback_data.reporter, feedback_data)
+            if pending_status :
+                set_wait_time(feedback_data,feedbackid)
+            
+        if data['status'] == 'Resolved':
+            print pending_status
+            context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL', feedback[0])
+            mail.send_email_to_initiator_after_issue_resolved(context)
+            send_sms('INITIATOR_FEEDBACK_STATUS', feedback_data.reporter, feedback_data)
+            if pending_status :
+                set_wait_time(feedback_data,feedbackid)
+                
+        if data['status'] == 'Closed':
+            print pending_status
+            context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL', feedback[0])
+            mail.send_email_to_initiator_after_issue_resolved(context)
+            send_sms('INITIATOR_FEEDBACK_STATUS', feedback_data.reporter, feedback_data)
+            if pending_status :
+                set_wait_time(feedback_data,feedbackid)
+                
+        if data['status'] == 'Progress':
+            if pending_status :
+                set_wait_time(feedback_data,feedbackid)
+             
         if feedback_data.assign_to:   
             if assign_number != feedback_data.assign_to.phone_number: 
                 context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL', feedback[0])   
@@ -389,7 +435,18 @@ def modify_servicedesk_tickets(request,feedbackid):
                 send_sms('SEND_MSG_TO_ASSIGNEE', feedback_data.assign_to.phone_number, feedback_data)
         if feedback_data.status == 'Closed':
             context = create_context('TICKET_CLOSED_DETAIL_TO_BAJAJ', feedback[0]) 
-            mail.send_email_to_bajaj_after_issue_closed(context) 
+            mail.send_email_to_bajaj_after_issue_closed(context)
+         
+        start_date = feedback[0].created_date
+        end_date = feedback[0].resolved_date
+        if start_date > end_date:
+            raise ValueError('You provided a start_date that comes after the end_date.')
+        else:
+            wait = end_date-start_date
+            wait_time = float(wait.days) + float(wait.seconds) / float(86400)
+            feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
+            wait_final = wait_time - feedback[0].wait_time
+            aftersell_common.Feedback.objects.filter(id = feedbackid).update(wait_time=wait_final)
+            print feedback[0].wait_time
             
-                 
     return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj_all})
