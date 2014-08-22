@@ -19,6 +19,9 @@ task_info = {
     "export_coupon_redeem_to_sap": {
         "time_taken": 0
     },
+    "export_customer_reg_to_sap": {
+        "time_taken": 0
+    },
     "send_report_mail_for_feed": {
         "day_duration": 1
     },

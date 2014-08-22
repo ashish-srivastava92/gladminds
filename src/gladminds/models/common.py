@@ -120,9 +120,8 @@ class GladMindUsers(models.Model):
     gender = models.CharField(max_length=2, choices=GENDER_CHOICES)
     tshirt_size = models.CharField(max_length=2, choices=SIZE_CHOICES)
     pincode = models.CharField(max_length=15, null=True, blank=True)
-    
 
-    class Meta(object):
+    class Meta:
         app_label = "gladminds"
         verbose_name_plural = "Users"
 
@@ -169,6 +168,7 @@ class ProductData(models.Model):
     created_on = models.DateTimeField(null=True, default=datetime.now())
     isActive = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
+    veh_reg_no = models.CharField(max_length=15, null=True, blank=True)
 
     class Meta:
         app_label = "gladminds"
@@ -191,7 +191,7 @@ class CouponData(models.Model):
     valid_kms = models.IntegerField(max_length=10, null=False)
     service_type = models.IntegerField(max_length=10, null=False)
     sa_phone_number = models.ForeignKey('aftersell.ServiceAdvisor', null=True, blank=True)
-    status = models.SmallIntegerField(choices=STATUS_CHOICES, default=1)
+    status = models.SmallIntegerField(choices=STATUS_CHOICES, default=1, db_index=True)
     closed_date = models.DateTimeField(null=True, blank=True)
     mark_expired_on = models.DateTimeField(null=True, blank=True)
     actual_service_date = models.DateTimeField(null=True, blank=True)
@@ -200,6 +200,7 @@ class CouponData(models.Model):
     schedule_reminder_date = models.DateTimeField(null=True, blank=True)
     order = models.PositiveIntegerField(default=0)
     extended_date = models.DateTimeField(null=True, blank=True)
+    servicing_dealer = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
 
     class Meta:
         app_label = "gladminds"
@@ -215,6 +216,7 @@ class CouponData(models.Model):
 class ServiceAdvisorCouponRelationship(models.Model):
     unique_service_coupon = models.ForeignKey(CouponData, null=False)
     service_advisor_phone = models.ForeignKey('aftersell.ServiceAdvisor', null=False)
+    dealer_id = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
 
     class Meta:
         app_label = 'gladminds'
@@ -279,10 +281,13 @@ class SASaveForm(models.Model):
 class CustomerTempRegistration(models.Model):
     product_data = models.ForeignKey(ProductData, null=True, blank=True)
     new_customer_name = models.CharField(max_length=50, null=True, blank=True)
-    new_number = models.CharField(max_length=15, unique=True)
+    new_number = models.CharField(max_length=15)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
     temp_customer_id = models.CharField(max_length=50, null=False, blank=False, unique=True)
-    sent_to_sap = models.BooleanField(default=True)
+    sent_to_sap = models.BooleanField(default=False)
+    remarks = models.CharField(max_length=500, null=True, blank=True)
+    tagged_sap_id = models.CharField(
+        max_length=215, null=True, blank=True, unique=True)
 
     class Meta:
         app_label = "gladminds"
