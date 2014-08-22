@@ -29,7 +29,7 @@
         "fields": {
             "template_key": "FEEDBACK_CONFIRMATION",
             "sender": "feed-report@gladminds.co",
-            "reciever": "",
+            "reciever": "srv.sngh@gmail.com",
             "subject": "Thank you for feedback",
             "body": "We have received your {type}.\n Our team will get back to you soon.",
             "description": "Feedback Confirmation mail"
@@ -41,8 +41,8 @@
         "fields": {
             "template_key": "INITIATOR_FEEDBACK_MAIL_DETAIL",
             "sender": "feed-report@gladminds.co",
-            "reciever": "",
-            "subject": "Feedback Details",
+            "reciever": "srv.sngh@gmail.com",
+            "subject": "Feedback  with reference-no-{id} Details",
             "body": "Your {type} has been assigned to one of our technician.\n Severity:{priority}.\n Once it resolved we will notify you.",
             "description": "Feedback Detail mail"
         }
@@ -53,9 +53,9 @@
         "fields": {
             "template_key": "ASSIGNEE_FEEDBACK_MAIL_DETAIL",
             "sender": "feed-report@gladminds.co",
-            "reciever": "",
-            "subject": "Feedback Assign To You",
-            "body": "A GladMinds user has a feedback for us, which says:\n {message} \n Its has been reported by {reporter} on {created_date}.\n It has been assigned to you.\n Please address the issue as soon as possible.", 
+            "reciever": "srv.sngh@gmail.com",
+            "subject": "Feedback with reference-no-{id} Assign To You",
+            "body": "A GladMinds user has a {type} for us, which says:\n {message} \n Its has been reported by {reporter} on {created_date}.\n It has been assigned to you.\n Please address the issue as soon as possible.", 
             "description": "Feedback Detail mail to assignee"
         }
     },
@@ -65,8 +65,8 @@
         "fields": {
             "template_key": "INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL",
             "sender": "feed-report@gladminds.co",
-            "reciever": "",
-            "subject": "Feedback Status",
+            "reciever": "srv.sngh@gmail.com",
+            "subject": "Feedback  with reference-no-{id} Status",
             "body": "Your {type} has been resolved", 
             "description": "Feedback status mail"
         }
@@ -78,8 +78,8 @@
             "template_key": "FEEDBACK_DETAIL_TO_ADIM",
             "sender": "feed-report@gladminds.co",
             "reciever": "srv.sngh@gmail.com",
-            "subject": "Feedback",
-            "body": "A GladMinds user has a feedback for us, which says:\n {message} \n Its has been reported by {reporter} on {created_date}.", 
+            "subject": "Feedback  with reference-no-{id}",
+            "body": "A GladMinds user has a {type} for us, which says:\n {message} \n Its has been reported by {reporter} on {created_date}.", 
             "description": "Feedback  mail to Admin"
         }
     },    
@@ -87,12 +87,24 @@
         "model": "gladminds.emailtemplate",
         "pk": 8,
         "fields": {
-            "template_key": "TICKET_CLOSED_DETAIL_TO_BAJAJ",
+            "template_key": "TICKET_RESOLVED_DETAIL_TO_BAJAJ",
+            "sender": "feed-report@gladminds.co",
+            "reciever": "srv.sngh92@yahoo.com",
+            "subject": "Feedback  with reference-no-{id} resolved",
+            "body": "The {type} reported by {reporter} on {created_date} has been resolved.\n The Feedback received by reporter is {remark}", 
+            "description": "Feedback  mail to bajaj"
+        }
+    },
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 9,
+        "fields": {
+            "template_key": "TICKET_RESOLVED_DETAIL_TO_MANAGER",
             "sender": "feed-report@gladminds.co",
             "reciever": "srv.sngh@gmail.com",
-            "subject": "Feedback Closed",
-            "body": "The {type} reported by {reporter} on {created_date} has been closed.\n The Feedback received by reporter is {remark}", 
-            "description": "Feedback  mail to bajaj"
+            "subject": "Feedback  with reference-no-{id} resolved",
+            "body": "The {type} reported by {reporter} on {created_date} has been resolved.", 
+            "description": "Feedback  mail to manager"
         }
     }
 ]

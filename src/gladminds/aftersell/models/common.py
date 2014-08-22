@@ -121,6 +121,7 @@ class ServiceDeskUser(models.Model):
     
 class Feedback(models.Model):
     reporter = models.CharField(max_length=15)
+    reporter_email_id = models.CharField(max_length=50, null=True, blank= True)
     assign_to = models.ForeignKey(ServiceDeskUser, null=True, blank= True)
     message = models.CharField(max_length=512, null=True, blank=False)
     status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
@@ -129,6 +130,7 @@ class Feedback(models.Model):
     subject = models.CharField(max_length=512, null=True, blank=True)
     created_date = models.DateTimeField(null=True, blank= False,auto_now=True)
     modified_date = models.DateTimeField(null=True, blank= True,auto_now=True)
+    closed_date = models.DateTimeField(null=True, blank=True)
     resolved_date = models.DateTimeField(null=True, blank=True)
     pending_from = models.DateTimeField(null=True, blank=True)
     due_date = models.DateTimeField(null=True, blank=True)

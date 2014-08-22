@@ -261,7 +261,7 @@
     "pk": 30,
     "fields": {
       "template_key": "SEND_RCV_FEEDBACK",
-      "template": "Thanks for providing feedback. We will get back to you soon.",
+      "template": "Thanks for providing {type}. We will get back to you soon.",
       "description": "Send this message when service advisor files complain successfully"
     }
   }, 
