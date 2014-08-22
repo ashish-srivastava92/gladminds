@@ -1,22 +1,19 @@
+from django.core import mail
+from django.conf import settings 
+from django.contrib.auth.models import User, Group
+from django.test.client import Client
+
 from integration.base_integration import GladmindsResourceTestCase
 from provider.oauth2.models import Client as auth_client
 from provider.oauth2.models import AccessToken
-from django.contrib.auth.models import User, Group
-from django.test.client import Client
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
-from django.core import mail
-from django.conf import settings 
-from django.test.utils import override_settings
+from gladminds.mail import send_feedback_received,send_servicedesk_feedback
 from gladminds.aftersell.models import logs
- 
  
 import json
 client = Client()
-from gladminds.mail import send_feedback_received,send_servicedesk_feedback
- 
-client = Client()
- 
+
 class TestServiceDesk_Flow(GladmindsResourceTestCase):
     def setUp(self):
         super(TestServiceDesk_Flow, self).setUp()
@@ -81,7 +78,6 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
             
          
     def test_sms_email_assignee_after_feedback_assigned(self):
-        print len(mail.outbox)
         log_len_after = logs.AuditLog.objects.all()
         user_servicedesk_info = User.objects.filter(username='sdo')
         service_desk = aftersell_common.ServiceDeskUser(user = user_servicedesk_info[0], phone_number = '+917760814041', email_id = 'srv.sngh@gmail.com',  designation = 'SDM' )

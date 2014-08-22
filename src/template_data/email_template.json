@@ -53,7 +53,7 @@
         "fields": {
             "template_key": "ASSIGNEE_FEEDBACK_MAIL_DETAIL",
             "sender": "feed-report@gladminds.co",
-            "reciever": "",
+            "reciever": "srv.sngh@gmail.com",
             "subject": "Feedback with reference-no-{id} Assign To You",
             "body": "A GladMinds user has a {type} for us, which says:\n {message} \n Its has been reported by {reporter} on {created_date}.\n It has been assigned to you.\n Please address the issue as soon as possible.", 
             "description": "Feedback Detail mail to assignee"
@@ -65,7 +65,7 @@
         "fields": {
             "template_key": "INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL",
             "sender": "feed-report@gladminds.co",
-            "reciever": "",
+            "reciever": "srv.sngh@gmail.com",
             "subject": "Feedback  with reference-no-{id} Status",
             "body": "Your {type} has been resolved", 
             "description": "Feedback status mail"

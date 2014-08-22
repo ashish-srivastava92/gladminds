@@ -187,8 +187,8 @@
       });
       return false;
   });
-    $('.form-horizontal').on('submit', function(e) {
-    	var data = Utils.getFormData('.form-horizontal');
+    $('.servicedesk').on('submit', function(e) {
+    	var data = Utils.getFormData('.servicedesk');
         var formData = new FormData($(this).get(0));
         console.log(data);
         var url = '/aftersell/feedbackdetails/'+data.ticketId+'/';

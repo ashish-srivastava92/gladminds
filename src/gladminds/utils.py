@@ -266,7 +266,7 @@ def create_context(email_template_name, feedback_obj):
     assign_to = feedback_obj.assign_to
     priority = feedback_obj.priority 
     data = get_email_template(email_template_name)
-    data['subject'].format(id = id)
+    data['newsubject'] = data['subject'].format(id = id)
     data['content'] = data['body'].format(type = type, reporter = reporter, 
                                           message = message, created_date = created_date, 
                                           assign_to = assign_to,  priority =  priority, remark = "")

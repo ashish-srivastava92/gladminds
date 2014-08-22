@@ -180,11 +180,9 @@ def send_feedback_received(data):
 def send_servicedesk_feedback(data, feedback_obj):
     try:
         context = Context({"content": data['content']})
-        
-        print  feedback_obj.reporter_emailId
         send_template_email("base_email_template.html", context,
                             data,
-                            receiver= feedback_obj.reporter_emailId)
+                            receiver= feedback_obj.reporter_email_id)
     except Exception as ex:
         logger.info("[Exception feedback initiator email]  {0}".format(ex))
         
@@ -203,7 +201,7 @@ def send_email_to_initiator_after_issue_assigned(data, feedback_obj):
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
                             data,
-                            receiver= feedback_obj.reporter_emailId)
+                            receiver= feedback_obj.reporter_email_id)
     except Exception as ex:
         logger.info("[Exception feedback initiator after issue assigned email]  {0}".format(ex)) 
 
@@ -221,7 +219,7 @@ def send_email_to_initiator_after_issue_resolved(data, feedback_obj):
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
                             data,
-                            receiver= feedback_obj.reporter_emailId)
+                            receiver= feedback_obj.reporter_email_id)
     except Exception as ex:
         logger.info("[Exception feedback initiator after issue resloved email]  {0}".format(ex))
         
@@ -251,7 +249,7 @@ def send_template_email(template_name, context, mail_detail,receiver=None):
     if receiver is None:
         receiver =  mail_detail['reciever']
     send_email(sender =  mail_detail['sender'], receiver = receiver, 
-               subject = mail_detail['subject'], body = body, 
+               subject = mail_detail['newsubject'], body = body, 
                smtp_server = settings.MAIL_SERVER)
     logger.info("Mail sent successfully")
     #TODO We have to remove hard code receiver

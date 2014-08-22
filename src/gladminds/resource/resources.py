@@ -432,12 +432,11 @@ class GladmindsResources(Resource):
         ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
         try:
             active_sa = self.validate_dealer(phone_number)
-            
             if not active_sa:
                 message = templates.get_template('SEND_SA_UNAUTHORISED_SA')
             else:
                 if with_detail:
-                    gladminds_feedback_object = aftersell_common.Feedback(reporter=active_sa,
+                    gladminds_feedback_object = aftersell_common.Feedback(reporter=active_sa.service_advisor_id.phone_number,
                                                                 priority=sms_dict['priority'] , type=sms_dict['type'], 
                                                                 subject=sms_dict['subject'], message=sms_dict['message'],
                                                                 status="Open", created_date=datetime.now()
@@ -448,11 +447,9 @@ class GladmindsResources(Resource):
                                                                 created_date=datetime.now()
                                                                 )
                 gladminds_feedback_object.save()
-                message = templates.get_template('SEND_RCV_FEEDBACK')
-                message_popup ='We have received your input.We will get back to you soon.'
+                message = templates.get_template('SEND_RCV_FEEDBACK').format(type = gladminds_feedback_object.type  )
         except Exception as ex:
             message = templates.get_template('SEND_INVALID_MESSAGE')
-            message_popup = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
             logger.info("Send complain message received successfully with %s" % message)
             phone_number = utils.get_phone_number_format(phone_number)
@@ -465,9 +462,8 @@ class GladmindsResources(Resource):
             send_feedback_received(context)
             context = create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)
             send_servicedesk_feedback(context, gladminds_feedback_object)
-            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message = message_popup)
-            
-            return {'status': True, 'message': message_popup}
+            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message = message)
+        return {'status': True, 'message': message}
         
         
     
