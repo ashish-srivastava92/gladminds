@@ -460,9 +460,10 @@ class GladmindsResources(Resource):
                                                                 )
                 gladminds_feedback_object.save()
                 message = templates.get_template('SEND_RCV_FEEDBACK')
+                message_popup ='We have received your input.We will get back to you soon.'
         except Exception as ex:
             message = templates.get_template('SEND_INVALID_MESSAGE')
-        
+            message_popup = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
             logger.info("Send complain message received successfully with %s" % message)
             phone_number = utils.get_phone_number_format(phone_number)
@@ -470,13 +471,14 @@ class GladmindsResources(Resource):
                 task_queue = get_task_queue()
                 task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
             else:
-                send_coupon.delay(phone_number=phone_number, message=message)
+                send_coupon.delay(phone_number=phone_number, message=message)      
             context = create_context('FEEDBACK_DETAIL_TO_ADIM',  gladminds_feedback_object)    
             send_feedback_received(context)
             context = create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)
-            send_servicedesk_feedback(context)
-            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
-        return {'status': True, 'message': message}
+            send_servicedesk_feedback(context, gladminds_feedback_object)
+            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message = message_popup)
+            
+            return {'status': True, 'message': message_popup}
         
         
     

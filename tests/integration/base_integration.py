@@ -18,6 +18,16 @@ class GladmindsResourceTestCase(ResourceTestCase):
             temp_obj = common.MessageTemplate(template_key=fields['template_key']\
                        , template=fields['template'], description=fields['description'])
             temp_obj.save()
+        file_path = os.path.join(settings.PROJECT_DIR, 'template_data/email_template.json')
+        email_templates = json.loads(open(file_path).read())
+        common.EmailTemplate.objects.all().delete()
+        for email_temp in email_templates:
+            fields = email_temp['fields']
+            temp_obj = common.EmailTemplate(template_key=fields['template_key']\
+                       , sender=fields['sender'], reciever=fields['reciever'],\
+                        subject=fields['subject'], body=fields['body'],\
+                        description=fields['description'])
+            temp_obj.save()   
         self.MESSAGE_URL = "/v1/messages"
 
         #old implementation of test case;

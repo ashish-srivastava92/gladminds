@@ -127,6 +127,7 @@
       var formData = new FormData($(this).get(0));
       var messageModal = $('.modal.message-modal'),
           messageBlock = $('.modal-body', messageModal),
+          messageHeader = $('.modal-title', messageModal),
           waitingModal = $('.modal.waiting-dialog'),
       jqXHR = $.ajax({
           type: 'POST',
@@ -141,18 +142,57 @@
           },
           success: function(data){
               messageBlock.text(data.message);
+              messageHeader.text("Thanks");
               waitingModal.modal('hide');
               messageModal.modal('show');
+              
           },
           error: function() {
               messageBlock.text('Invalid Data');
+              messageHeader.text("Invalid");
               waitingModal.modal('hide');
               messageModal.modal('show');
           }
       });
       return false;
   });
-    
+    $('.form-horizontal').on('submit', function(e) {
+    	var data = Utils.getFormData('.form-horizontal');
+        var formData = new FormData($(this).get(0));
+        console.log(data);
+        var url = '/aftersell/feedbackdetails/'+data.ticketId+'/';
+        var messageModal = $('.modal.message-modal'),
+            messageBlock = $('.modal-body', messageModal),
+            messageHeader = $('.modal-title', messageModal),
+            waitingModal = $('.modal.waiting-dialog'),
+        jqXHR = $.ajax({
+            type: 'POST',
+            url: url,
+            data: formData,
+            cache: false,
+            processData: false,
+            contentType: false,
+            beforeSend: function(){
+                $(this).find('input[type="text"]').val('');
+                waitingModal.modal('show');
+            },
+            success: function(data){
+                messageBlock.text('Updated Successfully');
+                messageHeader.text("Save");
+                waitingModal.modal('hide');
+                messageModal.modal('show');
+                
+            },
+            error: function() {
+                messageBlock.text('Invalid Data');
+                messageHeader.text("Invalid");
+                waitingModal.modal('hide');
+                messageModal.modal('show');
+            }
+        });
+        return false;
+    });
+  
     $('#jobCard').on('change', function() {
         var fileInput = $(this),
             ext = fileInput.val().split('.').pop().toLowerCase();

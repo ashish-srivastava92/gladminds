@@ -177,14 +177,16 @@ def send_feedback_received(data):
     except Exception as ex:
         logger.info("[Exception ucn request email]: {0}".format(ex))
         
-def send_servicedesk_feedback(data):
+def send_servicedesk_feedback(data, feedback_obj):
     try:
         context = Context({"content": data['content']})
-        send_template_email("base_email_template.html", context, 
-                            data, 
-                            receiver="srv.sngh@gmail.com")
+        
+        print  feedback_obj.reporter_emailId
+        send_template_email("base_email_template.html", context,
+                            data,
+                            receiver= feedback_obj.reporter_emailId)
     except Exception as ex:
-        logger.info("[Exception feedback receiver email]  {0}".format(ex))
+        logger.info("[Exception feedback initiator email]  {0}".format(ex))
         
 
 def send_email_to_assignee(data, feedback_obj):
@@ -196,14 +198,14 @@ def send_email_to_assignee(data, feedback_obj):
     except Exception as ex:
         logger.info("[Exception feedback receiver email]  {0}".format(ex)) 
         
-def send_email_to_initiator_after_issue_assigned(data):
+def send_email_to_initiator_after_issue_assigned(data, feedback_obj):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
                             data,
-                            receiver="srv.sngh@gmail.com")
+                            receiver= feedback_obj.reporter_emailId)
     except Exception as ex:
-        logger.info("[Exception feedback receiver email]  {0}".format(ex)) 
+        logger.info("[Exception feedback initiator after issue assigned email]  {0}".format(ex)) 
 
 def send_status_mail_to_assignee(data):
     try:
@@ -212,25 +214,32 @@ def send_status_mail_to_assignee(data):
                              data,
                             receiver = feedback_obj.assign_to.email_id)
     except Exception as ex:
-        logger.info("[Exception feedback receiver email]  {0}".format(ex))
+        logger.info("[Exception feedback assignee email]  {0}".format(ex))
 
-def send_email_to_initiator_after_issue_resolved(data):
+def send_email_to_initiator_after_issue_resolved(data, feedback_obj):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                             data,
-                            receiver="srv.sngh@gmail.com")
+                            data,
+                            receiver= feedback_obj.reporter_emailId)
     except Exception as ex:
-        logger.info("[Exception feedback receiver email]  {0}".format(ex))
+        logger.info("[Exception feedback initiator after issue resloved email]  {0}".format(ex))
         
-def send_email_to_bajaj_after_issue_closed(data):
+def send_email_to_bajaj_after_issue_resolved(data):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                             data,
-                            receiver="srv.sngh@gmail.com")
+                             data)
     except Exception as ex:
         logger.info("[Exception fail to send mail to bajaj]  {0}".format(ex)) 
+
+def send_email_to_manager_after_issue_resolved(data, manager_obj):
+    try:
+        context = Context({"content": data['content']})
+        send_template_email("base_email_template.html", context,
+                             data, receiver = manager_obj.email_id)
+    except Exception as ex:
+        logger.info("[Exception fail to send mail to manager]  {0}".format(ex))         
            
 def send_template_email(template_name, context, mail_detail,receiver=None): 
     '''generic function use for send mail for any html template'''
