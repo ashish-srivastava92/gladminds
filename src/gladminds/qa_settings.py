@@ -53,6 +53,7 @@ TEMPLATE_DIRS = (
 #                      'OTP_TWILIO_FROM' : '+1 469-513-9856',
 #                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/Messages.json'
 #                 }
+FILE_CACHE_DURATION = 0
 
 SMS_CLIENT = "AIRTEL"
 SMS_CLIENT_DETAIL = {
@@ -89,6 +90,8 @@ SAP_CRM_DETAIL = {
 
 COUPON_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl&v0"
 ASC_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/asc-feed/?wsdl&v0"
+CUSTOMER_REGISTRATION_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/customer-feed/?wsdl&v0"
+CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
 
 ENABLE_AMAZON_SQS = True
 

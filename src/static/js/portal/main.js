@@ -50,40 +50,37 @@
         return false;
     });
     
-    $('.vin-form').on('submit', function() {
-        var vin = $('#srch-vin').val(),
-            messageModal = $('.modal.message-modal'),
-            messageBlock = $('.modal-body', messageModal);
-        $('.customer-vin').val(vin);
+    $('.cutomer-reg-form').on('submit', function() {
+      var vin = $('#srch-vin').val(),
+          messageModal = $('.modal.message-modal'),
+          messageBlock = $('.modal-body', messageModal);
+      $('.customer-vin').val(vin);
       
         var jqXHR = $.ajax({
             type: 'POST',
             url: '/aftersell/exceptions/customer',
             data: {'vin': vin},
             success: function(data){
-                if (data.phone) {
-                    $('.customer-phone').val(data.phone).attr('readOnly', true);
-                    $('.customer-name').val(data.name).attr('readOnly', true);
-                    $('.name-readonly').attr('readOnly', true);
-                    $('.purchase-date').val(data.purchase_date).attr('readOnly', true);
-                    $('.customer-id').val(data.id).attr('readOnly', true);
-                    $('.customer-submit').attr('disabled', true);
-                }
-              else if (data.message) {
-                    $('.customer-phone').val(data.phone);
-                    $('.customer-name').val('').attr('readOnly', false);
-                    $('.name-readonly').attr('readOnly', false);
-                    $('.purchase-date').val('').attr('readOnly', false);
-                    $('.customer-id').val('').attr('readOnly', false);
-                    $('.customer-phone').attr('readOnly', false);
-                    $('.customer-submit').attr('disabled', true);
-                    messageBlock.text(data.message);
-                    messageModal.modal('show');
-                    if (!data.status) {
-                        $('.customer-id').val('').attr('readOnly', true);
-                        $('.customer-submit').attr('disabled', false);
-                    }
-                }
+              if (data['phone']) {
+                  $('.customer-phone').val(data['phone']);
+                  $('.customer-name').val(data['name']).attr('readOnly', true);
+                  $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
+                  $('.customer-id').val(data['id']).attr('readOnly', true);
+                  $('.customer-submit').attr('disabled', false);
+              }	
+              else if (data['message']) {
+                  $('.customer-phone').val('');
+            	  $('.customer-name').val('').attr('readOnly', false);
+                  $('.purchase-date').val('').attr('readOnly', false);
+                  $('.customer-id').val('').attr('readOnly', false);
+                  $('.customer-submit').attr('disabled', true);
+                  messageBlock.text(data.message);
+                  messageModal.modal('show');
+                  if (!data['status']) {
+                	  $('.customer-id').val('').attr('readOnly', true);
+                	  $('.customer-submit').attr('disabled', false);
+                  }
+              }
             },
             error: function() {
                 messageBlock.text('Oops! Some error occurred!');
@@ -92,6 +89,40 @@
         });
         return false;
     });
+
+    $('.vin-form').on('submit', function() {
+    	var table = $("#search-results tbody .search-detail");
+    	table.remove(); 
+        var value = $('#search-value').val(),
+            field = $('#search-field').val(),
+            messageModal = $('.modal.message-modal'),
+            messageBlock = $('.modal-body', messageModal),
+            data = {};
+        data[field] =  value;
+        var jqXHR = $.ajax({
+              type: 'POST',
+              url: '/aftersell/exceptions/search',
+              data: data,
+              success: function(data){
+                if (data['message']) {
+                      messageBlock.text(data.message);
+                      messageModal.modal('show');
+                }
+                else if (data.length > 0) {
+                	var table = $("#search-results tbody");
+                    $.each(data, function(idx, elem){
+                        table.append("<tr class='search-detail'><td>"+elem.vin+"</td><td>"+elem.id+"</td><td>"+elem.name+"</td><td>"+elem.phone+"</td></tr>");
+                    });
+                }	
+
+              },
+              error: function() {
+              	messageBlock.text('Oops! Some error occurred!');
+                  messageModal.modal('show');
+              }
+            });
+        return false;
+      });
     
     $('.ucn-recovery-form').on('submit', function() {
         var formData = new FormData($(this).get(0));

@@ -198,7 +198,7 @@ class GladmindsResources(Resource):
         '''
         exceed_limit_coupon = common.CouponData.objects\
             .filter(Q(status=1) | Q(status=4), vin__vin=vin, valid_kms__lt=actual_kms)\
-            .update(status=5)
+            .update(status=5, actual_kms=actual_kms)
         logger.info("%s are exceed limit coupon" % exceed_limit_coupon)
 
     def get_vin(self, sap_customer_id):
@@ -214,7 +214,8 @@ class GladmindsResources(Resource):
         valid_coupon.actual_kms = actual_kms
         valid_coupon.actual_service_date = update_time
         valid_coupon.status = status
-        valid_coupon.sa_phone_number = dealer_data
+        valid_coupon.sa_phone_number = dealer_data.service_advisor_id
+        valid_coupon.servicing_dealer = dealer_data.dealer_id
         valid_coupon.save()
 
     def update_inprogress_coupon(self, coupon, actual_kms, dealer_data):
@@ -244,36 +245,35 @@ class GladmindsResources(Resource):
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         dealer_data = self.validate_dealer(phone_number)
         if not dealer_data:
-            return False
+            return {'status': False, 'message': templates.get_template('UNAUTHORISED_SA')}
         if not self.is_valid_data(customer_id=sap_customer_id, sa_phone=phone_number):
             return {'status': False, 'message': templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')}
         try:
             vin = self.get_vin(sap_customer_id)
             self.update_exceed_limit_coupon(actual_kms, vin)
             valid_coupon = common.CouponData.objects.select_for_update()\
-                           .filter(Q(status=1) | Q(status=4) | Q(status=5), vin__vin=vin, valid_kms__gte=actual_kms) \
+                           .filter(Q(status=1) | Q(status=4) | Q(status=5), vin__vin=vin, valid_kms__gte=actual_kms, service_type__gte=service_type) \
                            .select_related('vin', 'customer_phone_number__phone_number').order_by('service_type')
-
             if len(valid_coupon) > 1:
                 self.update_higher_range_coupon(valid_coupon[0].valid_kms, vin)
                 valid_coupon = valid_coupon[0]
-                logger.info('valid Coupon: %s' % valid_coupon)
             elif len(valid_coupon) > 0:
                 valid_coupon = valid_coupon[0]
-                logger.info('valid coupon: %s' % valid_coupon)
             else:
-                dealer_message = templates.get_template('SEND_SA_NO_VALID_COUPON').format(sap_customer_id)
+                dealer_message = templates.get_template('SEND_SA_NO_VALID_COUPON').format(sap_customer_id, service_type)
                 logger.info(dealer_message)
                 return {'status': False, 'message': dealer_message}
             
             coupon_sa_obj = common.ServiceAdvisorCouponRelationship.objects.filter(unique_service_coupon=valid_coupon\
-                                                                                   ,service_advisor_phone=dealer_data)
-            logger.info('Coupon_sa_obj: %s' % coupon_sa_obj)
+                                                                                   ,service_advisor_phone=dealer_data.service_advisor_id\
+                                                                                   ,dealer_id=dealer_data.dealer_id)
+            logger.info('Coupon_sa_obj exists: %s' % coupon_sa_obj)
             if not len(coupon_sa_obj):
                 coupon_sa_obj = common.ServiceAdvisorCouponRelationship(unique_service_coupon=valid_coupon\
-                                                                        ,service_advisor_phone=dealer_data)
+                                                                        ,service_advisor_phone=dealer_data.service_advisor_id\
+                                                                        ,dealer_id=dealer_data.dealer_id)
                 coupon_sa_obj.save()
-                logger.info('Coupon obj: %s' % coupon_sa_obj)
+                logger.info('Coupon obj created: %s' % coupon_sa_obj)
 
             in_progress_coupon = common.CouponData.objects.select_for_update()\
                                  .filter(vin__vin=vin, valid_kms__gte=actual_kms, status=4) \
@@ -325,31 +325,32 @@ class GladmindsResources(Resource):
 
 
     def close_coupon(self, sms_dict, phone_number):
-        sa_object = self.validate_dealer(phone_number)
+        dealer_sa_object = self.validate_dealer(phone_number)
         unique_service_coupon = sms_dict['usc']
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         message = None
-        if not sa_object:
-            return False
+        if not dealer_sa_object:
+            return {'status': False, 'message': templates.get_template('UNAUTHORISED_SA')}
         if not self.is_valid_data(customer_id=sap_customer_id, coupon=unique_service_coupon, sa_phone=phone_number):
             return {'status': False, 'message': templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')}
-        if not self.is_sa_initiator(unique_service_coupon, sa_object):
-            message="SA is not the coupon initiator."
-            logger.info(message)
-            return {'status': False, 'message': message}
+        if not self.is_sa_initiator(unique_service_coupon, dealer_sa_object):
+            return {'status': False, 'message': "SA is not the coupon initiator."}
         try:
             vin = self.get_vin(sap_customer_id)
             coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
-            customer_phone_number = coupon_object.vin.customer_phone_number.phone_number
-            coupon_object.status = 2
-            coupon_object.sa_phone_number=sa_object
-            coupon_object.closed_date = datetime.now()
-            logger.info("object before save %s" % coupon_object)
-            coupon_object.save()
-            logger.info("object after save %s" % coupon_object)
-            common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, service_type__lt=coupon_object.service_type).update(status=3)
-            message = templates.get_template('SEND_SA_CLOSE_COUPON').format(customer_id=sap_customer_id, usc=unique_service_coupon)
+            if coupon_object.status == 2:
+                message=templates.get_template('COUPON_ALREADY_CLOSED')
+            else:
+                customer_phone_number = coupon_object.vin.customer_phone_number.phone_number
+                coupon_object.status = 2
+                coupon_object.sa_phone_number=dealer_sa_object.service_advisor_id
+                coupon_object.servicing_dealer=dealer_sa_object.dealer_id
+                coupon_object.closed_date = datetime.now()
+                coupon_object.save()
+#                 common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, service_type__lt=coupon_object.service_type).update(status=3)
+                message = templates.get_template('SEND_SA_CLOSE_COUPON').format(customer_id=sap_customer_id, usc=unique_service_coupon)
         except Exception as ex:
+            logger.error("[Exception_coupon_close]".format(ex))
             message = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
             logger.info("Close coupon with message %s" % message)
@@ -363,29 +364,17 @@ class GladmindsResources(Resource):
         return {'status': True, 'message': message}
 
     def validate_dealer(self, phone_number):
-        try:
-            service_advisor_objects = aftersell_common.ServiceAdvisor.objects.filter(phone_number=phone_number)
-            for service_advisor_obj in service_advisor_objects:
-                all_sa_dealer_obj = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = service_advisor_obj, status = u'Y')
-                if len(all_sa_dealer_obj) > 0:
-                    return service_advisor_obj
-        except Exception as ex:
-            sms_message = 'Not an authorised user to avail this service.'
-            message = 'Not an authorised user to avail this service. Phone number - {0}'.format(phone_number)
-            logger.error(ex)
-            logger.error(message)
-            if settings.ENABLE_AMAZON_SQS:
-                task_queue = get_task_queue()
-                task_queue.add("send_coupon", {"phone_number":phone_number, "message": sms_message})
-            else:
-                send_coupon.delay(phone_number=phone_number, message=sms_message)
-            audit.audit_log(action='failure', sender=phone_number, reciever="", message=message, status='warning')
+        all_sa_dealer_obj = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id__phone_number = phone_number, status = u'Y')
+        if len(all_sa_dealer_obj) == 0:
             return None
+        service_advisor_obj = all_sa_dealer_obj[0]
+        return service_advisor_obj
 
-    def is_sa_initiator(self, coupon_id, sa_object):
+    def is_sa_initiator(self, coupon_id, dealer_sa_data):
         coupon_data = common.CouponData.objects.filter(unique_service_coupon = coupon_id)
         coupon_sa_obj = common.ServiceAdvisorCouponRelationship.objects.filter(unique_service_coupon=coupon_data\
-                                                                                   ,service_advisor_phone=sa_object)
+                                                                                   ,service_advisor_phone=dealer_sa_data.service_advisor_id\
+                                                                                   ,dealer_id=dealer_sa_data.dealer_id)
         return len(coupon_sa_obj)>0
         
     
