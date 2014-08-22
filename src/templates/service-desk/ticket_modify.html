@@ -15,103 +15,103 @@
 	<div class="message"></div>
 </div>
  <div class="row">
-          <div class="col-md-offset-8 col-md-2">
-            <a class="logout" href="/aftersell/provider/logout">Logout</a>&nbsp;&nbsp;&nbsp;
-            <a class="logout" href="/aftersell/servicedesk/">Back</a>
-          </div>
-        </div>
+ 	<div class="col-md-offset-8 col-md-2">
+    	<a class="logout" href="/aftersell/provider/logout">Logout</a>&nbsp;&nbsp;&nbsp;
+        <a class="logout" href="/aftersell/servicedesk/">Back</a>
+	</div>
+ </div>
         
 <div class = 'container'>
 	<div class="row">
-	  <div class="col-md-4">
-	  </div>
-	  <div class="col-md-4">
-		<form class="form-horizontal" role="form" method="post">
-		{% for feedback in feedback %}
-		 <div class="form-group">
-    <label class="col-sm-3 control-label" for="Subject">Subject</label>
-    <div class="col-sm-9">
-    <input type="textarea" class="form-control" id="subject" value={{feedback.subject}} readonly>
-    </div>
-  </div>
+		<div class="col-md-4">
+		</div>
+		<div class="col-md-4">
+			<form class="form-horizontal" role="form" method="post">
+			{% for feedback in feedback %}
+		 	<div class="form-group">
+   				<label class="col-sm-3 control-label" for="Subject">Subject</label>
+   			 	<div class="col-sm-9">
+    				<input type="textarea" class="form-control" id="subject" value={{feedback.subject}} readonly>
+    		 	</div>
+			</div>
   
-    <div class="form-group">
-   <label class="col-sm-3 control-label"for="Message">Message</label>
-   <div class="col-sm-9">
-   <textarea  class="form-control"id="Message" value={{feedback.message}} readonly>{{feedback.message}}</textarea>
-    </div>
-  </div>
+    		<div class="form-group">
+   				<label class="col-sm-3 control-label"for="Message">Message</label>
+   				<div class="col-sm-9">
+   					<textarea  class="form-control"id="Message" value={{feedback.message}} readonly>{{feedback.message}}</textarea>
+   				</div>
+  			</div>
   
-  <div class="form-group">
-    <label class="col-sm-3 control-label" for="reporter">Reporter</label>
-    <div class="col-sm-9">
-    <input type="text" class="form-control" id="reporter" value={{feedback.reporter}} readonly >
-    </div>
-  </div>
+  			<div class="form-group">
+    			<label class="col-sm-3 control-label" for="reporter">Reporter</label>
+    			<div class="col-sm-9">
+    				<input type="text" class="form-control" id="reporter" value={{feedback.reporter}} readonly >
+    			</div>
+  			</div>
   
-  <div class="form-group">
-    <label class="col-sm-3 control-label" for="Assign To">Assign_To</label>
-    <div class="col-sm-9">
-    <select class="form-control" name="Assign_To" id="Assign To" {% if group == 'SDO' %} readonly {% endif %} required>
-                      <option value = {{feedback.assign_to}}>{{feedback.assign_to}}</option>
-                      {% for type in servicedeskuser %}
-                      	<option value="{{type}}">{{type}}</option>
-                      {% endfor %}
-   </select>
-    </div>
-  </div>
+  			<div class="form-group">
+    			<label class="col-sm-3 control-label" for="Assign To">Assign_To</label>
+    			<div class="col-sm-9">
+    				<select class="form-control" name="Assign_To" id="Assign To" {% if group == 'SDO' %} readonly {% endif %} required>
+                    	<option value = {{feedback.assign_to}}>{{feedback.assign_to}}</option>
+                      	{% for type in servicedeskuser %}
+                      		<option value="{{type}}">{{type}}</option>
+                      	{% endfor %}
+   					</select>
+   				 </div>	
+			</div>
   
-    <div class="form-group">
-  <label class="col-sm-3 control-label" for="Priority">Priority</label>
-  <div class="col-sm-9">
-    <select class="form-control" name="Priority" id="Priority" readonly>
-                      <option value ={{feedback.priority}}>{{feedback.priority}}</option>
-                      {% for type in PRIORITY %}
-                      	<option value="{{type}}">{{type}}</option>
-                      {% endfor %}
-    </select>
-    </div>
-      </div>
+    		<div class="form-group">
+  				<label class="col-sm-3 control-label" for="Priority">Priority</label>
+  				<div class="col-sm-9">
+    				<select class="form-control" name="Priority" id="Priority" readonly>
+                    	<option value ={{feedback.priority}}>{{feedback.priority}}</option>
+                      	{% for type in PRIORITY %}
+                      		<option value="{{type}}">{{type}}</option>
+                        {% endfor %}
+    				</select>
+    			</div>
+      		</div>
       
-   <div class="form-group">
-    <label class="col-sm-3 control-label" for="Status">Status</label>
-    <div class="col-sm-9">
-    <select class="form-control" name="status" id="status" >
-                      <option value ={{feedback.status}}>{{feedback.status}}</option>
-                      {% for type in FEEDBACK_STATUS %}
-                      	<option value="{{type}}">{{type}}</option>
-                      {% endfor %}
-    </select>
-    </div>
-  </div>
+   			<div class="form-group">
+    			<label class="col-sm-3 control-label" for="Status">Status</label>
+    			<div class="col-sm-9">
+    				<select class="form-control" name="status" id="status" >
+                    	<option value ={{feedback.status}}>{{feedback.status}}</option>
+                      	{% for type in FEEDBACK_STATUS %}
+                      		<option value="{{type}}">{{type}}</option>
+                      	{% endfor %}
+    				</select>
+    			</div>
+  			</div>
    
-  <div class="form-group">
-    <label class="col-sm-3 control-label" for="type">Type</label>
-    <div class="col-sm-9">
-    <select class="form-control" name="type" id="type" readonly>
-                      <option value ={{feedback.type}}>{{feedback.type}}</option>
-                      {% for type in FEEDBACK_TYPE %}
-                     	 <option value="{{type}}">{{type}}</option>
-                      {% endfor %}
-    </select>
-    </div>
-  </div>
+  			<div class="form-group">
+    			<label class="col-sm-3 control-label" for="type">Type</label>
+    			<div class="col-sm-9">
+    				<select class="form-control" name="type" id="type" readonly>
+                    	<option value ={{feedback.type}}>{{feedback.type}}</option>
+                      	{% for type in FEEDBACK_TYPE %}
+                     		<option value="{{type}}">{{type}}</option>
+                      	{% endfor %}
+    				</select>
+    			</div>
+  			</div>
   
-    <div class="form-group">
-    <label class="col-sm-3 control-label" for="resolved_date">Resolved Date</label>
-    <div class="col-sm-9">
-    <input type="datetime" class="form-control" name="resolved_date" id="resolved_date" readonly value="{{feedback.resolved_date}}">
-    </div>
-  </div>
+    		<div class="form-group">
+    			<label class="col-sm-3 control-label" for="resolved_date">Resolved Date</label>
+    			<div class="col-sm-9">
+    				<input type="datetime" class="form-control" name="resolved_date" readonly value="{{feedback.resolved_date}}">
+   				</div>
+  			</div>
   
-  <div class="form-group">
-    <label class="col-sm-3 control-label" for="due_date">Due Date</label>
-    <div class="col-sm-9">
-    <input type="datetime" class="form-control" name="due_date" id="due_date" readonly value="{{feedback.due_date}}" >
-    </div>
-  </div>
+			<div class="form-group">
+  				<label class="col-sm-3 control-label" for="due_date">Due Date</label>
+    			<div class="col-sm-9">
+    				<input type="datetime" class="form-control" name="due_date" readonly value="{{feedback.due_date}}" >
+   				</div>
+			</div>
  
-  {% endfor %}
+  		{% endfor %}
   
   <div class="form-group">
     <div class="col-sm-offset-3 col-sm-9">
