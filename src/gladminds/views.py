@@ -516,7 +516,7 @@ def modify_servicedesk_tickets(request,feedbackid):
             start_date = feedback[0].created_date
             end_date = feedback[0].resolved_date
             if start_date > end_date:
-                raise ValueError('You provided a start_date that comes after the end_date.')
+                raise ValueError('Invalid resolved date. Resolved date should be after the created date')
             else:
                 start_date = start_date.strftime(TIME_FORMAT)
                 end_date = end_date.strftime(TIME_FORMAT)
