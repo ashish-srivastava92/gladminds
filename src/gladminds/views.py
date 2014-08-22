@@ -92,7 +92,6 @@ def generate_otp(request):
         return render(request, 'portal/get_otp.html')
 
 def validate_otp(request):
-    print "here"
     if request.method == 'GET':
         return render(request, 'portal/validate_otp.html')
     elif request.method == 'POST':
@@ -223,6 +222,7 @@ def create_report(method, query_params, user):
     report_data = []
     filter = {}
     params = {}
+    args = { Q(status=4) | Q(status=2) }
     status_options = {'4': 'In Progress', '2':'Closed'}
     user = afterbuy_common.RegisteredDealer.objects.filter(dealer_id=user)
     filter['servicing_dealer'] = user[0]
@@ -238,10 +238,10 @@ def create_report(method, query_params, user):
         if status:
             params['status'] = status
             filter['status'] = status
-        all_coupon_data = common.CouponData.objects.filter(**filter)
+        all_coupon_data = common.CouponData.objects.filter(*args, **filter)
     elif method == 'GET':
         message = "" 
-        all_coupon_data = {}
+        all_coupon_data = []
     else:
         return HttpResponseBadRequest()
     
