@@ -339,8 +339,7 @@ def set_wait_time(feedback_data,feedbackid):
     end_date = datetime.now()
     wait = subtract_dates(start_date, end_date)
     wait_time = float(wait.days) + float(wait.seconds) / float(86400)
-    feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
-    previous_wait = feedback[0].wait_time
+    previous_wait = feedback_data.wait_time
     aftersell_common.Feedback.objects.filter(id = feedbackid).update(wait_time=wait_time+previous_wait)
         
 
@@ -442,11 +441,10 @@ def modify_servicedesk_tickets(request,feedbackid):
         if start_date > end_date:
             raise ValueError('You provided a start_date that comes after the end_date.')
         else:
-            wait = end_date-start_date
+            wait = subtract_dates(start_date, end_date)
             wait_time = float(wait.days) + float(wait.seconds) / float(86400)
             feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
-            wait_final = wait_time - feedback[0].wait_time
+            wait_final = float(wait_time) - feedback[0].wait_time
             aftersell_common.Feedback.objects.filter(id = feedbackid).update(wait_time=wait_final)
-            print feedback[0].wait_time
             
     return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj_all})

@@ -132,7 +132,7 @@ class Feedback(models.Model):
     resolved_date = models.DateTimeField(null=True, blank=True)
     pending_start = models.DateTimeField(null=True, blank=True)
     due_date = models.DateTimeField(null=True, blank=True)
-    wait_time = models.FloatField(max_length=20, null=True, blank=True)
+    wait_time = models.FloatField(max_length=20, null=True, blank=True, default = '0.0')
     remarks = models.CharField(max_length=512, null=True, blank=True)
     ratings = models.CharField(max_length=12, choices=RATINGS)
 
