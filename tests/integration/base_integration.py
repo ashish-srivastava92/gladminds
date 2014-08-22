@@ -1,6 +1,7 @@
 from tastypie.test import ResourceTestCase
 from django.core import management
 from gladminds.models import common
+from gladminds.management.commands import load_gm_migration_data
 from gladminds.aftersell.models import common as aftersell_common
 import os
 from django.conf import settings
@@ -18,6 +19,11 @@ class GladmindsResourceTestCase(ResourceTestCase):
             temp_obj = common.MessageTemplate(template_key=fields['template_key']\
                        , template=fields['template'], description=fields['description'])
             temp_obj.save()
+        file_path = os.path.join(settings.PROJECT_DIR, 'template_data/email_template.json')
+        email_templates = json.loads(open(file_path).read())
+        common.EmailTemplate.objects.all().delete()
+        load_email_obj = load_gm_migration_data.Command()
+        load_email_obj.add_email_template()
         self.MESSAGE_URL = "/v1/messages"
 
         #old implementation of test case;
