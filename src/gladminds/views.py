@@ -202,7 +202,7 @@ def exceptions(request, exception=None):
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
-<<<<<<< HEAD
+
 @login_required()
 def servicedesk(request, servicedesk=None):
     groups = stringify_groups(request.user)
@@ -239,11 +239,6 @@ def save_help_desk_data(request):
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)
     return gladmindsResources.get_complain_data(sms_dict, sms_dict['advisorMobile'], with_detail=True)
-
-UPDATE_FAIL = 'Phone number already registered!'
-UPDATE_SUCCESS = 'Customer has been registered with ID: '
-=======
-
 
 @login_required()
 def reports(request, report=None):
@@ -301,7 +296,6 @@ def create_report(method, query_params, user):
 UPDATE_FAIL = 'Some error occurred, try again later.'
 UPDATE_SUCCESS = 'Customer phone number has been updated '
 REGISTER_SUCCESS = 'Customer has been registered with ID: '
->>>>>>> upstream/prod_gm_1_3_1
 def register_customer(request, group=None):
     post_data = request.POST
     data_source = []
@@ -324,14 +318,6 @@ def register_customer(request, group=None):
         return json.dumps({"message": message})
          
     try:
-<<<<<<< HEAD
-        customer_obj = common.CustomerTempRegistration(product_data=product_obj[0],
-                                                       new_customer_name=data_source[0]['customer_name'],
-                                                       new_number=data_source[0]['customer_phone_number'],
-                                                       product_purchase_date=data_source[0]['product_purchase_date'],
-                                                       temp_customer_id=temp_customer_id)
-        customer_obj.save()
-=======
         customer_obj = common.CustomerTempRegistration.objects.get(temp_customer_id = temp_customer_id)
         customer_obj.new_number = data_source[0]['customer_phone_number']
         customer_obj.sent_to_sap = False
@@ -344,7 +330,6 @@ def register_customer(request, group=None):
                                                        temp_customer_id = temp_customer_id)
     customer_obj.save()
     try:
->>>>>>> upstream/prod_gm_1_3_1
         feed_remark = FeedLogWithRemark(len(data_source),
                                         feed_type='Purchase Feed',
                                         action='Received', status=True)
@@ -353,15 +338,10 @@ def register_customer(request, group=None):
     except Exception as ex:
         logger.info(ex)
         return json.dumps({"message": UPDATE_FAIL})
-<<<<<<< HEAD
-    return json.dumps({'message': UPDATE_SUCCESS + temp_customer_id})
-=======
     if existing_customer:
         return json.dumps({'message': UPDATE_SUCCESS})
     return json.dumps({'message': REGISTER_SUCCESS + temp_customer_id})
       
->>>>>>> upstream/prod_gm_1_3_1
-
 SUCCESS_MESSAGE = 'Registration is complete'
 EXCEPTION_INVALID_DEALER = 'The dealer-id provided is not registered'
 ALREADY_REGISTERED = 'Already Registered Number'
