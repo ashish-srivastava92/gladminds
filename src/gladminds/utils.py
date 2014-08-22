@@ -97,8 +97,16 @@ def get_task_queue():
     queue_name = settings.SQS_QUEUE_NAME
     return SqsTaskQueue(queue_name)
 
-def get_customer_info(data):
-    data = data.POST
+def format_product_object(product_obj):
+    purchase_date = product_obj.product_purchase_date.strftime('%d/%m/%Y')
+    return {'id': product_obj.sap_customer_id,
+            'phone': get_phone_number_format(str(product_obj.customer_phone_number)), 
+            'name': product_obj.customer_phone_number.customer_name, 
+            'purchase_date': purchase_date,
+            'vin': product_obj.vin}
+
+def get_customer_info(request):
+    data=request.POST
     try:
         product_obj = common.ProductData.objects.get(vin=data['vin'])
     except Exception as ex:
@@ -106,11 +114,8 @@ def get_customer_info(data):
         message = '''VIN '{0}' does not exist in our records.'''.format(data['vin'])
         return {'message': message, 'status': 'fail'}
     if product_obj.product_purchase_date:
-        purchase_date = product_obj.product_purchase_date.strftime('%d/%m/%Y')
-        return {'id': product_obj.sap_customer_id,
-                'phone': get_phone_number_format(str(product_obj.customer_phone_number)),
-                'name': product_obj.customer_phone_number.customer_name,
-                'purchase_date': purchase_date}
+        product_data =  format_product_object(product_obj)
+        return product_data
     else:
         message = '''VIN '{0}' has no associated customer.'''.format(data['vin'])
         return {'message': message}
@@ -125,17 +130,20 @@ def get_sa_list(request):
     return sa_phone_list
 
 def recover_coupon_info(request):
-    coupon_info = get_coupon_info(request)
-    upload_file(request)
-    return coupon_info
+    coupon_data = get_coupon_info(request)
+    ucn_recovery_obj = upload_file(request)
+    send_recovery_email_to_admin(ucn_recovery_obj, coupon_data)
+    message = 'UCN for customer {0} is {1}.'.format(coupon_data.vin.sap_customer_id,
+                                                coupon_data.unique_service_coupon) 
+    return {'status': True, 'message': message}
+    
 def get_coupon_info(request):
     data = request.POST
     customer_id = data['customerId']
     logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, request.user))
     product_data = common.ProductData.objects.filter(sap_customer_id=customer_id)[0]
     coupon_data = common.CouponData.objects.filter(vin=product_data, status=4)[0]
-    message = 'UCN for customer {0} is {1}.'.format(product_data.sap_customer_id, coupon_data.unique_service_coupon)
-    return {'status': True, 'message': message}
+    return coupon_data
 
 def upload_file(request):
     data = request.POST
@@ -152,7 +160,7 @@ def upload_file(request):
     ucn_recovery_obj = aftersell_common.UCNRecovery(reason=reason, user=user_obj, sap_customer_id=customer_id,
                                                     file_location=path)
     ucn_recovery_obj.save()
-    send_recovery_email_to_admin(ucn_recovery_obj)
+    return ucn_recovery_obj
 
 def get_file_name(request, file_obj):
     requester = request.user
@@ -179,12 +187,13 @@ def stringify_groups(user):
         groups.append(str(group.name))
     return groups
 
-def send_recovery_email_to_admin(file_obj):
+def send_recovery_email_to_admin(file_obj, coupon_data):
     file_location = file_obj.file_location
     reason = file_obj.reason
     customer_id = file_obj.sap_customer_id
     requester = str(file_obj.user)
-    data = get_email_template('UCN_REQUEST_ALERT').body.format(requester, customer_id, reason, file_location)
+    data = get_email_template('UCN_REQUEST_ALERT').body.format(requester,coupon_data.service_type,
+                customer_id, coupon_data.actual_kms, reason, file_location)
     send_ucn_request_alert(data=data)
 
 def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=None,
@@ -237,7 +246,9 @@ def create_feed_data(post_data, product_data, temp_customer_id):
     data['customer_phone_number'] = mobile_format(post_data['customer-phone'])
     data['customer_name'] = post_data['customer-name']
     data['engine'] = product_data.engine
+    data['veh_reg_no'] = product_data.veh_reg_no
     data['vin'] = product_data.vin
+    data['pin_no'] = data['state'] = data['city'] = None
     return data
 
 def get_list_from_set(set_data):
@@ -260,8 +271,44 @@ def create_context(email_template_name, feedback_obj):
     return data
 
 def subtract_dates(start_date, end_date):    
-    start_date = start_date.strftime("%Y-%m-%d %M:%S")
-    end_date = end_date.strftime("%Y-%m-%d %M:%S")
-    start_date = datetime.strptime(start_date, "%Y-%m-%d  %M:%S")
-    end_date = datetime.strptime(end_date, "%Y-%m-%d  %M:%S") 
+    start_date = start_date.strftime("%Y-%m-%d")
+    end_date = end_date.strftime("%Y-%m-%d")
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d")
     return start_date - end_date
+
+def search_details(request):
+    data = request.POST
+    kwargs = {}
+    search_results = []
+    if data.has_key('VIN'):
+        kwargs[ 'vin' ] = data['VIN']
+    elif data.has_key('Customer-ID'):
+        kwargs[ 'sap_customer_id' ] = data['Customer-ID']
+    elif data.has_key('Customer-Mobile'):
+        kwargs[ 'customer_phone_number__phone_number' ] = mobile_format(data['Customer-Mobile'])
+    product_obj = common.ProductData.objects.filter(**kwargs)
+    if not product_obj or not product_obj[0].product_purchase_date:
+        key = data.keys()
+        message = '''Customer details for {0} '{1}' not found.'''.format(key[0], data[key[0]])
+        logger.info(message)
+        return {'message': message}
+    for product in product_obj:
+        data = format_product_object(product)
+        search_results.append(data)    
+    return search_results
+
+def get_search_query_params(request, class_self):
+    custom_search_enabled = False
+    if 'custom_search' in request.GET and 'val' in request.GET:
+        class_self.search_fields = ()
+        request.GET = request.GET.copy()
+        class_self.search_fields = (request.GET.pop("custom_search")[0],)
+        search_value = request.GET.pop("val")[0]
+        request.GET["q"] = search_value
+        request.META['QUERY_STRING'] = 'q=%s'% search_value
+        custom_search_enabled = True
+    return custom_search_enabled
+
+def get_min_and_max_filter_date():
+    return (datetime.date.today() - datetime.timedelta(6*365/12)).isoformat(), (datetime.date.today()).isoformat()

@@ -1,3 +1,4 @@
+TIME_FORMAT = '%Y-%m-%d %M:%S'
 PROVIDERS = ['asc', 'dasc', 'dealer', 'desk']
 
 PROVIDER_MAPPING = {

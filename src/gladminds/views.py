@@ -12,6 +12,8 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.contrib.auth import authenticate, login, logout
+from django.db.models import Q
+from django.core.exceptions import ObjectDoesNotExist
 
 from gladminds.models import common
 from gladminds.sqs_tasks import send_otp
@@ -19,7 +21,7 @@ from gladminds import utils, message_template
 from gladminds import mail
 from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format, format_date_string, stringify_groups,\
-    get_list_from_set, create_context, get_user_groups, subtract_dates
+    get_list_from_set, create_context, get_user_groups, search_details
 from gladminds.sqs_tasks import export_asc_registeration_to_sap, send_sms
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.mail import sent_otp_email
@@ -30,7 +32,7 @@ from gladminds.scheduler import SqsTaskQueue
 from gladminds.resource.resources import GladmindsResources
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     USER_DESIGNATION, PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
-    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU
+    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, TIME_FORMAT
 
 gladmindsResources = GladmindsResources()
 logger = logging.getLogger('gladminds')
@@ -171,6 +173,9 @@ def exceptions(request, exception=None):
     groups = stringify_groups(request.user)
     if not ('ascs' in groups or 'dealers' in groups):
         return HttpResponseBadRequest()
+    if exception == 'report':
+        report_data = create_report(request.method, request.POST, request.user)
+        return render(request, 'portal/report.html', report_data)
     if request.method == 'GET':
         template = 'portal/exception.html'
         data = None
@@ -187,7 +192,8 @@ def exceptions(request, exception=None):
     elif request.method == 'POST':
         function_mapping = {
             'customer' : get_customer_info,
-            'recover' : recover_coupon_info
+            'recover' : recover_coupon_info,
+            'search' : search_details
         }
         try:
             data = function_mapping[exception](request)
@@ -196,6 +202,7 @@ def exceptions(request, exception=None):
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
+
 @login_required()
 def servicedesk(request, servicedesk=None):
     groups = stringify_groups(request.user)
@@ -233,21 +240,95 @@ def save_help_desk_data(request):
         sms_dict[field] = request.POST.get(field, None)
     return gladmindsResources.get_complain_data(sms_dict, sms_dict['advisorMobile'], with_detail=True)
 
-UPDATE_FAIL = 'Phone number already registered!'
-UPDATE_SUCCESS = 'Customer has been registered with ID: '
+@login_required()
+def reports(request, report=None):
+    groups = stringify_groups(request.user)
+    if not ('ascs' in groups or 'dealers' in groups):
+        return HttpResponseBadRequest()
+    if report == 'reconciliation':
+        report_data = create_report(request.method, request.POST, request.user)
+        return render(request, 'portal/report.html', report_data)
+    else:
+        return HttpResponseBadRequest()
+    
+def create_report(method, query_params, user):
+    report_data = []
+    filter = {}
+    params = {}
+    status_options = {'4': 'In Progress', '2':'Closed'}
+    user = afterbuy_common.RegisteredDealer.objects.filter(dealer_id=user)
+    filter['servicing_dealer'] = user[0]
+    params['min_date'], params['max_date'] = utils.get_min_and_max_filter_date() 
+    if method == 'POST':
+        message = "No coupon found."
+        status = query_params.get('status')
+        from_date = query_params.get('from')
+        to_date = query_params.get('to')
+        params['start_date'] = from_date
+        params['to_date'] = to_date
+        filter['closed_date__range'] = (from_date, to_date)
+        if status:
+            params['status'] = status
+            filter['status'] = status
+        all_coupon_data = common.CouponData.objects.filter(**filter)
+    elif method == 'GET':
+        message = "" 
+        all_coupon_data = {}
+    else:
+        return HttpResponseBadRequest()
+    
+    for coupon_data in all_coupon_data:
+        coupon_data_dict = {}
+        coupon_data_dict['customer_id'] = coupon_data.vin.sap_customer_id
+        coupon_data_dict['product_type'] = coupon_data.vin.product_type
+        coupon_data_dict['service_avil_date'] = datetime.datetime.now()
+        coupon_data_dict['vin'] = coupon_data.vin.vin
+        coupon_data_dict['sa_phone_name'] = coupon_data.sa_phone_number
+        coupon_data_dict['kms'] = coupon_data.actual_kms
+        coupon_data_dict['service_type'] = coupon_data.service_type
+        coupon_data_dict['service_status'] = status_options[str(coupon_data.status)]
+        coupon_data_dict['special_case'] = ''
+        report_data.append(coupon_data_dict)
+    return {"records": report_data, 'status_options': status_options, 'params': params, 
+            "message": message}
+    
+
+UPDATE_FAIL = 'Some error occurred, try again later.'
+UPDATE_SUCCESS = 'Customer phone number has been updated '
+REGISTER_SUCCESS = 'Customer has been registered with ID: '
 def register_customer(request, group=None):
     post_data = request.POST
     data_source = []
+    existing_customer = False
     product_obj = common.ProductData.objects.filter(vin=post_data['customer-vin'])
-    temp_customer_id = TEMP_ID_PREFIX + str(random.randint(10**5, 10**6))
+    if not post_data['customer-id']:
+        temp_customer_id = TEMP_ID_PREFIX + str(random.randint(10**5, 10**6))
+    else:
+        temp_customer_id = post_data['customer-id']
+        existing_customer = True
     data_source.append(utils.create_feed_data(post_data, product_obj[0], temp_customer_id))
+    check_with_invoice_date = utils.subtract_dates(data_source[0]['product_purchase_date'], product_obj[0].invoice_date)
+    check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.datetime.now())
+
+    if not existing_customer and check_with_invoice_date.days < 0 or check_with_today_date.days > 0:
+        message = "Product purchase date should be between {0} and {1}".\
+                format((product_obj[0].invoice_date).strftime("%d-%m-%Y"),(datetime.datetime.now()).strftime("%d-%m-%Y"))
+        logger.info('{0} Entered date is: {1}'.format(message, str(data_source[0]['product_purchase_date'])))
+        return json.dumps({"message": message})
+         
     try:
-        customer_obj = common.CustomerTempRegistration(product_data=product_obj[0],
-                                                       new_customer_name=data_source[0]['customer_name'],
-                                                       new_number=data_source[0]['customer_phone_number'],
-                                                       product_purchase_date=data_source[0]['product_purchase_date'],
-                                                       temp_customer_id=temp_customer_id)
-        customer_obj.save()
+        customer_obj = common.CustomerTempRegistration.objects.get(temp_customer_id = temp_customer_id)
+        customer_obj.new_number = data_source[0]['customer_phone_number']
+        customer_obj.sent_to_sap = False
+    except ObjectDoesNotExist as ex:
+        logger.info(ex)
+        customer_obj = common.CustomerTempRegistration(product_data=product_obj[0], 
+                                                       new_customer_name = data_source[0]['customer_name'],
+                                                       new_number = data_source[0]['customer_phone_number'],
+                                                       product_purchase_date = data_source[0]['product_purchase_date'],
+                                                       temp_customer_id = temp_customer_id)
+    customer_obj.save()
+    try:
         feed_remark = FeedLogWithRemark(len(data_source),
                                         feed_type='Purchase Feed',
                                         action='Received', status=True)
@@ -256,8 +337,10 @@ def register_customer(request, group=None):
     except Exception as ex:
         logger.info(ex)
         return json.dumps({"message": UPDATE_FAIL})
-    return json.dumps({'message': UPDATE_SUCCESS + temp_customer_id})
-
+    if existing_customer:
+        return json.dumps({'message': UPDATE_SUCCESS})
+    return json.dumps({'message': REGISTER_SUCCESS + temp_customer_id})
+      
 SUCCESS_MESSAGE = 'Registration is complete'
 EXCEPTION_INVALID_DEALER = 'The dealer-id provided is not registered'
 ALREADY_REGISTERED = 'Already Registered Number'
@@ -325,9 +408,10 @@ def sqs_tasks_view(request):
 def trigger_sqs_tasks(request):
     sqs_tasks = {
         'send-feed-mail' : 'send_report_mail_for_feed',
-        'export_coupon_redeem' : 'export_coupon_redeem_to_sap',
+        'export-coupon-redeem' : 'export_coupon_redeem_to_sap',
         'expire-service-coupon': 'expire_service_coupon',
         'send-reminder': 'send_reminder',
+        'export-customer-registered' : 'export_customer_reg_to_sap',
     }
 
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
@@ -337,10 +421,10 @@ def trigger_sqs_tasks(request):
 def set_wait_time(feedback_data,feedbackid):
     start_date = feedback_data.pending_from
     end_date = datetime.now()
-    start_date = start_date.strftime("%Y-%m-%d %M:%S")
-    end_date = end_date.strftime("%Y-%m-%d %M:%S")
-    start_date = datetime.strptime(start_date, "%Y-%m-%d  %M:%S")
-    end_date = datetime.strptime(end_date, "%Y-%m-%d  %M:%S") 
+    start_date = start_date.strftime(TIME_FORMAT)
+    end_date = end_date.strftime(TIME_FORMAT)
+    start_date = datetime.strptime(start_date, TIME_FORMAT)
+    end_date = datetime.strptime(end_date, TIME_FORMAT)
     wait = end_date - start_date
     wait_time = float(wait.days) + float(wait.seconds) / float(86400)
     previous_wait = feedback_data.wait_time
@@ -399,48 +483,50 @@ def modify_servicedesk_tickets(request,feedbackid):
             context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL', feedback[0])
             mail.send_email_to_initiator_after_issue_assigned(context)
             send_sms('INITIATOR_FEEDBACK_DETAILS',feedback_data.reporter, feedback_data)
-        
+
         if data['status'] == 'Open':
             context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL', feedback[0])
             mail.send_email_to_initiator_after_issue_resolved(context)
             send_sms('INITIATOR_FEEDBACK_STATUS', feedback_data.reporter, feedback_data)
-            
+
         if data['status'] == 'Resolved':
             aftersell_common.Feedback.objects.filter(id = feedbackid).update(resolved_date = datetime.now())
             context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL', feedback[0])
             mail.send_email_to_initiator_after_issue_resolved(context)
             send_sms('INITIATOR_FEEDBACK_STATUS', feedback_data.reporter, feedback_data)
-                
+
         if data['status'] == 'Closed':
             aftersell_common.Feedback.objects.filter(id = feedbackid).update(due_date = datetime.now())
             context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL', feedback[0])
             mail.send_email_to_initiator_after_issue_resolved(context)
             send_sms('INITIATOR_FEEDBACK_STATUS', feedback_data.reporter, feedback_data)
-        
+
         if pending_status :
             set_wait_time(feedback_data,feedbackid)
-            
-        if feedback_data.assign_to:   
-            if assign_number != feedback_data.assign_to.phone_number: 
-                context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL', feedback[0])   
+
+        if feedback_data.assign_to:
+            if assign_number != feedback_data.assign_to.phone_number:
+                context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL', feedback[0])
                 mail.send_email_to_assignee(context, feedback[0])
                 send_sms('SEND_MSG_TO_ASSIGNEE', feedback_data.assign_to.phone_number, feedback_data)
         if feedback_data.status == 'Closed':
-            context = create_context('TICKET_CLOSED_DETAIL_TO_BAJAJ', feedback[0]) 
+            context = create_context('TICKET_CLOSED_DETAIL_TO_BAJAJ', feedback[0])
             mail.send_email_to_bajaj_after_issue_closed(context)
-        if feedback[0].resolved_date: 
+        if feedback[0].resolved_date:
             start_date = feedback[0].created_date
             end_date = feedback[0].resolved_date
             if start_date > end_date:
                 raise ValueError('You provided a start_date that comes after the end_date.')
             else:
-                start_date = start_date.strftime("%Y-%m-%d %M:%S")
-                end_date = end_date.strftime("%Y-%m-%d %M:%S")
-                start_date = datetime.strptime(start_date, "%Y-%m-%d  %M:%S")
-                end_date = datetime.strptime(end_date, "%Y-%m-%d  %M:%S") 
+                start_date = start_date.strftime(TIME_FORMAT)
+                end_date = end_date.strftime(TIME_FORMAT)
+                start_date = datetime.strptime(start_date, TIME_FORMAT)
+                end_date = datetime.strptime(end_date, TIME_FORMAT)
                 wait = end_date - start_date
                 wait_time = float(wait.days) + float(wait.seconds) / float(86400)
                 feedback = aftersell_common.Feedback.objects.filter(id = feedbackid)
                 wait_final = float(wait_time) - feedback[0].wait_time
                 aftersell_common.Feedback.objects.filter(id = feedbackid).update(wait_time=wait_final)
-    return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj_all})
+    return render(request,'service-desk/ticket_modify.html',{"feedback":feedback,"FEEDBACK_STATUS": status,
+            "PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj_all})
+    
