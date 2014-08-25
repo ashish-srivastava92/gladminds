@@ -525,15 +525,12 @@ def modify_servicedesk_tickets(request,feedbackid):
     return render(request,'service-desk/ticket_modify.html',{"feedbacks":feedbacks,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj_all, "status_sdo" : ['Open','Progress','Resolved'] })
 
 def get_feedback_response(request,feedbackid):
-    print feedbackid
     if request.method == 'POST':
        data = request.POST
        if data['feedbackresponse']:
-          try:   
-             aftersell_common.Feedback.objects.filter(id = feedbackid).update( ratings = data['feedbackresponse'] ) 
-          except Exception as ex:
-              print "exp",ex
-              
-       return render(request,'service-desk/feedback_received.html')    
+          aftersell_common.Feedback.objects.filter(id = feedbackid).update( ratings = str(data['feedbackresponse'])) 
+          return render(request,'service-desk/feedback_received.html')   
+       else:
+           return HttpResponse() 
            
     

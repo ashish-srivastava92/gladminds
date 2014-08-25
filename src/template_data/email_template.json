@@ -43,7 +43,7 @@
             "sender": "feed-report@gladminds.co",
             "reciever": "srv.sngh@gmail.com",
             "subject": "Feedback  with reference-no-{id} Details",
-            "body": "Your {type} has been assigned to one of our technician.\n Severity:{priority}.\n Once it resolved we will notify you.",
+            "body": "Your {type} has been assigned to one of our technician.\n Severity:{priority}.The due date is:{due_date}.\n Once it resolved we will notify you.",
             "description": "Feedback Detail mail"
         }
     },
@@ -55,7 +55,7 @@
             "sender": "feed-report@gladminds.co",
             "reciever": "srv.sngh@gmail.com",
             "subject": "Feedback with reference-no-{id} Assign To You",
-            "body": "A GladMinds user has a {type} for us, which says:\n {message} \n Its has been reported by {reporter} on {created_date}.\n It has been assigned to you.\n Please address the issue as soon as possible.", 
+            "body": "A GladMinds user has a {type} for us, which says:\n {message}. \n Its has been reported by {reporter} on {created_date}.\n It has been assigned to you and due date is: {due_date}\n Please address the issue as soon as possible.", 
             "description": "Feedback Detail mail to assignee"
         }
     },
@@ -91,7 +91,7 @@
             "sender": "feed-report@gladminds.co",
             "reciever": "srv.sngh92@yahoo.com",
             "subject": "Feedback  with reference-no-{id} resolved",
-            "body": "The {type} reported by {reporter} on {created_date} has been resolved.\n The Feedback received by reporter is {remark}", 
+            "body": "The {type} reported by {reporter} on {created_date} has been resolved.\n The root cause of {type} was {root_cause}.\n The time taken to resolve the issue was {{}}.", 
             "description": "Feedback  mail to bajaj"
         }
     },
@@ -103,7 +103,7 @@
             "sender": "feed-report@gladminds.co",
             "reciever": "srv.sngh@gmail.com",
             "subject": "Feedback  with reference-no-{id} resolved",
-            "body": "The {type} reported by {reporter} on {created_date} has been resolved.", 
+            "body": "The {type} reported by {reporter} on {created_date} has been resolved.\n The root cause was {{root_cause}}", 
             "description": "Feedback  mail to manager"
         }
     }
