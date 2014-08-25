@@ -144,7 +144,6 @@ def get_coupon_info(request):
     logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, request.user))
     product_data = common.ProductData.objects.filter(sap_customer_id=customer_id)[0]
     coupon_data = common.CouponData.objects.filter(vin=product_data, status=4)[0]
-    print "######", coupon_data
     return coupon_data
 
 def upload_file(request):
