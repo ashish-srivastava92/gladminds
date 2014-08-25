@@ -1,3 +1,4 @@
+TIME_FORMAT = '%Y-%m-%d %M:%S'
 PROVIDERS = ['asc', 'dasc', 'dealer', 'desk']
 
 PROVIDER_MAPPING = {
@@ -37,6 +38,7 @@ FEEDBACK_STATUS = (
         ('Closed', 'Closed'),
         ('Resolved', 'Resolved'),
         ('Progress', 'Progress'),
+        ('Pending','Pending')
     )
 PRIORITY = (
         ('Low', 'Low'),

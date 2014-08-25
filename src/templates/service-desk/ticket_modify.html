@@ -97,6 +97,20 @@
                                          <textarea  class="form-control"  value={{feedback.message}} readonly>{{feedback.message}}</textarea>
                                     </div>
                                </div>
+                               <div class="form-group">
+    								<label class="col-sm-3 control-label" for="resolved_date">Resolved Date</label>
+    								<div class="col-sm-9">
+    									 <input type="datetime" class="form-control" name="resolved_date" readonly value="{{feedback.resolved_date}}">
+   									</div>
+  								</div>
+  
+								<div class="form-group">
+  									<label class="col-sm-3 control-label" for="due_date">Due Date</label>
+    								<div class="col-sm-9">
+    									 <input type="datetime" class="form-control" name="due_date" readonly value="{{feedback.due_date}}" >
+   									</div>
+								</div>
+								
                            {% endfor %}
                               <div class="form-group">
                                    <div class="col-sm-offset-3 col-sm-9">

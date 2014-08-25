@@ -15,6 +15,7 @@ from django.db import connection
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
 import boto
+from gladminds.constants import FEEDBACK_TYPE, PRIORITY
 
 
 class TestAssertWorks(TestCase):
@@ -107,9 +108,9 @@ class TestUtils(GladmindsUnitTestCase):
         self.assertEqual(data['vin'], 'VINXXX0011') 
         
     def test_get_list_from_set(self):
-        data = get_list_from_set(aftersell_common.FEEDBACK_TYPE)
+        data = get_list_from_set(FEEDBACK_TYPE)
         self.assertEqual(len(data), 5) 
-        data = get_list_from_set(aftersell_common.PRIORITY)
+        data = get_list_from_set(PRIORITY)
         self.assertEqual(len(data), 4) 
          
 
