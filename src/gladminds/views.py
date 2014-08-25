@@ -418,6 +418,7 @@ def trigger_sqs_tasks(request):
     taskqueue.add(sqs_tasks[request.POST['task']])
     return HttpResponse()
 
+#TODO Function needs to be refactored
 def set_wait_time(feedback_data,feedbackid):
     start_date = feedback_data.pending_from
     end_date = datetime.now()
@@ -436,7 +437,6 @@ def get_servicedesk_tickets(request):
     user_obj = request.user
     if group_name[0].name == 'SDM':
         feedbacks = aftersell_common.Feedback.objects.order_by('-created_date')
-        print len(feedbacks)
     if group_name[0].name == 'SDO':
         servicedesk_obj = aftersell_common.ServiceDeskUser.objects.filter(user=user_obj)
         feedbacks = aftersell_common.Feedback.objects.filter(assign_to=servicedesk_obj[0]).order_by('-created_date') 
