@@ -489,10 +489,11 @@ def modify_servicedesk_tickets(request,feedbackid):
             send_sms('INITIATOR_FEEDBACK_DETAILS',feedback_data.reporter, feedback_data)
              
         if feedback_data.status == 'Resolved':
+            host = request.get_host()
             servicedesk_obj_all = aftersell_common.ServiceDeskUser.objects.filter(designation = 'SDM')
             aftersell_common.Feedback.objects.filter(id = feedbackid).update(resolved_date = datetime.now())
             context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL', feedbacks[0])
-            mail.send_email_to_initiator_after_issue_resolved(context,feedbacks[0])
+            mail.send_email_to_initiator_after_issue_resolved(context,feedbacks[0],host)
             context = create_context('TICKET_RESOLVED_DETAIL_TO_BAJAJ', feedbacks[0]) 
             mail.send_email_to_bajaj_after_issue_resolved(context) 
             context = create_context('TICKET_RESOLVED_DETAIL_TO_MANAGER', feedbacks[0])
