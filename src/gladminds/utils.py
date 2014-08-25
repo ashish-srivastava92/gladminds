@@ -63,8 +63,9 @@ def get_phone_number_format(phone_number):
 
 
 def save_otp(user, token, email):
+    print "ddddddddddddddddddddddd",datetime.datetime.now()
     common.OTPToken.objects.filter(user=user).delete()
-    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=email)
+    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.datetime.now(), email=email)
     token_obj.save()
 
 def get_token(user, phone_number, email=''):
@@ -224,7 +225,7 @@ def format_date_string(date_string, date_format='%d/%m/%Y'):
     '''
     This function converts the date from string to datetime format
     '''
-    date = datetime.strptime(date_string, date_format)
+    date = datetime.datetime.strptime(date_string, date_format)
     return date
 
 

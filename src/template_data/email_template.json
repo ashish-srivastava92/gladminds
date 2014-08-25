@@ -65,7 +65,7 @@
         "fields": {
             "template_key": "INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL",
             "sender": "feed-report@gladminds.co",
-            "reciever": "srv.sngh@gmail.com",
+            "reciever": "srv.sngh92@yahoo.com",
             "subject": "Feedback  with reference-no-{id} Status",
             "body": "Your {type} has been resolved", 
             "description": "Feedback status mail"
