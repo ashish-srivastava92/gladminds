@@ -15,6 +15,7 @@ from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from gladminds.taskqueue import SqsTaskQueue
 from gladminds.mail import send_ucn_request_alert
 from django.db.models.fields.files import FieldFile
+from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE
 
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
@@ -276,7 +277,7 @@ def subtract_dates(start_date, end_date):
     start_date = start_date.strftime("%Y-%m-%d")
     end_date = end_date.strftime("%Y-%m-%d")
     start_date = datetime.strptime(start_date, "%Y-%m-%d")
-    end_date = datetime.strptime(end_date, "%Y-%m-%d") 
+    end_date = datetime.strptime(end_date, "%Y-%m-%d")
     return start_date - end_date
 
 def search_details(request):
