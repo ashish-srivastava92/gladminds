@@ -15,6 +15,7 @@ from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from gladminds.taskqueue import SqsTaskQueue
 from gladminds.mail import send_ucn_request_alert
 from django.db.models.fields.files import FieldFile
+from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE
 
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
@@ -143,6 +144,7 @@ def get_coupon_info(request):
     logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, request.user))
     product_data = common.ProductData.objects.filter(sap_customer_id=customer_id)[0]
     coupon_data = common.CouponData.objects.filter(vin=product_data, status=4)[0]
+    print "######", coupon_data
     return coupon_data
 
 def upload_file(request):
