@@ -1,51 +1,55 @@
-{% extends "base_template.html" %} {% block style %}
-<link href="/static/css/portal.css" rel="stylesheet">
-{% endblock %} {% block body %}
-<div class="navbar navbar-fixed-top">
-	<div class="navbar-inner">
-		<a class="brand" href="#"><img src="/static/img/bajaj_logo.jpg"
-			height=50px width=209px></a>
-	</div>
-</div>
+{% extends "base_template.html" %} 
 
-<div class="user-message">
-	<div class="message"></div>
-</div>
-<div class="row">
-	<div class="col-md-offset-8 col-md-2">
-		<a class="logout" href="/aftersell/provider/logout">Logout</a>
-	</div>
-</div>
-<div class="well" style="margin-left: 30px; margin-right: 30px">
+{% block body %}
 
-	<div class="row">
-		{% if not feedback %}
-		<div class='container'>
-			<h2 align='center'>
-				Hi {{request.user.username}} you have not been assign any ticket
-				yet.
-			<h2>
+<div class="navbar navbar-fixed-top " >
+	<div class ="row">
+		<div class= "col-md-10">
+			<div class="navbar-inner">
+				<a class="brand" href="#"><img src="/static/img/bajaj_logo.jpg"
+				height=50px width=209px></a>
+			</div>
 		</div>
-		{% elif feedback.length != 0 %}
-		<table class="table ">
+		<div class= "col-md-2">
+			<a class="logout" href="/aftersell/provider/logout">Logout</a>
+		</div>	
+	</div>
+</div>
+
+<div class="well">
+	<h3 class="text-center">Feedback Information</h3>
+	<div class="container">
+		{% if not feedbacks %}
+		<h4 class='text-center'>
+		   {% if group == 'SDM' %}
+			Hi {{request.user.username}} You dont have any feedback yet.
+			{% endif %}
+			Hi {{request.user.username}} you have not been assign any ticket
+			yet.
+		</h4>
+		{% elif feedbacks.length != 0 %}
+		<table class="table table-bordered table-hover">
 			<thead>
 				<tr>
 					<th>Reporter</th>
-					<th>Assign_to</th>
+					<th>Ticket Id</th>
+					<th>Assign To</th>
 					<th>Message</th>
 					<th>Subject</th>
 					<th>Priority</th>
 					<th>Type</th>
 					<th>Status</th>
 					<th>Created Date</th>
+					<th>Resolved Date</th>
 					<th>Due Date</th>
 					<th>Edit</th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for feedback in feedback %}
+				{% for feedback in feedbacks %}
 				<tr>
 					<td>{{feedback.reporter}}</td>
+					<td>{{feedback.id}}</td>
 					<td>{{feedback.assign_to}}</td>
 					<td>{{feedback.message}}</td>
 					<td>{{feedback.subject}}</td>
@@ -53,20 +57,21 @@
 					<td>{{feedback.type}}</td>
 					<td>{{feedback.status}}</td>
 					<td>{{feedback.created_date}}</td>
+					<td>{{feedback.resolved_date}}</td>
 					<td>{{feedback.due_date}}</td>
-					<td><a href="/aftersell/feedbackdetails/{{feedback.id}}/"><button
-								type="button" class="btn btn-default btn-sm">
+					<td>
+						<a href="/aftersell/feedbackdetails/{{feedback.id}}/">
+							<button type="button" class="btn btn-primary btn-sm">
 								<span class="glyphicon glyphicon-edit"></span> Edit
-							</button</a></td>
+							</button>
+						</a>
+					</td>
 				</tr>
 				{% endfor %}
 			</tbody>
 		</table>
 		{% endif %}
-
 	</div>
 </div>
 
-{% endblock %} {% block dependency%}
-<script src="/static/js/portal/triggerSQSTasks.js"></script>
-{% endblock dependency %}
+{% endblock %} 

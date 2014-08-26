@@ -4,6 +4,7 @@ import os
 from django.conf import settings
 import json
 from gladminds.models import common
+from gladminds.aftersell.models import common as aftersell_common
 from gladminds import feed
 
 BASIC_FEED = feed.BaseFeed()
@@ -11,11 +12,8 @@ BASIC_FEED = feed.BaseFeed()
 class Command(BaseCommand):
     
     def handle(self, *args, **options):
-#         self.add_group()
-       self.add_sms_template()
-       self.add_email_template()
-#         self.add_user_for_existing_dealer()
-#         self.add_user_in_gladminds_table()
+        self.add_sms_template()
+        self.add_email_template()
         
     def add_group(self):
         print "Loading groups..."
@@ -57,7 +55,7 @@ class Command(BaseCommand):
         
     def add_user_for_existing_dealer(self):
         print "Loading users for existing dealer...."
-        all_dealers = common.RegisteredDealer.objects.all()
+        all_dealers = aftersell_common.RegisteredDealer.objects.all()
         for dealer in all_dealers:
             BASIC_FEED.registerNewUser('dealer', username=dealer.dealer_id)
         print "Loaded users for existing dealer...."

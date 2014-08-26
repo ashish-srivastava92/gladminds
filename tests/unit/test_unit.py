@@ -15,6 +15,7 @@ from django.db import connection
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
 import boto
+from gladminds.constants import FEEDBACK_TYPE, PRIORITY
 
 
 class TestAssertWorks(TestCase):
@@ -57,9 +58,9 @@ class TestUtils(GladmindsUnitTestCase):
         sa_list = get_sa_list(request)
         self.assertEqual(len(sa_list), 1)
         coupon_info = get_coupon_info(request)
-        self.assertEqual(coupon_info.keys(), ['status', 'message'])
+        self.assertEqual(coupon_info.unique_service_coupon, 'COUPON005')
         customer = get_customer_info(request)
-        self.assertEquals(len(customer.keys()), 4)
+        self.assertEquals(len(customer.keys()), 5)
 
     def test_otp(self):
         phone_number = '1234567890'
@@ -72,7 +73,7 @@ class TestUtils(GladmindsUnitTestCase):
         product_info = common.ProductData(vin = '12345678999')
         product_info.save() 
         result=get_customer_info(request)
-        
+         
         self.assertEqual("VIN '12345678999' has no associated customer.",result['message'])
         request = RequestObject(data={'vin':'123456789'})
         result = get_customer_info(request)
@@ -81,12 +82,12 @@ class TestUtils(GladmindsUnitTestCase):
         request = RequestObject(data={'vin':'VINXXX001'})
         result = get_customer_info(request)
         self.assertEqual('+919999999',result['phone'])
-        
+         
     def test_get_coupon_info(self):  
         request = RequestObject(user='DEALER001', data={
                                 'customerId': 'SAP001', 'vin': 'VINXXX001'}, file={'jobCard': ''})
         result = get_coupon_info(request)
-        self.assertEqual("UCN for customer SAP001 is COUPON005.",result['message'])
+        self.assertEqual(30,result.valid_days)
         
     def test_save_pass(self):
         phone_number = '1234567890'
@@ -107,9 +108,9 @@ class TestUtils(GladmindsUnitTestCase):
         self.assertEqual(data['vin'], 'VINXXX0011') 
         
     def test_get_list_from_set(self):
-        data = get_list_from_set(aftersell_common.FEEDBACK_TYPE)
+        data = get_list_from_set(FEEDBACK_TYPE)
         self.assertEqual(len(data), 5) 
-        data = get_list_from_set(aftersell_common.PRIORITY)
+        data = get_list_from_set(PRIORITY)
         self.assertEqual(len(data), 4) 
          
 

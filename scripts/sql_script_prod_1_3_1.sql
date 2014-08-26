@@ -40,3 +40,14 @@ alter table gladminds_coupondata  add foreign key (sa_phone_number_id) reference
 show create table gladminds_coupondata;
 alter table gladminds_coupondata drop foreign key sa_phone_number_id_refs_id_add685cd;
 drop table gladminds_serviceadvisor;
+
+#################################################################
+alter table gladminds_coupondata add servicing_dealer_id integer, add constraint foreign key (servicing_dealer_id) references aftersell_registereddealer(id);
+alter table gladminds_serviceadvisorcouponrelationship add dealer_id_id integer, add constraint foreign key (dealer_id_id) references aftersell_registereddealer(id);
+
+alter table gladminds_customertempregistration add remarks VARCHAR(500) null;
+alter table gladminds_customertempregistration add tagged_sap_id VARCHAR(215) null;
+
+
+alter table  gladminds_productdata add veh_reg_no VARCHAR(15) null;
+alter table gladminds_gladmindusers add pincode VARCHAR(15) null;

@@ -121,6 +121,7 @@ class ServiceDeskUser(models.Model):
     
 class Feedback(models.Model):
     reporter = models.CharField(max_length=15)
+    reporter_email_id = models.CharField(max_length=50, null=True, blank= True)
     assign_to = models.ForeignKey(ServiceDeskUser, null=True, blank= True)
     message = models.CharField(max_length=512, null=True, blank=False)
     status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
@@ -130,7 +131,10 @@ class Feedback(models.Model):
     created_date = models.DateTimeField(null=True, blank= False,auto_now=True)
     modified_date = models.DateTimeField(null=True, blank= True,auto_now=True)
     closed_date = models.DateTimeField(null=True, blank=True)
+    resolved_date = models.DateTimeField(null=True, blank=True)
+    pending_from = models.DateTimeField(null=True, blank=True)
     due_date = models.DateTimeField(null=True, blank=True)
+    wait_time = models.FloatField(max_length=20, null=True, blank=True, default = '0.0')
     remarks = models.CharField(max_length=512, null=True, blank=True)
     ratings = models.CharField(max_length=12, choices=RATINGS)
 
@@ -138,5 +142,4 @@ class Feedback(models.Model):
     class Meta:
         app_label = "aftersell"
         verbose_name_plural = "aftersell feedback info"
-
         
