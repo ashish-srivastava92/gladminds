@@ -368,11 +368,9 @@ class ProductPurchaseFeed(BaseFeed):
             try:
                 product_data = common.ProductData.objects.get(
                     vin=product['vin'])
-                update_mobile_number =  False
                 if product_data.customer_phone_number and product_data.sap_customer_id == product['sap_customer_id']:
                     post_save.disconnect(
                         update_coupon_data, sender=common.ProductData)
-                    update_mobile_number =  True
                 try:
                     customer_data = common.GladMindUsers.objects.get(
                         phone_number=product['customer_phone_number'])
@@ -398,9 +396,8 @@ class ProductPurchaseFeed(BaseFeed):
                 product_data.customer_phone_number = customer_data    
                 product_data.save()
                 
-                if update_mobile_number:
-                    post_save.connect(
-                        update_coupon_data, sender=common.ProductData)
+                post_save.connect(
+                    update_coupon_data, sender=common.ProductData)
             except Exception as ex:
 
                 ex = '''[Exception: ProductPurchaseFeed_product_data]:
