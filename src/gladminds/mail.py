@@ -181,8 +181,7 @@ def send_servicedesk_feedback(data, feedback_obj):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                            data,
-                            receiver= feedback_obj.reporter_email_id)
+                            data, receiver= feedback_obj.reporter_email_id)
     except Exception as ex:
         logger.info("[Exception feedback initiator email]  {0}".format(ex))
         
@@ -191,8 +190,7 @@ def send_email_to_assignee(data, feedback_obj):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                             data,
-                            receiver = feedback_obj.assign_to.email_id)
+                             data, receiver = feedback_obj.assign_to.email_id)
     except Exception as ex:
         logger.info("[Exception feedback receiver email]  {0}".format(ex)) 
         
@@ -200,8 +198,7 @@ def send_email_to_initiator_after_issue_assigned(data, feedback_obj):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                            data,
-                            receiver= feedback_obj.reporter_email_id)
+                            data, receiver= feedback_obj.reporter_email_id)
     except Exception as ex:
         logger.info("[Exception feedback initiator after issue assigned email]  {0}".format(ex)) 
 
@@ -209,25 +206,25 @@ def send_status_mail_to_assignee(data):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                             data,
-                            receiver = feedback_obj.assign_to.email_id)
+                             data, receiver = feedback_obj.assign_to.email_id)
     except Exception as ex:
         logger.info("[Exception feedback assignee email]  {0}".format(ex))
 
-def send_email_to_initiator_after_issue_resolved(data, feedback_obj):
+def send_email_to_initiator_after_issue_resolved(data, feedback_obj, host):
     try:
-        context = Context({"content": data['content']})
-        send_template_email("base_email_template.html", context,
-                            data,
-                            receiver= feedback_obj.reporter_email_id)
+        context = Context({"content": data['content'],
+                            "id":feedback_obj.id,
+                            "url":host,
+                            })
+        send_template_email("initiator_feedback_resolved.html", context,
+                            data, receiver= feedback_obj.reporter_email_id)
     except Exception as ex:
         logger.info("[Exception feedback initiator after issue resloved email]  {0}".format(ex))
         
 def send_email_to_bajaj_after_issue_resolved(data):
     try:
         context = Context({"content": data['content']})
-        send_template_email("base_email_template.html", context,
-                             data)
+        send_template_email("base_email_template.html", context, data)
     except Exception as ex:
         logger.info("[Exception fail to send mail to bajaj]  {0}".format(ex)) 
 
@@ -252,4 +249,5 @@ def send_template_email(template_name, context, mail_detail,receiver=None):
                subject = mail_detail['newsubject'], body = body, 
                smtp_server = settings.MAIL_SERVER)
     logger.info("Mail sent successfully")
+    
     #TODO We have to remove hard code receiver

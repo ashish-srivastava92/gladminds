@@ -73,7 +73,7 @@ class TestUtils(GladmindsUnitTestCase):
         product_info = common.ProductData(vin = '12345678999')
         product_info.save() 
         result=get_customer_info(request)
-        
+         
         self.assertEqual("VIN '12345678999' has no associated customer.",result['message'])
         request = RequestObject(data={'vin':'123456789'})
         result = get_customer_info(request)
@@ -82,7 +82,7 @@ class TestUtils(GladmindsUnitTestCase):
         request = RequestObject(data={'vin':'VINXXX001'})
         result = get_customer_info(request)
         self.assertEqual('+919999999',result['phone'])
-        
+         
     def test_get_coupon_info(self):  
         request = RequestObject(user='DEALER001', data={
                                 'customerId': 'SAP001', 'vin': 'VINXXX001'}, file={'jobCard': ''})

@@ -26,7 +26,6 @@ def generate_unique_customer_id():
     unique_str = hashlib.md5(bytes_str).hexdigest()[:10]
     return unique_str.upper()
 
-
 def import_json():
     try:
         import simplejson as json
@@ -39,7 +38,6 @@ def import_json():
             except:
                 raise ImportError("Requires either simplejson, Python 2.6 or django.utils!")
     return json
-
 
 def mobile_format(phone_number):
     '''
@@ -55,17 +53,15 @@ def format_message(message):
     keywords = message.split(' ')
     return ' '.join([keyword for keyword in keywords if keyword])
 
-
 def get_phone_number_format(phone_number):
     '''
         This is used when we are sending message through sms client
     '''
     return phone_number[-10:]
 
-
 def save_otp(user, token, email):
     common.OTPToken.objects.filter(user=user).delete()
-    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=email)
+    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.datetime.now(), email=email)
     token_obj.save()
 
 def get_token(user, phone_number, email=''):
@@ -92,7 +88,6 @@ def update_pass(otp, password):
     user.set_password(password)
     user.save()
     return True
-
 
 def get_task_queue():
     queue_name = settings.SQS_QUEUE_NAME
@@ -175,7 +170,6 @@ def get_file_name(request, file_obj):
     customer_id = request.POST['customerId']
     return str(filename_prefix)+'_'+customer_id+'_'+filename_suffix+'.'+ext
 
-
 def get_user_groups(user):
     groups = []
     for group in user.groups.all():
@@ -220,14 +214,12 @@ def get_email_template(key):
     template_object = common.EmailTemplate.objects.filter(template_key=key).values()
     return template_object[0]
 
-
 def format_date_string(date_string, date_format='%d/%m/%Y'):
     '''
     This function converts the date from string to datetime format
     '''
-    date = datetime.strptime(date_string, date_format)
+    date = datetime.datetime.strptime(date_string, date_format)
     return date
-
 
 def get_dict_from_object(object):
     temp_dict = {}
