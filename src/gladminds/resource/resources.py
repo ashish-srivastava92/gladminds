@@ -428,7 +428,7 @@ class GladmindsResources(Resource):
     def determine_format(self, request):
         return 'application/json'
     
-    def get_complain_data(self, sms_dict, phone_number, with_detail):
+    def get_complain_data(self, sms_dict, phone_number, with_detail=False):
         ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
         try:
             active_sa = self.validate_dealer(phone_number)
