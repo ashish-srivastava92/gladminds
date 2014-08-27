@@ -492,7 +492,7 @@ def modify_servicedesk_tickets(request,feedbackid):
             aftersell_common.Feedback.objects.filter(id = feedbackid).update(resolved_date = datetime.now(),root_cause = data['rootcause'],resolution = data['resolution'])
             context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL', feedbacks[0])
             mail.send_email_to_initiator_after_issue_resolved(context,feedbacks[0])
-            context = create_context('TICKET_RESOLVED_DETAIL_TO_BAJAJ', feedbacks[0]) 
+            context = create_context('TICKET_RESOLVED_DETAIL_TO_BAJAJ', feedbacks[0])
             mail.send_email_to_bajaj_after_issue_resolved(context) 
             context = create_context('TICKET_RESOLVED_DETAIL_TO_MANAGER', feedbacks[0])
             mail.send_email_to_manager_after_issue_resolved(context, servicedesk_obj_all[0])

@@ -238,11 +238,12 @@
     });
 })();
 
-function rootCause(status,root_cause,resolution){
+function rootCause(status){
 	if (status == 'Resolved'){
-		root_cause.classList.remove('hide');
-		resolution.classList.remove('hide');
+		$('#rootcause').removeClass('hide')
+		$('#resolution').removeClass('hide')
 		}else {
-				root_cause.classList.add('hide');
-				resolution.classList.add('hide')};
+		$('#rootcause').addClass('hide')
+		$('#resolution').addClass('hide')
+			};
 }
