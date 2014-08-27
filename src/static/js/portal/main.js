@@ -237,3 +237,12 @@
 
     });
 })();
+
+function rootCause(status,root_cause,resolution){
+	if (status == 'Resolved'){
+		root_cause.classList.remove('hide');
+		resolution.classList.remove('hide');
+		}else {
+				root_cause.classList.add('hide');
+				resolution.classList.add('hide')};
+}

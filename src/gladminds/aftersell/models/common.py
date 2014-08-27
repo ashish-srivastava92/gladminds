@@ -137,6 +137,8 @@ class Feedback(models.Model):
     wait_time = models.FloatField(max_length=20, null=True, blank=True, default = '0.0')
     remarks = models.CharField(max_length=512, null=True, blank=True)
     ratings = models.CharField(max_length=12, choices=RATINGS)
+    root_cause = models.CharField(max_length=512, null=True, blank=True)
+    resolution = models.CharField(max_length=512, null=True, blank=True)
 
     
     class Meta:
