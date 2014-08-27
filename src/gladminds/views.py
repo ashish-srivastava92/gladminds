@@ -526,11 +526,10 @@ def modify_servicedesk_tickets(request,feedbackid):
 
 def get_feedback_response(request,feedbackid):
     if request.method == 'POST':
-       data = request.POST
-       if data['feedbackresponse']:
-          aftersell_common.Feedback.objects.filter(id = feedbackid).update( ratings = str(data['feedbackresponse'])) 
-          return render(request,'service-desk/feedback_received.html')   
-       else:
-           return HttpResponse() 
-           
-    
+        data = request.POST
+        if data['feedbackresponse']:
+            aftersell_common.Feedback.objects.filter(id = feedbackid).update( ratings = str(data['feedbackresponse'])) 
+            return render(request,'service-desk/feedback_received.html')
+        else:
+            return HttpResponse()
+        
