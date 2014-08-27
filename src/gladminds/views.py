@@ -452,6 +452,7 @@ def modify_servicedesk_tickets(request,feedbackid):
     assign_status = False
     pending_status=False
     feedbacks = aftersell_common.Feedback.objects.filter(id = feedbackid)
+    feedback_comment = aftersell_common.Comments(feedback_object=feedbacks[0])
     previous_status = feedbacks[0].status
     if feedbacks[0].status == 'Pending':
         pending_status = True
@@ -482,7 +483,7 @@ def modify_servicedesk_tickets(request,feedbackid):
             aftersell_common.Feedback.objects.filter(id = feedbackid).update(closed_date = datetime.now(), modified_date = datetime.now())
              
         feedback_data = feedbacks[0]
-        if assign_status and feedback_data.assign_to : 
+        if assign_status and feedback_data.assign_to :
             context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL', feedbacks[0]) 
             mail.send_email_to_initiator_after_issue_assigned(context, feedbacks[0])
             send_sms('INITIATOR_FEEDBACK_DETAILS',feedback_data.reporter, feedback_data)
@@ -502,10 +503,13 @@ def modify_servicedesk_tickets(request,feedbackid):
             set_wait_time(feedback_data,feedbackid)
                 
         if feedback_data.assign_to:   
-            if assign_number != feedback_data.assign_to.phone_number: 
+            if assign_number != feedback_data.assign_to.phone_number:
+                comment_object = aftersell_common.Comments(comments=data['comments'],user=request.user ,created_date=datetime.now(),feedback_object = feedbacks[0])
+                comment_object.save()
                 context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL', feedbacks[0])   
                 mail.send_email_to_assignee(context, feedbacks[0])
                 send_sms('SEND_MSG_TO_ASSIGNEE', feedback_data.assign_to.phone_number, feedback_data)
+               
                 
         if feedbacks[0].resolved_date:
             start_date = feedbacks[0].created_date
@@ -522,7 +526,7 @@ def modify_servicedesk_tickets(request,feedbackid):
                 feedbacks = aftersell_common.Feedback.objects.filter(id = feedbackid)
                 wait_final = float(wait_time) - feedbacks[0].wait_time
                 aftersell_common.Feedback.objects.filter(id = feedbackid).update(wait_time=wait_final)
-    return render(request,'service-desk/ticket_modify.html',{"feedbacks":feedbacks,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj_all, "status_sdo" : ['Open','Progress','Resolved'] })
+    return render(request,'service-desk/ticket_modify.html',{"feedbacks":feedbacks,"feedback_comment":feedback_comment,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj_all, "status_sdo" : ['Open','Progress','Resolved'] })
 
 def get_feedback_response(request,feedbackid):
     if request.method == 'POST':

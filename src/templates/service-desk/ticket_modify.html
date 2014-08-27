@@ -67,7 +67,7 @@
                                <div class="form-group">
                                     <label class="col-sm-3 control-label" for="Assign To">Assignee</label>
                                     <div class="col-sm-9">
-                                         <select class="form-control" name="Assign_To"  {% if group == 'SDO' %} readonly {% endif %} required>
+                                         <select class="form-control" name="Assign_To"   {% if group == 'SDO' %} readonly {% endif %} required  >
                                                <option value="None">------</option>
                                                {% for type in servicedeskuser %}
                       	                            <option {% if type == feedback.assign_to %} selected {% endif %} value="{{type}}">{{type}}</option>
@@ -75,6 +75,7 @@
                                          </select>
                                     </div>
                                </div>
+                                                                                             
                                <div class="form-group">
                                     <label class="col-sm-3 control-label" for="Status">Status</label>
                                     <div class="col-sm-9">
@@ -124,6 +125,13 @@
     									 <input type="datetime" class="form-control" name="due_date" readonly value="{{feedback.due_date}}" >
    									</div>
 								</div>
+								
+                               <div class="form-group " id="comments">
+                     	            <label class="col-sm-3 control-label" for="comments" >Comments</label>
+                                    <div class="col-sm-9">
+                                  	   	<textarea class="form-control" name="comments" value = "{{feedback_comment.comments}}" /></textarea>
+                               		</div>
+                               </div>
 								
                            {% endfor %}
                               <div class="form-group">

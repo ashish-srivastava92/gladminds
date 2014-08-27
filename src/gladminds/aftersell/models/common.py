@@ -145,3 +145,15 @@ class Feedback(models.Model):
         app_label = "aftersell"
         verbose_name_plural = "aftersell feedback info"
         
+class Comments(models.Model):
+    feedback_object = models.ForeignKey(Feedback, null=True, blank= True)
+    user = models.CharField(max_length=20)
+    comments = models.CharField(max_length=50, null=True, blank= True)
+    created_date = models.DateTimeField(null=True, blank=True)
+    modified_date = models.DateTimeField(null=True, blank=True)
+    isDeleted = models.BooleanField(default=True)
+    
+    class Meta:
+        app_label = "aftersell"
+        verbose_name_plural = "aftersell comment info" 
+        
