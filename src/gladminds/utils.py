@@ -258,13 +258,14 @@ def create_context(email_template_name, feedback_obj):
     created_date = feedback_obj.created_date
     assign_to = feedback_obj.assign_to
     priority = feedback_obj.priority 
-    due_date = feedback_obj.due_date 
+    root_cause = feedback_obj.root_cause
+    resolution = feedback_obj.resolution
     data = get_email_template(email_template_name)
     data['newsubject'] = data['subject'].format(id = id)
     data['content'] = data['body'].format(type = type, reporter = reporter, 
                                           message = message, created_date = created_date, 
-                                          assign_to = assign_to, due_date = due_date ,
-                                          root_cause = '' , priority =  priority, remark = "")
+                                          assign_to = assign_to,  priority =  priority, remark = "",
+                                          root_cause = root_cause, resolution = resolution)
     return data
 
 def subtract_dates(start_date, end_date):    

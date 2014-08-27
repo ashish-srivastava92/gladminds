@@ -78,17 +78,31 @@
                                <div class="form-group">
                                     <label class="col-sm-3 control-label" for="Status">Status</label>
                                     <div class="col-sm-9">
-                                           <select class="form-control" name="status" >
-                                                   {% for type in FEEDBACK_STATUS %}
-                                                       	<option {% if group == 'SDO' and type == 'Closed' %} disabled {% endif %} value="{{type}}">{{type}}</option>
-                                                   {% endfor %}
-                                            </select>
-                                    </div>
+	                                	<select class="form-control" name="status" id ="status" onchange="rootCause(this.options[this.selectedIndex].value)">
+                                        	{% for type in FEEDBACK_STATUS %}
+                                            	<option {% if group == 'SDO' and type == 'Closed' %} disabled {% endif %} value="{{type}}">{{type}}</option>
+                                            {% endfor %}
+                                       	</select>
+									</div>
+								</div>
+								<div class="form-group hide" id="rootcause">
+                     	            <label class="col-sm-3 control-label" for="rootcause" >Root cause</label>
+                                    <div class="col-sm-9">
+                                  	   	<textarea class="form-control" name="rootcause" value = "{{feedback.root_cause}}" /></textarea>
+                               		</div>
                                </div>
+                               
+                               <div class="form-group hide" id="resolution">
+                     	            <label class="col-sm-3 control-label" for="resolution" >Resolution</label>
+                                    <div class="col-sm-9">
+                                  	   	<textarea class="form-control" name="resolution" value = "{{feedback.resolution}}" /></textarea>
+                               		</div>
+                               </div>
+                               
                                <div class="form-group">
                                     <label class="col-sm-3 control-label" for="Subject">Subject</label>
                                     <div class="col-sm-9">
-                                           <input type="textarea" class="form-control"  value={{feedback.subject}} readonly>
+                                    	<input type="textarea" class="form-control"  value={{feedback.subject}} readonly>
                                    </div>
                                </div>
                                <div class="form-group">
