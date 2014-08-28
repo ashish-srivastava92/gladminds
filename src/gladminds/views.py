@@ -475,7 +475,6 @@ def modify_servicedesk_tickets(request,feedbackid):
             assign_status = True
 
         data = request.POST
-
         if data['Assign_To'] == 'None': 
             aftersell_common.Feedback.objects.filter(id = feedbackid).update( status = data['status'], priority = data['Priority'], modified_date = datetime.now())
         else:    
@@ -497,7 +496,7 @@ def modify_servicedesk_tickets(request,feedbackid):
         if feedback_data.status == 'Resolved':
             host = request.get_host()
             servicedesk_obj_all = aftersell_common.ServiceDeskUser.objects.filter(designation = 'SDM')
-            aftersell_common.Feedback.objects.filter(id = feedbackid).update(resolved_date = datetime.now())
+            aftersell_common.Feedback.objects.filter(id = feedbackid).update(resolved_date = datetime.now(),root_cause = data['rootcause'],resolution = data['resolution'])
             context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL', feedbacks[0])
             mail.send_email_to_initiator_after_issue_resolved(context,feedbacks[0],host)
             context = create_context('TICKET_RESOLVED_DETAIL_TO_BAJAJ', feedbacks[0]) 
@@ -533,11 +532,10 @@ def modify_servicedesk_tickets(request,feedbackid):
 
 def get_feedback_response(request,feedbackid):
     if request.method == 'POST':
-       data = request.POST
-       if data['feedbackresponse']:
-          aftersell_common.Feedback.objects.filter(id = feedbackid).update( ratings = str(data['feedbackresponse'])) 
-          return render(request,'service-desk/feedback_received.html')   
-       else:
-           return HttpResponse() 
-           
-    
+        data = request.POST
+        if data['feedbackresponse']:
+            aftersell_common.Feedback.objects.filter(id = feedbackid).update( ratings = str(data['feedbackresponse'])) 
+            return render(request,'service-desk/feedback_received.html')
+        else:
+            return HttpResponse()
+        
