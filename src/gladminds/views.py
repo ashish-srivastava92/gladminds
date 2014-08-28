@@ -249,7 +249,7 @@ def create_report(method, query_params, user):
         coupon_data_dict = {}
         coupon_data_dict['customer_id'] = coupon_data.vin.sap_customer_id
         coupon_data_dict['product_type'] = coupon_data.vin.product_type
-        coupon_data_dict['service_avil_date'] = datetime.datetime.now()
+        coupon_data_dict['service_avil_date'] = coupon_data.actual_service_date
         coupon_data_dict['vin'] = coupon_data.vin.vin
         coupon_data_dict['sa_phone_name'] = coupon_data.sa_phone_number
         coupon_data_dict['kms'] = coupon_data.actual_kms
