@@ -103,21 +103,6 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
         self.assertEqual(log_len_after[2].reciever , "9999999998") 
         self.assertEqual(log_len_after[3].reciever , "7760814041")   
         
-#         
-#     def test_sms_email_after_status_resolved(self):
-#         log_len_after = logs.AuditLog.objects.all()
-#         user_servicedesk_info = User.objects.filter(username='sdo')
-#         service_desk = aftersell_common.ServiceDeskUser(user = user_servicedesk_info[0], phone_number = '+917760814041', email_id = 'srv.sngh@gmail.com',  designation = 'SDM' )
-#         service_desk.save()
-#         user_servicedesk_info = User.objects.filter(username='sdoo')
-#         service_desk = aftersell_common.ServiceDeskUser(user = user_servicedesk_info[0], phone_number = '+919727071081', email_id = 'srv.sngh@gmail.com',  designation = 'SDM' )
-#         service_desk.save()
-#         data = {"Assign_To":"None","status":"Resolved","Priority":"High"}
-#         response = client.post("/aftersell/feedbackdetails/1/", data=data)
-#         log_len_after = logs.AuditLog.objects.all()
-#         self.assertEqual(log_len_after[1].reciever, "9999999998")
-#         
-#             
     def test_updated_feedback(self):
         log_len_after = logs.AuditLog.objects.all()
         data = {"Assign_To":"None","status":"Closed","Priority":"High"}
