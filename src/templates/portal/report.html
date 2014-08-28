@@ -47,24 +47,26 @@
 		</form>
 	</div>
 	<div>
-		<table class="table table-bordered table-hover">
+		<table class="table table-bordered table-hover report-table">
 			<thead>
 				<th>Customer ID</th>
 				<th>Product Type</th>
-				<th>Service Availed Date</th>
 				<th>VIN</th>
-				<th>Service Advisor Ph.</th>
-				<th>KMS</th>
+				<th>UCN</th>
+				<th>Service Availed Date</th>
+				<th>SA Mobile</th>
+				<th>Actual KMS</th>
 				<th>Service Type</th>
-				<th>Service Status</th>
+				<th>Status</th>
 				<th>Special Case</th>
 			</thead>
 			<tbody>
 			{% for record in records %}
 				<td>{{record.customer_id}}</td>
 				<td>{{record.product_type}}</td>
-				<td>{{record.service_avil_date}}</td>
 				<td>{{record.vin}}</td>
+				<td>{{record.coupon_no}}</td>
+				<td>{{record.service_avil_date}}</td>
 				<td>{{record.sa_phone_name}}</td>
 				<td>{{record.kms}}</td>
 				<td>{{record.service_type}}</td>
