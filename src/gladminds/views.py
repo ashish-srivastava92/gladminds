@@ -504,7 +504,8 @@ def modify_servicedesk_tickets(request,feedbackid):
                 
         if feedback_data.assign_to:   
             if assign_number != feedback_data.assign_to.phone_number:
-                comment_object = aftersell_common.Comments(comments=data['comments'],user=request.user ,created_date=datetime.now(),feedback_object = feedbacks[0])
+                comment_object = aftersell_common.Comments(comments=data['comments'], user=request.user,
+                                                           created_date=datetime.now(), feedback_object = feedbacks[0])
                 comment_object.save()
                 context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL', feedbacks[0])   
                 mail.send_email_to_assignee(context, feedbacks[0])
