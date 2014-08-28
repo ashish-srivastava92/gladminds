@@ -175,7 +175,7 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj):
         message = feedback_obj.message
         created_date = feedback_obj.created_date
         assign_to = feedback_obj.assign_to
-        priority = feedback_obj.priority   
+        priority = feedback_obj.priority
         comments = comment_obj.comments
         message = templates.get_template(template_name).format(type = type, 
                                           reporter = reporter, message = message,

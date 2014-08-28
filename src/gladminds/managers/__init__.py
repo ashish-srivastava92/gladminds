@@ -16,7 +16,8 @@ def get_feedbacks(user):
         feedbacks = aftersell_common.Feedback.objects.order_by('-created_date')
     if group.name == 'SDO':
         servicedesk_obj = aftersell_common.ServiceDeskUser.objects.filter(user=user)
-        feedbacks = aftersell_common.Feedback.objects.filter(assign_to=servicedesk_obj[0]).order_by('-created_date')
+        feedbacks = aftersell_common.Feedback.objects.filter(
+                        assign_to=servicedesk_obj[0]).order_by('-created_date')
     return feedbacks
 
 
@@ -49,7 +50,8 @@ def save_update_feedback(feedback_obj, data, user,  host):
         feedback_obj.status = data['status']
         feedback_obj.priority = data['Priority']
     else:
-        servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(phone_number=data['Assign_To'])
+        servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(
+                                                            phone_number=data['Assign_To'])
         feedback_obj.assign_to = servicedesk_assign_obj[0]
         feedback_obj.status = data['status']
         feedback_obj.priority = data['Priority']
@@ -60,12 +62,16 @@ def save_update_feedback(feedback_obj, data, user,  host):
         feedback_obj.closed_date = datetime.now()
     feedback_obj.save()
     if assign_status and feedback_obj.assign_to:
-        context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL', feedback_obj)
-        mail.send_email_to_initiator_after_issue_assigned(context, feedback_obj)
-        send_sms('INITIATOR_FEEDBACK_DETAILS',feedback_obj.reporter, feedback_obj, feedback_comment)
+        context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL',
+                                 feedback_obj)
+        mail.send_email_to_initiator_after_issue_assigned(context,
+                                                         feedback_obj)
+        send_sms('INITIATOR_FEEDBACK_DETAILS', feedback_obj.reporter,
+                 feedback_obj, feedback_comment)
 
     if feedback_obj.status == 'Resolved':
-        servicedesk_obj_all = aftersell_common.ServiceDeskUser.objects.filter(designation = 'SDM')
+        servicedesk_obj_all = aftersell_common.ServiceDeskUser.objects.filter(
+                                                    designation='SDM')
         feedback_obj.resolved_date = datetime.now()
         feedback_obj.resolved_date = datetime.now()
         feedback_obj.root_cause = data['rootcause']
@@ -90,21 +96,28 @@ def save_update_feedback(feedback_obj, data, user,  host):
 
     if feedback_obj.assign_to:
         if assign_number != feedback_obj.assign_to.phone_number:
-            comment_object = aftersell_common.Comments(comments=data['comments'], user=user,
-                                                           created_date=datetime.now(), feedback_object = feedback_obj)
+            comment_object = aftersell_common.Comments(
+                                        comments=data['comments'],
+                                        user=user, created_date=datetime.now(),
+                                        feedback_object=feedback_obj)
             comment_object.save()
-            context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL', feedback_obj)
+            context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL',
+                                      feedback_obj)
             mail.send_email_to_assignee(context, feedback_obj)
-            send_sms('SEND_MSG_TO_ASSIGNEE', feedback_obj.assign_to.phone_number, feedback_obj, comment_object)
+            send_sms('SEND_MSG_TO_ASSIGNEE',
+                     feedback_obj.assign_to.phone_number,
+                     feedback_obj, comment_object)
 
     if feedback_obj.resolved_date:
         start_date = feedback_obj.created_date
-        feedback_end_date = aftersell_common.Feedback.objects.get(id=feedback_obj.id)
+        feedback_end_date = aftersell_common.Feedback.objects.get(
+                                                    id=feedback_obj.id)
         end_date = feedback_end_date.resolved_date
         start_date, end_date = get_start_and_end_date(start_date,
                                                      end_date, TIME_FORMAT)
         if start_date > end_date:
-            raise ValueError('Invalid resolved date. Resolved date should be after the created date')
+            raise ValueError('Invalid resolved date.\
+             Resolved date should be after the created date')
         else:
             wait = end_date - start_date
             wait_time = float(wait.days) + float(wait.seconds) / float(86400)

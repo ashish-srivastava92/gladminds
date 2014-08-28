@@ -53,7 +53,8 @@ def get_feedback_response(request, feedback_id):
     if request.method == 'POST':
         data = request.POST
         if data['feedbackresponse']:
-            aftersell_common.Feedback.objects.filter(id = feedback_id).update(ratings = str(data['feedbackresponse']))
+            aftersell_common.Feedback.objects.filter(
+                  id=feedback_id).update(ratings=str(data['feedbackresponse']))
             return render(request, 'service-desk/feedback_received.html')
         else:
             return HttpResponse()
