@@ -150,7 +150,7 @@ class Comments(models.Model):
     user = models.CharField(max_length=20, null=False, blank=False)
     comments = models.CharField(max_length=100, null=True, blank=True)
     created_date = models.DateTimeField(null=False, blank=False)
-    modified_date = models.DateTimeField(null=True, blank=True)
+    modified_date = models.DateTimeField(null=True, blank=True, auto_now=True)
     isDeleted = models.BooleanField(default=False)
     
     class Meta:
