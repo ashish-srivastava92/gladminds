@@ -486,7 +486,7 @@ def modify_servicedesk_tickets(request,feedbackid):
         if assign_status and feedback_data.assign_to :
             context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL', feedbacks[0]) 
             mail.send_email_to_initiator_after_issue_assigned(context, feedbacks[0])
-            send_sms('INITIATOR_FEEDBACK_DETAILS',feedback_data.reporter, feedback_data)
+            send_sms('INITIATOR_FEEDBACK_DETAILS',feedback_data.reporter, feedback_data, feedback_comment)
              
         if feedback_data.status == 'Resolved':
             host = request.get_host()
@@ -498,7 +498,7 @@ def modify_servicedesk_tickets(request,feedbackid):
             mail.send_email_to_bajaj_after_issue_resolved(context) 
             context = create_context('TICKET_RESOLVED_DETAIL_TO_MANAGER', feedbacks[0])
             mail.send_email_to_manager_after_issue_resolved(context, servicedesk_obj_all[0])
-            send_sms('INITIATOR_FEEDBACK_STATUS', feedback_data.reporter, feedback_data)
+            send_sms('INITIATOR_FEEDBACK_STATUS', feedback_data.reporter, feedback_data, feedback_comment)
         if pending_status :
             set_wait_time(feedback_data,feedbackid)
                 
@@ -509,7 +509,7 @@ def modify_servicedesk_tickets(request,feedbackid):
                 comment_object.save()
                 context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL', feedbacks[0])   
                 mail.send_email_to_assignee(context, feedbacks[0])
-                send_sms('SEND_MSG_TO_ASSIGNEE', feedback_data.assign_to.phone_number, feedback_data)
+                send_sms('SEND_MSG_TO_ASSIGNEE', feedback_data.assign_to.phone_number, feedback_data, comment_object)
                
                 
         if feedbacks[0].resolved_date:
