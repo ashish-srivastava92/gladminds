@@ -21,7 +21,7 @@ from gladminds import utils, message_template
 from gladminds import mail
 from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format, format_date_string, stringify_groups,\
-    get_list_from_set, create_context, get_user_groups, search_details
+    get_list_from_set, create_context, get_user_groups, search_details, get_start_and_end_date
 from gladminds.sqs_tasks import export_asc_registeration_to_sap, send_sms
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.mail import sent_otp_email
@@ -431,18 +431,20 @@ def set_wait_time(feedback_data,feedbackid):
     previous_wait = feedback_data.wait_time
     aftersell_common.Feedback.objects.filter(id = feedbackid).update(wait_time=wait_time+previous_wait)
 
+
 @login_required()
 def get_servicedesk_tickets(request):
-    group_name =  request.user.groups.all()
+    group_name = request.user.groups.all()
     user_obj = request.user
     if group_name[0].name == 'SDM':
         feedbacks = aftersell_common.Feedback.objects.order_by('-created_date')
     if group_name[0].name == 'SDO':
-        servicedesk_obj = aftersell_common.ServiceDeskUser.objects.filter(user=user_obj)
+        servicedesk_obj = aftersell_common.ServiceDeskUser.objects.filter(user = user_obj)
         feedbacks = aftersell_common.Feedback.objects.filter(assign_to=servicedesk_obj[0]).order_by('-created_date') 
-    return render(request,'service-desk/tickets.html',{"feedbacks":feedbacks})
+    return render(request, 'service-desk/tickets.html', {"feedbacks": feedbacks})
 
-@login_required() 
+
+@login_required()
 def modify_servicedesk_tickets(request,feedbackid):
     group_name =  request.user.groups.all()
     status = get_list_from_set(FEEDBACK_STATUS)
@@ -459,7 +461,7 @@ def modify_servicedesk_tickets(request,feedbackid):
     if request.method == 'GET':
         feedbacks = aftersell_common.Feedback.objects.filter(id = feedbackid)
     if request.method == 'POST':
-        feedbacks = aftersell_common.Feedback.objects.filter(id = feedbackid)
+#         feedbacks = aftersell_common.Feedback.objects.filter(id = feedbackid)
         if feedbacks[0].assign_to:
             assign_number = feedbacks[0].assign_to.phone_number
         else:
@@ -525,13 +527,12 @@ def modify_servicedesk_tickets(request,feedbackid):
                 aftersell_common.Feedback.objects.filter(id = feedbackid).update(wait_time=wait_final)
     return render(request,'service-desk/ticket_modify.html',{"feedbacks":feedbacks,"FEEDBACK_STATUS": status,"PRIORITY":priority,"FEEDBACK_TYPE":type,"group":group_name[0].name,'servicedeskuser':servicedesk_obj_all, "status_sdo" : ['Open','Progress','Resolved'] })
 
-def get_feedback_response(request,feedbackid):
+
+def get_feedback_response(request, feedbackid):
     if request.method == 'POST':
-       data = request.POST
-       if data['feedbackresponse']:
-          aftersell_common.Feedback.objects.filter(id = feedbackid).update( ratings = str(data['feedbackresponse'])) 
-          return render(request,'service-desk/feedback_received.html')   
-       else:
-           return HttpResponse() 
-           
-    
+        data = request.POST
+        if data['feedbackresponse']:
+            aftersell_common.Feedback.objects.filter(id = feedbackid).update(ratings = str(data['feedbackresponse']))
+            return render(request, 'service-desk/feedback_received.html')
+        else:
+            return HttpResponse()

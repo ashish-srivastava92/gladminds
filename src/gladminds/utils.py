@@ -267,11 +267,12 @@ def create_context(email_template_name, feedback_obj):
                                           root_cause = '' , priority =  priority, remark = "")
     return data
 
-def subtract_dates(start_date, end_date):    
-    start_date = start_date.strftime("%Y-%m-%d")
-    end_date = end_date.strftime("%Y-%m-%d")
-    start_date = datetime.strptime(start_date, "%Y-%m-%d")
-    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+def subtract_dates(start_date, end_date, format = "%Y-%m-%d"):  
+    start_date = start_date.strftime(format)
+    end_date = end_date.strftime(format)
+    start_date = datetime.strptime(start_date, format)
+    end_date = datetime.strptime(end_date, format)
+    print start_date - end_date
     return start_date - end_date
 
 def search_details(request):
@@ -307,6 +308,14 @@ def get_search_query_params(request, class_self):
         custom_search_enabled = True
     return custom_search_enabled
 
-import datetime
+def get_start_and_end_date(start_date, end_date , format):
+   
+    start_date = start_date.strftime(format)
+    start_date = datetime.strptime(start_date, format)
+    end_date = end_date.strftime(format)
+    end_date = datetime.strptime(end_date, format)
+    return start_date,end_date
+
 def get_min_and_max_filter_date():
+    import datetime
     return (datetime.date.today() - datetime.timedelta(6*365/12)).isoformat(), (datetime.date.today()).isoformat()

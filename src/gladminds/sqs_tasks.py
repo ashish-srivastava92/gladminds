@@ -296,6 +296,14 @@ Crontab to import data from SAP to Gladminds Database
 
 
 @shared_task
+def mark_feeback_to_closed(*args, **kwargs):
+    taskmanager.mark_feeback_to_closed(*args, **kwargs)
+
+"""
+Crontab to import data from SAP to Gladminds Database
+"""
+
+@shared_task
 def import_data(*args, **kwargs):
     feed.load_feed()
 
@@ -455,6 +463,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "send_invalid_keyword_message" : send_invalid_keyword_message,
               
-              "export_customer_reg_to_sap" : export_customer_reg_to_sap 
+              "export_customer_reg_to_sap" : export_customer_reg_to_sap,
+              
+              "mark_feeback_to_closed" : mark_feeback_to_closed
 
               }
