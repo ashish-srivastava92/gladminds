@@ -28,7 +28,7 @@ def get_servicedesk_users(**filters):
     return aftersell_common.ServiceDeskUser.objects.filter(**filters)
 
 
-def save_update_feedback(feedback_obj, data, user,  host=''):
+def save_update_feedback(feedback_obj, data, user,  host):
     assign_status = False
     pending_status = False
     feedback_comment = aftersell_common.Comments(feedback_object=feedback_obj)
