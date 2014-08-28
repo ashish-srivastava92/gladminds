@@ -202,14 +202,6 @@ def send_email_to_initiator_after_issue_assigned(data, feedback_obj):
     except Exception as ex:
         logger.info("[Exception feedback initiator after issue assigned email]  {0}".format(ex)) 
 
-def send_status_mail_to_assignee(data):
-    try:
-        context = Context({"content": data['content']})
-        send_template_email("base_email_template.html", context,
-                             data, receiver = feedback_obj.assign_to.email_id)
-    except Exception as ex:
-        logger.info("[Exception feedback assignee email]  {0}".format(ex))
-
 def send_email_to_initiator_after_issue_resolved(data, feedback_obj, host):
     try:
         context = Context({"content": data['content'],

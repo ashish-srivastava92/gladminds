@@ -417,5 +417,5 @@ def trigger_sqs_tasks(request):
     taskqueue.add(sqs_tasks[request.POST['task']])
     return HttpResponse()
 
-#TODO Function needs to be refactored
+
 

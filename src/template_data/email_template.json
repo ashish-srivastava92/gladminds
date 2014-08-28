@@ -91,7 +91,7 @@
             "sender": "feed-report@gladminds.co",
             "reciever": "srv.sngh92@yahoo.com",
             "subject": "Feedback  with reference-no-{id} resolved",
-            "body": "The {type} reported by {reporter} on {created_date} has been resolved.\n The Feedback received by reporter is {remark},\n The root cause  is {root_cause} and the resolution is {resolution}",
+            "body": "The {type} reported by {reporter} on {created_date} has been resolved.\n The Feedback received by reporter is {remark},\n The root cause  is {root_cause} and the resolution is {resolution}", 
             "description": "Feedback  mail to bajaj"
         }
     },
