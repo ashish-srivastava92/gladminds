@@ -1,7 +1,7 @@
 import os, logging, hashlib, uuid, mimetypes
 import boto
 from boto.s3.key import Key
-from datetime import datetime
+import datetime
 from dateutil import tz
 from random import randint
 from django.utils import timezone
@@ -268,11 +268,11 @@ def create_context(email_template_name, feedback_obj):
                                           root_cause = root_cause, resolution = resolution)
     return data
 
-def subtract_dates(start_date, end_date):    
+def subtract_dates(start_date, end_date):
     start_date = start_date.strftime("%Y-%m-%d")
     end_date = end_date.strftime("%Y-%m-%d")
-    start_date = datetime.strptime(start_date, "%Y-%m-%d")
-    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+    start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
     return start_date - end_date
 
 def search_details(request):
@@ -310,5 +310,4 @@ def get_search_query_params(request, class_self):
 
 
 def get_min_and_max_filter_date():
-    import datetime
     return (datetime.date.today() - datetime.timedelta(6*365/12)).isoformat(), (datetime.date.today()).isoformat()

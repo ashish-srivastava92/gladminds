@@ -309,11 +309,10 @@ def register_customer(request, group=None):
         existing_customer = True
     data_source.append(utils.create_feed_data(post_data, product_obj[0], temp_customer_id))
     check_with_invoice_date = utils.subtract_dates(data_source[0]['product_purchase_date'], product_obj[0].invoice_date)
-    check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.datetime.now())
-
+    check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.now())
     if not existing_customer and check_with_invoice_date.days < 0 or check_with_today_date.days > 0:
         message = "Product purchase date should be between {0} and {1}".\
-                format((product_obj[0].invoice_date).strftime("%d-%m-%Y"),(datetime.datetime.now()).strftime("%d-%m-%Y"))
+                format((product_obj[0].invoice_date).strftime("%d-%m-%Y"),(datetime.now()).strftime("%d-%m-%Y"))
         logger.info('{0} Entered date is: {1}'.format(message, str(data_source[0]['product_purchase_date'])))
         return json.dumps({"message": message})
     

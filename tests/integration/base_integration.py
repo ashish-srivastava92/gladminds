@@ -12,18 +12,10 @@ class GladmindsResourceTestCase(ResourceTestCase):
 
     def setUp(self):
         super(GladmindsResourceTestCase, self).setUp()
-        file_path = os.path.join(settings.PROJECT_DIR, 'template_data/template.json')
-        message_templates = json.loads(open(file_path).read())
-        for message_temp in message_templates:
-            fields = message_temp['fields']
-            temp_obj = common.MessageTemplate(template_key=fields['template_key']\
-                       , template=fields['template'], description=fields['description'])
-            temp_obj.save()
-        file_path = os.path.join(settings.PROJECT_DIR, 'template_data/email_template.json')
-        email_templates = json.loads(open(file_path).read())
-        common.EmailTemplate.objects.all().delete()
         load_email_obj = load_gm_migration_data.Command()
         load_email_obj.add_email_template()
+        load_email_obj.add_sms_template()
+        load_email_obj.add_group()
         self.MESSAGE_URL = "/v1/messages"
 
         #old implementation of test case;
@@ -90,5 +82,21 @@ class GladmindsResourceTestCase(ResourceTestCase):
         coupon_obj = common.CouponData.objects.filter(unique_service_coupon=coupon_id)
         return coupon_obj[0]
         
+    def get_temp_customer_obj(self, **kwargs):
+        temp_customer_obj = common.CustomerTempRegistration.objects.get(**kwargs)
+        return temp_customer_obj
+    
+    def get_product_details(self, **kwargs):
+        product_data_obj = common.ProductData.objects.get(**kwargs)
+        return product_data_obj
+    
+    def send_dispatch_feed(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
         
+    def send_purchase_feed(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
         
