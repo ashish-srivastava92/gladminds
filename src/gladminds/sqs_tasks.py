@@ -168,23 +168,17 @@ def send_coupon(*args, **kwargs):
 This job send coupon close message to customer
 """
 
-def send_sms(template_name, phone_number, feedback_obj, comment_obj):
+def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
     try:
-        type = feedback_obj.type
-        reporter = feedback_obj.reporter
-        message = feedback_obj.message
-        created_date = feedback_obj.created_date
-        assign_to = feedback_obj.assign_to
-        priority = feedback_obj.priority   
-        comments = comment_obj.comments
-        message = templates.get_template(template_name).format(type = type, 
-                                          reporter = reporter, message = message,
-                                          created_date = created_date, 
-                                          assign_to = assign_to,  
-                                          priority =  priority,
-                                          comments = comments)
+        message = templates.get_template(template_name).format(type=feedback_obj.type,
+                                          reporter=feedback_obj.reporter, message=feedback_obj.message,
+                                          created_date=feedback_obj.created_date,
+                                          assign_to=feedback_obj.assign_to,
+                                          priority=feedback_obj.priority)
+        if comment_obj and template_name == 'SEND_MSG_TO_ASSIGNEE':
+            message = message + 'Note :' + comment_obj.comments
     except Exception as ex:
-           message = templates.get_template('SEND_INVALID_MESSAGE')
+        message = templates.get_template('SEND_INVALID_MESSAGE')
     finally:
         logger.info("Send complain message received successfully with %s" % message)
         phone_number = utils.get_phone_number_format(phone_number)
@@ -192,7 +186,7 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj):
             task_queue = utils.get_task_queue()
             task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
         else:
-           send_coupon.delay(phone_number=phone_number, message=message)
+            send_coupon.delay(phone_number=phone_number, message=message)
     audit_log(reciever = phone_number, action=AUDIT_ACTION, message=message)
     return {'status': True, 'message': message}
 
@@ -296,6 +290,14 @@ def expire_service_coupon(*args, **kwargs):
 Crontab to import data from SAP to Gladminds Database
 """
 
+
+@shared_task
+def mark_feeback_to_closed(*args, **kwargs):
+    taskmanager.mark_feeback_to_closed(*args, **kwargs)
+
+"""
+Crontab to import data from SAP to Gladminds Database
+"""
 
 @shared_task
 def import_data(*args, **kwargs):
@@ -457,6 +459,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "send_invalid_keyword_message" : send_invalid_keyword_message,
               
-              "export_customer_reg_to_sap" : export_customer_reg_to_sap 
+              "export_customer_reg_to_sap" : export_customer_reg_to_sap,
+              
+              "mark_feeback_to_closed" : mark_feeback_to_closed
 
               }

@@ -117,7 +117,7 @@ class ServiceDeskUser(models.Model):
         verbose_name_plural = "service desk users"
     
     def __unicode__(self):
-        return self.phone_number       
+        return self.phone_number
     
 class Feedback(models.Model):
     reporter = models.CharField(max_length=15)
@@ -128,7 +128,7 @@ class Feedback(models.Model):
     priority = models.CharField(max_length=12, choices=PRIORITY)
     type = models.CharField(max_length=12, choices=FEEDBACK_TYPE)
     subject = models.CharField(max_length=512, null=True, blank=True)
-    created_date = models.DateTimeField(null=True, blank= False,auto_now=True)
+    created_date = models.DateTimeField(null=True, blank= False)
     modified_date = models.DateTimeField(null=True, blank= True,auto_now=True)
     closed_date = models.DateTimeField(null=True, blank=True)
     resolved_date = models.DateTimeField(null=True, blank=True)
@@ -140,7 +140,6 @@ class Feedback(models.Model):
     root_cause = models.CharField(max_length=512, null=True, blank=True)
     resolution = models.CharField(max_length=512, null=True, blank=True)
 
-    
     class Meta:
         app_label = "aftersell"
         verbose_name_plural = "aftersell feedback info"
@@ -155,5 +154,5 @@ class Comments(models.Model):
     
     class Meta:
         app_label = "aftersell"
-        verbose_name_plural = "aftersell comment info" 
+        verbose_name_plural = "aftersell comment info"        
         

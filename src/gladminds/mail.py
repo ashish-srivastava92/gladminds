@@ -241,5 +241,4 @@ def send_template_email(template_name, context, mail_detail,receiver=None):
                subject = mail_detail['newsubject'], body = body, 
                smtp_server = settings.MAIL_SERVER)
     logger.info("Mail sent successfully")
-    
     #TODO We have to remove hard code receiver

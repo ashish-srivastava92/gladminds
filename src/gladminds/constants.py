@@ -1,4 +1,4 @@
-TIME_FORMAT = '%Y-%m-%d %M:%S'
+TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 PROVIDERS = ['asc', 'dasc', 'dealer', 'desk']
 
 PROVIDER_MAPPING = {'dealer' : 'dealer/login.html',
