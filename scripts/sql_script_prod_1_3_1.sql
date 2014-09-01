@@ -51,3 +51,8 @@ alter table gladminds_customertempregistration add tagged_sap_id VARCHAR(215) nu
 
 alter table  gladminds_productdata add veh_reg_no VARCHAR(15) null;
 alter table gladminds_gladmindusers add pincode VARCHAR(15) null;
+
+################################################################
+
+alter table aftersell_registereddealer add role VARCHAR(10);
+alter table aftersell_registereddealer3 add dependent_on VARCHAR(25);
