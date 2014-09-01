@@ -31,8 +31,8 @@ def check_sms_errors(request):
         audit_logs = logs.AuditLog.objects.filter(action='failure', date__range=(start_date, end_date))
         if audit_logs:
             health_status = 'error'
-            reason = 'On last {0} hours, {1} SMS Failed'.format(
-                      settings.SMS_HEALTH_CHECK_INTERVAL, len(audit_logs))
+            reason = 'On last {0} hours, {1} SMS Failed'.format(settings.SMS_HEALTH_CHECK_INTERVAL,
+                                                                len(audit_logs))
     except Exception as ex:
         reason = "Error on SMS Health Check : %s" % ex
         health_status = 'error'
@@ -45,16 +45,16 @@ def check_feed_errors(request):
         today = datetime.now()
         start_date = today - timedelta(hours=settings.FEED_HEALTH_CHECK_INTERVAL)
         end_date = today
-        feeds_logs = logs.DataFeedLog.objects.filter(
-                     failed_data_count__gt=0, timestamp__range=(start_date, end_date))
+        feeds_logs = logs.DataFeedLog.objects.filter(failed_data_count__gt=0,
+                                                     timestamp__range=(start_date, end_date))
         if feeds_logs:
             health_status = 'error'
             failed_data_count = 0
             for failed_feed in feeds_logs:
                 failed_data_count += failed_feed.failed_data_count
             health_status = 'error'
-            reason = 'On last {0} hours, {1} Feeds Failed'.format(
-                    settings.SMS_HEALTH_CHECK_INTERVAL, len(failed_data_count))
+            reason = 'On last {0} hours, {1} Feeds Failed'.format(settings.SMS_HEALTH_CHECK_INTERVAL,
+                                                                  len(failed_data_count))
     except Exception as ex:
         reason = "Error on SMS Health Check : %s" % ex
         health_status = 'error'

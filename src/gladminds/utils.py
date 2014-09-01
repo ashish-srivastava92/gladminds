@@ -96,13 +96,13 @@ def get_task_queue():
 def format_product_object(product_obj):
     purchase_date = product_obj.product_purchase_date.strftime('%d/%m/%Y')
     return {'id': product_obj.sap_customer_id,
-            'phone': get_phone_number_format(str(product_obj.customer_phone_number)), 
-            'name': product_obj.customer_phone_number.customer_name, 
+            'phone': get_phone_number_format(str(product_obj.customer_phone_number)),
+            'name': product_obj.customer_phone_number.customer_name,
             'purchase_date': purchase_date,
             'vin': product_obj.vin}
 
 def get_customer_info(request):
-    data=request.POST
+    data = request.POST
     try:
         product_obj = common.ProductData.objects.get(vin=data['vin'])
     except Exception as ex:
@@ -110,7 +110,7 @@ def get_customer_info(request):
         message = '''VIN '{0}' does not exist in our records.'''.format(data['vin'])
         return {'message': message, 'status': 'fail'}
     if product_obj.product_purchase_date:
-        product_data =  format_product_object(product_obj)
+        product_data = format_product_object(product_obj)
         return product_data
     else:
         message = '''VIN '{0}' has no associated customer.'''.format(data['vin'])
@@ -130,9 +130,9 @@ def recover_coupon_info(request):
     ucn_recovery_obj = upload_file(request)
     send_recovery_email_to_admin(ucn_recovery_obj, coupon_data)
     message = 'UCN for customer {0} is {1}.'.format(coupon_data.vin.sap_customer_id,
-                                                coupon_data.unique_service_coupon) 
+                                                    coupon_data.unique_service_coupon)
     return {'status': True, 'message': message}
-    
+
 def get_coupon_info(request):
     data = request.POST
     customer_id = data['customerId']
@@ -175,7 +175,7 @@ def get_user_groups(user):
     for group in user.groups.all():
         groups.append(str(group.name))
     return groups
-    
+
 def stringify_groups(user):
     groups = []
     for group in user.groups.all():
@@ -187,8 +187,9 @@ def send_recovery_email_to_admin(file_obj, coupon_data):
     reason = file_obj.reason
     customer_id = file_obj.sap_customer_id
     requester = str(file_obj.user)
-    data = get_email_template('UCN_REQUEST_ALERT').body.format(requester,coupon_data.service_type,
-                customer_id, coupon_data.actual_kms, reason, file_location)
+    data = get_email_template('UCN_REQUEST_ALERT').body.format(requester, coupon_data.service_type,
+                                                               customer_id, coupon_data.actual_kms,
+                                                               reason, file_location)
     send_ucn_request_alert(data=data)
 
 def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=None,
@@ -280,11 +281,11 @@ def search_details(request):
     kwargs = {}
     search_results = []
     if data.has_key('VIN'):
-        kwargs[ 'vin' ] = data['VIN']
+        kwargs['vin'] = data['VIN']
     elif data.has_key('Customer-ID'):
-        kwargs[ 'sap_customer_id' ] = data['Customer-ID']
+        kwargs['sap_customer_id'] = data['Customer-ID']
     elif data.has_key('Customer-Mobile'):
-        kwargs[ 'customer_phone_number__phone_number' ] = mobile_format(data['Customer-Mobile'])
+        kwargs['customer_phone_number__phone_number'] = mobile_format(data['Customer-Mobile'])
     product_obj = common.ProductData.objects.filter(**kwargs)
     if not product_obj or not product_obj[0].product_purchase_date:
         key = data.keys()
@@ -293,7 +294,7 @@ def search_details(request):
         return {'message': message}
     for product in product_obj:
         data = format_product_object(product)
-        search_results.append(data)    
+        search_results.append(data)
     return search_results
 
 def get_search_query_params(request, class_self):
