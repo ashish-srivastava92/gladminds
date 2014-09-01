@@ -62,7 +62,7 @@ def get_phone_number_format(phone_number):
 
 def save_otp(user, token, email):
     common.OTPToken.objects.filter(user=user).delete()
-    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.datetime.now(), email=email)
+    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=email)
     token_obj.save()
 
 def get_token(user, phone_number, email=''):
@@ -211,16 +211,19 @@ def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=None,
     logger.info('{1}: {0} has been uploaded'.format(s3_key.key, logger_msg))
     return path
 
+
 def get_email_template(key):
     template_object = common.EmailTemplate.objects.filter(template_key=key).values()
     return template_object[0]
+
 
 def format_date_string(date_string, date_format='%d/%m/%Y'):
     '''
     This function converts the date from string to datetime format
     '''
-    date = datetime.datetime.strptime(date_string, date_format)
+    date = datetime.strptime(date_string, date_format)
     return date
+
 
 def get_dict_from_object(object):
     temp_dict = {}
@@ -232,6 +235,7 @@ def get_dict_from_object(object):
         else:
             temp_dict[key] = object[key]
     return temp_dict
+
 
 def create_feed_data(post_data, product_data, temp_customer_id):
     data = {}
@@ -245,30 +249,24 @@ def create_feed_data(post_data, product_data, temp_customer_id):
     data['pin_no'] = data['state'] = data['city'] = None
     return data
 
+
 def get_list_from_set(set_data):
     created_list = []
     for set_object in set_data:
         created_list.append(list(set_object)[1])
     return created_list
 
+
 def create_context(email_template_name, feedback_obj):
-    type = feedback_obj.type
-    id = feedback_obj.id
-    reporter = feedback_obj.reporter
-    message = feedback_obj.message
-    created_date = feedback_obj.created_date
-    assign_to = feedback_obj.assign_to
-    priority = feedback_obj.priority 
-    root_cause = feedback_obj.root_cause
-    resolution = feedback_obj.resolution
     data = get_email_template(email_template_name)
-    data['newsubject'] = data['subject'].format(id = id)
-    data['content'] = data['body'].format(type = type, reporter = reporter, 
-                                          message = message, created_date = created_date, 
-                                          assign_to = assign_to,  priority =  priority, remark = "",
-                                          root_cause = root_cause, resolution = resolution, due_date = "")
+    data['newsubject'] = data['subject'].format(id = feedback_obj.id)
+    data['content'] = data['body'].format(type = feedback_obj.type, reporter = feedback_obj.reporter, 
+                                          message = feedback_obj.message, created_date = feedback_obj.created_date, 
+                                          assign_to = feedback_obj.assign_to,  priority =  feedback_obj.priority, remark = "",
+                                          root_cause = feedback_obj.root_cause, resolution = feedback_obj.resolution, due_date = "")
 
     return data
+
 
 def subtract_dates(start_date, end_date, format = "%Y-%m-%d"):  
     start_date = start_date.strftime(format)
@@ -276,6 +274,7 @@ def subtract_dates(start_date, end_date, format = "%Y-%m-%d"):
     start_date = datetime.strptime(start_date, format)
     end_date = datetime.strptime(end_date, format)
     return start_date - end_date
+
 
 def search_details(request):
     data = request.POST
@@ -295,8 +294,9 @@ def search_details(request):
         return {'message': message}
     for product in product_obj:
         data = format_product_object(product)
-        search_results.append(data)    
+        search_results.append(data)
     return search_results
+
 
 def get_search_query_params(request, class_self):
     custom_search_enabled = False
@@ -310,13 +310,15 @@ def get_search_query_params(request, class_self):
         custom_search_enabled = True
     return custom_search_enabled
 
-def get_start_and_end_date(start_date, end_date , format):
-   
+
+def get_start_and_end_date(start_date, end_date, format):
+
     start_date = start_date.strftime(format)
     start_date = datetime.strptime(start_date, format)
     end_date = end_date.strftime(format)
     end_date = datetime.strptime(end_date, format)
     return start_date,end_date
+
 
 def get_min_and_max_filter_date():
     import datetime

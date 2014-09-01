@@ -30,9 +30,9 @@ def get_servicedesk_users(**filters):
 
 
 def save_update_feedback(feedback_obj, data, user,  host):
+    comment_object = None
     assign_status = False
     pending_status = False
-    feedback_comment = aftersell_common.Comments(feedback_object=feedback_obj)
     if feedback_obj.status == 'Pending':
         pending_status = True
 
@@ -67,7 +67,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
         mail.send_email_to_initiator_after_issue_assigned(context,
                                                          feedback_obj)
         send_sms('INITIATOR_FEEDBACK_DETAILS', feedback_obj.reporter,
-                 feedback_obj, feedback_comment)
+                 feedback_obj)
 
     if feedback_obj.status == 'Resolved':
         servicedesk_obj_all = aftersell_common.ServiceDeskUser.objects.filter(
@@ -89,24 +89,26 @@ def save_update_feedback(feedback_obj, data, user,  host):
         mail.send_email_to_manager_after_issue_resolved(context,
                                                         servicedesk_obj_all[0])
         send_sms('INITIATOR_FEEDBACK_STATUS', feedback_obj.reporter,
-                 feedback_obj, feedback_comment)
+                 feedback_obj)
 
     if pending_status:
         set_wait_time(feedback_obj)
 
-    if feedback_obj.assign_to:
-        if assign_number != feedback_obj.assign_to.phone_number:
-            comment_object = aftersell_common.Comments(
+    if data['comments']:
+        comment_object = aftersell_common.Comments(
                                         comments=data['comments'],
                                         user=user, created_date=datetime.now(),
                                         feedback_object=feedback_obj)
-            comment_object.save()
+        comment_object.save()
+
+    if feedback_obj.assign_to:
+        if assign_number != feedback_obj.assign_to.phone_number:
             context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL',
                                       feedback_obj)
             mail.send_email_to_assignee(context, feedback_obj)
             send_sms('SEND_MSG_TO_ASSIGNEE',
                      feedback_obj.assign_to.phone_number,
-                     feedback_obj, comment_object)
+                     feedback_obj,  comment_object)
 
     if feedback_obj.resolved_date:
         start_date = feedback_obj.created_date

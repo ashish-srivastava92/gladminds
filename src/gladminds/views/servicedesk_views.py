@@ -36,7 +36,7 @@ def modify_servicedesk_tickets(request, feedback_id):
     priority_types = get_list_from_set(PRIORITY)
     feedback_types = get_list_from_set(FEEDBACK_TYPE)
     feedback_obj = get_feedback(feedback_id)
-    servicedesk_user = get_servicedesk_users(designation='SDO')
+    servicedesk_users = get_servicedesk_users(designation='SDO')
     if request.method == 'POST':
         host = request.get_host()
         save_update_feedback(feedback_obj, request.POST, request.user, host)
@@ -45,12 +45,11 @@ def modify_servicedesk_tickets(request, feedback_id):
                    "PRIORITY": priority_types,\
                     "FEEDBACK_TYPE": feedback_types,\
                    "group": group_name[0].name,\
-                   'servicedeskuser': servicedesk_user
+                   'servicedeskuser': servicedesk_users
                    })
 
-
+@require_http_methods(["POST"])
 def get_feedback_response(request, feedback_id):
-    if request.method == 'POST':
         data = request.POST
         if data['feedbackresponse']:
             aftersell_common.Feedback.objects.filter(
@@ -58,4 +57,3 @@ def get_feedback_response(request, feedback_id):
             return render(request, 'service-desk/feedback_received.html')
         else:
             return HttpResponse()
-        
