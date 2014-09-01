@@ -237,11 +237,11 @@
 })();
 
 function rootCause(status){
-	if (status == 'Resolved'){
-		$('#rootcause').removeClass('hide')
-		$('#resolution').removeClass('hide')
-		}else {
-		$('#rootcause').addClass('hide')
-		$('#resolution').addClass('hide')
-			};
+	if (status === 'Resolved'){
+		$('#rootcause').removeClass('hide');
+		$('#resolution').removeClass('hide');
+	}else {
+		$('#rootcause').addClass('hide');
+		$('#resolution').addClass('hide');
+	}
 }
