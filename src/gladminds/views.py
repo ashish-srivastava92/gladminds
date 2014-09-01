@@ -267,7 +267,7 @@ def create_report(method, query_params, user):
         to_date = query_params.get('to')
         params['start_date'] = from_date
         params['to_date'] = to_date
-        filter['closed_date__range'] = (from_date, to_date)
+        filter['actual_service_date__range'] = (str(from_date) + ' 00:00:00', str(to_date) +' 23:59:59')
         if status:
             params['status'] = status
             filter['status'] = status
@@ -282,8 +282,9 @@ def create_report(method, query_params, user):
         coupon_data_dict = {}
         coupon_data_dict['customer_id'] = coupon_data.vin.sap_customer_id
         coupon_data_dict['product_type'] = coupon_data.vin.product_type
-        coupon_data_dict['service_avil_date'] = datetime.datetime.now()
+        coupon_data_dict['service_avil_date'] = coupon_data.actual_service_date
         coupon_data_dict['vin'] = coupon_data.vin.vin
+        coupon_data_dict['coupon_no'] = coupon_data.unique_service_coupon
         coupon_data_dict['sa_phone_name'] = coupon_data.sa_phone_number
         coupon_data_dict['kms'] = coupon_data.actual_kms
         coupon_data_dict['service_type'] = coupon_data.service_type
