@@ -4,6 +4,7 @@ from gladminds.aftersell.models import logs
 from gladminds.models import common
 from datetime import datetime, timedelta
 from gladminds.models.common import CouponData, STATUS_CHOICES
+from gladminds.aftersell.models import common as aftersell_common
 from django.utils import timezone
 from django.db.models import Q
 from gladminds.utils import COUPON_STATUS
@@ -68,6 +69,10 @@ def expire_service_coupon(*args, **kwargs):
         else:
             coupon.status = COUPON_STATUS['Expired']
             coupon.save()
+            
+def mark_feeback_to_closed(*args, **kwargs):
+    fedback_closed_date = datetime.now()-timedelta(days=2)
+    aftersell_common.Feedback.objects.filter(status = 'Resolved', resloved_date__lte = feedback_closed_date ).update(status = 'Closed', closed_date = datetime.now())
 
 def import_data_from_sap(*args, **kwargs):
     pass

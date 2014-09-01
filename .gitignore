@@ -1,3 +1,5 @@
+*.log
+log/*.log
 *.pyc
 *.pyo
 *.py~
