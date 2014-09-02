@@ -47,13 +47,17 @@
 		</form>
 	</div>
 	<div>
+		{% if records %}
+			<p><b>{{records|length}}</b> results found.</p>
+		{% endif %}
 		<table class="table table-bordered table-hover report-table">
 			<thead>
 				<th>Customer ID</th>
 				<th>Product Type</th>
 				<th>VIN</th>
 				<th>UCN</th>
-				<th>Service Availed Date</th>
+				<th>Service Avalled Date</th>
+				<th>Closed Date</th>
 				<th>SA Mobile</th>
 				<th>Actual KMS</th>
 				<th>Service Type</th>
@@ -65,8 +69,19 @@
 				<td>{{record.customer_id}}</td>
 				<td>{{record.product_type}}</td>
 				<td>{{record.vin}}</td>
-				<td>{{record.coupon_no}}</td>
+				<td>
+					{% if record.service_status == "Closed" %}
+						{{record.coupon_no}}
+					{% endif%}
+				</td>
 				<td>{{record.service_avil_date}}</td>
+				<td>
+					{% if record.service_status == "Closed" %}
+						{{record.closed_date}}
+					{% else %}
+						Not Applicable 
+					{% endif%}
+				</td>
 				<td>{{record.sa_phone_name}}</td>
 				<td>{{record.kms}}</td>
 				<td>{{record.service_type}}</td>
