@@ -1,7 +1,7 @@
 import os, logging, hashlib, uuid, mimetypes
 import boto
 from boto.s3.key import Key
-from datetime import datetime
+import datetime
 from dateutil import tz
 from random import randint
 from django.utils import timezone
@@ -62,7 +62,7 @@ def get_phone_number_format(phone_number):
 
 def save_otp(user, token, email):
     common.OTPToken.objects.filter(user=user).delete()
-    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=email)
+    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.datetime.now(), email=email)
     token_obj.save()
 
 def get_token(user, phone_number, email=''):
@@ -221,14 +221,14 @@ def format_date_string(date_string, date_format='%d/%m/%Y'):
     '''
     This function converts the date from string to datetime format
     '''
-    date = datetime.strptime(date_string, date_format)
+    date = datetime.datetime.strptime(date_string, date_format)
     return date
 
 
 def get_dict_from_object(object):
     temp_dict = {}
     for key in object:
-        if isinstance(object[key], datetime):
+        if isinstance(object[key], datetime.datetime):
             temp_dict[key] = object[key].astimezone(tz.tzutc()).strftime('%Y-%m-%dT%H:%M:%S')
         elif isinstance(object[key], FieldFile):
             temp_dict[key] = None
@@ -267,12 +267,11 @@ def create_context(email_template_name, feedback_obj):
 
     return data
 
-
-def subtract_dates(start_date, end_date, format = "%Y-%m-%d"):  
-    start_date = start_date.strftime(format)
-    end_date = end_date.strftime(format)
-    start_date = datetime.strptime(start_date, format)
-    end_date = datetime.strptime(end_date, format)
+def subtract_dates(start_date, end_date):
+    start_date = start_date.strftime("%Y-%m-%d")
+    end_date = end_date.strftime("%Y-%m-%d")
+    start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
     return start_date - end_date
 
 
@@ -310,20 +309,17 @@ def get_search_query_params(request, class_self):
         custom_search_enabled = True
     return custom_search_enabled
 
-
 def get_start_and_end_date(start_date, end_date, format):
 
     start_date = start_date.strftime(format)
-    start_date = datetime.strptime(start_date, format)
+    start_date = datetime.datetime.strptime(start_date, format)
     end_date = end_date.strftime(format)
-    end_date = datetime.strptime(end_date, format)
+    end_date = datetime.datetime.strptime(end_date, format)
     return start_date,end_date
-
 
 def get_min_and_max_filter_date():
     import datetime
     return (datetime.date.today() - datetime.timedelta(6*365/12)).isoformat(), (datetime.date.today()).isoformat()
-
 
 #TODO Function needs to be refactored
 def set_wait_time(feedback_data):

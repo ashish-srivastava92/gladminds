@@ -211,9 +211,9 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         xml_data = open(file_path, 'r').read()
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
         self.assertEqual(200, response.status_code)
-        gm_user = GladMindUsers.objects.all()
-        self.assertEqual(gm_user[0].phone_number, "+919845340297", "Customer Phone Number is not updated")
-        self.assertEqual(GladMindUsers.objects.count(), 1, "Total GM User")
+        product_object = self.get_product_details(vin='XXXXXXXXXX')
+        self.assertEqual(product_object.customer_phone_number.phone_number, "+919845340297", "Customer Phone Number is not updated")
+        self.assertEqual(GladMindUsers.objects.count(), 2, "Total GM User")
 
     def test_authentication(self):
         user = User.objects.create_user('testuser', 'testuserpassword@gladminds.co', 'testuserpassword')
