@@ -62,7 +62,7 @@ def get_phone_number_format(phone_number):
 
 def save_otp(user, token, email):
     common.OTPToken.objects.filter(user=user).delete()
-    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=email)
+    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.datetime.now(), email=email)
     token_obj.save()
 
 def get_token(user, phone_number, email=''):
@@ -221,14 +221,14 @@ def format_date_string(date_string, date_format='%d/%m/%Y'):
     '''
     This function converts the date from string to datetime format
     '''
-    date = datetime.strptime(date_string, date_format)
+    date = datetime.datetime.strptime(date_string, date_format)
     return date
 
 
 def get_dict_from_object(object):
     temp_dict = {}
     for key in object:
-        if isinstance(object[key], datetime):
+        if isinstance(object[key], datetime.datetime):
             temp_dict[key] = object[key].astimezone(tz.tzutc()).strftime('%Y-%m-%dT%H:%M:%S')
         elif isinstance(object[key], FieldFile):
             temp_dict[key] = None
@@ -312,9 +312,9 @@ def get_search_query_params(request, class_self):
 def get_start_and_end_date(start_date, end_date, format):
 
     start_date = start_date.strftime(format)
-    start_date = datetime.strptime(start_date, format)
+    start_date = datetime.datetime.strptime(start_date, format)
     end_date = end_date.strftime(format)
-    end_date = datetime.strptime(end_date, format)
+    end_date = datetime.datetime.strptime(end_date, format)
     return start_date,end_date
 
 def get_min_and_max_filter_date():
