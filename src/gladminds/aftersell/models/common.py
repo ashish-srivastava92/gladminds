@@ -139,6 +139,7 @@ class Feedback(models.Model):
     ratings = models.CharField(max_length=12, choices=RATINGS)
     root_cause = models.CharField(max_length=512, null=True, blank=True)
     resolution = models.CharField(max_length=512, null=True, blank=True)
+    role = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         app_label = "aftersell"
