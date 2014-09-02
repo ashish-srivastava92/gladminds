@@ -427,27 +427,26 @@ class GladmindsResources(Resource):
 
     def determine_format(self, request):
         return 'application/json'
-    
+
     def get_complain_data(self, sms_dict, phone_number, with_detail=False):
         ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
         try:
-            active_sa = self.validate_dealer(phone_number)
-            if not active_sa:
-                message = templates.get_template('SEND_SA_UNAUTHORISED_SA')
-            else:
-                if with_detail:
-                    gladminds_feedback_object = aftersell_common.Feedback(reporter=active_sa.service_advisor_id.phone_number,
+            role = self.check_role_of_initiator(phone_number)
+            if with_detail:
+                gladminds_feedback_object = aftersell_common.Feedback(reporter=phone_number,
                                                                 priority=sms_dict['priority'] , type=sms_dict['type'], 
                                                                 subject=sms_dict['subject'], message=sms_dict['message'],
-                                                                status="Open", created_date=datetime.now()
+                                                                status="Open", created_date=datetime.now(),
+                                                                role=role
                                                                 )
-                else:
-                    gladminds_feedback_object = aftersell_common.Feedback(reporter=active_sa,
+            else:
+                gladminds_feedback_object = aftersell_common.Feedback(reporter=phone_number,
                                                                 message=sms_dict['message'], status="Open",
-                                                                created_date=datetime.now()
+                                                                created_date=datetime.now(),
+                                                                role=role
                                                                 )
-                gladminds_feedback_object.save()
-                message = templates.get_template('SEND_RCV_FEEDBACK').format(type = gladminds_feedback_object.type  )
+            gladminds_feedback_object.save()
+            message = templates.get_template('SEND_RCV_FEEDBACK').format(type=gladminds_feedback_object.type)
         except Exception as ex:
             message = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
@@ -457,20 +456,33 @@ class GladmindsResources(Resource):
                 task_queue = get_task_queue()
                 task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
             else:
-                send_coupon.delay(phone_number=phone_number, message=message)      
-            context = create_context('FEEDBACK_DETAIL_TO_ADIM',  gladminds_feedback_object)    
+                send_coupon.delay(phone_number=phone_number, message=message)
+            context = create_context('FEEDBACK_DETAIL_TO_ADIM',  gladminds_feedback_object)
             send_feedback_received(context)
             context = create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)
             send_servicedesk_feedback(context, gladminds_feedback_object)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message = message)
         return {'status': True, 'message': message}
-        
-        
-    
+
+    def check_role_of_initiator(self, phone_number):
+        active_sa = self.validate_dealer(phone_number)
+        if  active_sa:
+            return "SA"
+        else:
+            check_customer_obj = common.GladMindUsers.objects.filter(
+                                                    phone_number=phone_number)
+            if len(check_customer_obj) == 0:
+                return "other"
+            else:
+                return "Customer"
+
+
+
 #########################AfterBuy Resources############################################
 class GladmindsBaseResource(ModelResource):
     def determine_format(self, request):
         return 'application/json'
+
 
 class UserResources(GladmindsBaseResource):
     products = fields.ListField()
@@ -478,7 +490,7 @@ class UserResources(GladmindsBaseResource):
         queryset = common.GladMindUsers.objects.all()
         resource_name = 'users'
         authentication = AccessTokenAuthentication()
-    
+
     def prepend_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('process_otp'), name="validate_otp"),
