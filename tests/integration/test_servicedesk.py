@@ -20,8 +20,7 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
         self.access_token = 'testaccesstoken'
         user = User.objects.create_user(username='gladminds', email='gm@gm.com', password='gladminds')
         user.save()
-        user_group = Group.objects.create(name='dealers')
-        user_group.save()
+        user_group = Group.objects.get(name='dealers')
         user.groups.add(user_group)
         user_obj=User.objects.filter(username='gladminds')
         user_info = common.GladMindUsers(user=user_obj[0],phone_number='+9199999998')
@@ -47,6 +46,7 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
                 "type":"Problem", "subject":"hello",'comments':"sssss", "rootcause":"ssss", "resolution":"ssssss" }
         response = client.post("/aftersell/servicedesk/helpdesk", data=data)
         self.assertEqual(response.status_code, 200)
+    
     def test_new_dealer(self):
         data = {'username':'gladminds', 'password':'gladminds'}  
         response = client.post("/aftersell/dealer/login/", data=data)

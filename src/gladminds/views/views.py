@@ -10,7 +10,11 @@ from django.http.response import HttpResponseRedirect, HttpResponse,\
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
+
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
+from django.db import transaction
+
 
 from gladminds.models import common
 from gladminds.sqs_tasks import send_otp
@@ -269,7 +273,9 @@ def create_report(method, query_params, user):
     report_data = []
     filter = {}
     params = {}
-    status_options = {'4': 'In Progress', '2': 'Closed'}
+    args = { Q(status=4) | Q(status=2) }
+    status_options = {'4': 'In Progress', '2':'Closed'}
+
     user = afterbuy_common.RegisteredDealer.objects.filter(dealer_id=user)
     filter['servicing_dealer'] = user[0]
     params['min_date'], params['max_date'] = utils.get_min_and_max_filter_date() 
@@ -280,14 +286,14 @@ def create_report(method, query_params, user):
         to_date = query_params.get('to')
         params['start_date'] = from_date
         params['to_date'] = to_date
-        filter['closed_date__range'] = (from_date, to_date)
+        filter['actual_service_date__range'] = (str(from_date) + ' 00:00:00', str(to_date) +' 23:59:59')
         if status:
             params['status'] = status
             filter['status'] = status
-        all_coupon_data = common.CouponData.objects.filter(**filter)
+        all_coupon_data = common.CouponData.objects.filter(*args, **filter)
     elif method == 'GET':
-        message = ""
-        all_coupon_data = {}
+        message = "" 
+        all_coupon_data = []
     else:
         return HttpResponseBadRequest()
 
@@ -295,8 +301,9 @@ def create_report(method, query_params, user):
         coupon_data_dict = {}
         coupon_data_dict['customer_id'] = coupon_data.vin.sap_customer_id
         coupon_data_dict['product_type'] = coupon_data.vin.product_type
-        coupon_data_dict['service_avil_date'] = datetime.datetime.now()
+        coupon_data_dict['service_avil_date'] = coupon_data.actual_service_date
         coupon_data_dict['vin'] = coupon_data.vin.vin
+        coupon_data_dict['coupon_no'] = coupon_data.unique_service_coupon
         coupon_data_dict['sa_phone_name'] = coupon_data.sa_phone_number
         coupon_data_dict['kms'] = coupon_data.actual_kms
         coupon_data_dict['service_type'] = coupon_data.service_type
@@ -324,33 +331,34 @@ def register_customer(request, group=None):
         existing_customer = True
     data_source.append(utils.create_feed_data(post_data, product_obj[0], temp_customer_id))
     check_with_invoice_date = utils.subtract_dates(data_source[0]['product_purchase_date'], product_obj[0].invoice_date)
-    check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.datetime.now())
-
+    check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.now())
     if not existing_customer and check_with_invoice_date.days < 0 or check_with_today_date.days > 0:
         message = "Product purchase date should be between {0} and {1}".\
-                format((product_obj[0].invoice_date).strftime("%d-%m-%Y"),(datetime.datetime.now()).strftime("%d-%m-%Y"))
+                format((product_obj[0].invoice_date).strftime("%d-%m-%Y"),(datetime.now()).strftime("%d-%m-%Y"))
         logger.info('{0} Entered date is: {1}'.format(message, str(data_source[0]['product_purchase_date'])))
         return json.dumps({"message": message})
-
     try:
-        customer_obj = common.CustomerTempRegistration.objects.get(temp_customer_id=temp_customer_id)
-        customer_obj.new_number = data_source[0]['customer_phone_number']
-        customer_obj.sent_to_sap = False
-    except ObjectDoesNotExist as ex:
-        logger.info(ex)
-        customer_obj = common.CustomerTempRegistration(product_data=product_obj[0],
-                                                       new_customer_name=data_source[0]['customer_name'],
-                                                       new_number=data_source[0]['customer_phone_number'],
-                                                       product_purchase_date=data_source[0]['product_purchase_date'],
-                                            temp_customer_id=temp_customer_id)
-    customer_obj.save()
-    try:
-        feed_remark = FeedLogWithRemark(len(data_source),
-                                        feed_type='Purchase Feed',
-                                        action='Received', status=True)
-        sap_obj = SAPFeed()
-        sap_obj.import_to_db(feed_type='purchase', data_source=data_source,
-                             feed_remark=feed_remark)
+        with transaction.atomic():
+            customer_obj = common.CustomerTempRegistration.objects.filter(temp_customer_id = temp_customer_id)
+            if customer_obj:
+                customer_obj = customer_obj[0]
+                customer_obj.new_number = data_source[0]['customer_phone_number']
+                customer_obj.sent_to_sap = False
+            else:
+                customer_obj = common.CustomerTempRegistration(product_data=product_obj[0], 
+                                                               new_customer_name = data_source[0]['customer_name'],
+                                                               new_number = data_source[0]['customer_phone_number'],
+                                                               product_purchase_date = data_source[0]['product_purchase_date'],
+                                                               temp_customer_id = temp_customer_id)
+            customer_obj.save()
+            feed_remark = FeedLogWithRemark(len(data_source),
+                                                feed_type='Purchase Feed',
+                                                action='Received', status=True)
+            sap_obj = SAPFeed()
+            feed_response = sap_obj.import_to_db(feed_type='purchase', data_source=data_source, feed_remark=feed_remark)
+            if feed_response.failed_feeds > 0:
+                logger.info(json.dumps(feed_response.remarks))
+                raise
     except Exception as ex:
         logger.info(ex)
         return json.dumps({"message": UPDATE_FAIL})

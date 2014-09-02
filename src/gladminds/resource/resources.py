@@ -471,10 +471,10 @@ class GladmindsResources(Resource):
         else:
             check_customer_obj = common.GladMindUsers.objects.filter(
                                                     phone_number=phone_number)
-            if len(check_customer_obj) == 0:
-                return "other"
-            else:
+            if check_customer_obj:
                 return "Customer"
+            else:
+                return "other"
 
 
 
