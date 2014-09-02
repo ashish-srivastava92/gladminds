@@ -160,7 +160,7 @@ class ServiceAdvisorDealerAdmin(ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         extra_context = {'searchable_fields':"('dealer_id', 'service_advisor_id', 'service_advisor__name',"
-        "'service_advisor_phone_number')"}
+                        "'service_advisor_phone_number')"}
         return super(ServiceAdvisorDealerAdmin, self).changelist_view(request, extra_context=extra_context)
 
 ##############CUSTMERDATA AND GLADMINDS USER ADMIN###################
@@ -211,7 +211,6 @@ class ProductDataAdmin(ModelAdmin):
         admin site. This is used by changelist_view.
         """
         utils.get_search_query_params(request, self)
-        
         query_set = self.model._default_manager.get_query_set()
         query_set = query_set.select_related('').prefetch_related('customer_phone_number')
         query_set = query_set.filter(product_purchase_date__isnull=False)
@@ -245,14 +244,11 @@ class ProductDataAdmin(ModelAdmin):
         return coupon_service_type
 
     def changelist_view(self, request, extra_context=None):
-        custom_search_mapping = {
-                                     'Vin' : '^vin',
-                                     'Dealer Id': '^dealer_id__dealer_id',
-                                     'Sap Customer ID':'^sap_customer_id', 
-                                     'Customer Name': 'customer_phone_number__customer_name',
-                                     'Customer Phone Number': 'customer_phone_number__phone_number'
-                                }
-        
+        custom_search_mapping = {'Vin' : '^vin',
+                                 'Dealer Id': '^dealer_id__dealer_id',
+                                 'Sap Customer ID':'^sap_customer_id',
+                                 'Customer Name': 'customer_phone_number__customer_name',
+                                 'Customer Phone Number': 'customer_phone_number__phone_number'}
         extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping,
                          'searchable_fields': 'Vin, Sap Customer Id, Customer Phone Number and Customer Name'
                         }
@@ -302,24 +298,21 @@ class CouponAdmin(ModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
-    
+
     def changelist_view(self, request, extra_context=None):
-        custom_search_mapping = {
-                                     'Unique Service Coupon' : '^unique_service_coupon',
-                                     'Vin': '^vin__vin',
-                                     'Status': 'status' 
-                                }
+        custom_search_mapping = {'Unique Service Coupon' : '^unique_service_coupon',
+                                 'Vin': '^vin__vin',
+                                 'Status': 'status'}
         extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping,
                          'searchable_fields': 'Unique Service Coupon, Vin and Status'
                         }
         return super(CouponAdmin, self).changelist_view(request, extra_context=extra_context)
-     
+
     def queryset(self, request):
         """
         Returns a QuerySet of all model instances that can be edited by the
         admin site. This is used by changelist_view.
         """
-        
         if utils.get_search_query_params(request, self) and self.search_fields[0] == 'status':
             try:
                 request.GET = request.GET.copy()
@@ -328,8 +321,6 @@ class CouponAdmin(ModelAdmin):
                 request.META['QUERY_STRING'] = search_value
             except Exception:
                 pass
-            
-
         qs = self.model._default_manager.get_query_set()
         qs = qs.select_related('').prefetch_related('vin')
         '''
@@ -337,11 +328,10 @@ class CouponAdmin(ModelAdmin):
         '''
         if not request.GET and not request.POST and request.path == "/gladminds/coupondata/":
             qs = qs.filter(status=4)
-            
         return qs
 
     def get_changelist(self, request, **kwargs):
-            return CouponChangeList
+        return CouponChangeList
 
 class CouponChangeList(ChangeList):
 
@@ -460,8 +450,7 @@ class DispatchedProduct(ProductData):
         proxy = True
 
 class ListDispatchedProduct(ModelAdmin):
-    search_fields = ('^vin','^dealer_id__dealer_id')
-    
+    search_fields = ('^vin', '^dealer_id__dealer_id')
     list_display = (
         'vin', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
     exclude = ('order',)
@@ -472,7 +461,6 @@ class ListDispatchedProduct(ModelAdmin):
         Returns a QuerySet of all model instances that can be edited by the
         admin site. This is used by changelist_view.
         """
-        
         utils.get_search_query_params(request, self)
         query_set = self.model._default_manager.get_query_set()
         query_set = query_set.select_related('').prefetch_related('customer_phone_number', 'dealer_id', 'product_type')
@@ -490,14 +478,10 @@ class ListDispatchedProduct(ModelAdmin):
         return ' | '.join([str(ucn) for ucn in ucn_list])
 
     def changelist_view(self, request, extra_context=None):
-        custom_search_mapping = {
-                                     'Vin' : '^vin',
-                                     'Dealer Id': '^dealer_id__dealer_id',
-                                }
+        custom_search_mapping = {'Vin' : '^vin',
+                                 'Dealer Id': '^dealer_id__dealer_id',}
         extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping,
-                         'searchable_fields': 'Vin and  Dealer id'
-                        }
-        
+                         'searchable_fields': 'Vin and  Dealer id'}
         return super(ListDispatchedProduct, self).changelist_view(request, extra_context=extra_context)
 ##############################################################
 #########################ASCSaveForm#########################
@@ -519,13 +503,13 @@ class ASCSaveFormAdmin(ModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
-        
+
 class CustomerTempRegistrationAdmin(ModelAdmin):
     search_fields = (
         'product_data__vin', 'new_customer_name', 'new_number', 'temp_customer_id', 'sent_to_sap')
 
     list_display = (
-        'temp_customer_id','product_data', 'new_customer_name', 'new_number',
+        'temp_customer_id', 'product_data', 'new_customer_name', 'new_number',
         'product_purchase_date', 'sent_to_sap', 'remarks')
 
     def suit_row_attributes(self, obj):

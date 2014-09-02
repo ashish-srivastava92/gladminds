@@ -260,16 +260,17 @@ def get_list_from_set(set_data):
 
 def create_context(email_template_name, feedback_obj):
     data = get_email_template(email_template_name)
-    data['newsubject'] = data['subject'].format(id = feedback_obj.id)
-    data['content'] = data['body'].format(type = feedback_obj.type, reporter = feedback_obj.reporter, 
-                                          message = feedback_obj.message, created_date = feedback_obj.created_date, 
-                                          assign_to = feedback_obj.assign_to,  priority =  feedback_obj.priority, remark = "",
-                                          root_cause = feedback_obj.root_cause, resolution = feedback_obj.resolution, due_date = "")
+    data['newsubject'] = data['subject'].format(id=feedback_obj.id)
+    data['content'] = data['body'].format(type=feedback_obj.type, reporter=feedback_obj.reporter,
+                                          message=feedback_obj.message, created_date=feedback_obj.created_date,
+                                          assign_to=feedback_obj.assign_to, priority=feedback_obj.priority, remark="",
+                                          root_cause=feedback_obj.root_cause, resolution=feedback_obj.resolution,
+                                          due_date="")
 
     return data
 
 
-def subtract_dates(start_date, end_date, format = "%Y-%m-%d"):  
+def subtract_dates(start_date, end_date, format="%Y-%m-%d"):
     start_date = start_date.strftime(format)
     end_date = end_date.strftime(format)
     start_date = datetime.strptime(start_date, format)
@@ -318,7 +319,7 @@ def get_start_and_end_date(start_date, end_date, format):
     start_date = datetime.strptime(start_date, format)
     end_date = end_date.strftime(format)
     end_date = datetime.strptime(end_date, format)
-    return start_date,end_date
+    return start_date, end_date
 
 
 def get_min_and_max_filter_date():
@@ -337,4 +338,4 @@ def set_wait_time(feedback_data):
     wait = end_date - start_date
     wait_time = float(wait.days) + float(wait.seconds) / float(86400)
     previous_wait = feedback_data.wait_time
-    aftersell_common.Feedback.objects.filter(id = feedback_data.id).update(wait_time = wait_time+previous_wait)
+    aftersell_common.Feedback.objects.filter(id=feedback_data.id).update(wait_time=wait_time+previous_wait)

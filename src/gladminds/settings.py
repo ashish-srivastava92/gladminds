@@ -182,18 +182,17 @@ TEMPLATE_LOADERS = (
                     #  'django.template.loaders.eggs.Loader',
                    )
 
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django_otp.middleware.OTPMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    # 'gladminds.middleware.GladmindsMiddleware'
-    # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-                     )
+MIDDLEWARE_CLASSES = ('django.middleware.common.CommonMiddleware',
+                      'django.contrib.sessions.middleware.SessionMiddleware',
+                      'django.contrib.auth.middleware.AuthenticationMiddleware',
+                      'django_otp.middleware.OTPMiddleware',
+                      # 'django.middleware.csrf.CsrfViewMiddleware',
+                      'django.contrib.messages.middleware.MessageMiddleware',
+                      'corsheaders.middleware.CorsMiddleware',
+                      # 'gladminds.middleware.GladmindsMiddleware'
+                      # Uncomment the next line for simple clickjacking protection:
+                      # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+                   )
 
 CORS_ORIGIN_ALLOW_ALL = True
 ROOT_URLCONF = 'gladminds.urls'
