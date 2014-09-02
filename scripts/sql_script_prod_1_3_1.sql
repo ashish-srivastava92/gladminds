@@ -55,4 +55,4 @@ alter table gladminds_gladmindusers add pincode VARCHAR(15) null;
 ################################################################
 
 alter table aftersell_registereddealer add role VARCHAR(10);
-alter table aftersell_registereddealer3 add dependent_on VARCHAR(25);
+alter table aftersell_registereddealer add dependent_on VARCHAR(25);
