@@ -31,7 +31,6 @@
 	            <div class="col-md-4"></div>
 	            <div class="col-md-4">
 		             <form class="form-horizontal servicedesk" role="form" method="post">
-		                   {% for feedback in feedbacks %}
                                  <div class="form-group">
                                       <label class="col-sm-3 control-label" for="reporter">Reporter</label>
                                       <div class="col-sm-9">
@@ -124,8 +123,12 @@
     									 <input type="datetime" class="form-control" name="due_date" readonly value="{{feedback.due_date}}" >
    									</div>
 								</div>
-								
-                           {% endfor %}
+							   <div class="form-group " id="comments">
+                     	            <label class="col-sm-3 control-label" for="comments" >Comments</label>
+                                    <div class="col-sm-9">
+                                  	   	<textarea class="form-control" name="comments" value = "{{feedback_comment.comments}}" /></textarea>
+                               		</div>
+                              </div>	
                               <div class="form-group">
                                    <div class="col-sm-offset-3 col-sm-9">
                                           <button type="submit" class="btn btn-primary">Save</button>

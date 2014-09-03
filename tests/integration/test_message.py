@@ -170,10 +170,10 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         sms_dict = {'kms': 450, 'service_type': 2, 'sap_customer_id': 'SAP001'}
         self.validate_coupon(sms_dict, phone_number)
 
-        in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC001')
+        in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC002')
         self.assertEqual(in_progess_coupon.status, 4, "in_progess_coupon status should be 4")
 
-        in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC002')
+        in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC001')
         self.assertEqual(in_progess_coupon.status, 1, "Coupon should be in unused State")
 
     def test_forward_logic_2(self):
@@ -191,10 +191,10 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         sms_dict = {'kms': 450, 'service_type': 2, 'sap_customer_id': 'SAP001'}
         self.validate_coupon(sms_dict, phone_number)
 
-        in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC001')
+        in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC002')
         self.assertEqual(in_progess_coupon.status, 4, "in_progess_coupon status should be 4")
 
-        in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC002')
+        in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC001')
         self.assertEqual(in_progess_coupon.status, 1, "Coupon should be in unused State")
 
     def test_forward_logic_3(self):

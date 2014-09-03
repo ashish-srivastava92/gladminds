@@ -168,19 +168,15 @@ def send_coupon(*args, **kwargs):
 This job send coupon close message to customer
 """
 
-def send_sms(template_name, phone_number, feedback_obj):
+def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
     try:
-        type = feedback_obj.type
-        reporter = feedback_obj.reporter
-        message = feedback_obj.message
-        created_date = feedback_obj.created_date
-        assign_to = feedback_obj.assign_to
-        priority = feedback_obj.priority   
-        message = templates.get_template(template_name).format(type = type, 
-                                          reporter = reporter, message = message,
-                                          created_date = created_date, 
-                                          assign_to = assign_to,  
-                                          priority =  priority)
+        message = templates.get_template(template_name).format(type=feedback_obj.type,
+                                          reporter=feedback_obj.reporter, message=feedback_obj.message,
+                                          created_date=feedback_obj.created_date,
+                                          assign_to=feedback_obj.assign_to,
+                                          priority=feedback_obj.priority)
+        if comment_obj and template_name == 'SEND_MSG_TO_ASSIGNEE':
+            message = message + 'Note :' + comment_obj.comments
     except Exception as ex:
            message = templates.get_template('SEND_INVALID_MESSAGE')
     finally:
@@ -294,6 +290,14 @@ def expire_service_coupon(*args, **kwargs):
 Crontab to import data from SAP to Gladminds Database
 """
 
+
+@shared_task
+def mark_feeback_to_closed(*args, **kwargs):
+    taskmanager.mark_feeback_to_closed(*args, **kwargs)
+
+"""
+Crontab to import data from SAP to Gladminds Database
+"""
 
 @shared_task
 def import_data(*args, **kwargs):
@@ -455,6 +459,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "send_invalid_keyword_message" : send_invalid_keyword_message,
               
-              "export_customer_reg_to_sap" : export_customer_reg_to_sap 
+              "export_customer_reg_to_sap" : export_customer_reg_to_sap,
+              
+              "mark_feeback_to_closed" : mark_feeback_to_closed
 
               }

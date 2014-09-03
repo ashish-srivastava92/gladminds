@@ -1,7 +1,7 @@
 import os, logging, hashlib, uuid, mimetypes
 import boto
 from boto.s3.key import Key
-from datetime import datetime
+import datetime
 from dateutil import tz
 from random import randint
 from django.utils import timezone
@@ -15,7 +15,8 @@ from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from gladminds.taskqueue import SqsTaskQueue
 from gladminds.mail import send_ucn_request_alert
 from django.db.models.fields.files import FieldFile
-from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE
+from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
+    TIME_FORMAT
 
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
@@ -210,9 +211,11 @@ def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=None,
     logger.info('{1}: {0} has been uploaded'.format(s3_key.key, logger_msg))
     return path
 
+
 def get_email_template(key):
     template_object = common.EmailTemplate.objects.filter(template_key=key).values()
     return template_object[0]
+
 
 def format_date_string(date_string, date_format='%d/%m/%Y'):
     '''
@@ -221,16 +224,18 @@ def format_date_string(date_string, date_format='%d/%m/%Y'):
     date = datetime.datetime.strptime(date_string, date_format)
     return date
 
+
 def get_dict_from_object(object):
     temp_dict = {}
     for key in object:
-        if isinstance(object[key], datetime):
+        if isinstance(object[key], datetime.datetime):
             temp_dict[key] = object[key].astimezone(tz.tzutc()).strftime('%Y-%m-%dT%H:%M:%S')
         elif isinstance(object[key], FieldFile):
             temp_dict[key] = None
         else:
             temp_dict[key] = object[key]
     return temp_dict
+
 
 def create_feed_data(post_data, product_data, temp_customer_id):
     data = {}
@@ -244,36 +249,31 @@ def create_feed_data(post_data, product_data, temp_customer_id):
     data['pin_no'] = data['state'] = data['city'] = None
     return data
 
+
 def get_list_from_set(set_data):
     created_list = []
     for set_object in set_data:
         created_list.append(list(set_object)[1])
     return created_list
 
+
 def create_context(email_template_name, feedback_obj):
-    type = feedback_obj.type
-    id = feedback_obj.id
-    reporter = feedback_obj.reporter
-    message = feedback_obj.message
-    created_date = feedback_obj.created_date
-    assign_to = feedback_obj.assign_to
-    priority = feedback_obj.priority 
-    root_cause = feedback_obj.root_cause
-    resolution = feedback_obj.resolution
     data = get_email_template(email_template_name)
-    data['newsubject'] = data['subject'].format(id = id)
-    data['content'] = data['body'].format(type = type, reporter = reporter, 
-                                          message = message, created_date = created_date, 
-                                          assign_to = assign_to,  priority =  priority, remark = "",
-                                          root_cause = root_cause, resolution = resolution)
+    data['newsubject'] = data['subject'].format(id = feedback_obj.id)
+    data['content'] = data['body'].format(type = feedback_obj.type, reporter = feedback_obj.reporter, 
+                                          message = feedback_obj.message, created_date = feedback_obj.created_date, 
+                                          assign_to = feedback_obj.assign_to,  priority =  feedback_obj.priority, remark = "",
+                                          root_cause = feedback_obj.root_cause, resolution = feedback_obj.resolution, due_date = "")
+
     return data
 
-def subtract_dates(start_date, end_date):    
+def subtract_dates(start_date, end_date):
     start_date = start_date.strftime("%Y-%m-%d")
     end_date = end_date.strftime("%Y-%m-%d")
-    start_date = datetime.strptime(start_date, "%Y-%m-%d")
-    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+    start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
     return start_date - end_date
+
 
 def search_details(request):
     data = request.POST
@@ -293,8 +293,9 @@ def search_details(request):
         return {'message': message}
     for product in product_obj:
         data = format_product_object(product)
-        search_results.append(data)    
+        search_results.append(data)
     return search_results
+
 
 def get_search_query_params(request, class_self):
     custom_search_enabled = False
@@ -308,7 +309,27 @@ def get_search_query_params(request, class_self):
         custom_search_enabled = True
     return custom_search_enabled
 
+def get_start_and_end_date(start_date, end_date, format):
+
+    start_date = start_date.strftime(format)
+    start_date = datetime.datetime.strptime(start_date, format)
+    end_date = end_date.strftime(format)
+    end_date = datetime.datetime.strptime(end_date, format)
+    return start_date,end_date
 
 def get_min_and_max_filter_date():
     import datetime
     return (datetime.date.today() - datetime.timedelta(6*365/12)).isoformat(), (datetime.date.today()).isoformat()
+
+#TODO Function needs to be refactored
+def set_wait_time(feedback_data):
+    start_date = feedback_data.pending_from
+    end_date = datetime.now()
+    start_date = start_date.strftime(TIME_FORMAT)
+    end_date = end_date.strftime(TIME_FORMAT)
+    start_date = datetime.strptime(start_date, TIME_FORMAT)
+    end_date = datetime.strptime(end_date, TIME_FORMAT)
+    wait = end_date - start_date
+    wait_time = float(wait.days) + float(wait.seconds) / float(86400)
+    previous_wait = feedback_data.wait_time
+    aftersell_common.Feedback.objects.filter(id = feedback_data.id).update(wait_time = wait_time+previous_wait)
