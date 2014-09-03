@@ -242,7 +242,7 @@ class ProductDataAdmin(ModelAdmin):
             coupon_service_type = " | ".join(
                 [str(obj.service_type) for obj in gm_coupon_data_obj])
         return coupon_service_type
-    
+
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('customer_phone_number',)
         form = super(ProductDataAdmin, self).get_form(request, obj, **kwargs)

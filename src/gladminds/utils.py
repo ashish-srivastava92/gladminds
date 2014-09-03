@@ -17,7 +17,6 @@ from gladminds.mail import send_ucn_request_alert
 from django.db.models.fields.files import FieldFile
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     TIME_FORMAT
-from datetime import datetime
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 logger = logging.getLogger('gladminds')
@@ -326,11 +325,11 @@ def get_min_and_max_filter_date():
 #TODO Function needs to be refactored
 def set_wait_time(feedback_data):
     start_date = feedback_data.pending_from
-    end_date = datetime.now()
+    end_date = datetime.datetime.now()
     start_date = start_date.strftime(TIME_FORMAT)
     end_date = end_date.strftime(TIME_FORMAT)
-    start_date = datetime.strptime(start_date, TIME_FORMAT)
-    end_date = datetime.strptime(end_date, TIME_FORMAT)
+    start_date = datetime.datetime.strptime(start_date, TIME_FORMAT)
+    end_date = datetime.datetime.strptime(end_date, TIME_FORMAT)
     wait = end_date - start_date
     wait_time = float(wait.days) + float(wait.seconds) / float(86400)
     previous_wait = feedback_data.wait_time
