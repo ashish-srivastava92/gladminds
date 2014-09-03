@@ -17,13 +17,13 @@
 			  	<div class="form-group col-md-3">
 			    	<label class="col-md-2 control-label">From</label>
 			    	<div class="col-md-10">
-			      		<input type="date" value="{{params.start_date}}" min="{{params.min_date}}" max="{{params.max_date}}" class="form-control filter-min-max" placeholder="From" name="from" required>
+			      		<input type="date" value="{{params.start_date}}" min="{{params.min_date}}" max="{{params.max_date}}" class="form-control filter-min-max" placeholder="yyyy-mm-dd" name="from" required>
 			    	</div>
 			  	</div>
 			  	<div class="form-group col-md-3">
 			    	<label class="col-md-2 control-label">To</label>
 			    	<div class="col-md-10">
-			      		<input type="date" value="{{params.to_date}}" min="{{params.min_date}}" max="{{params.max_date}}" class="form-control filter-min-max" placeholder="To" name="to" required>
+			      		<input type="date" value="{{params.to_date}}" min="{{params.min_date}}" max="{{params.max_date}}" class="form-control filter-min-max" placeholder="yyyy-mm-dd" name="to" required>
 			    	</div>
 			  	</div>
 			  	<div class="form-group col-md-3">
@@ -47,24 +47,41 @@
 		</form>
 	</div>
 	<div>
-		<table class="table table-bordered table-hover">
+		{% if records %}
+			<p><b>{{records|length}}</b> results found.</p>
+		{% endif %}
+		<table class="table table-bordered table-hover report-table">
 			<thead>
 				<th>Customer ID</th>
 				<th>Product Type</th>
-				<th>Service Availed Date</th>
 				<th>VIN</th>
-				<th>Service Advisor Ph.</th>
-				<th>KMS</th>
+				<th>UCN</th>
+				<th>Service Availed Date</th>
+				<th>Closed Date</th>
+				<th>SA Mobile</th>
+				<th>Actual KMS</th>
 				<th>Service Type</th>
-				<th>Service Status</th>
+				<th>Status</th>
 				<th>Special Case</th>
 			</thead>
 			<tbody>
 			{% for record in records %}
 				<td>{{record.customer_id}}</td>
 				<td>{{record.product_type}}</td>
-				<td>{{record.service_avil_date}}</td>
 				<td>{{record.vin}}</td>
+				<td>
+					{% if record.service_status == "Closed" %}
+						{{record.coupon_no}}
+					{% endif%}
+				</td>
+				<td>{{record.service_avil_date}}</td>
+				<td>
+					{% if record.service_status == "Closed" %}
+						{{record.closed_date}}
+					{% else %}
+						n/a 
+					{% endif%}
+				</td>
 				<td>{{record.sa_phone_name}}</td>
 				<td>{{record.kms}}</td>
 				<td>{{record.service_type}}</td>

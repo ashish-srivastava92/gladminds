@@ -369,10 +369,9 @@ class ProductPurchaseFeed(BaseFeed):
             try:
                 product_data = common.ProductData.objects.get(
                     vin=product['vin'])
-
-                if self.update_customer_number(product_data, product['customer_phone_number']):
-                    logger.info("Update Customer Number")
-                    continue
+                if product_data.customer_phone_number and product_data.sap_customer_id == product['sap_customer_id']:
+                    post_save.disconnect(
+                        update_coupon_data, sender=common.ProductData)
                 try:
                     customer_data = common.GladMindUsers.objects.get(
                         phone_number=product['customer_phone_number'])
@@ -391,11 +390,15 @@ class ProductPurchaseFeed(BaseFeed):
                 if not product_data.sap_customer_id  or product_data.sap_customer_id.find('T') == 0:
                     product_purchase_date = product['product_purchase_date']
                     product_data.sap_customer_id = product['sap_customer_id']
-                    product_data.customer_phone_number = customer_data
                     product_data.product_purchase_date = product_purchase_date
                     product_data.engine = product["engine"]
                     product_data.veh_reg_no =  product['veh_reg_no']
-                    product_data.save()
+                
+                product_data.customer_phone_number = customer_data    
+                product_data.save()
+                
+                post_save.connect(
+                    update_coupon_data, sender=common.ProductData)
             except Exception as ex:
 
                 ex = '''[Exception: ProductPurchaseFeed_product_data]:
@@ -523,27 +526,36 @@ post_save.connect(update_coupon_data, sender=common.ProductData)
 class ASCFeed(BaseFeed):
     def import_data(self):
         for dealer in self.data_source:
-            try:
-                dealer_data = aftersell_common.RegisteredDealer.objects.get(
-                    dealer_id=dealer['dealer_id'])
-            except ObjectDoesNotExist as ex:
-                logger.debug(
-                    "[Exception: ASCFeed_dealer_data]: {0}"
-                    .format(ex))
-                dealer_data = aftersell_common.RegisteredDealer(
-                    dealer_id=dealer['dealer_id'], address=dealer['address'])
-                dealer_data.save()
-                self.registerNewUser('dealer', username=dealer['dealer_id'])
-            try:
-                asc_data = aftersell_common.RegisteredASC(
-                    asc_id=dealer['asc_id'], dealer_id=dealer_data, asc_name=dealer['name'],
-                    phone_number=dealer['phone_number'],address=dealer['address'],
-                    email_id=dealer['email'], registration_date=datetime.now())
-                user_obj = self.registerNewUser('ASC', username=dealer['asc_id'])
-                asc_data.user = user_obj
-                asc_data.save()
-            except Exception as ex:
-                ex = "[Exception: ASCFeed_dealer_data]: {0}".format(ex)
+            dealer_data = aftersell_common.RegisteredDealer.objects.filter(
+                                                    dealer_id=dealer['asc_id'])
+            if not dealer_data:
+                if dealer['dealer_id']:
+                    try:
+                        dealer_data = aftersell_common.RegisteredDealer.objects.get(
+                            dealer_id=dealer['dealer_id'])
+                    except ObjectDoesNotExist as ex:
+                        logger.debug(
+                            "[Exception: ASCFeed_dealer_data]: {0}"
+                            .format(ex))
+                        dealer_data = aftersell_common.RegisteredDealer(
+                            dealer_id=dealer['dealer_id'], address=dealer['address'])
+                        dealer_data.save()
+                        self.registerNewUser('dealer', username=dealer['dealer_id'])
+                    asc_data = aftersell_common.RegisteredDealer(dealer_id=dealer['asc_id'],
+                                        address=dealer['address'], dependent_on=dealer['dealer_id'])
+                else:
+                    asc_data = aftersell_common.RegisteredDealer(dealer_id=dealer['asc_id'],
+                        role ='asc', address=dealer['address'])
+
+                try:
+                    asc_data.save()
+                    self.registerNewUser('ASC', username=dealer['asc_id'])
+                except Exception as ex:
+                    ex = "[Exception: ASCFeed_dealer_data]: {0}".format(ex)
+                    logger.error(ex)
+                    self.feed_remark.fail_remarks(ex)
+            else:
+                ex = "[Exception: ASCFeed_dealer_data] asc_id {0} already exists".format(dealer['asc_id'])
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         return self.feed_remark
