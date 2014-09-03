@@ -39,11 +39,10 @@
     $('.customer-form').on('submit', function(e) {
         var data = Utils.getFormData('.customer-form'),
             vin = $('#srch-vin').val();
-        data.vin = vin;
+        data['vin'] = vin;
         Utils.submitForm(e, data, '/aftersell/register/customer');
         $('.customer-phone').val('').attr('readOnly', false);
-        $('.customer-name').val('');
-        $('.name-readonly').attr('readOnly', false);
+        $('.customer-name').val('').attr('readOnly', false);
         $('.purchase-date').val('').attr('readOnly', false);
         $('.customer-id').val('').attr('readOnly', false);
         $('.customer-submit').attr('disabled', true);
@@ -238,11 +237,11 @@
 })();
 
 function rootCause(status){
-	if (status == 'Resolved'){
-		$('#rootcause').removeClass('hide')
-		$('#resolution').removeClass('hide')
-		}else {
-		$('#rootcause').addClass('hide')
-		$('#resolution').addClass('hide')
-			};
+	if (status === 'Resolved'){
+		$('#rootcause').removeClass('hide');
+		$('#resolution').removeClass('hide');
+	}else {
+		$('#rootcause').addClass('hide');
+		$('#resolution').addClass('hide');
+	}
 }

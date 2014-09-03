@@ -286,6 +286,11 @@ Crontab to set the is_expire=True for all those coupon which expire till current
 @shared_task
 def expire_service_coupon(*args, **kwargs):
     taskmanager.expire_service_coupon(*args, **kwargs)
+    
+"""
+Crontab to close notification for reminder
+"""
+
 
 """
 Crontab to import data from SAP to Gladminds Database

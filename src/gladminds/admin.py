@@ -242,7 +242,12 @@ class ProductDataAdmin(ModelAdmin):
             coupon_service_type = " | ".join(
                 [str(obj.service_type) for obj in gm_coupon_data_obj])
         return coupon_service_type
-
+    
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('customer_phone_number',)
+        form = super(ProductDataAdmin, self).get_form(request, obj, **kwargs)
+        return form
+    
     def changelist_view(self, request, extra_context=None):
         custom_search_mapping = {'Vin' : '^vin',
                                  'Dealer Id': '^dealer_id__dealer_id',
@@ -476,6 +481,11 @@ class ListDispatchedProduct(ModelAdmin):
         for coupon in CouponData.objects.filter(vin=obj.id):
             ucn_list.append(coupon.unique_service_coupon)
         return ' | '.join([str(ucn) for ucn in ucn_list])
+    
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('customer_phone_number',)
+        form = super(ListDispatchedProduct, self).get_form(request, obj, **kwargs)
+        return form
 
     def changelist_view(self, request, extra_context=None):
         custom_search_mapping = {'Vin' : '^vin',
@@ -520,6 +530,12 @@ class CustomerTempRegistrationAdmin(ModelAdmin):
         css_class = class_map.get(str(obj.sent_to_sap))
         if css_class:
             return {'class': css_class}
+        
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('product_data',)
+        form = super(CustomerTempRegistrationAdmin, self).get_form(request, obj, **kwargs)
+        return form    
+        
 ##############################################################
 
 class UserNotificationAdmin(ModelAdmin):

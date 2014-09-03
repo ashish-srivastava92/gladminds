@@ -5,6 +5,7 @@ from gladminds.models import common
 from datetime import datetime, timedelta
 from gladminds.models.common import CouponData, STATUS_CHOICES
 from gladminds.aftersell.models import common as aftersell_common
+from gladminds.afterbuy.models import common as afterbuy_common
 from django.utils import timezone
 from django.db.models import Q
 from gladminds.utils import COUPON_STATUS
@@ -38,6 +39,10 @@ def get_customers_to_send_reminder(*args, **kwargs):
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         reminder.last_reminder_date = datetime.now()
         reminder.save()
+        user = common.GladMindUsers.objects.filter(phone_number=phone_number)
+        notification = afterbuy_common.UserNotification(user=user[0],message=message, notification_date=datetime.now(),
+                                                        notification_read=0)
+        notification.save()
     transaction.commit()
 
 @transaction.commit_manually()
@@ -85,7 +90,7 @@ def expire_service_coupon(*args, **kwargs):
 def mark_feeback_to_closed(*args, **kwargs):
     fedback_closed_date = datetime.now()-timedelta(days=2)
     aftersell_common.Feedback.objects.filter(status='Resolved',
-                                             resloved_date__lte=feedback_closed_date).update(
+                                             resloved_date__lte=fedback_closed_date).update(
                                                                                              status='Closed',
                                                                                              closed_date=datetime.now())
 
