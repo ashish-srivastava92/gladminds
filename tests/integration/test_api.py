@@ -21,21 +21,24 @@ class AfterBuyIntegrationTests(ResourceTestCase):
         secret_cli.save()
         access = AccessToken(user=user, token=self.access_token, client=secret_cli)
         access.save()
-        
+
     def test_users(self):
         uri='/v1/users/?accessToken=%s'%(self.access_token)
         response=self.api_client.get(uri, format='json')
         self.assertValidJSONResponse(response)
-         
+
     def test_products(self):
         uri='/v1/users/?accessToken=%s'%(self.access_token)
         response=self.api_client.get(uri, format='json')
         self.assertValidJSONResponse(response)
-        
+
+
     def test_brands(self):
         uri='/v1/users/?accessToken=%s'%(self.access_token)
         response=self.api_client.get(uri, format='json')
         self.assertValidJSONResponse(response)
-        
-        
-    
+
+    def test_audit_api(self):
+        uri='/v1/audit/'
+        response=self.api_client.get(uri, format='json')
+        self.assertValidJSONResponse(response)

@@ -22,10 +22,12 @@ from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 logger = logging.getLogger('gladminds')
 
+
 def generate_unique_customer_id():
     bytes_str = os.urandom(24)
     unique_str = hashlib.md5(bytes_str).hexdigest()[:10]
     return unique_str.upper()
+
 
 def import_json():
     try:
@@ -40,12 +42,14 @@ def import_json():
                 raise ImportError("Requires either simplejson, Python 2.6 or django.utils!")
     return json
 
+
 def mobile_format(phone_number):
     '''
         GM store numbers in +91 format
         And when airtel pull message from customer
         or service advisor we will check that number in +91 format'''
     return '+91' + phone_number[-10:]
+
 
 def format_message(message):
     '''
@@ -54,16 +58,19 @@ def format_message(message):
     keywords = message.split(' ')
     return ' '.join([keyword for keyword in keywords if keyword])
 
+
 def get_phone_number_format(phone_number):
     '''
         This is used when we are sending message through sms client
     '''
     return phone_number[-10:]
 
+
 def save_otp(user, token, email):
     common.OTPToken.objects.filter(user=user).delete()
     token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.datetime.now(), email=email)
     token_obj.save()
+
 
 def get_token(user, phone_number, email=''):
     if email and user.email_id != email:
@@ -74,6 +81,7 @@ def get_token(user, phone_number, email=''):
     save_otp(user, token, email)
     return token
 
+
 def validate_otp(user, otp, phone):
     token_obj = common.OTPToken.objects.filter(user=user)[0]
     if int(otp) == int(token_obj.token) and (timezone.now()-token_obj.request_date).seconds <= OTP_VALIDITY:
@@ -81,6 +89,7 @@ def validate_otp(user, otp, phone):
     elif (timezone.now()-token_obj.request_date).seconds > OTP_VALIDITY:
         token_obj.delete()
     raise
+
 
 def update_pass(otp, password):
     token_obj = common.OTPToken.objects.filter(token=otp)[0]
@@ -90,9 +99,11 @@ def update_pass(otp, password):
     user.save()
     return True
 
+
 def get_task_queue():
     queue_name = settings.SQS_QUEUE_NAME
     return SqsTaskQueue(queue_name)
+
 
 def format_product_object(product_obj):
     purchase_date = product_obj.product_purchase_date.strftime('%d/%m/%Y')
@@ -101,6 +112,7 @@ def format_product_object(product_obj):
             'name': product_obj.customer_phone_number.customer_name, 
             'purchase_date': purchase_date,
             'vin': product_obj.vin}
+
 
 def get_customer_info(request):
     data=request.POST
@@ -117,6 +129,7 @@ def get_customer_info(request):
         message = '''VIN '{0}' has no associated customer.'''.format(data['vin'])
         return {'message': message}
 
+
 def get_sa_list(request):
     dealer = aftersell_common.RegisteredDealer.objects.filter(dealer_id=request.user)[0]
     service_advisors = aftersell_common.ServiceAdvisorDealerRelationship.objects\
@@ -126,6 +139,7 @@ def get_sa_list(request):
         sa_phone_list.append(service_advisor.service_advisor_id)
     return sa_phone_list
 
+
 def recover_coupon_info(request):
     coupon_data = get_coupon_info(request)
     ucn_recovery_obj = upload_file(request)
@@ -133,7 +147,8 @@ def recover_coupon_info(request):
     message = 'UCN for customer {0} is {1}.'.format(coupon_data.vin.sap_customer_id,
                                                 coupon_data.unique_service_coupon) 
     return {'status': True, 'message': message}
-    
+
+
 def get_coupon_info(request):
     data = request.POST
     customer_id = data['customerId']
@@ -141,6 +156,7 @@ def get_coupon_info(request):
     product_data = common.ProductData.objects.filter(sap_customer_id=customer_id)[0]
     coupon_data = common.CouponData.objects.filter(vin=product_data, status=4)[0]
     return coupon_data
+
 
 def upload_file(request):
     data = request.POST
@@ -159,6 +175,7 @@ def upload_file(request):
     ucn_recovery_obj.save()
     return ucn_recovery_obj
 
+
 def get_file_name(request, file_obj):
     requester = request.user
     if 'dealers' in requester.groups.all():
@@ -171,17 +188,21 @@ def get_file_name(request, file_obj):
     customer_id = request.POST['customerId']
     return str(filename_prefix)+'_'+customer_id+'_'+filename_suffix+'.'+ext
 
+
 def get_user_groups(user):
     groups = []
     for group in user.groups.all():
         groups.append(str(group.name))
     return groups
-    
+
+
+
 def stringify_groups(user):
     groups = []
     for group in user.groups.all():
         groups.append(str(group.name))
     return groups
+
 
 def send_recovery_email_to_admin(file_obj, coupon_data):
     file_location = file_obj.file_location
@@ -191,6 +212,7 @@ def send_recovery_email_to_admin(file_obj, coupon_data):
     data = get_email_template('UCN_REQUEST_ALERT').body.format(requester,coupon_data.service_type,
                 customer_id, coupon_data.actual_kms, reason, file_location)
     send_ucn_request_alert(data=data)
+
 
 def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=None,
                    destination='', file_obj=None, logger_msg=None, file_mimetype=None):
@@ -267,6 +289,7 @@ def create_context(email_template_name, feedback_obj):
 
     return data
 
+
 def subtract_dates(start_date, end_date):
     start_date = start_date.strftime("%Y-%m-%d")
     end_date = end_date.strftime("%Y-%m-%d")
@@ -309,6 +332,7 @@ def get_search_query_params(request, class_self):
         custom_search_enabled = True
     return custom_search_enabled
 
+
 def get_start_and_end_date(start_date, end_date, format):
 
     start_date = start_date.strftime(format)
@@ -317,18 +341,20 @@ def get_start_and_end_date(start_date, end_date, format):
     end_date = datetime.datetime.strptime(end_date, format)
     return start_date,end_date
 
+
 def get_min_and_max_filter_date():
-    import datetime
     return (datetime.date.today() - datetime.timedelta(6*365/12)).isoformat(), (datetime.date.today()).isoformat()
 
 #TODO Function needs to be refactored
+
+
 def set_wait_time(feedback_data):
     start_date = feedback_data.pending_from
-    end_date = datetime.now()
+    end_date = datetime.datetime.now()
     start_date = start_date.strftime(TIME_FORMAT)
     end_date = end_date.strftime(TIME_FORMAT)
-    start_date = datetime.strptime(start_date, TIME_FORMAT)
-    end_date = datetime.strptime(end_date, TIME_FORMAT)
+    start_date = datetime.datetime.strptime(start_date, TIME_FORMAT)
+    end_date = datetime.datetime.strptime(end_date, TIME_FORMAT)
     wait = end_date - start_date
     wait_time = float(wait.days) + float(wait.seconds) / float(86400)
     previous_wait = feedback_data.wait_time
