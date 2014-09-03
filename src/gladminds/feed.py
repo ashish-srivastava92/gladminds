@@ -548,7 +548,7 @@ class ASCFeed(BaseFeed):
 
                 try:
                     asc_data.save()
-                    self.registerNewUser('ASC', username=dealer['asc_id'])
+                    self.registerNewUser('ASC', username=dealer['asc_id'], email=dealer['email'])
                 except Exception as ex:
                     ex = "[Exception: ASCFeed_dealer_data]: {0}".format(ex)
                     logger.error(ex)
