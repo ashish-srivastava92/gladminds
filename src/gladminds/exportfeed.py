@@ -87,11 +87,12 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
                 logger.info("Response from SAP: {0}".format(result))
                 if result[0][0]['item'][0]['STATUS'] == 'SUCCESS':
                     try:
-                        temp_customer_object = common.CustomerTempRegistration.objects.get(temp_customer_id=item['CUSTOMER_ID'])
+                        temp_customer_object = common.CustomerTempRegistration.objects.get(temp_customer_id=
+                                                                                           item['CUSTOMER_ID'])
                         temp_customer_object.sent_to_sap = True
                         if result[2]:
                             temp_customer_object.remarks = result[2][0]['item'][0]['REMARKS']
-                        else: 
+                        else:
                             temp_customer_object.tagged_sap_id = result[1][0]['item'][0]['PARTNER']
                         temp_customer_object.save()
                         export_status = True
@@ -109,4 +110,3 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
-        

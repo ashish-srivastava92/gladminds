@@ -31,7 +31,7 @@ class SqsHandler(View):
         task_map = {} if not 'task_map' in kwargs else kwargs['task_map']
         if not isinstance(task_map, dict):
             raise Exception("task_map must be a dictionary mapping task names to a callable/function that will"
-            "perform the task")
+                            "perform the task")
         self._validate_task_map(task_map)
         self.task_map = task_map
 
@@ -68,10 +68,8 @@ class SqsTaskQueue(TaskQueue):
 
     def add(self, task_name, task_params=None, delay_seconds=None, **kwargs):
         task_params = task_params or {}
-        payload = {
-                   "task_name": task_name,
-                   "params": task_params
-                   }
+        payload = {"task_name": task_name,
+                   "params": task_params}
         payload_as_str = json.dumps(payload)
         self._conn.send_message(self._q, payload_as_str, delay_seconds=delay_seconds)
 

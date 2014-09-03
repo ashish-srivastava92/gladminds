@@ -23,7 +23,7 @@ def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER
     mail.quit()
 
 
-def feed_report(feed_data = None):
+def feed_report(feed_data=None):
     from gladminds import mail
     try:
         yesterday = datetime.now().date() - timedelta(days=1)
@@ -34,15 +34,15 @@ def feed_report(feed_data = None):
         body = template.render(context)
         mail_detail = settings.MAIL_DETAIL
         mail.send_email(sender=mail_detail['sender'],
-                   receiver=mail_detail['receiver'],
-                   subject=mail_detail['subject'], body=body,
-                   smtp_server=settings.MAIL_SERVER)
+                        receiver=mail_detail['receiver'],
+                        subject=mail_detail['subject'], body=body,
+                        smtp_server=settings.MAIL_SERVER)
 
     except Exception as ex:
         logger.info("[Exception feed_report]: {0}".format(ex))
 
 
-def feed_failure_report(remarks = None, feed_type=None):
+def feed_failure_report(remarks=None, feed_type=None):
     try:
         file_stream = open(settings.EMAIL_DIR+'/feed_failure_report.html')
         feed_temp = file_stream.read()
@@ -63,19 +63,18 @@ def send_registration_failure(feed_data=None,
                               feed_type=None, brand=None):
     try:
         file_stream = open(settings.TEMPLATE_DIR +
-                            '/portal/registration_failure_report.html')
+                           '/portal/registration_failure_report.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
         context = Context({"feed_type": feed_type,
                            "feed_logs": feed_data})
         body = template.render(context)
 
-        mail_detail = settings.REGISTRATION_CONFIG[brand][feed_type][
-                                                         'fail_mail_detail']
+        mail_detail = settings.REGISTRATION_CONFIG[brand][feed_type]['fail_mail_detail']
         logger.info(mail_detail)
         logger.info(settings.MAIL_SERVER)
-        send_email(sender=mail_detail['sender'], receiver=mail_detail[
-              'receiver'], subject=mail_detail['subject'], body=body,
+        send_email(sender=mail_detail['sender'], receiver=mail_detail['receiver'],
+                   subject=mail_detail['subject'], body=body,
                    smtp_server=settings.MAIL_SERVER)
 
     except Exception as ex:
@@ -128,7 +127,6 @@ def insurance_extend(data=None, receiver=None, subject=None):
                         smtp_server=settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception item insurance extend]: {0}".format(ex))
-        
 
 def sent_otp_email(data=None, receiver=None, subject=None):
     from gladminds import mail
@@ -140,13 +138,12 @@ def sent_otp_email(data=None, receiver=None, subject=None):
         context = Context({"otp": data})
         body = template.render(context)
         mail_detail = settings.OTP_MAIL
-        
-        mail.send_email(sender = mail_detail['sender'], receiver = receiver, 
-                   subject = mail_detail['subject'], body = body, 
-                   smtp_server = settings.MAIL_SERVER)
+        mail.send_email(sender=mail_detail['sender'], receiver=receiver,
+                        subject=mail_detail['subject'], body=body,
+                        smtp_server=settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception otp email]: {0}".format(ex))
-    
+
 def send_ucn_request_alert(data=None):
     from gladminds import mail
     try:
@@ -156,13 +153,11 @@ def send_ucn_request_alert(data=None):
         context = Context({"content": data})
         body = template.render(context)
         mail_detail = settings.UCN_RECOVERY_MAIL_DETAIL
-        
-        mail.send_email(sender = mail_detail['sender'], receiver = mail_detail['receiver'], 
-                   subject = mail_detail['subject'], body = body, 
-                   smtp_server = settings.MAIL_SERVER)
+        mail.send_email(sender=mail_detail['sender'], receiver=mail_detail['receiver'],
+                        subject=mail_detail['subject'], body=body, smtp_server=settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception ucn request email]: {0}".format(ex))
-    
+
 def send_feedback_received(data):
     from gladminds import mail
     try:
@@ -171,74 +166,71 @@ def send_feedback_received(data):
         template = Template(feed_temp)
         context = Context({"content": data['content']})
         body = template.render(context)
-        mail.send_email(sender = data['sender'], receiver = data['reciever'], 
-                   subject = data['subject'], body = body, 
-                   smtp_server = settings.MAIL_SERVER)
+        mail.send_email(sender=data['sender'], receiver=data['reciever'],
+                        subject=data['subject'], body=body, smtp_server=settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception ucn request email]: {0}".format(ex))
-        
+
 def send_servicedesk_feedback(data, feedback_obj):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                            data, receiver= feedback_obj.reporter_email_id)
+                            data, receiver=feedback_obj.reporter_email_id)
     except Exception as ex:
         logger.info("[Exception feedback initiator email]  {0}".format(ex))
-        
 
 def send_email_to_assignee(data, feedback_obj):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                             data, receiver = feedback_obj.assign_to.email_id)
+                            data, receiver=feedback_obj.assign_to.email_id)
     except Exception as ex:
-        logger.info("[Exception feedback receiver email]  {0}".format(ex)) 
-        
+        logger.info("[Exception feedback receiver email]  {0}".format(ex))
+
 def send_email_to_initiator_after_issue_assigned(data, feedback_obj):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                            data, receiver= feedback_obj.reporter_email_id)
+                            data, receiver=feedback_obj.reporter_email_id)
     except Exception as ex:
-        logger.info("[Exception feedback initiator after issue assigned email]  {0}".format(ex)) 
+        logger.info("[Exception feedback initiator after issue assigned email]  {0}".format(ex))
 
 def send_email_to_initiator_after_issue_resolved(data, feedback_obj, host):
     try:
         context = Context({"content": data['content'],
-                            "id":feedback_obj.id,
-                            "url":host,
-                            })
+                           "id":feedback_obj.id,
+                           "url":host,})
         send_template_email("initiator_feedback_resolved.html", context,
-                            data, receiver= feedback_obj.reporter_email_id)
+                            data, receiver=feedback_obj.reporter_email_id)
     except Exception as ex:
         logger.info("[Exception feedback initiator after issue resloved email]  {0}".format(ex))
-        
+
 def send_email_to_bajaj_after_issue_resolved(data):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context, data)
     except Exception as ex:
-        logger.info("[Exception fail to send mail to bajaj]  {0}".format(ex)) 
+        logger.info("[Exception fail to send mail to bajaj]  {0}".format(ex))
 
 def send_email_to_manager_after_issue_resolved(data, manager_obj):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                             data, receiver = manager_obj.email_id)
+                            data, receiver=manager_obj.email_id)
     except Exception as ex:
-        logger.info("[Exception fail to send mail to manager]  {0}".format(ex))         
-           
-def send_template_email(template_name, context, mail_detail,receiver=None): 
+        logger.info("[Exception fail to send mail to manager]  {0}".format(ex))
+
+def send_template_email(template_name, context, mail_detail, receiver=None):
     '''generic function use for send mail for any html template'''
-    
     file_stream = open(settings.EMAIL_DIR+'/'+ template_name)
     feed_temp = file_stream.read()
     template = Template(feed_temp)
     body = template.render(context)
     if receiver is None:
-        receiver =  mail_detail['reciever']
-    send_email(sender =  mail_detail['sender'], receiver = receiver, 
-               subject = mail_detail['newsubject'], body = body, 
-               smtp_server = settings.MAIL_SERVER)
+        receiver = mail_detail['reciever']
+    send_email(sender=mail_detail['sender'], receiver=receiver,
+               subject=mail_detail['newsubject'], body=body,
+               smtp_server=settings.MAIL_SERVER)
     logger.info("Mail sent successfully")
     #TODO We have to remove hard code receiver
+    

@@ -61,7 +61,7 @@ SUIT_CONFIG = {
                      'label': 'Save Form -> ASC'},
                     {'model': 'auditlog', 'label': 'Audit Log'},
                     {'model': 'datafeedlog',
-                     'label': 'Feed Log'}, 
+                     'label': 'Feed Log'},
                     {'model': 'customertempregistration',
                      'label': ' Customer registration'}, 'uploadproductcsv',
                     'messagetemplate', 'emailtemplate', 'gladmindusers',)},
@@ -182,18 +182,17 @@ TEMPLATE_LOADERS = (
                     #  'django.template.loaders.eggs.Loader',
                    )
 
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django_otp.middleware.OTPMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    # 'gladminds.middleware.GladmindsMiddleware'
-    # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-                     )
+MIDDLEWARE_CLASSES = ('django.middleware.common.CommonMiddleware',
+                      'django.contrib.sessions.middleware.SessionMiddleware',
+                      'django.contrib.auth.middleware.AuthenticationMiddleware',
+                      'django_otp.middleware.OTPMiddleware',
+                      # 'django.middleware.csrf.CsrfViewMiddleware',
+                      'django.contrib.messages.middleware.MessageMiddleware',
+                      'corsheaders.middleware.CorsMiddleware',
+                      # 'gladminds.middleware.GladmindsMiddleware'
+                      # Uncomment the next line for simple clickjacking protection:
+                      # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+                   )
 
 CORS_ORIGIN_ALLOW_ALL = True
 ROOT_URLCONF = 'gladminds.urls'
@@ -322,24 +321,20 @@ MAIL_DETAIL = {
 FEED_FAILURE_MAIL_DETAIL = {
 
     "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds+alerts@hashedin.com","support@gladminds.co"],
+    "receiver": ["gladminds+alerts@hashedin.com", "support@gladminds.co"],
     "subject": "Gladminds Feed Failure Mail",
     "body": """""",
 }
 
-UCN_RECOVERY_MAIL_DETAIL = {
-                            "sender": "feed-report@gladminds.co",
+UCN_RECOVERY_MAIL_DETAIL = {"sender": "feed-report@gladminds.co",
                             "receiver": ["gladminds@hashedin.com"],
                             "subject": "Gladminds UCN Recovery Mail",
-                            "body": """""",
-                           }
+                            "body": """""",}
 
-OTP_MAIL = {
-                  "sender":"support@gladminds.co",
-                  "subject":"Reset Password",
-                  "receiver": [""],
-                  "body": """""",
-              }
+OTP_MAIL = {"sender":"support@gladminds.co",
+            "subject":"Reset Password",
+            "receiver": [""],
+            "body": """""",}
 
 
 # AfterBuy File Upload location configuration
