@@ -14,6 +14,7 @@ from gladminds import audit, message_template as templates
 from gladminds import utils
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
+from gladminds.afterbuy.models import common as afterbuy_common
 from gladminds.audit import feed_log
 from gladminds.utils import get_task_queue
 
@@ -515,6 +516,8 @@ def update_coupon_data(sender, **kwargs):
             else:
                 message = templates.get_template('SEND_CUSTOMER_ON_PRODUCT_PURCHASE').format(
                     customer_name=customer_data.customer_name, sap_customer_id=instance.sap_customer_id)
+            notification = afterbuy_common.UserNotification(user=customer_data, message=message, notification_date=datetime.now(), notification_read=0)
+            notification.save()
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
                 task_queue.add("send_on_product_purchase", {"phone_number":
