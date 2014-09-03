@@ -290,7 +290,7 @@ def create_report(method, query_params, user):
         if status:
             params['status'] = status
             filter['status'] = status
-        all_coupon_data = common.CouponData.objects.filter(*args, **filter)
+        all_coupon_data = common.CouponData.objects.filter(*args, **filter).order_by('-actual_service_date')
     elif method == 'GET':
         message = "" 
         all_coupon_data = []
@@ -309,6 +309,7 @@ def create_report(method, query_params, user):
         coupon_data_dict['service_type'] = coupon_data.service_type
         coupon_data_dict['service_status'] = status_options[str(coupon_data.status)]
         coupon_data_dict['special_case'] = ''
+        coupon_data_dict['closed_date'] = coupon_data.closed_date
         report_data.append(coupon_data_dict)
     return {"records": report_data, 'status_options': status_options, 'params': params,
             "message": message}
