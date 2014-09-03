@@ -13,8 +13,8 @@ class GladmindsWsgiMounter(WsgiMounter):
     :param mounts: dict of :class:`spyne.application.Application` instances
     whose keys are url fragments.
     """
-    def __init__(self, mounts=None, default = None):
-        super(GladmindsWsgiMounter, self).__init__(mounts = mounts)
+    def __init__(self, mounts=None, default=None):
+        super(GladmindsWsgiMounter, self).__init__(mounts=mounts)
         self.app_default = default
 
     def __call__(self, environ, start_response):
@@ -31,5 +31,5 @@ class GladmindsWsgiMounter(WsgiMounter):
 
         environ['SCRIPT_NAME'] = ''.join(('/', original_script_name, script))
         environ['PATH_INFO'] = ''.join(('/', '/'.join(fragments[1:])))
-        
         return app(environ, start_response)
+    

@@ -18,7 +18,6 @@ from django.db.models.fields.files import FieldFile
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     TIME_FORMAT
 
-
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 logger = logging.getLogger('gladminds')
 
@@ -97,13 +96,13 @@ def get_task_queue():
 def format_product_object(product_obj):
     purchase_date = product_obj.product_purchase_date.strftime('%d/%m/%Y')
     return {'id': product_obj.sap_customer_id,
-            'phone': get_phone_number_format(str(product_obj.customer_phone_number)), 
-            'name': product_obj.customer_phone_number.customer_name, 
+            'phone': get_phone_number_format(str(product_obj.customer_phone_number)),
+            'name': product_obj.customer_phone_number.customer_name,
             'purchase_date': purchase_date,
             'vin': product_obj.vin}
 
 def get_customer_info(request):
-    data=request.POST
+    data = request.POST
     try:
         product_obj = common.ProductData.objects.get(vin=data['vin'])
     except Exception as ex:
@@ -111,7 +110,7 @@ def get_customer_info(request):
         message = '''VIN '{0}' does not exist in our records.'''.format(data['vin'])
         return {'message': message, 'status': 'fail'}
     if product_obj.product_purchase_date:
-        product_data =  format_product_object(product_obj)
+        product_data = format_product_object(product_obj)
         return product_data
     else:
         message = '''VIN '{0}' has no associated customer.'''.format(data['vin'])
@@ -131,9 +130,9 @@ def recover_coupon_info(request):
     ucn_recovery_obj = upload_file(request)
     send_recovery_email_to_admin(ucn_recovery_obj, coupon_data)
     message = 'UCN for customer {0} is {1}.'.format(coupon_data.vin.sap_customer_id,
-                                                coupon_data.unique_service_coupon) 
+                                                    coupon_data.unique_service_coupon)
     return {'status': True, 'message': message}
-    
+
 def get_coupon_info(request):
     data = request.POST
     customer_id = data['customerId']
@@ -176,7 +175,7 @@ def get_user_groups(user):
     for group in user.groups.all():
         groups.append(str(group.name))
     return groups
-    
+
 def stringify_groups(user):
     groups = []
     for group in user.groups.all():
@@ -188,8 +187,9 @@ def send_recovery_email_to_admin(file_obj, coupon_data):
     reason = file_obj.reason
     customer_id = file_obj.sap_customer_id
     requester = str(file_obj.user)
-    data = get_email_template('UCN_REQUEST_ALERT').body.format(requester,coupon_data.service_type,
-                customer_id, coupon_data.actual_kms, reason, file_location)
+    data = get_email_template('UCN_REQUEST_ALERT').body.format(requester, coupon_data.service_type,
+                                                               customer_id, coupon_data.actual_kms,
+                                                               reason, file_location)
     send_ucn_request_alert(data=data)
 
 def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=None,
@@ -259,11 +259,12 @@ def get_list_from_set(set_data):
 
 def create_context(email_template_name, feedback_obj):
     data = get_email_template(email_template_name)
-    data['newsubject'] = data['subject'].format(id = feedback_obj.id)
-    data['content'] = data['body'].format(type = feedback_obj.type, reporter = feedback_obj.reporter, 
-                                          message = feedback_obj.message, created_date = feedback_obj.created_date, 
-                                          assign_to = feedback_obj.assign_to,  priority =  feedback_obj.priority, remark = "",
-                                          root_cause = feedback_obj.root_cause, resolution = feedback_obj.resolution, due_date = "")
+    data['newsubject'] = data['subject'].format(id=feedback_obj.id)
+    data['content'] = data['body'].format(type=feedback_obj.type, reporter=feedback_obj.reporter,
+                                          message=feedback_obj.message, created_date=feedback_obj.created_date,
+                                          assign_to=feedback_obj.assign_to, priority=feedback_obj.priority, remark="",
+                                          root_cause=feedback_obj.root_cause, resolution=feedback_obj.resolution,
+                                          due_date="")
 
     return data
 
@@ -280,11 +281,11 @@ def search_details(request):
     kwargs = {}
     search_results = []
     if data.has_key('VIN'):
-        kwargs[ 'vin' ] = data['VIN']
+        kwargs['vin'] = data['VIN']
     elif data.has_key('Customer-ID'):
-        kwargs[ 'sap_customer_id' ] = data['Customer-ID']
+        kwargs['sap_customer_id'] = data['Customer-ID']
     elif data.has_key('Customer-Mobile'):
-        kwargs[ 'customer_phone_number__phone_number' ] = mobile_format(data['Customer-Mobile'])
+        kwargs['customer_phone_number__phone_number'] = mobile_format(data['Customer-Mobile'])
     product_obj = common.ProductData.objects.filter(**kwargs)
     if not product_obj or not product_obj[0].product_purchase_date:
         key = data.keys()
@@ -324,12 +325,12 @@ def get_min_and_max_filter_date():
 #TODO Function needs to be refactored
 def set_wait_time(feedback_data):
     start_date = feedback_data.pending_from
-    end_date = datetime.now()
+    end_date = datetime.datetime.now()
     start_date = start_date.strftime(TIME_FORMAT)
     end_date = end_date.strftime(TIME_FORMAT)
-    start_date = datetime.strptime(start_date, TIME_FORMAT)
-    end_date = datetime.strptime(end_date, TIME_FORMAT)
+    start_date = datetime.datetime.strptime(start_date, TIME_FORMAT)
+    end_date = datetime.datetime.strptime(end_date, TIME_FORMAT)
     wait = end_date - start_date
     wait_time = float(wait.days) + float(wait.seconds) / float(86400)
     previous_wait = feedback_data.wait_time
-    aftersell_common.Feedback.objects.filter(id = feedback_data.id).update(wait_time = wait_time+previous_wait)
+    aftersell_common.Feedback.objects.filter(id=feedback_data.id).update(wait_time=wait_time+previous_wait)
