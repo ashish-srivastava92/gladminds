@@ -19,7 +19,7 @@ def _exponential_backoff(index):
     return __BACKOFF[index]
 
 
-def waitForSms(mobile, check_date=None, time_to_check_for=128):
+def wait_for_sms(mobile, check_date=None, time_to_check_for=128):
     total_time = 0
     for i in range(10):
         #check for audit (use check date for filtering)
@@ -42,13 +42,13 @@ class BaseTestCase(ResourceTestCase):
 
     def assertSmsReceived(self, mobile, check_date=datetime.now(), time_to_check_for=128, msg="sms failed"):
         try:
-            waitForSms(mobile, check_date, time_to_check_for)
+            wait_for_sms(mobile, check_date, time_to_check_for)
             return
         except:
             raise self.failureException(msg)
 
-    def assertSmsSent(self, mobile):
+    def checkSmsSent(self, mobile):
         pass
 
-    def assertServiceTypeOfCoupon(self, id, service_type):
+    def checkServiceTypeOfCoupon(self, id, service_type):
         pass
