@@ -36,20 +36,23 @@ class TestCustomerRegistration(GladmindsResourceTestCase):
                     'phone-number' : '9999999999',
                     'email' : 'abc@abc.com',
                     'pincode' : '562106'
-                } 
+                }
 
     def register_customer(self, data):
         response = self.client.post('/aftersell/register/customer', data=data)
         return response
-    
-    def register_asc(self, by, **kwargs):
-        if by == "self":
-            response = self.client.post('/aftersell/asc/self-register/', data=self.asc_data)
-            return response
-        elif by == "dealer":
+
+    def check_asc_exists(self, name, check_name, by):
+        if by == 'dealer':
             response = self.client.post('/aftersell/register/asc', data=self.asc_data)
-            return response
-        
+            self.assertEqual(response.status_code, 200)
+        elif by == 'self':
+            response = self.client.post('/aftersell/asc/self-register/', data=self.asc_data)
+            self.assertEqual(response.status_code, 200)
+    
+        temp_asc_obj = self.get_temp_asc_obj(name=name)
+        self.assertEqual(temp_asc_obj.name, check_name)
+
     def test_temp_customer_registration(self):
         data = {
                     'customer-phone': '9999999999',
@@ -80,13 +83,8 @@ class TestCustomerRegistration(GladmindsResourceTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_asc_registration_by_self(self):
-        response = self.register_asc(by="self")
-        temp_asc_obj = self.get_temp_asc_obj(name='test_asc')
-        self.assertEqual(temp_asc_obj.name, 'test_asc')
-        self.assertEqual(response.status_code, 200)
-        
+        self.check_asc_exists('test_asc','test_asc','dealer')
+
     def test_asc_registration_by_dealer(self):
-        response = self.register_asc(by="dealer")
-        temp_asc_obj = self.get_temp_asc_obj(name='test_asc')
-        self.assertEqual(temp_asc_obj.name, 'test_asc')
-        self.assertEqual(response.status_code, 200)
+        self.check_asc_exists('test_asc','test_asc','self')
+        
