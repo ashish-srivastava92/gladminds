@@ -29,10 +29,26 @@ class TestCustomerRegistration(GladmindsResourceTestCase):
         test_user.save()
         login = self.client.login(username='DEALER01', password='DEALER01@123')
         self.send_dispatch_feed()
+        self.asc_data = {
+                    'name' : 'test_asc',
+                    'address' : 'ABCDEF',
+                    'password' : '123',
+                    'phone-number' : '9999999999',
+                    'email' : 'abc@abc.com',
+                    'pincode' : '562106'
+                } 
 
     def register_customer(self, data):
         response = self.client.post('/aftersell/register/customer', data=data)
         return response
+    
+    def register_asc(self, by, **kwargs):
+        if by == "self":
+            response = self.client.post('/aftersell/asc/self-register/', data=self.asc_data)
+            return response
+        elif by == "dealer":
+            response = self.client.post('/aftersell/register/asc', data=self.asc_data)
+            return response
         
     def test_temp_customer_registration(self):
         data = {
@@ -63,39 +79,14 @@ class TestCustomerRegistration(GladmindsResourceTestCase):
         self.assertEqual(product_obj.customer_phone_number.phone_number, '+919999999999')
         self.assertEqual(response.status_code, 200)
 
-    def register_self_asc(self, data):
-        response = self.client.post('/aftersell/asc/self-register/', data=data)
-        return response
-    
-    def test_temp_asc_self_registration(self):
-        data = {
-                    'name' : 'test_asc',
-                    'address' : 'ABCDEF',
-                    'password' : '123',
-                    'phone-number' : '9999999999',
-                    'email' : 'abc@abc.com',
-                    'pincode' : '562106'
-                }
-        response = self.register_self_asc(data)
-        temp_asc_obj = self.get_temp_asc_obj(name='test_asc')
-        self.assertEqual(temp_asc_obj.name, 'test_asc')
-        self.assertEqual(response.status_code, 200)
-    
-    def register_asc_through_dealer(self, data):
-        response = self.client.post('/aftersell/register/asc', data=data)
-        return response
-    
-    def test_temp_asc_registration_through_dealer(self):
-        data = {
-                    'name' : 'test_asc',
-                    'address' : 'ABCDEF',
-                    'password' : '123',
-                    'phone-number' : '9999999999',
-                    'email' : 'abc@abc.com',
-                    'pincode' : '562106'
-                }
-        response = self.register_asc_through_dealer(data)
+    def test_asc_registration_by_self(self):
+        response = self.register_asc(by="self")
         temp_asc_obj = self.get_temp_asc_obj(name='test_asc')
         self.assertEqual(temp_asc_obj.name, 'test_asc')
         self.assertEqual(response.status_code, 200)
         
+    def test_asc_registration_by_dealer(self):
+        response = self.register_asc(by="dealer")
+        temp_asc_obj = self.get_temp_asc_obj(name='test_asc')
+        self.assertEqual(temp_asc_obj.name, 'test_asc')
+        self.assertEqual(response.status_code, 200)

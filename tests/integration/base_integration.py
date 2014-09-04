@@ -99,8 +99,7 @@ class GladmindsResourceTestCase(ResourceTestCase):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
         xml_data = open(file_path, 'r').read()
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
-        
+
     def get_temp_asc_obj(self, **kwargs):
         temp_asc_obj = aftersell_common.ASCSaveForm.objects.get(**kwargs)
         return temp_asc_obj
-    
