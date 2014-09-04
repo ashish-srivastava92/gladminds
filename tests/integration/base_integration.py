@@ -94,9 +94,9 @@ class GladmindsResourceTestCase(ResourceTestCase):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
         xml_data = open(file_path, 'r').read()
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
-        
+
     def send_purchase_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
         xml_data = open(file_path, 'r').read()
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
-        
+

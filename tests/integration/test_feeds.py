@@ -1,5 +1,6 @@
 import logging
 import os
+from tastypie.test import ResourceTestCase
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -10,6 +11,7 @@ from gladminds.aftersell.models.common import RegisteredDealer,\
     ServiceAdvisorDealerRelationship, ServiceAdvisor, RegisteredASC
 from datetime import datetime, timedelta
 from integration.base_integration import GladmindsResourceTestCase
+from integration.base import BaseTestCase
 from gladminds import feed
 import xml.etree.ElementTree as ET
 from django.utils import unittest
@@ -17,11 +19,14 @@ from django.db import transaction
 
 logger = logging.getLogger('gladminds')
 
+# base_test = BaseTestCase()
 
-class FeedsResourceTest(GladmindsResourceTestCase):
+
+class FeedsResourceTest(GladmindsResourceTestCase, BaseTestCase):
 
     def setUp(self):
         TestCase.setUp(self)
+        BaseTestCase.setUp(self)
         user = User.objects.create_user('gladminds', 'gladminds@gladminds.co', 'gladminds')
         user.save()
 
@@ -189,7 +194,6 @@ class FeedsResourceTest(GladmindsResourceTestCase):
 
         response_content = response.content
         xml_parser = ET.fromstring(response_content)
-        
         with transaction.atomic():
             status = xml_parser.findall('*//{http://api.gladmindsplatform.co/api/v1/bajaj/feed/}postDealerResult')[0].text
             self.assertEqual(status, 'SUCCESS')
@@ -257,14 +261,7 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         coupon_data = CouponData.objects.all()[0]
         self.assertEquals(u"USC002", coupon_data.unique_service_coupon)
 
-       
     def test_asc_feed(self):
-        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/asc_feed.xml')
-        xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
-        self.assertEqual(200, response.status_code)
-        
-        dealer = RegisteredDealer.objects.filter(dealer_id='GMDEALER001')
-        asc = RegisteredASC.objects.get(asc_id='ASC001')
-        self.assertEquals('xyz', asc.asc_name)
-        
+        self.send_asc_feed()
+        self.check_asc_feed_saved_to_db()
+
