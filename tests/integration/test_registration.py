@@ -62,3 +62,40 @@ class TestCustomerRegistration(GladmindsResourceTestCase):
         product_obj = self.get_product_details(vin='XXXXXXXXXX')
         self.assertEqual(product_obj.customer_phone_number.phone_number, '+919999999999')
         self.assertEqual(response.status_code, 200)
+
+    def register_self_asc(self, data):
+        response = self.client.post('/aftersell/asc/self-register/', data=data)
+        return response
+    
+    def test_temp_asc_self_registration(self):
+        data = {
+                    'name' : 'test_asc',
+                    'address' : 'ABCDEF',
+                    'password' : '123',
+                    'phone-number' : '9999999999',
+                    'email' : 'abc@abc.com',
+                    'pincode' : '562106'
+                }
+        response = self.register_self_asc(data)
+        temp_asc_obj = self.get_temp_asc_obj(name='test_asc')
+        self.assertEqual(temp_asc_obj.name, 'test_asc')
+        self.assertEqual(response.status_code, 200)
+    
+    def register_asc_through_dealer(self, data):
+        response = self.client.post('/aftersell/register/asc', data=data)
+        return response
+    
+    def test_temp_asc_registration_through_dealer(self):
+        data = {
+                    'name' : 'test_asc',
+                    'address' : 'ABCDEF',
+                    'password' : '123',
+                    'phone-number' : '9999999999',
+                    'email' : 'abc@abc.com',
+                    'pincode' : '562106'
+                }
+        response = self.register_asc_through_dealer(data)
+        temp_asc_obj = self.get_temp_asc_obj(name='test_asc')
+        self.assertEqual(temp_asc_obj.name, 'test_asc')
+        self.assertEqual(response.status_code, 200)
+        
