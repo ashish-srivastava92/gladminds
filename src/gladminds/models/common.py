@@ -298,17 +298,6 @@ class EmailTemplate(models.Model):
         app_label = "gladminds"
         verbose_name_plural = "Email Template"
 
-
-class SASaveForm(models.Model):
-    name = models.CharField(max_length=255, null=False)
-    phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)
-    status = models.CharField(max_length=10, blank=False, null=False)
-
-    class Meta:
-        app_label = "gladminds"
-        verbose_name_plural = "SA Save Form"
-
-
 class CustomerTempRegistration(models.Model):
     product_data = models.ForeignKey(ProductData, null=True, blank=True)
     new_customer_name = models.CharField(max_length=50, null=True, blank=True)
