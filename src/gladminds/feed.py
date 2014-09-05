@@ -201,59 +201,52 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                                 address=dealer['address'])
             try:
                 mobile_number_active = self.check_mobile_active(dealer, dealer_data)
-                service_advisor = aftersell_common.ServiceAdvisor.objects.filter(service_advisor_id=dealer['service_advisor_id'])
-                if not mobile_number_active:
-                    if len(service_advisor) > 0:
-                        if dealer['phone_number'] != service_advisor[0].phone_number:
-                            service_advisor[0].phone_number = dealer['phone_number']
-                            service_advisor[0].save()
-                            logger.info("[Info: DealerAndServiceAdvisorFeed_sa]: Updated phone number for {0}".format(dealer['service_advisor_id']))
-                        service_advisor = service_advisor[0]
-                    else:
-                        service_advisor = aftersell_common.ServiceAdvisor(service_advisor_id=dealer['service_advisor_id'], 
-                                                            name=dealer['name'], phone_number=dealer['phone_number'])
-                        service_advisor.save()
-                        self.register_user('SA', username=dealer['service_advisor_id'])
-                elif service_advisor and dealer['status']=='N':
-                    service_advisor = service_advisor[0]
-                else:
-                    raise
+                if mobile_number_active and dealer['status']=='Y':
+                    raise ValueError(dealer['phone_number'] + ' is active under another dealer')
+                try:
+                    service_advisor = aftersell_common.ServiceAdvisor.objects.get(
+                                        service_advisor_id=dealer['service_advisor_id'])
+                    if service_advisor.phone_number != dealer['phone_number']:
+                        service_advisor.phone_number = dealer['phone_number']
+                        logger.info(
+                        "[Info: DealerAndServiceAdvisorFeed_sa]: Updated phone number for {0}"
+                        .format(dealer['service_advisor_id']))
+                except ObjectDoesNotExist as odne:
+                    logger.info(
+                    "[Exception:  DealerAndServiceAdvisorFeed_sa]: {0}"
+                    .format(odne))
+                    service_advisor = aftersell_common.ServiceAdvisor(
+                                            service_advisor_id=dealer['service_advisor_id'], 
+                                            name=dealer['name'], phone_number=dealer['phone_number'])
+                    self.register_user('SA', username=dealer['service_advisor_id'])
+                service_advisor.save()
+                
+                try:
+                    service_advisor_dealer = aftersell_common.ServiceAdvisorDealerRelationship.objects.get(
+                                               service_advisor_id=service_advisor, dealer_id=dealer_data)
+                    service_advisor_dealer.status = unicode(dealer['status'])
+                except ObjectDoesNotExist as odne:
+                    service_advisor_dealer = aftersell_common.ServiceAdvisorDealerRelationship(
+                                                dealer_id=dealer_data,
+                                                service_advisor_id=service_advisor,
+                                                status=dealer['status'])
+                    
+                service_advisor_dealer.save()
+                    
             except Exception as ex:
                 total_failed += 1
-                ex = "[Exception: Service Advisor is not created]: {0}".format(ex)
+                ex = "{0}".format(ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
-                continue
-
-            try:
-                mobile_number_active = self.check_mobile_active(dealer, dealer_data)
-                service_advisor_dealer = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=service_advisor, dealer_id=dealer_data)
-                if dealer['status']=='Y' and mobile_number_active:
-                    raise
-                elif len(service_advisor_dealer) == 0:
-                    sa_dealer_rel = aftersell_common.ServiceAdvisorDealerRelationship(dealer_id=dealer_data, service_advisor_id=service_advisor, status=dealer['status'])
-                    sa_dealer_rel.save()
-                else:
-                    service_advisor_dealer[
-                        0].status = unicode(dealer['status'])
-                    service_advisor_dealer[0].save()
-            except Exception as ex:
-                ex = "[Exception: Service Advisor and dealer relation is not created]: {0}"\
-                    .format(ex)
-                self.feed_remark.fail_remarks(ex)
-                logger.error(ex)
                 continue
 
         return self.feed_remark
 
-    def update_other_dealer_sa_relationship(self, service_advisor, status):
-        if status == 'Y':
-            aftersell_common.ServiceAdvisorDealerRelationship.objects\
-                .filter(service_advisor_id=service_advisor).update(status='N')
-
     def check_mobile_active(self, dealer, dealer_data):
-        list_mobile = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id__phone_number=dealer['phone_number'], status='Y')
-        list_active_mobile = list_mobile.exclude(dealer_id=dealer_data, service_advisor_id__service_advisor_id=dealer['service_advisor_id'])
+        list_mobile = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(
+                                service_advisor_id__phone_number=dealer['phone_number'], status='Y')
+        list_active_mobile = list_mobile.exclude(dealer_id=dealer_data,
+                                service_advisor_id__service_advisor_id=dealer['service_advisor_id'])
         if list_active_mobile:
             return True
         return False
