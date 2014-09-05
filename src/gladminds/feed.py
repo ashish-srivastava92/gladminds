@@ -235,7 +235,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                     
             except Exception as ex:
                 total_failed += 1
-                ex = "[Exception: DealerAndServiceAdvisorFeed_sa]: {0}".format(ex)
+                ex = "{0}".format(ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
                 continue

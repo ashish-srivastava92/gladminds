@@ -358,7 +358,6 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
         return json.dumps({"message": EXCEPTION_INVALID_DEALER})
     return json.dumps({"message": SUCCESS_MESSAGE})
 
-ALREADY_ACTIVE = ' is active under another dealer'
 def save_sa_registration(request, groups):
     data = request.POST
     existing_sa = False
@@ -381,9 +380,9 @@ def save_sa_registration(request, groups):
         feed_response = sap_obj.import_to_db(feed_type='dealer',
                             data_source=data_source, feed_remark=feed_remark)
         if feed_response.failed_feeds > 0:
-            failure_msg = json.dumps(feed_response.remarks)
+            failure_msg = list(feed_response.remarks.elements())[0]
             logger.info(failure_msg)
-            return json.dumps({"message": phone_number + ALREADY_ACTIVE})
+            return json.dumps({"message": failure_msg})
     except Exception as ex:
         logger.info(ex)
         return json.dumps({"message": UPDATE_FAIL})
