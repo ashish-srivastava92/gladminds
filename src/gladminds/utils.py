@@ -241,7 +241,7 @@ def create_sa_feed_data(post_data, user_id, temp_sa_id):
     data['dealer_id'] = user_id
     data['phone_number'] = mobile_format(post_data['phone-number'])
     data['service_advisor_id'] = temp_sa_id
-    data['name'] = post_data['name'].lower()
+    data['name'] = post_data['name'].upper()
     data['status'] = post_data['status']
     data['address'] = None
     return data
