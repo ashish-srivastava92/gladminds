@@ -2,7 +2,7 @@ import logging
 
 
 from django.shortcuts import render
-from django.http.response import HttpResponse
+from django.http.response import HttpResponse, HttpResponseNotFound
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
@@ -35,18 +35,22 @@ def modify_servicedesk_tickets(request, feedback_id):
     status = get_list_from_set(FEEDBACK_STATUS)
     priority_types = get_list_from_set(PRIORITY)
     feedback_types = get_list_from_set(FEEDBACK_TYPE)
-    feedback_obj = get_feedback(feedback_id)
+    feedback_obj = get_feedback(feedback_id, request.user)
     servicedesk_users = get_servicedesk_users(designation='SDO')
     if request.method == 'POST':
         host = request.get_host()
-        save_update_feedback(feedback_obj, request.POST, request.user, host)
-    return render(request, 'service-desk/ticket_modify.html',\
-                  {"feedback": feedback_obj, "FEEDBACK_STATUS": status,\
+        save_update_feedback(feedback_obj[0], request.POST, request.user, host)
+    if feedback_obj:
+        return render(request, 'service-desk/ticket_modify.html',\
+                  {"feedback": feedback_obj[0], "FEEDBACK_STATUS": status,\
                    "PRIORITY": priority_types,\
                     "FEEDBACK_TYPE": feedback_types,\
                    "group": group_name[0].name,\
                    'servicedeskuser': servicedesk_users
                    })
+    else:
+        return HttpResponseNotFound()
+
 
 @require_http_methods(["POST"])
 def get_feedback_response(request, feedback_id):

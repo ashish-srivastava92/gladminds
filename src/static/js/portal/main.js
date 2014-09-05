@@ -174,13 +174,19 @@
                 messageHeader.text('Thanks');
                 waitingModal.modal('hide');
                 messageModal.modal('show');
-              
+                $('#message').val('');
+                $('#priority').val(''); 
+                $('#type').val('');
+                $('#subject').val('');
+                $('#advisorMobile').val('');
+                
             },
             error: function() {
                 messageBlock.text('Invalid Data');
                 messageHeader.text('Invalid');
                 waitingModal.modal('hide');
                 messageModal.modal('show');
+                
             }
         });
         return false;
@@ -234,6 +240,7 @@
     $(document).ready(function() {
 
     });
+
 })();
 
 function rootCause(status){
@@ -245,3 +252,5 @@ function rootCause(status){
 		$('#resolution').addClass('hide');
 	}
 }
+
+
