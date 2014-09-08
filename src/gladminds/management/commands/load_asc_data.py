@@ -25,7 +25,7 @@ class Command(BaseCommand):
                 for row_list in spamreader:
                     temp ={}
                     temp['asc_id'] = row_list[5].strip()
-                    temp['name'] = row_list[6].strip()
+                    temp['name'] = (row_list[6].strip())[0:29]
                     temp['phone_number'] = ''
                     temp['address'] = str(row_list[7].strip()) + ", " +str(row_list[8].strip())
                     temp['email'] = row_list[9].strip()
