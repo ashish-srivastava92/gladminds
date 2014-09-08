@@ -56,7 +56,6 @@ SMS_CLIENT_DETAIL = {'login':'GladMinds1',
                      'working_key': '1486415t035t8052c7pc',
                      'sender_id': 'GLADMS'}
 
-
 ########################SQS Queue Name
 SQS_QUEUE_NAME = "gladminds-dev"
 ######################################

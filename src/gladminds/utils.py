@@ -249,7 +249,6 @@ def create_feed_data(post_data, product_data, temp_customer_id):
     data['pin_no'] = data['state'] = data['city'] = None
     return data
 
-
 def get_list_from_set(set_data):
     created_list = []
     for set_object in set_data:
@@ -268,7 +267,17 @@ def create_context(email_template_name, feedback_obj):
 
     return data
 
-def subtract_dates(start_date, end_date):
+def create_sa_feed_data(post_data, user_id, temp_sa_id):
+    data ={}
+    data['dealer_id'] = user_id
+    data['phone_number'] = mobile_format(post_data['phone-number'])
+    data['service_advisor_id'] = temp_sa_id
+    data['name'] = post_data['name'].upper()
+    data['status'] = post_data['status']
+    data['address'] = None
+    return data
+
+def subtract_dates(start_date, end_date):    
     start_date = start_date.strftime("%Y-%m-%d")
     end_date = end_date.strftime("%Y-%m-%d")
     start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
