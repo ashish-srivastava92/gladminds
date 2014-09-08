@@ -14,6 +14,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist
 
 
 from gladminds.models import common
@@ -36,6 +37,7 @@ from gladminds.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
 gladmindsResources = GladmindsResources()
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
+TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
 
 
 def auth_login(request, provider):
@@ -408,18 +410,33 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
         return json.dumps({"message": EXCEPTION_INVALID_DEALER})
     return json.dumps({"message": SUCCESS_MESSAGE})
 
-
 def save_sa_registration(request, groups):
     data = request.POST
-    if not ('dealers' in groups or 'ascs' in groups):
-        raise
-    data = {key: val for key, val in data.iteritems()}
+    data_source = []
     phone_number = mobile_format(str(data['phone-number']))
-    if common.SASaveForm.objects.filter(phone_number=phone_number):
-        return json.dumps({'message': ALREADY_REGISTERED})
-    asc_obj = common.SASaveForm(name=data['name'],
-    phone_number=phone_number, status=data['status'])
-    asc_obj.save()
+    try:
+        service_advisor = afterbuy_common.ServiceAdvisor.objects.get(
+                            phone_number=phone_number, name=data['name'])
+        service_advisor_id = service_advisor.service_advisor_id
+    except ObjectDoesNotExist as odne:
+        logger.info("[Exception:]: {0}".format(odne))
+        service_advisor_id = TEMP_SA_ID_PREFIX + str(random.randint(10**5, 10**6))
+    
+    try:
+        data_source.append(utils.create_sa_feed_data(data, request.user, service_advisor_id))
+        feed_remark = FeedLogWithRemark(len(data_source),
+                                                    feed_type='Dealer Feed',
+                                                    action='Received', status=True)
+        sap_obj = SAPFeed()
+        feed_response = sap_obj.import_to_db(feed_type='dealer',
+                            data_source=data_source, feed_remark=feed_remark)
+        if feed_response.failed_feeds > 0:
+            failure_msg = list(feed_response.remarks.elements())[0]
+            logger.info(failure_msg)
+            return json.dumps({"message": failure_msg})
+    except Exception as ex:
+        logger.info(ex)
+        return json.dumps({"message": UPDATE_FAIL})
     return json.dumps({'message': SUCCESS_MESSAGE})
 
 
