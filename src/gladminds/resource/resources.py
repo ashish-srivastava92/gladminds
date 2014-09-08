@@ -457,6 +457,7 @@ class GladmindsResources(Resource):
                 task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
             else:
                 send_coupon.delay(phone_number=phone_number, message=message)
+            gladminds_feedback_object = aftersell_common.Feedback.objects.get(id=gladminds_feedback_object.id)
             context = create_context('FEEDBACK_DETAIL_TO_ADIM',  gladminds_feedback_object)
             send_feedback_received(context)
             context = create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)

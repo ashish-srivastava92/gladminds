@@ -11,6 +11,8 @@ TEMPLATE_DIR = os.path.join(PROJECT_DIR, "templates")
 EMAIL_DIR = os.path.join(TEMPLATE_DIR, "email")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
 
+TIMEZONE = 'Asia/Kolkata'
+
 ALLOWED_HOSTS = ['*']
 
 ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':

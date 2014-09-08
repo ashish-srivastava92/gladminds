@@ -2,6 +2,7 @@ import os, logging, hashlib, uuid, mimetypes
 import boto
 from boto.s3.key import Key
 import datetime
+import pytz
 from dateutil import tz
 from random import randint
 from django.utils import timezone
@@ -11,7 +12,7 @@ from gladminds.models.common import STATUS_CHOICES
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
 from django_otp.oath import TOTP
-from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
+from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY, TIMEZONE
 from gladminds.taskqueue import SqsTaskQueue
 from gladminds.mail import send_ucn_request_alert
 from django.db.models.fields.files import FieldFile
@@ -257,10 +258,11 @@ def get_list_from_set(set_data):
 
 
 def create_context(email_template_name, feedback_obj):
+    created_date = feedback_obj.created_date
     data = get_email_template(email_template_name)
     data['newsubject'] = data['subject'].format(id=feedback_obj.id)
     data['content'] = data['body'].format(type=feedback_obj.type, reporter=feedback_obj.reporter,
-                                          message=feedback_obj.message, created_date=feedback_obj.created_date,
+                                          message=feedback_obj.message, created_date=convert_utc_to_local_time(created_date),
                                           assign_to=feedback_obj.assign_to, priority=feedback_obj.priority, remark="",
                                           root_cause=feedback_obj.root_cause, resolution=feedback_obj.resolution,
                                           due_date="")
@@ -343,3 +345,9 @@ def set_wait_time(feedback_data):
     wait_time = float(wait.days) + float(wait.seconds) / float(86400)
     previous_wait = feedback_data.wait_time
     aftersell_common.Feedback.objects.filter(id=feedback_data.id).update(wait_time=wait_time+previous_wait)
+
+def convert_utc_to_local_time(date):
+    utc = pytz.utc
+    timezone = pytz.timezone(TIMEZONE)
+    return date.astimezone(timezone).replace(tzinfo=None)
+ 
