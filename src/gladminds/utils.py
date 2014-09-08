@@ -277,6 +277,7 @@ def search_details(request):
 def services_search_details(request):
     data = request.POST
     kwargs = {}
+    response = {}
     search_results = []
     if data.has_key('VIN'):
         kwargs[ 'vin' ] = data['VIN']
@@ -291,7 +292,10 @@ def services_search_details(request):
                 temp['service_type'] = coupon.service_type
                 temp['status'] = STATUS_CHOICES[coupon.status - 1][1]
                 search_results.append(temp)
-            return search_results
+            response['search_results'] = search_results
+            response['other_details'] = {'vin': product_obj[0].vin, 'customer_id': product_obj[0].sap_customer_id,\
+                                         'customer_name': product_obj[0].customer_phone_number.customer_name}
+            return response
         except Exception as ex:
             logger.log(ex)
             return {'message': ex}
