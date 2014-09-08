@@ -12,12 +12,11 @@ from gladminds.models import common
 from gladminds import  message_template as templates
 from gladminds import utils
 import pytz
+from gladminds.utils import format_date
 logger = logging.getLogger("gladminds")
 __all__ = ['GladmindsTaskManager']
 AUDIT_ACTION = 'SEND TO QUEUE'
 sms_client = load_gateway()
-utc = pytz.utc
-timezone = pytz.timezone("Asia/Kolkata")
 
 """
 This task send sms to customer on customer registration
@@ -171,11 +170,12 @@ This job send coupon close message to customer
 """
 
 def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
+    created_date = feedback_obj.created_date
     try:
         message = templates.get_template(template_name).format(type=feedback_obj.type,
                                                                reporter=feedback_obj.reporter,
                                                                message=feedback_obj.message,
-                                                               created_date=feedback_obj.created_date.astimezone(timezone).replace(tzinfo=None),
+                                                               created_date=format_date(created_date),
                                                                assign_to=feedback_obj.assign_to,
                                                                priority=feedback_obj.priority)
         if comment_obj and template_name == 'SEND_MSG_TO_ASSIGNEE':
