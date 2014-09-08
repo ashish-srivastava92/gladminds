@@ -274,6 +274,36 @@ def search_details(request):
         search_results.append(data)    
     return search_results
 
+def services_search_details(request):
+    data = request.POST
+    kwargs = {}
+    response = {}
+    search_results = []
+    if data.has_key('VIN'):
+        kwargs[ 'vin' ] = data['VIN']
+    elif data.has_key('Customer-ID'):
+        kwargs[ 'sap_customer_id' ] = data['Customer-ID']
+    product_obj = common.ProductData.objects.filter(**kwargs)
+    if len(product_obj) == 1:
+        try:
+            coupon_obj = common.CouponData.objects.filter(vin=product_obj[0]).order_by('status')
+            for coupon in coupon_obj:
+                temp = {}
+                temp['service_type'] = coupon.service_type
+                temp['status'] = STATUS_CHOICES[coupon.status - 1][1]
+                search_results.append(temp)
+            response['search_results'] = search_results
+            response['other_details'] = {'vin': product_obj[0].vin, 'customer_id': product_obj[0].sap_customer_id,\
+                                         'customer_name': product_obj[0].customer_phone_number.customer_name}
+            return response
+        except Exception as ex:
+            logger.log(ex)
+            return {'message': ex}
+    else:
+        key = data.keys()
+        message = '''Customer details for {0} '{1}' not found.'''.format(key[0], data[key[0]])
+        return {'message': message}
+    
 def get_search_query_params(request, class_self):
     custom_search_enabled = False
     if 'custom_search' in request.GET and 'val' in request.GET:

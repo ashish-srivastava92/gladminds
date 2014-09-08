@@ -85,6 +85,46 @@
       return false;
     });
 
+    $('.service-status-search').on('submit', function() {
+    	var table = $(".status-search-results tbody .search-detail");
+    		table.remove(); 
+    		$('.other-details').remove();
+    	var value = $('.status-search-value').val(),
+	        field = $('.status-search-field').val(),
+	        messageModal = $('.modal.message-modal'),
+	        messageBlock = $('.modal-body', messageModal),
+	        data = {};
+    	data[field] =  value;
+    	var jqXHR = $.ajax({
+            type: 'POST',
+            url: '/aftersell/exceptions/status',
+            data: data,
+            success: function(data){
+            	var service_detail = data['search_results'],
+            		other_details = data['other_details']; 
+            	if (data['message']) {
+                    messageBlock.text(data.message);
+                    messageModal.modal('show');
+            	}
+            	if (service_detail.length > 0) {
+            		var details_html = "<div class='other-details'><label class='control-label'>VIN:&nbsp</label>"+ other_details.vin +"<br><label class='control-label'>Customer Id:&nbsp</label>"+ other_details.customer_id +"<br><label class='control-label'>Customer Name:&nbsp</label>"+ other_details.customer_name +"</div>",
+            			table = $(".status-search-results tbody");
+            			$('.status-result-detail').append(details_html);
+            			$.each(service_detail, function(idx, elem){
+            				table.append("<tr class='search-detail'><td>"+elem.service_type+"</td><td>"+elem.status+"</td></tr>");
+            			});
+            	}	
+            },
+            error: function() {
+            	messageBlock.text('Oops! Some error occurred!');
+                messageModal.modal('show');
+            }
+          });
+      return false;
+
+    });
+    
+    
     $('.vin-form').on('submit', function() {
     	var table = $("#search-results tbody .search-detail");
     	table.remove(); 
@@ -158,7 +198,4 @@
       }
     });
     
-    $(document).ready(function() {
-
-    });
 })();

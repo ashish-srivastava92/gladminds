@@ -20,7 +20,8 @@ from gladminds.sqs_tasks import send_otp
 from gladminds import utils, message_template
 from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format,\
-    format_date_string, stringify_groups, search_details
+    format_date_string, stringify_groups, search_details,\
+    services_search_details
 from gladminds.sqs_tasks import export_asc_registeration_to_sap
 from gladminds.mail import sent_otp_email
 from gladminds.feed import SAPFeed
@@ -198,7 +199,8 @@ def exceptions(request, exception=None):
         function_mapping = {
             'customer' : get_customer_info,
             'recover' : recover_coupon_info,
-            'search' : search_details
+            'search' : search_details,
+            'status' : services_search_details
         }
         try:
             data = function_mapping[exception](request)
