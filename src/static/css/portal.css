@@ -48,15 +48,8 @@
 }
 
 .ellips{
-	 overflow:hidden;
-    -ms-text-overflow:ellipsis;
-    text-overflow:ellipsis;
-    width:100px;
-    height:1.2em;
+ width: 150px;
+ overflow: hidden;
 }
-.ellips:hover {
-    overflow:visible;
-    width:auto;
-    
-}
+
 

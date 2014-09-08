@@ -79,7 +79,7 @@
             "sender": "feed-report@gladminds.co",
             "reciever": "srv.sngh@gmail.com",
             "subject": "Feedback  with reference-no-{id}",
-            "body": "A GladMinds user has a {type} for us, which says:\n {message} \n Its has been reported by {reporter} on {created_date}.", 
+            "body": "A GladMinds user has a {type} for us, which says:\n {message}.\n It has been reported by {reporter} on {created_date}.", 
             "description": "Feedback  mail to Admin"
         }
     },    

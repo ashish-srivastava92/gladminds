@@ -253,4 +253,6 @@ function rootCause(status){
 	}
 }
 
-
+function showMessage(id){
+	$('#'+id).popover();	
+}

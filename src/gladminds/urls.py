@@ -5,7 +5,6 @@ from gladminds.resource import resources
 from gladminds.sqs_tasks import _tasks_map
 from gladminds.taskqueue import SqsHandler
 from gladminds.afterbuy import api_resource
-
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
@@ -14,7 +13,6 @@ api_v1 = Api(api_name="v1")
 api_v1.register(resources.GladmindsResources())
 api_v1.register(resources.UserResources())
 api_v1.register(api_resource.AfterBuyResources())
-
 
 urlpatterns = patterns('',
     url(r'^aftersell/(?P<provider>[a-zA-Z]+)/login/$', 'gladminds.views.auth_login', name='user_login'),

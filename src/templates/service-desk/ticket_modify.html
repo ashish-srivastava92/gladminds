@@ -80,7 +80,7 @@
                                     <div class="col-sm-9">
 	                                	<select class="form-control" name="status" id ="status" onchange="rootCause(this.options[this.selectedIndex].value)">
                                         	{% for type in FEEDBACK_STATUS %}
-                                            	<option {% if group == 'SDO' and type == 'Closed' %} disabled {% endif %} value="{{type}}">{{type}}</option>
+                                            	<option {% if type == feedback.status %} selected {% endif %} value="{{type}}">{{type}}</option>
                                             {% endfor %}
                                        	</select>
 									</div>
