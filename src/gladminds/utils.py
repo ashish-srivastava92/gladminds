@@ -261,7 +261,7 @@ def create_context(email_template_name, feedback_obj):
     created_date = feedback_obj.created_date
     data = get_email_template(email_template_name)
     data['newsubject'] = data['subject'].format(id=feedback_obj.id)
-    data['content'] = data['body'].format(type=feedback_obj.type, reporter=feedback_obj.reporter,
+    data['content'] = data['body'].format(id=feedback_obj.id, type=feedback_obj.type, reporter=feedback_obj.reporter,
                                           message=feedback_obj.message, created_date=convert_utc_to_local_time(created_date),
                                           assign_to=feedback_obj.assign_to, priority=feedback_obj.priority, remark="",
                                           root_cause=feedback_obj.root_cause, resolution=feedback_obj.resolution,

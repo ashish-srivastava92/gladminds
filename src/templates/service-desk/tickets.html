@@ -49,7 +49,7 @@
 				{% for feedback in feedbacks %}
 				<tr>
 					<td>{{feedback.reporter|default_if_none:""}}</td>
-					<td>{{feedback.id|default_if_none:""}}</td>
+					<td>GM-{{feedback.id|default_if_none:""}}</td>
 					<td>{{feedback.assign_to|default_if_none:""}}</td>
 					<td>
 					   <div class="ellips">
