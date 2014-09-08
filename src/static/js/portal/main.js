@@ -209,7 +209,10 @@
                 messageHeader.text('Save');
                 waitingModal.modal('hide');
                 messageModal.modal('show');
-                parent.window.location="/aftersell/servicedesk/";
+                setTimeout(function() {
+                	parent.window.location="/aftersell/servicedesk/";
+                }, 3000);
+                
             },
             error: function() {
                 messageBlock.text('Invalid Data');
