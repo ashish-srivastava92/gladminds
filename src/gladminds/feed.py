@@ -487,13 +487,12 @@ class ASCFeed(BaseFeed):
     def import_data(self):
         for dealer in self.data_source:
             asc_data = aftersell_common.RegisteredDealer.objects.filter(
-                                                    dealer_id=dealer['asc_id'])
+                                                dealer_id=dealer['asc_id'])
             if not asc_data:
                 asc_data = aftersell_common.RegisteredDealer(dealer_id=dealer['asc_id'],
                                     role='asc', address=dealer['address'])                
                 if dealer['dealer_id']:
-                    dealer_data = self.check_or_create_dealer(dealer_id=dealer['dealer_id'],
-                                            address=dealer['address'])
+                    dealer_data = self.check_or_create_dealer(dealer_id=dealer['dealer_id'])
                     asc_data.dependent_on=dealer['dealer_id']
                 try:
                     asc_data.save()

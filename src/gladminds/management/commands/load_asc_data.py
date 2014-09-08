@@ -14,7 +14,7 @@ class Command(BaseCommand):
 
     def upload_asc_data(self):
         print "Started running function..."
-        file_list = ['testData.csv']
+        file_list = ['DEALER_ASC_MATRIX.csv']
         file = open("newfile.txt", "w")
         asc_list = []
         
