@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.exceptions import DataNotFoundError
 from gladminds.utils import create_context, get_list_from_set,\
@@ -21,8 +20,13 @@ def get_feedbacks(user):
     return feedbacks
 
 
-def get_feedback(feedback_id):
-    return aftersell_common.Feedback.objects.get(id=feedback_id)
+def get_feedback(feedback_id, user):
+    group = user.groups.all()[0]
+    if group.name == 'SDO':
+        servicedesk_obj = aftersell_common.ServiceDeskUser.objects.filter(user=user)
+        return aftersell_common.Feedback.objects.filter(id=feedback_id,assign_to=servicedesk_obj[0])
+    else:
+        return aftersell_common.Feedback.objects.filter(id=feedback_id)
 
 
 def get_servicedesk_users(**filters):

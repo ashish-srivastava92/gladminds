@@ -1,14 +1,14 @@
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
-PROVIDERS = ['asc', 'dasc', 'dealer', 'desk']
+PROVIDERS = ['asc', 'dasc', 'dealer', 'helpdesk']
 
 PROVIDER_MAPPING = {'dealer' : 'dealer/login.html',
-                    'desk' : 'service-desk/login.html'}
+                    'helpdesk' : 'service-desk/login.html'}
 
 GROUP_MAPPING = {'dealers' : '/aftersell/dealer/login',
                  'ascs' : '/aftersell/asc/login',
                  'dascs' :'/aftersell/asc/login',
-                 'SDO' :'/aftersell/desk/login',
-                 'SDM' : '/aftersell/desk/login'}
+                 'SDO' :'/aftersell/helpdesk/login',
+                 'SDM' : '/aftersell/helpdesk/login'}
 
 USER_GROUPS = ['dealers', 'ascs', 'dascs', 'SDO', 'SDM']
 

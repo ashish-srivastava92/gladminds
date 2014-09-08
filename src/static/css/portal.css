@@ -46,3 +46,10 @@
 .report-table th {
 	text-align: center;
 }
+
+.ellips{
+ width: 150px;
+ overflow: hidden;
+}
+
+

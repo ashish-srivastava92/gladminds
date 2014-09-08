@@ -80,7 +80,7 @@
                                     <div class="col-sm-9">
 	                                	<select class="form-control" name="status" id ="status" onchange="rootCause(this.options[this.selectedIndex].value)">
                                         	{% for type in FEEDBACK_STATUS %}
-                                            	<option {% if group == 'SDO' and type == 'Closed' %} disabled {% endif %} value="{{type}}">{{type}}</option>
+                                            	<option {% if type == feedback.status %} selected {% endif %} value="{{type}}">{{type}}</option>
                                             {% endfor %}
                                        	</select>
 									</div>
@@ -134,7 +134,7 @@
                                    <div class="col-sm-offset-3 col-sm-9">
                                           <button type="submit" class="btn btn-primary">Save</button>
                                           <a class="logout" href="/aftersell/servicedesk/"> 
-                                              <button type="button" class="btn btn-default">Cancle</button>
+                                              <button type="button" class="btn btn-default">Cancel</button>
                                            </a>
                                   </div>
                               </div> 
