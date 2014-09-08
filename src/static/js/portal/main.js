@@ -174,7 +174,6 @@
                 messageHeader.text('Thanks');
                 waitingModal.modal('hide');
                 messageModal.modal('show');
-              
             },
             error: function() {
                 messageBlock.text('Invalid Data');
@@ -210,7 +209,7 @@
                 messageHeader.text('Save');
                 waitingModal.modal('hide');
                 messageModal.modal('show');
-                
+                parent.window.location="/aftersell/servicedesk/";
             },
             error: function() {
                 messageBlock.text('Invalid Data');
@@ -238,10 +237,14 @@
 
 function rootCause(status){
 	if (status === 'Resolved'){
-		$('#rootcause').removeClass('hide');
-		$('#resolution').removeClass('hide');
+		$('.rootcause').removeClass('hide');
+		$('.resolution').removeClass('hide');
+		$('.root-cause').attr('required', true);
+		$('.ticket-resolution').attr('required', true);
 	}else {
-		$('#rootcause').addClass('hide');
-		$('#resolution').addClass('hide');
+		$('.rootcause').addClass('hide');
+		$('.resolution').addClass('hide');
+		$('.root-cause').attr('required', false);
+		$('.ticket-resolution').attr('required', false);
 	}
 }
