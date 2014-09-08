@@ -106,7 +106,7 @@
                     messageBlock.text(data.message);
                     messageModal.modal('show');
             	}
-            	else if (service_detail.length > 0) {
+            	if (service_detail.length > 0) {
             		var details_html = "<div class='other-details'><label class='control-label'>VIN:&nbsp</label>"+ other_details.vin +"<br><label class='control-label'>Customer Id:&nbsp</label>"+ other_details.customer_id +"<br><label class='control-label'>Customer Name:&nbsp</label>"+ other_details.customer_name +"</div>",
             			table = $(".status-search-results tbody");
             			$('.status-result-detail').append(details_html);

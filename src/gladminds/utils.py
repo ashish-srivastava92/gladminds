@@ -284,7 +284,7 @@ def services_search_details(request):
     elif data.has_key('Customer-ID'):
         kwargs[ 'sap_customer_id' ] = data['Customer-ID']
     product_obj = common.ProductData.objects.filter(**kwargs)
-    if len(product_obj):
+    if len(product_obj) == 1:
         try:
             coupon_obj = common.CouponData.objects.filter(vin=product_obj[0]).order_by('status')
             for coupon in coupon_obj:
