@@ -85,6 +85,42 @@
       return false;
     });
 
+    $('.service-status-search').on('submit', function() {
+    	var table = $(".status-search-results tbody .search-detail");
+    		table.remove(); 
+    	var value = $('.status-search-value').val(),
+	        field = $('.status-search-field').val(),
+	        messageModal = $('.modal.message-modal'),
+	        messageBlock = $('.modal-body', messageModal),
+	        data = {};
+    	data[field] =  value;
+    	var jqXHR = $.ajax({
+            type: 'POST',
+            url: '/aftersell/exceptions/status',
+            data: data,
+            success: function(data){
+              if (data['message']) {
+                    messageBlock.text(data.message);
+                    messageModal.modal('show');
+              }
+              else if (data.length > 0) {
+              	var table = $(".status-search-results tbody");
+                  $.each(data, function(idx, elem){
+                      table.append("<tr class='search-detail'><td>"+elem.service_type+"</td><td>"+elem.status+"</td></tr>");
+                  });
+              }	
+
+            },
+            error: function() {
+            	messageBlock.text('Oops! Some error occurred!');
+                messageModal.modal('show');
+            }
+          });
+      return false;
+
+    });
+    
+    
     $('.vin-form').on('submit', function() {
     	var table = $("#search-results tbody .search-detail");
     	table.remove(); 
@@ -158,7 +194,4 @@
       }
     });
     
-    $(document).ready(function() {
-
-    });
 })();
