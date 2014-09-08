@@ -286,7 +286,7 @@ def services_search_details(request):
     product_obj = common.ProductData.objects.filter(**kwargs)
     if len(product_obj) == 1:
         try:
-            coupon_obj = common.CouponData.objects.filter(vin=product_obj[0]).order_by('status')
+            coupon_obj = common.CouponData.objects.filter(vin=product_obj[0]).order_by('service_type')
             for coupon in coupon_obj:
                 temp = {}
                 temp['service_type'] = coupon.service_type
