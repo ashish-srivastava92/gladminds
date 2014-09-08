@@ -35,9 +35,3 @@ class AfterBuyIntegrationTests(ResourceTestCase):
         uri = '/v1/users/?accessToken=%s'%(self.access_token)
         response = self.api_client.get(uri, format='json')
         self.assertValidJSONResponse(response)
-
-    def test_audit_api(self):
-        uri = '/v1/audit/'
-        response = self.api_client.get(uri, format='json')
-        self.assertValidJSONResponse(response)
-        
