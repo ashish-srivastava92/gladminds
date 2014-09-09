@@ -284,13 +284,8 @@ def export_close_coupon_data(*args, **kwargs):
 
 @shared_task
 def export_coupon_redeem_to_sap(*args, **kwargs):
-#     today = datetime.now().date()
-    today = datetime.now()
-    start_date = today - timedelta(days=1)
-    end_date = today
     redeem_obj = feed.CouponRedeemFeedToSAP()
-    feed_export_data = redeem_obj.export_data(
-        start_date=start_date, end_date=end_date)
+    feed_export_data = redeem_obj.export_data()
     if len(feed_export_data[0]) > 0:
         coupon_redeem = exportfeed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
                        'username'], password=settings.SAP_CRM_DETAIL['password'],
