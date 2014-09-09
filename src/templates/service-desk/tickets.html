@@ -2,7 +2,7 @@
 
 {% block body %}
 
-<div class="navbar navbar-fixed-top " >
+<div class="navbar navbar-fixed-top">
 	<div class ="row">
 		<div class= "col-md-10">
 			<div class="navbar-inner">
@@ -31,29 +31,31 @@
 		<table id="gladmindDesk" class="table table-striped table-bordered" >
         <thead>
 				<tr>
+				    <th>Ticket</th>
 					<th>Reporter</th>
-					<th>Ticket Id</th>
 					<th>Assignee</th>
 					<th>Message</th>
-					<th>Subject</th>
 					<th>Priority</th>
 					<th>Type</th>
 					<th>Status</th>
-					<th>Created Date</th>
-					<th>Resolved Date</th>
-					<th>Due Date</th>
-					<th>Edit</th>
+					<th>Created</th>
+					<th>Resolved</th>
+					<th>Due</th>
 				</tr>
 			</thead>
         <tbody>
 				{% for feedback in feedbacks %}
-				<tr>
+				<tr> 
+				    <td>
+				       <a href="/aftersell/feedbackdetails/{{feedback.id}}/">
+							GM-{{feedback.id|default_if_none:""}}
+						</a>  
+					</td>
 					<td>{{feedback.reporter|default_if_none:""}}</td>
-					<td>GM-{{feedback.id|default_if_none:""}}</td>
 					<td>{{feedback.assign_to|default_if_none:""}}</td>
 					<td>
 					   <div class="ellips">
-					        <a id="{{feedback.id}}" class="btn" href="#" data-content="{{feedback.message|default_if_none:""}}" rel="popover" data-placement="bottom" data-trigger="hover"  onmouseover="showMessage({{feedback.id}})">
+					        <a id="{{feedback.id}}" class="btn alignleft" href="#" data-content="{{feedback.message|default_if_none:""}}" rel="popover" data-placement="bottom" data-trigger="hover"  onmouseover="showMessage({{feedback.id}})">
 					           {% if feedback.message|length > 20 %}
 					                {{feedback.message|slice:"20"|default_if_none:""}}....
 					           {% else  %}
@@ -62,21 +64,13 @@
                             </a>
                        </div>
                    </td>
-					<td>{{feedback.subject|default_if_none:""}}</td>
 					<td>{{feedback.priority|default_if_none:""}}</td>
 					<td>{{feedback.type|default_if_none:""}}</td>
 					<td>{{feedback.status|default_if_none:""}}</td>
 					<td>{{feedback.created_date|default_if_none:""}}</td>
 					<td>{{feedback.resolved_date|default_if_none:""}}</td>
 					<td>{{feedback.due_date|default_if_none:""}}</td>
-					<td>
-						<a href="/aftersell/feedbackdetails/{{feedback.id}}/">
-							<button type="button" class="btn btn-primary btn-sm">
-								<span class="glyphicon glyphicon-edit"></span> Edit
-							</button>
-						</a>
-					</td>
-				</tr>
+			</tr>
 				{% endfor %}
 			</tbody>
 		</table>
