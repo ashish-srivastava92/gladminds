@@ -258,11 +258,9 @@ function rootCause(status){
 		$('.root-cause').attr('required', false);
 		$('.ticket-resolution').attr('required', false);
 	}
+	$('.assignee').attr('required', false);
 	if (status != 'Open'){
 		$('.assignee').attr('required', true);
-	}
-	else{
-		$('.assignee').attr('required', false);
 	}
 }
 
