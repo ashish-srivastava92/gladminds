@@ -248,11 +248,7 @@
 
 function rootCause(status){
 	
-	var rootcause = $('.rootcause');
-	var resolution = $('.resolution'); 
-	var root_cause = $('.root-cause'); 
-	var ticket_resolution = $('.ticket-resolution');
-	var assignee = $('.assignee'); 
+	var rootcause = $('.rootcause'), resolution = $('.resolution'), root_cause = $('.root-cause'), ticket_resolution = $('.ticket-resolution'), assignee = $('.assignee'); 
 	
 	assignee.attr('required', false);
 	rootcause.addClass('hide');
