@@ -88,46 +88,46 @@
 								<div class="form-group hide rootcause">
                      	            <label class="col-sm-3 control-label" for="rootcause" >Root cause</label>
                                     <div class="col-sm-9">
-                                  	   	<textarea class="form-control root-cause" name="rootcause" value = "{{feedback.root_cause}}" /></textarea>
+                                  	   	<textarea class="form-control root-cause" name="rootcause" value = "{{feedback.root_cause|default_if_none:""}}" /></textarea>
                                		</div>
                                </div>
                                
                                <div class="form-group hide resolution">
                      	            <label class="col-sm-3 control-label" for="resolution" >Resolution</label>
                                     <div class="col-sm-9">
-                                  	   	<textarea class="form-control ticket-resolution" name="resolution" value = "{{feedback.resolution}}" /></textarea>
+                                  	   	<textarea class="form-control ticket-resolution" name="resolution" value = "{{feedback.resolution|default_if_none:""}}" /></textarea>
                                		</div>
                                </div>
                                
                                <div class="form-group">
                                     <label class="col-sm-3 control-label" for="Subject">Subject</label>
                                     <div class="col-sm-9">
-                                    	<input type="textarea" class="form-control"  value={{feedback.subject}} readonly>
+                                    	<input type="textarea" class="form-control"  value={{feedback.subject|default_if_none:""}} readonly>
                                    </div>
                                </div>
                                <div class="form-group">
                                     <label class="col-sm-3 control-label" for="Message">Message</label>
                                     <div class="col-sm-9">
-                                         <textarea  class="form-control"  value={{feedback.message}} readonly>{{feedback.message}}</textarea>
+                                         <textarea  class="form-control"  value={{feedback.message|default_if_none:""}} readonly>{{feedback.message}}</textarea>
                                     </div>
                                </div>
                                <div class="form-group">
     								<label class="col-sm-3 control-label" for="resolved_date">Resolved Date</label>
     								<div class="col-sm-9">
-    									 <input type="datetime" class="form-control" name="resolved_date" readonly value="{{feedback.resolved_date}}">
+    									 <input type="datetime" class="form-control" name="resolved_date" readonly value="{{feedback.resolved_date|default_if_none:""}}">
    									</div>
   								</div>
   
 								<div class="form-group">
   									<label class="col-sm-3 control-label" for="due_date">Due Date</label>
     								<div class="col-sm-9">
-    									 <input type="datetime" class="form-control" name="due_date" readonly value="{{feedback.due_date}}" >
+    									 <input type="datetime" class="form-control" name="due_date" readonly value="{{feedback.due_date|default_if_none:""}}" >
    									</div>
 								</div>
 							   <div class="form-group " id="comments">
                      	            <label class="col-sm-3 control-label" for="comments" >Comments</label>
                                     <div class="col-sm-9">
-                                  	   	<textarea class="form-control" name="comments" value = "{{feedback_comment.comments}}" /></textarea>
+                                  	   	<textarea class="form-control" name="comments" value = "{{feedback_comment.comments|default_if_none:""}}" /></textarea>
                                		</div>
                               </div>	
                               <div class="form-group">
