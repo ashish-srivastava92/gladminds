@@ -105,7 +105,7 @@ class DealerForm(ModelForm):
 class DealerAdmin(ModelAdmin):
     form = DealerForm
     search_fields = ('dealer_id',)
-    list_display = ('dealer_id', 'address')
+    list_display = ('dealer_id', 'role', 'dependent_on', 'address')
 #    list_display = ('dealer_id', 'address', 'service_advisor_id')
 #     inlines = (SAInline,)
 #
