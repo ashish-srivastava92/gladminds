@@ -109,6 +109,10 @@ class SAPFeed(object):
             asc_obj = ASCFeed(data_source=data_source,
                                                feed_remark=feed_remark)
             return asc_obj.import_data()
+        elif feed_type == 'old_fsc':
+            fsc_obj = OldFscFeed(data_source=data_source,
+                                               feed_remark=feed_remark)
+            return fsc_obj.import_data()
 
 
 class BaseFeed(object):
@@ -389,8 +393,8 @@ class ProductServiceFeed(BaseFeed):
 class CouponRedeemFeedToSAP(BaseFeed):
 
     def export_data(self, start_date=None, end_date=None):
-        results = common.CouponData.objects.filter(closed_date__range=(
-            start_date, end_date), status=2).select_related('vin', 'customer_phone_number__phone_number')
+        results = common.CouponData.objects.filter(sent_to_sap=0,
+                            status=2).select_related('vin', 'customer_phone_number__phone_number')
         items = []
         total_failed = 0
         item_batch = {
@@ -532,3 +536,24 @@ class CustomerRegistationFeedToSAP(BaseFeed):
                 logger.error("error on customer info from db %s" % str(ex))
                 total_failed = total_failed + 1
         return items, item_batch, total_failed
+    
+class OldFscFeed(BaseFeed):
+    
+    def import_data(self):
+        for fsc in self.data_source:
+            try:
+                coupon_data = common.CouponData.objects.get(
+                vin__vin=fsc['vin'], service_type=int(fsc['service']))
+                coupon_data.status = 2
+                time_stamp = datetime.strptime(fsc['time_stamp'], '%Y-%m-%d%H%M%S').strftime('%Y-%m-%d %H:%M')
+                coupon_data.closed_date = time_stamp
+                coupon_data.sent_to_sap = True
+                dealer_data = self.check_or_create_dealer(dealer_id=fsc['dealer'])
+                coupon_data.servicing_dealer = dealer_data
+                coupon_data.save()
+            except Exception as ex:
+                ex = "[Exception: OLD_FSC_FEED]: For VIN {0} coupon of service type {1}:: {2}".format(
+                            fsc['vin'], fsc['service'], ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+        return self.feed_remark

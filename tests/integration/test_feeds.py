@@ -265,3 +265,21 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         asc = RegisteredASC.objects.get(asc_id='ASC001')
         self.assertEquals('xyz', asc.asc_name)
         
+    def test_old_fsc_feed(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+        
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/old_fsc_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+        
+        coupon_data = CouponData.objects.filter(vin__vin='XXXXXXXXXX', service_type=2)
+        self.assertEquals(coupon_data[0].status, 2)

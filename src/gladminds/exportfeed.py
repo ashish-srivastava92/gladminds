@@ -42,6 +42,9 @@ class ExportCouponRedeemFeed(BaseExportFeed):
                 ITEM=[item], ITEM_BATCH=item_batch)
             if result[1]['I_STATUS'] == 'SUCCESS':
                 export_status = True
+                coupon = common.CouponData.objects.get(item['GCP_UCN_NO'])
+                coupon.sent_to_sap = True
+                coupon.save()
                 logger.error("Sent the details of coupon {0} to sap".format(item['GCP_UCN_NO']))
             else:
                 total_failed = total_failed + 1

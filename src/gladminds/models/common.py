@@ -232,6 +232,7 @@ class CouponData(models.Model):
     order = models.PositiveIntegerField(default=0)
     extended_date = models.DateTimeField(null=True, blank=True)
     servicing_dealer = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
+    sent_to_sap = models.BooleanField(default=False)
 
     class Meta:
         app_label = "gladminds"
