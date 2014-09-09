@@ -50,7 +50,7 @@
 	margin-bottom: 20px;
 	padding: 15px 0px 0px 61px;
 }
-.alignleft{
+.gladdesk-message{
 	padding-left:0px;
 	padding-top:0px;
 	
@@ -65,7 +65,7 @@
  overflow: hidden;
 }
 
-.input-sm{ 
+#gladmindDesk_filter .input-sm{ 
 	margin-left:5px; !important
 	
 }
