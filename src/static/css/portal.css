@@ -50,6 +50,11 @@
 	margin-bottom: 20px;
 	padding: 15px 0px 0px 61px;
 }
+.gladdesk-message{
+	padding-left:0px;
+	padding-top:0px;
+	
+}
 
 .report-table th {
 	text-align: center;
@@ -60,7 +65,7 @@
  overflow: hidden;
 }
 
-.alignleft{
-	padding-left:0px;
+#gladmindDesk_filter .input-sm{ 
+	margin-left:5px; !important
+	
 }
-

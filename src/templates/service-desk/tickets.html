@@ -55,7 +55,7 @@
 					<td>{{feedback.assign_to|default_if_none:""}}</td>
 					<td>
 					   <div class="ellips">
-					        <a id="{{feedback.id}}" class="btn alignleft" href="#" data-content="{{feedback.message|default_if_none:""}}" rel="popover" data-placement="bottom" data-trigger="hover"  onmouseover="showMessage({{feedback.id}})">
+					        <a id="{{feedback.id}}" class="btn gladdesk-message" href="#" data-content="{{feedback.message|default_if_none:""}}" rel="popover" data-placement="bottom" data-trigger="hover"  onmouseover="showMessage({{feedback.id}})">
 					           {% if feedback.message|length > 20 %}
 					                {{feedback.message|slice:"20"|default_if_none:""}}....
 					           {% else  %}
