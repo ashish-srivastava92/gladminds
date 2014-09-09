@@ -247,16 +247,27 @@
 })();
 
 function rootCause(status){
+	
+	var rootcause = $('.rootcause'),
+	    resolution = $('.resolution'),
+	    root_cause = $('.root-cause'),
+	    ticket_resolution = $('.ticket-resolution'),
+	    assignee = $('.assignee'); 
+	
+	assignee.attr('required', false);
+	rootcause.addClass('hide');
+	resolution.addClass('hide');
+	root_cause.attr('required', false);
+	ticket_resolution.attr('required', false);
+	
 	if (status === 'Resolved'){
-		$('.rootcause').removeClass('hide');
-		$('.resolution').removeClass('hide');
-		$('.root-cause').attr('required', true);
-		$('.ticket-resolution').attr('required', true);
-	}else {
-		$('.rootcause').addClass('hide');
-		$('.resolution').addClass('hide');
-		$('.root-cause').attr('required', false);
-		$('.ticket-resolution').attr('required', false);
+	  rootcause.removeClass('hide');
+	  resolution.removeClass('hide');
+	  root_cause.attr('required', true);
+	  ticket_resolution.attr('required', true);
+	}
+	if (status != 'Open'){
+		assignee.attr('required', true);
 	}
 }
 

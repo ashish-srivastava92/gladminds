@@ -50,7 +50,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
     if assign is None:
         assign_status = True
 
-    if data['Assign_To'] == 'None':
+    if data['Assign_To'] == '':
         feedback_obj.status = data['status']
         feedback_obj.priority = data['Priority']
     else:
