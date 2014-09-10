@@ -1,7 +1,11 @@
 /***** Changing body styling issue need to be fixed   *******/
 
-.navbar-fixed-top{
+.navbar-fixed-top {
 	position:absolute;
+}
+
+li {
+	list-style: none;
 }
 
 /****** End of body styling ******/
@@ -60,24 +64,22 @@
 	text-align: center;
 }
 
-.ellips{
+.ellips {
   width: 150px;
   text-overflow: ellipsis;
   display: block;
   overflow: hidden;
   white-space: nowrap;
- 
 }
 
-#gladmindDesk_filter .input-sm{ 
+#gladmindDesk_filter .input-sm { 
 	margin-left:5px; !important
-	
 }
 
 textarea {
   resize: none;
 }
 
-.style-username{
-	margin-top:15px;
+.style-username {
+    margin-top:15px;
 }

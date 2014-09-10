@@ -11,7 +11,7 @@
 			</div>
 		</div>
 		<div class= "col-md-2">
-		  <li type="none" class="dropdown style-username">
+		  <li class="dropdown style-username">
              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{request.user.username}} <b class="caret"></b></a>
              <ul class="dropdown-menu">
                <li><a href="/aftersell/provider/logout">Logout</a></li>
@@ -61,7 +61,9 @@
 					<td>
 					   <div>
 					       {% if feedback.message|length > 20 %}
-					        <span id="{{feedback.id}}" class="btn gladdesk-message ellips" data-content="{{feedback.message|default_if_none:""}}" rel="popover" data-placement="bottom" data-trigger="hover"  onmouseover="showMessage({{feedback.id}})">
+					         <span id="{{feedback.id}}" class="btn gladdesk-message ellips" 
+					            data-content="{{feedback.message|default_if_none:""}}" rel="popover" 
+					            data-placement="bottom" data-trigger="hover"  onmouseover="showMessage({{feedback.id}})">
 					              {{feedback.message}}
 					       {% else  %}
                                   {{feedback.message}}
