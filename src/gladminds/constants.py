@@ -4,11 +4,11 @@ PROVIDERS = ['asc', 'dasc', 'dealer', 'helpdesk']
 PROVIDER_MAPPING = {'dealer' : 'dealer/login.html',
                     'helpdesk' : 'service-desk/login.html'}
 
-GROUP_MAPPING = {'dealers' : '/aftersell/dealer/',
-                 'ascs' : '/aftersell/asc/',
-                 'dascs' :'/aftersell/asc/',
-                 'SDO' :'/aftersell/helpdesk/',
-                 'SDM' : '/aftersell/helpdesk/'}
+GROUP_MAPPING = {'dealers' : '/aftersell/dealer/login',
+                 'ascs' : '/aftersell/asc/login',
+                 'dascs' :'/aftersell/asc/login',
+                 'SDO' :'/aftersell/helpdesk/login',
+                 'SDM' : '/aftersell/helpdesk/login'}
 
 USER_GROUPS = ['dealers', 'ascs', 'dascs', 'SDO', 'SDM']
 
