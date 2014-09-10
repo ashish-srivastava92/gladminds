@@ -21,7 +21,7 @@ ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
-
+LOGIN_URL = '/aftersell/dealer/'
 COUPON_VALID_DAYS = 30
 
 TOTP_SECRET_KEY = '93424'

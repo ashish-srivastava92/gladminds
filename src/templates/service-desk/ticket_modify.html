@@ -16,9 +16,13 @@
 	           </div>
 	      </div>
           <div class= "col-md-2">
-                 <a class="logout" href="/aftersell/provider/logout">Logout
-                 </a>
-          </div>	
+              <li class="dropdown style-username">
+                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{request.user.username}} <b class="caret"></b></a>
+                 <ul class="dropdown-menu">
+                   <li><a href="/aftersell/provider/logout">Logout</a></li>
+                 </ul>
+             </li>
+        </div>	
 	</div>
 </div>
 
