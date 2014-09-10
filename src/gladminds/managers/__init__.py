@@ -129,5 +129,5 @@ def save_update_feedback(feedback_obj, data, user,  host):
             wait = end_date - start_date
             wait_time = wait.total_seconds() 
             wait_final = wait_time - feedback_obj.wait_time
-            feedback_obj.wait_time = wait_final
+            feedback_obj.wait_time = wait_final 
             feedback_obj.save()

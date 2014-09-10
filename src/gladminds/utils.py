@@ -343,7 +343,7 @@ def set_wait_time(feedback_data):
     start_date = datetime.datetime.strptime(start_date, TIME_FORMAT)
     end_date = datetime.datetime.strptime(end_date, TIME_FORMAT)
     wait = end_date - start_date
-    wait_time = float(wait.days) + float(wait.seconds) / float(86400)
+    wait_time = wait.total_seconds() 
     previous_wait = feedback_data.wait_time
     aftersell_common.Feedback.objects.filter(id=feedback_data.id).update(wait_time=wait_time+previous_wait)
 
