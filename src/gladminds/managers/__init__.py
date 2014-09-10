@@ -2,7 +2,7 @@ from datetime import datetime
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.exceptions import DataNotFoundError
 from gladminds.utils import create_context, get_list_from_set,\
-    get_start_and_end_date, set_wait_time
+    get_start_and_end_date, set_wait_time, convert_utc_to_local_time
 from gladminds import mail
 from gladminds.sqs_tasks import send_sms
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
@@ -119,6 +119,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
         feedback_end_date = aftersell_common.Feedback.objects.get(
                                                     id=feedback_obj.id)
         end_date = feedback_end_date.resolved_date
+        end_date = convert_utc_to_local_time(end_date)
         start_date, end_date = get_start_and_end_date(start_date,
                                                      end_date, TIME_FORMAT)
         if start_date > end_date:
@@ -126,7 +127,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
              Resolved date should be after the created date')
         else:
             wait = end_date - start_date
-            wait_time = float(wait.days) + float(wait.seconds) / float(86400)
-            wait_final = float(wait_time) - feedback_obj.wait_time
+            wait_time = wait.total_seconds() 
+            wait_final = wait_time - feedback_obj.wait_time
             feedback_obj.wait_time = wait_final
             feedback_obj.save()

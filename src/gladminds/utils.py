@@ -265,7 +265,7 @@ def create_context(email_template_name, feedback_obj):
                                           message=feedback_obj.message, created_date=convert_utc_to_local_time(created_date),
                                           assign_to=feedback_obj.assign_to, priority=feedback_obj.priority, remark="",
                                           root_cause=feedback_obj.root_cause, resolution=feedback_obj.resolution,
-                                          due_date="")
+                                          due_date="",resolution_time=total_time_spent(feedback_obj.wait_time))
 
     return data
 
@@ -337,6 +337,7 @@ def get_min_and_max_filter_date():
 def set_wait_time(feedback_data):
     start_date = feedback_data.pending_from
     end_date = datetime.datetime.now()
+    start_date = convert_utc_to_local_time(start_date)
     start_date = start_date.strftime(TIME_FORMAT)
     end_date = end_date.strftime(TIME_FORMAT)
     start_date = datetime.datetime.strptime(start_date, TIME_FORMAT)
@@ -351,3 +352,11 @@ def convert_utc_to_local_time(date):
     timezone = pytz.timezone(TIMEZONE)
     return date.astimezone(timezone).replace(tzinfo=None)
  
+def total_time_spent(wait_time):
+    minutes, seconds = divmod(wait_time, 60)
+    hours, minutes = divmod(minutes, 60)
+    days, hours = divmod(hours, 24)
+    weeks, days = divmod(days, 7)
+    return " {0} days ,{1}:{2}:{3}" .format(int(days),int(hours),int(minutes),int(seconds))
+    
+    
