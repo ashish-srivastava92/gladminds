@@ -119,10 +119,10 @@ def update_pass(request):
         password = request.POST['password']
         utils.update_pass(otp, password)
         logger.info('Password has been updated.')
-        return HttpResponseRedirect('/aftersell/asc?update=true')
+        return HttpResponseRedirect('/aftersell/asc/login?update=true')
     except:
         logger.error('Password update failed.')
-        return HttpResponseRedirect('/aftersell/asc?error=true')
+        return HttpResponseRedirect('/aftersell/asc/login?error=true')
 
 
 def redirect_user(request):
