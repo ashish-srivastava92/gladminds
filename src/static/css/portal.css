@@ -61,8 +61,12 @@
 }
 
 .ellips{
- width: 150px;
- overflow: hidden;
+  width: 150px;
+  text-overflow: ellipsis;
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+ 
 }
 
 #gladmindDesk_filter .input-sm{ 
@@ -72,4 +76,8 @@
 
 textarea {
   resize: none;
+}
+
+.style-username{
+	margin-top:15px;
 }

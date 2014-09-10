@@ -15,7 +15,8 @@ api_v1.register(resources.UserResources())
 api_v1.register(api_resource.AfterBuyResources())
 
 urlpatterns = patterns('',
-    url(r'^aftersell/(?P<provider>[a-zA-Z]+)/login/$', 'gladminds.views.auth_login', name='user_login'),
+    url(r'^aftersell/servicedesk/$', 'gladminds.views.servicedesk_views.get_servicedesk_tickets', name='get_servicedesk_tickets'),                  
+    url(r'^aftersell/(?P<provider>[a-zA-Z]+)/$', 'gladminds.views.auth_login', name='user_login'),
     url(r'^aftersell/provider/logout$', 'gladminds.views.user_logout', name='user_logout'),
     url(r'api/doc/', include('tastypie_swagger.urls', namespace='tastypie_swagger')),
     url(r'^aftersell/provider/redirect$', 'gladminds.views.redirect_user'),
@@ -28,7 +29,6 @@ urlpatterns = patterns('',
     url(r'^aftersell/users/otp/validate', 'gladminds.views.validate_otp', name='validate_otp'),
     url(r'^aftersell/users/otp/update_pass', 'gladminds.views.update_pass', name='update_pass'),
     url(r'^aftersell/asc/self-register/$', 'gladminds.views.asc_registration'),
-    url(r'^aftersell/servicedesk/$', 'gladminds.views.servicedesk_views.get_servicedesk_tickets', name='get_servicedesk_tickets'),
     url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/$', 'gladminds.views.servicedesk_views.modify_servicedesk_tickets', name='modify_servicedesk_tickets'),
     url(r'^aftersell/feedbackresponse/(?P<feedback_id>\d+)/$', 'gladminds.views.servicedesk_views.get_feedback_response', name='get_feedback_response'),
     #Afterbuy accesstoken URL.

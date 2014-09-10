@@ -11,7 +11,12 @@
 			</div>
 		</div>
 		<div class= "col-md-2">
-			<a class="logout" href="/aftersell/provider/logout">Logout</a>
+		  <li type="none" class="dropdown style-username">
+             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{request.user.username}} <b class="caret"></b></a>
+             <ul class="dropdown-menu">
+               <li><a href="/aftersell/provider/logout">Logout</a></li>
+             </ul>
+          </li>
 		</div>	
 	</div>
 </div>
@@ -54,14 +59,14 @@
 					<td>{{feedback.reporter|default_if_none:""}}</td>
 					<td>{{feedback.assign_to|default_if_none:""}}</td>
 					<td>
-					   <div class="ellips">
-					        <a id="{{feedback.id}}" class="btn gladdesk-message" href="#" data-content="{{feedback.message|default_if_none:""}}" rel="popover" data-placement="bottom" data-trigger="hover"  onmouseover="showMessage({{feedback.id}})">
-					           {% if feedback.message|length > 20 %}
-					                {{feedback.message|slice:"20"|default_if_none:""}}....
-					           {% else  %}
+					   <div>
+					       {% if feedback.message|length > 20 %}
+					        <span id="{{feedback.id}}" class="btn gladdesk-message ellips" data-content="{{feedback.message|default_if_none:""}}" rel="popover" data-placement="bottom" data-trigger="hover"  onmouseover="showMessage({{feedback.id}})">
+					              {{feedback.message}}
+					       {% else  %}
                                   {{feedback.message}}
-                               {% endif %}
-                            </a>
+                           {% endif %}
+                            </span>
                        </div>
                    </td>
 					<td>{{feedback.priority|default_if_none:""}}</td>
