@@ -336,7 +336,7 @@ class GladmindsResources(Resource):
         try:
             vin = self.get_vin(sap_customer_id)
             coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
-            if coupon_object.status == 2:
+            if coupon_object.status == 2 or coupon_object.status == 6:
                 message=templates.get_template('COUPON_ALREADY_CLOSED')
             else:
                 customer_phone_number = coupon_object.vin.customer_phone_number.phone_number

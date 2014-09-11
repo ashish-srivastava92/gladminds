@@ -226,8 +226,8 @@ def create_report(method, query_params, user):
     report_data = []
     filter = {}
     params = {}
-    args = { Q(status=4) | Q(status=2) }
-    status_options = {'4': 'In Progress', '2':'Closed'}
+    args = { Q(status=4) | Q(status=2) | Q(status=6)}
+    status_options = {'6': 'Closed Old Fsc', '4': 'In Progress', '2':'Closed'}
     user = afterbuy_common.RegisteredDealer.objects.filter(dealer_id=user)
     filter['servicing_dealer'] = user[0]
     params['min_date'], params['max_date'] = utils.get_min_and_max_filter_date() 
