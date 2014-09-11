@@ -276,6 +276,8 @@ def search_details(request):
 
 def services_search_details(request):
     data = request.POST
+    key = data.keys()
+    message = '''No Service Details available for {0} '{1}'.'''.format(key[0], data[key[0]])
     kwargs = {}
     response = {}
     search_results = []
@@ -283,25 +285,29 @@ def services_search_details(request):
         kwargs[ 'vin' ] = data['VIN']
     elif data.has_key('Customer-ID'):
         kwargs[ 'sap_customer_id' ] = data['Customer-ID']
+        
     product_obj = common.ProductData.objects.filter(**kwargs)
     if len(product_obj) == 1:
+        if not product_obj[0].product_purchase_date:
+            return {'message': message}
         try:
             coupon_obj = common.CouponData.objects.filter(vin=product_obj[0]).order_by('service_type')
-            for coupon in coupon_obj:
-                temp = {}
-                temp['service_type'] = coupon.service_type
-                temp['status'] = STATUS_CHOICES[coupon.status - 1][1]
-                search_results.append(temp)
-            response['search_results'] = search_results
-            response['other_details'] = {'vin': product_obj[0].vin, 'customer_id': product_obj[0].sap_customer_id,\
-                                         'customer_name': product_obj[0].customer_phone_number.customer_name}
-            return response
+            if len(coupon_obj) > 0:
+                for coupon in coupon_obj:
+                    temp = {}
+                    temp['service_type'] = coupon.service_type
+                    temp['status'] = STATUS_CHOICES[coupon.status - 1][1]
+                    search_results.append(temp)
+                response['search_results'] = search_results
+                response['other_details'] = {'vin': product_obj[0].vin, 'customer_id': product_obj[0].sap_customer_id,\
+                                             'customer_name': product_obj[0].customer_phone_number.customer_name}
+                return response
+            else:
+                return {'message': message}
         except Exception as ex:
             logger.log(ex)
             return {'message': ex}
     else:
-        key = data.keys()
-        message = '''Details for {0} '{1}' not found.'''.format(key[0], data[key[0]])
         return {'message': message}
     
 def get_search_query_params(request, class_self):
