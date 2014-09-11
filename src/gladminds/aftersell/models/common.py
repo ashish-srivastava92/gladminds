@@ -120,9 +120,11 @@ class ServiceDeskUser(models.Model):
     
     def __unicode__(self):
         return self.phone_number
-    
+
+
 class Feedback(models.Model):
     reporter = models.CharField(max_length=15)
+    reporter_name = models.CharField(max_length=30)
     reporter_email_id = models.CharField(max_length=50, null=True, blank= True)
     assign_to = models.ForeignKey(ServiceDeskUser, null=True, blank= True)
     message = models.CharField(max_length=512, null=True, blank=False)

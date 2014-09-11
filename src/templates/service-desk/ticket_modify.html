@@ -63,7 +63,7 @@
 							<div class="form-group">
                      			<label class="col-sm-4 control-label" for="reporter">Reporter</label>
                         		<div class="col-sm-8">
-                        			<input type="text" class="form-control"  value='{{feedback.reporter|default_if_none:""}}' readonly >
+                        			<input type="text" class="form-control"  value='{{feedback.reporter_name|default_if_none:""}} ({{feedback.reporter|default_if_none:""}})' readonly >
                         		</div>
                     		</div>
 						</div>
@@ -74,7 +74,7 @@
                         			<select class="form-control assignee" name="Assign_To"   {% if group == 'SDO' %} readonly {% endif %}  >
                             			<option value=""></option>
                                			{% for type in servicedeskuser %}
-                      	          			<option {% if type == feedback.assign_to %} selected {% endif %} value="{{type}}">{{type}}</option>
+                      	          			<option {% if type == feedback.assign_to %} selected {% endif %} value="{{type}}">{{type.user.username}}({{type}})</option>
                                 		{% endfor %}
                             		</select>
                       			</div>
@@ -100,7 +100,7 @@
 	 						<div class="form-group">
   								<label class="col-sm-4 control-label" for="due_date">Due Date</label>
     							<div class="col-sm-8">
-    								<input type="datetime" class="form-control" name="due_date" readonly value='{{feedback.due_date|default_if_none:""}}' >
+    								<input type="datetime" class="form-control" name="due_date"  value='{{feedback.due_date|default_if_none:""}}' >
    								</div>
 							</div>
 	 					</div>
