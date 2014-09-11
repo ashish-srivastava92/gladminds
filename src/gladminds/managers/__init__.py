@@ -61,7 +61,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
     if data['status'] == 'Closed':
         feedback_obj.closed_date = datetime.now()
     if data['due_date']:
-        due_date = datetime.strptime(data['due_date'], "%Y-%m-%d")
+        due_date = datetime.strptime(data['due_date'], "%d/%m/%Y")
         feedback_obj.due_date = due_date
     feedback_obj.save()
     if assign_status and feedback_obj.assign_to:
