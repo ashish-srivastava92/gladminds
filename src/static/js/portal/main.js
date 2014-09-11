@@ -271,6 +271,14 @@ function rootCause(status){
 	}
 }
 
+function dueDateRequire(assignTo){
+	var dueDate = $('.due-date');
+	dueDate.attr('required', true);
+	if ($('.assignee').val() == ''){
+		dueDate.attr('required', false);
+	}
+}
+
 function showMessage(id){
 	$('#'+id).popover();	
 }

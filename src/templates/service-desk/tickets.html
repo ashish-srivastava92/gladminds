@@ -56,8 +56,8 @@
 							GM-{{feedback.id|default_if_none:""}}
 						</a>  
 					</td>
-					<td>{{feedback.reporter|default_if_none:""}}</td>
-					<td>{{feedback.assign_to|default_if_none:""}}</td>
+					<td>{{feedback.reporter_name|default_if_none:""}}</td>
+					<td>{{feedback.assign_to.user.username|default_if_none:""}}</td>
 					<td>
 					   <div>
 					       {% if feedback.message|length > 20 %}
