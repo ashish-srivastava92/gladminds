@@ -1,5 +1,6 @@
 {% extends "admin/base_site.html" %}
 {% load i18n admin_static admin_list admin_urls suit_list suit_tags %}
+{% load admintags %}
 {% load url from future %}
 
 {% block extrastyle %}
@@ -74,7 +75,7 @@
 
 		  {% if custom_search %}
 		  	  <div class="search-container form-inline">
-	          	<input type="text" size="40" id="cust-searchbar" placeholder="Keyword" value = {% if cl.query %}{{cl.query}}{% else %}""{% endif %} />&nbsp;
+	          	<input type="text" size="40" id="cust-searchbar" placeholder="Keyword" value = "{% if cl.query %}{{cl.query|map_coupon}}{% else %}''{% endif %}" />&nbsp;
 	          	<span class="search-filters">
 		        	<select data-name="status" class="auto-width cust-search-filter" style="max-width: 200px">
 		        		<option>Select Search Type</option>
