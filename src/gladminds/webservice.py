@@ -198,7 +198,7 @@ class ProductPurchaseModelList(ComplexModel):
     __namespace__ = tns
     ProductPurchaseData = Array(ProductPurchaseModel)
     
-class OldFscDataModel(ComplexModel):
+class OldFscItem(ComplexModel):
     __namespace__ = tns
     KUNNAR = Unicode
     CHASSIS = Unicode
@@ -213,12 +213,12 @@ class OldFscStatusModel(ComplexModel):
     
 class OldFSCModel(ComplexModel):
     __namespace__ = tns
-    GT_OLD_FSC = OldFscDataModel
+    GT_OLD_FSC = Array(OldFscItem)
     GT_STATUS = OldFscStatusModel
     
 class OldFSCModelList(ComplexModel):
     __namespace__ = tns
-    OldFSCData = Array(OldFSCModel)
+    OldFSCData = OldFSCModel
 
 
 class BrandService(ServiceBase):
@@ -380,20 +380,18 @@ class OldFscService(ServiceBase):
 
     @srpc(OldFSCModelList, AuthenticationModel, _returns=Unicode)
     def postOldFsc(ObjectList, Credential):
-        feed_remark = FeedLogWithRemark(len(ObjectList.OldFSCData),
+        feed_remark = FeedLogWithRemark(len(ObjectList.OldFSCData.GT_OLD_FSC),
                                         feed_type='Old Fsc Feed',
                                         action='Received', status=True)
         old_fsc_list = []
-        for fsc in ObjectList.OldFSCData:
+        for fsc in ObjectList.OldFSCData.GT_OLD_FSC:
             try:
                 old_fsc_list.append({
-                    'vin': fsc.GT_OLD_FSC.CHASSIS,
-                    'dealer': fsc.GT_OLD_FSC.KUNNAR,
-                    'material_number': fsc.GT_OLD_FSC.MATNR,
-                    'charge': fsc.GT_OLD_FSC.CHARG,
-                    'service': fsc.GT_OLD_FSC.SERVICE,
-                    'status': fsc.GT_STATUS.STATUS,
-                    'time_stamp': fsc.GT_STATUS.TIMESTAMP,
+                    'vin': fsc.CHASSIS,
+                    'dealer': fsc.KUNNAR,
+                    'material_number': fsc.MATNR,
+                    'charge': fsc.CHARG,
+                    'service': fsc.SERVICE
                 })
               
             except Exception as ex:

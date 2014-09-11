@@ -545,8 +545,7 @@ class OldFscFeed(BaseFeed):
                 coupon_data = common.CouponData.objects.get(
                 vin__vin=fsc['vin'], service_type=int(fsc['service']))
                 coupon_data.status = 6
-                time_stamp = datetime.strptime(fsc['time_stamp'], '%Y-%m-%d%H%M%S').strftime('%Y-%m-%d %H:%M')
-                coupon_data.closed_date = time_stamp
+                coupon_data.closed_date = datetime.now()
                 coupon_data.sent_to_sap = True
                 dealer_data = self.check_or_create_dealer(dealer_id=fsc['dealer'])
                 coupon_data.servicing_dealer = dealer_data
