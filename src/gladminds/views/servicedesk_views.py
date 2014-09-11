@@ -49,7 +49,7 @@ def modify_servicedesk_tickets(request, feedback_id):
                     "FEEDBACK_TYPE": feedback_types,\
                     "ROOT_CAUSE" : root_cause,\
                    "group": group_name[0].name,\
-                   'servicedeskuser': servicedesk_users,
+                   'servicedeskuser': servicedesk_users
                    })
     else:
         return HttpResponseNotFound()
