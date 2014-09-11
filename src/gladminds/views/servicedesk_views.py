@@ -9,7 +9,8 @@ from django.conf import settings
 from gladminds.utils import get_list_from_set
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.resource.resources import GladmindsResources
-from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE
+from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
+    ROOT_CAUSE
 from gladminds.managers import get_feedbacks, get_feedback,\
     get_servicedesk_users, save_update_feedback
 from django.views.decorators.http import require_http_methods
@@ -35,6 +36,7 @@ def modify_servicedesk_tickets(request, feedback_id):
     status = get_list_from_set(FEEDBACK_STATUS)
     priority_types = get_list_from_set(PRIORITY)
     feedback_types = get_list_from_set(FEEDBACK_TYPE)
+    root_cause = get_list_from_set(ROOT_CAUSE)
     feedback_obj = get_feedback(feedback_id, request.user)
     servicedesk_users = get_servicedesk_users(designation='SDO')
     if request.method == 'POST':
@@ -45,8 +47,9 @@ def modify_servicedesk_tickets(request, feedback_id):
                   {"feedback": feedback_obj[0], "FEEDBACK_STATUS": status,\
                    "PRIORITY": priority_types,\
                     "FEEDBACK_TYPE": feedback_types,\
+                    "ROOT_CAUSE" : root_cause,\
                    "group": group_name[0].name,\
-                   'servicedeskuser': servicedesk_users
+                   'servicedeskuser': servicedesk_users,
                    })
     else:
         return HttpResponseNotFound()

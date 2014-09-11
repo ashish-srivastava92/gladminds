@@ -252,7 +252,7 @@ function rootCause(status){
 	    resolution = $('.resolution'),
 	    root_cause = $('.root-cause'),
 	    ticket_resolution = $('.ticket-resolution'),
-	    assignee = $('.assignee'); 
+	    assignee = $('.assignee');
 	
 	assignee.attr('required', false);
 	rootcause.addClass('hide');
@@ -269,6 +269,11 @@ function rootCause(status){
 	if (status != 'Open'){
 		assignee.attr('required', true);
 	}
+	
+	if (status == 'Pending'){
+		assignee.val('');
+	}
+	
 }
 
 function showMessage(id){

@@ -48,3 +48,11 @@ USER_DESIGNATION = (('SDO', 'Owner'),
 RATINGS = (('1', 'Glad'),
            ('2', 'Very Glad'),
            ('3', 'Not Glad'))
+
+ROOT_CAUSE = (('Data','Data'),
+              ('Infrastructure','Infrastructure'),
+              ('Bug','Bug'),
+              ('New Requirement','New Requirement'),
+              ('Network','Network'),
+              ('Non-issue','Non-issue'),
+              ('External System','External System'))
