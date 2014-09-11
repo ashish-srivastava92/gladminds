@@ -301,7 +301,7 @@ def services_search_details(request):
             return {'message': ex}
     else:
         key = data.keys()
-        message = '''Customer details for {0} '{1}' not found.'''.format(key[0], data[key[0]])
+        message = '''Details for {0} '{1}' not found.'''.format(key[0], data[key[0]])
         return {'message': message}
     
 def get_search_query_params(request, class_self):
