@@ -282,4 +282,4 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         self.assertEqual(200, response.status_code)
         
         coupon_data = CouponData.objects.filter(vin__vin='XXXXXXXXXX', service_type=2)
-        self.assertEquals(coupon_data[0].status, 2)
+        self.assertEquals(coupon_data[0].status, 6)

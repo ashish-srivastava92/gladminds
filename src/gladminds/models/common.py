@@ -211,7 +211,8 @@ class ProductData(models.Model):
 ####################################################################
 
 STATUS_CHOICES = ((1, 'Unused'), (2, 'Closed'), (
-    3, 'Expired'), (4, 'In Progress'), (5, 'Exceeds Limit'))
+    3, 'Expired'), (4, 'In Progress'), (
+       5, 'Exceeds Limit'), (6, 'Closed Old Fsc'))
 
 
 class CouponData(models.Model):

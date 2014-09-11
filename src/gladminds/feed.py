@@ -544,7 +544,7 @@ class OldFscFeed(BaseFeed):
             try:
                 coupon_data = common.CouponData.objects.get(
                 vin__vin=fsc['vin'], service_type=int(fsc['service']))
-                coupon_data.status = 2
+                coupon_data.status = 6
                 time_stamp = datetime.strptime(fsc['time_stamp'], '%Y-%m-%d%H%M%S').strftime('%Y-%m-%d %H:%M')
                 coupon_data.closed_date = time_stamp
                 coupon_data.sent_to_sap = True
