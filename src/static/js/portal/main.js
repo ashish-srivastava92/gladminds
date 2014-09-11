@@ -277,7 +277,6 @@ function dueDateRequire(assignTo){
 	if ($('.assignee').val() == ''){
 		dueDate.attr('required', false);
 	}
-		1
 }
 
 function showMessage(id){
