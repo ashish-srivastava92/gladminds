@@ -71,7 +71,7 @@
 							<div class="form-group">
                     			<label class="col-sm-4 control-label" for="Assign To">Assignee</label>
                         		<div class="col-sm-8">
-                        			<select class="form-control assignee" name="Assign_To"   {% if group == 'SDO' %} readonly {% endif %}  >
+                        			<select class="form-control assignee" name="Assign_To"   {% if group == 'SDO' %} readonly {% endif %} onchange="dueDateRequire(this.options[this.selectedIndex].value)" >
                             			<option value=""></option>
                                			{% for type in servicedeskuser %}
                       	          			<option {% if type == feedback.assign_to %} selected {% endif %} value="{{type}}">{{type.user.username}}({{type}})</option>
@@ -100,7 +100,7 @@
 	 						<div class="form-group">
   								<label class="col-sm-4 control-label" for="due_date">Due Date</label>
     							<div class="col-sm-8">
-    								<input type="datetime" class="form-control" name="due_date"  value='{{feedback.due_date|default_if_none:""}}' >
+    								<input type="datetime" class="form-control due-date" name="due_date"  value='{{feedback.due_date|date:'d/m/Y'|default_if_none:""}}' >
    								</div>
 							</div>
 	 					</div>
