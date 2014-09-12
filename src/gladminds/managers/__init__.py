@@ -29,10 +29,6 @@ def get_feedback(feedback_id, user):
         return aftersell_common.Feedback.objects.filter(id=feedback_id)
 
 
-def get_servicedesk_users(**filters):
-    return aftersell_common.ServiceDeskUser.objects.filter(**filters)
-
-
 def save_update_feedback(feedback_obj, data, user,  host):
     comment_object = None
     assign_status = False
@@ -53,22 +49,26 @@ def save_update_feedback(feedback_obj, data, user,  host):
     if data['Assign_To'] == '':
         feedback_obj.status = data['status']
         feedback_obj.priority = data['Priority']
+        feedback_obj.assign_to = None
     else:
         servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(
                                                             phone_number=data['Assign_To'])
         feedback_obj.assign_to = servicedesk_assign_obj[0]
         feedback_obj.status = data['status']
         feedback_obj.priority = data['Priority']
-        feedback_obj.modified_date = datetime.now()
     if data['status'] == 'Pending':
         feedback_obj.pending_from = datetime.now()
     if data['status'] == 'Closed':
         feedback_obj.closed_date = datetime.now()
+    if data['due_date']:
+        due_date = datetime.strptime(data['due_date'], "%d/%m/%Y")
+        feedback_obj.due_date = due_date
     feedback_obj.save()
     if assign_status and feedback_obj.assign_to:
         context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL',
                                  feedback_obj)
-        mail.send_email_to_initiator_after_issue_assigned(context,
+        if feedback_obj.reporter_email_id:
+            mail.send_email_to_initiator_after_issue_assigned(context,
                                                          feedback_obj)
         send_sms('INITIATOR_FEEDBACK_DETAILS', feedback_obj.reporter,
                  feedback_obj)
