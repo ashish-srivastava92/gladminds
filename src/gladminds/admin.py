@@ -429,7 +429,7 @@ class FeedLogAdmin(ModelAdmin):
         if obj.file_location:
             update_remark = ''
             update_remark = u'<a href="{0}" target="_blank">{1}</a>'.\
-                                            format(obj.file_location, " For More...")
+                                            format(obj.file_location, " Click for details")
             return update_remark
     feed_remarks.allow_tags = True
 
