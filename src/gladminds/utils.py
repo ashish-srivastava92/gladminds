@@ -265,8 +265,7 @@ def create_context(email_template_name, feedback_obj):
                                           message=feedback_obj.message, created_date=convert_utc_to_local_time(created_date),
                                           assign_to=feedback_obj.assign_to, priority=feedback_obj.priority, remark="",
                                           root_cause=feedback_obj.root_cause, resolution=feedback_obj.resolution,
-                                          due_date="",resolution_time=total_time_spent(feedback_obj.wait_time))
-
+                                          due_date="",resolution_time=total_time_spent(feedback_obj))
     return data
 
 def create_sa_feed_data(post_data, user_id, temp_sa_id):
@@ -352,7 +351,20 @@ def convert_utc_to_local_time(date):
     timezone = pytz.timezone(TIMEZONE)
     return date.astimezone(timezone).replace(tzinfo=None)
  
-def total_time_spent(wait_time):
+def total_time_spent(feedback_obj):
+    wait_time = feedback_obj.wait_time
+    if feedback_obj.resolved_date:
+        start_date = convert_utc_to_local_time(feedback_obj.created_date)
+        end_date = feedback_obj.resolved_date
+        start_date, end_date = get_start_and_end_date(start_date,
+                                                     end_date, TIME_FORMAT)
+        if start_date > end_date:
+            raise ValueError('Invalid resolved date.\
+             Resolved date should be after the created date')
+        else:
+            wait = end_date - start_date
+            wait_time = wait.total_seconds() 
+            wait_time = wait_time - feedback_obj.wait_time
     minutes, seconds = divmod(wait_time, 60)
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
