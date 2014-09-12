@@ -426,13 +426,9 @@ class FeedLogAdmin(ModelAdmin):
                     'failed_data_count', 'feed_remarks')
 
     def feed_remarks(self, obj):
-        if obj.remarks and obj.file_location:
-            remarks = json.loads(obj.remarks)
+        if obj.file_location:
             update_remark = ''
-            for remark, occurence in remarks.iteritems():
-                update_remark = "[ {0} : {1} ].  ".format(remark, occurence)
-    
-            update_remark = update_remark[:100] + u'<a href="{0}">{1}</a>'.\
+            update_remark = u'<a href="{0}" target="_blank">{1}</a>'.\
                                             format(obj.file_location, " For More...")
             return update_remark
     feed_remarks.allow_tags = True
