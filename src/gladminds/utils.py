@@ -358,13 +358,9 @@ def total_time_spent(feedback_obj):
         end_date = feedback_obj.resolved_date
         start_date, end_date = get_start_and_end_date(start_date,
                                                      end_date, TIME_FORMAT)
-        if start_date > end_date:
-            raise ValueError('Invalid resolved date.\
-             Resolved date should be after the created date')
-        else:
-            wait = end_date - start_date
-            wait_time = wait.total_seconds() 
-            wait_time = wait_time - feedback_obj.wait_time
+        wait = end_date - start_date
+        wait_time = wait.total_seconds() 
+        wait_time = wait_time - feedback_obj.wait_time
     minutes, seconds = divmod(wait_time, 60)
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
