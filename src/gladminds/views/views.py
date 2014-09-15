@@ -22,7 +22,8 @@ from gladminds.sqs_tasks import send_otp
 from gladminds import utils, message_template
 from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format, stringify_groups,\
-    get_list_from_set,  get_user_groups, search_details
+    get_list_from_set,  get_user_groups, search_details, format_date_string,\
+    services_search_details
 from gladminds.sqs_tasks import export_asc_registeration_to_sap
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.mail import sent_otp_email
@@ -206,9 +207,10 @@ def exceptions(request, exception=None):
                                            "data": data, 'groups': groups})
     elif request.method == 'POST':
         function_mapping = {
-            'customer': get_customer_info,
-            'recover': recover_coupon_info,
-            'search': search_details
+            'customer' : get_customer_info,
+            'recover' : recover_coupon_info,
+            'search' : search_details,
+            'status' : services_search_details
         }
         try:
             data = function_mapping[exception](request)
@@ -275,9 +277,8 @@ def create_report(method, query_params, user):
     report_data = []
     filter = {}
     params = {}
-    args = { Q(status=4) | Q(status=2) }
-    status_options = {'4': 'In Progress', '2':'Closed'}
-
+    args = { Q(status=4) | Q(status=2) | Q(status=6)}
+    status_options = {'6': 'Closed Old Fsc', '4': 'In Progress', '2':'Closed'}
     user = afterbuy_common.RegisteredDealer.objects.filter(dealer_id=user)
     filter['servicing_dealer'] = user[0]
     params['min_date'], params['max_date'] = utils.get_min_and_max_filter_date() 

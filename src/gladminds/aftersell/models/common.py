@@ -45,7 +45,7 @@ class UCNRecovery(models.Model):
 
 class RegisteredDealer(models.Model):
     dealer_id = models.CharField(
-        max_length=25, blank=False, null=False, unique=True, help_text="Dealer Code must be unique")
+        max_length=25, blank=False, null=False, unique=True, verbose_name="id", help_text="Dealer Code must be unique")
     address = models.TextField(blank=True, null=True)
     role = models.CharField(max_length=10, default='dealer', blank=False)
     dependent_on = models.CharField(max_length=25, blank=True, null=True)
