@@ -12,8 +12,13 @@
     </div>
     <div id="wrapper">
         <div class="row">
-          <div class="col-md-offset-8 col-md-2">
-            <a class="logout" href="/aftersell/provider/logout">Logout</a>
+          <div class="col-md-offset-8 col-md-4">
+            <li class="dropdown style-username">
+             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{request.user.username}} <b class="caret"></b></a>
+             <ul class="dropdown-menu">
+               <li><a href="/aftersell/provider/logout">Logout</a></li>
+             </ul>
+          </li>
           </div>
         </div>
         <div class="row">
