@@ -113,21 +113,3 @@ def save_update_feedback(feedback_obj, data, user,  host):
             send_sms('SEND_MSG_TO_ASSIGNEE',
                      feedback_obj.assign_to.phone_number,
                      feedback_obj,  comment_object)
-
-    if feedback_obj.resolved_date:
-        start_date = feedback_obj.created_date
-        feedback_end_date = aftersell_common.Feedback.objects.get(
-                                                    id=feedback_obj.id)
-        end_date = feedback_end_date.resolved_date
-        end_date = convert_utc_to_local_time(end_date)
-        start_date, end_date = get_start_and_end_date(start_date,
-                                                     end_date, TIME_FORMAT)
-        if start_date > end_date:
-            raise ValueError('Invalid resolved date.\
-             Resolved date should be after the created date')
-        else:
-            wait = end_date - start_date
-            wait_time = wait.total_seconds() 
-            wait_final = wait_time - feedback_obj.wait_time
-            feedback_obj.wait_time = wait_final 
-            feedback_obj.save()

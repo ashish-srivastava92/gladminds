@@ -3,7 +3,7 @@ from django.conf import settings
 from datetime import datetime
 from django.contrib.auth.models import User
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
-    USER_DESIGNATION, RATINGS
+    USER_DESIGNATION, RATINGS, ROOT_CAUSE
 
 ##########################################################################
 ########################## ASC Save Form #########################
@@ -142,7 +142,7 @@ class Feedback(models.Model):
     wait_time = models.FloatField(max_length=20, null=True, blank=True, default='0.0')
     remarks = models.CharField(max_length=512, null=True, blank=True)
     ratings = models.CharField(max_length=12, choices=RATINGS)
-    root_cause = models.CharField(max_length=512, null=True, blank=True)
+    root_cause = models.CharField(max_length=12, choices=ROOT_CAUSE)
     resolution = models.CharField(max_length=512, null=True, blank=True)
     role = models.CharField(max_length=50, null=True, blank=True)
 

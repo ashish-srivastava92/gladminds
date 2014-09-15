@@ -36,7 +36,7 @@
                     <select class="form-control" name="advisorMobile" id="advisorMobile" required>
                       <option value="">Select mobile number</option>
                       {% for phone in data %}
-                      <option value="{{phone}}">{{phone}}</option>
+                      <option value="{{phone}}">{{phone.name}} ({{phone.phone_number}})</option>
                       {% endfor %}
                     </select>
                   </div>
