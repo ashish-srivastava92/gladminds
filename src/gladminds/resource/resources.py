@@ -254,6 +254,7 @@ class GladmindsResources(Resource):
             valid_coupon = common.CouponData.objects.select_for_update()\
                            .filter(Q(status=1) | Q(status=4) | Q(status=5), vin__vin=vin, valid_kms__gte=actual_kms, service_type__gte=service_type) \
                            .select_related('vin', 'customer_phone_number__phone_number').order_by('service_type')
+            logger.info(valid_coupon)
             if len(valid_coupon) > 1:
                 self.update_higher_range_coupon(valid_coupon[0].valid_kms, vin)
                 valid_coupon = valid_coupon[0]
