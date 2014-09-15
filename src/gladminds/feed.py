@@ -111,6 +111,10 @@ class SAPFeed(object):
             asc_obj = ASCFeed(data_source=data_source,
                               feed_remark=feed_remark)
             return asc_obj.import_data()
+        elif feed_type == 'old_fsc':
+            fsc_obj = OldFscFeed(data_source=data_source,
+                                               feed_remark=feed_remark)
+            return fsc_obj.import_data()
 
 
 class BaseFeed(object):
@@ -393,8 +397,8 @@ class ProductServiceFeed(BaseFeed):
 class CouponRedeemFeedToSAP(BaseFeed):
 
     def export_data(self, start_date=None, end_date=None):
-        results = common.CouponData.objects.filter(closed_date__range=(
-            start_date, end_date), status=2).select_related('vin', 'customer_phone_number__phone_number')
+        results = common.CouponData.objects.filter(sent_to_sap=0,
+                            status=2).select_related('vin', 'customer_phone_number__phone_number')
         items = []
         total_failed = 0
         item_batch = {
@@ -444,7 +448,6 @@ class ASCRegistrationToSAP(BaseFeed):
 
 def update_coupon_data(sender, **kwargs):
     from gladminds.sqs_tasks import send_on_product_purchase
-    import inspect
     instance = kwargs['instance']
     logger.info("triggered update_coupon_data")
     if instance.customer_phone_number:
@@ -495,17 +498,16 @@ class ASCFeed(BaseFeed):
     def import_data(self):
         for dealer in self.data_source:
             asc_data = aftersell_common.RegisteredDealer.objects.filter(
-                                                    dealer_id=dealer['asc_id'])
+                                                dealer_id=dealer['asc_id'])
             if not asc_data:
                 asc_data = aftersell_common.RegisteredDealer(dealer_id=dealer['asc_id'],
                                     role='asc', address=dealer['address'])                
                 if dealer['dealer_id']:
-                    dealer_data = self.check_or_create_dealer(dealer_id=dealer['dealer_id'],
-                                            address=dealer['address'])
+                    dealer_data = self.check_or_create_dealer(dealer_id=dealer['dealer_id'])
                     asc_data.dependent_on=dealer['dealer_id']
                 try:
                     asc_data.save()
-                    self.register_user('ASC', username=dealer['asc_id'], email=dealer['email'])
+                    self.register_user('ASC', username=dealer['asc_id'], email=dealer['email'], first_name=dealer['name'])
                 except Exception as ex:
                     ex = "[Exception: ASCFeed_dealer_data]: {0}".format(ex)
                     logger.error(ex)
@@ -540,3 +542,23 @@ class CustomerRegistationFeedToSAP(BaseFeed):
                 logger.error("error on customer info from db %s" % str(ex))
                 total_failed = total_failed + 1
         return items, item_batch, total_failed
+    
+class OldFscFeed(BaseFeed):
+    
+    def import_data(self):
+        for fsc in self.data_source:
+            try:
+                coupon_data = common.CouponData.objects.get(
+                vin__vin=fsc['vin'], service_type=int(fsc['service']))
+                coupon_data.status = 6
+                coupon_data.closed_date = datetime.now()
+                coupon_data.sent_to_sap = True
+                dealer_data = self.check_or_create_dealer(dealer_id=fsc['dealer'])
+                coupon_data.servicing_dealer = dealer_data
+                coupon_data.save()
+            except Exception as ex:
+                ex = "[Exception: OLD_FSC_FEED]: For VIN {0} coupon of service type {1}:: {2}".format(
+                            fsc['vin'], fsc['service'], ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+        return self.feed_remark

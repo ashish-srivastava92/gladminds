@@ -180,7 +180,8 @@ class ProductData(models.Model):
 ####################################################################
 
 STATUS_CHOICES = ((1, 'Unused'), (2, 'Closed'), (
-    3, 'Expired'), (4, 'In Progress'), (5, 'Exceeds Limit'))
+    3, 'Expired'), (4, 'In Progress'), (
+       5, 'Exceeds Limit'), (6, 'Closed Old Fsc'))
 
 
 class CouponData(models.Model):
@@ -201,6 +202,7 @@ class CouponData(models.Model):
     order = models.PositiveIntegerField(default=0)
     extended_date = models.DateTimeField(null=True, blank=True)
     servicing_dealer = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
+    sent_to_sap = models.BooleanField(default=False)
 
     class Meta:
         app_label = "gladminds"

@@ -196,6 +196,28 @@ class ProductPurchaseModel(ComplexModel):
 class ProductPurchaseModelList(ComplexModel):
     __namespace__ = tns
     ProductPurchaseData = Array(ProductPurchaseModel)
+    
+class OldFscItem(ComplexModel):
+    __namespace__ = tns
+    KUNNAR = Unicode
+    CHASSIS = Unicode
+    CHARG = Unicode
+    MATNR = Unicode
+    SERVICE = Unicode
+
+class OldFscStatusModel(ComplexModel):
+    __namespace__ = tns
+    STATUS = Unicode
+    TIMESTAMP = Unicode(pattern=pattern)
+    
+class OldFSCModel(ComplexModel):
+    __namespace__ = tns
+    GT_OLD_FSC = Array(OldFscItem)
+    GT_STATUS = OldFscStatusModel
+    
+class OldFSCModelList(ComplexModel):
+    __namespace__ = tns
+    OldFSCData = OldFSCModel
 
 
 class BrandService(ServiceBase):
@@ -227,7 +249,6 @@ class DealerService(ServiceBase):
         feed_remark = FeedLogWithRemark(len(ObjectList.DealerData),
                                         feed_type='Dealer Feed',
                                         action='Received', status=True)
-        print ObjectList.DealerData
         for dealer in ObjectList.DealerData:
             try:
                 dealer_list.append({
@@ -349,6 +370,36 @@ class ProductPurchaseService(ServiceBase):
         feed_remark.save_to_feed_log()
         return get_response(feed_remark)
 
+class OldFscService(ServiceBase):
+    __namespace__ = tns
+
+    @srpc(OldFSCModelList, AuthenticationModel, _returns=Unicode)
+    def postOldFsc(ObjectList, Credential):
+        feed_remark = FeedLogWithRemark(len(ObjectList.OldFSCData.GT_OLD_FSC),
+                                        feed_type='Old Fsc Feed',
+                                        action='Received', status=True)
+        old_fsc_list = []
+        for fsc in ObjectList.OldFSCData.GT_OLD_FSC:
+            try:
+                old_fsc_list.append({
+                    'vin': fsc.CHASSIS,
+                    'dealer': fsc.KUNNAR,
+                    'material_number': fsc.MATNR,
+                    'charge': fsc.CHARG,
+                    'service': fsc.SERVICE
+                })
+              
+            except Exception as ex:
+                ex = "OldFscUpdateService: {0}  Error on Validating "\
+                                                            .format(ex)
+                logger.error("OldFscUpdateService: {0} Object List is {1}"
+                             .format(ex, product))
+                feed_remark.fail_remarks(ex)
+        feed_remark = save_to_db(
+            feed_type='old_fsc', data_source=old_fsc_list,
+                                                 feed_remark=feed_remark)
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
 
 def get_response(feed_remark):
     return FAILED if feed_remark.failed_feeds > 0 else SUCCESS
@@ -374,7 +425,7 @@ ProductDispatchService.event_manager.add_listener(
 ProductPurchaseService.event_manager.add_listener(
     'method_call', _on_method_call)
 
-all_app = Application([BrandService, DealerService, ProductDispatchService, ProductPurchaseService, ASCService],
+all_app = Application([BrandService, DealerService, ProductDispatchService, ProductPurchaseService, ASCService, OldFscService],
                       tns=tns,
                       in_protocol=Soap11(validator='lxml'),
                       out_protocol=Soap11())
@@ -407,9 +458,16 @@ purchase_app = Application([ProductPurchaseService],
                            out_protocol=Soap11()
                           )
 
+old_fsc_app = Application([OldFscService],
+                           tns=tns,
+                           in_protocol=Soap11(validator='lxml'),
+                           out_protocol=Soap11()
+                           )
+
 all_service = csrf_exempt(DjangoApplication(all_app))
 brand_service = csrf_exempt(DjangoApplication(brand_app))
 dealer_service = csrf_exempt(DjangoApplication(dealer_app))
 asc_service = csrf_exempt(DjangoApplication(asc_app))
 dispatch_service = csrf_exempt(DjangoApplication(dispatch_app))
 purchase_service = csrf_exempt(DjangoApplication(purchase_app))
+old_fsc_service = csrf_exempt(DjangoApplication(old_fsc_app))
