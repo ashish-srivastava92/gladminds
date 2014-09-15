@@ -17,13 +17,17 @@
 			  	<div class="form-group col-md-3">
 			    	<label class="col-md-2 control-label">From</label>
 			    	<div class="col-md-10">
-			      		<input type="date" value="{{params.start_date}}" min="{{params.min_date}}" max="{{params.max_date}}" class="form-control filter-min-max" placeholder="yyyy-mm-dd" name="from" required>
+			      		<input type="text" value="{{params.start_date}}" min="{{params.min_date}}" 
+			      			max="{{params.max_date}}" class="form-control filter-start-date" placeholder="yyyy-mm-dd" 
+			      			name="from" required />
 			    	</div>
 			  	</div>
 			  	<div class="form-group col-md-3">
 			    	<label class="col-md-2 control-label">To</label>
 			    	<div class="col-md-10">
-			      		<input type="date" value="{{params.to_date}}" min="{{params.min_date}}" max="{{params.max_date}}" class="form-control filter-min-max" placeholder="yyyy-mm-dd" name="to" required>
+			      		<input type="text" value="{{params.to_date}}" min="{{params.min_date}}" 
+			      			max="{{params.max_date}}" class="form-control filter-end-date" placeholder="yyyy-mm-dd" 
+			      			name="to" required />
 			    	</div>
 			  	</div>
 			  	<div class="form-group col-md-3">
@@ -102,4 +106,14 @@
 {% block dependency %}
 <script src="/static/js/portal/utils.js"></script>
 <script src="/static/js/portal/main.js"></script>
+<script type="text/javascript">
+	var minDate = "{{params.min_date}}",
+		maxDate = "{{params.max_date}}";
+
+	$('.filter-start-date, .filter-end-date').datepicker({
+		dateFormat:'yy-mm-dd',
+		minDate: minDate,
+		maxDate: maxDate
+	});
+</script>
 {% endblock dependency %}
