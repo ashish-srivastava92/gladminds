@@ -1,28 +1,11 @@
 {% extends "base_template.html" %}
 
 {% block body %}
-<div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <a class="brand" href="#"><img src="/static/img/bajaj_logo.jpg" height=50px width=209px></a>
-    </div>
-</div>
 <div class="well">
     <div class="user-message">
         <div class="message"></div>
     </div>
     <div id="wrapper">
-        {% if not asc_registration %}
-        <div class="row">
-          <div class="col-md-offset-8 col-md-4">
-           <li class="dropdown style-username">
-             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Hi {{request.user.username}} <b class="caret"></b></a>
-             <ul class="dropdown-menu">
-               <li><a href="/aftersell/provider/logout">Logout</a></li>
-             </ul>
-          </li>
-          </div>
-        </div>
-        {% endif %}
         <div class="row">
             {% if not asc_registration %}
             <div class="col-md-3 .col-md-offset-1">
