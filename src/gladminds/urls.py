@@ -18,6 +18,7 @@ api_v1.register(api_resource.AfterBuyResources())
 api_v1.register(audit_api.AuditResources())
 
 urlpatterns = patterns('',
+    url(r'^site-info/$', 'gladminds.views.site_info', name='site_info'),
     url(r'^aftersell/(?P<provider>[a-zA-Z]+)/login/$', 'gladminds.views.auth_login', name='user_login'),
     url(r'^aftersell/provider/logout$', 'gladminds.views.user_logout', name='user_logout'),
     url(r'api/doc/', include('tastypie_swagger.urls', namespace='tastypie_swagger')),

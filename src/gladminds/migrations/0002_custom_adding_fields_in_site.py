@@ -7,11 +7,9 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         db.execute('alter table django_site add column folder_name varchar(255)')
-        db.execute('alter table django_site add column subdomains varchar(255)')
 
     def backwards(self, orm):
         db.execute(u'alter table django_site drop column folder')
-        db.execute(u'alter table django_site drop column subdomains')
 
 
     models = {
