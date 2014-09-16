@@ -1,14 +1,15 @@
-/***** Changing body styling issue need to be fixed   *******/
 
-.navbar-fixed-top {
-	position:absolute;
+body {
+	margin: 0;
+}
+
+.navbar-style {
+    margin-bottom: 0;
 }
 
 li {
 	list-style: none;
 }
-
-/****** End of body styling ******/
 
 .portal-form-label{
     padding-top: 15px;   

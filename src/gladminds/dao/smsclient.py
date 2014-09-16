@@ -88,7 +88,7 @@ class KapSmsClient(SmsClientBaseObject):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
         logger.info(
-            '[INFO]: sending message{0} to {1} through kap'.format(message, phone_number))
+            '[INFO]: sending message {0} to {1} through kap'.format(message, phone_number))
         params = {'to' : phone_number, 'message' : message, 'workingkey' : self.working_key, 'sender': self.sender_id}
         return self.send_request(url = self.message_url, params = params)
         
@@ -96,7 +96,7 @@ class KapSmsClient(SmsClientBaseObject):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
         logger.info(
-            '[INFO]: sending message{0} to {1} through kap'.format(message, phone_number))
+            '[INFO]: sending message {0} to {1} through kap'.format(message, phone_number))
         params = {'workingkey' : self.working_key, 'sender': self.sender_id, 'to' : phone_number, 'message' : message}
         return self.send_request(url = self.message_url, params = params)
     
