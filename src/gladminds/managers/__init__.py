@@ -38,11 +38,12 @@ def save_update_feedback(feedback_obj, data, user,  host):
 
     if feedback_obj.assign_to:
         assign_number = feedback_obj.assign_to.phone_number
+        previous_assignee = feedback_obj.assign_to
     else:
         assign_number = None
 
     assign = feedback_obj.assign_to
-
+    
     if assign is None:
         assign_status = True
 
@@ -50,10 +51,16 @@ def save_update_feedback(feedback_obj, data, user,  host):
         feedback_obj.status = data['status']
         feedback_obj.priority = data['Priority']
         feedback_obj.assign_to = None
+    
     else:
-        servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(
+        if data['reporter_status'] == 'true':
+            feedback_obj.assign_to_reporter = True
+            feedback_obj.assign_to = previous_assignee
+        else:
+            servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(
                                                             phone_number=data['Assign_To'])
-        feedback_obj.assign_to = servicedesk_assign_obj[0]
+            feedback_obj.assign_to = servicedesk_assign_obj[0]
+            feedback_obj.assign_to_reporter = False
         feedback_obj.status = data['status']
         feedback_obj.priority = data['Priority']
     if data['status'] == 'Pending':
