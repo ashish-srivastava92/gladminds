@@ -255,5 +255,32 @@
       "template": "The FSC is already tagged in the system",
       "description": "Send coupon is closed message to an initiator if it has been closed by some other sa"
     }
-  }  
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 29,
+    "fields": {
+      "template_key":"RCV_CUSTOMER_DETAILS",
+      "template":"{message}",
+      "description":"Receive this message for getting customer details"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 30,
+    "fields": {
+      "template_key": "SEND_CUSTOMER_DETAILS",
+      "template": "Your {0} is {1}",
+      "description": "Send id or vin to customer depending upon message he sent"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 31,
+    "fields": {
+      "template_key":"INVALID_RECOVERY_MESSAGE",
+      "template":"No service register for {0}: {1}",
+      "description":"Send on if customer id or VIN does not exits."
+    }
+  } 
 ]

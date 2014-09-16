@@ -14,7 +14,8 @@ DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
 ALLOWED_HOSTS = ['*']
 
 ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
-                    'service', 'check': 'a', 'close': 'c', 'brand': 'brand'}
+                    'service', 'check': 'a', 'close': 'c', 'brand': 'brand',
+                    'customer_detail_recovery': 'r'}
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
