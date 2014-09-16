@@ -478,17 +478,17 @@ def update_coupon_data(sender, **kwargs):
                     customer_name=customer_data.customer_name, sap_customer_id=instance.sap_customer_id)
             notification = afterbuy_common.UserNotification(user=customer_data, message=message, notification_date=datetime.now(), notification_read=0)
             notification.save()
+            customer_phone_number = utils.get_phone_number_format(instance.customer_phone_number.phone_number)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_on_product_purchase", {"phone_number":
-                                                            instance.customer_phone_number.phone_number,
-                                                            "message":message})
+                task_queue.add("send_on_product_purchase", {"phone_number": 
+                                customer_phone_number, "message":message})
             else:
                 send_on_product_purchase.delay(
-                phone_number=instance.customer_phone_number.phone_number, message=message)
+                phone_number=customer_phone_number, message=message)
  
             audit.audit_log(
-                reciever=instance.customer_phone_number, action='SEND TO QUEUE', message=message)
+                reciever=customer_phone_number, action='SEND TO QUEUE', message=message)
         except Exception as ex:
             logger.info("[Exception]: Signal-In Update Coupon Data %s" % ex)
 
