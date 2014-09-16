@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from datetime import datetime
 from django.contrib.auth.models import User
+from gladminds.models.common import UserProfile
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     USER_DESIGNATION, RATINGS
 
@@ -28,7 +29,7 @@ class ASCSaveForm(models.Model):
 
 class UCNRecovery(models.Model):
     reason = models.TextField(null=False)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(UserProfile)
     sap_customer_id = models.CharField(max_length=215, null=True, blank=True)
     file_location = models.CharField(max_length=215, null=True, blank=True)
     request_date = models.DateTimeField(default=datetime.now())
@@ -88,7 +89,7 @@ class ServiceAdvisorDealerRelationship(models.Model):
 
 
 class RegisteredASC(models.Model):
-    user = models.OneToOneField(User, null=True, blank=True)
+    user = models.OneToOneField(UserProfile, null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)
     asc_name = models.CharField(max_length=215)
     email_id = models.EmailField(max_length=215, null=True, blank=True)
@@ -109,7 +110,7 @@ class RegisteredASC(models.Model):
         
     
 class ServiceDeskUser(models.Model):
-    user = models.OneToOneField(User, null=True, blank=True)
+    user = models.OneToOneField(UserProfile, null=True, blank=True)
     email_id = models.EmailField(max_length=215, null=True, blank=True)
     phone_number = models.CharField(max_length=15, unique=True)
     designation = models.CharField(max_length=10, choices = USER_DESIGNATION)

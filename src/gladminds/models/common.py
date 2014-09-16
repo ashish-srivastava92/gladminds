@@ -11,6 +11,21 @@ BrandData contains brand related information
 '''
 
 
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, primary_key=True)
+    phone_number = models.CharField(
+                   max_length=15, blank=False, null=False)
+    profile_pic = models.CharField(
+                   max_length=200, blank=True, null=True)
+
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "User Profile"
+
+    def __unicode__(self):
+        return self.user
+
+
 class UploadProductCSV(models.Model):
     file_location = settings.PROJECT_DIR + '/data/'
     upload_brand_feed = models.FileField(upload_to=file_location, blank=True)
@@ -92,7 +107,7 @@ and unique phone numner
 
 
 class GladMindUsers(models.Model):
-    user = models.OneToOneField(User, null=True, blank=True)
+    user = models.OneToOneField(UserProfile, null=True, blank=True)
     gladmind_customer_id = models.CharField(
         max_length=215, unique=True, null=True)
     customer_name = models.CharField(max_length=215)
@@ -242,7 +257,7 @@ class MessageTemplate(models.Model):
 ########################TOTP Details################################
 
 class OTPToken(models.Model):
-    user = models.ForeignKey(User, null=True, blank=True)
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
     token = models.CharField(max_length=256, null=False)
     request_date = models.DateTimeField(null=True, blank=True)
     email = models.CharField(max_length=50, null=False)
