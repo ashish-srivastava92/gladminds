@@ -183,6 +183,7 @@ TEMPLATE_LOADERS = (
                    )
 
 MIDDLEWARE_CLASSES = (
+    #'gladminds.middlewares.dynamicsite_middleware.DynamicSitesMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
@@ -232,6 +233,7 @@ INSTALLED_APPS = (
     'provider',
     'provider.oauth2',
     'debug_toolbar',
+    'south'
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )

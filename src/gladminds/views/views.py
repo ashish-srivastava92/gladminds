@@ -1,20 +1,18 @@
 import logging
 import json
 import random
-import datetime
-
 from datetime import datetime
+
 from django.shortcuts import render_to_response, render
 from django.http.response import HttpResponseRedirect, HttpResponse,\
-    HttpResponseBadRequest
+    HttpResponseBadRequest, Http404
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
-
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
 from django.db import transaction
-
+from django.contrib.sites.models import Site
+from django.template.context import RequestContext
+from django.db.models.query_utils import Q
 
 from gladminds.models import common
 from gladminds.sqs_tasks import send_otp
@@ -448,3 +446,18 @@ def trigger_sqs_tasks(request):
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
     taskqueue.add(sqs_tasks[request.POST['task']])
     return HttpResponse()
+
+
+def site_info(request):
+    if request.method != 'GET':
+        raise Http404
+    site = None
+    if settings.SITE_ID:
+        site = Site.objects.get_current()
+    args = {
+        'request_get_host':request.get_host(),
+        'http_host':request.META['HTTP_HOST'],
+        'site':site
+    }
+    return render_to_response('dynamicsites/site_info.html', args,
+        context_instance=RequestContext(request))
