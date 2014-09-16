@@ -55,7 +55,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
     else:
         if data['reporter_status'] == 'true':
             feedback_obj.assign_to_reporter = True
-            assign_to_reporter(feedback_obj,data, previous_assignee)
+            feedback_obj.assign_to = previous_assignee
         else:
             servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(
                                                             phone_number=data['Assign_To'])
@@ -120,10 +120,3 @@ def save_update_feedback(feedback_obj, data, user,  host):
             send_sms('SEND_MSG_TO_ASSIGNEE',
                      feedback_obj.assign_to.phone_number,
                      feedback_obj,  comment_object)
-
-
-def assign_to_reporter(feedback_obj, data, previous_assignee):
-    feedback_obj.assign_to = previous_assignee
-    if data['reporter_status'] == True:
-        feedback_obj.assign_to_reporter = True
-        
