@@ -56,3 +56,8 @@ alter table gladminds_gladmindusers add pincode VARCHAR(15) null;
 
 alter table aftersell_registereddealer add role VARCHAR(10);
 alter table aftersell_registereddealer add dependent_on VARCHAR(25);
+
+########################################################################
+alter table gladminds_coupondata add column sent_to_sap boolean default false;
+update gladminds_coupondata set sent_to_sap=1 where closed_date < '2014-10-08%';
+

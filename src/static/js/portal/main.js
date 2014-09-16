@@ -89,6 +89,49 @@
         return false;
     });
 
+    $('.service-status-search').on('submit', function() {
+        var table = $('.status-search-results tbody .search-detail');
+        table.remove();
+        $('.other-details').remove();
+        var value = $('.status-search-value').val(),
+            field = $('.status-search-field').val(),
+            messageModal = $('.modal.message-modal'),
+            messageBlock = $('.modal-body', messageModal),
+            data = {};
+        data[field] =  value;
+        var jqXHR = $.ajax({
+            type: 'POST',
+            url: '/aftersell/exceptions/status',
+            data: data,
+            success: function(data){
+                var serviceDetail = data.search_results,
+                    otherDetails = data.other_details;
+                if (data.message) {
+                    messageBlock.text(data.message);
+                    messageModal.modal('show');
+                }
+                if (serviceDetail.length > 0) {
+                    var detailsHtml = '<div class="other-details"><label class="control-label">VIN:&nbsp</label>'
+                                      + otherDetails.vin +'<br><label class="control-label">Customer Id:&nbsp</label>'
+                                      + otherDetails.customer_id +'<br><label class="control-label">Customer Name:&nbsp</label>'
+                                      + otherDetails.customer_name +'</div>',
+                        table = $('.status-search-results tbody');
+                    $('.status-result-detail').append(detailsHtml);
+                    $.each(serviceDetail, function(idx, elem){
+                            table.append('<tr class="search-detail"><td>'+elem.service_type+'</td><td>'+elem.status+'</td></tr>');
+                        });
+                }
+            },
+            error: function() {
+                messageBlock.text('Oops! Some error occurred!');
+                messageModal.modal('show');
+            }
+        });
+        return false;
+
+    });
+    
+    
     $('.vin-form').on('submit', function() {
         var table = $('#search-results tbody .search-detail');
         table.remove();
@@ -175,7 +218,7 @@
                 waitingModal.modal('hide');
                 messageModal.modal('show');
                 $('#message').val('');
-                $('#priority').val(''); 
+                $('#priority').val('');
                 $('#type').val('');
                 $('#subject').val('');
                 $('#advisorMobile').val('');
@@ -224,7 +267,7 @@
                 waitingModal.modal('hide');
                 messageModal.modal('show');
                 setTimeout(function() {
-                	parent.window.location="/aftersell/servicedesk/";
+                    parent.window.location='/aftersell/servicedesk/';
                 }, 3000);
                 
             },
@@ -254,12 +297,12 @@
 })();
 
 function rootCause(status){
-	
+	'use strict';
 	var rootcause = $('.rootcause'),
-	    resolution = $('.resolution'),
-	    root_cause = $('.root-cause'),
-	    ticket_resolution = $('.ticket-resolution'),
-	    assignee = $('.assignee');
+        resolution = $('.resolution'),
+        root_cause = $('.root-cause'),
+        ticket_resolution = $('.ticket-resolution'),
+        assignee = $('.assignee');
 	
 	assignee.attr('required', false);
 	rootcause.addClass('hide');
@@ -268,29 +311,31 @@ function rootCause(status){
 	ticket_resolution.attr('required', false);
 	
 	if (status === 'Resolved'){
-	  rootcause.removeClass('hide');
-	  resolution.removeClass('hide');
-	  root_cause.attr('required', true);
-	  ticket_resolution.attr('required', true);
+        rootcause.removeClass('hide');
+        resolution.removeClass('hide');
+        root_cause.attr('required', true);
+        ticket_resolution.attr('required', true);
 	}
-	if (status != 'Open'){
+	if (status !== 'Open'){
 		assignee.attr('required', true);
 	}
 	
-	if (status == 'Pending'){
+	if (status === 'Pending'){
 		assignee.val('');
 	}
 	
 }
 
 function dueDateRequire(assignTo){
+	'use strict';
 	var dueDate = $('.due-date');
 	dueDate.attr('required', true);
-	if ($('.assignee').val() == ''){
+	if ($('.assignee').val() === ''){
 		dueDate.attr('required', false);
 	}
 }
 
 function showMessage(id){
-	$('#'+id).popover();	
+	'use strict';
+	$('#'+id).popover();
 }

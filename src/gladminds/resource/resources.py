@@ -254,6 +254,7 @@ class GladmindsResources(Resource):
             valid_coupon = common.CouponData.objects.select_for_update()\
                            .filter(Q(status=1) | Q(status=4) | Q(status=5), vin__vin=vin, valid_kms__gte=actual_kms, service_type__gte=service_type) \
                            .select_related('vin', 'customer_phone_number__phone_number').order_by('service_type')
+            logger.info(valid_coupon)
             if len(valid_coupon) > 1:
                 self.update_higher_range_coupon(valid_coupon[0].valid_kms, vin)
                 valid_coupon = valid_coupon[0]
@@ -338,7 +339,7 @@ class GladmindsResources(Resource):
         try:
             vin = self.get_vin(sap_customer_id)
             coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
-            if coupon_object.status == 2:
+            if coupon_object.status == 2 or coupon_object.status == 6:
                 message=templates.get_template('COUPON_ALREADY_CLOSED')
             else:
                 customer_phone_number = coupon_object.vin.customer_phone_number.phone_number

@@ -107,7 +107,7 @@ class DealerForm(ModelForm):
 class DealerAdmin(ModelAdmin):
     form = DealerForm
     search_fields = ('dealer_id',)
-    list_display = ('dealer_id', 'address')
+    list_display = ('dealer_id', 'role', 'dependent_on', 'address')
 #    list_display = ('dealer_id', 'address', 'service_advisor_id')
 #     inlines = (SAInline,)
 #
@@ -298,7 +298,8 @@ class CouponAdmin(ModelAdmin):
             '2': 'warning',
             '3': 'error',
             '4': 'info',
-            '5': 'error'
+            '5': 'error',
+            '6': 'warning'
         }
         css_class = class_map.get(str(obj.status))
         if css_class:
@@ -422,14 +423,10 @@ class FeedLogAdmin(ModelAdmin):
                     'failed_data_count', 'feed_remarks')
 
     def feed_remarks(self, obj):
-        if obj.remarks and obj.file_location:
-            remarks = json.loads(obj.remarks)
+        if obj.file_location:
             update_remark = ''
-            for remark, occurence in remarks.iteritems():
-                update_remark = "[ {0} : {1} ].  ".format(remark, occurence)
-
-            update_remark = update_remark[:100] + u'<a href="{0}">{1}</a>'.\
-                                            format(obj.file_location, " For More...")
+            update_remark = u'<a href="{0}" target="_blank">{1}</a>'.\
+                                            format(obj.file_location, " Click for details")
             return update_remark
     feed_remarks.allow_tags = True
 
