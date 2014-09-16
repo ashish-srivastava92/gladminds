@@ -145,7 +145,7 @@ class Feedback(models.Model):
     root_cause = models.CharField(max_length=12, choices=ROOT_CAUSE)
     resolution = models.CharField(max_length=512, null=True, blank=True)
     role = models.CharField(max_length=50, null=True, blank=True)
-
+    assign_to_reporter = models.BooleanField(default=False)
     class Meta:
         app_label = "aftersell"
         verbose_name_plural = "aftersell feedback info"

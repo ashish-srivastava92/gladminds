@@ -199,8 +199,15 @@
             messageModal = $('.modal.message-modal'),
             messageBlock = $('.modal-body', messageModal),
             messageHeader = $('.modal-title', messageModal),
-            waitingModal = $('.modal.waiting-dialog'),
-        jqXHR = $.ajax({
+            waitingModal = $('.modal.waiting-dialog');
+        if (data.Assign_To == 'Assign back to the reporter'){
+        	formData.append("reporter_status",true);
+        }
+        else{
+        	formData.append("reporter_status",false);
+        }
+        	
+        var jqXHR = $.ajax({
             type: 'POST',
             url: url,
             data: formData,
