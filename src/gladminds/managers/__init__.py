@@ -90,7 +90,8 @@ def save_update_feedback(feedback_obj, data, user,  host):
         feedback_obj.save()
         context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL',
                                   feedback_obj)
-        mail.send_email_to_initiator_after_issue_resolved(context,
+        if feedback_obj.reporter_email_id:
+            mail.send_email_to_initiator_after_issue_resolved(context,
                                                           feedback_obj, host)
         context = create_context('TICKET_RESOLVED_DETAIL_TO_BAJAJ',
                                  feedback_obj)
