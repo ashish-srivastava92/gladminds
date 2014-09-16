@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 
-from gladminds.fields import FolderNameField, SubdomainListField
+from gladminds.fields import FolderNameField
 ##################BRAND-PRPDUCT MODELS#######################
 '''
 BrandData contains brand related information
@@ -312,7 +312,7 @@ class ProductInsuranceInfo(models.Model):
     insurance_phone = models.CharField(
         max_length=15, blank=False, null=False)
     image_url = models.CharField(max_length=215, null=True, blank=True)
-    
+
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "product insurance info"
@@ -328,7 +328,7 @@ class ProductWarrantyInfo(models.Model):
     policy_number = models.CharField(max_length=15, unique=True, blank=True)
     premium = models.CharField(max_length=50, null=True, blank=True)
     image_url = models.CharField(max_length=215, null=True, blank=True)
-    
+
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "product warranty info"
@@ -347,36 +347,7 @@ class SparesData(models.Model):
 #########################################################################################
 
 
-
 """
-Monkey-patch the Site object to include a list of subdomains
-
-Future ideas include:
-
-* Site-enabled checkbox
-* Site-groups
-* Account subdomains (ala basecamp)
+Monkey-patch the Site object to include folder for template
 """
-
-# not sure which is better...
-# Site.add_to_class('subdomains', SubdomainListField(blank=True))
 FolderNameField(blank=True).contribute_to_class(Site,'folder_name')
-SubdomainListField(blank=True).contribute_to_class(Site,'subdomains')
-
-@property
-def has_subdomains(self):
-    return len(self.subdomains)
-
-@property
-def default_subdomain(self):
-    """
-    Return the first subdomain in self.subdomains or '' if no subdomains defined
-    """
-    if len(self.subdomains):
-        if self.subdomains[0]=="''":
-            return ''
-        return self.subdomains[0]
-    return ''
-
-Site.has_subdomains = has_subdomains
-Site.default_subdomain = default_subdomain

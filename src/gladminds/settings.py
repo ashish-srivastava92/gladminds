@@ -183,7 +183,6 @@ TEMPLATE_LOADERS = (
                    )
 
 MIDDLEWARE_CLASSES = (
-    #'gladminds.middlewares.dynamicsite_middleware.DynamicSitesMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
@@ -191,6 +190,7 @@ MIDDLEWARE_CLASSES = (
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    #'gladminds.middlewares.dynamicsite_middleware.DynamicSitesMiddleware',
     # 'gladminds.middleware.GladmindsMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',

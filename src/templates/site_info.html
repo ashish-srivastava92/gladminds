@@ -1,8 +1,7 @@
 {% extends 'base.html' %}
-
 {% block title %}Site Info for {{site.name}}!{% endblock %}
 
-{% block content %}
+{% block body %}
 <table>
 	<tr>
 		<td>Name</td>
@@ -27,14 +26,6 @@
 	<tr>
 		<td>Folder name</td>
 		<td>{{ site.folder_name }}</td>
-	</tr>
-	<tr>
-		<td>Supported subdomains</td>
-		<td>{{ site.subdomains }}</td>
-	</tr>
-	<tr>
-		<td>Requested subdomain</td>
-		<td>{{ request.subdomain }}</td>
 	</tr>
 </table>
 {% endblock %}
