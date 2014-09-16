@@ -46,8 +46,8 @@ def get_message_template_mapper():
                         'auth_rule': ['open']
                          },
                 settings.ALLOWED_KEYWORDS['customer_detail_recovery']:{
-                         'receive': get_template('RCV_CUSTOMER_DETAILS'),
-                         'send':get_template('SEND_CUSTOMER_DETAILS'),
+                        'receive': get_template('RCV_CUSTOMER_DETAILS'),
+                        'send':get_template('SEND_CUSTOMER_DETAILS'),
                         'invalid':get_template('SEND_INVALID_MESSAGE'),
                         'handler':'send_customer_detail',
                         'auth_rule': ['open']
