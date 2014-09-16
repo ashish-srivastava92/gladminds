@@ -243,7 +243,7 @@
             messageBlock = $('.modal-body', messageModal),
             messageHeader = $('.modal-title', messageModal),
             waitingModal = $('.modal.waiting-dialog');
-        if (data.Assign_To == 'Assign back to the reporter'){
+        if (data.Assign_To == 'Assign to reporter'){
         	formData.append("reporter_status",true);
         }
         else{

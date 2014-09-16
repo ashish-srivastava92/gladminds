@@ -105,7 +105,7 @@
                                			{% for type in servicedeskuser %}
                       	          			<option {% if type == feedback.assign_to %} selected {% endif %} value="{{type}}">{{type.user.username}}({{type}})</option>
                                 		{% endfor %}
-                                		<option {% if feedback.assign_to_reporter == True %} selected {%endif%} value ='Assign to reporter'>Assign back to the reporter</option>
+                                		<option {% if feedback.assign_to_reporter %} selected {%endif%} value ='Assign to reporter'>Assign to reporter</option>
                             		</select>
                       			</div>
                     		</div>
