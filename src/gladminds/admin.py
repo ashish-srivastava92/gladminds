@@ -28,6 +28,7 @@ from gladminds.models.common import EmailTemplate
 from gladminds.aftersell.models.common import ASCSaveForm, Feedback
 from gladminds.afterbuy.models.common import UserNotification
 from gladminds import utils
+from django.contrib.sites.admin import SiteAdmin
 
 
 ############################BRAND AND PRODUCT ADMIN##########################
@@ -585,3 +586,6 @@ admin.site.register(UploadProductCSV)
 admin.site.register(LogEntry)
 admin.site.register(UserNotification, UserNotificationAdmin)
 admin.site.register(Feedback, UserFeedback)
+
+
+SiteAdmin.list_display += ('subdomains',)
