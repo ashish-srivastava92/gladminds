@@ -465,6 +465,8 @@ class GladmindsResources(Resource):
             if gladminds_feedback_object.reporter_email_id:
                 context = create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)
                 send_servicedesk_feedback(context, gladminds_feedback_object)
+            else:
+                logger.info("Reporter emailId not found.")
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message = message)
         return {'status': True, 'message': message}
 
