@@ -1,20 +1,17 @@
 import logging
 import json
 import random
-import datetime
-
 from datetime import datetime
+
 from django.shortcuts import render_to_response, render
 from django.http.response import HttpResponseRedirect, HttpResponse,\
-    HttpResponseBadRequest
+    HttpResponseBadRequest, Http404
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
-
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
 from django.db import transaction
-
+from django.contrib.sites.models import Site
+from django.db.models.query_utils import Q
 
 from gladminds.models import common
 from gladminds.sqs_tasks import send_otp
@@ -38,11 +35,15 @@ logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 
 
+def gm_render(request, *args, **kwargs):
+    return render(request, args, kwargs)
+
+
 def auth_login(request, provider):
     if request.method == 'GET':
             if provider not in PROVIDERS:
                 return HttpResponseBadRequest()
-            return render(request, PROVIDER_MAPPING.get(provider, 'asc/login.html'))
+            return gm_render(request, PROVIDER_MAPPING.get(provider, 'asc/login.html'))
 
     if request.method == 'POST':
         username = request.POST['username']
@@ -91,12 +92,12 @@ def generate_otp(request):
             logger.error('Invalid details, mobile {0}'.format(request.POST.get('mobile', '')))
             return HttpResponseRedirect('/aftersell/users/otp/generate?details=invalid')
     elif request.method == 'GET':
-        return render(request, 'portal/get_otp.html')
+        return gm_render(request, 'portal/get_otp.html')
 
 
 def validate_otp(request):
     if request.method == 'GET':
-        return render(request, 'portal/validate_otp.html')
+        return gm_render(request, 'portal/validate_otp.html')
     elif request.method == 'POST':
         try:
             otp = request.POST['otp']
@@ -105,7 +106,7 @@ def validate_otp(request):
             user = aftersell_common.RegisteredASC.objects.filter(phone_number=mobile_format(phone_number))[0].user
             utils.validate_otp(user, otp, phone_number)
             logger.info('OTP validated for mobile number {0}'.format(phone_number))
-            return render(request, 'portal/reset_pass.html', {'otp': otp})
+            return gm_render(request, 'portal/reset_pass.html', {'otp': otp})
         except:
             logger.error('OTP validation failed for mobile number {0}'.format(phone_number))
             return HttpResponseRedirect('/aftersell/users/otp/generate?token=invalid')
@@ -138,7 +139,7 @@ def register(request, menu):
         return HttpResponseBadRequest()
     if request.method == 'GET':
         user_id = request.user
-        return render(request, TEMPLATE_MAPPING.get(menu), {'active_menu' : ACTIVE_MENU.get(menu)\
+        return gm_render(request, TEMPLATE_MAPPING.get(menu), {'active_menu' : ACTIVE_MENU.get(menu)\
                                                                     , 'groups': groups, 'user_id' : user_id})
     elif request.method == 'POST':
         save_user = {
@@ -157,7 +158,7 @@ def register(request, menu):
 
 def asc_registration(request):
     if request.method == 'GET':
-        return render(request, 'portal/asc_registration.html',
+        return gm_render(request, 'portal/asc_registration.html',
                       {'asc_registration': True})
     elif request.method == 'POST':
 #        save_user = {
@@ -186,7 +187,7 @@ def exceptions(request, exception=None):
         return HttpResponseBadRequest()
     if exception == 'report':
         report_data = create_report(request.method, request.POST, request.user)
-        return render(request, 'portal/report.html', report_data)
+        return gm_render(request, 'portal/report.html', report_data)
     if request.method == 'GET':
         template = 'portal/exception.html'
         data = None
@@ -200,7 +201,7 @@ def exceptions(request, exception=None):
             #It is acceptable if there is no
             #data_mapping defined for a function
             pass
-        return render(request, template, {'active_menu': exception,
+        return gm_render(request, template, {'active_menu': exception,
                                            "data": data, 'groups': groups})
     elif request.method == 'POST':
         function_mapping = {
@@ -231,7 +232,7 @@ def servicedesk(request, servicedesk=None):
         except:
             #It is acceptable if there is no data_mapping defined for a function
             pass
-        return render(request, template, {'active_menu': servicedesk,
+        return gm_render(request, template, {'active_menu': servicedesk,
                                           "data": data, 'groups': groups,
                      "types": get_list_from_set(aftersell_common.FEEDBACK_TYPE),
                      "priorities": get_list_from_set(aftersell_common.PRIORITY)})
@@ -264,7 +265,7 @@ def reports(request, report=None):
         return HttpResponseBadRequest()
     if report == 'reconciliation':
         report_data = create_report(request.method, request.POST, request.user)
-        return render(request, 'portal/report.html', report_data)
+        return gm_render(request, 'portal/report.html', report_data)
     else:
         return HttpResponseBadRequest()
 
@@ -448,3 +449,17 @@ def trigger_sqs_tasks(request):
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
     taskqueue.add(sqs_tasks[request.POST['task']])
     return HttpResponse()
+
+
+def site_info(request):
+    if request.method != 'GET':
+        raise Http404
+    site = None
+    if settings.SITE_ID:
+        site = Site.objects.get_current()
+    args = {
+        'request_get_host': request.get_host(),
+        'http_host': request.META['HTTP_HOST'],
+        'site': site
+    }
+    return gm_render(request, 'site_info.html', args)

@@ -2,11 +2,28 @@ from datetime import datetime
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+from django.contrib.sites.models import Site
+
+from gladminds.fields import FolderNameField
 ##################BRAND-PRPDUCT MODELS#######################
 '''
 BrandData contains brand related information
 '''
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, primary_key=True)
+    phone_number = models.CharField(
+                   max_length=15, blank=False, null=False)
+    profile_pic = models.CharField(
+                   max_length=200, blank=True, null=True)
+
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "User Profile"
+
+    def __unicode__(self):
+        return self.user
 
 
 class UploadProductCSV(models.Model):
@@ -90,7 +107,7 @@ and unique phone numner
 
 
 class GladMindUsers(models.Model):
-    user = models.OneToOneField(User, null=True, blank=True)
+    user = models.OneToOneField(UserProfile, null=True, blank=True)
     gladmind_customer_id = models.CharField(
         max_length=215, unique=True, null=True)
     customer_name = models.CharField(max_length=215)
@@ -240,7 +257,7 @@ class MessageTemplate(models.Model):
 ########################TOTP Details################################
 
 class OTPToken(models.Model):
-    user = models.ForeignKey(User, null=True, blank=True)
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
     token = models.CharField(max_length=256, null=False)
     request_date = models.DateTimeField(null=True, blank=True)
     email = models.CharField(max_length=50, null=False)
@@ -310,7 +327,7 @@ class ProductInsuranceInfo(models.Model):
     insurance_phone = models.CharField(
         max_length=15, blank=False, null=False)
     image_url = models.CharField(max_length=215, null=True, blank=True)
-    
+
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "product insurance info"
@@ -326,7 +343,7 @@ class ProductWarrantyInfo(models.Model):
     policy_number = models.CharField(max_length=15, unique=True, blank=True)
     premium = models.CharField(max_length=50, null=True, blank=True)
     image_url = models.CharField(max_length=215, null=True, blank=True)
-    
+
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "product warranty info"
@@ -344,3 +361,8 @@ class SparesData(models.Model):
     
 #########################################################################################
 
+
+"""
+Monkey-patch the Site object to include folder for template
+"""
+FolderNameField(blank=True).contribute_to_class(Site,'folder_name')

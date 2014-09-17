@@ -190,6 +190,7 @@ MIDDLEWARE_CLASSES = (
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    #'gladminds.middlewares.dynamicsite_middleware.DynamicSitesMiddleware',
     # 'gladminds.middleware.GladmindsMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -232,6 +233,7 @@ INSTALLED_APPS = (
     'provider',
     'provider.oauth2',
     'debug_toolbar',
+    'south'
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )

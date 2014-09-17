@@ -1,19 +1,10 @@
 import tablib
-import datetime
 import json
 from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib import admin
-from suit.admin import SortableTabularInline, SortableModelAdmin
-from suit.widgets import SuitDateWidget, SuitSplitDateTimeWidget, \
-    EnclosedInput, LinkedSelect, AutosizedTextarea
-from suit.widgets import NumberInput
-from suit.admin import SortableModelAdmin
-from django.forms import ModelForm, TextInput
-from django.contrib.admin import ModelAdmin
-from django.contrib.admin import DateFieldListFilter
-from django.contrib.admin import ModelAdmin, SimpleListFilter
-from django.db import connections
-from django.db import models
+from suit.admin import SortableTabularInline
+from suit.widgets import EnclosedInput, AutosizedTextarea
+from django.forms import ModelForm
 from django.contrib.admin.models import LogEntry
 from models.common import GladMindUsers, ProductTypeData, \
     BrandData, ProductData, CouponData, MessageTemplate,\
@@ -21,13 +12,12 @@ from models.common import GladMindUsers, ProductTypeData, \
 from gladminds.aftersell.models.common import \
     RegisteredDealer, ServiceAdvisorDealerRelationship, ServiceAdvisor
 from gladminds.aftersell.models.logs import AuditLog, DataFeedLog
-from import_export.admin import ImportExportModelAdmin, ExportMixin
-from import_export import fields, widgets
 from import_export import resources
 from gladminds.models.common import EmailTemplate
 from gladminds.aftersell.models.common import ASCSaveForm, Feedback
 from gladminds.afterbuy.models.common import UserNotification
 from gladminds import utils
+from django.contrib.admin.options import ModelAdmin
 
 
 ############################BRAND AND PRODUCT ADMIN##########################
