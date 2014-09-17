@@ -61,3 +61,7 @@ alter table aftersell_registereddealer add dependent_on VARCHAR(25);
 alter table gladminds_coupondata add column sent_to_sap boolean default false;
 update gladminds_coupondata set sent_to_sap=1 where closed_date < '2014-10-08%';
 
+###########################################################################
+alter table gladminds_coupondata add column credit_date DATETIME NULL;
+alter table gladminds_coupondata add column credit_note varchar(50) NULL;
+
