@@ -70,7 +70,7 @@ class GladmindsResources(Resource):
                 logger.info('Terminating the service coupon {0}'.format(ucn))
                 message = '{2} {0} {1}'.format(customer_id, ucn, settings.ALLOWED_KEYWORDS['close'].upper())
                 logger.info('Message to send: ' + message)
-        phone_number = mobile_format(phone_number)
+        phone_number = utils.get_phone_number_format(phone_number)
         message = format_message(message)
         audit.audit_log(action='RECIEVED', sender=phone_number, reciever='+1 469-513-9856', message=message, status='success')
         logger.info('Recieved Message from phone number: {0} and message: {1}'.format(phone_number, message))
@@ -107,7 +107,7 @@ class GladmindsResources(Resource):
         handler = getattr(self, sms_dict['handler'], None)
         try:
             with transaction.atomic():
-                to_be_serialized = handler(sms_dict, phone_number)
+                to_be_serialized = handler(sms_dict, mobile_format(phone_number))
         except Exception as ex:
             logger.info("The database failed to perform {0}:{1}".format(request.POST.get('action'), ex))
         return self.create_response(request, data=to_be_serialized)
@@ -398,6 +398,7 @@ class GladmindsResources(Resource):
             message=templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')
 
         if message:
+            sa_phone = utils.get_phone_number_format(sa_phone)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
                 task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message})
