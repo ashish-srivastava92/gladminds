@@ -6,6 +6,13 @@ var Utils = {
 		});
 		return data;
 	},
+	
+	showErrorMessage : function(message, fadeIn, fadeOut){
+		var messageBlock = $(".user-message .message");
+	      	messageBlock.text(message);
+	      	messageBlock.stop().fadeOut(0);
+	      	messageBlock.fadeIn(fadeIn).fadeOut(fadeOut);
+	},
 
 	submitForm : function(event, data, url) {
 		// Items are hidden

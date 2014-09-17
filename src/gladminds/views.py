@@ -68,8 +68,8 @@ def user_logout(request):
             logout(request)
             return HttpResponseRedirect('/aftersell/dasc/login')
     return HttpResponseBadRequest('Not Allowed')
-    
-    
+
+@login_required()
 def change_password(request): 
     if request.method == 'GET':
         return render(request, 'portal/change_password.html')
@@ -79,19 +79,16 @@ def change_password(request):
             user = User.objects.get(username=request.user)
             old_password = request.POST.get('oldPassword')
             new_password = request.POST.get('newPassword')
-            print "old passs", old_password
             check_pass = user.check_password(str(old_password))
-            print "check pass...", check_pass
             if check_pass:
-                print "set pass",user.set_password(str(new_password))
-                return HttpResponse('Password Updated')
+                user.set_password(str(new_password))
+                user.save()
+                data = {'message': 'Password Changed successfully', 'status': True}
             else:
-                print "pass not found"
-                return HttpResponse('Old password wrong')
-                
+                data = {'message': 'Old password wrong', 'status': False}
+            return HttpResponse(json.dumps(data), content_type='application/json')
         else:
             return HttpResponseBadRequest('Not Allowed')
-    
 
 def generate_otp(request):
     if request.method == 'POST':
