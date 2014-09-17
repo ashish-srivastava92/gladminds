@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.exceptions import DataNotFoundError
@@ -8,6 +9,7 @@ from gladminds.sqs_tasks import send_sms
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     TIME_FORMAT
 
+logger = logging.getLogger('gladminds')
 
 def get_feedbacks(user):
     group = user.groups.all()[0]
@@ -77,6 +79,8 @@ def save_update_feedback(feedback_obj, data, user,  host):
         if feedback_obj.reporter_email_id:
             mail.send_email_to_initiator_after_issue_assigned(context,
                                                          feedback_obj)
+        else:
+            logger.info("Reporter emailId not found.")
         send_sms('INITIATOR_FEEDBACK_DETAILS', feedback_obj.reporter,
                  feedback_obj)
 
@@ -88,10 +92,14 @@ def save_update_feedback(feedback_obj, data, user,  host):
         feedback_obj.root_cause = data['rootcause']
         feedback_obj.resolution = data['resolution']
         feedback_obj.save()
-        context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL',
+        if feedback_obj.reporter_email_id:
+            context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL',
                                   feedback_obj)
-        mail.send_email_to_initiator_after_issue_resolved(context,
+            mail.send_email_to_initiator_after_issue_resolved(context,
                                                           feedback_obj, host)
+        else:
+            logger.info("Reporter emailId not found.")
+
         context = create_context('TICKET_RESOLVED_DETAIL_TO_BAJAJ',
                                  feedback_obj)
         mail.send_email_to_bajaj_after_issue_resolved(context)

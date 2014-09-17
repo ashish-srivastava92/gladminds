@@ -463,8 +463,11 @@ class GladmindsResources(Resource):
             gladminds_feedback_object = aftersell_common.Feedback.objects.get(id=gladminds_feedback_object.id)
             context = create_context('FEEDBACK_DETAIL_TO_ADIM',  gladminds_feedback_object)
             send_feedback_received(context)
-            context = create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)
-            send_servicedesk_feedback(context, gladminds_feedback_object)
+            if gladminds_feedback_object.reporter_email_id:
+                context = create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)
+                send_servicedesk_feedback(context, gladminds_feedback_object)
+            else:
+                logger.info("Reporter emailId not found.")
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message = message)
         return {'status': True, 'message': message}
 
