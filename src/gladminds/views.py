@@ -28,6 +28,7 @@ from gladminds.feed import SAPFeed
 from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
 from gladminds.aftersell.models import common as afterbuy_common
 from gladminds.scheduler import SqsTaskQueue
+from django.views.decorators.http import require_http_methods
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
@@ -68,6 +69,28 @@ def user_logout(request):
             return HttpResponseRedirect('/aftersell/dasc/login')
     return HttpResponseBadRequest('Not Allowed')
     
+    
+def change_password(request): 
+    if request.method == 'GET':
+        return render(request, 'portal/change_password.html')
+    if request.method == 'POST':
+        groups = stringify_groups(request.user)
+        if 'dealers' in groups or 'ascs' in groups:
+            user = User.objects.get(username=request.user)
+            old_password = request.POST.get('oldPassword')
+            new_password = request.POST.get('newPassword')
+            print "old passs", old_password
+            check_pass = user.check_password(str(old_password))
+            print "check pass...", check_pass
+            if check_pass:
+                print "set pass",user.set_password(str(new_password))
+                return HttpResponse('Password Updated')
+            else:
+                print "pass not found"
+                return HttpResponse('Old password wrong')
+                
+        else:
+            return HttpResponseBadRequest('Not Allowed')
     
 
 def generate_otp(request):

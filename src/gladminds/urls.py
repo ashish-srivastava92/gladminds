@@ -18,6 +18,7 @@ api_v1.register(resources.UserResources())
 urlpatterns = patterns('',
     url(r'^aftersell/(?P<provider>[a-zA-Z]+)/login/$', 'gladminds.views.auth_login', name='user_login'),
     url(r'^aftersell/provider/logout$', 'gladminds.views.user_logout', name='user_logout'),
+    url(r'^aftersell/provider/change-password$', 'gladminds.views.change_password', name='change_password'),
     url(r'api/doc/', include('tastypie_swagger.urls', namespace='tastypie_swagger')),
     url(r'^aftersell/provider/redirect$', 'gladminds.views.redirect_user'),
 

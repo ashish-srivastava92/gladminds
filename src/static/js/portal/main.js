@@ -1,5 +1,15 @@
 (function() {
 
+	$(".change-password-form").on("submit", function() {
+	    if($(".new-password").val() != $(".retype-new-pass").val()) {
+	      var messageBlock = $(".user-message .message");
+	      messageBlock.text("Passwords do not match");
+	      messageBlock.stop().fadeOut(0);
+	      messageBlock.fadeIn(1000).fadeOut(7000);
+	      return false;
+	    }
+	  });
+	
     $('input.advisor-action').click(function() {
         var actionSet = $(this).parents('.advisor-action-item'), postAction = $(this).val(), sibblingActionSet = actionSet.siblings('.advisor-action-item'), disabledInputs = actionSet.find('input[type="text"]'), activeInputs = sibblingActionSet.find('input[type="text"]');
 
