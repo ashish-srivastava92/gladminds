@@ -9,7 +9,7 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Removing unique constraint on 'UserProfile', fields ['phone_number']
-        db.execute('insert into gladminds_userprofile (user_id) select id from auth_user')
+        db.execute('insert into gladminds_userprofile (user_id, phone_number) select id, 999999999 from auth_user')
 
 
     def backwards(self, orm):
