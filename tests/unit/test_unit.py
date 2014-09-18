@@ -113,7 +113,7 @@ class TestUtils(GladmindsUnitTestCase):
         data = get_list_from_set(PRIORITY)
         self.assertEqual(len(data), 4) 
          
-
+    
 
 class TestFeedLogWithRemark(ResourceTestCase):
     '''

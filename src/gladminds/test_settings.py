@@ -24,8 +24,8 @@ REDIS_URL = 'redis://localhost:6379'
 
 FEED_TYPE = 'CSV'
 
-LOGGING['handlers']['gladminds_logs']['filename'] = 'log/gladminds/app/test_case.log'
-LOGGING['handlers']['afterbuy_logs']['filename'] = 'log/gladminds/app/test_case.log'
+LOGGING['handlers']['gladminds_logs']['filename'] = '/var/log/gladminds/test_case.log'
+LOGGING['handlers']['afterbuy_logs']['filename'] = '/var/log/gladminds/test_case.log'
 
 FEED_FAILURE_MAIL_ENABLED = False
 

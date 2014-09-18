@@ -127,7 +127,6 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
         log_len_after = logs.AuditLog.objects.all()
         self.assertEqual(feedbacks[0].priority  ,'High')     
               
-               
 class GladmindsUrlsTest(GladmindsResourceTestCase):
     def setUp(self):
         super(GladmindsUrlsTest, self).setUp()       

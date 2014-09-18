@@ -5,7 +5,8 @@ from gladminds.resource import resources
 from gladminds.sqs_tasks import _tasks_map
 from gladminds.taskqueue import SqsHandler
 from gladminds.afterbuy import api_resource
-from gladminds.apis import audit_api
+from gladminds.apis import audit_api, product_api
+from gladminds.apis import user_apis
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -16,6 +17,8 @@ api_v1.register(resources.GladmindsResources())
 api_v1.register(resources.UserResources())
 api_v1.register(api_resource.AfterBuyResources())
 api_v1.register(audit_api.AuditResources())
+api_v1.register(user_apis.GladMindUserResources())
+
 
 urlpatterns = patterns('',
     url(r'^site-info/$', 'gladminds.views.site_info', name='site_info'),

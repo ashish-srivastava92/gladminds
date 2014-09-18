@@ -29,11 +29,30 @@ class TestCustomerRegistration(GladmindsResourceTestCase):
         test_user.save()
         login = self.client.login(username='DEALER01', password='DEALER01@123')
         self.send_dispatch_feed()
+        self.asc_data = {
+                    'name' : 'test_asc',
+                    'address' : 'ABCDEF',
+                    'password' : '123',
+                    'phone-number' : '9999999999',
+                    'email' : 'abc@abc.com',
+                    'pincode' : '562106'
+                }
 
     def register_customer(self, data):
         response = self.client.post('/aftersell/register/customer', data=data)
         return response
-        
+
+    def check_asc_exists(self, name, check_name, by):
+        if by == 'dealer':
+            response = self.client.post('/aftersell/register/asc', data=self.asc_data)
+            self.assertEqual(response.status_code, 200)
+        elif by == 'self':
+            response = self.client.post('/aftersell/asc/self-register/', data=self.asc_data)
+            self.assertEqual(response.status_code, 200)
+    
+        temp_asc_obj = self.get_temp_asc_obj(name=name)
+        self.assertEqual(temp_asc_obj.name, check_name)
+
     def test_temp_customer_registration(self):
         data = {
                     'customer-phone': '9999999999',
@@ -62,3 +81,11 @@ class TestCustomerRegistration(GladmindsResourceTestCase):
         product_obj = self.get_product_details(vin='XXXXXXXXXX')
         self.assertEqual(product_obj.customer_phone_number.phone_number, '+919999999999')
         self.assertEqual(response.status_code, 200)
+
+    def test_asc_registration_by_self(self):
+        self.check_asc_exists('test_asc','test_asc','dealer')
+
+#TODO : Fix this test case
+#     def test_asc_registration_by_dealer(self):
+#         self.check_asc_exists('test_asc','test_asc','self')
+#         
