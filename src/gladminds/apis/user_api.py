@@ -10,7 +10,7 @@ class UserResource(CustomBaseResource):
         queryset = User.objects.all()
         resource_name = 'user'
         authorization= Authorization()
-        detail_allowed_methods = ['get', 'post']
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']
         excludes = ['password']
         always_return_data = True
 
@@ -21,7 +21,7 @@ class UserProfileResources(CustomBaseResource):
         queryset = common.UserProfile.objects.all()
         resource_name = 'userprofile'
         authorization= Authorization()
-        detail_allowed_methods =['get', 'post']
+        detail_allowed_methods =['get', 'post', 'put', 'delete']
         always_return_data = True
         filtering = {
                      "user":  ALL_WITH_RELATIONS
@@ -35,7 +35,7 @@ class GladMindUserResources(CustomBaseResource):
         queryset = common.GladMindUsers.objects.all()
         resource_name = 'gmusers'
         authorization= Authorization()
-        detail_allowed_methods = ['get', 'post']
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']
         filtering = {
                      "user":  ALL_WITH_RELATIONS,
                      "customer_name" : ALL,
