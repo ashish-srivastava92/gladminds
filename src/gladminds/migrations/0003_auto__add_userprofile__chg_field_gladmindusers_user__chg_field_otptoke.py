@@ -11,11 +11,14 @@ class Migration(SchemaMigration):
         # Adding model 'UserProfile'
         db.create_table(u'gladminds_userprofile', (
             ('user', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True, primary_key=True)),
-            ('phone_number', self.gf('django.db.models.fields.CharField')(unique=True, max_length=15)),
+            ('phone_number', self.gf('django.db.models.fields.CharField')(max_length=15, null=True, blank=True)),
             ('profile_pic', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
         ))
         db.send_create_signal('gladminds', ['UserProfile'])
 
+
+        # Changing field 'GladMindUsers.user'
+        db.alter_column(u'gladminds_gladmindusers', 'user_id', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['gladminds.UserProfile'], unique=True, null=True))
 
         # Changing field 'OTPToken.user'
         db.alter_column(u'gladminds_otptoken', 'user_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['gladminds.UserProfile'], null=True))
@@ -24,6 +27,9 @@ class Migration(SchemaMigration):
         # Deleting model 'UserProfile'
         db.delete_table(u'gladminds_userprofile')
 
+
+        # Changing field 'GladMindUsers.user'
+        db.alter_column(u'gladminds_gladmindusers', 'user_id', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True, null=True))
 
         # Changing field 'OTPToken.user'
         db.alter_column(u'gladminds_otptoken', 'user_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True))
@@ -146,11 +152,11 @@ class Migration(SchemaMigration):
             'isActive': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'phone_number': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '15'}),
             'pincode': ('django.db.models.fields.CharField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
-            'registration_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 16, 0, 0)'}),
+            'registration_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 17, 0, 0)'}),
             'state': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'thumb_url': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
             'tshirt_size': ('django.db.models.fields.CharField', [], {'max_length': '2'}),
-            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.User']", 'unique': 'True', 'null': 'True', 'blank': 'True'})
+            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['gladminds.UserProfile']", 'unique': 'True', 'null': 'True', 'blank': 'True'})
         },
         'gladminds.messagetemplate': {
             'Meta': {'object_name': 'MessageTemplate'},
@@ -169,7 +175,7 @@ class Migration(SchemaMigration):
         },
         'gladminds.productdata': {
             'Meta': {'object_name': 'ProductData'},
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 16, 0, 0)', 'null': 'True'}),
+            'created_on': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 17, 0, 0)', 'null': 'True'}),
             'customer_phone_number': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['gladminds.GladMindUsers']", 'null': 'True', 'blank': 'True'}),
             'customer_product_number': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'dealer_id': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['aftersell.RegisteredDealer']", 'null': 'True', 'blank': 'True'}),
@@ -180,7 +186,7 @@ class Migration(SchemaMigration):
             'invoice_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'invoice_loc': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
             'isActive': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'last_modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 16, 0, 0)'}),
+            'last_modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 17, 0, 0)'}),
             'order': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'product_purchase_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'product_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['gladminds.ProductTypeData']", 'null': 'True', 'blank': 'True'}),
@@ -263,7 +269,7 @@ class Migration(SchemaMigration):
         },
         'gladminds.userprofile': {
             'Meta': {'object_name': 'UserProfile'},
-            'phone_number': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '15'}),
+            'phone_number': ('django.db.models.fields.CharField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
             'profile_pic': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.User']", 'unique': 'True', 'primary_key': 'True'})
         }
