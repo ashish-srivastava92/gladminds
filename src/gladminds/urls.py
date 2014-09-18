@@ -23,7 +23,7 @@ urlpatterns = patterns('',
 
     url(r'^aftersell/register/(?P<menu>[a-zA-Z0-9]+)$', 'gladminds.views.register'),
     url(r'^aftersell/exceptions/(?P<exception>[a-zA-Z0-9]+)$', 'gladminds.views.exceptions'),
-    url(r'^aftersell/reports/(?P<report>[a-zA-Z0-9]+)$', 'gladminds.views.reports'),
+    url(r'^aftersell/reports/reconciliation$', 'gladminds.views.reports'),
     url(r'^aftersell/users/otp/generate$', 'gladminds.views.generate_otp', name='generate_otp'),
     url(r'^aftersell/users/otp/validate', 'gladminds.views.validate_otp', name='validate_otp'),
     url(r'^aftersell/users/otp/update_pass', 'gladminds.views.update_pass', name='update_pass'),
