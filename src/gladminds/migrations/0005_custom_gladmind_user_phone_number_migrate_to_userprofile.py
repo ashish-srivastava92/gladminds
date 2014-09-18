@@ -7,16 +7,21 @@ from django.db import models
 
 class Migration(SchemaMigration):
 
-    def forwards(self, orm):
-        # Removing unique constraint on 'UserProfile', fields ['phone_number']
-        db.delete_unique(u'gladminds_userprofile', ['phone_number'])
+    no_dry_run = True
 
+    def forwards(self, orm):
+        for gm in orm.GladMindUsers.objects.all():
+            user_profile = orm.UserProfile.objects.filter(user=gm.user.user.id)
+            if user_profile:
+                user_details = user_profile[0]
+                user_details.phone_number = gm.phone_number
+                user_details.save()
 
     def backwards(self, orm):
         # Adding unique constraint on 'UserProfile', fields ['phone_number']
-        db.create_unique(u'gladminds_userprofile', ['phone_number'])
+        pass
 
-
+        
     models = {
         'aftersell.registereddealer': {
             'Meta': {'object_name': 'RegisteredDealer'},
@@ -135,7 +140,7 @@ class Migration(SchemaMigration):
             'isActive': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'phone_number': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '15'}),
             'pincode': ('django.db.models.fields.CharField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
-            'registration_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 16, 0, 0)'}),
+            'registration_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 17, 0, 0)'}),
             'state': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'thumb_url': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
             'tshirt_size': ('django.db.models.fields.CharField', [], {'max_length': '2'}),
@@ -158,7 +163,7 @@ class Migration(SchemaMigration):
         },
         'gladminds.productdata': {
             'Meta': {'object_name': 'ProductData'},
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 16, 0, 0)', 'null': 'True'}),
+            'created_on': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 17, 0, 0)', 'null': 'True'}),
             'customer_phone_number': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['gladminds.GladMindUsers']", 'null': 'True', 'blank': 'True'}),
             'customer_product_number': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'dealer_id': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['aftersell.RegisteredDealer']", 'null': 'True', 'blank': 'True'}),
@@ -169,7 +174,7 @@ class Migration(SchemaMigration):
             'invoice_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'invoice_loc': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
             'isActive': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'last_modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 16, 0, 0)'}),
+            'last_modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 17, 0, 0)'}),
             'order': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'product_purchase_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'product_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['gladminds.ProductTypeData']", 'null': 'True', 'blank': 'True'}),
@@ -252,7 +257,7 @@ class Migration(SchemaMigration):
         },
         'gladminds.userprofile': {
             'Meta': {'object_name': 'UserProfile'},
-            'phone_number': ('django.db.models.fields.CharField', [], {'max_length': '15'}),
+            'phone_number': ('django.db.models.fields.CharField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
             'profile_pic': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.User']", 'unique': 'True', 'primary_key': 'True'})
         }

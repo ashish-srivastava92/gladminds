@@ -14,7 +14,7 @@ BrandData contains brand related information
 class UserProfile(models.Model):
     user = models.OneToOneField(User, primary_key=True)
     phone_number = models.CharField(
-                   max_length=15, blank=False, null=False)
+                   max_length=15, blank=True, null=True)
     profile_pic = models.CharField(
                    max_length=200, blank=True, null=True)
 
