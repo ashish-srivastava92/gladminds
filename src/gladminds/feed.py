@@ -149,12 +149,9 @@ class BaseFeed(object):
             new_user.groups.add(user_group)
             new_user.save()
             logger.info(user + ' {0} registered successfully'.format(username))
-            if phone_number:
-                user_deatils = common.UserProfile(user=new_user, phone_number=phone_number)
-            else:
-                user_deatils = common.UserProfile(user=new_user)   
-            user_deatils.save()
-            return user_deatils
+            user_details = common.UserProfile(user=new_user, phone_number=phone_number)
+            user_details.save()
+            return user_details
         else:
             logger.info('{0} id is not provided.'.format(user))
             raise Exception('{0} id is not provided.'.format(user))    
