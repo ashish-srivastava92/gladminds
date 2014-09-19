@@ -3,6 +3,7 @@
 {% block report_content %}
 
 <div>
+    {% if records %}
 	<table class="table table-striped table-bordered report-table">
 		<thead>
 			<th>Customer ID</th>
@@ -38,8 +39,8 @@
 			{% endfor %}
 		</tbody>
 	</table>
-	{% if not records %}
-	<div class="text-center bg-info">{{message}}</div>
+	{% elif params %}
+	<div class="text-center bg-info">No coupons found matching the request</div>
 	{% endif %}
 </div>
 {% endblock %}

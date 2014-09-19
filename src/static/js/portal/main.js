@@ -200,15 +200,12 @@
     
     $('.report-type-dropdown').on('change', function() {
         var reportType = $(this),
-            couponStatus = $('.coupon-status-dropdown');
+            couponStatus = $('.coupon-status');
         if (reportType.val() === 'credit') {
-            couponStatus.val('2');
-            couponStatus.attr('readOnly', true);
+            couponStatus.addClass('hide');
         }
         else {
-            couponStatus.val('');
-            couponStatus.attr('readOnly', false);
+            couponStatus.removeClass('hide');
         }
     });
-    
 })();

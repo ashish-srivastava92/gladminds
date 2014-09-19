@@ -215,37 +215,37 @@ def reports(request):
     if not ('ascs' in groups or 'dealers' in groups):
         return HttpResponseBadRequest()
     status_options = {'4': 'In Progress', '2':'Closed'}
-    report_data =  {'status_options': status_options}
+    report_options = {'reconciliation': 'Reconciliation', 'credit':'Credit Note'}  
+    min_date, max_date = utils.get_min_and_max_filter_date()
+    template_rendered = 'portal/reconciliation_report.html'
+    report_data =  {'status_options': status_options,
+                    'report_options': report_options,
+                    'min_date':min_date,
+                    'max_date': max_date}
     if request.method == 'POST':
-        data = request.POST
-        report_data = create_reconciliation_report(data, request.user, status_options)
-        if data['report-type']== 'credit':
-            return render(request, 'portal/credit_note_report.html', report_data)
-    return render(request, 'portal/reconciliation_report.html', report_data)
+        report_data['params'] = request.POST.copy()
+        if report_data['params']['type']== 'credit':
+            report_data['params']['status']='2'
+            template_rendered = 'portal/credit_note_report.html'
+        report_data['records'] = create_reconciliation_report(report_data['params'], request.user)
+    return render(request, template_rendered, report_data)
 
     
-def create_reconciliation_report(query_params, user, status_options):
+def create_reconciliation_report(query_params, user):
     report_data = []
     filter = {}
     params = {}
     user = afterbuy_common.RegisteredDealer.objects.filter(dealer_id=user)
     filter['servicing_dealer'] = user[0]
-    params['min_date'], params['max_date'] = utils.get_min_and_max_filter_date() 
-    message = "No coupon found."
+    args = { Q(status=4) | Q(status=2) | Q(status=6)}
     status = query_params.get('status')
     from_date = query_params.get('from')
     to_date = query_params.get('to')
-    params['report_type'] = query_params.get('report_type')
-    params['start_date'] = from_date
-    params['to_date'] = to_date
-    params['status'] = status
     filter['actual_service_date__range'] = (str(from_date) + ' 00:00:00', str(to_date) +' 23:59:59')
-    if status=='4':
-        args = { Q(status=4) }
-    elif status=='2':
-        args = { Q(status=2) | Q(status=6)}
-    else:
-        args = { Q(status=4) | Q(status=2) | Q(status=6)}
+    if status:
+        args = { Q(status=status) }
+        if status=='2':
+            args = { Q(status=2) | Q(status=6)}      
     all_coupon_data = common.CouponData.objects.filter(*args, **filter).order_by('-actual_service_date')
     map_status = {'6': 'Closed', '4': 'In Progress', '2':'Closed'}
     for coupon_data in all_coupon_data:
@@ -255,7 +255,7 @@ def create_reconciliation_report(query_params, user, status_options):
         coupon_data_dict['service_avil_date'] = coupon_data.actual_service_date
         coupon_data_dict['closed_date'] = coupon_data.closed_date
         coupon_data_dict['service_status'] = map_status[str(coupon_data.status)]
-        if query_params['report-type']== 'credit':
+        if query_params['type']== 'credit':
             customer_details = coupon_data.vin.customer_phone_number
             coupon_data_dict['customer_name'] = customer_details.customer_name
             coupon_data_dict['customer_number'] = customer_details.phone_number
@@ -269,8 +269,7 @@ def create_reconciliation_report(query_params, user, status_options):
             coupon_data_dict['service_type'] = coupon_data.service_type
             coupon_data_dict['special_case'] = ''
         report_data.append(coupon_data_dict)
-    return {"records": report_data, 'status_options': status_options, 'params': params, 
-            "message": message}
+    return report_data
     
 
 UPDATE_FAIL = 'Some error occurred, try again later.'
