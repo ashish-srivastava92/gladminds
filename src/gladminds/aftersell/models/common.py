@@ -44,6 +44,7 @@ class UCNRecovery(models.Model):
 
 
 class RegisteredDealer(models.Model):
+    user = models.OneToOneField(UserProfile, null=True, blank=True)
     dealer_id = models.CharField(
         max_length=25, blank=False, null=False, unique=True, help_text="Dealer Code must be unique")
     address = models.TextField(blank=True, null=True)
@@ -59,6 +60,7 @@ class RegisteredDealer(models.Model):
 
 
 class ServiceAdvisor(models.Model):
+    user = models.OneToOneField(UserProfile, null=True, blank=True)
     service_advisor_id = models.CharField(
         max_length=15, blank=False, unique=True, null=False)
     name = models.CharField(max_length=25, blank=False, null=False)
