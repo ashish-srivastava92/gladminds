@@ -89,7 +89,7 @@ class ProductTypeData(models.Model):
     order = models.PositiveIntegerField(default=0)
     warranty_email = models.EmailField(max_length=215, null=True, blank=True)
     warranty_phone = models.CharField(
-        max_length=15, blank=False, null=False)
+        max_length=15, blank=True, null=True)
 
     class Meta:
         app_label = "gladminds"
