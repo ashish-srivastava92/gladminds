@@ -12,10 +12,10 @@ class BrandDataResources(CustomBaseResource):
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete']
         always_return_data = True
-        
-        
+
+
 class ProductTypeDataResources(CustomBaseResource):
-    brand_id = fields.ForeignKey(BrandDataResources, 'brand_id', full=True)
+    brand = fields.ForeignKey(BrandDataResources, 'brand', null=True, blank=True)
     class Meta:
         queryset = common.ProductTypeData.objects.all()
         resource_name = "producttype"

@@ -20,6 +20,7 @@ api_v1.register(api_resource.AfterBuyResources())
 api_v1.register(audit_api.AuditResources())
 api_v1.register(user_apis.GladMindUserResources())
 api_v1.register(product_apis.ProductDataResources())
+  
 
 
 urlpatterns = patterns('',
