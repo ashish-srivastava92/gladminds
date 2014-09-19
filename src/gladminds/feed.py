@@ -122,7 +122,7 @@ class BaseFeed(object):
         pass
 
     def registerNewUser(self, user, group=None, username=None, first_name='', last_name='',
-                          email=''):
+                          email='',phone_number=None):
         logger.info('New {0} Registration with id - {1}'.format(user, username))
         if not group:
             group = USER_GROUP[user]
@@ -149,7 +149,12 @@ class BaseFeed(object):
             new_user.groups.add(user_group)
             new_user.save()
             logger.info(user + ' {0} registered successfully'.format(username))
-            return new_user
+            if phone_number:
+                user_deatils = common.UserProfile(user=new_user, phone_number=phone_number)
+            else:
+                user_deatils = common.UserProfile(user=new_user)   
+            user_deatils.save()
+            return user_deatils
         else:
             logger.info('{0} id is not provided.'.format(user))
             raise Exception('{0} id is not provided.'.format(user))    
@@ -192,10 +197,10 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 logger.debug(
                     "[Exception: DealerAndServiceAdvisorFeed_dealer_data]: {0}"
                     .format(odne))
-                dealer_data = aftersell_common.RegisteredDealer(
+                user_obj = self.registerNewUser('dealer', username=dealer['dealer_id'])
+                dealer_data = aftersell_common.RegisteredDealer(user=user_obj,
                     dealer_id=dealer['dealer_id'], address=dealer['address'])
                 dealer_data.save()
-                self.registerNewUser('dealer', username=dealer['dealer_id'])
 
             try:
                 mobile_number_active = self.check_mobile_active(dealer, dealer_data)
@@ -208,10 +213,10 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                             logger.info("[Info: DealerAndServiceAdvisorFeed_sa]: Updated phone number for {0}".format(dealer['service_advisor_id']))
                         service_advisor = service_advisor[0]
                     else:
-                        service_advisor = aftersell_common.ServiceAdvisor(service_advisor_id=dealer['service_advisor_id'], 
+                        user_obj = self.registerNewUser('SA', username=dealer['service_advisor_id'], phone_number=dealer['phone_number'])
+                        service_advisor = aftersell_common.ServiceAdvisor(user=user_obj, service_advisor_id=dealer['service_advisor_id'], 
                                                             name=dealer['name'], phone_number=dealer['phone_number'])
                         service_advisor.save()
-                        self.registerNewUser('SA', username=dealer['service_advisor_id'])
                 elif dealer['status']=='N':
                     service_advisor = service_advisor[0]
                 else:
@@ -270,10 +275,10 @@ class ProductDispatchFeed(BaseFeed):
                         dealer_data = aftersell_common.RegisteredDealer.objects.get(
                             dealer_id=product['dealer_id'])
                     except Exception as ex:
-                        dealer_data = aftersell_common.RegisteredDealer(
+                        user_obj = self.registerNewUser('dealer', username=product['dealer_id'])
+                        dealer_data = aftersell_common.RegisteredDealer(user=user_obj,
                             dealer_id=product['dealer_id'])
                         dealer_data.save()
-                        self.registerNewUser('dealer', username=product['dealer_id'])
                     self.get_or_create_product_type(
                         product_type=product['product_type'])
                     producttype_data = common.ProductTypeData.objects.get(
@@ -380,7 +385,7 @@ class ProductPurchaseFeed(BaseFeed):
                         '[Exception: ProductPurchaseFeed_customer_data]: {0}'.format(odne))
                     # Register this customer
                     gladmind_customer_id = utils.generate_unique_customer_id()
-                    user=self.registerNewUser('customer', username=gladmind_customer_id)
+                    user=self.registerNewUser('customer', username=gladmind_customer_id, phone_number=product['customer_phone_number'])
                     customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, phone_number=product[
                                                          'customer_phone_number'], registration_date=datetime.now(),
                                                          customer_name=product['customer_name'], pincode=product['pin_no'],
@@ -537,10 +542,11 @@ class ASCFeed(BaseFeed):
                         logger.debug(
                             "[Exception: ASCFeed_dealer_data]: {0}"
                             .format(ex))
-                        dealer_data = aftersell_common.RegisteredDealer(
+                        user_obj = self.registerNewUser('dealer', username=dealer['dealer_id'])
+                        dealer_data = aftersell_common.RegisteredDealer(user=user_obj,
                             dealer_id=dealer['dealer_id'], address=dealer['address'])
                         dealer_data.save()
-                        self.registerNewUser('dealer', username=dealer['dealer_id'])
+                        
                     asc_data = aftersell_common.RegisteredDealer(dealer_id=dealer['asc_id'],
                                         address=dealer['address'], dependent_on=dealer['dealer_id'])
                 else:
