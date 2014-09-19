@@ -338,7 +338,7 @@ class GladmindsResources(Resource):
             coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
             if coupon_object.status == 2 or coupon_object.status == 6:
                 message=templates.get_template('COUPON_ALREADY_CLOSED')
-            else:
+            elif coupon_object.status == 4:
                 customer_phone_number = coupon_object.vin.customer_phone_number.phone_number
                 coupon_object.status = 2
                 coupon_object.sa_phone_number=dealer_sa_object.service_advisor_id
@@ -347,6 +347,8 @@ class GladmindsResources(Resource):
                 coupon_object.save()
 #                 common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, service_type__lt=coupon_object.service_type).update(status=3)
                 message = templates.get_template('SEND_SA_CLOSE_COUPON').format(customer_id=sap_customer_id, usc=unique_service_coupon)
+            else:
+                message = templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')
         except Exception as ex:
             logger.error("[Exception_coupon_close]".format(ex))
             message = templates.get_template('SEND_INVALID_MESSAGE')
