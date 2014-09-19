@@ -33,25 +33,26 @@ class ExportCouponRedeemFeed(BaseExportFeed):
 
     def export(self, items=None, item_batch=None, total_failed_on_feed=0):
         logger.info(
-            "Export {2}: Items:{0} and Item_batch: {1}"\
-            .format(items, item_batch, self.feed_type))
+            "Export {0}".format(self.feed_type))
         client = self.get_client()
         total_failed = total_failed_on_feed
         for item in items:
+            logger.info("Trying to send SAP the coupon: {0}"\
+                        .format(item))            
             result = client.service.MI_GCP_UCN_Sync(
                 ITEM=[item], ITEM_BATCH=item_batch)
+            logger.info("Response from SAP: {0}".format(result))
             if result[1]['I_STATUS'] == 'SUCCESS':
                 export_status = True
                 coupon = common.CouponData.objects.get(item['GCP_UCN_NO'])
                 coupon.sent_to_sap = True
                 coupon.save()
-                logger.error("Sent the details of coupon {0} to sap".format(item['GCP_UCN_NO']))
+                logger.info("Sent the details of coupon {0} to sap".format(item['GCP_UCN_NO']))
             else:
                 total_failed = total_failed + 1
                 export_status = False
                 logger.error("Failed to send the details of coupon {0} to sap".format(item['GCP_UCN_NO']))
 
-        logger.info("Response from SAP: {0}".format(result))
         feed_log(feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
