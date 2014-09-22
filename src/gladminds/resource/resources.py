@@ -232,6 +232,15 @@ class GladmindsResources(Resource):
         elif validity_date >= today and expiry_date < today:
             coupon.actual_service_date = datetime.now()
             coupon.save()
+    
+    def get_requested_coupon_status(self, vin, service_type):
+        requested_coupon = common.CouponData.objects.filter(vin__vin=vin,
+                                                    service_type=service_type) 
+        if not requested_coupon:
+            status = "not available"
+        else:
+            status = common.STATUS_CHOICES[requested_coupon[0].status - 1][1]
+        return status
         
     def validate_coupon(self, sms_dict, phone_number):
         actual_kms = int(sms_dict['kms'])
@@ -284,13 +293,29 @@ class GladmindsResources(Resource):
             if len(in_progress_coupon) > 0:
                 self.update_inprogress_coupon(in_progress_coupon[0], actual_kms, dealer_data)
                 logger.info("Validate_coupon: in_progress_coupon")
-                dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=in_progress_coupon[0].service_type, customer_id=sap_customer_id)
-                customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=in_progress_coupon[0].unique_service_coupon, service_type=in_progress_coupon[0].service_type)
+                dealer_message = templates.get_template('COUPON_ALREADY_INPROGRESS').format(
+                                                    service_type=in_progress_coupon[0].service_type,
+                                                    customer_id=sap_customer_id)
+                customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(
+                                                    coupon=in_progress_coupon[0].unique_service_coupon,
+                                                    service_type=in_progress_coupon[0].service_type)
             elif valid_coupon:
                 logger.info("Validate_coupon: valid_coupon")
                 self.update_coupon(valid_coupon, actual_kms, dealer_data, 4)
-                dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=valid_coupon.service_type, customer_id=sap_customer_id)
-                customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=valid_coupon.unique_service_coupon, service_type=valid_coupon.service_type)
+                if(valid_coupon.service_type == int(service_type)):
+                    dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(
+                                                    service_type=valid_coupon.service_type,
+                                                    customer_id=sap_customer_id)
+                else:    
+                    requested_coupon_status = self.get_requested_coupon_status(vin, service_type)
+                    dealer_message = templates.get_template('SEND_SA_OTHER_VALID_COUPON').format(
+                                            req_service_type=service_type,
+                                            req_status=requested_coupon_status,                                                     
+                                            service_type=valid_coupon.service_type,
+                                            customer_id=sap_customer_id)
+                customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(
+                                            coupon=valid_coupon.unique_service_coupon,
+                                            service_type=valid_coupon.service_type)
             else:
                 logger.info("Validate_coupon: ELSE PART")
                 customer_message_countdown = 10
