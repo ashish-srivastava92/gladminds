@@ -372,6 +372,7 @@ class UserPreferences(models.Model):
         return self.user_details
 
     class Meta:
+        app_label = "gladminds"
         verbose_name_plural = "User Preferences"
         unique_together = ("user_details", "key")
 
