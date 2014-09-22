@@ -480,7 +480,7 @@ class ASCRegistrationToSAP(BaseFeed):
 
 
 def update_coupon_data(sender, **kwargs):
-    from gladminds.sqs_tasks import send_on_product_purchase
+    from gladminds.core.sqs_tasks import send_on_product_purchase
     import inspect
     instance = kwargs['instance']
     logger.info("triggered update_coupon_data")
