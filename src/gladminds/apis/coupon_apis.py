@@ -1,4 +1,4 @@
-from tastypie.constants import ALL_WITH_RELATIONS, ALL
+from tastypie.constants import ALL_WITH_RELATIONS
 from tastypie.authorization import Authorization
 from tastypie import fields
 from gladminds.models import common
