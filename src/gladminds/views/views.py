@@ -14,20 +14,20 @@ from django.contrib.sites.models import Site
 from django.db.models.query_utils import Q
 
 from gladminds.models import common
-from gladminds.sqs_tasks import send_otp
-from gladminds import utils, message_template
-from gladminds.utils import get_task_queue, get_customer_info,\
+from gladminds.core.sqs_tasks import send_otp
+from gladminds.core import utils, message_template
+from gladminds.core.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format, stringify_groups,\
     get_list_from_set,  get_user_groups, search_details
-from gladminds.sqs_tasks import export_asc_registeration_to_sap
+from gladminds.core.sqs_tasks import export_asc_registeration_to_sap
 from gladminds.aftersell.models import common as aftersell_common
-from gladminds.mail import sent_otp_email
-from gladminds.feed import SAPFeed
+from gladminds.core.mail import sent_otp_email
+from gladminds.core.feed import SAPFeed
 from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
 from gladminds.aftersell.models import common as afterbuy_common
-from gladminds.scheduler import SqsTaskQueue
+from gladminds.core.scheduler import SqsTaskQueue
 from gladminds.resource.resources import GladmindsResources
-from gladminds.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
+from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU
 
 gladmindsResources = GladmindsResources()

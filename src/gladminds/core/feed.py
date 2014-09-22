@@ -10,12 +10,12 @@ from django.db.models.signals import post_save
 from django.contrib.auth.models import User, Group
 from django.db.models import signals
 
-from gladminds import audit, message_template as templates
-from gladminds import utils
+from gladminds.core import audit, message_template as templates
+from gladminds.core import utils
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
-from gladminds.audit import feed_log
-from gladminds.utils import get_task_queue
+from gladminds.core.audit import feed_log
+from gladminds.core.utils import get_task_queue
 
 logger = logging.getLogger("gladminds")
 USER_GROUP = {'dealer': 'dealers', 'ASC': 'ascs', 'SA':'sas', 'customer':"customer"}

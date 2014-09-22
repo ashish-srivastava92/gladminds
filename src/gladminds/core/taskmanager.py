@@ -1,5 +1,5 @@
 from django.db import models, transaction
-from gladminds import audit, utils, message_template as templates
+from gladminds.core import audit, utils, message_template as templates
 from gladminds.aftersell.models import logs
 from gladminds.models import common
 from datetime import datetime, timedelta
@@ -7,7 +7,7 @@ from gladminds.models.common import CouponData, STATUS_CHOICES
 from gladminds.aftersell.models import common as aftersell_common
 from django.utils import timezone
 from django.db.models import Q
-from gladminds.utils import COUPON_STATUS
+from gladminds.core.utils import COUPON_STATUS
 from django.conf import settings
 
 AUDIT_ACTION = "SENT TO QUEUE"
