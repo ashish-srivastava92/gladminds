@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 
-from gladminds.fields import FolderNameField
 ##################BRAND-PRPDUCT MODELS#######################
 '''
 BrandData contains brand related information
@@ -360,9 +359,3 @@ class SparesData(models.Model):
         verbose_name_plural = "spare info"
     
 #########################################################################################
-
-
-"""
-Monkey-patch the Site object to include folder for template
-"""
-FolderNameField(blank=True).contribute_to_class(Site,'folder_name')
