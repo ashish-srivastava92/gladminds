@@ -2,6 +2,27 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
 
+
+#############GLADMINDUSER PROFILE MODEL####################
+'''
+BrandData contains brand related information
+'''
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, primary_key=True)
+    phone_number = models.CharField(
+                   max_length=15, blank=True, null=True)
+    profile_pic = models.CharField(
+                   max_length=200, blank=True, null=True)
+
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "User Profile"
+
+    def __unicode__(self):
+        return self.user
+
 #############GLADMINDUSER & CUSTOMERDATA MODEL####################
 
 '''
@@ -11,7 +32,7 @@ and unique phone numner
 
 
 class GladMindUsers(models.Model):
-    user = models.OneToOneField(User, null=True, blank=True)
+    user = models.OneToOneField(UserProfile, null=True, blank=True)
     gladmind_customer_id = models.CharField(
         max_length=215, unique=True, null=True)
     customer_name = models.CharField(max_length=215)
@@ -22,10 +43,24 @@ class GladMindUsers(models.Model):
     country = models.CharField(max_length=255, null=True, blank=True)
     state = models.CharField(max_length=255, null=True, blank=True)
     date_of_birth = models.CharField(max_length=255, null=True, blank=True)
-    gender = models.IntegerField(max_length=50, null=True, blank=True)
     img_url = models.FileField(upload_to="users", blank=True)
     thumb_url = models.FileField(upload_to="users", blank=True)
     isActive = models.BooleanField(default=True)
+    #added these attributes for afterbuy application
+    accepted_terms = models.BooleanField(default=False)
+    SIZE_CHOICES = (
+        ('S', 'Small'),
+        ('M', 'Medium'),
+        ('L', 'Large'),
+        ('XL', 'Extra Large'),
+    )
+    GENDER_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('X', 'Other'),
+    )
+    gender = models.CharField(max_length=2, choices=GENDER_CHOICES, blank=True, null=True)
+    tshirt_size = models.CharField(max_length=2, choices=SIZE_CHOICES, blank=True, null=True)
     pincode = models.CharField(max_length=15, null=True, blank=True)
 
     class Meta:
@@ -37,7 +72,6 @@ class GladMindUsers(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None):
         return super(GladMindUsers, self).save(force_insert, force_update, using)
-    
 
 
 
@@ -101,22 +135,3 @@ class UserMobileInfo(models.Model):
         verbose_name_plural = "mobile info"
         
         
-'''
-BrandData contains brand related information
-'''
-
-
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, primary_key=True)
-    phone_number = models.CharField(
-                   max_length=15, blank=True, null=True)
-    profile_pic = models.CharField(
-                   max_length=200, blank=True, null=True)
-
-    class Meta:
-        app_label = "gladminds"
-        verbose_name_plural = "User Profile"
-
-    def __unicode__(self):
-        return self.user
-
