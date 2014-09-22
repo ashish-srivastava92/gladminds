@@ -6,7 +6,7 @@ from suit.admin import SortableTabularInline
 from suit.widgets import EnclosedInput, AutosizedTextarea
 from django.forms import ModelForm
 from django.contrib.admin.models import LogEntry
-from models.common import GladMindUsers, ProductTypeData, \
+from gladminds.models.common import GladMindUsers, ProductTypeData, \
     BrandData, ProductData, CouponData, MessageTemplate,\
     UploadProductCSV, CustomerTempRegistration
 from gladminds.aftersell.models.common import \
@@ -16,7 +16,7 @@ from import_export import resources
 from gladminds.models.common import EmailTemplate
 from gladminds.aftersell.models.common import ASCSaveForm, Feedback
 from gladminds.afterbuy.models.common import UserNotification
-from gladminds import utils
+from gladminds.core import utils
 from django.contrib.admin.options import ModelAdmin
 
 
