@@ -18,16 +18,16 @@ from tastypie.utils.urls import trailing_slash
 from tastypie import http
 from tastypie.exceptions import ImmediateHttpResponse
 
-from gladminds import smsparser, utils, audit, message_template as templates
+from gladminds.core import smsparser, utils, audit, message_template as templates
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
-from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
+from gladminds.core.sqs_tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
-from gladminds.utils import mobile_format, format_message, get_task_queue, create_context
-from gladminds.feed import BaseFeed
+from gladminds.core.utils import mobile_format, format_message, get_task_queue, create_context
+from gladminds.core.feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
-from gladminds.mail import send_feedback_received,send_servicedesk_feedback
+from gladminds.core.mail import send_feedback_received,send_servicedesk_feedback
 
 logger = logging.getLogger('gladminds')
 json = utils.import_json()

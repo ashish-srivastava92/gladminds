@@ -3,7 +3,7 @@ from django.conf import settings
 from datetime import datetime
 from django.contrib.auth.models import User
 from gladminds.models.common import UserProfile
-from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
+from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     USER_DESIGNATION, RATINGS
 
 ##########################################################################

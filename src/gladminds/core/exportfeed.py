@@ -1,6 +1,6 @@
 from suds.client import Client
 from suds.transport.http import HttpAuthenticated
-from gladminds.audit import feed_log
+from gladminds.core.audit import feed_log
 from gladminds.models import common
 from django.conf import settings
 import logging

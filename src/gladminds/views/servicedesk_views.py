@@ -6,10 +6,10 @@ from django.http.response import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
-from gladminds.utils import get_list_from_set
+from gladminds.core.utils import get_list_from_set
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.resource.resources import GladmindsResources
-from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE
+from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE
 from gladminds.managers import get_feedbacks, get_feedback,\
     get_servicedesk_users, save_update_feedback
 from django.views.decorators.http import require_http_methods

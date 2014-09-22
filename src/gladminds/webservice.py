@@ -12,12 +12,12 @@ from spyne.server.wsgi import WsgiApplication
 from spyne.service import ServiceBase
 from spyne.util.wsgi_wrapper import WsgiMounter
 
-from gladminds.feed import SAPFeed
-from gladminds.soap_authentication import AuthenticationService
+from gladminds.core.feed import SAPFeed
+from gladminds.core.soap_authentication import AuthenticationService
 import logging
 from django.conf import settings
 import json
-from gladminds import utils
+from gladminds.core import utils
 from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
 
 
