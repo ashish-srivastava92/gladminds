@@ -38,21 +38,27 @@ class ExportCouponRedeemFeed(BaseExportFeed):
         total_failed = total_failed_on_feed
         for item in items:
             logger.info("Trying to send SAP the coupon: {0}"\
-                        .format(item))            
-            result = client.service.MI_GCP_UCN_Sync(
-                ITEM=[item], ITEM_BATCH=item_batch)
-            logger.info("Response from SAP: {0}".format(result))
-            if result[1]['I_STATUS'] == 'SUCCESS':
-                export_status = True
-                coupon = common.CouponData.objects.get(item['GCP_UCN_NO'])
-                coupon.sent_to_sap = True
-                coupon.save()
-                logger.info("Sent the details of coupon {0} to sap".format(item['GCP_UCN_NO']))
-            else:
-                total_failed = total_failed + 1
-                export_status = False
-                logger.error("Failed to send the details of coupon {0} to sap".format(item['GCP_UCN_NO']))
-
+                        .format(item))
+            try:            
+                result = client.service.MI_GCP_UCN_Sync(
+                    ITEM=[item], ITEM_BATCH=item_batch)
+                logger.info("Response from SAP: {0}".format(result))
+                if result[1]['I_STATUS'] == 'SUCCESS':
+                    try:
+                        export_status = True
+                        coupon = common.CouponData.objects.get(unique_service_coupon=item['GCP_UCN_NO'])
+                        coupon.sent_to_sap = True
+                        coupon.save()
+                        logger.info("Sent the details of coupon {0} to sap".format(item['GCP_UCN_NO']))
+                    except Exception as ex:
+                        logger.error("Coupon with id {0} does not exist".format(item['GCP_UCN_NO']))
+                else:
+                    total_failed = total_failed + 1
+                    export_status = False
+                    logger.error("Failed to send the details of coupon {0} to sap".format(item['GCP_UCN_NO']))
+            except Exception as ex:
+                logger.error("Failed to send the details to sap")
+                logger.error(ex)
         feed_log(feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
