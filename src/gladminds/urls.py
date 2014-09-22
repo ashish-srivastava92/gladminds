@@ -2,12 +2,14 @@ from django.conf.urls import patterns, include, url
 from django.conf import settings
 from tastypie.api import Api
 from gladminds.resource import resources
-from gladminds.sqs_tasks import _tasks_map
-from gladminds.taskqueue import SqsHandler
+from gladminds.core.sqs_tasks import _tasks_map
+from gladminds.core.taskqueue import SqsHandler
 from gladminds.afterbuy import api_resource
 from gladminds.apis import audit_api, coupon_apis
 from gladminds.apis import product_apis
 from gladminds.apis import user_apis
+
+from gladminds.health_check import health_check_view 
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin

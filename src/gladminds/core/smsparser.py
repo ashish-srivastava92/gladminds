@@ -1,7 +1,7 @@
 import logging
 logger = logging.getLogger('gladminds')
 from parse import *
-from gladminds import utils, message_template as templates
+from gladminds.core import utils, message_template as templates
 
 class SmsException(Exception):
     def __init__(self, message=None, template=None):

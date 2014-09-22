@@ -9,10 +9,10 @@ from tastypie.resources import ModelResource
 from tastypie.utils.urls import trailing_slash
 
 from gladminds.models import common
-from gladminds import utils
+from gladminds.core import utils
 from gladminds.resource.authentication import AccessTokenAuthentication
 from gladminds.afterbuy.models import common as afterbuy_common
-from gladminds.utils import mobile_format
+from gladminds.core.utils import mobile_format
 from gladminds.aftersell.models import common as aftersell_common
 
 
