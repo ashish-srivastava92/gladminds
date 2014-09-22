@@ -164,11 +164,11 @@ class GladmindsResources(Resource):
         else:
             message = templates.get_template('SEND_INVALID_MESSAGE')
 
-#         if settings.ENABLE_AMAZON_SQS:
-#             task_queue = get_task_queue()
-#             task_queue.add("customer_detail_recovery", {"phone_number":phone_number, "message":message})
-#         else:
-#             customer_detail_recovery.delay(phone_number=phone_number, message=message)
+        if settings.ENABLE_AMAZON_SQS:
+            task_queue = get_task_queue()
+            task_queue.add("customer_detail_recovery", {"phone_number":phone_number, "message":message})
+        else:
+            customer_detail_recovery.delay(phone_number=phone_number, message=message)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
