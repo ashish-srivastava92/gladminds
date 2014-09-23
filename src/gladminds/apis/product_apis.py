@@ -15,10 +15,10 @@ class BrandDataResources(CustomBaseResource):
 
 
 class ProductTypeDataResources(CustomBaseResource):
-    brand = fields.ForeignKey(BrandDataResources, 'brand', null=True, blank=True)
+    brand = fields.ForeignKey(BrandDataResources, 'brand_id', full=True)
     class Meta:
         queryset = common.ProductTypeData.objects.all()
-        resource_name = "producttype"
+        resource_name = "producttypes"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
         always_return_data = True
@@ -28,7 +28,7 @@ class ProductDataResources(CustomBaseResource):
     customer_phone_number = fields.ForeignKey(GladMindUserResources, 'customer_phone_number',  null=True, blank=True, full=True)
     class Meta:
         queryset = common.ProductData.objects.all()
-        resource_name = "productdata"
+        resource_name = "products"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
         filtering = {

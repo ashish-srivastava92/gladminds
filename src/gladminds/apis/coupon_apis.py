@@ -11,7 +11,7 @@ class RegisteredDealerResources(CustomBaseResource):
         queryset = aftersell_common.RegisteredDealer.objects.all()
         resource_name = "registereddealer"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'delete']
+        detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
 
 class ServiceAdvisorResources(CustomBaseResource):
@@ -19,7 +19,7 @@ class ServiceAdvisorResources(CustomBaseResource):
         queryset = aftersell_common.ServiceAdvisor.objects.all()
         resource_name = "serviceadvisor"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'delete']
+        detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
 
 class CouponDataResources(CustomBaseResource):
@@ -29,9 +29,9 @@ class CouponDataResources(CustomBaseResource):
                                          null=True, blank=True)
     class Meta:
         queryset = common.CouponData.objects.all()
-        resource_name = "coupondata"
+        resource_name = "coupons"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'delete']
+        detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
         filtering = {
                         "servicing_dealer" : ALL_WITH_RELATIONS,

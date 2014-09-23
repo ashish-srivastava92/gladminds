@@ -46,8 +46,7 @@ class BrandData(models.Model):
     brand_id = models.CharField(
         max_length=50, null=False, unique=True, help_text="Brand Id must be unique")
     brand_name = models.CharField(max_length=250, null=False)
-    brand_image_loc = models.FileField(
-        upload_to=settings.AFTERBUY_BRAND_LOC, blank=True)
+    brand_image_loc = models.CharField(max_length=250, blank=True, null=True)
     isActive = models.BooleanField(default=True)
 
     class Meta:
@@ -82,8 +81,7 @@ class ProductTypeData(models.Model):
     brand_id = models.ForeignKey(BrandData, null=False)
     product_name = models.CharField(max_length=255, null=False)
     product_type = models.CharField(max_length=255, unique=True, null=False)
-    product_image_loc = models.FileField(
-        upload_to=settings.AFTERBUY_PRODUCT_TYPE_LOC, blank=True)
+    product_image_loc = models.CharField(max_length=250, blank=True, null=True)
     isActive = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
     warranty_email = models.EmailField(max_length=215, null=True, blank=True)
