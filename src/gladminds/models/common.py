@@ -236,6 +236,7 @@ class CouponData(models.Model):
     sent_to_sap = models.BooleanField(default=False)
     credit_date = models.DateTimeField(null=True, blank=True)
     credit_note = models.CharField(max_length=50, null=True, blank=True)
+    special_case = models.BooleanField(default=False)
 
     class Meta:
         app_label = "gladminds"

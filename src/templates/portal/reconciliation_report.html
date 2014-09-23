@@ -34,7 +34,7 @@
 				<td>{{record.kms|default_if_none:""}}</td>
 				<td>{{record.service_type|default_if_none:""}}</td>
 				<td>{{record.service_status|default_if_none:""}}</td>
-				<td>{{record.special_case|default_if_none:""}}</td>
+				<td>{% if record.special_case %} Yes {% else %} No {% endif%}</td>
 			</tr>
 			{% endfor %}
 		</tbody>

@@ -65,3 +65,7 @@ update gladminds_coupondata set sent_to_sap=1 where closed_date < '2014-10-08%';
 alter table gladminds_coupondata add column credit_date DATETIME NULL;
 alter table gladminds_coupondata add column credit_note varchar(50) NULL;
 
+############################################################################
+
+alter table aftersell_ucnrecovery add column unique_service_coupon varchar(215) NULL;
+alter table gladminds_coupondata add column special_case boolean default false;
