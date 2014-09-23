@@ -152,7 +152,7 @@ def get_coupon_info(data):
         coupon_data.save()
     except Exception as ex:
         coupon_data = None
-        logger.error('[UCN_RECOVERY_ERROR:: {0}'.format(ex))
+        logger.error('[UCN_RECOVERY_ERROR]:: {0}'.format(ex))
     return coupon_data
 
 def upload_file(data, unique_service_coupon):
