@@ -199,9 +199,6 @@ def exceptions(request, exception=None):
     groups = stringify_groups(request.user)
     if not ('ascs' in groups or 'dealers' in groups):
         return HttpResponseBadRequest()
-    if exception == 'report':
-        report_data = create_report(request.method, request.POST, request.user)
-        return render(request, 'portal/report.html', report_data)
     if request.method == 'GET':
         template = 'portal/exception.html'
         data=None
@@ -232,59 +229,67 @@ def exceptions(request, exception=None):
 
 
 @login_required()
-def reports(request, report=None):
+def reports(request):
     groups = stringify_groups(request.user)
+    report_data=[]
     if not ('ascs' in groups or 'dealers' in groups):
         return HttpResponseBadRequest()
-    if report == 'reconciliation':
-        report_data = create_report(request.method, request.POST, request.user)
-        return render(request, 'portal/report.html', report_data)
-    else:
-        return HttpResponseBadRequest()
+    status_options = {'4': 'In Progress', '2':'Closed'}
+    report_options = {'reconciliation': 'Reconciliation', 'credit':'Credit Note'}  
+    min_date, max_date = utils.get_min_and_max_filter_date()
+    template_rendered = 'portal/reconciliation_report.html'
+    report_data =  {'status_options': status_options,
+                    'report_options': report_options,
+                    'min_date':min_date,
+                    'max_date': max_date}
+    if request.method == 'POST':
+        report_data['params'] = request.POST.copy()
+        if report_data['params']['type']== 'credit':
+            report_data['params']['status']='2'
+            template_rendered = 'portal/credit_note_report.html'
+        report_data['records'] = create_reconciliation_report(report_data['params'], request.user)
+    return render(request, template_rendered, report_data)
+
     
-def create_report(method, query_params, user):
+def create_reconciliation_report(query_params, user):
     report_data = []
     filter = {}
     params = {}
-    args = { Q(status=4) | Q(status=2) | Q(status=6)}
-    status_options = {'6': 'Closed Old Fsc', '4': 'In Progress', '2':'Closed'}
     user = afterbuy_common.RegisteredDealer.objects.filter(dealer_id=user)
     filter['servicing_dealer'] = user[0]
-    params['min_date'], params['max_date'] = utils.get_min_and_max_filter_date() 
-    if method == 'POST':
-        message = "No coupon found."
-        status = query_params.get('status')
-        from_date = query_params.get('from')
-        to_date = query_params.get('to')
-        params['start_date'] = from_date
-        params['to_date'] = to_date
-        filter['actual_service_date__range'] = (str(from_date) + ' 00:00:00', str(to_date) +' 23:59:59')
-        if status:
-            params['status'] = status
-            filter['status'] = status
-        all_coupon_data = common.CouponData.objects.filter(*args, **filter).order_by('-actual_service_date')
-    elif method == 'GET':
-        message = "" 
-        all_coupon_data = []
-    else:
-        return HttpResponseBadRequest()
-    
+    args = { Q(status=4) | Q(status=2) | Q(status=6)}
+    status = query_params.get('status')
+    from_date = query_params.get('from')
+    to_date = query_params.get('to')
+    filter['actual_service_date__range'] = (str(from_date) + ' 00:00:00', str(to_date) +' 23:59:59')
+    if status:
+        args = { Q(status=status) }
+        if status=='2':
+            args = { Q(status=2) | Q(status=6)}      
+    all_coupon_data = common.CouponData.objects.filter(*args, **filter).order_by('-actual_service_date')
+    map_status = {'6': 'Closed', '4': 'In Progress', '2':'Closed'}
     for coupon_data in all_coupon_data:
         coupon_data_dict = {}
-        coupon_data_dict['customer_id'] = coupon_data.vin.sap_customer_id
-        coupon_data_dict['product_type'] = coupon_data.vin.product_type
-        coupon_data_dict['service_avil_date'] = coupon_data.actual_service_date
         coupon_data_dict['vin'] = coupon_data.vin.vin
-        coupon_data_dict['coupon_no'] = coupon_data.unique_service_coupon
         coupon_data_dict['sa_phone_name'] = coupon_data.sa_phone_number
-        coupon_data_dict['kms'] = coupon_data.actual_kms
-        coupon_data_dict['service_type'] = coupon_data.service_type
-        coupon_data_dict['service_status'] = status_options[str(coupon_data.status)]
-        coupon_data_dict['special_case'] = ''
+        coupon_data_dict['service_avil_date'] = coupon_data.actual_service_date
         coupon_data_dict['closed_date'] = coupon_data.closed_date
+        coupon_data_dict['service_status'] = map_status[str(coupon_data.status)]
+        if query_params['type']== 'credit':
+            customer_details = coupon_data.vin.customer_phone_number
+            coupon_data_dict['customer_name'] = customer_details.customer_name
+            coupon_data_dict['customer_number'] = customer_details.phone_number
+            coupon_data_dict['credit_date'] = coupon_data.credit_date
+            coupon_data_dict['credit_note'] = coupon_data.credit_note
+        else:
+            coupon_data_dict['customer_id'] = coupon_data.vin.sap_customer_id
+            coupon_data_dict['product_type'] = coupon_data.vin.product_type
+            coupon_data_dict['coupon_no'] = coupon_data.unique_service_coupon
+            coupon_data_dict['kms'] = coupon_data.actual_kms
+            coupon_data_dict['service_type'] = coupon_data.service_type
+            coupon_data_dict['special_case'] = ''
         report_data.append(coupon_data_dict)
-    return {"records": report_data, 'status_options': status_options, 'params': params, 
-            "message": message}
+    return report_data
     
 
 UPDATE_FAIL = 'Some error occurred, try again later.'

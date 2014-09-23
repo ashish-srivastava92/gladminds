@@ -226,4 +226,14 @@
       }
     });
     
+    $('.report-type-dropdown').on('change', function() {
+        var reportType = $(this),
+            couponStatus = $('.coupon-status');
+        if (reportType.val() === 'credit') {
+            couponStatus.addClass('hide');
+        }
+        else {
+            couponStatus.removeClass('hide');
+        }
+    });
 })();
