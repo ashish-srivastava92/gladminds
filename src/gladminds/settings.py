@@ -190,7 +190,7 @@ MIDDLEWARE_CLASSES = (
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    #'gladminds.middlewares.dynamicsite_middleware.DynamicSitesMiddleware',
+    'gladminds.core.middlewares.dynamicsite_middleware.DynamicSitesMiddleware',
     # 'gladminds.middleware.GladmindsMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -400,3 +400,6 @@ SMS_HEALTH_CHECK_INTERVAL = 6
 #######################FEED_HEALTH_CHECK_INTERVAL
 FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
+BRAND = 'mock'
+BRANDS = ['bajaj', 'demo']
+###############################################
