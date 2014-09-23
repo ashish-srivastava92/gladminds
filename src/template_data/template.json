@@ -261,7 +261,7 @@
     "pk": 29,
     "fields": {
       "template_key":"RCV_CUSTOMER_DETAILS",
-      "template":"{message}",
+      "template":"{params} {message}",
       "description":"Receive this message for getting customer details"
     }
   },

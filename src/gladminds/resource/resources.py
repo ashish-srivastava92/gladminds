@@ -141,11 +141,10 @@ class GladmindsResources(Resource):
         return True
 
     def send_customer_detail(self, sms_dict, phone_number):
-        sms_text = sms_dict['message'].split(' ')
-        if len(sms_text) == 2 and sms_text[0] in ['vin', 'id']:
-            keyword = sms_text[0]
-            value = sms_text[1]
+        keyword = sms_dict['params']
+        value = sms_dict['message']
 
+        if value and len(value)>5 and keyword in ['vin', 'id']:
             try:
                 if keyword == 'id':
                     product_object = common.ProductData.objects.get(sap_customer_id=value)
