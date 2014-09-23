@@ -454,12 +454,5 @@ def trigger_sqs_tasks(request):
 def site_info(request):
     if request.method != 'GET':
         raise Http404
-    site = None
-    if settings.SITE_ID:
-        site = Site.objects.get_current()
-    args = {
-        'request_get_host': request.get_host(),
-        'http_host': request.META['HTTP_HOST'],
-        'site': site
-    }
-    return gm_render(request, 'site_info.html', args)
+    brand = settings.BRAND
+    return HttpResponse(json.dumps({'brand': brand}), content_type='application/json')
