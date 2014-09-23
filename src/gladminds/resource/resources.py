@@ -445,6 +445,7 @@ class GladmindsResources(Resource):
             return True
         else:
             sa_phone = utils.get_phone_number_format(phone_number)
+            message = "SA is not the coupon initiator."
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
                 task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message})
