@@ -198,8 +198,10 @@
 	        <ul class="nav nav-justified">
 	          	{% block menu %}
 					<li id="navindex"><a href="{% url 'djangobb:index' %}">{% trans "Index" %}</a></li>
+					<li id="announcements"><a href="{% url 'djangobb:announcements' %}">{% trans "Announcements" %}</a></li>
 					<li id="navuserlist"><a href="{% url 'djangobb:forum_users' %}">{% trans "User list" %}</a></li>
 					<li id="navsearch"><a href="{% url 'djangobb:search' %}">{% trans "Search" %}</a></li>
+					
 					{% if user.is_superuser %}
 						<li id="navadmin"><a href="{% url 'admin:index' %}">{% trans "Administration" %}</a></li>
 					{% endif %}
@@ -210,8 +212,7 @@
 					{% endif %}
 					{% endblock %}
 	        </ul>
-	      </div>	
-	
+	      </div>
 		<div id="brdwelcome" class="inbox">
 			<ul class="conl">
 				{% if user.is_authenticated %}
@@ -256,10 +257,10 @@
 	</div>
 	</div>
 	<div class="col-md-3 box">
-		<div id="calendar-common" class="calendar box"></div>
-		<div id="gm-ads" class="calendar box">Ads</div>
+		<div id="calendar-common" class="calendar box">Event Calendar</div>
+		<div id="gm-ads" class="calendar box">Kit Collections</div>
 		{% if user.is_authenticated %}
-		<div id="calendar-users" class="calendar box"></div>
+		<div id="calendar-users" class="calendar box">My Calendar</div>
 		{% endif %}
 	</div>
 	<div id="brdfooter" class="box row">

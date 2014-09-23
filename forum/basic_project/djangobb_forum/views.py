@@ -283,7 +283,14 @@ def search(request):
     return render(request, template_name, context)
 
 
-
+@login_required
+def announcements(request):
+    data = []
+    data.append({'img':'guest.jpg', 'text': "hey i think it works great"})
+    data.append({'img':'guest.jpg', 'text': "it just works out of the box"})
+    data.append({'img':'guest.jpg', 'text': "cool how are you"})
+    data.append({'img':'guest.jpg', 'text': "did you checked my product"})
+    return render(request, 'djangobb_forum/announcements.html', {'announcements': data})
 
 @login_required
 def misc(request):

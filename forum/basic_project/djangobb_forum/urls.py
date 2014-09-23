@@ -13,6 +13,7 @@ urlpatterns = patterns('',
 
     # Forum
     url('^$', forum_views.index, name='index'),
+    url('^announcements$', forum_views.announcements, name='announcements'),
     url('^(?P<forum_id>\d+)/$', forum_views.show_forum, name='forum'),
     url('^moderate/(?P<forum_id>\d+)/$', forum_views.moderate, name='moderate'),
     url('^search/$', forum_views.search, name='search'),
