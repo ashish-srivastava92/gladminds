@@ -9,7 +9,8 @@ from gladminds.feed import BaseFeed
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
-    send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
+    send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message, \
+    customer_detail_recovery
 from tastypie import fields
 from tastypie.http import HttpBadRequest, HttpUnauthorized
 from tastypie.resources import Resource, ModelResource
@@ -136,6 +137,37 @@ class GladmindsResources(Resource):
             task_queue.add("send_registration_detail", {"phone_number":phone_number, "message":message})
         else:
             send_registration_detail.delay(phone_number=phone_number, message=message)
+        audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        return True
+
+    def send_customer_detail(self, sms_dict, phone_number):
+        keyword = sms_dict['params']
+        value = sms_dict['message']
+
+        if value and len(value)>5 and keyword in ['vin', 'id']:
+            try:
+                if keyword == 'id':
+                    product_object = common.ProductData.objects.get(sap_customer_id=value)
+                    message = templates.get_template('SEND_CUSTOMER_DETAILS').format('VIN', product_object.vin)
+                else:
+                    product_object = common.ProductData.objects.get(vin__contains=value)
+                    if product_object.sap_customer_id:
+                        message = templates.get_template('SEND_CUSTOMER_DETAILS').\
+                                        format('ID', product_object.sap_customer_id)
+                    else:
+                        message = templates.get_template('INVALID_RECOVERY_MESSAGE').format(keyword, value)
+                
+            except Exception as ex:
+                logger.info('Details not found with message %s' % ex)
+                message = templates.get_template('INVALID_RECOVERY_MESSAGE').format(keyword, value)
+        else:
+            message = templates.get_template('SEND_INVALID_MESSAGE')
+
+        if settings.ENABLE_AMAZON_SQS:
+            task_queue = get_task_queue()
+            task_queue.add("customer_detail_recovery", {"phone_number":phone_number, "message":message})
+        else:
+            customer_detail_recovery.delay(phone_number=phone_number, message=message)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 

@@ -267,11 +267,38 @@
   },
   {
     "model": "gladminds.messagetemplate",
-    "pk": 29,
+    "pk": 30,
     "fields": {
       "template_key": "SEND_SA_OTHER_VALID_COUPON",
       "template": "Requested free service {req_service_type} is {req_status}. Please proceed for free service {service_type} for Customer ID {customer_id}",
       "description": "Send in-progress coupon if it is available"
     }
-  }   
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 31,
+    "fields": {
+      "template_key":"RCV_CUSTOMER_DETAILS",
+      "template":"{params} {message}",
+      "description":"Receive this message for getting customer details"
+	}
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 32,
+    "fields": {
+      "template_key": "SEND_CUSTOMER_DETAILS",
+      "template": "Your {0} is {1}",
+      "description": "Send id or vin to customer depending upon message he sent"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 33,
+    "fields": {
+      "template_key":"INVALID_RECOVERY_MESSAGE",
+      "template":"No service register for {0}: {1}",
+      "description":"Send on if customer id or VIN does not exits."
+    }
+  } 
 ]

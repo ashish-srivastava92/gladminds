@@ -1,5 +1,5 @@
 (function() {
-
+	
     $('input.advisor-action').click(function() {
         var actionSet = $(this).parents('.advisor-action-item'), postAction = $(this).val(), sibblingActionSet = actionSet.siblings('.advisor-action-item'), disabledInputs = actionSet.find('input[type="text"]'), activeInputs = sibblingActionSet.find('input[type="text"]');
 
@@ -123,7 +123,35 @@
       return false;
 
     });
-    
+
+    $(".change-password-form").on("submit", function() {
+	    if($(".new-password").val() != $(".retype-new-pass").val()) {
+	    	Utils.showErrorMessage('Password does not matches.', 1000, 7000);
+		    return false;
+	    }else{
+	    	var data = Utils.getFormData('.change-password-form');
+	    	$.ajax({
+	              type: 'POST',
+	              url: '/aftersell/provider/change-password',
+	              data: data,
+	              success: function(data){
+	            	  if (data['message']) {
+	            		  Utils.showErrorMessage(data['message'], 10, 7000)
+	            	  }
+            		  setTimeout(function(){
+            			  if(data['status']){
+            				  history.back();
+            			  }
+            		  }, 2000); 
+	              },
+	              error: function(data) {
+	            	  messageBlock.text('Oops! Some error occurred!');
+	                  messageModal.modal('show');
+	              }
+	            });
+	    	return false;
+	    }
+    });
     
     $('.vin-form').on('submit', function() {
     	var table = $("#search-results tbody .search-detail");
