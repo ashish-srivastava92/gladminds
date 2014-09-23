@@ -1,0 +1,16 @@
+DIV.box,#adminconsole FIELDSET TH,.rowodd,.roweven {
+	background-color: #fff;
+	background-image: None;
+}
+
+.djangobb {
+	FONT-SIZE: 12px;
+}
+
+.calendar {
+	height: 150px;
+}
+
+.djangobb H2 {
+	PADDING: 18px 6px;
+}
