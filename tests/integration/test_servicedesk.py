@@ -8,7 +8,7 @@ from provider.oauth2.models import Client as auth_client
 from provider.oauth2.models import AccessToken
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
-from gladminds.mail import send_feedback_received,send_servicedesk_feedback
+from gladminds.core.mail import send_feedback_received,send_servicedesk_feedback
 from gladminds.aftersell.models import logs
  
 import json

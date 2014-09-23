@@ -1,29 +1,177 @@
-from datetime import datetime
 from django.db import models
 from django.conf import settings
+from datetime import datetime
 from django.contrib.auth.models import User
-from django.contrib.sites.models import Site
+from gladminds.gm.models import UserProfile, GladMindUsers
+from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
+    USER_DESIGNATION, RATINGS
+    
 
-##################BRAND-PRPDUCT MODELS#######################
-'''
-BrandData contains brand related information
-'''
+##########################################################################
+########################## ASC Save Form #########################
+ASC_STATUS_CHOICES = ((1, 'In Progress'), (2, 'Failed'))
 
-
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, primary_key=True)
-    phone_number = models.CharField(
-                   max_length=15, blank=True, null=True)
-    profile_pic = models.CharField(
-                   max_length=200, blank=True, null=True)
+class ASCSaveForm(models.Model):
+    name = models.CharField(max_length=255, null=False)
+    password = models.CharField(max_length=255, null=False, blank=False)
+    phone_number = models.CharField(max_length=15, null=False, blank=False,
+                                                         unique=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    pincode = models.CharField(max_length=255, null=True, blank=True)
+    address = models.CharField(max_length=255, null=True, blank=True)
+    status = models.SmallIntegerField(choices=ASC_STATUS_CHOICES, default=1)
+    timestamp = models.DateTimeField(default=datetime.now)
+    dealer_id = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
-        app_label = "gladminds"
-        verbose_name_plural = "User Profile"
+        abstract = True
+        app_label = "core"
+        verbose_name_plural = "ASC Save Form"
+
+
+class UCNRecovery(models.Model):
+    reason = models.TextField(null=False)
+    user = models.ForeignKey(UserProfile)
+    sap_customer_id = models.CharField(max_length=215, null=True, blank=True)
+    file_location = models.CharField(max_length=215, null=True, blank=True)
+    request_date = models.DateTimeField(default=datetime.now())
+
+    class Meta:
+        abstract = True
+        app_label = "core"
+        verbose_name_plural = "UCN recovery logs"
+
+###################################################################
+
+######################DEALER-SA MODELS#############################
+
+
+class RegisteredDealer(models.Model):
+    dealer_id = models.CharField(
+        max_length=25, blank=False, null=False, unique=True, help_text="Dealer Code must be unique")
+    address = models.TextField(blank=True, null=True)
+    role = models.CharField(max_length=10, default='dealer', blank=False)
+    dependent_on = models.CharField(max_length=25, blank=True, null=True)
+
+    class Meta:
+        abstract = True
+        app_label = "aftersell"
+        verbose_name_plural = "Dealer Data"
 
     def __unicode__(self):
-        return self.user
+        return self.dealer_id
 
+
+class ServiceAdvisor(models.Model):
+    service_advisor_id = models.CharField(
+        max_length=15, blank=False, unique=True, null=False)
+    name = models.CharField(max_length=25, blank=False, null=False)
+    phone_number = models.CharField(
+        max_length=15, blank=False, null=False)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        abstract = True
+        app_label = "aftersell"
+        verbose_name_plural = "Service Advisor Data"
+
+    def __unicode__(self):
+        return self.phone_number
+
+
+##################################################################
+#############Service Advisor and Registered Relationship MODEL####
+
+
+class ServiceAdvisorDealerRelationship(models.Model):
+    dealer_id = models.ForeignKey(RegisteredDealer, null=False)
+    service_advisor_id = models.ForeignKey(ServiceAdvisor, null=False)
+    status = models.CharField(max_length=10, blank=False, null=False)
+
+    class Meta:
+        abstract = True
+        app_label = "aftersell"
+        verbose_name_plural = "Service Advisor And Dealer Relationship"
+
+
+class RegisteredASC(models.Model):
+    user = models.OneToOneField(UserProfile, null=True, blank=True)
+    phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)
+    asc_name = models.CharField(max_length=215)
+    email_id = models.EmailField(max_length=215, null=True, blank=True)
+    registration_date = models.DateTimeField(default=datetime.now())
+    address = models.CharField(max_length=255, null=True, blank=True)
+    city = models.CharField(max_length=255, null=True, blank=True)
+    country = models.CharField(max_length=255, null=True, blank=True)
+    state = models.CharField(max_length=255, null=True, blank=True)
+    img_url = models.FileField(upload_to="users", blank=True)
+    isActive = models.BooleanField(default=True)
+    asc_id = models.CharField(
+        max_length=20, blank=False, unique=True, null=False)
+    dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        app_label = "aftersell"
+        verbose_name_plural = "Registered ASC Form"
+        
+    
+class ServiceDeskUser(models.Model):
+    user = models.OneToOneField(UserProfile, null=True, blank=True)
+    email_id = models.EmailField(max_length=215, null=True, blank=True)
+    phone_number = models.CharField(max_length=15, unique=True)
+    designation = models.CharField(max_length=10, choices = USER_DESIGNATION)
+    
+    class Meta:
+        abstract = True
+        app_label = "aftersell"
+        verbose_name_plural = "service desk users"
+    
+    def __unicode__(self):
+        return self.phone_number
+    
+class Feedback(models.Model):
+    reporter = models.CharField(max_length=15)
+    reporter_email_id = models.CharField(max_length=50, null=True, blank= True)
+    assign_to = models.ForeignKey(ServiceDeskUser, null=True, blank= True)
+    message = models.CharField(max_length=512, null=True, blank=False)
+    status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
+    priority = models.CharField(max_length=12, choices=PRIORITY)
+    type = models.CharField(max_length=12, choices=FEEDBACK_TYPE)
+    subject = models.CharField(max_length=512, null=True, blank=True)
+    created_date = models.DateTimeField(null=True, blank= False)
+    modified_date = models.DateTimeField(null=True, blank= True,auto_now=True)
+    closed_date = models.DateTimeField(null=True, blank=True)
+    resolved_date = models.DateTimeField(null=True, blank=True)
+    pending_from = models.DateTimeField(null=True, blank=True)
+    due_date = models.DateTimeField(null=True, blank=True)
+    wait_time = models.FloatField(max_length=20, null=True, blank=True, default = '0.0')
+    remarks = models.CharField(max_length=512, null=True, blank=True)
+    ratings = models.CharField(max_length=12, choices=RATINGS)
+    root_cause = models.CharField(max_length=512, null=True, blank=True)
+    resolution = models.CharField(max_length=512, null=True, blank=True)
+    role = models.CharField(max_length=50, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        app_label = "aftersell"
+        verbose_name_plural = "aftersell feedback info"
+        
+class Comments(models.Model):
+    feedback_object = models.ForeignKey(Feedback, null=False, blank=False)
+    user = models.CharField(max_length=20, null=False, blank=False)
+    comments = models.CharField(max_length=100, null=True, blank=True)
+    created_date = models.DateTimeField(null=False, blank=False)
+    modified_date = models.DateTimeField(null=True, blank=True, auto_now=True)
+    isDeleted = models.BooleanField(default=False)
+    
+    class Meta:
+        abstract = True
+        app_label = "aftersell"
+        verbose_name_plural = "aftersell comment info"
+        
+
+########################### Models Taken from Gladminds Common ##################
 
 class UploadProductCSV(models.Model):
     file_location = settings.PROJECT_DIR + '/data/'
@@ -37,10 +185,10 @@ class UploadProductCSV(models.Model):
         upload_to=file_location, blank=True)
 
     class Meta:
+        abstract = True
         app_label = "gladminds"
         verbose_name_plural = "Upload Product Data"
-
-
+        
 class BrandData(models.Model):
     pk_brand_id = models.AutoField(primary_key=True)
     brand_id = models.CharField(
@@ -51,6 +199,7 @@ class BrandData(models.Model):
     isActive = models.BooleanField(default=True)
 
     class Meta:
+        abstract = True
         app_label = "gladminds"
         verbose_name_plural = "Brand Data"
 
@@ -88,71 +237,15 @@ class ProductTypeData(models.Model):
     order = models.PositiveIntegerField(default=0)
     warranty_email = models.EmailField(max_length=215, null=True, blank=True)
     warranty_phone = models.CharField(
-        max_length=15, blank=True, null=True)
+        max_length=15, blank=False, null=False)
 
     class Meta:
+        abstract = True
         app_label = "gladminds"
         verbose_name_plural = "Product Type"
 
     def __unicode__(self):
         return self.product_type
-
-#############GLADMINDUSER & CUSTOMERDATA MODEL####################
-
-'''
-Gladmindusers have auto generated glamind customer id,
-and unique phone numner
-'''
-
-
-class GladMindUsers(models.Model):
-    user = models.OneToOneField(UserProfile, null=True, blank=True)
-    gladmind_customer_id = models.CharField(
-        max_length=215, unique=True, null=True)
-    customer_name = models.CharField(max_length=215)
-    email_id = models.EmailField(max_length=215, null=True, blank=True)
-    phone_number = models.CharField(max_length=15, unique=True)
-    registration_date = models.DateTimeField(default=datetime.now())
-    address = models.CharField(max_length=255, null=True, blank=True)
-    country = models.CharField(max_length=255, null=True, blank=True)
-    state = models.CharField(max_length=255, null=True, blank=True)
-    date_of_birth = models.CharField(max_length=255, null=True, blank=True)
-    img_url = models.FileField(upload_to="users", blank=True)
-    thumb_url = models.FileField(upload_to="users", blank=True)
-    isActive = models.BooleanField(default=True)
-    #added these attributes for afterbuy application
-    accepted_terms = models.BooleanField(default=False)
-    SIZE_CHOICES = (
-        ('S', 'Small'),
-        ('M', 'Medium'),
-        ('L', 'Large'),
-        ('XL', 'Extra Large'),
-    )
-    GENDER_CHOICES = (
-        ('M', 'Male'),
-        ('F', 'Female'),
-        ('X', 'Other'),
-    )
-    gender = models.CharField(max_length=2, choices=GENDER_CHOICES, blank=True, null=True)
-    tshirt_size = models.CharField(max_length=2, choices=SIZE_CHOICES, blank=True, null=True)
-    pincode = models.CharField(max_length=15, null=True, blank=True)
-
-    class Meta:
-        app_label = "gladminds"
-        verbose_name_plural = "Users"
-
-    def __unicode__(self):
-        return self.phone_number
-
-    def save(self, force_insert=False, force_update=False, using=None):
-        return super(GladMindUsers, self).save(force_insert, force_update, using)
-
-'''
-CustomerData contains info about
-which customer bought which product and
-the vin of product and the dealer
-'''
-
 
 class ProductData(models.Model):
     id = models.AutoField(primary_key=True)
@@ -187,6 +280,7 @@ class ProductData(models.Model):
     veh_reg_no = models.CharField(max_length=15, null=True, blank=True)
 
     class Meta:
+        abstract = True
         app_label = "gladminds"
         verbose_name_plural = "Product Data"
 
@@ -219,6 +313,7 @@ class CouponData(models.Model):
     servicing_dealer = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
 
     class Meta:
+        abstract = True
         app_label = "gladminds"
         verbose_name_plural = "Coupon Information"
 
@@ -231,10 +326,11 @@ class CouponData(models.Model):
 
 class ServiceAdvisorCouponRelationship(models.Model):
     unique_service_coupon = models.ForeignKey(CouponData, null=False)
-    service_advisor_phone = models.ForeignKey('aftersell.ServiceAdvisor', null=False)
-    dealer_id = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
+    service_advisor_phone = models.ForeignKey(ServiceAdvisor, null=False)
+    dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
 
     class Meta:
+        abstract = True
         app_label = 'gladminds'
         verbose_name_plural = 'Service Advisor And Coupon Relationship'
 
@@ -248,9 +344,9 @@ class MessageTemplate(models.Model):
     description = models.CharField(max_length=512, null=True)
 
     class Meta:
+        abstract = True
         app_label = "gladminds"
         verbose_name_plural = "Message Template"
-
 
 ####################################################################
 ########################TOTP Details################################
@@ -262,6 +358,7 @@ class OTPToken(models.Model):
     email = models.CharField(max_length=50, null=False)
 
     class Meta:
+        abstract = True
         app_label = "gladminds"
         verbose_name_plural = "OTPs"
 
@@ -280,6 +377,7 @@ class EmailTemplate(models.Model):
     description = models.CharField(max_length=512, null=True)
 
     class Meta:
+        abstract = True
         app_label = "gladminds"
         verbose_name_plural = "Email Template"
 
@@ -290,6 +388,7 @@ class SASaveForm(models.Model):
     status = models.CharField(max_length=10, blank=False, null=False)
 
     class Meta:
+        abstract = True
         app_label = "gladminds"
         verbose_name_plural = "SA Save Form"
 
@@ -306,6 +405,7 @@ class CustomerTempRegistration(models.Model):
         max_length=215, null=True, blank=True, unique=True)
 
     class Meta:
+        abstract = True
         app_label = "gladminds"
         verbose_name_plural = "Customer temporary info"
 
@@ -328,6 +428,7 @@ class ProductInsuranceInfo(models.Model):
     image_url = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
+        abstract = True
         app_label = "gladminds"
         verbose_name_plural = "product insurance info"
     
@@ -344,6 +445,7 @@ class ProductWarrantyInfo(models.Model):
     image_url = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
+        abstract = True
         app_label = "gladminds"
         verbose_name_plural = "product warranty info"
         
@@ -355,7 +457,14 @@ class SparesData(models.Model):
     spare_contact = models.CharField(max_length=50, null=True, blank=True)
     
     class Meta:
+        abstract = True
         app_label = "gladminds"
         verbose_name_plural = "spare info"
     
 #########################################################################################
+
+
+"""
+Monkey-patch the Site object to include folder for template
+"""
+# FolderNameField(blank=True).contribute_to_class(Site,'folder_name')

@@ -1,15 +1,15 @@
 from __future__ import absolute_import
 from celery import shared_task
 from django.conf import settings
-from gladminds.audit import audit_log, feed_log
+from gladminds.core.audit import audit_log, feed_log
 from gladminds.dao.smsclient import load_gateway, MessageSentFailed
 from datetime import datetime, timedelta
-from gladminds import mail
+from gladminds.core import mail
 import logging
-from gladminds import taskmanager, feed, export_file, exportfeed
+from gladminds.core import taskmanager, feed, export_file, exportfeed
 from gladminds.models import common
-from gladminds import  message_template as templates
-from gladminds import utils
+from gladminds.core import  message_template as templates
+from gladminds.core import utils
 
 logger = logging.getLogger("gladminds")
 __all__ = ['GladmindsTaskManager']

@@ -12,10 +12,10 @@ from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
 from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
-from gladminds.taskqueue import SqsTaskQueue
-from gladminds.mail import send_ucn_request_alert
+from gladminds.core.taskqueue import SqsTaskQueue
+from gladminds.core.mail import send_ucn_request_alert
 from django.db.models.fields.files import FieldFile
-from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
+from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     TIME_FORMAT
 
 

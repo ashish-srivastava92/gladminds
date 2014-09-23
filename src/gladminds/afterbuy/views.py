@@ -17,15 +17,15 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 
 from gladminds.models import common
-from gladminds import utils
-from gladminds import mail
+from gladminds.core import utils
+from gladminds.core import mail
 from gladminds.afterbuy.auth import authentication_required
-from gladminds.utils import mobile_format
-from gladminds.sqs_tasks import send_otp
-from gladminds import message_template
-from gladminds.utils import get_task_queue
-from gladminds.mail import sent_otp_email
-from gladminds.feed import BaseFeed
+from gladminds.core.utils import mobile_format
+from gladminds.core.sqs_tasks import send_otp
+from gladminds.core import message_template
+from gladminds.core.utils import get_task_queue
+from gladminds.core.mail import sent_otp_email
+from gladminds.core.feed import BaseFeed
 from gladminds.afterbuy import utils as afterbuy_utils
 
 logger = logging.getLogger("gladminds")

@@ -12,7 +12,7 @@ from gladminds.aftersell.models.common import RegisteredDealer,\
 from datetime import datetime, timedelta
 from integration.base_integration import GladmindsResourceTestCase
 from integration.base import BaseTestCase
-from gladminds import feed
+from gladminds.core import feed
 import xml.etree.ElementTree as ET
 from django.utils import unittest
 from django.db import transaction
