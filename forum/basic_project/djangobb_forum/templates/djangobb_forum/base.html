@@ -51,9 +51,144 @@
 		</script>
 	{% endif %}
 	{% block extra_meta %}{% endblock %}
+	<link rel='stylesheet' href="{{ STATIC_URL }}djangobb_forum/calendar/fullcalendar.min.css" />
+	<script src='{{ STATIC_URL }}djangobb_forum/calendar/moment.min.js'></script>
+	<script src='{{ STATIC_URL }}djangobb_forum/calendar/fullcalendar.min.js'></script>
 	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}djangobb_forum/css/bootstrap.css" />
 	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}djangobb_forum/css/justified-nav.css" />
 	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}djangobb_forum/themes/taguetic/style.css" />
+	
+	<script>
+
+	$(document).ready(function() {
+
+		$('#calendar-common').fullCalendar({
+			defaultDate: '2014-09-23',
+			editable: true,
+			eventLimit: true, // allow "more" link when too many events
+			events: [
+				{
+					title: 'All Day Event',
+					start: '2014-09-01'
+				},
+				{
+					title: 'Long Event',
+					start: '2014-09-07',
+					end: '2014-09-10'
+				},
+				{
+					id: 999,
+					title: 'Repeating Event',
+					start: '2014-09-09T16:00:00'
+				},
+				{
+					id: 999,
+					title: 'Repeating Event',
+					start: '2014-09-16T16:00:00'
+				},
+				{
+					title: 'Conference',
+					start: '2014-09-11',
+					end: '2014-09-13'
+				},
+				{
+					title: 'Meeting',
+					start: '2014-09-12T10:30:00',
+					end: '2014-09-12T12:30:00'
+				},
+				{
+					title: 'Lunch',
+					start: '2014-09-12T12:00:00'
+				},
+				{
+					title: 'Meeting',
+					start: '2014-09-12T14:30:00'
+				},
+				{
+					title: 'Happy Hour',
+					start: '2014-09-12T17:30:00'
+				},
+				{
+					title: 'Dinner',
+					start: '2014-09-12T20:00:00'
+				},
+				{
+					title: 'Birthday Party',
+					start: '2014-09-13T07:00:00'
+				},
+				{
+					title: 'Click for Google',
+					url: 'http://google.com/',
+					start: '2014-09-28'
+				}
+			]
+		});
+		
+		$('#calendar-users').fullCalendar({
+			defaultDate: '2014-09-23',
+			editable: true,
+			eventLimit: true, // allow "more" link when too many events
+			events: [
+				{
+					title: 'All Day Event',
+					start: '2014-09-01'
+				},
+				{
+					title: 'Long Event',
+					start: '2014-09-07',
+					end: '2014-09-10'
+				},
+				{
+					id: 999,
+					title: 'Repeating Event',
+					start: '2014-09-09T16:00:00'
+				},
+				{
+					id: 999,
+					title: 'Repeating Event',
+					start: '2014-09-16T16:00:00'
+				},
+				{
+					title: 'Conference',
+					start: '2014-09-11',
+					end: '2014-09-13'
+				},
+				{
+					title: 'Meeting',
+					start: '2014-09-12T10:30:00',
+					end: '2014-09-12T12:30:00'
+				},
+				{
+					title: 'Lunch',
+					start: '2014-09-12T12:00:00'
+				},
+				{
+					title: 'Meeting',
+					start: '2014-09-12T14:30:00'
+				},
+				{
+					title: 'Happy Hour',
+					start: '2014-09-12T17:30:00'
+				},
+				{
+					title: 'Dinner',
+					start: '2014-09-12T20:00:00'
+				},
+				{
+					title: 'Birthday Party',
+					start: '2014-09-13T07:00:00'
+				},
+				{
+					title: 'Click for Google',
+					url: 'http://google.com/',
+					start: '2014-09-28'
+				}
+			]
+		});
+	});
+
+</script>
+	
 </head>
 <body>
   <div class="container">
@@ -121,9 +256,11 @@
 	</div>
 	</div>
 	<div class="col-md-3 box">
-		<div id="calendar-common" class="calendar box">Calendar1</div>
+		<div id="calendar-common" class="calendar box"></div>
 		<div id="gm-ads" class="calendar box">Ads</div>
-		<div id="calendar-users" class="calendar box">Calendar2</div>
+		{% if user.is_authenticated %}
+		<div id="calendar-users" class="calendar box"></div>
+		{% endif %}
 	</div>
 	<div id="brdfooter" class="box row">
 	<h2><span>{% trans "Board footer" %}</span></h2>
