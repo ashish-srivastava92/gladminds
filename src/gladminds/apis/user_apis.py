@@ -5,7 +5,18 @@ from django.contrib.auth.models import User
 from gladminds.models import common
 from gladminds.apis.baseresource import CustomBaseResource
 
+class UserResource(CustomBaseResource):
+    class Meta:
+        queryset = User.objects.all()
+        resource_name = 'users'
+        excludes = ['password']
+        authorization= Authorization()
+        detail_allowed_methods =['get', 'post', 'put', 'delete']
+        always_return_data = True
+        
+     
 class UserProfileResources(CustomBaseResource):
+    user = fields.OneToOneField(UserResource, 'user', full=True)
     class Meta:
         queryset = common.UserProfile.objects.all()
         resource_name = 'userprofile'
