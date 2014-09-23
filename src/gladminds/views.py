@@ -207,7 +207,7 @@ def exceptions(request, exception=None):
             'check' : get_sa_list
         }
         try:
-            data = data_mapping[exception](request)
+            data = data_mapping[exception](request.user)
         except:
             #It is acceptable if there is no data_mapping defined for a function
             pass
@@ -220,9 +220,14 @@ def exceptions(request, exception=None):
             'status' : services_search_details
         }
         try:
-            data = function_mapping[exception](request)
+            post_data = request.POST.copy()
+            post_data['current_user'] = request.user
+            if request.FILES:
+                post_data['job_card']=request.FILES['jobCard']
+            data = function_mapping[exception](post_data)
             return HttpResponse(content=json.dumps(data),  content_type='application/json')
-        except:
+        except Exception as ex:
+            logger.error(ex)
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
@@ -287,7 +292,7 @@ def create_reconciliation_report(query_params, user):
             coupon_data_dict['coupon_no'] = coupon_data.unique_service_coupon
             coupon_data_dict['kms'] = coupon_data.actual_kms
             coupon_data_dict['service_type'] = coupon_data.service_type
-            coupon_data_dict['special_case'] = ''
+            coupon_data_dict['special_case'] = coupon_data.special_case
         report_data.append(coupon_data_dict)
     return report_data
     

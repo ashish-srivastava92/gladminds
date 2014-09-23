@@ -219,7 +219,8 @@ class GladmindsResources(Resource):
         '''
         updated_coupon = common.CouponData.objects\
                         .filter(Q(status=4) | Q(status=5), vin__vin=vin, valid_kms__gt=kms)\
-                        .update(status=1, sa_phone_number=None, actual_kms=None, actual_service_date=None)
+                        .update(status=1, sa_phone_number=None, actual_kms=None,
+                                actual_service_date=None, servicing_dealer=None)
         logger.info("%s have higher KMS range" % updated_coupon)
 
     def update_exceed_limit_coupon(self, actual_kms, vin):
@@ -233,6 +234,7 @@ class GladmindsResources(Resource):
 
     def get_vin(self, sap_customer_id):
         try:
+            sap_customer_id = utils.get_updated_customer_id(sap_customer_id) 
             customer_product_data = common.CouponData.objects.select_related \
                                             ('vin').filter(vin__sap_customer_id=sap_customer_id).order_by('vin', 'valid_days')
             return customer_product_data[0].vin.vin
@@ -243,6 +245,7 @@ class GladmindsResources(Resource):
                                                  update_time=datetime.now()):
         valid_coupon.actual_kms = actual_kms
         valid_coupon.actual_service_date = update_time
+        valid_coupon.extended_date = update_time + timedelta(days=COUPON_VALID_DAYS)
         valid_coupon.status = status
         valid_coupon.sa_phone_number = dealer_data.service_advisor_id
         valid_coupon.servicing_dealer = dealer_data.dealer_id
@@ -259,7 +262,6 @@ class GladmindsResources(Resource):
         validity_date = coupon.extended_date
         today = timezone.now()
         if expiry_date >= today:
-            coupon.extended_date = datetime.now() + timedelta(days=COUPON_VALID_DAYS)
             self.update_coupon(coupon, actual_kms, dealer_data, 4, today)
         elif validity_date >= today and expiry_date < today:
             coupon.actual_service_date = datetime.now()
@@ -388,7 +390,7 @@ class GladmindsResources(Resource):
             return {'status': False, 'message': templates.get_template('UNAUTHORISED_SA')}
         if not self.is_valid_data(customer_id=sap_customer_id, coupon=unique_service_coupon, sa_phone=phone_number):
             return {'status': False, 'message': templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')}
-        if not self.is_sa_initiator(unique_service_coupon, dealer_sa_object):
+        if not self.is_sa_initiator(unique_service_coupon, dealer_sa_object, phone_number):
             return {'status': False, 'message': "SA is not the coupon initiator."}
         try:
             vin = self.get_vin(sap_customer_id)
@@ -423,16 +425,32 @@ class GladmindsResources(Resource):
     def validate_dealer(self, phone_number):
         all_sa_dealer_obj = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id__phone_number = phone_number, status = u'Y')
         if len(all_sa_dealer_obj) == 0:
+            message=templates.get_template('UNAUTHORISED_SA')
+            sa_phone = utils.get_phone_number_format(phone_number)
+            if settings.ENABLE_AMAZON_SQS:
+                task_queue = get_task_queue()
+                task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message})
+            else:
+                send_invalid_keyword_message.delay(phone_number=sa_phone, message=message)
             return None
         service_advisor_obj = all_sa_dealer_obj[0]
         return service_advisor_obj
 
-    def is_sa_initiator(self, coupon_id, dealer_sa_data):
+    def is_sa_initiator(self, coupon_id, dealer_sa_data, phone_number):
         coupon_data = common.CouponData.objects.filter(unique_service_coupon = coupon_id)
         coupon_sa_obj = common.ServiceAdvisorCouponRelationship.objects.filter(unique_service_coupon=coupon_data\
                                                                                    ,service_advisor_phone=dealer_sa_data.service_advisor_id\
                                                                                    ,dealer_id=dealer_sa_data.dealer_id)
-        return len(coupon_sa_obj)>0
+        if len(coupon_sa_obj)>0:
+            return True
+        else:
+            sa_phone = utils.get_phone_number_format(phone_number)
+            if settings.ENABLE_AMAZON_SQS:
+                task_queue = get_task_queue()
+                task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message})
+            else:
+                send_invalid_keyword_message.delay(phone_number=sa_phone, message=message)
+        return False
         
     
     def is_valid_data(self, customer_id=None, coupon=None, sa_phone=None):
@@ -442,7 +460,9 @@ class GladmindsResources(Resource):
         '''
         coupon_obj = customer_obj = message = None
         if coupon: coupon_obj = common.CouponData.objects.filter(unique_service_coupon=coupon)
-        if customer_id: customer_obj = common.ProductData.objects.filter(sap_customer_id=customer_id)
+        if customer_id:
+            customer_id = utils.get_updated_customer_id(customer_id) 
+            customer_obj = common.ProductData.objects.filter(sap_customer_id=customer_id)
 
         if ((customer_obj and coupon_obj and coupon_obj[0].vin.vin != customer_obj[0].vin) or\
             (not customer_obj and not coupon_obj)):
