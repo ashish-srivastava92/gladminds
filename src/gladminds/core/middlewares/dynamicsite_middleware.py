@@ -15,7 +15,7 @@ class DynamicSitesMiddleware(object):
         self.domain, self.port = self.get_domain_and_port()
         BRAND.value = self.domain.split('.')[0]
         if BRAND.value not in settings.BRANDS:
-            BRAND.value = 'gm'
+            BRAND.value = settings.GM_BRAND
 
     def get_domain_and_port(self):
         """
