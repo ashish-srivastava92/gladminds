@@ -216,6 +216,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
     'suit',
     'django.contrib.admin',
     'import_export',
