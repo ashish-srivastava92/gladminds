@@ -55,7 +55,7 @@ class RegisteredDealer(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "aftersell"
+        app_label = "core"
         verbose_name_plural = "Dealer Data"
 
     def __unicode__(self):
@@ -72,7 +72,7 @@ class ServiceAdvisor(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "aftersell"
+        app_label = "core"
         verbose_name_plural = "Service Advisor Data"
 
     def __unicode__(self):
@@ -90,7 +90,7 @@ class ServiceAdvisorDealerRelationship(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "aftersell"
+        app_label = "core"
         verbose_name_plural = "Service Advisor And Dealer Relationship"
 
 
@@ -112,7 +112,7 @@ class RegisteredASC(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "aftersell"
+        app_label = "core"
         verbose_name_plural = "Registered ASC Form"
         
     
@@ -124,7 +124,7 @@ class ServiceDeskUser(models.Model):
     
     class Meta:
         abstract = True
-        app_label = "aftersell"
+        app_label = "core"
         verbose_name_plural = "service desk users"
     
     def __unicode__(self):
@@ -154,7 +154,7 @@ class Feedback(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "aftersell"
+        app_label = "core"
         verbose_name_plural = "aftersell feedback info"
         
 class Comments(models.Model):
@@ -167,7 +167,7 @@ class Comments(models.Model):
     
     class Meta:
         abstract = True
-        app_label = "aftersell"
+        app_label = "core"
         verbose_name_plural = "aftersell comment info"
         
 
@@ -186,7 +186,7 @@ class UploadProductCSV(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "gladminds"
+        app_label = "core"
         verbose_name_plural = "Upload Product Data"
         
 class BrandData(models.Model):
@@ -200,7 +200,7 @@ class BrandData(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "gladminds"
+        app_label = "core"
         verbose_name_plural = "Brand Data"
 
     def __unicode__(self):
@@ -241,7 +241,7 @@ class ProductTypeData(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "gladminds"
+        app_label = "core"
         verbose_name_plural = "Product Type"
 
     def __unicode__(self):
@@ -281,7 +281,7 @@ class ProductData(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "gladminds"
+        app_label = "core"
         verbose_name_plural = "Product Data"
 
     def __unicode__(self):
@@ -314,7 +314,7 @@ class CouponData(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "gladminds"
+        app_label = "core"
         verbose_name_plural = "Coupon Information"
 
     def __unicode__(self):
@@ -331,7 +331,7 @@ class ServiceAdvisorCouponRelationship(models.Model):
 
     class Meta:
         abstract = True
-        app_label = 'gladminds'
+        app_label = "core"
         verbose_name_plural = 'Service Advisor And Coupon Relationship'
 
 ##################################################################
@@ -345,7 +345,7 @@ class MessageTemplate(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "gladminds"
+        app_label = "core"
         verbose_name_plural = "Message Template"
 
 ####################################################################
@@ -359,7 +359,7 @@ class OTPToken(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "gladminds"
+        app_label = "core"
         verbose_name_plural = "OTPs"
 
 
@@ -378,7 +378,7 @@ class EmailTemplate(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "gladminds"
+        app_label = "core"
         verbose_name_plural = "Email Template"
 
 
@@ -389,7 +389,7 @@ class SASaveForm(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "gladminds"
+        app_label = "core"
         verbose_name_plural = "SA Save Form"
 
 
@@ -406,7 +406,7 @@ class CustomerTempRegistration(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "gladminds"
+        app_label = "core"
         verbose_name_plural = "Customer temporary info"
 
     def __unicode__(self):
@@ -429,7 +429,7 @@ class ProductInsuranceInfo(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "gladminds"
+        app_label = "core"
         verbose_name_plural = "product insurance info"
     
 #######################################################################################
@@ -446,7 +446,7 @@ class ProductWarrantyInfo(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "gladminds"
+        app_label = "core"
         verbose_name_plural = "product warranty info"
         
 ########################################################################################
@@ -458,7 +458,7 @@ class SparesData(models.Model):
     
     class Meta:
         abstract = True
-        app_label = "gladminds"
+        app_label = "core"
         verbose_name_plural = "spare info"
     
 #########################################################################################
