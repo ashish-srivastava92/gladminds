@@ -69,7 +69,7 @@ class BaseTestCase(ResourceTestCase):
         if kwargs.get('group_name'):
             user_group = Group.objects.get(name=kwargs['group_name'])
             user.groups.add(user_group)
-        if kwargs.get('group_name'):    
+        if kwargs.get('group_name'):
             user_profile = aftersell_common.UserProfile(user=user, phone_number=kwargs['phone_number'])
             user_profile.save()
             return user_profile
