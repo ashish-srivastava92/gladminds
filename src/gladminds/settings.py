@@ -102,6 +102,14 @@ DATABASES = {
         # localhost through TCP.
         'HOST': '',
         'PORT': '',  # Set to empty string for default.
+    },
+    'gm': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'gm.db',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
     }
 }
 
