@@ -1,12 +1,10 @@
 from tastypie.test import ResourceTestCase
-from django.core import management
 from django.contrib.auth.models import User, Group
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.management.commands import load_gm_migration_data
 import os
 from django.conf import settings
-import json
 from time import sleep
 from datetime import datetime
 from django.test import TestCase
@@ -68,12 +66,16 @@ class BaseTestCase(ResourceTestCase):
     def create_user(self):
         user = User.objects.create_user('gladminds', 'gladminds@gladminds.co', 'gladminds')
         user.save()
+        user_obj = User.objects.get(username='gladminds')
+        self.assertEqual(user_obj.username, 'gladminds')
         return user
 
     def create_user_profile(self):
         user_obj = self.create_user()
         user_profile = aftersell_common.UserProfile(user=user_obj, phone_number="+91776084041")
         user_profile.save()
+        user_profile_obj = aftersell_common.UserProfile.objects.get(phone_number="+91776084041")
+        self.assertEqual(user_profile_obj.phone_number, '+91776084041')
         return user_profile
 
     def create_dealer(self):
@@ -81,6 +83,10 @@ class BaseTestCase(ResourceTestCase):
         test_user.save()
         user_group = Group.objects.get(name='dealers')
         test_user.groups.add(user_group)
+        user_profile = aftersell_common.UserProfile(user=test_user, phone_number="+91776084042")
+        user_profile.save()
+        user_profile_obj = aftersell_common.UserProfile.objects.get(phone_number="+91776084042")
+        self.assertEqual(user_profile_obj.phone_number, '+91776084042')
 
     def create_sdo(self):
         user_servicedesk_owner = User.objects.create_user(username='sdo', email='gm@gm.com', password='123')
@@ -91,7 +97,9 @@ class BaseTestCase(ResourceTestCase):
         user_profile.save()
         service_desk_owner = aftersell_common.ServiceDeskUser(user=user_profile, phone_number="+919999999999", email_id="srv.sngh@gmail.com", designation='SDO' )
         service_desk_owner.save()
-        return user_profile
+        service_desk_owner_obj = aftersell_common.ServiceDeskUser.objects.get(designation='SDO')
+        self.assertEqual(service_desk_owner_obj.designation, 'SDO')
+        return service_desk_owner
 
     def create_sdm(self):
         user_servicedesk_manager = User.objects.create_user(username='sdm', email='gm@gm.com', password='123')
@@ -102,6 +110,8 @@ class BaseTestCase(ResourceTestCase):
         user_profile.save()
         service_desk_owner = aftersell_common.ServiceDeskUser(user=user_profile, phone_number="+911999999989", email_id="srv.sngh@gmail.com", designation='SDM' )
         service_desk_owner.save()
+        service_desk_owner_obj = aftersell_common.ServiceDeskUser.objects.get(designation='SDM')
+        self.assertEqual(service_desk_owner_obj.designation, 'SDM')
 
     def create_service_advisor(self):
         user_serviceadvisor = User.objects.create_user(username='SA002Test', email='gm@gm.com', password='123')
@@ -112,6 +122,8 @@ class BaseTestCase(ResourceTestCase):
         serviceadvisor_profile.save()
         service_advisor_obj = aftersell_common.ServiceAdvisor(user=serviceadvisor_profile, service_advisor_id='SA002Test', name='UMOTOR', phone_number='+919999999998')
         service_advisor_obj.save()
+        service_advisor = aftersell_common.ServiceAdvisor.objects.get(service_advisor_id='SA002Test')
+        self.assertEqual(service_advisor.service_advisor_id, 'SA002Test')
         return service_advisor_obj
 
     def create_register_dealer(self):
@@ -123,6 +135,8 @@ class BaseTestCase(ResourceTestCase):
         register_dealer_profile.save()
         register_dealer_obj = aftersell_common.RegisteredDealer(user=register_dealer_profile, dealer_id ='RD002Test', role='dealer')
         register_dealer_obj.save()
+        register_dealer = aftersell_common.RegisteredDealer.objects.get(dealer_id='RD002Test')
+        self.assertEqual(register_dealer.dealer_id, 'RD002Test')
         return register_dealer_obj
 
     def create_dealer_service_advisor(self):
@@ -130,6 +144,9 @@ class BaseTestCase(ResourceTestCase):
         dealer_obj = aftersell_common.RegisteredDealer.objects.get(dealer_id ='RD002Test')
         dealer_service_advisor_obj = aftersell_common.ServiceAdvisorDealerRelationship(dealer_id=dealer_obj, service_advisor_id=service_advisor1, status='Y')
         dealer_service_advisor_obj.save()
+        dealer_service_advisor = aftersell_common.ServiceAdvisorDealerRelationship.objects.get(status='Y')
+        self.assertEqual(dealer_service_advisor .status, 'Y')
+
         return dealer_service_advisor_obj
 
     def dealer_login(self):
@@ -137,12 +154,10 @@ class BaseTestCase(ResourceTestCase):
         self.client.login(username='DEALER01', password='DEALER01@123')
 
     def post_feedback(self):
-        test_user = User.objects.create_user('DEALER02', 'dealer@xyz.com', 'DEALER01@123')
-        test_user.save()
-        user_group = Group.objects.get(name='dealers')
-        test_user.groups.add(user_group)
-        data = {'username': 'DEALER02', 'password': 'DEALER01@123'}
+        self.create_dealer()
+        data = {'username': 'DEALER01', 'password': 'DEALER01@123'}
         response = client.post("/aftersell/dealer/login/", data=data)
+        self.assertEqual(response.status_code, 302)
         data = {"messsage":"test","priority":"High","advisorMobile":"+919999999998",
                 "type":"Problem", "subject":"hello" }
         response = client.post("/aftersell/servicedesk/helpdesk", data=data)
@@ -194,7 +209,7 @@ class BaseTestCase(ResourceTestCase):
                     'customer-id': 'GMCUSTOMER01',
                 }
         response = self.client.post('/aftersell/register/customer', data=data)
-        print response.status_code
+        self.assertEqual(response.status_code, 200)
         return response
 
     def send_dispatch_feed(self):
@@ -236,7 +251,7 @@ class BaseTestCase(ResourceTestCase):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
         xml_data = open(file_path, 'r').read()
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
-
+        self.assertEqual(response.status_code, 200)
 
 
         

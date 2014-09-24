@@ -1,30 +1,20 @@
-from django.core import mail
-from django.conf import settings 
-from django.contrib.auth.models import User, Group
 from django.test.client import Client
 
 from integration.base_integration import GladmindsResourceTestCase
-from provider.oauth2.models import Client as auth_client
-from provider.oauth2.models import AccessToken
-from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
-from gladminds.core.mail import send_feedback_received,send_servicedesk_feedback
 from gladminds.aftersell.models import logs
 from integration.base import BaseTestCase
 from django.test import TestCase
 
- 
-import json
 client = Client()
 
 
-class TestServiceDesk_Flow(GladmindsResourceTestCase, BaseTestCase):
+class TestServiceDeskFlow(GladmindsResourceTestCase, BaseTestCase):
     def setUp(self):
         TestCase.setUp(self)
         BaseTestCase.setUp(self)
         self.client = Client()
         self.create_user()
-        self.create_dealer()
         self.create_service_advisor()
         self.create_register_dealer()
         self.create_dealer_service_advisor()
