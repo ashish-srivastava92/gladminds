@@ -21,13 +21,13 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
 
         # Changing field 'ProductTypeData.warranty_phone'
-        db.alter_column(u'gladminds_producttypedata', 'warranty_phone', self.gf('django.db.models.fields.CharField')(default=datetime.datetime(2014, 9, 18, 0, 0), max_length=15))
+        db.alter_column(u'gladminds_producttypedata', 'warranty_phone', self.gf('django.db.models.fields.CharField')(default=datetime.datetime(2014, 9, 19, 0, 0), max_length=15))
 
         # Changing field 'GladMindUsers.tshirt_size'
-        db.alter_column(u'gladminds_gladmindusers', 'tshirt_size', self.gf('django.db.models.fields.CharField')(default=datetime.datetime(2014, 9, 18, 0, 0), max_length=2))
+        db.alter_column(u'gladminds_gladmindusers', 'tshirt_size', self.gf('django.db.models.fields.CharField')(default=datetime.datetime(2014, 9, 19, 0, 0), max_length=2))
 
         # Changing field 'GladMindUsers.gender'
-        db.alter_column(u'gladminds_gladmindusers', 'gender', self.gf('django.db.models.fields.CharField')(default=datetime.datetime(2014, 9, 18, 0, 0), max_length=2))
+        db.alter_column(u'gladminds_gladmindusers', 'gender', self.gf('django.db.models.fields.CharField')(default=datetime.datetime(2014, 9, 19, 0, 0), max_length=2))
 
     models = {
         'aftersell.registereddealer': {
@@ -36,7 +36,8 @@ class Migration(SchemaMigration):
             'dealer_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '25'}),
             'dependent_on': ('django.db.models.fields.CharField', [], {'max_length': '25', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'role': ('django.db.models.fields.CharField', [], {'default': "'dealer'", 'max_length': '10'})
+            'role': ('django.db.models.fields.CharField', [], {'default': "'dealer'", 'max_length': '10'}),
+            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['gladminds.UserProfile']", 'unique': 'True', 'null': 'True', 'blank': 'True'})
         },
         'aftersell.serviceadvisor': {
             'Meta': {'object_name': 'ServiceAdvisor'},
@@ -44,7 +45,8 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '25'}),
             'order': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'phone_number': ('django.db.models.fields.CharField', [], {'max_length': '15'}),
-            'service_advisor_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '15'})
+            'service_advisor_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '15'}),
+            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['gladminds.UserProfile']", 'unique': 'True', 'null': 'True', 'blank': 'True'})
         },
         u'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -147,7 +149,7 @@ class Migration(SchemaMigration):
             'isActive': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'phone_number': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '15'}),
             'pincode': ('django.db.models.fields.CharField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
-            'registration_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 18, 0, 0)'}),
+            'registration_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 19, 0, 0)'}),
             'state': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'thumb_url': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
             'tshirt_size': ('django.db.models.fields.CharField', [], {'max_length': '2', 'null': 'True', 'blank': 'True'}),
@@ -170,7 +172,7 @@ class Migration(SchemaMigration):
         },
         'gladminds.productdata': {
             'Meta': {'object_name': 'ProductData'},
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 18, 0, 0)', 'null': 'True'}),
+            'created_on': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 19, 0, 0)', 'null': 'True'}),
             'customer_phone_number': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['gladminds.GladMindUsers']", 'null': 'True', 'blank': 'True'}),
             'customer_product_number': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'dealer_id': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['aftersell.RegisteredDealer']", 'null': 'True', 'blank': 'True'}),
@@ -181,7 +183,7 @@ class Migration(SchemaMigration):
             'invoice_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'invoice_loc': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
             'isActive': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'last_modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 18, 0, 0)'}),
+            'last_modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 19, 0, 0)'}),
             'order': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'product_purchase_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'product_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['gladminds.ProductTypeData']", 'null': 'True', 'blank': 'True'}),

@@ -102,6 +102,14 @@ DATABASES = {
         # localhost through TCP.
         'HOST': '',
         'PORT': '',  # Set to empty string for default.
+    },
+    'gm': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'gm.db',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
     }
 }
 
@@ -177,6 +185,7 @@ TEMPLATE_LOADERS = (
                     #         'django.template.loaders.filesystem.Loader',
                     #         'django.template.loaders.app_directories.Loader',
                     #     )),
+                    'gladminds.core.custom_template_loader.Loader',
                     'django.template.loaders.filesystem.Loader',
                     'django.template.loaders.app_directories.Loader',
                     #  'django.template.loaders.eggs.Loader',
@@ -190,7 +199,7 @@ MIDDLEWARE_CLASSES = (
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    #'gladminds.middlewares.dynamicsite_middleware.DynamicSitesMiddleware',
+    'gladminds.core.middlewares.dynamicsite_middleware.DynamicSitesMiddleware',
     # 'gladminds.middleware.GladmindsMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -216,6 +225,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
     'suit',
     'django.contrib.admin',
     'import_export',
@@ -399,3 +409,7 @@ SMS_HEALTH_CHECK_INTERVAL = 6
 #######################FEED_HEALTH_CHECK_INTERVAL
 FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
+BRAND = 'mock'
+GM_BRAND = 'gm'
+BRANDS = ['bajaj', 'demo']
+###############################################

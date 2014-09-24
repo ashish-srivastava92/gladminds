@@ -359,3 +359,20 @@ class SparesData(models.Model):
         verbose_name_plural = "spare info"
     
 #########################################################################################
+
+class UserPreferences(models.Model):
+    """
+    This model is used for storing user preferences
+    """
+    user_details = models.ForeignKey(UserProfile)
+    key = models.CharField(max_length=100)
+    value = models.CharField(max_length=200)
+
+    def unicode(self):
+        return self.user_details
+
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "User Preferences"
+        unique_together = ("user_details", "key")
+
