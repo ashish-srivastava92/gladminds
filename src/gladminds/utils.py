@@ -341,3 +341,29 @@ def get_updated_customer_id(customer_id):
         except Exception as ex:
             logger.info("Temporary ID {0} does not exists: {1}".format(customer_id, ex))
     return customer_id
+
+def service_advisor_search(data):
+    dealer_data = aftersell_common.RegisteredDealer.objects.get(
+                dealer_id=data['current_user'])
+    sa_phone_number = mobile_format(data['phone_number'])
+    message = sa_phone_number + ' is active under another dealer'
+    
+    sa_details = aftersell_common.ServiceAdvisorDealerRelationship.objects.select_related(
+                    'service_advisor_id').filter(service_advisor_id__phone_number=sa_phone_number,
+                                dealer_id=dealer_data)
+
+    sa_mobile_active = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(
+                            service_advisor_id__phone_number=sa_phone_number,
+                            status='Y').exclude(dealer_id=dealer_data)
+    if not sa_details and not sa_mobile_active:
+        message = 'Service advisor is not associated, Please register the service advisor'
+        return {'message': message}
+    if sa_details:
+        service_advisor_details = {'id': sa_details[0].service_advisor_id.service_advisor_id,
+                                   'phone': data['phone_number'], 
+                                   'name': sa_details[0].service_advisor_id.name, 
+                                   'status': sa_details[0].status,
+                                   'active':len(sa_mobile_active),
+                                   'message':message}
+        return service_advisor_details
+    return {'message': message, 'status': 'fail'}

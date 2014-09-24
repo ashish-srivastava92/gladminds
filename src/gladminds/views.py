@@ -21,7 +21,7 @@ from gladminds import utils, message_template
 from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format,\
     format_date_string, stringify_groups, search_details,\
-    services_search_details
+    services_search_details, service_advisor_search
 from gladminds.sqs_tasks import export_asc_registeration_to_sap
 from gladminds.mail import sent_otp_email
 from gladminds.feed import SAPFeed
@@ -217,7 +217,8 @@ def exceptions(request, exception=None):
             'customer' : get_customer_info,
             'recover' : recover_coupon_info,
             'search' : search_details,
-            'status' : services_search_details
+            'status' : services_search_details,
+            'serviceadvisor': service_advisor_search
         }
         try:
             post_data = request.POST.copy()
