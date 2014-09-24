@@ -63,77 +63,48 @@ class BaseTestCase(ResourceTestCase):
     def check_service_type_of_coupon(self, id, service_type):
         pass
 
-    def create_user(self):
-        user = User.objects.create_user('gladminds', 'gladminds@gladminds.co', 'gladminds')
+    def create_user(self, **kwargs):
+        user = User.objects.create_user(kwargs['username'], kwargs['email'], kwargs['password'])
         user.save()
-        user_obj = User.objects.get(username='gladminds')
-        self.assertEqual(user_obj.username, 'gladminds')
-        return user
-
-    def create_user_profile(self):
-        user_obj = self.create_user()
-        user_profile = aftersell_common.UserProfile(user=user_obj, phone_number="+91776084041")
-        user_profile.save()
-        user_profile_obj = aftersell_common.UserProfile.objects.get(phone_number="+91776084041")
-        self.assertEqual(user_profile_obj.phone_number, '+91776084041')
-        return user_profile
+        if kwargs.get('group_name'):
+            user_group = Group.objects.get(name=kwargs['group_name'])
+            user.groups.add(user_group)
+        if kwargs.get('group_name'):    
+            user_profile = aftersell_common.UserProfile(user=user, phone_number=kwargs['phone_number'])
+            user_profile.save()
+            return user_profile
 
     def create_dealer(self):
-        test_user = User.objects.create_user('DEALER01', 'dealer@xyz.com', 'DEALER01@123')
-        test_user.save()
-        user_group = Group.objects.get(name='dealers')
-        test_user.groups.add(user_group)
-        user_profile = aftersell_common.UserProfile(user=test_user, phone_number="+91776084042")
-        user_profile.save()
+        test_user = self.create_user(username='DEALER01', email='dealer@xyz.com', password='DEALER01@123', group_name='dealers', phone_number="+91776084042")
         user_profile_obj = aftersell_common.UserProfile.objects.get(phone_number="+91776084042")
         self.assertEqual(user_profile_obj.phone_number, '+91776084042')
 
     def create_sdo(self):
-        user_servicedesk_owner = User.objects.create_user(username='sdo', email='gm@gm.com', password='123')
-        user_servicedesk_owner.save()
-        user_group = Group.objects.get(name='SDO')
-        user_servicedesk_owner.groups.add(user_group)
-        user_profile = aftersell_common.UserProfile(user=user_servicedesk_owner, phone_number="+919999999999")
-        user_profile.save()
-        service_desk_owner = aftersell_common.ServiceDeskUser(user=user_profile, phone_number="+919999999999", email_id="srv.sngh@gmail.com", designation='SDO' )
+        user_servicedesk_owner = self.create_user(username='sdo', email='gm@gm.com', password='123', group_name='SDO', phone_number="+919999999999")
+        service_desk_owner = aftersell_common.ServiceDeskUser(user=user_servicedesk_owner, phone_number="+919999999999", email_id="srv.sngh@gmail.com", designation='SDO' )
         service_desk_owner.save()
         service_desk_owner_obj = aftersell_common.ServiceDeskUser.objects.get(designation='SDO')
         self.assertEqual(service_desk_owner_obj.designation, 'SDO')
         return service_desk_owner
 
     def create_sdm(self):
-        user_servicedesk_manager = User.objects.create_user(username='sdm', email='gm@gm.com', password='123')
-        user_servicedesk_manager.save()
-        user_group = Group.objects.get(name='SDM')
-        user_servicedesk_manager.groups.add(user_group)
-        user_profile = aftersell_common.UserProfile(user=user_servicedesk_manager, phone_number="+911999999989")
-        user_profile.save()
-        service_desk_owner = aftersell_common.ServiceDeskUser(user=user_profile, phone_number="+911999999989", email_id="srv.sngh@gmail.com", designation='SDM' )
+        user_servicedesk_manager = self.create_user(username='sdm', email='gm@gm.com', password='123', group_name='SDM', phone_number="+911999999989")
+        service_desk_owner = aftersell_common.ServiceDeskUser(user=user_servicedesk_manager, phone_number="+911999999989", email_id="srv.sngh@gmail.com", designation='SDM' )
         service_desk_owner.save()
         service_desk_owner_obj = aftersell_common.ServiceDeskUser.objects.get(designation='SDM')
         self.assertEqual(service_desk_owner_obj.designation, 'SDM')
 
     def create_service_advisor(self):
-        user_serviceadvisor = User.objects.create_user(username='SA002Test', email='gm@gm.com', password='123')
-        user_serviceadvisor.save()
-        user_group = Group.objects.get(name='sas')
-        user_serviceadvisor.groups.add(user_group)
-        serviceadvisor_profile = aftersell_common.UserProfile(user=user_serviceadvisor, phone_number='+919999999998')
-        serviceadvisor_profile.save()
-        service_advisor_obj = aftersell_common.ServiceAdvisor(user=serviceadvisor_profile, service_advisor_id='SA002Test', name='UMOTOR', phone_number='+919999999998')
+        user_serviceadvisor = self.create_user(username='SA002Test', email='gm@gm.com', password='123', group_name='sas', phone_number='+919999999998')
+        service_advisor_obj = aftersell_common.ServiceAdvisor(user=user_serviceadvisor, service_advisor_id='SA002Test', name='UMOTOR', phone_number='+919999999998')
         service_advisor_obj.save()
         service_advisor = aftersell_common.ServiceAdvisor.objects.get(service_advisor_id='SA002Test')
         self.assertEqual(service_advisor.service_advisor_id, 'SA002Test')
         return service_advisor_obj
 
     def create_register_dealer(self):
-        user_register_dealer = User.objects.create_user(username='RD002Test', email='gm@gm.com', password='123')
-        user_register_dealer.save()
-        user_group = Group.objects.get(name='dealers')
-        user_register_dealer.groups.add(user_group)
-        register_dealer_profile = aftersell_common.UserProfile(user=user_register_dealer, phone_number='+919999999997')
-        register_dealer_profile.save()
-        register_dealer_obj = aftersell_common.RegisteredDealer(user=register_dealer_profile, dealer_id ='RD002Test', role='dealer')
+        user_register_dealer = self.create_user(username='RD002Test', email='gm@gm.com', password='123', group_name='dealers', phone_number='+919999999997')
+        register_dealer_obj = aftersell_common.RegisteredDealer(user=user_register_dealer, dealer_id ='RD002Test', role='dealer')
         register_dealer_obj.save()
         register_dealer = aftersell_common.RegisteredDealer.objects.get(dealer_id='RD002Test')
         self.assertEqual(register_dealer.dealer_id, 'RD002Test')
