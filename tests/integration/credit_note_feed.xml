@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://api.gladmindsplatform.co/api/v1/bajaj/feed/">
+  <SOAP-ENV:Body>
+    <ns1:postCreditNote>
+      <ns1:ObjectList>
+        <ns1:CreditNoteData>
+            <ns1:CreditNoteModel>
+              <ns1:CREDIT_NOTE>paid</ns1:CREDIT_NOTE>
+              <ns1:CHASSIS>XXXXXXXXXX</ns1:CHASSIS>
+              <ns1:CREDIT_DATE>2013-12-06</ns1:CREDIT_DATE>
+              <ns1:SERVICE_TYPE>1</ns1:SERVICE_TYPE>
+              <ns1:UCN_NO>USC001</ns1:UCN_NO>
+            </ns1:CreditNoteModel>
+        </ns1:CreditNoteData>
+      </ns1:ObjectList>
+      <ns1:Credential>
+        <ns1:UserName>gladminds</ns1:UserName>
+        <ns1:Password>gladminds</ns1:Password>
+      </ns1:Credential>
+    </ns1:postCreditNote>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

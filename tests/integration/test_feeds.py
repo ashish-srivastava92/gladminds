@@ -1,5 +1,6 @@
 import logging
 import os
+import pytz
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -14,6 +15,7 @@ from gladminds import feed
 import xml.etree.ElementTree as ET
 from django.utils import unittest
 from django.db import transaction
+
 
 logger = logging.getLogger('gladminds')
 
@@ -286,3 +288,27 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         
         coupon_data = CouponData.objects.filter(vin__vin='XXXXXXXXXX', service_type=2)
         self.assertEquals(coupon_data[0].status, 6)
+        
+    def test_credit_note_feed(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+        
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/credit_note_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+        
+        coupon_data = CouponData.objects.filter(vin__vin='XXXXXXXXXX', service_type=1)
+        utc = pytz.utc
+        timezone = pytz.timezone('Asia/Kolkata')
+        credit_date = coupon_data[0].credit_date.astimezone(timezone).replace(tzinfo=None)
+        credit_date = credit_date.strftime("%Y-%m-%d")
+        self.assertEquals(credit_date, '2013-12-07')
+        self.assertEquals(coupon_data[0].credit_note, 'paid')
