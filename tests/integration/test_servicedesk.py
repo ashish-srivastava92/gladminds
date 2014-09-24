@@ -29,13 +29,13 @@ class TestServiceDeskFlow(GladmindsResourceTestCase, BaseTestCase):
 
     def test_get_feedback_sdo(self):
         self.post_feedback()
-        self.test_servicedesk_login_sdo()
+        self.servicedesk_login_sdo()
         feedback_obj = aftersell_common.Feedback.objects.all()
         self.assertEqual(feedback_obj[0].priority, "High")
 
     def test_get_feedback_sdm(self):
         self.post_feedback()
-        self.test_servicedesk_login_sdm()
+        self.servicedesk_login_sdm()
         feedback_obj = aftersell_common.Feedback.objects.all()
         self.assertEqual(feedback_obj[0].priority, "High")
  

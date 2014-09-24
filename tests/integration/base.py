@@ -134,14 +134,14 @@ class BaseTestCase(ResourceTestCase):
         response = client.post("/aftersell/servicedesk/helpdesk", data=data)
         self.assertEqual(response.status_code, 200)
 
-    def test_servicedesk_login_sdo(self):
+    def servicedesk_login_sdo(self):
         self.create_sdo()
         data = {'username': 'sdo', 'password': '123'}
         response = client.post("/aftersell/desk/login/", data=data)
         response = client.get("/aftersell/servicedesk/")
         self.assertEqual(response.status_code, 200)
 
-    def test_servicedesk_login_sdm(self):
+    def servicedesk_login_sdm(self):
         self.create_sdm()
         data = {'username': 'sdm', 'password': '123'}
         response = client.post("/aftersell/desk/login/", data=data)
