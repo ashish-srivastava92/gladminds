@@ -5,7 +5,7 @@ from gladminds.resource import resources
 from gladminds.core.sqs_tasks import _tasks_map
 from gladminds.core.taskqueue import SqsHandler
 from gladminds.afterbuy import api_resource
-from gladminds.apis import audit_api, coupon_apis
+from gladminds.apis import audit_api, coupon_apis, preferences_apis
 from gladminds.apis import product_apis
 from gladminds.apis import user_apis
 
@@ -23,7 +23,8 @@ api_v1.register(audit_api.AuditResources())
 api_v1.register(user_apis.GladMindUserResources())
 api_v1.register(product_apis.ProductDataResources())
 api_v1.register(coupon_apis.CouponDataResources())
-
+api_v1.register(preferences_apis.UserPreferencesResource())
+api_v1.register(preferences_apis.AppPreferencesResource())
 
 urlpatterns = patterns('',
     url(r'^site-info/$', 'gladminds.views.site_info', name='site_info'),
