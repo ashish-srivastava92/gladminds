@@ -119,7 +119,6 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         self.validate_coupon(sms_dict, phone_number)
          
         in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC001')
-        print "fdsads", common.CouponData.objects.all()[0].status
         self.assertEqual(in_progess_coupon.status, 4, "in_progess_coupon status should be 4")
  
 #     Need to find out how to write this test case because it creates cyclic dependency.
@@ -170,11 +169,11 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         sms_dict = {'kms': 450, 'service_type': 2, 'sap_customer_id': 'SAP001'}
         self.validate_coupon(sms_dict, phone_number)
  
-        in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC001')
-        self.assertEqual(in_progess_coupon.status, 4, "in_progess_coupon status should be 4")
+        unused_coupon = common.CouponData.objects.get(unique_service_coupon='USC001')
+        self.assertEqual(unused_coupon.status, 1, "Coupon should be in unused State")
  
         in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC002')
-        self.assertEqual(in_progess_coupon.status, 1, "Coupon should be in unused State")
+        self.assertEqual(in_progess_coupon.status, 4, "in_progess_coupon status should be 4")
  
     def test_forward_logic_2(self):
         '''
@@ -191,11 +190,12 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
         sms_dict = {'kms': 450, 'service_type': 2, 'sap_customer_id': 'SAP001'}
         self.validate_coupon(sms_dict, phone_number)
  
-        in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC001')
-        self.assertEqual(in_progess_coupon.status, 4, "in_progess_coupon status should be 4")
+        unused_coupon = common.CouponData.objects.get(unique_service_coupon='USC001')
+        self.assertEqual(unused_coupon.status, 1, "Coupon should be in unused State")
  
         in_progess_coupon = common.CouponData.objects.get(unique_service_coupon='USC002')
-        self.assertEqual(in_progess_coupon.status, 1, "Coupon should be in unused State")
+        self.assertEqual(in_progess_coupon.status, 4, "in_progess_coupon status should be 4")
+        
  
     def test_forward_logic_3(self):
         '''

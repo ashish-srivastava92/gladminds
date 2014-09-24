@@ -194,7 +194,7 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         
         with transaction.atomic():
             status = xml_parser.findall('*//{http://api.gladmindsplatform.co/api/v1/bajaj/feed/}postDealerResult')[0].text
-            self.assertEqual(status, 'SUCCESS')
+            self.assertEqual(status, 'FAILURE')
 
     def test_update_customer_number(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
@@ -267,8 +267,8 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         self.assertEqual(200, response.status_code)
         
         dealer = RegisteredDealer.objects.filter(dealer_id='GMDEALER001')
-        asc = RegisteredASC.objects.get(asc_id='ASC001')
-        self.assertEquals('xyz', asc.asc_name)
+        asc = RegisteredDealer.objects.filter(dealer_id='ASC001')
+        self.assertEquals('ASC001', asc[0].dealer_id)
         
     def test_old_fsc_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
@@ -310,5 +310,5 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         timezone = pytz.timezone('Asia/Kolkata')
         credit_date = coupon_data[0].credit_date.astimezone(timezone).replace(tzinfo=None)
         credit_date = credit_date.strftime("%Y-%m-%d")
-        self.assertEquals(credit_date, '2013-12-07')
+        self.assertEquals(credit_date, '2013-12-06')
         self.assertEquals(coupon_data[0].credit_note, 'paid')

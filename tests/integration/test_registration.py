@@ -68,7 +68,7 @@ class TestCustomerRegistration(GladmindsResourceTestCase):
         self.test_user = User.objects.create_user('test_asc', 'testasc@gmail.com', 'test_asc_pass')
         login = self.client.login(username='test_asc', password='test_asc_pass')
         self.assertTrue(login)
-        ascgroup = Group.objects.create(name='ascs')
+        ascgroup = Group.objects.get(name='ascs')
         ascgroup.user_set.add(self.test_user)
         data = {'oldPassword': 'test_asc_pass', 'newPassword':'test_asc_pass_new'}
         self.client.post('/aftersell/provider/change-password', data)

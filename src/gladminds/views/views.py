@@ -13,6 +13,7 @@ from django.contrib.auth import authenticate, login, logout
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
+from django.contrib.auth.models import User
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 

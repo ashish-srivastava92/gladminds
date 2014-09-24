@@ -258,7 +258,6 @@
   },
   {
     "model": "gladminds.messagetemplate",
-<<<<<<< HEAD
     "pk": 29,
     "fields": {
       "template_key": "SEND_RCV_FEEDBACK",
