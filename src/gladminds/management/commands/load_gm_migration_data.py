@@ -14,6 +14,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.add_sms_template()
         self.add_email_template()
+        #self.add_group()
         
     def add_group(self):
         print "Loading groups..."
