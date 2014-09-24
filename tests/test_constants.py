@@ -77,3 +77,14 @@ GM_COUPONS = {
                     "vin": "22"
                     }
             }
+
+USER_PREFERENCE = {
+                   "user_details" : 1,
+                   "key" : "name",
+                   "value" : "test_user"
+                }
+APP_PREFERENCE = {
+                   "brand" : 1,
+                   "key" : "name",
+                   "value" : "test_brand"
+                }

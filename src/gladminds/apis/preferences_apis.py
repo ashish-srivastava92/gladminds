@@ -80,7 +80,7 @@ class UserPreferencesResource(GladMindsResource):
         """
         data = bundle.data
         try:
-            if data['key'].find('') != -1:
+            if data['key'].find(' ') != -1:
                 raise ImmediateHttpResponse(
                 response=http.HttpBadRequest('key cannot have blank spaces!'))
         except Exception as e:
