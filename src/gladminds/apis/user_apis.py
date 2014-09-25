@@ -2,7 +2,7 @@ from tastypie.constants import ALL_WITH_RELATIONS, ALL
 from tastypie.authorization import Authorization
 from tastypie import fields 
 from django.contrib.auth.models import User
-from gladminds.models import common
+from gladminds.core import base_models as common
 from gladminds.apis.baseresource import CustomBaseResource
 
 class UserProfileResources(CustomBaseResource):

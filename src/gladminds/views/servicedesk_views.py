@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
 from gladminds.core.utils import get_list_from_set
-from gladminds.aftersell.models import common as aftersell_common
+from gladminds.core import base_models as common
 from gladminds.resource.resources import GladmindsResources
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE
 from gladminds.managers import get_feedbacks, get_feedback,\
@@ -52,7 +52,7 @@ def modify_servicedesk_tickets(request, feedback_id):
 def get_feedback_response(request, feedback_id):
         data = request.POST
         if data['feedbackresponse']:
-            aftersell_common.Feedback.objects.filter(
+            common.Feedback.objects.filter(
                   id=feedback_id).update(ratings=str(data['feedbackresponse']))
             return render(request, 'service-desk/feedback_received.html')
         else:

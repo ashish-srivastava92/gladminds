@@ -1,10 +1,9 @@
 from django.db import models, transaction
 from gladminds.core import audit, utils, message_template as templates
 from gladminds.aftersell.models import logs
-from gladminds.models import common
+from gladminds.core import base_models as common
 from datetime import datetime, timedelta
-from gladminds.models.common import CouponData, STATUS_CHOICES
-from gladminds.aftersell.models import common as aftersell_common
+from gladminds.core.base_models import CouponData, STATUS_CHOICES
 from django.utils import timezone
 from django.db.models import Q
 from gladminds.core.utils import COUPON_STATUS
@@ -15,7 +14,7 @@ AUDIT_ACTION = "SENT TO QUEUE"
 
 @transaction.commit_manually()
 def get_customers_to_send_reminder(*args, **kwargs):
-    from gladminds.sqs_tasks import send_reminder_message
+    from gladminds.core.sqs_tasks import send_reminder_message
     day = kwargs.get('reminder_day', None)
     today_date = datetime.now().date()
     reminder_date = datetime.now().date()+timedelta(days=day)
@@ -72,7 +71,7 @@ def expire_service_coupon(*args, **kwargs):
             
 def mark_feeback_to_closed(*args, **kwargs):
     fedback_closed_date = datetime.now()-timedelta(days=2)
-    aftersell_common.Feedback.objects.filter(status = 'Resolved', resloved_date__lte = feedback_closed_date ).update(status = 'Closed', closed_date = datetime.now())
+    common.Feedback.objects.filter(status = 'Resolved', resloved_date__lte = feedback_closed_date ).update(status = 'Closed', closed_date = datetime.now())
 
 def import_data_from_sap(*args, **kwargs):
     pass

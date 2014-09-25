@@ -1,7 +1,7 @@
 from suds.client import Client
 from suds.transport.http import HttpAuthenticated
 from gladminds.core.audit import feed_log
-from gladminds.models import common
+from gladminds.core import base_models as common
 from django.conf import settings
 import logging
 logger = logging.getLogger("gladminds")
