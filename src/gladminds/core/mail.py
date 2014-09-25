@@ -24,7 +24,6 @@ def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER
 
 
 def feed_report(feed_data = None):
-    from gladminds import mail
     try:
         yesterday = datetime.now().date() - timedelta(days=1)
         file_stream = open(settings.EMAIL_DIR+'/feed_report.html')
@@ -83,7 +82,6 @@ def send_registration_failure(feed_data=None,
 
 
 def item_purchase_interest(data=None, receiver=None, subject=None):
-    from gladminds import mail
     try:
         file_stream = open(
             settings.EMAIL_DIR + '/purchase_interest_mail.html')
@@ -99,7 +97,6 @@ def item_purchase_interest(data=None, receiver=None, subject=None):
 
 
 def warrenty_extend(data=None, receiver=None, subject=None):
-    from gladminds import mail
     try:
         file_stream = open(
             settings.EMAIL_DIR + '/warrenty_extend_mail.html')
@@ -115,7 +112,6 @@ def warrenty_extend(data=None, receiver=None, subject=None):
 
 
 def insurance_extend(data=None, receiver=None, subject=None):
-    from gladminds import mail
     try:
         file_stream = open(
             settings.EMAIL_DIR + '/insurance_extend_mail.html')
@@ -131,7 +127,6 @@ def insurance_extend(data=None, receiver=None, subject=None):
         
 
 def sent_otp_email(data=None, receiver=None, subject=None):
-    from gladminds import mail
     try:
         date = datetime.now().date()
         file_stream = open(settings.EMAIL_DIR+'/otp_email.html')
@@ -140,15 +135,13 @@ def sent_otp_email(data=None, receiver=None, subject=None):
         context = Context({"otp": data})
         body = template.render(context)
         mail_detail = settings.OTP_MAIL
-        
-        mail.send_email(sender = mail_detail['sender'], receiver = receiver, 
+        send_email(sender = mail_detail['sender'], receiver = receiver, 
                    subject = mail_detail['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception otp email]: {0}".format(ex))
     
 def send_ucn_request_alert(data=None):
-    from gladminds import mail
     try:
         file_stream = open(settings.EMAIL_DIR+'/ucn_request_email.html')
         feed_temp = file_stream.read()
@@ -157,21 +150,20 @@ def send_ucn_request_alert(data=None):
         body = template.render(context)
         mail_detail = settings.UCN_RECOVERY_MAIL_DETAIL
         
-        mail.send_email(sender = mail_detail['sender'], receiver = mail_detail['receiver'], 
+        send_email(sender = mail_detail['sender'], receiver = mail_detail['receiver'], 
                    subject = mail_detail['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception ucn request email]: {0}".format(ex))
     
 def send_feedback_received(data):
-    from gladminds import mail
     try:
         file_stream = open(settings.EMAIL_DIR+'/base_email_template.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
         context = Context({"content": data['content']})
         body = template.render(context)
-        mail.send_email(sender = data['sender'], receiver = data['reciever'], 
+        send_email(sender = data['sender'], receiver = data['reciever'], 
                    subject = data['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
