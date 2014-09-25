@@ -12,18 +12,16 @@ from django.contrib.auth import authenticate, login, logout
 from django.db import transaction
 from django.db.models.query_utils import Q
 
-from gladminds.models import common
+from gladminds.core import base_models as common
 from gladminds.core.sqs_tasks import send_otp
 from gladminds.core import utils, message_template
 from gladminds.core.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format, stringify_groups,\
     get_list_from_set,  get_user_groups, search_details
 from gladminds.core.sqs_tasks import export_asc_registeration_to_sap
-from gladminds.aftersell.models import common as aftersell_common
 from gladminds.core.mail import sent_otp_email
 from gladminds.core.feed import SAPFeed
 from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
-from gladminds.aftersell.models import common as afterbuy_common
 from gladminds.core.scheduler import SqsTaskQueue
 from gladminds.resource.resources import GladmindsResources
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
@@ -70,7 +68,7 @@ def generate_otp(request):
             phone_number = request.POST['mobile']
             email = request.POST.get('email', '')
             logger.info('OTP request received. Mobile: {0}'.format(phone_number))
-            user = aftersell_common.RegisteredASC.objects.filter(phone_number=mobile_format(phone_number))[0].user
+            user = common.RegisteredASC.objects.filter(phone_number=mobile_format(phone_number))[0].user
             token = utils.get_token(user, phone_number, email=email)
             message = message_template.get_template('SEND_OTP').format(token)
             if settings.ENABLE_AMAZON_SQS:
@@ -98,7 +96,7 @@ def validate_otp(request):
             otp = request.POST['otp']
             phone_number = request.POST['phone']
             logger.info('OTP {0} recieved for validation. Mobile {1}'.format(otp, phone_number))
-            user = aftersell_common.RegisteredASC.objects.filter(phone_number=mobile_format(phone_number))[0].user
+            user = common.RegisteredASC.objects.filter(phone_number=mobile_format(phone_number))[0].user
             utils.validate_otp(user, otp, phone_number)
             logger.info('OTP validated for mobile number {0}'.format(phone_number))
             return render(request, 'portal/reset_pass.html', {'otp': otp})
@@ -163,7 +161,7 @@ def asc_registration(request):
 #        return HttpResponse(response_object, content_type="application/json")
         data = request.POST
         try:
-            asc_obj = afterbuy_common.ASCSaveForm(name=data['name'],
+            asc_obj = common.ASCSaveForm(name=data['name'],
                  address=data['address'], password=data['password'],
                  phone_number=data['phone-number'], email=data['email'],
                  pincode=data['pincode'], status=1)
@@ -229,8 +227,8 @@ def servicedesk(request, servicedesk=None):
             pass
         return render(request, template, {'active_menu': servicedesk,
                                           "data": data, 'groups': groups,
-                     "types": get_list_from_set(aftersell_common.FEEDBACK_TYPE),
-                     "priorities": get_list_from_set(aftersell_common.PRIORITY)})
+                     "types": get_list_from_set(common.FEEDBACK_TYPE),
+                     "priorities": get_list_from_set(common.PRIORITY)})
     elif request.method == 'POST':
         function_mapping = {
             'helpdesk': save_help_desk_data
@@ -272,7 +270,7 @@ def create_report(method, query_params, user):
     args = { Q(status=4) | Q(status=2) }
     status_options = {'4': 'In Progress', '2':'Closed'}
 
-    user = afterbuy_common.RegisteredDealer.objects.filter(dealer_id=user)
+    user = common.RegisteredDealer.objects.filter(dealer_id=user)
     filter['servicing_dealer'] = user[0]
     params['min_date'], params['max_date'] = utils.get_min_and_max_filter_date() 
     if method == 'POST':
@@ -374,19 +372,19 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
     phone_number = mobile_format(str(data['phone-number']))
     if not ('dealers' in groups or 'self' in groups):
         raise
-    if afterbuy_common.RegisteredASC.objects.filter(phone_number=phone_number)\
-        or afterbuy_common.ASCSaveForm.objects.filter(
+    if common.RegisteredASC.objects.filter(phone_number=phone_number)\
+        or common.ASCSaveForm.objects.filter(
                                                     phone_number=phone_number):
         return json.dumps({'message': ALREADY_REGISTERED})
 
     try:
         dealer_data = None
         if "dealer_id" in data:
-            dealer_data = afterbuy_common.RegisteredDealer.objects.\
+            dealer_data = common.RegisteredDealer.objects.\
                                             get(dealer_id=data["dealer_id"])
             dealer_data = dealer_data.dealer_id if dealer_data else None
 
-        asc_obj = afterbuy_common.ASCSaveForm(name=data['name'],
+        asc_obj = common.ASCSaveForm(name=data['name'],
                   address=data['address'], password=data['password'],
                   phone_number=phone_number, email=data['email'],
                   pincode=data['pincode'], status=1, dealer_id=dealer_data)

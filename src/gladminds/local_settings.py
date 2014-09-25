@@ -14,7 +14,23 @@ TEMPLATE_DEBUG = DEBUG
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gladmindsdb',
+        'NAME': 'gm',
+        'USER': 'root',
+        'PASSWORD': 'hasher123',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    },
+    'bajaj': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'bajaj',
+        'USER': 'root',
+        'PASSWORD': 'hasher123',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    },
+    'mock': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mock',
         'USER': 'root',
         'PASSWORD': 'hasher123',
         'HOST': '127.0.0.1',

@@ -19,8 +19,7 @@ from tastypie import http
 from tastypie.exceptions import ImmediateHttpResponse
 
 from gladminds.core import smsparser, utils, audit, message_template as templates
-from gladminds.models import common
-from gladminds.aftersell.models import common as aftersell_common
+from gladminds.core import base_models as common
 from gladminds.core.sqs_tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
@@ -364,7 +363,7 @@ class GladmindsResources(Resource):
         return {'status': True, 'message': message}
 
     def validate_dealer(self, phone_number):
-        all_sa_dealer_obj = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id__phone_number = phone_number, status = u'Y')
+        all_sa_dealer_obj = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id__phone_number = phone_number, status = u'Y')
         if len(all_sa_dealer_obj) == 0:
             return None
         service_advisor_obj = all_sa_dealer_obj[0]
@@ -433,14 +432,14 @@ class GladmindsResources(Resource):
         try:
             role = self.check_role_of_initiator(phone_number)
             if with_detail:
-                gladminds_feedback_object = aftersell_common.Feedback(reporter=phone_number,
+                gladminds_feedback_object = common.Feedback(reporter=phone_number,
                                                                 priority=sms_dict['priority'] , type=sms_dict['type'], 
                                                                 subject=sms_dict['subject'], message=sms_dict['message'],
                                                                 status="Open", created_date=datetime.now(),
                                                                 role=role
                                                                 )
             else:
-                gladminds_feedback_object = aftersell_common.Feedback(reporter=phone_number,
+                gladminds_feedback_object = common.Feedback(reporter=phone_number,
                                                                 message=sms_dict['message'], status="Open",
                                                                 created_date=datetime.now(),
                                                                 role=role
