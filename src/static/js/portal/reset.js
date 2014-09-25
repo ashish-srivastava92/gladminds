@@ -51,10 +51,9 @@ $(function() {
   var populateFields = function() {
     var splittedUrl = window.location.href.split('?');
     if(splittedUrl.length > 1) {
-      if(splittedUrl[1].indexOf("phone")>=0){
-        var pattern = /[0-9]{10}/g,
-            phone = splittedUrl[1].match(pattern)[0];
-        $(".otp-validation-form #phone").val(phone);
+      if(splittedUrl[1].indexOf("name")>=0){
+            name = splittedUrl[1].split('=')[1];
+        $(".otp-validation-form #name").val(name);
       }
     }
   };
