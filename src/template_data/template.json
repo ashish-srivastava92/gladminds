@@ -258,7 +258,7 @@
   },
   {
     "model": "gladminds.messagetemplate",
-    "pk": 30,
+    "pk": 29,
     "fields": {
       "template_key": "SEND_RCV_FEEDBACK",
       "template": "Thanks for providing {type}. We will get back to you soon.",
@@ -267,7 +267,7 @@
   }, 
   {
     "model": "gladminds.messagetemplate",
-    "pk": 31,
+    "pk": 30,
     "fields": {
       "template_key": "RCV_USER_COMPLAINT",
       "template": "{message}",
@@ -276,7 +276,7 @@
   },
     {
     "model": "gladminds.messagetemplate",
-    "pk": 32,
+    "pk": 31,
     "fields": {
       "template_key": "SEND_MSG_TO_ASSIGNEE",
       "template": "A GladMinds user has a feedback for us, which says: {message} Its has been reported by {reporter} on {created_date}. It has been assigned to you. Please address the issue as soon as possible.",
@@ -285,20 +285,65 @@
   },
   {
     "model": "gladminds.messagetemplate",
-    "pk": 33,
+    "pk": 32,
     "fields": {
       "template_key": "INITIATOR_FEEDBACK_DETAILS",
       "template": "Your {type} has been assigned to one of our technician.Severity:{priority}.",
       "description": "Your feedback has been assigned to one of our technician  is looking into it."
-    }
-  },
+      }
+   },
   {
-    "model": "gladminds.messagetemplate",
-    "pk": 34,
+    "model": "gladminds.messagetemplate",   
+    "pk": 33,
     "fields": {
       "template_key": "INITIATOR_FEEDBACK_STATUS",
       "template": "Your {type} has been resolved.",
       "description": "Your Complaint has been resolved."
     }
-  }
+  },
+  {
+    "model": "gladminds.messagetemplate",   
+    "pk": 34,
+    "fields": {
+      "template_key": "COUPON_ALREADY_INPROGRESS",
+      "template": "Free service {service_type} is already in-progress. Please proceed for the same for Customer ID {customer_id}",
+      "description": "Send in-progress coupon if it is available"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 35,
+    "fields": {
+      "template_key": "SEND_SA_OTHER_VALID_COUPON",
+      "template": "Requested free service {req_service_type} is {req_status}. Please proceed for free service {service_type} for Customer ID {customer_id}",
+      "description": "Send in-progress coupon if it is available"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 36,
+    "fields": {
+      "template_key":"RCV_CUSTOMER_DETAILS",
+      "template":"{params} {message}",
+      "description":"Receive this message for getting customer details"
+	}
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 37,
+    "fields": {
+      "template_key": "SEND_CUSTOMER_DETAILS",
+      "template": "Your {0} is {1}",
+      "description": "Send id or vin to customer depending upon message he sent"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 38,
+    "fields": {
+      "template_key":"INVALID_RECOVERY_MESSAGE",
+      "template":"No service register for {0}: {1}",
+      "description":"Send on if customer id or VIN does not exits."
+    }
+  } 
 ]

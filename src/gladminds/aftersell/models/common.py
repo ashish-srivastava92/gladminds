@@ -33,6 +33,7 @@ class UCNRecovery(models.Model):
     sap_customer_id = models.CharField(max_length=215, null=True, blank=True)
     file_location = models.CharField(max_length=215, null=True, blank=True)
     request_date = models.DateTimeField(default=datetime.now())
+    unique_service_coupon = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
         app_label = "aftersell"

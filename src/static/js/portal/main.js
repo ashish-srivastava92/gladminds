@@ -130,7 +130,37 @@
         return false;
 
     });
-    
+
+    $('.change-password-form').on('submit', function() {
+        if($('.new-password').val() !== $('.retype-new-pass').val()) {
+            Utils.showErrorMessage('Password does not matches.', 1000, 7000);
+            return false;
+        }else{
+            var data = Utils.getFormData('.change-password-form');
+            $.ajax({
+                type: 'POST',
+                url: '/aftersell/provider/change-password',
+                data: data,
+                success: function(data){
+                        if (data.message) {
+                            Utils.showErrorMessage(data.message, 10, 7000);
+                        }
+                        setTimeout(function(){
+                            if(data.status){
+                                history.back();
+                            }
+                        }, 2000);
+                    },
+                error: function(data) {
+                    var messageModal = $('.modal.message-modal'),
+                        messageBlock = $('.modal-body', messageModal);
+                    messageBlock.text('Oops! Some error occurred!');
+                    messageModal.modal('show');
+                }
+            });
+            return false;
+        }
+    });
     
     $('.vin-form').on('submit', function() {
         var table = $('#search-results tbody .search-detail');
@@ -243,13 +273,13 @@
             messageBlock = $('.modal-body', messageModal),
             messageHeader = $('.modal-title', messageModal),
             waitingModal = $('.modal.waiting-dialog');
-        if (data.Assign_To == 'Assign to reporter'){
-        	formData.append("reporter_status",true);
+        if (data.Assign_To === 'Assign to reporter'){
+            formData.append('reporter_status',true);
         }
         else{
-        	formData.append("reporter_status",false);
+            formData.append('reporter_status',false);
         }
-        	
+
         var jqXHR = $.ajax({
             type: 'POST',
             url: url,
@@ -294,27 +324,37 @@
 
     });
 
+    $('.report-type-dropdown').on('change', function() {
+        var reportType = $(this),
+            couponStatus = $('.coupon-status');
+        if (reportType.val() === 'credit') {
+            couponStatus.addClass('hide');
+        }
+        else {
+            couponStatus.removeClass('hide');
+        }
+    });
 })();
 
 function rootCause(status){
 	'use strict';
-	var rootcause = $('.rootcause'),
+	var rootCauseClass = $('.rootcause'),
         resolution = $('.resolution'),
-        root_cause = $('.root-cause'),
-        ticket_resolution = $('.ticket-resolution'),
+        reason = $('.root-cause'),
+        ticketResolution = $('.ticket-resolution'),
         assignee = $('.assignee');
 	
 	assignee.attr('required', false);
-	rootcause.addClass('hide');
+	rootCauseClass.addClass('hide');
 	resolution.addClass('hide');
-	root_cause.attr('required', false);
-	ticket_resolution.attr('required', false);
+	reason.attr('required', false);
+	ticketResolution.attr('required', false);
 	
 	if (status === 'Resolved'){
-        rootcause.removeClass('hide');
+		rootCauseClass.removeClass('hide');
         resolution.removeClass('hide');
-        root_cause.attr('required', true);
-        ticket_resolution.attr('required', true);
+        reason.attr('required', true);
+        ticketResolution.attr('required', true);
 	}
 	if (status !== 'Open'){
 		assignee.attr('required', true);
