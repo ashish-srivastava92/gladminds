@@ -37,7 +37,7 @@ var Utils = {
 			},
 			error : function() {
 				waitingModal.modal("hide");
-				messageBlock.text("Invalid Data");
+				messageBlock.text("Some error occurred. Please contact customer support: +91-9741775128");
 				messageModal.modal("show");
 			}
 		});

@@ -28,6 +28,10 @@
     $('.sa-form').on('submit', function(event) {
         var data = Utils.getFormData('.sa-form');
         Utils.submitForm(event, data, '/aftersell/register/sa');
+        $('.sa-phone').val('').attr('readOnly', false);
+        $('.sa-name').val('').attr('readOnly', false);
+        $('.sa-id').val('').attr('readOnly', false);
+        $('.sa-submit').attr('disabled', true);
         return false;
     });
     
@@ -78,7 +82,7 @@
               }
             },
             error: function() {
-            	messageBlock.text('Oops! Some error occurred!');
+            	messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
                 messageModal.modal('show');
             }
           });
@@ -116,7 +120,7 @@
             	}	
             },
             error: function() {
-            	messageBlock.text('Oops! Some error occurred!');
+            	messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
                 messageModal.modal('show');
             }
           });
@@ -145,7 +149,7 @@
             		  }, 2000); 
 	              },
 	              error: function(data) {
-	            	  messageBlock.text('Oops! Some error occurred!');
+	            	  messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
 	                  messageModal.modal('show');
 	              }
 	            });
@@ -184,7 +188,7 @@
 
               },
               error: function() {
-              	messageBlock.text('Oops! Some error occurred!');
+              	messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
                   messageModal.modal('show');
               }
             });
@@ -239,5 +243,49 @@
         else {
             couponStatus.removeClass('hide');
         }
+    });
+    $('.sa-reg-form').on('submit', function() {
+        var saMobile = $('#srch-sa').val(),
+            messageModal = $('.modal.message-modal'),
+            messageBlock = $('.modal-body', messageModal);
+        
+        var jqXHR = $.ajax({
+            type: 'POST',
+            url: '/aftersell/exceptions/serviceadvisor',
+            data: {'phone_number': saMobile},
+            success: function(data){
+                if (data.phone) {
+                    $('.sa-phone').val(data.phone).attr('readOnly', true);
+                    $('.sa-name').val(data.name).attr('readOnly', true);
+                    $('.sa-id').val(data.id).attr('readOnly', true);
+                    $('.sa-status').val(data.status).attr('readOnly', false);
+                    $('.sa-submit').attr('disabled', false);
+                    if (data.active>0){
+                        $('.sa-status').attr('readOnly', true);
+                        $('.sa-submit').attr('disabled', true);
+                        messageBlock.text(data.message);
+                        messageModal.modal('show');
+                    }
+                }
+                else if (data.message) {
+                    $('.sa-phone').val('').attr('readOnly', false);
+                    $('.sa-status').val('').attr('readOnly', false);
+                    $('.sa-name').val('').attr('readOnly', false);
+                    $('.sa-id').val('').attr('readOnly', false);
+                    $('.sa-submit').attr('disabled', true);
+                    messageBlock.text(data.message);
+                    messageModal.modal('show');
+                    if (!data.status) {
+                        $('.sa-id').val('').attr('readOnly', true);
+                        $('.sa-submit').attr('disabled', false);
+                    }
+                }
+            },
+            error: function() {
+                    messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
+                    messageModal.modal('show');
+                }
+        });
+        return false;
     });
 })();

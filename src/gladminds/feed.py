@@ -294,8 +294,9 @@ class ProductDispatchFeed(BaseFeed):
                 valid_coupon = common.CouponData.objects.filter(unique_service_coupon=product['unique_service_coupon'])
                 service_type_exists = common.CouponData.objects.filter(vin__vin=product['vin'], service_type=str(product['service_type']))
                 if service_type_exists and not valid_coupon:
-                    logger.error('VIN already has coupon of this service type {0} VIN - {1}'.format(product['vin'], product['unique_service_coupon']))
-                    raise ValueError()
+                    service_type_error = 'VIN already has coupon of service type {0}'.format(product['service_type'])
+                    logger.error(service_type_error)
+                    raise ValueError(service_type_error)
                 elif not valid_coupon:
                     coupon_data = common.CouponData(unique_service_coupon=product['unique_service_coupon'],
                             vin=product_data, valid_days=product['valid_days'],
@@ -308,11 +309,12 @@ class ProductDispatchFeed(BaseFeed):
                     logger.info('UCN is already saved in database. VIN - {0} UCN - {1}'.format(product['vin'], product['unique_service_coupon']))
                     continue
                 else:
-                    logger.error('Coupon Already registered for a VIN! VIN {0}  - UCN {1}'.format(product['vin'], product['unique_service_coupon']))
-                    raise ValueError()
+                    coupon_exist_error = 'Coupon already registered for VIN {0}'.format(valid_coupon[0].vin.vin)
+                    logger.error(coupon_exist_error)
+                    raise ValueError(coupon_exist_error)
             except Exception as ex:   
-                ex = '''Coupon: {2} Save error! {0}
-                         VIN - {1}'''.format(ex, product['vin'], product['unique_service_coupon'])
+                ex = '''[Error: ProductDispatchFeed_product_data_save]: VIN - {0} Coupon - {1} {2}'''.format(
+                                        product['vin'], product['unique_service_coupon'], ex)
                 self.feed_remark.fail_remarks(ex)
                 logger.error(ex)
                 continue

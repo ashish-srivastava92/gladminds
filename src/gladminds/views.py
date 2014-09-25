@@ -21,7 +21,7 @@ from gladminds import utils, message_template
 from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format,\
     format_date_string, stringify_groups, search_details,\
-    services_search_details
+    services_search_details, service_advisor_search
 from gladminds.sqs_tasks import export_asc_registeration_to_sap
 from gladminds.mail import sent_otp_email
 from gladminds.feed import SAPFeed
@@ -207,7 +207,7 @@ def exceptions(request, exception=None):
             'check' : get_sa_list
         }
         try:
-            data = data_mapping[exception](request)
+            data = data_mapping[exception](request.user)
         except:
             #It is acceptable if there is no data_mapping defined for a function
             pass
@@ -217,12 +217,18 @@ def exceptions(request, exception=None):
             'customer' : get_customer_info,
             'recover' : recover_coupon_info,
             'search' : search_details,
-            'status' : services_search_details
+            'status' : services_search_details,
+            'serviceadvisor': service_advisor_search
         }
         try:
-            data = function_mapping[exception](request)
+            post_data = request.POST.copy()
+            post_data['current_user'] = request.user
+            if request.FILES:
+                post_data['job_card']=request.FILES['jobCard']
+            data = function_mapping[exception](post_data)
             return HttpResponse(content=json.dumps(data),  content_type='application/json')
-        except:
+        except Exception as ex:
+            logger.error(ex)
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
@@ -287,14 +293,13 @@ def create_reconciliation_report(query_params, user):
             coupon_data_dict['coupon_no'] = coupon_data.unique_service_coupon
             coupon_data_dict['kms'] = coupon_data.actual_kms
             coupon_data_dict['service_type'] = coupon_data.service_type
-            coupon_data_dict['special_case'] = ''
+            coupon_data_dict['special_case'] = coupon_data.special_case
         report_data.append(coupon_data_dict)
     return report_data
     
 
-UPDATE_FAIL = 'Some error occurred, try again later.'
-UPDATE_SUCCESS = 'Customer phone number has been updated '
-REGISTER_SUCCESS = 'Customer has been registered with ID: '
+CUST_UPDATE_SUCCESS = 'Customer phone number has been updated.'
+CUST_REGISTER_SUCCESS = 'Customer has been registered with ID: '
 def register_customer(request, group=None):
     post_data = request.POST
     data_source = []
@@ -313,7 +318,7 @@ def register_customer(request, group=None):
     if not existing_customer and check_with_invoice_date.days < 0 or check_with_today_date.days > 0:
         message = "Product purchase date should be between {0} and {1}".\
                 format((product_obj[0].invoice_date).strftime("%d-%m-%Y"),(datetime.datetime.now()).strftime("%d-%m-%Y"))
-        logger.info('{0} Entered date is: {1}'.format(message, str(data_source[0]['product_purchase_date'])))
+        logger.info('[Temporary_cust_registration]:: {0} Entered date is: {1}'.format(message, str(data_source[0]['product_purchase_date'])))
         return json.dumps({"message": message})
     
     try:    
@@ -330,26 +335,27 @@ def register_customer(request, group=None):
                                                                product_purchase_date = data_source[0]['product_purchase_date'],
                                                                temp_customer_id = temp_customer_id)
             customer_obj.save()
-            
+            logger.info('[Temporary_cust_registration]:: Initiating purchase feed')
             feed_remark = FeedLogWithRemark(len(data_source),
                                                 feed_type='Purchase Feed',
                                                 action='Received', status=True)
             sap_obj = SAPFeed()
             feed_response = sap_obj.import_to_db(feed_type='purchase', data_source=data_source, feed_remark=feed_remark)
             if feed_response.failed_feeds > 0:
-                logger.info(json.dumps(feed_response.remarks))
-                raise 
+                logger.info('[Temporary_cust_registration]:: ' + json.dumps(feed_response.remarks))
+                raise ValueError('purchase feed failed!')
+            logger.info('[Temporary_cust_registration]:: purchase feed completed')
     except Exception as ex:
         logger.info(ex)
-        return json.dumps({"message": UPDATE_FAIL})
+        return HttpResponseBadRequest()
     if existing_customer:
-        return json.dumps({'message': UPDATE_SUCCESS})
-    return json.dumps({'message': REGISTER_SUCCESS + temp_customer_id})
+        return json.dumps({'message': CUST_UPDATE_SUCCESS})
+    return json.dumps({'message': CUST_REGISTER_SUCCESS + temp_customer_id})
       
 
-SUCCESS_MESSAGE = 'Registration is complete'
-EXCEPTION_INVALID_DEALER = 'The dealer-id provided is not registered'
-ALREADY_REGISTERED = 'Already Registered Number'
+ASC_REGISTER_SUCCESS = 'ASC registration is complete.'
+EXCEPTION_INVALID_DEALER = 'The dealer-id provided is not registered.'
+ALREADY_REGISTERED = 'Already Registered Number.'
 def save_asc_registeration(request, groups=[], brand='bajaj'):
     #TODO: Remove the brand parameter and pass it inside request.POST
     data = request.POST
@@ -383,37 +389,38 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
     except Exception as ex:
         logger.info(ex)
         return json.dumps({"message": EXCEPTION_INVALID_DEALER})
-    return json.dumps({"message": SUCCESS_MESSAGE})
+    return json.dumps({"message": ASC_REGISTER_SUCCESS})
 
+SA_UPDATE_SUCCESS = 'Service advisor status has been updated.'
+SA_REGISTER_SUCCESS = 'Service advisor registration is complete.'
 def save_sa_registration(request, groups):
     data = request.POST
     existing_sa = False
     data_source = []
     phone_number = mobile_format(str(data['phone-number']))
-    try:
-        service_advisor = afterbuy_common.ServiceAdvisor.objects.get(
-                            phone_number=phone_number, name=data['name'])
-        service_advisor_id = service_advisor.service_advisor_id
-    except ObjectDoesNotExist as odne:
-        logger.info("[Exception:]: {0}".format(odne))
+    if data['sa-id']:
+        service_advisor_id = data['sa-id']
+        existing_sa = True
+    else:
         service_advisor_id = TEMP_SA_ID_PREFIX + str(random.randint(10**5, 10**6))
+   
+    data_source.append(utils.create_sa_feed_data(data, request.user, service_advisor_id))
+    logger.info('[Temporary_sa_registration]:: Initiating dealer-sa feed for ID' + service_advisor_id)
+    feed_remark = FeedLogWithRemark(len(data_source),
+                                                feed_type='Dealer Feed',
+                                                action='Received', status=True)
+    sap_obj = SAPFeed()
     
-    try:
-        data_source.append(utils.create_sa_feed_data(data, request.user, service_advisor_id))
-        feed_remark = FeedLogWithRemark(len(data_source),
-                                                    feed_type='Dealer Feed',
-                                                    action='Received', status=True)
-        sap_obj = SAPFeed()
-        feed_response = sap_obj.import_to_db(feed_type='dealer',
-                            data_source=data_source, feed_remark=feed_remark)
-        if feed_response.failed_feeds > 0:
-            failure_msg = list(feed_response.remarks.elements())[0]
-            logger.info(failure_msg)
-            return json.dumps({"message": failure_msg})
-    except Exception as ex:
-        logger.info(ex)
-        return json.dumps({"message": UPDATE_FAIL})
-    return json.dumps({'message': SUCCESS_MESSAGE})
+    feed_response = sap_obj.import_to_db(feed_type='dealer',
+                        data_source=data_source, feed_remark=feed_remark)
+    if feed_response.failed_feeds > 0:
+        failure_msg = list(feed_response.remarks.elements())[0]
+        logger.info('[Temporary_sa_registration]:: dealer-sa feed fialed ' + failure_msg)
+        return json.dumps({"message": failure_msg})
+    logger.info('[Temporary_sa_registration]:: dealer-sa feed completed')
+    if existing_sa:
+        return json.dumps({'message': SA_UPDATE_SUCCESS})
+    return json.dumps({'message': SA_REGISTER_SUCCESS})
 
 
 def register_user(request, user=None):
