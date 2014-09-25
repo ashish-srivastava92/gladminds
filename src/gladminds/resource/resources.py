@@ -240,7 +240,7 @@ class GladmindsResources(Resource):
             logger.error("Vin is not in customer_product_data Error %s " % ax)
 
     def update_coupon(self, valid_coupon, actual_kms, dealer_data, status,\
-                                                 update_time=datetime.now()):
+                                                 update_time):
         valid_coupon.actual_kms = actual_kms
         valid_coupon.actual_service_date = update_time
         valid_coupon.status = status
@@ -258,11 +258,12 @@ class GladmindsResources(Resource):
         
         validity_date = coupon.extended_date
         today = timezone.now()
+        current_time = datetime.now()
         if expiry_date >= today:
-            coupon.extended_date = datetime.now() + timedelta(days=COUPON_VALID_DAYS)
-            self.update_coupon(coupon, actual_kms, dealer_data, 4, today)
+            coupon.extended_date = current_time + timedelta(days=COUPON_VALID_DAYS)
+            self.update_coupon(coupon, actual_kms, dealer_data, 4, current_time)
         elif validity_date >= today and expiry_date < today:
-            coupon.actual_service_date = datetime.now()
+            coupon.actual_service_date = current_time
             coupon.save()
     
     def get_requested_coupon_status(self, vin, service_type):
@@ -278,8 +279,8 @@ class GladmindsResources(Resource):
         actual_kms = int(sms_dict['kms'])
         service_type = sms_dict['service_type']
         dealer_message = None
-        customer_phone_number = None
         customer_message = None
+        customer_phone_number = None
         customer_message_countdown = settings.DELAY_IN_CUSTOMER_UCN_MESSAGE
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         dealer_data = self.validate_dealer(phone_number)
@@ -333,7 +334,7 @@ class GladmindsResources(Resource):
                                                     service_type=in_progress_coupon[0].service_type)
             elif valid_coupon:
                 logger.info("Validate_coupon: valid_coupon")
-                self.update_coupon(valid_coupon, actual_kms, dealer_data, 4)
+                self.update_coupon(valid_coupon, actual_kms, dealer_data, 4, datetime.now())
                 if(valid_coupon.service_type == int(service_type)):
                     dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(
                                                     service_type=valid_coupon.service_type,
