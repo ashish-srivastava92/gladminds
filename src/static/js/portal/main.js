@@ -153,6 +153,10 @@
 	    }
     });
     
+    $('.cancel-change-pass').click(function(){
+    	history.back();
+    });
+    
     $('.vin-form').on('submit', function() {
     	var table = $("#search-results tbody .search-detail");
     	table.remove(); 
