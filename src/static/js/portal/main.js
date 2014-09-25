@@ -28,6 +28,10 @@
     $('.sa-form').on('submit', function(event) {
         var data = Utils.getFormData('.sa-form');
         Utils.submitForm(event, data, '/aftersell/register/sa');
+        $('.sa-phone').val('').attr('readOnly', false);
+        $('.sa-name').val('').attr('readOnly', false);
+        $('.sa-id').val('').attr('readOnly', false);
+        $('.sa-submit').attr('disabled', true);
         return false;
     });
     
@@ -78,7 +82,7 @@
               }
             },
             error: function() {
-            	messageBlock.text('Oops! Some error occurred!');
+            	messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
                 messageModal.modal('show');
             }
           });
@@ -116,7 +120,7 @@
             	}	
             },
             error: function() {
-            	messageBlock.text('Oops! Some error occurred!');
+            	messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
                 messageModal.modal('show');
             }
           });
@@ -145,7 +149,7 @@
             		  }, 2000); 
 	              },
 	              error: function(data) {
-	            	  messageBlock.text('Oops! Some error occurred!');
+	            	  messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
 	                  messageModal.modal('show');
 	              }
 	            });
@@ -180,7 +184,7 @@
 
               },
               error: function() {
-              	messageBlock.text('Oops! Some error occurred!');
+              	messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
                   messageModal.modal('show');
               }
             });
@@ -274,7 +278,7 @@
                 }
             },
             error: function() {
-                    messageBlock.text('Oops! Some error occurred!');
+                    messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
                     messageModal.modal('show');
                 }
         });
