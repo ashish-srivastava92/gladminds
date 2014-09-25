@@ -1,19 +1,18 @@
 from django.test import TestCase
 from django.test.client import Client
-from integration.base_integration import GladmindsResourceTestCase
 from integration.base import BaseTestCase
 
 
-class TestDealerRegistration(GladmindsResourceTestCase,BaseTestCase):
+class TestDealerRegistration(BaseTestCase):
     def setUp(self):
         self.client = Client()
         BaseTestCase.setUp(self)
-
+ 
     def test_new_dealer(self):
         self.dealer_login()
 
 
-class TestCustomerRegistration(GladmindsResourceTestCase, BaseTestCase):
+class TestCustomerRegistration(BaseTestCase):
     def setUp(self):
         TestCase.setUp(self)
         BaseTestCase.setUp(self)

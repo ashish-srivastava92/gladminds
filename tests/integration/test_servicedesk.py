@@ -1,6 +1,5 @@
 from django.test.client import Client
 
-from integration.base_integration import GladmindsResourceTestCase
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.aftersell.models import logs
 from integration.base import BaseTestCase
@@ -9,7 +8,7 @@ from django.test import TestCase
 client = Client()
 
 
-class TestServiceDeskFlow(GladmindsResourceTestCase, BaseTestCase):
+class TestServiceDeskFlow(BaseTestCase):
     def setUp(self):
         TestCase.setUp(self)
         BaseTestCase.setUp(self)
@@ -41,21 +40,21 @@ class TestServiceDeskFlow(GladmindsResourceTestCase, BaseTestCase):
  
     def test_sms_email_assignee_after_feedback_assigned(self):
         self.post_feedback()
-        self.test_servicedesk_login_sdm()
+        self.servicedesk_login_sdm()
         self.update_feedback_assigned()
         log_len_after = logs.AuditLog.objects.all()
         self.assertEqual(log_len_after[0].reciever, "9999999998")
         self.assertEqual(log_len_after[1].reciever, "9999999998")
-        self.assertEqual(log_len_after[2].reciever , "9999999999")
+        self.assertEqual(log_len_after[2].reciever, "9999999999")
  
     def test_sms_email_after_resolved(self):
         self.post_feedback()
-        self.test_servicedesk_login_sdo()
+        self.servicedesk_login_sdo()
         self.update_feedback_resolved()
 
     def test_updated_feedback(self):
         self.post_feedback()
-        self.test_servicedesk_login_sdm()
+        self.servicedesk_login_sdm()
         self.update_feedback_fields()
-        feedbacks = aftersell_common.Feedback.objects.filter(priority = 'High')
-        self.assertEqual(feedbacks[0].status  ,'Closed')
+        feedbacks = aftersell_common.Feedback.objects.filter(priority='High')
+        self.assertEqual(feedbacks[0].status ,'Closed')
