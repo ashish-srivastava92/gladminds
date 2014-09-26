@@ -1,7 +1,6 @@
 ''' Test Case for testing out the Afterbuy Api
 '''
-
-from integration.base_integration import GladmindsResourceTestCase
+ 
 from provider.oauth2.models import Client as auth_client
 from provider.oauth2.models import AccessToken
 from django.utils import unittest
@@ -13,10 +12,10 @@ from gladminds.models import common
 from gladminds.afterbuy.models import common as afterbuy_common
 import json
 client = Client()
-
-
-class TestAfterbuy(GladmindsResourceTestCase, BaseTestCase):
-
+ 
+ 
+class TestAfterbuy(BaseTestCase):
+ 
     def setUp(self):
         TestCase.setUp(self)
         BaseTestCase.setUp(self)
@@ -27,15 +26,15 @@ class TestAfterbuy(GladmindsResourceTestCase, BaseTestCase):
         secret_cli.save()
         access = AccessToken(user=user, token=self.access_token, client=secret_cli)
         access.save()
-        user_obj = self.create_gladmind_user()
-        brand_obj = self.create_get_brand_obj(brand_id='1', brand_name="test_brand")
-        testProductType = self.create_get_product_type_obj(brand_id=brand_obj, product_name="Test", warranty_email="abc@def.com", warranty_phone="88888888")
-        self.create_get_user_product_obj(vin='MD2A57BZ4EWA05472', customer_phone_number=user_obj)
-        product_info = self.create_get_product_obj(vin='MD2A57BZ4EWA05472', customer_phone_number=user_obj, product_type=testProductType)
-        self.create_get_product_insurance_info(product=product_info, issue_date='2014-07-28', expiry_date='2014-07-28', insurance_phone='1111111111', policy_number='12s33')
-        self.create_get_product_warranty_info(product=product_info, issue_date='2014-07-28', expiry_date='2014-07-28')
-        self.create_get_spare_data(spare_brand=brand_obj, spare_name="test spare")
-
+        self.send_dispatch_feed_and_create_product_product_type_database()
+        self.send_purchase_feed_and_create_product_product_type_database()
+        product_info = self.get_product_info(vin='XXXXXXXXXX')
+        brand_obj = self.get_brand_info(brand_id='bajaj')
+        #product data
+        self.create_and_get_product_insurance_info(product=product_info, issue_date='2014-07-28', expiry_date='2014-07-28', insurance_phone='1111111111', policy_number='12s33')
+        self.create_and_get_product_warranty_info(product=product_info, issue_date='2014-07-28', expiry_date='2014-07-28')
+        self.create_and_get_spare_data(spare_brand=brand_obj, spare_name="test spare")
+ 
     @unittest.skip("skip the test")
     def test_create_new_user(self):
         '''
@@ -112,25 +111,25 @@ class TestAfterbuy(GladmindsResourceTestCase, BaseTestCase):
         self.assertEqual(get_response.content, "No notification exists.")
 
     def test_get_product_insurance(self):
-        get_response = client.get('/v1/afterbuy/product/insurance/?vin=MD2A57BZ4EWA05472')
+        get_response = client.get('/v1/afterbuy/product/insurance/?vin=XXXXXXXXXX')
         self.assert_successful_http_response(get_response)
         get_response = client.get('/v1/afterbuy/product/insurance/?vin=')
         self.assertEqual(get_response.status_code, 400)
 
     def test_get_product_warranty(self):
-        get_response = client.get('/v1/afterbuy/product/warranty/?vin=MD2A57BZ4EWA05472')
+        get_response = client.get('/v1/afterbuy/product/warranty/?vin=XXXXXXXXXX')
         self.assert_successful_http_response(get_response)
         get_response = client.get('/v1/afterbuy/product/warranty/?vin=')
         self.assertEqual(get_response.status_code,400)
 
     def test_get_spares_list(self):
-        get_response = client.get('/v1/afterbuy/product/spares/?vin=MD2A57BZ4EWA05472')
+        get_response = client.get('/v1/afterbuy/product/spares/?vin=XXXXXXXXXX')
         self.assert_successful_http_response(get_response)
         get_response = client.get('/v1/afterbuy/product/spares/?vin=')
         self.assertEqual(get_response.status_code,400)
 
     def test_save_user_details(self):
-        create_mock_data = {"mobile":"99999998","name":"xyz","email":"xyz@gmail.com","gender":"m","address":"a-302 om complex"
+        create_mock_data = {"mobile":"666666","name":"xyz","email":"xyz@gmail.com","gender":"m","address":"a-302 om complex"
                 ,"size":"1","pincode":"320037"}
         get_response = client.post("/v1/afterbuy/user/save/", data=create_mock_data)
         deserialize_resp = self.deserialize(get_response)
@@ -145,16 +144,16 @@ class TestAfterbuy(GladmindsResourceTestCase, BaseTestCase):
         self.assert_successful_http_response(get_response)
 
     def test_get_product_coupons(self):
-        create_mock_data = {'vin': 'MD2A57BZ4EWA05472'}
+        create_mock_data = {'vin': 'XXXXXXXXXX'}
         get_response = client.get('/v1/afterbuy/product/coupons/', data=create_mock_data)
         self.assert_successful_http_response(get_response)
 
     def test_get_product_purchase_information(self):
-        get_response = client.get('/v1/afterbuy/product/purchase-info/', data={'vin': 'MD2A57BZ4EWA05472'})
+        get_response = client.get('/v1/afterbuy/product/purchase-info/', data={'vin': 'XXXXXXXXXX'})
         self.assert_successful_http_response(get_response)
 
     def test_save_user_phone_details(self):
-        create_mock_data = {"mobile":"99999998", "IMEI":"123e4","ICCID":"12ef", "phone_name":"9727071081",
+        create_mock_data = {"mobile":"666666", "IMEI":"123e4","ICCID":"12ef", "phone_name":"9727071081",
                  "serial_number":"123eee", "capacity":"2", "os":"dummyos","version":"11", "Model":"reb" }
         get_response = client.post("/v1/afterbuy/phone-details/", data=create_mock_data)
         deserialize_resp = self.deserialize(get_response)
@@ -162,16 +161,16 @@ class TestAfterbuy(GladmindsResourceTestCase, BaseTestCase):
         self.assert_successful_http_response(get_response)
 
     def test_post_dispatch_dict(self):
-        create_mock_data = {"mobile":"99999998","vin":"MD2A57BZ4EWA05472"}
+        create_mock_data = {"mobile":"99999998","vin":"XXXXXXXXXX"}
         get_response = client.post('/v1/afterbuy/product/info/', data=create_mock_data)
         self.assert_successful_http_response(get_response) 
 
     def test_get_dispatch_dict(self):
-        create_mock_data = {"mobile":"99999998"}
+        create_mock_data = {"mobile":"666666"}
         get_response = client.get('/v1/afterbuy/product/info/', data=create_mock_data)
         self.assert_successful_http_response(get_response)
 
     def test_delete_dispatch_dict(self):
-        url = '/v1/afterbuy/product/info/?mobile=99999998&vin=MD2A57BZ4EWA05472'
+        url = '/v1/afterbuy/product/info/?mobile=99999998&vin=XXXXXXXXXX'
         get_response = client.delete(url)
         self.assert_successful_http_response(get_response)

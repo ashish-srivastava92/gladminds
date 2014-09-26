@@ -18,17 +18,17 @@ class FeedsResourceTest(BaseTestCase):
         self.create_user(username='gladminds', email='gladminds@gladminds.co', password='gladminds')
 
     def test_service_advisor_feed(self):
-        self.send_service_advisor_feed()
-        self.check_service_feed_saved_to_db()
+        self.create_service_advisor_through_feed()
+        self.check_service_feed_saved_to_database()
 
     def test_service_advisor_dealer_relationship(self):
-        self.send_service_advisor_feed()
-        self.check_service_advisor_dealer_relationship_db()
+        self.create_service_advisor_through_feed()
+        self.check_service_advisor_dealer_relationship_saved_to_database()
         '''
            Checking out with new feed to change the status of service advisor
         '''
         self.send_service_advisor_feed_with_new_status()
-        self.check_data_saved_to_db()
+        self.check_data_saved_to_database()
 
     def test_service_advisor_phone_number_updation_logic(self):
         '''
@@ -38,32 +38,32 @@ class FeedsResourceTest(BaseTestCase):
             2. updating with an active mobile number should fail
             3. Try to register a new SA with an active mobile number should fail
         '''
-        self.send_service_advisor_feed()
-        self.check_service_feed_saved_to_db()
+        self.create_service_advisor_through_feed()
+        self.check_service_feed_saved_to_database()
 
         self.send_sa_upate_mobile_feed()
-        self.service_advisor_db_upadted()
+        self.service_advisor_database_upadted()
 
     def test_product_dispatch(self):
-        self.send_service_advisor_feed()
-        self.send_dispatch_feed()
-        self.check_product_data_db()
+        self.create_service_advisor_through_feed()
+        self.send_dispatch_feed_and_create_product_product_type_database()
+        self.check_product_data_saved_to_database()
 
     def test_product_purchase(self):
-        self.send_purchase_feed()
+        self.send_purchase_feed_and_create_product_product_type_database()
 
     def test_coupon_redamption_feed(self):
-        self.send_service_advisor_feed()
-        self.send_dispatch_feed()
-        self.send_purchase_feed()
-        self.coupon_data_db()
+        self.create_service_advisor_through_feed()
+        self.send_dispatch_feed_and_create_product_product_type_database()
+        self.send_purchase_feed_and_create_product_product_type_database()
+        self.coupon_data_saved_to_database()
 
     def test_partial_fail(self):
         self.send_as_feed_without_id()
 
     def test_update_customer_number(self):
-        self.send_dispatch_feed()
-        self.send_purchase_feed()
+        self.send_dispatch_feed_and_create_product_product_type_database()
+        self.send_purchase_feed_and_create_product_product_type_database()
         gm_user = GladMindUsers.objects.all()
         self.assertEqual(1, len(gm_user))
         self.send_purchase_feed_with_diff_cust_num()
@@ -103,5 +103,5 @@ class FeedsResourceTest(BaseTestCase):
 
     def test_asc_feed(self):
         self.send_asc_feed()
-        self.check_asc_feed_saved_to_db()
+        self.check_asc_feed_saved_to_database()
 

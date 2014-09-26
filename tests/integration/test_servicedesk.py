@@ -14,9 +14,7 @@ class TestServiceDeskFlow(BaseTestCase):
         BaseTestCase.setUp(self)
         self.client = Client()
         self.create_user(username='gladminds', email='gladminds@gladminds.co', password='gladminds')
-        self.create_service_advisor()
-        self.create_register_dealer()
-        self.create_dealer_service_advisor()
+        self.create_service_advisor_through_feed()
 
     def test_send_servicedesk_feedback(self):
         self.post_feedback()

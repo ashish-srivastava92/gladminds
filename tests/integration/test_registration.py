@@ -18,7 +18,7 @@ class TestCustomerRegistration(BaseTestCase):
         BaseTestCase.setUp(self)
         self.client = Client()
         self.create_user(username='gladminds', email='gladminds@gladminds.co', password='gladminds')
-        self.send_dispatch_feed()
+        self.send_dispatch_feed_and_create_product_product_type_database()
         self.dealer_login()
 
     def test_temp_customer_registration(self):
@@ -28,7 +28,7 @@ class TestCustomerRegistration(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_update_cutomer_mobile(self):
-        self.send_purchase_feed()
+        self.send_purchase_feed_and_create_product_product_type_database()
         product_obj = self.get_product_details(vin='XXXXXXXXXX')
         self.assertEqual(product_obj.customer_phone_number.phone_number, '+91666666')
         response = self.register_customer()
