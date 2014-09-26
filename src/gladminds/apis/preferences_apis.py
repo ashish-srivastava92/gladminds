@@ -14,14 +14,14 @@ from gladminds.managers.common_orm import get_preferences_list,\
 
 class UserPreferencesResource(GladMindsResource):
     id = fields.IntegerField(attribute="id")
-    user_details = fields.IntegerField(attribute="user_details")
+    user_profile = fields.IntegerField(attribute="user_profile")
     key = fields.CharField(attribute='key')
     value = fields.CharField(attribute='value', null=True)
     """
     It is a preferences resource
     """
     class Meta:
-        resource_name = 'preferences'
+        resource_name = 'user-preferences'
         authorization = Authorization()
         object_class = GladMindsObject
 
@@ -42,11 +42,11 @@ class UserPreferencesResource(GladMindsResource):
         filters = {}
         if hasattr(bundle.request, 'GET'):
             filters = bundle.request.GET.copy()
-        q = filters.get('user_details', None)
+        q = filters.get('user_profile', None)
         preference_key = kwargs["pk"]
         data = bundle.data
         data['key'] = preference_key
-        data['user_details'] = q
+        data['user_profile'] = q
         update_preference(bundle.data, preference_key, q)
 
     def obj_delete(self, bundle, **kwargs):
@@ -57,8 +57,8 @@ class UserPreferencesResource(GladMindsResource):
         filters = {}
         if hasattr(request, 'GET'):
             filters = request.GET.copy()
-        q = filters.get('user_details', None)
-        data = get_preferences_list(user_details=q)
+        q = filters.get('user_profile', None)
+        data = get_preferences_list(user_profile=q)
         return map(GladMindsObject, data)
 
     def obj_get_list(self, bundle, **kwargs):
@@ -68,7 +68,7 @@ class UserPreferencesResource(GladMindsResource):
         filters = {}
         if hasattr(bundle.request, 'GET'):
             filters = bundle.request.GET.copy()
-        q = filters.get('user_details', None)
+        q = filters.get('user_profile', None)
         # We can use select_related it will solve the performance issue
         serialized_obj = get_preference(kwargs["pk"], q)
         return GladMindsObject(serialized_obj)

@@ -362,17 +362,17 @@ class UserPreferences(models.Model):
     """
     This model is used for storing user preferences
     """
-    user_details = models.ForeignKey(UserProfile)
+    user_profile = models.ForeignKey(UserProfile)
     key = models.CharField(max_length=100)
     value = models.CharField(max_length=200)
-
+ 
     def unicode(self):
-        return self.user_details
-
+        return self.user_profile
+ 
     class Meta:
         app_label = "gladminds"
         verbose_name_plural = "User Preferences"
-        unique_together = ("user_details", "key")
+        unique_together = ("user_profile", "key")
 
 class AppPreferences(models.Model):
 

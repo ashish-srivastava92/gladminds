@@ -8,14 +8,56 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding model 'AppPreferences'
+        db.create_table(u'gladminds_apppreferences', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('brand', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['gladminds.BrandData'])),
+            ('key', self.gf('django.db.models.fields.CharField')(max_length=100)),
+            ('value', self.gf('django.db.models.fields.CharField')(max_length=200)),
+        ))
+        db.send_create_signal('gladminds', ['AppPreferences'])
+
+        # Adding unique constraint on 'AppPreferences', fields ['brand', 'key']
+        db.create_unique(u'gladminds_apppreferences', ['brand_id', 'key'])
+
+        # Adding model 'UserPreferences'
+        db.create_table(u'gladminds_userpreferences', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('user_profile', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['gladminds.UserProfile'])),
+            ('key', self.gf('django.db.models.fields.CharField')(max_length=100)),
+            ('value', self.gf('django.db.models.fields.CharField')(max_length=200)),
+        ))
+        db.send_create_signal('gladminds', ['UserPreferences'])
+
+        # Adding unique constraint on 'UserPreferences', fields ['user_profile', 'key']
+        db.create_unique(u'gladminds_userpreferences', ['user_profile_id', 'key'])
+
+
+        # Changing field 'ProductTypeData.product_image_loc'
+        db.alter_column(u'gladminds_producttypedata', 'product_image_loc', self.gf('django.db.models.fields.CharField')(max_length=250, null=True))
 
         # Changing field 'BrandData.brand_image_loc'
-        db.alter_column(u'gladminds_branddata', 'brand_image_loc', self.gf('django.db.models.fields.files.FileField')(max_length=100, null=True))
+        db.alter_column(u'gladminds_branddata', 'brand_image_loc', self.gf('django.db.models.fields.CharField')(max_length=250, null=True))
 
     def backwards(self, orm):
+        # Removing unique constraint on 'UserPreferences', fields ['user_profile', 'key']
+        db.delete_unique(u'gladminds_userpreferences', ['user_profile_id', 'key'])
+
+        # Removing unique constraint on 'AppPreferences', fields ['brand', 'key']
+        db.delete_unique(u'gladminds_apppreferences', ['brand_id', 'key'])
+
+        # Deleting model 'AppPreferences'
+        db.delete_table(u'gladminds_apppreferences')
+
+        # Deleting model 'UserPreferences'
+        db.delete_table(u'gladminds_userpreferences')
+
+
+        # Changing field 'ProductTypeData.product_image_loc'
+        db.alter_column(u'gladminds_producttypedata', 'product_image_loc', self.gf('django.db.models.fields.files.FileField')(default=None, max_length=100))
 
         # Changing field 'BrandData.brand_image_loc'
-        db.alter_column(u'gladminds_branddata', 'brand_image_loc', self.gf('django.db.models.fields.files.FileField')(default=datetime.datetime(2014, 9, 23, 0, 0), max_length=100))
+        db.alter_column(u'gladminds_branddata', 'brand_image_loc', self.gf('django.db.models.fields.files.FileField')(default=None, max_length=100))
 
     models = {
         'aftersell.registereddealer': {
@@ -72,10 +114,17 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
+        'gladminds.apppreferences': {
+            'Meta': {'unique_together': "(('brand', 'key'),)", 'object_name': 'AppPreferences'},
+            'brand': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['gladminds.BrandData']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'key': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'value': ('django.db.models.fields.CharField', [], {'max_length': '200'})
+        },
         'gladminds.branddata': {
             'Meta': {'object_name': 'BrandData'},
             'brand_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
-            'brand_image_loc': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
+            'brand_image_loc': ('django.db.models.fields.CharField', [], {'max_length': '250', 'null': 'True', 'blank': 'True'}),
             'brand_name': ('django.db.models.fields.CharField', [], {'max_length': '250'}),
             'isActive': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'pk_brand_id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
@@ -137,7 +186,7 @@ class Migration(SchemaMigration):
             'isActive': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'phone_number': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '15'}),
             'pincode': ('django.db.models.fields.CharField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
-            'registration_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 23, 0, 0)'}),
+            'registration_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 25, 0, 0)'}),
             'state': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'thumb_url': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
             'tshirt_size': ('django.db.models.fields.CharField', [], {'max_length': '2', 'null': 'True', 'blank': 'True'}),
@@ -160,7 +209,7 @@ class Migration(SchemaMigration):
         },
         'gladminds.productdata': {
             'Meta': {'object_name': 'ProductData'},
-            'created_on': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 23, 0, 0)', 'null': 'True'}),
+            'created_on': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 25, 0, 0)', 'null': 'True'}),
             'customer_phone_number': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['gladminds.GladMindUsers']", 'null': 'True', 'blank': 'True'}),
             'customer_product_number': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'dealer_id': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['aftersell.RegisteredDealer']", 'null': 'True', 'blank': 'True'}),
@@ -171,7 +220,7 @@ class Migration(SchemaMigration):
             'invoice_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'invoice_loc': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
             'isActive': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'last_modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 23, 0, 0)'}),
+            'last_modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 9, 25, 0, 0)'}),
             'order': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'product_purchase_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'product_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['gladminds.ProductTypeData']", 'null': 'True', 'blank': 'True'}),
@@ -203,7 +252,7 @@ class Migration(SchemaMigration):
             'brand_id': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['gladminds.BrandData']"}),
             'isActive': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'order': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
-            'product_image_loc': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'}),
+            'product_image_loc': ('django.db.models.fields.CharField', [], {'max_length': '250', 'null': 'True', 'blank': 'True'}),
             'product_name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'product_type': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
             'product_type_id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -253,10 +302,10 @@ class Migration(SchemaMigration):
             'upload_product_purchase_feed': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'blank': 'True'})
         },
         'gladminds.userpreferences': {
-            'Meta': {'unique_together': "(('user_details', 'key'),)", 'object_name': 'UserPreferences'},
+            'Meta': {'unique_together': "(('user_profile', 'key'),)", 'object_name': 'UserPreferences'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'key': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'user_details': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['gladminds.UserProfile']"}),
+            'user_profile': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['gladminds.UserProfile']"}),
             'value': ('django.db.models.fields.CharField', [], {'max_length': '200'})
         },
         'gladminds.userprofile': {

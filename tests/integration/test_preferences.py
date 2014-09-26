@@ -26,7 +26,7 @@ class TestUserPreferencesResourceApi(ResourceTestCase):
         access.save()
 
     def add_user_preference(self):
-        resp = self.api_client.post('/v1/preferences/', data=USER_PREFERENCE)
+        resp = self.api_client.post('/v1/user-preferences/', data=USER_PREFERENCE)
         return resp
 
     def test_create_user_perference(self):
@@ -36,7 +36,7 @@ class TestUserPreferencesResourceApi(ResourceTestCase):
     def test_get_a_particular_user_preference(self):
         resp = self.add_user_preference()
         self.assertEquals(resp.status_code,201)
-        resp = self.api_client.get('/v1/preferences/name/?user_details=1', format='json')
+        resp = self.api_client.get('/v1/user-preferences/name/?user_profile=1', format='json')
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['value'], "test_user")
         self.assertEqual(len(self.deserialize(resp)), 5)
@@ -44,20 +44,20 @@ class TestUserPreferencesResourceApi(ResourceTestCase):
     def test_update_user_preference(self):
         resp = self.add_user_preference()
         self.assertEquals(resp.status_code,201)
-        resp = self.api_client.get('/v1/preferences/name/?user_details=1', format='json')
+        resp = self.api_client.get('/v1/user-preferences/name/?user_profile=1', format='json')
         self.assertEqual(self.deserialize(resp)['value'], "test_user")
-        resp = self.api_client.put('/v1/preferences/name/?user_details=1', format='json', data={"value":"test"})
+        resp = self.api_client.put('/v1/user-preferences/name/?user_profile=1', format='json', data={"value":"test"})
         self.assertEquals(resp.status_code, 204)
-        resp = self.api_client.get('/v1/preferences/name/?user_details=1', format='json')
+        resp = self.api_client.get('/v1/user-preferences/name/?user_profile=1', format='json')
         self.assertEqual(self.deserialize(resp)['value'], "test")
 
     def test_delete_user_preference(self):
         resp = self.add_user_preference()
         self.assertEquals(resp.status_code,201)
-        resp = self.api_client.get('/v1/preferences/name/?user_details=1', format='json')
+        resp = self.api_client.get('/v1/user-preferences/name/?user_profile=1', format='json')
         self.assertEquals(resp.status_code,200)
         self.assertEqual(len(self.deserialize(resp)), 5)
-        resp = self.api_client.delete('/v1/preferences/1/', format='json')
+        resp = self.api_client.delete('/v1/user-preferences/1/', format='json')
         self.assertEquals(resp.status_code,204)
      
 class TestAppPreferencesResourceApi(ResourceTestCase):

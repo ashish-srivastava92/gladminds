@@ -79,7 +79,7 @@ GM_COUPONS = {
             }
 
 USER_PREFERENCE = {
-                   "user_details" : 1,
+                   "user_profile" : 1,
                    "key" : "name",
                    "value" : "test_user"
                 }
