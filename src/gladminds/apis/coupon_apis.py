@@ -1,14 +1,13 @@
 from tastypie.constants import ALL_WITH_RELATIONS
 from tastypie.authorization import Authorization
 from tastypie import fields
-from gladminds.models import common
-from gladminds.aftersell.models import common as aftersell_common
+from gladminds.core import base_models as common
 from gladminds.apis.baseresource import CustomBaseResource
 from gladminds.apis.product_apis import ProductDataResources
 
 class RegisteredDealerResources(CustomBaseResource):
     class Meta:
-        queryset = aftersell_common.RegisteredDealer.objects.all()
+        queryset = common.RegisteredDealer.objects.all()
         resource_name = "registereddealer"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
@@ -16,7 +15,7 @@ class RegisteredDealerResources(CustomBaseResource):
 
 class ServiceAdvisorResources(CustomBaseResource):
     class Meta:
-        queryset = aftersell_common.ServiceAdvisor.objects.all()
+        queryset = common.ServiceAdvisor.objects.all()
         resource_name = "serviceadvisor"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']

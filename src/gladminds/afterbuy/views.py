@@ -16,7 +16,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 
-from gladminds.models import common
+from gladminds.core import base_models as common
 from gladminds.core import utils
 from gladminds.core import mail
 from gladminds.afterbuy.auth import authentication_required

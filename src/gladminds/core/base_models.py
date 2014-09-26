@@ -24,7 +24,6 @@ class ASCSaveForm(models.Model):
     dealer_id = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "ASC Save Form"
 
@@ -37,7 +36,6 @@ class UCNRecovery(models.Model):
     request_date = models.DateTimeField(default=datetime.now())
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "UCN recovery logs"
 
@@ -54,7 +52,6 @@ class RegisteredDealer(models.Model):
     dependent_on = models.CharField(max_length=25, blank=True, null=True)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "Dealer Data"
 
@@ -71,7 +68,6 @@ class ServiceAdvisor(models.Model):
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "Service Advisor Data"
 
@@ -89,7 +85,6 @@ class ServiceAdvisorDealerRelationship(models.Model):
     status = models.CharField(max_length=10, blank=False, null=False)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "Service Advisor And Dealer Relationship"
 
@@ -111,7 +106,6 @@ class RegisteredASC(models.Model):
     dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "Registered ASC Form"
         
@@ -123,7 +117,6 @@ class ServiceDeskUser(models.Model):
     designation = models.CharField(max_length=10, choices = USER_DESIGNATION)
     
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "service desk users"
     
@@ -153,7 +146,6 @@ class Feedback(models.Model):
     role = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "aftersell feedback info"
         
@@ -166,7 +158,6 @@ class Comments(models.Model):
     isDeleted = models.BooleanField(default=False)
     
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "aftersell comment info"
         
@@ -185,7 +176,6 @@ class UploadProductCSV(models.Model):
         upload_to=file_location, blank=True)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "Upload Product Data"
         
@@ -199,7 +189,6 @@ class BrandData(models.Model):
     isActive = models.BooleanField(default=True)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "Brand Data"
 
@@ -240,7 +229,6 @@ class ProductTypeData(models.Model):
         max_length=15, blank=False, null=False)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "Product Type"
 
@@ -257,7 +245,7 @@ class ProductData(models.Model):
         max_length=215, null=True, blank=True, unique=True)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
     invoice_date = models.DateTimeField(null=True, blank=True)
-    dealer_id = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
+    dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
     engine = models.CharField(max_length=255, null=True, blank=True)
 
     # Added below column for after buy application
@@ -280,7 +268,6 @@ class ProductData(models.Model):
     veh_reg_no = models.CharField(max_length=15, null=True, blank=True)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "Product Data"
 
@@ -310,10 +297,9 @@ class CouponData(models.Model):
     schedule_reminder_date = models.DateTimeField(null=True, blank=True)
     order = models.PositiveIntegerField(default=0)
     extended_date = models.DateTimeField(null=True, blank=True)
-    servicing_dealer = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
+    servicing_dealer = models.ForeignKey(RegisteredDealer, null=True, blank=True)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "Coupon Information"
 
@@ -330,7 +316,6 @@ class ServiceAdvisorCouponRelationship(models.Model):
     dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = 'Service Advisor And Coupon Relationship'
 
@@ -344,7 +329,6 @@ class MessageTemplate(models.Model):
     description = models.CharField(max_length=512, null=True)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "Message Template"
 
@@ -358,7 +342,6 @@ class OTPToken(models.Model):
     email = models.CharField(max_length=50, null=False)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "OTPs"
 
@@ -377,7 +360,6 @@ class EmailTemplate(models.Model):
     description = models.CharField(max_length=512, null=True)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "Email Template"
 
@@ -388,7 +370,6 @@ class SASaveForm(models.Model):
     status = models.CharField(max_length=10, blank=False, null=False)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "SA Save Form"
 
@@ -405,7 +386,6 @@ class CustomerTempRegistration(models.Model):
         max_length=215, null=True, blank=True, unique=True)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "Customer temporary info"
 
@@ -428,7 +408,6 @@ class ProductInsuranceInfo(models.Model):
     image_url = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "product insurance info"
     
@@ -445,7 +424,6 @@ class ProductWarrantyInfo(models.Model):
     image_url = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
-        abstract = True
         app_label = "core"
         verbose_name_plural = "product warranty info"
         
@@ -458,8 +436,6 @@ class SparesData(models.Model):
     
     class Meta:
         abstract = True
-        app_label = "core"
-        verbose_name_plural = "spare info"
     
 #########################################################################################
 

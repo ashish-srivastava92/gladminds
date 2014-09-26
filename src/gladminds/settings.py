@@ -94,7 +94,7 @@ DATABASES = {
         # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'ENGINE': 'django.db.backends.sqlite3',
         # Or path to database file if using sqlite3.
-        'NAME': 'gladminds.db',
+        'NAME': 'gm.db',
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -103,9 +103,17 @@ DATABASES = {
         'HOST': '',
         'PORT': '',  # Set to empty string for default.
     },
-    'gm': {
+    'bajaj': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'gm.db',
+        'NAME': 'bajaj.db',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    },
+    'mock': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'mock.db',
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
@@ -200,7 +208,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'gladminds.core.middlewares.dynamicsite_middleware.DynamicSitesMiddleware',
-    # 'gladminds.middleware.GladmindsMiddleware'
+#     'gladminds.middleware.GladmindsMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
                      )
@@ -229,10 +237,10 @@ INSTALLED_APPS = (
     'suit',
     'django.contrib.admin',
     'import_export',
-    'gladminds.models',
     'gladminds.superadmin',
-    'gladminds.afterbuy',
-    'gladminds.aftersell',
+    'gladminds.gm',
+    'gladminds.core',
+    'gladminds.bajaj',
     'gladminds',
     'djcelery',
     'corsheaders',

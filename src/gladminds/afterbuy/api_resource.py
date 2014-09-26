@@ -8,12 +8,11 @@ from tastypie.http import HttpBadRequest
 from tastypie.resources import ModelResource
 from tastypie.utils.urls import trailing_slash
 
-from gladminds.models import common
+from gladminds.core import base_models as common
 from gladminds.core import utils
 from gladminds.resource.authentication import AccessTokenAuthentication
-from gladminds.afterbuy.models import common as afterbuy_common
+from gladminds.gm import models as gm_common
 from gladminds.core.utils import mobile_format
-from gladminds.aftersell.models import common as aftersell_common
 
 
 logger = logging.getLogger("gladminds")
@@ -89,7 +88,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             product_data[field] = request.POST.get(field, None)
 
         try:
-            product_info = afterbuy_common.UserProducts.objects.get(vin = vin)
+            product_info = gm_common.UserProducts.objects.get(vin = vin)
 
             if product_info.customer_phone_number.phone_number != phone_number:
                 data = {'status':1, 'message': 'product is assigned to other user.'}
@@ -108,7 +107,7 @@ class AfterBuyResources(AfterBuyBaseResource):
                 if not product_type_list:
                     data = {'status':1, 'message': 'product name not exists'}
                 else:
-                    afterbuy_product_object = afterbuy_common.UserProducts(vin=vin,
+                    afterbuy_product_object = gm_common.UserProducts(vin=vin,
                                             item_name = product_data['item_name'], customer_phone_number=user_object,
                                             product_type=product_type_list[0], product_purchase_date =
                                             product_data['product_purchase_date'],
@@ -137,7 +136,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             return HttpBadRequest("vin and mobile are required.")
         try:
             phone_number = mobile_format(mobile)
-            product_info = afterbuy_common.UserProducts.objects.get(vin = vin)
+            product_info = gm_common.UserProducts.objects.get(vin = vin)
 
             if product_info.customer_phone_number.phone_number != phone_number:
                 return HttpResponse("You are not allowed to delete this product.")
@@ -241,7 +240,7 @@ class AfterBuyResources(AfterBuyBaseResource):
         try:
             phone_number= mobile_format(phone_number)
             user_info = common.GladMindUsers.objects.get(phone_number=phone_number)
-            notification_count = len(afterbuy_common.UserNotification.objects.filter(user=user_info, notification_read=0))
+            notification_count = len(gm_common.UserNotification.objects.filter(user=user_info, notification_read=0))
             resp = {'count': notification_count}
         except Exception as ex:
             logger.info("[Exception get_product_insurance]:{0}".format(ex))
@@ -259,7 +258,7 @@ class AfterBuyResources(AfterBuyBaseResource):
         try:
             phone_number= mobile_format(phone_number)
             user_info = common.GladMindUsers.objects.get(phone_number=phone_number)
-            notifications = afterbuy_common.UserNotification.objects.filter(user=user_info)
+            notifications = gm_common.UserNotification.objects.filter(user=user_info)
             if not notifications:
                 return HttpResponse("No notification exists.")
             else:
@@ -318,7 +317,7 @@ class AfterBuyResources(AfterBuyBaseResource):
         try:
             phone_number= mobile_format(phone_number)
             message = request.POST.get('message', None)
-            user_feedback = aftersell_common.Feedback(reporter = phone_number, message = message)
+            user_feedback = common.Feedback(reporter = phone_number, message = message)
             user_feedback.save()
             data={'status':1, 'message':"saved successfully"}
         except Exception as ex:
@@ -342,7 +341,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             os = request.POST.get('os', None)
             version = request.POST.get('version', None)
             model = request.POST.get('Model', None)
-            user_mobile_info = afterbuy_common.UserMobileInfo(user=user, IMEI=IMEI, ICCID=ICCID,
+            user_mobile_info = gm_common.UserMobileInfo(user=user, IMEI=IMEI, ICCID=ICCID,
                                                               phone_name=phone_name, serial_number=serial_number,
                                                               capacity=capacity, operating_system=os,
                                                               version=version, model=model)
