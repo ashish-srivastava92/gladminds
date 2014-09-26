@@ -26,8 +26,9 @@ class TestAfterbuy(BaseTestCase):
         secret_cli.save()
         access = AccessToken(user=user, token=self.access_token, client=secret_cli)
         access.save()
-        self.send_dispatch_feed_and_create_product_product_type_database()
-        self.send_purchase_feed_and_create_product_product_type_database()
+        self.send_dispatch_feed()
+        self.send_purchase_feed()
+        '''This both feed will create product data, product type ,brand database'''
         product_info = self.get_product_info(vin='XXXXXXXXXX')
         brand_obj = self.get_brand_info(brand_id='bajaj')
         #product data

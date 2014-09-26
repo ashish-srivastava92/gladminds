@@ -116,14 +116,14 @@ class BaseTestCase(ResourceTestCase):
         spare_data.save()
         return spare_data
 
-    def create_sdo(self):
-        user_servicedesk_owner = self.create_user(username='sdo', email='gm@gm.com', password='123', group_name='SDO', phone_number="+919999999999")
+    def create_sdo(self, **kwargs):
+        user_servicedesk_owner = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name='SDM', phone_number=kwargs['phone_number'])
         service_desk_owner = aftersell_common.ServiceDeskUser(user=user_servicedesk_owner, phone_number="+919999999999", email_id="srv.sngh@gmail.com", designation='SDO' )
         service_desk_owner.save()
         return service_desk_owner
 
-    def create_sdm(self):
-        user_servicedesk_manager = self.create_user(username='sdm', email='gm@gm.com', password='123', group_name='SDM', phone_number="+911999999989")
+    def create_sdm(self, **kwargs):
+        user_servicedesk_manager = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name='SDM', phone_number=kwargs['phone_number'])
         service_desk_owner = aftersell_common.ServiceDeskUser(user=user_servicedesk_manager, phone_number="+911999999989", email_id="srv.sngh@gmail.com", designation='SDM' )
         service_desk_owner.save()
 
@@ -133,6 +133,7 @@ class BaseTestCase(ResourceTestCase):
 
     def dealer_login(self):
         self.create_user(username='DEALER01', email='dealer@xyz.com', password='DEALER01@123', group_name='dealers', phone_number="+91776084042")
+        data = {'username': 'DEALER01', 'password': 'DEALER01@123'}
         self.client.login(username='DEALER01', password='DEALER01@123')
 
     def post_feedback(self):
@@ -145,37 +146,21 @@ class BaseTestCase(ResourceTestCase):
         response = client.post("/aftersell/servicedesk/helpdesk", data=data)
         self.assertEqual(response.status_code, 200)
 
-    def servicedesk_login_sdo(self):
-        self.create_sdo()
-        data = {'username': 'sdo', 'password': '123'}
-        response = client.post("/aftersell/desk/login/", data=data)
+    def login(self, **kwargs):
+        create_mock_data = {'username': kwargs['username'], 'password': kwargs['password']}
+        response = client.post("/aftersell/"+ kwargs['provider'] +"/login/", data=create_mock_data)
         self.assertEqual(response.status_code, 302)
+
+    def get_feedback_information(self):
         response = client.get("/aftersell/servicedesk/")
         self.assertEqual(response.status_code, 200)
 
-    def servicedesk_login_sdm(self):
-        self.create_sdm()
-        data = {'username': 'sdm', 'password': '123'}
-        response = client.post("/aftersell/desk/login/", data=data)
-        self.assertEqual(response.status_code, 302)
-        response = client.get("/aftersell/servicedesk/")
-        self.assertEqual(response.status_code, 200)
-
-    def update_feedback_assigned(self):
-        self.create_sdo()
-        data = {"Assign_To":"+919999999999","status":"Open","Priority":"High", "comments":"ssss", "rootcause":"ssss", "resolution":"ssssss"  }
-        response = client.post("/aftersell/feedbackdetails/1/", data=data)
-        self.assertEqual(response.status_code, 200)
-
-    def update_feedback_resolved(self):
-        self.create_sdm()
-        data = {"Assign_To":"+919999999999","status":"Resolved","Priority":"High", "comments":"ssss", "rootcause":"ssss", "resolution":"ssssss"  }
-        response = client.post("/aftersell/feedbackdetails/1/", data=data)
-        self.assertEqual(response.status_code, 200)
-
-    def update_feedback_fields(self):
-        self.create_sdo()
-        data = {"Assign_To":"None","status":"Closed","Priority":"High","comments":"ssss","rootcause":"ssss", "resolution":"ssssss" }
+    def update_feedback(self, **kwargs):
+        data = {"Assign_To":"+919999999999", "status":"Open","Priority":"High", "comments":"ssss", "rootcause":"ssss", "resolution":"ssssss"  }
+        if kwargs.get('status'):
+            data['status'] = kwargs['status']
+        if kwargs.get('assign_To'):
+            data['Assign_To'] = kwargs['assign_To']
         response = client.post("/aftersell/feedbackdetails/1/", data=data)
         self.assertEqual(response.status_code, 200)
 
@@ -193,7 +178,6 @@ class BaseTestCase(ResourceTestCase):
                 }
         response = self.client.post('/aftersell/register/customer', data=data)
         self.assertEqual(response.status_code, 200)
-        return response
 
     def get_temp_asc_obj(self, **kwargs):
         temp_asc_obj = aftersell_common.ASCSaveForm.objects.get(**kwargs)
@@ -219,23 +203,17 @@ class BaseTestCase(ResourceTestCase):
         self.assertEqual(temp_asc_obj.name, check_name)
 #########################################send feed function################################################################
 
-    def send_purchase_feed_and_create_product_product_type_database(self):
+    def send_purchase_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
-        xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
-        self.assertEqual(200, response.status_code)
+        self.post_feed(file_path)
 
     def send_purchase_feed_with_diff_cust_num(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/purchase_feed_with_diff_cust_num.xml')
-        xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
-        self.assertEqual(200, response.status_code)
+        self.post_feed(file_path)
 
     def check_for_auth(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/feeds_for_testing_auth.xml')
-        xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
-        self.assertEqual(200, response.status_code)
+        self.post_feed(file_path)
 
     def send_as_feed_without_id(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/without_sa_id_sa_feed.xml')
@@ -252,39 +230,33 @@ class BaseTestCase(ResourceTestCase):
 
     def send_sa_upate_mobile_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/SA_mobile_update_data/SA_update_mobile_feed.xml')
-        xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
-        self.assertEqual(200, response.status_code)
+        self.post_feed(file_path)
 
-    def send_dispatch_feed_and_create_product_product_type_database(self):
+    def send_dispatch_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
-        xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
-        self.assertEqual(response.status_code, 200)
+        self.post_feed(file_path)
 
     def send_dispatch_feed_without_ucn(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed_without_ucn.xml')
-        xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
-        self.assertEqual(200, response.status_code)
+        self.post_feed(file_path)
 
     def send_asc_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/asc_feed.xml')
-        xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
-        self.assert_successful_http_response(response)
+        self.post_feed(file_path)
 
     def create_service_advisor_through_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
-        xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
-        self.assertEqual(response.status_code, 200)
+        self.post_feed(file_path)
 
     def send_service_advisor_feed_with_new_status(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed_2.xml')
+        self.post_feed(file_path)
+
+    def post_feed(self, file_path):
         xml_data = open(file_path, 'r').read()
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
         self.assertEqual(200, response.status_code)
+
 
 #############################check data saved to database or not#########################################
 

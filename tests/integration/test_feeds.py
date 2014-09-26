@@ -46,24 +46,24 @@ class FeedsResourceTest(BaseTestCase):
 
     def test_product_dispatch(self):
         self.create_service_advisor_through_feed()
-        self.send_dispatch_feed_and_create_product_product_type_database()
+        self.send_dispatch_feed()
         self.check_product_data_saved_to_database()
 
     def test_product_purchase(self):
-        self.send_purchase_feed_and_create_product_product_type_database()
+        self.send_purchase_feed()
 
     def test_coupon_redamption_feed(self):
         self.create_service_advisor_through_feed()
-        self.send_dispatch_feed_and_create_product_product_type_database()
-        self.send_purchase_feed_and_create_product_product_type_database()
+        self.send_dispatch_feed()
+        self.send_purchase_feed()
         self.coupon_data_saved_to_database()
 
     def test_partial_fail(self):
         self.send_as_feed_without_id()
 
     def test_update_customer_number(self):
-        self.send_dispatch_feed_and_create_product_product_type_database()
-        self.send_purchase_feed_and_create_product_product_type_database()
+        self.send_dispatch_feed()
+        self.send_purchase_feed()
         gm_user = GladMindUsers.objects.all()
         self.assertEqual(1, len(gm_user))
         self.send_purchase_feed_with_diff_cust_num()
