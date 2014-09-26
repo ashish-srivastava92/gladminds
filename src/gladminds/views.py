@@ -93,10 +93,11 @@ def change_password(request):
 def generate_otp(request):
     if request.method == 'POST':
         try:
-            phone_number = request.POST['mobile']
-            email = request.POST.get('email', '')
-            logger.info('OTP request received. Mobile: {0}'.format(phone_number))
-            token = utils.get_token(phone_number, email=email)
+            username = request.POST['username']
+            user = common.User.objects.get(username=username)
+            phone_number = ''
+            logger.info('OTP request received . username: {0}'.format(username))
+            token = utils.get_token(user, phone_number)
             message = message_template.get_template('SEND_OTP').format(token)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
@@ -105,11 +106,11 @@ def generate_otp(request):
                 send_otp.delay(phone_number=phone_number, message=message)
             logger.info('OTP sent to mobile {0}'.format(phone_number))
             #Send email if email address exist
-            if email:
-                sent_otp_email(data=token, receiver=email, subject='Forgot Password')
-            return HttpResponseRedirect('/aftersell/users/otp/validate?phone='+phone_number)
-        except:
-            logger.error('Invalid details, mobile {0}'.format(request.POST.get('mobile', '')))
+            if user.email:
+                sent_otp_email(data=token, receiver=user.email, subject='Forgot Password')
+            return HttpResponseRedirect('/aftersell/users/otp/validate?username='+username)
+        except Exception as ex:
+            logger.error('Invalid details, mobile {0}'.format(phone_number))
             return HttpResponseRedirect('/aftersell/users/otp/generate?details=invalid')
     elif request.method == 'GET':
         return render(request, 'portal/get_otp.html')
@@ -120,13 +121,13 @@ def validate_otp(request):
     elif request.method == 'POST':
         try:
             otp = request.POST['otp']
-            phone_number = request.POST['phone']
-            logger.info('OTP {0} recieved for validation. Mobile {1}'.format(otp, phone_number))
-            utils.validate_otp(otp, phone_number)
-            logger.info('OTP validated for mobile number {0}'.format(phone_number))
+            username = request.POST['username']
+            logger.info('OTP {0} recieved for validation. username {1}'.format(otp, username))
+            utils.validate_otp(otp, username)
+            logger.info('OTP validated for name {0}'.format(username))
             return render(request, 'portal/reset_pass.html', {'otp': otp})
         except:
-            logger.error('OTP validation failed for mobile number {0}'.format(phone_number))
+            logger.error('OTP validation failed for name {0}'.format(username))
             return HttpResponseRedirect('/aftersell/users/otp/generate?token=invalid')
 
 def update_pass(request):
