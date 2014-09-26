@@ -95,7 +95,6 @@ def generate_otp(request):
         try:
             username = request.POST['username']
             user = common.User.objects.get(username=username)
-            email = user.email
             phone_number = ''
             logger.info('OTP request received . username: {0}'.format(username))
             token = utils.get_token(user, phone_number)
@@ -107,8 +106,8 @@ def generate_otp(request):
                 send_otp.delay(phone_number=phone_number, message=message)
             logger.info('OTP sent to mobile {0}'.format(phone_number))
             #Send email if email address exist
-            if email:
-                sent_otp_email(data=token, receiver=email, subject='Forgot Password')
+            if user.email:
+                sent_otp_email(data=token, receiver=user.email, subject='Forgot Password')
             return HttpResponseRedirect('/aftersell/users/otp/validate?username='+username)
         except Exception as ex:
             logger.error('Invalid details, mobile {0}'.format(phone_number))
