@@ -93,11 +93,12 @@ def change_password(request):
 def generate_otp(request):
     if request.method == 'POST':
         try:
-            name = request.POST['name']
-            email = common.User.objects.get(username=name).email
+            username = request.POST['username']
+            user = common.User.objects.get(username=username)
+            email = user.email
             phone_number = ''
-            logger.info('OTP request received . name: {0}'.format(name))
-            token = utils.get_token(phone_number, email=email)
+            logger.info('OTP request received . username: {0}'.format(username))
+            token = utils.get_token(user, phone_number, email=email)
             message = message_template.get_template('SEND_OTP').format(token)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
@@ -108,7 +109,7 @@ def generate_otp(request):
             #Send email if email address exist
             if email:
                 sent_otp_email(data=token, receiver=email, subject='Forgot Password')
-            return HttpResponseRedirect('/aftersell/users/otp/validate?name='+name)
+            return HttpResponseRedirect('/aftersell/users/otp/validate?username='+username)
         except Exception as ex:
             logger.error('Invalid details, mobile {0}'.format(phone_number))
             return HttpResponseRedirect('/aftersell/users/otp/generate?details=invalid')
@@ -121,13 +122,13 @@ def validate_otp(request):
     elif request.method == 'POST':
         try:
             otp = request.POST['otp']
-            name = request.POST['name']
-            logger.info('OTP {0} recieved for validation. name {1}'.format(otp, name))
-            utils.validate_otp(otp, name)
-            logger.info('OTP validated for name {0}'.format(name))
+            username = request.POST['username']
+            logger.info('OTP {0} recieved for validation. username {1}'.format(otp, username))
+            utils.validate_otp(otp, username)
+            logger.info('OTP validated for name {0}'.format(username))
             return render(request, 'portal/reset_pass.html', {'otp': otp})
         except:
-            logger.error('OTP validation failed for name {0}'.format(name))
+            logger.error('OTP validation failed for name {0}'.format(username))
             return HttpResponseRedirect('/aftersell/users/otp/generate?token=invalid')
 
 def update_pass(request):

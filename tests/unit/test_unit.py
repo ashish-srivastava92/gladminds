@@ -61,9 +61,10 @@ class TestUtils(GladmindsUnitTestCase):
 
     def test_otp(self):
         name = 'TestUser'
-        email = common.User.objects.get(username=name).email
+        user = common.User.objects.get(username=name)
+        email = user.email
         phone_number = ''
-        token = get_token(phone_number, email=email)
+        token = get_token(user, phone_number, email=email)
         self.assertTrue(isinstance(token, int))
         self.assertTrue(validate_otp(token, name))
 
