@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from unit.base_unit import RequestObject, GladmindsUnitTestCase
 from gladminds.utils import get_sa_list, get_coupon_info, get_customer_info, get_token, validate_otp
 from gladminds.aftersell.models import logs
+from gladminds.models import common
 from django.db import connection
 import boto
 
@@ -41,6 +42,7 @@ class TestUtils(GladmindsUnitTestCase):
                             , actual_service_date=datetime.now() - timedelta(days=20), extended_date=datetime.now() - timedelta(days=2))
         self.get_message_template(template_key='SEND_CUSTOMER_VALID_COUPON'\
                                   , template='Service Type {service_type}. UCN {coupon}.', description='Desc')
+        user_obj = self.get_user_obj(username='TestUser', email='test@gmail.com')
         asc_user = User(username='ASC001')
         asc_user.set_password('123')
         asc_user.save()
@@ -58,10 +60,12 @@ class TestUtils(GladmindsUnitTestCase):
         self.assertEquals(len(customer.keys()), 4)
 
     def test_otp(self):
-        phone_number = '1234567890'
-        token = get_token(phone_number)
+        name = 'TestUser'
+        email = common.User.objects.get(username=name).email
+        phone_number = ''
+        token = get_token(phone_number, email=email)
         self.assertTrue(isinstance(token, int))
-        self.assertTrue(validate_otp(token, phone_number))
+        self.assertTrue(validate_otp(token, name))
 
 
 class TestFeedLogWithRemark(ResourceTestCase):
