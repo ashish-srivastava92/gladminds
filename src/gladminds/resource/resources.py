@@ -143,31 +143,35 @@ class GladmindsResources(Resource):
     def send_customer_detail(self, sms_dict, phone_number):
         keyword = sms_dict['params']
         value = sms_dict['message']
-
+        kwargs = {}
         if value and len(value)>5 and keyword in ['vin', 'id']:
-            try:
-                if keyword == 'id':
-                    product_object = common.ProductData.objects.get(sap_customer_id=value)
-                    message = templates.get_template('SEND_CUSTOMER_DETAILS').format('VIN', product_object.vin)
-                else:
-                    product_object = common.ProductData.objects.get(vin__contains=value)
-                    if product_object.sap_customer_id:
-                        message = templates.get_template('SEND_CUSTOMER_DETAILS').\
-                                        format('ID', product_object.sap_customer_id)
-                    else:
-                        message = templates.get_template('INVALID_RECOVERY_MESSAGE').format(keyword, value)
+            if keyword == 'id':
+                kwargs['sap_customer_id'] = value
+                model_key = 'vin'
+                search_key = 'vin'
+            else:
+                kwargs['vin__endswith'] = value
+                model_key = 'id'
+                search_key = 'sap_customer_id'
                 
+            try:
+                product_object = common.ProductData.objects.get(**kwargs)
+                if product_object.sap_customer_id and mobile_format(product_object.customer_phone_number.phone_number) == mobile_format(phone_number):
+                    message = templates.get_template('SEND_CUSTOMER_DETAILS').format(model_key, getattr(product_object, search_key))
+                else:
+                    message = templates.get_template('INVALID_RECOVERY_MESSAGE').format(keyword)
+            
             except Exception as ex:
                 logger.info('Details not found with message %s' % ex)
-                message = templates.get_template('INVALID_RECOVERY_MESSAGE').format(keyword, value)
+                message = templates.get_template('INVALID_RECOVERY_MESSAGE').format(keyword)
         else:
             message = templates.get_template('SEND_INVALID_MESSAGE')
-
-        if settings.ENABLE_AMAZON_SQS:
-            task_queue = get_task_queue()
-            task_queue.add("customer_detail_recovery", {"phone_number":phone_number, "message":message})
-        else:
-            customer_detail_recovery.delay(phone_number=phone_number, message=message)
+        
+#         if settings.ENABLE_AMAZON_SQS:
+#             task_queue = get_task_queue()
+#             task_queue.add("customer_detail_recovery", {"phone_number":phone_number, "message":message})
+#         else:
+#             customer_detail_recovery.delay(phone_number=phone_number, message=message)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
