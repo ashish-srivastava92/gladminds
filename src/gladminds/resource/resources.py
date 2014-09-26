@@ -19,7 +19,8 @@ from tastypie import http
 from tastypie.exceptions import ImmediateHttpResponse
 from django.db.models import Q
 import logging
-from gladminds.utils import mobile_format, format_message
+from gladminds.utils import mobile_format, format_message,\
+    get_phone_number_format
 from django.utils import timezone
 from django.conf import settings
 from gladminds.utils import get_task_queue
@@ -144,6 +145,7 @@ class GladmindsResources(Resource):
         keyword = sms_dict['params']
         value = sms_dict['message']
         kwargs = {}
+        kwargs['customer_phone_number__phone_number__endswith'] = get_phone_number_format(phone_number)
         if value and len(value)>5 and keyword in ['vin', 'id']:
             if keyword == 'id':
                 kwargs['sap_customer_id'] = value
@@ -156,7 +158,7 @@ class GladmindsResources(Resource):
                 
             try:
                 product_object = common.ProductData.objects.get(**kwargs)
-                if product_object.sap_customer_id and mobile_format(product_object.customer_phone_number.phone_number) == mobile_format(phone_number):
+                if product_object.sap_customer_id:
                     message = templates.get_template('SEND_CUSTOMER_DETAILS').format(model_key, getattr(product_object, search_key))
                 else:
                     message = templates.get_template('INVALID_RECOVERY_MESSAGE').format(keyword)
