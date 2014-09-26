@@ -98,7 +98,7 @@ def generate_otp(request):
             email = user.email
             phone_number = ''
             logger.info('OTP request received . username: {0}'.format(username))
-            token = utils.get_token(user, phone_number, email=email)
+            token = utils.get_token(user, phone_number)
             message = message_template.get_template('SEND_OTP').format(token)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()

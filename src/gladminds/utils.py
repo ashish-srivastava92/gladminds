@@ -61,16 +61,16 @@ def get_phone_number_format(phone_number):
     return phone_number[-10:]
 
 
-def save_otp(token, phone_number, email, user):
+def save_otp(token, user):
     common.OTPToken.objects.filter(user=user).delete()
-    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=email)
+    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=user.email)
     token_obj.save()
 
-def get_token(user, phone_number, email=''):
+def get_token(user, phone_number):
     totp=TOTP(TOTP_SECRET_KEY+str(randint(10000,99999))+str(phone_number))
     totp.time=30
     token = totp.token()
-    save_otp(token, phone_number, email, user)
+    save_otp(token, user)
     return token
 
 def validate_otp(otp, name):
