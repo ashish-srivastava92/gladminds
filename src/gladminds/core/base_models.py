@@ -150,9 +150,9 @@ class Feedback(models.Model):
         verbose_name_plural = "aftersell feedback info"
         
 class Comments(models.Model):
-    feedback_object = models.ForeignKey(Feedback, null=False, blank=False)
+    feedback_object = models.ForeignKey(Feedback, null=False, blank=False, related_name='feedbcak_object')
     user = models.CharField(max_length=20, null=False, blank=False)
-    comments = models.CharField(max_length=100, null=True, blank=True)
+    comments_str = models.CharField(max_length=100, null=True, blank=True)
     created_date = models.DateTimeField(null=False, blank=False)
     modified_date = models.DateTimeField(null=True, blank=True, auto_now=True)
     isDeleted = models.BooleanField(default=False)
@@ -287,7 +287,7 @@ class CouponData(models.Model):
     valid_days = models.IntegerField(max_length=10, null=False)
     valid_kms = models.IntegerField(max_length=10, null=False)
     service_type = models.IntegerField(max_length=10, null=False)
-    sa_phone_number = models.ForeignKey('aftersell.ServiceAdvisor', null=True, blank=True)
+    sa_phone_number = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=1, db_index=True)
     closed_date = models.DateTimeField(null=True, blank=True)
     mark_expired_on = models.DateTimeField(null=True, blank=True)

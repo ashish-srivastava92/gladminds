@@ -17,7 +17,7 @@ class UserProfile(models.Model):
                    max_length=200, blank=True, null=True)
 
     class Meta:
-        app_label = "gladminds"
+        app_label = "gm"
         verbose_name_plural = "User Profile"
 
     def __unicode__(self):
@@ -64,7 +64,7 @@ class GladMindUsers(models.Model):
     pincode = models.CharField(max_length=15, null=True, blank=True)
 
     class Meta:
-        app_label = "gladminds"
+        app_label = "gm"
         verbose_name_plural = "Users"
 
     def __unicode__(self):
@@ -82,7 +82,7 @@ class OTPToken(models.Model):
     email = models.CharField(max_length=50, null=False)
 
     class Meta:
-        app_label = "afterbuy"
+        app_label = "gm"
         verbose_name_plural = "OTPs"
         
 class UserNotification(models.Model):
@@ -92,7 +92,7 @@ class UserNotification(models.Model):
     notification_read = models.BooleanField(default=False)
 
     class Meta:
-        app_label = "afterbuy"
+        app_label = "gm"
         verbose_name_plural = "notification"
         
 class UserProducts(models.Model):
@@ -113,7 +113,7 @@ class UserProducts(models.Model):
     is_deleted = models.BooleanField(default=False)
     
     class Meta:
-        app_label = "afterbuy"
+        app_label = "gm"
         verbose_name_plural = "userProducts"
     
     def __unicode__(self):
@@ -131,7 +131,7 @@ class UserMobileInfo(models.Model):
     model = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
-        app_label = "afterbuy"
+        app_label = "gm"
         verbose_name_plural = "mobile info"
         
         
