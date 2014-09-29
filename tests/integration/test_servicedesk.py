@@ -3,7 +3,7 @@ from django.test.client import Client
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.aftersell.models import logs
 from integration.base import BaseTestCase
-from integration.test_system_logic import SystemFunction
+from integration.test_system_logic import System
 from django.test import TestCase
 
 client = Client()
@@ -14,7 +14,7 @@ class TestServiceDeskFlow(BaseTestCase):
         TestCase.setUp(self)
         BaseTestCase.setUp(self)
         self.client = Client()
-        self.system = SystemFunction(self)
+        self.system = System(self)
         system = self.system
         self.create_user(username='gladminds', email='gladminds@gladminds.co', password='gladminds')
         system.create_sdo(username='sdo', email='gm@gm.com', password='123', phone_number="+919999999999")

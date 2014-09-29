@@ -5,7 +5,7 @@ from provider.oauth2.models import Client as auth_client
 from provider.oauth2.models import AccessToken
 from django.utils import unittest
 from integration.test_brand_logic import Brand
-from integration.test_system_logic import SystemFunction
+from integration.test_system_logic import System
 from django.test.client import Client
 from integration.base import BaseTestCase
 from django.test import TestCase
@@ -21,7 +21,7 @@ class TestAfterbuy(BaseTestCase):
         BaseTestCase.setUp(self)
         self.brand = Brand(self)
         brand = self.brand
-        self.system = SystemFunction(self)
+        self.system = System(self)
         system = self.system
         self.access_token = 'testaccesstoken'
         self.create_user(username='gladminds', email='gm@gm.com', password='gladminds')

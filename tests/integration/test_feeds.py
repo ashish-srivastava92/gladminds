@@ -4,7 +4,7 @@ from gladminds.models.common import \
      CouponData, GladMindUsers
 from integration.base import BaseTestCase
 from integration.test_brand_logic import Brand
-from integration.test_system_logic import SystemFunction
+from integration.test_system_logic import System
 from django.utils import unittest
 
 logger = logging.getLogger('gladminds')
@@ -17,7 +17,7 @@ class FeedsResourceTest(BaseTestCase):
     def setUp(self):
         TestCase.setUp(self)
         self.brand = Brand(self)
-        self.system = SystemFunction(self)
+        self.system = System(self)
         BaseTestCase.setUp(self)
         self.create_user(username='gladminds', email='gladminds@gladminds.co', password='gladminds')
 

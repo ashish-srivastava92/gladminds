@@ -2,14 +2,14 @@ from django.test import TestCase
 from django.test.client import Client
 from integration.base import BaseTestCase
 from integration.test_brand_logic import Brand
-from integration.test_system_logic import SystemFunction
+from integration.test_system_logic import System
 
 
 class TestDealerRegistration(BaseTestCase):
     def setUp(self):
         self.client = Client()
         BaseTestCase.setUp(self)
-        self.system = SystemFunction(self)
+        self.system = System(self)
 
     def test_new_dealer(self):
         system = self.system
@@ -22,7 +22,7 @@ class TestCustomerRegistration(BaseTestCase):
         BaseTestCase.setUp(self)
         self.brand = Brand(self)
         brand = self.brand
-        self.system = SystemFunction(self)
+        self.system = System(self)
         self.client = Client()
         self.create_user(username='gladminds', email='gladminds@gladminds.co', password='gladminds')
         brand.send_dispatch_feed()

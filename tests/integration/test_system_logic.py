@@ -7,7 +7,7 @@ from django.test.client import Client
 client = Client()
 
 
-class SystemFunction(BaseTestCase):
+class System(BaseTestCase):
     def __init__(self, tester):
         self.tester = tester
 
