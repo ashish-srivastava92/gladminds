@@ -1,13 +1,14 @@
 from tastypie.constants import ALL_WITH_RELATIONS
 from tastypie.authorization import Authorization
 from tastypie import fields
-from gladminds.core import base_models as common
 from gladminds.apis.baseresource import CustomBaseResource
 from gladminds.apis.product_apis import ProductDataResources
+from gladminds.core.base_models import CouponData, ServiceAdvisor,\
+    RegisteredDealer
 
 class RegisteredDealerResources(CustomBaseResource):
     class Meta:
-        queryset = common.RegisteredDealer.objects.all()
+        queryset = RegisteredDealer.objects.all()
         resource_name = "registereddealer"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
@@ -15,7 +16,7 @@ class RegisteredDealerResources(CustomBaseResource):
 
 class ServiceAdvisorResources(CustomBaseResource):
     class Meta:
-        queryset = common.ServiceAdvisor.objects.all()
+        queryset = ServiceAdvisor.objects.all()
         resource_name = "serviceadvisor"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
@@ -27,7 +28,7 @@ class CouponDataResources(CustomBaseResource):
     servicing_dealer = fields.ForeignKey(RegisteredDealerResources, 'servicing_dealer', full=True,
                                          null=True, blank=True)
     class Meta:
-        queryset = common.CouponData.objects.all()
+        queryset = CouponData.objects.all()
         resource_name = "coupons"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']

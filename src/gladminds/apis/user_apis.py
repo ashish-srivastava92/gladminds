@@ -2,8 +2,8 @@ from tastypie.constants import ALL_WITH_RELATIONS, ALL
 from tastypie.authorization import Authorization
 from tastypie import fields 
 from django.contrib.auth.models import User
-from gladminds.core import base_models as common
 from gladminds.apis.baseresource import CustomBaseResource
+from gladminds.gm.models import UserProfile, GladMindUsers
 
 class UserResource(CustomBaseResource):
     class Meta:
@@ -18,7 +18,7 @@ class UserResource(CustomBaseResource):
 class UserProfileResources(CustomBaseResource):
     user = fields.OneToOneField(UserResource, 'user', full=True)
     class Meta:
-        queryset = common.UserProfile.objects.all()
+        queryset = UserProfile.objects.all()
         resource_name = 'userprofile'
         authorization= Authorization()
         detail_allowed_methods =['get', 'post', 'put', 'delete']
@@ -32,7 +32,7 @@ class UserProfileResources(CustomBaseResource):
 class GladMindUserResources(CustomBaseResource):
     user = fields.OneToOneField(UserProfileResources, 'user', full=True)
     class Meta:
-        queryset = common.GladMindUsers.objects.all()
+        queryset = GladMindUsers.objects.all()
         resource_name = 'gmusers'
         authorization= Authorization()
         detail_allowed_methods = ['get', 'post', 'put', 'delete']

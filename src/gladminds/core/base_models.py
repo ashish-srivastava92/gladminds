@@ -444,3 +444,21 @@ class SparesData(models.Model):
 Monkey-patch the Site object to include folder for template
 """
 # FolderNameField(blank=True).contribute_to_class(Site,'folder_name')
+
+class AppPreferences(models.Model):
+
+    """
+    This model is used for storing application preferences
+    """
+    brand = models.ForeignKey(BrandData)
+    key = models.CharField(max_length=100)
+    value = models.CharField(max_length=200)
+
+    def __unicode__(self):
+        return self.brand
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "Application Preferences"
+        unique_together = ("brand", "key")
+

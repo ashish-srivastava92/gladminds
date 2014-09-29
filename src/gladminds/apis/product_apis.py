@@ -1,13 +1,13 @@
 from tastypie.constants import ALL_WITH_RELATIONS, ALL
 from tastypie.authorization import Authorization
 from tastypie import fields 
-from gladminds.core import base_models as common
 from gladminds.apis.baseresource import CustomBaseResource
 from gladminds.apis.user_apis import GladMindUserResources
+from gladminds.core.base_models import BrandData, ProductTypeData, ProductData
 
 class BrandDataResources(CustomBaseResource):
     class Meta:
-        queryset = common.BrandData.objects.all()
+        queryset = BrandData.objects.all()
         resource_name = "brands"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete']
@@ -17,7 +17,7 @@ class BrandDataResources(CustomBaseResource):
 class ProductTypeDataResources(CustomBaseResource):
     brand = fields.ForeignKey(BrandDataResources, 'brand_id', full=True)
     class Meta:
-        queryset = common.ProductTypeData.objects.all()
+        queryset = ProductTypeData.objects.all()
         resource_name = "producttypes"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
@@ -27,7 +27,7 @@ class ProductDataResources(CustomBaseResource):
     product_type = fields.ForeignKey(ProductTypeDataResources, 'product_type', null=True, blank=True, full=True)
     customer_phone_number = fields.ForeignKey(GladMindUserResources, 'customer_phone_number',  null=True, blank=True, full=True)
     class Meta:
-        queryset = common.ProductData.objects.all()
+        queryset = ProductData.objects.all()
         resource_name = "products"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put', 'delete']

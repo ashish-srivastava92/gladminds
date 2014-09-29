@@ -7,8 +7,9 @@ from tastypie.test import ResourceTestCase, TestApiClient
 from django.test.client import Client
 from provider.oauth2.models import AccessToken
 from provider.oauth2.models import Client as auth_client
-from gladminds.models import UserPreferences, AppPreferences
 from test_constants import USER_PREFERENCE, APP_PREFERENCE
+from gladminds.gm.models import UserPreferences
+from gladminds.core.base_models import AppPreferences
 
 client = TestApiClient()
 djangoClient=Client()
