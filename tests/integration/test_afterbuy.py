@@ -1,15 +1,15 @@
 ''' Test Case for testing out the Afterbuy Api
 '''
- 
+
 from provider.oauth2.models import Client as auth_client
 from provider.oauth2.models import AccessToken
 from django.utils import unittest
-from django.contrib.auth.models import User
+from integration.test_brand_logic import Brand
+from integration.test_system_logic import SystemFunction
 from django.test.client import Client
 from integration.base import BaseTestCase
 from django.test import TestCase
-from gladminds.models import common
-from gladminds.afterbuy.models import common as afterbuy_common
+
 import json
 client = Client()
  
@@ -19,6 +19,10 @@ class TestAfterbuy(BaseTestCase):
     def setUp(self):
         TestCase.setUp(self)
         BaseTestCase.setUp(self)
+        self.brand = Brand(self)
+        brand = self.brand
+        self.system = SystemFunction(self)
+        system = self.system
         self.access_token = 'testaccesstoken'
         self.create_user(username='gladminds', email='gm@gm.com', password='gladminds')
         user = self.get_user_obj(username='gladminds')
@@ -26,15 +30,15 @@ class TestAfterbuy(BaseTestCase):
         secret_cli.save()
         access = AccessToken(user=user, token=self.access_token, client=secret_cli)
         access.save()
-        self.send_dispatch_feed()
-        self.send_purchase_feed()
+        brand.send_dispatch_feed()
+        brand.send_purchase_feed()
         '''This both feed will create product data, product type ,brand database'''
-        product_info = self.get_product_info(vin='XXXXXXXXXX')
-        brand_obj = self.get_brand_info(brand_id='bajaj')
+        product_info = system.get_product_info(vin='XXXXXXXXXX')
+        brand_obj = system.get_brand_info(brand_id='bajaj')
         #product data
-        self.create_and_get_product_insurance_info(product=product_info, issue_date='2014-07-28', expiry_date='2014-07-28', insurance_phone='1111111111', policy_number='12s33')
-        self.create_and_get_product_warranty_info(product=product_info, issue_date='2014-07-28', expiry_date='2014-07-28')
-        self.create_and_get_spare_data(spare_brand=brand_obj, spare_name="test spare")
+        system.create_and_get_product_insurance_info(product=product_info, issue_date='2014-07-28', expiry_date='2014-07-28', insurance_phone='1111111111', policy_number='12s33')
+        system.create_and_get_product_warranty_info(product=product_info, issue_date='2014-07-28', expiry_date='2014-07-28')
+        system.create_and_get_spare_data(spare_brand=brand_obj, spare_name="test spare")
  
     @unittest.skip("skip the test")
     def test_create_new_user(self):
