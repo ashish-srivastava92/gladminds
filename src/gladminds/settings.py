@@ -94,7 +94,7 @@ DATABASES = {
         # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'ENGINE': 'django.db.backends.sqlite3',
         # Or path to database file if using sqlite3.
-        'NAME': 'gm.db',
+        'NAME': 'gm',
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -105,7 +105,7 @@ DATABASES = {
     },
     'bajaj': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'bajaj.db',
+        'NAME': 'bajaj',
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
@@ -113,7 +113,7 @@ DATABASES = {
     },
     'mock': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'mock.db',
+        'NAME': 'mock',
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
