@@ -100,7 +100,7 @@ def generate_otp(request):
             message = message_template.get_template('SEND_OTP').format(token)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message, "sms_client":settings.SMS_CLIENT})
+                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message, 'sms_client':settings.SMS_CLIENT})
             else:
                 send_otp.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
             logger.info('OTP sent to mobile {0}'.format(phone_number))

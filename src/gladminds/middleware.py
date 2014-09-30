@@ -19,8 +19,9 @@ class GladmindsMessageMiddleware(object):
     #If the request is come on message APIs, then based on the IP we set sms client
     def process_request(self, request, **kwargs):
         request_ip = request.META['REMOTE_ADDR']
-        logger.info('[GladmindsMiddleWare]:: The request is coming from the ip {0}'.format(request_ip))
-        if request_ip == '54.84.243.77':
+        airtel_ip = settings.AIRTEL_IP
+        logger.info('[GladmindsMiddleWare]:: The request is coming from the ip {0} airtel-IP{1}'.format(request_ip, airtel_ip))
+        if request_ip != airtel_ip:
             SMS_CLIENT.value = 'AIRTEL'
         else:
             SMS_CLIENT.value = 'KAP'
