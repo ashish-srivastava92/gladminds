@@ -20,7 +20,7 @@ class GladmindsMessageMiddleware(object):
     def process_request(self, request, **kwargs):
         request_ip = request.META['REMOTE_ADDR']
         logger.info('[GladmindsMiddleWare]:: The request is coming from the ip {0}'.format(request_ip))
-        if request_ip != '54.84.243.77':
+        if request_ip == '54.84.243.77':
             SMS_CLIENT.value = 'AIRTEL'
         else:
             SMS_CLIENT.value = 'KAP'
