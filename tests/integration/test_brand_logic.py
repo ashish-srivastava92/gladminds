@@ -95,7 +95,7 @@ class Brand(object):
         return product_data
 
     def check_asc_feed_saved_to_database(self):
-        self.tester.send_asc_feed()
+        self.send_asc_feed()
         asc = aftersell_common.RegisteredDealer.objects.get(dealer_id='ASC001')
         self.tester.assertEquals('ASC001', asc.dealer_id)
 

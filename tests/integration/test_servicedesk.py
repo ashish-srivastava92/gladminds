@@ -25,9 +25,10 @@ class TestServiceDeskFlow(BaseTestCase):
         initiator.post_feedback()
         log_len_after = logs.AuditLog.objects.all()
         feedback_obj = aftersell_common.Feedback.objects.all()
-        self.assertEqual(feedback_obj[0].priority, "High")
-        self.assertEqual(len(log_len_after),1)
-        self.assertEqual(log_len_after[0].reciever, "9999999998")
+        system = self.system
+        system.verify_result(input=feedback_obj[0].priority, output="High")
+        system.verify_result(input=len(log_len_after), output=1)
+        system.verify_result(input=log_len_after[0].reciever, output="9999999998")
  
     def test_get_feedback_sdo(self):
         initiator = self.system
@@ -36,7 +37,8 @@ class TestServiceDeskFlow(BaseTestCase):
         service_desk_owner.login(username='sdo', password='123', provider='desk', group_name='SDO')
         service_desk_owner.get_feedback_information()
         feedback_obj = aftersell_common.Feedback.objects.all()
-        self.assertEqual(feedback_obj[0].priority, "High")
+        system = self.system
+        system.verify_result(input=feedback_obj[0].priority, output="High")
  
     def test_get_feedback_sdm(self):
         initiator = self.system
@@ -45,7 +47,8 @@ class TestServiceDeskFlow(BaseTestCase):
         service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDM')
         service_desk_manager.get_feedback_information()
         feedback_obj = aftersell_common.Feedback.objects.all()
-        self.assertEqual(feedback_obj[0].priority, "High")
+        system = self.system
+        system.verify_result(input=feedback_obj[0].priority, output="High")
  
     def test_sms_email_assignee_after_feedback_assigned(self):
         initiator = self.system
@@ -54,9 +57,10 @@ class TestServiceDeskFlow(BaseTestCase):
         service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDO')
         service_desk_manager.update_feedback(status='Open')
         log_len_after = logs.AuditLog.objects.all()
-        self.assertEqual(log_len_after[0].reciever, "9999999998")
-        self.assertEqual(log_len_after[1].reciever, "9999999998")
-        self.assertEqual(log_len_after[2].reciever, "9999999999")
+        system = self.system
+        system.verify_result(input=log_len_after[0].reciever, output="9999999998")
+        system.verify_result(input=log_len_after[1].reciever, output="9999999998")
+        system.verify_result(input=log_len_after[2].reciever, output="9999999999")
  
     def test_sms_email_after_resolved(self):
         initiator = self.system
@@ -72,4 +76,5 @@ class TestServiceDeskFlow(BaseTestCase):
         service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDM')
         service_desk_manager.update_feedback(status='Closed', assign_to='None')
         feedbacks = aftersell_common.Feedback.objects.filter(priority='High')
-        self.assertEqual(feedbacks[0].status ,'Closed')
+        system = self.system
+        system.verify_result(input=feedbacks[0].status, output='Closed')

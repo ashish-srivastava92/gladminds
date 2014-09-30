@@ -35,13 +35,13 @@ class TestCustomerRegistration(BaseTestCase):
         dealer.register_customer()
 
     def test_update_cutomer_mobile(self):
-        system = self.system
+        dealer = self.system
         brand = self.brand
-        product_obj = system.get_product_details(vin='XXXXXXXXXX')
-        self.assertEqual(product_obj.customer_phone_number.phone_number, '+91666666')
+        product_obj = dealer.get_product_details(vin='XXXXXXXXXX')
+        dealer.verify_result(input=product_obj.customer_phone_number.phone_number, output='+91666666')
         brand.send_purchase_feed_with_diff_cust_num()
-        product_obj = system.get_product_details(vin='XXXXXXXXXX')
-        self.assertEqual(product_obj.customer_phone_number.phone_number, '+919845340297')
+        product_obj = dealer.get_product_details(vin='XXXXXXXXXX')
+        dealer.verify_result(input=product_obj.customer_phone_number.phone_number, output='+919845340297')
 
     def test_asc_registration_by_self(self):
         dealer = self.system

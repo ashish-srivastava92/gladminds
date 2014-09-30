@@ -78,11 +78,11 @@ class FeedsResourceTest(BaseTestCase):
         brand.send_dispatch_feed()
         brand.send_purchase_feed()
         gm_user = GladMindUsers.objects.all()
-        self.assertEqual(1, len(gm_user))
+        system.verify_result(input=len(gm_user), output=1)
         brand.send_purchase_feed_with_diff_cust_num()
         product_object = system.get_product_details(vin='XXXXXXXXXX')
-        self.assertEqual(product_object.customer_phone_number.phone_number, "+919845340297", "Customer Phone Number is not updated")
-        self.assertEqual(GladMindUsers.objects.count(), 2, "Total GM User")
+        system.verify_result(input=product_object.customer_phone_number.phone_number, output="+919845340297")
+        system.verify_result(input=GladMindUsers.objects.count(), output=2)
  
     def test_auth(self):
         brand = self.brand
@@ -92,31 +92,33 @@ class FeedsResourceTest(BaseTestCase):
     @unittest.skip("Skipping Adding this functionality in future")
     def test_coupon_status_on_dispatch_feed(self):
         brand = self.brand
+        system = self.system
         '''
             Test for testing out coupon status on dispatch feed
             Its default value is 1
         '''
         brand.send_dispatch_feed()
- 
-        self.assertEquals(2, CouponData.objects.count())
+        system.verify_result(input=CouponData.objects.count(), output=2)
         coupon_data = CouponData.objects.all()[0]
-        self.assertEquals(u"USC001", coupon_data.unique_service_coupon)
-        self.assertEquals(2, coupon_data.status)
+        system.verify_result(input=CouponData.objects.count(), output=2)
+        system.verify_result(input=coupon_data.unique_service_coupon, output=u"USC001")
+        system.verify_result(input=coupon_data.status, output=2)
         coupon_data = CouponData.objects.all()[1]
-        self.assertEquals(u"USC002", coupon_data.unique_service_coupon)
-        self.assertEquals(1, coupon_data.status, 'Default value should be 1')
- 
+        system.verify_result(input=coupon_data.status, output=2)
+        system.verify_result(input=coupon_data.unique_service_coupons, output=u"USC002")
+        system.verify_result(input=coupon_data.status, output=1)
+
     def test_coupon_status_without_ucn(self):
         brand = self.brand
+        system = self.system
         '''
             Test for testing out dispatch feed without_ucn
         '''
         brand.send_dispatch_feed_without_ucn()
- 
-        self.assertEquals(1, CouponData.objects.count())
+        system.verify_result(input=CouponData.objects.count(), output=1)
         coupon_data = CouponData.objects.all()[0]
-        self.assertEquals(u"USC002", coupon_data.unique_service_coupon)
- 
+        system.verify_result(input=coupon_data.unique_service_coupon, output=u"USC002")
+
     def test_asc_feed(self):
         brand = self.brand
         brand.send_asc_feed()
