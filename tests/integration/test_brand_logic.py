@@ -76,10 +76,26 @@ class Brand(object):
         xml_data = open(file_path, 'r').read()
         response = self.tester.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
         self.tester.assertEqual(200, response.status_code)
-#############################check data saved to database or not#########################################
+
+    def send_check_message(self, **kwargs):
+        response = client.post(kwargs['url'], kwargs['message'])
+        return response
+
+    def check_coupon_status(self, **kwargs):
+        coupon_status = common.CouponData.objects.get(unique_service_coupon=kwargs['unique_service_coupon'])
+        return coupon_status
+
+    def get_coupon_obj(self, **kwargs):
+        coupon_obj = common.CouponData(**kwargs)
+        coupon_obj.save()
+        return coupon_obj
+
+    def get_product_obj(self, **kwargs):
+        product_data = common.ProductData.objects.get(**kwargs)
+        return product_data
 
     def check_asc_feed_saved_to_database(self):
-        self.send_asc_feed()
+        self.tester.send_asc_feed()
         asc = aftersell_common.RegisteredDealer.objects.get(dealer_id='ASC001')
         self.tester.assertEquals('ASC001', asc.dealer_id)
 

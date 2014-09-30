@@ -12,8 +12,8 @@ class TestDealerRegistration(BaseTestCase):
         self.system = System(self)
 
     def test_new_dealer(self):
-        system = self.system
-        system.dealer_login()
+        dealer = self.system
+        dealer.dealer_login()
 
 
 class TestCustomerRegistration(BaseTestCase):
@@ -30,9 +30,9 @@ class TestCustomerRegistration(BaseTestCase):
         '''This both feed will create product data, product type ,brand database'''
 
     def test_temp_customer_registration(self):
-        system = self.system
-        system.dealer_login()
-        system.register_customer()
+        dealer = self.system
+        dealer.dealer_login()
+        dealer.register_customer()
 
     def test_update_cutomer_mobile(self):
         system = self.system
@@ -44,10 +44,10 @@ class TestCustomerRegistration(BaseTestCase):
         self.assertEqual(product_obj.customer_phone_number.phone_number, '+919845340297')
 
     def test_asc_registration_by_self(self):
-        system = self.system
-        system.dealer_login()
-        system.check_asc_exists('test_asc','test_asc','dealer')
+        dealer = self.system
+        dealer.dealer_login()
+        dealer.check_asc_exists('test_asc','test_asc','dealer')
 
     def test_asc_registration_by_dealer(self):
-        system = self.system
-        system .check_asc_exists('test_asc','test_asc','self')
+        dealer = self.system
+        dealer.check_asc_exists('test_asc','test_asc','self')

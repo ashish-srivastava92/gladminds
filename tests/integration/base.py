@@ -43,6 +43,7 @@ class BaseTestCase(ResourceTestCase):
         load_email_obj.add_email_template()
         load_email_obj.add_sms_template()
         load_email_obj.add_group()
+        self.MESSAGE_URL = "/v1/messages"
 
     def assert_successful_http_response(self, resp, msg=None):
         return self.assertTrue(resp.status_code >= 200 

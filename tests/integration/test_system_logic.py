@@ -125,6 +125,10 @@ class System(BaseTestCase):
 
         temp_asc_obj = self.get_temp_asc_obj(name=name)
         self.tester.assertEqual(temp_asc_obj.name, check_name)
+
+    def verify_result(self, **kwargs):
+        self.tester.assertEquals(kwargs['input'], kwargs['output'])
+
 #########################################send feed function################################################################
 
 
