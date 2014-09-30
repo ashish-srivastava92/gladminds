@@ -100,9 +100,9 @@ def generate_otp(request):
             message = message_template.get_template('SEND_OTP').format(token)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
+                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_otp.delay(phone_number=phone_number, message=message)
+                send_otp.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
             logger.info('OTP sent to mobile {0}'.format(phone_number))
             #Send email if email address exist
             if email:
@@ -381,10 +381,11 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
         if settings.ENABLE_AMAZON_SQS:
             task_queue = utils.get_task_queue()
             task_queue.add("export_asc_registeration_to_sap", \
-               {"phone_number": phone_number, "brand": brand})
+               {"phone_number": phone_number, "brand": brand, "sms_client":settings.SMS_CLIENT})
         else:
             export_asc_registeration_to_sap.delay(phone_number=data[
-                                        'phone-number'], brand=brand)
+                                        'phone-number'], brand=brand,
+                                        sms_client=settings.SMS_CLIENT)
 
     except Exception as ex:
         logger.info(ex)

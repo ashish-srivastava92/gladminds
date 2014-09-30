@@ -80,9 +80,9 @@ class GladmindsResources(Resource):
             message = ink.template
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message})
+                task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
+                send_invalid_keyword_message.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
 
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpBadRequest(ink.message))
@@ -90,18 +90,18 @@ class GladmindsResources(Resource):
             message = inm.template
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message})
+                task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
+                send_invalid_keyword_message.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpBadRequest(inm.message))
         except smsparser.InvalidFormat as inf:
             message = angular_format('CORRECT FORMAT: ' + inf.template)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message})
+                task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
+                send_invalid_keyword_message.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpBadRequest(inf.message))
         handler = getattr(self, sms_dict['handler'], None)
@@ -132,11 +132,11 @@ class GladmindsResources(Resource):
         message = smsparser.render_sms_template(status='send', keyword=sms_dict['keyword'], customer_id=gladmind_customer_id)
         phone_number = utils.get_phone_number_format(phone_number)
         logger.info("customer is registered with message %s" % message)
-        if settings.ENABLE_AMAZON_SQS:
+        if settings.ENABLE_AMAZON_SQS:           
             task_queue = get_task_queue()
-            task_queue.add("send_registration_detail", {"phone_number":phone_number, "message":message})
+            task_queue.add("send_registration_detail", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         else:
-            send_registration_detail.delay(phone_number=phone_number, message=message)
+            send_registration_detail.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
@@ -165,9 +165,9 @@ class GladmindsResources(Resource):
 
         if settings.ENABLE_AMAZON_SQS:
             task_queue = get_task_queue()
-            task_queue.add("customer_detail_recovery", {"phone_number":phone_number, "message":message})
+            task_queue.add("customer_detail_recovery", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         else:
-            customer_detail_recovery.delay(phone_number=phone_number, message=message)
+            customer_detail_recovery.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
@@ -201,9 +201,9 @@ class GladmindsResources(Resource):
         phone_number = utils.get_phone_number_format(phone_number)
         if settings.ENABLE_AMAZON_SQS:
             task_queue = get_task_queue()
-            task_queue.add("send_service_detail", {"phone_number":phone_number, "message":message})
+            task_queue.add("send_service_detail", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         else:
-            send_service_detail.delay(phone_number=phone_number, message=message)
+            send_service_detail.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
@@ -358,9 +358,9 @@ class GladmindsResources(Resource):
                 customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(service_type=requested_coupon.service_type)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_coupon_detail_customer", {"phone_number":utils.get_phone_number_format(customer_phone_number), "message":customer_message}, delay_seconds=customer_message_countdown)
+                task_queue.add("send_coupon_detail_customer", {"phone_number":utils.get_phone_number_format(customer_phone_number), "message":customer_message, "sms_client":settings.SMS_CLIENT}, delay_seconds=customer_message_countdown)
             else:
-                send_coupon_detail_customer.apply_async( kwargs={ 'phone_number': utils.get_phone_number_format(customer_phone_number), 'message':customer_message}, countdown=customer_message_countdown)
+                send_coupon_detail_customer.apply_async( kwargs={ 'phone_number': utils.get_phone_number_format(customer_phone_number), 'message':customer_message, "sms_client":settings.SMS_CLIENT}, countdown=customer_message_countdown)
             audit.audit_log(reciever=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
         except IndexError as ie:
             dealer_message = templates.get_template('SEND_INVALID_VIN_OR_FSC')
@@ -374,9 +374,9 @@ class GladmindsResources(Resource):
             phone_number = utils.get_phone_number_format(phone_number)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_service_detail", {"phone_number":phone_number, "message":dealer_message})
+                task_queue.add("send_service_detail", {"phone_number":phone_number, "message":dealer_message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_service_detail.delay(phone_number=phone_number, message=dealer_message)
+                send_service_detail.delay(phone_number=phone_number, message=dealer_message, sms_client=settings.SMS_CLIENT)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=dealer_message)
         return {'status': True, 'message': dealer_message}
 
@@ -416,9 +416,9 @@ class GladmindsResources(Resource):
             phone_number = utils.get_phone_number_format(phone_number)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
+                task_queue.add("send_coupon", {"phone_number":phone_number, "message": message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_coupon.delay(phone_number=phone_number, message=message)
+                send_coupon.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return {'status': True, 'message': message}
 
@@ -429,9 +429,9 @@ class GladmindsResources(Resource):
             sa_phone = utils.get_phone_number_format(phone_number)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message})
+                task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_invalid_keyword_message.delay(phone_number=sa_phone, message=message)
+                send_invalid_keyword_message.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
             return None
         service_advisor_obj = all_sa_dealer_obj[0]
         return service_advisor_obj
@@ -448,9 +448,9 @@ class GladmindsResources(Resource):
             message = "SA is not the coupon initiator."
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message})
+                task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_invalid_keyword_message.delay(phone_number=sa_phone, message=message)
+                send_invalid_keyword_message.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
         return False
         
     
@@ -478,9 +478,9 @@ class GladmindsResources(Resource):
             sa_phone = utils.get_phone_number_format(sa_phone)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message})
+                task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_invalid_keyword_message.delay(phone_number=sa_phone, message=message)
+                send_invalid_keyword_message.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
             audit.audit_log(reciever=sa_phone, action=AUDIT_ACTION, message=message)
             logger.info("Message sent to SA : " + message)
             return False

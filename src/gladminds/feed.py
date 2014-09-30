@@ -482,10 +482,11 @@ def update_coupon_data(sender, **kwargs):
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
                 task_queue.add("send_on_product_purchase", {"phone_number": 
-                                customer_phone_number, "message":message})
+                                customer_phone_number, "message":message,
+                                "sms_client":settings.SMS_CLIENT})
             else:
                 send_on_product_purchase.delay(
-                phone_number=customer_phone_number, message=message)
+                phone_number=customer_phone_number, message=message, sms_client=settings.SMS_CLIENT)
  
             audit.audit_log(
                 reciever=customer_phone_number, action='SEND TO QUEUE', message=message)
