@@ -390,7 +390,7 @@ TEMP_SA_ID_PREFIX = 'SA'
 FEED_FAILURE_MAIL_ENABLED = True
 ##########################################################################
 #########################New relic file location########################
-NEW_RELIC_FILE_LOCATION = './src/newrelic_qa.ini'
+NEW_RELIC_FILE_LOCATION = './src/'
 ########################################################################
 AIRTEL_IP = '54.84.243.77'
 SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
