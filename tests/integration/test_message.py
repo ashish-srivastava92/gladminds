@@ -46,21 +46,21 @@ class CustomerRegistrationTest(GladmindsResourceTestCase, BaseTestCase):
     def test_customer_registration(self):
         brand = self.brand
         system = self.system
-        response = brand.send_check_message(url=self.MESSAGE_URL, message=self.CUST_REG)
+        response = brand.send_sms(url=self.MESSAGE_URL, message=self.CUST_REG)
         system.verify_result(input=response.status_code, output=200)
 
     def test_invalid_message(self):
         brand = self.brand
         system = self.system
-        response = brand.send_check_message(url=self.MESSAGE_URL, message=self.INVALID_CUST_REG)
+        response = brand.send_sms(url=self.MESSAGE_URL, message=self.INVALID_CUST_REG)
         system.verify_result(input=response.status_code, output=400)
-        response = brand.send_check_message(url=self.MESSAGE_URL, message=self.INVALID_CUST_REG_KEY)
+        response = brand.send_sms(url=self.MESSAGE_URL, message=self.INVALID_CUST_REG_KEY)
         system.verify_result(input=response.status_code, output=400)
    
     def test_already_registered_customer(self):
         brand = self.brand
         system = self.system
-        response = brand.send_check_message(url=self.MESSAGE_URL, message=self.ALREADY_CUST_REG)
+        response = brand.send_sms(url=self.MESSAGE_URL, message=self.ALREADY_CUST_REG)
         system.verify_result(input=response.status_code, output=200)
 
 class CustomerServiceTest(BaseTestCase):
@@ -88,15 +88,15 @@ class CustomerServiceTest(BaseTestCase):
     def test_valid_service(self):
         brand = self.brand
         system = self.system
-        response = brand.send_check_message(url=self.MESSAGE_URL, message=self.vlid_service_message)
+        response = brand.send_sms(url=self.MESSAGE_URL, message=self.vlid_service_message)
         system.verify_result(input=response.status_code, output=200)
 
     def test_invalid_service(self):
         brand = self.brand
         system = self.system
-        response = brand.send_check_message(url=self.MESSAGE_URL, message=self.inavlid_service_message)
+        response = brand.send_sms(url=self.MESSAGE_URL, message=self.inavlid_service_message)
         system.verify_result(input=response.status_code, output=200)
-        response = brand.send_check_message(url=self.MESSAGE_URL, message=self.service_message_with_invalid_phone_number)
+        response = brand.send_sms(url=self.MESSAGE_URL, message=self.service_message_with_invalid_phone_number)
         system.verify_result(input=response.status_code, output=200)
 
 
@@ -118,19 +118,11 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         brand.send_purchase_feed()
         self.product_obj = brand.get_product_obj(vin='XXXXXXXXXX')
 
-    def validate_coupon(self, data, phone_number):
-        brand = self.brand
-        system = self.system
-        data = 'A {1} {0} {2}'.format(data['kms'], data['sap_customer_id'], data['service_type'])
-        create_sms_dict = {'text': data, 'phoneNumber': phone_number}
-        response = brand.send_check_message(url=self.MESSAGE_URL, message=create_sms_dict)
-        system.verify_result(input=response.status_code, output=200)
-
     def test_simple_inprogress_from_unused(self):
         brand = self.brand
         system = self.system
         create_sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'GMCUSTOMER01'}
-        self.validate_coupon(create_sms_dict, "55555")
+        brand.check_coupon(create_sms_dict, "55555")
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
         system.verify_result(input=coupon_status.status, output=4)
 #     Need to find out how to write this test case because it creates cyclic dependency.
@@ -149,7 +141,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         brand.get_coupon_obj(unique_service_coupon='USC0002', vin=self.product_obj, valid_days=30, valid_kms=2000, service_type=2)
         brand.get_coupon_obj(unique_service_coupon='USC0003', vin=self.product_obj, valid_days=30, valid_kms=5000, service_type=3)
         create_sms_dict = {'kms': 2050, 'service_type': 3, 'sap_customer_id': 'GMCUSTOMER01'}
-        self.validate_coupon(create_sms_dict, '55555')
+        brand.check_coupon(create_sms_dict, '55555')
         system.verify_result(input=common.CouponData.objects.filter(unique_service_coupon='USC001')[0].status, output=5)
         system.verify_result(input=common.CouponData.objects.filter(unique_service_coupon='USC0002')[0].status, output=5)
         system.verify_result(input=common.CouponData.objects.filter(unique_service_coupon='USC0003')[0].status, output=4)
@@ -160,7 +152,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         brand.get_coupon_obj(unique_service_coupon='USC0003', vin=self.product_obj, valid_days=30, valid_kms=5000, service_type=3)
         data = 'C {0} {1}'.format('SAP004', 'USC002')
         sms_dict = {'text': data, 'phoneNumber': '55555'}
-        response = brand.send_check_message(url=self.MESSAGE_URL, message=sms_dict)
+        response = brand.send_sms(url=self.MESSAGE_URL, message=sms_dict)
         result = json.loads(response.content)
         self.assertFalse(result['status'])
 
@@ -178,7 +170,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         system.verify_result(input=aftersell_common.ServiceAdvisor.objects.count(), output=3)
 
         create_sms_dict = {'kms': 450, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
-        self.validate_coupon(create_sms_dict, '55555')
+        brand.check_coupon(create_sms_dict, '55555')
 
         '''In-progress Coupon'''
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC0002')
@@ -202,7 +194,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         system.verify_result(input=aftersell_common.ServiceAdvisor.objects.count(), output=3)
 
         create_sms_dict = {'kms': 600, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
-        self.validate_coupon(create_sms_dict, '55555')
+        brand.check_coupon(create_sms_dict, '55555')
 
         '''In-progress Coupon'''
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC0002')
@@ -231,7 +223,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         system.verify_result(input=aftersell_common.ServiceAdvisor.objects.count(), output=3)
 
         create_sms_dict = {'kms': 1100, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
-        self.validate_coupon(create_sms_dict, '55555')
+        brand.check_coupon(create_sms_dict, '55555')
 
         '''in_progess_coupon status should be 4'''
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
@@ -261,10 +253,10 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         system.verify_result(input=aftersell_common.ServiceAdvisor.objects.count(), output=3)
 
         sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'GMCUSTOMER01'}
-        self.validate_coupon(sms_dict, '55555')
+        brand.check_coupon(sms_dict, '55555')
 
         sms_dict = {'kms': 1100, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
-        self.validate_coupon(sms_dict, '55555')
+        brand.check_coupon(sms_dict, '55555')
 
         '''in_progess_coupon status should be 4'''
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
@@ -298,7 +290,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
 
         sms_dict = {'kms': 1100, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
  
-        self.validate_coupon(sms_dict, '55555')
+        brand.check_coupon(sms_dict, '55555')
  
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
         system.verify_result(input=coupon_status.status, output=5)
@@ -308,7 +300,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         system.verify_result(input=coupon_status.status, output=4)
  
         sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'GMCUSTOMER01'}
-        self.validate_coupon(sms_dict, '55555')
+        brand.check_coupon(sms_dict, '55555')
  
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
         system.verify_result(input=coupon_status.status, output=4)
@@ -329,7 +321,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
             Mark 3 as exceed limit
         '''
         sms_dict = {'kms': 1550, 'service_type': 3, 'sap_customer_id': 'GMCUSTOMER01'}
-        self.validate_coupon(sms_dict, '55555')
+        brand.check_coupon(sms_dict, '55555')
 
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
         system.verify_result(input=coupon_status.status, output=5)
@@ -359,11 +351,11 @@ class BrandData(GladmindsResourceTestCase, BaseTestCase):
     def test_get_all_products_of_a_brand(self):
         brand = self.brand
         system = self.system
-        response = brand.send_check_message(url=self.MESSAGE_URL, message=self.VALID_BRAND_ID)
+        response = brand.send_sms(url=self.MESSAGE_URL, message=self.VALID_BRAND_ID)
         system.verify_result(input=response.status_code, output=200)
  
     def test_get_all_brand(self):
         brand = self.brand
         system = self.system
-        response = brand.send_check_message(url=self.MESSAGE_URL, message=self.INVALID_BRAND_ID)
+        response = brand.send_sms(url=self.MESSAGE_URL, message=self.INVALID_BRAND_ID)
         system.verify_result(input=response.status_code, output=200)

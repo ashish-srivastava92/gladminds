@@ -77,7 +77,7 @@ class Brand(object):
         response = self.tester.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
         self.tester.assertEqual(200, response.status_code)
 
-    def send_check_message(self, **kwargs):
+    def send_sms(self, **kwargs):
         response = client.post(kwargs['url'], kwargs['message'])
         return response
 
@@ -98,6 +98,12 @@ class Brand(object):
         self.send_asc_feed()
         asc = aftersell_common.RegisteredDealer.objects.get(dealer_id='ASC001')
         self.tester.assertEquals('ASC001', asc.dealer_id)
+
+    def check_coupon(self, data, phone_number):
+        data = 'A {1} {0} {2}'.format(data['kms'], data['sap_customer_id'], data['service_type'])
+        create_sms_dict = {'text': data, 'phoneNumber': phone_number}
+        response = self.send_sms(url='/v1/messages', message=create_sms_dict)
+        self.tester.assertEqual(200, response.status_code)
 
     def check_service_feed_saved_to_database(self):
         self.tester.assertEquals(3, aftersell_common.RegisteredDealer.objects.count())
