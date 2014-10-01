@@ -13,6 +13,13 @@
        <link rel="stylesheet" href="/static/libs/datepicker/css/jquery-ui.css">
 	    <link href="/static/css/bootstrap.css" rel="stylesheet"> 
 	    <link href="/static/css/dataTables.bootstrap.css" rel="stylesheet">  
+	    
+	    <!--[if gt IE 7]>
+		    <link href="/static/css/bootstrap-ie7.css" rel="stylesheet">
+		    <link href="/static/css/style-ie7.css" rel="stylesheet">
+		    <script src="/static/libs/html5.js"></script>
+	    <![endif]-->
+	    
 	    <!-- Add custom CSS here -->
 	    <link href="/static/css/sb-admin.css" rel="stylesheet">
 	    <link rel="stylesheet" href="/static/css/morris-0.4.3.min.css">
@@ -24,7 +31,7 @@
     {% block header %}
       <div class="navbar navbar-style">
         <div class="navbar-inner">
-           <a class="brand" href="#"><img src="/static/img/bajaj_logo.jpg" height=50px width=209px></a>
+           <a class="brand" href="#"><img src="/static/img/bajaj_logo.jpg" class='brand-logo' height=50px width=209px></a>
            {% if not asc_registration %}
               <ul class="nav pull-right">
                  <li class="dropdown style-username">

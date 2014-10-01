@@ -19,7 +19,8 @@ from tastypie import http
 from tastypie.exceptions import ImmediateHttpResponse
 from django.db.models import Q
 import logging
-from gladminds.utils import mobile_format, format_message
+from gladminds.utils import mobile_format, format_message,\
+    get_phone_number_format
 from django.utils import timezone
 from django.conf import settings
 from gladminds.utils import get_task_queue
@@ -143,26 +144,31 @@ class GladmindsResources(Resource):
     def send_customer_detail(self, sms_dict, phone_number):
         keyword = sms_dict['params']
         value = sms_dict['message']
-
+        kwargs = {}
+        kwargs['customer_phone_number__phone_number__endswith'] = get_phone_number_format(phone_number)
         if value and len(value)>5 and keyword in ['vin', 'id']:
-            try:
-                if keyword == 'id':
-                    product_object = common.ProductData.objects.get(sap_customer_id=value)
-                    message = templates.get_template('SEND_CUSTOMER_DETAILS').format('VIN', product_object.vin)
-                else:
-                    product_object = common.ProductData.objects.get(vin__contains=value)
-                    if product_object.sap_customer_id:
-                        message = templates.get_template('SEND_CUSTOMER_DETAILS').\
-                                        format('ID', product_object.sap_customer_id)
-                    else:
-                        message = templates.get_template('INVALID_RECOVERY_MESSAGE').format(keyword, value)
+            if keyword == 'id':
+                kwargs['sap_customer_id'] = value
+                model_key = 'vin'
+                search_key = 'vin'
+            else:
+                kwargs['vin__endswith'] = value
+                model_key = 'id'
+                search_key = 'sap_customer_id'
                 
+            try:
+                product_object = common.ProductData.objects.get(**kwargs)
+                if product_object.sap_customer_id:
+                    message = templates.get_template('SEND_CUSTOMER_DETAILS').format(model_key, getattr(product_object, search_key))
+                else:
+                    message = templates.get_template('INVALID_RECOVERY_MESSAGE').format(keyword)
+            
             except Exception as ex:
                 logger.info('Details not found with message %s' % ex)
-                message = templates.get_template('INVALID_RECOVERY_MESSAGE').format(keyword, value)
+                message = templates.get_template('INVALID_RECOVERY_MESSAGE').format(keyword)
         else:
             message = templates.get_template('SEND_INVALID_MESSAGE')
-
+        
         if settings.ENABLE_AMAZON_SQS:
             task_queue = get_task_queue()
             task_queue.add("customer_detail_recovery", {"phone_number":phone_number, "message":message})
@@ -242,7 +248,7 @@ class GladmindsResources(Resource):
             logger.error("Vin is not in customer_product_data Error %s " % ax)
 
     def update_coupon(self, valid_coupon, actual_kms, dealer_data, status,\
-                                                 update_time=datetime.now()):
+                                                 update_time):
         valid_coupon.actual_kms = actual_kms
         valid_coupon.actual_service_date = update_time
         valid_coupon.extended_date = update_time + timedelta(days=COUPON_VALID_DAYS)
@@ -261,10 +267,12 @@ class GladmindsResources(Resource):
         
         validity_date = coupon.extended_date
         today = timezone.now()
+        current_time = datetime.now()
         if expiry_date >= today:
-            self.update_coupon(coupon, actual_kms, dealer_data, 4, today)
+            coupon.extended_date = current_time + timedelta(days=COUPON_VALID_DAYS)
+            self.update_coupon(coupon, actual_kms, dealer_data, 4, current_time)
         elif validity_date >= today and expiry_date < today:
-            coupon.actual_service_date = datetime.now()
+            coupon.actual_service_date = current_time
             coupon.save()
     
     def get_requested_coupon_status(self, vin, service_type):
@@ -280,8 +288,8 @@ class GladmindsResources(Resource):
         actual_kms = int(sms_dict['kms'])
         service_type = sms_dict['service_type']
         dealer_message = None
-        customer_phone_number = None
         customer_message = None
+        customer_phone_number = None
         customer_message_countdown = settings.DELAY_IN_CUSTOMER_UCN_MESSAGE
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         dealer_data = self.validate_dealer(phone_number)
@@ -335,7 +343,7 @@ class GladmindsResources(Resource):
                                                     service_type=in_progress_coupon[0].service_type)
             elif valid_coupon:
                 logger.info("Validate_coupon: valid_coupon")
-                self.update_coupon(valid_coupon, actual_kms, dealer_data, 4)
+                self.update_coupon(valid_coupon, actual_kms, dealer_data, 4, datetime.now())
                 if(valid_coupon.service_type == int(service_type)):
                     dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(
                                                     service_type=valid_coupon.service_type,
