@@ -8,7 +8,6 @@ from django.test import TestCase
 
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
-from django.contrib.auth.models import User
 from django.test.client import Client
 import logging
 import json
@@ -56,12 +55,13 @@ class CustomerRegistrationTest(GladmindsResourceTestCase, BaseTestCase):
         system.verify_result(input=response.status_code, output=400)
         response = brand.send_sms(url=self.MESSAGE_URL, message=self.INVALID_CUST_REG_KEY)
         system.verify_result(input=response.status_code, output=400)
-   
+
     def test_already_registered_customer(self):
         brand = self.brand
         system = self.system
         response = brand.send_sms(url=self.MESSAGE_URL, message=self.ALREADY_CUST_REG)
         system.verify_result(input=response.status_code, output=200)
+
 
 class CustomerServiceTest(BaseTestCase):
 
@@ -134,7 +134,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
 #         sa_dealer_rel = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = sa_obj[0])[0]
 #         sa_dealer_rel.status = 'N'
 #         sa_dealer_rel.save()
-  
+
     def test_coupon_expiry(self):
         brand = self.brand
         system = self.system
@@ -145,7 +145,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         system.verify_result(input=common.CouponData.objects.filter(unique_service_coupon='USC001')[0].status, output=5)
         system.verify_result(input=common.CouponData.objects.filter(unique_service_coupon='USC0002')[0].status, output=5)
         system.verify_result(input=common.CouponData.objects.filter(unique_service_coupon='USC0003')[0].status, output=4)
-  
+
     def test_invalid_ucn_or_sap_id(self):
         brand = self.brand
         brand.get_coupon_obj(unique_service_coupon='USC0002', vin=self.product_obj, valid_days=30, valid_kms=2000, service_type=2)
@@ -156,7 +156,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         result = json.loads(response.content)
         self.assertFalse(result['status'])
 
-    def test_forward_logic_1(self):
+    def test_coupon_logic_1(self):
         '''
             check SAP001 450 2
             If we have check coupon with this message
@@ -180,7 +180,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
         system.verify_result(input=coupon_status.status, output=1)
 
-    def test_forward_logic_2(self):
+    def test_coupon_logic_2(self):
         '''
             If we have check coupon with this message
             check SAP001 600 2.
@@ -204,7 +204,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
         system.verify_result(input=coupon_status.status, output=5)
 
-    def test_forward_logic_3(self):
+    def test_coupon_logic_3(self):
         '''
             Initial state
             coupon 1 is in unused and valid in b/w (400 - 500)
@@ -233,7 +233,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC0002')
         system.verify_result(input=coupon_status.status, output=5)
 
-    def test_forward_logic_4(self):
+    def test_coupon_logic_4(self):
         '''
             Initial state
             coupon 1 is in in-progress and valid in b/w (400 - 500)
@@ -266,7 +266,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC0002')
         system.verify_result(input=coupon_status.status, output=5)
 
-    def test_forward_logic_5(self):
+    def test_coupon_logic_5(self):
         '''
             Initial state
             coupon 1 is in unused and valid in b/w (400 - 500)
@@ -289,19 +289,19 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         brand.get_coupon_obj(unique_service_coupon='USC0003', vin=self.product_obj, valid_days=90, valid_kms=1500, service_type=3)
 
         sms_dict = {'kms': 1100, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
- 
+
         brand.check_coupon(sms_dict, '55555')
- 
+
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
         system.verify_result(input=coupon_status.status, output=5)
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC0002')
         system.verify_result(input=coupon_status.status, output=5)
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC0003')
         system.verify_result(input=coupon_status.status, output=4)
- 
+
         sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'GMCUSTOMER01'}
         brand.check_coupon(sms_dict, '55555')
- 
+
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
         system.verify_result(input=coupon_status.status, output=4)
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC0002')
@@ -329,10 +329,10 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         system.verify_result(input=coupon_status.status, output=5)
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC0003')
         system.verify_result(input=coupon_status.status, output=5)
-   
- 
+
+
 class BrandData(GladmindsResourceTestCase, BaseTestCase):
- 
+
     def setUp(self):
         TestCase.setUp(self)
         BaseTestCase.setUp(self)
@@ -343,17 +343,17 @@ class BrandData(GladmindsResourceTestCase, BaseTestCase):
             'text': "BRAND BRAND001", 'phoneNumber': self.PHONE_NUMBER}
         self.INVALID_BRAND_ID = {
             'text': "BRAND BRAN", 'phoneNumber': self.PHONE_NUMBER}
- 
+
     '''
     TestCase for getting all products associated with the brand for a customer
     '''
- 
+
     def test_get_all_products_of_a_brand(self):
         brand = self.brand
         system = self.system
         response = brand.send_sms(url=self.MESSAGE_URL, message=self.VALID_BRAND_ID)
         system.verify_result(input=response.status_code, output=200)
- 
+
     def test_get_all_brand(self):
         brand = self.brand
         system = self.system
