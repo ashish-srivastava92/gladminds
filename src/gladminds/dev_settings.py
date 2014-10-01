@@ -77,3 +77,67 @@ MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail DEV"
 FEED_FAILURE_MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail DEV"
+
+# A sample logging configuration. The only tangible logging
+# performed by this configuration is to send an email to
+# the site admins on every HTTP 500 error when DEBUG=False.
+# See http://docs.djangoproject.com/en/dev/topics/logging for
+# more details on how to customize your logging configuration.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(name)-20s: %(levelname)-8s %(message)s'
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
+    'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'gladminds_logs': {
+            'level': 'INFO',
+            'filename': 'log/gladminds/app/gladminds.log',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
+        },
+        'afterbuy_logs': {
+            'level': 'INFO',
+            'filename': 'log/gladminds/app/afterbuy.log',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
+        }
+    },
+
+    'loggers': {
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'gladminds': {
+            'handlers': ['gladminds_logs'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'spyne': {
+            'handlers': ['gladminds_logs'],
+            'level': 'WARN',
+            'propagate': True,
+        }, 'afterbuy': {
+            'handlers': ['afterbuy_logs'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
+    }
+}

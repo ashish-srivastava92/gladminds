@@ -269,13 +269,13 @@ LOGGING = {
         },
         'gladminds_logs': {
             'level': 'INFO',
-            'filename': 'log/gladminds/app/gladminds.log',
+            'filename': 'log/gladminds.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         },
         'afterbuy_logs': {
             'level': 'INFO',
-            'filename': 'log/gladminds/app/afterbuy.log',
+            'filename': 'log/afterbuy.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         }
