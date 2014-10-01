@@ -89,6 +89,15 @@ SUIT_CONFIG = {
 
 MANAGERS = ADMINS
 
+DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
+
+# Mapping is first app name then db name
+DATABASE_APPS_MAPPING = {
+                         'gm': 'default',
+                         'bajaj':'bajaj',
+                         'mock': 'mock'
+                    }
+
 DATABASES = {
     'default': {
         # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
@@ -239,6 +248,7 @@ INSTALLED_APPS = (
     'import_export',
     'gladminds.superadmin',
     'gladminds.gm',
+    'gladminds.mock',
     'gladminds.core',
     'gladminds.bajaj',
     'gladminds',
