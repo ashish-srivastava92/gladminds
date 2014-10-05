@@ -1,7 +1,7 @@
 from tastypie.constants import ALL_WITH_RELATIONS
 from tastypie.authorization import Authorization
 from tastypie import fields
-from gladminds.core import base_models as common
+from gladminds.core import models as common
 from gladminds.apis.baseresource import CustomBaseResource
 from gladminds.apis.product_apis import ProductDataResources
 

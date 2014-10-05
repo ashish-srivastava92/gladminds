@@ -26,10 +26,10 @@ class ServiceAdvisorDealerRelationship(base_models.ServiceAdvisorDealerRelations
         app_label = "bajaj"
         verbose_name_plural = "Service Advisor And Dealer Relationship"
 
-class RegisteredASC(base_models.RegisteredASC):
-    class Meta:
-        app_label = "bajaj"
-        verbose_name_plural = "Registered ASC Form"
+# class RegisteredASC(base_models.RegisteredASC):
+#     class Meta:
+#         app_label = "bajaj"
+#         verbose_name_plural = "Registered ASC Form"
     
 class ServiceDeskUser(base_models.ServiceDeskUser):
     class Meta:
