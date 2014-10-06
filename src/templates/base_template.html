@@ -48,13 +48,13 @@
     {% endblock %}
     {% block body %}
     {% endblock %}
-        <!--[if lt IE 9]>
+        <!--[if IE]>
         	<script src="/static/js/jquery-1.7.1.min.js"></script> 
     	<![endif]-->
 
-    	<!--[if gt IE 8]>
-        	<script src="/static/js/jquery-2.1.1.js"></script> 
-        <![endif]-->
+		<!--[if !IE]><!-->
+			<script src="/static/js/jquery-2.1.1.js"></script> 
+		<!--<![endif]-->
         
 	    <script src="/static/libs/datepicker/js/jquery-ui.js"></script>
 	    <script src="/static/js/bootstrap.js"></script>

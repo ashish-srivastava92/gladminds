@@ -1,7 +1,7 @@
 var Utils = {
 	getFormData : function(className) {
 		var data = $(className).serializeArray();
-		$(className).serializeArray().map(function(x) {
+		$.map(data, function(x) {
 			data[x.name] = x.value;
 		});
 		return data;
