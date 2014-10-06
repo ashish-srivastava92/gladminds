@@ -333,8 +333,8 @@ UCN_RECOVERY_MAIL_DETAIL = {
 
 VIN_DOES_NOT_EXIST_DETAIL = {
     "sender": "support@gladminds.co",
-    "receiver": ["srv.sngh@gmail.com","suresh.narayanan@hashedin.com"],
-    "subject": "Gladminds UCN Recovery Mail",
+    "receiver": ["jojibabu.vege@gladminds.co","ssozarde@bajajauto.co.in","skdixit@bajajauto.co.in","nvhasabnis@bajajauto.co.in"],
+    "subject": "Request for Dispatch feed",
     "body": """""",
 } 
 
