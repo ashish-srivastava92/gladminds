@@ -31,8 +31,8 @@
             "sender": "support@gladminds.co",
             "reciever": "gladminds@hashedin.com",
             "subject": "Send Dispatch Feed", 
-            "body": "Request initiated from: {0}. VIN/Frame No. {1} does not exist in our records. Please send the Dispatch Feed for VIN:{1}",
-            "description": "VIN does not exist"
+            "body": "Request initiated from: {0}. VIN/Frame No. {1} does not exist in GCP database. Request you to send a Dispatch feed for the same.",
+            "description": "Request for Dispatch feed"
         }
     }
 ]
