@@ -48,7 +48,14 @@
     {% endblock %}
     {% block body %}
     {% endblock %}
-        <script src="/static/js/jquery-2.1.1.js"></script>
+        <!--[if lt IE 9]>
+        	<script src="/static/js/jquery-1.7.1.min.js"></script> 
+    	<![endif]-->
+
+    	<!--[if gt IE 8]>
+        	<script src="/static/js/jquery-2.1.1.js"></script> 
+        <![endif]-->
+        
 	    <script src="/static/libs/datepicker/js/jquery-ui.js"></script>
 	    <script src="/static/js/bootstrap.js"></script>
 	    <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
