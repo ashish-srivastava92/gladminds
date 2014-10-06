@@ -158,12 +158,28 @@ def send_ucn_request_alert(data=None):
         context = Context({"content": data})
         body = template.render(context)
         mail_detail = settings.UCN_RECOVERY_MAIL_DETAIL
-        
+
         mail.send_email(sender = mail_detail['sender'], receiver = mail_detail['receiver'], 
                    subject = mail_detail['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception ucn request email]: {0}".format(ex))
+
+
+def send_mail_when_vin_does_not_exist(data=None):
+    from gladminds import mail
+    try:
+        file_stream = open(settings.TEMPLATE_DIR+'/vin_does_not_exist.html')
+        feed_temp = file_stream.read()
+        template = Template(feed_temp)
+        context = Context({"content": data})
+        body = template.render(context)
+        mail_detail = settings.VIN_DOES_NOT_EXIST_DETAIL
+        mail.send_email(sender=mail_detail['sender'], receiver=mail_detail['receiver'],
+                   subject=mail_detail['subject'], body=body,
+                   smtp_server=settings.MAIL_SERVER)
+    except Exception as ex:
+        logger.info("[Exception VIN not found email]: {0}".format(ex))
 
 
 def send_asc_registration_mail(data=None):

@@ -12,7 +12,7 @@ from gladminds.aftersell.models import common as aftersell_common
 from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from gladminds.taskqueue import SqsTaskQueue
-from gladminds.mail import send_ucn_request_alert
+from gladminds.mail import send_ucn_request_alert, send_mail_when_vin_does_not_exist
 
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
@@ -108,9 +108,11 @@ def get_customer_info(data):
     except Exception as ex:
         logger.info(ex)
         message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
+        data = get_email_template('VIN DOES NOT EXIST').body.format(data['current_user'], data['vin'])
+        send_mail_when_vin_does_not_exist(data=data)
         return {'message': message, 'status': 'fail'}
     if product_obj.product_purchase_date:
-        product_data =  format_product_object(product_obj)
+        product_data = format_product_object(product_obj)
         return product_data
     else:
         message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
