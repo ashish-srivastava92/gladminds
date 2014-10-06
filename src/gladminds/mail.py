@@ -15,7 +15,10 @@ def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER
 #   header = "To:{0}\nFrom:{1}\n{2}".format(", ".join(receiver),sender, subject)
 #   msg = "{0}\n{1}\n\n ".format(header, msg)
     msg['Subject'] = subject
-    msg['To'] = ", ".join(receiver)
+    if isinstance(receiver, list):
+        msg['To'] = ", ".join(receiver)
+    else:
+        msg['To'] = receiver
     msg['From'] = "GCP_Bajaj_FSC_Feeds<%s>" % sender
     mail = smtplib.SMTP(smtp_server)
     mail.sendmail(from_addr=sender, to_addrs=receiver, msg=msg.as_string())
@@ -176,8 +179,22 @@ def send_mail_when_vin_does_not_exist(data=None):
                    subject=mail_detail['subject'], body=body,
                    smtp_server=settings.MAIL_SERVER)
     except Exception as ex:
-        logger.info("[Exception ucn request email]: {0}".format(ex))
+        logger.info("[Exception VIN not found email]: {0}".format(ex))
 
 
+def send_asc_registration_mail(data=None):
+    from gladminds import mail
+    try:
+        file_stream = open(settings.TEMPLATE_DIR+'/asc_username_password_email.html')
+        feed_temp = file_stream.read()
+        template = Template(feed_temp)
+        context = Context({"content": data})
+        body = template.render(context)
+        mail_detail = settings.REGISTER_ASC_MAIL_DETAIL
+            
+        mail.send_email(sender = mail_detail['sender'], receiver = data['receiver'], 
+                   subject = mail_detail['subject'], body = body, 
+                   smtp_server = settings.MAIL_SERVER)
+    except Exception as ex:
+        logger.info("[Exception asc registration email]: {0}".format(ex))
     
-

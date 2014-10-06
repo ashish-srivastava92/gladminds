@@ -338,6 +338,14 @@ VIN_DOES_NOT_EXIST_DETAIL = {
     "body": """""",
 } 
 
+REGISTER_ASC_MAIL_DETAIL = {
+    "sender": "support@gladminds.co",
+    "receiver": [],
+    "subject": "ASC Registration Mail",
+    "body": """""",
+} 
+
+
 OTP_MAIL = {
                   "sender":"support@gladminds.co",
                   "subject":"Reset Password",
