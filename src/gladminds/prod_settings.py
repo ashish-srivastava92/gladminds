@@ -57,20 +57,7 @@ TEMPLATE_DIRS = (
 
 FILE_CACHE_DURATION = 0
 
-# SMS_CLIENT = "AIRTEL"
-# SMS_CLIENT_DETAIL={
-#                    'login':'bajajauto',
-#                    'pass':'bajaj',
-#                    'authenticate_url':'http://117.99.128.32:80/login/pushsms.php' ,
-#                    'message_url': 'http://117.99.128.32:80/login/pushsms.php'                  
-#                    }
-
 SMS_CLIENT = "KAP"
-SMS_CLIENT_DETAIL = {'login':'GladMinds1',
-                     'pass':'kap@user!23',
-                     'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
-                     'working_key': '1486415t035t8052c7pc',
-                     'sender_id': 'GLADMS'}
 
 FEED_TYPE = 'CSV'
 
@@ -126,8 +113,6 @@ SQS_QUEUE_NAME = "gladminds-prod"
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail"
 UCN_RECOVERY_MAIL_DETAIL["receiver"] = ["gladminds@hashedin.com"," nvhasabnis@bajajauto.co.in","ssozarde@bajajauto.co.in","jojibabu.vege@gladminds.co","support@gladminds.co"]
-#########################New relic file location########################
-NEW_RELIC_FILE_LOCATION = './src/newrelic.ini'
 ########################################################################
 ###################Change Mail Subject on Prod##########################
 MAIL_DETAIL["subject"]= "GladMinds Feed Report"

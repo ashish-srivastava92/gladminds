@@ -7,7 +7,24 @@ from gladminds import smsparser
 import logging
 logger = logging.getLogger(__name__)
 
-__all__ = ['GladmindsMiddleware']
+__all__ = ['GladmindsMiddleware', 'GladmindsMessageMiddleware']
+SMS_CLIENT = settings.__dict__['_wrapped'].__class__.SMS_CLIENT =  utils.make_tls_property()
+
+"""
+Gladminds middleware to identify the IP from where the message request came
+and reply through the same platform
+"""
+
+class GladmindsMessageMiddleware(object):    
+    #If the request is come on message APIs, then based on the IP we set sms client
+    def process_request(self, request, **kwargs):
+        request_ip = request.META['REMOTE_ADDR']
+        airtel_ip = settings.AIRTEL_IP
+        logger.info('[GladmindsMiddleWare]:: The request is coming from the ip {0} airtel-IP{1}'.format(request_ip, airtel_ip))
+        if request_ip == airtel_ip:
+            SMS_CLIENT.value = 'AIRTEL'
+        else:
+            SMS_CLIENT.value = 'KAP'
 
 """
 Gladminds middleware to identify the user type (i.e Customer, Service Advisor and Admin). 

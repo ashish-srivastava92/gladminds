@@ -8,16 +8,16 @@ from gladminds import mail
 import logging
 from gladminds import taskmanager, feed, export_file, exportfeed
 from gladminds.models import common
-
 logger = logging.getLogger("gladminds")
-
-sms_client = load_gateway()
-
 
 """
 This task send sms to customer on customer registration
 """
 
+def send_sms(**kwargs):
+    sms_client = kwargs.get('sms_client', None)
+    sms_client_gateway = load_gateway(sms_client)
+    response_data = sms_client_gateway.send_stateless(**kwargs)
 
 @shared_task
 def send_registration_detail(*args, **kwargs):
@@ -26,13 +26,33 @@ def send_registration_detail(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        send_sms(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_registration_detail.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         audit_log(status=status, reciever=phone_number, message=message)
+
+
+"""
+This task send customer details recovery by sms 
+"""
+
+
+def customer_detail_recovery(*args, **kwargs):
+    status = "success"
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        send_sms(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        customer_detail_recovery.retry(
+            exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        audit_log(status=status, reciever=phone_number, message=message)
+
 
 """
 This task send customer valid service detail
@@ -45,7 +65,7 @@ def send_service_detail(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        response_data = sms_client.send_stateless(**kwargs)
+        send_sms(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_service_detail.retry(
@@ -64,7 +84,7 @@ def send_coupon_validity_detail(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        send_sms(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_validity_detail.retry(
@@ -84,7 +104,7 @@ def send_coupon_detail_customer(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        send_sms(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_detail_customer.retry(
@@ -103,7 +123,7 @@ def send_reminder_message(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        send_sms(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_reminder_message.retry(
@@ -122,7 +142,7 @@ def send_coupon_close_message(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        send_sms(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_close_message.retry(
@@ -140,7 +160,7 @@ def send_otp(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        send_sms(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_otp.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
@@ -154,7 +174,7 @@ def send_coupon(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        send_sms(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
@@ -172,7 +192,7 @@ def send_close_sms_customer(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        send_sms(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_close_sms_customer.retry(
@@ -187,7 +207,7 @@ def send_brand_sms_customer(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        send_sms(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_brand_sms_customer.retry(
@@ -206,7 +226,7 @@ def send_invalid_keyword_message(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        send_sms(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_invalid_keyword_message.retry(
@@ -226,7 +246,7 @@ def send_on_product_purchase(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        send_sms(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_on_product_purchase.retry(
@@ -422,6 +442,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "send_invalid_keyword_message" : send_invalid_keyword_message,
               
-              "export_customer_reg_to_sap" : export_customer_reg_to_sap 
+              "export_customer_reg_to_sap" : export_customer_reg_to_sap,
+              
+              "customer_detail_recovery": customer_detail_recovery  
 
               }

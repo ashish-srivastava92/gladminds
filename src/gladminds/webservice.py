@@ -220,6 +220,17 @@ class OldFSCModelList(ComplexModel):
     __namespace__ = tns
     OldFSCData = OldFSCModel
 
+class CreditNoteModel(ComplexModel):
+    __namespace__ = tns
+    CHASSIS = Unicode
+    UCN_NO = Unicode
+    SERVICE_TYPE = Unicode
+    CREDIT_NOTE = Unicode
+    CREDIT_DATE = Date
+
+class CreditNoteModelList(ComplexModel):
+    __namespace__ = tns
+    CreditNoteData = Array(CreditNoteModel)
 
 class BrandService(ServiceBase):
     __namespace__ = tns
@@ -261,11 +272,9 @@ class DealerService(ServiceBase):
                     'status': dealer.ACTIVE_FLAG
                 })
             except Exception as ex:
-                ex = "DealerService: {0}  Error on Validating ".format(ex)
-                logger.error("DealerService: {0} Object list element is {1}"
-                             .format(ex, dealer))
-                logger.error(dealer)
+                ex = "DealerService: {0}  Error on Validating {1}".format(dealer, ex)
                 feed_remark.fail_remarks(ex)
+                logger.error(ex)
         feed_remark = save_to_db(feed_type='dealer', data_source=dealer_list,
                               feed_remark=feed_remark)
 
@@ -292,11 +301,9 @@ class ASCService(ServiceBase):
                     'dealer_id': asc_element.KUNNAR
                 })
             except Exception as ex:
-                ex = "ASCService: {0}  Error on Validating ".format(ex)
-                logger.error("DealerService: {0} Object list element is {1}"
-                             .format(ex, asc_element))
-                logger.error(asc_element)
+                ex = "ASCService: {0}  Error on Validating {1}".format(asc_element, ex)
                 feed_remark.fail_remarks(ex)
+                logger.error(ex)
         feed_remark = save_to_db(feed_type='ASC', data_source=asc_list,
                               feed_remark=feed_remark)
         feed_remark.save_to_feed_log()
@@ -326,11 +333,9 @@ class ProductDispatchService(ServiceBase):
                     'coupon_status': settings.DEFAULT_COUPON_STATUS,
                 })
             except Exception as ex:
-                ex = "ProductDispatchService: {0}  Error on Validating"\
-                                                        .format(ex)
+                ex = "ProductDispatchService: {0}  Error on Validating {1}".format(product, ex)
                 feed_remark.fail_remarks(ex)
-                logger.error("ProductDispatchService: {0} Object List is {1}"
-                             .format(ex, product))
+                logger.error(ex)
 
         feed_remark = save_to_db(
             feed_type='dispatch', data_source=product_dispatch_list,
@@ -363,11 +368,9 @@ class ProductPurchaseService(ServiceBase):
                     'veh_reg_no': product.VEH_REG_NO
                 })
             except Exception as ex:
-                ex = "ProductPurchaseService: {0}  Error on Validating "\
-                                                            .format(ex)
-                logger.error("ProductPurchaseService: {0} Object List is {1}"
-                             .format(ex, product))
+                ex = "ProductPurchaseService: {0}  Error on Validating {1}".format(product, ex)
                 feed_remark.fail_remarks(ex)
+                logger.error(ex)
 
         feed_remark = save_to_db(
             feed_type='purchase', data_source=product_purchase_list,
@@ -395,14 +398,42 @@ class OldFscService(ServiceBase):
                 })
               
             except Exception as ex:
-                ex = "OldFscUpdateService: {0}  Error on Validating "\
-                                                            .format(ex)
-                logger.error("OldFscUpdateService: {0} Object List is {1}"
-                             .format(ex, product))
+                ex = "OldFscUpdateService: {0}  Error on Validating {1}".format(fsc, ex)
                 feed_remark.fail_remarks(ex)
+                logger.error(ex)
         feed_remark = save_to_db(
             feed_type='old_fsc', data_source=old_fsc_list,
                                                  feed_remark=feed_remark)
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
+    
+class CreditNoteService(ServiceBase):
+    __namespace__ = tns
+
+    @srpc(CreditNoteModelList, AuthenticationModel, _returns=Unicode)
+    def postCreditNote(ObjectList, Credential):
+        feed_remark = FeedLogWithRemark(len(ObjectList.CreditNoteData),
+                                        feed_type='Credit Note Feed',
+                                        action='Received', status=True)
+        credit_note_list = []
+        for credit_note in ObjectList.CreditNoteData:
+            try:
+                credit_note_list.append({
+                    'vin': credit_note.CHASSIS,
+                    'unique_service_coupon': credit_note.UCN_NO,
+                    'service_type': credit_note.SERVICE_TYPE,
+                    'credit_note': credit_note.CREDIT_NOTE,
+                    'credit_date': credit_note.CREDIT_DATE,
+                })
+
+            except Exception as ex:
+                ex = "CreditNoteService: {0} Error on Validating {1}".format(credit_note, ex)
+                feed_remark.fail_remarks(ex)
+                logger.error(ex)
+
+        feed_remark = save_to_db(
+            feed_type='credit_note', data_source=credit_note_list,
+                                        feed_remark=feed_remark)
         feed_remark.save_to_feed_log()
         return get_response(feed_remark)
 
@@ -431,7 +462,9 @@ ProductDispatchService.event_manager.add_listener(
 ProductPurchaseService.event_manager.add_listener(
     'method_call', _on_method_call)
 
-all_app = Application([BrandService, DealerService, ProductDispatchService, ProductPurchaseService, ASCService, OldFscService],
+all_app = Application([BrandService, DealerService, ProductDispatchService,
+                       ProductPurchaseService, ASCService,
+                       OldFscService, CreditNoteService],
                       tns=tns,
                       in_protocol=Soap11(validator='lxml'),
                       out_protocol=Soap11()
@@ -473,6 +506,12 @@ old_fsc_app = Application([OldFscService],
                            out_protocol=Soap11()
                            )
 
+credit_note_app = Application([CreditNoteService],
+                           tns=tns,
+                           in_protocol=Soap11(validator='lxml'),
+                           out_protocol=Soap11()
+                           )
+
 all_service = csrf_exempt(DjangoApplication(all_app))
 brand_service = csrf_exempt(DjangoApplication(brand_app))
 dealer_service = csrf_exempt(DjangoApplication(dealer_app))
@@ -480,3 +519,4 @@ asc_service = csrf_exempt(DjangoApplication(asc_app))
 dispatch_service = csrf_exempt(DjangoApplication(dispatch_app))
 purchase_service = csrf_exempt(DjangoApplication(purchase_app))
 old_fsc_service = csrf_exempt(DjangoApplication(old_fsc_app))
+credit_note_service = csrf_exempt(DjangoApplication(credit_note_app))

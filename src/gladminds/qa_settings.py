@@ -65,11 +65,6 @@ FILE_CACHE_DURATION = 0
 #                    }
 
 SMS_CLIENT = "KAP"
-SMS_CLIENT_DETAIL = {'login':'GladMinds1',
-                     'pass':'kap@user!23',
-                     'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
-                     'working_key': '1486415t035t8052c7pc',
-                     'sender_id': 'GLADMS'}
 
 FEED_TYPE = 'CSV'
 

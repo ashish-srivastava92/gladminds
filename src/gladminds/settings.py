@@ -14,7 +14,8 @@ DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
 ALLOWED_HOSTS = ['*']
 
 ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
-                    'service', 'check': 'a', 'close': 'c', 'brand': 'brand'}
+                    'service', 'check': 'a', 'close': 'c', 'brand': 'brand',
+                    'customer_detail_recovery': 'r'}
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -185,7 +186,8 @@ MIDDLEWARE_CLASSES = (
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    #'gladminds.middleware.GladmindsMiddleware'
+    'gladminds.middleware.GladmindsMessageMiddleware'
+#     'gladminds.middleware.GladmindsMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -267,13 +269,13 @@ LOGGING = {
         },
         'gladminds_logs': {
             'level': 'INFO',
-            'filename': 'log/gladminds/app/gladminds.log',
+            'filename': '/var/log/gladminds/gladminds.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         },
         'afterbuy_logs': {
             'level': 'INFO',
-            'filename': 'log/gladminds/app/afterbuy.log',
+            'filename': '/var/log/gladminds/afterbuy.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         }
@@ -395,5 +397,16 @@ TEMP_SA_ID_PREFIX = 'SA'
 FEED_FAILURE_MAIL_ENABLED = True
 ##########################################################################
 #########################New relic file location########################
-NEW_RELIC_FILE_LOCATION = './src/newrelic_qa.ini'
+NEW_RELIC_FILE_LOCATION = './src/'
 ########################################################################
+AIRTEL_IP = '54.84.243.77'
+SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
+                              'pass':'bajaj',
+                              'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',
+                              'message_url': 'http://117.99.128.32:80/login/pushsms.php'},
+                  'KAP': {'login':'GladMinds1',
+                          'pass':'kap@user!23',
+                          'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
+                          'working_key': '1486415t035t8052c7pc',
+                          'sender_id': 'GLADMS'}
+                  }

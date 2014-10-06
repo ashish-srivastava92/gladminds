@@ -28,9 +28,10 @@ sys.path.append(PROJECT_DIR)
 #Change the app_name.settings to your app_name, for example lithium.settings
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gladminds.settings")
 
-NEW_RELIC = os.environ.get('NEW_RELIC')
+NEW_RELIC = os.environ.get('NEW_RELIC', 'newrelic_prod.ini')
 from django.conf import settings
-newrelic.agent.initialize(settings.NEW_RELIC_FILE_LOCATION)
+NEW_RELIC_FILE = settings.NEW_RELIC_FILE_LOCATION + NEW_RELIC
+newrelic.agent.initialize(NEW_RELIC_FILE)
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION

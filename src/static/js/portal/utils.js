@@ -6,6 +6,13 @@ var Utils = {
 		});
 		return data;
 	},
+	
+	showErrorMessage : function(message, fadeIn, fadeOut){
+		var messageBlock = $(".user-message .message");
+	      	messageBlock.text(message);
+	      	messageBlock.stop().fadeOut(0);
+	      	messageBlock.fadeIn(fadeIn).fadeOut(fadeOut);
+	},
 
 	submitForm : function(event, data, url) {
 		// Items are hidden
@@ -30,7 +37,7 @@ var Utils = {
 			},
 			error : function() {
 				waitingModal.modal("hide");
-				messageBlock.text("Invalid Data");
+				messageBlock.text("Some error occurred. Please contact customer support: +91-9741775128");
 				messageModal.modal("show");
 			}
 		});

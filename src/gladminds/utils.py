@@ -61,24 +61,20 @@ def get_phone_number_format(phone_number):
     return phone_number[-10:]
 
 
-def save_otp(token, phone_number, email):
-    user = aftersell_common.RegisteredASC.objects.filter(phone_number=mobile_format(phone_number))[0].user
-    if email and user.email_id != email:
-        raise
+def save_otp(token, user):
     common.OTPToken.objects.filter(user=user).delete()
-    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=email)
+    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=user.email)
     token_obj.save()
 
-def get_token(phone_number, email=''):
+def get_token(user, phone_number):
     totp=TOTP(TOTP_SECRET_KEY+str(randint(10000,99999))+str(phone_number))
     totp.time=30
     token = totp.token()
-    save_otp(token, phone_number, email)
+    save_otp(token, user)
     return token
 
-def validate_otp(otp, phone):
-    asc = aftersell_common.RegisteredASC.objects.filter(phone_number=mobile_format(phone))[0].user
-    token_obj = common.OTPToken.objects.filter(user=asc)[0]
+def validate_otp(otp, name):
+    token_obj = common.OTPToken.objects.filter(user__username=name)[0]
     if int(otp) == int(token_obj.token) and (timezone.now()-token_obj.request_date).seconds <= OTP_VALIDITY:
         return True
     elif (timezone.now()-token_obj.request_date).seconds > OTP_VALIDITY:
@@ -106,27 +102,25 @@ def format_product_object(product_obj):
             'purchase_date': purchase_date,
             'vin': product_obj.vin}
 
-def get_customer_info(request):
-    data=request.POST
+def get_customer_info(data):
     try:
         product_obj = common.ProductData.objects.get(vin=data['vin'])
     except Exception as ex:
         logger.info(ex)
-        message = '''VIN '{0}' does not exist in our records.'''.format(data['vin'])
-        data = get_email_template('VIN DOES NOT EXIST').body.format(request.user, data['vin'])
+        message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
+        data = get_email_template('VIN DOES NOT EXIST').body.format(data['current_user'], data['vin'])
         send_mail_when_vin_does_not_exist(data=data)
-
         return {'message': message, 'status': 'fail'}
     if product_obj.product_purchase_date:
-        product_data =  format_product_object(product_obj)
+        product_data = format_product_object(product_obj)
         return product_data
     else:
-        message = '''VIN '{0}' has no associated customer.'''.format(data['vin'])
+        message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
         return {'message': message}
 
-def get_sa_list(request):
+def get_sa_list(user):
     dealer = aftersell_common.RegisteredDealer.objects.filter(
-                dealer_id=request.user)[0]
+                dealer_id=user)[0]
     service_advisors = aftersell_common.ServiceAdvisorDealerRelationship.objects\
                                 .filter(dealer_id=dealer, status='Y')
     sa_phone_list = []
@@ -134,40 +128,49 @@ def get_sa_list(request):
         sa_phone_list.append(service_advisor.service_advisor_id)
     return sa_phone_list
 
-def recover_coupon_info(request):
-    coupon_data = get_coupon_info(request)
-    ucn_recovery_obj = upload_file(request)
-    send_recovery_email_to_admin(ucn_recovery_obj, coupon_data)
-    message = 'UCN for customer {0} is {1}.'.format(coupon_data.vin.sap_customer_id,
-                                                coupon_data.unique_service_coupon) 
-    return {'status': True, 'message': message}
-    
-def get_coupon_info(request):
-    data=request.POST
+def recover_coupon_info(data):
     customer_id = data['customerId']
-    logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, request.user))
-    product_data = common.ProductData.objects.filter(sap_customer_id=customer_id)[0]
-    coupon_data = common.CouponData.objects.filter(vin=product_data, status=4)[0]
+    logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, data['current_user']))
+    coupon_data = get_coupon_info(data)
+    if coupon_data:
+        ucn_recovery_obj = upload_file(data, coupon_data.unique_service_coupon)
+        send_recovery_email_to_admin(ucn_recovery_obj, coupon_data)
+        message = 'UCN for customer {0} is {1}.'.format(customer_id,
+                                                    coupon_data.unique_service_coupon)
+        return {'status': True, 'message': message}
+    else:
+        message = 'No coupon in progress for customerID {0}.'.format(customer_id) 
+        return {'status': False, 'message': message}
+    
+def get_coupon_info(data):
+    customer_id = get_updated_customer_id(data['customerId'])
+    try:
+        coupon_data = common.CouponData.objects.get(vin__sap_customer_id=customer_id, status=4)
+        coupon_data.special_case = True
+        coupon_data.save()
+    except Exception as ex:
+        coupon_data = None
+        logger.error('[UCN_RECOVERY_ERROR]:: {0}'.format(ex))
     return coupon_data
 
-def upload_file(request):
-    data = request.POST
-    user_obj = request.user
-    file_obj = request.FILES['jobCard']
+def upload_file(data, unique_service_coupon):
+    user_obj = data['current_user']
+    file_obj = data['job_card']
     customer_id = data['customerId']
     reason = data['reason']
-    customer_id = request.POST['customerId']
-    file_obj.name = get_file_name(request, file_obj)
+    file_obj.name = get_file_name(data, file_obj)
     #TODO: Include Facility to get brand name here
     destination = settings.JOBCARD_DIR.format('bajaj')
     path = uploadFileToS3(destination=destination, file_obj=file_obj, 
                           bucket=settings.JOBCARD_BUCKET, logger_msg="JobCard")
-    ucn_recovery_obj = aftersell_common.UCNRecovery(reason=reason, user=user_obj, sap_customer_id=customer_id, file_location=path)
+    ucn_recovery_obj = aftersell_common.UCNRecovery(reason=reason, user=user_obj,
+                                        sap_customer_id=customer_id, file_location=path,
+                                        unique_service_coupon=unique_service_coupon)
     ucn_recovery_obj.save()
     return ucn_recovery_obj
 
-def get_file_name(request, file_obj):
-    requester = request.user
+def get_file_name(data, file_obj):
+    requester = data['current_user']
     if 'dealers' in requester.groups.all():
         filename_prefix = requester
     else:
@@ -175,7 +178,7 @@ def get_file_name(request, file_obj):
         filename_prefix = requester
     filename_suffix = str(uuid.uuid4())
     ext = file_obj.name.split('.')[-1]
-    customer_id = request.POST['customerId']
+    customer_id = data['customerId']
     return str(filename_prefix)+'_'+customer_id+'_'+filename_suffix+'.'+ext
     
 def stringify_groups(user):
@@ -256,20 +259,19 @@ def subtract_dates(start_date, end_date):
     end_date = datetime.strptime(end_date, "%Y-%m-%d") 
     return start_date - end_date
 
-def search_details(request):
-    data = request.POST
+def search_details(data):
     kwargs = {}
     search_results = []
     if data.has_key('VIN'):
         kwargs[ 'vin' ] = data['VIN']
     elif data.has_key('Customer-ID'):
-        kwargs[ 'sap_customer_id' ] = data['Customer-ID']
+        kwargs[ 'sap_customer_id' ] = get_updated_customer_id(data['Customer-ID'])
     elif data.has_key('Customer-Mobile'):
         kwargs[ 'customer_phone_number__phone_number' ] = mobile_format(data['Customer-Mobile'])
     product_obj = common.ProductData.objects.filter(**kwargs)
     if not product_obj or not product_obj[0].product_purchase_date:
         key = data.keys()
-        message = '''Customer details for {0} '{1}' not found.'''.format(key[0], data[key[0]])
+        message = '''Customer details for {0} '{1}' not found. Please contact customer support: +91-9741775128.'''.format(key[0], data[key[0]])
         logger.info(message)
         return {'message': message}
     for product in product_obj:
@@ -277,18 +279,16 @@ def search_details(request):
         search_results.append(data)    
     return search_results
 
-def services_search_details(request):
-    data = request.POST
+def services_search_details(data):
     key = data.keys()
-    message = '''No Service Details available for {0} '{1}'.'''.format(key[0], data[key[0]])
+    message = '''No Service Details available for {0} '{1}'. Please contact customer support: +91-9741775128.'''.format(key[0], data[key[0]])
     kwargs = {}
     response = {}
     search_results = []
     if data.has_key('VIN'):
         kwargs[ 'vin' ] = data['VIN']
     elif data.has_key('Customer-ID'):
-        kwargs[ 'sap_customer_id' ] = data['Customer-ID']
-        
+        kwargs[ 'sap_customer_id' ] = get_updated_customer_id(data['Customer-ID'])
     product_obj = common.ProductData.objects.filter(**kwargs)
     if len(product_obj) == 1:
         if not product_obj[0].product_purchase_date:
@@ -329,4 +329,63 @@ def get_search_query_params(request, class_self):
 def get_min_and_max_filter_date():
     import datetime
     return (datetime.date.today() - datetime.timedelta(6*365/12)).isoformat(), (datetime.date.today()).isoformat()
-            
+
+def get_updated_customer_id(customer_id):
+    if customer_id and customer_id.find('T') == 0:
+        try:
+            temp_customer_obj = common.CustomerTempRegistration.objects.select_related('product_data').\
+                                       get(temp_customer_id=customer_id)
+            customer_id = temp_customer_obj.product_data.sap_customer_id
+        except Exception as ex:
+            logger.info("Temporary ID {0} does not exists: {1}".format(customer_id, ex))
+    return customer_id
+
+def service_advisor_search(data):
+    dealer_data = aftersell_common.RegisteredDealer.objects.get(
+                dealer_id=data['current_user'])
+    sa_phone_number = mobile_format(data['phone_number'])
+    message = sa_phone_number + ' is active under another dealer.'
+    
+    sa_details = aftersell_common.ServiceAdvisorDealerRelationship.objects.select_related(
+                    'service_advisor_id').filter(service_advisor_id__phone_number=sa_phone_number,
+                                dealer_id=dealer_data)
+
+    sa_mobile_active = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(
+                            service_advisor_id__phone_number=sa_phone_number,
+                            status='Y').exclude(dealer_id=dealer_data)
+    if not sa_details and not sa_mobile_active:
+        message = 'Service advisor is not associated, Please register the service advisor.'
+        return {'message': message}
+    if sa_details:
+        service_advisor_details = {'id': sa_details[0].service_advisor_id.service_advisor_id,
+                                   'phone': data['phone_number'], 
+                                   'name': sa_details[0].service_advisor_id.name, 
+                                   'status': sa_details[0].status,
+                                   'active':len(sa_mobile_active),
+                                   'message':message}
+        return service_advisor_details
+    return {'message': message, 'status': 'fail'}
+
+
+def make_tls_property(default=None):
+    """Creates a class-wide instance property with a thread-specific value."""
+    class TLSProperty(object):
+        def __init__(self):
+            from threading import local
+            self.local = local()
+
+        def __get__(self, instance, cls):
+            if not instance:
+                return self
+            return self.value
+
+        def __set__(self, instance, value):
+            self.value = value
+
+        def _get_value(self):
+            return getattr(self.local, 'value', default)
+        def _set_value(self, value):
+            self.local.value = value
+        value = property(_get_value, _set_value)
+
+    return TLSProperty()
