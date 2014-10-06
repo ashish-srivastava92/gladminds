@@ -22,5 +22,17 @@
             "body": "User {0} has requested service type {1} UCN for customer {2} with actual kms {3}.\nReason: {4}.\n\n jobcard Uploaded {5}",
             "description": "UCN request Alert"
         }
+    },
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 3,
+        "fields": {
+            "template_key": "VIN DOES NOT EXIST",
+            "sender": "support@gladminds.co",
+            "reciever": "gladminds@hashedin.com",
+            "subject": "Send Dispatch Feed", 
+            "body": "Request initiated from: {0}. VIN/Frame No. {1} does not exist in our records. Please send the Dispatch Feed for VIN:{1}",
+            "description": "VIN does not exist"
+        }
     }
 ]
