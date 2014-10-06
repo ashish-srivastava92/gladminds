@@ -327,6 +327,13 @@ UCN_RECOVERY_MAIL_DETAIL = {
     "receiver": ["gladminds@hashedin.com"],
     "subject": "Gladminds UCN Recovery Mail",
     "body": """""",
+}
+
+VIN_DOES_NOT_EXIST_DETAIL = {
+    "sender": "support@gladminds.co",
+    "receiver": ["jojibabu.vege@gladminds.co","ssozarde@bajajauto.co.in","skdixit@bajajauto.co.in","nvhasabnis@bajajauto.co.in"],
+    "subject": "Gladminds UCN Recovery Mail",
+    "body": """""",
 } 
 
 OTP_MAIL = {
