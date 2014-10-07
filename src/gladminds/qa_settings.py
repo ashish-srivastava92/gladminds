@@ -120,6 +120,7 @@ SQS_QUEUE_NAME = "gladminds-qa"
 ######################################
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail QA"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail QA"
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["srv.sngh92@yahoo.com","priyanka.n@hashedin.com","somit@hashedin.com","suresh@hashedin.com","chandan.patel@hashedin.com","naureen.razi@hashedin.com"]
 ###################Change Mail Subject on QA##########################
 MAIL_DETAIL["subject"]= "GladMinds Feed Report QA"
 MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com", 'sourabh.gupta@hashedin.com']

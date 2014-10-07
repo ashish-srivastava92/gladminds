@@ -333,17 +333,17 @@ UCN_RECOVERY_MAIL_DETAIL = {
 
 VIN_DOES_NOT_EXIST_DETAIL = {
     "sender": "support@gladminds.co",
-    "receiver": ["jojibabu.vege@gladminds.co","ssozarde@bajajauto.co.in","skdixit@bajajauto.co.in","nvhasabnis@bajajauto.co.in"],
+    "receiver": [],
     "subject": "Request for Dispatch feed",
     "body": """""",
-} 
+}
 
 REGISTER_ASC_MAIL_DETAIL = {
     "sender": "support@gladminds.co",
     "receiver": [],
     "subject": "ASC Registration Mail",
     "body": """""",
-} 
+}
 
 
 OTP_MAIL = {
