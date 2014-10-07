@@ -113,6 +113,7 @@ SQS_QUEUE_NAME = "gladminds-prod"
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail"
 UCN_RECOVERY_MAIL_DETAIL["receiver"] = ["gladminds@hashedin.com"," nvhasabnis@bajajauto.co.in","ssozarde@bajajauto.co.in","jojibabu.vege@gladminds.co","support@gladminds.co"]
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["jojibabu.vege@gladminds.co","ssozarde@bajajauto.co.in","skdixit@bajajauto.co.in","nvhasabnis@bajajauto.co.in"]
 ########################################################################
 ###################Change Mail Subject on Prod##########################
 MAIL_DETAIL["subject"]= "GladMinds Feed Report"
