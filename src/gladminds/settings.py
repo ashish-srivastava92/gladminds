@@ -267,6 +267,11 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
+         'console':{
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
         'gladminds_logs': {
             'level': 'INFO',
             'filename': '/var/log/gladminds/gladminds.log',
@@ -288,16 +293,16 @@ LOGGING = {
             'propagate': True,
         },
         'gladminds': {
-            'handlers': ['gladminds_logs'],
+            'handlers': ['gladminds_logs','console'],
             'level': 'INFO',
             'propagate': True,
         },
         'spyne': {
-            'handlers': ['gladminds_logs'],
+            'handlers': ['gladminds_logs','console'],
             'level': 'WARN',
             'propagate': True,
         }, 'afterbuy': {
-            'handlers': ['afterbuy_logs'],
+            'handlers': ['afterbuy_logs','console'],
             'level': 'DEBUG',
             'propagate': True,
         }

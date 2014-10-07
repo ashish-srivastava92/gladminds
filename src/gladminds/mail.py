@@ -191,7 +191,7 @@ def send_asc_registration_mail(data=None):
         context = Context({"content": data})
         body = template.render(context)
         mail_detail = settings.REGISTER_ASC_MAIL_DETAIL
-            
+
         mail.send_email(sender = mail_detail['sender'], receiver = data['receiver'], 
                    subject = mail_detail['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
