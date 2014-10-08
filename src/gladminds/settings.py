@@ -420,6 +420,6 @@ SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                   'KAP': {'login':'GladMinds1',
                           'pass':'kap@user!23',
                           'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
-                          'working_key': '1486415t035t8052c7pc',
+                          'working_key': '2uj6gnnnlbx37x436cppq87176j660w9',
                           'sender_id': 'GLADMS'}
                   }
