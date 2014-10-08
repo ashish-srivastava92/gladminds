@@ -109,15 +109,16 @@
             	if (data['message']) {
                     messageBlock.text(data.message);
                     messageModal.modal('show');
+            	}else{
+	            	if (service_detail.length > 0) {
+	            		var details_html = "<div class='other-details'><label class='control-label'>VIN:&nbsp</label>"+ other_details.vin +"<br><label class='control-label'>Customer Id:&nbsp</label>"+ other_details.customer_id +"<br><label class='control-label'>Customer Name:&nbsp</label>"+ other_details.customer_name +"</div>",
+	            			table = $(".status-search-results tbody");
+	            			$('.status-result-detail').append(details_html);
+	            			$.each(service_detail, function(idx, elem){
+	            				table.append("<tr class='search-detail'><td>"+elem.service_type+"</td><td>"+elem.status+"</td></tr>");
+	            			});
+	            	}
             	}
-            	if (service_detail.length > 0) {
-            		var details_html = "<div class='other-details'><label class='control-label'>VIN:&nbsp</label>"+ other_details.vin +"<br><label class='control-label'>Customer Id:&nbsp</label>"+ other_details.customer_id +"<br><label class='control-label'>Customer Name:&nbsp</label>"+ other_details.customer_name +"</div>",
-            			table = $(".status-search-results tbody");
-            			$('.status-result-detail').append(details_html);
-            			$.each(service_detail, function(idx, elem){
-            				table.append("<tr class='search-detail'><td>"+elem.service_type+"</td><td>"+elem.status+"</td></tr>");
-            			});
-            	}	
             },
             error: function() {
             	messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
