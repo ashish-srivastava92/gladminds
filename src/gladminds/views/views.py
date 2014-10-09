@@ -255,7 +255,7 @@ def servicedesk(request, servicedesk=None):
             'helpdesk': get_sa_list
             }
         try:
-            data = data_mapping[servicedesk](request)
+            data = data_mapping[servicedesk](request.user)
         except:
             #It is acceptable if there is no data_mapping defined for a function
             pass
