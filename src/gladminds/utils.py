@@ -118,7 +118,7 @@ def get_customer_info(data):
 
 def get_sa_list(user):
     dealer = aftersell_common.RegisteredDealer.objects.filter(
-                dealer_id=user)[0]
+                dealer_id=str(user))[0]
     service_advisors = aftersell_common.ServiceAdvisorDealerRelationship.objects\
                                 .filter(dealer_id=dealer, status='Y')
     sa_phone_list = []
