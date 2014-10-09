@@ -3,72 +3,191 @@ from gladminds.core.base_models import *
 
 
 class ASCSaveForm(ASCSaveForm):
-    pass
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "ASC Save Form"
+
 
 class UCNRecovery(UCNRecovery):
-    pass
+    user_id = models.ForeignKey(UserProfile, related_name='core_ucn_recovery')
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "UCN recovery logs"
 
-class RegisteredDealer(ServiceAdvisor):
-    pass
+
+class RegisteredDealer(RegisteredDealer):
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "Dealer Data"
+
 
 class ServiceAdvisor(ServiceAdvisor):
-    pass
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "Service Advisor Data"
+
 
 class ServiceAdvisorDealerRelationship(ServiceAdvisorDealerRelationship):
-    pass
+    dealer_id = models.ForeignKey(RegisteredDealer, null=False)
+    service_advisor_id = models.ForeignKey(ServiceAdvisor, null=False)
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "Service Advisor And Dealer Relationship"
 
-class RegisteredASC(RegisteredASC):
-    pass
+
+# class RegisteredASC(RegisteredASC):
+#     pass
+    
     
 class ServiceDeskUser(ServiceDeskUser):
-    pass
+    user = models.OneToOneField(UserProfile, null=True, blank=True, related_name='core_service_desk_user')
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "service desk users"
+
 
 class Feedback(Feedback):
-    pass
+    assign_to = models.ForeignKey(ServiceDeskUser, null=True, blank= True)
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "user feedback info"
+        
         
 class Comments(Comments):
-    pass
+    feedback_object = models.ForeignKey(Feedback, null=False, blank=False)
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "user comment info"    
+    
 
 class UploadProductCSV(UploadProductCSV):
-    pass
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "Upload Product Data"
+
 
 class BrandData(BrandData):
-    pass
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "Brand Data"
+
 
 class ProductTypeData(ProductTypeData):
-    pass
-
+    brand_id = models.ForeignKey(BrandData, null=False, related_name='core_product_type_date')
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "Product Type"
+    
+    
 class ProductData(ProductData):
-    pass
+    customer_phone_number = models.ForeignKey(
+        GladMindUsers, null=True, blank=True, related_name='core_product_date')
+    product_type = models.ForeignKey(ProductTypeData, null=True, blank=True)
+    dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
+
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "Product Data"
+
 
 class CouponData(CouponData):
-    pass
+    vin = models.ForeignKey(ProductData, null=False, editable=False)
+    sa_phone_number = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
+    servicing_dealer = models.ForeignKey(RegisteredDealer, null=True, blank=True)
+
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "Coupon Information"
+
+
+##################################################################
+#############Service Advisor and Coupon Relationship MODEL########
+
 
 class ServiceAdvisorCouponRelationship(ServiceAdvisorCouponRelationship):
-    pass
+    unique_service_coupon = models.ForeignKey(CouponData, null=False)
+    service_advisor_phone = models.ForeignKey(ServiceAdvisor, null=False)
+    dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
+
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = 'Service Advisor And Coupon Relationship'
+
 
 class MessageTemplate(MessageTemplate):
-    pass
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "Message Template"
+
 
 class OTPToken(OTPToken):
-    pass
+    user = models.ForeignKey(UserProfile, null=True, blank=True, related_name='core_otp_token')
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "OTPs"
+
 
 class EmailTemplate(EmailTemplate):
-    pass
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "Email Template"
+
 
 class SASaveForm(SASaveForm):
-    pass
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "SA Save Form"
+
 
 class CustomerTempRegistration(CustomerTempRegistration):
-    pass
+    product_data = models.ForeignKey(ProductData, null=True, blank=True)
+
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "Customer temporary info"
+
+######################################################################################
 
 class ProductInsuranceInfo(ProductInsuranceInfo):
-    pass
+    product = models.ForeignKey(ProductData, null=False)
+
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "product insurance info"
+    
+#######################################################################################
 
 class ProductWarrantyInfo(ProductWarrantyInfo):
-    pass
+    product = models.ForeignKey(ProductData, null=False)
+
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "product warranty info"
+        
+########################################################################################
 
 class SparesData(SparesData):
-    pass
+    spare_brand = models.ForeignKey(BrandData, null=False)
+    
+    class Meta:
+        app_label = "core"
+        verbose_name_plural = "spares data"
+    
+#########################################################################################
 
-from gladminds.core.models import *
+# from gladminds.core.models import *

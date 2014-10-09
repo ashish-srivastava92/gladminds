@@ -6,7 +6,7 @@ from suit.admin import SortableTabularInline
 from suit.widgets import EnclosedInput, AutosizedTextarea
 from django.forms import ModelForm
 from django.contrib.admin.models import LogEntry
-from gladminds.core.base_models import GladMindUsers, ProductTypeData, \
+from gladminds.core.models import GladMindUsers, ProductTypeData, \
     BrandData, ProductData, CouponData, MessageTemplate,\
     UploadProductCSV, CustomerTempRegistration,\
     RegisteredDealer, ServiceAdvisorDealerRelationship, ServiceAdvisor,\
