@@ -709,13 +709,13 @@ def generate_otp(request):
     try:
         customer_data = common.GladMindUsers.objects.get(phone_number=mobile_format(phone_number))
         if not customer_data.user:
-            user = feed.registerNewUser('customer', username=customer_data.gladmind_customer_id)
+            user = feed.register_user('customer', username=customer_data.gladmind_customer_id)
     except ObjectDoesNotExist as odne:
         logger.info(
             '[Exception: New_customer_data]: {0}'.format(odne))
         # Register this customer
         gladmind_customer_id = utils.generate_unique_customer_id()
-        user = feed.registerNewUser('customer', username=gladmind_customer_id)
+        user = feed.register_user('customer', username=gladmind_customer_id)
         customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, 
                                              phone_number=mobile_format(phone_number), 
                                              registration_date=datetime.now())

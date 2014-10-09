@@ -115,6 +115,10 @@ class SAPFeed(object):
             fsc_obj = OldFscFeed(data_source=data_source,
                                                feed_remark=feed_remark)
             return fsc_obj.import_data()
+        elif feed_type == 'credit_note':
+            credit_note_obj = CreditNoteFeed(data_source=data_source,
+                                               feed_remark=feed_remark)
+            return credit_note_obj.import_data()
 
 
 class BaseFeed(object):
@@ -559,6 +563,28 @@ class OldFscFeed(BaseFeed):
             except Exception as ex:
                 ex = "[Exception: OLD_FSC_FEED]: For VIN {0} coupon of service type {1}:: {2}".format(
                             fsc['vin'], fsc['service'], ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+        return self.feed_remark
+
+class CreditNoteFeed(BaseFeed):
+    
+    def import_data(self):
+        for credit_note in self.data_source:
+            try:
+                coupon_data = common.CouponData.objects.get(vin__vin=credit_note['vin'],
+                                    unique_service_coupon=credit_note['unique_service_coupon'],
+                                    service_type=int(credit_note['service_type']))
+                coupon_data.credit_note = credit_note['credit_note']
+                coupon_data.credit_date = credit_note['credit_date']
+                coupon_data.save()
+                logger.info("updated credit details:: vin : {0} coupon : {1} service_type : {2}".format(
+                            credit_note['vin'], credit_note['unique_service_coupon'],
+                            credit_note['service_type']))
+            except Exception as ex:
+                ex = "[Exception: CREDIT_NOTE_FEED]: For VIN {0} with coupon {1} of service type {2}:: {3}".format(
+                            credit_note['vin'], credit_note['unique_service_coupon'],
+                            credit_note['service_type'], ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         return self.feed_remark

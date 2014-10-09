@@ -82,7 +82,7 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
         user_servicedesk_info = User.objects.filter(username='sdo')
         service_desk = aftersell_common.ServiceDeskUser(user = user_servicedesk_info[0], phone_number = '+917760814041', email_id = 'srv.sngh@gmail.com',  designation = 'SDM' )
         service_desk.save()
-        data = {"Assign_To":"+917760814041","status":"Open","Priority":"High","comments":"ssss", "rootcause":"ssss", "resolution":"ssssss","due_date":'12/08/1922' }
+        data = {"Assign_To":"+917760814041","status":"Open","Priority":"High","comments":"ssss", "rootcause":"ssss", "resolution":"ssssss","due_date":'12/08/1922', 'reporter_status':False}
         response = client.post("/aftersell/feedbackdetails/1/", data=data)
         log_len_after = logs.AuditLog.objects.all()
         self.assertEqual(log_len_after[1].reciever, "9999999998")
@@ -97,7 +97,7 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
         user_servicedesk_info = User.objects.filter(username='sdoo')
         service_desk = aftersell_common.ServiceDeskUser(user = user_servicedesk_info[0], phone_number = '+919727071081', email_id = 'srv.sngh@gmail.com',  designation = 'SDM' )
         service_desk.save()
-        data = {"Assign_To":"+917760814041","status":"Resolved","Priority":"High","comments":"ssss", "rootcause":"ssss", "resolution":"ssssss","due_date":'12/08/1922' }
+        data = {"Assign_To":"+917760814041","status":"Resolved","Priority":"High","comments":"ssss", "rootcause":"ssss", "resolution":"ssssss","due_date":'12/08/1922', 'reporter_status':False}
         response = client.post("/aftersell/feedbackdetails/1/", data=data)
         log_len_after = logs.AuditLog.objects.all()
         self.assertEqual(log_len_after[1].reciever, "9999999998")
@@ -113,7 +113,7 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
         user_servicedesk_info = User.objects.filter(username='sdoo')
         service_desk = aftersell_common.ServiceDeskUser(user = user_servicedesk_info[0], phone_number = '+919727071081', email_id = 'srv.sngh@gmail.com',  designation = 'SDM' )
         service_desk.save()
-        data = {"Assign_To":'',"status":"Resolved","Priority":"High","comments":"ssss", "rootcause":"ssss", "resolution":"ssssss","due_date":'12/08/1922' }
+        data = {"Assign_To":'',"status":"Resolved","Priority":"High","comments":"ssss", "rootcause":"ssss", "resolution":"ssssss","due_date":'12/08/1922', 'reporter_status':False}
         response = client.post("/aftersell/feedbackdetails/1/", data=data)
         log_len_after = logs.AuditLog.objects.all()
         self.assertEqual(log_len_after[1].reciever, "9999999998")
@@ -121,7 +121,7 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
             
     def test_updated_feedback(self):
         log_len_after = logs.AuditLog.objects.all()
-        data = {"Assign_To":'',"status":"Closed","Priority":"High","comments":"ssss","rootcause":"ssss", "resolution":"ssssss","due_date":'12/08/1922' }
+        data = {"Assign_To":'',"status":"Closed","Priority":"High","comments":"ssss","rootcause":"ssss", "resolution":"ssssss","due_date":'12/08/1922', 'reporter_status':False}
         response = client.post("/aftersell/feedbackdetails/1/", data=data)
         feedbacks = aftersell_common.Feedback.objects.filter(priority = 'High')
         log_len_after = logs.AuditLog.objects.all()
