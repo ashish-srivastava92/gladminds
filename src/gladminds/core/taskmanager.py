@@ -3,7 +3,7 @@ from gladminds.core import audit, utils, message_template as templates
 from gladminds.aftersell.models import logs
 from gladminds.core import base_models as common
 from datetime import datetime, timedelta
-from gladminds.core.base_models import CouponData, STATUS_CHOICES
+from gladminds.core.models import CouponData, STATUS_CHOICES
 from django.utils import timezone
 from django.db.models import Q
 from gladminds.core.utils import COUPON_STATUS
@@ -18,7 +18,7 @@ def get_customers_to_send_reminder(*args, **kwargs):
     day = kwargs.get('reminder_day', None)
     today_date = datetime.now().date()
     reminder_date = datetime.now().date()+timedelta(days=day)
-    results = common.CouponData.objects.select_for_update().filter(mark_expired_on__range=(today_date, reminder_date), last_reminder_date__isnull=True, status=1).select_related('vin', 'customer_phone_number__phone_number')
+    results = CouponData.objects.select_for_update().filter(mark_expired_on__range=(today_date, reminder_date), last_reminder_date__isnull=True, status=1).select_related('vin', 'customer_phone_number__phone_number')
     for reminder in results:
         product = reminder.vin
         phone_number = product.customer_phone_number.phone_number

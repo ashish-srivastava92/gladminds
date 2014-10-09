@@ -13,7 +13,7 @@ from gladminds.health_check import health_check_view
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
-admin.autodiscover()
+# admin.autodiscover()
 
 api_v1 = Api(api_name="v1")
 api_v1.register(resources.GladmindsResources())

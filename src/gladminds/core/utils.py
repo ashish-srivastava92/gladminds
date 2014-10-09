@@ -7,7 +7,7 @@ from random import randint
 from django.utils import timezone
 from django.conf import settings
 from django.template import Context
-from gladminds.core.base_models import STATUS_CHOICES
+from gladminds.core.models import STATUS_CHOICES
 from gladminds.core import base_models
 from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
