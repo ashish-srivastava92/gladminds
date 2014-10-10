@@ -23,6 +23,7 @@ from gladminds.utils import mobile_format, format_message,\
     get_phone_number_format
 from django.utils import timezone
 from django.conf import settings
+from gladminds.decorator import log_time
 from gladminds.utils import get_task_queue
 from gladminds.settings import COUPON_VALID_DAYS
 from django.http.response import HttpResponse, HttpResponseBadRequest
@@ -113,6 +114,7 @@ class GladmindsResources(Resource):
             logger.info("The database failed to perform {0}:{1}".format(request.POST.get('action'), ex))
         return self.create_response(request, data=to_be_serialized)
 
+    @log_time
     def register_customer(self, sms_dict, phone_number):
         customer_name = sms_dict['name']
         email_id = sms_dict['email_id']
@@ -141,6 +143,7 @@ class GladmindsResources(Resource):
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
+    @log_time
     def send_customer_detail(self, sms_dict, phone_number):
         keyword = sms_dict['params']
         value = sms_dict['message']
@@ -177,6 +180,7 @@ class GladmindsResources(Resource):
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
+    @log_time
     def customer_service_detail(self, sms_dict, phone_number):
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         message = None
@@ -257,6 +261,7 @@ class GladmindsResources(Resource):
         valid_coupon.servicing_dealer = dealer_data.dealer_id
         valid_coupon.save()
 
+    @log_time
     def update_inprogress_coupon(self, coupon, actual_kms, dealer_data):
         logger.info("Expired on %s" % coupon.mark_expired_on)
         logger.info("Extended on %s" % coupon.extended_date)
@@ -283,7 +288,8 @@ class GladmindsResources(Resource):
         else:
             status = common.STATUS_CHOICES[requested_coupon[0].status - 1][1]
         return status
-        
+    
+    @log_time        
     def validate_coupon(self, sms_dict, phone_number):
         actual_kms = int(sms_dict['kms'])
         service_type = sms_dict['service_type']
@@ -389,6 +395,7 @@ class GladmindsResources(Resource):
         return {'status': True, 'message': dealer_message}
 
     
+    @log_time
     def close_coupon(self, sms_dict, phone_number):
         dealer_sa_object = self.validate_dealer(phone_number)
         unique_service_coupon = sms_dict['usc']
@@ -462,6 +469,7 @@ class GladmindsResources(Resource):
         return False
         
     
+    @log_time
     def is_valid_data(self, customer_id=None, coupon=None, sa_phone=None):
         '''
             Error During wrong entry of Customer ID or UCN (message to the service advisor)
