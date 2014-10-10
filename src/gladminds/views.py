@@ -257,7 +257,6 @@ def reports(request):
         report_data['records'] = create_reconciliation_report(report_data['params'], request.user)
     return render(request, template_rendered, report_data)
 
-    
 def create_reconciliation_report(query_params, user):
     report_data = []
     filter = {}

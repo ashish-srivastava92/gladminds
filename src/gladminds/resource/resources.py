@@ -283,7 +283,7 @@ class GladmindsResources(Resource):
         else:
             status = common.STATUS_CHOICES[requested_coupon[0].status - 1][1]
         return status
-        
+    
     def validate_coupon(self, sms_dict, phone_number):
         actual_kms = int(sms_dict['kms'])
         service_type = sms_dict['service_type']
