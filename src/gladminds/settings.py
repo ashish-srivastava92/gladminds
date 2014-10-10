@@ -272,6 +272,12 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
+        'sql': {
+            'level': 'INFO',
+            'filename': '/var/log/gladminds/sql.log',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
+        },
         'gladminds_logs': {
             'level': 'INFO',
             'filename': '/var/log/gladminds/gladminds.log',
@@ -290,6 +296,11 @@ LOGGING = {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
+            'propagate': True,
+        },
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['sql'],
             'propagate': True,
         },
         'gladminds': {
