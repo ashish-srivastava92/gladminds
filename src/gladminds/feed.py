@@ -559,11 +559,12 @@ class OldFscFeed(BaseFeed):
                                                          status=6, closed_date=datetime.now(), sent_to_sap = True, servicing_dealer = dealer_data)
                     old_coupon_data.save()
                 else:
-                    coupon_data.status = 6
-                    coupon_data.closed_date = datetime.now()
-                    coupon_data.sent_to_sap = True
-                    coupon_data.servicing_dealer = dealer_data
-                    coupon_data.save()
+                    cupon_details = coupon_data[0]
+                    cupon_details.status = 6
+                    cupon_details.closed_date = datetime.now()
+                    cupon_details.sent_to_sap = True
+                    cupon_details.servicing_dealer = dealer_data
+                    cupon_details.save()
             except Exception as ex:
                 ex = "[Exception: OLD_FSC_FEED]: VIN {0} does not exist::{1}".format(
                             fsc['vin'], ex)
