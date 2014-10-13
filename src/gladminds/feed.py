@@ -550,17 +550,24 @@ class OldFscFeed(BaseFeed):
     def import_data(self):
         for fsc in self.data_source:
             try:
-                coupon_data = common.CouponData.objects.get(
-                vin__vin=fsc['vin'], service_type=int(fsc['service']))
-                coupon_data.status = 6
-                coupon_data.closed_date = datetime.now()
-                coupon_data.sent_to_sap = True
                 dealer_data = self.check_or_create_dealer(dealer_id=fsc['dealer'])
-                coupon_data.servicing_dealer = dealer_data
-                coupon_data.save()
+                product_data = common.ProductData.objects.get(vin=fsc['vin'])
+                coupon_data = common.CouponData.objects.filter(vin__vin=fsc['vin'],
+                                            service_type=int(fsc['service']))
+                if len(coupon_data) == 0:
+                    old_coupon_data = common.OldFscData(vin=product_data, service_type = int(fsc['service']),
+                                                         status=6, closed_date=datetime.now(), sent_to_sap = True, servicing_dealer = dealer_data)
+                    old_coupon_data.save()
+                else:
+                    cupon_details = coupon_data[0]
+                    cupon_details.status = 6
+                    cupon_details.closed_date = datetime.now()
+                    cupon_details.sent_to_sap = True
+                    cupon_details.servicing_dealer = dealer_data
+                    cupon_details.save()
             except Exception as ex:
-                ex = "[Exception: OLD_FSC_FEED]: For VIN {0} coupon of service type {1}:: {2}".format(
-                            fsc['vin'], fsc['service'], ex)
+                ex = "[Exception: OLD_FSC_FEED]: VIN {0} does not exist::{1}".format(
+                            fsc['vin'], ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         return self.feed_remark
