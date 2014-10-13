@@ -273,7 +273,7 @@ class OldFscData(models.Model):
         verbose_name_plural = "Old Coupon Information"
 
     def __unicode__(self):
-        return self.vin
+        return str(self.id)
 ##################################################################
 #############Service Advisor and Coupon Relationship MODEL########
 

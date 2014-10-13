@@ -555,9 +555,15 @@ class OldFscFeed(BaseFeed):
                 coupon_data = common.CouponData.objects.filter(vin__vin=fsc['vin'],
                                             service_type=int(fsc['service']))
                 if len(coupon_data) == 0:
-                    old_coupon_data = common.OldFscData(vin=product_data, service_type = int(fsc['service']),
+                    try:
+                        old_fsc_obj = common.OldFscData.objects.get(vin=product_data, service_type=int(fsc['service']) )
+                    except Exception as ex:
+                        ex = "[Exception: OLD_FSC_FEED]: For VIN {0} service type {1} does not exist in old fsc database::{2}".format(
+                            fsc['vin'], fsc['service'], ex)
+                        logger.info(ex)
+                        old_coupon_data = common.OldFscData(vin=product_data, service_type = int(fsc['service']),
                                                          status=6, closed_date=datetime.now(), sent_to_sap = True, servicing_dealer = dealer_data)
-                    old_coupon_data.save()
+                        old_coupon_data.save()
                 else:
                     cupon_details = coupon_data[0]
                     cupon_details.status = 6
