@@ -19,9 +19,10 @@ class DatabaseAppsRouter(object):
 
     def db_for_write(self, model, **hints):
         """Point all write operations to the specific database."""
-        if settings.DATABASE_APPS_MAPPING.has_key(model._meta.app_label):
-            return settings.DATABASE_APPS_MAPPING[model._meta.app_label]
-        return None
+        return settings.DATABASE_APPS_MAPPING.get(settings.BRAND)
+#         if settings.DATABASE_APPS_MAPPING.has_key(model._meta.app_label):
+#             return settings.DATABASE_APPS_MAPPING[model._meta.app_label]
+#         return None
 
     def allow_relation(self, obj1, obj2, **hints):
         """Allow any relation between apps that use the same database."""

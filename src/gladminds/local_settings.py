@@ -16,7 +16,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gm',
         'USER': 'root',
-        'PASSWORD': 'hasher123',
+        'PASSWORD': 'admin',
         'HOST': '127.0.0.1',
         'PORT': '3306',
     },
@@ -24,15 +24,15 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'bajaj',
         'USER': 'root',
-        'PASSWORD': 'hasher123',
+        'PASSWORD': 'admin',
         'HOST': '127.0.0.1',
         'PORT': '3306',
     },
-    'mock': {
+    'demo': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mock',
+        'NAME': 'demo',
         'USER': 'root',
-        'PASSWORD': 'hasher123',
+        'PASSWORD': 'admin',
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }
