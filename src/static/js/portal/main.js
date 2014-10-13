@@ -288,4 +288,35 @@
         });
         return false;
     });
+    $('.asc td:nth-child(1)').click(function(){
+    	var url = '/aftersell/sa/'+$(this)[0].id+"/",
+        messageModal = $('.modal.message-modal'),
+        messageBlock = $('.modal-body'),
+        messageHeader = $('.modal-title'),
+        waitingModal = $('.modal.waiting-dialog'),
+    jqXHR = $.ajax({
+        type: 'POST',
+        url: url,
+        cache: false,
+        processData: false,
+        contentType: false,
+        beforeSend: function(){
+            waitingModal.modal('show');
+        },
+        success: function(data){
+        	console.log(data);
+            messageBlock.html(data);
+            messageHeader.text("Service Advisor's");
+            waitingModal.modal('hide');
+            messageModal.modal('show');
+        },
+        error: function() {
+            messageBlock.text('Invalid Data');
+            messageHeader.text('Invalid');
+            waitingModal.modal('hide');
+            messageModal.modal('show');
+        }
+    });
+    return false;
+    });
 })();

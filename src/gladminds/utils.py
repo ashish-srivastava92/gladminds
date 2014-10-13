@@ -9,6 +9,7 @@ from django.conf import settings
 from gladminds.models.common import STATUS_CHOICES
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
+from django.contrib.auth.models import User
 from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from gladminds.taskqueue import SqsTaskQueue
@@ -127,6 +128,26 @@ def get_sa_list(user):
     for service_advisor in service_advisors:
         sa_phone_list.append(service_advisor.service_advisor_id)
     return sa_phone_list
+
+def get_sa_list_for_login_dealer(user):
+    dealer = aftersell_common.RegisteredDealer.objects.filter(
+                dealer_id=user)[0]
+    service_advisors = aftersell_common.ServiceAdvisorDealerRelationship.objects\
+                                .filter(dealer_id=dealer, status='Y')
+    return service_advisors
+
+def get_asc_list_for_login_dealer(user):
+    print "dddddddd",user
+    ascs = aftersell_common.RegisteredDealer.objects.filter(
+                dependent_on=user)
+    print len(ascs)
+    asc_list_with_detail = []
+    for asc in ascs:
+        asc_detail = User.objects.filter(username=asc.dealer_id)
+        print"ssssS", asc_detail[0].first_name
+        asc_list_with_detail.append(asc_detail[0])
+    print "sssssss",   asc_list_with_detail
+    return asc_list_with_detail
 
 def recover_coupon_info(data):
     customer_id = data['customerId']

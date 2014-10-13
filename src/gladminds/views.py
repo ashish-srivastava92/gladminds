@@ -21,7 +21,8 @@ from gladminds import utils, message_template
 from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format,\
     format_date_string, stringify_groups, search_details,\
-    services_search_details, service_advisor_search
+    services_search_details, service_advisor_search,\
+    get_sa_list_for_login_dealer,get_asc_list_for_login_dealer
 from gladminds.sqs_tasks import export_asc_registeration_to_sap
 from gladminds.mail import sent_otp_email
 from gladminds.feed import SAPFeed
@@ -234,6 +235,39 @@ def exceptions(request, exception=None):
     else:
         return HttpResponseBadRequest()
 
+@login_required()
+def users(request, users=None):
+    groups = stringify_groups(request.user)
+    if not ('ascs' in groups or 'dealers' in groups):
+        return HttpResponseBadRequest()
+    if request.method == 'GET':
+        template = 'portal/users.html'
+        data=None
+        data_mapping = {
+            'sa': get_sa_list_for_login_dealer,
+            'asc': get_asc_list_for_login_dealer
+        }
+        try:
+            data = data_mapping[users](request.user)
+        except:
+            #It is acceptable if there is no data_mapping defined for a function
+            pass
+        return render(request, template, {'active_menu' : users, "data" : data, 'groups': groups})
+    else:
+        return HttpResponseBadRequest()
+
+@login_required()
+def get_sa_under_asc(request, id=None):
+    print "Dddddddd",id
+    template = 'portal/sa_list.html'
+    data = None
+    try:
+            data = get_sa_list_for_login_dealer(id)
+            print data
+    except:
+            #It is acceptable if there is no data_mapping defined for a function
+        pass
+    return render(request, template, {'active_menu':'sa',"data": data})
 
 @login_required()
 def reports(request):
