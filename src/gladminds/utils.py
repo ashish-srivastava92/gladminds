@@ -137,16 +137,12 @@ def get_sa_list_for_login_dealer(user):
     return service_advisors
 
 def get_asc_list_for_login_dealer(user):
-    print "dddddddd",user
     ascs = aftersell_common.RegisteredDealer.objects.filter(
                 dependent_on=user)
-    print len(ascs)
     asc_list_with_detail = []
     for asc in ascs:
         asc_detail = User.objects.filter(username=asc.dealer_id)
-        print"ssssS", asc_detail[0].first_name
         asc_list_with_detail.append(asc_detail[0])
-    print "sssssss",   asc_list_with_detail
     return asc_list_with_detail
 
 def recover_coupon_info(data):

@@ -258,12 +258,10 @@ def users(request, users=None):
 
 @login_required()
 def get_sa_under_asc(request, id=None):
-    print "Dddddddd",id
     template = 'portal/sa_list.html'
     data = None
     try:
             data = get_sa_list_for_login_dealer(id)
-            print data
     except:
             #It is acceptable if there is no data_mapping defined for a function
         pass
