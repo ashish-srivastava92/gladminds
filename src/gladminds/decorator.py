@@ -1,6 +1,6 @@
 from django.utils.log import logging
 import time
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('gladminds')
 
 '''Decorator generator that logs the time it takes a function to execute'''
 #Decorator generator

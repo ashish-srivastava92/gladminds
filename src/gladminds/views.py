@@ -16,6 +16,7 @@ from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
 from gladminds.models import common
+from gladminds.decorator import log_time
 from gladminds.sqs_tasks import send_otp
 from gladminds import utils, message_template
 from gladminds.utils import get_task_queue, get_customer_info,\
@@ -257,6 +258,7 @@ def reports(request):
         report_data['records'] = create_reconciliation_report(report_data['params'], request.user)
     return render(request, template_rendered, report_data)
 
+@log_time
 def create_reconciliation_report(query_params, user):
     report_data = []
     filter = {}
@@ -300,6 +302,7 @@ def create_reconciliation_report(query_params, user):
 
 CUST_UPDATE_SUCCESS = 'Customer phone number has been updated.'
 CUST_REGISTER_SUCCESS = 'Customer has been registered with ID: '
+@log_time
 def register_customer(request, group=None):
     post_data = request.POST
     data_source = []
@@ -356,6 +359,7 @@ def register_customer(request, group=None):
 ASC_REGISTER_SUCCESS = 'ASC registration is complete.'
 EXCEPTION_INVALID_DEALER = 'The dealer-id provided is not registered.'
 ALREADY_REGISTERED = 'Already Registered Number.'
+@log_time
 def save_asc_registeration(request, groups=[], brand='bajaj'):
     #TODO: Remove the brand parameter and pass it inside request.POST
     data = request.POST
@@ -394,6 +398,7 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
 
 SA_UPDATE_SUCCESS = 'Service advisor status has been updated.'
 SA_REGISTER_SUCCESS = 'Service advisor registration is complete.'
+@log_time
 def save_sa_registration(request, groups):
     data = request.POST
     existing_sa = False
