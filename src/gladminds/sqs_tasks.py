@@ -16,6 +16,7 @@ This task send sms to customer on customer registration
 
 def send_sms(**kwargs):
     sms_client = kwargs.get('sms_client', None)
+    logger.info('sms_client is {0}'.format(sms_client))
     sms_client_gateway = load_gateway(sms_client)
     response_data = sms_client_gateway.send_stateless(**kwargs)
 

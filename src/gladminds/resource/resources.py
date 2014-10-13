@@ -290,7 +290,6 @@ class GladmindsResources(Resource):
     
     @log_time
     def validate_coupon(self, sms_dict, phone_number):
-        print "called....validate_coupon"
         actual_kms = int(sms_dict['kms'])
         service_type = sms_dict['service_type']
         dealer_message = None
