@@ -95,7 +95,7 @@ DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
 DATABASE_APPS_MAPPING = {
                          'gm': 'default',
                          'bajaj':'bajaj',
-                         'mock': 'mock'
+                         'demo': 'demo'
                     }
 
 DATABASES = {
@@ -120,9 +120,9 @@ DATABASES = {
         'HOST': '',
         'PORT': '',
     },
-    'mock': {
+    'demo': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'mock',
+        'NAME': 'demo',
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
@@ -251,7 +251,7 @@ INSTALLED_APPS = (
     'gladminds.gm',
     'gladminds.core',
     'gladminds.bajaj',
-    'gladminds.mock',
+    'gladminds.demo',
     'djcelery',
     'corsheaders',
     'storages',
@@ -260,7 +260,7 @@ INSTALLED_APPS = (
     'django_otp.plugins.otp_totp',
     'provider',
     'provider.oauth2',
-    'debug_toolbar',
+   # 'debug_toolbar',
     'south'
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
@@ -427,7 +427,7 @@ SMS_HEALTH_CHECK_INTERVAL = 6
 #######################FEED_HEALTH_CHECK_INTERVAL
 FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
-BRAND = 'mock'
+BRAND = 'demo'
 GM_BRAND = 'gm'
 BRANDS = ['bajaj', 'demo']
 ###############################################

@@ -4,8 +4,12 @@ Wrapper for loading templates from the filesystem.
 
 from django.conf import settings
 from django.template.base import TemplateDoesNotExist
-from django.template.loader import BaseLoader, find_template
+from django.template.loader import BaseLoader
 from django.utils._os import safe_join
+from django.utils.importlib import import_module
+from django.core.exceptions import ImproperlyConfigured
+import os
+
 
 class Loader(BaseLoader):
     is_usable = True
@@ -21,8 +25,13 @@ class Loader(BaseLoader):
         for template_dir in template_dirs:
             try:
                 brand = settings.BRAND
-                if brand not in settings.GM_BRAND:
-                    yield safe_join("{0}/{1}".format(template_dir, brand), template_name)
+                if brand in settings.BRANDS and brand not in settings.GM_BRAND:
+                    try:
+                        mod = import_module('gladminds.{0}'.format(brand))
+                    except ImportError as e:
+                        raise ImproperlyConfigured('ImportError %s: %s' % (brand, e.args[0]))
+                    brand_template_dir = os.path.join(os.path.dirname(mod.__file__), 'templates')
+                    yield safe_join(brand_template_dir, template_name)
                 else:
                     yield safe_join(template_dir, template_name)
             except UnicodeDecodeError:
