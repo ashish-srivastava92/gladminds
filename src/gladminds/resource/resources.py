@@ -5,6 +5,7 @@ from django.db import models, transaction
 from django.forms.models import model_to_dict
 from gladminds import smsparser, utils, audit, message_template as templates
 from gladminds.models import common
+from gladminds.decorator import log_time
 from gladminds.feed import BaseFeed
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
@@ -113,6 +114,7 @@ class GladmindsResources(Resource):
             logger.info("The database failed to perform {0}:{1}".format(request.POST.get('action'), ex))
         return self.create_response(request, data=to_be_serialized)
 
+    @log_time
     def register_customer(self, sms_dict, phone_number):
         customer_name = sms_dict['name']
         email_id = sms_dict['email_id']
@@ -141,6 +143,7 @@ class GladmindsResources(Resource):
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
+    @log_time
     def send_customer_detail(self, sms_dict, phone_number):
         keyword = sms_dict['params']
         value = sms_dict['message']
@@ -177,6 +180,7 @@ class GladmindsResources(Resource):
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
+    @log_time
     def customer_service_detail(self, sms_dict, phone_number):
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         message = None
@@ -284,7 +288,9 @@ class GladmindsResources(Resource):
             status = common.STATUS_CHOICES[requested_coupon[0].status - 1][1]
         return status
     
+    @log_time
     def validate_coupon(self, sms_dict, phone_number):
+        print "called....validate_coupon"
         actual_kms = int(sms_dict['kms'])
         service_type = sms_dict['service_type']
         dealer_message = None
@@ -389,6 +395,7 @@ class GladmindsResources(Resource):
         return {'status': True, 'message': dealer_message}
 
     
+    @log_time
     def close_coupon(self, sms_dict, phone_number):
         dealer_sa_object = self.validate_dealer(phone_number)
         unique_service_coupon = sms_dict['usc']

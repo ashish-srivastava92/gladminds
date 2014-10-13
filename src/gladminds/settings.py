@@ -273,7 +273,7 @@ LOGGING = {
             'formatter': 'simple'
         },
         'sql': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'filename': '/var/log/gladminds/sql.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
