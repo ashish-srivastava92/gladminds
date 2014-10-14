@@ -25,6 +25,15 @@ api_v1.register(product_apis.ProductDataResources())
 api_v1.register(coupon_apis.CouponDataResources())
 api_v1.register(preferences_apis.UserPreferencesResource())
 api_v1.register(preferences_apis.AppPreferencesResource())
+# api_v1.register(resources.GladmindsResources())
+# api_v1.register(resources.UserResources())
+# api_v1.register(api_resource.AfterBuyResources())
+# api_v1.register(audit_api.AuditResources())
+# api_v1.register(user_apis.GladMindUserResources())
+# api_v1.register(product_apis.ProductDataResources())
+# api_v1.register(coupon_apis.CouponDataResources())
+
+>>>>>>> upstream/gm_2_1
 
 urlpatterns = patterns('',
     url(r'^site-info/$', 'gladminds.views.site_info', name='site_info'),

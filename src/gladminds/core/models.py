@@ -1,4 +1,5 @@
 from gladminds.core.base_models import *
+from gladminds.gm.models import UserProfile, GladMindUsers
 
 
 

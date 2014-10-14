@@ -37,7 +37,6 @@ class DatabaseAppsRouter(object):
 
     def allow_syncdb(self, db, model):
         """Make sure that apps only appear in the related database."""
-
         if model._meta.app_label in ['auth', 'contenttypes', 'sessions', 'sites', 'admin']:
             return True
 
