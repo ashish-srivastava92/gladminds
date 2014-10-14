@@ -5,9 +5,9 @@ from gladminds.resource import resources
 from gladminds.core.sqs_tasks import _tasks_map
 from gladminds.core.taskqueue import SqsHandler
 from gladminds.afterbuy import api_resource
-from gladminds.apis import audit_api, coupon_apis
-from gladminds.apis import product_apis
-from gladminds.apis import user_apis
+# from gladminds.apis import audit_api, coupon_apis
+# from gladminds.apis import product_apis
+# from gladminds.apis import user_apis
 
 from gladminds.health_check import health_check_view 
 
@@ -16,13 +16,13 @@ from django.contrib import admin
 # admin.autodiscover()
 
 api_v1 = Api(api_name="v1")
-api_v1.register(resources.GladmindsResources())
-api_v1.register(resources.UserResources())
-api_v1.register(api_resource.AfterBuyResources())
-api_v1.register(audit_api.AuditResources())
-api_v1.register(user_apis.GladMindUserResources())
-api_v1.register(product_apis.ProductDataResources())
-api_v1.register(coupon_apis.CouponDataResources())
+# api_v1.register(resources.GladmindsResources())
+# api_v1.register(resources.UserResources())
+# api_v1.register(api_resource.AfterBuyResources())
+# api_v1.register(audit_api.AuditResources())
+# api_v1.register(user_apis.GladMindUserResources())
+# api_v1.register(product_apis.ProductDataResources())
+# api_v1.register(coupon_apis.CouponDataResources())
 
 
 urlpatterns = patterns('',

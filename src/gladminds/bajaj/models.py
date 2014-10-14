@@ -3,8 +3,15 @@ from django.db import models
 from gladminds.gm.models import UserProfile, GladMindUsers
 
 
+class RegisteredDealer(base_models.RegisteredDealer):
+
+    class Meta:
+        app_label = "bajaj"
+        verbose_name_plural = "Dealer Data"
+
+
 class ASCSaveForm(base_models.ASCSaveForm):
-    
+
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = "ASC Save Form"
@@ -12,17 +19,10 @@ class ASCSaveForm(base_models.ASCSaveForm):
 
 class UCNRecovery(base_models.UCNRecovery):
     user = models.ForeignKey(UserProfile, related_name='bajaj_ucn_recovery')
-    
+
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = "UCN recovery logs"
-
-
-class RegisteredDealer(base_models.RegisteredDealer):
-    
-    class Meta:
-        app_label = "bajaj"
-        verbose_name_plural = "Dealer Data"
 
 
 class ServiceAdvisor(base_models.ServiceAdvisor):
@@ -118,7 +118,7 @@ class ServiceAdvisorCouponRelationship(base_models.ServiceAdvisorCouponRelations
     unique_service_coupon = models.ForeignKey(CouponData, null=False)
     service_advisor_phone = models.ForeignKey(ServiceAdvisor, null=False)
     dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
-    
+
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = 'Service Advisor And Coupon Relationship'

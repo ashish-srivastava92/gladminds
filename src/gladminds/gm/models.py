@@ -84,7 +84,7 @@ class OTPToken(models.Model):
     class Meta:
         app_label = "gm"
         verbose_name_plural = "OTPs"
-        
+
 class UserNotification(models.Model):
     user = models.ForeignKey(GladMindUsers, null=False, blank=False)
     message = models.CharField(max_length=256, null=False)
@@ -94,7 +94,7 @@ class UserNotification(models.Model):
     class Meta:
         app_label = "gm"
         verbose_name_plural = "notification"
-        
+
 class UserProducts(models.Model):
     vin = models.CharField(max_length=215, null=True, unique=True, blank=True)
     customer_phone_number = models.ForeignKey(
@@ -117,7 +117,7 @@ class UserProducts(models.Model):
         verbose_name_plural = "userProducts"
     
     def __unicode__(self):
-        return self.vin    
+        return self.vin
        
 class UserMobileInfo(models.Model):
     user = models.ForeignKey(GladMindUsers, null=False, blank=False)
@@ -133,5 +133,3 @@ class UserMobileInfo(models.Model):
     class Meta:
         app_label = "gm"
         verbose_name_plural = "mobile info"
-        
-        
