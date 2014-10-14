@@ -111,7 +111,6 @@ def get_customer_info(data):
         message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
         if data['groups'][0] == "dealers":
             data['groups'][0] = "Dealer"
-            print data['groups'][0]
         else:
             data['groups'][0] = "ASC"
         data = get_email_template('VIN DOES NOT EXIST').body.format(data['current_user'], data['vin'], data['groups'][0])
