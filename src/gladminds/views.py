@@ -226,6 +226,7 @@ def exceptions(request, exception=None):
         try:
             post_data = request.POST.copy()
             post_data['current_user'] = request.user
+            post_data['groups'] = groups
             if request.FILES:
                 post_data['job_card']=request.FILES['jobCard']
             data = function_mapping[exception](post_data)

@@ -109,7 +109,11 @@ def get_customer_info(data):
     except Exception as ex:
         logger.info(ex)
         message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
-        data = get_email_template('VIN DOES NOT EXIST').body.format(data['current_user'], data['vin'])
+        if data['groups'][0] == "dealers":
+            data['groups'][0] = "Dealer"
+        else:
+            data['groups'][0] = "ASC"
+        data = get_email_template('VIN DOES NOT EXIST').body.format(data['current_user'], data['vin'], data['groups'][0])
         send_mail_when_vin_does_not_exist(data=data)
         return {'message': message, 'status': 'fail'}
     if product_obj.product_purchase_date:

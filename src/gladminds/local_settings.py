@@ -71,7 +71,7 @@ MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail DEV"
 FEED_FAILURE_MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail DEV"
-VIN_DOES_NOT_EXIST_DETAIL["receiver"] = []
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 
 
 LOGGING['handlers']['gladminds_logs']['filename'] = 'log/gladminds.log'
