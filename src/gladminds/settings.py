@@ -95,22 +95,17 @@ DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
 DATABASE_APPS_MAPPING = {
                          'gm': 'default',
                          'bajaj':'bajaj',
-                         'mock': 'mock'
+                         'demo': 'demo'
                     }
 
 DATABASES = {
     'default': {
-        # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'ENGINE': 'django.db.backends.sqlite3',
-        # Or path to database file if using sqlite3.
         'NAME': 'gm',
-        # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
-        # Empty for localhost through domain sockets or '127.0.0.1' for
-        # localhost through TCP.
         'HOST': '',
-        'PORT': '',  # Set to empty string for default.
+        'PORT': '',
     },
     'bajaj': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -120,9 +115,9 @@ DATABASES = {
         'HOST': '',
         'PORT': '',
     },
-    'mock': {
+    'demo': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'mock',
+        'NAME': 'demo',
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
@@ -209,6 +204,7 @@ TEMPLATE_LOADERS = (
                    )
 
 MIDDLEWARE_CLASSES = (
+    'gladminds.core.middlewares.dynamicsite_middleware.DynamicSitesMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
@@ -216,7 +212,6 @@ MIDDLEWARE_CLASSES = (
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'gladminds.core.middlewares.dynamicsite_middleware.DynamicSitesMiddleware',
 #     'gladminds.middleware.GladmindsMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -251,7 +246,7 @@ INSTALLED_APPS = (
     'gladminds.gm',
     'gladminds.core',
     'gladminds.bajaj',
-    'gladminds.mock',
+    'gladminds.demo',
     'djcelery',
     'corsheaders',
     'storages',
@@ -260,7 +255,7 @@ INSTALLED_APPS = (
     'django_otp.plugins.otp_totp',
     'provider',
     'provider.oauth2',
-    'debug_toolbar',
+   # 'debug_toolbar',
     'south'
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
@@ -427,7 +422,7 @@ SMS_HEALTH_CHECK_INTERVAL = 6
 #######################FEED_HEALTH_CHECK_INTERVAL
 FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
-BRAND = 'mock'
+BRAND = 'demo'
 GM_BRAND = 'gm'
 BRANDS = ['bajaj', 'demo']
 ###############################################

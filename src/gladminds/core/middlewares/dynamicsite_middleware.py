@@ -1,5 +1,6 @@
 from django.conf import settings
 from gladminds.core.utils import make_tls_property
+from django.utils.cache import patch_vary_headers
 
 BRAND = settings.__dict__['_wrapped'].__class__.BRAND = make_tls_property()
 
@@ -16,6 +17,18 @@ class DynamicSitesMiddleware(object):
         BRAND.value = self.domain.split('.')[0]
         if BRAND.value not in settings.BRANDS:
             BRAND.value = settings.GM_BRAND
+
+        try:
+            if BRAND.value not in settings.GM_BRAND:
+                request.urlconf = 'gladminds.{0}.urls'.format(BRAND.value)
+        except KeyError:
+            # use default urlconf (settings.ROOT_URLCONF)
+            pass
+
+    def process_response(self, request, response):
+        if getattr(request, "urlconf", None):
+            patch_vary_headers(response, ('Host',))
+        return response
 
     def get_domain_and_port(self):
         """
