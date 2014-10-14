@@ -180,7 +180,7 @@
   	"pk": 20,
   	"fields": {
   		"template_key": "SEND_CUSTOMER_SUPPORTED_KEYWORD",
-  		"template": "Supported keyword: 1.GCP_REG 2.SERVICE 3.BRAND 4.A 5.C",
+  		"template": "Supported keyword: 1.GCP_REG 2.SERVICE 3.BRAND 4.A 5.C 6.R",
   		"description": "Send supported message format to customer"
   	}
   },
