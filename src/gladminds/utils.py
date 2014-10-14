@@ -288,7 +288,7 @@ def search_details(data):
     product_obj = common.ProductData.objects.filter(**kwargs)
     if not product_obj or not product_obj[0].product_purchase_date:
         key = data.keys()
-        message = '''Customer details for {0} '{1}' not found. Please contact customer support: +91-9741775128.'''.format(key[0], data[key[0]])
+        message = '''{0} '{1}' has no associated customer. Please register the customer.'''.format(key[0], data[key[0]])
         logger.info(message)
         return {'message': message}
     for product in product_obj:
@@ -298,7 +298,7 @@ def search_details(data):
 
 def services_search_details(data):
     key = data.keys()
-    message = '''No Service Details available for {0} '{1}'. Please contact customer support: +91-9741775128.'''.format(key[0], data[key[0]])
+    message = '''No Service Details available for {0} '{1}'. Please register the customer.'''.format(key[0], data[key[0]])
     kwargs = {}
     response = {}
     search_results = []
