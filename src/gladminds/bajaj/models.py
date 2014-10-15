@@ -62,23 +62,16 @@ class Comments(base_models.Comments):
     
     class Meta:
         app_label = "bajaj"
-        verbose_name_plural = "user comment info"    
-        
-class BrandData(base_models.BrandData):
-    
-    class Meta:
-        app_label = "bajaj"
-        verbose_name_plural = "Brand Data"
+        verbose_name_plural = "user comment info"
 
 
 class ProductTypeData(base_models.ProductTypeData):
-    brand_id = models.ForeignKey(BrandData, null=False, related_name='bajaj_product_type_date')
-    
+
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = "Product Type"
-        
-        
+
+
 class ProductData(base_models.ProductData):
     customer_phone_number = models.ForeignKey(
         GladmindsUser, null=True, blank=True, related_name='bajaj_product_date')
@@ -88,8 +81,8 @@ class ProductData(base_models.ProductData):
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = "Product Data"
-    
-        
+
+
 class CouponData(base_models.CouponData):
     vin = models.ForeignKey(ProductData, null=False, editable=False)
     sa_phone_number = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
@@ -159,7 +152,7 @@ class CustomerTempRegistration(base_models.CustomerTempRegistration):
 
 class ProductInsuranceInfo(base_models.ProductInsuranceInfo):
     product = models.ForeignKey(ProductData, null=False)
-    
+
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = "product insurance info"
@@ -167,15 +160,14 @@ class ProductInsuranceInfo(base_models.ProductInsuranceInfo):
 
 class ProductWarrantyInfo(base_models.ProductWarrantyInfo):
     product = models.ForeignKey(ProductData, null=False)
-    
+
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = "product warranty info"
 
 
 class SparesData(base_models.SparesData):
-    spare_brand = models.ForeignKey(BrandData, null=False)
-    
+
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = "spare info"

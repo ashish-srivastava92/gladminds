@@ -12,7 +12,7 @@ from gladminds.afterbuy import api_resource
 from gladminds.health_check import health_check_view 
 
 # Uncomment the next two lines to enable the admin:
-from django.contrib import admin
+from gladminds.admin import admin
 # admin.autodiscover()
 
 api_v1 = Api(api_name="v1")
@@ -90,7 +90,7 @@ urlpatterns += patterns('gladminds',
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^sms/','superadmin.views.send_sms', name='send_sms'),
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    url(r'^', include(admin.site.urls)),
+    url(r'^', include(admin.urls)),
 )
 
 
