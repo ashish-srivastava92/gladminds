@@ -1,10 +1,20 @@
 from gladminds.core import base_models
 from django.db import models
-from gladminds.gm.models import UserProfile, GladMindUsers
+from gladminds.gm.models import GladmindsUser
+from django.contrib.auth.models import User
+
+
+class UserProfile(base_models.UserProfile):
+    user = models.OneToOneField(User, primary_key=True,
+                                        related_name='demo_users')
+
+    class Meta:
+        app_label = "demo"
+        verbose_name_plural = "Brand User"
 
 
 class ASCSaveForm(base_models.ASCSaveForm):
-    
+
     class Meta:
         app_label = "demo"
         verbose_name_plural = "ASC Save Form"
@@ -90,11 +100,10 @@ class ProductTypeData(base_models.ProductTypeData):
     class Meta:
         app_label = "demo"
         verbose_name_plural = "Product Type"
-        
-        
+
 class ProductData(base_models.ProductData):
     customer_phone_number = models.ForeignKey(
-        GladMindUsers, null=True, blank=True, related_name='demo_product_date')
+        GladmindsUser, null=True, blank=True, related_name='demo_product_date')
     product_type = models.ForeignKey(ProductTypeData, null=True, blank=True)
     dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
 
