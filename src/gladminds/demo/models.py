@@ -12,18 +12,21 @@ class UserProfile(base_models.UserProfile):
         app_label = "demo"
         verbose_name_plural = "Brand User"
 
+
 class Dealer(base_models.Dealer):
     user = models.OneToOneField(UserProfile, primary_key=True,
-                                related_name='demo_registered_dealer')    
+                                related_name='demo_registered_dealer')
+
     class Meta:
         app_label = "demo"
         verbose_name_plural = "Dealer Data"
-    
+
+
 class AuthorizedServiceCenter(base_models.AuthorizedServiceCenter):
     user = models.OneToOneField(UserProfile, primary_key=True,
                                 related_name='demo_registered_asc')
     dealer = models.ForeignKey(Dealer, null=True, blank=True)
-    
+
     class Meta:
         app_label = "demo"
         verbose_name_plural = "Service center Data"
@@ -31,25 +34,26 @@ class AuthorizedServiceCenter(base_models.AuthorizedServiceCenter):
 
 class ServiceAdvisor(base_models.ServiceAdvisor):
     user = models.OneToOneField(UserProfile, primary_key=True,
-                            related_name='bajaj_service_advisor')    
+                            related_name='bajaj_service_advisor')
     dealer = models.ForeignKey(Dealer, null=True, blank=True)
     asc = models.ForeignKey(AuthorizedServiceCenter, null=True, blank=True)
-    
+
     class Meta:
         app_label = "demo"
         verbose_name_plural = "Service Advisor Data"
 
+
 class ServiceDeskUser(base_models.ServiceDeskUser):
     user = models.OneToOneField(UserProfile, null=True, blank=True, related_name='demo_service_desk_user')
-    
+
     class Meta:
         app_label = "demo"
         verbose_name_plural = "service desk users"
-        
+
 
 class Feedback(base_models.Feedback):
     assign_to = models.ForeignKey(ServiceDeskUser, null=True, blank= True)
-    
+
     class Meta:
         app_label = "demo"
         verbose_name_plural = "user feedback info"
@@ -57,24 +61,18 @@ class Feedback(base_models.Feedback):
 
 class Comments(base_models.Comments):
     feedback_object = models.ForeignKey(Feedback, null=False, blank=False)
-    
+
     class Meta:
         app_label = "demo"
-        verbose_name_plural = "user comment info"    
-        
-class BrandData(base_models.BrandData):
-    
-    class Meta:
-        app_label = "demo"
-        verbose_name_plural = "Brand Data"
+        verbose_name_plural = "user comment info"
 
 
 class ProductTypeData(base_models.ProductTypeData):
-    brand_id = models.ForeignKey(BrandData, null=False, related_name='demo_product_type_date')
-    
+
     class Meta:
         app_label = "demo"
         verbose_name_plural = "Product Type"
+
 
 class ProductData(base_models.ProductData):
     customer_phone_number = models.ForeignKey(
@@ -85,8 +83,8 @@ class ProductData(base_models.ProductData):
     class Meta:
         app_label = "demo"
         verbose_name_plural = "Product Data"
-    
-        
+
+
 class CouponData(base_models.CouponData):
     vin = models.ForeignKey(ProductData, null=False, editable=False)
     sa_phone_number = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
@@ -101,27 +99,29 @@ class ServiceAdvisorCouponRelationship(base_models.ServiceAdvisorCouponRelations
     unique_service_coupon = models.ForeignKey(CouponData, null=False)
     service_advisor_phone = models.ForeignKey(ServiceAdvisor, null=False)
     dealer_id = models.ForeignKey(Dealer, null=True, blank=True)
-    
+
     class Meta:
         app_label = "demo"
         verbose_name_plural = 'Service Advisor And Coupon Relationship'
 
 class UCNRecovery(base_models.UCNRecovery):
     user = models.ForeignKey(UserProfile, related_name='demo_ucn_recovery')
-    
+
     class Meta:
         app_label = "demo"
         verbose_name_plural = "UCN recovery logs"
 
+
 class OTPToken(base_models.OTPToken):
     user = models.ForeignKey(UserProfile, null=True, blank=True, related_name='demo_otp_token')
-    
+
     class Meta:
         app_label = "demo"
         verbose_name_plural = "OTPs"
 
+
 class MessageTemplate(base_models.MessageTemplate):
-    
+
     class Meta:
         app_label = "demo"
         verbose_name_plural = "Message Template"
@@ -140,6 +140,7 @@ class ASCTempRegistration(base_models.ASCTempRegistration):
         app_label = "demo"
         verbose_name_plural = "ASC Save Form"
 
+
 class SATempRegistration(base_models.SATempRegistration):
 
     class Meta:
@@ -149,7 +150,7 @@ class SATempRegistration(base_models.SATempRegistration):
 
 class CustomerTempRegistration(base_models.CustomerTempRegistration):
     product_data = models.ForeignKey(ProductData, null=True, blank=True)
-    
+
     class Meta:
         app_label = "demo"
         verbose_name_plural = "Customer temporary info"
@@ -157,7 +158,7 @@ class CustomerTempRegistration(base_models.CustomerTempRegistration):
 
 class ProductInsuranceInfo(base_models.ProductInsuranceInfo):
     product = models.ForeignKey(ProductData, null=False)
-    
+
     class Meta:
         app_label = "demo"
         verbose_name_plural = "product insurance info"
@@ -165,15 +166,14 @@ class ProductInsuranceInfo(base_models.ProductInsuranceInfo):
 
 class ProductWarrantyInfo(base_models.ProductWarrantyInfo):
     product = models.ForeignKey(ProductData, null=False)
-    
+
     class Meta:
         app_label = "demo"
         verbose_name_plural = "product warranty info"
 
 
 class SparesData(base_models.SparesData):
-    spare_brand = models.ForeignKey(BrandData, null=False)
-    
+
     class Meta:
         app_label = "demo"
         verbose_name_plural = "spare info"

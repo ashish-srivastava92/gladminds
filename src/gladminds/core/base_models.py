@@ -132,43 +132,14 @@ class Comments(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "aftersell comment info"    
-        
-class BrandData(BaseModel):
-    pk_brand_id = models.AutoField(primary_key=True)
-    brand_id = models.CharField(
-        max_length=50, null=False, unique=True, help_text="Brand Id must be unique")
-    brand_name = models.CharField(max_length=250, null=False)
-    brand_image_loc = models.FileField(
-        upload_to=settings.AFTERBUY_BRAND_LOC, blank=True)
-    isActive = models.BooleanField(default=True)
-
-    class Meta:
-        abstract = True
-        verbose_name_plural = "Brand Data"
-
-    def __unicode__(self):
-        return self.brand_id
-
-    def image_tag(self):
-        if self.brand_name == 'Bajaj':
-            url = settings.STATIC_URL + 'img/bajaj.jpg'
-            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
-        elif self.brand_name == 'Honda':
-            url = settings.STATIC_URL + 'img/honda.jpg'
-            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
-        else:
-            url = settings.STATIC_URL + 'img/noimage.jpg'
-            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
-    image_tag.short_description = 'Image'
-    image_tag.allow_tags = True
+        verbose_name_plural = "aftersell comment info"
 
 
 '''
 ProductTypeData  is linked to Brand data
 For 1 Brand there can be multiple Products
 '''
-    
+
 class ProductTypeData(BaseModel):
     product_type_id = models.AutoField(primary_key=True)
     product_name = models.CharField(max_length=255, null=False)
