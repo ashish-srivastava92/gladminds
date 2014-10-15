@@ -7,8 +7,8 @@ from django.test import TestCase
 from gladminds.models.common import \
     ProductData, CouponData, GladMindUsers
 
-from gladminds.aftersell.models.common import RegisteredDealer,\
-    ServiceAdvisorDealerRelationship, ServiceAdvisor, RegisteredASC
+from gladminds.aftersell.models.common import Dealer,\
+    ServiceAdvisorDealerRelationship, ServiceAdvisor, AuthorizedServiceCenter
 from datetime import datetime, timedelta
 from integration.base_integration import GladmindsResourceTestCase
 from integration.base import BaseTestCase
@@ -36,8 +36,8 @@ class FeedsResourceTest(GladmindsResourceTestCase, BaseTestCase):
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
 
         self.assertEqual(200, response.status_code)
-        self.assertEquals(3, RegisteredDealer.objects.count())
-        dealer_data = RegisteredDealer.objects.all()[0]
+        self.assertEquals(3, Dealer.objects.count())
+        dealer_data = Dealer.objects.all()[0]
         self.assertEquals(u"GMDEALER001", dealer_data.dealer_id)
         service_advisors = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
         self.assertEquals(1, len(service_advisors))
@@ -56,13 +56,13 @@ class FeedsResourceTest(GladmindsResourceTestCase, BaseTestCase):
 
         sa_obj_1 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
 
-        dealer_obj_1 = RegisteredDealer.objects.filter(dealer_id='GMDEALER001')
+        dealer_obj_1 = Dealer.objects.filter(dealer_id='GMDEALER001')
         sa_dealer_rel_obj_1 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_1[0], dealer_id=dealer_obj_1[0])
         self.assertEquals('Y', sa_dealer_rel_obj_1.status)
 
         sa_obj_2 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA02')
 
-        dealer_obj_2 = RegisteredDealer.objects.filter(dealer_id='GMDEALER002')
+        dealer_obj_2 = Dealer.objects.filter(dealer_id='GMDEALER002')
         sa_dealer_rel_obj_2 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_2[0], dealer_id=dealer_obj_2[0])
         self.assertEquals('Y', sa_dealer_rel_obj_2.status)
 
@@ -77,12 +77,12 @@ class FeedsResourceTest(GladmindsResourceTestCase, BaseTestCase):
 
         sa_obj_1 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
         self.assertEquals('+9155555', sa_obj_1[0].phone_number)
-        dealer_obj_1 = RegisteredDealer.objects.filter(dealer_id='GMDEALER001')
+        dealer_obj_1 = Dealer.objects.filter(dealer_id='GMDEALER001')
         sa_dealer_rel_obj_1 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_1[0], dealer_id=dealer_obj_1[0])
         self.assertEquals('N', sa_dealer_rel_obj_1.status)
 
         sa_obj_2 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA02')
-        dealer_obj_2 = RegisteredDealer.objects.filter(dealer_id='GMDEALER002')
+        dealer_obj_2 = Dealer.objects.filter(dealer_id='GMDEALER002')
         sa_dealer_rel_obj_2 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_2[0], dealer_id=dealer_obj_2[0])
         self.assertEquals('Y', sa_dealer_rel_obj_2.status)
         
@@ -109,16 +109,16 @@ class FeedsResourceTest(GladmindsResourceTestCase, BaseTestCase):
         self.assertEqual(200, response.status_code)
         
         sa_obj_1 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
-        dealer_obj_1 = RegisteredDealer.objects.filter(dealer_id='GMDEALER001')
+        dealer_obj_1 = Dealer.objects.filter(dealer_id='GMDEALER001')
         self.assertEquals('+9112345', sa_obj_1[0].phone_number)
         sa_dealer_rel_obj_2 = ServiceAdvisorDealerRelationship.objects.get(service_advisor_id=sa_obj_1[0], dealer_id=dealer_obj_1[0])
         self.assertEquals('N', sa_dealer_rel_obj_2.status)
         
         sa_obj_2 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA02')
-        dealer_obj_2 = RegisteredDealer.objects.filter(dealer_id='GMDEALER002')
+        dealer_obj_2 = Dealer.objects.filter(dealer_id='GMDEALER002')
         self.assertEquals('+91555551', sa_obj_2[0].phone_number)
         
-        dealer_obj_3 = RegisteredDealer.objects.filter(dealer_id='GMDEALER003')
+        dealer_obj_3 = Dealer.objects.filter(dealer_id='GMDEALER003')
         sa_obj_3 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA03')
         self.assertEquals(0, len(sa_obj_3))
         self.assertEquals(0, len(dealer_obj_3))

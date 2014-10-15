@@ -56,7 +56,7 @@ class Command(BaseCommand):
         
     def add_user_for_existing_dealer(self):
         print "Loading users for existing dealer...."
-        all_dealers = aftersell_common.RegisteredDealer.objects.all()
+        all_dealers = aftersell_common.Dealer.objects.all()
         for dealer in all_dealers:
             BASIC_FEED.registerNewUser('dealer', username=dealer.dealer_id)
         print "Loaded users for existing dealer...."

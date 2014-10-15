@@ -8,9 +8,9 @@ from django.forms import ModelForm
 from django.contrib.admin.models import LogEntry
 from gladminds.core.models import GladMindUsers, ProductTypeData, \
     BrandData, ProductData, CouponData, MessageTemplate,\
-    UploadProductCSV, CustomerTempRegistration,\
-    RegisteredDealer, ServiceAdvisorDealerRelationship, ServiceAdvisor,\
-    EmailTemplate, ASCSaveForm, Feedback
+    CustomerTempRegistration,Dealer,\
+    ServiceAdvisorDealerRelationship, ServiceAdvisor,\
+    EmailTemplate, ASCTempRegistration, Feedback
 from gladminds.gm.models import UserNotification
 from gladminds.aftersell.models.logs import AuditLog, DataFeedLog
 from import_export import resources
@@ -110,7 +110,7 @@ class ServiceAdvisorAdmin(ModelAdmin):
     exclude = ('order',)
 
     def dealer_id(self, obj):
-        return u'<a href="/gladminds/registereddealer/%s/">%s</a>' % (obj.dealer_id.pk, obj.dealer_id)
+        return u'<a href="/gladminds/dealer/%s/">%s</a>' % (obj.dealer_id.pk, obj.dealer_id)
     dealer_id.allow_tags = True
 
 
@@ -122,7 +122,7 @@ class ServiceAdvisorDealerAdmin(ModelAdmin):
         'dealer_id', 'name', 'service_advisor_ids', 'phone_number', 'status')
 
     def dealer_id(self, obj):
-        return u'<a href="/gladminds/registereddealer/%s/">%s</a>' % (obj.dealer_id.pk, obj.dealer_id)
+        return u'<a href="/gladminds/dealer/%s/">%s</a>' % (obj.dealer_id.pk, obj.dealer_id)
     dealer_id.allow_tags = True
 
     def service_advisor_ids(self, obj):
@@ -498,10 +498,10 @@ class ListDispatchedProduct(ModelAdmin):
         
         return super(ListDispatchedProduct, self).changelist_view(request, extra_context=extra_context)
 ##############################################################
-#########################ASCSaveForm#########################
+#########################ASCTempRegistration#########################
 
 
-class ASCSaveFormAdmin(ModelAdmin):
+class ASCTempRegistrationAdmin(ModelAdmin):
     search_fields = (
         'name', 'phone_number', 'email', 'pincode',
         'address', 'status', 'timestamp', 'dealer_id')
@@ -559,7 +559,7 @@ admin.site.register(DispatchedProduct, ListDispatchedProduct)
 admin.site.register(ServiceAdvisor, ServiceAdvisorAdmin)
 admin.site.register(
     ServiceAdvisorDealerRelationship, ServiceAdvisorDealerAdmin)
-admin.site.register(RegisteredDealer, DealerAdmin)
+admin.site.register(Dealer, DealerAdmin)
 admin.site.register(AuditLog, AuditLogAdmin)
 admin.site.register(DataFeedLog, FeedLogAdmin)
 admin.site.register(GladMindUsers, GladMindUserAdmin)
@@ -567,9 +567,8 @@ admin.site.register(ProductData, ProductDataAdmin)
 admin.site.register(CouponData, CouponAdmin)
 admin.site.register(MessageTemplate, MessageTemplateAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
-admin.site.register(ASCSaveForm, ASCSaveFormAdmin)
+admin.site.register(ASCTempRegistration, ASCTempRegistrationAdmin)
 admin.site.register(CustomerTempRegistration, CustomerTempRegistrationAdmin)
-admin.site.register(UploadProductCSV)
 admin.site.register(LogEntry)
 admin.site.register(UserNotification, UserNotificationAdmin)
 admin.site.register(Feedback, UserFeedback)

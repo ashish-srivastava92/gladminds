@@ -22,9 +22,9 @@ class TestSaveFormRegistration(GladmindsResourceTestCase):
 
         response = self.client.post('/aftersell/asc/self-register/', data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(afterbuy_common.ASCSaveForm.objects.count(), 1)
+        self.assertEqual(afterbuy_common.ASCTempRegistration.objects.count(), 1)
         self.assertEqual(afterbuy_common
-                         .ASCSaveForm.objects.all()[0].phone_number,
+                         .ASCTempRegistration.objects.all()[0].phone_number,
                           data['phone-number'])
 
     def test_fail_registration_mail(self):

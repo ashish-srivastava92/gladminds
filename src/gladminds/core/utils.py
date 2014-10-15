@@ -130,7 +130,7 @@ def get_customer_info(request):
 
 
 def get_sa_list(request):
-    dealer = base_models.RegisteredDealer.objects.filter(dealer_id=request.user)[0]
+    dealer = base_models.Dealer.objects.filter(dealer_id=request.user)[0]
     service_advisors = base_models.ServiceAdvisorDealerRelationship.objects\
                                 .filter(dealer_id=dealer, status='Y')
     sa_phone_list = []
