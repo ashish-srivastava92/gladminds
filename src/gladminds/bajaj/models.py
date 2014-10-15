@@ -1,6 +1,17 @@
-from gladminds.core import base_models
 from django.db import models
-from gladminds.gm.models import UserProfile, GladMindUsers
+from django.contrib.auth.models import User
+
+from gladminds.core import base_models
+from gladminds.gm.models import GladmindsUser
+
+
+class UserProfile(base_models.UserProfile):
+    user = models.OneToOneField(User, primary_key=True,
+                                        related_name='bajaj_users')
+
+    class Meta:
+        app_label = "bajaj"
+        verbose_name_plural = "Brand Users"
 
 
 class RegisteredDealer(base_models.RegisteredDealer):
@@ -99,7 +110,7 @@ class ProductTypeData(base_models.ProductTypeData):
         
 class ProductData(base_models.ProductData):
     customer_phone_number = models.ForeignKey(
-        GladMindUsers, null=True, blank=True, related_name='bajaj_product_date')
+        GladmindsUser, null=True, blank=True, related_name='bajaj_product_date')
     product_type = models.ForeignKey(ProductTypeData, null=True, blank=True)
     dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
 
