@@ -4,10 +4,28 @@ from gladminds.gm.models import UserProfile, GladMindUsers
 
 
 class RegisteredDealer(base_models.RegisteredDealer):
+    user = models.ForeignKey(UserProfile, related_name='bajaj_registered_dealer')
 
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = "Dealer Data"
+
+
+class ServiceAdvisor(base_models.ServiceAdvisor):
+    user = models.ForeignKey(UserProfile, related_name='bajaj_service_advisor')
+
+    class Meta:
+        app_label = "bajaj"
+        verbose_name_plural = "Service Advisor Data"
+
+
+class ServiceAdvisorDealerRelationship(base_models.ServiceAdvisorDealerRelationship):
+    dealer_id = models.ForeignKey(RegisteredDealer, null=False)
+    service_advisor_id = models.ForeignKey(ServiceAdvisor, null=False)
+
+    class Meta:
+        app_label = "bajaj"
+        verbose_name_plural = "Service Advisor And Dealer Relationship"
 
 
 class ASCSaveForm(base_models.ASCSaveForm):
@@ -25,20 +43,6 @@ class UCNRecovery(base_models.UCNRecovery):
         verbose_name_plural = "UCN recovery logs"
 
 
-class ServiceAdvisor(base_models.ServiceAdvisor):
-    
-    class Meta:
-        app_label = "bajaj"
-        verbose_name_plural = "Service Advisor Data"
-
-
-class ServiceAdvisorDealerRelationship(base_models.ServiceAdvisorDealerRelationship):
-    dealer_id = models.ForeignKey(RegisteredDealer, null=False)
-    service_advisor_id = models.ForeignKey(ServiceAdvisor, null=False)
-    
-    class Meta:
-        app_label = "bajaj"
-        verbose_name_plural = "Service Advisor And Dealer Relationship"
 
 
 # class RegisteredASC(base_models.RegisteredASC):
@@ -49,15 +53,15 @@ class ServiceAdvisorDealerRelationship(base_models.ServiceAdvisorDealerRelations
 
 class ServiceDeskUser(base_models.ServiceDeskUser):
     user = models.OneToOneField(UserProfile, null=True, blank=True, related_name='bajaj_service_desk_user')
-    
+
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = "service desk users"
-        
+
 
 class Feedback(base_models.Feedback):
-    assign_to = models.ForeignKey(ServiceDeskUser, null=True, blank= True)
-    
+    assign_to = models.ForeignKey(ServiceDeskUser, null=True, blank=True)
+
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = "user feedback info"
