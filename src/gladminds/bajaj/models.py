@@ -25,6 +25,7 @@ class Dealer(base_models.Dealer):
 class AuthorizedServiceCenter(base_models.AuthorizedServiceCenter):
     user = models.OneToOneField(UserProfile, primary_key=True,
                                 related_name='bajaj_registered_asc')
+    dealer = models.ForeignKey(Dealer, null=True, blank=True)
 
     class Meta:
         app_label = "bajaj"
@@ -33,8 +34,8 @@ class AuthorizedServiceCenter(base_models.AuthorizedServiceCenter):
 class ServiceAdvisor(base_models.ServiceAdvisor):
     user = models.OneToOneField(UserProfile, primary_key=True,
                             related_name='bajaj_service_advisor')
-    dealer_id = models.ForeignKey(Dealer, null=True, blank=True)
-    asc_id = models.ForeignKey(AuthorizedServiceCenter, null=True, blank=True)
+    dealer = models.ForeignKey(Dealer, null=True, blank=True)
+    asc = models.ForeignKey(AuthorizedServiceCenter, null=True, blank=True)
 
     class Meta:
         app_label = "bajaj"
