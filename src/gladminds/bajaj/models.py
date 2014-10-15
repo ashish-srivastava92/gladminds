@@ -14,53 +14,31 @@ class UserProfile(base_models.UserProfile):
         verbose_name_plural = "Brand Users"
 
 
-class RegisteredDealer(base_models.RegisteredDealer):
-    user = models.ForeignKey(UserProfile, related_name='bajaj_registered_dealer')
+class Dealer(base_models.Dealer):
+    user = models.OneToOneField(UserProfile, primary_key=True,
+                                related_name='bajaj_registered_dealer')
 
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = "Dealer Data"
 
+class AuthorizedServiceCenter(base_models.AuthorizedServiceCenter):
+    user = models.OneToOneField(UserProfile, primary_key=True,
+                                related_name='bajaj_registered_asc')
+
+    class Meta:
+        app_label = "bajaj"
+        verbose_name_plural = "Service center Data"
 
 class ServiceAdvisor(base_models.ServiceAdvisor):
-    user = models.ForeignKey(UserProfile, related_name='bajaj_service_advisor')
+    user = models.OneToOneField(UserProfile, primary_key=True,
+                            related_name='bajaj_service_advisor')
+    dealer_id = models.ForeignKey(Dealer, null=True, blank=True)
+    asc_id = models.ForeignKey(RegisteredASC, null=True, blank=True)
 
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = "Service Advisor Data"
-
-
-class ServiceAdvisorDealerRelationship(base_models.ServiceAdvisorDealerRelationship):
-    dealer_id = models.ForeignKey(RegisteredDealer, null=False)
-    service_advisor_id = models.ForeignKey(ServiceAdvisor, null=False)
-
-    class Meta:
-        app_label = "bajaj"
-        verbose_name_plural = "Service Advisor And Dealer Relationship"
-
-
-class ASCSaveForm(base_models.ASCSaveForm):
-
-    class Meta:
-        app_label = "bajaj"
-        verbose_name_plural = "ASC Save Form"
-
-
-class UCNRecovery(base_models.UCNRecovery):
-    user = models.ForeignKey(UserProfile, related_name='bajaj_ucn_recovery')
-
-    class Meta:
-        app_label = "bajaj"
-        verbose_name_plural = "UCN recovery logs"
-
-
-
-
-# class RegisteredASC(base_models.RegisteredASC):
-#     class Meta:
-#         app_label = "bajaj"
-#         verbose_name_plural = "Registered ASC Form"
-
 
 class ServiceDeskUser(base_models.ServiceDeskUser):
     user = models.OneToOneField(UserProfile, null=True, blank=True, related_name='bajaj_service_desk_user')
@@ -83,15 +61,7 @@ class Comments(base_models.Comments):
     
     class Meta:
         app_label = "bajaj"
-        verbose_name_plural = "user comment info"
-
-
-class UploadProductCSV(base_models.UploadProductCSV):
-    
-    class Meta:
-        app_label = "bajaj"
-        verbose_name_plural = "Upload Product Data"
-    
+        verbose_name_plural = "user comment info"    
         
 class BrandData(base_models.BrandData):
     
@@ -112,7 +82,7 @@ class ProductData(base_models.ProductData):
     customer_phone_number = models.ForeignKey(
         GladmindsUser, null=True, blank=True, related_name='bajaj_product_date')
     product_type = models.ForeignKey(ProductTypeData, null=True, blank=True)
-    dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
+    dealer_id = models.ForeignKey(Dealer, null=True, blank=True)
 
     class Meta:
         app_label = "bajaj"
@@ -122,7 +92,7 @@ class ProductData(base_models.ProductData):
 class CouponData(base_models.CouponData):
     vin = models.ForeignKey(ProductData, null=False, editable=False)
     sa_phone_number = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
-    servicing_dealer = models.ForeignKey(RegisteredDealer, null=True, blank=True)
+    servicing_dealer = models.ForeignKey(Dealer, null=True, blank=True)
 
     class Meta:
         app_label = "bajaj"
@@ -132,19 +102,18 @@ class CouponData(base_models.CouponData):
 class ServiceAdvisorCouponRelationship(base_models.ServiceAdvisorCouponRelationship):
     unique_service_coupon = models.ForeignKey(CouponData, null=False)
     service_advisor_phone = models.ForeignKey(ServiceAdvisor, null=False)
-    dealer_id = models.ForeignKey(RegisteredDealer, null=True, blank=True)
+    dealer_id = models.ForeignKey(Dealer, null=True, blank=True)
 
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = 'Service Advisor And Coupon Relationship'
 
+class UCNRecovery(base_models.UCNRecovery):
+    user = models.ForeignKey(UserProfile, related_name='bajaj_ucn_recovery')
 
-class MessageTemplate(base_models.MessageTemplate):
-    
     class Meta:
         app_label = "bajaj"
-        verbose_name_plural = "Message Template"
-
+        verbose_name_plural = "UCN recovery logs"
 
 class OTPToken(base_models.OTPToken):
     user = models.ForeignKey(UserProfile, null=True, blank=True, related_name='bajaj_otp_token')
@@ -154,14 +123,25 @@ class OTPToken(base_models.OTPToken):
         verbose_name_plural = "OTPs"
 
 
+class MessageTemplate(base_models.MessageTemplate):
+    
+    class Meta:
+        app_label = "bajaj"
+        verbose_name_plural = "Message Template"
+
 class EmailTemplate(base_models.EmailTemplate):
 
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = "Email Template"
 
+class ASCTempRegistration(base_models.ASCTempRegistration):
 
-class SASaveForm(base_models.SASaveForm):
+    class Meta:
+        app_label = "bajaj"
+        verbose_name_plural = "ASC Save Form"
+
+class SATempRegistration(base_models.SATempRegistration):
 
     class Meta:
         app_label = "bajaj"

@@ -461,7 +461,7 @@ class CouponRedeemFeedToSAP(BaseFeed):
 class ASCRegistrationToSAP(BaseFeed):
 
     def export_data(self, asc_phone_number=None):
-        asc_form_obj = common.ASCSaveForm.objects\
+        asc_form_obj = common.ASCTempRegistration.objects\
             .get(phone_number=asc_phone_number, status=1)
 
         item_batch = {

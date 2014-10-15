@@ -161,7 +161,7 @@ def asc_registration(request):
 #        return HttpResponse(response_object, content_type="application/json")
         data = request.POST
         try:
-            asc_obj = common.ASCSaveForm(name=data['name'],
+            asc_obj = common.ASCTempRegistration(name=data['name'],
                  address=data['address'], password=data['password'],
                  phone_number=data['phone-number'], email=data['email'],
                  pincode=data['pincode'], status=1)
@@ -373,7 +373,7 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
     if not ('dealers' in groups or 'self' in groups):
         raise
     if common.RegisteredASC.objects.filter(phone_number=phone_number)\
-        or common.ASCSaveForm.objects.filter(
+        or common.ASCTempRegistration.objects.filter(
                                                     phone_number=phone_number):
         return json.dumps({'message': ALREADY_REGISTERED})
 
@@ -384,7 +384,7 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
                                             get(dealer_id=data["dealer_id"])
             dealer_data = dealer_data.dealer_id if dealer_data else None
 
-        asc_obj = common.ASCSaveForm(name=data['name'],
+        asc_obj = common.ASCTempRegistration(name=data['name'],
                   address=data['address'], password=data['password'],
                   phone_number=phone_number, email=data['email'],
                   pincode=data['pincode'], status=1, dealer_id=dealer_data)
@@ -409,9 +409,9 @@ def save_sa_registration(request, groups):
         raise
     data = {key: val for key, val in data.iteritems()}
     phone_number = mobile_format(str(data['phone-number']))
-    if common.SASaveForm.objects.filter(phone_number=phone_number):
+    if common.SATempRegistration.objects.filter(phone_number=phone_number):
         return json.dumps({'message': ALREADY_REGISTERED})
-    asc_obj = common.SASaveForm(name=data['name'],
+    asc_obj = common.SATempRegistration(name=data['name'],
     phone_number=phone_number, status=data['status'])
     asc_obj.save()
     return json.dumps({'message': SUCCESS_MESSAGE})

@@ -87,5 +87,5 @@ class GladmindsResourceTestCase(ResourceTestCase):
         return temp_customer_obj
 
     def get_temp_asc_obj(self, **kwargs):
-        temp_asc_obj = aftersell_common.ASCSaveForm.objects.get(**kwargs)
+        temp_asc_obj = aftersell_common.ASCTempRegistration.objects.get(**kwargs)
         return temp_asc_obj
