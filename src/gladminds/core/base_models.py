@@ -31,7 +31,7 @@ class UCNRecovery(models.Model):
     sap_customer_id = models.CharField(max_length=215, null=True, blank=True)
     file_location = models.CharField(max_length=215, null=True, blank=True)
     request_date = models.DateTimeField(default=datetime.now())
-
+    unique_service_coupon = models.CharField(max_length=215, null=True, blank=True)
     class Meta:
         abstract = True
         verbose_name_plural = "UCN recovery logs"
@@ -427,15 +427,10 @@ class AppPreferences(models.Model):
     """
     This model is used for storing application preferences
     """
-    brand = models.ForeignKey(BrandData)
     key = models.CharField(max_length=100)
     value = models.CharField(max_length=200)
-
-    def __unicode__(self):
-        return self.brand
     
     class Meta:
-        app_label = "core"
+        abstract = True
         verbose_name_plural = "Application Preferences"
-        unique_together = ("brand", "key")
 

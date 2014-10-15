@@ -7,8 +7,8 @@ from tastypie.utils.mime import determine_format
 from tastypie.http import HttpBadRequest
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.fields import ApiField, CharField
-
-
+ 
+ 
 class GladMindsObject(dict):
     """
     GladMindsObject is used because:-
@@ -23,22 +23,22 @@ class GladMindsObject(dict):
             return self[name]
         else:
             return None
- 
- 
+  
+  
 class JSONApiField(ApiField):
     """
     Custom ApiField for dealing with data from custom JSONFields.
     """
     dehydrated_type = 'json'
     help_text = 'JSON structured data.'
- 
+  
     def dehydrate(self, bundle, for_list=True):
         return self.convert(super(JSONApiField, self).dehydrate(bundle, for_list))
- 
+  
     def convert(self, value):
         return value
- 
- 
+  
+  
 def get_required_dictionary(original_dict, *fields):
     """
     It will return the new dictionary which will have only given fields
@@ -49,8 +49,8 @@ def get_required_dictionary(original_dict, *fields):
         #FIXME : Bad way to handle empty strings
         new_dict[f] = None if val == "" else val
     return new_dict
- 
- 
+  
+  
 class GladMindsResource(Resource):
     """
     All resourses are inheriting this resource,
@@ -65,7 +65,7 @@ class GladMindsResource(Resource):
         if fmt == 'text/html' and 'format' not in request:
             fmt = 'application/json'
         return fmt
- 
+  
     def check_mandatory_fields(self, bundle, *mandatory_fields):
         """
         For given mandatory fields it will check from bundle.
@@ -75,8 +75,8 @@ class GladMindsResource(Resource):
             if f not in bundle.data.keys():
                 raise ImmediateHttpResponse(HttpBadRequest("%s cannot be\
                 empty" % f))
- 
- 
+  
+  
 class GladMindsModelResource(ModelResource):
     """
     It is inheriting Model Resources

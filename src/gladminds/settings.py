@@ -49,7 +49,7 @@ SUIT_CONFIG = {
     'LIST_PER_PAGE': 20,
     'SHOW_REQUIRED_ASTERISK': True,
     'MENU': (
-        {'app': 'gladminds', 'label': 'Data', 'icon': ' icon-folder-open',
+        {'app': 'gm', 'label': 'Data', 'icon': ' icon-folder-open',
          'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
                     {'model': 'dispatchedproduct',
                      'label': 'Feed -> Product Dispatch'},

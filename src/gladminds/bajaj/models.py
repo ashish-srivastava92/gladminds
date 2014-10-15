@@ -184,3 +184,13 @@ class SparesData(base_models.SparesData):
         app_label = "bajaj"
         verbose_name_plural = "spare info"
 
+
+class AppPreferences(base_models.AppPreferences):
+    brand = models.ForeignKey(BrandData, null=False)    
+    
+    class Meta:
+        app_label = "bajaj"
+        verbose_name_plural = "app preference"
+        unique_together = ("brand", "key")
+
+
