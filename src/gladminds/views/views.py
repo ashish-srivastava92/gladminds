@@ -68,7 +68,7 @@ def generate_otp(request):
             phone_number = request.POST['mobile']
             email = request.POST.get('email', '')
             logger.info('OTP request received. Mobile: {0}'.format(phone_number))
-            user = common.RegisteredASC.objects.filter(phone_number=mobile_format(phone_number))[0].user
+            user = common.AuthorizedServiceCenter.objects.filter(phone_number=mobile_format(phone_number))[0].user
             token = utils.get_token(user, phone_number, email=email)
             message = message_template.get_template('SEND_OTP').format(token)
             if settings.ENABLE_AMAZON_SQS:
@@ -96,7 +96,7 @@ def validate_otp(request):
             otp = request.POST['otp']
             phone_number = request.POST['phone']
             logger.info('OTP {0} recieved for validation. Mobile {1}'.format(otp, phone_number))
-            user = common.RegisteredASC.objects.filter(phone_number=mobile_format(phone_number))[0].user
+            user = common.AuthorizedServiceCenter.objects.filter(phone_number=mobile_format(phone_number))[0].user
             utils.validate_otp(user, otp, phone_number)
             logger.info('OTP validated for mobile number {0}'.format(phone_number))
             return render(request, 'portal/reset_pass.html', {'otp': otp})
@@ -270,7 +270,7 @@ def create_report(method, query_params, user):
     args = { Q(status=4) | Q(status=2) }
     status_options = {'4': 'In Progress', '2':'Closed'}
 
-    user = common.RegisteredDealer.objects.filter(dealer_id=user)
+    user = common.Dealer.objects.filter(dealer_id=user)
     filter['servicing_dealer'] = user[0]
     params['min_date'], params['max_date'] = utils.get_min_and_max_filter_date() 
     if method == 'POST':
@@ -372,7 +372,7 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
     phone_number = mobile_format(str(data['phone-number']))
     if not ('dealers' in groups or 'self' in groups):
         raise
-    if common.RegisteredASC.objects.filter(phone_number=phone_number)\
+    if common.AuthorizedServiceCenter.objects.filter(phone_number=phone_number)\
         or common.ASCTempRegistration.objects.filter(
                                                     phone_number=phone_number):
         return json.dumps({'message': ALREADY_REGISTERED})
@@ -380,7 +380,7 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
     try:
         dealer_data = None
         if "dealer_id" in data:
-            dealer_data = common.RegisteredDealer.objects.\
+            dealer_data = common.Dealer.objects.\
                                             get(dealer_id=data["dealer_id"])
             dealer_data = dealer_data.dealer_id if dealer_data else None
 

@@ -49,7 +49,7 @@ class GladmindsResourceTestCase(ResourceTestCase):
         return product_data
 
     def get_delear_obj(self, **kwargs):
-        delear_data = aftersell_common.RegisteredDealer(**kwargs)
+        delear_data = aftersell_common.Dealer(**kwargs)
         delear_data.save()
         return delear_data
 

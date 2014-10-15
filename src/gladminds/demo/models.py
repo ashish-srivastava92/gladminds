@@ -29,7 +29,7 @@ class ServiceAdvisor(base_models.ServiceAdvisor):
     user = models.OneToOneField(UserProfile, primary_key=True,
                             related_name='bajaj_service_advisor')    
     dealer_id = models.ForeignKey(Dealer, null=True, blank=True)
-    asc_id = models.ForeignKey(RegisteredASC, null=True, blank=True)
+    asc_id = models.ForeignKey(AuthorizedServiceCenter, null=True, blank=True)
     
     class Meta:
         app_label = "demo"

@@ -8,7 +8,7 @@ from django.forms import ModelForm
 from django.contrib.admin.models import LogEntry
 from gladminds.core.models import GladMindUsers, ProductTypeData, \
     BrandData, ProductData, CouponData, MessageTemplate,\
-    CustomerTempRegistration,RegisteredDealer,\
+    CustomerTempRegistration,Dealer,\
     ServiceAdvisorDealerRelationship, ServiceAdvisor,\
     EmailTemplate, ASCTempRegistration, Feedback
 from gladminds.gm.models import UserNotification
@@ -110,7 +110,7 @@ class ServiceAdvisorAdmin(ModelAdmin):
     exclude = ('order',)
 
     def dealer_id(self, obj):
-        return u'<a href="/gladminds/registereddealer/%s/">%s</a>' % (obj.dealer_id.pk, obj.dealer_id)
+        return u'<a href="/gladminds/dealer/%s/">%s</a>' % (obj.dealer_id.pk, obj.dealer_id)
     dealer_id.allow_tags = True
 
 
@@ -122,7 +122,7 @@ class ServiceAdvisorDealerAdmin(ModelAdmin):
         'dealer_id', 'name', 'service_advisor_ids', 'phone_number', 'status')
 
     def dealer_id(self, obj):
-        return u'<a href="/gladminds/registereddealer/%s/">%s</a>' % (obj.dealer_id.pk, obj.dealer_id)
+        return u'<a href="/gladminds/dealer/%s/">%s</a>' % (obj.dealer_id.pk, obj.dealer_id)
     dealer_id.allow_tags = True
 
     def service_advisor_ids(self, obj):
@@ -559,7 +559,7 @@ admin.site.register(DispatchedProduct, ListDispatchedProduct)
 admin.site.register(ServiceAdvisor, ServiceAdvisorAdmin)
 admin.site.register(
     ServiceAdvisorDealerRelationship, ServiceAdvisorDealerAdmin)
-admin.site.register(RegisteredDealer, DealerAdmin)
+admin.site.register(Dealer, DealerAdmin)
 admin.site.register(AuditLog, AuditLogAdmin)
 admin.site.register(DataFeedLog, FeedLogAdmin)
 admin.site.register(GladMindUsers, GladMindUserAdmin)

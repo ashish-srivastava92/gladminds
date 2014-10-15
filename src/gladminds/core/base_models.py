@@ -45,7 +45,7 @@ class Dealer(BaseModel):
         max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
 
-    objects = managers.RegisteredDealerManager()
+    objects = managers.DealerManager()
 
     class Meta:
         abstract = True
@@ -63,7 +63,7 @@ class AuthorizedServiceCenter(BaseModel):
     role = models.CharField(max_length=10, default='dealer', blank=False)
     status = models.CharField(max_length=10, blank=False, null=False)
 
-    objects = managers.RegisteredDealerManager()
+    objects = managers.DealerManager()
 
     class Meta:
         abstract = True
