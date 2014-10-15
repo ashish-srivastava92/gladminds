@@ -59,11 +59,6 @@ class AuthorizedServiceCenter(BaseModel):
     asc_id = models.CharField(
         max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
-    address = models.TextField(blank=True, null=True)
-    role = models.CharField(max_length=10, default='dealer', blank=False)
-    status = models.CharField(max_length=10, blank=False, null=False)
-
-    objects = managers.DealerManager()
 
     class Meta:
         abstract = True
@@ -71,6 +66,7 @@ class AuthorizedServiceCenter(BaseModel):
 
     def __unicode__(self):
         return self.dealer_id
+
 
 class ServiceAdvisor(BaseModel):
     service_advisor_id = models.CharField(
@@ -87,6 +83,7 @@ class ServiceAdvisor(BaseModel):
 
     def __unicode__(self):
         return self.phone_number
+
 
 class ServiceDeskUser(BaseModel):
     email_id = models.EmailField(max_length=215, null=True, blank=True)

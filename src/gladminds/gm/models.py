@@ -9,6 +9,10 @@ class Industry(BaseModel):
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
 
+    class Meta:
+        app_label = "gm"
+        verbose_name_plural = "Industries"
+
 
 class Service(BaseModel):
     name = models.CharField(max_length=200)
@@ -23,7 +27,7 @@ class Brand(BaseModel):
     brand_id = models.CharField(
         max_length=50, null=False, unique=True, help_text="Brand Id must be unique")
     brand_name = models.CharField(max_length=250, null=False)
-    brand_logo = models.CharField(max_length=200, null=True, blank=False)
+    brand_logo = models.CharField(max_length=200, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     industry = models.ForeignKey(Industry)
     services = models.ManyToManyField(Service, through="BrandService")
