@@ -6,7 +6,7 @@ from suit.admin import SortableTabularInline
 from suit.widgets import EnclosedInput, AutosizedTextarea
 from django.forms import ModelForm
 from django.contrib.admin.models import LogEntry
-from gladminds.core.models import GladMindUsers, ProductTypeData, \
+from gladminds.core.models import GladmindsUser, ProductTypeData, \
     BrandData, ProductData, CouponData, MessageTemplate,\
     UploadProductCSV, CustomerTempRegistration,\
     RegisteredDealer, ServiceAdvisorDealerRelationship, ServiceAdvisor,\
@@ -216,7 +216,7 @@ class ProductDataAdmin(ModelAdmin):
         return ' | '.join([str(ucn) for ucn in ucn_list])
 
     def customer_name(self, obj):
-        gm_user_obj = GladMindUsers.objects.get(
+        gm_user_obj = GladmindsUser.objects.get(
             phone_number=obj.customer_phone_number)
         name = ''
         if gm_user_obj:
@@ -562,7 +562,7 @@ admin.site.register(
 admin.site.register(RegisteredDealer, DealerAdmin)
 admin.site.register(AuditLog, AuditLogAdmin)
 admin.site.register(DataFeedLog, FeedLogAdmin)
-admin.site.register(GladMindUsers, GladMindUserAdmin)
+admin.site.register(GladmindsUser, GladMindUserAdmin)
 admin.site.register(ProductData, ProductDataAdmin)
 admin.site.register(CouponData, CouponAdmin)
 admin.site.register(MessageTemplate, MessageTemplateAdmin)

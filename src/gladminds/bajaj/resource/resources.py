@@ -27,7 +27,7 @@ from gladminds.core.utils import mobile_format, format_message, get_task_queue, 
 from gladminds.core.feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
 from gladminds.core.mail import send_feedback_received,send_servicedesk_feedback
-from gladminds.gm.models import GladMindUsers
+from gladminds.gm.models import GladmindsUser
 
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -116,7 +116,7 @@ class GladmindsResources(Resource):
         customer_name = sms_dict['name']
         email_id = sms_dict['email_id']
         try:
-            object = common.GladMindUsers.objects.get(phone_number=phone_number)
+            object = common.GladmindsUser.objects.get(phone_number=phone_number)
             gladmind_customer_id = object.gladmind_customer_id
             customer_name = object.customer_name
         except ObjectDoesNotExist as odne:
@@ -124,7 +124,7 @@ class GladmindsResources(Resource):
             registration_date = datetime.now()
             user_feed = BaseFeed()
             user = user_feed.registerNewUser('customer', username=gladmind_customer_id)
-            customer = common.GladMindUsers(
+            customer = common.GladmindsUser(
                 user=user, gladmind_customer_id=gladmind_customer_id, phone_number=phone_number,
                 customer_name=customer_name, email_id=email_id,
                 registration_date=registration_date)
@@ -469,7 +469,7 @@ class GladmindsResources(Resource):
         if  active_sa:
             return "SA"
         else:
-            check_customer_obj = common.GladMindUsers.objects.filter(
+            check_customer_obj = common.GladmindsUser.objects.filter(
                                                     phone_number=phone_number)
             if check_customer_obj:
                 return "Customer"
@@ -487,7 +487,7 @@ class GladmindsBaseResource(ModelResource):
 class UserResources(GladmindsBaseResource):
     products = fields.ListField()
     class Meta:
-        queryset = GladMindUsers.objects.all()
+        queryset = GladmindsUser.objects.all()
         resource_name = 'users'
         authentication = AccessTokenAuthentication()
 
@@ -501,7 +501,7 @@ class UserResources(GladmindsBaseResource):
         request = bundle.request
         customer_id = kwargs['pk']
         try:
-            customer_detail = GladMindUsers.objects.get(gladmind_customer_id=customer_id)
+            customer_detail = GladmindsUser.objects.get(gladmind_customer_id=customer_id)
             return customer_detail
         except:
             raise ImmediateHttpResponse(response=http.HttpBadRequest())

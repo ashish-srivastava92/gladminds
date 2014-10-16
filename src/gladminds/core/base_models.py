@@ -16,6 +16,30 @@ class BaseModel(models.Model):
         abstract = True
 
 
+class UserProfile(BaseModel):
+    phone_number = models.CharField(
+                   max_length=15, blank=True, null=True)
+    profile_pic = models.CharField(
+                   max_length=200, blank=True, null=True)
+    status = models.CharField(max_length=10, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    state = models.CharField(max_length=255, null=True, blank=True)
+    country = models.CharField(max_length=255, null=True, blank=True)
+    pincode = models.CharField(max_length=15, null=True, blank=True)
+    date_of_birth = models.DateTimeField(null=True, blank=True)
+
+    GENDER_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('X', 'Other'),
+    )
+    gender = models.CharField(max_length=2, choices=GENDER_CHOICES,
+                              blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+
 class RegisteredDealer(BaseModel):
     dealer_id = models.CharField(
         max_length=25, blank=False, null=False, unique=True,
@@ -457,3 +481,16 @@ class AppPreferences(models.Model):
         abstract = True
         verbose_name_plural = "Application Preferences"
 
+class UserPreferences(models.Model):
+    """
+    This model is used for storing user preferences
+    """
+    key = models.CharField(max_length=100)
+    value = models.CharField(max_length=200)
+
+    def unicode(self):
+        return self.user_profile
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "User Preferences"

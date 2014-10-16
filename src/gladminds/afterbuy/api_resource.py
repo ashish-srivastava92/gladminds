@@ -60,7 +60,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             return HttpBadRequest("mobile is required.")
         try:
             phone_number= mobile_format(mobile)
-            user_info = common.GladMindUsers.objects.get(phone_number=phone_number)
+            user_info = common.GladmindsUser.objects.get(phone_number=phone_number)
             product_info = common.ProductData.objects.filter(customer_phone_number=user_info)
             if not product_info:
                 return HttpResponse("No product exist.")
@@ -101,7 +101,7 @@ class AfterBuyResources(AfterBuyBaseResource):
                 data = {'status':1, 'message': 'product saved successfully'}
         except Exception as ex:
             try:
-                user_object = common.GladMindUsers.objects.get(phone_number=phone_number)
+                user_object = common.GladmindsUser.objects.get(phone_number=phone_number)
                 product_name = request.POST.get('product_name', None)
                 product_type_list = common.ProductTypeData.objects.filter(product_name = product_name)
                 if not product_type_list:
@@ -239,7 +239,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             return HttpBadRequest("phone_number is required.")
         try:
             phone_number= mobile_format(phone_number)
-            user_info = common.GladMindUsers.objects.get(phone_number=phone_number)
+            user_info = common.GladmindsUser.objects.get(phone_number=phone_number)
             notification_count = len(gm_common.UserNotification.objects.filter(user=user_info, notification_read=0))
             resp = {'count': notification_count}
         except Exception as ex:
@@ -257,7 +257,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             return HttpBadRequest("phone_number is required.")
         try:
             phone_number= mobile_format(phone_number)
-            user_info = common.GladMindUsers.objects.get(phone_number=phone_number)
+            user_info = common.GladmindsUser.objects.get(phone_number=phone_number)
             notifications = gm_common.UserNotification.objects.filter(user=user_info)
             if not notifications:
                 return HttpResponse("No notification exists.")
@@ -293,7 +293,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             return HttpBadRequest("phone_number is required.")
         try:
             phone_number= mobile_format(phone_number)
-            user_info = common.GladMindUsers.objects.get(phone_number=phone_number)
+            user_info = common.GladmindsUser.objects.get(phone_number=phone_number)
             user_info.customer_name = request.POST.get('name', None)
             user_info.email_id = request.POST.get('email', None)
             user_info.gender = request.POST.get('gender', None)
@@ -332,7 +332,7 @@ class AfterBuyResources(AfterBuyBaseResource):
             return HttpBadRequest("phone_number is required.")
         try:
             phone_number= mobile_format(phone_number)
-            user = common.GladMindUsers.objects.get(phone_number=phone_number)
+            user = common.GladmindsUser.objects.get(phone_number=phone_number)
             IMEI = request.POST.get('IMEI', None)
             ICCID = request.POST.get('ICCID', None)
             phone_name = request.POST.get('phone_name', None)

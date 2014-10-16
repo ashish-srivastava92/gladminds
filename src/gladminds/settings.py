@@ -64,7 +64,7 @@ SUIT_CONFIG = {
                      'label': 'Feed Log'}, 
                     {'model': 'customertempregistration',
                      'label': ' Customer registration'}, 'uploadproductcsv',
-                    'messagetemplate', 'emailtemplate', 'gladmindusers',)},
+                    'messagetemplate', 'emailtemplate', 'GladmindsUser',)},
         {'app': 'aftersell', 'label': 'AfterSell', 'icon': ' icon-folder-open',
          'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
                     {'model': 'dispatchedproduct',
@@ -80,7 +80,7 @@ SUIT_CONFIG = {
                      'label': 'Feed Log'},
                     {'model': 'feedback',
                      'label': 'Help Desk'}, 'uploadproductcsv',
-                    'messagetemplate', 'emailtemplate', 'gladmindusers',)},
+                    'messagetemplate', 'emailtemplate', 'GladmindsUser',)},
         {'app': 'afterbuy', 'label': 'AfterBuy', 'icon': ' icon-folder-open',
          'models': ({'model': 'usernotification', 'label': 'notification'},)},
         {'app': 'djcelery', 'label': 'Job Management', 'icon': 'icon-tasks'})
