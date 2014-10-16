@@ -33,7 +33,7 @@ class FeedsResourceTest(GladmindsResourceTestCase, BaseTestCase):
     def test_service_advisor_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data,content_type='text/xml')
 
         self.assertEqual(200, response.status_code)
         self.assertEquals(3, Dealer.objects.count())
@@ -46,7 +46,7 @@ class FeedsResourceTest(GladmindsResourceTestCase, BaseTestCase):
     def test_service_advisor_dealer_relationship(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data, content_type='text/xml')
         self.assertEqual(200, response.status_code)
         sa_dealer_rel_data = ServiceAdvisorDealerRelationship.objects.all()
 
@@ -72,7 +72,7 @@ class FeedsResourceTest(GladmindsResourceTestCase, BaseTestCase):
 
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed_2.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data, content_type='text/xml')
         self.assertEqual(200, response.status_code)
 
         sa_obj_1 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
@@ -96,7 +96,7 @@ class FeedsResourceTest(GladmindsResourceTestCase, BaseTestCase):
         '''
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data, content_type='text/xml')
         self.assertEqual(200, response.status_code)
         sa_obj_1 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
         self.assertEquals('+9155555', sa_obj_1[0].phone_number)
@@ -105,7 +105,7 @@ class FeedsResourceTest(GladmindsResourceTestCase, BaseTestCase):
         
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/SA_mobile_update_data/SA_update_mobile_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data, content_type='text/xml')
         self.assertEqual(200, response.status_code)
         
         sa_obj_1 = ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
@@ -126,15 +126,15 @@ class FeedsResourceTest(GladmindsResourceTestCase, BaseTestCase):
     def test_product_dispatch(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(200, response.status_code)
 
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(200, response.status_code)
         
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(200, response.status_code)        
 
         self.assertEquals(1, ProductData.objects.count())
@@ -148,23 +148,23 @@ class FeedsResourceTest(GladmindsResourceTestCase, BaseTestCase):
     def test_product_purchase(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(200, response.status_code)
 
     def test_coupon_redamption_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/service_advisor_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(200, response.status_code)
 
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(200, response.status_code)
 
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(200, response.status_code)
 
         self.assertEqual(CouponData.objects.count(), 2, "Two coupon created")
@@ -189,31 +189,31 @@ class FeedsResourceTest(GladmindsResourceTestCase, BaseTestCase):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/without_sa_id_sa_feed.xml')
         xml_data = open(file_path, 'r').read()
         with transaction.atomic():
-            response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+            response = self.client.post('/api/v1/feed/?wsdl', data=xml_data,content_type='text/xml')
             self.assertEqual(200, response.status_code)
 
         response_content = response.content
         xml_parser = ET.fromstring(response_content)
         with transaction.atomic():
-            status = xml_parser.findall('*//{http://api.gladmindsplatform.co/api/v1/bajaj/feed/}postDealerResult')[0].text
+            status = xml_parser.findall('*//{http://api.gladmindsplatform.co/api/v1/feed/}postDealerResult')[0].text
             self.assertEqual(status, 'SUCCESS')
 
     def test_update_customer_number(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data, content_type='text/xml')
         self.assertEqual(200, response.status_code)
 
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data, content_type='text/xml')
         self.assertEqual(200, response.status_code)
         gm_user = GladMindUsers.objects.all()
         self.assertEqual(1, len(gm_user))
 
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/purchase_feed_with_diff_cust_num.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data, content_type='text/xml')
         self.assertEqual(200, response.status_code)
         product_object = self.get_product_details(vin='XXXXXXXXXX')
         self.assertEqual(product_object.customer_phone_number.phone_number, "+919845340297", "Customer Phone Number is not updated")
@@ -225,7 +225,7 @@ class FeedsResourceTest(GladmindsResourceTestCase, BaseTestCase):
 
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/feeds_for_testing_auth.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(200, response.status_code)
 
     @unittest.skip("Skipping Adding this functionality in future")
@@ -236,7 +236,7 @@ class FeedsResourceTest(GladmindsResourceTestCase, BaseTestCase):
         '''
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data, content_type='text/xml')
         self.assertEqual(200, response.status_code)
 
         self.assertEquals(2, CouponData.objects.count())
@@ -254,7 +254,7 @@ class FeedsResourceTest(GladmindsResourceTestCase, BaseTestCase):
         '''
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed_without_ucn.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data, content_type='text/xml')
         self.assertEqual(200, response.status_code)
 
         self.assertEquals(1, CouponData.objects.count())
