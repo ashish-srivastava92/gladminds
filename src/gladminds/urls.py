@@ -1,7 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.conf import settings
 from tastypie.api import Api
-from gladminds.resource import resources
 from gladminds.core.sqs_tasks import _tasks_map
 from gladminds.core.taskqueue import SqsHandler
 from gladminds.afterbuy import api_resource
@@ -13,10 +12,11 @@ from gladminds.health_check import health_check_view
 
 # Uncomment the next two lines to enable the admin:
 from gladminds.admin import admin
+from gladminds.gm.resource.user_resource import GladmindsUserResource
 # admin.autodiscover()
 
 api_v1 = Api(api_name="v1")
-# api_v1.register(resources.GladmindsResources())
+api_v1.register(GladmindsUserResource())
 # api_v1.register(resources.UserResources())
 # api_v1.register(api_resource.AfterBuyResources())
 # api_v1.register(audit_api.AuditResources())

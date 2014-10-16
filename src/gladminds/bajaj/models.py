@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from gladminds.core import base_models
-from gladminds.gm.models import GladmindsUser
 
 
 class UserProfile(base_models.UserProfile):
@@ -41,16 +40,9 @@ class ServiceAdvisor(base_models.ServiceAdvisor):
         app_label = "bajaj"
         verbose_name_plural = "Service Advisor Data"
 
-class ServiceDeskUser(base_models.ServiceDeskUser):
-    user = models.OneToOneField(UserProfile, null=True, blank=True, related_name='bajaj_service_desk_user')
-
-    class Meta:
-        app_label = "bajaj"
-        verbose_name_plural = "service desk users"
-
 
 class Feedback(base_models.Feedback):
-    assign_to = models.ForeignKey(ServiceDeskUser, null=True, blank=True)
+    assign_to = models.ForeignKey(UserProfile, null=True, blank=True)
 
     class Meta:
         app_label = "bajaj"
@@ -59,7 +51,7 @@ class Feedback(base_models.Feedback):
 
 class Comments(base_models.Comments):
     feedback_object = models.ForeignKey(Feedback, null=False, blank=False)
-    
+
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = "user comment info"
@@ -74,7 +66,7 @@ class ProductTypeData(base_models.ProductTypeData):
 
 class ProductData(base_models.ProductData):
     customer_phone_number = models.ForeignKey(
-        GladmindsUser, null=True, blank=True, related_name='bajaj_product_date')
+        UserProfile, null=True, blank=True, related_name='bajaj_product_date')
     product_type = models.ForeignKey(ProductTypeData, null=True, blank=True)
     dealer_id = models.ForeignKey(Dealer, null=True, blank=True)
 
