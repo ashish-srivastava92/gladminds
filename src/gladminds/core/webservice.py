@@ -25,7 +25,7 @@ logger = logging.getLogger("gladminds")
 
 
 pattern = r'(\d{4})-(\d{2})-(\d{2})(\d{2})(\d{2})(\d{2})'
-tns = "http://api.gladmindsplatform.co/api/v1/bajaj/feed/"
+tns = "http://api.gladmindsplatform.co/api/v1/feed/"
 SUCCESS = "SUCCESS"
 FAILED = "FAILURE"
 

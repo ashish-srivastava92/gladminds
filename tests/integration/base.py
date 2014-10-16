@@ -186,12 +186,12 @@ class BaseTestCase(ResourceTestCase):
     def send_dispatch_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data,content_type='text/xml')
 
     def send_asc_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/asc_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assert_successful_http_response(response)
 
     def check_asc_feed_saved_to_db(self):
@@ -221,7 +221,7 @@ class BaseTestCase(ResourceTestCase):
     def send_purchase_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
         xml_data = open(file_path, 'r').read()
-        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        response = self.client.post('/api/v1/feed/?wsdl', data=xml_data,content_type='text/xml')
         self.assertEqual(response.status_code, 200)
 
 
