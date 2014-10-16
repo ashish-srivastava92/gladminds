@@ -27,7 +27,7 @@ from gladminds.core.utils import mobile_format, format_message, get_task_queue, 
 from gladminds.core.feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
 from gladminds.core.mail import send_feedback_received,send_servicedesk_feedback
-from gladminds.gm.models import GladMindUsers
+from gladminds.gm.models import GladmindsUser
 
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -487,7 +487,7 @@ class GladmindsBaseResource(ModelResource):
 class UserResources(GladmindsBaseResource):
     products = fields.ListField()
     class Meta:
-        queryset = GladMindUsers.objects.all()
+        queryset = GladmindsUser.objects.all()
         resource_name = 'users'
         authentication = AccessTokenAuthentication()
 
@@ -501,7 +501,7 @@ class UserResources(GladmindsBaseResource):
         request = bundle.request
         customer_id = kwargs['pk']
         try:
-            customer_detail = GladMindUsers.objects.get(gladmind_customer_id=customer_id)
+            customer_detail = GladmindsUser.objects.get(gladmind_customer_id=customer_id)
             return customer_detail
         except:
             raise ImmediateHttpResponse(response=http.HttpBadRequest())
