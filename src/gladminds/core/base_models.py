@@ -85,19 +85,6 @@ class ServiceAdvisor(BaseModel):
         return self.phone_number
 
 
-class ServiceDeskUser(BaseModel):
-    email_id = models.EmailField(max_length=215, null=True, blank=True)
-    phone_number = models.CharField(max_length=15, unique=True)
-    designation = models.CharField(max_length=10, choices = USER_DESIGNATION)
-
-    class Meta:
-        abstract = True
-        verbose_name_plural = "service desk users"
-
-    def __unicode__(self):
-        return self.phone_number        
-
-
 class Feedback(BaseModel):
     reporter = models.CharField(max_length=15)
     reporter_email_id = models.CharField(max_length=50, null=True, blank= True)
