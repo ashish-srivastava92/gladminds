@@ -1,37 +1,36 @@
 # from tastypie.constants import ALL_WITH_RELATIONS
 # from tastypie.authorization import Authorization
 # from tastypie import fields
+# from gladminds.core import models as common
 # from gladminds.apis.baseresource import CustomBaseResource
 # from gladminds.apis.product_apis import ProductDataResources
-# from gladminds.core.base_models import CouponData, ServiceAdvisor,\
-#     RegisteredDealer
-#  
-# class RegisteredDealerResources(CustomBaseResource):
+# 
+# class DealerResources(CustomBaseResource):
 #     class Meta:
-#         queryset = RegisteredDealer.objects.all()
-#         resource_name = "registereddealer"
+#         queryset = common.Dealer.objects.all()
+#         resource_name = "dealer"
 #         authorization = Authorization()
-#         detail_allowed_methods = ['get', 'post', 'delete', 'put']
+#         detail_allowed_methods = ['get', 'post', 'delete']
 #         always_return_data = True
-#  
+# 
 # class ServiceAdvisorResources(CustomBaseResource):
 #     class Meta:
-#         queryset = ServiceAdvisor.objects.all()
+#         queryset = common.ServiceAdvisor.objects.all()
 #         resource_name = "serviceadvisor"
 #         authorization = Authorization()
-#         detail_allowed_methods = ['get', 'post', 'delete', 'put']
+#         detail_allowed_methods = ['get', 'post', 'delete']
 #         always_return_data = True
-#  
+# 
 # class CouponDataResources(CustomBaseResource):
 #     vin = fields.ForeignKey(ProductDataResources, 'vin', full=True)
 #     sa_phone_number = fields.ForeignKey(ServiceAdvisorResources, 'sa_phone_number', full=True, null=True, blank=True)
-#     servicing_dealer = fields.ForeignKey(RegisteredDealerResources, 'servicing_dealer', full=True,
+#     servicing_dealer = fields.ForeignKey(DealerResources, 'servicing_dealer', full=True,
 #                                          null=True, blank=True)
 #     class Meta:
-#         queryset = CouponData.objects.all()
-#         resource_name = "coupons"
+#         queryset = common.CouponData.objects.all()
+#         resource_name = "coupondata"
 #         authorization = Authorization()
-#         detail_allowed_methods = ['get', 'post', 'delete', 'put']
+#         detail_allowed_methods = ['get', 'post', 'delete']
 #         always_return_data = True
 #         filtering = {
 #                         "servicing_dealer" : ALL_WITH_RELATIONS,

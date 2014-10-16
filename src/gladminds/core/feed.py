@@ -187,14 +187,14 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
         total_failed = 0
         for dealer in self.data_source:
             try:
-                dealer_data = common.RegisteredDealer.objects.get(
+                dealer_data = common.Dealer.objects.get(
                     dealer_id=dealer['dealer_id'])
             except ObjectDoesNotExist as odne:
                 logger.debug(
                     "[Exception: DealerAndServiceAdvisorFeed_dealer_data]: {0}"
                     .format(odne))
                 user_obj = self.registerNewUser('dealer', username=dealer['dealer_id'])
-                dealer_data = common.RegisteredDealer(user=user_obj,
+                dealer_data = common.Dealer(user=user_obj,
                     dealer_id=dealer['dealer_id'], address=dealer['address'])
                 dealer_data.save()
 
@@ -268,11 +268,11 @@ class ProductDispatchFeed(BaseFeed):
                     '[Info: ProductDispatchFeed_product_data]: {0}'.format(odne))
                 try:
                     try:
-                        dealer_data = common.RegisteredDealer.objects.get(
+                        dealer_data = common.Dealer.objects.get(
                             dealer_id=product['dealer_id'])
                     except Exception as ex:
                         user_obj = self.registerNewUser('dealer', username=product['dealer_id'])
-                        dealer_data = common.RegisteredDealer(user=user_obj,
+                        dealer_data = common.Dealer(user=user_obj,
                             dealer_id=product['dealer_id'])
                         dealer_data.save()
                     self.get_or_create_product_type(
@@ -461,7 +461,7 @@ class CouponRedeemFeedToSAP(BaseFeed):
 class ASCRegistrationToSAP(BaseFeed):
 
     def export_data(self, asc_phone_number=None):
-        asc_form_obj = common.ASCSaveForm.objects\
+        asc_form_obj = common.ASCTempRegistration.objects\
             .get(phone_number=asc_phone_number, status=1)
 
         item_batch = {
@@ -527,26 +527,26 @@ post_save.connect(update_coupon_data, sender=common.ProductData)
 class ASCFeed(BaseFeed):
     def import_data(self):
         for dealer in self.data_source:
-            dealer_data = common.RegisteredDealer.objects.filter(
+            dealer_data = common.Dealer.objects.filter(
                                                     dealer_id=dealer['asc_id'])
             if not dealer_data:
                 if dealer['dealer_id']:
                     try:
-                        dealer_data = common.RegisteredDealer.objects.get(
+                        dealer_data = common.Dealer.objects.get(
                             dealer_id=dealer['dealer_id'])
                     except ObjectDoesNotExist as ex:
                         logger.debug(
                             "[Exception: ASCFeed_dealer_data]: {0}"
                             .format(ex))
                         user_obj = self.registerNewUser('dealer', username=dealer['dealer_id'])
-                        dealer_data = common.RegisteredDealer(user=user_obj,
+                        dealer_data = common.Dealer(user=user_obj,
                             dealer_id=dealer['dealer_id'], address=dealer['address'])
                         dealer_data.save()
                         
-                    asc_data = common.RegisteredDealer(dealer_id=dealer['asc_id'],
+                    asc_data = common.Dealer(dealer_id=dealer['asc_id'],
                                         address=dealer['address'], dependent_on=dealer['dealer_id'])
                 else:
-                    asc_data = common.RegisteredDealer(dealer_id=dealer['asc_id'],
+                    asc_data = common.Dealer(dealer_id=dealer['asc_id'],
                         role ='asc', address=dealer['address'])
 
                 try:

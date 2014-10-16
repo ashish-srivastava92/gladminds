@@ -1,11 +1,67 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
 
-from gladminds.core.base_models import BaseModel
+from gladminds.core.base_models import BaseModel, MessageTemplate, EmailTemplate
+
+
+class Industry(BaseModel):
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+
+
+class Service(BaseModel):
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+
+    class Meta:
+        app_label = "gm"
+        verbose_name_plural = "Services"
+
+
+class Brand(BaseModel):
+    brand_id = models.CharField(
+        max_length=50, null=False, unique=True, help_text="Brand Id must be unique")
+    brand_name = models.CharField(max_length=250, null=False)
+    brand_logo = models.CharField(max_length=200, null=True, blank=False)
+    is_active = models.BooleanField(default=True)
+    industry = models.ForeignKey(Industry)
+    services = models.ManyToManyField(Service, through="BrandService")
+
+    class Meta:
+        app_label = "gm"
+        verbose_name_plural = "Brand Data"
+
+    def __unicode__(self):
+        return self.brand_id
+
+    def image_tag(self):
+        if self.brand_name == 'Bajaj':
+            url = settings.STATIC_URL + 'img/bajaj.jpg'
+            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
+        elif self.brand_name == 'Honda':
+            url = settings.STATIC_URL + 'img/honda.jpg'
+            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
+        else:
+            url = settings.STATIC_URL + 'img/noimage.jpg'
+            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
+    image_tag.short_description = 'Image'
+    image_tag.allow_tags = True
+
+
+class BrandService(BaseModel):
+    brand = models.ForeignKey(Brand)
+    service = models.ForeignKey(Service)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        app_label = "gm"
 
 
 class GladmindsUser(BaseModel):
     user = models.OneToOneField(User, primary_key=True)
+    gladmind_customer_id = models.CharField(
+        max_length=215, unique=True, null=True)
     phone_number = models.CharField(
                    max_length=15, blank=True, null=True)
     profile_pic = models.CharField(
@@ -23,8 +79,6 @@ class GladmindsUser(BaseModel):
     )
     gender = models.CharField(max_length=2, choices=GENDER_CHOICES,
                               blank=True, null=True)
-    gladmind_customer_id = models.CharField(
-        max_length=215, unique=True, null=True)
     #added these attributes for afterbuy application
     accepted_terms = models.BooleanField(default=False)
     SIZE_CHOICES = (
@@ -45,7 +99,19 @@ class GladmindsUser(BaseModel):
         return self.phone_number
 
 
-class OTPToken(models.Model):
+class UserProduct(BaseModel):
+    gm_user = models.ForeignKey(GladmindsUser)
+    brand = models.ForeignKey(Brand)
+    product_type = models.CharField(max_length=100)
+    product_id = models.CharField(max_length=300)
+    description = models.TextField(null=True, blank=True)
+
+    class Meta:
+        app_label = "gm"
+        verbose_name_plural = "User Products"
+
+
+class OTPToken(BaseModel):
     user = models.ForeignKey(GladmindsUser)
     token = models.CharField(max_length=256)
     request_date = models.DateTimeField(null=True, blank=True)
@@ -55,8 +121,8 @@ class OTPToken(models.Model):
         verbose_name_plural = "OTPs"
 
 
-class UserNotification(models.Model):
-    user = models.ForeignKey(GladmindsUser)
+class UserNotification(BaseModel):
+    gm_user = models.ForeignKey(GladmindsUser)
     message = models.CharField(max_length=256, null=False)
     notification_date = models.DateTimeField(null=True, blank=True)
     notification_read = models.BooleanField(default=False)
@@ -64,6 +130,25 @@ class UserNotification(models.Model):
     class Meta:
         app_label = "gm"
         verbose_name_plural = "notification"
+
+
+class MessageTemplate(MessageTemplate):
+
+    class Meta:
+        app_label = "gm"
+        verbose_name_plural = "Message Template"
+
+
+class EmailTemplate(EmailTemplate):
+
+    class Meta:
+        app_label = "gm"
+        verbose_name_plural = "Email Template"
+
+
+
+##################################################################################################
+
 
 
 class UserProducts(models.Model):

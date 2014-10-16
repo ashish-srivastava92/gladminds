@@ -104,15 +104,15 @@ class BaseTestCase(ResourceTestCase):
 
     def create_register_dealer(self):
         user_register_dealer = self.create_user(username='RD002Test', email='gm@gm.com', password='123', group_name='dealers', phone_number='+919999999997')
-        register_dealer_obj = aftersell_common.RegisteredDealer(user=user_register_dealer, dealer_id ='RD002Test', role='dealer')
+        register_dealer_obj = aftersell_common.Dealer(user=user_register_dealer, dealer_id ='RD002Test', role='dealer')
         register_dealer_obj.save()
-        register_dealer = aftersell_common.RegisteredDealer.objects.get(dealer_id='RD002Test')
+        register_dealer = aftersell_common.Dealer.objects.get(dealer_id='RD002Test')
         self.assertEqual(register_dealer.dealer_id, 'RD002Test')
         return register_dealer_obj
 
     def create_dealer_service_advisor(self):
         service_advisor1 = aftersell_common.ServiceAdvisor.objects.get(phone_number='+919999999998')
-        dealer_obj = aftersell_common.RegisteredDealer.objects.get(dealer_id ='RD002Test')
+        dealer_obj = aftersell_common.Dealer.objects.get(dealer_id ='RD002Test')
         dealer_service_advisor_obj = aftersell_common.ServiceAdvisorDealerRelationship(dealer_id=dealer_obj, service_advisor_id=service_advisor1, status='Y')
         dealer_service_advisor_obj.save()
         dealer_service_advisor = aftersell_common.ServiceAdvisorDealerRelationship.objects.get(status='Y')
@@ -196,7 +196,7 @@ class BaseTestCase(ResourceTestCase):
 
     def check_asc_feed_saved_to_db(self):
         self.send_asc_feed()
-        asc = aftersell_common.RegisteredDealer.objects.get(dealer_id='ASC001')
+        asc = aftersell_common.Dealer.objects.get(dealer_id='ASC001')
         self.assertEquals('ASC001', asc.dealer_id)
 
     def check_asc_exists(self, name, check_name, by):
