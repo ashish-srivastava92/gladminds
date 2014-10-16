@@ -28,25 +28,13 @@ api_v1 = Api(api_name="v1")
 urlpatterns = patterns('',
     url(r'^site-info/$', 'gladminds.views.site_info', name='site_info'),
     url(r'api/doc/', include('tastypie_swagger.urls', namespace='tastypie_swagger')),
-    
-    url(r'^aftersell/(?P<provider>[a-zA-Z]+)/login/$', 'gladminds.views.auth_login', name='user_login'),
-    url(r'^aftersell/provider/logout$', 'gladminds.views.user_logout', name='user_logout'),
-    url(r'^aftersell/provider/redirect$', 'gladminds.views.redirect_user'),
-    url(r'^aftersell/users/otp/generate$', 'gladminds.views.generate_otp', name='generate_otp'),
-    url(r'^aftersell/users/otp/validate', 'gladminds.views.validate_otp', name='validate_otp'),
-    url(r'^aftersell/users/otp/update_pass', 'gladminds.views.update_pass', name='update_pass'),
-    
-    url(r'^aftersell/servicedesk/(?P<servicedesk>[a-zA-Z0-9]+)$', 'gladminds.views.servicedesk'),
-    url(r'^aftersell/servicedesk/$', 'gladminds.views.servicedesk_views.get_servicedesk_tickets', name='get_servicedesk_tickets'),
-    url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/$', 'gladminds.views.servicedesk_views.modify_servicedesk_tickets', name='modify_servicedesk_tickets'),
-    url(r'^aftersell/feedbackresponse/(?P<feedback_id>\d+)/$', 'gladminds.views.servicedesk_views.get_feedback_response', name='get_feedback_response'),
     #Afterbuy accesstoken URL.
     url(r'^oauth2/', include('provider.oauth2.urls', namespace = 'oauth2')),
-
 )
 
 urlpatterns += patterns('gladminds',
     (r'', include(api_v1.urls)),
+    
     url(r'^afterbuy/otp/generate/', 'afterbuy.views.generate_otp'),
     url(r'^afterbuy/otp/validate/', 'afterbuy.views.validate_otp'),
     url(r'^app/logout', 'afterbuy.views.app_logout', name='app_logout'),
@@ -55,21 +43,14 @@ urlpatterns += patterns('gladminds',
     
     # After buy API
     url(r'^v1/api/users/auth', 'afterbuy.views.get_access_token'),
+
     url(r'^tasks-view', 'views.sqs_tasks_view'),
     url(r'^trigger-tasks', 'views.trigger_sqs_tasks'),
     url(r'^tasks/', SqsHandler.as_view(task_map=_tasks_map)),
     url(r'^health-check', 'health_check.health_check_view'),
-
     url(r'^afterbuy/$', 'afterbuy.views.main', name='main'),
-#     url(r'^app/create-account', 'afterbuy.views.create_account', name='create_account'),
-#     url(r'^app/login', 'afterbuy.views.my_login', name='my_login'),
-#     url(r'^app/getData', 'afterbuy.views.get_data', name='get_data'),
-    # url(r'^$', 'gladminds.views.home', name='home'),
-    # url(r'^gladminds/', include('gladminds.foo.urls')),
 
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^sms/','superadmin.views.send_sms', name='send_sms'),
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^', include(admin.urls)),
 )
 
