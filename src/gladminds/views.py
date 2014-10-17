@@ -23,12 +23,14 @@ from gladminds.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format,\
     format_date_string, stringify_groups, search_details,\
     services_search_details, service_advisor_search,\
-    get_sa_list_for_login_dealer,get_asc_list_for_login_dealer
+    get_sa_list_for_login_dealer,get_asc_list_for_login_dealer,get_asc_data,\
+    asc_cuopon_details, get_state_city
 from gladminds.sqs_tasks import export_asc_registeration_to_sap
 from gladminds.mail import sent_otp_email
 from gladminds.feed import SAPFeed
 from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
 from gladminds.aftersell.models import common as afterbuy_common
+from gladminds.aftersell.models import common as aftersell_common
 from gladminds.scheduler import SqsTaskQueue
 from django.views.decorators.http import require_http_methods
 
@@ -469,10 +471,11 @@ def register_user(request, user=None):
     status = save_user[user](request.POST)
 
     return HttpResponse(json.dumps(status), mimetype="application/json")
-    
-    
+
+
 def sqs_tasks_view(request):
     return render_to_response('trigger-sqs-tasks.html')
+
 
 def trigger_sqs_tasks(request):
     sqs_tasks = {
@@ -482,7 +485,92 @@ def trigger_sqs_tasks(request):
         'send-reminder': 'send_reminder',
         'export-customer-registered' : 'export_customer_reg_to_sap',
     }
-    
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
     taskqueue.add(sqs_tasks[request.POST['task']])
     return HttpResponse()
+
+
+def brand_details(requests, role=None):
+    data = requests.GET
+    data_list = []
+    data_dict = {}
+    if role == 'asc':
+        asc_data = aftersell_common.RegisteredDealer.objects.filter(role='asc')
+        for asc in asc_data:
+            asc_detail = {}
+            asc_detail['id'] = asc.dealer_id
+            asc_detail['address'] = asc.address
+            asc_details = get_state_city(asc_detail, asc.address)
+            data_list.append(asc_detail)
+        data_dict['count'] = len(asc_data)
+        data_dict[role] = data_list
+    elif role == 'sa':
+        sa_data = aftersell_common.ServiceAdvisor.objects.all()
+        for sa in sa_data:
+            sa_detail = {}
+            sa_detail['id'] = sa.service_advisor_id
+            sa_detail['name'] = sa.name
+            sa_detail['phone_number'] = sa.phone_number
+            data_list.append(sa_detail)
+        data_dict['count'] = len(sa_data)
+        data_dict[role] = data_list
+    elif role == 'customers':
+        customer_data = common.GladMindUsers.objects.all()
+        for customer in customer_data:
+            customer_detail = {}
+            customer_detail['id'] = customer.gladmind_customer_id
+            customer_detail['name'] = customer.customer_name
+            customer_detail['phone_number'] = customer.phone_number
+            customer_detail['email_id'] = customer.email_id
+            customer_detail['address'] = customer.address
+            customer_detail = get_state_city(customer_detail, customer.address)
+            data_list.append(customer_detail)
+        data_dict['count'] = len(customer_data)
+        data_dict[role] = data_list
+    elif role == 'active-asc':
+        active_asc_count = 0
+        asc_details = get_asc_data()
+        for asc_detail in asc_details:
+                active_ascs = {}
+                if asc_detail.date_joined != asc_detail.last_login:
+                    active_asc_count = active_asc_count + 1;
+                    asc_data = aftersell_common.RegisteredDealer.objects.get(dealer_id=asc_detail.username)
+                    active_ascs['id'] = asc_data.dealer_id
+                    active_ascs['address'] = asc_data.address
+                    active_ascs = get_state_city(active_ascs, asc_data.address)
+                    active_ascs['cuopon_unused'] = asc_cuopon_details(asc_data.dealer_id, 1)
+                    active_ascs['cuopon_closed'] = asc_cuopon_details(asc_data.dealer_id, 2)
+                    active_ascs['cuopon_expired'] = asc_cuopon_details(asc_data.dealer_id, 3)
+                    active_ascs['cuopon_inprogress'] = asc_cuopon_details(asc_data.dealer_id, 4)
+                    active_ascs['cuopon_exceed_limit'] = asc_cuopon_details(asc_data.dealer_id, 5)
+                    active_ascs['cuopon_closed_old_fsc'] = asc_cuopon_details(asc_data.dealer_id, 6)
+                    data_list.append(active_ascs)
+        data_dict['count'] = active_asc_count
+        data_dict[role] = data_list
+    elif role == 'not-active-asc':
+        not_active_asc_count = 0
+        asc_details = get_asc_data()
+        for asc_detail in asc_details:
+                not_active_ascs = {}
+                if asc_detail.date_joined == asc_detail.last_login:
+                    not_active_asc_count = not_active_asc_count + 1;
+                    asc_data = aftersell_common.RegisteredDealer.objects.get(dealer_id=asc_detail.username)
+                    not_active_ascs['id'] = asc_data.dealer_id
+                    data_list.append(not_active_ascs)
+        data_dict['count'] = not_active_asc_count
+        data_dict[role] = data_list
+    if data:
+        filter_data_list = []
+        filter_data_dict = {}
+        count = 0
+        for filter in data_dict[role]:
+            if filter.get("city", None) == data.get('city') or filter.get('state', None) == data.get('state'):
+                count = count + 1
+                filter_data_list.append(filter)
+                filter_data_dict[role] = filter_data_list
+                filter_data_dict['count'] = count
+                return HttpResponse(json.dumps(filter_data_dict))
+            else:
+                return HttpResponse(json.dumps(filter_data_list))
+    return HttpResponse(json.dumps(data_dict))
+
