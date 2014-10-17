@@ -141,26 +141,40 @@ class CustomerTempRegistration(base_models.CustomerTempRegistration):
         app_label = "bajaj"
         verbose_name_plural = "Customer temporary info"
 
-
-class ProductInsuranceInfo(base_models.ProductInsuranceInfo):
-    product = models.ForeignKey(ProductData, null=False)
-
-    class Meta:
-        app_label = "bajaj"
-        verbose_name_plural = "product insurance info"
-
-
-class ProductWarrantyInfo(base_models.ProductWarrantyInfo):
-    product = models.ForeignKey(ProductData, null=False)
-
-    class Meta:
-        app_label = "bajaj"
-        verbose_name_plural = "product warranty info"
-
-
 class SparesData(base_models.SparesData):
 
     class Meta:
         app_label = "bajaj"
         verbose_name_plural = "spare info"
 
+class UserPreferences(base_models.UserPreferences):
+    user_profile = models.ForeignKey(UserProfile)
+    class Meta:
+        app_label = "bajaj"
+        verbose_name_plural = "user preference"
+        unique_together = ("user_profile", "key")
+
+class SMSLog(base_models.SMSLog):
+
+    class Meta:
+        app_label = "bajaj"
+        verbose_name_plural = "SMS Log"
+
+class EmailLog(base_models.EmailLog):
+
+    class Meta:
+        app_label = "bajaj"
+        verbose_name_plural = "Email Log"
+        
+class DataFeedLog(base_models.DataFeedLog):
+
+    class Meta:
+        app_label = "bajaj"
+        verbose_name_plural = "Feed Log"
+
+class AuditLog(base_models.DataFeedLog):
+    user_profile = models.ForeignKey(UserProfile)
+
+    class Meta:
+        app_label = "bajaj"
+        verbose_name_plural = "Audit Log"

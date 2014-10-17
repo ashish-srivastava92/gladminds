@@ -18,7 +18,7 @@ for sap_id in sap_ids:
         product_obj = product_obj[0] 
         user_id = product_obj.customer_phone_number
         product_obj.customer_phone_number = None
-        common.GladMindUsers.delete(id = user_id.id)
+        common.GladmindsUser.delete(id = user_id.id)
         product_obj.customer_phone_number = None
         product_obj.sap_customer_id = None
         product_obj.product_purchase_date = None

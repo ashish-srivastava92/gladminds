@@ -344,7 +344,7 @@ class ProductPurchaseFeed(BaseFeed):
                 customer_ph_num = product_data.customer_phone_number.phone_number
             if product_data.sap_customer_id and not customer_ph_num == phone_number:
                 try:
-                    customer_data = common.GladMindUsers.objects.get(
+                    customer_data = common.GladmindsUser.objects.get(
                         phone_number=customer_ph_num)
                     customer_data.phone_number = phone_number
                     customer_data.save()
@@ -374,7 +374,7 @@ class ProductPurchaseFeed(BaseFeed):
                     post_save.disconnect(
                         update_coupon_data, sender=common.ProductData)
                 try:
-                    customer_data = common.GladMindUsers.objects.get(
+                    customer_data = common.GladmindsUser.objects.get(
                         phone_number=product['customer_phone_number'])
                 except ObjectDoesNotExist as odne:
                     logger.info(
@@ -382,7 +382,7 @@ class ProductPurchaseFeed(BaseFeed):
                     # Register this customer
                     gladmind_customer_id = utils.generate_unique_customer_id()
                     user=self.registerNewUser('customer', username=gladmind_customer_id, phone_number=product['customer_phone_number'])
-                    customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, phone_number=product[
+                    customer_data = common.GladmindsUser(user=user, gladmind_customer_id=gladmind_customer_id, phone_number=product[
                                                          'customer_phone_number'], registration_date=datetime.now(),
                                                          customer_name=product['customer_name'], pincode=product['pin_no'],
                                                          state=product['state'], address=product['city'])
@@ -497,7 +497,7 @@ def update_coupon_data(sender, **kwargs):
             coupon_object.save()
         
         try:
-            customer_data = common.GladMindUsers.objects.get(
+            customer_data = common.GladmindsUser.objects.get(
                 phone_number=instance.customer_phone_number)
             temp_customer_data = common.CustomerTempRegistration.objects.filter(product_data__vin=vin)
             if temp_customer_data and not temp_customer_data[0].temp_customer_id == instance.sap_customer_id:
