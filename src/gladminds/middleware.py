@@ -18,13 +18,13 @@ and reply through the same platform
 class GladmindsMessageMiddleware(object):    
     #If the request is come on message APIs, then based on the IP we set sms client
     def process_request(self, request, **kwargs):
-        request_ip = request.META['REMOTE_ADDR']
-        airtel_ip = settings.AIRTEL_IP
-        if request_ip == airtel_ip:
-            SMS_CLIENT.value = 'AIRTEL'
-        else:
+        logger.info(request.POST)
+        source_client = request.POST.get('source', None)
+        if source_client:
             SMS_CLIENT.value = 'KAP'
-        logger.info('Request IP is {0} and client is {1}'.format(request_ip, SMS_CLIENT.value))
+        else:
+            SMS_CLIENT.value = 'AIRTEL'
+        logger.info('Client is {1}'.format(SMS_CLIENT.value))
         
 
 """
