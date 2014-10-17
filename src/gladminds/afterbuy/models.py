@@ -70,80 +70,48 @@ class UserNotification(models.Model):
         app_label = "afterbuy"
         verbose_name_plural = "notifications"
         
-        
-class AuditLog(models.Model):
-    date = models.DateTimeField()
-    action = models.CharField(max_length=250)
-    message = models.CharField(max_length=250)
-    sender = models.CharField(max_length=250)
-    reciever = models.CharField(max_length=250)
-    status = models.CharField(max_length=250)
 
-    class Meta:
-        app_label = "afterbuy"
-        verbose_name_plural = "audit logs"
-
-class ProductTypeData(BaseModel):
-    product_type_id = models.AutoField(primary_key=True)
-    product_name = models.CharField(max_length=255, null=False)
-    product_type = models.CharField(max_length=255, unique=True, null=False)
-    product_image_loc = models.FileField(
-        upload_to=settings.AFTERBUY_PRODUCT_TYPE_LOC, blank=True)
-    isActive = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(default=0)
-    warranty_email = models.EmailField(max_length=215, null=True, blank=True)
-    warranty_phone = models.CharField(
-        max_length=15, blank=False, null=False)
-
-    class Meta:
-            app_label = "afterbuy"
-            verbose_name_plural = "Product Type"
-
-    def __unicode__(self):
-        return self.product_type
-
-class ProductData(BaseModel):
-    customer_phone_number = models.ForeignKey(
-        Consumer, null=True, blank=True, related_name='bajaj_product_date')
-    product_type = models.ForeignKey(ProductTypeData, null=True, blank=True)
-    id = models.AutoField(primary_key=True)
+class UserProducts(models.Model):
     vin = models.CharField(max_length=215, null=True, unique=True, blank=True)
-    sap_customer_id = models.CharField(
-        max_length=215, null=True, blank=True, unique=True)
+    consumer_phone_number = models.ForeignKey(
+        Consumer, null=True, blank=True)
+    item_name = models.CharField(max_length=256, null=False)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
-    invoice_date = models.DateTimeField(null=True, blank=True)
-    engine = models.CharField(max_length=255, null=True, blank=True)
-
-    # Added below column for after buy application
-    customer_product_number = models.CharField(
-        max_length=255, null=True, blank=True)
     purchased_from = models.CharField(max_length=255, null=True, blank=True)
     seller_email = models.EmailField(max_length=255, null=True, blank=True)
     seller_phone = models.CharField(max_length=255, null=True, blank=True)
     warranty_yrs = models.FloatField(null=True, blank=True)
     insurance_yrs = models.FloatField(null=True, blank=True)
-
     invoice_loc = models.FileField(upload_to="invoice", blank=True)
     warranty_loc = models.FileField(upload_to="warrenty", blank=True)
     insurance_loc = models.FileField(upload_to="insurance", blank=True)
-
-    last_modified = models.DateTimeField(null=False, default=datetime.now())
-    created_on = models.DateTimeField(null=True, default=datetime.now())
-    isActive = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(default=0)
-    veh_reg_no = models.CharField(max_length=15, null=True, blank=True)
+    is_deleted = models.BooleanField(default=False)
+    
+    class Meta:
+        app_label = "afterbuy"
+        verbose_name_plural = "userProducts"
+    
+    def __unicode__(self):
+        return self.vin    
+       
+class UserMobileInfo(models.Model):
+    user = models.ForeignKey(Consumer, null=False, blank=False)
+    IMEI = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    ICCID = models.CharField(max_length=50, null=True, blank=True)
+    phone_name = models.CharField(max_length=100, null=True, blank=True)
+    serial_number = models.CharField(max_length=50, null=True, blank=True)
+    capacity = models.CharField(max_length=50, null=True, blank=True)
+    operating_system = models.CharField(max_length=50, null=True, blank=True)
+    version = models.CharField(max_length=50, null=True, blank=True)
+    model = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
-        abstract = True
-        verbose_name_plural = "Product Data"
+        app_label = "afterbuy"
+        verbose_name_plural = "mobile info"
 
-    def __unicode__(self):
-        return self.vin
 
 class ProductInsuranceInfo(BaseModel):
-    product = models.ForeignKey(ProductData, null=False)
-    issue_date = models.DateTimeField(null=True, blank=False)
-    expiry_date = models.DateTimeField(null=True, blank= False)
+    product = models.ForeignKey(UserProducts, null=False)
     insurance_brand_id = models.CharField(max_length=15, null=True, blank=True)
     insurance_brand_name = models.CharField(max_length=50, null=True, blank=True)
     policy_number = models.CharField(max_length=15, unique=True, blank=True)
@@ -152,6 +120,13 @@ class ProductInsuranceInfo(BaseModel):
     insurance_phone = models.CharField(
         max_length=15, blank=False, null=False)
     image_url = models.CharField(max_length=215, null=True, blank=True)
+    insurance_agency_name =  models.CharField(max_length=215, null=True, blank=True)
+    issue_date = models.DateTimeField(null=True, blank=False)
+    expiry_date = models.DateTimeField(null=True, blank= False)
+    insurance_type = models.CharField(max_length=15,null=True, blank=True)
+    vehicle_value = models.FloatField(min_value=0.0)
+    nominee = models.CharField(max_length=15,blank=True,null=True)
+    support_contact = models.CharField(max_length=12,blank=True,null=True)
 
     class Meta:
         app_label = "afterbuy"
@@ -159,7 +134,7 @@ class ProductInsuranceInfo(BaseModel):
 
 
 class ProductWarrantyInfo(BaseModel):
-    product = models.ForeignKey(ProductData, null=False)
+    product = models.ForeignKey(UserProducts, null=False)
     issue_date = models.DateTimeField(null=True, blank=False)
     expiry_date = models.DateTimeField(null=True, blank= False)
     warranty_brand_id = models.CharField(max_length=15, null=True, blank=True)
@@ -195,18 +170,44 @@ class EmailTemplate(BaseModel):
     class Meta:
         app_label = "afterbuy"
         verbose_name_plural = "Message Template"
-        
-class UserMobileInfo(models.Model):
-    user = models.ForeignKey(GladmindsUser)
-    IMEI = models.CharField(max_length=50, null=True, blank=True, unique=True)
-    ICCID = models.CharField(max_length=50, null=True, blank=True)
-    phone_name = models.CharField(max_length=100, null=True, blank=True)
-    serial_number = models.CharField(max_length=50, null=True, blank=True)
-    capacity = models.CharField(max_length=50, null=True, blank=True)
-    operating_system = models.CharField(max_length=50, null=True, blank=True)
-    version = models.CharField(max_length=50, null=True, blank=True)
-    model = models.CharField(max_length=50, null=True, blank=True)
 
+class PollutionCertificate(BaseModel):
+    pucc_number = models.CharField()
+    issue_date = models.DateTimeField(null=True, blank=False)
+    expiry_date = models.DateTimeField(null=True, blank= False)
+    image_url = models.CharField(max_length=215, null=True, blank=True)
+    
     class Meta:
-        app_label = "gm"
-        verbose_name_plural = "mobile info"
+        app_label = "afterbuy"
+        verbose_name_plural = "Pollution Certificate"
+
+
+class RegistrationCertificate(BaseModel):
+    vehicle_registration_number = models.CharField()
+    registration_date = models.DateTimeField(null=True, blank=False)
+    chassis_number = models.CharField()
+    engine_number = models.CharField()
+    owner_name = models.CharField(max_length=512)
+    address = models.CharField(max_length=512)
+    registration_upto = models.DateTimeField(null=True, blank=False)
+    manufacturer = models.CharField(max_length=512)
+    manufacturing_date = models.DateTimeField(null=True, blank=False)
+    model_number = models.CharField()
+    colour = models.CharField()
+    image_url = models.CharField(max_length=215, null=True, blank=True)
+    
+    class Meta:
+        app_label = "afterbuy"
+        verbose_name_plural = "Registration Certificate"
+    
+class License(BaseModel):
+    license_number = models.CharField()
+    issue_date = models.DateTimeField(null=True, blank=False)
+    expiry_date = models.DateTimeField(null=True, blank= False)
+    blood_group = models.CharField()
+    image_url = models.CharField(max_length=215, null=True, blank=True)
+    
+    class Meta:
+        app_label = "afterbuy"
+        verbose_name_plural = "license"
+        
