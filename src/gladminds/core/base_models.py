@@ -311,39 +311,6 @@ class CustomerTempRegistration(BaseModel):
         return self.new_customer_name
 
 
-########################################AfterBuy Specific Models##############################################
-
-class ProductInsuranceInfo(BaseModel):
-    issue_date = models.DateTimeField(null=True, blank=False)
-    expiry_date = models.DateTimeField(null=True, blank= False)
-    insurance_brand_id = models.CharField(max_length=15, null=True, blank=True)
-    insurance_brand_name = models.CharField(max_length=50, null=True, blank=True)
-    policy_number = models.CharField(max_length=15, unique=True, blank=True)
-    premium = models.CharField(max_length=50, null=True, blank=True)
-    insurance_email = models.EmailField(max_length=215, null=True, blank=True)
-    insurance_phone = models.CharField(
-        max_length=15, blank=False, null=False)
-    image_url = models.CharField(max_length=215, null=True, blank=True)
-
-    class Meta:
-        abstract = True
-        verbose_name_plural = "product insurance info"
-    
-
-class ProductWarrantyInfo(BaseModel):
-    issue_date = models.DateTimeField(null=True, blank=False)
-    expiry_date = models.DateTimeField(null=True, blank= False)
-    warranty_brand_id = models.CharField(max_length=15, null=True, blank=True)
-    warranty_brand_name = models.CharField(max_length=50, null=True, blank=True)
-    policy_number = models.CharField(max_length=15, unique=True, blank=True)
-    premium = models.CharField(max_length=50, null=True, blank=True)
-    image_url = models.CharField(max_length=215, null=True, blank=True)
-
-    class Meta:
-        abstract = True
-        verbose_name_plural = "product warranty info"
-        
-
 class SparesData(BaseModel):
     spare_name = models.CharField(max_length=50, null=True, blank=True)
     spare_contact = models.CharField(max_length=50, null=True, blank=True)
@@ -373,3 +340,54 @@ class UserPreferences(models.Model):
     class Meta:
         abstract = True
         verbose_name_plural = "User Preferences"
+        
+        
+class SMSLog(models.Model):
+    date = models.DateTimeField()
+    action = models.CharField(max_length=250)
+    message = models.CharField(max_length=250)
+    sender = models.CharField(max_length=250)
+    reciever = models.CharField(max_length=250)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "SMS Log"
+
+class EmailLog(models.Model):
+    date = models.DateTimeField()
+    action = models.CharField(max_length=250)
+    message = models.CharField(max_length=250)
+    sender = models.CharField(max_length=250)
+    reciever = models.CharField(max_length=250)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Email Log"
+
+class DataFeedLog(models.Model):
+    data_feed_id = models.AutoField(primary_key=True)
+    feed_type = models.CharField(max_length=50, null=False)
+    total_data_count = models.IntegerField(null=False)
+    failed_data_count = models.IntegerField(null=False)
+    success_data_count = models.IntegerField(null=False)
+    action = models.CharField(max_length=50, null=False)
+    status = models.BooleanField(null=False)
+    timestamp = models.DateTimeField(default=datetime.now)
+    remarks = models.CharField(max_length=2048, null=True, blank=True)
+    file_location = models.CharField(max_length=215, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Feed Log"
+        
+class AuditLog(models.Model):
+    date = models.DateTimeField()
+    device = models.CharField(max_length=250)
+    useragent = models.CharField(max_length=250)
+    urls = models.CharField(max_length=250)
+    accesstoken = models.CharField(max_length=250)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Audit log"
+
