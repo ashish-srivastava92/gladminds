@@ -3,7 +3,8 @@ from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
-from gladminds.core.base_models import BaseModel
+from gladminds.core.base_models import BaseModel, UserProfile, MessageTemplate,\
+           EmailTemplate, SMSLog, EmailLog, AuditLog
 
 class Consumer(BaseModel):
     user = models.OneToOneField(User, primary_key=True)
@@ -69,19 +70,6 @@ class UserNotification(models.Model):
     class Meta:
         app_label = "afterbuy"
         verbose_name_plural = "notifications"
-        
-        
-class AuditLog(models.Model):
-    date = models.DateTimeField()
-    action = models.CharField(max_length=250)
-    message = models.CharField(max_length=250)
-    sender = models.CharField(max_length=250)
-    reciever = models.CharField(max_length=250)
-    status = models.CharField(max_length=250)
-
-    class Meta:
-        app_label = "afterbuy"
-        verbose_name_plural = "audit logs"
 
 class ProductTypeData(BaseModel):
     product_type_id = models.AutoField(primary_key=True)
@@ -172,30 +160,6 @@ class ProductWarrantyInfo(BaseModel):
         app_label = "afterbuy"
         verbose_name_plural = "product warranty info"
         
-class MessageTemplate(BaseModel):
-    template_key = models.CharField(max_length=255, unique=True, null=False)
-    template = models.CharField(max_length=512, null=False)
-    description = models.CharField(max_length=512, null=True)
-
-    class Meta:
-        app_label = "afterbuy"
-        verbose_name_plural = "Message Template"
-
-
-
-class EmailTemplate(BaseModel):
-    template_key = models.CharField(max_length=255, unique=True, null=False,\
-                                     blank=False)
-    sender = models.CharField(max_length=512, null=False)
-    reciever = models.CharField(max_length=512, null=False)
-    subject = models.CharField(max_length=512, null=False)
-    body = models.CharField(max_length=512, null=False)
-    description = models.CharField(max_length=512, null=True)
-
-    class Meta:
-        app_label = "afterbuy"
-        verbose_name_plural = "Message Template"
-        
 class UserMobileInfo(models.Model):
     user = models.ForeignKey(GladmindsUser)
     IMEI = models.CharField(max_length=50, null=True, blank=True, unique=True)
@@ -208,5 +172,37 @@ class UserMobileInfo(models.Model):
     model = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
-        app_label = "gm"
+        app_label = "afterbuy"
         verbose_name_plural = "mobile info"
+        
+class MessageTemplate(MessageTemplate):
+
+    class Meta:
+        app_label = "afterbuy"
+        verbose_name_plural = "Message Template"
+
+
+class EmailTemplate(EmailTemplate):
+
+    class Meta:
+        app_label = "afterbuy"
+        verbose_name_plural = "Email Template"
+
+class SMSLog(SMSLog):
+
+    class Meta:
+        app_label = "gm"
+        verbose_name_plural = "SMS Log"
+        
+class EmailLog(EmailLog):
+
+    class Meta:
+        app_label = "afterbuy"
+        verbose_name_plural = "Email Log"
+
+class AuditLog(AuditLog):
+    user_profile = models.ForeignKey(GladmindsUser)
+
+    class Meta:
+        app_label = "afterbuy"
+        verbose_name_plural = "Audit Log"    
