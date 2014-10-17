@@ -19,6 +19,8 @@ class GladmindsMessageMiddleware(object):
     #If the request is come on message APIs, then based on the IP we set sms client
     def process_request(self, request, **kwargs):
         logger.info(request.POST)
+        logger.info(request)
+        logger.info(request.GET)
         source_client = request.POST.get('source', None)
         if source_client:
             SMS_CLIENT.value = 'KAP'
