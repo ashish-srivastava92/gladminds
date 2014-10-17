@@ -94,7 +94,7 @@ class UserProducts(models.Model):
     def __unicode__(self):
         return self.vin    
        
-class UserMobileInfo(models.Model):
+class UserMobileInfo(BaseModel):
     user = models.ForeignKey(Consumer, null=False, blank=False)
     IMEI = models.CharField(max_length=50, null=True, blank=True, unique=True)
     ICCID = models.CharField(max_length=50, null=True, blank=True)
@@ -147,20 +147,6 @@ class ProductWarrantyInfo(BaseModel):
         app_label = "afterbuy"
         verbose_name_plural = "product warranty info"
         
-class UserMobileInfo(models.Model):
-    user = models.ForeignKey(GladmindsUser)
-    IMEI = models.CharField(max_length=50, null=True, blank=True, unique=True)
-    ICCID = models.CharField(max_length=50, null=True, blank=True)
-    phone_name = models.CharField(max_length=100, null=True, blank=True)
-    serial_number = models.CharField(max_length=50, null=True, blank=True)
-    capacity = models.CharField(max_length=50, null=True, blank=True)
-    operating_system = models.CharField(max_length=50, null=True, blank=True)
-    version = models.CharField(max_length=50, null=True, blank=True)
-    model = models.CharField(max_length=50, null=True, blank=True)
-    
-    class Meta:
-        app_label = "afterbuy"
-        verbose_name_plural = "mobile info"
 
 class PollutionCertificate(BaseModel):
     pucc_number = models.CharField()
@@ -227,7 +213,7 @@ class EmailLog(EmailLog):
         verbose_name_plural = "Email Log"
 
 class AuditLog(AuditLog):
-    user_profile = models.ForeignKey(GladmindsUser)
+    user_profile = models.ForeignKey(Consumer)
 
     class Meta:
         app_label = "afterbuy"
