@@ -194,3 +194,18 @@ class UserMobileInfo(models.Model):
     class Meta:
         app_label = "gm"
         verbose_name_plural = "mobile info"
+
+class AppPreferences(models.Model):
+
+    """
+    This model is used for storing application preferences
+    """
+    brand = models.ForeignKey(Brand, null=False)
+    key = models.CharField(max_length=100)
+    value = models.CharField(max_length=200)
+    
+    class Meta:
+        app_label = "gm"
+        unique_together = ("brand", "key")
+        verbose_name_plural = "Application Preferences"
+        

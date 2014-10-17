@@ -358,3 +358,18 @@ class SparesData(BaseModel):
 Monkey-patch the Site object to include folder for template
 """
 # FolderNameField(blank=True).contribute_to_class(Site,'folder_name')
+
+
+class UserPreferences(models.Model):
+    """
+    This model is used for storing user preferences
+    """
+    key = models.CharField(max_length=100)
+    value = models.CharField(max_length=200)
+
+    def unicode(self):
+        return self.user_profile
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "User Preferences"

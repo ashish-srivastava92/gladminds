@@ -4,23 +4,31 @@ from tastypie.api import Api
 from gladminds.core.sqs_tasks import _tasks_map
 from gladminds.core.taskqueue import SqsHandler
 from gladminds.afterbuy import api_resource
-# from gladminds.apis import audit_api, coupon_apis
-# from gladminds.apis import product_apis
-# from gladminds.apis import user_apis
+from gladminds.apis import audit_api, preferences_apis, user_apis
 
 from gladminds.health_check import health_check_view 
 
 # Uncomment the next two lines to enable the admin:
 from gladminds.admin import admin
 from gladminds.gm.resource.user_resource import GladmindsUserResource
+from gladminds.core.resource import resources
 # admin.autodiscover()
 
 api_v1 = Api(api_name="v1")
-api_v1.register(GladmindsUserResource())
+api_v1.register(resources.GladmindsResources())
+api_v1.register(resources.UserResources())
+api_v1.register(api_resource.AfterBuyResources())
+api_v1.register(audit_api.AuditResources())
+api_v1.register(user_apis.GladMindUserResources())
+
+#api_v1.register(product_apis.ProductDataResources())
+#api_v1.register(coupon_apis.CouponDataResources())
+#api_v1.register(preferences_apis.UserPreferencesResource())
+#api_v1.register(preferences_apis.AppPreferencesResource())
+# api_v1.register(resources.GladmindsResources())
 # api_v1.register(resources.UserResources())
 # api_v1.register(api_resource.AfterBuyResources())
 # api_v1.register(audit_api.AuditResources())
-# api_v1.register(user_apis.GladMindUserResources())
 # api_v1.register(product_apis.ProductDataResources())
 # api_v1.register(coupon_apis.CouponDataResources())
 

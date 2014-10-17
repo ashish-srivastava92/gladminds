@@ -95,7 +95,7 @@ def fnc_create_item(request):
         if insurance_file:
             file_name = str(uuid.uuid4()) + str(datetime.now())
             insurance_file.name = file_name
-        user_obj = common.GladMindUsers.objects.get(
+        user_obj = common.GladmindsUser.objects.get(
             gladmind_customer_id=user_id)
         brand_obj = common.BrandData.objects.get(brand_id=brand_id)
         product_type_obj = common.ProductTypeData(
@@ -217,7 +217,7 @@ def fnc_get_notification(request):
     resp = []
     try:
         unique_id = request.GET.get('unique_id')
-        user = common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
+        user = common.GladmindsUser.objects.get(gladmind_customer_id=unique_id)
         phone_num = user.phone_number
         items = common.ProductData.objects.all()
         for item in items:
@@ -241,7 +241,7 @@ def fnc_item_purchase_interest(request):
     unique_id = request.GET.get('unique_id')
     subject = '"Item Purchase Interest'
     try:
-        user = common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
+        user = common.GladmindsUser.objects.get(gladmind_customer_id=unique_id)
         data['item'] = request.GET.get('item')
         data['email_id'] = user.email_id
         data['user_name'] = user.customer_name
@@ -267,7 +267,7 @@ def fnc_warranty_extend(request):
     data['item'] = request.GET.get('item')
     subject = 'Warranty Extend Request'
     try:
-        user = common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
+        user = common.GladmindsUser.objects.get(gladmind_customer_id=unique_id)
         data['email_id'] = user.email_id
         data['user_name'] = user.customer_name
         data['phone_number'] = user.phone_number
@@ -289,7 +289,7 @@ def fnc_insurance_extend(request):
     data['item'] = request.GET.get('item')
     subject = 'Insurance Purchase Request'
     try:
-        user = common.GladMindUsers.objects.get(gladmind_customer_id=unique_id)
+        user = common.GladmindsUser.objects.get(gladmind_customer_id=unique_id)
         data['email_id'] = user.email_id
         data['user_name'] = user.customer_name
         data['phone_number'] = user.phone_number
@@ -323,7 +323,7 @@ def fnc_get_profile(request):
     resp = {}
     unique_id = request.GET.get('unique_id')
     try:
-        user_profile = common.GladMindUsers.objects.get(
+        user_profile = common.GladmindsUser.objects.get(
             gladmind_customer_id=unique_id)
         resp['name'] = user_profile.customer_name
         resp['email'] = user_profile.email_id
@@ -369,7 +369,7 @@ def fnc_get_user_items(request):
     unique_id = request.GET.get('unique_id')
     myitems = []
     try:
-        user_data = common.GladMindUsers.objects.get(
+        user_data = common.GladmindsUser.objects.get(
             gladmind_customer_id=unique_id)
         items = common.ProductData.objects.filter(
             customer_phone_number__gladmind_customer_id=unique_id, isActive=True)
@@ -457,7 +457,7 @@ def fnc_check_login(request):
             user_name = user_obj.username
             time_stamp = datetime.now()
             unique_id = 'GMS17' + str(time_stamp)
-            user_profile = common.GladMindUsers.objects.get(user=user)
+            user_profile = common.GladmindsUser.objects.get(user=user)
             unique_id = user_profile.gladmind_customer_id
 #             user_profile.save()
             id = user_profile.user_id
@@ -489,7 +489,7 @@ def fnc_update_user_details(request):
             file_name = str(uuid.uuid4()) + str(datetime.now())
             user_image.name = file_name
         try:
-            user_object = common.GladMindUsers.objects.get(
+            user_object = common.GladmindsUser.objects.get(
                 gladmind_customer_id=customer_id)
             user = User.objects.get(id=user_object.user_id)
             user.username = user_name
@@ -507,7 +507,7 @@ def fnc_update_user_details(request):
             if user_image:
                 user_object.img_url = File(user_image)
             user_object.save()
-            user_obj = common.GladMindUsers.objects.get(
+            user_obj = common.GladmindsUser.objects.get(
                 gladmind_customer_id=customer_id)
             data = {'status': " 1", 'thumbURL': str(
                 user_obj.img_url), 'sourceURL': str(user_obj.img_url)}
@@ -554,7 +554,7 @@ def fnc_create_new_user(request):
         try:
             time_stamp = datetime.now()
             unique_id = 'GMS17' + utils.generate_unique_customer_id()
-            gladmind_user = common.GladMindUsers(user=User.objects.create_user(user_name, user_email, user_password),
+            gladmind_user = common.GladmindsUser(user=User.objects.create_user(user_name, user_email, user_password),
                                                  country=user_country,
                                                  state=user_state,
                                                  gladmind_customer_id=unique_id,
@@ -566,7 +566,7 @@ def fnc_create_new_user(request):
                                                  address=user_address,
                                                  img_url=File(user_image))
             gladmind_user.save()
-            user_obj = common.GladMindUsers.objects.get(
+            user_obj = common.GladmindsUser.objects.get(
                 gladmind_customer_id=unique_id)
             send_registration_mail(gladmind_user)
             data = {'status': 1, 'message': 'Success!', 'unique_id': unique_id,
@@ -707,7 +707,7 @@ def generate_otp(request):
     logger.info('OTP request received. Mobile: {0}'.format(phone_number))
     feed = BaseFeed()
     try:
-        customer_data = common.GladMindUsers.objects.get(phone_number=mobile_format(phone_number))
+        customer_data = common.GladmindsUser.objects.get(phone_number=mobile_format(phone_number))
         if not customer_data.user:
             user = feed.registerNewUser('customer', username=customer_data.gladmind_customer_id)
     except ObjectDoesNotExist as odne:
@@ -716,7 +716,7 @@ def generate_otp(request):
         # Register this customer
         gladmind_customer_id = utils.generate_unique_customer_id()
         user = feed.registerNewUser('customer', username=gladmind_customer_id)
-        customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, 
+        customer_data = common.GladmindsUser(user=user, gladmind_customer_id=gladmind_customer_id, 
                                              phone_number=mobile_format(phone_number), 
                                              registration_date=datetime.now())
         customer_data.save()
@@ -742,7 +742,7 @@ def validate_otp(request):
         otp = request.POST['otp']
         phone_number= request.POST['mobile']
         logger.info('OTP {0} recieved for validation. Mobile {1}'.format(otp, phone_number))
-        gladmind_user = common.GladMindUsers.objects.get(phone_number=mobile_format(phone_number))
+        gladmind_user = common.GladmindsUser.objects.get(phone_number=mobile_format(phone_number))
         afterbuy_utils.validate_otp(gladmind_user, otp, phone_number)
         log_message = 'OTP validated for mobile number {0}'.format(phone_number)
         logger.info(log_message)

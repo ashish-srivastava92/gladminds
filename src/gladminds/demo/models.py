@@ -164,3 +164,12 @@ class SparesData(base_models.SparesData):
         app_label = "demo"
         verbose_name_plural = "spare info"
 
+class UserPreferences(base_models.UserPreferences):
+    user_profile = models.ForeignKey(UserProfile)
+    class Meta:
+        app_label = "demo"
+        verbose_name_plural = "user preference"
+        unique_together = ("user_profile", "key")
+
+
+
