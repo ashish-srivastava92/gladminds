@@ -39,6 +39,49 @@ class UserProfile(BaseModel):
     class Meta:
         abstract = True
 
+class Industry(BaseModel):
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Industries"
+
+class Brand(BaseModel):
+    brand_id = models.CharField(
+        max_length=50, null=False, unique=True, help_text="Brand Id must be unique")
+    brand_name = models.CharField(max_length=250, null=False)
+    brand_logo = models.CharField(max_length=200, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Brand Data"
+
+    def __unicode__(self):
+        return self.brand_id
+
+    def image_tag(self):
+        if self.brand_name == 'Bajaj':
+            url = settings.STATIC_URL + 'img/bajaj.jpg'
+            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
+        elif self.brand_name == 'Honda':
+            url = settings.STATIC_URL + 'img/honda.jpg'
+            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
+        else:
+            url = settings.STATIC_URL + 'img/noimage.jpg'
+            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
+    image_tag.short_description = 'Image'
+    image_tag.allow_tags = True
+
+class OTPToken(BaseModel):
+    token = models.CharField(max_length=256, null=False)
+    request_date = models.DateTimeField(null=True, blank=True)
+    email = models.CharField(max_length=50, null=False)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "OTPs"
 
 class Dealer(BaseModel):
     dealer_id = models.CharField(
@@ -124,13 +167,13 @@ ProductTypeData  is linked to Brand data
 For 1 Brand there can be multiple Products
 '''
 
-class ProductTypeData(BaseModel):
+class ProductType(BaseModel):
     product_type_id = models.AutoField(primary_key=True)
     product_name = models.CharField(max_length=255, null=False)
     product_type = models.CharField(max_length=255, unique=True, null=False)
-    product_image_loc = models.FileField(
-        upload_to=settings.AFTERBUY_PRODUCT_TYPE_LOC, blank=True)
-    isActive = models.BooleanField(default=True)
+    image_url = models.CharField(
+                   max_length=200, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
     warranty_email = models.EmailField(max_length=215, null=True, blank=True)
     warranty_phone = models.CharField(

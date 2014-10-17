@@ -57,7 +57,7 @@ class Comments(base_models.Comments):
         verbose_name_plural = "user comment info"
 
 
-class ProductTypeData(base_models.ProductTypeData):
+class ProductType(base_models.ProductType):
 
     class Meta:
         app_label = "demo"
@@ -67,7 +67,7 @@ class ProductTypeData(base_models.ProductTypeData):
 class ProductData(base_models.ProductData):
     customer_phone_number = models.ForeignKey(
         UserProfile, null=True, blank=True, related_name='demo_product_date')
-    product_type = models.ForeignKey(ProductTypeData, null=True, blank=True)
+    product_type = models.ForeignKey(ProductType, null=True, blank=True)
     dealer_id = models.ForeignKey(Dealer, null=True, blank=True)
 
     class Meta:
