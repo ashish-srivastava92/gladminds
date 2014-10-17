@@ -388,5 +388,6 @@ class AuditLog(models.Model):
     accesstoken = models.CharField(max_length=250)
 
     class Meta:
-        app_label = "Audit log"
+        abstract = True
+        verbose_name_plural = "Audit log"
 

@@ -172,7 +172,7 @@ class DataFeedLog(base_models.DataFeedLog):
         app_label = "demo"
         verbose_name_plural = "Feed Log"
 
-class AuditLog(base_models.DataFeedLog):
+class AuditLog(base_models.AuditLog):
     user_profile = models.ForeignKey(UserProfile)
 
     class Meta:

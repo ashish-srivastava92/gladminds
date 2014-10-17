@@ -120,7 +120,7 @@ class EmailLog(EmailLog):
         app_label = "gm"
         verbose_name_plural = "Email Log"
 
-class AuditLog(base_models.DataFeedLog):
+class AuditLog(AuditLog):
     user_profile = models.ForeignKey(GladmindsUser)
 
     class Meta:
