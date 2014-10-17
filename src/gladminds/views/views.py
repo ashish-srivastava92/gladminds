@@ -23,7 +23,7 @@ from gladminds.core.mail import sent_otp_email
 from gladminds.core.feed import SAPFeed
 from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
 from gladminds.core.scheduler import SqsTaskQueue
-from gladminds.resource.resources import GladmindsResources
+from gladminds.core.resource.resources import GladmindsResources
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU
 

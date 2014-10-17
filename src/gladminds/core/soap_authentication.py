@@ -6,7 +6,7 @@ import logging
 logger = logging.getLogger("gladminds")
 
 class AuthenticationError(Fault):
-    __namespace__ = 'gladminds.webservice.authentication'
+    __namespace__ = 'gladminds.core.webservice.authentication'
 
     def __init__(self, user_name):
         # TODO: self.transport.http.resp_code = HTTP_401
@@ -16,7 +16,7 @@ class AuthenticationError(Fault):
                                                  )
 
 class AuthorizationError(Fault):
-    __namespace__ = 'gladminds.webservice.authentication'
+    __namespace__ = 'gladminds.core.webservice.authentication'
 
     def __init__(self):
         # TODO: self.transport.http.resp_code = HTTP_401

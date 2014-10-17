@@ -4,7 +4,7 @@ from authentication import AccessTokenAuthentication
 
 from django.conf.urls import url
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import transaction
+from django.db import models, transaction
 from django.forms.models import model_to_dict
 from django.http.response import HttpResponse, HttpResponseBadRequest
 from django.contrib.auth.models import User
@@ -116,7 +116,7 @@ class GladmindsResources(Resource):
         customer_name = sms_dict['name']
         email_id = sms_dict['email_id']
         try:
-            object = common.GladmindsUser.objects.get(phone_number=phone_number)
+            object = common.GladMindUsers.objects.get(phone_number=phone_number)
             gladmind_customer_id = object.gladmind_customer_id
             customer_name = object.customer_name
         except ObjectDoesNotExist as odne:
@@ -124,7 +124,7 @@ class GladmindsResources(Resource):
             registration_date = datetime.now()
             user_feed = BaseFeed()
             user = user_feed.registerNewUser('customer', username=gladmind_customer_id)
-            customer = common.GladmindsUser(
+            customer = common.GladMindUsers(
                 user=user, gladmind_customer_id=gladmind_customer_id, phone_number=phone_number,
                 customer_name=customer_name, email_id=email_id,
                 registration_date=registration_date)
@@ -469,88 +469,9 @@ class GladmindsResources(Resource):
         if  active_sa:
             return "SA"
         else:
-            check_customer_obj = common.GladmindsUser.objects.filter(
+            check_customer_obj = common.GladmindsUsers.objects.filter(
                                                     phone_number=phone_number)
             if check_customer_obj:
                 return "Customer"
             else:
                 return "other"
-
-
-
-#########################AfterBuy Resources############################################
-class GladmindsBaseResource(ModelResource):
-    def determine_format(self, request):
-        return 'application/json'
-
-
-class UserResources(GladmindsBaseResource):
-    products = fields.ListField()
-    class Meta:
-        queryset = GladmindsUser.objects.all()
-        resource_name = 'users'
-        authentication = AccessTokenAuthentication()
-
-    def prepend_urls(self):
-        return [
-            url(r"^(?P<resource_name>%s)/otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('process_otp'), name="validate_otp"),
-            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/products%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_products'), name="api_get_products"),
-        ]    
-        
-    def obj_get(self, bundle, **kwargs):
-        request = bundle.request
-        customer_id = kwargs['pk']
-        try:
-            customer_detail = GladmindsUser.objects.get(gladmind_customer_id=customer_id)
-            return customer_detail
-        except:
-            raise ImmediateHttpResponse(response=http.HttpBadRequest())
-    
-    def obj_create(self, bundle, **kwargs):
-        """
-        A ORM-specific implementation of ``obj_create``.
-        """
-#        bundle.obj = self._meta.object_class()
-#        for key, value in kwargs.items():
-#            setattr(bundle.obj, key, value)
-#
-#        bundle = self.full_hydrate(bundle)
-#        return self.save(bundle)
-        return bundle
-    
-    def get_products(self, request, **kwargs):
-        user_id = kwargs['pk']
-        products = common.ProductData.objects.filter(customer_phone_number__gladmind_customer_id=user_id).select_related('customer_phone_number')
-        products = [model_to_dict(product) for product in products]
-        to_be_serialized = {"products": products}
-        return self.create_response(request, data=to_be_serialized)
-    
-    def dehydrate(self, bundle):
-        products = common.ProductData.objects.filter(customer_phone_number__id=bundle.data['id']).select_related('customer_phone_number')
-        bundle.data['products'] = [model_to_dict(product) for product in products]
-        return bundle
-    
-    def process_otp(self, bundle, **kwargs):
-        if bundle.GET.get('otp', None) and bundle.GET.get('user_id', None):
-            try:
-                customer_phone = common.ProductData.objects.filter(sap_customer_id=bundle.GET['user_id'])[0]
-                http_class=HttpResponse
-                data={'status':True}
-            except:
-                http_class=HttpResponseBadRequest
-                data={'message':'User does not exist.'}
-        elif bundle.GET.get('user_id', None):
-            try:
-                #TODO: Implement real API
-                customer_phone = common.ProductData.objects.filter(sap_customer_id=bundle.GET['user_id'])[0]
-                http_class=HttpResponse
-                data={'message':'OTP has been sent to user mobile.'}
-            except:
-                http_class=HttpResponseBadRequest
-                data={'message':'User does not exist.'}
-        else:
-            http_class=HttpResponseBadRequest
-            data={'message': 'Invalid OTP or User.'}
-        
-        return self.create_response(bundle, response_class=http_class, data=data)
-        

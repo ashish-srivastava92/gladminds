@@ -10,9 +10,9 @@ from tastypie.utils.urls import trailing_slash
 
 from gladminds.core import base_models as common
 from gladminds.core import utils
-from gladminds.resource.authentication import AccessTokenAuthentication
 from gladminds.gm import models as gm_common
 from gladminds.core.utils import mobile_format
+from gladminds.core.resource.authentication import AccessTokenAuthentication
 
 
 logger = logging.getLogger("gladminds")

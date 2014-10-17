@@ -1,7 +1,7 @@
-from gladminds.core import base_models
 from django.db import models
-from gladminds.gm.models import GladmindsUser
 from django.contrib.auth.models import User
+
+from gladminds.core import base_models
 
 
 class UserProfile(base_models.UserProfile):
@@ -10,7 +10,7 @@ class UserProfile(base_models.UserProfile):
 
     class Meta:
         app_label = "demo"
-        verbose_name_plural = "Brand User"
+        verbose_name_plural = "Brand Users"
 
 
 class Dealer(base_models.Dealer):
@@ -21,7 +21,6 @@ class Dealer(base_models.Dealer):
         app_label = "demo"
         verbose_name_plural = "Dealer Data"
 
-
 class AuthorizedServiceCenter(base_models.AuthorizedServiceCenter):
     user = models.OneToOneField(UserProfile, primary_key=True,
                                 related_name='demo_registered_asc')
@@ -31,10 +30,9 @@ class AuthorizedServiceCenter(base_models.AuthorizedServiceCenter):
         app_label = "demo"
         verbose_name_plural = "Service center Data"
 
-
 class ServiceAdvisor(base_models.ServiceAdvisor):
     user = models.OneToOneField(UserProfile, primary_key=True,
-                            related_name='bajaj_service_advisor')
+                            related_name='demo_service_advisor')
     dealer = models.ForeignKey(Dealer, null=True, blank=True)
     asc = models.ForeignKey(AuthorizedServiceCenter, null=True, blank=True)
 
@@ -43,16 +41,8 @@ class ServiceAdvisor(base_models.ServiceAdvisor):
         verbose_name_plural = "Service Advisor Data"
 
 
-class ServiceDeskUser(base_models.ServiceDeskUser):
-    user = models.OneToOneField(UserProfile, null=True, blank=True, related_name='demo_service_desk_user')
-
-    class Meta:
-        app_label = "demo"
-        verbose_name_plural = "service desk users"
-
-
 class Feedback(base_models.Feedback):
-    assign_to = models.ForeignKey(ServiceDeskUser, null=True, blank= True)
+    assign_to = models.ForeignKey(UserProfile, null=True, blank=True)
 
     class Meta:
         app_label = "demo"
@@ -76,7 +66,7 @@ class ProductTypeData(base_models.ProductTypeData):
 
 class ProductData(base_models.ProductData):
     customer_phone_number = models.ForeignKey(
-        GladmindsUser, null=True, blank=True, related_name='demo_product_date')
+        UserProfile, null=True, blank=True, related_name='demo_product_date')
     product_type = models.ForeignKey(ProductTypeData, null=True, blank=True)
     dealer_id = models.ForeignKey(Dealer, null=True, blank=True)
 
@@ -111,21 +101,19 @@ class UCNRecovery(base_models.UCNRecovery):
         app_label = "demo"
         verbose_name_plural = "UCN recovery logs"
 
-
 class OTPToken(base_models.OTPToken):
     user = models.ForeignKey(UserProfile, null=True, blank=True, related_name='demo_otp_token')
-
+    
     class Meta:
         app_label = "demo"
         verbose_name_plural = "OTPs"
 
 
 class MessageTemplate(base_models.MessageTemplate):
-
+    
     class Meta:
         app_label = "demo"
         verbose_name_plural = "Message Template"
-
 
 class EmailTemplate(base_models.EmailTemplate):
 
@@ -133,13 +121,11 @@ class EmailTemplate(base_models.EmailTemplate):
         app_label = "demo"
         verbose_name_plural = "Email Template"
 
-
 class ASCTempRegistration(base_models.ASCTempRegistration):
 
     class Meta:
         app_label = "demo"
         verbose_name_plural = "ASC Save Form"
-
 
 class SATempRegistration(base_models.SATempRegistration):
 
@@ -150,7 +136,7 @@ class SATempRegistration(base_models.SATempRegistration):
 
 class CustomerTempRegistration(base_models.CustomerTempRegistration):
     product_data = models.ForeignKey(ProductData, null=True, blank=True)
-
+    
     class Meta:
         app_label = "demo"
         verbose_name_plural = "Customer temporary info"
