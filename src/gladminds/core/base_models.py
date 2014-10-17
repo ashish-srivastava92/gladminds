@@ -375,17 +375,6 @@ Monkey-patch the Site object to include folder for template
 """
 # FolderNameField(blank=True).contribute_to_class(Site,'folder_name')
 
-class AppPreferences(models.Model):
-
-    """
-    This model is used for storing application preferences
-    """
-    key = models.CharField(max_length=100)
-    value = models.CharField(max_length=200)
-    
-    class Meta:
-        abstract = True
-        verbose_name_plural = "Application Preferences"
 
 class UserPreferences(models.Model):
     """

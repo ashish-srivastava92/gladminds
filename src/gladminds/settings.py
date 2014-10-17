@@ -95,7 +95,8 @@ DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
 DATABASE_APPS_MAPPING = {
                          'gm': 'default',
                          'bajaj':'bajaj',
-                         'demo': 'demo'
+                         'demo': 'demo',
+                         'afterbuy':'afterbuy'
                     }
 
 DATABASES = {
@@ -118,6 +119,14 @@ DATABASES = {
     'demo': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'demo',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    },
+    'afterbuy': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'afterbuy',
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
