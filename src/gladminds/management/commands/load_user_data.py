@@ -4,7 +4,7 @@ from datetime import datetime
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
+from gladminds.core.feed_log_remark import FeedLogWithRemark
 from gladminds.feed import SAPFeed
 
 

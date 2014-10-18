@@ -479,9 +479,6 @@ class GladmindsResources(Resource):
 
 
 #########################AfterBuy Resources############################################
-class GladmindsBaseResource(ModelResource):
-    def determine_format(self, request):
-        return 'application/json'
 
 
 class UserResources(GladmindsBaseResource):

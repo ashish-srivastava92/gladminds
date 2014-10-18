@@ -146,6 +146,7 @@ class ProductWarrantyInfo(BaseModel):
         
 
 class PollutionCertificate(BaseModel):
+    product = models.ForeignKey(UserProducts)
     pucc_number = models.CharField()
     issue_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank= True)
@@ -156,15 +157,16 @@ class PollutionCertificate(BaseModel):
         verbose_name_plural = "Pollution Certificate"
 
 class RegistrationCertificate(BaseModel):
+    product = models.ForeignKey(UserProducts)
     vehicle_registration_number = models.CharField()
-    registration_date = models.DateTimeField(null=True, blank=False)
+    registration_date = models.DateTimeField(null=True, blank=True)
     chassis_number = models.CharField()
     engine_number = models.CharField()
     owner_name = models.CharField(max_length=512)
     address = models.CharField(max_length=512)
-    registration_upto = models.DateTimeField(null=True, blank=False)
+    registration_upto = models.DateTimeField(null=True, blank=True)
     manufacturer = models.CharField(max_length=512)
-    manufacturing_date = models.DateTimeField(null=True, blank=False)
+    manufacturing_date = models.DateTimeField(null=True, blank=True)
     model_number = models.CharField()
     colour = models.CharField()
     image_url = models.CharField(max_length=215, null=True, blank=True)
@@ -174,6 +176,7 @@ class RegistrationCertificate(BaseModel):
         verbose_name_plural = "Registration Certificate"
     
 class License(BaseModel):
+    product = models.ForeignKey(UserProducts)
     license_number = models.CharField()
     issue_date = models.DateTimeField(null=True, blank=False)
     expiry_date = models.DateTimeField(null=True, blank= False)
@@ -210,7 +213,7 @@ class EmailLog(EmailLog):
         verbose_name_plural = "Email Log"
 
 class AuditLog(AuditLog):
-    user_profile = models.ForeignKey(Consumer)
+    user = models.ForeignKey(Consumer)
 
     class Meta:
         app_label = "afterbuy"

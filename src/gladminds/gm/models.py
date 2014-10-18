@@ -11,7 +11,16 @@ class Industry(Industry):
         app_label = "gm"
         verbose_name_plural = "Industries"
 
+class ServiceType(BaseModel):
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+
+    class Meta:
+        app_label = "gm"
+        verbose_name_plural = "Service Types"
+
 class Service(BaseModel):
+    type = models.ForeignKey(ServiceType)
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
 
@@ -31,6 +40,7 @@ class BrandService(BaseModel):
     brand = models.ForeignKey(Brand)
     service = models.ForeignKey(Service)
     active = models.BooleanField(default=True)
+    comment = models.TextField(null=True, blank=True)
 
     class Meta:
         app_label = "gm"

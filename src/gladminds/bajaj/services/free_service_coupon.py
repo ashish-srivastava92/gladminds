@@ -4,7 +4,7 @@ from authentication import AccessTokenAuthentication
 
 from django.conf.urls import url
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import models, transaction
+from django.db import transaction
 from django.forms.models import model_to_dict
 from django.http.response import HttpResponse, HttpResponseBadRequest
 from django.contrib.auth.models import User
@@ -479,9 +479,6 @@ class GladmindsResources(Resource):
 
 
 #########################AfterBuy Resources############################################
-class GladmindsBaseResource(ModelResource):
-    def determine_format(self, request):
-        return 'application/json'
 
 
 class UserResources(GladmindsBaseResource):

@@ -76,8 +76,8 @@ class ProductData(base_models.ProductData):
 
 
 class CouponData(base_models.CouponData):
-    vin = models.ForeignKey(ProductData, null=False, editable=False)
-    sa_phone_number = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
+    product = models.ForeignKey(ProductData, null=False, editable=False)
+    service_advisor = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
     servicing_dealer = models.ForeignKey(Dealer, null=True, blank=True)
 
     class Meta:
@@ -87,7 +87,7 @@ class CouponData(base_models.CouponData):
 
 class ServiceAdvisorCouponRelationship(base_models.ServiceAdvisorCouponRelationship):
     unique_service_coupon = models.ForeignKey(CouponData, null=False)
-    service_advisor_phone = models.ForeignKey(ServiceAdvisor, null=False)
+    service_advisor = models.ForeignKey(ServiceAdvisor, null=False)
     dealer_id = models.ForeignKey(Dealer, null=True, blank=True)
 
     class Meta:
@@ -173,7 +173,7 @@ class DataFeedLog(base_models.DataFeedLog):
         verbose_name_plural = "Feed Log"
 
 class AuditLog(base_models.AuditLog):
-    user_profile = models.ForeignKey(UserProfile)
+    user = models.ForeignKey(UserProfile)
 
     class Meta:
         app_label = "demo"

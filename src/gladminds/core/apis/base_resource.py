@@ -7,6 +7,19 @@ from tastypie.utils.mime import determine_format
 from tastypie.http import HttpBadRequest
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.fields import ApiField, CharField
+from tastypie.resources import ModelResource
+from tastypie.utils.mime import determine_format
+
+class CustomBaseModelResource(ModelResource):
+    def determine_format(self, request):
+        """
+        return application/json as the default format
+        """
+        fmt = determine_format(request, self._meta.serializer,\
+                               default_format=self._meta.default_format)
+        if fmt == 'text/html' and 'format' not in request:
+            fmt = 'application/json'
+        return fmt
  
  
 class GladMindsObject(dict):
@@ -51,7 +64,7 @@ def get_required_dictionary(original_dict, *fields):
     return new_dict
   
   
-class GladMindsResource(Resource):
+class CustomBaseResource(Resource):
     """
     All resourses are inheriting this resource,
     it have all functions which is commonly using to all classes
@@ -75,20 +88,3 @@ class GladMindsResource(Resource):
             if f not in bundle.data.keys():
                 raise ImmediateHttpResponse(HttpBadRequest("%s cannot be\
                 empty" % f))
-  
-  
-class GladMindsModelResource(ModelResource):
-    """
-    It is inheriting Model Resources
-    We are using this resource where we can easily work
-    using tastypie model resource it self.
-    """
-    def determine_format(self, request):
-        """
-        return application/json as the default format
-        """
-        fmt = determine_format(request, self._meta.serializer,\
-                               default_format=self._meta.default_format)
-        if fmt == 'text/html' and 'format' not in request:
-            fmt = 'application/json'
-        return fmt
