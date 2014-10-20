@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from gladminds.aftersell.models import common as aftersell_common
+from gladminds.core import base_models as common
 from gladminds.core.exceptions import DataNotFoundError
 from gladminds.core.utils import create_context, get_list_from_set,\
     get_start_and_end_date, set_wait_time
@@ -13,20 +13,20 @@ from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
 def get_feedbacks(user):
     group = user.groups.all()[0]
     if group.name == 'SDM':
-        feedbacks = aftersell_common.Feedback.objects.order_by('-created_date')
+        feedbacks = common.Feedback.objects.order_by('-created_date')
     if group.name == 'SDO':
-        servicedesk_obj = aftersell_common.ServiceDeskUser.objects.filter(user=user)
-        feedbacks = aftersell_common.Feedback.objects.filter(
+        servicedesk_obj = common.ServiceDeskUser.objects.filter(user=user)
+        feedbacks = common.Feedback.objects.filter(
                         assign_to=servicedesk_obj[0]).order_by('-created_date')
     return feedbacks
 
 
 def get_feedback(feedback_id):
-    return aftersell_common.Feedback.objects.get(id=feedback_id)
+    return common.Feedback.objects.get(id=feedback_id)
 
 
 def get_servicedesk_users(**filters):
-    return aftersell_common.ServiceDeskUser.objects.filter(**filters)
+    return common.ServiceDeskUser.objects.filter(**filters)
 
 
 def save_update_feedback(feedback_obj, data, user,  host):
@@ -50,7 +50,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
         feedback_obj.status = data['status']
         feedback_obj.priority = data['Priority']
     else:
-        servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(
+        servicedesk_assign_obj = common.ServiceDeskUser.objects.filter(
                                                             phone_number=data['Assign_To'])
         feedback_obj.assign_to = servicedesk_assign_obj[0]
         feedback_obj.status = data['status']
@@ -70,7 +70,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
                  feedback_obj)
 
     if feedback_obj.status == 'Resolved':
-        servicedesk_obj_all = aftersell_common.ServiceDeskUser.objects.filter(
+        servicedesk_obj_all = common.ServiceDeskUser.objects.filter(
                                                     designation='SDM')
         feedback_obj.resolved_date = datetime.now()
         feedback_obj.resolved_date = datetime.now()
@@ -95,7 +95,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
         set_wait_time(feedback_obj)
 
     if data['comments']:
-        comment_object = aftersell_common.Comments(
+        comment_object = common.Comments(
                                         comments=data['comments'],
                                         user=user, created_date=datetime.now(),
                                         feedback_object=feedback_obj)
@@ -112,7 +112,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
 
     if feedback_obj.resolved_date:
         start_date = feedback_obj.created_date
-        feedback_end_date = aftersell_common.Feedback.objects.get(
+        feedback_end_date = common.Feedback.objects.get(
                                                     id=feedback_obj.id)
         end_date = feedback_end_date.resolved_date
         start_date, end_date = get_start_and_end_date(start_date,

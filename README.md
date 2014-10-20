@@ -95,3 +95,20 @@ Contributions and ideas are welcome. These are some ideas we would like to imple
 3. ```build``` for jenkins build and package
 4. ```incr``` for linting or testing incremental changes e.g. modified files only.
 5. more ...
+
+
+
+
+-----------------OTHER-------------------
+https://github.com/hashedin/gladminds/wiki/How-to-start-working-on-Stage-2.1
+
+drop database gm;
+drop database bajaj;
+drop database demo;
+create database gm;
+create database bajaj;
+create database demo;
+
+bin/django syncdb                       to create tables in gm
+bin/django syncdb --database=bajaj      to create tables in bajaj
+bin/django syncdb --database=demo       to create tables in mock

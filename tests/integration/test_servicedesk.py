@@ -78,3 +78,4 @@ class TestServiceDeskFlow(BaseTestCase):
         feedbacks = aftersell_common.Feedback.objects.filter(priority='High')
         system = self.system
         system.verify_result(input=feedbacks[0].status, output='Closed')
+

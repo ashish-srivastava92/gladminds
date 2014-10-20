@@ -49,7 +49,7 @@ class GladmindsResourceTestCase(ResourceTestCase):
         return product_data
 
     def get_delear_obj(self, **kwargs):
-        delear_data = aftersell_common.RegisteredDealer(**kwargs)
+        delear_data = aftersell_common.Dealer(**kwargs)
         delear_data.save()
         return delear_data
 
@@ -87,5 +87,5 @@ class GladmindsResourceTestCase(ResourceTestCase):
         return temp_customer_obj
 
     def get_temp_asc_obj(self, **kwargs):
-        temp_asc_obj = aftersell_common.ASCSaveForm.objects.get(**kwargs)
+        temp_asc_obj = aftersell_common.ASCTempRegistration.objects.get(**kwargs)
         return temp_asc_obj

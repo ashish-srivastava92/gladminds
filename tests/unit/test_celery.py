@@ -67,7 +67,7 @@ class TestCronjobs(GladmindsUnitTestCase):
     
     def tearDown(self):
         common.BrandData.objects.filter(brand_id='brand001').delete()
-        aftersell_common.RegisteredDealer.objects.filter(dealer_id='DEALER001').delete()
+        aftersell_common.Dealer.objects.filter(dealer_id='DEALER001').delete()
         common.GladMindUsers.objects.filter(Q(phone_number='9999999')|Q(phone_number='8888888')).delete()
         aftersell_common.ServiceAdvisor.objects.filter(Q(service_advisor_id='SA001Test')|Q(service_advisor_id='SA002Test')).delete()
 

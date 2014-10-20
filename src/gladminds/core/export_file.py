@@ -1,4 +1,4 @@
-from gladminds.models import common
+# from gladminds.models import common
 from django.conf import settings
 import csv
 import datetime 

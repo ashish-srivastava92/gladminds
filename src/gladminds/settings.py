@@ -49,7 +49,7 @@ SUIT_CONFIG = {
     'LIST_PER_PAGE': 20,
     'SHOW_REQUIRED_ASTERISK': True,
     'MENU': (
-        {'app': 'gladminds', 'label': 'Data', 'icon': ' icon-folder-open',
+        {'app': 'gm', 'label': 'Data', 'icon': ' icon-folder-open',
          'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
                     {'model': 'dispatchedproduct',
                      'label': 'Feed -> Product Dispatch'},
@@ -57,13 +57,13 @@ SUIT_CONFIG = {
                      'label': 'Feed -> Product Purchase'},
                     {'model': 'coupondata',
                      'label': 'Feed -> Coupon Redemption'},
-                    {'model': 'ascsaveform',
+                    {'model': 'ASCTempRegistration',
                      'label': 'Save Form -> ASC'},
                     {'model': 'auditlog', 'label': 'Audit Log'},
                     {'model': 'datafeedlog',
                      'label': 'Feed Log'}, 
                     {'model': 'customertempregistration',
-                     'label': ' Customer registration'}, 'uploadproductcsv',
+                     'label': ' Customer registration'},
                     'messagetemplate', 'emailtemplate', 'gladmindusers',)},
         {'app': 'aftersell', 'label': 'AfterSell', 'icon': ' icon-folder-open',
          'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
@@ -73,13 +73,13 @@ SUIT_CONFIG = {
                      'label': 'Feed -> Product Purchase'},
                     {'model': 'coupondata',
                      'label': 'Feed -> Coupon Redemption'},
-                    {'model': 'ascsaveform',
+                    {'model': 'ASCTempRegistration',
                      'label': 'Save Form -> ASC'},
                     {'model': 'auditlog', 'label': 'Audit Log'},
                     {'model': 'datafeedlog',
                      'label': 'Feed Log'},
                     {'model': 'feedback',
-                     'label': 'Help Desk'}, 'uploadproductcsv',
+                     'label': 'Help Desk'},
                     'messagetemplate', 'emailtemplate', 'gladmindusers',)},
         {'app': 'afterbuy', 'label': 'AfterBuy', 'icon': ' icon-folder-open',
          'models': ({'model': 'usernotification', 'label': 'notification'},)},
@@ -89,23 +89,44 @@ SUIT_CONFIG = {
 
 MANAGERS = ADMINS
 
+DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
+
+# Mapping is first app name then db name
+DATABASE_APPS_MAPPING = {
+                         'gm': 'default',
+                         'bajaj':'bajaj',
+                         'demo': 'demo',
+                         'afterbuy':'afterbuy'
+                    }
+
 DATABASES = {
     'default': {
-        # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'ENGINE': 'django.db.backends.sqlite3',
-        # Or path to database file if using sqlite3.
-        'NAME': 'gladminds.db',
-        # The following settings are not used with sqlite3:
+        'NAME': 'gm',
         'USER': '',
         'PASSWORD': '',
-        # Empty for localhost through domain sockets or '127.0.0.1' for
-        # localhost through TCP.
         'HOST': '',
-        'PORT': '',  # Set to empty string for default.
+        'PORT': '',
     },
-    'gm': {
+    'bajaj': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'gm.db',
+        'NAME': 'bajaj',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    },
+    'demo': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'demo',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    },
+    'afterbuy': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'afterbuy',
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
@@ -170,6 +191,7 @@ STATICFILES_DIRS = (
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
+    'gladminds.core.custom_staticfiles_loader.FileSystemFinder',                   
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
@@ -185,13 +207,14 @@ TEMPLATE_LOADERS = (
                     #         'django.template.loaders.filesystem.Loader',
                     #         'django.template.loaders.app_directories.Loader',
                     #     )),
-                    'gladminds.core.custom_template_loader.Loader',
+                    'gladminds.core.loaders.custom_template_loader.Loader',
                     'django.template.loaders.filesystem.Loader',
                     'django.template.loaders.app_directories.Loader',
                     #  'django.template.loaders.eggs.Loader',
                    )
 
 MIDDLEWARE_CLASSES = (
+    'gladminds.core.middlewares.dynamicsite_middleware.DynamicSitesMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
@@ -199,8 +222,7 @@ MIDDLEWARE_CLASSES = (
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'gladminds.core.middlewares.dynamicsite_middleware.DynamicSitesMiddleware',
-    # 'gladminds.middleware.GladmindsMiddleware'
+#     'gladminds.middleware.GladmindsMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
                      )
@@ -229,11 +251,11 @@ INSTALLED_APPS = (
     'suit',
     'django.contrib.admin',
     'import_export',
-    'gladminds.models',
-    'gladminds.superadmin',
-    'gladminds.afterbuy',
-    'gladminds.aftersell',
     'gladminds',
+    'gladminds.gm',
+    'gladminds.core',
+    'gladminds.bajaj',
+    'gladminds.demo',
     'djcelery',
     'corsheaders',
     'storages',
@@ -242,7 +264,7 @@ INSTALLED_APPS = (
     'django_otp.plugins.otp_totp',
     'provider',
     'provider.oauth2',
-    'debug_toolbar',
+   # 'debug_toolbar',
     'south'
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
@@ -409,7 +431,7 @@ SMS_HEALTH_CHECK_INTERVAL = 6
 #######################FEED_HEALTH_CHECK_INTERVAL
 FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
-BRAND = 'mock'
+BRAND = 'demo'
 GM_BRAND = 'gm'
 BRANDS = ['bajaj', 'demo']
 ###############################################

@@ -129,7 +129,7 @@ class TestFeedLogWithRemark(ResourceTestCase):
         file_path = os.path.join(settings.BASE_DIR,
                                  'etc/test_data/unit/test_feed_log_remark.xml')
         xml_data = open(file_path, 'r').read()
-        self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,
+        self.client.post('/api/v1/feed/?wsdl', data=xml_data,
                                     content_type='text/xml')
 
         feed_logs_obj = logs.DataFeedLog.objects.all()

@@ -7,9 +7,8 @@ from random import randint
 from django.utils import timezone
 from django.conf import settings
 from django.template import Context
-from gladminds.models.common import STATUS_CHOICES
-from gladminds.models import common
-from gladminds.aftersell.models import common as aftersell_common
+from gladminds.core.models import STATUS_CHOICES
+from gladminds.core import base_models
 from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from gladminds.core.taskqueue import SqsTaskQueue
@@ -67,8 +66,8 @@ def get_phone_number_format(phone_number):
 
 
 def save_otp(user, token, email):
-    common.OTPToken.objects.filter(user=user).delete()
-    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.datetime.now(), email=email)
+    base_models.OTPToken.objects.filter(user=user).delete()
+    token_obj = base_models.OTPToken(user=user, token=str(token), request_date=datetime.datetime.now(), email=email)
     token_obj.save()
 
 
@@ -83,7 +82,7 @@ def get_token(user, phone_number, email=''):
 
 
 def validate_otp(user, otp, phone):
-    token_obj = common.OTPToken.objects.filter(user=user)[0]
+    token_obj = base_models.OTPToken.objects.filter(user=user)[0]
     if int(otp) == int(token_obj.token) and (timezone.now()-token_obj.request_date).seconds <= OTP_VALIDITY:
         return True
     elif (timezone.now()-token_obj.request_date).seconds > OTP_VALIDITY:
@@ -92,7 +91,7 @@ def validate_otp(user, otp, phone):
 
 
 def update_pass(otp, password):
-    token_obj = common.OTPToken.objects.filter(token=otp)[0]
+    token_obj = base_models.OTPToken.objects.filter(token=otp)[0]
     user = token_obj.user
     token_obj.delete()
     user.set_password(password)
@@ -117,7 +116,7 @@ def format_product_object(product_obj):
 def get_customer_info(request):
     data=request.POST
     try:
-        product_obj = common.ProductData.objects.get(vin=data['vin'])
+        product_obj = base_models.ProductData.objects.get(vin=data['vin'])
     except Exception as ex:
         logger.info(ex)
         message = '''VIN '{0}' does not exist in our records.'''.format(data['vin'])
@@ -131,8 +130,8 @@ def get_customer_info(request):
 
 
 def get_sa_list(request):
-    dealer = aftersell_common.RegisteredDealer.objects.filter(dealer_id=request.user)[0]
-    service_advisors = aftersell_common.ServiceAdvisorDealerRelationship.objects\
+    dealer = base_models.Dealer.objects.filter(dealer_id=request.user)[0]
+    service_advisors = base_models.ServiceAdvisorDealerRelationship.objects\
                                 .filter(dealer_id=dealer, status='Y')
     sa_phone_list = []
     for service_advisor in service_advisors:
@@ -153,8 +152,8 @@ def get_coupon_info(request):
     data = request.POST
     customer_id = data['customerId']
     logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, request.user))
-    product_data = common.ProductData.objects.filter(sap_customer_id=customer_id)[0]
-    coupon_data = common.CouponData.objects.filter(vin=product_data, status=4)[0]
+    product_data = base_models.ProductData.objects.filter(sap_customer_id=customer_id)[0]
+    coupon_data = base_models.CouponData.objects.filter(vin=product_data, status=4)[0]
     return coupon_data
 
 
@@ -170,7 +169,7 @@ def upload_file(request):
     destination = settings.JOBCARD_DIR.format('bajaj')
     path = uploadFileToS3(destination=destination, file_obj=file_obj,
                           bucket=settings.JOBCARD_BUCKET, logger_msg="JobCard")
-    ucn_recovery_obj = aftersell_common.UCNRecovery(reason=reason, user=user_obj, sap_customer_id=customer_id,
+    ucn_recovery_obj = base_models.UCNRecovery(reason=reason, user=user_obj, sap_customer_id=customer_id,
                                                     file_location=path)
     ucn_recovery_obj.save()
     return ucn_recovery_obj
@@ -235,7 +234,7 @@ def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=None,
 
 
 def get_email_template(key):
-    template_object = common.EmailTemplate.objects.filter(template_key=key).values()
+    template_object = base_models.EmailTemplate.objects.filter(template_key=key).values()
     return template_object[0]
 
 
@@ -308,7 +307,7 @@ def search_details(request):
         kwargs[ 'sap_customer_id' ] = data['Customer-ID']
     elif data.has_key('Customer-Mobile'):
         kwargs[ 'customer_phone_number__phone_number' ] = mobile_format(data['Customer-Mobile'])
-    product_obj = common.ProductData.objects.filter(**kwargs)
+    product_obj = base_models.ProductData.objects.filter(**kwargs)
     if not product_obj or not product_obj[0].product_purchase_date:
         key = data.keys()
         message = '''Customer details for {0} '{1}' not found.'''.format(key[0], data[key[0]])
@@ -358,7 +357,7 @@ def set_wait_time(feedback_data):
     wait = end_date - start_date
     wait_time = float(wait.days) + float(wait.seconds) / float(86400)
     previous_wait = feedback_data.wait_time
-    aftersell_common.Feedback.objects.filter(id = feedback_data.id).update(wait_time = wait_time+previous_wait)
+    base_models.Feedback.objects.filter(id = feedback_data.id).update(wait_time = wait_time+previous_wait)
 
 
 # ripped from djangotoolbox

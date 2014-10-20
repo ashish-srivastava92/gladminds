@@ -45,9 +45,9 @@ class GladmindsMiddleware(object):
                     raise HttpResponseBadRequest()
             elif 'customer' in auth_rule:
                 try:
-                    object = common.GladMindUsers.objects.get(phone_number=phone_number)
+                    object = common.GladmindsUser.objects.get(phone_number=phone_number)
                     request.user['role'] = 'Customer'
                     request.user['phone_number'] = phone_number
-                except common.GladMindUsers.DoesNotExist:
+                except common.GladmindsUser.DoesNotExist:
                     raise HttpResponseBadRequest()
         return

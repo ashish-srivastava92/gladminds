@@ -1,7 +1,7 @@
 import logging
 from django.test import TestCase
-from gladminds.models.common import \
-     CouponData, GladMindUsers
+from gladminds.models.common import  CouponData, GladMindUsers
+
 from integration.base import BaseTestCase
 from integration.test_brand_logic import Brand
 from integration.test_system_logic import System
@@ -35,7 +35,7 @@ class FeedsResourceTest(BaseTestCase):
         '''
         brand.send_service_advisor_feed_with_new_status()
         brand.check_data_saved_to_database()
- 
+
     def test_service_advisor_phone_number_updation_logic(self):
         brand = self.brand
         '''
@@ -88,7 +88,7 @@ class FeedsResourceTest(BaseTestCase):
         brand = self.brand
         self.create_user(username='testuser', email='testuserpassword@gladminds.co', password='testuserpassword')
         brand.check_for_auth()
- 
+
     @unittest.skip("Skipping Adding this functionality in future")
     def test_coupon_status_on_dispatch_feed(self):
         brand = self.brand
@@ -97,6 +97,7 @@ class FeedsResourceTest(BaseTestCase):
             Test for testing out coupon status on dispatch feed
             Its default value is 1
         '''
+
         brand.send_dispatch_feed()
         system.verify_result(input=CouponData.objects.count(), output=2)
         coupon_data = CouponData.objects.all()[0]
