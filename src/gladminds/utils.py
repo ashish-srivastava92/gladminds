@@ -436,7 +436,7 @@ def get_state_city(details, address):
             details['state'] = addr[0]
             details['city'] = addr[1]
         else:
-            details['state'] = addr[0]
-            details['city'] = 'Null'
+            details['city'] = addr[0]
+            details['state'] = 'Null'
             
     return details
