@@ -99,16 +99,35 @@ Contributions and ideas are welcome. These are some ideas we would like to imple
 
 
 
------------------OTHER-------------------
-https://github.com/hashedin/gladminds/wiki/How-to-start-working-on-Stage-2.1
+-----------------Local Development changes-------------------
+'''
+Edit /etc/hosts file
+add:-
 
+127.0.0.1       local.afterbuy.co
+127.0.0.1       local.gladmindsplatform.co
+127.0.0.1       local.bajaj.gladmindsplatform.co
+127.0.0.1       local.demo.gladmindsplatform.co
+
+'''
+
+'''
 drop database gm;
 drop database bajaj;
 drop database demo;
+drop database afterbuy;
 create database gm;
 create database bajaj;
 create database demo;
+create database afterbuy;
+'''
 
-bin/django syncdb                       to create tables in gm
+'''
 bin/django syncdb --database=bajaj      to create tables in bajaj
 bin/django syncdb --database=demo       to create tables in mock
+bin/django syncdb --database=afterbuy       to create tables in mock
+bin/django syncdb                       to create tables in gm
+'''
+
+https://github.com/hashedin/gladminds/wiki/How-to-start-working-on-Stage-2.1
+
