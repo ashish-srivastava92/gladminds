@@ -4,7 +4,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 from gladminds.core.base_models import BaseModel, MessageTemplate,\
-           EmailTemplate, SMSLog, EmailLog, AuditLog, Industry, Brand,ProductType
+           EmailTemplate, SMSLog, EmailLog, AuditLog, Industry, Brand,ProductType,\
+    OTPToken
 
 class Industry(Industry):
     
@@ -117,14 +118,14 @@ class ProductInsuranceInfo(BaseModel):
     product = models.ForeignKey(UserProduct)
     agency_name =  models.CharField(max_length=100)
     policy_number = models.CharField(max_length=20, unique=True)
-    premium = models.FloatField(min_value=0.0, null=True, blank=True)
+    premium = models.FloatField(null=True, blank=True)
     agency_contact = models.CharField(
         max_length=25, blank=True, null=True)
     insurance_type = models.CharField(max_length=15,null=True, blank=True)
     nominee = models.CharField(max_length=15,blank=True,null=True)
     issue_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank= True)
-    vehicle_value = models.FloatField(min_value=0.0, null=True, blank= True)
+    vehicle_value = models.FloatField(null=True, blank= True)
     image_url = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
@@ -147,7 +148,7 @@ class ProductWarrantyInfo(BaseModel):
 
 class PollutionCertificate(BaseModel):
     product = models.ForeignKey(UserProduct)
-    pucc_number = models.CharField()
+    pucc_number = models.CharField(max_length=25)
     issue_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank= True)
     image_url = models.CharField(max_length=215, null=True, blank=True)
@@ -158,17 +159,16 @@ class PollutionCertificate(BaseModel):
 
 class RegistrationCertificate(BaseModel):
     product = models.ForeignKey(UserProduct)
-    vehicle_registration_number = models.CharField()
+    vehicle_registration_number = models.CharField(max_length=50)
     registration_date = models.DateTimeField(null=True, blank=True)
-    chassis_number = models.CharField()
-    engine_number = models.CharField()
-    owner_name = models.CharField(max_length=512)
+    chassis_number = models.CharField(max_length=50)
+    owner_name = models.CharField(max_length=25)
     address = models.CharField(max_length=512)
     registration_upto = models.DateTimeField(null=True, blank=True)
     manufacturer = models.CharField(max_length=512)
     manufacturing_date = models.DateTimeField(null=True, blank=True)
-    model_number = models.CharField()
-    colour = models.CharField()
+    model_number = models.CharField(max_length=50)
+    colour = models.CharField(max_length=25)
     image_url = models.CharField(max_length=215, null=True, blank=True)
     
     class Meta:
@@ -177,10 +177,10 @@ class RegistrationCertificate(BaseModel):
     
 class License(BaseModel):
     product = models.ForeignKey(UserProduct)
-    license_number = models.CharField()
+    license_number = models.CharField(max_length=50)
     issue_date = models.DateTimeField(null=True, blank=False)
     expiry_date = models.DateTimeField(null=True, blank= False)
-    blood_group = models.CharField()
+    blood_group = models.CharField(max_length=50)
     image_url = models.CharField(max_length=215, null=True, blank=True)
     
     class Meta:
@@ -189,12 +189,12 @@ class License(BaseModel):
         
 class Invoice(BaseModel):
     product = models.ForeignKey(UserProduct)
-    invoice_number = models.CharField()
+    invoice_number = models.CharField(max_length=50)
     purchase_date = models.DateTimeField(null=True, blank=False)
-    dealer_name = models.CharField()
+    dealer_name = models.CharField(max_length=50)
     dealer_contact = models.CharField(
         max_length=25, blank=True, null=True)
-    amount = models.FloatField(min_value=0.0, null=True, blank= True)
+    amount = models.FloatField(null=True, blank= True)
     image_url = models.CharField(max_length=215, null=True, blank=True)
     
     class Meta:
