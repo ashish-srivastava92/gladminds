@@ -57,6 +57,11 @@ class GladmindsUnitTestCase(django.test.TestCase):
         asc_obj = aftersell_common.RegisteredASC(**kwargs)
         asc_obj.save()
         return asc_obj
+    
+    def get_user_obj(self, **kwargs):
+        user_obj = common.User(**kwargs)
+        user_obj.save()
+        return user_obj
         
     def _get_model_obj(self, model):
         model_obj = model.save()

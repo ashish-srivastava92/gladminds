@@ -2,7 +2,7 @@
 var Utils = {
 	getFormData : function(className) {
 		var data = $(className).serializeArray();
-		$(className).serializeArray().map(function(x) {
+		$.map(data, function(x) {
 			data[x.name] = x.value;
 		});
 		return data;
@@ -39,9 +39,9 @@ var Utils = {
 				event.preventDefault();
 			},
 			error : function() {
-				waitingModal.modal('hide');
-				messageBlock.text('Invalid Data');
-				messageModal.modal('show');
+				waitingModal.modal("hide");
+				messageBlock.text("Some error occurred. Please contact customer support: +91-9741775128");
+				messageModal.modal("show");
 			}
 		});
 	}

@@ -180,7 +180,7 @@
   	"pk": 20,
   	"fields": {
   		"template_key": "SEND_CUSTOMER_SUPPORTED_KEYWORD",
-  		"template": "Supported keyword: 1.GCP_REG 2.SERVICE 3.BRAND 4.A 5.C 6.SD",
+  		"template": "Supported keyword: 1.GCP_REG 2.SERVICE 3.BRAND 4.A 5.C 6.SD 7.R",
   		"description": "Send supported message format to customer"
   	}
   },
@@ -333,7 +333,7 @@
     "pk": 37,
     "fields": {
       "template_key": "SEND_CUSTOMER_DETAILS",
-      "template": "Your {0} is {1}",
+      "template": "Your {0} is {1}.",
       "description": "Send id or vin to customer depending upon message he sent"
     }
   },
@@ -341,9 +341,9 @@
     "model": "gladminds.messagetemplate",
     "pk": 38,
     "fields": {
-      "template_key":"INVALID_RECOVERY_MESSAGE",
-      "template":"No service register for {0}: {1}",
-      "description":"Send on if customer id or VIN does not exits."
+      "template_key": "INVALID_RECOVERY_MESSAGE",
+      "template": "Incorrect {0} or no matching details.",
+      "description": "Send on if customer id or VIN does not exits."
     }
   } 
 ]

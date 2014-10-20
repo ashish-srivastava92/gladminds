@@ -64,11 +64,6 @@ FILE_CACHE_DURATION = 0
 #                    }
 
 SMS_CLIENT = "KAP"
-SMS_CLIENT_DETAIL = {'login':'GladMinds1',
-                     'pass':'kap@user!23',
-                     'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
-                     'working_key': '1486415t035t8052c7pc',
-                     'sender_id': 'GLADMS'}
 
 FEED_TYPE = 'CSV'
 
@@ -120,7 +115,9 @@ SQS_QUEUE_NAME = "gladminds-qa"
 ######################################
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail QA"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail QA"
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 ###################Change Mail Subject on QA##########################
 MAIL_DETAIL["subject"] = "GladMinds Feed Report QA"
-MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com", 'sourabh.gupta@hashedin.com']
+
+MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 #######################################################################

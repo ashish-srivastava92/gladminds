@@ -66,11 +66,12 @@ FEED_TYPE = 'CSV'
 FEED_FAILURE_MAIL_ENABLED = True
 
 MAIL_DETAIL["subject"] = "GladMinds Feed Report DEV"
-MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
+MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail DEV"
-FEED_FAILURE_MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
+FEED_FAILURE_MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail DEV"
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 
 
 LOGGING['handlers']['gladminds_logs']['filename'] = 'log/gladminds.log'
