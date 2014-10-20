@@ -432,6 +432,11 @@ def get_state_city(details, address):
         details['city'] = 'Null'
     else:
         addr = address.split(',')
-        details['state'] = addr[0]
-        details['city'] = addr[1]
+        if len(addr) == 2:
+            details['state'] = addr[1]
+            details['city'] = addr[0]
+        else:
+            details['city'] = addr[0]
+            details['state'] = 'Null'
+
     return details
