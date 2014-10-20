@@ -34,6 +34,8 @@ urlpatterns = patterns('',
     url(r'^aftersell/servicedesk/$', 'gladminds.views.servicedesk_views.get_servicedesk_tickets', name='get_servicedesk_tickets'),
     url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/$', 'gladminds.views.servicedesk_views.modify_servicedesk_tickets', name='modify_servicedesk_tickets'),
     url(r'^aftersell/feedbackresponse/(?P<feedback_id>\d+)/$', 'gladminds.views.servicedesk_views.get_feedback_response', name='get_feedback_response'),
+     url(r'^aftersell/(?P<role>[a-zA-Z0-9.-]+)/$', 'gladminds.views.brand_details'),
+
     #Afterbuy accesstoken URL.
     url(r'^oauth2/', include('provider.oauth2.urls', namespace = 'oauth2')),
 

@@ -487,3 +487,28 @@ def make_tls_property(default=None):
         value = property(_get_value, _set_value)
 
     return TLSProperty()
+
+
+def get_asc_data():
+    asc_data = aftersell_common.RegisteredDealer.objects.filter(role='asc')
+    asc_list = []
+    for asc in asc_data:
+        asc_detail = User.objects.get(username=asc.dealer_id)
+        asc_list.append(asc_detail)
+    return asc_list
+
+
+def asc_cuopon_details(asc_id, status_type):
+    cuopon_details = common.CouponData.objects.filter(servicing_dealer=asc_id, status=status_type)
+    return len(cuopon_details)
+
+
+def get_state_city(details, address):
+    if address == None or address == '':
+        details['state'] = 'Null'
+        details['city'] = 'Null'
+    else:
+        addr = address.split(',')
+        details['state'] = addr[0]
+        details['city'] = addr[1]
+    return details
