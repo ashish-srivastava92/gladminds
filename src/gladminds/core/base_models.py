@@ -5,7 +5,7 @@ from django.conf import settings
 
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     USER_DESIGNATION, RATINGS
-from gladminds.core import managers
+from gladminds.core.managers import user_manager
 
 
 class BaseModel(models.Model):
@@ -88,7 +88,7 @@ class Dealer(BaseModel):
         max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
 
-    objects = managers.DealerManager()
+    objects = user_manager.DealerManager()
 
     class Meta:
         abstract = True
