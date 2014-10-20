@@ -250,7 +250,6 @@ INSTALLED_APPS = (
     'suit',
     'django.contrib.admin',
     'import_export',
-    'gladminds.superadmin',
     'gladminds',
     'gladminds.gm',
     'gladminds.core',
