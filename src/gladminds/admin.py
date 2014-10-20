@@ -7,9 +7,8 @@ from suit.widgets import EnclosedInput, AutosizedTextarea
 from django.forms import ModelForm
 from django.contrib.admin.models import LogEntry
 
-from gladminds.gm.models import UserNotification, Brand, GladmindsUser,\
+from gladminds.gm.models import Brand, GladmindsUser,\
     MessageTemplate, EmailTemplate, Industry
-from gladminds.aftersell.models.logs import AuditLog, DataFeedLog
 from gladminds.core import utils
 
 
@@ -156,9 +155,6 @@ class UserFeedback(ModelAdmin):
 
 admin.register(Industry)
 admin.register(Brand)
-admin.register(AuditLog, AuditLogAdmin)
-admin.register(DataFeedLog, FeedLogAdmin)
-admin.register(GladmindsUser, GladmindsUserAdmin)
+#admin.register(GladmindsUser, GladmindsUserAdmin)
 admin.register(MessageTemplate, MessageTemplateAdmin)
 admin.register(EmailTemplate, EmailTemplateAdmin)
-admin.register(UserNotification, UserNotificationAdmin)

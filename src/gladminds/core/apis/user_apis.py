@@ -2,13 +2,13 @@ from tastypie.constants import ALL_WITH_RELATIONS, ALL
 from tastypie.authorization import Authorization
 from tastypie import fields 
 from django.contrib.auth.models import User
-from gladminds.apis.baseresource import CustomBaseResource
-from gladminds.gm.models import GladmindsUser
 from django.contrib.auth.models import AnonymousUser, User
 from django.utils import timezone
 from tastypie.authentication import Authentication
 from provider.oauth2.models import AccessToken
 import logging
+from gladminds.core.apis.base_resource import CustomBaseResource
+from gladminds.gm.models import GladmindsUser
 
 
 class AuthError(RuntimeError):
@@ -58,7 +58,6 @@ class AccessTokenAuthentication(Authentication):
 class UserResource(CustomBaseResource):
     class Meta:
         queryset = User.objects.all()
-        print "user",queryset
         resource_name = 'users'
         excludes = ['password']
         authorization= Authorization()
