@@ -433,10 +433,10 @@ def get_state_city(details, address):
     else:
         addr = address.split(',')
         if len(addr) == 2:
-            details['state'] = addr[0]
-            details['city'] = addr[1]
+            details['state'] = addr[1]
+            details['city'] = addr[0]
         else:
             details['city'] = addr[0]
             details['state'] = 'Null'
-            
+
     return details
