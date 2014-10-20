@@ -18,7 +18,7 @@ import logging
 from django.conf import settings
 import json
 from gladminds.core import utils
-from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
+from gladminds.core.feed_log_remark import FeedLogWithRemark
 
 
 logger = logging.getLogger("gladminds")

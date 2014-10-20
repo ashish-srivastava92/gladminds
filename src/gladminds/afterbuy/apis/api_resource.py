@@ -13,16 +13,12 @@ from gladminds.core import utils
 from gladminds.gm import models as gm_common
 from gladminds.core.utils import mobile_format
 from gladminds.core.resource.authentication import AccessTokenAuthentication
-
+from gladminds.core.resource.base_resource import CustomBaseResource
 
 logger = logging.getLogger("gladminds")
 
-class AfterBuyBaseResource(ModelResource):
-    def determine_format(self, request):
-        return 'application/json'
-
 '''Contains all the apis for AfterBuy App'''
-class AfterBuyResources(AfterBuyBaseResource):
+class AfterBuyResources(CustomBaseResource):
     class Meta:
 #         queryset = common.ProductData.objects.all()
         resource_name = 'afterbuy'

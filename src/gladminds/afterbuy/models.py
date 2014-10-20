@@ -4,15 +4,34 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 from gladminds.core.base_models import BaseModel, MessageTemplate,\
-           EmailTemplate, SMSLog, EmailLog, AuditLog
+           EmailTemplate, SMSLog, EmailLog, AuditLog, Industry, Brand,ProductType
+
+class Industry(Industry):
+    
+    class Meta:
+        app_label = "afterbuy"
+        verbose_name_plural = "Industries"
+        
+class Brand(Brand):
+    industry = models.ForeignKey(Industry)
+
+    class Meta:
+        app_label = "afterbuy"
+        verbose_name_plural = "Brands"
+        
+class ProductType(ProductType):
+
+    class Meta:
+        app_label = "afterbuy"
+        verbose_name_plural = "Product Types"
 
 class Consumer(BaseModel):
     user = models.OneToOneField(User, primary_key=True)
     consumer_id = models.CharField(
-        max_length=215, unique=True, null=True)
+        max_length=50, unique=True)
     phone_number = models.CharField(
                    max_length=15, blank=True, null=True)
-    profile_pic = models.CharField(
+    image_url = models.CharField(
                    max_length=200, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     state = models.CharField(max_length=255, null=True, blank=True)
@@ -41,61 +60,45 @@ class Consumer(BaseModel):
 
     class Meta:
         app_label = "afterbuy"
-        verbose_name_plural = "consumer"
+        verbose_name_plural = "Consumers"
 
     def __unicode__(self):
         return self.phone_number
 
-
-class Industry(BaseModel):
-    name = models.CharField(max_length=200)
-    description = models.TextField(null=True, blank=True)
-
-class OTPToken(models.Model):
-    user = models.ForeignKey(Consumer, null=False, blank=False)
-    token = models.CharField(max_length=256, null=False)
-    request_date = models.DateTimeField(null=True, blank=True)
-    email = models.CharField(max_length=50, null=False)
+class OTPToken(OTPToken):
+    user = models.ForeignKey(Consumer)
 
     class Meta:
         app_label = "afterbuy"
         verbose_name_plural = "OTPs"
 
-class UserNotification(models.Model):
-    user = models.ForeignKey(Consumer, null=False, blank=False)
-    message = models.CharField(max_length=256, null=False)
-    notification_date = models.DateTimeField(null=True, blank=True)
+class UserNotification(BaseModel):
+    user = models.ForeignKey(Consumer)
+    message = models.TextField()
+    action = models.TextField(blank=True,null=True)
     notification_read = models.BooleanField(default=False)
 
     class Meta:
         app_label = "afterbuy"
-        verbose_name_plural = "notifications"
+        verbose_name_plural = "Notifications"
 
-class UserProducts(models.Model):
-    vin = models.CharField(max_length=215, null=True, unique=True, blank=True)
-    consumer_phone_number = models.ForeignKey(
-        Consumer, null=True, blank=True)
-    item_name = models.CharField(max_length=256, null=False)
-    product_purchase_date = models.DateTimeField(null=True, blank=True)
-    purchased_from = models.CharField(max_length=255, null=True, blank=True)
-    seller_email = models.EmailField(max_length=255, null=True, blank=True)
-    seller_phone = models.CharField(max_length=255, null=True, blank=True)
-    warranty_yrs = models.FloatField(null=True, blank=True)
-    insurance_yrs = models.FloatField(null=True, blank=True)
-    invoice_loc = models.FileField(upload_to="invoice", blank=True)
-    warranty_loc = models.FileField(upload_to="warrenty", blank=True)
-    insurance_loc = models.FileField(upload_to="insurance", blank=True)
+class UserProduct(models.Model):
+    consumer = models.ForeignKey(Consumer)
+    brand = models.ForeignKey(Brand)
+    type = models.ForeignKey(ProductType)
+    purchase_date = models.DateTimeField(null=True, blank=True)
+    brand_product_id = models.CharField(max_length=100, null=True, blank=True)
+    color = models.CharField(max_length=50)
+    image_url = models.CharField(
+                   max_length=200, blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
     
     class Meta:
         app_label = "afterbuy"
-        verbose_name_plural = "userProducts"
-    
-    def __unicode__(self):
-        return self.vin    
+        verbose_name_plural = "User Products"   
        
 class UserMobileInfo(BaseModel):
-    user = models.ForeignKey(Consumer, null=False, blank=False)
+    user = models.ForeignKey(Consumer)
     IMEI = models.CharField(max_length=50, null=True, blank=True, unique=True)
     ICCID = models.CharField(max_length=50, null=True, blank=True)
     phone_name = models.CharField(max_length=100, null=True, blank=True)
@@ -107,38 +110,32 @@ class UserMobileInfo(BaseModel):
 
     class Meta:
         app_label = "afterbuy"
-        verbose_name_plural = "mobile info"
+        verbose_name_plural = "Mobile Details"
 
 
 class ProductInsuranceInfo(BaseModel):
-    product = models.ForeignKey(UserProducts, null=False)
-    insurance_brand_id = models.CharField(max_length=15, null=True, blank=True)
-    insurance_brand_name = models.CharField(max_length=50, null=True, blank=True)
-    policy_number = models.CharField(max_length=15, unique=True, blank=True)
-    premium = models.CharField(max_length=50, null=True, blank=True)
-    insurance_email = models.EmailField(max_length=215, null=True, blank=True)
-    insurance_phone = models.CharField(
-        max_length=15, blank=False, null=False)
-    image_url = models.CharField(max_length=215, null=True, blank=True)
-    insurance_agency_name =  models.CharField(max_length=215, null=True, blank=True)
-    issue_date = models.DateTimeField(null=True, blank=False)
-    expiry_date = models.DateTimeField(null=True, blank= False)
+    product = models.ForeignKey(UserProducts)
+    agency_name =  models.CharField(max_length=100)
+    policy_number = models.CharField(max_length=20, unique=True)
+    premium = models.FloatField(min_value=0.0, null=True, blank=True)
+    agency_contact = models.CharField(
+        max_length=25, blank=True, null=True)
     insurance_type = models.CharField(max_length=15,null=True, blank=True)
-    vehicle_value = models.FloatField(min_value=0.0)
     nominee = models.CharField(max_length=15,blank=True,null=True)
-    support_contact = models.CharField(max_length=12,blank=True,null=True)
+    issue_date = models.DateTimeField(null=True, blank=True)
+    expiry_date = models.DateTimeField(null=True, blank= True)
+    vehicle_value = models.FloatField(min_value=0.0, null=True, blank= True)
+    image_url = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
         app_label = "afterbuy"
-        verbose_name_plural = "product insurance info"
+        verbose_name_plural = "Product Insurance Info"
 
 
 class ProductWarrantyInfo(BaseModel):
-    product = models.ForeignKey(UserProducts, null=False)
-    issue_date = models.DateTimeField(null=True, blank=False)
-    expiry_date = models.DateTimeField(null=True, blank= False)
-    warranty_brand_id = models.CharField(max_length=15, null=True, blank=True)
-    warranty_brand_name = models.CharField(max_length=50, null=True, blank=True)
+    product = models.ForeignKey(UserProducts)
+    issue_date = models.DateTimeField(null=True, blank=True)
+    expiry_date = models.DateTimeField(null=True, blank=True)
     policy_number = models.CharField(max_length=15, unique=True, blank=True)
     premium = models.CharField(max_length=50, null=True, blank=True)
     image_url = models.CharField(max_length=215, null=True, blank=True)
@@ -149,9 +146,10 @@ class ProductWarrantyInfo(BaseModel):
         
 
 class PollutionCertificate(BaseModel):
+    product = models.ForeignKey(UserProducts)
     pucc_number = models.CharField()
-    issue_date = models.DateTimeField(null=True, blank=False)
-    expiry_date = models.DateTimeField(null=True, blank= False)
+    issue_date = models.DateTimeField(null=True, blank=True)
+    expiry_date = models.DateTimeField(null=True, blank= True)
     image_url = models.CharField(max_length=215, null=True, blank=True)
     
     class Meta:
@@ -159,15 +157,16 @@ class PollutionCertificate(BaseModel):
         verbose_name_plural = "Pollution Certificate"
 
 class RegistrationCertificate(BaseModel):
+    product = models.ForeignKey(UserProducts)
     vehicle_registration_number = models.CharField()
-    registration_date = models.DateTimeField(null=True, blank=False)
+    registration_date = models.DateTimeField(null=True, blank=True)
     chassis_number = models.CharField()
     engine_number = models.CharField()
     owner_name = models.CharField(max_length=512)
     address = models.CharField(max_length=512)
-    registration_upto = models.DateTimeField(null=True, blank=False)
+    registration_upto = models.DateTimeField(null=True, blank=True)
     manufacturer = models.CharField(max_length=512)
-    manufacturing_date = models.DateTimeField(null=True, blank=False)
+    manufacturing_date = models.DateTimeField(null=True, blank=True)
     model_number = models.CharField()
     colour = models.CharField()
     image_url = models.CharField(max_length=215, null=True, blank=True)
@@ -177,6 +176,7 @@ class RegistrationCertificate(BaseModel):
         verbose_name_plural = "Registration Certificate"
     
 class License(BaseModel):
+    product = models.ForeignKey(UserProducts)
     license_number = models.CharField()
     issue_date = models.DateTimeField(null=True, blank=False)
     expiry_date = models.DateTimeField(null=True, blank= False)
@@ -213,7 +213,7 @@ class EmailLog(EmailLog):
         verbose_name_plural = "Email Log"
 
 class AuditLog(AuditLog):
-    user_profile = models.ForeignKey(Consumer)
+    user = models.ForeignKey(Consumer)
 
     class Meta:
         app_label = "afterbuy"

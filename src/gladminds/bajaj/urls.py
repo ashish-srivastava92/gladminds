@@ -1,8 +1,8 @@
 from django.conf.urls import patterns, url, include
 from django.conf import settings
 from gladminds.bajaj.admin import brand_admin
-from gladminds.bajaj.resource import resources, product_apis, coupon_apis
-from gladminds.afterbuy import api_resource
+from gladminds.bajaj.apis import resources, product_apis, coupon_apis
+from gladminds.afterbuy.apis import api_resource
 from tastypie.api import Api
 from gladminds.core import urls as core_urls
 

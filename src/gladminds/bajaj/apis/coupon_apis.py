@@ -2,24 +2,8 @@ from tastypie.constants import ALL_WITH_RELATIONS
 from tastypie.authorization import Authorization
 from tastypie import fields
 from gladminds.apis.baseresource import CustomBaseResource
-from gladminds.bajaj.resource.product_apis import ProductDataResources
+from gladminds.bajaj.apis.product_apis import ProductDataResources
 from gladminds.bajaj.models import CouponData, ServiceAdvisor, Dealer
-  
-class DealerResources(CustomBaseResource):
-    class Meta:
-        queryset = Dealer.objects.all()
-        resource_name = "dealer"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'delete']
-        always_return_data = True
-  
-class ServiceAdvisorResources(CustomBaseResource):
-    class Meta:
-        queryset = ServiceAdvisor.objects.all()
-        resource_name = "serviceadvisor"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'delete']
-        always_return_data = True
   
 class CouponDataResources(CustomBaseResource):
     vin = fields.ForeignKey(ProductDataResources, 'vin', full=True)

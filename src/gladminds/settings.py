@@ -206,7 +206,7 @@ TEMPLATE_LOADERS = (
                     #         'django.template.loaders.filesystem.Loader',
                     #         'django.template.loaders.app_directories.Loader',
                     #     )),
-                    'gladminds.core.custom_template_loader.Loader',
+                    'gladminds.core.loaders.custom_template_loader.Loader',
                     'django.template.loaders.filesystem.Loader',
                     'django.template.loaders.app_directories.Loader',
                     #  'django.template.loaders.eggs.Loader',

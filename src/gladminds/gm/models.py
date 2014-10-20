@@ -3,19 +3,24 @@ from django.contrib.auth.models import User
 from django.conf import settings
 
 from gladminds.core.base_models import BaseModel, UserProfile, MessageTemplate,\
-           EmailTemplate, SMSLog, EmailLog, AuditLog
+           EmailTemplate, SMSLog, EmailLog, AuditLog, Industry, Brand, OTPToken
 
+class Industry(Industry):
+    
+    class Meta:
+        app_label = "gm"
+        verbose_name_plural = "Industries"
 
-class Industry(BaseModel):
+class ServiceType(BaseModel):
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
 
     class Meta:
         app_label = "gm"
-        verbose_name_plural = "Industries"
-
+        verbose_name_plural = "Service Types"
 
 class Service(BaseModel):
+    type = models.ForeignKey(ServiceType)
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
 
@@ -23,47 +28,27 @@ class Service(BaseModel):
         app_label = "gm"
         verbose_name_plural = "Services"
 
-
-class Brand(BaseModel):
-    brand_id = models.CharField(
-        max_length=50, null=False, unique=True, help_text="Brand Id must be unique")
-    brand_name = models.CharField(max_length=250, null=False)
-    brand_logo = models.CharField(max_length=200, null=True, blank=True)
-    is_active = models.BooleanField(default=True)
+class Brand(Brand):
     industry = models.ForeignKey(Industry)
     services = models.ManyToManyField(Service, through="BrandService")
 
     class Meta:
         app_label = "gm"
-        verbose_name_plural = "Brand Data"
-
-    def __unicode__(self):
-        return self.brand_id
-
-    def image_tag(self):
-        if self.brand_name == 'Bajaj':
-            url = settings.STATIC_URL + 'img/bajaj.jpg'
-            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
-        elif self.brand_name == 'Honda':
-            url = settings.STATIC_URL + 'img/honda.jpg'
-            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
-        else:
-            url = settings.STATIC_URL + 'img/noimage.jpg'
-            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
-    image_tag.short_description = 'Image'
-    image_tag.allow_tags = True
-
+        verbose_name_plural = "Brands"
 
 class BrandService(BaseModel):
     brand = models.ForeignKey(Brand)
     service = models.ForeignKey(Service)
     active = models.BooleanField(default=True)
+    comment = models.TextField(null=True, blank=True)
 
     class Meta:
         app_label = "gm"
 
 
 class GladmindsUser(UserProfile):
+    user = models.OneToOneField(User, primary_key=True,
+                                        related_name='gm_users')
 
     class Meta:
         app_label = "gm"
@@ -72,10 +57,8 @@ class GladmindsUser(UserProfile):
     def __unicode__(self):
         return self.phone_number
 
-class OTPToken(BaseModel):
+class OTPToken(OTPToken):
     user = models.ForeignKey(GladmindsUser)
-    token = models.CharField(max_length=256)
-    request_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         app_label = "gm"

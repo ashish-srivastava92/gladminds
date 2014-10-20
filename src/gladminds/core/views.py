@@ -21,7 +21,7 @@ from gladminds.core.utils import get_task_queue, get_customer_info,\
 from gladminds.core.sqs_tasks import export_asc_registeration_to_sap
 from gladminds.core.mail import sent_otp_email
 from gladminds.core.feed import SAPFeed
-from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
+from gladminds.core.feed_log_remark import FeedLogWithRemark
 from gladminds.core.scheduler import SqsTaskQueue
 from gladminds.core.resource.resources import GladmindsResources
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\

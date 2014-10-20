@@ -19,7 +19,7 @@ class BaseModel(models.Model):
 class UserProfile(BaseModel):
     phone_number = models.CharField(
                    max_length=15, blank=True, null=True)
-    profile_pic = models.CharField(
+    image_url = models.CharField(
                    max_length=200, blank=True, null=True)
     status = models.CharField(max_length=10, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
@@ -39,6 +39,49 @@ class UserProfile(BaseModel):
     class Meta:
         abstract = True
 
+class Industry(BaseModel):
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Industries"
+
+class Brand(BaseModel):
+    brand_id = models.CharField(
+        max_length=50, null=False, unique=True, help_text="Brand Id must be unique")
+    name = models.CharField(max_length=250, null=False)
+    image_url = models.CharField(max_length=200, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Brand Data"
+
+    def __unicode__(self):
+        return self.brand_id
+
+    def image_tag(self):
+        if self.brand_name == 'Bajaj':
+            url = settings.STATIC_URL + 'img/bajaj.jpg'
+            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
+        elif self.brand_name == 'Honda':
+            url = settings.STATIC_URL + 'img/honda.jpg'
+            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
+        else:
+            url = settings.STATIC_URL + 'img/noimage.jpg'
+            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
+    image_tag.short_description = 'Image'
+    image_tag.allow_tags = True
+
+class OTPToken(BaseModel):
+    token = models.CharField(max_length=256, null=False)
+    request_date = models.DateTimeField(null=True, blank=True)
+    email = models.CharField(max_length=50, null=False)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "OTPs"
 
 class Dealer(BaseModel):
     dealer_id = models.CharField(
@@ -84,53 +127,18 @@ class ServiceAdvisor(BaseModel):
     def __unicode__(self):
         return self.phone_number
 
-
-class Feedback(BaseModel):
-    reporter = models.CharField(max_length=15)
-    reporter_email_id = models.CharField(max_length=50, null=True, blank= True)
-    message = models.CharField(max_length=512, null=True, blank=False)
-    status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
-    priority = models.CharField(max_length=12, choices=PRIORITY)
-    type = models.CharField(max_length=12, choices=FEEDBACK_TYPE)
-    subject = models.CharField(max_length=512, null=True, blank=True)
-    closed_date = models.DateTimeField(null=True, blank=True)
-    resolved_date = models.DateTimeField(null=True, blank=True)
-    pending_from = models.DateTimeField(null=True, blank=True)
-    due_date = models.DateTimeField(null=True, blank=True)
-    wait_time = models.FloatField(max_length=20, null=True, blank=True, default = '0.0')
-    remarks = models.CharField(max_length=512, null=True, blank=True)
-    ratings = models.CharField(max_length=12, choices=RATINGS)
-    root_cause = models.CharField(max_length=512, null=True, blank=True)
-    resolution = models.CharField(max_length=512, null=True, blank=True)
-    role = models.CharField(max_length=50, null=True, blank=True)
-
-    class Meta:
-        abstract = True
-        verbose_name_plural = "aftersell feedback info"
-
-
-class Comments(BaseModel):
-    user = models.CharField(max_length=20, null=False, blank=False)
-    comments_str = models.CharField(max_length=100, null=True, blank=True)
-    isDeleted = models.BooleanField(default=False)
-
-    class Meta:
-        abstract = True
-        verbose_name_plural = "aftersell comment info"
-
-
 '''
 ProductTypeData  is linked to Brand data
 For 1 Brand there can be multiple Products
 '''
 
-class ProductTypeData(BaseModel):
+class ProductType(BaseModel):
     product_type_id = models.AutoField(primary_key=True)
     product_name = models.CharField(max_length=255, null=False)
     product_type = models.CharField(max_length=255, unique=True, null=False)
-    product_image_loc = models.FileField(
-        upload_to=settings.AFTERBUY_PRODUCT_TYPE_LOC, blank=True)
-    isActive = models.BooleanField(default=True)
+    image_url = models.CharField(
+                   max_length=200, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
     warranty_email = models.EmailField(max_length=215, null=True, blank=True)
     warranty_phone = models.CharField(
@@ -146,39 +154,22 @@ class ProductTypeData(BaseModel):
 ####################################################################
 
 class ProductData(BaseModel):
-    id = models.AutoField(primary_key=True)
-    vin = models.CharField(max_length=215, null=True, unique=True, blank=True)
-    sap_customer_id = models.CharField(
+    product_id = models.CharField(max_length=215, unique=True)
+    customer_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
-    product_purchase_date = models.DateTimeField(null=True, blank=True)
+    purchase_date = models.DateTimeField(null=True, blank=True)
     invoice_date = models.DateTimeField(null=True, blank=True)
     engine = models.CharField(max_length=255, null=True, blank=True)
-
-    # Added below column for after buy application
-    customer_product_number = models.CharField(
-        max_length=255, null=True, blank=True)
-    purchased_from = models.CharField(max_length=255, null=True, blank=True)
-    seller_email = models.EmailField(max_length=255, null=True, blank=True)
-    seller_phone = models.CharField(max_length=255, null=True, blank=True)
-    warranty_yrs = models.FloatField(null=True, blank=True)
-    insurance_yrs = models.FloatField(null=True, blank=True)
-
-    invoice_loc = models.FileField(upload_to="invoice", blank=True)
-    warranty_loc = models.FileField(upload_to="warrenty", blank=True)
-    insurance_loc = models.FileField(upload_to="insurance", blank=True)
-
-    last_modified = models.DateTimeField(null=False, default=datetime.now())
-    created_on = models.DateTimeField(null=True, default=datetime.now())
-    isActive = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(default=0)
     veh_reg_no = models.CharField(max_length=15, null=True, blank=True)
-
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+    
     class Meta:
         abstract = True
         verbose_name_plural = "Product Data"
 
     def __unicode__(self):
-        return self.vin
+        return self.product_id
 
 
 STATUS_CHOICES = ((1, 'Unused'), (2, 'Closed'), (
@@ -216,7 +207,7 @@ class ServiceAdvisorCouponRelationship(BaseModel):
 
 class UCNRecovery(BaseModel):
     reason = models.TextField(null=False)
-    sap_customer_id = models.CharField(max_length=215, null=True, blank=True)
+    customer_id = models.CharField(max_length=215, null=True, blank=True)
     file_location = models.CharField(max_length=215, null=True, blank=True)
     request_date = models.DateTimeField(default=datetime.now())
 
@@ -228,9 +219,8 @@ class UCNRecovery(BaseModel):
 ########################TOTP Details################################
 
 class OTPToken(BaseModel):
-    token = models.CharField(max_length=256, null=False)
+    token = models.CharField(max_length=256)
     request_date = models.DateTimeField(null=True, blank=True)
-    email = models.CharField(max_length=50, null=False)
 
     class Meta:
         abstract = True
@@ -310,6 +300,7 @@ class CustomerTempRegistration(BaseModel):
     def __unicode__(self):
         return self.new_customer_name
 
+#############################################################
 
 class SparesData(BaseModel):
     spare_name = models.CharField(max_length=50, null=True, blank=True)
@@ -324,10 +315,8 @@ class SparesData(BaseModel):
 """
 Monkey-patch the Site object to include folder for template
 """
-# FolderNameField(blank=True).contribute_to_class(Site,'folder_name')
 
-
-class UserPreferences(models.Model):
+class UserPreferences(BaseModel):
     """
     This model is used for storing user preferences
     """
@@ -342,23 +331,22 @@ class UserPreferences(models.Model):
         verbose_name_plural = "User Preferences"
         
         
-class SMSLog(models.Model):
-    date = models.DateTimeField()
+class SMSLog(BaseModel):
     action = models.CharField(max_length=250)
-    message = models.CharField(max_length=250)
-    sender = models.CharField(max_length=250)
-    reciever = models.CharField(max_length=250)
+    message = models.TextField(null=True, blank=True)
+    sender = models.CharField(max_length=15)
+    reciever = models.CharField(max_length=15)
 
     class Meta:
         abstract = True
         verbose_name_plural = "SMS Log"
 
-class EmailLog(models.Model):
-    date = models.DateTimeField()
-    action = models.CharField(max_length=250)
-    message = models.CharField(max_length=250)
-    sender = models.CharField(max_length=250)
-    reciever = models.CharField(max_length=250)
+class EmailLog(BaseModel):
+    subject = models.CharField(max_length=250, null=True, blank=True)
+    message = models.TextField(null=True, blank=True)
+    sender = models.CharField(max_length=100, null=True, blank=True)
+    reciever = models.TextField()
+    cc = models.TextField(null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -380,14 +368,46 @@ class DataFeedLog(models.Model):
         abstract = True
         verbose_name_plural = "Feed Log"
         
-class AuditLog(models.Model):
-    date = models.DateTimeField()
-    device = models.CharField(max_length=250)
-    useragent = models.CharField(max_length=250)
+class AuditLog(BaseModel):
+    device = models.CharField(max_length=250, null=True, blank=True)
+    user_agent = models.CharField(max_length=250, null=True, blank=True)
     urls = models.CharField(max_length=250)
-    accesstoken = models.CharField(max_length=250)
+    access_token = models.CharField(max_length=250, null=True, blank=True)
 
     class Meta:
         abstract = True
         verbose_name_plural = "Audit log"
 
+
+class Feedback(BaseModel):
+    reporter = models.CharField(max_length=15)
+    reporter_email_id = models.CharField(max_length=50, null=True, blank= True)
+    message = models.CharField(max_length=512, null=True, blank=False)
+    status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
+    priority = models.CharField(max_length=12, choices=PRIORITY)
+    type = models.CharField(max_length=12, choices=FEEDBACK_TYPE)
+    subject = models.CharField(max_length=512, null=True, blank=True)
+    closed_date = models.DateTimeField(null=True, blank=True)
+    resolved_date = models.DateTimeField(null=True, blank=True)
+    pending_from = models.DateTimeField(null=True, blank=True)
+    due_date = models.DateTimeField(null=True, blank=True)
+    wait_time = models.FloatField(max_length=20, null=True, blank=True, default = '0.0')
+    remarks = models.CharField(max_length=512, null=True, blank=True)
+    ratings = models.CharField(max_length=12, choices=RATINGS)
+    root_cause = models.CharField(max_length=512, null=True, blank=True)
+    resolution = models.CharField(max_length=512, null=True, blank=True)
+    role = models.CharField(max_length=50, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "aftersell feedback info"
+
+
+class Comments(BaseModel):
+    user = models.CharField(max_length=20, null=False, blank=False)
+    comments_str = models.CharField(max_length=100, null=True, blank=True)
+    isDeleted = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "aftersell comment info"
