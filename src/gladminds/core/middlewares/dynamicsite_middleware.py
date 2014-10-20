@@ -14,10 +14,11 @@ class DynamicSitesMiddleware(object):
     def process_request(self, request):
         self.request = request
         self.domain, self.port = self.get_domain_and_port()
-        BRAND.value = self.domain.split('.')[0]
+        BRAND.value = self.get_fields(self.domain)
         if BRAND.value not in settings.BRANDS:
             BRAND.value = settings.GM_BRAND
-
+        
+        print BRAND.value
         try:
             if BRAND.value not in settings.GM_BRAND:
                 request.urlconf = 'gladminds.{0}.urls'.format(BRAND.value)
@@ -29,6 +30,12 @@ class DynamicSitesMiddleware(object):
         if getattr(request, "urlconf", None):
             patch_vary_headers(response, ('Host',))
         return response
+
+    def get_fields(self, domain):
+        fields = domain.split('.')
+        if fields[0] in ['local', 'dev', 'qa', 'staging']:
+            fields = fields[1:]
+        return fields[0]
 
     def get_domain_and_port(self):
         """
