@@ -274,19 +274,19 @@ LOGGING = {
         },
         'sql': {
             'level': 'DEBUG',
-            'filename': '/var/log/gladminds/sql.log',
+            'filename': '/var/log/httpd/gladminds/sql.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         },
         'gladminds_logs': {
             'level': 'INFO',
-            'filename': '/var/log/gladminds/gladminds.log',
+            'filename': '/var/log/httpd/gladminds/gladminds.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         },
         'afterbuy_logs': {
             'level': 'INFO',
-            'filename': '/var/log/gladminds/afterbuy.log',
+            'filename': '/var/log/httpd/gladminds/afterbuy.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         }
