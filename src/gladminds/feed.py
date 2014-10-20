@@ -299,8 +299,9 @@ class ProductDispatchFeed(BaseFeed):
                 service_type_exists = common.CouponData.objects.filter(vin__vin=product['vin'],
                                                                        service_type=str(product['service_type']))
                 if service_type_exists and not valid_coupon:
-                    logger.error('VIN already has coupon of this service type {0} VIN - {1}'.format(product['vin'], product['unique_service_coupon']))
-                    raise ValueError()
+                    service_type_error = 'VIN already has coupon of service type {0}'.format(product['service_type'])
+                    logger.error(service_type_error)
+                    raise ValueError(service_type_error)
                 elif not valid_coupon:
                     coupon_data = common.CouponData(unique_service_coupon=product['unique_service_coupon'],
                                                     vin=product_data, valid_days=product['valid_days'],
@@ -313,11 +314,12 @@ class ProductDispatchFeed(BaseFeed):
                     logger.info('UCN is already saved in database. VIN - {0} UCN - {1}'.format(product['vin'], product['unique_service_coupon']))
                     continue
                 else:
-                    logger.error('Coupon Already registered for a VIN! VIN {0}  - UCN {1}'.format(product['vin'], product['unique_service_coupon']))
-                    raise ValueError()
+                    coupon_exist_error = 'Coupon already registered for VIN {0}'.format(valid_coupon[0].vin.vin)
+                    logger.error(coupon_exist_error)
+                    raise ValueError(coupon_exist_error)
             except Exception as ex:   
-                ex = '''Coupon: {2} Save error! {0}
-                         VIN - {1}'''.format(ex, product['vin'], product['unique_service_coupon'])
+                ex = '''[Error: ProductDispatchFeed_product_data_save]: VIN - {0} Coupon - {1} {2}'''.format(
+                                        product['vin'], product['unique_service_coupon'], ex)
                 self.feed_remark.fail_remarks(ex)
                 logger.error(ex)
                 continue
@@ -486,10 +488,11 @@ def update_coupon_data(sender, **kwargs):
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
                 task_queue.add("send_on_product_purchase", {"phone_number": 
-                                customer_phone_number, "message":message})
+                                customer_phone_number, "message":message,
+                                "sms_client":settings.SMS_CLIENT})
             else:
                 send_on_product_purchase.delay(
-                phone_number=customer_phone_number, message=message)
+                phone_number=customer_phone_number, message=message, sms_client=settings.SMS_CLIENT)
  
             audit.audit_log(
                 reciever=customer_phone_number, action='SEND TO QUEUE', message=message)
@@ -552,17 +555,30 @@ class OldFscFeed(BaseFeed):
     def import_data(self):
         for fsc in self.data_source:
             try:
-                coupon_data = common.CouponData.objects.get(
-                vin__vin=fsc['vin'], service_type=int(fsc['service']))
-                coupon_data.status = 6
-                coupon_data.closed_date = datetime.now()
-                coupon_data.sent_to_sap = True
                 dealer_data = self.check_or_create_dealer(dealer_id=fsc['dealer'])
-                coupon_data.servicing_dealer = dealer_data
-                coupon_data.save()
-            except Exception as ex:
-                ex = "[Exception: OLD_FSC_FEED]: For VIN {0} coupon of service type {1}:: {2}".format(
+                product_data = common.ProductData.objects.get(vin=fsc['vin'])
+                coupon_data = common.CouponData.objects.filter(vin__vin=fsc['vin'],
+                                            service_type=int(fsc['service']))
+                if len(coupon_data) == 0:
+                    try:
+                        old_fsc_obj = common.OldFscData.objects.get(vin=product_data, service_type=int(fsc['service']) )
+                    except Exception as ex:
+                        ex = "[Exception: OLD_FSC_FEED]: For VIN {0} service type {1} does not exist in old fsc database::{2}".format(
                             fsc['vin'], fsc['service'], ex)
+                        logger.info(ex)
+                        old_coupon_data = common.OldFscData(vin=product_data, service_type = int(fsc['service']),
+                                                         status=6, closed_date=datetime.now(), sent_to_sap = True, servicing_dealer = dealer_data)
+                        old_coupon_data.save()
+                else:
+                    cupon_details = coupon_data[0]
+                    cupon_details.status = 6
+                    cupon_details.closed_date = datetime.now()
+                    cupon_details.sent_to_sap = True
+                    cupon_details.servicing_dealer = dealer_data
+                    cupon_details.save()
+            except Exception as ex:
+                ex = "[Exception: OLD_FSC_FEED]: VIN {0} does not exist::{1}".format(
+                            fsc['vin'], ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         return self.feed_remark

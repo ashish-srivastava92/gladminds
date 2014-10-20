@@ -7,15 +7,15 @@ logger = logging.getLogger("gladminds")
 
 __all__ = ['KapSmsClient', 'AirtelSmsClient', 'TwilioSmsClient']
 
-def load_gateway():
-    client = settings.SMS_CLIENT_DETAIL
-    if settings.SMS_CLIENT is 'MOCK':
+def load_gateway(sms_client):
+    client = settings.SMS_CLIENT_DETAIL[sms_client]
+    if sms_client == 'MOCK':
         return MockSmsClient(**client)
-    elif settings.SMS_CLIENT is 'AIRTEL':
+    elif sms_client == 'AIRTEL':
         return AirtelSmsClient(**client)
-    elif settings.SMS_CLIENT is 'TWILIO':
+    elif sms_client == 'TWILIO':
         return TwilioSmsClient(**client)
-    elif settings.SMS_CLIENT is 'KAP':
+    elif sms_client == 'KAP':
         return KapSmsClient(**client)
         
 class SmsClientExcetion(Exception):
@@ -124,6 +124,8 @@ class AirtelSmsClient(SmsClientBaseObject):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
         session_id = self._get_session_id()
+        logger.info(
+            '[INFO]: sending message {0} to {1} through airtel'.format(message, phone_number))        
         params = {'mob_no' : phone_number, 'text' : message, 'login' : self.login, 'pass': self.password}
         return self.send_request(url = self.message_url, params = params)
     
@@ -131,11 +133,17 @@ class AirtelSmsClient(SmsClientBaseObject):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
         session_id = self._get_session_id()
+        logger.info(
+            '[INFO]: sending message {0} to {1} through airtel'.format(message, phone_number))         
         params = {'mob_no' : phone_number, 'text' : message, 'sessionID' : session_id}
         return self.send_request(url = self.message_url, params = params)
     
     def send_request(self, url, params):
+        logger.info(
+            '[INFO]: sending message to Airtel url {0}'.format(url))               
         resp = requests.get(url = url, params = params)
+        logger.info(
+            '[INFO]: Response from Airtel url {0} {1}'.format(resp.content, resp.status_code))          
         assert resp.status_code==200
 #         json = import_json()
 #         data = resp.content

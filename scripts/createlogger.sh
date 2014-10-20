@@ -1,5 +1,6 @@
-mkdir -p  log/gladminds/app/
-echo "" >> log/gladminds/app/gladminds.log
-echo "" >> log/gladminds/app/afterbuy.log
-echo "" >> log/gladminds/app/test_case.log
-chmod -R o+rwx log/gladminds/app/
+mkdir -p  /var/log/gladminds/
+echo "" >> /var/log/gladminds/sql.log
+echo "" >> /var/log/gladminds/gladminds.log
+echo "" >> /var/log/gladminds/afterbuy.log
+echo "" >> /var/log/gladminds/test_case.log
+chmod -R o+rwx /var/log/gladminds/

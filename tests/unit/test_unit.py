@@ -11,6 +11,7 @@ from gladminds.utils import get_sa_list, get_coupon_info, get_customer_info,\
  get_list_from_set, get_token, create_feed_data , \
  validate_otp,recover_coupon_info, update_pass, format_date_string
 from gladminds.aftersell.models import logs
+from gladminds.models import common
 from django.db import connection
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
@@ -110,7 +111,6 @@ class TestUtils(GladmindsUnitTestCase):
         self.assertEqual(len(data), 5) 
         data = get_list_from_set(PRIORITY)
         self.assertEqual(len(data), 4) 
-         
 
 
 class TestFeedLogWithRemark(ResourceTestCase):

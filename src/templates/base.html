@@ -11,6 +11,13 @@
     <link href="/static/css/sb-admin.css" rel="stylesheet">
     <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
     <!-- <link rel="stylesheet" href="/static/css/morris-0.4.3.min.css"> -->
+	
+	<!--[if gt IE 7]>
+		<link href="/static/css/bootstrap-ie7.css" rel="stylesheet">
+	    <link href="/static/css/style-ie7.css" rel="stylesheet">
+	    <script src="/static/libs/html5.js"></script>
+    <![endif]-->    
+    
     {% block style %}
     {% endblock %}
   </head>
@@ -20,7 +27,14 @@
     {% block body %}
     {% endblock %}
    </div>
-   <script src="/static/js/jquery-2.1.1.js"></script>
+	<!--[if IE]>
+       	<script src="/static/js/jquery-1.7.1.min.js"></script> 
+   	<![endif]-->
+
+	<!--[if !IE]><!-->
+		<script src="/static/js/jquery-2.1.1.js"></script> 
+	<!--<![endif]-->
+
     <script src="/static/js/bootstrap.js"></script>
     <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
     <script src="http://cdn.oesmith.co.uk/morris-0.4.3.min.js"></script> 

@@ -5,9 +5,27 @@ from django.http import HttpResponseBadRequest
 from gladminds import utils
 from gladminds import smsparser
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('gladminds')
 
-__all__ = ['GladmindsMiddleware']
+__all__ = ['GladmindsMiddleware', 'GladmindsMessageMiddleware']
+SMS_CLIENT = settings.__dict__['_wrapped'].__class__.SMS_CLIENT =  utils.make_tls_property()
+
+"""
+Gladminds middleware to identify the IP from where the message request came
+and reply through the same platform
+"""
+
+class GladmindsMessageMiddleware(object):    
+    #If the request is come on message APIs, then based on the IP we set sms client
+    def process_request(self, request, **kwargs):
+        source_client = request.POST.get('source', None)
+        logger.info('Client is {0}'.format(source_client))
+        if source_client:
+            SMS_CLIENT.value = 'KAP'
+        else:
+            SMS_CLIENT.value = 'AIRTEL'
+        logger.info('Client is {0}'.format(SMS_CLIENT.value))
+        
 
 """
 Gladminds middleware to identify the user type (i.e Customer, Service Advisor and Admin).
