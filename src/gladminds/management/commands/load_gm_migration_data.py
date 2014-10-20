@@ -3,8 +3,8 @@ from django.contrib.auth.models import Group
 import os
 from django.conf import settings
 import json
-from gladminds.models import common
-from gladminds.aftersell.models import common as aftersell_common
+from gladminds.core import base_models as common
+
 from gladminds.core import feed
 
 BASIC_FEED = feed.BaseFeed()
