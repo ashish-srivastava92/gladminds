@@ -4,7 +4,7 @@ It will have all Common Orm Functions which is using for APIS
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 from gladminds.gm.models import UserPreferences
-from gladminds.core.base_models import AppPreferences
+from gladminds.gm.models import AppPreferences
  
 def get_preferences_list(user_profile=None):
     """Returns preferences depending on user filter

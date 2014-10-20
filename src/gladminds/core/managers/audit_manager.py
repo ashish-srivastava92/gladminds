@@ -1,6 +1,6 @@
 from django.utils import timezone
 
-from gladminds.core.base_models import AuditLog, DataFeedLog
+from gladminds.bajaj.models import AuditLog, DataFeedLog
 
 
 def audit_log(action='SENT', sender='+1 469-513-9856', reciever=None,

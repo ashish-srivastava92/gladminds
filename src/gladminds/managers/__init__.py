@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from gladminds.core import base_models as common
+from gladminds.bajaj import models as common
 from gladminds.core.exceptions import DataNotFoundError
 from gladminds.core.utils import create_context, get_list_from_set,\
     get_start_and_end_date, set_wait_time

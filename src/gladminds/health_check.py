@@ -4,7 +4,7 @@ from django import template
 from django.conf import settings
 from django.db.models import get_app, get_models
 from django.http.response import HttpResponse
-from gladminds.core.base_models import AuditLog
+from gladminds.bajaj.models import AuditLog
 
 logger = logging.getLogger("gladminds")
 

@@ -13,7 +13,7 @@ from django.db.models import signals
 from gladminds.core.managers import audit_manager
 from gladminds.bajaj.services import message_template as templates
 from gladminds.core import utils
-from gladminds.core import base_models as models
+from gladminds.bajaj import models
 from gladminds.core.managers.audit_manager import feed_log
 from gladminds.core.utils import get_task_queue
 

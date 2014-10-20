@@ -7,8 +7,8 @@ from django.conf import settings
 from gladminds.core.managers import audit_manager as audit
 from gladminds.core import utils
 from gladminds.bajaj.services import message_template as templates
-from gladminds.core import base_models as models
-from gladminds.core.base_models import CouponData, STATUS_CHOICES, DataFeedLog
+from gladminds.bajaj import models
+from gladminds.core.base_models import CouponData, STATUS_CHOICES
 from gladminds.core.utils import COUPON_STATUS
 
 AUDIT_ACTION = "SENT TO QUEUE"
@@ -81,7 +81,7 @@ def import_data_from_sap(*args, **kwargs):
 def get_data_feed_log_detail(start_date=None, end_date=None):
     start_date = start_date
     end_date = end_date
-    feed_logs = DataFeedLog.objects.filter(timestamp__range=(start_date, end_date))
+    feed_logs = models.DataFeedLog.objects.filter(timestamp__range=(start_date, end_date))
     feed_data = []
     for feed in feed_logs:
         data = {}

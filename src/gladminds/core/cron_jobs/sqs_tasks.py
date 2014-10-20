@@ -4,7 +4,7 @@ from django.conf import settings
 from datetime import datetime, timedelta
 import logging
 
-from gladminds.core import base_models as common
+from gladminds.bajaj import models as common
 from gladminds.core import utils, export_file
 from gladminds.core.managers.audit_manager import audit_log, feed_log
 from gladminds.core.managers.sms_client_manager import load_gateway, MessageSentFailed
