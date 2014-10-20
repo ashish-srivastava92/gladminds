@@ -41,7 +41,6 @@ class DatabaseAppsRouter(object):
             return True
 
         if db in settings.DATABASE_APPS_MAPPING.values():
-            print db
             return settings.DATABASE_APPS_MAPPING.get(model._meta.app_label) == db 
         elif settings.DATABASE_APPS_MAPPING.has_key(model._meta.app_label):
             # Here table will not be created 
