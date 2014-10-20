@@ -2,29 +2,34 @@ from datetime import datetime
 
 from django.db import models
 from django.contrib.auth.models import User
-from django.conf import settings
 from gladminds.core.base_models import BaseModel, MessageTemplate,\
            EmailTemplate, SMSLog, EmailLog, AuditLog, Industry, Brand,ProductType,\
     OTPToken
 
+_APP_NAME = 'afterbuy'
+
+
 class Industry(Industry):
-    
+
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "Industries"
-        
+
+
 class Brand(Brand):
     industry = models.ForeignKey(Industry)
 
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "Brands"
-        
+
+
 class ProductType(ProductType):
 
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "Product Types"
+
 
 class Consumer(BaseModel):
     user = models.OneToOneField(User, primary_key=True)
@@ -60,18 +65,17 @@ class Consumer(BaseModel):
                                    blank=True, null=True)
 
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "Consumers"
 
-    def __unicode__(self):
-        return self.phone_number
 
 class OTPToken(OTPToken):
     user = models.ForeignKey(Consumer)
 
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "OTPs"
+
 
 class UserNotification(BaseModel):
     user = models.ForeignKey(Consumer)
@@ -80,8 +84,9 @@ class UserNotification(BaseModel):
     notification_read = models.BooleanField(default=False)
 
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "Notifications"
+
 
 class UserProduct(models.Model):
     consumer = models.ForeignKey(Consumer)
@@ -93,11 +98,12 @@ class UserProduct(models.Model):
     image_url = models.CharField(
                    max_length=200, blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
-    
+
     class Meta:
-        app_label = "afterbuy"
-        verbose_name_plural = "User Products"   
-       
+        app_label = _APP_NAME
+        verbose_name_plural = "User Products"
+
+
 class UserMobileInfo(BaseModel):
     user = models.ForeignKey(Consumer)
     IMEI = models.CharField(max_length=50, null=True, blank=True, unique=True)
@@ -110,13 +116,13 @@ class UserMobileInfo(BaseModel):
     model = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "Mobile Details"
 
 
 class ProductInsuranceInfo(BaseModel):
     product = models.ForeignKey(UserProduct)
-    agency_name =  models.CharField(max_length=100)
+    agency_name = models.CharField(max_length=100)
     policy_number = models.CharField(max_length=20, unique=True)
     premium = models.FloatField(null=True, blank=True)
     agency_contact = models.CharField(
@@ -129,7 +135,7 @@ class ProductInsuranceInfo(BaseModel):
     image_url = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "Product Insurance Info"
 
 
@@ -142,9 +148,9 @@ class ProductWarrantyInfo(BaseModel):
     image_url = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "product warranty info"
-        
+
 
 class PollutionCertificate(BaseModel):
     product = models.ForeignKey(UserProduct)
@@ -152,10 +158,11 @@ class PollutionCertificate(BaseModel):
     issue_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank= True)
     image_url = models.CharField(max_length=215, null=True, blank=True)
-    
+
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "Pollution Certificate"
+
 
 class RegistrationCertificate(BaseModel):
     product = models.ForeignKey(UserProduct)
@@ -170,11 +177,12 @@ class RegistrationCertificate(BaseModel):
     model_number = models.CharField(max_length=50)
     colour = models.CharField(max_length=25)
     image_url = models.CharField(max_length=215, null=True, blank=True)
-    
+
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "Registration Certificate"
-    
+
+
 class License(BaseModel):
     product = models.ForeignKey(UserProduct)
     license_number = models.CharField(max_length=50)
@@ -182,11 +190,12 @@ class License(BaseModel):
     expiry_date = models.DateTimeField(null=True, blank= False)
     blood_group = models.CharField(max_length=50)
     image_url = models.CharField(max_length=215, null=True, blank=True)
-    
+
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "license"
-        
+
+
 class Invoice(BaseModel):
     product = models.ForeignKey(UserProduct)
     invoice_number = models.CharField(max_length=50)
@@ -196,10 +205,11 @@ class Invoice(BaseModel):
         max_length=25, blank=True, null=True)
     amount = models.FloatField(null=True, blank= True)
     image_url = models.CharField(max_length=215, null=True, blank=True)
-    
+
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "invoice"
+
 
 class Support (BaseModel):
     product = models.ForeignKey(UserProduct)
@@ -209,38 +219,41 @@ class Support (BaseModel):
     feedback_form = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "support"
 
-        
+
 class MessageTemplate(MessageTemplate):
 
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "Message Template"
 
 
 class EmailTemplate(EmailTemplate):
 
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "Email Template"
+
 
 class SMSLog(SMSLog):
 
     class Meta:
-        app_label = "gm"
+        app_label = _APP_NAME
         verbose_name_plural = "SMS Log"
-        
+
+
 class EmailLog(EmailLog):
 
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "Email Log"
+
 
 class AuditLog(AuditLog):
     user = models.ForeignKey(Consumer)
 
     class Meta:
-        app_label = "afterbuy"
+        app_label = _APP_NAME
         verbose_name_plural = "Audit Log"

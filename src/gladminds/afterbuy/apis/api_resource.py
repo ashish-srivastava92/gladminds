@@ -12,8 +12,8 @@ from gladminds.core import base_models as common
 from gladminds.core import utils
 from gladminds.gm import models as gm_common
 from gladminds.core.utils import mobile_format
-from gladminds.core.resource.authentication import AccessTokenAuthentication
-from gladminds.core.resource.base_resource import CustomBaseResource
+from gladminds.core.apis.base_resource import CustomBaseResource
+from gladminds.core.apis.user_apis import AccessTokenAuthentication
 
 logger = logging.getLogger("gladminds")
 
