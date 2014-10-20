@@ -17,7 +17,6 @@ from gladminds.core.resource.base_resource import CustomBaseResource
 
 logger = logging.getLogger("gladminds")
 
-'''Contains all the apis for AfterBuy App'''
 class AfterBuyResources(CustomBaseResource):
     class Meta:
 #         queryset = common.ProductData.objects.all()

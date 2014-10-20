@@ -256,6 +256,7 @@ INSTALLED_APPS = (
     'gladminds.core',
     'gladminds.bajaj',
     'gladminds.demo',
+    'gladminds.afterbuy',
     'djcelery',
     'corsheaders',
     'storages',
