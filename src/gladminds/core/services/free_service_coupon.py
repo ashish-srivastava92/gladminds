@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from authentication import AccessTokenAuthentication
+
 
 from django.conf.urls import url
 from django.core.exceptions import ObjectDoesNotExist
@@ -18,19 +18,22 @@ from tastypie.utils.urls import trailing_slash
 from tastypie import http
 from tastypie.exceptions import ImmediateHttpResponse
 
-from gladminds.core import smsparser, utils, audit, message_template as templates
+from gladminds.core.apis.user_apis import AccessTokenAuthentication
+from gladminds.core.managers import sms_parser, audit_manager
+from gladminds.bajaj.services import message_template as templates
 from gladminds.core import base_models as common
-from gladminds.core.sqs_tasks import send_registration_detail, send_service_detail, \
+from gladminds.core.cron_jobs.sqs_tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
-from gladminds.core.utils import mobile_format, format_message, get_task_queue, create_context
-from gladminds.core.feed import BaseFeed
+from gladminds.core.utils import mobile_format, format_message, get_task_queue, create_context, import_json
+from gladminds.bajaj.feeds.feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
-from gladminds.core.mail import send_feedback_received,send_servicedesk_feedback
+from gladminds.core.managers.mail import send_feedback_received,send_servicedesk_feedback
 from gladminds.gm.models import GladmindsUser
+from gladminds.core.apis.base_apis import CustomBaseResource
 
 logger = logging.getLogger('gladminds')
-json = utils.import_json()
+json = import_json()
 
 
 __all__ = ['GladmindsTaskManager']
@@ -481,7 +484,7 @@ class GladmindsResources(Resource):
 #########################AfterBuy Resources############################################
 
 
-class UserResources(GladmindsBaseResource):
+class UserResources(CustomBaseResource):
     products = fields.ListField()
     class Meta:
         queryset = GladmindsUser.objects.all()

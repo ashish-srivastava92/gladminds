@@ -8,7 +8,7 @@ from django.conf import settings
 
 from gladminds.core.utils import get_list_from_set
 from gladminds.core import base_models as common
-from gladminds.core.resource.resources import GladmindsResources
+from gladminds.core.services.free_service_coupon import GladmindsResources
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE
 from gladminds.managers import get_feedbacks, get_feedback,\
     get_servicedesk_users, save_update_feedback

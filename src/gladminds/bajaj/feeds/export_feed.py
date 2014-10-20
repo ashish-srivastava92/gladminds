@@ -1,7 +1,7 @@
 from suds.client import Client
 from suds.transport.http import HttpAuthenticated
-from gladminds.core.audit import feed_log
-from gladminds.core import base_models as common
+from gladminds.core.managers.audit_manager import feed_log
+from gladminds.core import base_models as models
 from django.conf import settings
 import logging
 logger = logging.getLogger("gladminds")
@@ -87,7 +87,7 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
                 logger.info("Response from SAP: {0}".format(result))
                 if result[0][0]['item'][0]['STATUS'] == 'SUCCESS':
                     try:
-                        temp_customer_object = common.CustomerTempRegistration.objects.get(temp_customer_id=item['CUSTOMER_ID'])
+                        temp_customer_object = models.CustomerTempRegistration.objects.get(temp_customer_id=item['CUSTOMER_ID'])
                         temp_customer_object.sent_to_sap = True
                         if result[2]:
                             temp_customer_object.remarks = result[2][0]['item'][0]['REMARKS']
