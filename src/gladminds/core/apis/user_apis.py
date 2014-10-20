@@ -7,7 +7,7 @@ from django.utils import timezone
 from tastypie.authentication import Authentication
 from provider.oauth2.models import AccessToken
 import logging
-from gladminds.core.apis.base_resource import CustomBaseResource
+from gladminds.core.apis.base_apis import CustomBaseResource
 from gladminds.gm.models import GladmindsUser
 
 

@@ -1,6 +1,9 @@
 from django.conf.urls import patterns, include, url
 from django.conf import settings
 from tastypie.api import Api
+
+from gladminds.core.cron_jobs.sqs_tasks import _tasks_map
+from gladminds.core.cron_jobs.taskqueue import SqsHandler
 from gladminds.afterbuy.apis import api_resource
 #from gladminds.apis import audit_api, preferences_apis, user_apis
 
