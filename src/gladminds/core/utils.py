@@ -7,15 +7,15 @@ from random import randint
 from django.utils import timezone
 from django.conf import settings
 from django.template import Context
-from gladminds.core.models import STATUS_CHOICES
 from gladminds.core import base_models
 from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
-from gladminds.core.taskqueue import SqsTaskQueue
-from gladminds.core.mail import send_ucn_request_alert
+from gladminds.core.managers.mail import send_ucn_request_alert
 from django.db.models.fields.files import FieldFile
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     TIME_FORMAT
+from gladminds.core.base_models import STATUS_CHOICES
+from gladminds.core.cron_jobs.taskqueue import SqsTaskQueue
 
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
