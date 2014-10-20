@@ -114,7 +114,7 @@ class UserMobileInfo(BaseModel):
 
 
 class ProductInsuranceInfo(BaseModel):
-    product = models.ForeignKey(UserProducts)
+    product = models.ForeignKey(UserProduct)
     agency_name =  models.CharField(max_length=100)
     policy_number = models.CharField(max_length=20, unique=True)
     premium = models.FloatField(min_value=0.0, null=True, blank=True)
@@ -133,7 +133,7 @@ class ProductInsuranceInfo(BaseModel):
 
 
 class ProductWarrantyInfo(BaseModel):
-    product = models.ForeignKey(UserProducts)
+    product = models.ForeignKey(UserProduct)
     issue_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank=True)
     policy_number = models.CharField(max_length=15, unique=True, blank=True)
@@ -146,7 +146,7 @@ class ProductWarrantyInfo(BaseModel):
         
 
 class PollutionCertificate(BaseModel):
-    product = models.ForeignKey(UserProducts)
+    product = models.ForeignKey(UserProduct)
     pucc_number = models.CharField()
     issue_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank= True)
@@ -157,7 +157,7 @@ class PollutionCertificate(BaseModel):
         verbose_name_plural = "Pollution Certificate"
 
 class RegistrationCertificate(BaseModel):
-    product = models.ForeignKey(UserProducts)
+    product = models.ForeignKey(UserProduct)
     vehicle_registration_number = models.CharField()
     registration_date = models.DateTimeField(null=True, blank=True)
     chassis_number = models.CharField()
@@ -176,7 +176,7 @@ class RegistrationCertificate(BaseModel):
         verbose_name_plural = "Registration Certificate"
     
 class License(BaseModel):
-    product = models.ForeignKey(UserProducts)
+    product = models.ForeignKey(UserProduct)
     license_number = models.CharField()
     issue_date = models.DateTimeField(null=True, blank=False)
     expiry_date = models.DateTimeField(null=True, blank= False)
@@ -186,6 +186,32 @@ class License(BaseModel):
     class Meta:
         app_label = "afterbuy"
         verbose_name_plural = "license"
+        
+class Invoice(BaseModel):
+    product = models.ForeignKey(UserProduct)
+    invoice_number = models.CharField()
+    purchase_date = models.DateTimeField(null=True, blank=False)
+    dealer_name = models.CharField()
+    dealer_contact = models.CharField(
+        max_length=25, blank=True, null=True)
+    amount = models.FloatField(min_value=0.0, null=True, blank= True)
+    image_url = models.CharField(max_length=215, null=True, blank=True)
+    
+    class Meta:
+        app_label = "afterbuy"
+        verbose_name_plural = "invoice"
+
+class Support (BaseModel):
+    product = models.ForeignKey(UserProduct)
+    toll_free = models.CharField(max_length=25, blank=True, null=True)
+    service_center_name = models.CharField(max_length=25, blank=True, null=True)
+    service_center_number =models.CharField(max_length=25, blank=True, null=True)
+    feedback_form = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        app_label = "afterbuy"
+        verbose_name_plural = "support"
+
         
 class MessageTemplate(MessageTemplate):
 
