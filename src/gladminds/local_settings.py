@@ -11,12 +11,14 @@ OUT_DIR = os.path.join(BASE_DIR, "out")
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'admin')
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gm',
         'USER': 'root',
-        'PASSWORD': 'gladminds',
+        'PASSWORD': DB_PASSWORD,
         'HOST': '127.0.0.1',
         'PORT': '3306',
     },
@@ -24,7 +26,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'bajaj',
         'USER': 'root',
-        'PASSWORD': 'gladminds',
+        'PASSWORD': DB_PASSWORD,
         'HOST': '127.0.0.1',
         'PORT': '3306',
     },
@@ -32,7 +34,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'demo',
         'USER': 'root',
-        'PASSWORD': 'gladminds',
+        'PASSWORD': DB_PASSWORD,
         'HOST': '127.0.0.1',
         'PORT': '3306',
     },
@@ -40,10 +42,10 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'afterbuy',
         'USER': 'root',
-        'PASSWORD': 'gladminds',
+        'PASSWORD': DB_PASSWORD,
         'HOST': '127.0.0.1',
         'PORT': '3306',
-    }         
+    }
 }
 
 
