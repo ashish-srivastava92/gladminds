@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from gladminds.core import base_models as common
+from gladminds.bajaj import models as common
 from gladminds.core.exceptions import DataNotFoundError
 from gladminds.core.utils import create_context, get_list_from_set,\
     get_start_and_end_date, set_wait_time
-from gladminds.core import mail
-from gladminds.core.sqs_tasks import send_sms
+from gladminds.core.managers import mail
+from gladminds.core.cron_jobs.sqs_tasks import send_sms
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     TIME_FORMAT
 

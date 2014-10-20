@@ -4,7 +4,7 @@ from django import template
 from django.conf import settings
 from django.db.models import get_app, get_models
 from django.http.response import HttpResponse
-from gladminds.aftersell.models import logs
+from gladminds.bajaj.models import AuditLog
 
 logger = logging.getLogger("gladminds")
 
@@ -28,7 +28,7 @@ def check_sms_errors(request):
         today = datetime.now()
         start_date = today - timedelta(hours=settings.SMS_HEALTH_CHECK_INTERVAL)
         end_date = today
-        audit_logs = logs.AuditLog.objects.filter(action='failure', date__range=(start_date, end_date))
+        audit_logs = AuditLog.objects.filter(action='failure', date__range=(start_date, end_date))
         if audit_logs:
             health_status = 'error'
             reason = 'On last {0} hours, {1} SMS Failed'.format(

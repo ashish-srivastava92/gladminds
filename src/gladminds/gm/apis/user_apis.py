@@ -1,5 +1,5 @@
 #########################AfterBuy Resources############################################
-from gladminds.core.resource.resources import GladmindsBaseResource
+from gladminds.core.apis.base_apis import CustomBaseResource
 from tastypie import fields, http
 from gladminds.gm.models import GladmindsUser, UserProduct
 from gladminds.core.resource.authentication import AccessTokenAuthentication
@@ -11,7 +11,7 @@ from django.http.response import HttpResponse, HttpResponseBadRequest
 
 
 
-class GladmindsUserResource(GladmindsBaseResource):
+class GladmindsUserResource(CustomBaseResource):
     products = fields.ListField()
     class Meta:
         queryset = GladmindsUser.objects.all()

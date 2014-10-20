@@ -1,13 +1,15 @@
 from django.db import models, transaction
-from gladminds.core import audit, utils, message_template as templates
-from gladminds.aftersell.models import logs
-from gladminds.core import base_models as common
 from datetime import datetime, timedelta
-from gladminds.core.models import CouponData, STATUS_CHOICES
 from django.utils import timezone
 from django.db.models import Q
-from gladminds.core.utils import COUPON_STATUS
 from django.conf import settings
+
+from gladminds.core.managers import audit_manager as audit
+from gladminds.core import utils
+from gladminds.bajaj.services import message_template as templates
+from gladminds.bajaj import models
+from gladminds.core.base_models import CouponData, STATUS_CHOICES
+from gladminds.core.utils import COUPON_STATUS
 
 AUDIT_ACTION = "SENT TO QUEUE"
 
@@ -37,7 +39,7 @@ def get_customers_to_send_reminder(*args, **kwargs):
 def get_customers_to_send_reminder_by_admin(*args, **kwargs):
     from gladminds.sqs_tasks import send_reminder_message
     today = datetime.now().date()
-    results = common.CouponData.objects.select_for_update().filter(schedule_reminder_date__day=today.day, schedule_reminder_date__month=today.month, schedule_reminder_date__year=today.year, status=1).select_related('vin', 'customer_phone_number__phone_number')
+    results = models.CouponData.objects.select_for_update().filter(schedule_reminder_date__day=today.day, schedule_reminder_date__month=today.month, schedule_reminder_date__year=today.year, status=1).select_related('vin', 'customer_phone_number__phone_number')
     for reminder in results:
         product = reminder.vin
         phone_number = product.customer_phone_number.phone_number
@@ -71,7 +73,7 @@ def expire_service_coupon(*args, **kwargs):
             
 def mark_feeback_to_closed(*args, **kwargs):
     fedback_closed_date = datetime.now()-timedelta(days=2)
-    common.Feedback.objects.filter(status = 'Resolved', resloved_date__lte = feedback_closed_date ).update(status = 'Closed', closed_date = datetime.now())
+    models.Feedback.objects.filter(status = 'Resolved', resloved_date__lte = feedback_closed_date ).update(status = 'Closed', closed_date = datetime.now())
 
 def import_data_from_sap(*args, **kwargs):
     pass
@@ -79,7 +81,7 @@ def import_data_from_sap(*args, **kwargs):
 def get_data_feed_log_detail(start_date=None, end_date=None):
     start_date = start_date
     end_date = end_date
-    feed_logs = logs.DataFeedLog.objects.filter(timestamp__range=(start_date, end_date))
+    feed_logs = models.DataFeedLog.objects.filter(timestamp__range=(start_date, end_date))
     feed_data = []
     for feed in feed_logs:
         data = {}
