@@ -43,27 +43,30 @@ class UserResources(CustomBaseResource):
         email_id = request.POST.get('email_id')
         name = request.POST.get('name')
         password = request.POST.get('password')
-        if not phone_number or not email_id or not name:
+        phone_number = mobile_format(phone_number)
+        if not phone_number or not email_id or not name or not password:
             return HttpBadRequest("phone_number, username and password required.")
         try:
-            customer_id = utils.generate_unique_customer_id()
-            phone_number = mobile_format(phone_number)
-            create_user = User.objects.create_user(customer_id,
-                                                    email_id, password)
-            create_user.save()
-            try:
-                afterbuy_common.Consumer.objects.get(
+            afterbuy_common.Consumer.objects.get(
                                                 phone_number=phone_number)
-                data = {'status': 0, 'message': 'already registered'}
-            except:
-                user_register = afterbuy_common.Consumer(user=create_user,
-                            phone_number=phone_number, consumer_id=customer_id)
-                user_register.save()
-                data = {'status': 1, 'message': 'succefully registerd'}
+            data = {'status': 0, 'message': 'phone number already registered'}
         except Exception as ex:
-            log_message = "unable to save details :{0}".format(ex)
-            logger.info(log_message)
-            data = {'status': 0, 'message': log_message}
+                try:
+                    create_user = User.objects.get(email=email_id)
+                    data = {'status': 0, 'message': 'email id already registered'}
+                    return HttpResponse(json.dumps(data), content_type="application/json")
+                except Exception as ex:
+                    log_message = "new user :{0}".format(ex)
+                    logger.info(log_message)
+                    customer_id = utils.generate_unique_customer_id()
+                    create_user = User.objects.create_user(customer_id,
+                                                        email_id, password)
+                    create_user.first_name = name
+                    create_user.save()
+                    user_register = afterbuy_common.Consumer(user=create_user,
+                                phone_number=phone_number, consumer_id=customer_id)
+                    user_register.save()
+                    data = {'status': 1, 'message': 'succefully registerd'}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def dispatch_dict(self, request, **kwargs):
@@ -156,7 +159,6 @@ class UserResources(CustomBaseResource):
 
     def get_user_details(self, request, **kwargs):
         customer_id = kwargs['user_id']
-        print kwargs
         cosumer_data = {}
         if not id:
             return HttpBadRequest("id is required.")
