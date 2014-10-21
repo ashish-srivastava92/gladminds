@@ -20,7 +20,7 @@ logger = logging.getLogger("gladminds")
 
 class ProductResources(CustomBaseResource):
     class Meta:
-        resource_name = 'product'
+        resource_name = 'products'
         authentication = AccessTokenAuthentication()
 
     def prepend_urls(self):
@@ -38,8 +38,6 @@ class ProductResources(CustomBaseResource):
             return self.get_product_insurance(request, **kwargs)
         if request.method == "POST":
             return self.save_product_insurance(request, **kwargs)
-        if request.method == "DELETE":
-            return self.delete_user_product_information(request, **kwargs)
 
     def get_product_insurance(self, request, **kwargs):
         resp = {}
