@@ -513,6 +513,7 @@ def brand_details(requests, role=None):
         data_dict['total_count'] = len(sa_data)
         for sa in sa_data[offset:limit]:
             sa_detail = {}
+            sa_detail = get_sa_details(sa_detail, sa )
             sa_detail['id'] = sa.service_advisor_id
             sa_detail['name'] = sa.name
             sa_detail['phone_number'] = sa.phone_number
@@ -582,3 +583,12 @@ def brand_details(requests, role=None):
                 return HttpResponse(json.dumps(filter_data_list))
     return HttpResponse(json.dumps(data_dict))
 
+
+def get_sa_details(sa_details, id):
+    sa_detail = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=id)[0]
+    sa_dealer_details = aftersell_common.RegisteredDealer.objects.get(id=sa_detail.dealer_id.id)
+    if sa_dealer_details.role == None:
+        sa_details['dealer'] = sa_dealer_details.dealer_id
+    else:
+        sa_details['asc'] = sa_dealer_details.dealer_id
+    return sa_details
