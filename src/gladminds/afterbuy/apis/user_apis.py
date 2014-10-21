@@ -117,8 +117,9 @@ class UserResources(CustomBaseResource):
 
     def authenticate_user_send_otp(self, request, **kwargs):
         phone_number = request.POST.get('phone_number')
-        if not phone_number:
-            return HttpBadRequest("email id is required")
+        email = request.POST.get('email',None)
+        if not phone_number or not email:
+            return HttpBadRequest("phone_number oe email is required")
         try:
             phone_number = phone_number
             logger.info('OTP request received. Mobile: {0}'.format(phone_number))
@@ -132,7 +133,7 @@ class UserResources(CustomBaseResource):
                 send_otp.delay(phone_number=phone_number, message=message)  # @UndefinedVariable
             logger.info('OTP sent to mobile {0}'.format(phone_number))
             #Send email if email address exist
-            if user.user.email:
+            if email:
                 sent_otp_email(data=token, receiver=user.email, subject='Your OTP')
                 data = {'status': 1, 'message': "OTP sent_successfully"}
         except Exception as ex:
@@ -149,8 +150,7 @@ class UserResources(CustomBaseResource):
             phone_number = phone_number
             consumer = afterbuy_common.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
             user = User.objects.get(id=consumer.user_id)
-            user.password = password
-            user.save()
+            user.set_password(password)
             data = {'status': 1, 'message': "password updated successfully"}
         except Exception as ex:
             logger.error('Invalid details, mobile {0}'.format(request.POST.get('phone_number', '')))
