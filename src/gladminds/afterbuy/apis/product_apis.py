@@ -14,18 +14,22 @@ from gladminds.afterbuy import models as afterbuy_common
 from gladminds.core.utils import mobile_format
 from gladminds.core.apis.user_apis import AccessTokenAuthentication
 from django.contrib.auth.models import User
-from gladminds.core.apis.base_apis import CustomBaseResource
+from gladminds.core.apis.base_apis import CustomBaseModelResource
+from gladminds.afterbuy.managers import get_product
 
 logger = logging.getLogger("gladminds")
 
-class ProductResources(CustomBaseResource):
+class ProductResources(CustomBaseModelResource):
     class Meta:
         resource_name = 'products'
+        queryset = afterbuy_common.UserProduct.objects.all() 
         authentication = AccessTokenAuthentication()
+        always_return_data = True
 
     def prepend_urls(self):
         return [
-                url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/insurance%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('dispatch_dict'), name="api_dispatch_dict"),
+                url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/insurance%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_insurance'), name="get_product_insurance"),
+                url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/insurance_save%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('save_product_insurance'), name="save_product_insurance"),
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/license%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_license'), name="get_product_license"),
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/registration%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_registration_certificate'), name="get_product_registration_certificate"),
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/pollution%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_pollution_certificate'), name="get_product_pollution_certificate"),
@@ -33,11 +37,6 @@ class ProductResources(CustomBaseResource):
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/invoice%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_invoice'), name="get_product_invoice")
         ]
         
-    def dispatch_dict(self, request, **kwargs):
-        if request.method == "GET":
-            return self.get_product_insurance(request, **kwargs)
-        if request.method == "POST":
-            return self.save_product_insurance(request, **kwargs)
 
     def get_product_insurance(self, request, **kwargs):
         resp = {}
@@ -45,8 +44,7 @@ class ProductResources(CustomBaseResource):
         product_id = kwargs.get('product_id')
         try:
             phone_number= mobile_format(mobile)
-            user_info = afterbuy_common.Consumer.objects.get(phone_number=phone_number)
-            product_info = afterbuy_common.UserProduct.objects.get(id=product_id,consumer=user_info)
+            product_info = get_product(phone_number, product_id)
             insurance_info = afterbuy_common.ProductInsuranceInfo.objects.get(product=product_info)
             for field in ['agency_name', 'policy_number', 'premium', 'agency_contact',
                            'insurance_type', 'nominee', 'issue_date', 'expiry_date', 'vehicle_value','image_url']:
@@ -64,8 +62,7 @@ class ProductResources(CustomBaseResource):
             return HttpBadRequest("phone_number is required.")
         try:
             phone_number= mobile_format(phone_number)
-            user_info = afterbuy_common.Consumer.objects.get(phone_number=phone_number)
-            product_info = afterbuy_common.UserProduct.objects.get(id=product_id, consumer=user_info)
+            product_info = get_product(phone_number, product_id)
             insurance_info = afterbuy_common.ProductInsuranceInfo(product=product_info)
             insurance_info.save()
             insurance_info.agency_name = request.POST.get('agency_name', None)
@@ -94,8 +91,7 @@ class ProductResources(CustomBaseResource):
         product_id = kwargs.get('product_id')
         try:
             phone_number= mobile_format(mobile)
-            user_info = afterbuy_common.Consumer.objects.get(phone_number=phone_number)
-            product_info = afterbuy_common.UserProduct.objects.get(id=product_id,consumer=user_info)
+            product_info = get_product(phone_number, product_id)
             license_info = afterbuy_common.License.objects.get(product=product_info)
             for field in ['license_number', 'issue_date', 'expiry_date', 'blood_group','image_url']:
                 resp[field] = getattr(license_info, field)
@@ -111,8 +107,7 @@ class ProductResources(CustomBaseResource):
         product_id = kwargs.get('product_id')
         try:
             phone_number= mobile_format(mobile)
-            user_info = afterbuy_common.Consumer.objects.get(phone_number=phone_number)
-            product_info = afterbuy_common.UserProduct.objects.get(id=product_id,consumer=user_info)
+            product_info = get_product(phone_number, product_id)
             registration_info = afterbuy_common.RegistrationCertificate.objects.get(product=product_info)
             for field in ['vehicle_registration_number', 'registration_date', 'chassis_number', 'owner_name', 'address', 'registration_upto', 'manufacturer', 'manufacturing_date', 'model_number', 'colour', 'image_url']:
                 resp[field] = getattr(registration_info, field)
@@ -128,8 +123,7 @@ class ProductResources(CustomBaseResource):
         product_id = kwargs.get('product_id')
         try:
             phone_number= mobile_format(mobile)
-            user_info = afterbuy_common.Consumer.objects.get(phone_number=phone_number)
-            product_info = afterbuy_common.UserProduct.objects.get(id=product_id,consumer=user_info)
+            product_info = get_product(phone_number, product_id)
             pollution_info = afterbuy_common.PollutionCertificate.objects.get(product=product_info)
             for field in ['pucc_number', 'issue_date', 'expiry_date', 'image_url']:
                 resp[field] = getattr(pollution_info, field)
@@ -145,8 +139,7 @@ class ProductResources(CustomBaseResource):
         product_id = kwargs.get('product_id')
         try:
             phone_number= mobile_format(mobile)
-            user_info = afterbuy_common.Consumer.objects.get(phone_number=phone_number)
-            product_info = afterbuy_common.UserProduct.objects.get(id=product_id,consumer=user_info)
+            product_info = get_product(phone_number, product_id)
             support_info = afterbuy_common.Support.objects.get(product=product_info)
             for field in ['toll_free', 'service_center_name', 'service_center_number', 'feedback_form']:
                 resp[field] = getattr(support_info, field)
@@ -162,8 +155,7 @@ class ProductResources(CustomBaseResource):
         product_id = kwargs.get('product_id')
         try:
             phone_number= mobile_format(mobile)
-            user_info = afterbuy_common.Consumer.objects.get(phone_number=phone_number)
-            product_info = afterbuy_common.UserProduct.objects.get(id=product_id,consumer=user_info)
+            product_info = get_product(phone_number, product_id)
             invoice_info = afterbuy_common.Invoice.objects.get(product=product_info)
             for field in ['invoice_number', 'purchase_date', 'dealer_name', 'dealer_contact', 'amount', 'image_url']:
                 resp[field] = getattr(invoice_info, field)
