@@ -1,49 +1,46 @@
 ''' Test Case for testing out the Afterbuy Api
 '''
 
-from integration.base_integration import GladmindsResourceTestCase
 from provider.oauth2.models import Client as auth_client
 from provider.oauth2.models import AccessToken
-
-from django.contrib.auth.models import User
+from django.utils import unittest
+from integration.test_brand_logic import Brand
+from integration.test_system_logic import System
 from django.test.client import Client
-from gladminds.models import common
-from gladminds.afterbuy.models import common as afterbuy_common
+from integration.base import BaseTestCase
+from django.test import TestCase
+
 import json
 client = Client()
-
-
-class TestAfterbuy(GladmindsResourceTestCase):
-
+ 
+ 
+class TestAfterbuy(BaseTestCase):
+ 
     def setUp(self):
-        super(TestAfterbuy, self).setUp()
+        TestCase.setUp(self)
+        BaseTestCase.setUp(self)
+        self.brand = Brand(self)
+        brand = self.brand
+        self.system = System(self)
+        system = self.system
         self.access_token = 'testaccesstoken'
-        user = User.objects.create_user(username='gladminds', email='gm@gm.com', password='gladminds')
+        self.create_user(username='gladminds', email='gm@gm.com', password='gladminds')
+        user = self.get_user_obj(username='gladminds')
         secret_cli = auth_client(user=user, name='client', client_type=1, url='')
         secret_cli.save()
         access = AccessToken(user=user, token=self.access_token, client=secret_cli)
-        access.save()        
-        user_info = common.GladMindUsers(phone_number='+9199999998')
-        user_info.save()
-        user_obj = common.GladMindUsers.objects.filter(phone_number='+9199999998')
-        testBrand = common.BrandData(brand_id='1', brand_name="test_brand")
-        testBrand.save()
-        brands = common.BrandData.objects.get(brand_name="test_brand")        
-        testProductType = common.ProductTypeData(brand_id=brands, product_name="Test", warranty_email="abc@def.com", warranty_phone="88888888")
-        testProductType.save()        
-        testProductType = common.ProductTypeData.objects.get(brand_id=brands)
-        product_infos = afterbuy_common.UserProducts(vin = 'MD2A57BZ4EWA05472',customer_phone_number=user_obj[0])
-        product_infos.save()
-        product_info = common.ProductData(vin = 'MD2A57BZ4EWA05472' , customer_phone_number=user_obj[0],product_type=testProductType)
-        product_info.save()
-        testProductInsuranceInfo = common.ProductInsuranceInfo(product=product_info, issue_date='2014-07-28', expiry_date='2014-07-28', insurance_phone='1111111111')
-        testProductInsuranceInfo.save()
-        testProductWarranty = common.ProductWarrantyInfo(product=product_info, issue_date='2014-07-28', expiry_date='2014-07-28')
-        testProductWarranty.save()
-        testSpareData = common.SparesData(spare_brand=brands,spare_name="test spare")
-        testSpareData.save()
-        
-        
+        access.save()
+        brand.send_dispatch_feed()
+        brand.send_purchase_feed()
+        '''This both feed will create product data, product type ,brand database'''
+        product_info = system.get_product_info(vin='XXXXXXXXXX')
+        brand_obj = system.get_brand_info(brand_id='bajaj')
+        #product data
+        system.create_and_get_product_insurance_info(product=product_info, issue_date='2014-07-28', expiry_date='2014-07-28', insurance_phone='1111111111', policy_number='12s33')
+        system.create_and_get_product_warranty_info(product=product_info, issue_date='2014-07-28', expiry_date='2014-07-28')
+        system.create_and_get_spare_data(spare_brand=brand_obj, spare_name="test spare")
+ 
+    @unittest.skip("skip the test")
     def test_create_new_user(self):
         '''
             Response of Api Status :
@@ -73,7 +70,8 @@ class TestAfterbuy(GladmindsResourceTestCase):
         }
         response = client.post('/afterbuy/', data=data)
         self.assertEqual(response.status_code, 200)
-        
+
+    @unittest.skip("skip the test")
     def test_check_login(self):
         self.test_create_new_user()
         data = { 
@@ -84,97 +82,100 @@ class TestAfterbuy(GladmindsResourceTestCase):
         response = client.post(
             '/afterbuy/', data=data)
         self.assertEqual(response.status_code, 200)
-        
+
     def test_product_details(self):
-        response = client.get('/afterbuy/', data={'action': 'getProducts'})
-        self.assertEqual(response.status_code, 200)
+        create_mock_data = {'action': 'getProducts'}
+        get_response = client.get('/afterbuy/', data=create_mock_data)
+        self.assert_successful_http_response(get_response)
 
     def test_create_item(self):
-        response = client.get('/afterbuy/', data={'action': 'addingItem'})
-        self.assertEqual(response.status_code, 200)
-        
+        create_mock_data = {'action': 'addingItem'}
+        get_response = client.get('/afterbuy/', data=create_mock_data)
+        self.assert_successful_http_response(get_response)
+
     def test_generating_OTP(self):
-        data = {"mobile":"99999999"}
-        response = client.post("/afterbuy/otp/generate/", data=data)
-        deserialize_resp = self.deserialize(response)
+        create_mock_data = {"mobile":"99999999"}
+        get_response = client.post("/afterbuy/otp/generate/", data=create_mock_data)
+        deserialize_resp = self.deserialize(get_response)
         self.assertEqual('OTP sent to mobile 99999999', deserialize_resp['message'])
-        self.assertEqual(200, response.status_code)
-        
+        self.assert_successful_http_response(get_response)
+
     def test_notification_count_of_user(self):
-        data = {"mobile":"99999999"}
-        resp = client.post("/afterbuy/otp/generate/", data=data)
-        response = client.get('/v1/afterbuy/notification/count/?mobile=99999999')
-        resp_content = json.loads(response.content)
+        create_mock_data = {"mobile":"99999999"}
+        resp = client.post("/afterbuy/otp/generate/", data=create_mock_data)
+        get_response = client.get('/v1/afterbuy/notification/count/?mobile=99999999')
+        resp_content = json.loads(get_response.content)
         self.assertEqual(resp_content['count'], 0)
-        self.assertEqual(response.status_code, 200)
+        self.assert_successful_http_response(get_response)
 
     def test_notification_list_of_user(self):
-        data = {"mobile":"99999999"}
-        resp = client.post("/afterbuy/otp/generate/", data=data)
-        response = client.get('/v1/afterbuy/notification/list/?mobile=99999999')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, "No notification exists.")
-           
+        create_mock_data = {"mobile":"99999999"}
+        resp = client.post("/afterbuy/otp/generate/", data=create_mock_data)
+        get_response = client.get('/v1/afterbuy/notification/list/?mobile=99999999')
+        self.assert_successful_http_response(get_response)
+        self.assertEqual(get_response.content, "No notification exists.")
+
     def test_get_product_insurance(self):
-        response = client.get('/v1/afterbuy/product/insurance/?vin=MD2A57BZ4EWA05472')
-        self.assertEqual(response.status_code, 200)
-        response = client.get('/v1/afterbuy/product/insurance/?vin=')
-        self.assertEqual(response.status_code, 400)
-    
+        get_response = client.get('/v1/afterbuy/product/insurance/?vin=XXXXXXXXXX')
+        self.assert_successful_http_response(get_response)
+        get_response = client.get('/v1/afterbuy/product/insurance/?vin=')
+        self.assertEqual(get_response.status_code, 400)
+
     def test_get_product_warranty(self):
-        response = client.get('/v1/afterbuy/product/warranty/?vin=MD2A57BZ4EWA05472')
-        self.assertEqual(response.status_code, 200)
-        response = client.get('/v1/afterbuy/product/warranty/?vin=')
-        self.assertEqual(response.status_code,400)
+        get_response = client.get('/v1/afterbuy/product/warranty/?vin=XXXXXXXXXX')
+        self.assert_successful_http_response(get_response)
+        get_response = client.get('/v1/afterbuy/product/warranty/?vin=')
+        self.assertEqual(get_response.status_code,400)
 
     def test_get_spares_list(self):
-        response = client.get('/v1/afterbuy/product/spares/?vin=MD2A57BZ4EWA05472')
-        self.assertEqual(response.status_code, 200)
-        response = client.get('/v1/afterbuy/product/spares/?vin=')
-        self.assertEqual(response.status_code,400)
-        
+        get_response = client.get('/v1/afterbuy/product/spares/?vin=XXXXXXXXXX')
+        self.assert_successful_http_response(get_response)
+        get_response = client.get('/v1/afterbuy/product/spares/?vin=')
+        self.assertEqual(get_response.status_code,400)
+
     def test_save_user_details(self):
-        data = {"mobile":"99999998","name":"xyz","email":"xyz@gmail.com","gender":"m","address":"a-302 om complex"
+        create_mock_data = {"mobile":"666666","name":"xyz","email":"xyz@gmail.com","gender":"m","address":"a-302 om complex"
                 ,"size":"1","pincode":"320037"}
-        response = client.post("/v1/afterbuy/user/save/", data=data)
-        deserialize_resp = self.deserialize(response)
+        get_response = client.post("/v1/afterbuy/user/save/", data=create_mock_data)
+        deserialize_resp = self.deserialize(get_response)
         self.assertEqual('details saved', deserialize_resp['message'])
-        self.assertEqual(200, response.status_code) 
-           
+        self.assert_successful_http_response(get_response)
+
     def test_save_user_feedback(self):
-        data = {"mobile":"99999998", "message":"dummy message"}
-        response = client.post("/v1/afterbuy/user/feedback/", data=data)
-        deserialize_resp = self.deserialize(response)
+        create_mock_data = {"mobile":"99999998", "message":"dummy message"}
+        get_response = client.post("/v1/afterbuy/user/feedback/", data=create_mock_data)
+        deserialize_resp = self.deserialize(get_response)
         self.assertEqual('saved successfully', deserialize_resp['message'])
-        self.assertEqual(200, response.status_code)  
+        self.assert_successful_http_response(get_response)
 
     def test_get_product_coupons(self):
-        response = client.get('/v1/afterbuy/product/coupons/', data={'vin': 'MD2A57BZ4EWA05472'})
-        self.assertEqual(response.status_code, 200)  
-     
+        create_mock_data = {'vin': 'XXXXXXXXXX'}
+        get_response = client.get('/v1/afterbuy/product/coupons/', data=create_mock_data)
+        self.assert_successful_http_response(get_response)
+
     def test_get_product_purchase_information(self):
-        response = client.get('/v1/afterbuy/product/purchase-info/', data={'vin': 'MD2A57BZ4EWA05472'})
-        self.assertEqual(response.status_code, 200)  
-               
+        get_response = client.get('/v1/afterbuy/product/purchase-info/', data={'vin': 'XXXXXXXXXX'})
+        self.assert_successful_http_response(get_response)
+
     def test_save_user_phone_details(self):
-        data = {"mobile":"99999998", "IMEI":"123e4","ICCID":"12ef", "phone_name":"9727071081",
+        create_mock_data = {"mobile":"666666", "IMEI":"123e4","ICCID":"12ef", "phone_name":"9727071081",
                  "serial_number":"123eee", "capacity":"2", "os":"dummyos","version":"11", "Model":"reb" }
-        response = client.post("/v1/afterbuy/phone-details/", data=data)
-        deserialize_resp = self.deserialize(response)
+        get_response = client.post("/v1/afterbuy/phone-details/", data=create_mock_data)
+        deserialize_resp = self.deserialize(get_response)
         self.assertEqual('details saved', deserialize_resp[0]['message'])
-        self.assertEqual(200, response.status_code)
-        
+        self.assert_successful_http_response(get_response)
+
     def test_post_dispatch_dict(self):
-        data={"mobile":"99999998","vin":"MD2A57BZ4EWA05472"}
-        response = client.post('/v1/afterbuy/product/info/', data=data)
-        self.assertEqual(response.status_code, 200) 
-        
+        create_mock_data = {"mobile":"99999998","vin":"XXXXXXXXXX"}
+        get_response = client.post('/v1/afterbuy/product/info/', data=create_mock_data)
+        self.assert_successful_http_response(get_response) 
+
     def test_get_dispatch_dict(self):
-        data={"mobile":"99999998"}
-        response = client.get('/v1/afterbuy/product/info/', data=data)
-        self.assertEqual(response.status_code, 200)                             
-             
+        create_mock_data = {"mobile":"666666"}
+        get_response = client.get('/v1/afterbuy/product/info/', data=create_mock_data)
+        self.assert_successful_http_response(get_response)
+
     def test_delete_dispatch_dict(self):
-        url = '/v1/afterbuy/product/info/?mobile=99999998&vin=MD2A57BZ4EWA05472' 
-        response = client.delete(url)
-        self.assertEqual(response.status_code, 200)                       
+        url = '/v1/afterbuy/product/info/?mobile=99999998&vin=XXXXXXXXXX'
+        get_response = client.delete(url)
+        self.assert_successful_http_response(get_response)

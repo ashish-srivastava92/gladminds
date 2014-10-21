@@ -119,7 +119,7 @@ def insurance_extend(data=None, receiver=None, subject=None):
         template = Template(item)
         context = Context({"user": data})
         body = template.render(context)
-        mail.send_email(sender=data['email_id'], receiver=receiver,
+        send_email(sender=data['email_id'], receiver=receiver,
                         subject=subject, body=body,
                         smtp_server=settings.MAIL_SERVER)
     except Exception as ex:

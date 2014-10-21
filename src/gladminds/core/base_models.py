@@ -215,16 +215,6 @@ class UCNRecovery(BaseModel):
         abstract = True
         verbose_name_plural = "UCN recovery logs"
 
-####################################################################
-########################TOTP Details################################
-
-class OTPToken(BaseModel):
-    token = models.CharField(max_length=256)
-    request_date = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        abstract = True
-        verbose_name_plural = "OTPs"
 
 ##################################################################
 ####################Message Template DB Storage###################

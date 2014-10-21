@@ -45,10 +45,10 @@ class ProductResources(CustomBaseModelResource):
 
     def get_product_insurance(self, request, **kwargs):
         resp = {}
-        mobile = request.GET.get('phone_number')
+        phone_number = request.GET.get('phone_number')
         product_id = kwargs.get('product_id')
         try:
-            phone_number= mobile_format(mobile)
+            phone_number= mobile_format(phone_number)
             product_info = get_product(phone_number, product_id)
             insurance_info = afterbuy_common.ProductInsuranceInfo.objects.get(product=product_info)
             for field in ['agency_name', 'policy_number', 'premium', 'agency_contact',
@@ -91,10 +91,10 @@ class ProductResources(CustomBaseModelResource):
         
     def get_product_license(self, request, **kwargs):
         resp = {}
-        mobile = request.GET.get('phone_number')
+        phone_number = request.GET.get('phone_number')
         product_id = kwargs.get('product_id')
         try:
-            phone_number= mobile_format(mobile)
+            phone_number= mobile_format(phone_number)
             product_info = get_product(phone_number, product_id)
             license_info = afterbuy_common.License.objects.get(product=product_info)
             for field in ['license_number', 'issue_date', 'expiry_date', 'blood_group','image_url']:
@@ -130,10 +130,10 @@ class ProductResources(CustomBaseModelResource):
     
     def get_product_registration_certificate(self, request, **kwargs):
         resp = {}
-        mobile = request.GET.get('phone_number')
+        phone_number = request.GET.get('phone_number')
         product_id = kwargs.get('product_id')
         try:
-            phone_number= mobile_format(mobile)
+            phone_number= mobile_format(phone_number)
             product_info = get_product(phone_number, product_id)
             registration_info = afterbuy_common.RegistrationCertificate.objects.get(product=product_info)
             for field in ['vehicle_registration_number', 'registration_date', 'chassis_number', 'owner_name', 'address', 'registration_upto', 'manufacturer', 'manufacturing_date', 'model_number', 'colour', 'image_url']:
@@ -175,10 +175,10 @@ class ProductResources(CustomBaseModelResource):
   
     def get_product_pollution_certificate(self, request, **kwargs):
         resp = {}
-        mobile = request.GET.get('phone_number')
+        phone_number = request.GET.get('phone_number')
         product_id = kwargs.get('product_id')
         try:
-            phone_number= mobile_format(mobile)
+            phone_number= mobile_format(phone_number)
             product_info = get_product(phone_number, product_id)
             pollution_info = afterbuy_common.PollutionCertificate.objects.get(product=product_info)
             for field in ['pucc_number', 'issue_date', 'expiry_date', 'image_url']:
@@ -214,10 +214,10 @@ class ProductResources(CustomBaseModelResource):
   
     def get_product_support(self, request, **kwargs):
         resp = {}
-        mobile = request.GET.get('phone_number')
+        phone_number = request.GET.get('phone_number')
         product_id = kwargs.get('product_id')
         try:
-            phone_number= mobile_format(mobile)
+            phone_number= mobile_format(phone_number)
             product_info = get_product(phone_number, product_id)
             support_info = afterbuy_common.Support.objects.get(product=product_info)
             for field in ['toll_free', 'service_center_name', 'service_center_number', 'feedback_form']:
@@ -252,10 +252,10 @@ class ProductResources(CustomBaseModelResource):
 
     def get_product_invoice(self, request, **kwargs):
         resp = {}
-        mobile = request.GET.get('phone_number')
+        phone_number = request.GET.get('phone_number')
         product_id = kwargs.get('product_id')
         try:
-            phone_number= mobile_format(mobile)
+            phone_number= mobile_format(phone_number)
             product_info = get_product(phone_number, product_id)
             invoice_info = afterbuy_common.Invoice.objects.get(product=product_info)
             for field in ['invoice_number', 'purchase_date', 'dealer_name', 'dealer_contact', 'amount', 'image_url']:
@@ -290,3 +290,4 @@ class ProductResources(CustomBaseModelResource):
             data={'status':0, 'message':log_message}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
+    

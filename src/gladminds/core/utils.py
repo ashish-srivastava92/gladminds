@@ -7,6 +7,7 @@ from random import randint
 from django.utils import timezone
 from django.conf import settings
 from django.template import Context
+from gladminds.core import base_models
 from django_otp.oath import TOTP
 
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
@@ -388,3 +389,5 @@ def make_tls_property(default=None):
         value = property(_get_value, _set_value)
 
     return TLSProperty()
+
+
