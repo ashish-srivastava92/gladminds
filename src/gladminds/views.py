@@ -587,7 +587,6 @@ def brand_details(requests, role=None):
 def get_sa_details(sa_details, id):
     sa_detail = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=id)[0]
     sa_dealer_details = aftersell_common.RegisteredDealer.objects.get(id=sa_detail.dealer_id.id)
-    print sa_dealer_details.role
     if sa_dealer_details.role == None:
         sa_details['dealer'] = sa_dealer_details.dealer_id
     else:
