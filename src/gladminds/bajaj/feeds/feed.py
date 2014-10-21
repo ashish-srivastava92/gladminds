@@ -160,21 +160,10 @@ class BaseFeed(object):
 class BrandProductTypeFeed(BaseFeed):
 
     def import_data(self):
-        for brand in self.data_source:
+        for product in self.data_source:
             try:
-                brand_data = models.BrandData.objects.get(
-                    brand_id=brand['brand_id'])
-            except ObjectDoesNotExist as odne:
-                logger.info(
-                    "[Exception: BrandProductTypeFeed_brand_data]: {0}"
-                    .format(odne))
-                brand_data = models.BrandData(
-                    brand_id=brand['brand_id'], brand_name=brand['brand_name'])
-                brand_data.save()
-
-            try:
-                product_type = models.ProductTypeData(brand_id=brand_data, product_name=brand[
-                                                      'product_name'], product_type=brand['product_type'])
+                product_type = models.ProductType(product_name=product[
+                                                      'product_name'], product_type=product['product_type'])
                 product_type.save()
             except Exception as ex:
                 logger.info(
@@ -263,10 +252,10 @@ class ProductDispatchFeed(BaseFeed):
         for product in self.data_source:
             try:
                 product_data = models.ProductData.objects.get(
-                    vin=product['vin'])
-            except ObjectDoesNotExist as odne:
+                    product_id=product['vin'])
+            except ObjectDoesNotExist as done:
                 logger.info(
-                    '[Info: ProductDispatchFeed_product_data]: {0}'.format(odne))
+                    '[Info: ProductDispatchFeed_product_data]: {0}'.format(done))
                 try:
                     try:
                         dealer_data = models.Dealer.objects.get(
@@ -278,11 +267,11 @@ class ProductDispatchFeed(BaseFeed):
                         dealer_data.save()
                     self.get_or_create_product_type(
                         product_type=product['product_type'])
-                    producttype_data = models.ProductTypeData.objects.get(
+                    producttype_data = models.ProductType.objects.get(
                         product_type=product['product_type'])
                     invoice_date = product['invoice_date']
                     product_data = models.ProductData(
-                        vin=product['vin'], product_type=producttype_data, invoice_date=invoice_date, dealer_id=dealer_data)
+                        product_id=product['vin'], product_type=producttype_data, invoice_date=invoice_date, dealer_id=dealer_data)
                     product_data.save()
                     logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN - {0}'.format(product['vin'], product['unique_service_coupon']))
                 except Exception as ex:
@@ -292,24 +281,23 @@ class ProductDispatchFeed(BaseFeed):
                     self.feed_remark.fail_remarks(ex)
                     logger.error(ex)
                     continue
-
             try:
                 if not product['unique_service_coupon']:
                     continue
                 valid_coupon = models.CouponData.objects.filter(unique_service_coupon=product['unique_service_coupon'])
-                service_type_exists = models.CouponData.objects.filter(vin__vin=product['vin'], service_type=str(product['service_type']))
+                service_type_exists = models.CouponData.objects.filter(product__product_id=product['vin'], service_type=str(product['service_type']))
                 if service_type_exists and not valid_coupon:
                     logger.error('VIN already has coupon of this service type {0} VIN - {1}'.format(product['vin'], product['unique_service_coupon']))
                     raise ValueError()
                 elif not valid_coupon:
                     coupon_data = models.CouponData(unique_service_coupon=product['unique_service_coupon'],
-                            vin=product_data, valid_days=product['valid_days'],
+                            product=product_data, valid_days=product['valid_days'],
                             valid_kms=product['valid_kms'], service_type=product['service_type'],
                             status=product['coupon_status'])
                     coupon_data.save()
                     logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN - {0} UCN - {1}'.format(product['vin'], product['unique_service_coupon']))
                     
-                elif valid_coupon[0].vin.vin == product['vin'] and str(valid_coupon[0].service_type) == str(product['service_type']):
+                elif valid_coupon[0].product.product_id == product['vin'] and str(valid_coupon[0].service_type) == str(product['service_type']):
                     logger.info('UCN is already saved in database. VIN - {0} UCN - {1}'.format(product['vin'], product['unique_service_coupon']))
                     continue
                 else:
@@ -326,8 +314,6 @@ class ProductDispatchFeed(BaseFeed):
 
     def get_or_create_product_type(self, product_type=None):
         brand_list = [{
-            'brand_id': 'bajaj',
-            'brand_name': 'bajaj',
             'product_type': product_type,
             'product_name': product_type,
         }]

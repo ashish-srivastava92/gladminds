@@ -25,7 +25,7 @@ logger = logging.getLogger("gladminds")
 
 
 pattern = r'(\d{4})-(\d{2})-(\d{2})(\d{2})(\d{2})(\d{2})'
-tns = "http://api.gladmindsplatform.co/api/v1/feed/"
+tns = "http://api.gladmindsplatform.co/api/v1/bajaj/feed/"
 SUCCESS = "SUCCESS"
 FAILED = "FAILURE"
 
@@ -308,7 +308,6 @@ class ProductDispatchService(ServiceBase):
                 feed_remark.fail_remarks(ex)
                 logger.error("ProductDispatchService: {0} Object List is {1}"
                              .format(ex, product))
-
         feed_remark = save_to_db(feed_type='dispatch', data_source=product_dispatch_list, feed_remark=feed_remark)
         feed_remark.save_to_feed_log()
         return get_response(feed_remark)
