@@ -10,8 +10,9 @@ api_v1 = Api(api_name="v1")
 # api_v1.register(user_apis.GladMindUserResources())
 
 urlpatterns = patterns('',
-    url(r'^', include(core_urls)),
+   
     url(r'^site-info/$', 'gladminds.bajaj.views.site_info', name='site_info'),
-    url(r'^', include(brand_admin.urls)),
-    (r'', include(api_v1.urls))
+    url(r'', include(brand_admin.urls)),
+    url(r'', include(core_urls)),
+    url(r'', include(api_v1.urls))
 )

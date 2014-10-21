@@ -8,5 +8,6 @@ api_v1.register(product_apis.ProductResources())
 
 
 urlpatterns = patterns('',
-    (r'', include(api_v1.urls))
+    (r'', include(api_v1.urls)),
+    url(r'^', include(brand_admin.urls))
 )
