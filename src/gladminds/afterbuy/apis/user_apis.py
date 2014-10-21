@@ -1,14 +1,12 @@
 import json
 import logging
 from django.forms.models import model_to_dict
-from django.views.decorators.csrf import csrf_exempt
 from django.http.response import HttpResponse
 from django.conf.urls import url
 from tastypie.http import HttpBadRequest
-from tastypie.resources import ModelResource
 from tastypie.utils.urls import trailing_slash
 from django.contrib.auth.models import User
-from gladminds.core import base_models as common
+from django.contrib.auth import  login
 from gladminds.core import utils
 from gladminds.afterbuy import utils as afterbuy_utils
 from gladminds.afterbuy import models as afterbuy_common
@@ -19,8 +17,10 @@ from gladminds.bajaj.services import message_template
 from gladminds.core.managers.mail import sent_otp_email
 from gladminds.core.apis.base_apis import CustomBaseResource
 from gladminds.core.utils import mobile_format, get_task_queue
+from django.contrib.auth import authenticate
 
 logger = logging.getLogger("gladminds")
+
 
 class UserResources(CustomBaseResource):
     class Meta:
@@ -36,6 +36,7 @@ class UserResources(CustomBaseResource):
             url(r"^(?P<resource_name>%s)/forgot-password%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('change_user_password'), name="change_user_password"),
             url(r"^(?P<resource_name>%s)/details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_user_details'), name="get_user_details"),
             url(r"^(?P<resource_name>%s)/product/info%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('dispatch_dict'), name="api_dispatch_dict"),
+            url(r"^(?P<resource_name>%s)/login%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('auth_login'), name="auth_login"),
         ]
 
     def save_user_details(self, request, **kwargs):
@@ -46,14 +47,14 @@ class UserResources(CustomBaseResource):
         if not phone_number or not email_id or not name:
             return HttpBadRequest("phone_number, username and password required.")
         try:
+            customer_id = utils.generate_unique_customer_id()
             phone_number = mobile_format(phone_number)
-            create_user = User(username=name, password=password, email=email_id)
+            create_user = User.objects.create_user(customer_id,email_id,password)
             create_user.save()
             try:
                 user_details = afterbuy_common.Consumer.objects.get(phone_number=phone_number)
                 data = {'status': 0, 'message': 'already registered'}
             except:
-                customer_id = utils.generate_unique_customer_id()
                 user_register = afterbuy_common.Consumer(user=create_user, phone_number=phone_number, consumer_id=customer_id)
                 user_register.save()
                 data = {'status': 1, 'message': 'succefully registerd'}
@@ -168,3 +169,25 @@ class UserResources(CustomBaseResource):
             logger.info("[Exception get_user_product_information]:{0}".format(ex))
             return HttpBadRequest("Not a registered number")
         return HttpResponse(json.dumps(cosumer_data), content_type="application/json")
+
+    def auth_login(self, request, **kwargs):
+        phone_number = request.POST.get('phone_number')
+        password = request.POST.get('password')
+        if not phone_number or not password:
+            return HttpBadRequest("Phone Number and password  required.")
+        phone_number = request.POST['phone_number']
+        password = request.POST['phone_number']
+        try:
+            consumer_obj = afterbuy_common.Consumer.objects.get(phone_number=mobile_format(phone_number))
+            password = request.POST['password']
+            user = authenticate(username=consumer_obj.consumer_id, password=password)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    data = {'status': 1, 'message': "login successfully"}
+            else:
+                data = {'status': 0, 'message': "login unsuccessfully"}
+        except Exception as ex:
+                data = {'status': 0, 'message': "login unsuccessfully"}
+                logger.info("[Exception get_user_login_information]:{0}".format(ex))
+        return HttpResponse(json.dumps(data), content_type="application/json")
