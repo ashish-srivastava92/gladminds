@@ -24,18 +24,17 @@ logger = logging.getLogger("gladminds")
 
 class UserResources(CustomBaseResource):
     class Meta:
-#         queryset = common.ProductData.objects.all()
         resource_name = 'user'
         authentication = AccessTokenAuthentication()
 
     def prepend_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/registration%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('save_user_details'), name="save_user_details"),
-            url(r"^(?P<resource_name>%s)/authenticate/email-id%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('authenticate_user_email_id'), name="authenticate_user_email_id"),
-            url(r"^(?P<resource_name>%s)/send-opt%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('authenticate_user_send_otp'), name="authenticate_user_send_otp"),
+            url(r"^(?P<resource_name>%s)/authenticate-email%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('authenticate_user_email_id'), name="authenticate_user_email_id"),
+            url(r"^(?P<resource_name>%s)/send-otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('authenticate_user_send_otp'), name="authenticate_user_send_otp"),
             url(r"^(?P<resource_name>%s)/forgot-password%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('change_user_password'), name="change_user_password"),
-            url(r"^(?P<resource_name>%s)/details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_user_details'), name="get_user_details"),
-            url(r"^(?P<resource_name>%s)/product/info%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('dispatch_dict'), name="api_dispatch_dict"),
+            url(r"^(?P<resource_name>%s)/(?P<user_id>\d+)/details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_user_details'), name="get_user_details"),
+            url(r"^(?P<resource_name>%s)/(?P<user_id>\d+)/products%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('dispatch_dict'), name="api_dispatch_dict"),
             url(r"^(?P<resource_name>%s)/login%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('auth_login'), name="auth_login"),
         ]
 
@@ -49,13 +48,16 @@ class UserResources(CustomBaseResource):
         try:
             customer_id = utils.generate_unique_customer_id()
             phone_number = mobile_format(phone_number)
-            create_user = User.objects.create_user(customer_id,email_id,password)
+            create_user = User.objects.create_user(customer_id,
+                                                    email_id, password)
             create_user.save()
             try:
-                user_details = afterbuy_common.Consumer.objects.get(phone_number=phone_number)
+                afterbuy_common.Consumer.objects.get(
+                                                phone_number=phone_number)
                 data = {'status': 0, 'message': 'already registered'}
             except:
-                user_register = afterbuy_common.Consumer(user=create_user, phone_number=phone_number, consumer_id=customer_id)
+                user_register = afterbuy_common.Consumer(user=create_user,
+                            phone_number=phone_number, consumer_id=customer_id)
                 user_register.save()
                 data = {'status': 1, 'message': 'succefully registerd'}
         except Exception as ex:
@@ -72,21 +74,25 @@ class UserResources(CustomBaseResource):
         '''This API fetches all the information of the products own
         by a particular user whose mobile is provided in the request '''
         resp = []
-        mobile = request.GET.get('phone_number')
-        if not mobile:
-            return HttpBadRequest("Phone Number is required.")
+        customer_id = kwargs['user_id']
+        customer_id = int(customer_id)
+        if not id:
+            return HttpBadRequest("user_id is required.")
         try:
-            phone_number = mobile_format(mobile)
-            user_info = afterbuy_common.Consumer.objects.get(phone_number=phone_number)
-            product_info = afterbuy_common.UserProduct.objects.filter(consumer=user_info)
+            user_info = afterbuy_common.Consumer.objects.get(
+                                user__id=customer_id)
+            product_info = afterbuy_common.UserProduct.objects.filter(
+                                    consumer=user_info)
             if not product_info:
                 data = {'status': 0, 'message': "No product exist."}
-                return HttpResponse(json.dumps(data), content_type="application/json")
+                return HttpResponse(json.dumps(data),
+                                    content_type="application/json")
             else:
                 for product_object in map(model_to_dict, product_info):
                     resp.append(utils.get_dict_from_object(product_object))
         except Exception as ex:
-            logger.info("[Exception get_user_product_information]:{0}".format(ex))
+            logger.info("[Exception get_user_product_information]:{0}".
+                        format(ex))
             return HttpBadRequest("Not a registered number")
         return HttpResponse(json.dumps(resp))
 
@@ -149,12 +155,15 @@ class UserResources(CustomBaseResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def get_user_details(self, request, **kwargs):
-        mobile = request.GET.get('phone_number')
+        customer_id = kwargs['user_id']
+        print kwargs
         cosumer_data = {}
-        if not mobile:
-            return HttpBadRequest("Phone Number is required.")
+        if not id:
+            return HttpBadRequest("id is required.")
         try:
-            consumer_obj = afterbuy_common.Consumer.objects.filter(phone_number=mobile_format(mobile))[0]
+            customer_id = int(customer_id)
+            consumer_obj = afterbuy_common.Consumer.objects.get(
+                                                        user__id=customer_id)
             cosumer_data['username'] = consumer_obj.user.username
             cosumer_data['email'] = consumer_obj.user.email
             cosumer_data['phone_number'] = consumer_obj.phone_number
@@ -167,7 +176,7 @@ class UserResources(CustomBaseResource):
             cosumer_data['tshirt_size'] = consumer_obj.tshirt_size
         except Exception as ex:
             logger.info("[Exception get_user_product_information]:{0}".format(ex))
-            return HttpBadRequest("Not a registered number")
+            return HttpBadRequest("Not a registered user")
         return HttpResponse(json.dumps(cosumer_data), content_type="application/json")
 
     def auth_login(self, request, **kwargs):
@@ -178,9 +187,11 @@ class UserResources(CustomBaseResource):
         phone_number = request.POST['phone_number']
         password = request.POST['phone_number']
         try:
-            consumer_obj = afterbuy_common.Consumer.objects.get(phone_number=mobile_format(phone_number))
+            consumer_obj = afterbuy_common.Consumer.objects.get(phone_number
+                                             =mobile_format(phone_number))
             password = request.POST['password']
-            user = authenticate(username=consumer_obj.consumer_id, password=password)
+            user = authenticate(username=consumer_obj.consumer_id,
+                                password=password)
             if user is not None:
                 if user.is_active:
                     login(request, user)
@@ -189,5 +200,6 @@ class UserResources(CustomBaseResource):
                 data = {'status': 0, 'message': "login unsuccessfully"}
         except Exception as ex:
                 data = {'status': 0, 'message': "login unsuccessfully"}
-                logger.info("[Exception get_user_login_information]:{0}".format(ex))
+                logger.info("[Exception get_user_login_information]:{0}".
+                            format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
