@@ -13,18 +13,39 @@ from gladminds.afterbuy import models as afterbuy_common
 
 from gladminds.core.apis.user_apis import AccessTokenAuthentication
 from gladminds import settings
+from tastypie import fields
 from gladminds.bajaj.services import message_template
 from gladminds.core.managers.mail import sent_otp_email
-from gladminds.core.apis.base_apis import CustomBaseResource
+from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.utils import mobile_format, get_task_queue
 from django.contrib.auth import authenticate
+from tastypie.resources import  ALL, ModelResource
+from tastypie.authorization import Authorization
 
 logger = logging.getLogger("gladminds")
 
 
-class UserResources(CustomBaseResource):
+class DjangoUserResources(ModelResource):
     class Meta:
+        queryset = User.objects.all()
+        resource_name = 'django'
+        excludes = ['email', 'password', 'is_active', 'is_staff', 'is_superuser']
+        authorization = Authorization()
+        detail_allowed_methods = ['get']
+        always_return_data = True
+        filtering = {
+            'username': ALL,
+        }
+
+
+class UserResources(CustomBaseModelResource):
+    user = fields.ForeignKey(DjangoUserResources, 'user', null=True, blank=True, full=True)
+
+    class Meta:
+        queryset = afterbuy_common.Consumer.objects.all()
         resource_name = 'user'
+        authorization = Authorization()
+        detail_allowed_methods = ['get']
         authentication = AccessTokenAuthentication()
 
     def prepend_urls(self):

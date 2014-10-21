@@ -8,19 +8,15 @@ from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 
 def save_otp(user, token):
-    print "1"
     afterbuy_common.OTPToken.objects.filter(user=user).delete()
-    print "2"
     token_obj = afterbuy_common.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=user.user.email)
     token_obj.save()
-    print "3"
 
 def get_token(user, phone_number):
     totp=TOTP(TOTP_SECRET_KEY+str(randint(10000,99999))+str(phone_number))
     totp.time=30
     token = totp.token()
     save_otp(user, token)
-    print token
     return token
 
 def validate_otp(user, otp, phone):
