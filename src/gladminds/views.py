@@ -585,10 +585,13 @@ def brand_details(requests, role=None):
 
 
 def get_sa_details(sa_details, id):
-    sa_detail = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=id)[0]
-    sa_dealer_details = aftersell_common.RegisteredDealer.objects.get(id=sa_detail.dealer_id.id)
-    if sa_dealer_details.role == None:
-        sa_details['dealer'] = sa_dealer_details.dealer_id
+    sa_detail = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=id)
+    if sa_detail:
+        sa_dealer_details = aftersell_common.RegisteredDealer.objects.get(id=sa_detail[0].dealer_id.id)
+        if sa_dealer_details.role == None:
+            sa_details['dealer'] = sa_dealer_details.dealer_id
+        else:
+            sa_details['asc'] = sa_dealer_details.dealer_id
     else:
-        sa_details['asc'] = sa_dealer_details.dealer_id
+        sa_details['dealer/asc'] = 'Null'
     return sa_details
