@@ -17,15 +17,14 @@ class DynamicSitesMiddleware(object):
         BRAND.value = self.get_fields(self.domain)
         if BRAND.value not in settings.BRANDS:
             BRAND.value = settings.GM_BRAND
-        
-        print BRAND.value
         try:
             if BRAND.value not in settings.GM_BRAND:
                 request.urlconf = 'gladminds.{0}.urls'.format(BRAND.value)
         except KeyError:
             # use default urlconf (settings.ROOT_URLCONF)
             pass
-
+        
+        
     def process_response(self, request, response):
         if getattr(request, "urlconf", None):
             patch_vary_headers(response, ('Host',))
