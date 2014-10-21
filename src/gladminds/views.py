@@ -494,30 +494,39 @@ def brand_details(requests, role=None):
     data = requests.GET
     data_list = []
     data_dict = {}
+    limit = data.get('limit', 20)
+    offset = data.get('offset', 0)
+    limit = int(limit)
+    offset = int(offset)
     if role == 'asc':
         asc_data = aftersell_common.RegisteredDealer.objects.filter(role='asc')
-        for asc in asc_data:
+        data_dict['total_count'] = len(asc_data)
+        for asc in asc_data[offset:limit]:
             asc_detail = {}
             asc_detail['id'] = asc.dealer_id
             asc_detail['address'] = asc.address
             asc_details = get_state_city(asc_detail, asc.address)
             data_list.append(asc_detail)
-        data_dict['count'] = len(asc_data)
         data_dict[role] = data_list
     elif role == 'sa':
         sa_data = aftersell_common.ServiceAdvisor.objects.all()
-        for sa in sa_data:
+        data_dict['total_count'] = len(sa_data)
+        for sa in sa_data[offset:limit]:
             sa_detail = {}
             sa_detail['id'] = sa.service_advisor_id
             sa_detail['name'] = sa.name
             sa_detail['phone_number'] = sa.phone_number
             data_list.append(sa_detail)
-        data_dict['count'] = len(sa_data)
         data_dict[role] = data_list
     elif role == 'customers':
         customer_data = common.GladMindUsers.objects.all()
-        for customer in customer_data:
+        data_dict['total_count'] = len(customer_data)
+        for customer in customer_data[offset:limit]:
+            customer_product = common.ProductData.objects.filter(customer_phone_number=customer)
             customer_detail = {}
+            if  customer_product:
+                customer_detail['vin'] = customer_product[0].vin
+                customer_detail['sap_id'] = customer_product[0].sap_customer_id
             customer_detail['id'] = customer.gladmind_customer_id
             customer_detail['name'] = customer.customer_name
             customer_detail['phone_number'] = customer.phone_number
@@ -525,7 +534,6 @@ def brand_details(requests, role=None):
             customer_detail['address'] = customer.address
             customer_detail = get_state_city(customer_detail, customer.address)
             data_list.append(customer_detail)
-        data_dict['count'] = len(customer_data)
         data_dict[role] = data_list
     elif role == 'active-asc':
         active_asc_count = 0
@@ -559,12 +567,12 @@ def brand_details(requests, role=None):
                     data_list.append(not_active_ascs)
         data_dict['count'] = not_active_asc_count
         data_dict[role] = data_list
-    if data:
+    if data.get('city') or data.get('state') or data.get('sap_id'):
         filter_data_list = []
         filter_data_dict = {}
         count = 0
         for filter in data_dict[role]:
-            if filter.get("city", None) == data.get('city') or filter.get('state', None) == data.get('state'):
+            if filter.get("city", None) == data.get('city') or filter.get('state', None) == data.get('state') or filter.get('sap_id', None) == data.get('sap_id'):
                 count = count + 1
                 filter_data_list.append(filter)
                 filter_data_dict[role] = filter_data_list
