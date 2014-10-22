@@ -24,7 +24,7 @@ def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER
 
 
 def feed_report(feed_data = None):
-    try:
+    try:    
         yesterday = datetime.now().date() - timedelta(days=1)
         file_stream = open(settings.EMAIL_DIR+'/feed_report.html')
         feed_temp = file_stream.read()
