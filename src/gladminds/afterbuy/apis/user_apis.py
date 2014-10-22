@@ -143,17 +143,18 @@ class UserResources(CustomBaseModelResource):
             return HttpBadRequest("phone_number oe email is required")
         try:
             phone_number = phone_number
-            logger.info('OTP request received. Mobile: {0}'.format(phone_number))
-            user = afterbuy_common.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
-            token = afterbuy_utils.get_token(user, phone_number)
-            message = message_template.get_template('SEND_OTP').format(token)
-            if settings.ENABLE_AMAZON_SQS:
-                task_queue = get_task_queue()
-                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
-            else:
-                send_otp.delay(phone_number=phone_number, message=message)  # @UndefinedVariable
-            logger.info('OTP sent to mobile {0}'.format(phone_number))
-            #Send email if email address exist
+            if phone_number:
+                logger.info('OTP request received. Mobile: {0}'.format(phone_number))
+                user = afterbuy_common.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
+                token = afterbuy_utils.get_token(user, phone_number)
+                message = message_template.get_template('SEND_OTP').format(token)
+                if settings.ENABLE_AMAZON_SQS:
+                    task_queue = get_task_queue()
+                    task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
+                else:
+                    send_otp.delay(phone_number=phone_number, message=message)  # @UndefinedVariable
+                logger.info('OTP sent to mobile {0}'.format(phone_number))
+                #Send email if email address exist
             if email:
                 sent_otp_email(data=token, receiver=user.email, subject='Your OTP')
                 data = {'status': 1, 'message': "OTP sent_successfully"}
@@ -188,15 +189,10 @@ class UserResources(CustomBaseModelResource):
             consumer_obj = afterbuy_common.Consumer.objects.get(
                                                         user__id=customer_id)
             cosumer_data['username'] = consumer_obj.user.username
+            cosumer_data['created_date'] = str(consumer_obj.created_date)
             cosumer_data['email'] = consumer_obj.user.email
             cosumer_data['phone_number'] = consumer_obj.phone_number
-            cosumer_data['image_url'] = consumer_obj.image_url
-            cosumer_data['address'] = consumer_obj.address
-            cosumer_data['state'] = consumer_obj.state
-            cosumer_data['country'] = consumer_obj.country
-            cosumer_data['date_of_birth'] = consumer_obj.date_of_birth
-            cosumer_data['accepted_terms'] = consumer_obj.accepted_terms
-            cosumer_data['tshirt_size'] = consumer_obj.tshirt_size
+            cosumer_data['password'] = consumer_obj.user.password
         except Exception as ex:
             logger.info("[Exception get_user_product_information]:{0}".format(ex))
             return HttpBadRequest("Not a registered user")
@@ -204,16 +200,22 @@ class UserResources(CustomBaseModelResource):
 
     def auth_login(self, request, **kwargs):
         phone_number = request.POST.get('phone_number')
+        email_id = request.POST.get('email_id')
         password = request.POST.get('password')
-        if not phone_number or not password:
-            return HttpBadRequest("Phone Number and password  required.")
-        phone_number = request.POST['phone_number']
-        password = request.POST['phone_number']
+        if not phone_number and not email_id and password:
+            return HttpBadRequest("Phone Number/email_id and password  required.")
         try:
-            consumer_obj = afterbuy_common.Consumer.objects.get(phone_number
-                                             =mobile_format(phone_number))
-            password = request.POST['password']
-            user = authenticate(username=consumer_obj.consumer_id,
+            if phone_number:
+                consumer_obj = afterbuy_common.Consumer.objects.get(phone_number
+                                                 =mobile_format(phone_number))
+                password = request.POST['password']
+                user = authenticate(username=consumer_obj.consumer_id,
+                                password=password)
+            elif email_id:
+                consumer_obj = User.objects.get(email
+                                                 =email_id)
+                password = request.POST['password']
+                user = authenticate(username=consumer_obj.username,
                                 password=password)
             if user is not None:
                 if user.is_active:
