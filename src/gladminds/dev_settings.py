@@ -11,16 +11,44 @@ OUT_DIR = os.path.join(BASE_DIR, "out")
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds123')
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gladmindsdb',
+        'NAME': 'gm',
         'USER': 'gladminds',
-        'PASSWORD': 'gladminds123',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    },
+    'bajaj': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'bajaj',
+        'USER': 'gladminds',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    },
+    'demo': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'demo',
+        'USER': 'gladminds',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    },
+    'afterbuy': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'afterbuy',
+        'USER': 'gladminds',
+        'PASSWORD': DB_PASSWORD,
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }
+
 
 
 BROKER_URL = 'redis://localhost:6379'
