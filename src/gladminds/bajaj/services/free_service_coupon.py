@@ -73,7 +73,7 @@ class GladmindsResources(Resource):
                 logger.info('Terminating the service coupon {0}'.format(ucn))
                 message = '{2} {0} {1}'.format(customer_id, ucn, settings.ALLOWED_KEYWORDS['close'].upper())
                 logger.info('Message to send: ' + message)
-        phone_number = mobile_format(phone_number)
+        phone_number = utils.get_phone_number_format(phone_number)
         message = format_message(message)
         audit.audit_log(action='RECIEVED', sender=phone_number, reciever='+1 469-513-9856', message=message, status='success')
         logger.info('Recieved Message from phone number: {0} and message: {1}'.format(phone_number, message))
@@ -83,9 +83,9 @@ class GladmindsResources(Resource):
             message = ink.template
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message})
+                task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
+                send_invalid_keyword_message.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
 
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpBadRequest(ink.message))
@@ -93,41 +93,41 @@ class GladmindsResources(Resource):
             message = inm.template
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message})
+                task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
+                send_invalid_keyword_message.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpBadRequest(inm.message))
         except smsparser.InvalidFormat as inf:
             message = angular_format('CORRECT FORMAT: ' + inf.template)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message})
+                task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_invalid_keyword_message.delay(phone_number=phone_number, message=message)
+                send_invalid_keyword_message.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpBadRequest(inf.message))
         handler = getattr(self, sms_dict['handler'], None)
         try:
             with transaction.atomic():
-                to_be_serialized = handler(sms_dict, phone_number)
+                to_be_serialized = handler(sms_dict, mobile_format(phone_number))
         except Exception as ex:
             logger.info("The database failed to perform {0}:{1}".format(request.POST.get('action'), ex))
         return self.create_response(request, data=to_be_serialized)
 
+    @log_time
     def register_customer(self, sms_dict, phone_number):
         customer_name = sms_dict['name']
         email_id = sms_dict['email_id']
         try:
-            object = common.GladmindsUser.objects.get(phone_number=phone_number)
+            object = common.GladMindUsers.objects.get(phone_number=phone_number)
             gladmind_customer_id = object.gladmind_customer_id
             customer_name = object.customer_name
         except ObjectDoesNotExist as odne:
             gladmind_customer_id = utils.generate_unique_customer_id()
             registration_date = datetime.now()
-            user_feed = BaseFeed()
-            user = user_feed.registerNewUser('customer', username=gladmind_customer_id)
-            customer = common.GladmindsUser(
+            user = BaseFeed.register_user('customer', username=gladmind_customer_id)
+            customer = common.GladMindUsers(
                 user=user, gladmind_customer_id=gladmind_customer_id, phone_number=phone_number,
                 customer_name=customer_name, email_id=email_id,
                 registration_date=registration_date)
@@ -136,14 +136,52 @@ class GladmindsResources(Resource):
         message = smsparser.render_sms_template(status='send', keyword=sms_dict['keyword'], customer_id=gladmind_customer_id)
         phone_number = utils.get_phone_number_format(phone_number)
         logger.info("customer is registered with message %s" % message)
-        if settings.ENABLE_AMAZON_SQS:
+        if settings.ENABLE_AMAZON_SQS:           
             task_queue = get_task_queue()
-            task_queue.add("send_registration_detail", {"phone_number":phone_number, "message":message})
+            task_queue.add("send_registration_detail", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         else:
-            send_registration_detail.delay(phone_number=phone_number, message=message)
+            send_registration_detail.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
+    @log_time
+    def send_customer_detail(self, sms_dict, phone_number):
+        keyword = sms_dict['params']
+        value = sms_dict['message']
+        kwargs = {}
+        kwargs['customer_phone_number__phone_number__endswith'] = get_phone_number_format(phone_number)
+        if value and len(value)>5 and keyword in ['vin', 'id']:
+            if keyword == 'id':
+                kwargs['sap_customer_id'] = value
+                model_key = 'vin'
+                search_key = 'vin'
+            else:
+                kwargs['vin__endswith'] = value
+                model_key = 'id'
+                search_key = 'sap_customer_id'
+                
+            try:
+                product_object = common.ProductData.objects.get(**kwargs)
+                if product_object.sap_customer_id:
+                    message = templates.get_template('SEND_CUSTOMER_DETAILS').format(model_key, getattr(product_object, search_key))
+                else:
+                    message = templates.get_template('INVALID_RECOVERY_MESSAGE').format(keyword)
+            
+            except Exception as ex:
+                logger.info('Details not found with message %s' % ex)
+                message = templates.get_template('INVALID_RECOVERY_MESSAGE').format(keyword)
+        else:
+            message = templates.get_template('SEND_INVALID_MESSAGE')
+        
+        if settings.ENABLE_AMAZON_SQS:
+            task_queue = get_task_queue()
+            task_queue.add("customer_detail_recovery", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
+        else:
+            customer_detail_recovery.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
+        audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        return True
+
+    @log_time
     def customer_service_detail(self, sms_dict, phone_number):
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         message = None
@@ -174,9 +212,9 @@ class GladmindsResources(Resource):
         phone_number = utils.get_phone_number_format(phone_number)
         if settings.ENABLE_AMAZON_SQS:
             task_queue = get_task_queue()
-            task_queue.add("send_service_detail", {"phone_number":phone_number, "message":message})
+            task_queue.add("send_service_detail", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         else:
-            send_service_detail.delay(phone_number=phone_number, message=message)
+            send_service_detail.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
@@ -192,7 +230,8 @@ class GladmindsResources(Resource):
         '''
         updated_coupon = common.CouponData.objects\
                         .filter(Q(status=4) | Q(status=5), vin__vin=vin, valid_kms__gt=kms)\
-                        .update(status=1, sa_phone_number=None, actual_kms=None, actual_service_date=None)
+                        .update(status=1, sa_phone_number=None, actual_kms=None,
+                                actual_service_date=None, servicing_dealer=None)
         logger.info("%s have higher KMS range" % updated_coupon)
 
     def update_exceed_limit_coupon(self, actual_kms, vin):
@@ -206,6 +245,7 @@ class GladmindsResources(Resource):
 
     def get_vin(self, sap_customer_id):
         try:
+            sap_customer_id = utils.get_updated_customer_id(sap_customer_id) 
             customer_product_data = common.CouponData.objects.select_related \
                                             ('vin').filter(vin__sap_customer_id=sap_customer_id).order_by('vin', 'valid_days')
             return customer_product_data[0].vin.vin
@@ -213,9 +253,10 @@ class GladmindsResources(Resource):
             logger.error("Vin is not in customer_product_data Error %s " % ax)
 
     def update_coupon(self, valid_coupon, actual_kms, dealer_data, status,\
-                                                 update_time=datetime.now()):
+                                                 update_time):
         valid_coupon.actual_kms = actual_kms
         valid_coupon.actual_service_date = update_time
+        valid_coupon.extended_date = update_time + timedelta(days=COUPON_VALID_DAYS)
         valid_coupon.status = status
         valid_coupon.sa_phone_number = dealer_data.service_advisor_id
         valid_coupon.servicing_dealer = dealer_data.dealer_id
@@ -231,19 +272,30 @@ class GladmindsResources(Resource):
         
         validity_date = coupon.extended_date
         today = timezone.now()
+        current_time = datetime.now()
         if expiry_date >= today:
-            coupon.extended_date = datetime.now() + timedelta(days=COUPON_VALID_DAYS)
-            self.update_coupon(coupon, actual_kms, dealer_data, 4, today)
+            coupon.extended_date = current_time + timedelta(days=COUPON_VALID_DAYS)
+            self.update_coupon(coupon, actual_kms, dealer_data, 4, current_time)
         elif validity_date >= today and expiry_date < today:
-            coupon.actual_service_date = datetime.now()
+            coupon.actual_service_date = current_time
             coupon.save()
-        
+    
+    def get_requested_coupon_status(self, vin, service_type):
+        requested_coupon = common.CouponData.objects.filter(vin__vin=vin,
+                                                    service_type=service_type) 
+        if not requested_coupon:
+            status = "not available"
+        else:
+            status = common.STATUS_CHOICES[requested_coupon[0].status - 1][1]
+        return status
+    
+    @log_time
     def validate_coupon(self, sms_dict, phone_number):
         actual_kms = int(sms_dict['kms'])
         service_type = sms_dict['service_type']
         dealer_message = None
-        customer_phone_number = None
         customer_message = None
+        customer_phone_number = None
         customer_message_countdown = settings.DELAY_IN_CUSTOMER_UCN_MESSAGE
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         dealer_data = self.validate_dealer(phone_number)
@@ -289,13 +341,29 @@ class GladmindsResources(Resource):
             if len(in_progress_coupon) > 0:
                 self.update_inprogress_coupon(in_progress_coupon[0], actual_kms, dealer_data)
                 logger.info("Validate_coupon: in_progress_coupon")
-                dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=in_progress_coupon[0].service_type, customer_id=sap_customer_id)
-                customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=in_progress_coupon[0].unique_service_coupon, service_type=in_progress_coupon[0].service_type)
+                dealer_message = templates.get_template('COUPON_ALREADY_INPROGRESS').format(
+                                                    service_type=in_progress_coupon[0].service_type,
+                                                    customer_id=sap_customer_id)
+                customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(
+                                                    coupon=in_progress_coupon[0].unique_service_coupon,
+                                                    service_type=in_progress_coupon[0].service_type)
             elif valid_coupon:
                 logger.info("Validate_coupon: valid_coupon")
-                self.update_coupon(valid_coupon, actual_kms, dealer_data, 4)
-                dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(service_type=valid_coupon.service_type, customer_id=sap_customer_id)
-                customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(coupon=valid_coupon.unique_service_coupon, service_type=valid_coupon.service_type)
+                self.update_coupon(valid_coupon, actual_kms, dealer_data, 4, datetime.now())
+                if(valid_coupon.service_type == int(service_type)):
+                    dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(
+                                                    service_type=valid_coupon.service_type,
+                                                    customer_id=sap_customer_id)
+                else:    
+                    requested_coupon_status = self.get_requested_coupon_status(vin, service_type)
+                    dealer_message = templates.get_template('SEND_SA_OTHER_VALID_COUPON').format(
+                                            req_service_type=service_type,
+                                            req_status=requested_coupon_status,                                                     
+                                            service_type=valid_coupon.service_type,
+                                            customer_id=sap_customer_id)
+                customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(
+                                            coupon=valid_coupon.unique_service_coupon,
+                                            service_type=valid_coupon.service_type)
             else:
                 logger.info("Validate_coupon: ELSE PART")
                 customer_message_countdown = 10
@@ -304,9 +372,9 @@ class GladmindsResources(Resource):
                 customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(service_type=requested_coupon.service_type)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_coupon_detail_customer", {"phone_number":utils.get_phone_number_format(customer_phone_number), "message":customer_message}, delay_seconds=customer_message_countdown)
+                task_queue.add("send_coupon_detail_customer", {"phone_number":utils.get_phone_number_format(customer_phone_number), "message":customer_message, "sms_client":settings.SMS_CLIENT}, delay_seconds=customer_message_countdown)
             else:
-                send_coupon_detail_customer.apply_async( kwargs={ 'phone_number': utils.get_phone_number_format(customer_phone_number), 'message':customer_message}, countdown=customer_message_countdown)
+                send_coupon_detail_customer.apply_async( kwargs={ 'phone_number': utils.get_phone_number_format(customer_phone_number), 'message':customer_message, "sms_client":settings.SMS_CLIENT}, countdown=customer_message_countdown)
             audit.audit_log(reciever=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
         except IndexError as ie:
             dealer_message = templates.get_template('SEND_INVALID_VIN_OR_FSC')
@@ -320,13 +388,14 @@ class GladmindsResources(Resource):
             phone_number = utils.get_phone_number_format(phone_number)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_service_detail", {"phone_number":phone_number, "message":dealer_message})
+                task_queue.add("send_service_detail", {"phone_number":phone_number, "message":dealer_message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_service_detail.delay(phone_number=phone_number, message=dealer_message)
+                send_service_detail.delay(phone_number=phone_number, message=dealer_message, sms_client=settings.SMS_CLIENT)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=dealer_message)
         return {'status': True, 'message': dealer_message}
 
-
+    
+    @log_time
     def close_coupon(self, sms_dict, phone_number):
         dealer_sa_object = self.validate_dealer(phone_number)
         unique_service_coupon = sms_dict['usc']
@@ -336,14 +405,14 @@ class GladmindsResources(Resource):
             return {'status': False, 'message': templates.get_template('UNAUTHORISED_SA')}
         if not self.is_valid_data(customer_id=sap_customer_id, coupon=unique_service_coupon, sa_phone=phone_number):
             return {'status': False, 'message': templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')}
-        if not self.is_sa_initiator(unique_service_coupon, dealer_sa_object):
+        if not self.is_sa_initiator(unique_service_coupon, dealer_sa_object, phone_number):
             return {'status': False, 'message': "SA is not the coupon initiator."}
         try:
             vin = self.get_vin(sap_customer_id)
             coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
-            if coupon_object.status == 2:
+            if coupon_object.status == 2 or coupon_object.status == 6:
                 message=templates.get_template('COUPON_ALREADY_CLOSED')
-            else:
+            elif coupon_object.status == 4:
                 customer_phone_number = coupon_object.vin.customer_phone_number.phone_number
                 coupon_object.status = 2
                 coupon_object.sa_phone_number=dealer_sa_object.service_advisor_id
@@ -352,6 +421,8 @@ class GladmindsResources(Resource):
                 coupon_object.save()
 #                 common.CouponData.objects.filter(Q(status=1) | Q(status=4), vin__vin=vin, service_type__lt=coupon_object.service_type).update(status=3)
                 message = templates.get_template('SEND_SA_CLOSE_COUPON').format(customer_id=sap_customer_id, usc=unique_service_coupon)
+            else:
+                message = templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')
         except Exception as ex:
             logger.error("[Exception_coupon_close]".format(ex))
             message = templates.get_template('SEND_INVALID_MESSAGE')
@@ -360,25 +431,42 @@ class GladmindsResources(Resource):
             phone_number = utils.get_phone_number_format(phone_number)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
+                task_queue.add("send_coupon", {"phone_number":phone_number, "message": message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_coupon.delay(phone_number=phone_number, message=message)
+                send_coupon.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return {'status': True, 'message': message}
 
     def validate_dealer(self, phone_number):
-        all_sa_dealer_obj = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id__phone_number = phone_number, status = u'Y')
+        all_sa_dealer_obj = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id__phone_number = phone_number, status = u'Y')
         if len(all_sa_dealer_obj) == 0:
+            message=templates.get_template('UNAUTHORISED_SA')
+            sa_phone = utils.get_phone_number_format(phone_number)
+            if settings.ENABLE_AMAZON_SQS:
+                task_queue = get_task_queue()
+                task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
+            else:
+                send_invalid_keyword_message.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
             return None
         service_advisor_obj = all_sa_dealer_obj[0]
         return service_advisor_obj
 
-    def is_sa_initiator(self, coupon_id, dealer_sa_data):
+    def is_sa_initiator(self, coupon_id, dealer_sa_data, phone_number):
         coupon_data = common.CouponData.objects.filter(unique_service_coupon = coupon_id)
         coupon_sa_obj = common.ServiceAdvisorCouponRelationship.objects.filter(unique_service_coupon=coupon_data\
                                                                                    ,service_advisor_phone=dealer_sa_data.service_advisor_id\
                                                                                    ,dealer_id=dealer_sa_data.dealer_id)
-        return len(coupon_sa_obj)>0
+        if len(coupon_sa_obj)>0:
+            return True
+        else:
+            sa_phone = utils.get_phone_number_format(phone_number)
+            message = "SA is not the coupon initiator."
+            if settings.ENABLE_AMAZON_SQS:
+                task_queue = get_task_queue()
+                task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
+            else:
+                send_invalid_keyword_message.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
+        return False
         
     
     def is_valid_data(self, customer_id=None, coupon=None, sa_phone=None):
@@ -388,7 +476,9 @@ class GladmindsResources(Resource):
         '''
         coupon_obj = customer_obj = message = None
         if coupon: coupon_obj = common.CouponData.objects.filter(unique_service_coupon=coupon)
-        if customer_id: customer_obj = common.ProductData.objects.filter(sap_customer_id=customer_id)
+        if customer_id:
+            customer_id = utils.get_updated_customer_id(customer_id) 
+            customer_obj = common.ProductData.objects.filter(sap_customer_id=customer_id)
 
         if ((customer_obj and coupon_obj and coupon_obj[0].vin.vin != customer_obj[0].vin) or\
             (not customer_obj and not coupon_obj)):
@@ -400,11 +490,12 @@ class GladmindsResources(Resource):
             message=templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')
 
         if message:
+            sa_phone = utils.get_phone_number_format(sa_phone)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message})
+                task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_invalid_keyword_message.delay(phone_number=sa_phone, message=message)
+                send_invalid_keyword_message.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
             audit.audit_log(reciever=sa_phone, action=AUDIT_ACTION, message=message)
             logger.info("Message sent to SA : " + message)
             return False
@@ -426,6 +517,10 @@ class GladmindsResources(Resource):
             message = templates.get_template('SEND_INVALID_MESSAGE')
         send_brand_sms_customer.delay(phone_number=phone_number, message=message)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        return True
+
+    def determine_format(self, request):
+        return 'application/json'
         return True
 
     def determine_format(self, request):

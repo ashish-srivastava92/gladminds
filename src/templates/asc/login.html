@@ -6,7 +6,7 @@
 
 {% block body %}
 <div class="user-message"><div class="message" style="display: block;"></div></div>
-<label><h2>ASC Login</h2></label>
+<label><h2>ASC Log-in</h2></label>
 <form role="form" method="post" >
     {% csrf_token %}
     <div class="row">
@@ -28,7 +28,7 @@
             </button>
         </div>
         <div class="col-md-2 form-group">
-            <a class="pull-right" href="/aftersell/users/otp/generate"><small>Need Help?</small></a>
+            <a class="pull-right" href="/aftersell/users/otp/generate"><small>Forgot Password</small></a>
         </div>
     </div>
     <div class="row" style="margin-top: 20px;">

@@ -42,7 +42,7 @@ class FeedLogWithRemark():
         feed_log(feed_type=self.feed_type, total_data_count=self.total_feeds,
               failed_data_count=self.failed_feeds,
               success_data_count=success_data_count, status=self.status,
-              action=self.action, remarks=remarks, file_location=path)
+              action=self.action, remarks=None, file_location=path)
     
     def upload_file(self, remarks):
         file_name = self.get_file_name()

@@ -2,8 +2,6 @@ from datetime import datetime
 from random import randint
 from django.utils import timezone
 from gladminds.afterbuy import models as common
-from gladminds.afterbuy import models as afterbuy_common
-from gladminds.core import base_models as common
 from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 
