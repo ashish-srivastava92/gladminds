@@ -495,8 +495,7 @@ class CreditNoteFeed(BaseFeed):
 class ASCFeed(BaseFeed):
     def import_data(self):
         for asc in self.data_source:
-            asc_data = models.AuthorizedServiceCenter.objects.filter(
-                                                    dealer_id=asc['asc_id'])
+            asc_data = models.AuthorizedServiceCenter.objects.filter(asc_id=asc['asc_id'])
             if not asc_data:
                 dealer_data = None
                 if asc['dealer_id']:
@@ -514,7 +513,6 @@ class ASCFeed(BaseFeed):
             else:
                 ex = "[Exception: ASCFeed_dealer_data] asc_id {0} already exists".format(asc['asc_id'])
                 logger.error(ex)
-                self.feed_remark.fail_remarks(ex)
         return self.feed_remark
     
 
