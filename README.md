@@ -105,7 +105,7 @@ Edit /etc/hosts file
 add:-
 
 127.0.0.1       local.afterbuy.co
-127.0.0.1       local.gladmindsplatform.co
+127.0.0.1       local.admin.gladmindsplatform.co
 127.0.0.1       local.bajaj.gladmindsplatform.co
 127.0.0.1       local.demo.gladmindsplatform.co
 

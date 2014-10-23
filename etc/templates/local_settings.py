@@ -8,20 +8,31 @@ STATIC_DIR = os.path.join(BASE_DIR, "src/static")
 TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
+DEBUG = True
+TEMPLATE_DEBUG = DEBUG
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gladmindsdb',
-        'USER': 'gladminds',
-        'PASSWORD': 'gladminds123',
+        'USER': 'root',
+        'PASSWORD': 'hasher123',
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }
 
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
+
+BROKER_URL = 'redis://localhost:6379'
+REDIS_URL = 'redis://localhost:6379'
+
+
+JOBCARD_DIR = '{0}/jobcards/dev/'
+
+FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/dev/'
+FEED_FAILURE_BUCKET = 'gladminds'
+
+MAIL_SERVER = 'localhost'
 
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
@@ -37,5 +48,31 @@ TEMPLATE_DIRS = (
     TEMPLATE_DIR,
 )
 
-#Celery Configuration
-BROKER_URL= 'redis://localhost:6379/0'
+SMS_CLIENT = "KAP"
+SMS_CLIENT_DETAIL = {
+                    'login':'GladMinds1',
+                    'pass':'kap@user!23',
+                    'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
+                    'working_key': '1486415t035t8052c7pc',
+                    'sender_id': 'GLADMS'
+                    }
+
+
+########################SQS Queue Name
+SQS_QUEUE_NAME = "gladminds-dev"
+######################################
+
+FEED_TYPE = 'CSV'
+FEED_FAILURE_MAIL_ENABLED = True
+
+MAIL_DETAIL["subject"] = "GladMinds Feed Report DEV"
+MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
+
+FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail DEV"
+FEED_FAILURE_MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
+UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail DEV"
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]
+
+
+LOGGING['handlers']['gladminds_logs']['filename'] = 'log/gladminds.log'
+LOGGING['handlers']['afterbuy_logs']['filename'] = 'log/afterbuy.log'
