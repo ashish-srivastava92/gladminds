@@ -148,7 +148,6 @@ class UserResources(CustomBaseModelResource):
                 user = afterbuy_common.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
                 token = afterbuy_utils.get_token(user, phone_number)
                 message = message_template.get_template('SEND_OTP').format(token)
-                print message
                 if settings.ENABLE_AMAZON_SQS:
                     task_queue = get_task_queue()
                     task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
@@ -234,7 +233,6 @@ class UserResources(CustomBaseModelResource):
             else:
                 data = {'status': 0, 'message': "login unsuccessfully"}
         except Exception as ex:
-                print "ex",ex
                 data = {'status': 0, 'message': "login unsuccessfully"}
                 logger.info("[Exception get_user_login_information]:{0}".
                             format(ex))
