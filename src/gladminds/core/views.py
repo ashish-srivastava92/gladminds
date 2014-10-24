@@ -26,6 +26,7 @@ from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.bajaj.services.free_service_coupon import GladmindsResources
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU
+from gladminds.core.decorator import log_time
 
 gladmindsResources = GladmindsResources()
 logger = logging.getLogger('gladminds')
