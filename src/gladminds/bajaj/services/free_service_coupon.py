@@ -31,6 +31,7 @@ from gladminds.settings import COUPON_VALID_DAYS
 from gladminds.core.managers.mail import send_feedback_received,send_servicedesk_feedback
 from gladminds.gm.models import GladmindsUser
 from gladminds.core.apis.base_apis import CustomBaseResource
+from gladminds.core.decorator import log_time
 
 logger = logging.getLogger('gladminds')
 json = import_json()
