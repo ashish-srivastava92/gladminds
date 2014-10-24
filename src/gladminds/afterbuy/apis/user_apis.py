@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import  login
 from gladminds.core import utils
 from gladminds.afterbuy import utils as afterbuy_utils
-from gladminds.afterbuy import models as afterbuy_common
+from gladminds.afterbuy import models as afterbuy_model
 
 from gladminds.core.apis.user_apis import AccessTokenAuthentication
 from gladminds import settings
@@ -43,7 +43,7 @@ class UserResources(CustomBaseModelResource):
     user = fields.ForeignKey(DjangoUserResources, 'user', null=True, blank=True, full=True)
 
     class Meta:
-        queryset = afterbuy_common.Consumer.objects.all()
+        queryset = afterbuy_model.Consumer.objects.all()
         resource_name = 'user'
         authorization = Authorization()
         detail_allowed_methods = ['get']
@@ -69,7 +69,7 @@ class UserResources(CustomBaseModelResource):
         if not phone_number or not email_id or not name or not password:
             return HttpBadRequest("phone_number, username and password required.")
         try:
-            afterbuy_common.Consumer.objects.get(
+            afterbuy_model.Consumer.objects.get(
                                                 phone_number=phone_number)
             data = {'status': 0, 'message': 'phone number already registered'}
         except Exception as ex:
@@ -85,7 +85,7 @@ class UserResources(CustomBaseModelResource):
                                                         email_id, password)
                     create_user.first_name = name
                     create_user.save()
-                    user_register = afterbuy_common.Consumer(user=create_user,
+                    user_register = afterbuy_model.Consumer(user=create_user,
                                 phone_number=phone_number, consumer_id=customer_id)
                     user_register.save()
                     data = {'status': 1, 'message': 'succefully registerd'}
@@ -104,9 +104,9 @@ class UserResources(CustomBaseModelResource):
         if not id:
             return HttpBadRequest("user_id is required.")
         try:
-            user_info = afterbuy_common.Consumer.objects.get(
+            user_info = afterbuy_model.Consumer.objects.get(
                                 user__id=customer_id)
-            product_info = afterbuy_common.UserProduct.objects.filter(
+            product_info = afterbuy_model.UserProduct.objects.filter(
                                     consumer=user_info)
             if not product_info:
                 data = {'status': 0, 'message': "No product exist."}
@@ -145,7 +145,7 @@ class UserResources(CustomBaseModelResource):
         try:
             if phone_number:
                 logger.info('OTP request received. Mobile: {0}'.format(phone_number))
-                user = afterbuy_common.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
+                user = afterbuy_model.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
                 token = afterbuy_utils.get_token(user, phone_number)
                 message = message_template.get_template('SEND_OTP').format(token)
                 if settings.ENABLE_AMAZON_SQS:
@@ -158,7 +158,7 @@ class UserResources(CustomBaseModelResource):
                 #Send email if email address exist
             if email:
                 user_obj = User.objects.get(email=email)
-                user = afterbuy_common.Consumer.objects.get(user=user_obj)
+                user = afterbuy_model.Consumer.objects.get(user=user_obj)
                 token = afterbuy_utils.get_token(user, phone_number)
                 sent_otp_email(data=token, receiver=email, subject='Your OTP')
                 data = {'status': 1, 'message': "OTP sent_successfully"}
@@ -175,7 +175,7 @@ class UserResources(CustomBaseModelResource):
             return HttpBadRequest("mobile and password required")
         try:
             if phone_number:
-                consumer = afterbuy_common.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
+                consumer = afterbuy_model.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
                 user = User.objects.get(id=consumer.user_id)
                 user.set_password(password)
                 data = {'status': 1, 'message': "password updated successfully"}
@@ -195,7 +195,7 @@ class UserResources(CustomBaseModelResource):
             return HttpBadRequest("id is required.")
         try:
             customer_id = int(customer_id)
-            consumer_obj = afterbuy_common.Consumer.objects.get(
+            consumer_obj = afterbuy_model.Consumer.objects.get(
                                                         user__id=customer_id)
             cosumer_data['username'] = consumer_obj.user.username
             cosumer_data['created_date'] = str(consumer_obj.created_date)
@@ -215,7 +215,7 @@ class UserResources(CustomBaseModelResource):
             return HttpBadRequest("Phone Number/email_id and password  required.")
         try:
             if phone_number:
-                consumer_obj = afterbuy_common.Consumer.objects.get(phone_number
+                consumer_obj = afterbuy_model.Consumer.objects.get(phone_number
                                                  =mobile_format(phone_number))
                 password = request.POST['password']
                 user = authenticate(username=consumer_obj.consumer_id,
