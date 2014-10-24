@@ -138,6 +138,7 @@ class UserResources(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def authenticate_user_send_otp(self, request, **kwargs):
+        data = request.POST
         phone_number = request.POST.get('phone_number')
         email = request.POST.get('email_id',None)
         if not phone_number and not email:
@@ -145,8 +146,7 @@ class UserResources(CustomBaseModelResource):
         try:
             if phone_number:
                 logger.info('OTP request received. Mobile: {0}'.format(phone_number))
-                user = afterbuy_model.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
-                token = afterbuy_utils.get_token(user, phone_number)
+                token = afterbuy_utils.get_token_by_phone_or_email(phone_number=mobile_format(phone_number))
                 message = message_template.get_template('SEND_OTP').format(token)
                 if settings.ENABLE_AMAZON_SQS:
                     task_queue = get_task_queue()
@@ -158,8 +158,7 @@ class UserResources(CustomBaseModelResource):
                 #Send email if email address exist
             if email:
                 user_obj = User.objects.get(email=email)
-                user = afterbuy_model.Consumer.objects.get(user=user_obj)
-                token = afterbuy_utils.get_token(user, phone_number)
+                token = afterbuy_utils.get_token_by_phone_or_email(user=user_obj)
                 sent_otp_email(data=token, receiver=email, subject='Your OTP')
                 data = {'status': 1, 'message': "OTP sent_successfully"}
         except Exception as ex:
@@ -176,13 +175,9 @@ class UserResources(CustomBaseModelResource):
         try:
             if phone_number:
                 consumer = afterbuy_model.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
-                user = User.objects.get(id=consumer.user_id)
-                user.set_password(password)
-                data = {'status': 1, 'message': "password updated successfully"}
+                data = afterbuy_utils.set_user_password(id=consumer.user_id,password = password)
             elif email:
-                user = User.objects.get(email=email)
-                user.set_password(password)
-                data = {'status': 1, 'message': "password updated successfully"}
+                data = afterbuy_utils.set_user_password(email=email, password = password)
         except Exception as ex:
             logger.error('Invalid details, mobile {0}'.format(request.POST.get('phone_number', '')))
             data = {'status': 0, 'message': "inavlid phone_number/email"}
