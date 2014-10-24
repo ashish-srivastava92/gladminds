@@ -1,5 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
-from gladminds.afterbuy import models as common
+from gladminds.bajaj import models as common
 from django.conf import settings
 
 def get_template(template_key):

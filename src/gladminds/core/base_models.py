@@ -191,6 +191,10 @@ class CouponData(BaseModel):
     schedule_reminder_date = models.DateTimeField(null=True, blank=True)
     order = models.PositiveIntegerField(default=0)
     extended_date = models.DateTimeField(null=True, blank=True)
+    sent_to_sap = models.BooleanField(default=False)
+    credit_date = models.DateTimeField(null=True, blank=True)
+    credit_note = models.CharField(max_length=50, null=True, blank=True)
+    special_case = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -210,11 +214,36 @@ class UCNRecovery(BaseModel):
     customer_id = models.CharField(max_length=215, null=True, blank=True)
     file_location = models.CharField(max_length=215, null=True, blank=True)
     request_date = models.DateTimeField(default=datetime.now())
+    unique_service_coupon = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
         abstract = True
         verbose_name_plural = "UCN recovery logs"
+        
+class OldFscData(BaseModel):
+    unique_service_coupon = models.CharField(
+        max_length=215, null=True)
+    valid_days = models.IntegerField(max_length=10, null=True)
+    valid_kms = models.IntegerField(max_length=10, null=True)
+    service_type = models.IntegerField(max_length=10, null=True)
+    status = models.SmallIntegerField(choices=STATUS_CHOICES, default=1, db_index=True)
+    closed_date = models.DateTimeField(null=True, blank=True)
+    mark_expired_on = models.DateTimeField(null=True, blank=True)
+    actual_service_date = models.DateTimeField(null=True, blank=True)
+    actual_kms = models.CharField(max_length=10, null=True, blank=True)
+    last_reminder_date = models.DateTimeField(null=True, blank=True)
+    schedule_reminder_date = models.DateTimeField(null=True, blank=True)
+    order = models.PositiveIntegerField(default=0)
+    extended_date = models.DateTimeField(null=True, blank=True)
+    sent_to_sap = models.BooleanField(default=False)
+    credit_date = models.DateTimeField(null=True, blank=True)
+    credit_note = models.CharField(max_length=50, null=True, blank=True)
+    special_case = models.BooleanField(default=False)
 
+    class Meta:
+        abstract = True
+        app_label = "gladminds"
+        verbose_name_plural = "Old Coupon Information"
 
 ##################################################################
 ####################Message Template DB Storage###################

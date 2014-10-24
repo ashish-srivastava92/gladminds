@@ -101,6 +101,15 @@ class UCNRecovery(base_models.UCNRecovery):
         app_label = "bajaj"
         verbose_name_plural = "UCN recovery logs"
 
+class OldFscData(base_models.OldFscData):
+    product = models.ForeignKey(ProductData, null=False, editable=False)
+    service_advisor = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
+    servicing_dealer = models.ForeignKey(Dealer, null=True, blank=True)
+
+    class Meta:
+        app_label = "bajaj"
+        verbose_name_plural = "Old Coupon Information"
+
 class OTPToken(base_models.OTPToken):
     user = models.ForeignKey(UserProfile, null=True, blank=True, related_name='bajaj_otp_token')
     
