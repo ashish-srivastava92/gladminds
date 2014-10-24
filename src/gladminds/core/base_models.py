@@ -191,6 +191,10 @@ class CouponData(BaseModel):
     schedule_reminder_date = models.DateTimeField(null=True, blank=True)
     order = models.PositiveIntegerField(default=0)
     extended_date = models.DateTimeField(null=True, blank=True)
+    sent_to_sap = models.BooleanField(default=False)
+    credit_date = models.DateTimeField(null=True, blank=True)
+    credit_note = models.CharField(max_length=50, null=True, blank=True)
+    special_case = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -210,6 +214,7 @@ class UCNRecovery(BaseModel):
     customer_id = models.CharField(max_length=215, null=True, blank=True)
     file_location = models.CharField(max_length=215, null=True, blank=True)
     request_date = models.DateTimeField(default=datetime.now())
+    unique_service_coupon = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
         abstract = True

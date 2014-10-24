@@ -443,18 +443,19 @@ class OldFscFeed(BaseFeed):
         for fsc in self.data_source:
             try:
                 dealer_data = self.check_or_create_dealer(dealer_id=fsc['dealer'])
-                product_data = models.ProductData.objects.get(vin=fsc['vin'])
-                coupon_data = models.CouponData.objects.filter(vin__vin=fsc['vin'],
+                product_data = models.ProductData.objects.get(product_id=fsc['vin'])
+                coupon_data = models.CouponData.objects.filter(product__product_id=fsc['vin'],
                                             service_type=int(fsc['service']))
                 if len(coupon_data) == 0:
                     try:
-                        old_fsc_obj = models.OldFscData.objects.get(vin=product_data, service_type=int(fsc['service']) )
+                        old_fsc_obj = models.OldFscData.objects.get(product=product_data, service_type=int(fsc['service']) )
                     except Exception as ex:
                         ex = "[Exception: OLD_FSC_FEED]: For VIN {0} service type {1} does not exist in old fsc database::{2}".format(
                             fsc['vin'], fsc['service'], ex)
                         logger.info(ex)
-                        old_coupon_data = models.OldFscData(vin=product_data, service_type = int(fsc['service']),
-                                                         status=6, closed_date=datetime.now(), sent_to_sap = True, servicing_dealer = dealer_data)
+                        old_coupon_data = models.OldFscData(product=product_data, service_type = int(fsc['service']),
+                                                         status=6, closed_date=datetime.now(), sent_to_sap = True,
+                                                         servicing_dealer = dealer_data)
                         old_coupon_data.save()
                 else:
                     cupon_details = coupon_data[0]
@@ -475,7 +476,7 @@ class CreditNoteFeed(BaseFeed):
     def import_data(self):
         for credit_note in self.data_source:
             try:
-                coupon_data = models.CouponData.objects.get(vin__vin=credit_note['vin'],
+                coupon_data = models.CouponData.objects.get(product__product_id=credit_note['vin'],
                                     unique_service_coupon=credit_note['unique_service_coupon'],
                                     service_type=int(credit_note['service_type']))
                 coupon_data.credit_note = credit_note['credit_note']
@@ -515,7 +516,7 @@ class ASCFeed(BaseFeed):
                 logger.error(ex)
         return self.feed_remark
     
-
+#TODO: fix and test cron jobs for coupon and customer registration
 class CouponRedeemFeedToSAP(BaseFeed):
 
     def export_data(self, start_date=None, end_date=None):
