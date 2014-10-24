@@ -13,7 +13,7 @@ def save_otp(user, token):
     token_obj = afterbuy_model.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=user.user.email)
     token_obj.save()
 
-def generate_otp(user, phone_number):
+def generate_otp(phone_number):
     totp=TOTP(TOTP_SECRET_KEY+str(randint(10000,99999))+str(phone_number))
     totp.time=30
     token = totp.token()
@@ -30,6 +30,6 @@ def validate_otp(user, otp, phone):
 
 def get_otp(**kwargs):
     user = afterbuy_model.Consumer.objects.filter(**kwargs)[0]
-    otp = generate_otp(user, user.phone_number)
+    otp = generate_otp(user.phone_number)
     save_otp(user, otp)
     return otp
