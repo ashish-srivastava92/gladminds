@@ -197,6 +197,7 @@ class UserResources(CustomBaseModelResource):
             cosumer_data['email'] = consumer_obj.user.email
             cosumer_data['phone_number'] = consumer_obj.phone_number
             cosumer_data['password'] = consumer_obj.user.password
+            cosumer_data['name'] = consumer_obj.user.first_name
         except Exception as ex:
             logger.info("[Exception get_user_product_information]:{0}".format(ex))
             return HttpBadRequest("Not a registered user")
