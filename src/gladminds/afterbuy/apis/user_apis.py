@@ -18,6 +18,7 @@ from gladminds.bajaj.services import message_template
 from gladminds.core.managers.mail import sent_otp_email
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.utils import mobile_format, get_task_queue
+from gladminds.core.cron_jobs.sqs_tasks import send_otp
 from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
 from tastypie.authorization import Authorization
@@ -138,45 +139,54 @@ class UserResources(CustomBaseModelResource):
 
     def authenticate_user_send_otp(self, request, **kwargs):
         phone_number = request.POST.get('phone_number')
-        email = request.POST.get('email',None)
-        if not phone_number or not email:
-            return HttpBadRequest("phone_number oe email is required")
+        email = request.POST.get('email_id',None)
+        if not phone_number and not email:
+            return HttpBadRequest("phone_number or email is required")
         try:
-            phone_number = phone_number
             if phone_number:
                 logger.info('OTP request received. Mobile: {0}'.format(phone_number))
                 user = afterbuy_common.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
                 token = afterbuy_utils.get_token(user, phone_number)
                 message = message_template.get_template('SEND_OTP').format(token)
+                print message
                 if settings.ENABLE_AMAZON_SQS:
                     task_queue = get_task_queue()
                     task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
                 else:
                     send_otp.delay(phone_number=phone_number, message=message)  # @UndefinedVariable
                 logger.info('OTP sent to mobile {0}'.format(phone_number))
+                data = {'status': 1, 'message': "OTP sent_successfully"}
                 #Send email if email address exist
             if email:
-                sent_otp_email(data=token, receiver=user.email, subject='Your OTP')
+                user_obj = User.objects.get(email=email)
+                user = afterbuy_common.Consumer.objects.get(user=user_obj)
+                token = afterbuy_utils.get_token(user, phone_number)
+                sent_otp_email(data=token, receiver=email, subject='Your OTP')
                 data = {'status': 1, 'message': "OTP sent_successfully"}
         except Exception as ex:
             logger.error('Invalid details, mobile {0}'.format(request.POST.get('phone_number', '')))
-            data = {'status': 0, 'message': "inavlid phone_number"}
+            data = {'status': 0, 'message': "inavlid phone_number/email_id"}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def change_user_password(self, request, **kwargs):
         phone_number = request.POST.get('phone_number')
+        email = request.POST.get('email_id')
         password = request.POST.get('password')
-        if not phone_number and not password:
+        if not phone_number and not password and not email:
             return HttpBadRequest("mobile and password required")
         try:
-            phone_number = phone_number
-            consumer = afterbuy_common.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
-            user = User.objects.get(id=consumer.user_id)
-            user.set_password(password)
-            data = {'status': 1, 'message': "password updated successfully"}
+            if phone_number:
+                consumer = afterbuy_common.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
+                user = User.objects.get(id=consumer.user_id)
+                user.set_password(password)
+                data = {'status': 1, 'message': "password updated successfully"}
+            elif email:
+                user = User.objects.get(email=email)
+                user.set_password(password)
+                data = {'status': 1, 'message': "password updated successfully"}
         except Exception as ex:
             logger.error('Invalid details, mobile {0}'.format(request.POST.get('phone_number', '')))
-            data = {'status': 0, 'message': "inavlid phone_number"}
+            data = {'status': 0, 'message': "inavlid phone_number/email"}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def get_user_details(self, request, **kwargs):
@@ -220,10 +230,11 @@ class UserResources(CustomBaseModelResource):
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    data = {'status': 1, 'message': "login successfully"}
+                    data = {'status': 1, 'message': "login successfully", "user_id": user.id}
             else:
                 data = {'status': 0, 'message': "login unsuccessfully"}
         except Exception as ex:
+                print "ex",ex
                 data = {'status': 0, 'message': "login unsuccessfully"}
                 logger.info("[Exception get_user_login_information]:{0}".
                             format(ex))
