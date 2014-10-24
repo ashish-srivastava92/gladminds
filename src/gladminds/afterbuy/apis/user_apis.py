@@ -58,6 +58,7 @@ class UserResources(CustomBaseModelResource):
             url(r"^(?P<resource_name>%s)/(?P<user_id>\d+)/details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_user_details'), name="get_user_details"),
             url(r"^(?P<resource_name>%s)/(?P<user_id>\d+)/products%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('dispatch_dict'), name="api_dispatch_dict"),
             url(r"^(?P<resource_name>%s)/login%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('auth_login'), name="auth_login"),
+            url(r"^(?P<resource_name>%s)/validate-otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('validate_otp'), name="validate_otp"),
         ]
 
     def save_user_details(self, request, **kwargs):
@@ -146,8 +147,8 @@ class UserResources(CustomBaseModelResource):
         try:
             if phone_number:
                 logger.info('OTP request received. Mobile: {0}'.format(phone_number))
-                token = afterbuy_utils.get_token_by_phone_or_email(phone_number=mobile_format(phone_number))
-                message = message_template.get_template('SEND_OTP').format(token)
+                otp = afterbuy_utils.get_otp(phone_number=mobile_format(phone_number))
+                message = message_template.get_template('SEND_OTP').format(otp)
                 if settings.ENABLE_AMAZON_SQS:
                     task_queue = get_task_queue()
                     task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
@@ -158,8 +159,8 @@ class UserResources(CustomBaseModelResource):
                 #Send email if email address exist
             if email:
                 user_obj = User.objects.get(email=email)
-                token = afterbuy_utils.get_token_by_phone_or_email(user=user_obj)
-                sent_otp_email(data=token, receiver=email, subject='Your OTP')
+                otp = afterbuy_utils.get_otp(user=user_obj)
+                sent_otp_email(data=otp, receiver=email, subject='Your OTP')
                 data = {'status': 1, 'message': "OTP sent_successfully"}
         except Exception as ex:
             logger.error('Invalid details, mobile {0}'.format(request.POST.get('phone_number', '')))
@@ -170,14 +171,19 @@ class UserResources(CustomBaseModelResource):
         phone_number = request.POST.get('phone_number')
         email = request.POST.get('email_id')
         password = request.POST.get('password')
+        kwargs = {}
         if not phone_number and not password and not email:
             return HttpBadRequest("mobile and password required")
         try:
             if phone_number:
                 consumer = afterbuy_model.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
-                data = afterbuy_utils.set_user_password(id=consumer.user_id,password = password)
+                kwargs['id'] = consumer.user__id
             elif email:
-                data = afterbuy_utils.set_user_password(email=email, password = password)
+                kwargs['email'] = email
+            user = User.objects.filter(**kwargs)[0]
+            user.set_password(password)
+            user.save()
+            data = {'status': 1, 'message': "password updated successfully"}
         except Exception as ex:
             logger.error('Invalid details, mobile {0}'.format(request.POST.get('phone_number', '')))
             data = {'status': 0, 'message': "inavlid phone_number/email"}
@@ -233,3 +239,22 @@ class UserResources(CustomBaseModelResource):
                 logger.info("[Exception get_user_login_information]:{0}".
                             format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
+
+    def validate_otp(self, request):
+        otp = request.POST.get('otp')
+        phone_number = request.POST.get('phone_number')
+        if not otp and not phone_number :
+            return HttpBadRequest("otp and phone_number required")
+        try:
+            user = afterbuy_model.Consumer.objects.get(phone_number
+                                                 =mobile_format(phone_number))
+            afterbuy_utils.validate_otp(user, otp, phone_number)
+            data = {'status': 1, 'message': "valid OTP"}
+        except Exception as ex:
+                data = {'status': 0, 'message': "invalid OTP"}
+                logger.info("[Exception OTP]:{0}".
+                            format(ex))
+        return HttpResponse(json.dumps(data), content_type="application/json")
+
+
+

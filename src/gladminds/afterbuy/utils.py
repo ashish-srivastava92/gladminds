@@ -13,31 +13,23 @@ def save_otp(user, token):
     token_obj = afterbuy_model.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=user.user.email)
     token_obj.save()
 
-def get_token(user, phone_number):
+def generate_otp(user, phone_number):
     totp=TOTP(TOTP_SECRET_KEY+str(randint(10000,99999))+str(phone_number))
     totp.time=30
     token = totp.token()
-    save_otp(user, token)
     return token
 
 def validate_otp(user, otp, phone):
-    token_obj = common.OTPToken.objects.filter(user=user)[0]
+    token_obj = afterbuy_model.OTPToken.objects.filter(user=user)[0]
     if int(otp) == int(token_obj.token) and (timezone.now()-token_obj.request_date).seconds <= OTP_VALIDITY:
         return True
     elif (timezone.now()-token_obj.request_date).seconds > OTP_VALIDITY:
         token_obj.delete()
     raise
 
-def set_user_password(**kwargs):
-    if kwargs.get('phone_number'):
-        user = User.objects.get(phone_number=kwargs['phone_number'])
-    elif kwargs.get('email'):
-        user = User.objects.get(email=kwargs['email'])
-    user.set_password(kwargs['password'])
-    data = {'status': 1, 'message': "password updated successfully"}
-    return data
 
-def get_token_by_phone_or_email(**kwargs):
+def get_otp(**kwargs):
     user = afterbuy_model.Consumer.objects.filter(**kwargs)[0]
-    token = get_token(user, user.phone_number)
-    return token
+    otp = generate_otp(user, user.phone_number)
+    save_otp(user, otp)
+    return otp
