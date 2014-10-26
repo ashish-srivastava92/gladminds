@@ -220,24 +220,13 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                     logger.info(
                     "[Exception:  DealerAndServiceAdvisorFeed_sa]: {0}"
                     .format(odne))
+                    sa_user = self.register_user('SA', username=dealer['service_advisor_id'])
                     service_advisor = models.ServiceAdvisor(
                                             service_advisor_id=dealer['service_advisor_id'], 
-                                            name=dealer['name'], phone_number=dealer['phone_number'])
-                    self.register_user('SA', username=dealer['service_advisor_id'])
+                                            name=dealer['name'], phone_number=dealer['phone_number'],
+                                            dealer=dealer_data, user=sa_user)
+                service_advisor.status = unicode(dealer['status'])
                 service_advisor.save()
-                
-                try:
-                    service_advisor_dealer = models.ServiceAdvisorDealerRelationship.objects.get(
-                                               service_advisor_id=service_advisor, dealer_id=dealer_data)
-                    service_advisor_dealer.status = unicode(dealer['status'])
-                except ObjectDoesNotExist as odne:
-                    service_advisor_dealer = models.ServiceAdvisorDealerRelationship(
-                                                dealer_id=dealer_data,
-                                                service_advisor_id=service_advisor,
-                                                status=dealer['status'])
-                    
-                service_advisor_dealer.save()
-                    
             except Exception as ex:
                 total_failed += 1
                 ex = "{0}".format(ex)
@@ -248,10 +237,10 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
         return self.feed_remark
 
     def check_mobile_active(self, dealer, dealer_data):
-        list_mobile = models.ServiceAdvisorDealerRelationship.objects.filter(
-                                service_advisor_id__phone_number=dealer['phone_number'], status='Y')
-        list_active_mobile = list_mobile.exclude(dealer_id=dealer_data,
-                                service_advisor_id__service_advisor_id=dealer['service_advisor_id'])
+        list_mobile = models.ServiceAdvisor.objects.filter(
+                                phone_number=dealer['phone_number'], status='Y')
+        list_active_mobile = list_mobile.exclude(dealer=dealer_data,
+                                                 service_advisor_id=dealer['service_advisor_id'])
         if list_active_mobile:
             return True
         return False
