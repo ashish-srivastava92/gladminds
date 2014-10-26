@@ -220,7 +220,8 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                     logger.info(
                     "[Exception:  DealerAndServiceAdvisorFeed_sa]: {0}"
                     .format(odne))
-                    sa_user = self.register_user('SA', username=dealer['service_advisor_id'])
+                    sa_user = self.register_user('SA', username=dealer['service_advisor_id'],
+                                                 phone_number=dealer['phone_number'])
                     service_advisor = models.ServiceAdvisor(
                                             service_advisor_id=dealer['service_advisor_id'], 
                                             name=dealer['name'], phone_number=dealer['phone_number'],
@@ -238,7 +239,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
 
     def check_mobile_active(self, dealer, dealer_data):
         list_mobile = models.ServiceAdvisor.objects.filter(
-                                phone_number=dealer['phone_number'], status='Y')
+                                user__phone_number=dealer['phone_number'], status='Y')
         list_active_mobile = list_mobile.exclude(dealer=dealer_data,
                                                  service_advisor_id=dealer['service_advisor_id'])
         if list_active_mobile:
