@@ -1,13 +1,13 @@
 from django.conf.urls import patterns, url, include
 from django.conf import settings
 from gladminds.bajaj.admin import brand_admin
-from gladminds.afterbuy.apis import api_resource
 from tastypie.api import Api
 from gladminds.core import urls as core_urls
+from gladminds.bajaj.apis import coupon_apis
 
 api_v1 = Api(api_name="v1")
 # api_v1.register(audit_api.AuditResources())
-# api_v1.register(user_apis.GladMindUserResources())
+api_v1.register(coupon_apis.CouponDataResources())
 
 urlpatterns = patterns('',
    

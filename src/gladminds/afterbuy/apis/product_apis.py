@@ -2,7 +2,7 @@ import json
 import logging
 from django.forms.models import model_to_dict
 from django.views.decorators.csrf import csrf_exempt
-from django.http.response import HttpResponse
+from django.http.response import HttpResponse, HttpResponseRedirect
 from django.conf.urls import url
 from django.template.base import kwarg_re
 from tastypie.http import HttpBadRequest
@@ -39,7 +39,8 @@ class ProductResources(CustomBaseModelResource):
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/support%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_support'), name="get_product_support"),
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/support_save%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('save_product_support'), name="save_product_support"),
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/invoice%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_invoice'), name="get_product_invoice"),
-                url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/invoice_save%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('save_product_invoice'), name="save_product_invoice")
+                url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/invoice_save%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('save_product_invoice'), name="save_product_invoice"),
+                url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/coupons%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_coupons'), name="get_product_coupons" )
         ]
         
 
@@ -290,3 +291,21 @@ class ProductResources(CustomBaseModelResource):
             data={'status':0, 'message':log_message}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
+    
+    def get_product_coupons(self, request, **kwargs):
+        phone_number = request.GET.get('phone_number')
+        product_id = kwargs.get('product_id')
+        if not phone_number:
+            return HttpBadRequest("Phone number is required.")
+        try:
+            if product_id:
+                product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
+                brand_product_id = product_info.brand_product_id
+                return HttpResponseRedirect('http://local.bajaj.gladmindsplatform.co:8000/v1/coupons/?product='+brand_product_id)
+
+        except Exception as ex:
+            print ex
+            logger.error('Invalid details, mobile {0}'.format(request.POST.get('mobile', '')))
+    
+    
+    
