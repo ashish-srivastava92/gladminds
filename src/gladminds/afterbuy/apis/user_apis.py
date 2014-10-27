@@ -163,7 +163,7 @@ class UserResources(CustomBaseModelResource):
                 sent_otp_email(data=otp, receiver=email, subject='Your OTP')
                 data = {'status': 1, 'message': "OTP sent_successfully"}
         except Exception as ex:
-            logger.error('Invalid details, mobile {0}'.format(request.POST.get('phone_number', '')))
+            logger.error('Invalid details, mobile {0} and exception {1}'.format(request.POST.get('phone_number', ''),ex))
             data = {'status': 0, 'message': "inavlid phone_number/email_id"}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
@@ -185,7 +185,7 @@ class UserResources(CustomBaseModelResource):
             user.save()
             data = {'status': 1, 'message': "password updated successfully"}
         except Exception as ex:
-            logger.error('Invalid details, mobile {0}'.format(request.POST.get('phone_number', '')))
+            logger.error('Invalid details, mobile {0} and exception {1}'.format(request.POST.get('phone_number', ''),ex))
             data = {'status': 0, 'message': "inavlid phone_number/email"}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
