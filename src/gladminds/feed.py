@@ -552,12 +552,12 @@ class OldFscFeed(BaseFeed):
                 dealer_data = self.check_or_create_dealer(dealer_id=fsc['dealer'])
                 product_data = common.ProductData.objects.filter(vin=fsc['vin'])
                 if len(product_data)==0:
-                    self.save_to_old_fsc_table(fsc['vin'], fsc['service'], dealer_data, "vin does not exist")
+                    self.save_to_old_fsc_table(dealer_data, fsc['service'], 'vin', fsc['vin'])
                 else:
                     coupon_data = common.CouponData.objects.filter(vin__vin=fsc['vin'],
                                             service_type=int(fsc['service']))
                     if len(coupon_data) == 0:
-                        self.save_to_old_fsc_table(fsc['vin'], fsc['service'], dealer_data, "Service type does not exist")
+                        self.save_to_old_fsc_table(dealer_data, fsc['service'], 'service_type', fsc['service'], vin = product_data[0] )
                     else:
                         cupon_details = coupon_data[0]
                         cupon_details.status = 6
@@ -567,12 +567,12 @@ class OldFscFeed(BaseFeed):
                         cupon_details.save()
         return self.feed_remark
 
-    def save_to_old_fsc_table(self, vin, st, dealer_detail, reason):
+    def save_to_old_fsc_table(self, dealer_detail,st, missing_field,missing_value, vin=None):
         try:
-            old_fsc_obj = common.OldFscData.objects.get(vin=vin, service_type=int(st))
+            old_fsc_obj = common.OldFscData.objects.get(vin=vin, service_type=int(st), missing_field=missing_field)
         except Exception as ex:
             old_coupon_data = common.OldFscData(vin=vin, service_type = int(st),
-                                             status=6, closed_date=datetime.now(), sent_to_sap = True, servicing_dealer = dealer_detail, reason=reason)
+                                             status=6, closed_date=datetime.now(), sent_to_sap = True, servicing_dealer = dealer_detail, missing_field=missing_field,  missing_value=missing_value)
             old_coupon_data.save()
 
 
