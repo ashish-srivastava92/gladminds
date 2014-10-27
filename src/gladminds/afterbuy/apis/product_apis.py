@@ -15,6 +15,7 @@ from gladminds.core.utils import mobile_format
 from gladminds.core.apis.user_apis import AccessTokenAuthentication
 from django.contrib.auth.models import User
 from gladminds.core.apis.base_apis import CustomBaseModelResource
+from gladminds.settings import COUPON_URL
 
 logger = logging.getLogger("gladminds")
 
@@ -292,22 +293,15 @@ class ProductResources(CustomBaseModelResource):
 
     
     def get_product_coupons(self, request, **kwargs):
-        phone_number = request.GET.get('phone_number')
         product_id = kwargs.get('product_id')
-#         if not phone_number:
-#             return HttpBadRequest("Phone number is required.")
         try:
             if product_id:
-                print "hell "
                 product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
-                print product_info.id
                 brand_product_id = product_info.brand_product_id
-                print brand_product_id
-                return HttpResponseRedirect('http://local.bajaj.gladmindsplatform.co:8000/v1/coupons/?product='+brand_product_id)
+                return HttpResponseRedirect(COUPON_URL+'/v1/coupons/?product='+brand_product_id)
 
         except Exception as ex:
-            print ex
-            logger.error('Invalid details, mobile {0}'.format(request.POST.get('mobile', '')))
+            logger.error('Invalid details')
     
     
     

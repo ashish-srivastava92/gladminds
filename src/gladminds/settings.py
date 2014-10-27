@@ -21,7 +21,7 @@ ADMINS = (
 )
 
 COUPON_VALID_DAYS = 30
-
+COUPON_URL = 'http://local.bajaj.gladmindsplatform.co:8000'
 TOTP_SECRET_KEY = '93424'
 OTP_VALIDITY = 120
 
