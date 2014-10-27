@@ -53,45 +53,44 @@
       var vin = $('#srch-vin').val(),
           messageModal = $('.modal.message-modal'),
           messageBlock = $('.modal-body', messageModal);
-      if(vin.length == 17) {
-	      $('.customer-vin').val(vin);
-	      
-	      var jqXHR = $.ajax({
-	            type: 'POST',
-	            url: '/aftersell/exceptions/customer',
-	            data: {'vin': vin},
-	            success: function(data){
-	              if (data['phone']) {
-	                  $('.customer-phone').val(data['phone']);
-	                  $('.customer-name').val(data['name']).attr('readOnly', true);
-	                  $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
-	                  $('.customer-id').val(data['id']).attr('readOnly', true);
-	                  $('.customer-submit').attr('disabled', false);
-	              }	
-	              else if (data['message']) {
-	                  $('.customer-phone').val('');
-	            	  $('.customer-name').val('').attr('readOnly', false);
-	                  $('.purchase-date').val('').attr('readOnly', false);
-	                  $('.customer-id').val('').attr('readOnly', false);
-	                  $('.customer-submit').attr('disabled', true);
-	                  messageBlock.text(data.message);
-	                  messageModal.modal('show');
-	                  if (!data['status']) {
-	                	  $('.customer-id').val('').attr('readOnly', true);
-	                	  $('.customer-submit').attr('disabled', false);
-	                  }
-	              }
-	            },
-	            error: function() {
-	            	messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
-	                messageModal.modal('show');
-	            }
-	          });
-	      }
-      else{
+      if(vin.trim().length!=17){
     	  messageBlock.text('VIN should be 17 digits. Please retry');
           messageModal.modal('show');
+          return false;
       }
+      $('.customer-vin').val(vin);
+      
+      var jqXHR = $.ajax({
+            type: 'POST',
+            url: '/aftersell/exceptions/customer',
+            data: {'vin': vin},
+            success: function(data){
+              if (data['phone']) {
+                  $('.customer-phone').val(data['phone']);
+                  $('.customer-name').val(data['name']).attr('readOnly', true);
+                  $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
+                  $('.customer-id').val(data['id']).attr('readOnly', true);
+                  $('.customer-submit').attr('disabled', false);
+              }	
+              else if (data['message']) {
+                  $('.customer-phone').val('');
+            	  $('.customer-name').val('').attr('readOnly', false);
+                  $('.purchase-date').val('').attr('readOnly', false);
+                  $('.customer-id').val('').attr('readOnly', false);
+                  $('.customer-submit').attr('disabled', true);
+                  messageBlock.text(data.message);
+                  messageModal.modal('show');
+                  if (!data['status']) {
+                	  $('.customer-id').val('').attr('readOnly', true);
+                	  $('.customer-submit').attr('disabled', false);
+                  }
+              }
+            },
+            error: function() {
+            	messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
+                messageModal.modal('show');
+            }
+          });
       return false;
     });
 
