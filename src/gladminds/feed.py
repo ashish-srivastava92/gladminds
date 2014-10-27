@@ -549,34 +549,32 @@ class OldFscFeed(BaseFeed):
     
     def import_data(self):
         for fsc in self.data_source:
-            try:
                 dealer_data = self.check_or_create_dealer(dealer_id=fsc['dealer'])
-                product_data = common.ProductData.objects.get(vin=fsc['vin'])
-                coupon_data = common.CouponData.objects.filter(vin__vin=fsc['vin'],
-                                            service_type=int(fsc['service']))
-                if len(coupon_data) == 0:
-                    try:
-                        old_fsc_obj = common.OldFscData.objects.get(vin=product_data, service_type=int(fsc['service']) )
-                    except Exception as ex:
-                        ex = "[Exception: OLD_FSC_FEED]: For VIN {0} service type {1} does not exist in old fsc database::{2}".format(
-                            fsc['vin'], fsc['service'], ex)
-                        logger.info(ex)
-                        old_coupon_data = common.OldFscData(vin=product_data, service_type = int(fsc['service']),
-                                                         status=6, closed_date=datetime.now(), sent_to_sap = True, servicing_dealer = dealer_data)
-                        old_coupon_data.save()
+                product_data = common.ProductData.objects.filter(vin=fsc['vin'])
+                if len(product_data)==0:
+                    self.save_to_old_fsc_table(fsc['vin'], fsc['service'], dealer_data, "vin does not exist")
                 else:
-                    cupon_details = coupon_data[0]
-                    cupon_details.status = 6
-                    cupon_details.closed_date = datetime.now()
-                    cupon_details.sent_to_sap = True
-                    cupon_details.servicing_dealer = dealer_data
-                    cupon_details.save()
-            except Exception as ex:
-                ex = "[Exception: OLD_FSC_FEED]: VIN {0} does not exist::{1}".format(
-                            fsc['vin'], ex)
-                logger.error(ex)
-                self.feed_remark.fail_remarks(ex)
+                    coupon_data = common.CouponData.objects.filter(vin__vin=fsc['vin'],
+                                            service_type=int(fsc['service']))
+                    if len(coupon_data) == 0:
+                        self.save_to_old_fsc_table(fsc['vin'], fsc['service'], dealer_data, "Service type does not exist")
+                    else:
+                        cupon_details = coupon_data[0]
+                        cupon_details.status = 6
+                        cupon_details.closed_date = datetime.now()
+                        cupon_details.sent_to_sap = True
+                        cupon_details.servicing_dealer = dealer_data
+                        cupon_details.save()
         return self.feed_remark
+
+    def save_to_old_fsc_table(self, vin, st, dealer_detail, reason):
+        try:
+            old_fsc_obj = common.OldFscData.objects.get(vin=vin, service_type=int(st))
+        except Exception as ex:
+            old_coupon_data = common.OldFscData(vin=vin, service_type = int(st),
+                                             status=6, closed_date=datetime.now(), sent_to_sap = True, servicing_dealer = dealer_detail, reason=reason)
+            old_coupon_data.save()
+
 
 class CreditNoteFeed(BaseFeed):
     
