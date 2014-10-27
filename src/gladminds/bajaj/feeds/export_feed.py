@@ -9,7 +9,7 @@ logger = logging.getLogger("gladminds")
 
 class BaseExportFeed(object):
 
-    def __init__(self, username=None, password=None, wsdl_url=None, \
+    def __init__(self, username=None, password=None, wsdl_url=None,\
                                                         feed_type=None):
         self.username = username
         self.password = password
@@ -17,7 +17,7 @@ class BaseExportFeed(object):
         self.feed_type = feed_type
 
     def get_http_authenticated(self):
-        return HttpAuthenticated(username=self.username, \
+        return HttpAuthenticated(username=self.username,\
                                  password=self.password)
 
     def get_client(self):
@@ -33,22 +33,32 @@ class ExportCouponRedeemFeed(BaseExportFeed):
 
     def export(self, items=None, item_batch=None, total_failed_on_feed=0):
         logger.info(
-            "Export {2}: Items:{0} and Item_batch: {1}"\
-            .format(items, item_batch, self.feed_type))
+            "Export {0}".format(self.feed_type))
         client = self.get_client()
         total_failed = total_failed_on_feed
         for item in items:
-            result = client.service.MI_GCP_UCN_Sync(
-                ITEM=[item], ITEM_BATCH=item_batch)
-            if result[1]['I_STATUS'] == 'SUCCESS':
-                export_status = True
-                logger.error("Sent the details of coupon {0} to sap".format(item['GCP_UCN_NO']))
-            else:
-                total_failed = total_failed + 1
-                export_status = False
-                logger.error("Failed to send the details of coupon {0} to sap".format(item['GCP_UCN_NO']))
-
-        logger.info("Response from SAP: {0}".format(result))
+            logger.info("Trying to send SAP the coupon: {0}"\
+                        .format(item))
+            try:            
+                result = client.service.MI_GCP_UCN_Sync(
+                    ITEM=[item], ITEM_BATCH=item_batch)
+                logger.info("Response from SAP: {0}".format(result))
+                if result[1]['I_STATUS'] == 'SUCCESS':
+                    try:
+                        export_status = True
+                        coupon = models.CouponData.objects.get(unique_service_coupon=item['GCP_UCN_NO'])
+                        coupon.sent_to_sap = True
+                        coupon.save()
+                        logger.info("Sent the details of coupon {0} to sap".format(item['GCP_UCN_NO']))
+                    except Exception as ex:
+                        logger.error("Coupon with id {0} does not exist".format(item['GCP_UCN_NO']))
+                else:
+                    total_failed = total_failed + 1
+                    export_status = False
+                    logger.error("Failed to send the details of coupon {0} to sap".format(item['GCP_UCN_NO']))
+            except Exception as ex:
+                logger.error("Failed to send the details to sap")
+                logger.error(ex)
         feed_log(feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
@@ -85,14 +95,14 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
                 result = client.service.SI_GCPCstID_sync(
                     item_custveh=[{"item": item}], item=item_batch)
                 logger.info("Response from SAP: {0}".format(result))
-                if result[0][0]['item'][0]['STATUS'] == 'SUCCESS':
+                if result[0]['item'][0]['STATUS'] == 'SUCCESS':
                     try:
                         temp_customer_object = models.CustomerTempRegistration.objects.get(temp_customer_id=item['CUSTOMER_ID'])
                         temp_customer_object.sent_to_sap = True
                         if result[2]:
-                            temp_customer_object.remarks = result[2][0]['item'][0]['REMARKS']
+                            temp_customer_object.remarks = result[2]['item'][0]['REMARKS']
                         else: 
-                            temp_customer_object.tagged_sap_id = result[1][0]['item'][0]['PARTNER']
+                            temp_customer_object.tagged_sap_id = result[1]['item'][0]['PARTNER']
                         temp_customer_object.save()
                         export_status = True
                         logger.info("Sent the details of customer ID {0} to sap".format(item['CUSTOMER_ID']))
@@ -109,4 +119,3 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
-        

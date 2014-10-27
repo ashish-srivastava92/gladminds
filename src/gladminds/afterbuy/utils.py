@@ -3,7 +3,6 @@ from random import randint
 from django.utils import timezone
 from gladminds.afterbuy import models as common
 from gladminds.afterbuy import models as afterbuy_model
-from gladminds.core import base_models as common
 from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from django.contrib.auth.models import User
@@ -33,7 +32,6 @@ def get_otp(**kwargs):
     otp = generate_otp(user.phone_number)
     save_otp(user, otp)
     return otp
-
 
 def get_template(template_key):
     object = afterbuy_model.MessageTemplate.objects.get(template_key=template_key)
