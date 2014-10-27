@@ -10,24 +10,61 @@
       Dashboard
     {% endblock %}
     </title>
-    <link href="/static/css/bootstrap.css" rel="stylesheet">
-    <!-- Add custom CSS here -->
-    <link href="/static/css/sb-admin.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/morris-0.4.3.min.css">
-    <link href="/static/css/portal.css" rel="stylesheet">
+       <link rel="stylesheet" href="/static/libs/datepicker/css/jquery-ui.css">
+	    <link href="/static/css/bootstrap.css" rel="stylesheet"> 
+	    <link href="/static/css/dataTables.bootstrap.css" rel="stylesheet">  
+	    
+	    <!--[if gt IE 7]>
+		    <link href="/static/css/bootstrap-ie7.css" rel="stylesheet">
+		    <link href="/static/css/style-ie7.css" rel="stylesheet">
+		    <script src="/static/libs/html5.js"></script>
+	    <![endif]-->
+	    
+	    <!-- Add custom CSS here -->
+	    <link href="/static/css/sb-admin.css" rel="stylesheet">
+	    <link rel="stylesheet" href="/static/css/morris-0.4.3.min.css">
+	    <link href="/static/css/portal.css" rel="stylesheet">
     {% block style %}
     {% endblock %}
   </head>
   <body>
+    {% block header %}
+      <div class="navbar navbar-style">
+        <div class="navbar-inner">
+           <a class="brand" href="#"><img src="/static/img/bajaj_logo.jpg" class='brand-logo' height=50px width=209px></a>
+           {% if not asc_registration %}
+              <ul class="nav pull-right">
+                 <li class="dropdown style-username">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{user.username}} <b class="caret"></b></a>
+                    <ul class="dropdown-menu pull-right">
+                       <li><a href="/aftersell/provider/change-password">Change Password</a></li>
+                       <li><a href="/aftersell/provider/logout">Logout</a></li>
+                   </ul>
+                </li>
+             </ul>
+           {% endif %}
+        </div>
+      </div>
+    {% endblock %}
     {% block body %}
     {% endblock %}
-   <script src="/static/js/jquery-1.10.2.js"></script>
-    <script src="/static/js/bootstrap.js"></script>
-    <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
-    <script src="http://cdn.oesmith.co.uk/morris-0.4.3.min.js"></script>
-    <script src="/static/js/morris/chart-data-morris.js"></script> -->
-    <script src="/static/js/tablesorter/jquery.tablesorter.js"></script>
-    <script src="/static/js/tablesorter/tables.js"></script>
+        <!--[if IE]>
+        	<script src="/static/js/jquery-1.7.1.min.js"></script> 
+        	<script src="/static/js/afterbuy/jquery-ui.js"></script>
+    	<![endif]-->
+
+		<!--[if !IE]><!-->
+			<script src="/static/js/jquery-2.1.1.js"></script> 
+			<script src="/static/libs/datepicker/js/jquery-ui.js"></script>
+		<!--<![endif]-->
+        
+	    
+	    <script src="/static/js/bootstrap.js"></script>
+	    <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+	    <script src="http://cdn.oesmith.co.uk/morris-0.4.3.min.js"></script>
+	    <script src="/static/js/morris/chart-data-morris.js"></script> -->
+	    <script src="/static/js/tablesorter/jquery.tablesorter.js"></script>
+	    <script src="/static/js/tablesorter/tables.js"></script>
     {% block dependency %}
     {% endblock dependency %}
   </body>

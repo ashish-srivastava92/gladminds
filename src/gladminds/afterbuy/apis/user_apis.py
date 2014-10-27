@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import  login
 from gladminds.core import utils
 from gladminds.afterbuy import utils as afterbuy_utils
-from gladminds.afterbuy import models as afterbuy_common
+from gladminds.afterbuy import models as afterbuy_model
 
 from gladminds.core.apis.user_apis import AccessTokenAuthentication
 from gladminds import settings
@@ -18,6 +18,7 @@ from gladminds.bajaj.services import message_template
 from gladminds.core.managers.mail import sent_otp_email
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.utils import mobile_format, get_task_queue
+from gladminds.core.cron_jobs.sqs_tasks import send_otp
 from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
 from tastypie.authorization import Authorization
@@ -42,7 +43,7 @@ class UserResources(CustomBaseModelResource):
     user = fields.ForeignKey(DjangoUserResources, 'user', null=True, blank=True, full=True)
 
     class Meta:
-        queryset = afterbuy_common.Consumer.objects.all()
+        queryset = afterbuy_model.Consumer.objects.all()
         resource_name = 'user'
         authorization = Authorization()
         detail_allowed_methods = ['get']
@@ -57,6 +58,7 @@ class UserResources(CustomBaseModelResource):
             url(r"^(?P<resource_name>%s)/(?P<user_id>\d+)/details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_user_details'), name="get_user_details"),
             url(r"^(?P<resource_name>%s)/(?P<user_id>\d+)/products%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('dispatch_dict'), name="api_dispatch_dict"),
             url(r"^(?P<resource_name>%s)/login%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('auth_login'), name="auth_login"),
+            url(r"^(?P<resource_name>%s)/validate-otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('validate_otp'), name="validate_otp"),
         ]
 
     def save_user_details(self, request, **kwargs):
@@ -68,7 +70,7 @@ class UserResources(CustomBaseModelResource):
         if not phone_number or not email_id or not name or not password:
             return HttpBadRequest("phone_number, username and password required.")
         try:
-            afterbuy_common.Consumer.objects.get(
+            afterbuy_model.Consumer.objects.get(
                                                 phone_number=phone_number)
             data = {'status': 0, 'message': 'phone number already registered'}
         except Exception as ex:
@@ -84,7 +86,7 @@ class UserResources(CustomBaseModelResource):
                                                         email_id, password)
                     create_user.first_name = name
                     create_user.save()
-                    user_register = afterbuy_common.Consumer(user=create_user,
+                    user_register = afterbuy_model.Consumer(user=create_user,
                                 phone_number=phone_number, consumer_id=customer_id)
                     user_register.save()
                     data = {'status': 1, 'message': 'succefully registerd'}
@@ -103,9 +105,9 @@ class UserResources(CustomBaseModelResource):
         if not id:
             return HttpBadRequest("user_id is required.")
         try:
-            user_info = afterbuy_common.Consumer.objects.get(
+            user_info = afterbuy_model.Consumer.objects.get(
                                 user__id=customer_id)
-            product_info = afterbuy_common.UserProduct.objects.filter(
+            product_info = afterbuy_model.UserProduct.objects.filter(
                                     consumer=user_info)
             if not product_info:
                 data = {'status': 0, 'message': "No product exist."}
@@ -137,46 +139,54 @@ class UserResources(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def authenticate_user_send_otp(self, request, **kwargs):
+        data = request.POST
         phone_number = request.POST.get('phone_number')
-        email = request.POST.get('email',None)
-        if not phone_number or not email:
-            return HttpBadRequest("phone_number oe email is required")
+        email = request.POST.get('email_id',None)
+        if not phone_number and not email:
+            return HttpBadRequest("phone_number or email is required")
         try:
-            phone_number = phone_number
             if phone_number:
                 logger.info('OTP request received. Mobile: {0}'.format(phone_number))
-                user = afterbuy_common.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
-                token = afterbuy_utils.get_token(user, phone_number)
-                message = message_template.get_template('SEND_OTP').format(token)
+                otp = afterbuy_utils.get_otp(phone_number=mobile_format(phone_number))
+                message = message_template.get_template('SEND_OTP').format(otp)
                 if settings.ENABLE_AMAZON_SQS:
                     task_queue = get_task_queue()
                     task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
                 else:
                     send_otp.delay(phone_number=phone_number, message=message)  # @UndefinedVariable
                 logger.info('OTP sent to mobile {0}'.format(phone_number))
+                data = {'status': 1, 'message': "OTP sent_successfully"}
                 #Send email if email address exist
             if email:
-                sent_otp_email(data=token, receiver=user.email, subject='Your OTP')
+                user_obj = User.objects.get(email=email)
+                otp = afterbuy_utils.get_otp(user=user_obj)
+                sent_otp_email(data=otp, receiver=email, subject='Your OTP')
                 data = {'status': 1, 'message': "OTP sent_successfully"}
         except Exception as ex:
             logger.error('Invalid details, mobile {0}'.format(request.POST.get('phone_number', '')))
-            data = {'status': 0, 'message': "inavlid phone_number"}
+            data = {'status': 0, 'message': "inavlid phone_number/email_id"}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def change_user_password(self, request, **kwargs):
         phone_number = request.POST.get('phone_number')
+        email = request.POST.get('email_id')
         password = request.POST.get('password')
-        if not phone_number and not password:
+        kwargs = {}
+        if not phone_number and not password and not email:
             return HttpBadRequest("mobile and password required")
         try:
-            phone_number = phone_number
-            consumer = afterbuy_common.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
-            user = User.objects.get(id=consumer.user_id)
+            if phone_number:
+                consumer = afterbuy_model.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
+                kwargs['id'] = consumer.user__id
+            elif email:
+                kwargs['email'] = email
+            user = User.objects.filter(**kwargs)[0]
             user.set_password(password)
+            user.save()
             data = {'status': 1, 'message': "password updated successfully"}
         except Exception as ex:
             logger.error('Invalid details, mobile {0}'.format(request.POST.get('phone_number', '')))
-            data = {'status': 0, 'message': "inavlid phone_number"}
+            data = {'status': 0, 'message': "inavlid phone_number/email"}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def get_user_details(self, request, **kwargs):
@@ -186,13 +196,14 @@ class UserResources(CustomBaseModelResource):
             return HttpBadRequest("id is required.")
         try:
             customer_id = int(customer_id)
-            consumer_obj = afterbuy_common.Consumer.objects.get(
+            consumer_obj = afterbuy_model.Consumer.objects.get(
                                                         user__id=customer_id)
             cosumer_data['username'] = consumer_obj.user.username
             cosumer_data['created_date'] = str(consumer_obj.created_date)
             cosumer_data['email'] = consumer_obj.user.email
             cosumer_data['phone_number'] = consumer_obj.phone_number
             cosumer_data['password'] = consumer_obj.user.password
+            cosumer_data['name'] = consumer_obj.user.first_name
         except Exception as ex:
             logger.info("[Exception get_user_product_information]:{0}".format(ex))
             return HttpBadRequest("Not a registered user")
@@ -206,7 +217,7 @@ class UserResources(CustomBaseModelResource):
             return HttpBadRequest("Phone Number/email_id and password  required.")
         try:
             if phone_number:
-                consumer_obj = afterbuy_common.Consumer.objects.get(phone_number
+                consumer_obj = afterbuy_model.Consumer.objects.get(phone_number
                                                  =mobile_format(phone_number))
                 password = request.POST['password']
                 user = authenticate(username=consumer_obj.consumer_id,
@@ -220,7 +231,7 @@ class UserResources(CustomBaseModelResource):
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    data = {'status': 1, 'message': "login successfully"}
+                    data = {'status': 1, 'message': "login successfully", "user_id": user.id}
             else:
                 data = {'status': 0, 'message': "login unsuccessfully"}
         except Exception as ex:
@@ -228,3 +239,22 @@ class UserResources(CustomBaseModelResource):
                 logger.info("[Exception get_user_login_information]:{0}".
                             format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
+
+    def validate_otp(self, request):
+        otp = request.POST.get('otp')
+        phone_number = request.POST.get('phone_number')
+        if not otp and not phone_number :
+            return HttpBadRequest("otp and phone_number required")
+        try:
+            user = afterbuy_model.Consumer.objects.get(phone_number
+                                                 =mobile_format(phone_number))
+            afterbuy_utils.validate_otp(user, otp, phone_number)
+            data = {'status': 1, 'message': "valid OTP"}
+        except Exception as ex:
+                data = {'status': 0, 'message': "invalid OTP"}
+                logger.info("[Exception OTP]:{0}".
+                            format(ex))
+        return HttpResponse(json.dumps(data), content_type="application/json")
+
+
+

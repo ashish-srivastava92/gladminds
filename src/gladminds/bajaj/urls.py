@@ -12,7 +12,7 @@ api_v1.register(coupon_apis.CouponDataResources())
 urlpatterns = patterns('',
    
     url(r'^site-info/$', 'gladminds.bajaj.views.site_info', name='site_info'),
-    url(r'', include(brand_admin.urls)),
     url(r'', include(core_urls)),
+    url(r'', include(brand_admin.urls)),
     url(r'', include(api_v1.urls))
 )

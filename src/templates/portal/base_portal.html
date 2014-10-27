@@ -7,14 +7,19 @@
 </div>
 
 <label>Users</label>
-<div class="list-group">
-    <a href="#" class="list-group-item">Service Advisors</a>
-    <a href="#" class="list-group-item">ASC's Service Advisors</a>
+<div class="list-group hidden">
+    {% if 'ascs' in groups %}
+    <a href="/aftersell/users/sa" class="list-group-item{% if active_menu == 'sa' %} active{% endif %}">Service Advisors</a>
+    {% endif %}
+    {% if 'dealers' in groups %}
+    <a href="/aftersell/users/asc" class="list-group-item{% if active_menu == 'asc' %} active{% endif %}">ASC's</a>
+    {% endif %}
 </div>
 
 <label>Exceptions</label>
 <div class="list-group">
 	<a href="/aftersell/exceptions/search" class="list-group-item{% if active_menu == 'search' %} active{% endif %}">Search Customer Details</a>
+	<a href="/aftersell/exceptions/status" class="list-group-item{% if active_menu == 'status' %} active{% endif %}">Service Status</a>
 	<a href="/aftersell/exceptions/check" class="list-group-item{% if active_menu == 'check' %} active{% endif %}">CHECK Free Service</a>
 	<a href="/aftersell/exceptions/close" class="list-group-item{% if active_menu == 'close' %} active{% endif %}">CLOSE Free Service</a>
 	<a href="/aftersell/exceptions/recover" class="list-group-item{% if active_menu == 'recover' %} active{% endif %}">UCN Recovery</a>
@@ -23,6 +28,5 @@
 
 <label>Reports</label>
 <div class="list-group">
-    <a href="/aftersell/servicedesk/helpdesk" class="list-group-item{% if active_menu == 'helpdesk' %} active{% endif %}">Contact Help Desk</a>
 	<a target="_blank" href="/aftersell/reports/reconciliation" class="list-group-item{% if active_menu == 'report' %} active{% endif %}">Reconciliation Report</a>
 </div>
