@@ -1,9 +1,9 @@
 from django.core.exceptions import ObjectDoesNotExist
-from gladminds.afterbuy import models as common
+from gladminds.bajaj import models 
 from django.conf import settings
 
 def get_template(template_key):
-    object = common.MessageTemplate.objects.get(template_key=template_key)
+    object = models.MessageTemplate.objects.get(template_key=template_key)
     return object.template
 
 RCV_MESSAGE_FORMAT = "{key} {message}"
