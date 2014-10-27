@@ -15,7 +15,6 @@ from gladminds.core.utils import mobile_format
 from gladminds.core.apis.user_apis import AccessTokenAuthentication
 from django.contrib.auth.models import User
 from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.afterbuy.managers import get_product
 
 logger = logging.getLogger("gladminds")
 
@@ -50,7 +49,7 @@ class ProductResources(CustomBaseModelResource):
         product_id = kwargs.get('product_id')
         try:
             phone_number= mobile_format(phone_number)
-            product_info = get_product(product_id)
+            product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
             insurance_info = afterbuy_common.ProductInsuranceInfo.objects.get(product=product_info)
             for field in ['agency_name', 'policy_number', 'premium', 'agency_contact',
                            'insurance_type', 'nominee', 'issue_date', 'expiry_date', 'vehicle_value','image_url']:
@@ -68,7 +67,7 @@ class ProductResources(CustomBaseModelResource):
             return HttpBadRequest("phone_number is required.")
         try:
             phone_number= mobile_format(phone_number)
-            product_info = get_product(product_id)
+            product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
             insurance_info = afterbuy_common.ProductInsuranceInfo(product=product_info)
             insurance_info.save()
             insurance_info.agency_name = request.POST.get('agency_name', None)
@@ -96,7 +95,7 @@ class ProductResources(CustomBaseModelResource):
         product_id = kwargs.get('product_id')
         try:
             phone_number= mobile_format(phone_number)
-            product_info = get_product(product_id)
+            product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
             license_info = afterbuy_common.License.objects.get(product=product_info)
             for field in ['license_number', 'issue_date', 'expiry_date', 'blood_group','image_url']:
                 resp[field] = getattr(license_info, field)
@@ -113,7 +112,7 @@ class ProductResources(CustomBaseModelResource):
             return HttpBadRequest("phone_number is required.")
         try:
             phone_number= mobile_format(phone_number)
-            product_info = get_product(product_id)
+            product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
             license_info = afterbuy_common.License(product=product_info)
             license_info.save()
             license_info.license_number = request.POST.get('license_number', None)
@@ -135,7 +134,7 @@ class ProductResources(CustomBaseModelResource):
         product_id = kwargs.get('product_id')
         try:
             phone_number= mobile_format(phone_number)
-            product_info = get_product(product_id)
+            product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
             registration_info = afterbuy_common.RegistrationCertificate.objects.get(product=product_info)
             for field in ['vehicle_registration_number', 'registration_date', 'chassis_number', 'owner_name', 'address', 'registration_upto', 'manufacturer', 'manufacturing_date', 'model_number', 'colour', 'image_url']:
                 resp[field] = getattr(registration_info, field)
@@ -152,7 +151,7 @@ class ProductResources(CustomBaseModelResource):
             return HttpBadRequest("phone_number is required.")
         try:
             phone_number= mobile_format(phone_number)
-            product_info = get_product(product_id)
+            product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
             registration_info = afterbuy_common.RegistrationCertificate(product=product_info)
             registration_info.save()
             registration_info.vehicle_registration_number = request.POST.get('vehicle_registration_number', None)
@@ -180,7 +179,7 @@ class ProductResources(CustomBaseModelResource):
         product_id = kwargs.get('product_id')
         try:
             phone_number= mobile_format(phone_number)
-            product_info = get_product(product_id)
+            product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
             pollution_info = afterbuy_common.PollutionCertificate.objects.get(product=product_info)
             for field in ['pucc_number', 'issue_date', 'expiry_date', 'image_url']:
                 resp[field] = getattr(pollution_info, field)
@@ -197,7 +196,7 @@ class ProductResources(CustomBaseModelResource):
             return HttpBadRequest("phone_number is required.")
         try:
             phone_number= mobile_format(phone_number)
-            product_info = get_product(product_id)
+            product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
             pollution_info = afterbuy_common.PollutionCertificate(product=product_info)
             pollution_info.save()
             pollution_info.pucc_number = request.POST.get('pucc_number', None)
@@ -219,7 +218,7 @@ class ProductResources(CustomBaseModelResource):
         product_id = kwargs.get('product_id')
         try:
             phone_number= mobile_format(phone_number)
-            product_info = get_product(product_id)
+            product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
             support_info = afterbuy_common.Support.objects.get(product=product_info)
             for field in ['toll_free', 'service_center_name', 'service_center_number', 'feedback_form']:
                 resp[field] = getattr(support_info, field)
@@ -236,7 +235,7 @@ class ProductResources(CustomBaseModelResource):
             return HttpBadRequest("phone_number is required.")
         try:
             phone_number= mobile_format(phone_number)
-            product_info = get_product(product_id)
+            product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
             support_info = afterbuy_common.Support(product=product_info)
             support_info.save()
             support_info.toll_free = request.POST.get('toll_free', None)
@@ -257,7 +256,7 @@ class ProductResources(CustomBaseModelResource):
         product_id = kwargs.get('product_id')
         try:
             phone_number= mobile_format(phone_number)
-            product_info = get_product(product_id)
+            product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
             invoice_info = afterbuy_common.Invoice.objects.get(product=product_info)
             for field in ['invoice_number', 'purchase_date', 'dealer_name', 'dealer_contact', 'amount', 'image_url']:
                 resp[field] = getattr(invoice_info, field)
@@ -274,7 +273,7 @@ class ProductResources(CustomBaseModelResource):
             return HttpBadRequest("phone_number is required.")
         try:
             phone_number= mobile_format(phone_number)
-            product_info = get_product(product_id)
+            product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
             invoice_info = afterbuy_common.Invoice(product=product_info)
             invoice_info.save()
             invoice_info.invoice_number = request.POST.get('invoice_number', None)
@@ -295,12 +294,15 @@ class ProductResources(CustomBaseModelResource):
     def get_product_coupons(self, request, **kwargs):
         phone_number = request.GET.get('phone_number')
         product_id = kwargs.get('product_id')
-        if not phone_number:
-            return HttpBadRequest("Phone number is required.")
+#         if not phone_number:
+#             return HttpBadRequest("Phone number is required.")
         try:
             if product_id:
+                print "hell "
                 product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
+                print product_info.id
                 brand_product_id = product_info.brand_product_id
+                print brand_product_id
                 return HttpResponseRedirect('http://local.bajaj.gladmindsplatform.co:8000/v1/coupons/?product='+brand_product_id)
 
         except Exception as ex:
