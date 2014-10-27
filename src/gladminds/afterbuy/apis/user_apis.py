@@ -14,7 +14,6 @@ from gladminds.afterbuy import models as afterbuy_model
 from gladminds.core.apis.user_apis import AccessTokenAuthentication
 from gladminds import settings
 from tastypie import fields
-from gladminds.bajaj.services import message_template
 from gladminds.core.managers.mail import sent_otp_email
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.utils import mobile_format, get_task_queue
@@ -148,7 +147,7 @@ class UserResources(CustomBaseModelResource):
             if phone_number:
                 logger.info('OTP request received. Mobile: {0}'.format(phone_number))
                 otp = afterbuy_utils.get_otp(phone_number=mobile_format(phone_number))
-                message = message_template.get_template('SEND_OTP').format(otp)
+                message = afterbuy_utils.get_template('SEND_OTP').format(otp)
                 if settings.ENABLE_AMAZON_SQS:
                     task_queue = get_task_queue()
                     task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
@@ -163,7 +162,7 @@ class UserResources(CustomBaseModelResource):
                 sent_otp_email(data=otp, receiver=email, subject='Your OTP')
                 data = {'status': 1, 'message': "OTP sent_successfully"}
         except Exception as ex:
-            logger.error('Invalid details, mobile {0}'.format(request.POST.get('phone_number', '')))
+            logger.error('Invalid details, mobile {0} and exception {1}'.format(request.POST.get('phone_number', ''),ex))
             data = {'status': 0, 'message': "inavlid phone_number/email_id"}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
@@ -185,7 +184,7 @@ class UserResources(CustomBaseModelResource):
             user.save()
             data = {'status': 1, 'message': "password updated successfully"}
         except Exception as ex:
-            logger.error('Invalid details, mobile {0}'.format(request.POST.get('phone_number', '')))
+            logger.error('Invalid details, mobile {0} and exception {1}'.format(request.POST.get('phone_number', ''),ex))
             data = {'status': 0, 'message': "inavlid phone_number/email"}
         return HttpResponse(json.dumps(data), content_type="application/json")
 

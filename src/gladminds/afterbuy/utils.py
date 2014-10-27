@@ -32,3 +32,7 @@ def get_otp(**kwargs):
     otp = generate_otp(user.phone_number)
     save_otp(user, otp)
     return otp
+
+def get_template(template_key):
+    object = afterbuy_model.MessageTemplate.objects.get(template_key=template_key)
+    return object.template
