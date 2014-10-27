@@ -89,7 +89,7 @@
 	          });
 	      }
       else{
-    	  messageBlock.text('Vin should be 17 digits. Please retry');
+    	  messageBlock.text('VIN should be 17 digits. Please retry');
           messageModal.modal('show');
       }
       return false;
