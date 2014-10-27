@@ -221,10 +221,10 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                     "[Exception:  DealerAndServiceAdvisorFeed_sa]: {0}"
                     .format(odne))
                     sa_user = self.register_user('SA', username=dealer['service_advisor_id'],
+                                                 first_name=dealer['name'],
                                                  phone_number=dealer['phone_number'])
                     service_advisor = models.ServiceAdvisor(
                                             service_advisor_id=dealer['service_advisor_id'], 
-                                            name=dealer['name'], phone_number=dealer['phone_number'],
                                             dealer=dealer_data, user=sa_user)
                 service_advisor.status = unicode(dealer['status'])
                 service_advisor.save()
