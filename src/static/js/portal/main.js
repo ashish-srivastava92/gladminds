@@ -53,6 +53,11 @@
       var vin = $('#srch-vin').val(),
           messageModal = $('.modal.message-modal'),
           messageBlock = $('.modal-body', messageModal);
+      if(vin.trim().length!=17){
+    	  messageBlock.text('VIN should be 17 digits. Please retry');
+          messageModal.modal('show');
+          return false;
+      }
       $('.customer-vin').val(vin);
       
       var jqXHR = $.ajax({
