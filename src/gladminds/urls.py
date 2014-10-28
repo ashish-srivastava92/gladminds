@@ -32,7 +32,7 @@ urlpatterns = patterns('',
     url(r'^aftersell/users/otp/update_pass', 'gladminds.views.update_pass', name='update_pass'),
 
     url(r'^aftersell/asc/self-register/$', 'gladminds.views.asc_registration'),
-     url(r'^aftersell/(?P<role>[a-zA-Z0-9.-]+)/$', 'gladminds.views.brand_details'),
+     url(r'^report/(?P<role>[a-zA-Z0-9.-]+)/$', 'gladminds.views.brand_details'),
 
     #Afterbuy accesstoken URL.
     url(r'^oauth2/', include('provider.oauth2.urls', namespace = 'oauth2')),
