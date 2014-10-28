@@ -108,7 +108,7 @@ class AuthorizedServiceCenter(BaseModel):
         verbose_name_plural = "Service Center Data"
 
     def __unicode__(self):
-        return self.dealer_id
+        return self.asc_id
 
 
 class ServiceAdvisor(BaseModel):
@@ -122,7 +122,7 @@ class ServiceAdvisor(BaseModel):
         verbose_name_plural = "Service Advisor Data"
 
     def __unicode__(self):
-        return self.phone_number
+        return self.service_advisor_id
 
 '''
 ProductTypeData  is linked to Brand data

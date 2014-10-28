@@ -1,18 +1,17 @@
 from django.utils import timezone
 
-from gladminds.bajaj.models import AuditLog, DataFeedLog
+from gladminds.bajaj.models import SMSLog, DataFeedLog
 
 
-def audit_log(action='SENT', sender='+1 469-513-9856', reciever=None,
-              message=None, status='success'):
+def sms_log(action='SENT', sender='+1 469-513-9856', reciever=None,
+              message=None):
     if reciever == '9999999999':
         status = 'fail'
 
-    action_log = AuditLog(date=timezone.now(),
-                               action=action, sender=sender,
-                               reciever=reciever, status=status,
+    sms_log = SMSLog(action=action, sender=sender,
+                               reciever=reciever,
                                message=message)
-    action_log.save()
+    sms_log.save()
 
 
 def feed_log(feed_type=None, total_data_count=None, failed_data_count=None,

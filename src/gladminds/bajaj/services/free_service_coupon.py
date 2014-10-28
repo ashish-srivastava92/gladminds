@@ -19,7 +19,8 @@ from tastypie import http
 from tastypie.exceptions import ImmediateHttpResponse
 
 from gladminds.core.apis.user_apis import AccessTokenAuthentication
-from gladminds.core.managers import sms_parser, audit_manager
+from gladminds.core.managers import sms_parser
+from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services import message_template as templates
 from gladminds.bajaj import models as common
 from gladminds.core.cron_jobs.sqs_tasks import send_registration_detail, send_service_detail, \
@@ -76,7 +77,7 @@ class GladmindsResources(Resource):
                 logger.info('Message to send: ' + message)
         phone_number = utils.get_phone_number_format(phone_number)
         message = format_message(message)
-        audit.audit_log(action='RECIEVED', sender=phone_number, reciever='+1 469-513-9856', message=message, status='success')
+        sms_log(action='RECIEVED', sender=phone_number, reciever='+1 469-513-9856', message=message, status='success')
         logger.info('Recieved Message from phone number: {0} and message: {1}'.format(phone_number, message))
         try:
             sms_dict = smsparser.sms_parser(message=message)
@@ -88,7 +89,7 @@ class GladmindsResources(Resource):
             else:
                 send_invalid_keyword_message.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
 
-            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpBadRequest(ink.message))
         except smsparser.InvalidMessage as inm:
             message = inm.template
@@ -97,7 +98,7 @@ class GladmindsResources(Resource):
                 task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
             else:
                 send_invalid_keyword_message.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
-            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpBadRequest(inm.message))
         except smsparser.InvalidFormat as inf:
             message = angular_format('CORRECT FORMAT: ' + inf.template)
@@ -106,7 +107,7 @@ class GladmindsResources(Resource):
                 task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
             else:
                 send_invalid_keyword_message.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
-            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
             raise ImmediateHttpResponse(HttpBadRequest(inf.message))
         handler = getattr(self, sms_dict['handler'], None)
         try:
@@ -142,7 +143,7 @@ class GladmindsResources(Resource):
             task_queue.add("send_registration_detail", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         else:
             send_registration_detail.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
-        audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
     @log_time
@@ -179,7 +180,7 @@ class GladmindsResources(Resource):
             task_queue.add("customer_detail_recovery", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         else:
             customer_detail_recovery.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
-        audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
     @log_time
@@ -216,7 +217,7 @@ class GladmindsResources(Resource):
             task_queue.add("send_service_detail", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         else:
             send_service_detail.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
-        audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
     def get_customer_phone_number_from_vin(self, vin):
@@ -376,7 +377,7 @@ class GladmindsResources(Resource):
                 task_queue.add("send_coupon_detail_customer", {"phone_number":utils.get_phone_number_format(customer_phone_number), "message":customer_message, "sms_client":settings.SMS_CLIENT}, delay_seconds=customer_message_countdown)
             else:
                 send_coupon_detail_customer.apply_async( kwargs={ 'phone_number': utils.get_phone_number_format(customer_phone_number), 'message':customer_message, "sms_client":settings.SMS_CLIENT}, countdown=customer_message_countdown)
-            audit.audit_log(reciever=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
+            sms_log(reciever=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
         except IndexError as ie:
             dealer_message = templates.get_template('SEND_INVALID_VIN_OR_FSC')
         except ObjectDoesNotExist as odne:
@@ -392,7 +393,7 @@ class GladmindsResources(Resource):
                 task_queue.add("send_service_detail", {"phone_number":phone_number, "message":dealer_message, "sms_client":settings.SMS_CLIENT})
             else:
                 send_service_detail.delay(phone_number=phone_number, message=dealer_message, sms_client=settings.SMS_CLIENT)
-            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=dealer_message)
+            sms_log(reciever=phone_number, action=AUDIT_ACTION, message=dealer_message)
         return {'status': True, 'message': dealer_message}
 
     
@@ -435,7 +436,7 @@ class GladmindsResources(Resource):
                 task_queue.add("send_coupon", {"phone_number":phone_number, "message": message, "sms_client":settings.SMS_CLIENT})
             else:
                 send_coupon.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
-            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return {'status': True, 'message': message}
 
     def validate_dealer(self, phone_number):
@@ -497,7 +498,7 @@ class GladmindsResources(Resource):
                 task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
             else:
                 send_invalid_keyword_message.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
-            audit.audit_log(reciever=sa_phone, action=AUDIT_ACTION, message=message)
+            sms_log(reciever=sa_phone, action=AUDIT_ACTION, message=message)
             logger.info("Message sent to SA : " + message)
             return False
         return True
@@ -517,7 +518,7 @@ class GladmindsResources(Resource):
         except Exception as ex:
             message = templates.get_template('SEND_INVALID_MESSAGE')
         send_brand_sms_customer.delay(phone_number=phone_number, message=message)
-        audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
     def determine_format(self, request):
@@ -560,7 +561,7 @@ class GladmindsResources(Resource):
             send_feedback_received(context)
             context = create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)
             send_servicedesk_feedback(context, gladminds_feedback_object)
-            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message = message)
+            sms_log(reciever=phone_number, action=AUDIT_ACTION, message = message)
         return {'status': True, 'message': message}
 
     def check_role_of_initiator(self, phone_number):
