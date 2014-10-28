@@ -11,6 +11,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.db import transaction
 from django.db.models.query_utils import Q
+from django.contrib.auth.models import User
 
 from gladminds.bajaj import models as common
 from gladminds.core import utils
@@ -187,7 +188,8 @@ def asc_registration(request):
                  phone_number=data['phone-number'], email=data['email'],
                  pincode=data['pincode'], status=1)
             asc_obj.save()
-        except:
+        except Exception as ex:
+            print ex
             return HttpResponse(json.dumps({'message': 'Already Registered'}),
                                 content_type='application/json')
         return HttpResponse(json.dumps({'message': 'Registration is complete'}),
@@ -432,18 +434,18 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
     phone_number = mobile_format(str(data['phone-number']))
     if not ('dealers' in groups or 'self' in groups):
         raise
-    if afterbuy_common.RegisteredASC.objects.filter(phone_number=phone_number)\
-        or afterbuy_common.ASCSaveForm.objects.filter(phone_number=phone_number):
+    if common.AuthorizedServiceCenter.objects.filter(user__phone_number=phone_number)\
+        or common.ASCTempRegistration.objects.filter(phone_number=phone_number):
         return json.dumps({'message': ALREADY_REGISTERED})
 
     try:
         dealer_data = None
         if "dealer_id" in data:
-            dealer_data = afterbuy_common.RegisteredDealer.objects.\
+            dealer_data = common.Dealer.objects.\
                                             get(dealer_id=data["dealer_id"])
             dealer_data = dealer_data.dealer_id if dealer_data else None
 
-        asc_obj = afterbuy_common.ASCSaveForm(name=data['name'],
+        asc_obj = common.ASCTempRegistration(name=data['name'],
                  address=data['address'], password=data['password'],
                  phone_number=phone_number, email=data['email'],
                  pincode=data['pincode'], status=1, dealer_id=dealer_data)
