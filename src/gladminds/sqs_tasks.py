@@ -16,7 +16,6 @@ from gladminds.utils import convert_utc_to_local_time
 logger = logging.getLogger("gladminds")
 __all__ = ['GladmindsTaskManager']
 AUDIT_ACTION = 'SEND TO QUEUE'
-sms_client = load_gateway()
 
 
 """

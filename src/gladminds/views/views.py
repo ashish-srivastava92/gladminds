@@ -22,20 +22,14 @@ from gladminds.models import common
 from gladminds.decorator import log_time
 from gladminds.sqs_tasks import send_otp
 from gladminds import utils, message_template
-<<<<<<< HEAD:src/gladminds/views/views.py
-from gladminds.utils import get_task_queue, get_customer_info, get_list_from_set,  get_user_groups,\
-    get_sa_list, recover_coupon_info, mobile_format, format_date_string, stringify_groups, search_details,\
-    services_search_details, service_advisor_search, get_sa_list_for_login_dealer,get_asc_list_for_login_dealer
-=======
-from gladminds.utils import get_task_queue, get_customer_info,\
-    get_sa_list, recover_coupon_info, mobile_format,\
-    format_date_string, stringify_groups, search_details,\
-    services_search_details, service_advisor_search,\
-    get_sa_list_for_login_dealer,get_asc_list_for_login_dealer,get_asc_data,\
-    asc_cuopon_details, get_state_city
->>>>>>> upstream/prod_gm_1_3_1:src/gladminds/views.py
 from gladminds.sqs_tasks import export_asc_registeration_to_sap
 from gladminds.aftersell.models import common as aftersell_common
+from gladminds.utils import get_task_queue, get_customer_info,\
+    get_sa_list, recover_coupon_info, mobile_format,\
+     stringify_groups, search_details,\
+    services_search_details, service_advisor_search,\
+    get_sa_list_for_login_dealer,get_asc_list_for_login_dealer,get_asc_data,\
+    asc_cuopon_details, get_state_city, get_user_groups, get_list_from_set
 from gladminds.mail import sent_otp_email
 from gladminds.feed import SAPFeed
 from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
@@ -318,6 +312,27 @@ def servicedesk(request, servicedesk=None):
     else:
         return HttpResponseBadRequest()
 
+def get_feedbacks(user):
+    group = user.groups.all()[0]
+    if group.name == 'dealers':
+        sa_list = get_sa_list(user)
+        feedback_list = []
+        if sa_list:
+            for phone_number in sa_list:
+                feedbacks = aftersell_common.Feedback.objects.filter(
+                        reporter=phone_number).order_by('-created_date')
+                for feedback in feedbacks:
+                    feedback_list.append(feedback)
+    return feedback_list
+
+
+@login_required()
+@require_http_methods(["GET"])
+def get_user_tickets(request,servicedesk=None):  
+    return render(request, 'portal/tickets.html',\
+                  {"feedbacks": get_feedbacks(request.user)})
+
+
 
 def save_help_desk_data(request):
     fields = ['message', 'priority', 'advisorMobile', 'type', 'subject']
@@ -537,10 +552,6 @@ def trigger_sqs_tasks(request):
         'send-reminder': 'send_reminder',
         'export-customer-registered': 'export_customer_reg_to_sap',
     }
-<<<<<<< HEAD:src/gladminds/views/views.py
-
-=======
->>>>>>> upstream/prod_gm_1_3_1:src/gladminds/views.py
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
     taskqueue.add(sqs_tasks[request.POST['task']])
     return HttpResponse()
