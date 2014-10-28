@@ -431,26 +431,24 @@ def get_updated_customer_id(customer_id):
             logger.info("Temporary ID {0} does not exists: {1}".format(customer_id, ex))
     return customer_id
 
-def service_advisor_search(data):
-    dealer_data = aftersell_common.RegisteredDealer.objects.get(
-                dealer_id=data['current_user'])
-    sa_phone_number = mobile_format(data['phone_number'])
-    message = sa_phone_number + ' is active under another dealer.'
-    
-    sa_details = aftersell_common.ServiceAdvisorDealerRelationship.objects.select_related(
-                    'service_advisor_id').filter(service_advisor_id__phone_number=sa_phone_number,
-                                dealer_id=dealer_data)
 
-    sa_mobile_active = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(
-                            service_advisor_id__phone_number=sa_phone_number,
-                            status='Y').exclude(dealer_id=dealer_data)
+def service_advisor_search(data):
+    dealer_data = models.Dealer.objects.get(
+                dealer_id=data['current_user'])
+    phone_number = mobile_format(data['phone_number'])
+    message = phone_number + ' is active under another dealer.' 
+    sa_details = models.ServiceAdvisor.objects.filter(user__phone_number=phone_number, dealer=dealer_data)
+    sa_mobile_active = models.ServiceAdvisor.objects.filter(
+                                user__phone_number=phone_number,
+                                status='Y').exclude(dealer=dealer_data)
     if not sa_details and not sa_mobile_active:
         message = 'Service advisor is not associated, Please register the service advisor.'
         return {'message': message}
     if sa_details:
-        service_advisor_details = {'id': sa_details[0].service_advisor_id.service_advisor_id,
-                                   'phone': data['phone_number'], 
-                                   'name': sa_details[0].service_advisor_id.name, 
+        user_details = sa_details[0].user
+        service_advisor_details = {'id': sa_details[0].service_advisor_id,
+                                   'phone': data['phone_number'],
+                                   'name':  user_details.user.first_name, 
                                    'status': sa_details[0].status,
                                    'active':len(sa_mobile_active),
                                    'message':message}

@@ -122,7 +122,7 @@ class ServiceAdvisor(BaseModel):
         verbose_name_plural = "Service Advisor Data"
 
     def __unicode__(self):
-        return self.phone_number
+        return self.service_advisor_id
 
 '''
 ProductTypeData  is linked to Brand data

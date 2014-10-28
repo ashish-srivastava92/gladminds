@@ -18,7 +18,8 @@ from gladminds.core import utils
 from gladminds.bajaj.services import message_template
 from gladminds.core.utils import get_task_queue, get_customer_info,\
     get_sa_list, recover_coupon_info, mobile_format, stringify_groups,\
-    get_list_from_set,  get_user_groups, search_details
+    get_list_from_set,  get_user_groups, search_details,\
+    services_search_details, service_advisor_search
 from gladminds.core.cron_jobs.sqs_tasks import export_asc_registeration_to_sap, send_otp
 from gladminds.core.managers.mail import sent_otp_email
 from gladminds.bajaj.feeds.feed import SAPFeed
@@ -32,6 +33,7 @@ from gladminds.core.decorator import log_time
 gladmindsResources = GladmindsResources()
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
+TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
 
 
 def auth_login(request, provider):
@@ -186,10 +188,9 @@ def asc_registration(request):
             asc_obj = common.ASCTempRegistration(name=data['name'],
                  address=data['address'], password=data['password'],
                  phone_number=data['phone-number'], email=data['email'],
-                 pincode=data['pincode'], status=1)
+                 pincode=data['pincode'])
             asc_obj.save()
         except Exception as ex:
-            print ex
             return HttpResponse(json.dumps({'message': 'Already Registered'}),
                                 content_type='application/json')
         return HttpResponse(json.dumps({'message': 'Registration is complete'}),
@@ -223,11 +224,18 @@ def exceptions(request, exception=None):
         function_mapping = {
             'customer': get_customer_info,
             'recover': recover_coupon_info,
-            'search': search_details
+            'search': search_details,
+            'status': services_search_details,
+            'serviceadvisor': service_advisor_search
         }
         try:
-            data = function_mapping[exception](request)
-            return HttpResponse(content=json.dumps(data), content_type='application/json')
+            post_data = request.POST.copy()
+            post_data['current_user'] = request.user
+            post_data['groups'] = groups
+            if request.FILES:
+                post_data['job_card']=request.FILES['jobCard']
+            data = function_mapping[exception](post_data)
+            return HttpResponse(content=json.dumps(data),  content_type='application/json')
         except:
             return HttpResponseBadRequest()
     else:
@@ -331,7 +339,7 @@ def create_reconciliation_report(query_params, user):
     report_data = []
     filter = {}
     params = {}
-    user = afterbuy_common.RegisteredDealer.objects.filter(dealer_id=user)
+    user = common.Dealer.objects.filter(dealer_id=user)
     filter['servicing_dealer'] = user[0]
     args = { Q(status=4) | Q(status=2) | Q(status=6)}
     status = query_params.get('status')
@@ -366,7 +374,7 @@ def create_reconciliation_report(query_params, user):
             coupon_data_dict['special_case'] = coupon_data.special_case
         report_data.append(coupon_data_dict)
     return report_data
-    
+
 
 CUST_UPDATE_SUCCESS = 'Customer phone number has been updated.'
 CUST_REGISTER_SUCCESS = 'Customer has been registered with ID: '
@@ -448,7 +456,7 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
         asc_obj = common.ASCTempRegistration(name=data['name'],
                  address=data['address'], password=data['password'],
                  phone_number=phone_number, email=data['email'],
-                 pincode=data['pincode'], status=1, dealer_id=dealer_data)
+                 pincode=data['pincode'], dealer_id=dealer_data)
         asc_obj.save()
         if settings.ENABLE_AMAZON_SQS:
             task_queue = utils.get_task_queue()
@@ -477,14 +485,12 @@ def save_sa_registration(request, groups):
         existing_sa = True
     else:
         service_advisor_id = TEMP_SA_ID_PREFIX + str(random.randint(10**5, 10**6))
-   
     data_source.append(utils.create_sa_feed_data(data, request.user, service_advisor_id))
     logger.info('[Temporary_sa_registration]:: Initiating dealer-sa feed for ID' + service_advisor_id)
     feed_remark = FeedLogWithRemark(len(data_source),
                                                 feed_type='Dealer Feed',
                                                 action='Received', status=True)
     sap_obj = SAPFeed()
-    
     feed_response = sap_obj.import_to_db(feed_type='dealer',
                         data_source=data_source, feed_remark=feed_remark)
     if feed_response.failed_feeds > 0:
