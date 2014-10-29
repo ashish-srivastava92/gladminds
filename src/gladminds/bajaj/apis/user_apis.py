@@ -10,7 +10,7 @@ from provider.oauth2.models import AccessToken
 import logging
 from gladminds.core.apis.base_apis import CustomBaseModelResource
   
-class UserProfileResources(CustomBaseModelResource):
+class SAProfileResource(CustomBaseModelResource):
     class Meta:
         queryset = UserProfile.objects.all()
         resource_name = "user_profile"

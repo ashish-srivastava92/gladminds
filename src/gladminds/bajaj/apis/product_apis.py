@@ -3,7 +3,7 @@ from tastypie.authorization import Authorization
 from tastypie import fields 
 from gladminds.bajaj.models import ProductData, ProductType
 from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.bajaj.apis.user_apis import UserProfileResources, DealerResources
+from gladminds.bajaj.apis.user_apis import DealerResources, SAProfileResource
    
 class ProductTypeDataResources(CustomBaseModelResource):
     class Meta:
@@ -15,7 +15,7 @@ class ProductTypeDataResources(CustomBaseModelResource):
    
 class ProductDataResources(CustomBaseModelResource):
     product_type = fields.ForeignKey(ProductTypeDataResources, 'product_type', null=True, blank=True, full=True)
-    customer_phone_number = fields.ForeignKey(UserProfileResources, 'customer_phone_number', null=True, blank=True, full=True)
+    customer_phone_number = fields.ForeignKey(SAProfileResource, 'customer_phone_number', null=True, blank=True, full=True)
     dealer_id = fields.ForeignKey(DealerResources, 'dealer_id', null=True, blank=True, full=True)
     class Meta:
         queryset = ProductData.objects.all()
