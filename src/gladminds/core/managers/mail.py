@@ -236,7 +236,6 @@ def send_template_email(template_name, context, mail_detail,receiver=None):
     #TODO We have to remove hard code receiver
 
 def send_mail_when_vin_does_not_exist(data=None):
-    from gladminds import mail
     try:
         file_stream = open(settings.TEMPLATE_DIR+'/vin_does_not_exist.html')
         feed_temp = file_stream.read()
@@ -244,7 +243,7 @@ def send_mail_when_vin_does_not_exist(data=None):
         context = Context({"content": data})
         body = template.render(context)
         mail_detail = settings.VIN_DOES_NOT_EXIST_DETAIL
-        mail.send_email(sender=mail_detail['sender'], receiver=mail_detail['receiver'],
+        send_email(sender=mail_detail['sender'], receiver=mail_detail['receiver'],
                    subject=mail_detail['subject'], body=body,
                    smtp_server=settings.MAIL_SERVER)
     except Exception as ex:

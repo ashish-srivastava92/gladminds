@@ -340,7 +340,7 @@ def create_reconciliation_report(query_params, user):
     filter = {}
     params = {}
     user = common.Dealer.objects.filter(dealer_id=user)
-    filter['servicing_dealer'] = user[0]
+    filter['servicing_dealer'] = 'NULL'
     args = { Q(status=4) | Q(status=2) | Q(status=6)}
     status = query_params.get('status')
     from_date = query_params.get('from')
@@ -349,25 +349,27 @@ def create_reconciliation_report(query_params, user):
     if status:
         args = { Q(status=status) }
         if status=='2':
-            args = { Q(status=2) | Q(status=6)}      
+            args = { Q(status=2) | Q(status=6)}   
     all_coupon_data = common.CouponData.objects.filter(*args, **filter).order_by('-actual_service_date')
+    print "ssssssss",all_coupon_data
     map_status = {'6': 'Closed', '4': 'In Progress', '2':'Closed'}
     for coupon_data in all_coupon_data:
         coupon_data_dict = {}
-        coupon_data_dict['vin'] = coupon_data.vin.vin
-        coupon_data_dict['sa_phone_name'] = coupon_data.sa_phone_number
+        coupon_data_dict['vin'] = coupon_data.product.product_id
+        user = coupon_data.service_advisor
+        coupon_data_dict['sa_phone_name'] = user.phone_number
         coupon_data_dict['service_avil_date'] = coupon_data.actual_service_date
         coupon_data_dict['closed_date'] = coupon_data.closed_date
         coupon_data_dict['service_status'] = map_status[str(coupon_data.status)]
         if query_params['type']== 'credit':
-            customer_details = coupon_data.vin.customer_phone_number
-            coupon_data_dict['customer_name'] = customer_details.customer_name
+            customer_details = coupon_data.product.customer_details
+            coupon_data_dict['customer_name'] = customer_details.user.first_name
             coupon_data_dict['customer_number'] = customer_details.phone_number
             coupon_data_dict['credit_date'] = coupon_data.credit_date
             coupon_data_dict['credit_note'] = coupon_data.credit_note
         else:
-            coupon_data_dict['customer_id'] = coupon_data.vin.sap_customer_id
-            coupon_data_dict['product_type'] = coupon_data.vin.product_type
+            coupon_data_dict['customer_id'] = coupon_data.product.customer_id
+            coupon_data_dict['product_type'] = coupon_data.product.product_type
             coupon_data_dict['coupon_no'] = coupon_data.unique_service_coupon
             coupon_data_dict['kms'] = coupon_data.actual_kms
             coupon_data_dict['service_type'] = coupon_data.service_type
@@ -383,24 +385,23 @@ def register_customer(request, group=None):
     post_data = request.POST
     data_source = []
     existing_customer = False
-    product_obj = common.ProductData.objects.filter(vin=post_data['customer-vin'])
+    product_obj = common.ProductData.objects.filter(product_id=post_data['customer-vin'])
     if not post_data['customer-id']:
         temp_customer_id = TEMP_ID_PREFIX + str(random.randint(10**5, 10**6))
     else:
         temp_customer_id = post_data['customer-id']
         existing_customer = True
     data_source.append(utils.create_feed_data(post_data, product_obj[0], temp_customer_id))
-    
-    check_with_invoice_date = utils.subtract_dates(data_source[0]['product_purchase_date'], product_obj[0].invoice_date)    
-    check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.datetime.now())
 
+    check_with_invoice_date = utils.subtract_dates(data_source[0]['product_purchase_date'], product_obj[0].invoice_date)    
+    check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.now())
     if not existing_customer and check_with_invoice_date.days < 0 or check_with_today_date.days > 0:
         message = "Product purchase date should be between {0} and {1}".\
-                format((product_obj[0].invoice_date).strftime("%d-%m-%Y"),(datetime.datetime.now()).strftime("%d-%m-%Y"))
+                format((product_obj[0].invoice_date).strftime("%d-%m-%Y"),(datetime.now()).strftime("%d-%m-%Y"))
         logger.info('[Temporary_cust_registration]:: {0} Entered date is: {1}'.format(message, str(data_source[0]['product_purchase_date'])))
         return json.dumps({"message": message})
-    
-    try:    
+
+    try:
         with transaction.atomic():
             customer_obj = common.CustomerTempRegistration.objects.filter(temp_customer_id = temp_customer_id)
             if customer_obj:
