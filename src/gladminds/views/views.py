@@ -281,17 +281,24 @@ def get_sa_under_asc(request, id=None):
         pass
     return render(request, template, {'active_menu':'sa',"data": data})
 
-def get_feedbacks(user):
+def get_feedbacks(user, status):
     group = user.groups.all()[0]
+    feedbacks = []
+    if not status:
+        status = ['Open', 'Pending', 'Progress']
+    else:
+        status = [status]
     if group.name == 'dealers':
         sa_list = get_sa_list(user)
         if sa_list:
-            feedbacks = aftersell_common.Feedback.objects.filter(reporter__in=sa_list).order_by('-created_date')
+            feedbacks = aftersell_common.Feedback.objects.filter(reporter__in=sa_list, status__in=status).order_by('-created_date')
+            
     return feedbacks
 
 
 @login_required()
 def servicedesk(request,servicedesk=None):
+    status = request.GET.get('status',None)
     groups = stringify_groups(request.user)
     if request.method == 'GET':
         template = 'portal/help_desk.html'
@@ -301,10 +308,10 @@ def servicedesk(request,servicedesk=None):
             }
         try:
             data = data_mapping[servicedesk](request.user)
-        except:
+        except Exception as ex:
             #It is acceptable if there is no data_mapping defined for a function
             pass
-        return render(request, template, {"feedbacks" : get_feedbacks(request.user),
+        return render(request, template, {"feedbacks" : get_feedbacks(request.user, status),
                                           'active_menu': servicedesk,
                                           "data": data, 'groups': groups,
                      "status": get_list_from_set(aftersell_common.FEEDBACK_STATUS),
