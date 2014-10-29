@@ -20,8 +20,9 @@ ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
+API_FLAG = False
 COUPON_VALID_DAYS = 30
-COUPON_URL = 'http://local.bajaj.gladmindsplatform.co:8000'
+COUPON_URL = 'local.bajaj.gladmindsplatform.co'
 TOTP_SECRET_KEY = '93424'
 OTP_VALIDITY = 120
 

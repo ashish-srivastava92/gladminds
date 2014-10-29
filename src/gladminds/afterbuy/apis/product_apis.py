@@ -15,7 +15,7 @@ from gladminds.core.utils import mobile_format
 from gladminds.core.apis.user_apis import AccessTokenAuthentication
 from django.contrib.auth.models import User
 from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.settings import COUPON_URL
+from gladminds.settings import COUPON_URL, API_FLAG
 
 logger = logging.getLogger("gladminds")
 
@@ -291,15 +291,18 @@ class ProductResources(CustomBaseModelResource):
             data={'status':0, 'message':log_message}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
-    
+#FIX ME    
     def get_product_coupons(self, request, **kwargs):
+        port = request.META['SERVER_PORT']
         product_id = kwargs.get('product_id')
         try:
             if product_id:
                 product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
                 brand_product_id = product_info.brand_product_id
-                return HttpResponseRedirect(COUPON_URL+'/v1/coupons/?product='+brand_product_id)
-
+                if not API_FLAG:
+                    return HttpResponseRedirect('http://'+COUPON_URL+':'+port+'/v1/coupons/?product='+brand_product_id)
+                else:
+                    return HttpResponseRedirect('http://'+COUPON_URL+'/v1/coupons/?product='+brand_product_id)
         except Exception as ex:
             logger.error('Invalid details')
     
