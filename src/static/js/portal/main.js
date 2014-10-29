@@ -55,10 +55,14 @@
     
     $('.cutomer-reg-form').on('submit', function() {
         var vin = $('#srch-vin').val(),
-            messageModal = $('.modal.message-modal'),
-            messageBlock = $('.modal-body', messageModal);
+          messageModal = $('.modal.message-modal'),
+          messageBlock = $('.modal-body', messageModal);
+        if(vin.trim().length!==17){
+            messageBlock.text('VIN should be 17 digits. Please retry');
+            messageModal.modal('show');
+            return false;
+        }
         $('.customer-vin').val(vin);
-      
         var jqXHR = $.ajax({
             type: 'POST',
             url: '/aftersell/exceptions/customer',
@@ -113,10 +117,10 @@
                 if (data.message) {
                     messageBlock.text(data.message);
                     messageModal.modal('show');
-            	}else{
-	            	if (service_detail.length > 0) {
+                }else{
+                    if (service_detail.length > 0) {
 	            		var details_html = "<div class='other-details'><label class='control-label'>VIN:&nbsp</label>"+ other_details.vin +"<br><label class='control-label'>Customer Id:&nbsp</label>"+ other_details.customer_id +"<br><label class='control-label'>Customer Name:&nbsp</label>"+ other_details.customer_name +"</div>",
-	            			table = $(".status-search-results tbody");
+                          table = $('.status-search-results tbody');
                         $('.status-result-detail').append(details_html);
                         $.each(service_detail, function(idx, elem){
                                 table.append('<tr class="search-detail"><td>'+elem.service_type+'</td><td>'+elem.status+'</td></tr>');

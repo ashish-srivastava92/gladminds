@@ -215,7 +215,7 @@ class CouponData(models.Model):
         return self.unique_service_coupon
 
 class OldFscData(models.Model):
-    vin = models.ForeignKey(ProductData, null=False, editable=False)
+    vin = models.ForeignKey(ProductData, null=True, editable=False)
     unique_service_coupon = models.CharField(
         max_length=215, null=True)
     valid_days = models.IntegerField(max_length=10, null=True)
@@ -236,6 +236,8 @@ class OldFscData(models.Model):
     credit_date = models.DateTimeField(null=True, blank=True)
     credit_note = models.CharField(max_length=50, null=True, blank=True)
     special_case = models.BooleanField(default=False)
+    missing_field = models.CharField(max_length=50, null=True, blank=True)
+    missing_value = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         app_label = "gladminds"
