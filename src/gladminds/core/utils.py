@@ -107,12 +107,12 @@ def get_task_queue():
 
 
 def format_product_object(product_obj):
-    purchase_date = product_obj.product_purchase_date.strftime('%d/%m/%Y')
-    return {'id': product_obj.sap_customer_id,
-            'phone': get_phone_number_format(str(product_obj.customer_phone_number)), 
-            'name': product_obj.customer_phone_number.customer_name, 
+    purchase_date = product_obj.purchase_date.strftime('%d/%m/%Y')
+    return {'id': product_obj.customer_id,
+            'phone': get_phone_number_format(str(product_obj.customer_details.phone_number)), 
+            'name': product_obj.customer_details.user.first_name, 
             'purchase_date': purchase_date,
-            'vin': product_obj.vin}
+            'vin': product_obj.product_id}
 
 def get_customer_info(data):
     try:
@@ -124,10 +124,10 @@ def get_customer_info(data):
             data['groups'][0] = "Dealer"
         else:
             data['groups'][0] = "ASC"
-        data = get_email_template('VIN DOES NOT EXIST').body.format(data['current_user'], data['vin'], data['groups'][0])
-        send_mail_when_vin_does_not_exist(data=data)
+        template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
+        send_mail_when_vin_does_not_exist(data=template)
         return {'message': message, 'status': 'fail'}
-    if product_obj.product_purchase_date:
+    if product_obj.purchase_date:
         product_data = format_product_object(product_obj)
         return product_data
     else:
@@ -299,7 +299,7 @@ def create_feed_data(post_data, product_data, temp_customer_id):
     data['customer_name'] = post_data['customer-name']
     data['engine'] = product_data.engine
     data['veh_reg_no'] = product_data.veh_reg_no
-    data['vin'] = product_data.vin
+    data['vin'] = product_data.product_id
     data['pin_no'] = data['state'] = data['city'] = None
     return data
 
@@ -323,7 +323,7 @@ def create_context(email_template_name, feedback_obj):
 
     return data
 
-def subtract_dates(start_date, end_date):    
+def subtract_dates(start_date, end_date): 
     start_date = start_date.strftime("%Y-%m-%d")
     end_date = end_date.strftime("%Y-%m-%d")
     start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
@@ -334,20 +334,20 @@ def search_details(data):
     kwargs = {}
     search_results = []
     if data.has_key('VIN'):
-        kwargs[ 'vin' ] = data['VIN']
+        kwargs[ 'product_id' ] = data['VIN']
     elif data.has_key('Customer-ID'):
-        kwargs[ 'sap_customer_id' ] = get_updated_customer_id(data['Customer-ID'])
+        kwargs[ 'customer_id' ] = get_updated_customer_id(data['Customer-ID'])
     elif data.has_key('Customer-Mobile'):
-        kwargs[ 'customer_phone_number__phone_number' ] = mobile_format(data['Customer-Mobile'])
-    product_obj = common.ProductData.objects.filter(**kwargs)
-    if not product_obj or not product_obj[0].product_purchase_date:
+        kwargs[ 'customer_details__phone_number' ] = mobile_format(data['Customer-Mobile'])
+    product_obj = models.ProductData.objects.filter(**kwargs)
+    if not product_obj or not product_obj[0].purchase_date:
         key = data.keys()
         message = '''{0} '{1}' has no associated customer. Please register the customer.'''.format(key[0], data[key[0]])
         logger.info(message)
         return {'message': message}
     for product in product_obj:
         data = format_product_object(product)
-        search_results.append(data)    
+        search_results.append(data)
     return search_results
 
 def get_search_query_params(request, class_self):
@@ -431,26 +431,24 @@ def get_updated_customer_id(customer_id):
             logger.info("Temporary ID {0} does not exists: {1}".format(customer_id, ex))
     return customer_id
 
-def service_advisor_search(data):
-    dealer_data = aftersell_common.RegisteredDealer.objects.get(
-                dealer_id=data['current_user'])
-    sa_phone_number = mobile_format(data['phone_number'])
-    message = sa_phone_number + ' is active under another dealer.'
-    
-    sa_details = aftersell_common.ServiceAdvisorDealerRelationship.objects.select_related(
-                    'service_advisor_id').filter(service_advisor_id__phone_number=sa_phone_number,
-                                dealer_id=dealer_data)
 
-    sa_mobile_active = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(
-                            service_advisor_id__phone_number=sa_phone_number,
-                            status='Y').exclude(dealer_id=dealer_data)
+def service_advisor_search(data):
+    dealer_data = models.Dealer.objects.get(
+                dealer_id=data['current_user'])
+    phone_number = mobile_format(data['phone_number'])
+    message = phone_number + ' is active under another dealer.' 
+    sa_details = models.ServiceAdvisor.objects.filter(user__phone_number=phone_number, dealer=dealer_data)
+    sa_mobile_active = models.ServiceAdvisor.objects.filter(
+                                user__phone_number=phone_number,
+                                status='Y').exclude(dealer=dealer_data)
     if not sa_details and not sa_mobile_active:
         message = 'Service advisor is not associated, Please register the service advisor.'
         return {'message': message}
     if sa_details:
-        service_advisor_details = {'id': sa_details[0].service_advisor_id.service_advisor_id,
-                                   'phone': data['phone_number'], 
-                                   'name': sa_details[0].service_advisor_id.name, 
+        user_details = sa_details[0].user
+        service_advisor_details = {'id': sa_details[0].service_advisor_id,
+                                   'phone': data['phone_number'],
+                                   'name':  user_details.user.first_name, 
                                    'status': sa_details[0].status,
                                    'active':len(sa_mobile_active),
                                    'message':message}

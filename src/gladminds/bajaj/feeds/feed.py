@@ -212,8 +212,8 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 try:
                     service_advisor = models.ServiceAdvisor.objects.get(
                                         service_advisor_id=dealer['service_advisor_id'])
-                    if service_advisor.phone_number != dealer['phone_number']:
-                        service_advisor.phone_number = dealer['phone_number']
+                    if service_advisor.user.phone_number != dealer['phone_number']:
+                        service_advisor.user.phone_number = dealer['phone_number']
                         logger.info(
                         "[Info: DealerAndServiceAdvisorFeed_sa]: Updated phone number for {0}"
                         .format(dealer['service_advisor_id']))

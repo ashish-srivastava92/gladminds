@@ -371,6 +371,20 @@ UCN_RECOVERY_MAIL_DETAIL = {
                             "body": """""",
                            }
 
+VIN_DOES_NOT_EXIST_DETAIL = {
+    "sender": "support@gladminds.co",
+    "receiver": [],
+    "subject": "Request for Dispatch feed",
+    "body": """""",
+}
+
+REGISTER_ASC_MAIL_DETAIL = {
+    "sender": "support@gladminds.co",
+    "receiver": [],
+    "subject": "ASC Registration Mail",
+    "body": """""",
+}
+
 OTP_MAIL = {
                   "sender":"support@gladminds.co",
                   "subject":"Reset Password",
@@ -422,6 +436,7 @@ REGISTRATION_CONFIG = {
 ########################Password Postfix for dealers######################
 PASSWORD_POSTFIX = '@123'
 TEMP_ID_PREFIX = 'T'
+TEMP_SA_ID_PREFIX = 'SA'
 ###########################################################################
 ########################Feed Failure Mail enabled ######################
 FEED_FAILURE_MAIL_ENABLED = True
