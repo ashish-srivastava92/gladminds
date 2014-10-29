@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.db.models import Q
 from django.conf import settings
 
-from gladminds.core.managers import audit_manager as audit
+from gladminds.core.managers.audit_manager import sms_log
 from gladminds.core import utils
 from gladminds.bajaj.services import message_template as templates
 from gladminds.bajaj import models
@@ -30,7 +30,7 @@ def get_customers_to_send_reminder(*args, **kwargs):
         valid_kms = reminder.valid_kms
         message = templates.get_template('SEND_CUSTOMER_COUPON_REMINDER').format(usc=usc, vin=vin, expired_date=expired_date, valid_kms=valid_kms)
         send_reminder_message.delay(phone_number=phone_number, message=message)
-        audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         reminder.last_reminder_date = datetime.now()
         reminder.save()
     transaction.commit()
@@ -49,7 +49,7 @@ def get_customers_to_send_reminder_by_admin(*args, **kwargs):
         valid_kms = reminder.valid_kms
         message = templates.get_template('SEND_CUSTOMER_COUPON_REMINDER').format(usc=usc, vin=vin, expired_date=expired_date, valid_kms=valid_kms)
         send_reminder_message.delay(phone_number=phone_number, message=message)
-        audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         reminder.last_reminder_date = datetime.now()
         reminder.schedule_reminder_date = None
         reminder.save()
