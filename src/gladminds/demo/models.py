@@ -65,7 +65,7 @@ class ProductType(base_models.ProductType):
 
 
 class ProductData(base_models.ProductData):
-    customer_phone_number = models.ForeignKey(
+    customer_details = models.ForeignKey(
         UserProfile, null=True, blank=True, related_name='demo_product_date')
     product_type = models.ForeignKey(ProductType, null=True, blank=True)
     dealer_id = models.ForeignKey(Dealer, null=True, blank=True)

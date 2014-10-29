@@ -108,7 +108,7 @@ class AuthorizedServiceCenter(BaseModel):
         verbose_name_plural = "Service Center Data"
 
     def __unicode__(self):
-        return self.dealer_id
+        return self.asc_id
 
 
 class ServiceAdvisor(BaseModel):

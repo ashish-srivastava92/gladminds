@@ -10,11 +10,10 @@ from django.db.models.signals import post_save
 from django.contrib.auth.models import User, Group
 from django.db.models import signals
 
-from gladminds.core.managers import audit_manager
 from gladminds.bajaj.services import message_template as templates
 from gladminds.core import utils
 from gladminds.bajaj import models
-from gladminds.core.managers.audit_manager import feed_log
+from gladminds.core.managers.audit_manager import feed_log, sms_log
 from gladminds.core.utils import get_task_queue
 
 logger = logging.getLogger("gladminds")
@@ -129,8 +128,9 @@ class BaseFeed(object):
     def import_data(self):
         pass
 
-    def register_user(self, user, group=None, username=None, first_name='', last_name='',
-                          email='', address='', phone_number=None):
+    def register_user(self, user, group=None, username=None, phone_number=None,
+                      first_name='', last_name='', email='', address='',
+                      state='', pincode=''):
         logger.info('New {0} Registration with id - {1}'.format(user, username))
         if not group:
             group = USER_GROUP[user]
@@ -144,24 +144,25 @@ class BaseFeed(object):
             user_group.save()
         if username:
             try:
-                new_user = User.objects.get(username=username)
+                user_details = models.UserProfile.objects.get(user__username=username)
             except ObjectDoesNotExist as ex:
                 logger.info(
                     "[Exception: new_ registration]: {0}"
                     .format(ex))    
                 new_user = User(
                     username=username, first_name=first_name, last_name=last_name, email=email)
-                password = username + settings.PASSWORD_POSTFIX
+                if user=='customer':
+                    password = settings.PASSWORD_POSTFIX
+                else:
+                    password = username + settings.PASSWORD_POSTFIX
                 new_user.set_password(password)
                 new_user.save()
                 new_user.groups.add(user_group)
                 new_user.save()
                 logger.info(user + ' {0} registered successfully'.format(username))
-            try:
-                user_details = models.UserProfile.objects.get(user=new_user)
-            except ObjectDoesNotExist as ex:
                 user_details = models.UserProfile(user=new_user,
-                                        phone_number=phone_number, address=address)
+                                        phone_number=phone_number, address=address,
+                                        state=state, pincode=pincode)
                 user_details.save()
             return user_details
         else:
@@ -323,39 +324,29 @@ class ProductPurchaseFeed(BaseFeed):
         for product in self.data_source:
             try:
                 product_data = models.ProductData.objects.get(
-                    vin=product['vin'])
-                if product_data.customer_phone_number and product_data.sap_customer_id == product['sap_customer_id']:
+                    product_id=product['vin'])
+                if product_data.customer_details and product_data.customer_id == product['sap_customer_id']:
                     post_save.disconnect(
                         update_coupon_data, sender=models.ProductData)
-                try:
-                    customer_data = models.GladMindUsers.objects.get(
-                        phone_number=product['customer_phone_number'])
-                except ObjectDoesNotExist as odne:
-                    logger.info(
-                        '[Exception: ProductPurchaseFeed_customer_data]: {0}'.format(odne))
-                    # Register this customer
-                    gladmind_customer_id = utils.generate_unique_customer_id()
-                    user=self.register_user('customer', username=gladmind_customer_id)
-                    customer_data = models.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, phone_number=product[
-                                                         'customer_phone_number'], registration_date=datetime.now(),
-                                                         customer_name=product['customer_name'], pincode=product['pin_no'],
-                                                         state=product['state'], address=product['city'])
-                    customer_data.save()
+                username=utils.get_phone_number_format(product['customer_phone_number'])
+                customer_data=self.register_user('customer', username=username,
+                                phone_number=product['customer_phone_number'],
+                                first_name=product['customer_name'], pincode=product['pin_no'],
+                                state=product['state'], address=product['city'])
 
-                if not product_data.sap_customer_id  or product_data.sap_customer_id.find('T') == 0:
+                if not product_data.customer_id  or product_data.customer_id.find('T') == 0:
                     product_purchase_date = product['product_purchase_date']
-                    product_data.sap_customer_id = product['sap_customer_id']
-                    product_data.product_purchase_date = product_purchase_date
+                    product_data.customer_id = product['sap_customer_id']
+                    product_data.purchase_date = product_purchase_date
                     product_data.engine = product["engine"]
                     product_data.veh_reg_no =  product['veh_reg_no']
                 
-                product_data.customer_phone_number = customer_data    
+                product_data.customer_details = customer_data    
                 product_data.save()
                 
                 post_save.connect(
                     update_coupon_data, sender=models.ProductData)
             except Exception as ex:
-
                 ex = '''[Exception: ProductPurchaseFeed_product_data]:
                          {0} VIN - {1}'''.format(ex, product['vin'])
                 self.feed_remark.fail_remarks(ex)
@@ -384,33 +375,35 @@ def update_coupon_data(sender, **kwargs):
     from gladminds.core.cron_jobs.sqs_tasks import send_on_product_purchase
     instance = kwargs['instance']
     logger.info("triggered update_coupon_data")
-    if instance.customer_phone_number:
-        product_purchase_date = instance.product_purchase_date
-        vin = instance.vin
-        coupon_data = models.CouponData.objects.filter(vin=instance)
+    if instance.customer_details:
+        product_purchase_date = instance.purchase_date
+        vin = instance.product_id
+        coupon_data = models.CouponData.objects.filter(product=instance)
         for coupon in coupon_data:
             mark_expired_on = product_purchase_date + \
                 timedelta(days=int(coupon.valid_days))
             coupon_object = models.CouponData.objects.get(
-                vin=instance, unique_service_coupon=coupon.unique_service_coupon)
+                product=instance, unique_service_coupon=coupon.unique_service_coupon)
             coupon_object.mark_expired_on = mark_expired_on
             coupon_object.extended_date = mark_expired_on
             coupon_object.save()
         
         try:
-            customer_data = models.GladMindUsers.objects.get(
-                phone_number=instance.customer_phone_number)
-            temp_customer_data = models.CustomerTempRegistration.objects.filter(product_data__vin=vin)
-            if temp_customer_data and not temp_customer_data[0].temp_customer_id == instance.sap_customer_id:
+            customer_data = instance.customer_details
+            customer_name=customer_data.user.first_name
+            customer_phone_number = utils.get_phone_number_format(customer_data.phone_number)
+            customer_id=instance.customer_id
+            temp_customer_data = models.CustomerTempRegistration.objects.filter(product_data__product_id=vin)
+            if temp_customer_data and not temp_customer_data[0].temp_customer_id == customer_id:
                 message = templates.get_template('SEND_REPLACED_CUSTOMER_ID').format(
-                    customer_name=customer_data.customer_name, sap_customer_id=instance.sap_customer_id)
-            elif instance.sap_customer_id.find('T') == 0:
+                    customer_name=customer_name, sap_customer_id=customer_id)
+            elif instance.customer_id.find('T') == 0:
                 message = templates.get_template('SEND_TEMPORARY_CUSTOMER_ID').format(
-                    customer_name=customer_data.customer_name, sap_customer_id=instance.sap_customer_id)
+                    customer_name=customer_name, sap_customer_id=customer_id)
             else:
                 message = templates.get_template('SEND_CUSTOMER_ON_PRODUCT_PURCHASE').format(
-                    customer_name=customer_data.customer_name, sap_customer_id=instance.sap_customer_id)
-            customer_phone_number = utils.get_phone_number_format(instance.customer_phone_number.phone_number)
+                    customer_name=customer_name, sap_customer_id=customer_id)
+            
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
                 task_queue.add("send_on_product_purchase", {"phone_number": 
@@ -420,7 +413,7 @@ def update_coupon_data(sender, **kwargs):
                 send_on_product_purchase.delay(
                 phone_number=customer_phone_number, message=message, sms_client=settings.SMS_CLIENT)
  
-            audit.audit_log(
+            sms_log(
                 reciever=customer_phone_number, action='SEND TO QUEUE', message=message)
         except Exception as ex:
             logger.info("[Exception]: Signal-In Update Coupon Data %s" % ex)
