@@ -281,37 +281,6 @@ def get_sa_under_asc(request, id=None):
         pass
     return render(request, template, {'active_menu':'sa',"data": data})
 
-@login_required()
-def servicedesk(request, servicedesk=None):
-    groups = stringify_groups(request.user)
-    if request.method == 'GET':
-        template = 'portal/help_desk.html'
-        data = None
-        data_mapping = {
-            'helpdesk': get_sa_list
-            }
-        try:
-            data = data_mapping[servicedesk](request.user)
-        except:
-            #It is acceptable if there is no data_mapping defined for a function
-            pass
-        return render(request, template, {'active_menu': servicedesk,
-                                          "data": data, 'groups': groups,
-                     "types": get_list_from_set(aftersell_common.FEEDBACK_TYPE),
-                     "priorities": get_list_from_set(aftersell_common.PRIORITY)})
-    elif request.method == 'POST':
-        function_mapping = {
-            'helpdesk': save_help_desk_data
-        }
-        try:
-            data = function_mapping[servicedesk](request)
-            return HttpResponse(content=json.dumps(data),
-                                content_type='application/json')
-        except:
-            return HttpResponseBadRequest()
-    else:
-        return HttpResponseBadRequest()
-
 def get_feedbacks(user):
     group = user.groups.all()[0]
     if group.name == 'dealers':
@@ -327,12 +296,36 @@ def get_feedbacks(user):
 
 
 @login_required()
-@require_http_methods(["GET"])
-def get_user_tickets(request,servicedesk=None):  
-    return render(request, 'portal/tickets.html',\
-                  {"feedbacks": get_feedbacks(request.user)})
-
-
+def servicedesk(request,servicedesk=None):
+    groups = stringify_groups(request.user)
+    if request.method == 'GET':
+        template = 'portal/help_desk.html'
+        data = None
+        data_mapping = {
+            'helpdesk': get_sa_list
+            }
+        try:
+            data = data_mapping[servicedesk](request.user)
+        except:
+            #It is acceptable if there is no data_mapping defined for a function
+            pass
+        return render(request, template, {"feedbacks" : get_feedbacks(request.user),
+                                          'active_menu': servicedesk,
+                                          "data": data, 'groups': groups,
+                     "types": get_list_from_set(aftersell_common.FEEDBACK_TYPE),
+                     "priorities": get_list_from_set(aftersell_common.PRIORITY)})
+    elif request.method == 'POST':
+        function_mapping = {
+            'helpdesk': save_help_desk_data
+        }
+        try:
+            data = function_mapping[servicedesk](request)
+            return HttpResponse(content=json.dumps(data),
+                                content_type='application/json')
+        except:
+            return HttpResponseBadRequest()
+    else:
+        return HttpResponseBadRequest()
 
 def save_help_desk_data(request):
     fields = ['message', 'priority', 'advisorMobile', 'type', 'subject']
