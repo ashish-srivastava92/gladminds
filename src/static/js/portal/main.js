@@ -259,6 +259,9 @@
                 $('#type').val('');
                 $('#subject').val('');
                 $('#advisorMobile').val('');
+                setTimeout(function() {
+                    parent.window.location='/aftersell/servicedesk/helpdesk';
+                }, 2000);
                 
             },
             error: function() {

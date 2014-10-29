@@ -285,14 +285,9 @@ def get_feedbacks(user):
     group = user.groups.all()[0]
     if group.name == 'dealers':
         sa_list = get_sa_list(user)
-        feedback_list = []
         if sa_list:
-            for phone_number in sa_list:
-                feedbacks = aftersell_common.Feedback.objects.filter(
-                        reporter=phone_number).order_by('-created_date')
-                for feedback in feedbacks:
-                    feedback_list.append(feedback)
-    return feedback_list
+            feedbacks = aftersell_common.Feedback.objects.filter(reporter__in=sa_list).order_by('-created_date')
+    return feedbacks
 
 
 @login_required()
@@ -312,6 +307,7 @@ def servicedesk(request,servicedesk=None):
         return render(request, template, {"feedbacks" : get_feedbacks(request.user),
                                           'active_menu': servicedesk,
                                           "data": data, 'groups': groups,
+                     "status": get_list_from_set(aftersell_common.FEEDBACK_STATUS),
                      "types": get_list_from_set(aftersell_common.FEEDBACK_TYPE),
                      "priorities": get_list_from_set(aftersell_common.PRIORITY)})
     elif request.method == 'POST':
