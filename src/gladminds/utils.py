@@ -412,8 +412,12 @@ def make_tls_property(default=None):
     return TLSProperty()
 
 
-def get_asc_data():
-    asc_data = aftersell_common.RegisteredDealer.objects.filter(role='asc')
+def get_asc_data(data):
+    asc_details = {}
+    if data.has_key('city') and data.has_key('state'):
+        asc_details['address'] = ', '.join([data['state'], data['city']])
+    asc_details['role'] = 'asc'
+    asc_data = aftersell_common.RegisteredDealer.objects.filter(**asc_details)
     asc_list = []
     for asc in asc_data:
         asc_detail = User.objects.get(username=asc.dealer_id)
@@ -440,3 +444,4 @@ def get_state_city(details, address):
             details['state'] = 'Null'
 
     return details
+
