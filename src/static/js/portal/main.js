@@ -307,7 +307,9 @@
                 waitingModal.modal('hide');
                 messageModal.modal('show');
                 setTimeout(function() {
-                    parent.window.location='/aftersell/servicedesk/';
+                	var parts = document.referrer.split('://')[1].split('/');
+                	var pathName = parts.slice(1).join('/');
+                	parent.window.location='/'+pathName;
                 }, 3000);
                 
             },

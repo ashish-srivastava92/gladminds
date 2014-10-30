@@ -27,7 +27,7 @@
 							<div class="form-group">
                     			<label class="col-sm-4 control-label" for="type">Type</label>
                         		<div class="col-sm-8">
-                            		<select class="form-control" name="type"  {% if group == 'SDO' or group == 'dealers' %} readonly {% endif %}>
+                            		<select id="type" class="form-control" name="type"  {% if group == 'SDO' %} readonly {% endif %} >
                                 		{% for type in FEEDBACK_TYPE %}
                      	            		<option {% if type == feedback.type %} selected {% endif %} value="{{type}}">{{type}}</option>
                                     	{% endfor %}
@@ -175,9 +175,17 @@
 	 					<div class="form-group">
                    			<div class="col-sm-offset-4 col-sm-9">
                    				<button type="submit" class="btn btn-primary">Save</button>
-                   				<a class="logout" href="/aftersell/servicedesk/"> 
+								{% if group == 'dealers' or group == 'asc' %} 
+									<a class="logout" href="/aftersell/servicedesk/helpdesk"> 
                  		    		<button type="button" class="btn btn-default">Cancel</button>
 		                		</a>
+		                		{% else %}
+		                		<a class="logout" href="/aftersell/servicedesk/"> 
+                 		    		<button type="button" class="btn btn-default">Cancel</button>
+		                		</a>
+								 {% endif %}                   				
+								 
+                   				
                    			</div>
                   		</div>
 	 				</div>
@@ -194,4 +202,15 @@
 {% block dependency%}
 <script src="/static/js/portal/utils.js"></script>
 <script src="/static/js/portal/main.js"></script>
+<script>
+
+$(document).ready(function() {
+	$("#type").prop("disabled", true);
+});
+
+</script>
+
+
 {% endblock dependency %}
+
+
