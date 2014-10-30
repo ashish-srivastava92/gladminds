@@ -27,7 +27,7 @@
 							<div class="form-group">
                     			<label class="col-sm-4 control-label" for="type">Type</label>
                         		<div class="col-sm-8">
-                            		<select id="type" class="form-control" name="type"  {% if group == 'SDO' %} readonly {% endif %} >
+                            		<select id="type" class="form-control" name="type"  {% if group == 'SDO' or group == 'dealers' %} onfocus="disable_func()"  readonly {% endif %}  >
                                 		{% for type in FEEDBACK_TYPE %}
                      	            		<option {% if type == feedback.type %} selected {% endif %} value="{{type}}">{{type}}</option>
                                     	{% endfor %}
@@ -43,7 +43,7 @@
 	 						<div class="form-group">
                     			<label class="col-sm-4 control-label" for="Priority">Priority</label>
                         		<div class="col-sm-8">
-                            		<select class="form-control" name="Priority"  {% if group == 'SDO' or group == 'dealers' %} readonly {% endif %}>
+                            		<select id="priority" class="form-control" name="Priority"  {% if group == 'SDO' or group == 'dealers' %} onfocus="disable_func()" readonly {% endif %}>
                                 		{% for type in PRIORITY %}
                       	            		<option {% if type == feedback.priority %} selected {% endif %} value="{{type}}">{{type}}</option>
                                     	{% endfor %}
@@ -80,7 +80,7 @@
 							<div class="form-group">
                     			<label class="col-sm-4 control-label" for="Assign To">Assignee</label>
                         		<div class="col-sm-8">
-                        			<select class="form-control assignee" name="Assign_To"   {% if group == 'SDO' or group == 'dealers' %} readonly {% endif %} onchange="dueDateRequire(this.options[this.selectedIndex].value)" >
+                        			<select id="assignee" class="form-control assignee" name="Assign_To"   {% if group == 'SDO' or group == 'dealers' %} onfocus="disable_func()" readonly {% endif %} onchange="dueDateRequire(this.options[this.selectedIndex].value)" >
                             			<option value=""></option>
                                			{% for type in servicedeskuser %}
                       	          			<option {% if type == feedback.assign_to %} selected {% endif %} value="{{type}}">{{type.user.username}}({{type}})</option>
@@ -202,13 +202,6 @@
 {% block dependency%}
 <script src="/static/js/portal/utils.js"></script>
 <script src="/static/js/portal/main.js"></script>
-<script>
-
-$(document).ready(function() {
-	$("#type").prop("disabled", true);
-});
-
-</script>
 
 
 {% endblock dependency %}

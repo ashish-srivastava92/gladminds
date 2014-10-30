@@ -333,7 +333,7 @@
     });
     
     $(document).ready(function() {
-
+    	
     });
 
     $('.report-type-dropdown').on('change', function() {
@@ -451,6 +451,12 @@ function rootCause(status){
 	}
 	
 }
+function disable_func(){
+	$("#type").prop("disabled", true);
+	$("#priority").prop("disabled", true);
+	$("#assignee").prop("disabled", true);
+}
+
 
 function dueDateRequire(assignTo){
 	'use strict';
@@ -464,4 +470,14 @@ function dueDateRequire(assignTo){
 function showMessage(id){
 	'use strict';
 	$('#'+id).popover();
+}
+
+function change_status(){
+	var status = window.location.search.split('?status=')[1];
+    $('#status').val(status);
+    $('#status').change(function() {
+    	status = $('#status').val();
+    	window.location.href = window.location.pathname + '?status='+status;
+    });
+	
 }

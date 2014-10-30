@@ -178,13 +178,7 @@
 <script>
 $(document).ready(function() {
     $('#gladmindDesk').dataTable();
-    var status = window.location.search.split('?status=')[1];
-    $('#status').val(status);
-    $('#status').change(function() {
-    	status = $('#status').val();
-    	window.location.href = window.location.pathname + '?status='+status;
-    });
-    
+    change_status();
 } );
 
 </script>
