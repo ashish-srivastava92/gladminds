@@ -14,6 +14,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.db.models import Q
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import F
 
 from gladminds.models import common
 from gladminds.decorator import log_time
@@ -590,12 +591,12 @@ def get_active_asc_info(data, limit, offset, data_dict, data_list):
                 active_ascs['id'] = asc_data.dealer_id
                 active_ascs['address'] = asc_data.address
                 active_ascs = get_state_city(active_ascs, asc_data.address)
-                active_ascs['coupon_unused'] = asc_cuopon_details(asc_data.dealer_id, 1)
-                active_ascs['coupon_closed'] = asc_cuopon_details(asc_data.dealer_id, 2)
-                active_ascs['coupon_expired'] = asc_cuopon_details(asc_data.dealer_id, 3)
-                active_ascs['coupon_inprogress'] = asc_cuopon_details(asc_data.dealer_id, 4)
-                active_ascs['coupon_exceed_limit'] = asc_cuopon_details(asc_data.dealer_id, 5)
-                active_ascs['coupon_closed_old_fsc'] = asc_cuopon_details(asc_data.dealer_id, 6)
+                active_ascs['cuopon_unused'] = asc_cuopon_details(asc_data.dealer_id, 1)
+                active_ascs['cuopon_closed'] = asc_cuopon_details(asc_data.dealer_id, 2)
+                active_ascs['cuopon_expired'] = asc_cuopon_details(asc_data.dealer_id, 3)
+                active_ascs['cuopon_inprogress'] = asc_cuopon_details(asc_data.dealer_id, 4)
+                active_ascs['cuopon_exceed_limit'] = asc_cuopon_details(asc_data.dealer_id, 5)
+                active_ascs['cuopon_closed_old_fsc'] = asc_cuopon_details(asc_data.dealer_id, 6)
                 data_list.append(active_ascs)
     data_dict['count'] = active_asc_count
     data_dict['active-asc'] = data_list
@@ -603,21 +604,20 @@ def get_active_asc_info(data, limit, offset, data_dict, data_list):
 
 
 def get_not_active_asc_info(data, limit, offset, data_dict, data_list):
-     '''get city and state from parameter'''
-    not_active_asc_count = 0
+    '''get city and state from parameter'''
     asc_details = get_asc_data(data)
-    for asc_detail in asc_details:
-            not_active_ascs = {}
-            if asc_detail.date_joined == asc_detail.last_login:
-                not_active_asc_count = not_active_asc_count + 1;
-                asc_data = aftersell_common.RegisteredDealer.objects.get(dealer_id=asc_detail.username)
-                not_active_ascs['id'] = asc_data.dealer_id
-                not_active_ascs['id'] = asc_data.dealer_id
-                not_active_ascs['address'] = asc_data.address
-                not_active_ascs = get_state_city(not_active_ascs, asc_data.address)
-                data_list.append(not_active_ascs)
-    data_dict['count'] = not_active_asc_count
+    active_asc_list = asc_details.filter(date_joined=F('last_login'))
+    active_ascs = active_asc_list.values_list('username', flat=True)
+    asc_obj = aftersell_common.RegisteredDealer.objects.filter(dealer_id__in=active_ascs)
+    for asc in asc_obj:
+        not_active_ascs = {}
+        not_active_ascs['id'] = asc.dealer_id
+        not_active_ascs['address'] = asc.address
+        not_active_ascs = get_state_city(not_active_ascs, asc.address)
+        data_list.append(not_active_ascs)
+    data_dict['count'] = len( active_asc_list)
     data_dict['not-active-asc'] = data_list
+    print len(data_dict)
     return data_dict
 
 
