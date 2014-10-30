@@ -116,7 +116,7 @@ def format_product_object(product_obj):
 
 def get_customer_info(data):
     try:
-        product_obj = models.ProductData.objects.get(product_id=data['vin'])
+        product_obj = models.ProductData.objects.select_related('customer_details__user').get(product_id=data['vin'])
     except Exception as ex:
         logger.info(ex)
         message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])

@@ -53,8 +53,8 @@
         var vin = $('#srch-vin').val(),
             messageModal = $('.modal.message-modal'),
             messageBlock = $('.modal-body', messageModal);
-        if(vin.trim().length!=17){
-      	  messageBlock.text('VIN should be 17 digits. Please retry');
+        if(vin.trim().length!==17){
+            messageBlock.text('VIN should be 17 digits. Please retry');
             messageModal.modal('show');
             return false;
         }
@@ -95,42 +95,42 @@
     });
     
     $('.service-status-search').on('submit', function() {
-    	var table = $(".status-search-results tbody .search-detail");
-    		table.remove(); 
-    		$('.other-details').remove();
-    	var value = $('.status-search-value').val(),
-	        field = $('.status-search-field').val(),
-	        messageModal = $('.modal.message-modal'),
-	        messageBlock = $('.modal-body', messageModal),
-	        data = {};
-    	data[field] =  value;
-    	var jqXHR = $.ajax({
+        var table = $('.status-search-results tbody .search-detail');
+        table.remove();
+        $('.other-details').remove();
+        var value = $('.status-search-value').val(),
+            field = $('.status-search-field').val(),
+            messageModal = $('.modal.message-modal'),
+            messageBlock = $('.modal-body', messageModal),
+            data = {};
+        data[field] =  value;
+        var jqXHR = $.ajax({
             type: 'POST',
             url: '/aftersell/exceptions/status',
             data: data,
             success: function(data){
-            	var service_detail = data['search_results'],
-            		other_details = data['other_details']; 
-            	if (data['message']) {
+                var service_detail = data.search_results,
+                    other_details = data.other_details;
+                if (data.message) {
                     messageBlock.text(data.message);
                     messageModal.modal('show');
-            	}else{
-	            	if (service_detail.length > 0) {
-	            		var details_html = "<div class='other-details'><label class='control-label'>VIN:&nbsp</label>"+ other_details.vin +"<br><label class='control-label'>Customer Id:&nbsp</label>"+ other_details.customer_id +"<br><label class='control-label'>Customer Name:&nbsp</label>"+ other_details.customer_name +"</div>",
-	            			table = $(".status-search-results tbody");
-	            			$('.status-result-detail').append(details_html);
-	            			$.each(service_detail, function(idx, elem){
-	            				table.append("<tr class='search-detail'><td>"+elem.service_type+"</td><td>"+elem.status+"</td></tr>");
-	            			});
-	            	}
-            	}
+                }else{
+                    if (service_detail.length > 0) {
+                        var details_html = '<div class="other-details"><label class="control-label">VIN:&nbsp</label>'+ other_details.vin +"<br><label class='control-label'>Customer Id:&nbsp</label>"+ other_details.customer_id +'<br><label class="control-label">Customer Name:&nbsp</label>'+ other_details.customer_name +'</div>',
+                            table = $('.status-search-results tbody');
+                        $('.status-result-detail').append(details_html);
+                        $.each(service_detail, function(idx, elem){
+                            table.append('<tr class="search-detail"><td>'+elem.service_type+'</td><td>'+elem.status+'</td></tr>');
+                        });
+                    }
+                }
             },
             error: function() {
-            	messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
+                messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
                 messageModal.modal('show');
             }
-          });
-      return false;
+        });
+        return false;
 
     });
     
@@ -167,37 +167,39 @@
         return false;
     });
     
-    $(".change-password-form").on("submit", function() {
-	    if($(".new-password").val() != $(".retype-new-pass").val()) {
-	    	Utils.showErrorMessage('Password does not matches.', 1000, 7000);
-		    return false;
-	    }else{
-	    	var data = Utils.getFormData('.change-password-form');
-	    	$.ajax({
-	              type: 'POST',
-	              url: '/aftersell/provider/change-password',
-	              data: data,
-	              success: function(data){
-	            	  if (data['message']) {
-	            		  Utils.showErrorMessage(data['message'], 10, 7000)
-	            	  }
-            		  setTimeout(function(){
-            			  if(data['status']){
-            				  history.back();
-            			  }
-            		  }, 2000); 
-	              },
-	              error: function(data) {
-	            	  messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
-	                  messageModal.modal('show');
-	              }
-	            });
-	    	return false;
-	    }
+    $('.change-password-form').on('submit', function() {
+        if($('.new-password').val() !== $('.retype-new-pass').val()) {
+            Utils.showErrorMessage('Password does not matches.', 1000, 7000);
+            return false;
+        }else{
+            var data = Utils.getFormData('.change-password-form'),
+                messageModal = $('.modal.message-modal'),
+                messageBlock = $('.modal-body', messageModal);
+            $.ajax({
+                type: 'POST',
+                url: '/aftersell/provider/change-password',
+                data: data,
+                success: function(data){
+                    if (data.message) {
+                        Utils.showErrorMessage(data.message, 10, 7000);
+                    }
+                    setTimeout(function(){
+                        if(data.status){
+                            history.back();
+                        }
+                    }, 2000);
+                },
+                error: function(data) {
+                    messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
+                    messageModal.modal('show');
+                }
+            });
+            return false;
+        }
     });
     
     $('.cancel-change-pass').click(function(){
-    	history.back();
+        history.back();
     });
     
     $('.ucn-recovery-form').on('submit', function() {
@@ -367,36 +369,36 @@
         return false;
     });
     $('.asc td:nth-child(1)').click(function(){
-    	var url = '/aftersell/sa/'+$(this)[0].id+"/",
-        messageModal = $('.modal.message-modal'),
-        messageBlock = $('.modal-body'),
-        messageHeader = $('.modal-title'),
-        waitingModal = $('.modal.waiting-dialog'),
-    jqXHR = $.ajax({
-        type: 'POST',
-        url: url,
-        cache: false,
-        processData: false,
-        contentType: false,
-        beforeSend: function(){
-            waitingModal.modal('show');
-        },
-        success: function(data){
-        	console.log(data);
-            messageBlock.html(data);
-            messageHeader.text("Service Advisor's");
-            waitingModal.modal('hide');
-            messageModal.modal('show');
-        },
-        error: function() {
-            messageBlock.text('Invalid Data');
-            messageHeader.text('Invalid');
-            waitingModal.modal('hide');
-            messageModal.modal('show');
-        }
-    });
-    return false;
-    });
+        var url = '/aftersell/sa/'+$(this)[0].id+'/',
+            messageModal = $('.modal.message-modal'),
+            messageBlock = $('.modal-body'),
+            messageHeader = $('.modal-title'),
+            waitingModal = $('.modal.waiting-dialog'),
+            jqXHR = $.ajax({
+                type: 'POST',
+                url: url,
+                cache: false,
+                processData: false,
+                contentType: false,
+                beforeSend: function(){
+                    waitingModal.modal('show');
+                },
+                success: function(data){
+                    console.log(data);
+                    messageBlock.html(data);
+                    messageHeader.text('Service Advisor');
+                    waitingModal.modal('hide');
+                    messageModal.modal('show');
+                },
+                error: function() {
+                    messageBlock.text('Invalid Data');
+                    messageHeader.text('Invalid');
+                    waitingModal.modal('hide');
+                    messageModal.modal('show');
+                }
+            });
+        return false;
+		    });
 })();
 
 function rootCause(status){

@@ -144,7 +144,7 @@ class BaseFeed(object):
             user_group.save()
         if username:
             try:
-                user_details = models.UserProfile.objects.get(user__username=username)
+                user_details = models.UserProfile.objects.select_related('user').get(user__username=username)
             except ObjectDoesNotExist as ex:
                 logger.info(
                     "[Exception: new_ registration]: {0}"
@@ -171,7 +171,7 @@ class BaseFeed(object):
 
     def check_or_create_dealer(self, dealer_id, address=None):
         try:
-            dealer_data = models.Dealer.objects.get(
+            dealer_data = models.Dealer.objects.select_related('user__user').get(
                 dealer_id=dealer_id)
         except ObjectDoesNotExist as odne:
             logger.debug(
@@ -210,7 +210,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 if mobile_number_active and dealer['status']=='Y':
                     raise ValueError(dealer['phone_number'] + ' is active under another dealer')
                 try:
-                    service_advisor = models.ServiceAdvisor.objects.get(
+                    service_advisor = models.ServiceAdvisor.objects.select_related('user__user').get(
                                         service_advisor_id=dealer['service_advisor_id'])
                     if service_advisor.user.phone_number != dealer['phone_number']:
                         service_advisor.user.phone_number = dealer['phone_number']
@@ -253,7 +253,7 @@ class ProductDispatchFeed(BaseFeed):
     def import_data(self):
         for product in self.data_source:
             try:
-                product_data = models.ProductData.objects.get(
+                product_data = models.ProductData.objects.select_related('customer_details__user').get(
                     product_id=product['vin'])
             except ObjectDoesNotExist as done:
                 logger.info(
@@ -323,7 +323,7 @@ class ProductPurchaseFeed(BaseFeed):
 
         for product in self.data_source:
             try:
-                product_data = models.ProductData.objects.get(
+                product_data = models.ProductData.objects.select_related('customer_details__user').get(
                     product_id=product['vin'])
                 if product_data.customer_details and product_data.customer_id == product['sap_customer_id']:
                     post_save.disconnect(
