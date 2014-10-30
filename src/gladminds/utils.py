@@ -416,7 +416,7 @@ def make_tls_property(default=None):
 def get_asc_data(data):
     asc_details = {}
     if data.has_key('city') and data.has_key('state'):
-        asc_details['address'] = ', '.join([data['state'], data['city']])
+        asc_details['address'] = ', '.join([data['city'].upper(), data['state'].upper()])
     asc_details['role'] = 'asc'
     asc_data = aftersell_common.RegisteredDealer.objects.filter(**asc_details)
     asc_ids = asc_data.values_list('dealer_id', flat=True)

@@ -515,7 +515,7 @@ def get_asc_info(data, limit, offset, data_dict, data_list):
     '''get city and state from parameter'''
     asc_details = {}
     if data.has_key('city') and data.has_key('state'):
-        asc_details['address'] = ', '.join([data['state'], data['city']])
+        asc_details['address'] = ', '.join([data['city'].upper(), data['state'].upper()])
     asc_details['role'] = 'asc'
     asc_data = aftersell_common.RegisteredDealer.objects.filter(**asc_details)
     data_dict['total_count'] = len(asc_data)
@@ -547,57 +547,46 @@ def get_sa_info(data, limit, offset, data_dict, data_list):
 
 
 def get_customers_info(data, limit, offset, data_dict, data_list):
-    '''get cphone_number from parameter'''
-    customer_data = common.GladMindUsers.objects.all()
-    data_dict['total_count'] = len(customer_data)
-    for customer in customer_data[offset:limit]:
-        customer_product = common.ProductData.objects.filter(customer_phone_number=customer)
+    kwargs = {}
+    if data.has_key('sap_id'):
+        kwargs['sap_customer_id'] = data['sap_id']
+    args = {~Q(product_purchase_date=None)}
+    customer_products = common.ProductData.objects.filter(*args, **kwargs)[offset:limit]
+    for customer in customer_products:
         customer_detail = {}
-        if  customer_product:
-            customer_detail['vin'] = customer_product[0].vin
-            customer_detail['sap_id'] = customer_product[0].sap_customer_id
-        customer_detail['id'] = customer.gladmind_customer_id
-        customer_detail['name'] = customer.customer_name
-        customer_detail['phone_number'] = customer.phone_number
-        customer_detail['email_id'] = customer.email_id
-        customer_detail['address'] = customer.address
-        customer_detail = get_state_city(customer_detail, customer.address)
+        customer_detail['vin'] = customer.vin
+        customer_detail['sap_id'] = customer.sap_customer_id
+        customer_detail['id'] = customer.customer_phone_number.gladmind_customer_id
+        customer_detail['name'] = customer.customer_phone_number.customer_name
+        customer_detail['phone_number'] = customer.customer_phone_number.phone_number
+        customer_detail['email_id'] = customer.customer_phone_number.email_id
+        customer_detail['address'] = customer.customer_phone_number.address
+        customer_detail = get_state_city(customer_detail, customer_detail['address'])
         data_list.append(customer_detail)
     data_dict['customers'] = data_list
-    if data.get('sap_id'):
-        filter_data_list = []
-        filter_data_dict = {}
-        count = 0
-        for filter in data_dict['customers']:
-            if filter['sap_id'] == data.get('sap_id'):
-                count = count + 1
-                filter_data_list.append(filter)
-                filter_data_dict['customers'] = filter_data_list
-                filter_data_dict['count'] = count
-        return filter_data_dict
-    else:
-        return data_dict
+    return data_dict
+
 
 
 def get_active_asc_info(data, limit, offset, data_dict, data_list):
     '''get city and state from parameter'''
     active_asc_count = 0
     asc_details = get_asc_data(data)
-    for asc_detail in asc_details:
-            active_ascs = {}
-            if asc_detail.date_joined != asc_detail.last_login:
-                active_asc_count = active_asc_count + 1;
-                asc_data = aftersell_common.RegisteredDealer.objects.get(dealer_id=asc_detail.username)
-                active_ascs['id'] = asc_data.dealer_id
-                active_ascs['address'] = asc_data.address
-                active_ascs = get_state_city(active_ascs, asc_data.address)
-                active_ascs['cuopon_unused'] = asc_cuopon_details(asc_data.dealer_id, 1)
-                active_ascs['cuopon_closed'] = asc_cuopon_details(asc_data.dealer_id, 2)
-                active_ascs['cuopon_expired'] = asc_cuopon_details(asc_data.dealer_id, 3)
-                active_ascs['cuopon_inprogress'] = asc_cuopon_details(asc_data.dealer_id, 4)
-                active_ascs['cuopon_exceed_limit'] = asc_cuopon_details(asc_data.dealer_id, 5)
-                active_ascs['cuopon_closed_old_fsc'] = asc_cuopon_details(asc_data.dealer_id, 6)
-                data_list.append(active_ascs)
+    active_asc_list = asc_details.filter(~Q(date_joined=F('last_login')))
+    active_ascs = active_asc_list.values_list('username', flat=True)
+    asc_obj = aftersell_common.RegisteredDealer.objects.filter(dealer_id__in=active_ascs)
+    for asc_data in asc_obj[offset:limit]:
+        active_ascs = {}
+        active_ascs['id'] = asc_data.dealer_id
+        active_ascs['address'] = asc_data.address
+        active_ascs = get_state_city(active_ascs, asc_data.address)
+        active_ascs['cuopon_unused'] = asc_cuopon_details(asc_data.dealer_id, 1)
+        active_ascs['cuopon_closed'] = asc_cuopon_details(asc_data.dealer_id, 2)
+        active_ascs['cuopon_expired'] = asc_cuopon_details(asc_data.dealer_id, 3)
+        active_ascs['cuopon_inprogress'] = asc_cuopon_details(asc_data.dealer_id, 4)
+        active_ascs['cuopon_exceed_limit'] = asc_cuopon_details(asc_data.dealer_id, 5)
+        active_ascs['cuopon_closed_old_fsc'] = asc_cuopon_details(asc_data.dealer_id, 6)
+        data_list.append(active_ascs)
     data_dict['count'] = active_asc_count
     data_dict['active-asc'] = data_list
     return data_dict
@@ -606,18 +595,17 @@ def get_active_asc_info(data, limit, offset, data_dict, data_list):
 def get_not_active_asc_info(data, limit, offset, data_dict, data_list):
     '''get city and state from parameter'''
     asc_details = get_asc_data(data)
-    active_asc_list = asc_details.filter(date_joined=F('last_login'))
-    active_ascs = active_asc_list.values_list('username', flat=True)
-    asc_obj = aftersell_common.RegisteredDealer.objects.filter(dealer_id__in=active_ascs)
-    for asc in asc_obj:
+    not_active_asc_list = asc_details.filter(date_joined=F('last_login'))
+    not_active_ascs = not_active_asc_list.values_list('username', flat=True)
+    not_asc_obj = aftersell_common.RegisteredDealer.objects.filter(dealer_id__in=not_active_ascs)
+    for asc in not_asc_obj[offset:limit]:
         not_active_ascs = {}
         not_active_ascs['id'] = asc.dealer_id
         not_active_ascs['address'] = asc.address
         not_active_ascs = get_state_city(not_active_ascs, asc.address)
         data_list.append(not_active_ascs)
-    data_dict['count'] = len( active_asc_list)
+    data_dict['count'] = len( not_active_asc_list)
     data_dict['not-active-asc'] = data_list
-    print len(data_dict)
     return data_dict
 
 
