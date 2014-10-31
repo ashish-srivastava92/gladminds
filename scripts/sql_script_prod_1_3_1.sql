@@ -69,3 +69,9 @@ alter table gladminds_coupondata add column credit_note varchar(50) NULL;
 
 alter table aftersell_ucnrecovery add column unique_service_coupon varchar(215) NULL;
 alter table gladminds_coupondata add column special_case boolean default false;
+
+###############################################################################
+ALTER TABLE gladminds_oldfscdata MODIFY vin_id int(11) null;
+alter table gladminds_oldfscdata add column missing_field varchar(50) NULL;
+alter table gladminds_oldfscdata add column missing_value varchar(50) NULL;
+
