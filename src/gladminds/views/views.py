@@ -301,7 +301,7 @@ def servicedesk(request,servicedesk=None):
     status = request.GET.get('status',None)
     groups = stringify_groups(request.user)
     if request.method == 'GET':
-        template = 'portal/help_desk.html'
+        template = 'portal/feedback_details.html'
         data = None
         data_mapping = {
             'helpdesk': get_sa_list

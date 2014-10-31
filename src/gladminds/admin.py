@@ -19,7 +19,7 @@ from models.common import GladMindUsers, ProductTypeData, \
     BrandData, ProductData, CouponData, MessageTemplate,\
     UploadProductCSV, CustomerTempRegistration
 from gladminds.aftersell.models.common import \
-    RegisteredDealer, ServiceAdvisorDealerRelationship, ServiceAdvisor
+    RegisteredDealer, ServiceAdvisorDealerRelationship, ServiceAdvisor, SLA
 from gladminds.aftersell.models.logs import AuditLog, DataFeedLog
 from import_export.admin import ImportExportModelAdmin, ExportMixin
 from import_export import fields, widgets
@@ -566,3 +566,4 @@ admin.site.register(UploadProductCSV)
 admin.site.register(LogEntry)
 admin.site.register(UserNotification, UserNotificationAdmin)
 admin.site.register(Feedback, UserFeedback)
+admin.site.register(SLA)

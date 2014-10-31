@@ -457,16 +457,6 @@ function disable_func(){
 	$("#assignee").prop("disabled", true);
 }
 
-
-function dueDateRequire(assignTo){
-	'use strict';
-	var dueDate = $('.due-date');
-	dueDate.attr('required', true);
-	if ($('.assignee').val() === ''){
-		dueDate.attr('required', false);
-	}
-}
-
 function showMessage(id){
 	'use strict';
 	$('#'+id).popover();

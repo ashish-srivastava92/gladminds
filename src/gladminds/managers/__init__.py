@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+import datetime
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.exceptions import DataNotFoundError
 from gladminds.utils import create_context, get_list_from_set,\
@@ -31,6 +31,13 @@ def get_feedback(feedback_id, user):
         return aftersell_common.Feedback.objects.filter(id=feedback_id)
 
 
+def set_dueDate(priority, created_date):
+    sla_obj = aftersell_common.SLA.objects.get(priority=priority)
+    resolution_time = sla_obj.resolution_time
+    total_seconds = (resolution_time.hour * 3600) + (resolution_time.minute * 60) + (resolution_time.second)
+    due_date = created_date + datetime.timedelta(seconds=total_seconds)
+    return due_date
+
 def save_update_feedback(feedback_obj, data, user,  host):
     comment_object = None
     assign_status = False
@@ -43,9 +50,10 @@ def save_update_feedback(feedback_obj, data, user,  host):
         previous_assignee = feedback_obj.assign_to
     else:
         assign_number = None
-
+    if feedback_obj.status == 'Open':
+        feedback_obj.due_date = set_dueDate(data['Priority'], feedback_obj.created_date)
+        feedback_obj.save()
     assign = feedback_obj.assign_to
-    
     if assign is None:
         assign_status = True
 
@@ -66,12 +74,9 @@ def save_update_feedback(feedback_obj, data, user,  host):
         feedback_obj.status = data['status']
         feedback_obj.priority = data['Priority']
     if data['status'] == 'Pending':
-        feedback_obj.pending_from = datetime.now()
+        feedback_obj.pending_from = datetime.datetime.now()
     if data['status'] == 'Closed':
-        feedback_obj.closed_date = datetime.now()
-    if data['due_date']:
-        due_date = datetime.strptime(data['due_date'], "%d/%m/%Y")
-        feedback_obj.due_date = due_date
+        feedback_obj.closed_date = datetime.datetime.now()
     feedback_obj.save()
     if assign_status and feedback_obj.assign_to:
         context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL',
@@ -87,8 +92,8 @@ def save_update_feedback(feedback_obj, data, user,  host):
     if feedback_obj.status == 'Resolved':
         servicedesk_obj_all = aftersell_common.ServiceDeskUser.objects.filter(
                                                     designation='SDM')
-        feedback_obj.resolved_date = datetime.now()
-        feedback_obj.resolved_date = datetime.now()
+        feedback_obj.resolved_date = datetime.datetime.now()
+        feedback_obj.resolved_date = datetime.datetime.now()
         feedback_obj.root_cause = data['rootcause']
         feedback_obj.resolution = data['resolution']
         feedback_obj.save()
@@ -116,7 +121,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
     if data['comments']:
         comment_object = aftersell_common.Comments(
                                         comments=data['comments'],
-                                        user=user, created_date=datetime.now(),
+                                        user=user, created_date=datetime.datetime.now(),
                                         feedback_object=feedback_obj)
         comment_object.save()
 
