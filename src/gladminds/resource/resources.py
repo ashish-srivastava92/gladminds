@@ -408,7 +408,7 @@ class GladmindsResources(Resource):
             return {'status': False, 'message': "SA is not the coupon initiator."}
         try:
             vin = self.get_vin(sap_customer_id)
-            coupon_object = common.CouponData.objects.select_for_update().filter(vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
+            coupon_object = common.CouponData.objects.filter(vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
             if coupon_object.status == 2 or coupon_object.status == 6:
                 message=templates.get_template('COUPON_ALREADY_CLOSED')
             elif coupon_object.status == 4:
