@@ -18,7 +18,7 @@ def get_customers_to_send_reminder(*args, **kwargs):
     day = kwargs.get('reminder_day', None)
     today_date = datetime.now().date()
     reminder_date = datetime.now().date()+timedelta(days=day)
-    results = common.CouponData.objects.select_for_update().filter(mark_expired_on__range=(today_date, reminder_date), last_reminder_date__isnull=True, status=1).select_related('vin','customer_phone_number__phone_number')
+    results = common.CouponData.objects.filter(mark_expired_on__range=(today_date, reminder_date), last_reminder_date__isnull=True, status=1).select_related('vin','customer_phone_number__phone_number')
     for reminder in results:
         product = reminder.vin
         phone_number = product.customer_phone_number.phone_number
@@ -37,7 +37,7 @@ def get_customers_to_send_reminder(*args, **kwargs):
 def get_customers_to_send_reminder_by_admin(*args, **kwargs):
     from gladminds.sqs_tasks import send_reminder_message
     today=datetime.now().date()
-    results=common.CouponData.objects.select_for_update().filter(schedule_reminder_date__day=today.day, schedule_reminder_date__month=today.month, schedule_reminder_date__year=today.year, status=1).select_related('vin','customer_phone_number__phone_number')
+    results=common.CouponData.objects.filter(schedule_reminder_date__day=today.day, schedule_reminder_date__month=today.month, schedule_reminder_date__year=today.year, status=1).select_related('vin','customer_phone_number__phone_number')
     for reminder in results:
         product = reminder.vin
         phone_number = product.customer_phone_number.phone_number
