@@ -28,6 +28,7 @@ from gladminds.utils import get_task_queue, get_customer_info,\
     asc_cuopon_details, get_state_city
 from gladminds.sqs_tasks import export_asc_registeration_to_sap
 from gladminds.mail import sent_otp_email
+from collections import OrderedDict
 from gladminds.feed import SAPFeed
 from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
 from gladminds.aftersell.models import common as afterbuy_common
@@ -520,7 +521,7 @@ def get_asc_info(data, limit, offset, data_dict, data_list):
     asc_data = aftersell_common.RegisteredDealer.objects.filter(**asc_details)
     data_dict['total_count'] = len(asc_data)
     for asc in asc_data[offset:limit]:
-        asc_detail = {}
+        asc_detail = OrderedDict();
         asc_detail['id'] = asc.dealer_id
         asc_detail['address'] = asc.address
         get_state_city(asc_detail, asc.address)
@@ -536,11 +537,11 @@ def get_sa_info(data, limit, offset, data_dict, data_list):
     sa_data = aftersell_common.ServiceAdvisor.objects.filter(**sa_details)
     data_dict['total_count'] = len(sa_data)
     for sa in sa_data[offset:limit]:
-        sa_detail = {}
-        sa_detail = get_sa_details(sa_detail, sa)
+        sa_detail = OrderedDict();
         sa_detail['id'] = sa.service_advisor_id
         sa_detail['name'] = sa.name
         sa_detail['phone_number'] = sa.phone_number
+        sa_detail = get_sa_details(sa_detail, sa)
         data_list.append(sa_detail)
     data_dict['sa'] = data_list
     return data_dict
@@ -553,10 +554,10 @@ def get_customers_info(data, limit, offset, data_dict, data_list):
     args = {~Q(product_purchase_date=None)}
     customer_products = common.ProductData.objects.filter(*args, **kwargs)[offset:limit]
     for customer in customer_products:
-        customer_detail = {}
-        customer_detail['vin'] = customer.vin
+        customer_detail = OrderedDict();
         customer_detail['sap_id'] = customer.sap_customer_id
-        customer_detail['id'] = customer.customer_phone_number.gladmind_customer_id
+        customer_detail['gcp_id'] = customer.customer_phone_number.gladmind_customer_id
+        customer_detail['vin'] = customer.vin
         customer_detail['name'] = customer.customer_phone_number.customer_name
         customer_detail['phone_number'] = customer.customer_phone_number.phone_number
         customer_detail['email_id'] = customer.customer_phone_number.email_id
@@ -576,7 +577,7 @@ def get_active_asc_info(data, limit, offset, data_dict, data_list):
     active_ascs = active_asc_list.values_list('username', flat=True)
     asc_obj = aftersell_common.RegisteredDealer.objects.filter(dealer_id__in=active_ascs)
     for asc_data in asc_obj[offset:limit]:
-        active_ascs = {}
+        active_ascs = OrderedDict();
         active_ascs['id'] = asc_data.dealer_id
         active_ascs['address'] = asc_data.address
         active_ascs = get_state_city(active_ascs, asc_data.address)
@@ -599,7 +600,7 @@ def get_not_active_asc_info(data, limit, offset, data_dict, data_list):
     not_active_ascs = not_active_asc_list.values_list('username', flat=True)
     not_asc_obj = aftersell_common.RegisteredDealer.objects.filter(dealer_id__in=not_active_ascs)
     for asc in not_asc_obj[offset:limit]:
-        not_active_ascs = {}
+        not_active_ascs = OrderedDict();
         not_active_ascs['id'] = asc.dealer_id
         not_active_ascs['address'] = asc.address
         not_active_ascs = get_state_city(not_active_ascs, asc.address)
