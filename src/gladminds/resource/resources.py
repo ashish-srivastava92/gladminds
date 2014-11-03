@@ -221,6 +221,7 @@ class GladmindsResources(Resource):
         product_obj = common.ProductData.objects.filter(vin=vin).select_related('customer_phone_number__phone_number')
         return product_obj[0].customer_phone_number.phone_number
 
+
     def update_higher_range_coupon(self, kms, vin):
         '''
             Update those coupon have higher value than the least in progress
@@ -228,7 +229,7 @@ class GladmindsResources(Resource):
             of kilometer.
         '''
         updated_coupon = common.CouponData.objects\
-                        .filter(Q(status=4) | Q(status=5), vin__vin=vin, valid_kms__gt=kms)\
+                        .filter(Q(status=4) | Q(status=5), vin=vin, valid_kms__gt=kms)\
                         .update(status=1, sa_phone_number=None, actual_kms=None,
                                 actual_service_date=None, servicing_dealer=None)
         logger.info("%s have higher KMS range" % updated_coupon)
@@ -238,16 +239,15 @@ class GladmindsResources(Resource):
             Exceed Limit those coupon whose kms limit is small then actual kms limit
         '''
         exceed_limit_coupon = common.CouponData.objects\
-            .filter(Q(status=1) | Q(status=4), vin__vin=vin, valid_kms__lt=actual_kms)\
+            .filter(Q(status=1) | Q(status=4), vin=vin, valid_kms__lt=actual_kms)\
             .update(status=5, actual_kms=actual_kms)
         logger.info("%s are exceed limit coupon" % exceed_limit_coupon)
 
     def get_vin(self, sap_customer_id):
         try:
-            sap_customer_id = utils.get_updated_customer_id(sap_customer_id) 
-            customer_product_data = common.CouponData.objects.select_related \
-                                            ('vin').filter(vin__sap_customer_id=sap_customer_id).order_by('vin', 'valid_days')
-            return customer_product_data[0].vin.vin
+            sap_customer_id = utils.get_updated_customer_id(sap_customer_id)
+            product_data=common.ProductData.objects.get(sap_customer_id=sap_customer_id)
+            return product_data
         except Exception as ax:
             logger.error("Vin is not in customer_product_data Error %s " % ax)
 
@@ -280,7 +280,7 @@ class GladmindsResources(Resource):
             coupon.save()
     
     def get_requested_coupon_status(self, vin, service_type):
-        requested_coupon = common.CouponData.objects.filter(vin__vin=vin,
+        requested_coupon = common.CouponData.objects.filter(vin=vin,
                                                     service_type=service_type) 
         if not requested_coupon:
             status = "not available"
@@ -305,9 +305,10 @@ class GladmindsResources(Resource):
         try:
             vin = self.get_vin(sap_customer_id)
             self.update_exceed_limit_coupon(actual_kms, vin)
-            valid_coupon = common.CouponData.objects.select_for_update()\
-                           .filter(Q(status=1) | Q(status=4) | Q(status=5), vin__vin=vin, valid_kms__gte=actual_kms, service_type__gte=service_type) \
+            valid_coupon = common.CouponData.objects.filter(Q(status=1) | Q(status=4) | Q(status=5), vin=vin,
+                            valid_kms__gte=actual_kms, service_type__gte=service_type) \
                            .select_related('vin', 'customer_phone_number__phone_number').order_by('service_type')
+            logger.info(valid_coupon)
             if len(valid_coupon) > 1:
                 self.update_higher_range_coupon(valid_coupon[0].valid_kms, vin)
                 valid_coupon = valid_coupon[0]
@@ -329,12 +330,11 @@ class GladmindsResources(Resource):
                 coupon_sa_obj.save()
                 logger.info('Coupon obj created: %s' % coupon_sa_obj)
 
-            in_progress_coupon = common.CouponData.objects.select_for_update()\
-                                 .filter(vin__vin=vin, valid_kms__gte=actual_kms, status=4) \
+            in_progress_coupon = common.CouponData.objects.filter(vin=vin, valid_kms__gte=actual_kms, status=4) \
                                  .select_related ('vin', 'customer_phone_number__phone_number') \
                                  .order_by('service_type')
             try:
-                customer_phone_number = self.get_customer_phone_number_from_vin(vin) 
+                customer_phone_number = vin.customer_phone_number.phone_number
             except Exception as ax:
                 logger.error('Customer Phone Number is not stored in DB %s' % ax)
             if len(in_progress_coupon) > 0:
@@ -366,7 +366,7 @@ class GladmindsResources(Resource):
             else:
                 logger.info("Validate_coupon: ELSE PART")
                 customer_message_countdown = 10
-                requested_coupon = common.CouponData.objects.get(vin__vin=vin, service_type=service_type)
+                requested_coupon = common.CouponData.objects.get(vin=vin, service_type=service_type)
                 dealer_message = templates.get_template('SEND_SA_EXPIRED_COUPON').format(service_type=requested_coupon.service_type, customer_id=sap_customer_id)
                 customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(service_type=requested_coupon.service_type)
             if settings.ENABLE_AMAZON_SQS:
@@ -408,7 +408,7 @@ class GladmindsResources(Resource):
             return {'status': False, 'message': "SA is not the coupon initiator."}
         try:
             vin = self.get_vin(sap_customer_id)
-            coupon_object = common.CouponData.objects.select_for_update().filter(vin__vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
+            coupon_object = common.CouponData.objects.filter(vin=vin, unique_service_coupon=unique_service_coupon).select_related ('vin', 'customer_phone_number__phone_number')[0]
             if coupon_object.status == 2 or coupon_object.status == 6:
                 message=templates.get_template('COUPON_ALREADY_CLOSED')
             elif coupon_object.status == 4:

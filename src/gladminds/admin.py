@@ -214,10 +214,8 @@ class ProductDataAdmin(ModelAdmin):
         return query_set
 
     def UCN(self, obj):
-        ucn_list = []
-        for coupon in CouponData.objects.filter(vin=obj.id):
-            ucn_list.append(coupon.unique_service_coupon)
-        return ' | '.join([str(ucn) for ucn in ucn_list])
+        coupons = CouponData.objects.filter(vin=obj.id)
+        return ' | '.join([str(ucn.unique_service_coupon) for ucn in coupons])
 
     def customer_name(self, obj):
         gm_user_obj = GladMindUsers.objects.get(
@@ -469,7 +467,6 @@ class ListDispatchedProduct(ModelAdmin):
         
         utils.get_search_query_params(request, self)
         query_set = self.model._default_manager.get_query_set()
-        query_set = query_set.filter(invoice_date__isnull=False)
         # TODO: this should be handled by some parameter to the ChangeList.
 #        ordering = self.get_ordering(request)
 #        if ordering:
@@ -477,10 +474,8 @@ class ListDispatchedProduct(ModelAdmin):
         return query_set
 
     def UCN(self, obj):
-        ucn_list = []
-        for coupon in CouponData.objects.filter(vin=obj.id):
-            ucn_list.append(coupon.unique_service_coupon)
-        return ' | '.join([str(ucn) for ucn in ucn_list])
+        coupons = CouponData.objects.filter(vin=obj.id)
+        return ' | '.join([str(ucn.unique_service_coupon) for ucn in coupons])
     
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('customer_phone_number',)

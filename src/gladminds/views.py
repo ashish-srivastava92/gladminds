@@ -609,7 +609,6 @@ def get_not_active_asc_info(data, limit, offset, data_dict, data_list):
     data_dict['not-active-asc'] = data_list
     return data_dict
 
-
 def get_sa_details(sa_details, id):
     sa_detail = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=id)
     if sa_detail:
