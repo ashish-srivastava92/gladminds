@@ -3,7 +3,7 @@ from django.conf import settings
 from datetime import datetime
 from django.contrib.auth.models import User
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
-    USER_DESIGNATION, RATINGS, ROOT_CAUSE
+    USER_DESIGNATION, RATINGS, ROOT_CAUSE, SLA_PRIORITY
 
 ##########################################################################
 ########################## ASC Save Form #########################
@@ -163,4 +163,14 @@ class Comments(models.Model):
     class Meta:
         app_label = "aftersell"
         verbose_name_plural = "aftersell comment info"
+
+class SLA(models.Model):
+    priority = models.CharField(max_length=12, choices=SLA_PRIORITY, unique=True)
+    response_time = models.TimeField()
+    resolution_time = models.TimeField()
+    reminder_time = models.TimeField()
+    
+    class Meta:
+        app_label = "aftersell"
+        verbose_name_plural = "aftersell SLA info"
 

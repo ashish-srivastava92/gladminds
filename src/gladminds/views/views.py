@@ -283,22 +283,40 @@ def get_sa_under_asc(request, id=None):
         pass
     return render(request, template, {'active_menu':'sa',"data": data})
 
+def get_feedbacks(user, status):
+    group = user.groups.all()[0]
+    feedbacks = []
+    if not status:
+        status = ['Open', 'Pending', 'Progress']
+    else:
+        status = [status]
+    if group.name == 'dealers':
+        sa_list = get_sa_list(user)
+        if sa_list:
+            feedbacks = aftersell_common.Feedback.objects.filter(reporter__in=sa_list, status__in=status).order_by('-created_date')
+            
+    return feedbacks
+
+
 @login_required()
-def servicedesk(request, servicedesk=None):
+def servicedesk(request,servicedesk=None):
+    status = request.GET.get('status',None)
     groups = stringify_groups(request.user)
     if request.method == 'GET':
-        template = 'portal/help_desk.html'
+        template = 'portal/feedback_details.html'
         data = None
         data_mapping = {
             'helpdesk': get_sa_list
             }
         try:
             data = data_mapping[servicedesk](request.user)
-        except:
+        except Exception as ex:
             #It is acceptable if there is no data_mapping defined for a function
             pass
-        return render(request, template, {'active_menu': servicedesk,
+        return render(request, template, {"feedbacks" : get_feedbacks(request.user, status),
+                                          'active_menu': servicedesk,
                                           "data": data, 'groups': groups,
+                     "status": get_list_from_set(aftersell_common.FEEDBACK_STATUS),
                      "types": get_list_from_set(aftersell_common.FEEDBACK_TYPE),
                      "priorities": get_list_from_set(aftersell_common.PRIORITY)})
     elif request.method == 'POST':
@@ -313,28 +331,6 @@ def servicedesk(request, servicedesk=None):
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
-
-def get_feedbacks(user):
-    group = user.groups.all()[0]
-    if group.name == 'dealers':
-        sa_list = get_sa_list(user)
-        feedback_list = []
-        if sa_list:
-            for phone_number in sa_list:
-                feedbacks = aftersell_common.Feedback.objects.filter(
-                        reporter=phone_number).order_by('-created_date')
-                for feedback in feedbacks:
-                    feedback_list.append(feedback)
-    return feedback_list
-
-
-@login_required()
-@require_http_methods(["GET"])
-def get_user_tickets(request,servicedesk=None):  
-    return render(request, 'portal/tickets.html',\
-                  {"feedbacks": get_feedbacks(request.user)})
-
-
 
 def save_help_desk_data(request):
     fields = ['message', 'priority', 'advisorMobile', 'type', 'subject']

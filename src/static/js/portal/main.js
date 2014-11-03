@@ -264,6 +264,9 @@
                 $('#type').val('');
                 $('#subject').val('');
                 $('#advisorMobile').val('');
+                setTimeout(function() {
+                    parent.window.location='/aftersell/servicedesk/helpdesk';
+                }, 2000);
                 
             },
             error: function() {
@@ -309,7 +312,9 @@
                 waitingModal.modal('hide');
                 messageModal.modal('show');
                 setTimeout(function() {
-                    parent.window.location='/aftersell/servicedesk/';
+                	var parts = document.referrer.split('://')[1].split('/');
+                	var pathName = parts.slice(1).join('/');
+                	parent.window.location='/'+pathName;
                 }, 3000);
                 
             },
@@ -333,7 +338,7 @@
     });
     
     $(document).ready(function() {
-
+    	
     });
 
     $('.report-type-dropdown').on('change', function() {
@@ -451,17 +456,23 @@ function rootCause(status){
 	}
 	
 }
-
-function dueDateRequire(assignTo){
-	'use strict';
-	var dueDate = $('.due-date');
-	dueDate.attr('required', true);
-	if ($('.assignee').val() === ''){
-		dueDate.attr('required', false);
-	}
+function disable_func(){
+	$("#type").prop("disabled", true);
+	$("#priority").prop("disabled", true);
+	$("#assignee").prop("disabled", true);
 }
 
 function showMessage(id){
 	'use strict';
 	$('#'+id).popover();
+}
+
+function change_status(){
+	var status = window.location.search.split('?status=')[1];
+    $('#status').val(status);
+    $('#status').change(function() {
+    	status = $('#status').val();
+    	window.location.href = window.location.pathname + '?status='+status;
+    });
+	
 }
