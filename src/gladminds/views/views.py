@@ -300,37 +300,41 @@ def get_feedbacks(user, status):
 
 @login_required()
 def servicedesk(request,servicedesk=None):
-    status = request.GET.get('status',None)
-    groups = stringify_groups(request.user)
-    if request.method == 'GET':
-        template = 'portal/feedback_details.html'
-        data = None
-        data_mapping = {
-            'helpdesk': get_sa_list
+    if settings.ENABLE_SERVICE_DESK:
+        status = request.GET.get('status',None)
+        groups = stringify_groups(request.user)
+        if request.method == 'GET':
+            template = 'portal/feedback_details.html'
+            data = None
+            data_mapping = {
+                'helpdesk': get_sa_list
+                }
+            try:
+                data = data_mapping[servicedesk](request.user)
+            except Exception as ex:
+                #It is acceptable if there is no data_mapping defined for a function
+                pass
+            return render(request, template, {"feedbacks" : get_feedbacks(request.user, status),
+                                              'active_menu': servicedesk,
+                                              "data": data, 'groups': groups,
+                         "status": get_list_from_set(aftersell_common.FEEDBACK_STATUS),
+                         "types": get_list_from_set(aftersell_common.FEEDBACK_TYPE),
+                         "priorities": get_list_from_set(aftersell_common.PRIORITY)})
+        elif request.method == 'POST':
+            function_mapping = {
+                'helpdesk': save_help_desk_data
             }
-        try:
-            data = data_mapping[servicedesk](request.user)
-        except Exception as ex:
-            #It is acceptable if there is no data_mapping defined for a function
-            pass
-        return render(request, template, {"feedbacks" : get_feedbacks(request.user, status),
-                                          'active_menu': servicedesk,
-                                          "data": data, 'groups': groups,
-                     "status": get_list_from_set(aftersell_common.FEEDBACK_STATUS),
-                     "types": get_list_from_set(aftersell_common.FEEDBACK_TYPE),
-                     "priorities": get_list_from_set(aftersell_common.PRIORITY)})
-    elif request.method == 'POST':
-        function_mapping = {
-            'helpdesk': save_help_desk_data
-        }
-        try:
-            data = function_mapping[servicedesk](request)
-            return HttpResponse(content=json.dumps(data),
-                                content_type='application/json')
-        except:
+            try:
+                data = function_mapping[servicedesk](request)
+                return HttpResponse(content=json.dumps(data),
+                                    content_type='application/json')
+            except:
+                return HttpResponseBadRequest()
+        else:
             return HttpResponseBadRequest()
     else:
-        return HttpResponseBadRequest()
+        return HttpResponseRedirect('http://support.gladminds.co/')
+
 
 def save_help_desk_data(request):
     fields = ['message', 'priority', 'advisorMobile', 'type', 'subject']

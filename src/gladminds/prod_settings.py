@@ -116,3 +116,4 @@ MAIL_DETAIL["subject"] = "GladMinds Feed Report"
 FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/dev/'
 FEED_FAILURE_BUCKET = 'gladminds'
 #######################################################################
+ENABLE_SERVICE_DESK = False
