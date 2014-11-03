@@ -11,6 +11,7 @@ from gladminds.utils import get_sa_list, get_coupon_info, get_customer_info,\
  get_list_from_set, get_token, create_feed_data , \
  validate_otp,recover_coupon_info, update_pass, format_date_string
 from gladminds.aftersell.models import logs
+from gladminds.models import common
 from django.db import connection
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
@@ -53,13 +54,12 @@ class TestUtils(GladmindsUnitTestCase):
 
 
     def test_get_sa_list(self):
-        request = RequestObject(user='DEALER001', data={
-                                'customerId': 'SAP001', 'vin': 'VINXXX001'}, file={'jobCard': ''})
-        sa_list = get_sa_list(request)
+        post_data={'customerId': 'SAP001', 'vin': 'VINXXX001', 'current_user': 'DEALER001', 'jobCard': ''}
+        sa_list = get_sa_list(post_data['current_user'])
         self.assertEqual(len(sa_list), 1)
-        coupon_info = get_coupon_info(request)
+        coupon_info = get_coupon_info(post_data)
         self.assertEqual(coupon_info.unique_service_coupon, 'COUPON005')
-        customer = get_customer_info(request)
+        customer = get_customer_info(post_data)
         self.assertEquals(len(customer.keys()), 5)
 
     def test_otp(self):
@@ -69,24 +69,23 @@ class TestUtils(GladmindsUnitTestCase):
         self.assertTrue(validate_otp(self.asc_user, token, phone_number))
         
     def test_get_customer_info(self):  
-        request=RequestObject(data={'vin':'12345678999'})
+        post_data={'vin':'12345678999'}
         product_info = common.ProductData(vin = '12345678999')
         product_info.save() 
-        result=get_customer_info(request)
+        result=get_customer_info(post_data)
          
-        self.assertEqual("VIN '12345678999' has no associated customer.",result['message'])
+        self.assertEqual("VIN '12345678999' has no associated customer. Please register the customer.",result['message'])
         request = RequestObject(data={'vin':'123456789'})
-        result = get_customer_info(request)
+        result = get_customer_info(post_data)
         self.assertEqual("VIN '123456789' does not exist in our records.",result['message'])
         self.assertEqual("fail",result['status'])
         request = RequestObject(data={'vin':'VINXXX001'})
-        result = get_customer_info(request)
+        result = get_customer_info(post_data)
         self.assertEqual('+919999999',result['phone'])
          
-    def test_get_coupon_info(self):  
-        request = RequestObject(user='DEALER001', data={
-                                'customerId': 'SAP001', 'vin': 'VINXXX001'}, file={'jobCard': ''})
-        result = get_coupon_info(request)
+    def test_get_coupon_info(self):
+        post_data={'customerId': 'SAP001', 'vin': 'VINXXX001', 'current_user': 'DEALER001', 'jobCard': ''}
+        result = get_coupon_info(post_data)
         self.assertEqual(30,result.valid_days)
         
     def test_save_pass(self):
@@ -112,7 +111,6 @@ class TestUtils(GladmindsUnitTestCase):
         self.assertEqual(len(data), 5) 
         data = get_list_from_set(PRIORITY)
         self.assertEqual(len(data), 4) 
-         
 
 
 class TestFeedLogWithRemark(ResourceTestCase):
@@ -134,8 +132,7 @@ class TestFeedLogWithRemark(ResourceTestCase):
 
         feed_logs_obj = logs.DataFeedLog.objects.all()
         self.assertEqual(len(feed_logs_obj), 1)
-        remark = json.loads(feed_logs_obj[0].remarks)
-        self.assertEqual(len(remark), 1)
+
         file_name = feed_logs_obj[0].file_location.split("/")[-1]
         
         

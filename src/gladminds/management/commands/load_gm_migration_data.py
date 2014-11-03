@@ -12,8 +12,9 @@ BASIC_FEED = feed.BaseFeed()
 class Command(BaseCommand):
     
     def handle(self, *args, **options):
-        self.add_sms_template()
-        self.add_email_template()
+#         self.add_sms_template()
+#         self.add_email_template()
+        pass
         
     def add_group(self):
         print "Loading groups..."

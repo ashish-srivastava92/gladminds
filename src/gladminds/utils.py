@@ -11,13 +11,15 @@ from django.template import Context
 from gladminds.models.common import STATUS_CHOICES
 from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
+from django.contrib.auth.models import User
 from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY, TIMEZONE
 from gladminds.taskqueue import SqsTaskQueue
-from gladminds.mail import send_ucn_request_alert
 from django.db.models.fields.files import FieldFile
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     TIME_FORMAT
+from gladminds.mail import send_ucn_request_alert, send_mail_when_vin_does_not_exist
+
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 logger = logging.getLogger('gladminds')
@@ -60,22 +62,20 @@ def get_phone_number_format(phone_number):
     '''
     return phone_number[-10:]
 
-def save_otp(user, token, email):
+def save_otp(token, user):
     common.OTPToken.objects.filter(user=user).delete()
-    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.datetime.now(), email=email)
+    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=user.email)
     token_obj.save()
 
-def get_token(user, phone_number, email=''):
-    if email and user.email_id != email:
-        raise
-    totp = TOTP(TOTP_SECRET_KEY+str(randint(10000, 99999))+str(phone_number))
-    totp.time = 30
+def get_token(user, phone_number):
+    totp=TOTP(TOTP_SECRET_KEY+str(randint(10000,99999))+str(phone_number))
+    totp.time=30
     token = totp.token()
-    save_otp(user, token, email)
+    save_otp(token, user)
     return token
 
-def validate_otp(user, otp, phone):
-    token_obj = common.OTPToken.objects.filter(user=user)[0]
+def validate_otp(otp, name):
+    token_obj = common.OTPToken.objects.filter(user__username=name)[0]
     if int(otp) == int(token_obj.token) and (timezone.now()-token_obj.request_date).seconds <= OTP_VALIDITY:
         return True
     elif (timezone.now()-token_obj.request_date).seconds > OTP_VALIDITY:
@@ -102,23 +102,29 @@ def format_product_object(product_obj):
             'purchase_date': purchase_date,
             'vin': product_obj.vin}
 
-def get_customer_info(request):
-    data = request.POST
+def get_customer_info(data):
     try:
         product_obj = common.ProductData.objects.get(vin=data['vin'])
     except Exception as ex:
         logger.info(ex)
-        message = '''VIN '{0}' does not exist in our records.'''.format(data['vin'])
+        message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
+        if data['groups'][0] == "dealers":
+            data['groups'][0] = "Dealer"
+        else:
+            data['groups'][0] = "ASC"
+        data = get_email_template('VIN DOES NOT EXIST').body.format(data['current_user'], data['vin'], data['groups'][0])
+        send_mail_when_vin_does_not_exist(data=data)
         return {'message': message, 'status': 'fail'}
     if product_obj.product_purchase_date:
         product_data = format_product_object(product_obj)
         return product_data
     else:
-        message = '''VIN '{0}' has no associated customer.'''.format(data['vin'])
+        message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
         return {'message': message}
 
-def get_sa_list(request):
-    dealer = aftersell_common.RegisteredDealer.objects.filter(dealer_id=request.user)[0]
+def get_sa_list(user):
+    dealer = aftersell_common.RegisteredDealer.objects.filter(
+                dealer_id=str(user))[0]
     service_advisors = aftersell_common.ServiceAdvisorDealerRelationship.objects\
                                 .filter(dealer_id=dealer, status='Y')
     sa_phone_list = []
@@ -126,41 +132,65 @@ def get_sa_list(request):
         sa_phone_list.append(service_advisor.service_advisor_id)
     return sa_phone_list
 
-def recover_coupon_info(request):
-    coupon_data = get_coupon_info(request)
-    ucn_recovery_obj = upload_file(request)
-    send_recovery_email_to_admin(ucn_recovery_obj, coupon_data)
-    message = 'UCN for customer {0} is {1}.'.format(coupon_data.vin.sap_customer_id,
-                                                    coupon_data.unique_service_coupon)
-    return {'status': True, 'message': message}
+def get_sa_list_for_login_dealer(user):
+    dealer = aftersell_common.RegisteredDealer.objects.filter(
+                dealer_id=user)[0]
+    service_advisors = aftersell_common.ServiceAdvisorDealerRelationship.objects\
+                                .filter(dealer_id=dealer, status='Y')
+    return service_advisors
 
-def get_coupon_info(request):
-    data = request.POST
+def get_asc_list_for_login_dealer(user):
+    ascs = aftersell_common.RegisteredDealer.objects.filter(
+                dependent_on=user)
+    asc_list_with_detail = []
+    for asc in ascs:
+        asc_detail = User.objects.filter(username=asc.dealer_id)
+        asc_list_with_detail.append(asc_detail[0])
+    return asc_list_with_detail
+
+def recover_coupon_info(data):
     customer_id = data['customerId']
-    logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, request.user))
-    product_data = common.ProductData.objects.filter(sap_customer_id=customer_id)[0]
-    coupon_data = common.CouponData.objects.filter(vin=product_data, status=4)[0]
+    logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, data['current_user']))
+    coupon_data = get_coupon_info(data)
+    if coupon_data:
+        ucn_recovery_obj = upload_file(data, coupon_data.unique_service_coupon)
+        send_recovery_email_to_admin(ucn_recovery_obj, coupon_data)
+        message = 'UCN for customer {0} is {1}.'.format(customer_id,
+                                                    coupon_data.unique_service_coupon)
+        return {'status': True, 'message': message}
+    else:
+        message = 'No coupon in progress for customerID {0}.'.format(customer_id) 
+        return {'status': False, 'message': message}
+    
+def get_coupon_info(data):
+    customer_id = get_updated_customer_id(data['customerId'])
+    try:
+        coupon_data = common.CouponData.objects.get(vin__sap_customer_id=customer_id, status=4)
+        coupon_data.special_case = True
+        coupon_data.save()
+    except Exception as ex:
+        coupon_data = None
+        logger.error('[UCN_RECOVERY_ERROR]:: {0}'.format(ex))
     return coupon_data
 
-def upload_file(request):
-    data = request.POST
-    user_obj = request.user
-    file_obj = request.FILES['jobCard']
+def upload_file(data, unique_service_coupon):
+    user_obj = data['current_user']
+    file_obj = data['job_card']
     customer_id = data['customerId']
     reason = data['reason']
-    customer_id = request.POST['customerId']
-    file_obj.name = get_file_name(request, file_obj)
+    file_obj.name = get_file_name(data, file_obj)
     #TODO: Include Facility to get brand name here
     destination = settings.JOBCARD_DIR.format('bajaj')
     path = uploadFileToS3(destination=destination, file_obj=file_obj,
                           bucket=settings.JOBCARD_BUCKET, logger_msg="JobCard")
-    ucn_recovery_obj = aftersell_common.UCNRecovery(reason=reason, user=user_obj, sap_customer_id=customer_id,
-                                                    file_location=path)
+    ucn_recovery_obj = aftersell_common.UCNRecovery(reason=reason, user=user_obj,
+                                        sap_customer_id=customer_id, file_location=path,
+                                        unique_service_coupon=unique_service_coupon)
     ucn_recovery_obj.save()
     return ucn_recovery_obj
 
-def get_file_name(request, file_obj):
-    requester = request.user
+def get_file_name(data, file_obj):
+    requester = data['current_user']
     if 'dealers' in requester.groups.all():
         filename_prefix = requester
     else:
@@ -168,7 +198,7 @@ def get_file_name(request, file_obj):
         filename_prefix = requester
     filename_suffix = str(uuid.uuid4())
     ext = file_obj.name.split('.')[-1]
-    customer_id = request.POST['customerId']
+    customer_id = data['customerId']
     return str(filename_prefix)+'_'+customer_id+'_'+filename_suffix+'.'+ext
 
 def get_user_groups(user):
@@ -285,21 +315,19 @@ def subtract_dates(start_date, end_date):
     end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
     return start_date - end_date
 
-
-def search_details(request):
-    data = request.POST
+def search_details(data):
     kwargs = {}
     search_results = []
     if data.has_key('VIN'):
         kwargs['vin'] = data['VIN']
     elif data.has_key('Customer-ID'):
-        kwargs['sap_customer_id'] = data['Customer-ID']
+        kwargs[ 'sap_customer_id' ] = get_updated_customer_id(data['Customer-ID'])
     elif data.has_key('Customer-Mobile'):
         kwargs['customer_phone_number__phone_number'] = mobile_format(data['Customer-Mobile'])
     product_obj = common.ProductData.objects.filter(**kwargs)
     if not product_obj or not product_obj[0].product_purchase_date:
         key = data.keys()
-        message = '''Customer details for {0} '{1}' not found.'''.format(key[0], data[key[0]])
+        message = '''{0} '{1}' has no associated customer. Please register the customer.'''.format(key[0], data[key[0]])
         logger.info(message)
         return {'message': message}
     for product in product_obj:
@@ -307,18 +335,16 @@ def search_details(request):
         search_results.append(data)
     return search_results
 
-def services_search_details(request):
-    data = request.POST
+def services_search_details(data):
     key = data.keys()
-    message = '''No Service Details available for {0} '{1}'.'''.format(key[0], data[key[0]])
+    message = '''No Service Details available for {0} '{1}'. Please register the customer.'''.format(key[0], data[key[0]])
     kwargs = {}
     response = {}
     search_results = []
     if data.has_key('VIN'):
         kwargs[ 'vin' ] = data['VIN']
     elif data.has_key('Customer-ID'):
-        kwargs[ 'sap_customer_id' ] = data['Customer-ID']
-        
+        kwargs[ 'sap_customer_id' ] = get_updated_customer_id(data['Customer-ID'])
     product_obj = common.ProductData.objects.filter(**kwargs)
     if len(product_obj) == 1:
         if not product_obj[0].product_purchase_date:
@@ -401,5 +427,93 @@ def total_time_spent(feedback_obj):
     days, hours = divmod(hours, 24)
     weeks, days = divmod(days, 7)
     return " {0} days ,{1}:{2}:{3}" .format(int(days),int(hours),int(minutes),int(seconds))
+
+def get_updated_customer_id(customer_id):
+    if customer_id and customer_id.find('T') == 0:
+        try:
+            temp_customer_obj = common.CustomerTempRegistration.objects.select_related('product_data').\
+                                       get(temp_customer_id=customer_id)
+            customer_id = temp_customer_obj.product_data.sap_customer_id
+        except Exception as ex:
+            logger.info("Temporary ID {0} does not exists: {1}".format(customer_id, ex))
+    return customer_id
+
+def service_advisor_search(data):
+    dealer_data = aftersell_common.RegisteredDealer.objects.get(
+                dealer_id=data['current_user'])
+    sa_phone_number = mobile_format(data['phone_number'])
+    message = sa_phone_number + ' is active under another dealer.'
     
-    
+    sa_details = aftersell_common.ServiceAdvisorDealerRelationship.objects.select_related(
+                    'service_advisor_id').filter(service_advisor_id__phone_number=sa_phone_number,
+                                dealer_id=dealer_data)
+
+    sa_mobile_active = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(
+                            service_advisor_id__phone_number=sa_phone_number,
+                            status='Y').exclude(dealer_id=dealer_data)
+    if not sa_details and not sa_mobile_active:
+        message = 'Service advisor is not associated, Please register the service advisor.'
+        return {'message': message}
+    if sa_details:
+        service_advisor_details = {'id': sa_details[0].service_advisor_id.service_advisor_id,
+                                   'phone': data['phone_number'], 
+                                   'name': sa_details[0].service_advisor_id.name, 
+                                   'status': sa_details[0].status,
+                                   'active':len(sa_mobile_active),
+                                   'message':message}
+        return service_advisor_details
+    return {'message': message, 'status': 'fail'}
+
+
+def make_tls_property(default=None):
+    """Creates a class-wide instance property with a thread-specific value."""
+    class TLSProperty(object):
+        def __init__(self):
+            from threading import local
+            self.local = local()
+
+        def __get__(self, instance, cls):
+            if not instance:
+                return self
+            return self.value
+
+        def __set__(self, instance, value):
+            self.value = value
+
+        def _get_value(self):
+            return getattr(self.local, 'value', default)
+        def _set_value(self, value):
+            self.local.value = value
+        value = property(_get_value, _set_value)
+
+    return TLSProperty()
+
+
+def get_asc_data():
+    asc_data = aftersell_common.RegisteredDealer.objects.filter(role='asc')
+    asc_list = []
+    for asc in asc_data:
+        asc_detail = User.objects.get(username=asc.dealer_id)
+        asc_list.append(asc_detail)
+    return asc_list
+
+
+def asc_cuopon_details(asc_id, status_type):
+    cuopon_details = common.CouponData.objects.filter(servicing_dealer=asc_id, status=status_type)
+    return len(cuopon_details)
+
+
+def get_state_city(details, address):
+    if address == None or address == '':
+        details['state'] = 'Null'
+        details['city'] = 'Null'
+    else:
+        addr = address.split(',')
+        if len(addr) == 2:
+            details['state'] = addr[1]
+            details['city'] = addr[0]
+        else:
+            details['city'] = addr[0]
+            details['state'] = 'Null'
+
+    return details

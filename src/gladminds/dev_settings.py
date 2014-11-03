@@ -49,13 +49,20 @@ TEMPLATE_DIRS = (
     TEMPLATE_DIR,
 )
 
-SMS_CLIENT = "KAP"
-SMS_CLIENT_DETAIL = {'login':'GladMinds1',
-                     'pass':'kap@user!23',
-                     'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
-                     'working_key': '1486415t035t8052c7pc',
-                     'sender_id': 'GLADMS'}
+######################################################
+#ADDED SETTINGS TO TEST CAPSYSTEM ON DEV ENV
+###########################################################
+ENABLE_AMAZON_SQS = False
 
+FILE_CACHE_DURATION = 0
+SMS_CLIENT = "KAP"
+  
+# SMS_CLIENT_DETAIL = {
+#                      'OTP_TWILIO_ACCOUNT' : 'ACbb8cb45f6113b8f2f6243c8eaa5ff971',
+#                      'OTP_TWILIO_AUTH' : 'aa445a4f0a7e651738e89810601f8860',
+#                      'OTP_TWILIO_FROM' : '+1 469-513-9856',
+#                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/Messages.json'
+#                 }
 ########################SQS Queue Name
 SQS_QUEUE_NAME = "gladminds-dev"
 ######################################
@@ -69,3 +76,8 @@ MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail DEV"
 FEED_FAILURE_MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail DEV"
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["srv.sngh92@yahoo.com","priyanka.n@hashedin.com","somit@hashedin.com","suresh@hashedin.com","chandan.patel@hashedin.com","naureen.razi@hashedin.com"]
+
+#############################################################################
+LOGGING['handlers']['gladminds_logs']['filename'] = 'log/gladminds/app/gladminds.log'
+LOGGING['handlers']['afterbuy_logs']['filename'] = 'log/gladminds/app/afterbuy.log'

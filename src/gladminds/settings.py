@@ -17,7 +17,7 @@ ALLOWED_HOSTS = ['*']
 
 ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
                     'service', 'check': 'a', 'close': 'c', 'brand': 'brand',
-                    'service_desk': 'sd'}
+                    'service_desk': 'sd', 'customer_detail_recovery': 'r'}
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -190,6 +190,7 @@ MIDDLEWARE_CLASSES = ('django.middleware.common.CommonMiddleware',
                       # 'django.middleware.csrf.CsrfViewMiddleware',
                       'django.contrib.messages.middleware.MessageMiddleware',
                       'corsheaders.middleware.CorsMiddleware',
+                      'gladminds.middleware.GladmindsMessageMiddleware'
                       # 'gladminds.middleware.GladmindsMiddleware'
                       # Uncomment the next line for simple clickjacking protection:
                       # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -270,15 +271,26 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
+         'console':{
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'sql': {
+            'level': 'DEBUG',
+            'filename': '/var/log/gladminds/sql.log',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
+        },
         'gladminds_logs': {
             'level': 'INFO',
-            'filename': 'log/gladminds/app/gladminds.log',
+            'filename': '/var/log/gladminds/gladminds.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         },
         'afterbuy_logs': {
             'level': 'INFO',
-            'filename': 'log/gladminds/app/afterbuy.log',
+            'filename': '/var/log/gladminds/afterbuy.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         }
@@ -290,17 +302,22 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['sql'],
+            'propagate': True,
+        },
         'gladminds': {
-            'handlers': ['gladminds_logs'],
+            'handlers': ['gladminds_logs','console'],
             'level': 'INFO',
             'propagate': True,
         },
         'spyne': {
-            'handlers': ['gladminds_logs'],
+            'handlers': ['gladminds_logs','console'],
             'level': 'WARN',
             'propagate': True,
         }, 'afterbuy': {
-            'handlers': ['afterbuy_logs'],
+            'handlers': ['afterbuy_logs','console'],
             'level': 'DEBUG',
             'propagate': True,
         }
@@ -327,10 +344,26 @@ FEED_FAILURE_MAIL_DETAIL = {
     "body": """""",
 }
 
-UCN_RECOVERY_MAIL_DETAIL = {"sender": "feed-report@gladminds.co",
-                            "receiver": ["gladminds@hashedin.com"],
-                            "subject": "Gladminds UCN Recovery Mail",
-                            "body": """""",}
+UCN_RECOVERY_MAIL_DETAIL = {
+    "sender": "feed-report@gladminds.co",
+    "receiver": ["gladminds@hashedin.com"],
+    "subject": "Gladminds UCN Recovery Mail",
+    "body": """""",
+}
+
+VIN_DOES_NOT_EXIST_DETAIL = {
+    "sender": "support@gladminds.co",
+    "receiver": [],
+    "subject": "Request for Dispatch feed",
+    "body": """""",
+}
+
+REGISTER_ASC_MAIL_DETAIL = {
+    "sender": "support@gladminds.co",
+    "receiver": [],
+    "subject": "ASC Registration Mail",
+    "body": """""",
+}
 
 OTP_MAIL = {"sender":"support@gladminds.co",
             "subject":"Reset Password",
@@ -387,10 +420,21 @@ TEMP_SA_ID_PREFIX = 'SA'
 FEED_FAILURE_MAIL_ENABLED = True
 ##########################################################################
 #########################New relic file location########################
-NEW_RELIC_FILE_LOCATION = './src/newrelic_qa.ini'
+NEW_RELIC_FILE_LOCATION = './src/'
 ########################################################################
 #######################SMS_HEALTH_CHECK_INTERVAL
 SMS_HEALTH_CHECK_INTERVAL = 6
 #######################FEED_HEALTH_CHECK_INTERVAL
 FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
+AIRTEL_IP = '54.84.243.77'
+SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
+                              'pass':'bajaj',
+                              'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',
+                              'message_url': 'http://117.99.128.32:80/login/pushsms.php'},
+                  'KAP': {'login':'GladMinds1',
+                          'pass':'kap@user!23',
+                          'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
+                          'working_key': '2uj6gnnnlbx37x436cppq87176j660w9',
+                          'sender_id': 'GLADMS'}
+                  }

@@ -13,27 +13,33 @@ from django.contrib.auth import authenticate, login, logout
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
+from django.contrib.auth.models import User
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
 
 from gladminds.models import common
+from gladminds.decorator import log_time
 from gladminds.sqs_tasks import send_otp
 from gladminds import utils, message_template
-from gladminds.utils import get_task_queue, get_customer_info,\
-    get_sa_list, recover_coupon_info, mobile_format, stringify_groups,\
-    get_list_from_set,  get_user_groups, search_details, format_date_string,\
-    services_search_details
 from gladminds.sqs_tasks import export_asc_registeration_to_sap
 from gladminds.aftersell.models import common as aftersell_common
+from gladminds.utils import get_task_queue, get_customer_info,\
+    get_sa_list, recover_coupon_info, mobile_format,\
+     stringify_groups, search_details,\
+    services_search_details, service_advisor_search,\
+    get_sa_list_for_login_dealer,get_asc_list_for_login_dealer,get_asc_data,\
+    asc_cuopon_details, get_state_city, get_user_groups, get_list_from_set
 from gladminds.mail import sent_otp_email
 from gladminds.feed import SAPFeed
 from gladminds.aftersell.feed_log_remark import FeedLogWithRemark
 from gladminds.aftersell.models import common as afterbuy_common
+from gladminds.aftersell.models import common as aftersell_common
 from gladminds.scheduler import SqsTaskQueue
 from gladminds.resource.resources import GladmindsResources
 from gladminds.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU
+from django.views.decorators.http import require_http_methods
 
 gladmindsResources = GladmindsResources()
 logger = logging.getLogger('gladminds')
@@ -70,28 +76,48 @@ def user_logout(request):
         return HttpResponseBadRequest()
     return HttpResponseBadRequest('Not Allowed')
 
+@login_required()
+def change_password(request): 
+    if request.method == 'GET':
+        return render(request, 'portal/change_password.html')
+    if request.method == 'POST':
+        groups = stringify_groups(request.user)
+        if 'dealers' in groups or 'ascs' in groups:
+            user = User.objects.get(username=request.user)
+            old_password = request.POST.get('oldPassword')
+            new_password = request.POST.get('newPassword')
+            check_pass = user.check_password(str(old_password))
+            if check_pass:
+                user.set_password(str(new_password))
+                user.save()
+                data = {'message': 'Password Changed successfully', 'status': True}
+            else:
+                data = {'message': 'Old password wrong', 'status': False}
+            return HttpResponse(json.dumps(data), content_type='application/json')
+        else:
+            return HttpResponseBadRequest('Not Allowed')
 
 def generate_otp(request):
     if request.method == 'POST':
         try:
-            phone_number = request.POST['mobile']
-            email = request.POST.get('email', '')
-            logger.info('OTP request received. Mobile: {0}'.format(phone_number))
-            user = aftersell_common.RegisteredASC.objects.filter(phone_number=mobile_format(phone_number))[0].user
-            token = utils.get_token(user, phone_number, email=email)
+            username = request.POST['username']
+            user = common.User.objects.get(username=username)
+            phone_number = ''
+            logger.info('OTP request received . username: {0}'.format(username))
+            token = utils.get_token(user, phone_number)
             message = message_template.get_template('SEND_OTP').format(token)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
+                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message, 'sms_client':settings.SMS_CLIENT})
             else:
-                send_otp.delay(phone_number=phone_number, message=message)  # @UndefinedVariable
+                send_otp.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
             logger.info('OTP sent to mobile {0}'.format(phone_number))
             #Send email if email address exist
-            if email:
-                sent_otp_email(data=token, receiver=email, subject='Forgot Password')
-            return HttpResponseRedirect('/aftersell/users/otp/validate?phone='+phone_number)
-        except:
-            logger.error('Invalid details, mobile {0}'.format(request.POST.get('mobile', '')))
+            if user.email:
+                sent_otp_email(data=token, receiver=user.email, subject='Forgot Password')
+            return HttpResponseRedirect('/aftersell/users/otp/validate?username='+username)
+        except Exception as ex:
+            logger.error('Invalid details, mobile {0}'.format(phone_number))
             return HttpResponseRedirect('/aftersell/users/otp/generate?details=invalid')
     elif request.method == 'GET':
         return render(request, 'portal/get_otp.html')
@@ -103,14 +129,13 @@ def validate_otp(request):
     elif request.method == 'POST':
         try:
             otp = request.POST['otp']
-            phone_number = request.POST['phone']
-            logger.info('OTP {0} recieved for validation. Mobile {1}'.format(otp, phone_number))
-            user = aftersell_common.RegisteredASC.objects.filter(phone_number=mobile_format(phone_number))[0].user
-            utils.validate_otp(user, otp, phone_number)
-            logger.info('OTP validated for mobile number {0}'.format(phone_number))
+            username = request.POST['username']
+            logger.info('OTP {0} recieved for validation. username {1}'.format(otp, username))
+            utils.validate_otp(otp, username)
+            logger.info('OTP validated for name {0}'.format(username))
             return render(request, 'portal/reset_pass.html', {'otp': otp})
         except:
-            logger.error('OTP validation failed for mobile number {0}'.format(phone_number))
+            logger.error('OTP validation failed for name {0}'.format(username))
             return HttpResponseRedirect('/aftersell/users/otp/generate?token=invalid')
 
 
@@ -187,9 +212,6 @@ def exceptions(request, exception=None):
     groups = stringify_groups(request.user)
     if not ('ascs' in groups or 'dealers' in groups):
         return HttpResponseBadRequest()
-    if exception == 'report':
-        report_data = create_report(request.method, request.POST, request.user)
-        return render(request, 'portal/report.html', report_data)
     if request.method == 'GET':
         template = 'portal/exception.html'
         data = None
@@ -198,7 +220,7 @@ def exceptions(request, exception=None):
             'check': get_sa_list
         }
         try:
-            data = data_mapping[exception](request)
+            data = data_mapping[exception](request.user)
         except:
             #It is acceptable if there is no
             #data_mapping defined for a function
@@ -210,16 +232,54 @@ def exceptions(request, exception=None):
             'customer' : get_customer_info,
             'recover' : recover_coupon_info,
             'search' : search_details,
-            'status' : services_search_details
+            'status' : services_search_details,
+            'serviceadvisor': service_advisor_search
         }
         try:
-            data = function_mapping[exception](request)
-            return HttpResponse(content=json.dumps(data), content_type='application/json')
-        except:
+            post_data = request.POST.copy()
+            post_data['current_user'] = request.user
+            post_data['groups'] = groups
+            if request.FILES:
+                post_data['job_card']=request.FILES['jobCard']
+            data = function_mapping[exception](post_data)
+            return HttpResponse(content=json.dumps(data),  content_type='application/json')
+        except Exception as ex:
+            logger.error(ex)
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
 
+@login_required()
+def users(request, users=None):
+    groups = stringify_groups(request.user)
+    if not ('ascs' in groups or 'dealers' in groups):
+        return HttpResponseBadRequest()
+    if request.method == 'GET':
+        template = 'portal/users.html'
+        data=None
+        data_mapping = {
+            'sa': get_sa_list_for_login_dealer,
+            'asc': get_asc_list_for_login_dealer
+        }
+        try:
+            data = data_mapping[users](request.user)
+        except:
+            #It is acceptable if there is no data_mapping defined for a function
+            pass
+        return render(request, template, {'active_menu' : users, "data" : data, 'groups': groups})
+    else:
+        return HttpResponseBadRequest()
+
+@login_required()
+def get_sa_under_asc(request, id=None):
+    template = 'portal/sa_list.html'
+    data = None
+    try:
+            data = get_sa_list_for_login_dealer(id)
+    except:
+            #It is acceptable if there is no data_mapping defined for a function
+        pass
+    return render(request, template, {'active_menu':'sa',"data": data})
 
 @login_required()
 def servicedesk(request, servicedesk=None):
@@ -231,7 +291,7 @@ def servicedesk(request, servicedesk=None):
             'helpdesk': get_sa_list
             }
         try:
-            data = data_mapping[servicedesk](request)
+            data = data_mapping[servicedesk](request.user)
         except:
             #It is acceptable if there is no data_mapping defined for a function
             pass
@@ -252,6 +312,27 @@ def servicedesk(request, servicedesk=None):
     else:
         return HttpResponseBadRequest()
 
+def get_feedbacks(user):
+    group = user.groups.all()[0]
+    if group.name == 'dealers':
+        sa_list = get_sa_list(user)
+        feedback_list = []
+        if sa_list:
+            for phone_number in sa_list:
+                feedbacks = aftersell_common.Feedback.objects.filter(
+                        reporter=phone_number).order_by('-created_date')
+                for feedback in feedbacks:
+                    feedback_list.append(feedback)
+    return feedback_list
+
+
+@login_required()
+@require_http_methods(["GET"])
+def get_user_tickets(request,servicedesk=None):  
+    return render(request, 'portal/tickets.html',\
+                  {"feedbacks": get_feedbacks(request.user)})
+
+
 
 def save_help_desk_data(request):
     fields = ['message', 'priority', 'advisorMobile', 'type', 'subject']
@@ -262,67 +343,71 @@ def save_help_desk_data(request):
 
 
 @login_required()
-def reports(request, report=None):
+def reports(request):
     groups = stringify_groups(request.user)
+    report_data=[]
     if not ('ascs' in groups or 'dealers' in groups):
         return HttpResponseBadRequest()
-    if report == 'reconciliation':
-        report_data = create_report(request.method, request.POST, request.user)
-        return render(request, 'portal/report.html', report_data)
-    else:
-        return HttpResponseBadRequest()
+    status_options = {'4': 'In Progress', '2':'Closed'}
+    report_options = {'reconciliation': 'Reconciliation', 'credit':'Credit Note'}  
+    min_date, max_date = utils.get_min_and_max_filter_date()
+    template_rendered = 'portal/reconciliation_report.html'
+    report_data =  {'status_options': status_options,
+                    'report_options': report_options,
+                    'min_date':min_date,
+                    'max_date': max_date}
+    if request.method == 'POST':
+        report_data['params'] = request.POST.copy()
+        if report_data['params']['type']== 'credit':
+            report_data['params']['status']='2'
+            template_rendered = 'portal/credit_note_report.html'
+        report_data['records'] = create_reconciliation_report(report_data['params'], request.user)
+    return render(request, template_rendered, report_data)
 
-
-def create_report(method, query_params, user):
+@log_time
+def create_reconciliation_report(query_params, user):
     report_data = []
     filter = {}
     params = {}
-    args = { Q(status=4) | Q(status=2) | Q(status=6)}
-    status_options = {'6': 'Closed Old Fsc', '4': 'In Progress', '2':'Closed'}
     user = afterbuy_common.RegisteredDealer.objects.filter(dealer_id=user)
     filter['servicing_dealer'] = user[0]
-    params['min_date'], params['max_date'] = utils.get_min_and_max_filter_date() 
-    if method == 'POST':
-        message = "No coupon found."
-        status = query_params.get('status')
-        from_date = query_params.get('from')
-        to_date = query_params.get('to')
-        params['start_date'] = from_date
-        params['to_date'] = to_date
-        filter['actual_service_date__range'] = (str(from_date) + ' 00:00:00', str(to_date) +' 23:59:59')
-        if status:
-            params['status'] = status
-            filter['status'] = status
-        all_coupon_data = common.CouponData.objects.filter(*args, **filter).order_by('-actual_service_date')
-    elif method == 'GET':
-        message = "" 
-        all_coupon_data = []
-    else:
-        return HttpResponseBadRequest()
-
+    args = { Q(status=4) | Q(status=2) | Q(status=6)}
+    status = query_params.get('status')
+    from_date = query_params.get('from')
+    to_date = query_params.get('to')
+    filter['actual_service_date__range'] = (str(from_date) + ' 00:00:00', str(to_date) +' 23:59:59')
+    if status:
+        args = { Q(status=status) }
+        if status=='2':
+            args = { Q(status=2) | Q(status=6)}      
+    all_coupon_data = common.CouponData.objects.filter(*args, **filter).order_by('-actual_service_date')
+    map_status = {'6': 'Closed', '4': 'In Progress', '2':'Closed'}
     for coupon_data in all_coupon_data:
         coupon_data_dict = {}
-        coupon_data_dict['customer_id'] = coupon_data.vin.sap_customer_id
-        coupon_data_dict['product_type'] = coupon_data.vin.product_type
-        coupon_data_dict['service_avil_date'] = coupon_data.actual_service_date
         coupon_data_dict['vin'] = coupon_data.vin.vin
-        coupon_data_dict['coupon_no'] = coupon_data.unique_service_coupon
         coupon_data_dict['sa_phone_name'] = coupon_data.sa_phone_number
-        coupon_data_dict['kms'] = coupon_data.actual_kms
-        coupon_data_dict['service_type'] = coupon_data.service_type
-        coupon_data_dict['service_status'] = status_options[str(coupon_data.status)]
-        coupon_data_dict['special_case'] = ''
+        coupon_data_dict['service_avil_date'] = coupon_data.actual_service_date
         coupon_data_dict['closed_date'] = coupon_data.closed_date
+        coupon_data_dict['service_status'] = map_status[str(coupon_data.status)]
+        if query_params['type']== 'credit':
+            customer_details = coupon_data.vin.customer_phone_number
+            coupon_data_dict['customer_name'] = customer_details.customer_name
+            coupon_data_dict['customer_number'] = customer_details.phone_number
+            coupon_data_dict['credit_date'] = coupon_data.credit_date
+            coupon_data_dict['credit_note'] = coupon_data.credit_note
+        else:
+            coupon_data_dict['customer_id'] = coupon_data.vin.sap_customer_id
+            coupon_data_dict['product_type'] = coupon_data.vin.product_type
+            coupon_data_dict['coupon_no'] = coupon_data.unique_service_coupon
+            coupon_data_dict['kms'] = coupon_data.actual_kms
+            coupon_data_dict['service_type'] = coupon_data.service_type
+            coupon_data_dict['special_case'] = coupon_data.special_case
         report_data.append(coupon_data_dict)
-    return {"records": report_data, 'status_options': status_options, 'params': params,
-            "message": message}
+    return report_data
 
-
-UPDATE_FAIL = 'Some error occurred, try again later.'
-UPDATE_SUCCESS = 'Customer phone number has been updated '
-REGISTER_SUCCESS = 'Customer has been registered with ID: '
-
-
+CUST_UPDATE_SUCCESS = 'Customer phone number has been updated.'
+CUST_REGISTER_SUCCESS = 'Customer has been registered with ID: '
+@log_time
 def register_customer(request, group=None):
     post_data = request.POST
     data_source = []
@@ -338,8 +423,8 @@ def register_customer(request, group=None):
     check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.now())
     if not existing_customer and check_with_invoice_date.days < 0 or check_with_today_date.days > 0:
         message = "Product purchase date should be between {0} and {1}".\
-                format((product_obj[0].invoice_date).strftime("%d-%m-%Y"),(datetime.now()).strftime("%d-%m-%Y"))
-        logger.info('{0} Entered date is: {1}'.format(message, str(data_source[0]['product_purchase_date'])))
+                format((product_obj[0].invoice_date).strftime("%d-%m-%Y"),(datetime.datetime.now()).strftime("%d-%m-%Y"))
+        logger.info('[Temporary_cust_registration]:: {0} Entered date is: {1}'.format(message, str(data_source[0]['product_purchase_date'])))
         return json.dumps({"message": message})
     try:
         with transaction.atomic():
@@ -355,26 +440,28 @@ def register_customer(request, group=None):
                                                                product_purchase_date = data_source[0]['product_purchase_date'],
                                                                temp_customer_id = temp_customer_id)
             customer_obj.save()
+            logger.info('[Temporary_cust_registration]:: Initiating purchase feed')
             feed_remark = FeedLogWithRemark(len(data_source),
                                                 feed_type='Purchase Feed',
                                                 action='Received', status=True)
             sap_obj = SAPFeed()
             feed_response = sap_obj.import_to_db(feed_type='purchase', data_source=data_source, feed_remark=feed_remark)
             if feed_response.failed_feeds > 0:
-                logger.info(json.dumps(feed_response.remarks))
-                raise
+                logger.info('[Temporary_cust_registration]:: ' + json.dumps(feed_response.remarks))
+                raise ValueError('purchase feed failed!')
+            logger.info('[Temporary_cust_registration]:: purchase feed completed')
     except Exception as ex:
         logger.info(ex)
-        return json.dumps({"message": UPDATE_FAIL})
+        return HttpResponseBadRequest()
     if existing_customer:
-        return json.dumps({'message': UPDATE_SUCCESS})
-    return json.dumps({'message': REGISTER_SUCCESS + temp_customer_id})
+        return json.dumps({'message': CUST_UPDATE_SUCCESS})
+    return json.dumps({'message': CUST_REGISTER_SUCCESS + temp_customer_id})
+      
 
-SUCCESS_MESSAGE = 'Registration is complete'
-EXCEPTION_INVALID_DEALER = 'The dealer-id provided is not registered'
-ALREADY_REGISTERED = 'Already Registered Number'
-
-
+ASC_REGISTER_SUCCESS = 'ASC registration is complete.'
+EXCEPTION_INVALID_DEALER = 'The dealer-id provided is not registered.'
+ALREADY_REGISTERED = 'Already Registered Number.'
+@log_time
 def save_asc_registeration(request, groups=[], brand='bajaj'):
     #TODO: Remove the brand parameter and pass it inside request.POST
     data = request.POST
@@ -401,44 +488,47 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
         if settings.ENABLE_AMAZON_SQS:
             task_queue = utils.get_task_queue()
             task_queue.add("export_asc_registeration_to_sap", \
-               {"phone_number": phone_number, "brand": brand})
+               {"phone_number": phone_number, "brand": brand, "sms_client":settings.SMS_CLIENT})
         else:
             export_asc_registeration_to_sap.delay(phone_number=data[
-                                        'phone-number'], brand=brand)
+                                        'phone-number'], brand=brand,
+                                        sms_client=settings.SMS_CLIENT)
 
     except Exception as ex:
         logger.info(ex)
         return json.dumps({"message": EXCEPTION_INVALID_DEALER})
-    return json.dumps({"message": SUCCESS_MESSAGE})
+    return json.dumps({"message": ASC_REGISTER_SUCCESS})
 
+SA_UPDATE_SUCCESS = 'Service advisor status has been updated.'
+SA_REGISTER_SUCCESS = 'Service advisor registration is complete.'
+@log_time
 def save_sa_registration(request, groups):
     data = request.POST
     data_source = []
     phone_number = mobile_format(str(data['phone-number']))
-    try:
-        service_advisor = afterbuy_common.ServiceAdvisor.objects.get(
-                            phone_number=phone_number, name=data['name'])
-        service_advisor_id = service_advisor.service_advisor_id
-    except ObjectDoesNotExist as odne:
-        logger.info("[Exception:]: {0}".format(odne))
+    if data['sa-id']:
+        service_advisor_id = data['sa-id']
+        existing_sa = True
+    else:
         service_advisor_id = TEMP_SA_ID_PREFIX + str(random.randint(10**5, 10**6))
+   
+    data_source.append(utils.create_sa_feed_data(data, request.user, service_advisor_id))
+    logger.info('[Temporary_sa_registration]:: Initiating dealer-sa feed for ID' + service_advisor_id)
+    feed_remark = FeedLogWithRemark(len(data_source),
+                                                feed_type='Dealer Feed',
+                                                action='Received', status=True)
+    sap_obj = SAPFeed()
     
-    try:
-        data_source.append(utils.create_sa_feed_data(data, request.user, service_advisor_id))
-        feed_remark = FeedLogWithRemark(len(data_source),
-                                                    feed_type='Dealer Feed',
-                                                    action='Received', status=True)
-        sap_obj = SAPFeed()
-        feed_response = sap_obj.import_to_db(feed_type='dealer',
-                            data_source=data_source, feed_remark=feed_remark)
-        if feed_response.failed_feeds > 0:
-            failure_msg = list(feed_response.remarks.elements())[0]
-            logger.info(failure_msg)
-            return json.dumps({"message": failure_msg})
-    except Exception as ex:
-        logger.info(ex)
-        return json.dumps({"message": UPDATE_FAIL})
-    return json.dumps({'message': SUCCESS_MESSAGE})
+    feed_response = sap_obj.import_to_db(feed_type='dealer',
+                        data_source=data_source, feed_remark=feed_remark)
+    if feed_response.failed_feeds > 0:
+        failure_msg = list(feed_response.remarks.elements())[0]
+        logger.info('[Temporary_sa_registration]:: dealer-sa feed fialed ' + failure_msg)
+        return json.dumps({"message": failure_msg})
+    logger.info('[Temporary_sa_registration]:: dealer-sa feed completed')
+    if existing_sa:
+        return json.dumps({'message': SA_UPDATE_SUCCESS})
+    return json.dumps({'message': SA_REGISTER_SUCCESS})
 
 
 def register_user(request, user=None):
@@ -462,7 +552,113 @@ def trigger_sqs_tasks(request):
         'send-reminder': 'send_reminder',
         'export-customer-registered': 'export_customer_reg_to_sap',
     }
-
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
     taskqueue.add(sqs_tasks[request.POST['task']])
     return HttpResponse()
+
+
+def brand_details(requests, role=None):
+    data = requests.GET
+    data_list = []
+    data_dict = {}
+    limit = data.get('limit', 20)
+    offset = data.get('offset', 0)
+    limit = int(limit)
+    offset = int(offset)
+    if role == 'asc':
+        asc_data = aftersell_common.RegisteredDealer.objects.filter(role='asc')
+        data_dict['total_count'] = len(asc_data)
+        for asc in asc_data[offset:limit]:
+            asc_detail = {}
+            asc_detail['id'] = asc.dealer_id
+            asc_detail['address'] = asc.address
+            asc_details = get_state_city(asc_detail, asc.address)
+            data_list.append(asc_detail)
+        data_dict[role] = data_list
+    elif role == 'sa':
+        sa_data = aftersell_common.ServiceAdvisor.objects.all()
+        data_dict['total_count'] = len(sa_data)
+        for sa in sa_data[offset:limit]:
+            sa_detail = {}
+            sa_detail = get_sa_details(sa_detail, sa )
+            sa_detail['id'] = sa.service_advisor_id
+            sa_detail['name'] = sa.name
+            sa_detail['phone_number'] = sa.phone_number
+            data_list.append(sa_detail)
+        data_dict[role] = data_list
+    elif role == 'customers':
+        customer_data = common.GladMindUsers.objects.all()
+        data_dict['total_count'] = len(customer_data)
+        for customer in customer_data[offset:limit]:
+            customer_product = common.ProductData.objects.filter(customer_phone_number=customer)
+            customer_detail = {}
+            if  customer_product:
+                customer_detail['vin'] = customer_product[0].vin
+                customer_detail['sap_id'] = customer_product[0].sap_customer_id
+            customer_detail['id'] = customer.gladmind_customer_id
+            customer_detail['name'] = customer.customer_name
+            customer_detail['phone_number'] = customer.phone_number
+            customer_detail['email_id'] = customer.email_id
+            customer_detail['address'] = customer.address
+            customer_detail = get_state_city(customer_detail, customer.address)
+            data_list.append(customer_detail)
+        data_dict[role] = data_list
+    elif role == 'active-asc':
+        active_asc_count = 0
+        asc_details = get_asc_data()
+        for asc_detail in asc_details:
+                active_ascs = {}
+                if asc_detail.date_joined != asc_detail.last_login:
+                    active_asc_count = active_asc_count + 1;
+                    asc_data = aftersell_common.RegisteredDealer.objects.get(dealer_id=asc_detail.username)
+                    active_ascs['id'] = asc_data.dealer_id
+                    active_ascs['address'] = asc_data.address
+                    active_ascs = get_state_city(active_ascs, asc_data.address)
+                    active_ascs['coupon_unused'] = asc_cuopon_details(asc_data.dealer_id, 1)
+                    active_ascs['coupon_closed'] = asc_cuopon_details(asc_data.dealer_id, 2)
+                    active_ascs['coupon_expired'] = asc_cuopon_details(asc_data.dealer_id, 3)
+                    active_ascs['coupon_inprogress'] = asc_cuopon_details(asc_data.dealer_id, 4)
+                    active_ascs['coupon_exceed_limit'] = asc_cuopon_details(asc_data.dealer_id, 5)
+                    active_ascs['coupon_closed_old_fsc'] = asc_cuopon_details(asc_data.dealer_id, 6)
+                    data_list.append(active_ascs)
+        data_dict['count'] = active_asc_count
+        data_dict[role] = data_list
+    elif role == 'not-active-asc':
+        not_active_asc_count = 0
+        asc_details = get_asc_data()
+        for asc_detail in asc_details:
+                not_active_ascs = {}
+                if asc_detail.date_joined == asc_detail.last_login:
+                    not_active_asc_count = not_active_asc_count + 1;
+                    asc_data = aftersell_common.RegisteredDealer.objects.get(dealer_id=asc_detail.username)
+                    not_active_ascs['id'] = asc_data.dealer_id
+                    data_list.append(not_active_ascs)
+        data_dict['count'] = not_active_asc_count
+        data_dict[role] = data_list
+    if data.get('city') or data.get('state') or data.get('sap_id'):
+        filter_data_list = []
+        filter_data_dict = {}
+        count = 0
+        for filter in data_dict[role]:
+            if filter.get("city", None) == data.get('city') or filter.get('state', None) == data.get('state') or filter.get('sap_id', None) == data.get('sap_id'):
+                count = count + 1
+                filter_data_list.append(filter)
+                filter_data_dict[role] = filter_data_list
+                filter_data_dict['count'] = count
+                return HttpResponse(json.dumps(filter_data_dict))
+            else:
+                return HttpResponse(json.dumps(filter_data_list))
+    return HttpResponse(json.dumps(data_dict))
+
+
+def get_sa_details(sa_details, id):
+    sa_detail = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=id)
+    if sa_detail:
+        sa_dealer_details = aftersell_common.RegisteredDealer.objects.get(id=sa_detail[0].dealer_id.id)
+        if sa_dealer_details.role == None:
+            sa_details['dealer'] = sa_dealer_details.dealer_id
+        else:
+            sa_details['asc'] = sa_dealer_details.dealer_id
+    else:
+        sa_details['dealer/asc'] = 'Null'
+    return sa_details
