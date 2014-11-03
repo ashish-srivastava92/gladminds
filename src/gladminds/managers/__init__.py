@@ -31,7 +31,7 @@ def get_feedback(feedback_id, user):
         return aftersell_common.Feedback.objects.filter(id=feedback_id)
 
 
-def set_dueDate(priority, created_date):
+def set_due_date(priority, created_date):
     sla_obj = aftersell_common.SLA.objects.get(priority=priority)
     resolution_time = sla_obj.resolution_time
     total_seconds = (resolution_time.hour * 3600) + (resolution_time.minute * 60) + (resolution_time.second)
@@ -51,7 +51,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
     else:
         assign_number = None
     if feedback_obj.status == 'Open':
-        feedback_obj.due_date = set_dueDate(data['Priority'], feedback_obj.created_date)
+        feedback_obj.due_date = set_due_date(data['Priority'], feedback_obj.created_date)
         feedback_obj.save()
     assign = feedback_obj.assign_to
     if assign is None:
