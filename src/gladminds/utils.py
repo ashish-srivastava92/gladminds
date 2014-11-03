@@ -14,6 +14,7 @@ from django_otp.oath import TOTP
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from gladminds.taskqueue import SqsTaskQueue
 from gladminds.mail import send_ucn_request_alert, send_mail_when_vin_does_not_exist
+from django.db.models import F
 
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
@@ -412,12 +413,14 @@ def make_tls_property(default=None):
     return TLSProperty()
 
 
-def get_asc_data():
-    asc_data = aftersell_common.RegisteredDealer.objects.filter(role='asc')
-    asc_list = []
-    for asc in asc_data:
-        asc_detail = User.objects.get(username=asc.dealer_id)
-        asc_list.append(asc_detail)
+def get_asc_data(data):
+    asc_details = {}
+    if data.has_key('city') and data.has_key('state'):
+        asc_details['address'] = ', '.join([data['city'].upper(), data['state'].upper()])
+    asc_details['role'] = 'asc'
+    asc_data = aftersell_common.RegisteredDealer.objects.filter(**asc_details)
+    asc_ids = asc_data.values_list('dealer_id', flat=True)
+    asc_list = User.objects.filter(username__in=asc_ids)
     return asc_list
 
 
@@ -440,3 +443,4 @@ def get_state_city(details, address):
             details['state'] = 'Null'
 
     return details
+

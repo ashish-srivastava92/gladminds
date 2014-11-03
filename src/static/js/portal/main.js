@@ -66,14 +66,14 @@
             data: {'vin': vin},
             success: function(data){
               if (data['phone']) {
-                  $('.customer-phone').val(data['phone']);
+                  $('.customer-phone').val(data['phone']).attr('readOnly', true);
                   $('.customer-name').val(data['name']).attr('readOnly', true);
                   $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
                   $('.customer-id').val(data['id']).attr('readOnly', true);
-                  $('.customer-submit').attr('disabled', false);
+                  $('.customer-submit').attr('disabled', true);
               }	
               else if (data['message']) {
-                  $('.customer-phone').val('');
+                  $('.customer-phone').val('').attr('readOnly', false);
             	  $('.customer-name').val('').attr('readOnly', false);
                   $('.purchase-date').val('').attr('readOnly', false);
                   $('.customer-id').val('').attr('readOnly', false);
