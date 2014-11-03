@@ -36,6 +36,11 @@ PRIORITY = (('Low', 'Low'),
             ('Medium', 'Medium'),
             ('Urgent', 'Urgent'),)
 
+SLA_PRIORITY = (('Low', 'Low'),
+                ('Medium', 'Medium'),
+                ('High', 'High'),
+                ('Urgent', 'Urgent'),)
+
 FEEDBACK_TYPE = (('Problem', 'Problem'),
                  ('Question', 'Question'),
                  ('Feature', 'Feature'),
