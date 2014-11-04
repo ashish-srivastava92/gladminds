@@ -47,9 +47,9 @@ class ProductInsuranceInfoResource(CustomBaseModelResource):
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
-    filtering = {
-                 "product" : ALL
-                }
+        filtering = {
+                     "product" : ALL
+                     }
     
     
 class InvoiceResource(CustomBaseModelResource):
@@ -101,3 +101,15 @@ class PollutionCertificateResource(CustomBaseModelResource):
                      }
         
 
+class SupportResource(CustomBaseModelResource):
+    product = fields.ForeignKey(UserProductResource, 'product', full=True, null=True)
+    class Meta:
+        queryset = afterbuy_common.Support.objects.all()
+        resource_name = 'support'
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'delete' ,'put']
+        always_return_data =True
+        filtering = {
+                     "product" : ALL
+                     }
+        
