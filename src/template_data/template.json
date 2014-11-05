@@ -315,7 +315,7 @@
     "pk": 35,
     "fields": {
       "template_key": "SEND_SA_OTHER_VALID_COUPON",
-      "template": "Requested free service {req_service_type} is {req_status}. Please proceed for free service {service_type} for Customer ID {customer_id}",
+      "template": "The request cannot be processed as the the current status of the requested service type {req_service_type} is {req_status}.",
       "description": "Send in-progress coupon if it is available"
     }
   },

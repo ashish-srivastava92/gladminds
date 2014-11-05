@@ -121,3 +121,4 @@ MAIL_DETAIL["subject"] = "GladMinds Feed Report QA"
 
 MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 #######################################################################
+ENABLE_SERVICE_DESK = False
