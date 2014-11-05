@@ -41,6 +41,10 @@ SLA_PRIORITY = (('Low', 'Low'),
                 ('High', 'High'),
                 ('Urgent', 'Urgent'),)
 
+TIME_UNIT = (('mins', 'mins'),
+             ('hrs', 'hrs'),
+             ('days', 'days'),)
+
 FEEDBACK_TYPE = (('Problem', 'Problem'),
                  ('Question', 'Question'),
                  ('Feature', 'Feature'),

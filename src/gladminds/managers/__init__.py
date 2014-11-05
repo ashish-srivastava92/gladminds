@@ -34,7 +34,13 @@ def get_feedback(feedback_id, user):
 def set_due_date(priority, created_date):
     sla_obj = aftersell_common.SLA.objects.get(priority=priority)
     resolution_time = sla_obj.resolution_time
-    total_seconds = (resolution_time.hour * 3600) + (resolution_time.minute * 60) + (resolution_time.second)
+    resolution_unit = sla_obj.resolution_unit
+    if resolution_unit == 'days':
+        total_seconds = resolution_time * 86400
+    elif resolution_unit == 'hrs':
+        total_seconds = resolution_time * 3600
+    else:
+        total_seconds = resolution_time * 60
     due_date = created_date + datetime.timedelta(seconds=total_seconds)
     return due_date
 
@@ -50,9 +56,6 @@ def save_update_feedback(feedback_obj, data, user,  host):
         previous_assignee = feedback_obj.assign_to
     else:
         assign_number = None
-    if feedback_obj.status == 'Open':
-        feedback_obj.due_date = set_due_date(data['Priority'], feedback_obj.created_date)
-        feedback_obj.save()
     assign = feedback_obj.assign_to
     if assign is None:
         assign_status = True
@@ -79,6 +82,8 @@ def save_update_feedback(feedback_obj, data, user,  host):
         feedback_obj.closed_date = datetime.datetime.now()
     feedback_obj.save()
     if assign_status and feedback_obj.assign_to:
+        feedback_obj.due_date = set_due_date(data['Priority'], feedback_obj.created_date)
+        feedback_obj.save()
         context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL',
                                  feedback_obj)
         if feedback_obj.reporter_email_id:

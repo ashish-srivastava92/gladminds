@@ -3,7 +3,8 @@ from django.conf import settings
 from datetime import datetime
 from django.contrib.auth.models import User
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
-    USER_DESIGNATION, RATINGS, ROOT_CAUSE, SLA_PRIORITY
+    USER_DESIGNATION, RATINGS, ROOT_CAUSE, SLA_PRIORITY, TIME_UNIT
+from composite_field.base import CompositeField
 
 ##########################################################################
 ########################## ASC Save Form #########################
@@ -164,11 +165,17 @@ class Comments(models.Model):
         app_label = "aftersell"
         verbose_name_plural = "aftersell comment info"
 
+
+class duration(CompositeField):
+    time = models.PositiveIntegerField()
+    unit = models.CharField(max_length=12, choices=TIME_UNIT, verbose_name = 'unit')
+
+
 class SLA(models.Model):
     priority = models.CharField(max_length=12, choices=SLA_PRIORITY, unique=True)
-    response_time = models.TimeField()
-    resolution_time = models.TimeField()
-    reminder_time = models.TimeField()
+    response = duration()
+    resolution = duration()
+    reminder = duration()
     
     class Meta:
         app_label = "aftersell"
