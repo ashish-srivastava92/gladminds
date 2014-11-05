@@ -180,7 +180,7 @@
   	"pk": 20,
   	"fields": {
   		"template_key": "SEND_CUSTOMER_SUPPORTED_KEYWORD",
-  		"template": "Supported keyword: 1.GCP_REG 2.SERVICE 3.BRAND 4.A 5.C 6.SD",
+  		"template": "Supported keyword: 1.GCP_REG 2.SERVICE 3.BRAND 4.A 5.C 6.SD 7.R",
   		"description": "Send supported message format to customer"
   	}
   },
@@ -258,6 +258,15 @@
   },
   {
     "model": "gladminds.messagetemplate",
+    "pk": 29,
+    "fields": {
+      "template_key": "COUPON_ALREADY_INPROGRESS",
+      "template": "Free service {service_type} is already in-progress. Please proceed for the same for Customer ID {customer_id}",
+      "description": "Send in-progress coupon if it is available"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
     "pk": 30,
     "fields": {
       "template_key": "SEND_RCV_FEEDBACK",
@@ -265,6 +274,7 @@
       "description": "Send this message when service advisor files complain successfully"
     }
   }, 
+
   {
     "model": "gladminds.messagetemplate",
     "pk": 31,
@@ -300,5 +310,41 @@
       "template": "Your {type} has been resolved.",
       "description": "Your Complaint has been resolved."
     }
-  }
+  },
+{
+    "model": "gladminds.messagetemplate",
+    "pk": 35,
+    "fields": {
+      "template_key": "SEND_SA_OTHER_VALID_COUPON",
+      "template": "The request cannot be processed as the the current status of the requested service type {req_service_type} is {req_status}.",
+      "description": "Send in-progress coupon if it is available"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 36,
+    "fields": {
+      "template_key":"RCV_CUSTOMER_DETAILS",
+      "template":"{params} {message}",
+      "description":"Receive this message for getting customer details"
+	}
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 37,
+    "fields": {
+      "template_key": "SEND_CUSTOMER_DETAILS",
+      "template": "Your {0} is {1}.",
+      "description": "Send id or vin to customer depending upon message he sent"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 38,
+    "fields": {
+      "template_key": "INVALID_RECOVERY_MESSAGE",
+      "template": "Incorrect {0} or no matching details.",
+      "description": "Send on if customer id or VIN does not exits."
+    }
+  } 
 ]

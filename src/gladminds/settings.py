@@ -15,7 +15,7 @@ ALLOWED_HOSTS = ['*']
 
 ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
                     'service', 'check': 'a', 'close': 'c', 'brand': 'brand',
-                    'service_desk': 'sd'}
+                    'service_desk': 'sd', 'customer_detail_recovery': 'r'}
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )

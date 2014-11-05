@@ -7,7 +7,6 @@ from random import randint
 from django.utils import timezone
 from django.conf import settings
 from django.template import Context
-from gladminds.core import base_models
 from django_otp.oath import TOTP
 
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
@@ -18,7 +17,6 @@ from gladminds.core.managers.mail import send_ucn_request_alert
 from django.db.models.fields.files import FieldFile
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     TIME_FORMAT
-from gladminds.core.base_models import STATUS_CHOICES
 from gladminds.core.cron_jobs.taskqueue import SqsTaskQueue
 from gladminds.core.managers.mail import send_ucn_request_alert, send_mail_when_vin_does_not_exist
 
@@ -136,8 +134,8 @@ def get_customer_info(data):
 
 def get_sa_list(request):
     dealer = models.Dealer.objects.filter(dealer_id=request.user)[0]
-    service_advisors = models.ServiceAdvisorDealerRelationship.objects\
-                                .filter(dealer_id=dealer, status='Y')
+    service_advisors = models.ServiceAdvisor.objects\
+                                .filter(dealer=dealer, status='Y')
     sa_phone_list = []
     for service_advisor in service_advisors:
         sa_phone_list.append(service_advisor.service_advisor_id)
@@ -145,10 +143,10 @@ def get_sa_list(request):
 
 
 def get_sa_list_for_login_dealer(user):
-    dealer = aftersell_common.RegisteredDealer.objects.filter(
+    dealer = models.Dealer.objects.filter(
                 dealer_id=user)[0]
-    service_advisors = aftersell_common.ServiceAdvisorDealerRelationship.objects\
-                                .filter(dealer_id=dealer, status='Y')
+    service_advisors = models.ServiceAdvisorDealer.objects\
+                                .filter(dealer=dealer, status='Y')
     return service_advisors
 
 def get_asc_list_for_login_dealer(user):
@@ -424,9 +422,9 @@ def services_search_details(data):
 def get_updated_customer_id(customer_id):
     if customer_id and customer_id.find('T') == 0:
         try:
-            temp_customer_obj = common.CustomerTempRegistration.objects.select_related('product_data').\
+            temp_customer_obj = models.CustomerTempRegistration.objects.select_related('product_data').\
                                        get(temp_customer_id=customer_id)
-            customer_id = temp_customer_obj.product_data.sap_customer_id
+            customer_id = temp_customer_obj.product_data.customer_id
         except Exception as ex:
             logger.info("Temporary ID {0} does not exists: {1}".format(customer_id, ex))
     return customer_id
