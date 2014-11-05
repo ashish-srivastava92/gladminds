@@ -99,45 +99,45 @@
     });
 
     $('.service-status-search').on('submit', function() {
-        var table = $('.status-search-results tbody .search-detail');
-        table.remove();
-        $('.other-details').remove();
-        var value = $('.status-search-value').val(),
-            field = $('.status-search-field').val(),
-            messageModal = $('.modal.message-modal'),
-            messageBlock = $('.modal-body', messageModal),
-            data = {};
-        data[field] =  value;
-        var jqXHR = $.ajax({
+    	var table = $(".status-search-results tbody .search-detail");
+    		table.remove(); 
+    		$('.other-details').remove();
+    	var value = $('.status-search-value').val(),
+	        field = $('.status-search-field').val(),
+	        messageModal = $('.modal.message-modal'),
+	        messageBlock = $('.modal-body', messageModal),
+	        data = {};
+    	data[field] =  value;
+    	var jqXHR = $.ajax({
             type: 'POST',
             url: '/aftersell/exceptions/status',
             data: data,
             success: function(data){
-                var serviceDetail = data.search_results,
-                    otherDetails = data.other_details;
-                if (data.message) {
+            	var service_detail = data['search_results'],
+            		other_details = data['other_details']; 
+            	if (data['message']) {
                     messageBlock.text(data.message);
                     messageModal.modal('show');
-                }else{
-                    if (service_detail.length > 0) {
+            	}else{
+	            	if (service_detail.length > 0) {
 	            		var details_html = "<div class='other-details'><label class='control-label'>VIN:&nbsp</label>"+ other_details.vin +"<br><label class='control-label'>Customer Id:&nbsp</label>"+ other_details.customer_id +"<br><label class='control-label'>Customer Name:&nbsp</label>"+ other_details.customer_name +"</div>",
-                          table = $('.status-search-results tbody');
-                        $('.status-result-detail').append(details_html);
-                        $.each(service_detail, function(idx, elem){
-                                table.append('<tr class="search-detail"><td>'+elem.service_type+'</td><td>'+elem.status+'</td></tr>');
-                            });
-                    }
-                }
+	            			table = $(".status-search-results tbody");
+	            			$('.status-result-detail').append(details_html);
+	            			$.each(service_detail, function(idx, elem){
+	            				table.append("<tr class='search-detail'><td>"+elem.service_type+"</td><td>"+elem.status+"</td></tr>");
+	            			});
+	            	}
+            	}
             },
             error: function() {
-                messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
+            	messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
                 messageModal.modal('show');
             }
-        });
-        return false;
+          });
+      return false;
 
     });
-
+    
     $('.change-password-form').on('submit', function() {
         if($('.new-password').val() !== $('.retype-new-pass').val()) {
             Utils.showErrorMessage('Password does not matches.', 1000, 7000);
