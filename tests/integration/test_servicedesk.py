@@ -12,6 +12,7 @@ from gladminds.mail import send_feedback_received,send_servicedesk_feedback
 from gladminds.aftersell.models import logs
  
 import json
+from django.utils import unittest
 client = Client()
 
 class TestServiceDesk_Flow(GladmindsResourceTestCase):
@@ -46,26 +47,30 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
                 "type":"Problem", "subject":"hello",'comments':"sssss", "rootcause":"ssss", "resolution":"ssssss" }
         response = client.post("/aftersell/servicedesk/helpdesk", data=data)
         self.assertEqual(response.status_code, 200)
-    
+   
+    @unittest.skip("Skipping Adding this functionality in future")
     def test_new_dealer(self):
         data = {'username':'gladminds', 'password':'gladminds'}  
         response = client.post("/aftersell/dealer/login/", data=data)
         self.assertEqual(response.status_code, 302)
-
+    
+    @unittest.skip("Skipping Adding this functionality in future")
     def test_send_servicedesk_feedback(self):
         log_len_after = logs.AuditLog.objects.all()
         feedback_obj = aftersell_common.Feedback.objects.all()
         self.assertEqual(feedback_obj[0].priority, "High")
         self.assertEqual(len(log_len_after),1)
         self.assertEqual(log_len_after[0].reciever, "9999999998")
-        
+    
+    @unittest.skip("Skipping Adding this functionality in future") 
     def test_get_feedback_sdo(self):
         data = {'username':'sdo', 'password':'123'}  
         response = client.post("/aftersell/desk/login/", data=data)
         self.assertEqual(response.status_code, 302)
         response = client.get("/aftersell/servicedesk/")
         self.assertEqual(response.status_code, 200)
-        
+    
+    @unittest.skip("Skipping Adding this functionality in future")  
     def test_get_feedback_sdm(self):
         data = {'username':'sdoo', 'password':'123'}  
         response = client.post("/aftersell/desk/login/", data=data)
@@ -76,7 +81,7 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
         response = client.get("/aftersell/servicedesk/")
         self.assertEqual(response.status_code, 200)    
             
-         
+    @unittest.skip("Skipping Adding this functionality in future")   
     def test_sms_email_assignee_after_feedback_assigned(self):
         log_len_after = logs.AuditLog.objects.all()
         user_servicedesk_info = User.objects.filter(username='sdo')
@@ -88,7 +93,7 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
         self.assertEqual(log_len_after[1].reciever, "9999999998")
         self.assertEqual(log_len_after[2].reciever , "7760814041")
         
-        
+    @unittest.skip("Skipping Adding this functionality in future")  
     def test_sms_email_after_resolved(self):
         log_len_after = logs.AuditLog.objects.all()
         user_servicedesk_info = User.objects.filter(username='sdo')
@@ -104,7 +109,7 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
         self.assertEqual(log_len_after[2].reciever , "9999999998") 
         self.assertEqual(log_len_after[3].reciever , "7760814041")   
         
-        
+    @unittest.skip("Skipping Adding this functionality in future")   
     def test_sms_email_after_status_resolved_not_assign_to_anyone(self):
         log_len_after = logs.AuditLog.objects.all()
         user_servicedesk_info = User.objects.filter(username='sdo')
@@ -118,7 +123,7 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
         log_len_after = logs.AuditLog.objects.all()
         self.assertEqual(log_len_after[1].reciever, "9999999998")
         
-            
+    @unittest.skip("Skipping Adding this functionality in future")       
     def test_updated_feedback(self):
         log_len_after = logs.AuditLog.objects.all()
         data = {"Assign_To":'',"status":"Closed","Priority":"High","comments":"ssss","rootcause":"ssss", "resolution":"ssssss","due_date":'12/08/1922', 'reporter_status':False}

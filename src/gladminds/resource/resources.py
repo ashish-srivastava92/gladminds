@@ -199,7 +199,7 @@ class GladmindsResources(Resource):
         else:
             customer_detail_recovery.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
         audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
-        return True
+        return {'status': True, 'message': message}
 
     @log_time
     def customer_service_detail(self, sms_dict, phone_number):
