@@ -654,14 +654,11 @@ def get_active_asc_info(data, limit, offset, data_dict, data_list):
         active_ascs['id'] = asc_data.dealer_id
         active_ascs['address'] = asc_data.address
         active_ascs = get_state_city(active_ascs, asc_data.address)
-        active_ascs['cuopon_unused'] = asc_cuopon_details(asc_data.dealer_id, 1)
-        active_ascs['cuopon_closed'] = asc_cuopon_details(asc_data.dealer_id, 2)
-        active_ascs['cuopon_expired'] = asc_cuopon_details(asc_data.dealer_id, 3)
-        active_ascs['cuopon_inprogress'] = asc_cuopon_details(asc_data.dealer_id, 4)
-        active_ascs['cuopon_exceed_limit'] = asc_cuopon_details(asc_data.dealer_id, 5)
-        active_ascs['cuopon_closed_old_fsc'] = asc_cuopon_details(asc_data.dealer_id, 6)
+        active_ascs['coupon_closed'] = asc_cuopon_details(asc_data, 2)
+        active_ascs['coupon_inprogress'] = asc_cuopon_details(asc_data, 4)
+        active_ascs['coupon_closed_old_fsc'] = asc_cuopon_details(asc_data, 6)
         data_list.append(active_ascs)
-    data_dict['count'] = active_asc_count
+    data_dict['count'] = len(active_asc_list)
     data_dict['active-asc'] = data_list
     return data_dict
 
