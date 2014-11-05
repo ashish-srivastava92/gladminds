@@ -363,11 +363,10 @@ class GladmindsResources(Resource):
             elif valid_coupon:
                 logger.info("Validate_coupon: valid_coupon")
                 self.update_coupon(valid_coupon, actual_kms, dealer_data, 4, datetime.now())
-                if(valid_coupon.service_type == int(service_type)):
-                    dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(
+                dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(
                                                     service_type=valid_coupon.service_type,
                                                     customer_id=sap_customer_id)
-                    
+
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(
                                             coupon=valid_coupon.unique_service_coupon,
                                             service_type=valid_coupon.service_type)
