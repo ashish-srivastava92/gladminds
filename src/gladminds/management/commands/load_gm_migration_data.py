@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 import os
 from django.conf import settings
 import json
-from gladminds.afterbuy.models import MessageTemplate, EmailTemplate
+from gladminds.demo.models import MessageTemplate, EmailTemplate
 
 class Command(BaseCommand):
     
@@ -28,9 +28,7 @@ class Command(BaseCommand):
         print "Loading sms template..."
         file_path = os.path.join(settings.PROJECT_DIR, 'template_data/template.json')
         message_templates = json.loads(open(file_path).read())
-        print "2"
         MessageTemplate.objects.all().delete()
-        print "3"
         for message_temp in message_templates:
             fields = message_temp['fields']
             temp_obj = MessageTemplate(template_key=fields['template_key']\

@@ -116,6 +116,8 @@ class ServiceAdvisor(BaseModel):
         max_length=15, blank=False, unique=True, null=False)
     order = models.PositiveIntegerField(default=0)
     status = models.CharField(max_length=10, blank=False, null=False)
+    
+    objects = user_manager.ServiceAdvisorManager()
 
     class Meta:
         abstract = True
@@ -160,7 +162,7 @@ class ProductData(BaseModel):
     veh_reg_no = models.CharField(max_length=15, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
-    
+        
     class Meta:
         abstract = True
         verbose_name_plural = "Product Data"
@@ -308,6 +310,8 @@ class CustomerTempRegistration(BaseModel):
     remarks = models.CharField(max_length=500, null=True, blank=True)
     tagged_sap_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
+
+    objects = user_manager.CustomerTempRegistrationManager()
 
     class Meta:
         abstract = True

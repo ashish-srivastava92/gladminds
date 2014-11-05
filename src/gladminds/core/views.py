@@ -13,7 +13,7 @@ from django.db import transaction
 from django.db.models.query_utils import Q
 from django.contrib.auth.models import User
 
-from gladminds.bajaj import models as common
+from gladminds.bajaj import models
 from gladminds.core import utils
 from gladminds.bajaj.services import message_template
 from gladminds.core.utils import get_task_queue, get_customer_info,\
@@ -92,7 +92,7 @@ def generate_otp(request):
             phone_number = request.POST['mobile']
             email = request.POST.get('email', '')
             logger.info('OTP request received. Mobile: {0}'.format(phone_number))
-            user = common.AuthorizedServiceCenter.objects.filter(phone_number=mobile_format(phone_number))[0].user
+            user = models.AuthorizedServiceCenter.objects.filter(phone_number=mobile_format(phone_number))[0].user
             token = utils.get_token(user, phone_number, email=email)
             message = message_template.get_template('SEND_OTP').format(token)
             if settings.ENABLE_AMAZON_SQS:
@@ -120,7 +120,7 @@ def validate_otp(request):
             otp = request.POST['otp']
             phone_number = request.POST['phone']
             logger.info('OTP {0} recieved for validation. Mobile {1}'.format(otp, phone_number))
-            user = common.AuthorizedServiceCenter.objects.filter(phone_number=mobile_format(phone_number))[0].user
+            user = models.AuthorizedServiceCenter.objects.filter(phone_number=mobile_format(phone_number))[0].user
             utils.validate_otp(user, otp, phone_number)
             logger.info('OTP validated for mobile number {0}'.format(phone_number))
             return render(request, 'portal/reset_pass.html', {'otp': otp})
@@ -185,7 +185,7 @@ def asc_registration(request):
 #        return HttpResponse(response_object, content_type="application/json")
         data = request.POST
         try:
-            asc_obj = common.ASCTempRegistration(name=data['name'],
+            asc_obj = models.ASCTempRegistration(name=data['name'],
                  address=data['address'], password=data['password'],
                  phone_number=data['phone-number'], email=data['email'],
                  pincode=data['pincode'])
@@ -208,16 +208,8 @@ def exceptions(request, exception=None):
     if request.method == 'GET':
         template = 'portal/exception.html'
         data = None
-        data_mapping = {
-            'close': get_sa_list,
-            'check': get_sa_list
-        }
-        try:
-            data = data_mapping[exception](request)
-        except:
-            #It is acceptable if there is no
-            #data_mapping defined for a function
-            pass
+        if exception in ['close', 'check']:
+            data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
         return render(request, template, {'active_menu': exception,
                                            "data": data, 'groups': groups})
     elif request.method == 'POST':
@@ -289,8 +281,8 @@ def servicedesk(request, servicedesk=None):
             pass
         return render(request, template, {'active_menu': servicedesk,
                                           "data": data, 'groups': groups,
-                     "types": get_list_from_set(common.FEEDBACK_TYPE),
-                     "priorities": get_list_from_set(common.PRIORITY)})
+                     "types": get_list_from_set(models.FEEDBACK_TYPE),
+                     "priorities": get_list_from_set(models.PRIORITY)})
     elif request.method == 'POST':
         function_mapping = {
             'helpdesk': save_help_desk_data
@@ -339,7 +331,7 @@ def create_reconciliation_report(query_params, user):
     report_data = []
     filter = {}
     params = {}
-    user = common.Dealer.objects.filter(dealer_id=user)
+    user = models.Dealer.objects.filter(dealer_id=user)
     filter['servicing_dealer'] = 'NULL'
     args = { Q(status=4) | Q(status=2) | Q(status=6)}
     status = query_params.get('status')
@@ -350,8 +342,7 @@ def create_reconciliation_report(query_params, user):
         args = { Q(status=status) }
         if status=='2':
             args = { Q(status=2) | Q(status=6)}   
-    all_coupon_data = common.CouponData.objects.filter(*args, **filter).order_by('-actual_service_date')
-    print "ssssssss",all_coupon_data
+    all_coupon_data = models.CouponData.objects.filter(*args, **filter).order_by('-actual_service_date')
     map_status = {'6': 'Closed', '4': 'In Progress', '2':'Closed'}
     for coupon_data in all_coupon_data:
         coupon_data_dict = {}
@@ -385,7 +376,7 @@ def register_customer(request, group=None):
     post_data = request.POST
     data_source = []
     existing_customer = False
-    product_obj = common.ProductData.objects.filter(product_id=post_data['customer-vin'])
+    product_obj = models.ProductData.objects.filter(product_id=post_data['customer-vin'])
     if not post_data['customer-id']:
         temp_customer_id = TEMP_ID_PREFIX + str(random.randint(10**5, 10**6))
     else:
@@ -403,13 +394,13 @@ def register_customer(request, group=None):
 
     try:
         with transaction.atomic():
-            customer_obj = common.CustomerTempRegistration.objects.filter(temp_customer_id = temp_customer_id)
+            customer_obj = models.CustomerTempRegistration.objects.filter(temp_customer_id = temp_customer_id)
             if customer_obj:
                 customer_obj = customer_obj[0]
                 customer_obj.new_number = data_source[0]['customer_phone_number']
                 customer_obj.sent_to_sap = False
             else:
-                customer_obj = common.CustomerTempRegistration(product_data=product_obj[0], 
+                customer_obj = models.CustomerTempRegistration(product_data=product_obj[0], 
                                                                new_customer_name = data_source[0]['customer_name'],
                                                                new_number = data_source[0]['customer_phone_number'],
                                                                product_purchase_date = data_source[0]['product_purchase_date'],
@@ -443,18 +434,18 @@ def save_asc_registeration(request, groups=[], brand='bajaj'):
     phone_number = mobile_format(str(data['phone-number']))
     if not ('dealers' in groups or 'self' in groups):
         raise
-    if common.AuthorizedServiceCenter.objects.filter(user__phone_number=phone_number)\
-        or common.ASCTempRegistration.objects.filter(phone_number=phone_number):
+    if models.AuthorizedServiceCenter.objects.filter(user__phone_number=phone_number)\
+        or models.ASCTempRegistration.objects.filter(phone_number=phone_number):
         return json.dumps({'message': ALREADY_REGISTERED})
 
     try:
         dealer_data = None
         if "dealer_id" in data:
-            dealer_data = common.Dealer.objects.\
+            dealer_data = models.Dealer.objects.\
                                             get(dealer_id=data["dealer_id"])
             dealer_data = dealer_data.dealer_id if dealer_data else None
 
-        asc_obj = common.ASCTempRegistration(name=data['name'],
+        asc_obj = models.ASCTempRegistration(name=data['name'],
                  address=data['address'], password=data['password'],
                  phone_number=phone_number, email=data['email'],
                  pincode=data['pincode'], dealer_id=dealer_data)
@@ -545,7 +536,7 @@ def brand_details(requests, role=None):
     limit = int(limit)
     offset = int(offset)
     if role == 'asc':
-        asc_data = aftersell_common.RegisteredDealer.objects.filter(role='asc')
+        asc_data = models.RegisteredDealer.objects.filter(role='asc')
         data_dict['total_count'] = len(asc_data)
         for asc in asc_data[offset:limit]:
             asc_detail = {}
@@ -555,7 +546,7 @@ def brand_details(requests, role=None):
             data_list.append(asc_detail)
         data_dict[role] = data_list
     elif role == 'sa':
-        sa_data = aftersell_common.ServiceAdvisor.objects.all()
+        sa_data = models.ServiceAdvisor.objects.all()
         data_dict['total_count'] = len(sa_data)
         for sa in sa_data[offset:limit]:
             sa_detail = {}
@@ -566,10 +557,10 @@ def brand_details(requests, role=None):
             data_list.append(sa_detail)
         data_dict[role] = data_list
     elif role == 'customers':
-        customer_data = common.GladMindUsers.objects.all()
+        customer_data = models.GladMindUsers.objects.all()
         data_dict['total_count'] = len(customer_data)
         for customer in customer_data[offset:limit]:
-            customer_product = common.ProductData.objects.filter(customer_phone_number=customer)
+            customer_product = models.ProductData.objects.filter(customer_phone_number=customer)
             customer_detail = {}
             if  customer_product:
                 customer_detail['vin'] = customer_product[0].vin
@@ -589,7 +580,7 @@ def brand_details(requests, role=None):
                 active_ascs = {}
                 if asc_detail.date_joined != asc_detail.last_login:
                     active_asc_count = active_asc_count + 1;
-                    asc_data = aftersell_common.RegisteredDealer.objects.get(dealer_id=asc_detail.username)
+                    asc_data = models.RegisteredDealer.objects.get(dealer_id=asc_detail.username)
                     active_ascs['id'] = asc_data.dealer_id
                     active_ascs['address'] = asc_data.address
                     active_ascs = get_state_city(active_ascs, asc_data.address)
@@ -609,7 +600,7 @@ def brand_details(requests, role=None):
                 not_active_ascs = {}
                 if asc_detail.date_joined == asc_detail.last_login:
                     not_active_asc_count = not_active_asc_count + 1;
-                    asc_data = aftersell_common.RegisteredDealer.objects.get(dealer_id=asc_detail.username)
+                    asc_data = models.RegisteredDealer.objects.get(dealer_id=asc_detail.username)
                     not_active_ascs['id'] = asc_data.dealer_id
                     data_list.append(not_active_ascs)
         data_dict['count'] = not_active_asc_count
@@ -631,9 +622,9 @@ def brand_details(requests, role=None):
 
 
 def get_sa_details(sa_details, id):
-    sa_detail = aftersell_common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=id)
+    sa_detail = models.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=id)
     if sa_detail:
-        sa_dealer_details = aftersell_common.RegisteredDealer.objects.get(id=sa_detail[0].dealer_id.id)
+        sa_dealer_details = models.RegisteredDealer.objects.get(id=sa_detail[0].dealer_id.id)
         if sa_dealer_details.role == None:
             sa_details['dealer'] = sa_dealer_details.dealer_id
         else:

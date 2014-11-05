@@ -5,7 +5,7 @@ from gladminds.core.exceptions import DataNotFoundError
 from gladminds.core.utils import create_context, get_list_from_set,\
     get_start_and_end_date, set_wait_time
 from gladminds.core.managers import mail
-from gladminds.core.cron_jobs.sqs_tasks import send_sms
+from gladminds.bajaj.services.service_desk import send_feedback_sms
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     TIME_FORMAT
 
@@ -66,7 +66,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
                                  feedback_obj)
         mail.send_email_to_initiator_after_issue_assigned(context,
                                                          feedback_obj)
-        send_sms('INITIATOR_FEEDBACK_DETAILS', feedback_obj.reporter,
+        send_feedback_sms('INITIATOR_FEEDBACK_DETAILS', feedback_obj.reporter,
                  feedback_obj)
 
     if feedback_obj.status == 'Resolved':
@@ -88,7 +88,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
                                  feedback_obj)
         mail.send_email_to_manager_after_issue_resolved(context,
                                                         servicedesk_obj_all[0])
-        send_sms('INITIATOR_FEEDBACK_STATUS', feedback_obj.reporter,
+        send_feedback_sms('INITIATOR_FEEDBACK_STATUS', feedback_obj.reporter,
                  feedback_obj)
 
     if pending_status:
@@ -106,7 +106,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
             context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL',
                                       feedback_obj)
             mail.send_email_to_assignee(context, feedback_obj)
-            send_sms('SEND_MSG_TO_ASSIGNEE',
+            send_feedback_sms('SEND_MSG_TO_ASSIGNEE',
                      feedback_obj.assign_to.phone_number,
                      feedback_obj,  comment_object)
 
