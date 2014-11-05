@@ -277,7 +277,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase):
   
         self.assertCouponStatus('USC001', 5)
         self.assertCouponStatus('USC002', 5)
-        self.assertCouponStatus('USC003', 4)
+        self.assertCouponStatus('USC003', 1)
   
         sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'SAP001'}
         self.validate_coupon(sms_dict, phone_number)
