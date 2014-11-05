@@ -7,15 +7,14 @@ from tastypie.test import ResourceTestCase
 from django.test import TestCase
 from datetime import datetime, timedelta
 from unit.base_unit import RequestObject, GladmindsUnitTestCase
-from gladminds.utils import get_sa_list, get_coupon_info, get_customer_info,\
+from gladminds.core.utils import get_sa_list, get_coupon_info, get_customer_info,\
  get_list_from_set, get_token, create_feed_data , \
  validate_otp,recover_coupon_info, update_pass, format_date_string
-from gladminds.aftersell.models import logs
 from django.db import connection
-from gladminds.models import common
-from gladminds.aftersell.models import common as aftersell_common
+from gladminds.bajaj import models as common
+from gladminds.bajaj import models as aftersell_common
 import boto
-from gladminds.constants import FEEDBACK_TYPE, PRIORITY
+from gladminds.core.constants import FEEDBACK_TYPE, PRIORITY
 
 
 class TestAssertWorks(TestCase):
@@ -132,7 +131,7 @@ class TestFeedLogWithRemark(ResourceTestCase):
         self.client.post('/api/v1/feed/?wsdl', data=xml_data,
                                     content_type='text/xml')
 
-        feed_logs_obj = logs.DataFeedLog.objects.all()
+        feed_logs_obj = common.DataFeedLog.objects.all()
         self.assertEqual(len(feed_logs_obj), 1)
         remark = json.loads(feed_logs_obj[0].remarks)
         self.assertEqual(len(remark), 1)

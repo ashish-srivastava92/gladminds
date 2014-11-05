@@ -1,13 +1,13 @@
 from integration.base_integration import GladmindsResourceTestCase
 from django.test.utils import override_settings
-from gladminds import sqs_tasks
-from gladminds.sqs_tasks import expire_service_coupon
+from gladminds.core.cron_jobs import sqs_tasks
+from gladminds.core.cron_jobs.sqs_tasks import expire_service_coupon
 from datetime import datetime, timedelta
 from unit.base_unit import GladmindsUnitTestCase
-from gladminds.utils import COUPON_STATUS
-from gladminds.taskmanager import get_data_feed_log_detail
-from gladminds.models import common
-from gladminds.aftersell.models import common as aftersell_common
+from gladminds.core.utils import COUPON_STATUS
+from gladminds.core.cron_jobs.taskmanager import get_data_feed_log_detail
+from gladminds.bajaj import models as common
+from gladminds.bajaj import models as aftersell_common
 from django.db.models import Q
 import time
 
