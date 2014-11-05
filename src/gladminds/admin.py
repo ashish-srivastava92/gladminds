@@ -287,7 +287,7 @@ class CouponAdmin(ModelAdmin):
     search_fields = (
         '^unique_service_coupon', '^vin__vin', 'status')
     list_display = ('vin', 'unique_service_coupon', "actual_service_date",
-                    'actual_kms', 'valid_days', 'valid_kms', 'status', "service_type")
+                    'actual_kms', 'status', "service_type",'sa_phone_number','servicing_dealer')
     exclude = ('order',)
 
     def suit_row_attributes(self, obj):
