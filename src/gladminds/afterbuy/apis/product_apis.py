@@ -92,7 +92,7 @@ class PollutionCertificateResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', full=True, null=True)
     class Meta:
         queryset = afterbuy_models.PollutionCertificate.objects.all()
-        resource_name = 'pollutions'
+        resource_name = 'pollution'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data =True
@@ -105,7 +105,7 @@ class SupportResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', full=True, null=True)
     class Meta:
         queryset = afterbuy_models.Support.objects.all()
-        resource_name = 'supports'
+        resource_name = 'support'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data =True
