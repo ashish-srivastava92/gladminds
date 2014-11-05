@@ -1,8 +1,7 @@
 import django.test
 from django.core import management
-from gladminds.models import common
-from gladminds.aftersell.models import common as aftersell_common
-from gladminds.aftersell.models import logs
+from gladminds.bajaj import models as common
+from gladminds.bajaj import models as aftersell_common
 
 
 class GladmindsUnitTestCase(django.test.TestCase):
@@ -37,9 +36,10 @@ class GladmindsUnitTestCase(django.test.TestCase):
 
     #TODO: Using _get_model_obj() does not work on below function
     def get_brand_obj(self, **kwargs):
-        brand_obj = common.BrandData(**kwargs)
-        brand_obj.save()
-        return brand_obj
+#         brand_obj = common.BrandData(**kwargs)
+#         brand_obj.save()
+#         return brand_obj
+        return None
 
     #TODO: Using _get_model_obj() does not work on below function
     def get_service_advisor_obj(self, **kwargs):
@@ -48,10 +48,12 @@ class GladmindsUnitTestCase(django.test.TestCase):
         return service_advisor_obj
 
     def get_dealer_service_advisor_obj(self, **kwargs):
-        return self._get_model_obj(aftersell_common.ServiceAdvisorDealerRelationship(**kwargs))
+        #return self._get_model_obj(aftersell_common.ServiceAdvisorDealerRelationship(**kwargs))
+        return None
 
     def get_customer_obj(self, **kwargs):
-        return self._get_model_obj(common.GladMindUsers(**kwargs))
+        #return self._get_model_obj(common.GladMindUsers(**kwargs))
+        return None
     
     def get_asc_obj(self, **kwargs):
         asc_obj = aftersell_common.AuthorizedServiceCenter(**kwargs)
@@ -67,7 +69,7 @@ class GladmindsUnitTestCase(django.test.TestCase):
         return coupon_obj[0]
     
     def get_datafeed_log(self, **kwargs):
-        feed_log = logs.DataFeedLog(**kwargs)
+        feed_log = common.DataFeedLog(**kwargs)
         feed_log.save()
         return feed_log
     

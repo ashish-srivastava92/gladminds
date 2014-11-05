@@ -1,8 +1,8 @@
 from tastypie.test import ResourceTestCase
 from django.core import management
-from gladminds.models import common
+from gladminds.bajaj import models as common
 from gladminds.management.commands import load_gm_migration_data
-from gladminds.aftersell.models import common as aftersell_common
+from gladminds.bajaj import models as aftersell_common
 import os
 from django.conf import settings
 import json
@@ -54,14 +54,15 @@ class GladmindsResourceTestCase(ResourceTestCase):
         return delear_data
 
     def get_product_type_obj(self, **kwargs):
-        product_type_data_obj = common.ProductTypeData(**kwargs)
+        product_type_data_obj = common.ProductType(**kwargs)
         product_type_data_obj.save()
         return product_type_data_obj
 
     def get_brand_obj(self, **kwargs):
-        brand_obj = common.BrandData(**kwargs)
-        brand_obj.save()
-        return brand_obj
+        #brand_obj = common.Brand(**kwargs)
+        #brand_obj.save()
+        #return brand_obj
+        return None
 
     def get_service_advisor_obj(self, **kwargs):
         service_advisor_obj = aftersell_common.ServiceAdvisor(**kwargs)
@@ -69,14 +70,15 @@ class GladmindsResourceTestCase(ResourceTestCase):
         return service_advisor_obj
 
     def get_dealer_service_advisor_obj(self, **kwargs):
-        dealer_service_advisor_obj = aftersell_common.ServiceAdvisorDealerRelationship(**kwargs)
-        dealer_service_advisor_obj.save()
-        return dealer_service_advisor_obj
+#         dealer_service_advisor_obj = aftersell_common.ServiceAdvisorDealerRelationship(**kwargs)
+#         dealer_service_advisor_obj.save()
+#         return dealer_service_advisor_obj
+         return None
 
     def get_customer_obj(self, **kwargs):
-        customer_obj = common.GladMindUsers(**kwargs)
-        customer_obj.save()
-        return customer_obj
+        #customer_obj = common.GladMindUsers(**kwargs)
+        #customer_obj.save()
+        return None
 
     def filter_coupon_obj(self, coupon_id=None):
         coupon_obj = common.CouponData.objects.filter(unique_service_coupon=coupon_id)

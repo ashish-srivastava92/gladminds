@@ -7,6 +7,15 @@ DATA_CSV_PATH = os.path.join(BASE_DIR, "src/testdata")
 
 DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
 DATABASES['default']['NAME'] = os.path.join(OUT_DIR, 'test.db')  # "/tmp/test.db"
+DATABASES['bajaj']['ENGINE'] = 'django.db.backends.sqlite3'
+DATABASES['bajaj']['NAME'] = os.path.join(OUT_DIR, 'bajaj.db')  # "/tmp/test.db"
+DATABASES['demo']['ENGINE'] = 'django.db.backends.sqlite3'
+DATABASES['demo']['NAME'] = os.path.join(OUT_DIR, 'demo.db')  # "/tmp/test.db"
+DATABASES['afterbuy']['ENGINE'] = 'django.db.backends.sqlite3'
+DATABASES['afterbuy']['NAME'] = os.path.join(OUT_DIR, 'afterbuy.db')  # "/tmp/test.db"
+
+
+
 SECRET_KEY = 'testsecretkeyshouldntbeusedinproduction'
 
 INSTALLED_APPS = INSTALLED_APPS + ('django_nose',)
@@ -24,8 +33,8 @@ REDIS_URL = 'redis://localhost:6379'
 
 FEED_TYPE = 'CSV'
 
-LOGGING['handlers']['gladminds_logs']['filename'] = '/var/log/gladminds/test_case.log'
-LOGGING['handlers']['afterbuy_logs']['filename'] = '/var/log/gladminds/test_case.log'
+LOGGING['handlers']['gladminds_logs']['filename'] = 'log/test_case.log'
+LOGGING['handlers']['afterbuy_logs']['filename'] = 'log/test_case.log'
 
 FEED_FAILURE_MAIL_ENABLED = False
 
