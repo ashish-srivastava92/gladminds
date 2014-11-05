@@ -3,7 +3,6 @@ import json
 import random
 import datetime
 
-from datetime import datetime
 from django.shortcuts import render_to_response, render
 from django.http.response import HttpResponseRedirect, HttpResponse,\
     HttpResponseBadRequest
@@ -428,7 +427,7 @@ def register_customer(request, group=None):
         existing_customer = True
     data_source.append(utils.create_feed_data(post_data, product_obj[0], temp_customer_id))
     check_with_invoice_date = utils.subtract_dates(data_source[0]['product_purchase_date'], product_obj[0].invoice_date)
-    check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.now())
+    check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.datetime.now())
     if not existing_customer and check_with_invoice_date.days < 0 or check_with_today_date.days > 0:
         message = "Product purchase date should be between {0} and {1}".\
                 format((product_obj[0].invoice_date).strftime("%d-%m-%Y"),(datetime.datetime.now()).strftime("%d-%m-%Y"))
@@ -513,13 +512,13 @@ SA_REGISTER_SUCCESS = 'Service advisor registration is complete.'
 def save_sa_registration(request, groups):
     data = request.POST
     data_source = []
+    existing_sa = False
     phone_number = mobile_format(str(data['phone-number']))
     if data['sa-id']:
         service_advisor_id = data['sa-id']
         existing_sa = True
     else:
         service_advisor_id = TEMP_SA_ID_PREFIX + str(random.randint(10**5, 10**6))
-   
     data_source.append(utils.create_sa_feed_data(data, request.user, service_advisor_id))
     logger.info('[Temporary_sa_registration]:: Initiating dealer-sa feed for ID' + service_advisor_id)
     feed_remark = FeedLogWithRemark(len(data_source),
@@ -531,7 +530,7 @@ def save_sa_registration(request, groups):
                         data_source=data_source, feed_remark=feed_remark)
     if feed_response.failed_feeds > 0:
         failure_msg = list(feed_response.remarks.elements())[0]
-        logger.info('[Temporary_sa_registration]:: dealer-sa feed fialed ' + failure_msg)
+        logger.info('[Temporary_sa_registration]:: dealer-sa feed failed ' + failure_msg)
         return json.dumps({"message": failure_msg})
     logger.info('[Temporary_sa_registration]:: dealer-sa feed completed')
     if existing_sa:
