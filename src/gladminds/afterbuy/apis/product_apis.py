@@ -5,7 +5,7 @@ from tastypie import fields
 from django.http.response import HttpResponseRedirect
 from django.conf.urls import url
 from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.afterbuy import models as afterbuy_common
+from gladminds.afterbuy import models as afterbuy_models
 from gladminds.settings import API_FLAG, COUPON_URL
 from tastypie.utils.urls import trailing_slash
 
@@ -13,7 +13,7 @@ logger = logging.getLogger("gladminds")
 
 class UserProductResource(CustomBaseModelResource):
     class Meta:
-        queryset = afterbuy_common.UserProduct.objects.all()
+        queryset = afterbuy_models.UserProduct.objects.all()
         resource_name = "products"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete','put']
@@ -29,7 +29,7 @@ class UserProductResource(CustomBaseModelResource):
         product_id = kwargs.get('product_id')
         try:
             if product_id:
-                product_info = afterbuy_common.UserProduct.objects.get(id=product_id)
+                product_info = afterbuy_models.UserProduct.objects.get(id=product_id)
                 brand_product_id = product_info.brand_product_id
                 if not API_FLAG:
                     return HttpResponseRedirect('http://'+COUPON_URL+':'+port+'/v1/coupons/?product='+brand_product_id)
@@ -42,7 +42,7 @@ class UserProductResource(CustomBaseModelResource):
 class ProductInsuranceInfoResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', null=True, blank=True, full=True)
     class Meta:
-        queryset = afterbuy_common.ProductInsuranceInfo.objects.all()
+        queryset = afterbuy_models.ProductInsuranceInfo.objects.all()
         resource_name = "insurance"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
@@ -55,7 +55,7 @@ class ProductInsuranceInfoResource(CustomBaseModelResource):
 class InvoiceResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', null=True, blank=True, full=True)
     class Meta:
-        queryset = afterbuy_common.Invoice.objects.all()
+        queryset = afterbuy_models.Invoice.objects.all()
         resource_name = "invoice"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
@@ -67,7 +67,7 @@ class InvoiceResource(CustomBaseModelResource):
 class LicenseResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', full=True, null=True)
     class Meta:
-        queryset = afterbuy_common.License.objects.all()
+        queryset = afterbuy_models.License.objects.all()
         resource_name = 'license'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
@@ -79,7 +79,7 @@ class LicenseResource(CustomBaseModelResource):
 class RegistrationCertificateResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', full=True, null=True)
     class Meta:
-        queryset = afterbuy_common.RegistrationCertificate.objects.all()
+        queryset = afterbuy_models.RegistrationCertificate.objects.all()
         resource_name = 'registration'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
@@ -91,7 +91,7 @@ class RegistrationCertificateResource(CustomBaseModelResource):
 class PollutionCertificateResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', full=True, null=True)
     class Meta:
-        queryset = afterbuy_common.PollutionCertificate.objects.all()
+        queryset = afterbuy_models.PollutionCertificate.objects.all()
         resource_name = 'pollution'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
@@ -104,7 +104,7 @@ class PollutionCertificateResource(CustomBaseModelResource):
 class SupportResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', full=True, null=True)
     class Meta:
-        queryset = afterbuy_common.Support.objects.all()
+        queryset = afterbuy_models.Support.objects.all()
         resource_name = 'support'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
