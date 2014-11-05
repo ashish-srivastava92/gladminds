@@ -438,3 +438,5 @@ SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                           'working_key': '2uj6gnnnlbx37x436cppq87176j660w9',
                           'sender_id': 'GLADMS'}
                   }
+##################################################################################################
+ENABLE_SERVICE_DESK = True
