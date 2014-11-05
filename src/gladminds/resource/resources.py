@@ -281,7 +281,7 @@ class GladmindsResources(Resource):
         valid_coupon.sa_phone_number = dealer_data.service_advisor_id
         valid_coupon.servicing_dealer = dealer_data.dealer_id
         valid_coupon.save()
-
+        
     def update_inprogress_coupon(self, coupon, actual_kms, dealer_data):
         logger.info("Expired on %s" % coupon.mark_expired_on)
         logger.info("Extended on %s" % coupon.extended_date)
@@ -327,29 +327,22 @@ class GladmindsResources(Resource):
             vin = self.get_vin(sap_customer_id)
             self.update_exceed_limit_coupon(actual_kms, vin)
             valid_coupon = common.CouponData.objects.filter(Q(status=1) | Q(status=4) | Q(status=5), vin=vin,
-                            valid_kms__gte=actual_kms, service_type__gte=service_type) \
+                            valid_kms__gte=actual_kms, service_type=service_type) \
                            .select_related('vin', 'customer_phone_number__phone_number').order_by('service_type')
             logger.info(valid_coupon)
-            if len(valid_coupon) > 1:
+            if len(valid_coupon) > 0:
                 self.update_higher_range_coupon(valid_coupon[0].valid_kms, vin)
                 valid_coupon = valid_coupon[0]
-            elif len(valid_coupon) > 0:
-                valid_coupon = valid_coupon[0]
-            else:
-                dealer_message = templates.get_template('SEND_SA_NO_VALID_COUPON').format(sap_customer_id, service_type)
-                logger.info(dealer_message)
-                return {'status': False, 'message': dealer_message}
-            
-            coupon_sa_obj = common.ServiceAdvisorCouponRelationship.objects.filter(unique_service_coupon=valid_coupon\
-                                                                                   ,service_advisor_phone=dealer_data.service_advisor_id\
-                                                                                   ,dealer_id=dealer_data.dealer_id)
-            logger.info('Coupon_sa_obj exists: %s' % coupon_sa_obj)
-            if not len(coupon_sa_obj):
-                coupon_sa_obj = common.ServiceAdvisorCouponRelationship(unique_service_coupon=valid_coupon\
-                                                                        ,service_advisor_phone=dealer_data.service_advisor_id\
-                                                                        ,dealer_id=dealer_data.dealer_id)
-                coupon_sa_obj.save()
-                logger.info('Coupon obj created: %s' % coupon_sa_obj)
+                coupon_sa_obj = common.ServiceAdvisorCouponRelationship.objects.filter(unique_service_coupon=valid_coupon\
+                                                                                       ,service_advisor_phone=dealer_data.service_advisor_id\
+                                                                                       ,dealer_id=dealer_data.dealer_id)
+                logger.info('Coupon_sa_obj exists: %s' % coupon_sa_obj)
+                if not len(coupon_sa_obj):
+                    coupon_sa_obj = common.ServiceAdvisorCouponRelationship(unique_service_coupon=valid_coupon\
+                                                                            ,service_advisor_phone=dealer_data.service_advisor_id\
+                                                                            ,dealer_id=dealer_data.dealer_id)
+                    coupon_sa_obj.save()
+                    logger.info('Coupon obj created: %s' % coupon_sa_obj)
 
             in_progress_coupon = common.CouponData.objects.filter(vin=vin, valid_kms__gte=actual_kms, status=4) \
                                  .select_related ('vin', 'customer_phone_number__phone_number') \
@@ -374,21 +367,19 @@ class GladmindsResources(Resource):
                     dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(
                                                     service_type=valid_coupon.service_type,
                                                     customer_id=sap_customer_id)
-                else:    
-                    requested_coupon_status = self.get_requested_coupon_status(vin, service_type)
-                    dealer_message = templates.get_template('SEND_SA_OTHER_VALID_COUPON').format(
-                                            req_service_type=service_type,
-                                            req_status=requested_coupon_status,                                                     
-                                            service_type=valid_coupon.service_type,
-                                            customer_id=sap_customer_id)
+                    
                 customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(
                                             coupon=valid_coupon.unique_service_coupon,
                                             service_type=valid_coupon.service_type)
             else:
+                requested_coupon_status = self.get_requested_coupon_status(vin, service_type)
+                dealer_message = templates.get_template('SEND_SA_OTHER_VALID_COUPON').format(
+                                            req_service_type=service_type,
+                                            req_status=requested_coupon_status,                                                     
+                                            customer_id=sap_customer_id)
                 logger.info("Validate_coupon: ELSE PART")
                 customer_message_countdown = 10
                 requested_coupon = common.CouponData.objects.get(vin=vin, service_type=service_type)
-                dealer_message = templates.get_template('SEND_SA_EXPIRED_COUPON').format(service_type=requested_coupon.service_type, customer_id=sap_customer_id)
                 customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(service_type=requested_coupon.service_type)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
