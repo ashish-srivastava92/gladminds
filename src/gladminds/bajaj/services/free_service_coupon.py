@@ -232,7 +232,7 @@ class GladmindsResources(Resource):
         updated_coupon = models.CouponData.objects\
                         .filter(Q(status=4) | Q(status=5), product=product, valid_kms__gt=kms)\
                         .update(status=1, service_advisor=None, actual_kms=None,
-                                actual_service_date=None, servicing_dealer=None)
+                                actual_service_date=None)
         logger.info("%s have higher KMS range" % updated_coupon)
 
     def update_exceed_limit_coupon(self, actual_kms, product):
@@ -297,7 +297,7 @@ class GladmindsResources(Resource):
         customer_phone_number = None
         customer_message_countdown = settings.DELAY_IN_CUSTOMER_UCN_MESSAGE
         sap_customer_id = sms_dict.get('sap_customer_id', None)
-        service_advisor = self.validate_dealer(phone_number)
+        service_advisor = self.validate_service_advisor(phone_number)
         if not service_advisor:
             return {'status': False, 'message': templates.get_template('UNAUTHORISED_SA')}
         if not self.is_valid_data(customer_id=sap_customer_id, sa_phone=phone_number):
@@ -385,7 +385,7 @@ class GladmindsResources(Resource):
     
     @log_time
     def close_coupon(self, sms_dict, phone_number):
-        service_advisor = self.validate_dealer(phone_number)
+        service_advisor = self.validate_service_advisor(phone_number)
         unique_service_coupon = sms_dict['usc']
         sap_customer_id = sms_dict.get('sap_customer_id', None)
         message = None
@@ -424,7 +424,7 @@ class GladmindsResources(Resource):
             sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return {'status': True, 'message': message}
 
-    def validate_dealer(self, phone_number):
+    def validate_service_advisor(self, phone_number):
         all_sa_dealer_obj = models.ServiceAdvisor.objects.active(phone_number)
         if len(all_sa_dealer_obj) == 0:
             message=templates.get_template('UNAUTHORISED_SA')
@@ -461,13 +461,21 @@ class GladmindsResources(Resource):
             -    "Wrong Customer ID or UCN"
         '''
         coupon_obj = customer_obj = []
+        message = ''
         if coupon: coupon_obj = models.CouponData.objects.filter(unique_service_coupon=coupon)
         if customer_id:
             customer_id = models.CustomerTempRegistration.objects.get_updated_customer_id(customer_id)
             customer_obj = models.ProductData.objects.filter(customer_id=customer_id)
-        if ((not customer_obj) or (not coupon_obj) or\
-             (coupon_obj and (coupon_obj[0].product.product_id != customer_obj[0].product_id))):
+        if ((customer_obj and coupon_obj and coupon_obj[0].product.product_id != customer_obj[0].product_id) or\
+            (not customer_obj and not coupon_obj)):
             message=templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')
+
+        elif customer_id and not customer_obj:
+            message=templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')
+        elif coupon and not coupon_obj:
+            message=templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')
+
+        if message:
             sa_phone = utils.get_phone_number_format(sa_phone)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = utils.get_task_queue()
@@ -481,11 +489,11 @@ class GladmindsResources(Resource):
 
 
     def get_brand_data(self, sms_dict, phone_number):
-        brand_id = sms_dict['brand_id']
+        product_type = sms_dict['brand_id']
         try:
-            product_data = common.ProductData.objects.select_related('product_type__brand_id').filter(customer_phone_number__phone_number=phone_number, product_type__brand_id__brand_id=brand_id)
+            product_data = models.ProductData.objects.select_related('product_type').filter(customer_details__phone_number=phone_number, product_type__product_type=product_type)
             if product_data:
-                product_list = map(lambda object: {'sap_customer_id':object.sap_customer_id, 'vin': object.vin}, product_data)
+                product_list = map(lambda object: {'sap_customer_id':object.customer_id, 'vin': object.product_id}, product_data)
                 template = templates.get_template('SEND_BRAND_DATA')
                 msg_list = [template.format(**key_args) for key_args in product_list]
                 message = ', '.join(msg_list)
@@ -495,7 +503,7 @@ class GladmindsResources(Resource):
             message = templates.get_template('SEND_INVALID_MESSAGE')
         send_brand_sms_customer.delay(phone_number=phone_number, message=message)
         sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
-        return True
+        return {'status': True, 'message': message}
 
     def determine_format(self, request):
         return 'application/json'
@@ -505,14 +513,14 @@ class GladmindsResources(Resource):
         try:
             role = self.check_role_of_initiator(phone_number)
             if with_detail:
-                gladminds_feedback_object = common.Feedback(reporter=phone_number,
+                gladminds_feedback_object = models.Feedback(reporter=phone_number,
                                                                 priority=sms_dict['priority'] , type=sms_dict['type'], 
                                                                 subject=sms_dict['subject'], message=sms_dict['message'],
                                                                 status="Open", created_date=datetime.now(),
                                                                 role=role
                                                                 )
             else:
-                gladminds_feedback_object = common.Feedback(reporter=phone_number,
+                gladminds_feedback_object = models.Feedback(reporter=phone_number,
                                                                 message=sms_dict['message'], status="Open",
                                                                 created_date=datetime.now(),
                                                                 role=role
@@ -537,12 +545,12 @@ class GladmindsResources(Resource):
         return {'status': True, 'message': message}
 
     def check_role_of_initiator(self, phone_number):
-        active_sa = self.validate_dealer(phone_number)
+        active_sa = self.validate_service_advisor(phone_number)
         if  active_sa:
             return "SA"
         else:
-            check_customer_obj = common.GladmindsUser.objects.filter(
-                                                    phone_number=phone_number)
+            check_customer_obj = models.ProductData.objects.filter(
+                                            customer_details__phone_number=phone_number)
             if check_customer_obj:
                 return "Customer"
             else:

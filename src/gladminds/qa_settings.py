@@ -55,13 +55,6 @@ TEMPLATE_DIRS = (
 #                 }
 FILE_CACHE_DURATION = 0
 
-SMS_CLIENT = "AIRTEL"
-SMS_CLIENT_DETAIL = {
-                     'login':'bajajauto',
-                     'pass':'bajaj',
-                     'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',
-                     'message_url': 'http://117.99.128.32:80/login/pushsms.php'
-                    }
 FEED_TYPE = 'CSV'
 
 #AfterBuy File Upload location configuration

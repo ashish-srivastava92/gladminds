@@ -176,7 +176,7 @@ def recover_coupon_info(data):
 def get_coupon_info(data):
     customer_id = get_updated_customer_id(data['customerId'])
     try:
-        coupon_data = common.CouponData.objects.get(vin__sap_customer_id=customer_id, status=4)
+        coupon_data = models.CouponData.objects.get(product__customer_id=customer_id, status=4)
         coupon_data.special_case = True
         coupon_data.save()
     except Exception as ex:
@@ -185,7 +185,7 @@ def get_coupon_info(data):
     return coupon_data
 
 def upload_file(data, unique_service_coupon):
-    user_obj = data['current_user']
+    user_obj = models.UserProfile.objects.get(user=data['current_user'])
     file_obj = data['job_card']
     customer_id = data['customerId']
     reason = data['reason']
@@ -194,8 +194,8 @@ def upload_file(data, unique_service_coupon):
     destination = settings.JOBCARD_DIR.format('bajaj')
     path = uploadFileToS3(destination=destination, file_obj=file_obj, 
                           bucket=settings.JOBCARD_BUCKET, logger_msg="JobCard")
-    ucn_recovery_obj = aftersell_common.UCNRecovery(reason=reason, user=user_obj,
-                                        sap_customer_id=customer_id, file_location=path,
+    ucn_recovery_obj = models.UCNRecovery(reason=reason, user=user_obj,
+                                        customer_id=customer_id, file_location=path,
                                         unique_service_coupon=unique_service_coupon)
     ucn_recovery_obj.save()
     return ucn_recovery_obj
@@ -229,9 +229,9 @@ def stringify_groups(user):
 def send_recovery_email_to_admin(file_obj, coupon_data):
     file_location = file_obj.file_location
     reason = file_obj.reason
-    customer_id = file_obj.sap_customer_id
+    customer_id = file_obj.customer_id
     requester = str(file_obj.user)
-    data = get_email_template('UCN_REQUEST_ALERT').body.format(requester,coupon_data.service_type,
+    data = get_email_template('UCN_REQUEST_ALERT')['body'].format(requester,coupon_data.service_type,
                 customer_id, coupon_data.actual_kms, reason, file_location)
     send_ucn_request_alert(data=data)
 
@@ -340,7 +340,7 @@ def search_details(data):
     product_obj = models.ProductData.objects.filter(**kwargs)
     if not product_obj or not product_obj[0].purchase_date:
         key = data.keys()
-        message = '''{0} '{1}' has no associated customer. Please register the customer.'''.format(key[0], data[key[0]])
+        message = '''Customer details for {0} '{1}' not found. Please contact customer support: +91-9741775128.'''.format(key[0], data[key[0]])
         logger.info(message)
         return {'message': message}
     for product in product_obj:
@@ -387,20 +387,20 @@ def set_wait_time(feedback_data):
 
 def services_search_details(data):
     key = data.keys()
-    message = '''No Service Details available for {0} '{1}'. Please register the customer.'''.format(key[0], data[key[0]])
+    message = '''No Service Details available for {0} '{1}'. Please contact customer support: +91-9741775128.'''.format(key[0], data[key[0]])
     kwargs = {}
     response = {}
     search_results = []
     if data.has_key('VIN'):
-        kwargs[ 'vin' ] = data['VIN']
+        kwargs[ 'product_id' ] = data['VIN']
     elif data.has_key('Customer-ID'):
-        kwargs[ 'sap_customer_id' ] = get_updated_customer_id(data['Customer-ID'])
-    product_obj = common.ProductData.objects.filter(**kwargs)
+        kwargs[ 'customer_id' ] = get_updated_customer_id(data['Customer-ID'])
+    product_obj = models.ProductData.objects.filter(**kwargs)
     if len(product_obj) == 1:
-        if not product_obj[0].product_purchase_date:
+        if not product_obj[0].purchase_date:
             return {'message': message}
         try:
-            coupon_obj = common.CouponData.objects.filter(vin=product_obj[0]).order_by('service_type')
+            coupon_obj = models.CouponData.objects.filter(product=product_obj[0]).order_by('service_type')
             if len(coupon_obj) > 0:
                 for coupon in coupon_obj:
                     temp = {}
@@ -408,8 +408,8 @@ def services_search_details(data):
                     temp['status'] = STATUS_CHOICES[coupon.status - 1][1]
                     search_results.append(temp)
                 response['search_results'] = search_results
-                response['other_details'] = {'vin': product_obj[0].vin, 'customer_id': product_obj[0].sap_customer_id,\
-                                             'customer_name': product_obj[0].customer_phone_number.customer_name}
+                response['other_details'] = {'vin': product_obj[0].product_id, 'customer_id': product_obj[0].customer_id,\
+                                             'customer_name': product_obj[0].customer_details.user.first_name}
                 return response
             else:
                 return {'message': message}
@@ -488,7 +488,7 @@ def get_asc_data():
 
 
 def asc_cuopon_details(asc_id, status_type):
-    cuopon_details = common.CouponData.objects.filter(servicing_dealer=asc_id, status=status_type)
+    cuopon_details = common.CouponData.objects.filter(service_advisor__asc=asc_id, status=status_type)
     return len(cuopon_details)
 
 

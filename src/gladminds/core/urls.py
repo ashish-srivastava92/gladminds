@@ -34,7 +34,7 @@ urlpatterns = patterns('',
      
     url(r'^aftersell/register/(?P<menu>[a-zA-Z0-9]+)$', 'gladminds.core.views.register'),
     url(r'^aftersell/exceptions/(?P<exception>[a-zA-Z0-9]+)$', 'gladminds.core.views.exceptions'),
-    url(r'^aftersell/asc/self-register/$', 'gladminds.core.views.asc_registration'),
+    url(r'^aftersell/asc/self-register/$', 'gladminds.core.views.save_asc_registration'),
     
     url(r'^aftersell/(?P<provider>[a-zA-Z]+)/login/$', 'gladminds.core.views.auth_login', name='user_login'),
     url(r'^aftersell/provider/logout$', 'gladminds.core.views.user_logout', name='user_logout'),
