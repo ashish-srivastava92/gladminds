@@ -53,13 +53,6 @@ TEMPLATE_DIRS = (
 #                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/Messages.json'
 #                 }
 
-SMS_CLIENT = "AIRTEL"
-SMS_CLIENT_DETAIL={
-                   'login':'bajajauto',
-                   'pass':'bajaj',
-                   'authenticate_url':'http://117.99.128.32:80/login/pushsms.php' ,
-                   'message_url': 'http://117.99.128.32:80/login/pushsms.php'
-                   }
 FEED_TYPE = 'CSV'
 
 SAP_CRM_DETAIL = {

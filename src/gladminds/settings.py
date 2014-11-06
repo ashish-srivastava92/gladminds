@@ -453,3 +453,14 @@ BRAND = 'demo'
 GM_BRAND = 'gm'
 BRANDS = ['bajaj', 'demo', 'afterbuy']
 ###############################################
+SMS_CLIENT = "KAP"
+SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
+                              'pass':'bajaj',
+                              'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',
+                              'message_url': 'http://117.99.128.32:80/login/pushsms.php'},
+                  'KAP': {'login':'GladMinds1',
+                          'pass':'kap@user!23',
+                          'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
+                          'working_key': '2uj6gnnnlbx37x436cppq87176j660w9',
+                          'sender_id': 'GLADMS'}
+                  }

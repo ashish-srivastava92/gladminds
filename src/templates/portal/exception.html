@@ -116,7 +116,7 @@
                     			<select class="form-control" name="advisorMobile" id="advisorMobile" required>
                       				<option value="">Select mobile number</option>
 									{% for phone in data %}
-				                    	<option value="{{phone}}">{{phone.user.user.first_name}} ({{phone.user.phone_number}})</option>
+				                    	<option value="{{phone.user.phone_number}}">{{phone.user.user.first_name}} ({{phone.user.phone_number}})</option>
 				                    {% endfor %}
                     			</select>
                   			</div>
@@ -164,7 +164,7 @@
                     	<select class="form-control" name="advisorMobile" id="advisorMobile" required>
                       		<option value="">Select mobile number</option>
                       		{% for phone in data %}
-                      			<option value="{{phone}}">{{phone.user.user.first_name}} ({{phone.user.phone_number}})</option>
+                      			<option value="{{phone.user.phone_number}}">{{phone.user.user.first_name}} ({{phone.user.phone_number}})</option>
                       		{% endfor %}
                     	</select>
                   	</div>

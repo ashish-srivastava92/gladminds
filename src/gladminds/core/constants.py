@@ -16,8 +16,8 @@ GROUP_MAPPING = {
 USER_GROUPS = [ 'dealers', 'ascs', 'dascs', 'SDO', 'SDM']
 
 REDIRECT_USER ={
-                'dealers' : '/aftersell/register/sa',
-                'ascs' : '/aftersell/register/asc',
+                'dealers' : '/aftersell/register/asc',
+                'ascs' : '/aftersell/register/sa',
                 'SDO' : '/aftersell/servicedesk/',
                 'SDM' : '/aftersell/servicedesk/'
                 }
