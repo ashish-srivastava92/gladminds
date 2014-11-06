@@ -15,14 +15,15 @@ class DatabaseAppsRouter(object):
 
     def db_for_read(self, model, **hints):
         """"Point all read operations to the specific database."""
-        return settings.DATABASE_APPS_MAPPING.get(settings.BRAND)
+        if model._meta.app_label in ['auth', 'contenttypes', 'sessions', 'sites', 'admin']:
+            return settings.DATABASE_APPS_MAPPING.get(settings.BRAND)
+        return settings.DATABASE_APPS_MAPPING.get(model._meta.app_label)
 
     def db_for_write(self, model, **hints):
         """Point all write operations to the specific database."""
-        return settings.DATABASE_APPS_MAPPING.get(settings.BRAND)
-#         if settings.DATABASE_APPS_MAPPING.has_key(model._meta.app_label):
-#             return settings.DATABASE_APPS_MAPPING[model._meta.app_label]
-#         return None
+        if model._meta.app_label in ['auth', 'contenttypes', 'sessions', 'sites', 'admin']:
+            return settings.DATABASE_APPS_MAPPING.get(settings.BRAND)
+        return settings.DATABASE_APPS_MAPPING.get(model._meta.app_label)
 
     def allow_relation(self, obj1, obj2, **hints):
         """Allow any relation between apps that use the same database."""

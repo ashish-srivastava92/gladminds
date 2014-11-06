@@ -7,7 +7,11 @@ logger = logging.getLogger("gladminds")
 
 __all__ = ['KapSmsClient', 'AirtelSmsClient', 'TwilioSmsClient']
 
+
 def load_gateway(sms_client):
+    if sms_client is None:
+        sms_client = 'MOCK'
+    print settings.SMS_CLIENT_DETAIL
     client = settings.SMS_CLIENT_DETAIL[sms_client]
     if sms_client == 'MOCK':
         return MockSmsClient(**client)

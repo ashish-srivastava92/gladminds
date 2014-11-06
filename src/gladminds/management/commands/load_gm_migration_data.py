@@ -3,10 +3,10 @@ from django.contrib.auth.models import Group
 import os
 from django.conf import settings
 import json
-from gladminds.afterbuy.models import MessageTemplate, EmailTemplate
+from gladminds.bajaj.models import MessageTemplate, EmailTemplate
 
 class Command(BaseCommand):
-    
+
     def handle(self, *args, **options):
         self.add_sms_template()
         self.add_email_template()
@@ -21,9 +21,8 @@ class Command(BaseCommand):
             group = Group(id=group['fields']["id"],name=group['fields']["name"])
             group.save()
         print "Loaded groups..."
-         
-        
-    
+
+
     def add_sms_template(self):
         print "Loading sms template..."
         file_path = os.path.join(settings.PROJECT_DIR, 'template_data/template.json')
@@ -37,7 +36,7 @@ class Command(BaseCommand):
                        , template=fields['template'], description=fields['description'])
             temp_obj.save()
         print "Loaded sms template..."
-    
+
     def add_email_template(self):
         print "Loading email template..."
         file_path = os.path.join(settings.PROJECT_DIR, 'template_data/email_template.json')
@@ -50,8 +49,8 @@ class Command(BaseCommand):
                         subject=fields['subject'], body=fields['body'],\
                         description=fields['description'])
             temp_obj.save()
-        print "Loaded email template..."   
-        
+        print "Loaded email template..."
+
     def add_user_for_existing_dealer(self):
         print "Loading users for existing dealer...."
         all_dealers = aftersell_common.Dealer.objects.all()
