@@ -191,7 +191,7 @@ class GladmindsResources(Resource):
                                         filter(product__customer_details__phone_number=phone_number, \
                                         product__customer_id=customer_id).\
                                         order_by('product', 'valid_days') if customer_id else \
-                                        common.CouponData.objects.select_related('product').\
+                                        models.CouponData.objects.select_related('product').\
                                         filter(product__customer_details__phone_number=phone_number).\
                                         order_by('product', 'valid_days')
             logger.info(customer_product_data)
@@ -280,12 +280,12 @@ class GladmindsResources(Resource):
             coupon.save()
     
     def get_requested_coupon_status(self, product, service_type):
-        requested_coupon = common.CouponData.objects.filter(product=product,
+        requested_coupon = models.CouponData.objects.filter(product=product,
                                                     service_type=service_type) 
         if not requested_coupon:
             status = "not available"
         else:
-            status = common.STATUS_CHOICES[requested_coupon[0].status - 1][1]
+            status = models.STATUS_CHOICES[requested_coupon[0].status - 1][1]
         return status
     
     @log_time
@@ -356,10 +356,10 @@ class GladmindsResources(Resource):
                                             req_service_type=service_type,
                                             req_status=requested_coupon_status,                                                     
                                             customer_id=sap_customer_id)
-                requested_coupon = common.CouponData.objects.get(vin=vin, service_type=service_type)
+                requested_coupon = models.CouponData.objects.get(product=product, service_type=service_type)
                 customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(service_type=requested_coupon.service_type)
             if settings.ENABLE_AMAZON_SQS:
-                task_queue = get_task_queue()
+                task_queue = utils.get_task_queue()
                 task_queue.add("send_coupon_detail_customer", {"phone_number":utils.get_phone_number_format(customer_phone_number), "message":customer_message, "sms_client":settings.SMS_CLIENT}, delay_seconds=customer_message_countdown)
             else:
                 send_coupon_detail_customer.apply_async( kwargs={ 'phone_number': utils.get_phone_number_format(customer_phone_number), 'message':customer_message, "sms_client":settings.SMS_CLIENT}, countdown=customer_message_countdown)
@@ -375,7 +375,7 @@ class GladmindsResources(Resource):
             logger.info("validate message send to SA %s" % dealer_message)
             phone_number = utils.get_phone_number_format(phone_number)
             if settings.ENABLE_AMAZON_SQS:
-                task_queue = get_task_queue()
+                task_queue = utils.get_task_queue()
                 task_queue.add("send_service_detail", {"phone_number":phone_number, "message":dealer_message, "sms_client":settings.SMS_CLIENT})
             else:
                 send_service_detail.delay(phone_number=phone_number, message=dealer_message, sms_client=settings.SMS_CLIENT)
