@@ -22,7 +22,7 @@ AUDIT_ACTION = 'SEND TO QUEUE'
 This task send sms to customer on customer registration
 """
 
-def send_sms(**kwargs):
+def set_gateway(**kwargs):
     sms_client = kwargs.get('sms_client', None)
     logger.info('sms_client is {0}'.format(sms_client))
     sms_client_gateway = load_gateway(sms_client)
@@ -35,7 +35,7 @@ def send_registration_detail(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_registration_detail.retry(
@@ -54,7 +54,7 @@ def customer_detail_recovery(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         customer_detail_recovery.retry(
@@ -74,7 +74,7 @@ def send_service_detail(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_service_detail.retry(
@@ -93,7 +93,7 @@ def send_coupon_validity_detail(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_validity_detail.retry(
@@ -113,7 +113,7 @@ def send_coupon_detail_customer(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_detail_customer.retry(
@@ -132,7 +132,7 @@ def send_reminder_message(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_reminder_message.retry(
@@ -151,7 +151,7 @@ def send_coupon_close_message(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_close_message.retry(
@@ -169,7 +169,7 @@ def send_otp(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_otp.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
@@ -183,7 +183,7 @@ def send_coupon(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
@@ -201,7 +201,7 @@ def send_close_sms_customer(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_close_sms_customer.retry(
@@ -216,7 +216,7 @@ def send_brand_sms_customer(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_brand_sms_customer.retry(
@@ -235,7 +235,7 @@ def send_invalid_keyword_message(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_invalid_keyword_message.retry(
@@ -255,7 +255,7 @@ def send_on_product_purchase(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_on_product_purchase.retry(
@@ -409,6 +409,30 @@ def export_customer_reg_to_sap(*args, **kwargs):
                              1], total_failed_on_feed=feed_export_data[2])
     else:
         logger.info("tasks.py: No Customer registered since last feed")
+        
+def send_sms(template_name, phone_number):
+    created_date = feedback_obj.created_date
+    try:
+        message = templates.get_template(template_name).format(type=feedback_obj.type,
+                                                               reporter=feedback_obj.reporter,
+                                                               message=feedback_obj.message,
+                                                               created_date=convert_utc_to_local_time(created_date),
+                                                               assign_to=feedback_obj.assign_to,
+                                                               priority=feedback_obj.priority)
+        if comment_obj and template_name == 'SEND_MSG_TO_ASSIGNEE':
+            message = message + 'Note :' + comment_obj.comments
+    except Exception as ex:
+        message = templates.get_template('SEND_INVALID_MESSAGE')
+    finally:
+        logger.info("Send complain message received successfully with %s" % message)
+        phone_number = utils.get_phone_number_format(phone_number)
+        if settings.ENABLE_AMAZON_SQS:
+            task_queue = utils.get_task_queue()
+            task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
+        else:
+            send_coupon.delay(phone_number=phone_number, message=message)
+    audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+    return {'status': True, 'message': message}
 
     
 _tasks_map = {"send_registration_detail": send_registration_detail,
