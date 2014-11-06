@@ -21,7 +21,7 @@ class DatabaseAppsRouter(object):
 
     def db_for_write(self, model, **hints):
         """Point all write operations to the specific database."""
-        if model._meta.app_label in ['auth', 'contenttypes', 'sessions', 'sites', 'admin']:
+        if model._meta.app_label in ['auth', 'contenttypes', 'sessions', 'sites', 'admin', 'djcelery']:
             return settings.DATABASE_APPS_MAPPING.get(settings.BRAND)
         return settings.DATABASE_APPS_MAPPING.get(model._meta.app_label)
 
@@ -38,7 +38,7 @@ class DatabaseAppsRouter(object):
 
     def allow_syncdb(self, db, model):
         """Make sure that apps only appear in the related database."""
-        if model._meta.app_label in ['auth', 'contenttypes', 'sessions', 'sites', 'admin']:
+        if model._meta.app_label in ['auth', 'contenttypes', 'sessions', 'sites', 'admin', 'djcelery']:
             return True
 
         if db in settings.DATABASE_APPS_MAPPING.values():
