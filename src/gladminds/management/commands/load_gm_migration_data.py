@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 import os
 from django.conf import settings
 import json
-from gladminds.demo.models import MessageTemplate, EmailTemplate
+from gladminds.bajaj.models import MessageTemplate, EmailTemplate
 
 class Command(BaseCommand):
     
