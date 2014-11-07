@@ -31,8 +31,7 @@ class CeleryTestCaseBase(GladmindsResourceTestCase):
         self.assertHttpOK(result)
         
     def test_delay_message(self):
-        self.brand_obj = self.get_brand_obj(brand_id='brand001', brand_name='bajaj')
-        product_type_obj = self.get_product_type_obj(brand_id=self.brand_obj, product_name='DISCO120', product_type='BIKE')
+        product_type_obj = self.get_product_type_obj(product_name='DISCO120', product_type='BIKE')
         self.dealer_obj = self.get_delear_obj(dealer_id='DEALER001')
         self.customer_obj = self.get_customer_obj(phone_number='232323232')
         self.product_obj = self.get_product_obj(vin="VINXXX001", product_type=product_type_obj, dealer_id = self.dealer_obj, customer_phone_number = self.customer_obj, sap_customer_id='SAP001')
