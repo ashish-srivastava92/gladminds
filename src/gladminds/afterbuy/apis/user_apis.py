@@ -256,4 +256,24 @@ class UserResources(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
 
 
+class UserResource(CustomBaseModelResource):
+    class Meta:
+        queryset = User.objects.all()
+        resource_name = "userss"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'delete', 'put']
+        always_return_data = True
+
+class ConsumerResource(CustomBaseModelResource):
+    user = fields.ForeignKey(UserResource, 'user', null=True, blank=True, full=True)
+    class Meta:
+        queryset = afterbuy_model.Consumer.objects.all()
+        resource_name = "consumers"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'delete', 'put']
+        always_return_data = True
+        filtering = {
+                     "consumer_id" : ALL
+                     }
+
 

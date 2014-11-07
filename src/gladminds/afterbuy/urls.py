@@ -12,7 +12,8 @@ api_v1.register(product_apis.UserProductResource())
 api_v1.register(product_apis.RegistrationCertificateResource())
 api_v1.register(product_apis.PollutionCertificateResource())
 api_v1.register(product_apis.SupportResource())
-api_v1.register(user_apis.UserResources())
+api_v1.register(product_apis.SupportResource())
+api_v1.register(product_apis.ConsumerResource())
 
 
 urlpatterns = patterns('',
