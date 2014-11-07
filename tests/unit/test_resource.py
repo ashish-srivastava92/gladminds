@@ -1,5 +1,5 @@
 import json, os
-from gladminds.models import common
+from gladminds.bajaj import models as common
 from django.test.client import Client
 from django.conf import settings
 from django.contrib.auth.models import User

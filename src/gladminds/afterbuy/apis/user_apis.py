@@ -239,7 +239,7 @@ class UserResources(CustomBaseModelResource):
                             format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
 
-    def validate_otp(self, request):
+    def validate_otp(self, request, **kwargs):
         otp = request.POST.get('otp')
         phone_number = request.POST.get('phone_number')
         if not otp and not phone_number :

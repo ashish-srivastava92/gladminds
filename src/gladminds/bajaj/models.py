@@ -78,7 +78,6 @@ class ProductData(base_models.ProductData):
 class CouponData(base_models.CouponData):
     product = models.ForeignKey(ProductData, null=False, editable=False)
     service_advisor = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
-    servicing_dealer = models.ForeignKey(Dealer, null=True, blank=True)
 
     class Meta:
         app_label = "bajaj"
@@ -88,7 +87,6 @@ class CouponData(base_models.CouponData):
 class ServiceAdvisorCouponRelationship(base_models.ServiceAdvisorCouponRelationship):
     unique_service_coupon = models.ForeignKey(CouponData, null=False)
     service_advisor = models.ForeignKey(ServiceAdvisor, null=False)
-    dealer_id = models.ForeignKey(Dealer, null=True, blank=True)
 
     class Meta:
         app_label = "bajaj"

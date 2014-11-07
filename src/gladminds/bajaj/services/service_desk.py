@@ -5,6 +5,8 @@ from django.shortcuts import render
 from django.http.response import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+from django.views.decorators.http import require_http_methods
+from django.contrib.sites.models import get_current_site
 
 from gladminds.core.utils import get_list_from_set
 from gladminds.bajaj import models as common
@@ -12,8 +14,8 @@ from gladminds.bajaj.services.free_service_coupon import GladmindsResources
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE
 from gladminds.managers import get_feedbacks, get_feedback,\
     get_servicedesk_users, save_update_feedback
-from django.views.decorators.http import require_http_methods
-from django.contrib.sites.models import get_current_site
+from gladminds.core.managers.audit_manager import sms_log
+
 
 gladmindsResources = GladmindsResources()
 logger = logging.getLogger('gladminds')
@@ -57,3 +59,28 @@ def get_feedback_response(request, feedback_id):
             return render(request, 'service-desk/feedback_received.html')
         else:
             return HttpResponse()
+        
+        
+def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=None):
+    created_date = feedback_obj.created_date
+    try:
+        message = templates.get_template(template_name).format(type=feedback_obj.type,
+                                                               reporter=feedback_obj.reporter,
+                                                               message=feedback_obj.message,
+                                                               created_date=convert_utc_to_local_time(created_date),
+                                                               assign_to=feedback_obj.assign_to,
+                                                               priority=feedback_obj.priority)
+        if comment_obj and template_name == 'SEND_MSG_TO_ASSIGNEE':
+            message = message + 'Note :' + comment_obj.comments
+    except Exception as ex:
+        message = templates.get_template('SEND_INVALID_MESSAGE')
+    finally:
+        logger.info("Send complain message received successfully with %s" % message)
+        phone_number = utils.get_phone_number_format(phone_number)
+        if settings.ENABLE_AMAZON_SQS:
+            task_queue = utils.get_task_queue()
+            task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
+        else:
+            send_coupon.delay(phone_number=phone_number, message=message)
+    sms_log(reciever=phone_number, action='SEND TO QUEUE', message=message)
+    return {'status': True, 'message': message}

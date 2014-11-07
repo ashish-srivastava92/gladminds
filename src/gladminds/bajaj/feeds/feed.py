@@ -239,8 +239,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
         return self.feed_remark
 
     def check_mobile_active(self, dealer, dealer_data):
-        list_mobile = models.ServiceAdvisor.objects.filter(
-                                user__phone_number=dealer['phone_number'], status='Y')
+        list_mobile = models.ServiceAdvisor.objects.active(dealer['phone_number'])
         list_active_mobile = list_mobile.exclude(dealer=dealer_data,
                                                  service_advisor_id=dealer['service_advisor_id'])
         if list_active_mobile:

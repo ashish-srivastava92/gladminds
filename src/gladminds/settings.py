@@ -15,7 +15,7 @@ ALLOWED_HOSTS = ['*']
 
 ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
                     'service', 'check': 'a', 'close': 'c', 'brand': 'brand',
-                    'service_desk': 'sd'}
+                    'service_desk': 'sd', 'customer_detail_recovery': 'r'}
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -267,7 +267,7 @@ INSTALLED_APPS = (
     'provider',
     'provider.oauth2',
    # 'debug_toolbar',
-    'south'
+    #'south'
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
@@ -453,3 +453,14 @@ BRAND = 'demo'
 GM_BRAND = 'gm'
 BRANDS = ['bajaj', 'demo', 'afterbuy']
 ###############################################
+SMS_CLIENT = "KAP"
+SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
+                              'pass':'bajaj',
+                              'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',
+                              'message_url': 'http://117.99.128.32:80/login/pushsms.php'},
+                  'KAP': {'login':'GladMinds1',
+                          'pass':'kap@user!23',
+                          'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
+                          'working_key': '2uj6gnnnlbx37x436cppq87176j660w9',
+                          'sender_id': 'GLADMS'}
+                  }
