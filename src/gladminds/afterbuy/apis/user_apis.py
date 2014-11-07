@@ -242,12 +242,22 @@ class UserResources(CustomBaseModelResource):
     def validate_otp(self, request, **kwargs):
         otp = request.POST.get('otp')
         phone_number = request.POST.get('phone_number')
-        if not otp and not phone_number :
-            return HttpBadRequest("otp and phone_number required")
+        email_id = request.POST.get('email_id')
+        if not otp and not email_id and not phone_number :
+            return HttpBadRequest("otp and phone_number/email_id required")
         try:
-            user = afterbuy_model.Consumer.objects.get(phone_number
-                                                 =mobile_format(phone_number))
-            afterbuy_utils.validate_otp(user, otp, phone_number)
+            if phone_number:
+                user = afterbuy_model.Consumer.objects.get(phone_number
+                                                     =mobile_format(phone_number))
+                afterbuy_utils.validate_otp(user, otp, phone_number)
+
+            elif email_id:
+                consumer_obj = User.objects.get(email
+                                                 =email_id)
+                user = afterbuy_model.Consumer.objects.get(user
+                                                     = consumer_obj)
+                phone_number = user.phone_number
+            afterbuy_utils.validate_otp(user, otp, user.phone_number)
             data = {'status': 1, 'message': "valid OTP"}
         except Exception as ex:
                 data = {'status': 0, 'message': "invalid OTP"}

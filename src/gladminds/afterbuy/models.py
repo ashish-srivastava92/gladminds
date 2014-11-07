@@ -215,11 +215,11 @@ class Support (BaseModel):
     product = models.ForeignKey(UserProduct)
     toll_free = models.CharField(max_length=255, blank=True, null=True)
     service_center_name = models.CharField(max_length=25, blank=True, null=True)
-    service_center_number =models.CharField(max_length=25, blank=True, null=True)
+    service_center_number = models.CharField(max_length=255, blank=True, null=True)
     feedback_form = models.CharField(max_length=255, blank=True, null=True)
     service_center_email_id = models.CharField(max_length=25, blank=True, null=True)
     service_center_website = models.CharField(max_length=255, blank=True, null=True)
-    
+
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "support"
