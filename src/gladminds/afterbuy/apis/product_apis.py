@@ -4,14 +4,29 @@ from tastypie.authorization import Authorization
 from tastypie import fields
 from django.http.response import HttpResponseRedirect
 from django.conf.urls import url
+from django.contrib.auth.models import User
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.afterbuy import models as afterbuy_models
 from gladminds.settings import API_FLAG, COUPON_URL
 from tastypie.utils.urls import trailing_slash
+from gladminds.afterbuy.apis.brand_apis import BrandResource
+from gladminds.afterbuy.apis.user_apis import ConsumerResource
 
 logger = logging.getLogger("gladminds")
 
+class ProductTypeResource(CustomBaseModelResource):
+    class Meta:
+        queryset = afterbuy_models.ProductType.objects.all()
+        resource_name = "types"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'delete', 'put']
+        always_return_data = True
+
 class UserProductResource(CustomBaseModelResource):
+    consumer = fields.ForeignKey(ConsumerResource, 'consumer', null=True, blank=True, full=True)
+    brand = fields.ForeignKey(BrandResource, 'brand', null=True, blank=True, full=True)
+    type = fields.ForeignKey(ProductTypeResource, 'type', null=True, blank=True, full=True)
+    
     class Meta:
         queryset = afterbuy_models.UserProduct.objects.all()
         resource_name = "products"
