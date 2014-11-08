@@ -545,9 +545,10 @@ class SlaAdmin(ModelAdmin):
     fieldsets = (
         (None, {
             'fields': (
-        'priority', ('response_time', 'response_unit'), ('resolution_time', 'resolution_unit'), ('reminder_time', 'reminder_unit'))
+        'priority', ('response_time', 'response_unit'), ('reminder_time', 'reminder_unit'), ('resolution_time', 'resolution_unit'))
         }),
         )
+    
                  
 ##############################################################
 
