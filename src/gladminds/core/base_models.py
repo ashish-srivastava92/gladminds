@@ -114,7 +114,6 @@ class AuthorizedServiceCenter(BaseModel):
 class ServiceAdvisor(BaseModel):
     service_advisor_id = models.CharField(
         max_length=15, blank=False, unique=True, null=False)
-    order = models.PositiveIntegerField(default=0)
     status = models.CharField(max_length=10, blank=False, null=False)
     
     objects = user_manager.ServiceAdvisorManager()
