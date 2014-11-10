@@ -31,7 +31,6 @@ from gladminds.utils import mobile_format, format_message,\
     get_phone_number_format
 from django.utils import timezone
 from django.conf import settings
-from gladminds.utils import get_task_queue
 from gladminds.settings import COUPON_VALID_DAYS
 from django.http.response import HttpResponse, HttpResponseBadRequest
 from django.contrib.auth.models import User
@@ -625,9 +624,9 @@ class GladmindsResources(Resource):
             phone_number = utils.get_phone_number_format(phone_number)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
+                task_queue.add("send_point", {"phone_number":phone_number, "message": message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_coupon.delay(phone_number=phone_number, message=message)
+                send_point.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return {'status': True, 'message': message}
     
@@ -660,9 +659,9 @@ class GladmindsResources(Resource):
             phone_number = utils.get_phone_number_format(phone_number)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
+                task_queue.add("send_point", {"phone_number":phone_number, "message": message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_coupon.delay(phone_number=phone_number, message=message)
+                send_point.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return {'status': True, 'message': message}
 
