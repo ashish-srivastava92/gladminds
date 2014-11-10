@@ -45,7 +45,8 @@ from gladminds.models import common
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
-    send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message
+    send_brand_sms_customer, send_close_sms_customer, \
+    send_invalid_keyword_message, send_point
 from gladminds.utils import mobile_format, format_message, get_task_queue, create_context
 from gladminds.feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
@@ -583,7 +584,90 @@ class GladmindsResources(Resource):
                 return "Customer"
             else:
                 return "other"
+    
+    def update_points(self, mechanic, accumulate=0, redeem=0):
+        total_points = mechanic.total_points + accumulate -redeem
+        mechanic.total_points = total_points 
+        mechanic.save()
+        return total_points
 
+    def fetch_spare_products(self, spare_product_codes):
+        spares = common.SparePart.objects.filter(unique_part_code__in=spare_product_codes)
+        return spares
+    
+    def fetch_catalogue_products(self, product_codes):
+        products = common.ProductCatalog.objects.filter(product_code__in=product_codes)
+        return products
+    
+    def get_mechanic(self, phone_number):
+        mechanic = common.Mechanic.objects.filter(phone_number=phone_number)
+        return mechanic
+
+    def accumulate_point(self, sms_dict, phone_number):
+        unique_product_codes = sms_dict['ucp'].split()
+        try:
+            mechanic = self.get_mechanic(utils.mobile_format(phone_number))
+            if not mechanic:
+                message=templates.get_template('UNREGISERED_USER')
+                raise ValueError('Unregistered user')
+            spares=self.fetch_spare_products(unique_product_codes)
+            added_points=0
+        
+            if len(spares)<len(unique_product_codes):
+               message=templates.get_template('SEND_INVALID_UCP')
+               raise ValueError('Invalid UCP')
+            for spare in spares:
+                added_points=added_points+spare.points
+            total_points=self.update_points(mechanic[0],accumulate=added_points)
+            message=templates.get_template('SEND_ACCUMULATED_POINT').format(
+                            mechanic_name=mechanic[0].name, added_points=added_points,
+                            total_points=total_points)
+        except Exception as ex:
+            logger.error('[accumulate_point]:{0}:: {1}'.format(phone_number, ex))
+        finally:
+            phone_number = utils.get_phone_number_format(phone_number)
+            if settings.ENABLE_AMAZON_SQS:
+                task_queue = get_task_queue()
+                task_queue.add("send_point", {"phone_number":phone_number, "message": message})
+            else:
+                send_point.delay(phone_number=phone_number, message=message)
+            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        return {'status': True, 'message': message}
+    
+    def redeem_point(self, sms_dict, phone_number):
+        product_codes = sms_dict['product_id'].split()
+        try:
+            mechanic = self.get_mechanic(utils.mobile_format(phone_number))
+            if not mechanic:
+                message=templates.get_template('UNREGISERED_USER')
+                raise ValueError('Unregistered user')
+            products=self.fetch_catalogue_products(product_codes)
+            redeem_points=0
+            product_ids=''
+            
+            for product in products:
+                redeem_points=redeem_points+product.points
+            left_points=mechanic[0].total_points-redeem_points
+            if left_points>0:
+                total_points=self.update_points(mechanic[0],redeem=redeem_points)
+                message=templates.get_template('SEND_REDEEM_POINT').format(
+                                mechanic_name=mechanic[0].name,
+                                product_code=sms_dict['product_id'],
+                                total_points=total_points)
+            else:
+                message=templates.get_template('SEND_INSUFFICIENT_POINT').format(
+                                shortage_points=abs(left_points))
+        except Exception as ex:
+            logger.error('[redeem_point]:{0}:: {1}'.format(phone_number, ex))
+        finally:    
+            phone_number = utils.get_phone_number_format(phone_number)
+            if settings.ENABLE_AMAZON_SQS:
+                task_queue = get_task_queue()
+                task_queue.add("send_point", {"phone_number":phone_number, "message": message})
+            else:
+                send_point.delay(phone_number=phone_number, message=message)
+            audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        return {'status': True, 'message': message}
 
 
 #########################AfterBuy Resources############################################
