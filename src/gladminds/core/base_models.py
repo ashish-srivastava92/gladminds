@@ -211,7 +211,6 @@ class UCNRecovery(BaseModel):
     reason = models.TextField(null=False)
     customer_id = models.CharField(max_length=215, null=True, blank=True)
     file_location = models.CharField(max_length=215, null=True, blank=True)
-    request_date = models.DateTimeField(default=datetime.now())
     unique_service_coupon = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
@@ -237,6 +236,8 @@ class OldFscData(BaseModel):
     credit_date = models.DateTimeField(null=True, blank=True)
     credit_note = models.CharField(max_length=50, null=True, blank=True)
     special_case = models.BooleanField(default=False)
+    missing_field = models.CharField(max_length=50, null=True, blank=True)
+    missing_value = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
