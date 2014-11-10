@@ -11,5 +11,5 @@ setup(
                       'suds==0.4', 'spyne==2.10.10', 'lxml==3.3.5','django-cors-headers==0.12', 
                       'django-storages==1.1.8', 'boto==2.28.0', 'django-tastypie-swagger==0.1.2', 
                       'django-otp==0.2.7', 'django-oauth2-provider==0.2.6.1', 'newrelic==2.20.0.17', 
-                      'django-debug-toolbar==1.2.1'],
+                      'django-debug-toolbar==1.2.1', 'django-composite-field'],
 )

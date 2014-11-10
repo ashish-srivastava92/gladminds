@@ -541,6 +541,15 @@ class UserFeedback(ModelAdmin):
     list_display = (
         'reporter', 'assign_to', 'message', 'subject', 'priority', 'type', 'status', 'created_date', 'modified_date')
 
+class SlaAdmin(ModelAdmin):
+    fieldsets = (
+        (None, {
+            'fields': (
+        'priority', ('response_time', 'response_unit'), ('reminder_time', 'reminder_unit'), ('resolution_time', 'resolution_unit'))
+        }),
+        )
+    
+                 
 ##############################################################
 
 admin.site.register(BrandData, BrandAdmin)
@@ -562,4 +571,4 @@ admin.site.register(UploadProductCSV)
 admin.site.register(LogEntry)
 admin.site.register(UserNotification, UserNotificationAdmin)
 admin.site.register(Feedback, UserFeedback)
-admin.site.register(SLA)
+admin.site.register(SLA, SlaAdmin)

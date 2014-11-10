@@ -3,7 +3,9 @@ from django.conf import settings
 from datetime import datetime
 from django.contrib.auth.models import User
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
-    USER_DESIGNATION, RATINGS, ROOT_CAUSE, SLA_PRIORITY
+    USER_DESIGNATION, RATINGS, ROOT_CAUSE, SLA_PRIORITY, TIME_UNIT
+from composite_field.base import CompositeField
+from django.core.exceptions import ValidationError
 
 ##########################################################################
 ########################## ASC Save Form #########################
@@ -164,13 +166,40 @@ class Comments(models.Model):
         app_label = "aftersell"
         verbose_name_plural = "aftersell comment info"
 
+
+class duration(CompositeField):
+    time = models.PositiveIntegerField()
+    unit = models.CharField(max_length=12, choices=TIME_UNIT, verbose_name = 'unit')
+
+
 class SLA(models.Model):
     priority = models.CharField(max_length=12, choices=SLA_PRIORITY, unique=True)
-    response_time = models.TimeField()
-    resolution_time = models.TimeField()
-    reminder_time = models.TimeField()
+    response = duration()
+    reminder = duration()
+    resolution = duration()
+        
+    def get_time_in_seconds(self, time , unit):
+        if unit == 'days':
+            total_time = time * 86400
+        elif unit == 'hrs':
+            total_time = time * 3600
+        else:
+            total_time = time * 60
+        return total_time
+    
+    def clean(self, *args, **kwargs):
+        response_time = self.get_time_in_seconds(self.response_time, self.response_unit)
+        resolution_time = self.get_time_in_seconds(self.resolution_time, self.resolution_unit)
+        reminder_time = self.get_time_in_seconds(self.reminder_time, self.reminder_unit)
+        
+        if reminder_time > response_time and resolution_time > reminder_time:
+            super(SLA, self).clean(*args, **kwargs)
+        else:
+            raise ValidationError("Ensure that Reminder time is greater than Response time and Resolution time is greater than Reminder time")
+            
     
     class Meta:
         app_label = "aftersell"
         verbose_name_plural = "aftersell SLA info"
 
+    

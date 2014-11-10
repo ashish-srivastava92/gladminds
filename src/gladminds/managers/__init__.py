@@ -3,7 +3,8 @@ import datetime
 from gladminds.aftersell.models import common as aftersell_common
 from gladminds.exceptions import DataNotFoundError
 from gladminds.utils import create_context, get_list_from_set,\
-    get_start_and_end_date, set_wait_time, convert_utc_to_local_time
+    get_start_and_end_date, set_wait_time, convert_utc_to_local_time,\
+     get_time_in_seconds
 from gladminds import mail
 from gladminds.sqs_tasks import send_sms
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
@@ -34,7 +35,8 @@ def get_feedback(feedback_id, user):
 def set_due_date(priority, created_date):
     sla_obj = aftersell_common.SLA.objects.get(priority=priority)
     resolution_time = sla_obj.resolution_time
-    total_seconds = (resolution_time.hour * 3600) + (resolution_time.minute * 60) + (resolution_time.second)
+    resolution_unit = sla_obj.resolution_unit
+    total_seconds = get_time_in_seconds(resolution_time, resolution_unit)
     due_date = created_date + datetime.timedelta(seconds=total_seconds)
     return due_date
 
@@ -50,9 +52,6 @@ def save_update_feedback(feedback_obj, data, user,  host):
         previous_assignee = feedback_obj.assign_to
     else:
         assign_number = None
-    if feedback_obj.status == 'Open':
-        feedback_obj.due_date = set_due_date(data['Priority'], feedback_obj.created_date)
-        feedback_obj.save()
     assign = feedback_obj.assign_to
     if assign is None:
         assign_status = True
@@ -79,6 +78,8 @@ def save_update_feedback(feedback_obj, data, user,  host):
         feedback_obj.closed_date = datetime.datetime.now()
     feedback_obj.save()
     if assign_status and feedback_obj.assign_to:
+        feedback_obj.due_date = set_due_date(data['Priority'], feedback_obj.created_date)
+        feedback_obj.save()
         context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL',
                                  feedback_obj)
         if feedback_obj.reporter_email_id:
