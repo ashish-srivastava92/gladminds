@@ -133,7 +133,7 @@ class Feedback(models.Model):
     assign_to = models.ForeignKey(ServiceDeskUser, null=True, blank=True)
     message = models.CharField(max_length=512, null=True, blank=False)
     status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
-    priority = models.CharField(max_length=12, choices=PRIORITY)
+    priority = models.CharField(max_length=12, choices=PRIORITY, default='Low')
     type = models.CharField(max_length=12, choices=FEEDBACK_TYPE)
     subject = models.CharField(max_length=512, null=True, blank=True)
     created_date = models.DateTimeField(null=True, blank=False)

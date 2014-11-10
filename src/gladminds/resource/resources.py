@@ -538,7 +538,7 @@ class GladmindsResources(Resource):
             if with_detail:
                 sa_name = aftersell_common.ServiceAdvisor.objects.filter(phone_number=phone_number)
                 gladminds_feedback_object = aftersell_common.Feedback(reporter=phone_number,
-                                                                priority=sms_dict['priority'] , type=sms_dict['type'], 
+                                                                type=sms_dict['type'], 
                                                                 subject=sms_dict['subject'], message=sms_dict['message'],
                                                                 status="Open", created_date=datetime.now(),
                                                                 role=role, reporter_name=sa_name[0].name
