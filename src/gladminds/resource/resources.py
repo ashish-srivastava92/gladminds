@@ -17,10 +17,7 @@ from gladminds.models import common
 from gladminds.decorator import log_time
 from gladminds.feed import BaseFeed
 from gladminds.aftersell.models import common as aftersell_common
-from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
-    send_coupon_detail_customer, send_coupon, \
-    send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message, \
-    customer_detail_recovery, send_point
+
 from tastypie import fields
 from tastypie.http import HttpBadRequest, HttpUnauthorized
 from tastypie.resources import Resource, ModelResource
@@ -46,7 +43,7 @@ from gladminds.aftersell.models import common as aftersell_common
 from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
     send_brand_sms_customer, send_close_sms_customer, \
-    send_invalid_keyword_message, send_point
+    send_invalid_keyword_message, customer_detail_recovery, send_point
 from gladminds.utils import mobile_format, format_message, get_task_queue, create_context
 from gladminds.feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
@@ -628,9 +625,9 @@ class GladmindsResources(Resource):
             phone_number = utils.get_phone_number_format(phone_number)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_point", {"phone_number":phone_number, "message": message})
+                task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
             else:
-                send_point.delay(phone_number=phone_number, message=message)
+                send_coupon.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return {'status': True, 'message': message}
     
@@ -663,9 +660,9 @@ class GladmindsResources(Resource):
             phone_number = utils.get_phone_number_format(phone_number)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add("send_point", {"phone_number":phone_number, "message": message})
+                task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
             else:
-                send_point.delay(phone_number=phone_number, message=message)
+                send_coupon.delay(phone_number=phone_number, message=message)
             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
         return {'status': True, 'message': message}
 
