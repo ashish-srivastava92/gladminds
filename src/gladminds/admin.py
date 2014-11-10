@@ -181,7 +181,12 @@ class GladMindUserAdmin(ModelAdmin):
         'gladmind_customer_id', 'customer_name', 'phone_number', 'email_id')
     list_display = ('gladmind_customer_id', 'customer_name',
                     'email_id', 'phone_number', 'date_of_registration')
-
+ 
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('user',)
+        form = super(GladMindUserAdmin, self).get_form(request, obj, **kwargs)
+        return form
+    
     def date_of_registration(self, obj):
         return obj.registration_date.strftime("%d %b %Y")
 

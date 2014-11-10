@@ -331,7 +331,7 @@ WSDL_CUSTOMER_REGISTRATION_LOC = TEMPLATE_DIR + '/customer_registration.wsdl'
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
     "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds@hashedin.com", "naveen.shankar@gladminds.co", "support@gladminds.co"],
+    "receiver": ["gladminds@hashedin.com", "naveen.shankar@gladminds.co", "support@gladminds.co","jojibabu.vege@gladminds.co"],
     "subject": "Gladminds Feed Report",
     "body": """""",
 }
