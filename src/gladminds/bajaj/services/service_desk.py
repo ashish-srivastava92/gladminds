@@ -8,6 +8,7 @@ from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.contrib.sites.models import get_current_site
 
+from gladminds.core import utils
 from gladminds.core.utils import get_list_from_set
 from gladminds.bajaj import models as common
 from gladminds.bajaj.services.free_service_coupon import GladmindsResources
@@ -15,6 +16,8 @@ from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE
 from gladminds.managers import get_feedbacks, get_feedback,\
     get_servicedesk_users, save_update_feedback
 from gladminds.core.managers.audit_manager import sms_log
+from gladminds.bajaj.services import message_template as templates
+from gladminds.core.cron_jobs.sqs_tasks import send_coupon
 
 
 gladmindsResources = GladmindsResources()
@@ -60,7 +63,11 @@ def get_feedback_response(request, feedback_id):
         else:
             return HttpResponse()
         
-        
+#TODO: remove it
+def convert_utc_to_local_time(created_date):
+    pass
+
+
 def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=None):
     created_date = feedback_obj.created_date
     try:

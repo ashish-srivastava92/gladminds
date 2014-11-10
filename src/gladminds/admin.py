@@ -2,14 +2,11 @@ import json
 
 from django.contrib.admin.options import ModelAdmin
 from django.contrib.admin.sites import AdminSite
-from suit.admin import SortableTabularInline
-from suit.widgets import EnclosedInput, AutosizedTextarea
+from suit.widgets import EnclosedInput
 from django.forms import ModelForm
-from django.contrib.admin.models import LogEntry
 
-from gladminds.gm.models import Brand, GladmindsUser,\
-    MessageTemplate, EmailTemplate, Industry
-from gladminds.core import utils
+from gladminds.gm.models import Brand,\
+    MessageTemplate, EmailTemplate, Industry, BrandCategory
 
 
 class GladmindsAdminSite(AdminSite):
@@ -155,6 +152,7 @@ class UserFeedback(ModelAdmin):
 
 admin.register(Industry)
 admin.register(Brand)
+admin.register(BrandCategory)
 #admin.register(GladmindsUser, GladmindsUserAdmin)
-admin.register(MessageTemplate, MessageTemplateAdmin)
-admin.register(EmailTemplate, EmailTemplateAdmin)
+admin.register(MessageTemplate)
+admin.register(EmailTemplate)
