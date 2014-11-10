@@ -267,17 +267,3 @@ class ConsumerResource(CustomBaseModelResource):
                 logger.info("[Exception OTP]:{0}".
                             format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
-
-
-class ConsumerResource(CustomBaseModelResource):
-    class Meta:
-        queryset = afterbuy_model.Consumer.objects.all()
-        resource_name = "consumers"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'delete', 'put']
-        always_return_data = True
-        filtering = {
-                     "consumer_id" : ALL
-                     }
-
-
