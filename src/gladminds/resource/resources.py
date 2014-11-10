@@ -47,6 +47,7 @@ from gladminds.utils import mobile_format, format_message, get_task_queue, creat
 from gladminds.feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
 from gladminds.mail import send_feedback_received,send_servicedesk_feedback
+from string import upper
 
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -631,7 +632,8 @@ class GladmindsResources(Resource):
         return {'status': True, 'message': message}
     
     def redeem_point(self, sms_dict, phone_number):
-        product_codes = sms_dict['product_id'].split()
+        
+        product_codes = sms_dict['product_id'].upper().split()
         try:
             mechanic = self.get_mechanic(utils.mobile_format(phone_number))
             if not mechanic:
@@ -644,7 +646,7 @@ class GladmindsResources(Resource):
             for product in products:
                 redeem_points=redeem_points+product.points
             left_points=mechanic[0].total_points-redeem_points
-            if left_points>0:
+            if left_points>=0:
                 total_points=self.update_points(mechanic[0],redeem=redeem_points)
                 message=templates.get_template('SEND_REDEEM_POINT').format(
                                 mechanic_name=mechanic[0].name,
