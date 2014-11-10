@@ -1,20 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import User
-from gladminds.core.base_models import BaseModel, MessageTemplate,\
-           EmailTemplate, SMSLog, EmailLog, AuditLog, Industry, Brand,\
-           ProductType, OTPToken, BrandCategory
+from gladminds.core import base_models
 
 _APP_NAME = 'afterbuy'
 
 
-class Industry(Industry):
+class Industry(base_models.Industry):
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Industries"
 
 
-class Brand(Brand):
+class Brand(base_models.Brand):
     industry = models.ForeignKey(Industry)
 
     class Meta:
@@ -22,7 +20,7 @@ class Brand(Brand):
         verbose_name_plural = "Brands"
 
 
-class BrandCategory(BrandCategory):
+class BrandCategory(base_models.BrandCategory):
     brand = models.ForeignKey(Brand)
 
     class Meta:
@@ -30,7 +28,7 @@ class BrandCategory(BrandCategory):
         verbose_name_plural = "Brand Categories"
 
 
-class ProductType(ProductType):
+class ProductType(base_models.ProductType):
     brand_category = models.ForeignKey(
             BrandCategory, null=True, blank=True)
 
@@ -39,7 +37,7 @@ class ProductType(ProductType):
         verbose_name_plural = "Product Types"
 
 
-class Consumer(BaseModel):
+class Consumer(base_models.BaseModel):
     user = models.OneToOneField(User, primary_key=True)
     consumer_id = models.CharField(
         max_length=50, unique=True)
@@ -77,7 +75,7 @@ class Consumer(BaseModel):
         verbose_name_plural = "Consumers"
 
 
-class OTPToken(OTPToken):
+class OTPToken(base_models.OTPToken):
     user = models.ForeignKey(Consumer)
 
     class Meta:
@@ -85,7 +83,7 @@ class OTPToken(OTPToken):
         verbose_name_plural = "OTPs"
 
 
-class UserNotification(BaseModel):
+class UserNotification(base_models.BaseModel):
     user = models.ForeignKey(Consumer)
     message = models.TextField()
     action = models.TextField(blank=True, null=True)
@@ -112,7 +110,7 @@ class UserProduct(models.Model):
         verbose_name_plural = "User Products"
 
 
-class UserMobileInfo(BaseModel):
+class UserMobileInfo(base_models.BaseModel):
     user = models.ForeignKey(Consumer)
     IMEI = models.CharField(max_length=50, null=True, blank=True, unique=True)
     ICCID = models.CharField(max_length=50, null=True, blank=True)
@@ -128,7 +126,7 @@ class UserMobileInfo(BaseModel):
         verbose_name_plural = "Mobile Details"
 
 
-class ProductInsuranceInfo(BaseModel):
+class ProductInsuranceInfo(base_models.BaseModel):
     product = models.ForeignKey(UserProduct)
     agency_name = models.CharField(max_length=100)
     policy_number = models.CharField(max_length=20, unique=True)
@@ -147,7 +145,7 @@ class ProductInsuranceInfo(BaseModel):
         verbose_name_plural = "Product Insurance Info"
 
 
-class ProductWarrantyInfo(BaseModel):
+class ProductWarrantyInfo(base_models.BaseModel):
     product = models.ForeignKey(UserProduct)
     issue_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank=True)
@@ -160,7 +158,7 @@ class ProductWarrantyInfo(BaseModel):
         verbose_name_plural = "product warranty info"
 
 
-class PollutionCertificate(BaseModel):
+class PollutionCertificate(base_models.BaseModel):
     product = models.ForeignKey(UserProduct)
     pucc_number = models.CharField(max_length=25)
     issue_date = models.DateTimeField(null=True, blank=True)
@@ -172,7 +170,7 @@ class PollutionCertificate(BaseModel):
         verbose_name_plural = "Pollution Certificate"
 
 
-class RegistrationCertificate(BaseModel):
+class RegistrationCertificate(base_models.BaseModel):
     product = models.ForeignKey(UserProduct)
     vehicle_registration_number = models.CharField(max_length=50)
     registration_date = models.DateTimeField(null=True, blank=True)
@@ -191,7 +189,7 @@ class RegistrationCertificate(BaseModel):
         verbose_name_plural = "Registration Certificate"
 
 
-class License(BaseModel):
+class License(base_models.BaseModel):
     product = models.ForeignKey(UserProduct)
     license_number = models.CharField(max_length=50)
     issue_date = models.DateTimeField(null=True)
@@ -204,7 +202,7 @@ class License(BaseModel):
         verbose_name_plural = "license"
 
 
-class Invoice(BaseModel):
+class Invoice(base_models.BaseModel):
     product = models.ForeignKey(UserProduct)
     invoice_number = models.CharField(max_length=50)
     purchase_date = models.DateTimeField(null=True, blank=True)
@@ -219,9 +217,9 @@ class Invoice(BaseModel):
         verbose_name_plural = "invoice"
 
 
-class Support (BaseModel):
+class Support (base_models.BaseModel):
     brand = models.ForeignKey(Brand)
-    brand_category = models.ForeignKey(null=True, blank=True)
+    brand_category = models.ForeignKey(BrandCategory, null=True, blank=True)
     company_name = models.CharField(max_length=255, null=True, blank=True)
     toll_free = models.CharField(max_length=255, blank=True, null=True)
     website = models.CharField(max_length=255, blank=True, null=True)
@@ -238,35 +236,35 @@ class Support (BaseModel):
         verbose_name_plural = "support"
 
 
-class MessageTemplate(MessageTemplate):
+class MessageTemplate(base_models.MessageTemplate):
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Message Template"
 
 
-class EmailTemplate(EmailTemplate):
+class EmailTemplate(base_models.EmailTemplate):
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Email Template"
 
 
-class SMSLog(SMSLog):
+class SMSLog(base_models.SMSLog):
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "SMS Log"
 
 
-class EmailLog(EmailLog):
+class EmailLog(base_models.EmailLog):
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Email Log"
 
 
-class AuditLog(AuditLog):
+class AuditLog(base_models.AuditLog):
     user = models.ForeignKey(Consumer)
 
     class Meta:
