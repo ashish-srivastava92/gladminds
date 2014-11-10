@@ -29,24 +29,27 @@ class DjangoUserResources(ModelResource):
     class Meta:
         queryset = User.objects.all()
         resource_name = 'django'
-        excludes = ['email', 'password', 'is_active', 'is_staff', 'is_superuser']
+        excludes = ['password', 'is_active', 'is_staff', 'is_superuser']
         authorization = Authorization()
-        detail_allowed_methods = ['get']
+        detail_allowed_methods = ['get','post', 'delete', 'put']
         always_return_data = True
         filtering = {
             'username': ALL,
         }
 
+class ConsumerResource(CustomBaseModelResource):
 
-class UserResources(CustomBaseModelResource):
     user = fields.ForeignKey(DjangoUserResources, 'user', null=True, blank=True, full=True)
 
     class Meta:
         queryset = afterbuy_model.Consumer.objects.all()
-        resource_name = 'user'
+        resource_name = "users"
         authorization = Authorization()
-        detail_allowed_methods = ['get']
-        authentication = AccessTokenAuthentication()
+        detail_allowed_methods = ['get', 'post', 'delete', 'put']
+        always_return_data = True
+        filtering = {
+                     "consumer_id" : ALL
+                     }
 
     def prepend_urls(self):
         return [
