@@ -295,7 +295,7 @@ def send_point(*args, **kwargs):
         set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
-        send_coupon.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+        send_point.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         audit_log(status=status, reciever=phone_number, message=message)
 
