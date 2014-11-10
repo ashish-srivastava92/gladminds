@@ -20,7 +20,7 @@ from gladminds.aftersell.models import common as aftersell_common
 from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
     send_brand_sms_customer, send_close_sms_customer, send_invalid_keyword_message, \
-    customer_detail_recovery
+    customer_detail_recovery, send_point
 from tastypie import fields
 from tastypie.http import HttpBadRequest, HttpUnauthorized
 from tastypie.resources import Resource, ModelResource
