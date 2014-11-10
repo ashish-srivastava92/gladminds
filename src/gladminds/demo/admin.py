@@ -2,7 +2,7 @@ from django.contrib.admin import AdminSite
 from django.contrib.auth.models import User
 
 from gladminds.demo.models import UserProfile, Dealer, AuthorizedServiceCenter,\
-ServiceAdvisor, ProductData, CouponData, EmailTemplate, MessageTemplate
+ServiceAdvisor, ProductData, CouponData, MessageTemplate, EmailTemplate, BrandCategory
 
 
 class DemoAdminSite(AdminSite):
@@ -20,7 +20,7 @@ brand_admin.register(AuthorizedServiceCenter)
 # brand_admin.register(CouponData)
 # brand_admin.register(EmailTemplate, EmailTemplateAdmin)
 # brand_admin.register(MessageTemplate, MessageTemplateAdmin)
-
+brand_admin.register(BrandCategory)
 brand_admin.register(ServiceAdvisor)
 brand_admin.register(ProductData)
 brand_admin.register(CouponData)

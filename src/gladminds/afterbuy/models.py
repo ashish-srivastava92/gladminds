@@ -1,10 +1,8 @@
-from datetime import datetime
-
 from django.db import models
 from django.contrib.auth.models import User
 from gladminds.core.base_models import BaseModel, MessageTemplate,\
-           EmailTemplate, SMSLog, EmailLog, AuditLog, Industry, Brand,ProductType,\
-    OTPToken
+           EmailTemplate, SMSLog, EmailLog, AuditLog, Industry, Brand,\
+           ProductType, OTPToken, BrandCategory
 
 _APP_NAME = 'afterbuy'
 
@@ -24,7 +22,17 @@ class Brand(Brand):
         verbose_name_plural = "Brands"
 
 
+class BrandCategory(BrandCategory):
+    brand = models.ForeignKey(Brand)
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Brand Categories"
+
+
 class ProductType(ProductType):
+    brand_category = models.ForeignKey(
+            BrandCategory, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -80,7 +88,7 @@ class OTPToken(OTPToken):
 class UserNotification(BaseModel):
     user = models.ForeignKey(Consumer)
     message = models.TextField()
-    action = models.TextField(blank=True,null=True)
+    action = models.TextField(blank=True, null=True)
     notification_read = models.BooleanField(default=False)
 
     class Meta:
@@ -127,11 +135,11 @@ class ProductInsuranceInfo(BaseModel):
     premium = models.FloatField(null=True, blank=True)
     agency_contact = models.CharField(
         max_length=25, blank=True, null=True)
-    insurance_type = models.CharField(max_length=15,null=True, blank=True)
-    nominee = models.CharField(max_length=15,blank=True,null=True)
+    insurance_type = models.CharField(max_length=15, null=True, blank=True)
+    nominee = models.CharField(max_length=15, blank=True, null=True)
     issue_date = models.DateTimeField(null=True, blank=True)
-    expiry_date = models.DateTimeField(null=True, blank= True)
-    vehicle_value = models.FloatField(null=True, blank= True)
+    expiry_date = models.DateTimeField(null=True, blank=True)
+    vehicle_value = models.FloatField(null=True, blank=True)
     image_url = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
@@ -186,9 +194,9 @@ class RegistrationCertificate(BaseModel):
 class License(BaseModel):
     product = models.ForeignKey(UserProduct)
     license_number = models.CharField(max_length=50)
-    issue_date = models.DateTimeField(null=True, blank=False)
-    expiry_date = models.DateTimeField(null=True, blank= False)
-    blood_group = models.CharField(max_length=50)
+    issue_date = models.DateTimeField(null=True)
+    expiry_date = models.DateTimeField(null=True)
+    blood_group = models.CharField(max_length=50, null=True, blank=True)
     image_url = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
@@ -199,11 +207,11 @@ class License(BaseModel):
 class Invoice(BaseModel):
     product = models.ForeignKey(UserProduct)
     invoice_number = models.CharField(max_length=50)
-    purchase_date = models.DateTimeField(null=True, blank=False)
+    purchase_date = models.DateTimeField(null=True, blank=True)
     dealer_name = models.CharField(max_length=50)
     dealer_contact = models.CharField(
         max_length=25, blank=True, null=True)
-    amount = models.FloatField(null=True, blank= True)
+    amount = models.FloatField(null=True, blank=True)
     image_url = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
@@ -212,13 +220,18 @@ class Invoice(BaseModel):
 
 
 class Support (BaseModel):
-    product = models.ForeignKey(UserProduct)
+    brand = models.ForeignKey(Brand)
+    brand_category = models.ForeignKey(null=True, blank=True)
+    company_name = models.CharField(max_length=255, null=True, blank=True)
     toll_free = models.CharField(max_length=255, blank=True, null=True)
-    service_center_name = models.CharField(max_length=25, blank=True, null=True)
-    service_center_number = models.CharField(max_length=255, blank=True, null=True)
-    feedback_form = models.CharField(max_length=255, blank=True, null=True)
-    service_center_email_id = models.CharField(max_length=25, blank=True, null=True)
-    service_center_website = models.CharField(max_length=255, blank=True, null=True)
+    website = models.CharField(max_length=255, blank=True, null=True)
+    email_id = models.CharField(max_length=25, blank=True, null=True)
+
+#     service_center_name = models.CharField(max_length=25, blank=True, null=True)
+#     service_center_number = models.CharField(max_length=255, blank=True, null=True)
+#     feedback_form = models.CharField(max_length=255, blank=True, null=True)
+#     service_center_email_id = models.CharField(max_length=25, blank=True, null=True)
+#     service_center_website = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         app_label = _APP_NAME
