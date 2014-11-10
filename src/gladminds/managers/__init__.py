@@ -4,7 +4,7 @@ from gladminds.aftersell.models import common as aftersell_common
 from gladminds.exceptions import DataNotFoundError
 from gladminds.utils import create_context, get_list_from_set,\
     get_start_and_end_date, set_wait_time, convert_utc_to_local_time,\
-    get_seconds
+     get_time_in_seconds
 from gladminds import mail
 from gladminds.sqs_tasks import send_sms
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
@@ -36,7 +36,7 @@ def set_due_date(priority, created_date):
     sla_obj = aftersell_common.SLA.objects.get(priority=priority)
     resolution_time = sla_obj.resolution_time
     resolution_unit = sla_obj.resolution_unit
-    total_seconds = get_seconds(resolution_time, resolution_unit)
+    total_seconds = get_time_in_seconds(resolution_time, resolution_unit)
     due_date = created_date + datetime.timedelta(seconds=total_seconds)
     return due_date
 

@@ -178,7 +178,7 @@ class SLA(models.Model):
     reminder = duration()
     resolution = duration()
         
-    def get_total_time(self, time , unit):
+    def get_time_in_seconds(self, time , unit):
         if unit == 'days':
             total_time = time * 86400
         elif unit == 'hrs':
@@ -188,9 +188,9 @@ class SLA(models.Model):
         return total_time
     
     def clean(self, *args, **kwargs):
-        response_time = self.get_total_time(self.response_time, self.response_unit)
-        resolution_time = self.get_total_time(self.resolution_time, self.resolution_unit)
-        reminder_time = self.get_total_time(self.reminder_time, self.reminder_unit)
+        response_time = self.get_time_in_seconds(self.response_time, self.response_unit)
+        resolution_time = self.get_time_in_seconds(self.resolution_time, self.resolution_unit)
+        reminder_time = self.get_time_in_seconds(self.reminder_time, self.reminder_unit)
         
         if reminder_time > response_time and resolution_time > reminder_time:
             super(SLA, self).clean(*args, **kwargs)

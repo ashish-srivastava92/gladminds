@@ -521,7 +521,7 @@ def get_state_city(details, address):
 
     return details
 
-def get_seconds(time, unit):
+def get_time_in_seconds(time, unit):
     if unit == 'days':
         total_seconds = time * 86400
     elif unit == 'hrs':
