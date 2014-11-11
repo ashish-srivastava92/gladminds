@@ -17,7 +17,8 @@ urlpatterns = patterns('',
 )
 
 urlpatterns += patterns('gladminds',
-    (r'', include(api_v1.urls)),
+    url(r'', include(api_v1.urls)),
+    url(r'api/doc/', include('gladminds.core.api_docs.swagger_urls', namespace='tastypie_swagger')),
     url(r'^', include(admin.urls)),
 )
 
