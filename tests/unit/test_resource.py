@@ -13,9 +13,7 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
     def setUp(self):
         super(GladmindsResourcesTest, self).setUp()
 
-
-        brand_obj = self.get_brand_obj(brand_id='brand001', brand_name='bajaj')
-        product_type_obj = self.get_product_type_obj(brand_id=brand_obj, product_name='DISCO120', product_type='BIKE')
+        product_type_obj = self.get_product_type_obj(product_name='DISCO120', product_type='BIKE')
         dealer_obj = self.get_delear_obj(dealer_id='DEALER001')
         customer_obj = self.get_customer_obj(phone_number='+919999999')
         product_obj = self.get_product_obj(vin="VINXXX001", product_type=product_type_obj, dealer_id=dealer_obj\
