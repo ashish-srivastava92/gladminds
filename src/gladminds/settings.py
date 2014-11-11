@@ -464,3 +464,10 @@ SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                           'working_key': '2uj6gnnnlbx37x436cppq87176j660w9',
                           'sender_id': 'GLADMS'}
                   }
+
+ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},
+          'demo': {'user': 'demo', 'password': 'demo'},
+          'afterbuy': {'user': 'afterbuy', 'password': 'afterbuy'},
+          'gladminds': {'user': 'gladminds', 'password': 'gladminds',
+                        'database': 'default'}
+          }
