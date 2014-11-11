@@ -314,8 +314,7 @@ def service_desk(request, servicedesk):
                                           'active_menu': servicedesk,
                                           "data": data, 'groups': groups,
                      "status": get_list_from_set(aftersell_common.FEEDBACK_STATUS),
-                     "types": get_list_from_set(aftersell_common.FEEDBACK_TYPE),
-                     "priorities": get_list_from_set(aftersell_common.PRIORITY)})
+                     "types": get_list_from_set(aftersell_common.FEEDBACK_TYPE)})
     elif request.method == 'POST':
         function_mapping = {
             'helpdesk': save_help_desk_data

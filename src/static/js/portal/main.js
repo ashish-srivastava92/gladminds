@@ -433,13 +433,14 @@ function rootCause(status){
         resolution = $('.resolution'),
         reason = $('.root-cause'),
         ticketResolution = $('.ticket-resolution'),
-        assignee = $('.assignee');
-	
+        assignee = $('.assignee'),
+        comments = $('.comments');
 	assignee.attr('required', false);
 	rootCauseClass.addClass('hide');
 	resolution.addClass('hide');
 	reason.attr('required', false);
 	ticketResolution.attr('required', false);
+	comments.attr('required', false);
 	
 	if (status === 'Resolved'){
 		rootCauseClass.removeClass('hide');
@@ -453,6 +454,7 @@ function rootCause(status){
 	
 	if (status === 'Pending'){
 		assignee.val('');
+		comments.attr('required', true);
 	}
 	
 }
@@ -476,3 +478,4 @@ function change_status(){
     });
 	
 }
+
