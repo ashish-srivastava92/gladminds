@@ -453,7 +453,7 @@ function rootCause(status){
 	}
 	
 	if (status === 'Pending'){
-		assignee.val('');
+		document.getElementById('assignee').value='Assign to reporter';
 		comments.attr('required', true);
 	}
 	
@@ -471,9 +471,9 @@ function showMessage(id){
 
 function change_status(){
 	var status = window.location.search.split('?status=')[1];
-    $('#status').val(status);
-    $('#status').change(function() {
-    	status = $('#status').val();
+    $('.status').val(status);
+    $('.status').change(function() {
+    	status = $('.status').val();
     	window.location.href = window.location.pathname + '?status='+status;
     });
 	

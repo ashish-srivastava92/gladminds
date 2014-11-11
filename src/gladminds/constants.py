@@ -29,7 +29,7 @@ ACTIVE_MENU = {'asc' : 'register_asc',
 FEEDBACK_STATUS = (('Open', 'Open'),
                    ('Closed', 'Closed'),
                    ('Resolved', 'Resolved'),
-                   ('Progress', 'Progress'),
+                   ('In-Progress', 'In-Progress'),
                    ('Pending', 'Pending'))
 
 PRIORITY = (('Low', 'Low'),
@@ -48,8 +48,7 @@ TIME_UNIT = (('mins', 'mins'),
 
 FEEDBACK_TYPE = (('Problem', 'Problem'),
                  ('Question', 'Question'),
-                 ('Feature', 'Feature'),
-                 ('Request', 'Request'),
+                 ('Feature-Request', 'Feature-Request'),
                  ('Suggestion', 'Suggestion'),)
 
 USER_DESIGNATION = (('SDO', 'Owner'),
