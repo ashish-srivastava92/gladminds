@@ -56,7 +56,7 @@
 							<div class="form-group">
                     			<label class="col-sm-4 control-label" for="Status">Status</label>
                        			<div class="col-sm-8">
-	                    			<select class="form-control" name="status" id ="status" onchange="rootCause(this.options[this.selectedIndex].value)" >
+	                    			<select class="form-control " name="status" onchange="rootCause(this.options[this.selectedIndex].value)" >
                             			{% for type in FEEDBACK_STATUS %}
                                 			<option {% if type == feedback.status %} selected {% endif %} value="{{type}}">{{type}}</option>
                                 		{% endfor %}

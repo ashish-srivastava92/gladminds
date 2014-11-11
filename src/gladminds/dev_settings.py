@@ -15,8 +15,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gladmindsdb',
-        'USER': 'gladminds',
-        'PASSWORD': 'gladminds123',
+        'USER': 'root',
+        'PASSWORD': 'hasher123',
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }
