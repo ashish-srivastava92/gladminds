@@ -17,3 +17,11 @@ class BrandResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
 
+
+class BrandProductCategoryResource(CustomBaseModelResource):
+    class Meta:
+        queryset = afterbuy_models.BrandProductCategory.objects.all()
+        resource_name = "brand_category"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'delete', 'put']
+        always_return_data = True
