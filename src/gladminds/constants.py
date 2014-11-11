@@ -12,10 +12,11 @@ GROUP_MAPPING = {'dealers' : '/aftersell/dealer/login',
 
 USER_GROUPS = ['dealers', 'ascs', 'dascs', 'SDO', 'SDM']
 
-REDIRECT_USER = {'dealers' : '/aftersell/register/sa',
-                 'ascs' : '/aftersell/register/asc',
-                 'SDO' : '/aftersell/servicedesk/',
-                 'SDM' : '/aftersell/servicedesk/'}
+REDIRECT_USER = {'dealers': '/aftersell/register/asc',
+                'ascs': '/aftersell/register/sa',
+                'SDO': '/aftersell/servicedesk/',
+                'SDM': '/aftersell/servicedesk/'}
+
 
 TEMPLATE_MAPPING = {'asc' :'portal/asc_registration.html',
                     'sa' :'portal/sa_registration.html',

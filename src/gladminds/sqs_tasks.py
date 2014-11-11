@@ -22,7 +22,7 @@ AUDIT_ACTION = 'SEND TO QUEUE'
 This task send sms to customer on customer registration
 """
 
-def send_sms(**kwargs):
+def set_gateway(**kwargs):
     sms_client = kwargs.get('sms_client', None)
     logger.info('sms_client is {0}'.format(sms_client))
     sms_client_gateway = load_gateway(sms_client)
@@ -35,7 +35,7 @@ def send_registration_detail(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_registration_detail.retry(
@@ -54,7 +54,7 @@ def customer_detail_recovery(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         customer_detail_recovery.retry(
@@ -74,7 +74,7 @@ def send_service_detail(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_service_detail.retry(
@@ -93,7 +93,7 @@ def send_coupon_validity_detail(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_validity_detail.retry(
@@ -113,7 +113,7 @@ def send_coupon_detail_customer(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_detail_customer.retry(
@@ -132,7 +132,7 @@ def send_reminder_message(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_reminder_message.retry(
@@ -151,7 +151,7 @@ def send_coupon_close_message(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_close_message.retry(
@@ -169,7 +169,7 @@ def send_otp(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_otp.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
@@ -183,7 +183,7 @@ def send_coupon(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
@@ -224,7 +224,7 @@ def send_close_sms_customer(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_close_sms_customer.retry(
@@ -239,7 +239,7 @@ def send_brand_sms_customer(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_brand_sms_customer.retry(
@@ -258,7 +258,7 @@ def send_invalid_keyword_message(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_invalid_keyword_message.retry(
@@ -278,11 +278,26 @@ def send_on_product_purchase(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        send_sms(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_on_product_purchase.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        audit_log(status=status, reciever=phone_number, message=message)
+        
+@shared_task
+def send_point(*args, **kwargs):
+    status = "success"
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        logger.info("request for sending sms received {0} message {1}".format(phone_number, message))
+        set_gateway(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        logger.error("[Eception:send_point]:{0}".format(ex))
+        send_point.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         audit_log(status=status, reciever=phone_number, message=message)
 
@@ -490,6 +505,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
 
               "mark_feeback_to_closed" : mark_feeback_to_closed,
 
-              "customer_detail_recovery": customer_detail_recovery
+              "customer_detail_recovery": customer_detail_recovery,
+              
+              "send_point": send_point
 
               }

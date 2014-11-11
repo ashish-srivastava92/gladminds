@@ -113,7 +113,7 @@ def get_customer_info(data):
             data['groups'][0] = "Dealer"
         else:
             data['groups'][0] = "ASC"
-        data = get_email_template('VIN DOES NOT EXIST').body.format(data['current_user'], data['vin'], data['groups'][0])
+        data = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
         send_mail_when_vin_does_not_exist(data=data)
         return {'message': message, 'status': 'fail'}
     if product_obj.product_purchase_date:
@@ -440,6 +440,7 @@ def get_updated_customer_id(customer_id):
     return customer_id
 
 def service_advisor_search(data):
+    print "1111111", data
     dealer_data = aftersell_common.RegisteredDealer.objects.get(
                 dealer_id=data['current_user'])
     sa_phone_number = mobile_format(data['phone_number'])

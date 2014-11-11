@@ -17,7 +17,8 @@ ALLOWED_HOSTS = ['*']
 
 ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
                     'service', 'check': 'a', 'close': 'c', 'brand': 'brand',
-                    'service_desk': 'sd', 'customer_detail_recovery': 'r'}
+                    'service_desk': 'sd', 'customer_detail_recovery': 'r',
+                    'accumulate_point':'ac', 'redeem_point':'rd'}
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -51,8 +52,7 @@ SUIT_CONFIG = {
     'SHOW_REQUIRED_ASTERISK': True,
     'MENU': (
         {'app': 'gladminds', 'label': 'Data', 'icon': ' icon-folder-open',
-         'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
-                    {'model': 'dispatchedproduct',
+         'models': ({'model': 'dispatchedproduct',
                      'label': 'Feed -> Product Dispatch'},
                     {'model': 'productdata',
                      'label': 'Feed -> Product Purchase'},
@@ -68,12 +68,6 @@ SUIT_CONFIG = {
                     'messagetemplate', 'emailtemplate', 'gladmindusers',)},
         {'app': 'aftersell', 'label': 'AfterSell', 'icon': ' icon-folder-open',
          'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
-                    {'model': 'dispatchedproduct',
-                     'label': 'Feed -> Product Dispatch'},
-                    {'model': 'productdata',
-                     'label': 'Feed -> Product Purchase'},
-                    {'model': 'coupondata',
-                     'label': 'Feed -> Coupon Redemption'},
                     {'model': 'ascsaveform',
                      'label': 'Save Form -> ASC'},
                     {'model': 'auditlog', 'label': 'Audit Log'},
@@ -82,6 +76,10 @@ SUIT_CONFIG = {
                     {'model': 'feedback',
                      'label': 'Help Desk'}, 'uploadproductcsv',
                     'messagetemplate', 'emailtemplate', 'gladmindusers',)},
+        {'app': 'gladminds', 'label': 'Loyalty', 'icon': ' icon-folder-open',
+         'models': ({'model': 'mechanic', 'label': 'Mechanic'},
+				    {'model': 'sparepart', 'label': 'Spare Part'},
+				    {'model': 'productcatalog', 'label': 'Product Catalog'},)},
         {'app': 'afterbuy', 'label': 'AfterBuy', 'icon': ' icon-folder-open',
          'models': ({'model': 'usernotification', 'label': 'notification'},)},
         {'app': 'djcelery', 'label': 'Job Management', 'icon': 'icon-tasks'})
@@ -331,7 +329,7 @@ WSDL_CUSTOMER_REGISTRATION_LOC = TEMPLATE_DIR + '/customer_registration.wsdl'
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
     "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds@hashedin.com", "naveen.shankar@gladminds.co"],
+    "receiver": ["gladminds@hashedin.com", "naveen.shankar@gladminds.co", "support@gladminds.co","jojibabu.vege@gladminds.co"],
     "subject": "Gladminds Feed Report",
     "body": """""",
 }
