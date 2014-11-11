@@ -20,7 +20,7 @@ class Brand(base_models.Brand):
         verbose_name_plural = "Brands"
 
 
-class BrandCategory(base_models.BrandCategory):
+class BrandProductCategory(base_models.BrandProductCategory):
     brand = models.ForeignKey(Brand)
 
     class Meta:
@@ -30,7 +30,7 @@ class BrandCategory(base_models.BrandCategory):
 
 class ProductType(base_models.ProductType):
     brand_category = models.ForeignKey(
-            BrandCategory, null=True, blank=True)
+            BrandProductCategory, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -219,7 +219,7 @@ class Invoice(base_models.BaseModel):
 
 class Support (base_models.BaseModel):
     brand = models.ForeignKey(Brand)
-    brand_category = models.ForeignKey(BrandCategory, null=True, blank=True)
+    brand_product_category = models.ForeignKey(BrandProductCategory, null=True, blank=True)
     company_name = models.CharField(max_length=255, null=True, blank=True)
     toll_free = models.CharField(max_length=255, blank=True, null=True)
     website = models.CharField(max_length=255, blank=True, null=True)

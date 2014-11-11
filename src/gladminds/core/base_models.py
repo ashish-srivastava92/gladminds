@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from django.db import models
-from django.conf import settings
 
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, RATINGS
 from gladminds.core.managers import user_manager
@@ -59,7 +58,7 @@ class Brand(BaseModel):
         verbose_name_plural = "Brand Data"
 
 
-class BrandCategory(BaseModel):
+class BrandProductCategory(BaseModel):
     name = models.CharField(max_length=250)
     description = models.TextField(null=True, blank=True)
 

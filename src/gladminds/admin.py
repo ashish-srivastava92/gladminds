@@ -6,7 +6,7 @@ from suit.widgets import EnclosedInput
 from django.forms import ModelForm
 
 from gladminds.gm.models import Brand,\
-    MessageTemplate, EmailTemplate, Industry, BrandCategory
+    MessageTemplate, EmailTemplate, Industry, BrandProductCategory
 
 
 class GladmindsAdminSite(AdminSite):
@@ -152,7 +152,7 @@ class UserFeedback(ModelAdmin):
 
 admin.register(Industry)
 admin.register(Brand)
-admin.register(BrandCategory)
+admin.register(BrandProductCategory)
 #admin.register(GladmindsUser, GladmindsUserAdmin)
 admin.register(MessageTemplate)
 admin.register(EmailTemplate)

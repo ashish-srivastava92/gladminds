@@ -23,7 +23,7 @@ class ServiceType(base_models.BaseModel):
 
 
 class Service(base_models.BaseModel):
-    type = models.ForeignKey(ServiceType)
+    service_type = models.ForeignKey(ServiceType)
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
 
@@ -41,7 +41,7 @@ class Brand(base_models.Brand):
         verbose_name_plural = "Brands"
 
 
-class BrandCategory(base_models.BrandCategory):
+class BrandProductCategory(base_models.BrandProductCategory):
     brand = models.ForeignKey(Brand)
 
     class Meta:

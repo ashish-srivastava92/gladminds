@@ -7,8 +7,10 @@ from gladminds.gm.apis import brand_apis
 
 api_v1 = Api(api_name="v1")
 api_v1.register(brand_apis.IndustryResource())
-api_v1.register(brand_apis.BrandCategoryResource())
+api_v1.register(brand_apis.BrandProductCategoryResource())
 api_v1.register(brand_apis.BrandResource())
+api_v1.register(brand_apis.ServiceResource())
+api_v1.register(brand_apis.ServiceTypeResource())
 
 
 urlpatterns = patterns('',

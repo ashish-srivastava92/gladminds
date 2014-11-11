@@ -6,7 +6,7 @@ from gladminds.core import base_models
 _APP_NAME = 'demo'
 
 
-class BrandCategory(base_models.BrandCategory):
+class BrandProductCategory(base_models.BrandProductCategory):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Brand Categories"
@@ -68,8 +68,8 @@ class Comments(base_models.Comments):
 
 
 class ProductType(base_models.ProductType):
-    brand_category = models.ForeignKey(
-            BrandCategory, null=True, blank=True, related_name='demo_product_type')
+    brand_product_category = models.ForeignKey(
+            BrandProductCategory, null=True, blank=True, related_name='demo_product_type')
 
     class Meta:
         app_label = _APP_NAME
