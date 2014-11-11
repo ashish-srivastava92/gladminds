@@ -35,6 +35,8 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
         user_servicedesk_owner.save()
         user_group = Group.objects.create(name='SDO')
         user_group.save()
+        sla = aftersell_common.SLA(priority='Low', response_time =10, response_unit='mins', resolution_time=10, resolution_unit='days', reminder_time=2, reminder_unit='hrs')
+        sla.save()
         user_servicedesk_owner.groups.add(user_group)
         dealer_obj = self.get_delear_obj(dealer_id='gladminds')
         service_advisor = self.get_service_advisor_obj(service_advisor_id='SA001Test', name='UMOTO', phone_number='+914444861111')
@@ -43,26 +45,23 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
         self.get_dealer_service_advisor_obj(dealer_id=dealer_obj, service_advisor_id=service_advisor1, status='Y')
         data = {'username':'gladminds', 'password':'gladminds'}  
         response = client.post("/aftersell/dealer/login/", data=data)
-        data = {"messsage":"test","priority":"High","advisorMobile":"+919999999998",
+        data = {"messsage":"test","advisorMobile":"+919999999998",
                 "type":"Problem", "subject":"hello",'comments':"sssss", "rootcause":"ssss", "resolution":"ssssss" }
         response = client.post("/aftersell/servicedesk/helpdesk", data=data)
         self.assertEqual(response.status_code, 200)
    
-    @unittest.skip("Skipping Adding this functionality in future")
     def test_new_dealer(self):
         data = {'username':'gladminds', 'password':'gladminds'}  
         response = client.post("/aftersell/dealer/login/", data=data)
         self.assertEqual(response.status_code, 302)
     
-    @unittest.skip("Skipping Adding this functionality in future")
     def test_send_servicedesk_feedback(self):
         log_len_after = logs.AuditLog.objects.all()
         feedback_obj = aftersell_common.Feedback.objects.all()
-        self.assertEqual(feedback_obj[0].priority, "High")
+        self.assertEqual(feedback_obj[0].type, "Problem")
         self.assertEqual(len(log_len_after),1)
         self.assertEqual(log_len_after[0].reciever, "9999999998")
     
-    @unittest.skip("Skipping Adding this functionality in future") 
     def test_get_feedback_sdo(self):
         data = {'username':'sdo', 'password':'123'}  
         response = client.post("/aftersell/desk/login/", data=data)
@@ -70,7 +69,6 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
         response = client.get("/aftersell/servicedesk/")
         self.assertEqual(response.status_code, 200)
     
-    @unittest.skip("Skipping Adding this functionality in future")  
     def test_get_feedback_sdm(self):
         data = {'username':'sdoo', 'password':'123'}  
         response = client.post("/aftersell/desk/login/", data=data)
@@ -81,19 +79,18 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
         response = client.get("/aftersell/servicedesk/")
         self.assertEqual(response.status_code, 200)    
             
-    @unittest.skip("Skipping Adding this functionality in future")   
     def test_sms_email_assignee_after_feedback_assigned(self):
         log_len_after = logs.AuditLog.objects.all()
         user_servicedesk_info = User.objects.filter(username='sdo')
         service_desk = aftersell_common.ServiceDeskUser(user = user_servicedesk_info[0], phone_number = '+917760814041', email_id = 'srv.sngh@gmail.com',  designation = 'SDM' )
         service_desk.save()
-        data = {"Assign_To":"+917760814041","status":"Open","Priority":"High","comments":"ssss", "rootcause":"ssss", "resolution":"ssssss","due_date":'12/08/1922', 'reporter_status':False}
+        data = {"Assign_To":"+917760814041","status":"Open","Priority":"Low","comments":"ssss", "rootcause":"ssss", "resolution":"ssssss", 'reporter_status':False}
         response = client.post("/aftersell/feedbackdetails/1/", data=data)
+        print "----------------------------------------------------------",response.status_code
         log_len_after = logs.AuditLog.objects.all()
         self.assertEqual(log_len_after[1].reciever, "9999999998")
         self.assertEqual(log_len_after[2].reciever , "7760814041")
         
-    @unittest.skip("Skipping Adding this functionality in future")  
     def test_sms_email_after_resolved(self):
         log_len_after = logs.AuditLog.objects.all()
         user_servicedesk_info = User.objects.filter(username='sdo')
@@ -102,14 +99,13 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
         user_servicedesk_info = User.objects.filter(username='sdoo')
         service_desk = aftersell_common.ServiceDeskUser(user = user_servicedesk_info[0], phone_number = '+919727071081', email_id = 'srv.sngh@gmail.com',  designation = 'SDM' )
         service_desk.save()
-        data = {"Assign_To":"+917760814041","status":"Resolved","Priority":"High","comments":"ssss", "rootcause":"ssss", "resolution":"ssssss","due_date":'12/08/1922', 'reporter_status':False}
+        data = {"Assign_To":"+917760814041","status":"Resolved","Priority":"Low","comments":"ssss", "rootcause":"ssss", "resolution":"ssssss",  'reporter_status':False}
         response = client.post("/aftersell/feedbackdetails/1/", data=data)
         log_len_after = logs.AuditLog.objects.all()
         self.assertEqual(log_len_after[1].reciever, "9999999998")
         self.assertEqual(log_len_after[2].reciever , "9999999998") 
         self.assertEqual(log_len_after[3].reciever , "7760814041")   
         
-    @unittest.skip("Skipping Adding this functionality in future")   
     def test_sms_email_after_status_resolved_not_assign_to_anyone(self):
         log_len_after = logs.AuditLog.objects.all()
         user_servicedesk_info = User.objects.filter(username='sdo')
@@ -123,7 +119,6 @@ class TestServiceDesk_Flow(GladmindsResourceTestCase):
         log_len_after = logs.AuditLog.objects.all()
         self.assertEqual(log_len_after[1].reciever, "9999999998")
         
-    @unittest.skip("Skipping Adding this functionality in future")       
     def test_updated_feedback(self):
         log_len_after = logs.AuditLog.objects.all()
         data = {"Assign_To":'',"status":"Closed","Priority":"High","comments":"ssss","rootcause":"ssss", "resolution":"ssssss","due_date":'12/08/1922', 'reporter_status':False}
