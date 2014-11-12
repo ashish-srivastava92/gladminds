@@ -7,6 +7,7 @@ from gladminds.bajaj.feeds import webservice
 urlpatterns = patterns('',
     url(r'^site-info/$', 'gladminds.bajaj.views.site_info', name='site_info'),
     url(r'', include(brand_admin.urls)),
+    url(r'api/doc/', include('gladminds.core.api_docs.swagger_urls', namespace='tastypie_swagger')),
     url(r'^api/v1/mock-feed/$', 'gladminds.bajaj.feeds.webservice.mock_service'),
     url(r'^api/v1/mock-feed/\?wsdl$', 'gladminds.bajaj.feeds.webservice.mock_service'),
     url(r'^api/v1/feed/\?wsdl$', 'gladminds.bajaj.feeds.webservice.all_service'),

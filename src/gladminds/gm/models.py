@@ -34,7 +34,8 @@ class Service(base_models.BaseModel):
 
 class Brand(base_models.Brand):
     industry = models.ForeignKey(Industry)
-    services = models.ManyToManyField(Service, through="BrandService")
+    services = models.ManyToManyField(Service, through="BrandService",
+                                      null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME

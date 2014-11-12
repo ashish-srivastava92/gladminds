@@ -19,5 +19,6 @@ api_v1.register(brand_apis.BrandResource())
 
 urlpatterns = patterns('',
     (r'', include(api_v1.urls)),
-    url(r'^', include(brand_admin.urls))
+    url(r'api/doc/', include('gladminds.core.api_docs.swagger_urls', namespace='tastypie_swagger')),
+    (r'^', include(brand_admin.urls))
 )
