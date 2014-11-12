@@ -39,7 +39,7 @@ from gladminds.aftersell.models import common as aftersell_common
 from gladminds.scheduler import SqsTaskQueue
 from gladminds.resource.resources import GladmindsResources
 from gladminds.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
-    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU
+    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS
 from django.views.decorators.http import require_http_methods
 
 gladmindsResources = GladmindsResources()
@@ -576,7 +576,7 @@ def brand_details(requests, role=None):
             'sa': get_sa_info,
             'customers': get_customers_info,
             'active-asc': get_active_asc_info,
-            'not-active-asc': get_not_active_asc_info,
+            'not-active-asc': get_not_active_asc_info
         }
     get_data = requests.GET
     data = function_mapping[role](data, limit, offset , data_dict, data_list)
@@ -639,10 +639,9 @@ def get_customers_info(data, limit, offset, data_dict, data_list):
     return data_dict
 
 
-
+ 
 def get_active_asc_info(data, limit, offset, data_dict, data_list):
     '''get city and state from parameter'''
-    active_asc_count = 0
     asc_details = get_asc_data(data)
     active_asc_list = asc_details.filter(~Q(date_joined=F('last_login')))
     active_ascs = active_asc_list.values_list('username', flat=True)
@@ -652,14 +651,45 @@ def get_active_asc_info(data, limit, offset, data_dict, data_list):
         active_ascs['id'] = asc_data.dealer_id
         active_ascs['address'] = asc_data.address
         active_ascs = get_state_city(active_ascs, asc_data.address)
-        active_ascs['coupon_closed'] = asc_cuopon_details(asc_data, 2)
-        active_ascs['coupon_inprogress'] = asc_cuopon_details(asc_data, 4)
-        active_ascs['coupon_closed_old_fsc'] = asc_cuopon_details(asc_data, 6)
+        active_ascs['coupon_closed'] = utils.asc_cuopon_data(asc_data, 2)
+        active_ascs['coupon_inprogress'] = utils.asc_cuopon_data(asc_data, 4)
+        active_ascs['coupon_closed_old_fsc'] = utils.asc_cuopon_data(asc_data, 6)
         data_list.append(active_ascs)
     data_dict['count'] = len(active_asc_list)
     data_dict['active-asc'] = data_list
     return data_dict
 
+def get_active_asc_report(request):
+    '''get city and state from parameter'''
+    data = request.GET.copy()
+    if data.has_key('month') and data.has_key('month') :
+        month = MONTHS.index(data['month']) + 1
+        year = data['year']
+    else:
+        now = datetime.datetime.now()
+        year = now.year
+        month = now.month
+    data_list = []
+    asc_details = get_asc_data(data)
+    active_asc_list = asc_details.filter(~Q(date_joined=F('last_login')))
+    active_ascs = active_asc_list.values_list('username', flat=True)
+    asc_obj = aftersell_common.RegisteredDealer.objects.filter(dealer_id__in=active_ascs)
+    for asc_data in asc_obj:
+        active_ascs = OrderedDict();
+        active_ascs['id'] = asc_data.dealer_id
+        active_ascs['address'] = asc_data.address
+        active_ascs = get_state_city(active_ascs, asc_data.address)
+        active_ascs['coupon_closed'] = asc_cuopon_details(asc_data, 2, year, month)
+        data_list.append(active_ascs)
+    years = utils.gernate_years()
+
+    return render(request, 'portal/asc_report.html',\
+                  {"data": data_list,
+                   "range": range(1,32),
+                   "month": MONTHS,
+                   "year": years,
+                   "mon": MONTHS[month-1]
+                   })
 
 def get_not_active_asc_info(data, limit, offset, data_dict, data_list):
     '''get city and state from parameter'''
