@@ -77,6 +77,9 @@ urlpatterns += patterns('gladminds',
     url(r'^health-check', 'health_check.health_check_view'),
 
     url(r'^afterbuy/$', 'afterbuy.views.main', name='main'),
+    url(r'^hlth_chk', 'health_check.gt_hlth_chk'),
+    url(r'^version.html$', 'views.render_version_info'),
+    
 #     url(r'^app/create-account', 'afterbuy.views.create_account', name='create_account'),
 #     url(r'^app/login', 'afterbuy.views.my_login', name='my_login'),
 #     url(r'^app/getData', 'afterbuy.views.get_data', name='get_data'),
