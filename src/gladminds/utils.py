@@ -4,6 +4,7 @@ from boto.s3.key import Key
 import datetime
 import pytz
 from dateutil import tz
+from datetime import date
 from random import randint
 from django.utils import timezone
 from django.conf import settings
@@ -19,6 +20,8 @@ from django.db.models.fields.files import FieldFile
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     TIME_FORMAT
 from gladminds.mail import send_ucn_request_alert, send_mail_when_vin_does_not_exist
+from django.db.models import F
+from django.db.models import Count
 
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
@@ -439,7 +442,6 @@ def get_updated_customer_id(customer_id):
     return customer_id
 
 def service_advisor_search(data):
-    print "1111111", data
     dealer_data = aftersell_common.RegisteredDealer.objects.get(
                 dealer_id=data['current_user'])
     sa_phone_number = mobile_format(data['phone_number'])
@@ -465,6 +467,9 @@ def service_advisor_search(data):
         return service_advisor_details
     return {'message': message, 'status': 'fail'}
 
+def asc_cuopon_data(asc_id, status_type):
+    cuopon_details = common.CouponData.objects.filter(servicing_dealer=asc_id, status=status_type)
+    return len(cuopon_details)
 
 def make_tls_property(default=None):
     """Creates a class-wide instance property with a thread-specific value."""
@@ -501,9 +506,15 @@ def get_asc_data(data):
     return asc_list
 
 
-def asc_cuopon_details(asc_id, status_type):
-    cuopon_details = common.CouponData.objects.filter(servicing_dealer=asc_id, status=status_type)
-    return len(cuopon_details)
+def asc_cuopon_details(asc_id, status_type, year, month):
+    cuopon_details = common.CouponData.objects.filter(servicing_dealer=asc_id, status=status_type, actual_service_date__range=[datetime.datetime(int(year),int(month),1,00,00,00),datetime.datetime(int(year),int(month)+1,1,00,00,00)])
+    cuopon_count = cuopon_details.values('actual_service_date').annotate(dcount=Count('actual_service_date'))
+    coupon_data = {}
+    for day in range(1,32):
+        coupon_data[day] = 0
+    for coupon in cuopon_count:
+        coupon_data[coupon['actual_service_date'].day] = coupon['dcount']
+    return coupon_data
 
 
 def get_state_city(details, address):
@@ -521,6 +532,17 @@ def get_state_city(details, address):
 
     return details
 
+
+
+def gernate_years():
+    start_year = 2013
+    current_year = datetime.date.today().year
+    year_list = []
+    for date in range(start_year, current_year+1):
+        year_list.append(date)
+    return year_list
+
+
 def get_time_in_seconds(time, unit):
     if unit == 'days':
         total_seconds = time * 86400
@@ -529,3 +551,4 @@ def get_time_in_seconds(time, unit):
     else:
         total_seconds = time * 60
     return total_seconds
+
