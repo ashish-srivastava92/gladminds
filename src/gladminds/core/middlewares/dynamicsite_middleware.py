@@ -3,6 +3,9 @@ from django.utils.cache import patch_vary_headers
 
 from gladminds.core.utils import make_tls_property
 
+import logging
+logger = logging.getLogger('gladminds')
+
 BRAND = settings.__dict__['_wrapped'].__class__.BRAND = make_tls_property()
 
 
@@ -24,8 +27,9 @@ class DynamicSitesMiddleware(object):
         except KeyError:
             # use default urlconf (settings.ROOT_URLCONF)
             pass
-        
-        
+        logger.info('BRAND is {0}, HOST is {1}'.format(BRAND.value,
+                                                       request.get_host()))
+
     def process_response(self, request, response):
         if getattr(request, "urlconf", None):
             patch_vary_headers(response, ('Host',))
