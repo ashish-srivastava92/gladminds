@@ -117,7 +117,8 @@ class PollutionCertificateResource(CustomBaseModelResource):
         
 
 class SupportResource(CustomBaseModelResource):
-    product = fields.ForeignKey(UserProductResource, 'product', full=True, null=True)
+    brand = fields.ForeignKey(BrandResource, 'brand', full=True, null=True)
+    brand_product_category = fields.ForeignKey(BrandResource, 'brand_product_category', full=True, null=True)
     class Meta:
         queryset = afterbuy_models.Support.objects.all()
         resource_name = 'support'
@@ -125,6 +126,6 @@ class SupportResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data =True
         filtering = {
-                     "product" : ALL
+                     "brand" : ALL
                      }
         
