@@ -23,13 +23,13 @@ class GladmindsUnitTestCase(TestCase):
 #        management.call_command('loaddata', 'etc/testdata/serviceadvisor.json', verbosity=0)
 #        management.call_command('loaddata', 'etc/testdata/product.json', verbosity=0)
 #        management.call_command('loaddata', 'etc/testdata/coupon.json', verbosity=0)
-        
+
     def get_coupon_obj(self, **kwargs):
-        return self._get_model_obj(common.CouponData(**kwargs))
+        return self._get_model_obj(models.CouponData(**kwargs))
 
     #TODO: Using _get_model_obj() does not work on below function
     def get_product_obj(self, **kwargs):
-        product_data = common.ProductData(**kwargs)
+        product_data = models.ProductData(**kwargs)
         product_data.save()
         return product_data
 
@@ -92,14 +92,19 @@ class GladmindsUnitTestCase(TestCase):
         return model
     
     def filter_coupon_obj(self, coupon_id=None):
-        coupon_obj = common.CouponData.objects.filter(unique_service_coupon=coupon_id)
+        coupon_obj = models.CouponData.objects.filter(unique_service_coupon=coupon_id)
         return coupon_obj[0]
     
     def get_datafeed_log(self, **kwargs):
-        feed_log = common.DataFeedLog(**kwargs)
+        feed_log = models.DataFeedLog(**kwargs)
         feed_log.save()
         return feed_log
     
+    def get_message_template(self, **kwargs):
+        msg_template = models.MessageTemplate(**kwargs)
+        msg_template.save()
+        return msg_template
+
 class RequestObject(object):
     '''
     This class creates a request type of object.

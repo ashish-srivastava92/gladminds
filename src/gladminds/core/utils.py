@@ -107,8 +107,8 @@ def get_task_queue():
 def format_product_object(product_obj):
     purchase_date = product_obj.purchase_date.strftime('%d/%m/%Y')
     return {'id': product_obj.customer_id,
-            'phone': get_phone_number_format(str(product_obj.customer_details.phone_number)), 
-            'name': product_obj.customer_details.user.first_name, 
+            'phone': get_phone_number_format(str(product_obj.customer_phone_number)), 
+            'name': product_obj.customer_name, 
             'purchase_date': purchase_date,
             'vin': product_obj.product_id}
 
@@ -336,7 +336,7 @@ def search_details(data):
     elif data.has_key('Customer-ID'):
         kwargs[ 'customer_id' ] = get_updated_customer_id(data['Customer-ID'])
     elif data.has_key('Customer-Mobile'):
-        kwargs[ 'customer_details__phone_number' ] = mobile_format(data['Customer-Mobile'])
+        kwargs[ 'customer_phone_number' ] = mobile_format(data['Customer-Mobile'])
     product_obj = models.ProductData.objects.filter(**kwargs)
     if not product_obj or not product_obj[0].purchase_date:
         key = data.keys()
@@ -409,7 +409,7 @@ def services_search_details(data):
                     search_results.append(temp)
                 response['search_results'] = search_results
                 response['other_details'] = {'vin': product_obj[0].product_id, 'customer_id': product_obj[0].customer_id,\
-                                             'customer_name': product_obj[0].customer_details.user.first_name}
+                                             'customer_name': product_obj[0].customer_name}
                 return response
             else:
                 return {'message': message}

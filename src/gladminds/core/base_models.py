@@ -1,10 +1,8 @@
 from datetime import datetime
 
 from django.db import models
-from django.conf import settings
 
-from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
-    USER_DESIGNATION, RATINGS
+from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, RATINGS
 from gladminds.core.managers import user_manager
 
 
@@ -39,6 +37,7 @@ class UserProfile(BaseModel):
     class Meta:
         abstract = True
 
+
 class Industry(BaseModel):
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
@@ -47,32 +46,26 @@ class Industry(BaseModel):
         abstract = True
         verbose_name_plural = "Industries"
 
+
 class Brand(BaseModel):
-    brand_id = models.CharField(
-        max_length=50, null=False, unique=True, help_text="Brand Id must be unique")
-    name = models.CharField(max_length=250, null=False)
+    name = models.CharField(max_length=250)
     image_url = models.CharField(max_length=200, null=True, blank=True)
     is_active = models.BooleanField(default=True)
+    description = models.TextField(null=True, blank=True)
 
     class Meta:
         abstract = True
         verbose_name_plural = "Brand Data"
 
-    def __unicode__(self):
-        return self.brand_id
 
-    def image_tag(self):
-        if self.brand_name == 'Bajaj':
-            url = settings.STATIC_URL + 'img/bajaj.jpg'
-            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
-        elif self.brand_name == 'Honda':
-            url = settings.STATIC_URL + 'img/honda.jpg'
-            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
-        else:
-            url = settings.STATIC_URL + 'img/noimage.jpg'
-            return u'<img src= ' + url + ' style="max-width: 37%;max-height: 15%" />'
-    image_tag.short_description = 'Image'
-    image_tag.allow_tags = True
+class BrandProductCategory(BaseModel):
+    name = models.CharField(max_length=250)
+    description = models.TextField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Brand Categories"
+
 
 class OTPToken(BaseModel):
     token = models.CharField(max_length=256, null=False)
@@ -82,6 +75,7 @@ class OTPToken(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "OTPs"
+
 
 class Dealer(BaseModel):
     dealer_id = models.CharField(
@@ -114,9 +108,8 @@ class AuthorizedServiceCenter(BaseModel):
 class ServiceAdvisor(BaseModel):
     service_advisor_id = models.CharField(
         max_length=15, blank=False, unique=True, null=False)
-    order = models.PositiveIntegerField(default=0)
     status = models.CharField(max_length=10, blank=False, null=False)
-    
+
     objects = user_manager.ServiceAdvisorManager()
 
     class Meta:
@@ -131,6 +124,7 @@ ProductTypeData  is linked to Brand data
 For 1 Brand there can be multiple Products
 '''
 
+
 class ProductType(BaseModel):
     product_type_id = models.AutoField(primary_key=True)
     product_name = models.CharField(max_length=255, null=False)
@@ -138,13 +132,9 @@ class ProductType(BaseModel):
     image_url = models.CharField(
                    max_length=200, blank=True, null=True)
     is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(default=0)
-    warranty_email = models.EmailField(max_length=215, null=True, blank=True)
-    warranty_phone = models.CharField(
-        max_length=15, blank=False, null=False)
 
     class Meta:
-        abstract= True
+        abstract = True
         verbose_name_plural = "Product Type"
 
     def __unicode__(self):
@@ -156,12 +146,17 @@ class ProductData(BaseModel):
     product_id = models.CharField(max_length=215, unique=True)
     customer_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
+    customer_phone_number = models.CharField(
+        max_length=15, null=True, blank=True, unique=True)
+    customer_name = models.CharField(
+        max_length=215, null=True, blank=True, unique=True)
+    customer_address = models.CharField(
+        max_length=215, null=True, blank=True, unique=True)
     purchase_date = models.DateTimeField(null=True, blank=True)
     invoice_date = models.DateTimeField(null=True, blank=True)
     engine = models.CharField(max_length=255, null=True, blank=True)
     veh_reg_no = models.CharField(max_length=15, null=True, blank=True)
     is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(default=0)
         
     class Meta:
         abstract = True
@@ -188,7 +183,6 @@ class CouponData(BaseModel):
     actual_kms = models.CharField(max_length=10, null=True, blank=True)
     last_reminder_date = models.DateTimeField(null=True, blank=True)
     schedule_reminder_date = models.DateTimeField(null=True, blank=True)
-    order = models.PositiveIntegerField(default=0)
     extended_date = models.DateTimeField(null=True, blank=True)
     sent_to_sap = models.BooleanField(default=False)
     credit_date = models.DateTimeField(null=True, blank=True)
@@ -212,7 +206,6 @@ class UCNRecovery(BaseModel):
     reason = models.TextField(null=False)
     customer_id = models.CharField(max_length=215, null=True, blank=True)
     file_location = models.CharField(max_length=215, null=True, blank=True)
-    request_date = models.DateTimeField(default=datetime.now())
     unique_service_coupon = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
@@ -232,12 +225,13 @@ class OldFscData(BaseModel):
     actual_kms = models.CharField(max_length=10, null=True, blank=True)
     last_reminder_date = models.DateTimeField(null=True, blank=True)
     schedule_reminder_date = models.DateTimeField(null=True, blank=True)
-    order = models.PositiveIntegerField(default=0)
     extended_date = models.DateTimeField(null=True, blank=True)
     sent_to_sap = models.BooleanField(default=False)
     credit_date = models.DateTimeField(null=True, blank=True)
     credit_note = models.CharField(max_length=50, null=True, blank=True)
     special_case = models.BooleanField(default=False)
+    missing_field = models.CharField(max_length=50, null=True, blank=True)
+    missing_value = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True

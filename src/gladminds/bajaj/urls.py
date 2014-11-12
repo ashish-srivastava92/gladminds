@@ -1,5 +1,4 @@
 from django.conf.urls import patterns, url, include
-from django.conf import settings
 from gladminds.bajaj.admin import brand_admin
 from tastypie.api import Api
 from gladminds.core import urls as core_urls
@@ -17,5 +16,5 @@ urlpatterns = patterns('',
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
     url(r'', include(core_urls)),
     url(r'', include(brand_admin.urls)),
-    url(r'', include(api_v1.urls))
+    url(r'', include(api_v1.urls)),
 )

@@ -1,6 +1,7 @@
 from django.conf import settings
-from gladminds.core.utils import make_tls_property
 from django.utils.cache import patch_vary_headers
+
+from gladminds.core.utils import make_tls_property
 
 BRAND = settings.__dict__['_wrapped'].__class__.BRAND = make_tls_property()
 

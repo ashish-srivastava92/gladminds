@@ -2,7 +2,7 @@ from django.contrib.admin import AdminSite
 from django.contrib.auth.models import User
 
 from gladminds.bajaj.models import UserProfile, Dealer, AuthorizedServiceCenter,\
-ServiceAdvisor, ProductData, CouponData, MessageTemplate, EmailTemplate
+ServiceAdvisor, ProductData, CouponData, MessageTemplate, EmailTemplate, BrandProductCategory
 
 class BajajAdminSite(AdminSite):
     pass
@@ -19,7 +19,7 @@ brand_admin.register(AuthorizedServiceCenter)
 # brand_admin.register(CouponData)
 # brand_admin.register(EmailTemplate, EmailTemplateAdmin)
 # brand_admin.register(MessageTemplate, MessageTemplateAdmin)
-
+brand_admin.register(BrandProductCategory)
 brand_admin.register(ServiceAdvisor)
 brand_admin.register(ProductData)
 brand_admin.register(CouponData)

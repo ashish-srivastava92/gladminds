@@ -454,9 +454,9 @@ def create_reconciliation_report(query_params, user):
         coupon_data_dict['closed_date'] = coupon_data.closed_date
         coupon_data_dict['service_status'] = map_status[str(coupon_data.status)]
         if query_params['type']== 'credit':
-            customer_details = coupon_data.product.customer_details
-            coupon_data_dict['customer_name'] = customer_details.user.first_name
-            coupon_data_dict['customer_number'] = customer_details.phone_number
+            product_details = coupon_data.product
+            coupon_data_dict['customer_name'] = product_details.customer_name
+            coupon_data_dict['customer_number'] = product_details.customer_phone_number
             coupon_data_dict['credit_date'] = coupon_data.credit_date
             coupon_data_dict['credit_note'] = coupon_data.credit_note
         else:

@@ -6,9 +6,8 @@ from tastypie.resources import Resource, ModelResource
 from tastypie.utils.mime import determine_format
 from tastypie.http import HttpBadRequest
 from tastypie.exceptions import ImmediateHttpResponse
-from tastypie.fields import ApiField, CharField
-from tastypie.resources import ModelResource
-from tastypie.utils.mime import determine_format
+from tastypie.fields import ApiField
+
 
 class CustomBaseModelResource(ModelResource):
     def determine_format(self, request):
