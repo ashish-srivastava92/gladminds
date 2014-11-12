@@ -368,4 +368,36 @@ class SparesData(models.Model):
         verbose_name_plural = "spare info"
     
 #########################################################################################
+#######################LOYALTY TABLES#################################
 
+class Mechanic(models.Model):
+    mechanic_id = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    total_points = models.IntegerField(max_length=50, null=True, blank=True)
+    name = models.CharField(max_length=150, null=True, blank=True)
+    address = models.CharField(max_length=250, null=True, blank=True)
+    phone_number = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    
+    class Meta:
+        app_label = "gladminds"
+
+class SparePart(models.Model):
+    part_serial_number = models.IntegerField(max_length=100, null=True, blank=True)
+    points = models.IntegerField(max_length=50, null=True, blank=True)
+    price = models.IntegerField(max_length=50, null=True, blank=True)
+    validity_from =  models.DateTimeField(null=True, blank= True)
+    validity_to =  models.DateTimeField(null=True, blank= True)
+    unique_part_code = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    sap_part_number = models.CharField(max_length=50, null=True, blank=True)
+    
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "spare parts"
+
+class ProductCatalog(models.Model):
+    product_code = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    product_name = models.CharField(max_length=50, null=True, blank=True)
+    points = models.IntegerField(max_length=50, null=True, blank=True)
+    
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "product catalog"

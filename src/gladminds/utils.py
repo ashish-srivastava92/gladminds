@@ -533,6 +533,7 @@ def get_state_city(details, address):
     return details
 
 
+
 def gernate_years():
     start_year = 2013
     current_year = datetime.date.today().year
@@ -540,4 +541,14 @@ def gernate_years():
     for date in range(start_year, current_year+1):
         year_list.append(date)
     return year_list
+
+
+def get_time_in_seconds(time, unit):
+    if unit == 'days':
+        total_seconds = time * 86400
+    elif unit == 'hrs':
+        total_seconds = time * 3600
+    else:
+        total_seconds = time * 60
+    return total_seconds
 

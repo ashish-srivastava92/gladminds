@@ -29,7 +29,7 @@ ACTIVE_MENU = {'asc' : 'register_asc',
 FEEDBACK_STATUS = (('Open', 'Open'),
                    ('Closed', 'Closed'),
                    ('Resolved', 'Resolved'),
-                   ('Progress', 'Progress'),
+                   ('In-Progress', 'In-Progress'),
                    ('Pending', 'Pending'))
 
 PRIORITY = (('Low', 'Low'),
@@ -42,10 +42,13 @@ SLA_PRIORITY = (('Low', 'Low'),
                 ('High', 'High'),
                 ('Urgent', 'Urgent'),)
 
+TIME_UNIT = (('mins', 'mins'),
+             ('hrs', 'hrs'),
+             ('days', 'days'),)
+
 FEEDBACK_TYPE = (('Problem', 'Problem'),
                  ('Question', 'Question'),
-                 ('Feature', 'Feature'),
-                 ('Request', 'Request'),
+                 ('Feature-Request', 'Feature-Request'),
                  ('Suggestion', 'Suggestion'),)
 
 USER_DESIGNATION = (('SDO', 'Owner'),
@@ -62,4 +65,4 @@ ROOT_CAUSE = (('Data','Data'),
               ('Network','Network'),
               ('Non-issue','Non-issue'),
               ('External System','External System'))
-MONTHS = ['Jan', 'Feb', 'Mar', 'April', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']

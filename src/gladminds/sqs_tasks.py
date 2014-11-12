@@ -285,6 +285,21 @@ def send_on_product_purchase(*args, **kwargs):
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         audit_log(status=status, reciever=phone_number, message=message)
+        
+@shared_task
+def send_point(*args, **kwargs):
+    status = "success"
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        logger.info("request for sending sms received {0} message {1}".format(phone_number, message))
+        set_gateway(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        logger.error("[Eception:send_point]:{0}".format(ex))
+        send_point.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        audit_log(status=status, reciever=phone_number, message=message)
 
 """
 Crontab to send reminder sms to customer 
@@ -490,6 +505,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
 
               "mark_feeback_to_closed" : mark_feeback_to_closed,
 
-              "customer_detail_recovery": customer_detail_recovery
+              "customer_detail_recovery": customer_detail_recovery,
+              
+              "send_point": send_point
 
               }

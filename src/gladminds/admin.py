@@ -17,7 +17,8 @@ from django.db import models
 from django.contrib.admin.models import LogEntry
 from models.common import GladMindUsers, ProductTypeData, \
     BrandData, ProductData, CouponData, MessageTemplate,\
-    UploadProductCSV, CustomerTempRegistration
+    UploadProductCSV, CustomerTempRegistration,\
+    Mechanic, SparePart, ProductCatalog
 from gladminds.aftersell.models.common import \
     RegisteredDealer, ServiceAdvisorDealerRelationship, ServiceAdvisor, SLA
 from gladminds.aftersell.models.logs import AuditLog, DataFeedLog
@@ -546,6 +547,29 @@ class UserFeedback(ModelAdmin):
     list_display = (
         'reporter', 'assign_to', 'message', 'subject', 'priority', 'type', 'status', 'created_date', 'modified_date')
 
+class SlaAdmin(ModelAdmin):
+    fieldsets = (
+        (None, {
+            'fields': (
+        'priority', ('response_time', 'response_unit'), ('reminder_time', 'reminder_unit'), ('resolution_time', 'resolution_unit'))
+        }),
+        )
+
+class MechanicAdmin(ModelAdmin):
+
+    list_display = (
+        'mechanic_id', 'name', 'phone_number', 'total_points','address')
+
+class SparePartAdmin(ModelAdmin):
+
+    list_display = (
+        'unique_part_code', 'points', 'price', 'part_serial_number', 'sap_part_number')
+
+class ProductCatalogAdmin(ModelAdmin):
+
+    list_display = (
+        'product_code', 'product_name', 'points')  
+                 
 ##############################################################
 
 admin.site.register(BrandData, BrandAdmin)
@@ -567,4 +591,7 @@ admin.site.register(UploadProductCSV)
 admin.site.register(LogEntry)
 admin.site.register(UserNotification, UserNotificationAdmin)
 admin.site.register(Feedback, UserFeedback)
-admin.site.register(SLA)
+admin.site.register(SLA, SlaAdmin)
+admin.site.register(Mechanic, MechanicAdmin)
+admin.site.register(SparePart, SparePartAdmin)
+admin.site.register(ProductCatalog, ProductCatalogAdmin)
