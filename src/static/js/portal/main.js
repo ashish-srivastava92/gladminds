@@ -55,6 +55,7 @@
     
     $('.cutomer-reg-form').on('submit', function() {
         var vin = $('#srch-vin').val(),
+          user = $('#user').text().trim(),
           messageModal = $('.modal.message-modal'),
           messageBlock = $('.modal-body', messageModal);
         if(vin.trim().length!==17){
@@ -68,8 +69,15 @@
             url: '/aftersell/exceptions/customer',
             data: {'vin': vin},
             success: function(data){
-
-              if (data['phone']) {
+              if (data['phone'] && user=="d123") {
+                  $('.customer-phone').val(data['phone']).attr('readOnly', false);
+                  $('.customer-name').val(data['name']).attr('readOnly', true);
+                  $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
+                  $('.customer-id').val(data['id']).attr('readOnly', true);
+                  $('.customer-submit').attr('disabled', false);
+              }	
+              
+              else if (data['phone']) {
                   $('.customer-phone').val(data['phone']).attr('readOnly', true);
                   $('.customer-name').val(data['name']).attr('readOnly', true);
                   $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
@@ -479,3 +487,9 @@ function change_status(){
 	
 }
 
+function getDataByDate(){
+    var month = $('#month').val(),
+        year =  $('#year').val();
+    window.location.href = window.location.pathname + '?month='+month+'&'+'year='+year;
+   
+}
