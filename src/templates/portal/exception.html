@@ -1,164 +1,183 @@
 {% extends "base_template.html" %}
 
 {% block body %}
-<div class="navbar navbar-fixed-top">
-  <div class="navbar-inner">
-    <a class="brand" href="#"><img src="/static/img/bajaj_logo.jpg" height=50px width=209px></a>
-  </div>
-</div>
 <div class="well">
     <div class="user-message">
-      <div class="message"></div>
+    	<div class="message"></div>
     </div>
     <div id="wrapper">
-        <div class="row">
-          <div class="col-md-offset-8 col-md-2">
-            <a class="logout" href="/aftersell/provider/logout">Logout</a>
-          </div>
-        </div>
         <div class="row">
             <div class="col-md-3 .col-md-offset-1">
                 {% include "portal/base_portal.html" %}
             </div>
             <div class="col-md-8">
-              {% if active_menu == 'customer' %}
-              <div class="row portal-form-heading">
-                  <div class="col-md-10">
-                      <h3 class="text-center">Search by Vin#</h3>
-                  </div>
-              </div>
-              <form class="vin-form" role="search">
-              <div class="col-md-offset-2">
-                <div class="row">
-                  <div class="col-md-2 form-group">
-                    <label class="control-label">VIN#:</label>
-                  </div>
-                  <div class="col-md-7 input-group">
-                    <input type="text" class="form-control" placeholder="Search" name="srch-vin" id="srch-vin" required>
-                    <div class="input-group-btn">
-                      <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"></span></button>
-                    </div>
-                  </div>
-                </div>
-                </div>
-              </form>
-              <div class="row portal-form-heading">
-                <div class="col-md-10">
-                  <h3 class="text-center">Customer Details</h3>
-                </div>
-              </div>
-				<div class="row">
-					<div class="col-md-offset-2">
-						<div class="row">
-							<div class="col-md-4 form-group">
-								<label class="control-label">Customer ID:</label>
-							</div>
-							<div class="col-md-5 form-group">
-								<input type="text" class="form-control customer-id" />
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-4 form-group">
-								<label class="control-label">Customer Mobile number:</label>
-							</div>
-							<div class="col-md-5 form-group">
-								<input type="text" class="form-control customer-phone" />
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-4 form-group">
-								<label class="control-label">Customer Name:</label>
-							</div>
-							<div class="col-md-5 form-group">
-								<input type="text" class="form-control customer-name" />
-							</div>
-						</div>
-					</div>
+              	{% if active_menu == 'search' %}
+            	<div class="row portal-form-heading">
+                	<div class="col-md-10">
+                    	<h3 class="text-center">Search Customer Details</h3>
+                  	</div>
+              	</div>
+              	<form class="vin-form" role="search">
+              		<div class="col-md-offset-1">
+                		<div class="row">
+                  			<div class="col-md-7 input-group">
+			                    <input type="text" class="form-control" placeholder="Search" name="search-value" id="search-value" required>
+			                    <div class="input-group-btn">
+                      				<button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+                    			</div>
+                  			</div>
+	                  		<div class="col-md-4 form-group">
+		                      	<select class="form-control" name="search-field" id="search-field" required>
+			                    	<option value="VIN" selected="selected">VIN</option>
+			                      	<option value="Customer-ID">Customer-ID</option>
+			                      	<option value="Customer-Mobile">Customer-Mobile</option>
+		                    	</select>
+	                  		</div>
+                		</div>
+                	</div>
+              	</form>
+              	<div class="row portal-form-heading">
+                	<div class="col-md-10">
+                  		<h3 class="text-center">Customer Details</h3>
+                	</div>
+              	</div>
+				<div class="row col-md-offset-1">
+					<table class="table table-hover table-bordered" id="search-results">
+						<thead>
+							<tr>
+								<th>VIN</th>
+								<th>Customer ID</th>
+								<th>Customer Name</th>
+								<th>Customer Mobile</th>
+							</tr>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
 				</div>
 				{% endif %}
-              {% if active_menu == 'close' %}
-              <div class="row portal-form-heading">
-                <div class="col-md-10">
-                    <h3 class="text-center">Close Free Service</h3>
+              	{% if active_menu == 'status' %}
+              	<div class="row portal-form-heading">
+                  	<div class="col-md-10">
+                    	<h3 class="text-center">Search VIN/Customer</h3>
+                  	</div>
+              	</div>
+              	<form class="service-status-search" role="status">
+              		<div class="col-md-offset-1">
+	                	<div class="row">
+	                  		<div class="col-md-7 input-group">
+	                    		<input type="text" class="form-control status-search-value" placeholder="Search" name="search-value" required>
+	                    		<div class="input-group-btn">
+	                      			<button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+	                    		</div>
+	                  		</div>
+	                  		<div class="col-md-4 form-group">
+	                      		<select class="form-control status-search-field" name="search-field" required>
+		                      		<option value="VIN" selected="selected">VIN</option>
+		                      		<option value="Customer-ID">Customer-ID</option>
+	                      		</select>
+	                  		</div>
+	                	</div>
+                	</div>
+              	</form>
+              	<div class="row portal-form-heading">
+                	<div class="col-md-10">
+                  		<h3 class="text-center">Search Results</h3>
+                	</div>
+              	</div>
+				<div class="row col-md-offset-1">
+					<div class="status-result-detail">
+		            </div>
+					<table class="table table-hover table-bordered status-search-results">
+						<thead>
+							<tr>
+								<th>Service Type</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
+				</div>
+				{% endif %}
+              	{% if active_menu == 'close' %}
+              	<div class="row portal-form-heading">
+                	<div class="col-md-10">
+                    	<h3 class="text-center">Close Free Service</h3>
+                	</div>
+              	</div>
+              	<form class="coupon-close-form row" role="search">
+              		<div class="col-md-offset-2">
+                		<div class="row">
+                  			<div class="col-md-3 form-group">
+								<label class="control-label">Service Advisor*:</label>
+                  			</div>
+                  			<div class="col-md-5 form-group">
+                    			<select class="form-control" name="advisorMobile" id="advisorMobile" required>
+                      				<option value="">Select mobile number</option>
+									{% for phone in data %}
+				                    	<option value="{{phone}}">{{phone.name}} ({{phone.phone_number}})</option>
+				                    {% endfor %}
+                    			</select>
+                  			</div>
+               	 		</div>
+                		<div class="row">
+                  			<div class="col-md-3 form-group">
+                    			<label class="control-label">Customer ID*:</label>
+                  			</div>
+                  			<div class="col-md-5 form-group">
+                    			<input type="text" class="form-control" name="customerId" id="customerId" required>
+                  			</div>
+                  			<input type="text" class="form-control hidden" name="action" value="close" id="action" hidden required>
+                		</div>
+                	<div class="row">
+                  		<div class="col-md-3 form-group">
+                    		<label class="control-label">UCN*:</label>
+                  		</div>
+                  		<div class="col-md-5 form-group">
+                    		<input type="text" class="form-control" name="ucn" id="ucn" required>
+                  		</div>
+                	</div>
+                	<div class="row">
+                  		<div class="col-md-8 form-group">
+                    		<button type="submit" value="Submit" class="btn btn-primary pull-right">
+                      			Submit
+                    		</button>
+                  		</div>
+                	</div>
+				</div>
+			</form>
+            {% endif %}
+            {% if active_menu == 'check' %}
+            <div class="row portal-form-heading">
+				<div class="col-md-10">
+					<h3 class="text-center">Check For Free Service</h3>
                 </div>
-              </div>
-              <form class="coupon-close-form row" role="search">
-              <div class="col-md-offset-2">
+			</div>
+            <form class="coupon-check-form" role="search">
+            	<div class="col-md-offset-2">
                 <div class="row">
-                  <div class="col-md-3 form-group">
-                    <label class="control-label">Service Advisor*:</label>
-                  </div>
-                  <div class="col-md-5 form-group">
-                    <select class="form-control" name="advisorMobile" id="advisorMobile" required>
-                      <option value="">Select mobile number</option>
-                      {% for phone in data %}
-                      <option value="{{phone}}">{{phone}}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
+                	<div class="col-md-3 form-group">
+                    	<label class="control-label">Service Advisor*:</label>
+                  	</div>
+                  	<div class="col-md-5 form-group">
+                    	<select class="form-control" name="advisorMobile" id="advisorMobile" required>
+                      		<option value="">Select mobile number</option>
+                      		{% for phone in data %}
+                      			<option value="{{phone}}">{{phone.name}} ({{phone.phone_number}})</option>
+                      		{% endfor %}
+                    	</select>
+                  	</div>
+				</div>
                 <div class="row">
-                  <div class="col-md-3 form-group">
-                    <label class="control-label">Customer ID*:</label>
-                  </div>
-                  <div class="col-md-5 form-group">
-                    <input type="text" class="form-control" name="customerId" id="customerId" required>
-                  </div>
-                  <input type="text" class="form-control hidden" name="action" value="close" id="action" hidden required>
+                	<div class="col-md-3 form-group">
+                    	<label class="control-label">Customer ID*:</label>
+                  	</div>
+					<div class="col-md-5 form-group">
+                    	<input type="text" class="form-control" name="customerId" id="customerId" required>
+                  	</div>
+					<input type="text" class="form-control hidden" name="action" value="validate" id="action" hidden required>
                 </div>
-                
-                <div class="row">
-                  <div class="col-md-3 form-group">
-                    <label class="control-label">UCN*:</label>
-                  </div>
-                  <div class="col-md-5 form-group">
-                    <input type="text" class="form-control" name="ucn" id="ucn" required>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-8 form-group">
-                    <button type="submit" value="Submit" class="btn btn-primary pull-right">
-                      Submit
-                    </button>
-                  </div>
-                </div>
-                </div>
-              </form>
-              {% endif %}
-              
-              {% if active_menu == 'check' %}
-              <div class="row portal-form-heading">
-                <div class="col-md-10">
-                    <h3 class="text-center">Check for Free Service</h3>
-                </div>
-              </div>
-              <form class="coupon-check-form" role="search">
-              <div class="col-md-offset-2">
-                <div class="row">
-                  <div class="col-md-3 form-group">
-                    <label class="control-label">Service Advisor*:</label>
-                  </div>
-                  <div class="col-md-5 form-group">
-                    <select class="form-control" name="advisorMobile" id="advisorMobile" required>
-                      <option value="">Select mobile number</option>
-                      {% for phone in data %}
-                      <option value="{{phone}}">{{phone}}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-3 form-group">
-                    <label class="control-label">Customer ID*:</label>
-                  </div>
-                  <div class="col-md-5 form-group">
-                    <input type="text" class="form-control" name="customerId" id="customerId" required>
-                  </div>
-                  
-                  <input type="text" class="form-control hidden" name="action" value="validate" id="action" hidden required>
-                  
-                </div>
-                
                 <div class="row">
                   <div class="col-md-3 form-group">
                     <label class="control-label">KMS*:</label>

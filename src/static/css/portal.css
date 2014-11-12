@@ -1,3 +1,16 @@
+
+body {
+	margin: 0 !important;
+}
+
+.navbar-style {
+    margin-bottom: 0;
+}
+
+li {
+	list-style: none;
+}
+
 .portal-form-label{
     padding-top: 15px;   
 }
@@ -26,9 +39,48 @@
 }
 
 .query-form {
-  margin-top: 10px;
+  	margin-top: 10px;
 }
 
 .no-wrapping{
+  	white-space: nowrap;
+}
+.bg-info {
+	background-color: #d9edf7;
+	font-size: 17px;
+}
+
+.reconciliation-report {
+	background-color: #F3F3F3;
+	margin-bottom: 20px;
+	padding: 15px;
+}
+.gladdesk-message{
+	padding-left:0px;
+	padding-top:0px;
+	
+}
+
+.report-table th {
+	text-align: center;
+}
+
+.ellips {
+  width: 150px;
+  text-overflow: ellipsis;
+  display: block;
+  overflow: hidden;
   white-space: nowrap;
+}
+
+#gladmindDesk_filter .input-sm { 
+	margin-left:5px; !important
+}
+
+textarea {
+  resize: none;
+}
+
+.style-username {
+    margin-top:15px;
 }

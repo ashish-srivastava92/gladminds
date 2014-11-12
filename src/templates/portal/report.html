@@ -1,0 +1,87 @@
+{% extends "base_template.html" %}
+
+{% block body %}
+<h3 class="text-center">Reconciliation Report</h3>
+<div class="container">
+	<div class="reconciliation-report">
+	    <div class="user-message">
+	        <div class="message"></div>
+	    </div>
+		<form class="report-form form-horizontal row" role="form" action="/aftersell/reports/reconciliation" method="post">
+			  	<div class="form-group">
+				  	<div class="form-group col-md-6">
+				    	<label class="col-md-3 control-label">From</label>
+				    	<div class="col-md-9">
+				      		<input type="text" value="{{params.from}}" min="{{min_date}}" 
+				      			max="{{max_date}}" class="form-control filter-start-date" placeholder="yyyy-mm-dd" 
+				      			name="from" required />
+				    	</div>
+				  	</div>
+				  	<div class="form-group col-md-6">
+				    	<label class="col-md-3 control-label">To</label>
+				    	<div class="col-md-9">
+				      		<input type="text" value="{{params.to}}" min="{{min_date}}" 
+				      			max="{{max_date}}" class="form-control filter-end-date" placeholder="yyyy-mm-dd" 
+				      			name="to" required />
+				    	</div>
+				  	</div>
+				</div>
+				<div class="form-group">
+				  	<div class="form-group col-md-6">
+				    	<label class="col-md-3 control-label">Report Type</label>
+				    	<div class="col-md-9">
+				      		<select placeholder="Choose Report" name="type" class="report-type-dropdown form-control chosen-select">
+								{% for key,val in report_options.items %}
+									<option {% if params.type == key  %} selected {% endif %} 
+									value="{{key}}">{{val}}</option>
+								{% endfor %}
+							</select>
+							</select>
+				    	</div>
+				  	</div>				
+				  	<div class="form-group col-md-6 coupon-status {% if params.type == 'credit' %} hide {% endif %}">
+				    	<label class="col-md-3 control-label">Status</label>
+				    	<div class="col-md-9">
+				      		<select placeholder="Choose Status" name="status" class="coupon-status-dropdown form-control chosen-select">
+								<option value=""> ...... </option>
+								{% for key,val in status_options.items %}
+									<option {% if params.status == key  %} selected {% endif %} 
+									value="{{key}}">{{val}}</option>
+								{% endfor %}
+							</select>
+				    	</div>
+				  	</div>
+				</div>
+				
+			  	<div class="form-group">
+				    <div class="col-md-offset-6 col-md-6">
+				      <button type="submit" class="btn btn-primary col-md-offset-9">Submit</button>
+				    </div>
+				</div>
+		</form>
+	</div>
+	{% block report_content %}
+    {% endblock %}
+</div>
+{% endblock %}
+{% block dependency %}
+<script src="/static/js/portal/utils.js"></script>
+<script src="/static/js/portal/main.js"></script>
+<script src="/static/js/jquery.dataTables.min.js"></script>
+<script src="/static/js/dataTables.bootstrap.js"></script>
+<script type="text/javascript">
+	var minDate = "{{params.min_date}}",
+		maxDate = "{{params.max_date}}";
+
+	$('.filter-start-date, .filter-end-date').datepicker({
+		dateFormat:'yy-mm-dd',
+		minDate: minDate,
+		maxDate: maxDate
+	});
+	
+    $('.report-table').dataTable({ 
+    	 "bFilter": false,
+    	 "bLengthChange": false
+     }); 
+</script>
+{% endblock dependency %}

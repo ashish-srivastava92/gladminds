@@ -1,24 +1,32 @@
-from django.shortcuts import render_to_response
-from django.core.files import File
-from django.http.response import HttpResponse, HttpResponseBadRequest
-from django.contrib.auth import authenticate, login
-from gladminds.models import common
-from gladminds import utils
-from django.template import Context, Template
-from django.contrib.auth import logout
-from django.views.decorators.csrf import csrf_exempt
-from django.conf import settings
-from django.contrib.auth.models import User
-from datetime import datetime
-from gladminds import mail
-from gladminds.afterbuy.auth import authentication_required
-from datetime import timedelta
-from provider.oauth2.models import Client
 import urllib
 import urllib2
 import uuid
 import logging
 import json
+from datetime import timedelta, datetime
+from provider.oauth2.models import Client
+from django.shortcuts import render_to_response, render
+from django.core.files import File
+from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.contrib.auth import authenticate, login
+from django.template import Context, Template
+from django.contrib.auth import logout
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+
+from gladminds.models import common
+from gladminds import utils
+from gladminds import mail
+from gladminds.afterbuy.auth import authentication_required
+from gladminds.utils import mobile_format
+from gladminds.sqs_tasks import send_otp
+from gladminds import message_template
+from gladminds.utils import get_task_queue
+from gladminds.mail import sent_otp_email
+from gladminds.feed import BaseFeed
+from gladminds.afterbuy import utils as afterbuy_utils
 
 logger = logging.getLogger("gladminds")
 GLADMINDS_ADMIN_MAIL = 'admin@gladminds.co'
@@ -638,6 +646,7 @@ def home(request):
 
 @csrf_exempt
 def get_access_token(request):
+    print request
     username = request.POST['username']
     password = request.POST['password']
 
@@ -663,3 +672,92 @@ def get_access_token(request):
     oath_request = urllib2.Request(page, params)
     response = urllib2.urlopen(oath_request)
     return HttpResponse(response.read(), mimetype="application/json")
+
+
+def generate_access_token(request, user):
+    password = user.username + settings.PASSWORD_POSTFIX
+    user_auth = authenticate(username=user.username, password=password)
+    secret_cli = Client(user=user_auth, name='client', client_type=1, url='')
+    secret_cli.save()
+    client_id = secret_cli.client_id
+    client_secret = secret_cli.client_secret
+    page = request.META['HTTP_HOST'] + '/oauth2/access_token'
+    if not 'http://' in page:
+        page = 'http://' + page
+    raw_params = {'client_id': client_id,
+                  'client_secret': client_secret,
+                  'grant_type': 'password',
+                  'username': user.username,
+                  'password': password,
+                  'scope': 'write'
+                  }
+    params = urllib.urlencode(raw_params)
+    oath_request = urllib2.Request(page, params)
+    response = urllib2.urlopen(oath_request)
+    return response
+
+def generate_otp(request):
+    if request.method != 'POST' or not request.POST.get('mobile'):
+        log_message = 'Expecting a mobile number'
+        logger.error(log_message)
+        data={'status':0, 'message':log_message}
+        return HttpResponse(json.dumps(data), content_type="application/json")
+    phone_number= request.POST['mobile']
+    email = request.POST.get('email', '')
+    logger.info('OTP request received. Mobile: {0}'.format(phone_number))
+    feed = BaseFeed()
+    try:
+        customer_data = common.GladMindUsers.objects.get(phone_number=mobile_format(phone_number))
+        if not customer_data.user:
+            user = feed.register_user('customer', username=customer_data.gladmind_customer_id)
+    except ObjectDoesNotExist as odne:
+        logger.info(
+            '[Exception: New_customer_data]: {0}'.format(odne))
+        # Register this customer
+        gladmind_customer_id = utils.generate_unique_customer_id()
+        user = feed.register_user('customer', username=gladmind_customer_id)
+        customer_data = common.GladMindUsers(user=user, gladmind_customer_id=gladmind_customer_id, 
+                                             phone_number=mobile_format(phone_number), 
+                                             registration_date=datetime.now())
+        customer_data.save()
+    token = afterbuy_utils.get_token(customer_data, phone_number, email=email)
+    message = message_template.get_template('SEND_OTP').format(token)
+    if settings.ENABLE_AMAZON_SQS:
+        task_queue = get_task_queue()
+        task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
+    else:
+        send_otp.delay(phone_number=phone_number, message=message)
+    log_message = 'OTP sent to mobile {0}'.format(phone_number)
+    logger.info(log_message)
+    data={'status':1, 'message':log_message}
+    return HttpResponse(json.dumps(data), content_type="application/json")
+
+def validate_otp(request):
+    if request.method != 'POST' or not request.POST.get('mobile'):
+        log_message = 'Expecting a mobile number and OTP'
+        logger.error(log_message)
+        data={'status':0, 'message':log_message}
+        return HttpResponse(json.dumps(data), content_type="application/json")
+    try:
+        otp = request.POST['otp']
+        phone_number= request.POST['mobile']
+        logger.info('OTP {0} recieved for validation. Mobile {1}'.format(otp, phone_number))
+        gladmind_user = common.GladMindUsers.objects.get(phone_number=mobile_format(phone_number))
+        afterbuy_utils.validate_otp(gladmind_user, otp, phone_number)
+        log_message = 'OTP validated for mobile number {0}'.format(phone_number)
+        logger.info(log_message)
+        #For marking terms of use as accepted
+        if not gladmind_user.accepted_terms:
+            gladmind_user.accepted_terms=1
+            gladmind_user.save()
+            logger.info("Terms of use marked as accepted")
+        #TODO: send access token on successful validation of otp
+#         response = generate_access_token(request, gladmind_user.user)
+#         return HttpResponse(response.read(), mimetype="application/json")
+        data={'status':1, 'message':log_message}
+        return HttpResponse(json.dumps(data), content_type="application/json")
+    except Exception as ex:
+        log_message = 'OTP validation failed for mobile number {0}: {1}'.format(phone_number, ex)
+        logger.info(log_message)
+        data={'status':0, 'message':log_message}
+        return HttpResponse(json.dumps(data), content_type="application/json")

@@ -17,7 +17,7 @@ MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gladminds_qa',
+        'NAME': 'gladmindsdb',
         'USER': 'gladminds',
         'PASSWORD': 'GmqaHash123',
         'HOST': 'gladminds-qa.chnnvvffqwop.us-east-1.rds.amazonaws.com',
@@ -27,7 +27,7 @@ DATABASES = {
 
 
 
-BROKER_URL= 'redis://localhost:6379'
+BROKER_URL = 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
 
 JOBCARD_DIR = '{0}/jobcards/qa/'
@@ -47,21 +47,24 @@ TEMPLATE_DIRS = (
 )
 
 # SMS_CLIENT = "TWILIO"
-# 
-# SMS_CLIENT_DETAIL = {
+# # SMS_CLIENT_DETAIL = {
 #                      'OTP_TWILIO_ACCOUNT' : 'ACbb8cb45f6113b8f2f6243c8eaa5ff971',
 #                      'OTP_TWILIO_AUTH' : 'aa445a4f0a7e651738e89810601f8860',
 #                      'OTP_TWILIO_FROM' : '+1 469-513-9856',
 #                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/Messages.json'
 #                 }
+FILE_CACHE_DURATION = 0
 
-SMS_CLIENT = "AIRTEL"
-SMS_CLIENT_DETAIL={
-                   'login':'bajajauto',
-                   'pass':'bajaj',
-                   'authenticate_url':'http://117.99.128.32:80/login/pushsms.php' ,
-                   'message_url': 'http://117.99.128.32:80/login/pushsms.php'                  
-                   }
+# SMS_CLIENT = "AIRTEL"
+# SMS_CLIENT_DETAIL={
+#                    'login':'bajajauto',
+#                    'pass':'bajaj',
+#                    'authenticate_url':'http://117.99.128.32:80/login/pushsms.php' ,
+#                    'message_url': 'http://117.99.128.32:80/login/pushsms.php'                  
+#                    }
+
+SMS_CLIENT = "KAP"
+
 FEED_TYPE = 'CSV'
 
 #AfterBuy File Upload location configuration
@@ -83,18 +86,18 @@ AWS_ACCESS_KEY_ID = 'AKIAIL7IDCSTNCG2R6JA'
 AWS_SECRET_ACCESS_KEY = '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'
 AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 
-SAP_CRM_DETAIL = {
-                  'username':'pisuper',
-                  'password':'welcome123'
-                  }
+SAP_CRM_DETAIL = {'username':'pisuper',
+                  'password':'welcome123'}
 
 COUPON_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl&v0"
+COUPON_WSDL = 'qa_coupon_redeem.wsdl'
 ASC_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/asc-feed/?wsdl&v0"
+CUSTOMER_REGISTRATION_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/customer-feed/?wsdl&v0"
+CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
 
 ENABLE_AMAZON_SQS = True
 
-AFTER_BUY_CONSTANTS = {
-                       "username": 'support@gladminds.com',
+AFTER_BUY_CONSTANTS = {"username": 'support@gladminds.com',
                        "password": 'gladminds123',
                        "key_prefix": 'qa',
                        "app_path": 'afterbuy_script/afterbuy.zip',
@@ -104,16 +107,17 @@ AFTER_BUY_CONSTANTS = {
                        "ios_apk_loc": "afterbuy_script/qa_ios_afterbuy.ipa",
                        "create_method": "file",
                        "package": "com.gladminds.afterbuyv1",
-                       "version": "0.1.0", 
-                       "title": "Afterbuy V1 App"
-                       }
+                       "version": "0.1.0",
+                       "title": "Afterbuy V1 App"}
 
 ########################SQS Queue Name
 SQS_QUEUE_NAME = "gladminds-qa"
 ######################################
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail QA"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail QA"
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 ###################Change Mail Subject on QA##########################
-MAIL_DETAIL["subject"]= "GladMinds Feed Report QA"
-MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com", 'sourabh.gupta@hashedin.com']
+MAIL_DETAIL["subject"] = "GladMinds Feed Report QA"
+
+MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 #######################################################################

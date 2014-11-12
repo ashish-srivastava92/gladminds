@@ -2,7 +2,10 @@ from django.db import models
 from django.conf import settings
 from datetime import datetime
 from django.contrib.auth.models import User
-
+from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
+    USER_DESIGNATION, RATINGS, ROOT_CAUSE, SLA_PRIORITY, TIME_UNIT
+from composite_field.base import CompositeField
+from django.core.exceptions import ValidationError
 
 ##########################################################################
 ########################## ASC Save Form #########################
@@ -32,6 +35,7 @@ class UCNRecovery(models.Model):
     sap_customer_id = models.CharField(max_length=215, null=True, blank=True)
     file_location = models.CharField(max_length=215, null=True, blank=True)
     request_date = models.DateTimeField(default=datetime.now())
+    unique_service_coupon = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
         app_label = "aftersell"
@@ -44,8 +48,10 @@ class UCNRecovery(models.Model):
 
 class RegisteredDealer(models.Model):
     dealer_id = models.CharField(
-        max_length=25, blank=False, null=False, unique=True, help_text="Dealer Code must be unique")
+        max_length=25, blank=False, null=False, unique=True, verbose_name="id", help_text="Dealer Code must be unique")
     address = models.TextField(blank=True, null=True)
+    role = models.CharField(max_length=10, default='dealer', blank=False)
+    dependent_on = models.CharField(max_length=25, blank=True, null=True)
 
     class Meta:
         app_label = "aftersell"
@@ -104,5 +110,96 @@ class RegisteredASC(models.Model):
     class Meta:
         app_label = "aftersell"
         verbose_name_plural = "Registered ASC Form"
+
+
+class ServiceDeskUser(models.Model):
+    user = models.OneToOneField(User, null=True, blank=True)
+    email_id = models.EmailField(max_length=215, null=True, blank=True)
+    phone_number = models.CharField(max_length=15, unique=True)
+    designation = models.CharField(max_length=10, choices = USER_DESIGNATION)
+
+    class Meta:
+        app_label = "aftersell"
+        verbose_name_plural = "service desk users"
+
+    def __unicode__(self):
+        return self.phone_number
+
+
+class Feedback(models.Model):
+    reporter = models.CharField(max_length=15)
+    reporter_name = models.CharField(max_length=30)
+    reporter_email_id = models.CharField(max_length=50, null=True, blank=True)
+    assign_to = models.ForeignKey(ServiceDeskUser, null=True, blank=True)
+    message = models.CharField(max_length=512, null=True, blank=False)
+    status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
+    priority = models.CharField(max_length=12, choices=PRIORITY, default='Low')
+    type = models.CharField(max_length=12, choices=FEEDBACK_TYPE)
+    subject = models.CharField(max_length=512, null=True, blank=True)
+    created_date = models.DateTimeField(null=True, blank=False)
+    modified_date = models.DateTimeField(null=True, blank=True, auto_now=True)
+    closed_date = models.DateTimeField(null=True, blank=True)
+    resolved_date = models.DateTimeField(null=True, blank=True)
+    pending_from = models.DateTimeField(null=True, blank=True)
+    due_date = models.DateTimeField(null=True, blank=True)
+    wait_time = models.FloatField(max_length=20, null=True, blank=True, default='0.0')
+    remarks = models.CharField(max_length=512, null=True, blank=True)
+    ratings = models.CharField(max_length=12, choices=RATINGS)
+    root_cause = models.CharField(max_length=12, choices=ROOT_CAUSE)
+    resolution = models.CharField(max_length=512, null=True, blank=True)
+    role = models.CharField(max_length=50, null=True, blank=True)
+    assign_to_reporter = models.BooleanField(default=False)
+    class Meta:
+        app_label = "aftersell"
+        verbose_name_plural = "aftersell feedback info"
+
+
+class Comments(models.Model):
+    feedback_object = models.ForeignKey(Feedback, null=False, blank=False)
+    user = models.CharField(max_length=20, null=False, blank=False)
+    comments = models.CharField(max_length=100, null=True, blank=True)
+    created_date = models.DateTimeField(null=False, blank=False)
+    modified_date = models.DateTimeField(null=True, blank=True, auto_now=True)
+    isDeleted = models.BooleanField(default=False)
+
+    class Meta:
+        app_label = "aftersell"
+        verbose_name_plural = "aftersell comment info"
+
+
+class duration(CompositeField):
+    time = models.PositiveIntegerField()
+    unit = models.CharField(max_length=12, choices=TIME_UNIT, verbose_name = 'unit')
+
+
+class SLA(models.Model):
+    priority = models.CharField(max_length=12, choices=SLA_PRIORITY, unique=True)
+    response = duration()
+    reminder = duration()
+    resolution = duration()
         
+    def get_time_in_seconds(self, time , unit):
+        if unit == 'days':
+            total_time = time * 86400
+        elif unit == 'hrs':
+            total_time = time * 3600
+        else:
+            total_time = time * 60
+        return total_time
+    
+    def clean(self, *args, **kwargs):
+        response_time = self.get_time_in_seconds(self.response_time, self.response_unit)
+        resolution_time = self.get_time_in_seconds(self.resolution_time, self.resolution_unit)
+        reminder_time = self.get_time_in_seconds(self.reminder_time, self.reminder_unit)
+        
+        if reminder_time > response_time and resolution_time > reminder_time:
+            super(SLA, self).clean(*args, **kwargs)
+        else:
+            raise ValidationError("Ensure that Reminder time is greater than Response time and Resolution time is greater than Reminder time")
+            
+    
+    class Meta:
+        app_label = "aftersell"
+        verbose_name_plural = "aftersell SLA info"
+
     

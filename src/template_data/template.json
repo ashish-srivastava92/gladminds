@@ -21,15 +21,6 @@
     "model": "gladminds.messagetemplate",
     "pk": 3,
     "fields": {
-      "template_key":"SEND_CUSTOMER_PRODUCT_REGISTER",
-      "template":"Successfully register PRODUCT ID: {0} INTO CUSTOMER ID: {1}",
-      "description":"Send on product registration confirmation"
-    }
-  },
-    {
-    "model": "gladminds.messagetemplate",
-    "pk": 4,
-    "fields": {
       "template_key":"SEND_CUSTOMER_INVALID_CUSTOMER",
       "template":"No service register for Customer Id: {sap_customer_id}",
       "description":"Send on if customer id is not valid"
@@ -37,7 +28,7 @@
   },
   {
     "model": "gladminds.messagetemplate",
-    "pk": 5,
+    "pk": 4,
     "fields": {
       "template_key":"SEND_SA_VALID_COUPON",
       "template":"Please proceed for free service {service_type} for Customer ID {customer_id}",
@@ -46,7 +37,7 @@
   },
     {
     "model": "gladminds.messagetemplate",
-    "pk": 6,
+    "pk": 5,
     "fields": {
       "template_key":"SEND_SA_EXPIRED_COUPON",
       "template":"Cannot proceed for Free Service {service_type} for Customer ID {customer_id}, as DAYS/KMS has exceeded",
@@ -55,7 +46,7 @@
   },
   {
     "model": "gladminds.messagetemplate",
-    "pk": 23,
+    "pk": 6,
     "fields": {
       "template_key":"SEND_INVALID_VIN_OR_FSC",
       "template":"Invalid ID or No Free service coupon available for this product",
@@ -64,7 +55,7 @@
   },
   {
     "model": "gladminds.messagetemplate",
-    "pk": 24,
+    "pk": 7,
     "fields": {
       "template_key":"SEND_INVALID_SERVICE_TYPE",
       "template":"Invalid service type: {service_type}",
@@ -73,7 +64,7 @@
   },
     {
     "model": "gladminds.messagetemplate",
-    "pk": 7,
+    "pk": 8,
     "fields": {
       "template_key":"SEND_CUSTOMER_VALID_COUPON",
       "template":"Congratulations for availing Free Service {service_type}. Your Unique Coupon Number is {coupon}. Please provide this number at the time of delivery only.Happy Riding",
@@ -82,20 +73,11 @@
   },
       {
     "model": "gladminds.messagetemplate",
-    "pk": 8,
+    "pk": 9,
     "fields": {
       "template_key":"SEND_CUSTOMER_EXPIRED_COUPON",
       "template":"Information provided by you is invalid for Free Service {service_type}",
       "description":"Send coupon invalid sms to customer also"
-    }
-  },
-      {
-    "model": "gladminds.messagetemplate",
-    "pk": 9,
-    "fields": {
-      "template_key":"SEND_SA_INVALID_COUPON_DETAIL",
-      "template":"Wrong COUPON ID:{0}",
-      "description":"Send wrong coupon"
     }
   },
       {
@@ -127,7 +109,7 @@
   },
       {
     "model": "gladminds.messagetemplate",
-    "pk": 14,
+    "pk": 13,
     "fields": {
       "template_key":"SEND_INVALID_MESSAGE",
       "template":"Invalid message For any assistance please contact our customer care at 9999999999",
@@ -137,7 +119,7 @@
   
   {
     "model": "gladminds.messagetemplate",
-    "pk": 15,
+    "pk": 14,
     "fields": {
       "template_key":"SEND_BRAND_DATA",
       "template":"CUSTOMER ID: {sap_customer_id} VIN: {vin}",
@@ -147,7 +129,7 @@
   
   {
     "model": "gladminds.messagetemplate",
-    "pk": 16,
+    "pk": 15,
     "fields": {
       "template_key":"RCV_CUSTOMER_REGISTRATION",
       "template":"{email_id} {name}",
@@ -157,7 +139,7 @@
   
   {
     "model": "gladminds.messagetemplate",
-    "pk": 17,
+    "pk": 16,
     "fields": {
       "template_key":"RCV_CUSTOMER_SERVICE_DETAIL",
       "template":"{sap_customer_id}",
@@ -167,7 +149,7 @@
   
   {
     "model": "gladminds.messagetemplate",
-    "pk": 18,
+    "pk": 17,
     "fields": {
       "template_key":"RCV_SA_COUPON_VALIDATION",
       "template":"{sap_customer_id} {kms} {service_type}",
@@ -177,7 +159,7 @@
   
   {
     "model": "gladminds.messagetemplate",
-    "pk": 19,
+    "pk": 18,
     "fields": {
       "template_key":"RCV_SA_COUPON_COMPLETE",
       "template":"{sap_customer_id} {usc}",
@@ -186,7 +168,7 @@
   },
   {
     "model": "gladminds.messagetemplate",
-    "pk": 20,
+    "pk": 19,
     "fields": {
       "template_key":"RCV_CUSTOMER_BRAND_DATA",
       "template":"{brand_id}",
@@ -195,16 +177,16 @@
   }, 
   {
   	"model": "gladminds.messagetemplate",
-  	"pk": 21,
+  	"pk": 20,
   	"fields": {
   		"template_key": "SEND_CUSTOMER_SUPPORTED_KEYWORD",
-  		"template": "Supported keyword: 1.GCP_REG 2.SERVICE 3.BRAND 4.A 5.C",
+  		"template": "Supported keyword: 1.GCP_REG 2.SERVICE 3.BRAND 4.A 5.C 6.SD 7.R",
   		"description": "Send supported message format to customer"
   	}
   },
   {
   	"model": "gladminds.messagetemplate",
-  	"pk": 22,
+  	"pk": 21,
   	"fields": {
   		"template_key": "SEND_CUSTOMER_ON_PRODUCT_PURCHASE",
   		"template": "Dear {customer_name}, Congrats on your purchase of Bajaj bike. Your customer id is {sap_customer_id}. Refer this id during servicing.",
@@ -213,7 +195,7 @@
   },
   {
     "model": "gladminds.messagetemplate",
-    "pk": 25,
+    "pk": 22,
     "fields": {
       "template_key": "SEND_SA_WRONG_CUSTOMER_UCN",
       "template": "Incorrect Customer ID or UCN",
@@ -222,38 +204,209 @@
   },
   {
     "model": "gladminds.messagetemplate",
-    "pk": 26,
+    "pk": 23,
     "fields": {
       "template_key":"SEND_SA_NO_VALID_COUPON",
-      "template":"No Digitised FSC available for Customer ID {0}",
+      "template":"No Digitised FSC for the service type {1} available for Customer ID {0}",
       "description":"Send when there is no UCN or all UCN are closed"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 24,
+    "fields": {
+      "template_key":"SEND_OTP",
+      "template":"Your one time password is {0}",
+      "description":"Send OTP"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 25,
+    "fields": {
+      "template_key": "SEND_TEMPORARY_CUSTOMER_ID",
+      "template": "Dear {customer_name}, Congrats on your purchase of Bajaj bike. Your Temporary customer id is {sap_customer_id}. Refer this id during servicing till you get Permanent Customer ID",
+      "description": "Send temporary customer ID to Customer"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 26,
+    "fields": {
+      "template_key": "SEND_REPLACED_CUSTOMER_ID",
+      "template": "Dear {customer_name}, Your Permanent customer ID is {sap_customer_id} for your Bajaj Bike. Please refer this ID during servicing of your Bike",
+      "description": "Send new sap ID to Customer"
     }
   },
   {
     "model": "gladminds.messagetemplate",
     "pk": 27,
     "fields": {
-      "template_key":"SEND_OTP",
-      "template":"Your one time use password is {0}",
-      "description":"Send OTP"
+      "template_key": "UNAUTHORISED_SA",
+      "template": "Sorry, you are not authorised to initiate this activity",
+      "description": "Send message to unauthorised SA"
     }
   },
   {
     "model": "gladminds.messagetemplate",
     "pk": 28,
     "fields": {
-      "template_key": "SEND_SA_WRONG_UCN",
-      "template": "Incorrect UCN",
-      "description": "Send message to SA reg wrong UCN"
+      "template_key": "COUPON_ALREADY_CLOSED",
+      "template": "The FSC is already tagged in the system",
+      "description": "Send coupon is closed message to an initiator if it has been closed by some other sa"
     }
   },
   {
     "model": "gladminds.messagetemplate",
     "pk": 29,
     "fields": {
-      "template_key": "SEND_SA_WRONG_CUSTOMER",
-      "template": "Incorrect Customer ID",
-      "description": "Send message to SA reg wrong Customer-Id"
+      "template_key": "SEND_RCV_FEEDBACK",
+      "template": "Thanks for providing {type}. We will get back to you soon.",
+      "description": "Send this message when service advisor files complain successfully"
+    }
+  }, 
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 30,
+    "fields": {
+      "template_key": "RCV_USER_COMPLAINT",
+      "template": "{message}",
+      "description": "Receive this message when service advisor files complain"
+    }
+  },
+    {
+    "model": "gladminds.messagetemplate",
+    "pk": 31,
+    "fields": {
+      "template_key": "SEND_MSG_TO_ASSIGNEE",
+      "template": "A GladMinds user has a feedback for us, which says: {message} Its has been reported by {reporter} on {created_date}. It has been assigned to you. Please address the issue as soon as possible.",
+      "description": "You have been assigned this task. "
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 32,
+    "fields": {
+      "template_key": "INITIATOR_FEEDBACK_DETAILS",
+      "template": "Your {type} has been assigned to one of our technician.Severity:{priority}.",
+      "description": "Your feedback has been assigned to one of our technician  is looking into it."
+      }
+   },
+  {
+    "model": "gladminds.messagetemplate",   
+    "pk": 33,
+    "fields": {
+      "template_key": "INITIATOR_FEEDBACK_STATUS",
+      "template": "Your {type} has been resolved.",
+      "description": "Your Complaint has been resolved."
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",   
+    "pk": 34,
+    "fields": {
+      "template_key": "COUPON_ALREADY_INPROGRESS",
+      "template": "Free service {service_type} is already in-progress. Please proceed for the same for Customer ID {customer_id}",
+      "description": "Send in-progress coupon if it is available"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 35,
+    "fields": {
+      "template_key": "SEND_SA_OTHER_VALID_COUPON",
+      "template": "The request cannot be processed as the the current status of the requested service type {req_service_type} is {req_status}.",
+      "description": "Send in-progress coupon if it is available"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 36,
+    "fields": {
+      "template_key":"RCV_CUSTOMER_DETAILS",
+      "template":"{params} {message}",
+      "description":"Receive this message for getting customer details"
+	}
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 37,
+    "fields": {
+      "template_key": "SEND_CUSTOMER_DETAILS",
+      "template": "Your {0} is {1}.",
+      "description": "Send id or vin to customer depending upon message he sent"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 38,
+    "fields": {
+      "template_key": "INVALID_RECOVERY_MESSAGE",
+      "template": "Incorrect {0} or no matching details.",
+      "description": "Send on if customer id or VIN does not exits."
+    }
+  },
+   {
+    "model": "gladminds.messagetemplate",
+    "pk": 39,
+    "fields": {
+      "template_key":"RCV_ACCUMULATE_POINT",
+      "template":"{ucp}",
+      "description":"Receive this message when mechanic send spare to accumulate points"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 40,
+    "fields": {
+      "template_key":"SEND_ACCUMULATED_POINT",
+      "template":"Dear {mechanic_name}, {added_points} points updated. Total points: {total_points}. To Redeem, Send SMS with Code RD<SPACE><PRODUCT CODE> to 9561112809",
+      "description":"Send this message when mechanic send product to accumulate points"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 41,
+    "fields": {
+      "template_key":"SEND_INVALID_UCP",
+      "template":"Invalid Entry… UPC does not exist in our records. Please contact our Customer Care at: 9611545154",
+      "description":"Send this message when ucp does not exists in our records"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 42,
+    "fields": {
+      "template_key":"RCV_REDEEM_POINT",
+      "template":"{product_id}",
+      "description":"Receive this message when mechanic send product to redeem points"
+    }
+  },
+   {
+    "model": "gladminds.messagetemplate",
+    "pk": 43,
+    "fields": {
+      "template_key":"SEND_REDEEM_POINT",
+      "template":"Dear {mechanic_name}, redemption request for {product_code} received. We shall update you when your products are shipped. Total points: {total_points}",
+      "description":"Send this message when mechanic send product to redeem points"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 44,
+    "fields": {
+      "template_key":"SEND_INSUFFICIENT_POINT",
+      "template":"You have insufficient points… Please accumulate {shortage_points} points for the specified Redemption",
+      "description":"Send this message when mechanic does not have enough points"
+    }
+  },
+   {
+    "model": "gladminds.messagetemplate",
+    "pk": 44,
+    "fields": {
+      "template_key":"UNREGISERED_USER",
+      "template":"Unregistered user. Please register with Bajaj Auto Ltd. (Contact#: 9611545154) to accumulate and redeem points and get home exclusive gifts.",
+      "description":"Send this message when mechanic is unregistered"
     }
   }
 ]

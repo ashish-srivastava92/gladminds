@@ -1,6 +1,6 @@
 django-debug-toolbar==1.2.1
 Django==1.6.4
-celery==3.1.12
+celery==3.1.16
 MySQL-python==1.2.5
 gunicorn==18.0
 django-suit==0.2.8
@@ -23,3 +23,4 @@ django-tastypie-swagger==0.1.2
 django_otp==0.2.7
 django-oauth2-provider
 newrelic==2.20.0.17
+django-composite-field

@@ -2,23 +2,26 @@
 import os
 import djcelery
 djcelery.setup_loader()
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 PROJECT_DIR = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]
 BASE_DIR = os.path.join(PROJECT_DIR, os.pardir)
 STATIC_DIR = os.path.join(PROJECT_DIR, "static")
 TEMPLATE_DIR = os.path.join(PROJECT_DIR, "templates")
+EMAIL_DIR = os.path.join(TEMPLATE_DIR, "email")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
+
+TIMEZONE = 'Asia/Kolkata'
 
 ALLOWED_HOSTS = ['*']
 
 ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
-                    'service', 'check': 'a', 'close': 'c', 'brand': 'brand'}
+                    'service', 'check': 'a', 'close': 'c', 'brand': 'brand',
+                    'service_desk': 'sd', 'customer_detail_recovery': 'r',
+                    'accumulate_point':'ac', 'redeem_point':'rd'}
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
-
 COUPON_VALID_DAYS = 30
 
 TOTP_SECRET_KEY = '93424'
@@ -49,8 +52,7 @@ SUIT_CONFIG = {
     'SHOW_REQUIRED_ASTERISK': True,
     'MENU': (
         {'app': 'gladminds', 'label': 'Data', 'icon': ' icon-folder-open',
-         'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
-                    {'model': 'dispatchedproduct',
+         'models': ({'model': 'dispatchedproduct',
                      'label': 'Feed -> Product Dispatch'},
                     {'model': 'productdata',
                      'label': 'Feed -> Product Purchase'},
@@ -60,22 +62,26 @@ SUIT_CONFIG = {
                      'label': 'Save Form -> ASC'},
                     {'model': 'auditlog', 'label': 'Audit Log'},
                     {'model': 'datafeedlog',
-                     'label': 'Feed Log'}, 'uploadproductcsv',
+                     'label': 'Feed Log'},
+                    {'model': 'customertempregistration',
+                     'label': ' Customer registration'}, 'uploadproductcsv',
                     'messagetemplate', 'emailtemplate', 'gladmindusers',)},
         {'app': 'aftersell', 'label': 'AfterSell', 'icon': ' icon-folder-open',
          'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
-                    {'model': 'dispatchedproduct',
-                     'label': 'Feed -> Product Dispatch'},
-                    {'model': 'productdata',
-                     'label': 'Feed -> Product Purchase'},
-                    {'model': 'coupondata',
-                     'label': 'Feed -> Coupon Redemption'},
                     {'model': 'ascsaveform',
                      'label': 'Save Form -> ASC'},
                     {'model': 'auditlog', 'label': 'Audit Log'},
                     {'model': 'datafeedlog',
-                     'label': 'Feed Log'}, 'uploadproductcsv',
+                     'label': 'Feed Log'},
+                    {'model': 'feedback',
+                     'label': 'Help Desk'}, 'uploadproductcsv',
                     'messagetemplate', 'emailtemplate', 'gladmindusers',)},
+        {'app': 'gladminds', 'label': 'Loyalty', 'icon': ' icon-folder-open',
+         'models': ({'model': 'mechanic', 'label': 'Mechanic'},
+				    {'model': 'sparepart', 'label': 'Spare Part'},
+				    {'model': 'productcatalog', 'label': 'Product Catalog'},)},
+        {'app': 'afterbuy', 'label': 'AfterBuy', 'icon': ' icon-folder-open',
+         'models': ({'model': 'usernotification', 'label': 'notification'},)},
         {'app': 'djcelery', 'label': 'Job Management', 'icon': 'icon-tasks'})
 }
 
@@ -94,7 +100,7 @@ DATABASES = {
         # Empty for localhost through domain sockets or '127.0.0.1' for
         # localhost through TCP.
         'HOST': '',
-        'PORT': '',                      # Set to empty string for default.
+        'PORT': '',  # Set to empty string for default.
     }
 }
 
@@ -165,28 +171,28 @@ SECRET_KEY = 'bbu7*-yvup0-*laxug+n5tf^lga_bwtrxu%y4ilb#$lv8%zw0m'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-# for performance enable cached templates 
-#      ('django.template.loaders.cached.Loader', (
-#         'django.template.loaders.filesystem.Loader',
-#         'django.template.loaders.app_directories.Loader',
-#     )),
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
+                    # for performance enable cached templates
+                    #      ('django.template.loaders.cached.Loader', (
+                    #         'django.template.loaders.filesystem.Loader',
+                    #         'django.template.loaders.app_directories.Loader',
+                    #     )),
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                    #  'django.template.loaders.eggs.Loader',
+                   )
 
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django_otp.middleware.OTPMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    #'gladminds.middleware.GladmindsMiddleware'
-    # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-)
+MIDDLEWARE_CLASSES = ('django.middleware.common.CommonMiddleware',
+                      'django.contrib.sessions.middleware.SessionMiddleware',
+                      'django.contrib.auth.middleware.AuthenticationMiddleware',
+                      'django_otp.middleware.OTPMiddleware',
+                      # 'django.middleware.csrf.CsrfViewMiddleware',
+                      'django.contrib.messages.middleware.MessageMiddleware',
+                      'corsheaders.middleware.CorsMiddleware',
+                      'gladminds.middleware.GladmindsMessageMiddleware'
+                      # 'gladminds.middleware.GladmindsMiddleware'
+                      # Uncomment the next line for simple clickjacking protection:
+                      # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+                   )
 
 CORS_ORIGIN_ALLOW_ALL = True
 ROOT_URLCONF = 'gladminds.urls'
@@ -263,15 +269,26 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
+         'console':{
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'sql': {
+            'level': 'DEBUG',
+            'filename': '/var/log/gladminds/sql.log',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
+        },
         'gladminds_logs': {
             'level': 'INFO',
-            'filename': 'log/gladminds/app/gladminds.log',
+            'filename': '/var/log/gladminds/gladminds.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         },
         'afterbuy_logs': {
             'level': 'INFO',
-            'filename': 'log/gladminds/app/afterbuy.log',
+            'filename': '/var/log/gladminds/afterbuy.log',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
         }
@@ -283,17 +300,22 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['sql'],
+            'propagate': True,
+        },
         'gladminds': {
-            'handlers': ['gladminds_logs'],
+            'handlers': ['gladminds_logs','console'],
             'level': 'INFO',
             'propagate': True,
         },
         'spyne': {
-            'handlers': ['gladminds_logs'],
+            'handlers': ['gladminds_logs','console'],
             'level': 'WARN',
             'propagate': True,
         }, 'afterbuy': {
-            'handlers': ['afterbuy_logs'],
+            'handlers': ['afterbuy_logs','console'],
             'level': 'DEBUG',
             'propagate': True,
         }
@@ -302,10 +324,12 @@ LOGGING = {
 
 WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR + '/coupon_redeem.wsdl'
 
+WSDL_CUSTOMER_REGISTRATION_LOC = TEMPLATE_DIR + '/customer_registration.wsdl'
+
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
     "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds@hashedin.com", "naveen.shankar@gladminds.co"],
+    "receiver": ["gladminds@hashedin.com", "naveen.shankar@gladminds.co", "support@gladminds.co","jojibabu.vege@gladminds.co"],
     "subject": "Gladminds Feed Report",
     "body": """""",
 }
@@ -313,7 +337,7 @@ MAIL_DETAIL = {
 FEED_FAILURE_MAIL_DETAIL = {
 
     "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds@hashedin.com"],
+    "receiver": ["gladminds+alerts@hashedin.com", "support@gladminds.co"],
     "subject": "Gladminds Feed Failure Mail",
     "body": """""",
 }
@@ -323,14 +347,26 @@ UCN_RECOVERY_MAIL_DETAIL = {
     "receiver": ["gladminds@hashedin.com"],
     "subject": "Gladminds UCN Recovery Mail",
     "body": """""",
-} 
+}
 
-OTP_MAIL = {
-                  "sender":"support@gladminds.co",
-                  "subject":"Reset Password",
-                  "receiver": [""],
-                  "body": """""",
-              }
+VIN_DOES_NOT_EXIST_DETAIL = {
+    "sender": "support@gladminds.co",
+    "receiver": [],
+    "subject": "Request for Dispatch feed",
+    "body": """""",
+}
+
+REGISTER_ASC_MAIL_DETAIL = {
+    "sender": "support@gladminds.co",
+    "receiver": [],
+    "subject": "ASC Registration Mail",
+    "body": """""",
+}
+
+OTP_MAIL = {"sender":"support@gladminds.co",
+            "subject":"Reset Password",
+            "receiver": [""],
+            "body": """""",}
 
 
 # AfterBuy File Upload location configuration
@@ -348,14 +384,12 @@ MEDIA_URL = '/media/'
 
 # S3 Configuration
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_ACCESS_KEY_ID = 'AKIAIL7IDCSTNCG2R6JA'
-AWS_SECRET_ACCESS_KEY = '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'
 AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 # S3_URL = 'http://%s.s3-website-us-east-1.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 
 
 DEFAULT_COUPON_STATUS = 1
-DELAY_IN_CUSTOMER_UCN_MESSAGE = 180
+DELAY_IN_CUSTOMER_UCN_MESSAGE = 5
 ENABLE_AMAZON_SQS = False
 
 #################Registration Configuration#################################
@@ -377,15 +411,30 @@ REGISTRATION_CONFIG = {
 ###########################################################################
 ########################Password Postfix for dealers######################
 PASSWORD_POSTFIX = '@123'
+TEMP_ID_PREFIX = 'T'
+TEMP_SA_ID_PREFIX = 'SA'
 ###########################################################################
 ########################Feed Failure Mail enabled ######################
 FEED_FAILURE_MAIL_ENABLED = True
 ##########################################################################
 #########################New relic file location########################
-NEW_RELIC_FILE_LOCATION = './src/newrelic_qa.ini'
+NEW_RELIC_FILE_LOCATION = './src/'
 ########################################################################
 #######################SMS_HEALTH_CHECK_INTERVAL
-SMS_HEALTH_CHECK_INTERVAL=6
+SMS_HEALTH_CHECK_INTERVAL = 6
 #######################FEED_HEALTH_CHECK_INTERVAL
-FEED_HEALTH_CHECK_INTERVAL=8
+FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
+AIRTEL_IP = '54.84.243.77'
+SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
+                              'pass':'bajaj',
+                              'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',
+                              'message_url': 'http://117.99.128.32:80/login/pushsms.php'},
+                  'KAP': {'login':'GladMinds1',
+                          'pass':'kap@user!23',
+                          'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
+                          'working_key': '2uj6gnnnlbx37x436cppq87176j660w9',
+                          'sender_id': 'GLADMS'}
+                  }
+##################################################################################################
+ENABLE_SERVICE_DESK = True

@@ -1,5 +1,6 @@
 import logging
 import os
+import pytz
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -14,6 +15,7 @@ from gladminds import feed
 import xml.etree.ElementTree as ET
 from django.utils import unittest
 from django.db import transaction
+
 
 logger = logging.getLogger('gladminds')
 
@@ -186,11 +188,13 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         with transaction.atomic():
             response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
             self.assertEqual(200, response.status_code)
+
         response_content = response.content
         xml_parser = ET.fromstring(response_content)
+        
         with transaction.atomic():
             status = xml_parser.findall('*//{http://api.gladmindsplatform.co/api/v1/bajaj/feed/}postDealerResult')[0].text
-            self.assertEqual(status, 'SUCCESS')
+            self.assertEqual(status, 'FAILURE')
 
     def test_update_customer_number(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
@@ -209,9 +213,9 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         xml_data = open(file_path, 'r').read()
         response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
         self.assertEqual(200, response.status_code)
-        gm_user = GladMindUsers.objects.all()
-        self.assertEqual(gm_user[0].phone_number, "+919845340297", "Customer Phone Number is not updated")
-        self.assertEqual(GladMindUsers.objects.count(), 1, "Total GM User")
+        product_object = self.get_product_details(vin='XXXXXXXXXX')
+        self.assertEqual(product_object.customer_phone_number.phone_number, "+919845340297", "Customer Phone Number is not updated")
+        self.assertEqual(GladMindUsers.objects.count(), 2, "Total GM User")
 
     def test_authentication(self):
         user = User.objects.create_user('testuser', 'testuserpassword@gladminds.co', 'testuserpassword')
@@ -263,6 +267,48 @@ class FeedsResourceTest(GladmindsResourceTestCase):
         self.assertEqual(200, response.status_code)
         
         dealer = RegisteredDealer.objects.filter(dealer_id='GMDEALER001')
-        asc = RegisteredASC.objects.get(asc_id='ASC001')
-        self.assertEquals('xyz', asc.asc_name)
+        asc = RegisteredDealer.objects.filter(dealer_id='ASC001')
+        self.assertEquals('ASC001', asc[0].dealer_id)
         
+    def test_old_fsc_feed(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+        
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/old_fsc_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+        
+        coupon_data = CouponData.objects.filter(vin__vin='XXXXXXXXXX', service_type=2)
+        self.assertEquals(coupon_data[0].status, 6)
+        
+    def test_credit_note_feed(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_dispatch_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/product_purchase_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data, content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+        
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/credit_note_feed.xml')
+        xml_data = open(file_path, 'r').read()
+        response = self.client.post('/api/v1/bajaj/feed/?wsdl', data=xml_data,content_type='text/xml')
+        self.assertEqual(200, response.status_code)
+        
+        coupon_data = CouponData.objects.filter(vin__vin='XXXXXXXXXX', service_type=1)
+        utc = pytz.utc
+        timezone = pytz.timezone('Asia/Kolkata')
+        credit_date = coupon_data[0].credit_date.astimezone(timezone).replace(tzinfo=None)
+        credit_date = credit_date.strftime("%Y-%m-%d")
+        self.assertEquals(credit_date, '2013-12-06')
+        self.assertEquals(coupon_data[0].credit_note, 'paid')

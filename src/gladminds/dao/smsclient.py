@@ -1,18 +1,22 @@
 from django.conf import settings
-from gladminds.utils import import_json
 import json
+import logging
 import requests
 
-__all__ = ['AirtelSmsClient', 'TwilioSmsClient']
+logger = logging.getLogger("gladminds")
 
-def load_gateway():
-    client = settings.SMS_CLIENT_DETAIL
-    if settings.SMS_CLIENT is 'MOCK':
+__all__ = ['KapSmsClient', 'AirtelSmsClient', 'TwilioSmsClient']
+
+def load_gateway(sms_client):
+    client = settings.SMS_CLIENT_DETAIL[sms_client]
+    if sms_client == 'MOCK':
         return MockSmsClient(**client)
-    elif settings.SMS_CLIENT is 'AIRTEL':
+    elif sms_client == 'AIRTEL':
         return AirtelSmsClient(**client)
-    elif settings.SMS_CLIENT is 'TWILIO':
+    elif sms_client == 'TWILIO':
         return TwilioSmsClient(**client)
+    elif sms_client == 'KAP':
+        return KapSmsClient(**client)
         
 class SmsClientExcetion(Exception):
     
@@ -67,6 +71,45 @@ class SmsClientBaseObject(object):
     
     def _set_session_id(self, session_id):
         self.session_id = session_id
+        
+class KapSmsClient(SmsClientBaseObject):
+    
+    def __init__(self, *args, **kwargs):
+        self.working_key  = kwargs['working_key']
+        self.sender_id = kwargs['sender_id']
+        self.login = kwargs['login']
+        self.password = kwargs['pass']
+        self.message_url = kwargs['message_url']
+        
+    def authenticate(self):
+        return    
+    
+    def send_stateless(self, **kwargs):
+        phone_number = kwargs['phone_number']
+        message = kwargs['message']
+        logger.info(
+            '[INFO]: sending message {0} to {1} through kap'.format(message, phone_number))
+        params = {'to' : phone_number, 'message' : message, 'workingkey' : self.working_key, 'sender': self.sender_id}
+        return self.send_request(url = self.message_url, params = params)
+        
+    def send_stateful(self, **kwargs):
+        phone_number = kwargs['phone_number']
+        message = kwargs['message']
+        logger.info(
+            '[INFO]: sending message {0} to {1} through kap'.format(message, phone_number))
+        params = {'workingkey' : self.working_key, 'sender': self.sender_id, 'to' : phone_number, 'message' : message}
+        return self.send_request(url = self.message_url, params = params)
+    
+    def send_request(self, url, params):
+        logger.info(
+            '[INFO]: sending message to KAP url {0}'.format(url))        
+        resp = requests.get(url = url, params = params)
+        logger.info(
+            '[INFO]: Response from KAP url {0} {1}'.format(resp.content, resp.status_code))          
+        assert resp.status_code==200
+#         json = import_json()
+#         data = resp.content
+        return resp.status_code  
 
 class AirtelSmsClient(SmsClientBaseObject):
     
@@ -81,6 +124,8 @@ class AirtelSmsClient(SmsClientBaseObject):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
         session_id = self._get_session_id()
+        logger.info(
+            '[INFO]: sending message {0} to {1} through airtel'.format(message, phone_number))        
         params = {'mob_no' : phone_number, 'text' : message, 'login' : self.login, 'pass': self.password}
         return self.send_request(url = self.message_url, params = params)
     
@@ -88,11 +133,17 @@ class AirtelSmsClient(SmsClientBaseObject):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
         session_id = self._get_session_id()
+        logger.info(
+            '[INFO]: sending message {0} to {1} through airtel'.format(message, phone_number))         
         params = {'mob_no' : phone_number, 'text' : message, 'sessionID' : session_id}
         return self.send_request(url = self.message_url, params = params)
     
     def send_request(self, url, params):
+        logger.info(
+            '[INFO]: sending message to Airtel url {0}'.format(url))               
         resp = requests.get(url = url, params = params)
+        logger.info(
+            '[INFO]: Response from Airtel url {0} {1}'.format(resp.content, resp.status_code))          
         assert resp.status_code==200
 #         json = import_json()
 #         data = resp.content

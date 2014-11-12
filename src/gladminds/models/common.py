@@ -1,7 +1,8 @@
+from datetime import datetime
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
-from datetime import datetime
+from django.db.models.signals import post_save
 ##################BRAND-PRPDUCT MODELS#######################
 '''
 BrandData contains brand related information
@@ -69,6 +70,9 @@ class ProductTypeData(models.Model):
         upload_to=settings.AFTERBUY_PRODUCT_TYPE_LOC, blank=True)
     isActive = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
+    warranty_email = models.EmailField(max_length=215, null=True, blank=True)
+    warranty_phone = models.CharField(
+        max_length=15, blank=False, null=False)
 
     class Meta:
         app_label = "gladminds"
@@ -97,10 +101,25 @@ class GladMindUsers(models.Model):
     country = models.CharField(max_length=255, null=True, blank=True)
     state = models.CharField(max_length=255, null=True, blank=True)
     date_of_birth = models.CharField(max_length=255, null=True, blank=True)
-    gender = models.IntegerField(max_length=50, null=True, blank=True)
     img_url = models.FileField(upload_to="users", blank=True)
     thumb_url = models.FileField(upload_to="users", blank=True)
     isActive = models.BooleanField(default=True)
+    #added these attributes for afterbuy application
+    accepted_terms = models.BooleanField(default=False)
+    SIZE_CHOICES = (
+        ('S', 'Small'),
+        ('M', 'Medium'),
+        ('L', 'Large'),
+        ('XL', 'Extra Large'),
+    )
+    GENDER_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('X', 'Other'),
+    )
+    gender = models.CharField(max_length=2, choices=GENDER_CHOICES)
+    tshirt_size = models.CharField(max_length=2, choices=SIZE_CHOICES)
+    pincode = models.CharField(max_length=15, null=True, blank=True)
 
     class Meta:
         app_label = "gladminds"
@@ -149,6 +168,7 @@ class ProductData(models.Model):
     created_on = models.DateTimeField(null=True, default=datetime.now())
     isActive = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
+    veh_reg_no = models.CharField(max_length=15, null=True, blank=True)
 
     class Meta:
         app_label = "gladminds"
@@ -160,7 +180,8 @@ class ProductData(models.Model):
 ####################################################################
 
 STATUS_CHOICES = ((1, 'Unused'), (2, 'Closed'), (
-    3, 'Expired'), (4, 'In Progress'), (5, 'Exceeds Limit'))
+    3, 'Expired'), (4, 'In Progress'), (
+       5, 'Exceeds Limit'), (6, 'Closed Old Fsc'))
 
 
 class CouponData(models.Model):
@@ -171,7 +192,7 @@ class CouponData(models.Model):
     valid_kms = models.IntegerField(max_length=10, null=False)
     service_type = models.IntegerField(max_length=10, null=False)
     sa_phone_number = models.ForeignKey('aftersell.ServiceAdvisor', null=True, blank=True)
-    status = models.SmallIntegerField(choices=STATUS_CHOICES, default=1)
+    status = models.SmallIntegerField(choices=STATUS_CHOICES, default=1, db_index=True)
     closed_date = models.DateTimeField(null=True, blank=True)
     mark_expired_on = models.DateTimeField(null=True, blank=True)
     actual_service_date = models.DateTimeField(null=True, blank=True)
@@ -180,6 +201,11 @@ class CouponData(models.Model):
     schedule_reminder_date = models.DateTimeField(null=True, blank=True)
     order = models.PositiveIntegerField(default=0)
     extended_date = models.DateTimeField(null=True, blank=True)
+    servicing_dealer = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
+    sent_to_sap = models.BooleanField(default=False)
+    credit_date = models.DateTimeField(null=True, blank=True)
+    credit_note = models.CharField(max_length=50, null=True, blank=True)
+    special_case = models.BooleanField(default=False)
 
     class Meta:
         app_label = "gladminds"
@@ -188,6 +214,37 @@ class CouponData(models.Model):
     def __unicode__(self):
         return self.unique_service_coupon
 
+class OldFscData(models.Model):
+    vin = models.ForeignKey(ProductData, null=True, editable=False)
+    unique_service_coupon = models.CharField(
+        max_length=215, null=True)
+    valid_days = models.IntegerField(max_length=10, null=True)
+    valid_kms = models.IntegerField(max_length=10, null=True)
+    service_type = models.IntegerField(max_length=10, null=True)
+    sa_phone_number = models.ForeignKey('aftersell.ServiceAdvisor', null=True, blank=True)
+    status = models.SmallIntegerField(choices=STATUS_CHOICES, default=1, db_index=True)
+    closed_date = models.DateTimeField(null=True, blank=True)
+    mark_expired_on = models.DateTimeField(null=True, blank=True)
+    actual_service_date = models.DateTimeField(null=True, blank=True)
+    actual_kms = models.CharField(max_length=10, null=True, blank=True)
+    last_reminder_date = models.DateTimeField(null=True, blank=True)
+    schedule_reminder_date = models.DateTimeField(null=True, blank=True)
+    order = models.PositiveIntegerField(default=0)
+    extended_date = models.DateTimeField(null=True, blank=True)
+    servicing_dealer = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
+    sent_to_sap = models.BooleanField(default=False)
+    credit_date = models.DateTimeField(null=True, blank=True)
+    credit_note = models.CharField(max_length=50, null=True, blank=True)
+    special_case = models.BooleanField(default=False)
+    missing_field = models.CharField(max_length=50, null=True, blank=True)
+    missing_value = models.CharField(max_length=50, null=True, blank=True)
+
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "Old Coupon Information"
+
+    def __unicode__(self):
+        return str(self.id)
 ##################################################################
 #############Service Advisor and Coupon Relationship MODEL########
 
@@ -195,6 +252,7 @@ class CouponData(models.Model):
 class ServiceAdvisorCouponRelationship(models.Model):
     unique_service_coupon = models.ForeignKey(CouponData, null=False)
     service_advisor_phone = models.ForeignKey('aftersell.ServiceAdvisor', null=False)
+    dealer_id = models.ForeignKey('aftersell.RegisteredDealer', null=True, blank=True)
 
     class Meta:
         app_label = 'gladminds'
@@ -245,26 +303,101 @@ class EmailTemplate(models.Model):
         app_label = "gladminds"
         verbose_name_plural = "Email Template"
 
-
-class SASaveForm(models.Model):
-    name = models.CharField(max_length=255, null=False)
-    phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)
-    status = models.CharField(max_length=10, blank=False, null=False)
-
-    class Meta:
-        app_label = "gladminds"
-        verbose_name_plural = "SA Save Form"
-
-
-class CustomerUpdatedInfo(models.Model):
+class CustomerTempRegistration(models.Model):
     product_data = models.ForeignKey(ProductData, null=True, blank=True)
     new_customer_name = models.CharField(max_length=50, null=True, blank=True)
-    new_number = models.CharField(max_length=15, unique=True)
+    new_number = models.CharField(max_length=15)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
+    temp_customer_id = models.CharField(max_length=50, null=False, blank=False, unique=True)
+    sent_to_sap = models.BooleanField(default=False)
+    remarks = models.CharField(max_length=500, null=True, blank=True)
+    tagged_sap_id = models.CharField(
+        max_length=215, null=True, blank=True, unique=True)
 
     class Meta:
         app_label = "gladminds"
-        verbose_name_plural = "Customer update info"
+        verbose_name_plural = "Customer temporary info"
 
     def __unicode__(self):
         return self.new_customer_name
+    
+######################################################################################
+
+class ProductInsuranceInfo(models.Model):
+    product = models.ForeignKey(ProductData, null=False)
+    issue_date = models.DateTimeField(null=True, blank=False)
+    expiry_date = models.DateTimeField(null=True, blank= False)
+    insurance_brand_id = models.CharField(max_length=15, null=True, blank=True)
+    insurance_brand_name = models.CharField(max_length=50, null=True, blank=True)
+    policy_number = models.CharField(max_length=15, unique=True, blank=True)
+    premium = models.CharField(max_length=50, null=True, blank=True)
+    insurance_email = models.EmailField(max_length=215, null=True, blank=True)
+    insurance_phone = models.CharField(
+        max_length=15, blank=False, null=False)
+    image_url = models.CharField(max_length=215, null=True, blank=True)
+    
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "product insurance info"
+    
+#######################################################################################
+
+class ProductWarrantyInfo(models.Model):
+    product = models.ForeignKey(ProductData, null=False)
+    issue_date = models.DateTimeField(null=True, blank=False)
+    expiry_date = models.DateTimeField(null=True, blank= False)
+    warranty_brand_id = models.CharField(max_length=15, null=True, blank=True)
+    warranty_brand_name = models.CharField(max_length=50, null=True, blank=True)
+    policy_number = models.CharField(max_length=15, unique=True, blank=True)
+    premium = models.CharField(max_length=50, null=True, blank=True)
+    image_url = models.CharField(max_length=215, null=True, blank=True)
+    
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "product warranty info"
+        
+########################################################################################
+
+class SparesData(models.Model):
+    spare_brand = models.ForeignKey(BrandData, null=False)
+    spare_name = models.CharField(max_length=50, null=True, blank=True)
+    spare_contact = models.CharField(max_length=50, null=True, blank=True)
+    
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "spare info"
+    
+#########################################################################################
+#######################LOYALTY TABLES#################################
+
+class Mechanic(models.Model):
+    mechanic_id = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    total_points = models.IntegerField(max_length=50, null=True, blank=True)
+    name = models.CharField(max_length=150, null=True, blank=True)
+    address = models.CharField(max_length=250, null=True, blank=True)
+    phone_number = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    
+    class Meta:
+        app_label = "gladminds"
+
+class SparePart(models.Model):
+    part_serial_number = models.IntegerField(max_length=100, null=True, blank=True)
+    points = models.IntegerField(max_length=50, null=True, blank=True)
+    price = models.IntegerField(max_length=50, null=True, blank=True)
+    validity_from =  models.DateTimeField(null=True, blank= True)
+    validity_to =  models.DateTimeField(null=True, blank= True)
+    unique_part_code = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    sap_part_number = models.CharField(max_length=50, null=True, blank=True)
+    
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "spare parts"
+
+class ProductCatalog(models.Model):
+    product_code = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    product_name = models.CharField(max_length=50, null=True, blank=True)
+    points = models.IntegerField(max_length=50, null=True, blank=True)
+    
+    class Meta:
+        app_label = "gladminds"
+        verbose_name_plural = "product catalog"

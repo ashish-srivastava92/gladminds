@@ -1,4 +1,6 @@
+'use strict';
 (function() {
+
 	$('.tasksER').click(function(e) {
 		var messageBlock = $('.user-message .message');
 		var sqsTasks = {'task' : e.currentTarget.parentNode.className};
@@ -22,8 +24,4 @@
 			}
 		});
 	});
-	
-	
-
 })();
-

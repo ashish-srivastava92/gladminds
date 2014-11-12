@@ -1,3 +1,4 @@
+
 from __future__ import absolute_import
 from celery import shared_task
 from django.conf import settings
@@ -8,16 +9,24 @@ from gladminds import mail
 import logging
 from gladminds import taskmanager, feed, export_file, exportfeed
 from gladminds.models import common
-
+from gladminds import  message_template as templates
+from gladminds import utils
+import pytz
+from gladminds.utils import convert_utc_to_local_time
 logger = logging.getLogger("gladminds")
-
-sms_client = load_gateway()
+__all__ = ['GladmindsTaskManager']
+AUDIT_ACTION = 'SEND TO QUEUE'
 
 
 """
 This task send sms to customer on customer registration
 """
 
+def set_gateway(**kwargs):
+    sms_client = kwargs.get('sms_client', None)
+    logger.info('sms_client is {0}'.format(sms_client))
+    sms_client_gateway = load_gateway(sms_client)
+    response_data = sms_client_gateway.send_stateless(**kwargs)
 
 @shared_task
 def send_registration_detail(*args, **kwargs):
@@ -26,13 +35,33 @@ def send_registration_detail(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_registration_detail.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         audit_log(status=status, reciever=phone_number, message=message)
+
+
+"""
+This task send customer details recovery by sms 
+"""
+
+
+def customer_detail_recovery(*args, **kwargs):
+    status = "success"
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        set_gateway(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        customer_detail_recovery.retry(
+            exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        audit_log(status=status, reciever=phone_number, message=message)
+
 
 """
 This task send customer valid service detail
@@ -45,7 +74,7 @@ def send_service_detail(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        response_data = sms_client.send_stateless(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_service_detail.retry(
@@ -64,7 +93,7 @@ def send_coupon_validity_detail(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_validity_detail.retry(
@@ -84,7 +113,7 @@ def send_coupon_detail_customer(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_detail_customer.retry(
@@ -103,7 +132,7 @@ def send_reminder_message(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_reminder_message.retry(
@@ -122,7 +151,7 @@ def send_coupon_close_message(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_close_message.retry(
@@ -140,12 +169,12 @@ def send_otp(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_otp.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        audit_log(status = status, reciever=phone_number, message=message)
+        audit_log(status=status, reciever=phone_number, message=message)
 
 
 @shared_task
@@ -154,7 +183,7 @@ def send_coupon(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
@@ -165,6 +194,29 @@ def send_coupon(*args, **kwargs):
 This job send coupon close message to customer
 """
 
+def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
+    created_date = feedback_obj.created_date
+    try:
+        message = templates.get_template(template_name).format(type=feedback_obj.type,
+                                                               reporter=feedback_obj.reporter,
+                                                               message=feedback_obj.message,
+                                                               created_date=convert_utc_to_local_time(created_date),
+                                                               assign_to=feedback_obj.assign_to,
+                                                               priority=feedback_obj.priority)
+        if comment_obj and template_name == 'SEND_MSG_TO_ASSIGNEE':
+            message = message + 'Note :' + comment_obj.comments
+    except Exception as ex:
+        message = templates.get_template('SEND_INVALID_MESSAGE')
+    finally:
+        logger.info("Send complain message received successfully with %s" % message)
+        phone_number = utils.get_phone_number_format(phone_number)
+        if settings.ENABLE_AMAZON_SQS:
+            task_queue = utils.get_task_queue()
+            task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
+        else:
+            send_coupon.delay(phone_number=phone_number, message=message)
+    audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+    return {'status': True, 'message': message}
 
 @shared_task
 def send_close_sms_customer(*args, **kwargs):
@@ -172,7 +224,7 @@ def send_close_sms_customer(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_close_sms_customer.retry(
@@ -187,7 +239,7 @@ def send_brand_sms_customer(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_brand_sms_customer.retry(
@@ -206,7 +258,7 @@ def send_invalid_keyword_message(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_invalid_keyword_message.retry(
@@ -226,11 +278,26 @@ def send_on_product_purchase(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        respone_data = sms_client.send_stateless(**kwargs)
+        set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_on_product_purchase.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        audit_log(status=status, reciever=phone_number, message=message)
+        
+@shared_task
+def send_point(*args, **kwargs):
+    status = "success"
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        logger.info("request for sending sms received {0} message {1}".format(phone_number, message))
+        set_gateway(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        logger.error("[Eception:send_point]:{0}".format(ex))
+        send_point.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         audit_log(status=status, reciever=phone_number, message=message)
 
@@ -261,11 +328,24 @@ Crontab to set the is_expire=True for all those coupon which expire till current
 @shared_task
 def expire_service_coupon(*args, **kwargs):
     taskmanager.expire_service_coupon(*args, **kwargs)
+    
+"""
+Crontab to close notification for reminder
+"""
+
 
 """
 Crontab to import data from SAP to Gladminds Database
 """
 
+
+@shared_task
+def mark_feeback_to_closed(*args, **kwargs):
+    taskmanager.mark_feeback_to_closed(*args, **kwargs)
+
+"""
+Crontab to import data from SAP to Gladminds Database
+"""
 
 @shared_task
 def import_data(*args, **kwargs):
@@ -284,19 +364,15 @@ def export_close_coupon_data(*args, **kwargs):
 
 @shared_task
 def export_coupon_redeem_to_sap(*args, **kwargs):
-#     today = datetime.now().date()
-    today = datetime.now()
-    start_date = today - timedelta(days=1)
-    end_date = today
     redeem_obj = feed.CouponRedeemFeedToSAP()
-    feed_export_data = redeem_obj.export_data(
-        start_date=start_date, end_date=end_date)
+    feed_export_data = redeem_obj.export_data()
     if len(feed_export_data[0]) > 0:
-        coupon_redeem = exportfeed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
-                       'username'], password=settings.SAP_CRM_DETAIL['password'],
-                      wsdl_url=settings.COUPON_WSDL_URL, feed_type='Coupon Redeem Feed')
-        coupon_redeem.export(items=feed_export_data[0], item_batch=feed_export_data[
-                             1], total_failed_on_feed=feed_export_data[2])
+        coupon_redeem = exportfeed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL['username'],
+                                                          password=settings.SAP_CRM_DETAIL['password'],
+                                                          wsdl_url=settings.COUPON_WSDL_URL,
+                                                          feed_type='Coupon Redeem Feed')
+        coupon_redeem.export(items=feed_export_data[0], item_batch=feed_export_data[1],
+                             total_failed_on_feed=feed_export_data[2])
     else:
         logger.info("tasks.py: No Coupon closed during last day")
 
@@ -331,14 +407,13 @@ def export_asc_registeration_to_sap(*args, **kwargs):
         asc_registeration_data = feed.ASCRegistrationToSAP()
         feed_export_data = asc_registeration_data.export_data(phone_number)
         export_obj = exportfeed.ExportCouponRedeemFeed(
-               username=settings.SAP_CRM_DETAIL['username'], password=settings
-               .SAP_CRM_DETAIL['password'], wsdl_url=settings.ASC_WSDL_URL)
+               username=settings.SAP_CRM_DETAIL['username'], password=settings.SAP_CRM_DETAIL['password'],
+               wsdl_url=settings.ASC_WSDL_URL)
         export_obj.export(items=feed_export_data['item'],
                           item_batch=feed_export_data['item_batch'])
     except Exception as ex:
         status = "failed"
-        config = settings.REGISTRATION_CONFIG[
-                                         brand][feed_type]
+        config = settings.REGISTRATION_CONFIG[brand][feed_type]
         export_asc_registeration_to_sap.retry(
             exc=ex, countdown=config["retry_time"], kwargs=kwargs,
             max_retries=config["num_of_retry"])
@@ -347,11 +422,10 @@ def export_asc_registeration_to_sap(*args, **kwargs):
         total_failed = 1 if status == "failed" else 0
         if status == "failed":
             feed_data = 'ASC Registration for this %s is failing' % phone_number
-            mail.send_registration_failure(feed_data=feed_data,
-                               feed_type="ASC Registration Feed", brand=brand)
+            mail.send_registration_failure(feed_data=feed_data,feed_type="ASC Registration Feed", brand=brand)
         feed_log(feed_type="ASC Registration Feed", total_data_count=1,
          failed_data_count=total_failed, success_data_count=1 - total_failed,
-                 action='Sent', status=export_status)
+         action='Sent', status=export_status)
 
 '''
 Delete the all the generated otp by end of day.
@@ -367,8 +441,26 @@ Cron Job to send report email for data feed
 def send_report_mail_for_feed_failure(*args, **kwargs):
     remarks = kwargs['remarks']
     feed_type = kwargs['feed_type']
-    mail.feed_failure_report(remarks = remarks, feed_type=feed_type)
-    
+    mail.feed_failure_report(remarks=remarks, feed_type=feed_type)
+
+'''
+Cron Job to send info of registered customer
+'''
+
+@shared_task
+def export_customer_reg_to_sap(*args, **kwargs):
+    redeem_obj = feed.CustomerRegistationFeedToSAP()
+    feed_export_data = redeem_obj.export_data()
+    if len(feed_export_data[0]) > 0:
+        customer_registered = exportfeed.ExportCustomerRegistrationFeed(username=settings.SAP_CRM_DETAIL['username'],
+                                                                        password=settings.SAP_CRM_DETAIL['password'],
+                                                                        wsdl_url=settings.CUSTOMER_REGISTRATION_WSDL_URL,
+                                                                        feed_type='Customer Registration Feed')
+        customer_registered.export(items=feed_export_data[0], item_batch=feed_export_data[1],
+                                   total_failed_on_feed=feed_export_data[2])
+    else:
+        logger.info("tasks.py: No Customer registered since last feed")
+
 _tasks_map = {"send_registration_detail": send_registration_detail,
 
               "send_service_detail": send_service_detail,
@@ -407,6 +499,14 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "delete_unused_otp" : delete_unused_otp,
               
-              "send_invalid_keyword_message" : send_invalid_keyword_message 
+              "send_invalid_keyword_message" : send_invalid_keyword_message,
+              
+              "export_customer_reg_to_sap" : export_customer_reg_to_sap,
+
+              "mark_feeback_to_closed" : mark_feeback_to_closed,
+
+              "customer_detail_recovery": customer_detail_recovery,
+              
+              "send_point": send_point
 
               }
