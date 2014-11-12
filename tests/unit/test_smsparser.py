@@ -33,12 +33,12 @@ class SmsParserTest(ResourceTestCase):
         with self.assertRaises(sms_parser.InvalidFormat):
             mock_client_sms = "GCP_REG test.user@testcase.com"
             sms_parser.sms_parser(message=mock_client_sms)
-
+ 
     def test_invalid_keyword(self):
         with self.assertRaises(sms_parser.InvalidKeyWord):
             mock_client_sms = "ANNONYM test.user@testcase.com Test User"
             sms_parser.sms_parser(message=mock_client_sms)
-
+ 
     def test_invalid_keyword_2(self):
         with self.assertRaises(sms_parser.InvalidMessage):
             mock_client_sms = ""

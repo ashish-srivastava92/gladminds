@@ -93,7 +93,7 @@ def validate_otp(user, otp, phone):
 
 def update_pass(otp, password):
     token_obj = models.OTPToken.objects.filter(token=otp)[0]
-    user = token_obj.user
+    user = token_obj.user.user
     token_obj.delete()
     user.set_password(password)
     user.save()
@@ -114,7 +114,7 @@ def format_product_object(product_obj):
 
 def get_customer_info(data):
     try:
-        product_obj = models.ProductData.objects.select_related('customer_details__user').get(product_id=data['vin'])
+        product_obj = models.ProductData.objects.get(product_id=data['vin'])
     except Exception as ex:
         logger.info(ex)
         message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
