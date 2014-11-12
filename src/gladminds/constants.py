@@ -62,3 +62,4 @@ ROOT_CAUSE = (('Data','Data'),
               ('Network','Network'),
               ('Non-issue','Non-issue'),
               ('External System','External System'))
+MONTHS = ['Jan', 'Feb', 'Mar', 'April', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
