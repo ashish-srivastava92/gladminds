@@ -252,8 +252,7 @@ class ProductDispatchFeed(BaseFeed):
     def import_data(self):
         for product in self.data_source:
             try:
-                product_data = models.ProductData.objects.select_related('customer_details__user').get(
-                    product_id=product['vin'])
+                product_data = models.ProductData.objects.get(product_id=product['vin'])
             except ObjectDoesNotExist as done:
                 logger.info(
                     '[Info: ProductDispatchFeed_product_data]: {0}'.format(done))
@@ -322,16 +321,11 @@ class ProductPurchaseFeed(BaseFeed):
 
         for product in self.data_source:
             try:
-                product_data = models.ProductData.objects.select_related('customer_details__user').get(
-                    product_id=product['vin'])
-                if product_data.customer_details and product_data.customer_id == product['sap_customer_id']:
+                product_data = models.ProductData.objects.get(product_id=product['vin'])
+                if product_data.customer_phone_number and product_data.customer_id == product['sap_customer_id']:
                     post_save.disconnect(
                         update_coupon_data, sender=models.ProductData)
-                username=utils.get_phone_number_format(product['customer_phone_number'])
-                customer_data=self.register_user('customer', username=username,
-                                phone_number=product['customer_phone_number'],
-                                first_name=product['customer_name'], pincode=product['pin_no'],
-                                state=product['state'], address=product['city'])
+                customer_address=product['city'] +','+ product['pin_no']+',' + product['state']
 
                 if not product_data.customer_id  or product_data.customer_id.find('T') == 0:
                     product_purchase_date = product['product_purchase_date']
@@ -340,7 +334,9 @@ class ProductPurchaseFeed(BaseFeed):
                     product_data.engine = product["engine"]
                     product_data.veh_reg_no =  product['veh_reg_no']
                 
-                product_data.customer_details = customer_data    
+                product_data.customer_phone_number = product['customer_phone_number']    
+                product_data.customer_name = product['customer_name']
+                product_data.customer_address = customer_address
                 product_data.save()
                 
                 post_save.connect(
@@ -374,7 +370,7 @@ def update_coupon_data(sender, **kwargs):
     from gladminds.core.cron_jobs.sqs_tasks import send_on_product_purchase
     instance = kwargs['instance']
     logger.info("triggered update_coupon_data")
-    if instance.customer_details:
+    if instance.customer_phone_number:
         product_purchase_date = instance.purchase_date
         vin = instance.product_id
         coupon_data = models.CouponData.objects.filter(product=instance)
@@ -388,9 +384,8 @@ def update_coupon_data(sender, **kwargs):
             coupon_object.save()
         
         try:
-            customer_data = instance.customer_details
-            customer_name=customer_data.user.first_name
-            customer_phone_number = utils.get_phone_number_format(customer_data.phone_number)
+            customer_name=instance.customer_name
+            customer_phone_number = utils.get_phone_number_format(instance.customer_phone_number)
             customer_id=instance.customer_id
             temp_customer_data = models.CustomerTempRegistration.objects.filter(product_data__product_id=vin)
             if temp_customer_data and not temp_customer_data[0].temp_customer_id == customer_id:
