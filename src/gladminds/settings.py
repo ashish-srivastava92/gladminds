@@ -306,6 +306,17 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
+         'console':{
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'sql': {
+            'level': 'DEBUG',
+            'filename': '/var/log/gladminds/sql.log',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
+        },
         'gladminds_logs': {
             'level': 'INFO',
             'filename': '/var/log/gladminds/gladminds.log',
@@ -326,22 +337,28 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['sql'],
+            'propagate': True,
+        },
         'gladminds': {
-            'handlers': ['gladminds_logs'],
+            'handlers': ['gladminds_logs','console'],
             'level': 'INFO',
             'propagate': True,
         },
         'spyne': {
-            'handlers': ['gladminds_logs'],
+            'handlers': ['gladminds_logs','console'],
             'level': 'WARN',
             'propagate': True,
         }, 'afterbuy': {
-            'handlers': ['afterbuy_logs'],
+            'handlers': ['afterbuy_logs','console'],
             'level': 'DEBUG',
             'propagate': True,
         }
     }
 }
+
 
 WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR + '/coupon_redeem.wsdl'
 
