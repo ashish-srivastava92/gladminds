@@ -6,18 +6,18 @@ from django.contrib.auth.models import User
 from integration.base_integration import GladmindsResourceTestCase
 from datetime import datetime, timedelta
 from gladminds.settings import COUPON_VALID_DAYS
-
-client = Client()
+from tastypie.test import TestApiClient
 
 class GladmindsResourcesTest(GladmindsResourceTestCase):
     def setUp(self):
         super(GladmindsResourcesTest, self).setUp()
+        self.api_client = TestApiClient()
 
         product_type_obj = self.get_product_type_obj(product_name='DISCO120', product_type='BIKE')
         dealer_obj = self.get_delear_obj(name='DEALER001')
-        customer_obj = self.get_customer_obj(name='test_user1', phone_number='+919999999')
-        product_obj = self.get_product_obj(product_id="VINXXX001", product_type=product_type_obj, dealer_id=dealer_obj\
-                                           , customer_details=customer_obj, customer_id='SAP001')
+        product_obj = self.get_product_obj(product_id="VINXXX001", product_type=product_type_obj,
+                                            dealer_id=dealer_obj, customer_phone_number='+919999999',
+                                            customer_name='test_user1', customer_id='SAP001')
         service_advisor = self.get_service_advisor_obj(service_advisor_id='SA001Test', name='UMOTO', phone_number='+914444861111')
         self.get_dealer_service_advisor_obj(dealer_id=dealer_obj, service_advisor_id=service_advisor, status='Y')
         service_advisor1 = self.get_service_advisor_obj(service_advisor_id='SA002Test', name='UMOTOR', phone_number='+919999999999')
@@ -25,9 +25,9 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         self.get_coupon_obj(unique_service_coupon='COUPON005', product=product_obj, valid_days=30, valid_kms=500\
                             , service_type=1, status=1, mark_expired_on=datetime.now() - timedelta(days=2)\
                             , actual_service_date=datetime.now() - timedelta(days=20), extended_date=datetime.now() - timedelta(days=2))
-        customer_obj1 = self.get_customer_obj(name='test_user2', phone_number='8888888')
-        product_obj1 = self.get_product_obj(product_id="VINXXX002", product_type=product_type_obj, dealer_id=dealer_obj\
-                                           , customer_details=customer_obj1, customer_id='SAP002')
+        product_obj1 = self.get_product_obj(product_id="VINXXX002", product_type=product_type_obj,
+                                            dealer_id=dealer_obj, customer_phone_number='8888888',
+                                            customer_name='test_user2', customer_id='SAP002')
         self.get_coupon_obj(unique_service_coupon='COUPON004', product=product_obj1, valid_days=30, valid_kms=500\
                             , service_type=1, status=1, mark_expired_on=datetime.now() - timedelta(days=2)\
                             , actual_service_date=datetime.now() - timedelta(days=20), extended_date=datetime.now() - timedelta(days=2))
@@ -40,18 +40,21 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         
                 
 #     def test_dispatch_gladminds(self):
-#         result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP001 500 1', 'phoneNumber' : '4444861111'})
+# #         url = 'http://local.bajaj.gladmindsplatform.co:8000/api/v1/feed/?wsdl'
+#         result = self.api_client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP001 500 1', 'phoneNumber' : '4444861111'})
+#         print "....", result.status_code
 #         self.assertHttpOK(result)
 #         self.assertTrue('true' in result.content)
-#         result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP001 500', 'phoneNumber' : '4444861111'})
+#         result = self.api_client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP001 500', 'phoneNumber' : '4444861111'})
 #         self.assertHttpBadRequest(result)
-#         result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['close'] + ' TESTVECHILEID00002', 'phoneNumber' : '4444861111'})
+#         result = self.api_client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['close'] + ' TESTVECHILEID00002', 'phoneNumber' : '4444861111'})
 #         self.assertHttpBadRequest(result)
-#         
-#     def test_format_message(self):
-#         result = client.post('/v1/messages', data={'text':'   ' + settings.ALLOWED_KEYWORDS['check'] + '    SAP001   500   1    ', 'phoneNumber' : '4444861111'})
-#         self.assertHttpOK(result)
-#         self.assertTrue('true' in result.content)
+         
+    def test_format_message(self):
+        result = self.api_client.post('/v1/messages', format='json', data={'text':'   ' + settings.ALLOWED_KEYWORDS['check'] + '    SAP001   500   1    ', 'phoneNumber' : '4444861111'})
+        print ".........", result.status_code
+        self.assertHttpOK(result)
+        self.assertTrue('true' in result.content)
 #         
 #     def test_close_coupon(self):
 #         '''

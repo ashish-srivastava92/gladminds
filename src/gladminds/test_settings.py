@@ -43,3 +43,5 @@ FEED_FAILURE_BUCKET = 'gladminds'
 JOBCARD_DIR = '{0}/jobcards/dev/'
 
 BRAND = 'bajaj'
+
+ENV = "test"

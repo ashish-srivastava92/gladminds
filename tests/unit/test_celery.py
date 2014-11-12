@@ -33,13 +33,12 @@ class TestCelery(GladmindsResourceTestCase):
 class TestCronjobs(GladmindsUnitTestCase):
  
     def setUp(self):
-        brand_obj = self.get_brand_obj()
         product_type_obj = self.get_product_type_obj(
             product_name='DISCO120', product_type='BIKE')
         dealer_obj = self.get_delear_obj(name='DEALER001')
-        customer_obj = self.get_customer_obj(name='test_user1', phone_number='+911111111111')
         product_obj = self.get_product_obj(product_id="VINXXX001", product_type=product_type_obj,
-                                           dealer_id=dealer_obj, customer_details=customer_obj, customer_id='SAP001')
+                                           dealer_id=dealer_obj, customer_phone_number='+911111111111', 
+                                           customer_name='test_user1', customer_id='SAP001')
         service_advisor = self.get_service_advisor_obj(
             service_advisor_id='SA001Test', name='UMOTO', phone_number='+914444861111')
         self.get_dealer_service_advisor_obj(
@@ -50,9 +49,9 @@ class TestCronjobs(GladmindsUnitTestCase):
             dealer_id=dealer_obj, service_advisor_id=service_advisor1, status='Y')
         self.get_coupon_obj(unique_service_coupon='COUPON005', product=product_obj, valid_days=30, valid_kms=500,
                             service_type=1, mark_expired_on=datetime.now() + timedelta(days=1), status=COUPON_STATUS['Unused'])
-        customer_obj1 = self.get_customer_obj(name='test_user2', phone_number='8888888')
         product_obj1 = self.get_product_obj(product_id="VINXXX002", product_type=product_type_obj,
-                                            dealer_id=dealer_obj, customer_details=customer_obj1, customer_id='SAP002')
+                                            dealer_id=dealer_obj, customer_phone_number='8888888',
+                                            customer_name='test_user2', customer_id='SAP002')
         self.get_coupon_obj(unique_service_coupon='COUPON004', actual_service_date=datetime.now() - timedelta(days=10), product=product_obj1,
                             valid_days=30, valid_kms=500, service_type=1, mark_expired_on=datetime.now() - timedelta(days=1), status=COUPON_STATUS['In Progress']\
                             ,extended_date=datetime.now()+timedelta(days=2))
@@ -65,13 +64,6 @@ class TestCronjobs(GladmindsUnitTestCase):
                             service_type=3, mark_expired_on=datetime.now() - timedelta(days=10), status=COUPON_STATUS['In Progress']\
                             ,extended_date=datetime.now()-timedelta(days=2))
          
-     
-    def tearDown(self):
-        gm_common.Brand.objects.filter(brand_id='brand001').delete()
-        aftersell_common.Dealer.objects.filter(dealer_id='DEALER001').delete()
-        common.UserProfile.objects.filter(Q(phone_number='9999999')|Q(phone_number='8888888')).delete()
-        aftersell_common.ServiceAdvisor.objects.filter(Q(service_advisor_id='SA001Test')|Q(service_advisor_id='SA002Test')).delete()
-  
     def test_expire_service_coupon(self):
         expire_service_coupon()
         self.assertEqual(
@@ -92,7 +84,6 @@ class TestCronjobs(GladmindsUnitTestCase):
         feeds = get_data_feed_log_detail(start_date=datetime.now()-timedelta(days=1), end_date=datetime.now()+timedelta(days=1))
         self.assertEqual(len(feeds), 1)
     
-
 class TestTasks(GladmindsUnitTestCase):
     def setUp(self):
         super(TestTasks, self).setUp()
