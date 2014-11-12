@@ -19,7 +19,6 @@ from django.db.models.fields.files import FieldFile
 from gladminds.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     TIME_FORMAT
 from gladminds.mail import send_ucn_request_alert, send_mail_when_vin_does_not_exist
-from django.db.models import F
 
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
@@ -65,7 +64,7 @@ def get_phone_number_format(phone_number):
 
 def save_otp(token, user):
     common.OTPToken.objects.filter(user=user).delete()
-    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=user.email)
+    token_obj = common.OTPToken(user=user, token=str(token), request_date=datetime.datetime.now(), email=user.email)
     token_obj.save()
 
 def get_token(user, phone_number):
@@ -289,14 +288,14 @@ def get_list_from_set(set_data):
 
 
 def create_context(email_template_name, feedback_obj):
-    created_date = feedback_obj.created_date
+    created_date = convert_utc_to_local_time(feedback_obj.created_date).strftime("%Y-%m-%d")
     data = get_email_template(email_template_name)
     data['newsubject'] = data['subject'].format(id=feedback_obj.id)
     data['content'] = data['body'].format(id=feedback_obj.id, type=feedback_obj.type, reporter=feedback_obj.reporter,
-                                          message=feedback_obj.message, created_date=convert_utc_to_local_time(created_date),
+                                          message=feedback_obj.message, created_date=created_date,
                                           assign_to=feedback_obj.assign_to, priority=feedback_obj.priority, remark="",
                                           root_cause=feedback_obj.root_cause, resolution=feedback_obj.resolution,
-                                          due_date="",resolution_time=total_time_spent(feedback_obj))
+                                          due_date=feedback_obj.due_date,resolution_time=total_time_spent(feedback_obj))
     return data
 
 def create_sa_feed_data(post_data, user_id, temp_sa_id):
