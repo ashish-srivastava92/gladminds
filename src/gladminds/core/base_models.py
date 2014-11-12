@@ -108,7 +108,6 @@ class AuthorizedServiceCenter(BaseModel):
 class ServiceAdvisor(BaseModel):
     service_advisor_id = models.CharField(
         max_length=15, blank=False, unique=True, null=False)
-    order = models.PositiveIntegerField(default=0)
     status = models.CharField(max_length=10, blank=False, null=False)
 
     objects = user_manager.ServiceAdvisorManager()
@@ -133,10 +132,6 @@ class ProductType(BaseModel):
     image_url = models.CharField(
                    max_length=200, blank=True, null=True)
     is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(default=0)
-    warranty_email = models.EmailField(max_length=215, null=True, blank=True)
-    warranty_phone = models.CharField(
-        max_length=15, blank=False, null=False)
 
     class Meta:
         abstract = True
@@ -151,12 +146,17 @@ class ProductData(BaseModel):
     product_id = models.CharField(max_length=215, unique=True)
     customer_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
+    customer_phone_number = models.CharField(
+        max_length=15, null=True, blank=True, unique=True)
+    customer_name = models.CharField(
+        max_length=215, null=True, blank=True, unique=True)
+    customer_address = models.CharField(
+        max_length=215, null=True, blank=True, unique=True)
     purchase_date = models.DateTimeField(null=True, blank=True)
     invoice_date = models.DateTimeField(null=True, blank=True)
     engine = models.CharField(max_length=255, null=True, blank=True)
     veh_reg_no = models.CharField(max_length=15, null=True, blank=True)
     is_active = models.BooleanField(default=True)
-    order = models.PositiveIntegerField(default=0)
         
     class Meta:
         abstract = True
@@ -183,7 +183,6 @@ class CouponData(BaseModel):
     actual_kms = models.CharField(max_length=10, null=True, blank=True)
     last_reminder_date = models.DateTimeField(null=True, blank=True)
     schedule_reminder_date = models.DateTimeField(null=True, blank=True)
-    order = models.PositiveIntegerField(default=0)
     extended_date = models.DateTimeField(null=True, blank=True)
     sent_to_sap = models.BooleanField(default=False)
     credit_date = models.DateTimeField(null=True, blank=True)
@@ -207,7 +206,6 @@ class UCNRecovery(BaseModel):
     reason = models.TextField(null=False)
     customer_id = models.CharField(max_length=215, null=True, blank=True)
     file_location = models.CharField(max_length=215, null=True, blank=True)
-    request_date = models.DateTimeField(default=datetime.now())
     unique_service_coupon = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
@@ -227,12 +225,13 @@ class OldFscData(BaseModel):
     actual_kms = models.CharField(max_length=10, null=True, blank=True)
     last_reminder_date = models.DateTimeField(null=True, blank=True)
     schedule_reminder_date = models.DateTimeField(null=True, blank=True)
-    order = models.PositiveIntegerField(default=0)
     extended_date = models.DateTimeField(null=True, blank=True)
     sent_to_sap = models.BooleanField(default=False)
     credit_date = models.DateTimeField(null=True, blank=True)
     credit_note = models.CharField(max_length=50, null=True, blank=True)
     special_case = models.BooleanField(default=False)
+    missing_field = models.CharField(max_length=50, null=True, blank=True)
+    missing_value = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True

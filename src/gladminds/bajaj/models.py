@@ -77,8 +77,6 @@ class ProductType(base_models.ProductType):
 
 
 class ProductData(base_models.ProductData):
-    customer_details = models.ForeignKey(
-        UserProfile, null=True, blank=True, related_name='bajaj_product_data')
     product_type = models.ForeignKey(ProductType, null=True, blank=True)
     dealer_id = models.ForeignKey(Dealer, null=True, blank=True)
 
@@ -116,7 +114,6 @@ class UCNRecovery(base_models.UCNRecovery):
 class OldFscData(base_models.OldFscData):
     product = models.ForeignKey(ProductData, null=False, editable=False)
     service_advisor = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
-    servicing_dealer = models.ForeignKey(Dealer, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME

@@ -150,7 +150,7 @@ class GladmindsResources(Resource):
         keyword = sms_dict['params']
         value = sms_dict['message']
         kwargs = {}
-        kwargs['customer_details__phone_number__endswith'] = utils.get_phone_number_format(phone_number)
+        kwargs['customer_phone_number__endswith'] = utils.get_phone_number_format(phone_number)
         if value and len(value)>5 and keyword in ['vin', 'id']:
             if keyword == 'id':
                 kwargs['customer_id'] = value
@@ -188,11 +188,11 @@ class GladmindsResources(Resource):
         message = None
         try:
             customer_product_data = models.CouponData.objects.select_related('product').\
-                                        filter(product__customer_details__phone_number=phone_number, \
+                                        filter(product__customer_phone_number=phone_number, \
                                         product__customer_id=customer_id).\
                                         order_by('product', 'valid_days') if customer_id else \
                                         models.CouponData.objects.select_related('product').\
-                                        filter(product__customer_details__phone_number=phone_number).\
+                                        filter(product__customer_phone_number=phone_number).\
                                         order_by('product', 'valid_days')
             logger.info(customer_product_data)
             valid_product_data = []
@@ -219,8 +219,8 @@ class GladmindsResources(Resource):
         return {'status': True, 'message': message}
 
     def get_customer_phone_number_from_vin(self, vin):
-        product_obj = models.ProductData.objects.filter(product_id=vin).select_related('customer_details__phone_number')
-        return product_obj[0].customer_details.phone_number
+        product_obj = models.ProductData.objects.filter(product_id=vin)
+        return product_obj[0].customer_phone_number
 
 
     def update_higher_range_coupon(self, kms, product):
@@ -324,10 +324,9 @@ class GladmindsResources(Resource):
                     logger.info('Coupon obj created: %s' % coupon_sa_obj)
 
             in_progress_coupon = models.CouponData.objects.filter(product=product, valid_kms__gte=actual_kms, status=4) \
-                                 .select_related ('product', 'customer_details__phone_number') \
-                                 .order_by('service_type')
+                                 .select_related ('product').order_by('service_type')
             try:
-                customer_phone_number = product.customer_details.phone_number
+                customer_phone_number = product.customer_phone_number
             except Exception as ax:
                 logger.error('Customer Phone Number is not stored in DB %s' % ax)
             if len(in_progress_coupon) > 0:
@@ -398,11 +397,11 @@ class GladmindsResources(Resource):
         try:
             product = self.get_product(sap_customer_id)
             coupon_object = models.CouponData.objects.filter(product=product,
-                            unique_service_coupon=unique_service_coupon).select_related ('product', 'customer_details__phone_number')[0]
+                            unique_service_coupon=unique_service_coupon).select_related ('product')[0]
             if coupon_object.status == 2 or coupon_object.status == 6:
                 message=templates.get_template('COUPON_ALREADY_CLOSED')
             elif coupon_object.status == 4:
-                customer_phone_number = coupon_object.product.customer_details.phone_number
+                customer_phone_number = coupon_object.product.customer_phone_number
                 coupon_object.status = 2
                 coupon_object.service_advisor=service_advisor
                 coupon_object.closed_date = datetime.now()
@@ -491,7 +490,7 @@ class GladmindsResources(Resource):
     def get_brand_data(self, sms_dict, phone_number):
         product_type = sms_dict['brand_id']
         try:
-            product_data = models.ProductData.objects.select_related('product_type').filter(customer_details__phone_number=phone_number, product_type__product_type=product_type)
+            product_data = models.ProductData.objects.select_related('product_type').filter(customer_phone_number=phone_number, product_type__product_type=product_type)
             if product_data:
                 product_list = map(lambda object: {'sap_customer_id':object.customer_id, 'vin': object.product_id}, product_data)
                 template = templates.get_template('SEND_BRAND_DATA')
@@ -550,7 +549,7 @@ class GladmindsResources(Resource):
             return "SA"
         else:
             check_customer_obj = models.ProductData.objects.filter(
-                                            customer_details__phone_number=phone_number)
+                                            customer_phone_number=phone_number)
             if check_customer_obj:
                 return "Customer"
             else:
