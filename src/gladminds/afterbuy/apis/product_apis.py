@@ -17,7 +17,7 @@ logger = logging.getLogger("gladminds")
 class ProductTypeResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.ProductType.objects.all()
-        resource_name = "types"
+        resource_name = "product-types"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
