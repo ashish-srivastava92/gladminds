@@ -18,7 +18,7 @@ db_new = MySQLdb.connect(host="localhost", # your host, usually localhost
 cur_new = db_new.cursor() 
 
 cur_old.execute("SELECT c.*, p.vin FROM gladminds_coupondata as c, gladminds_productdata as p\
-             where c.vin_id=p.id and c.vin_id in (101964, 102580)")
+             where c.vin_id=p.id and c.vin_id")
 coupon_data = cur_old.fetchall()
 
 
