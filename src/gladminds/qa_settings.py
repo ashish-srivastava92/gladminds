@@ -137,3 +137,4 @@ UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail QA"
 MAIL_DETAIL["subject"] = "GladMinds Feed Report QA"
 MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com", 'sourabh.gupta@hashedin.com']
 #######################################################################
+ENV = "qa"

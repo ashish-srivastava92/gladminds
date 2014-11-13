@@ -1,5 +1,6 @@
 from tastypie.test import ResourceTestCase
 from django.core import management
+from django.contrib.auth.models import User
 from gladminds.bajaj import models as common
 from gladminds.management.commands import load_gm_migration_data
 from gladminds.bajaj import models as aftersell_common
@@ -9,6 +10,7 @@ import json
 
 
 class GladmindsResourceTestCase(ResourceTestCase):
+    multi_db=True
 
     def setUp(self):
         super(GladmindsResourceTestCase, self).setUp()
@@ -47,9 +49,19 @@ class GladmindsResourceTestCase(ResourceTestCase):
         product_data = common.ProductData(**kwargs)
         product_data.save()
         return product_data
+    
+    def create_user_profile(self, **kwargs):
+        name = kwargs.get('name', None)
+        phone_number = kwargs.get('phone_number', None)
+        user_obj = User(username=name, first_name=name)
+        user_obj.save()
+        user_profile_obj = common.UserProfile(user=user_obj, phone_number=phone_number)
+        user_profile_obj.save()
+        return user_profile_obj
 
     def get_delear_obj(self, **kwargs):
-        delear_data = aftersell_common.Dealer(**kwargs)
+        user_profile_obj = self.create_user_profile(**kwargs)
+        delear_data = common.Dealer(user=user_profile_obj, dealer_id=kwargs.get('name', None))
         delear_data.save()
         return delear_data
 
@@ -65,10 +77,14 @@ class GladmindsResourceTestCase(ResourceTestCase):
         return None
 
     def get_service_advisor_obj(self, **kwargs):
-        service_advisor_obj = aftersell_common.ServiceAdvisor(**kwargs)
+        service_advisor_id = kwargs.get('service_advisor_id', None)
+        status = kwargs.get('status', 'Y')
+        user_profile_obj = self.create_user_profile(**kwargs)
+        service_advisor_obj = common.ServiceAdvisor(user=user_profile_obj, 
+                                                     status=status, service_advisor_id=service_advisor_id)
         service_advisor_obj.save()
         return service_advisor_obj
-
+    
     def get_dealer_service_advisor_obj(self, **kwargs):
 #         dealer_service_advisor_obj = aftersell_common.ServiceAdvisorDealerRelationship(**kwargs)
 #         dealer_service_advisor_obj.save()
