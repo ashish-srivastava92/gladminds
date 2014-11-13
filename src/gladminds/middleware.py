@@ -18,7 +18,7 @@ and reply through the same platform
 class GladmindsMessageMiddleware(object):    
     #If the request is come on message APIs, then based on the IP we set sms client
     def process_request(self, request, **kwargs):
-        source_client = request.POST.get('__gm_source', None)
+        source_client = request.GET.get('__gm_source', None)
         logger.info('[Middleware]: Source of client is {0}'.format(source_client))
         
         if source_client == settings.SMS_CLIENT_DETAIL['KAP']['params']:
