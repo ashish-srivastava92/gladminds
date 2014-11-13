@@ -114,36 +114,37 @@ class GladmindsResources(Resource):
             logger.info("The database failed to perform {0}:{1}".format(request.POST.get('action'), ex))
         return self.create_response(request, data=to_be_serialized)
 
-    #FIXME: needs to be done in Afterbuy API
-#     @log_time
-#     def register_customer(self, sms_dict, phone_number):
-#         customer_name = sms_dict['name']
-#         email_id = sms_dict['email_id']
-#         try:
-#             object = common.GladMindUsers.objects.get(phone_number=phone_number)
-#             gladmind_customer_id = object.gladmind_customer_id
-#             customer_name = object.customer_name
-#         except ObjectDoesNotExist as odne:
-#             gladmind_customer_id = utils.generate_unique_customer_id()
-#             registration_date = datetime.now()
-#             user_feed = BaseFeed()
-#             user = user_feed.register_user('customer', username=gladmind_customer_id)
-#             customer = common.GladMindUsers(
+    @log_time
+    def register_customer(self, sms_dict, phone_number):
+        customer_name = sms_dict['name']
+        email_id = sms_dict['email_id']
+        try:
+            object = models.UserProfile.objects.get(phone_number=phone_number)
+            gladmind_customer_id = object.gladmind_customer_id
+            customer_name = object.customer_name
+        except ObjectDoesNotExist as odne:
+            gladmind_customer_id = utils.generate_unique_customer_id()
+            registration_date = datetime.now()
+            user_feed = BaseFeed()
+            user = user_feed.register_user('customer', username=gladmind_customer_id)
+
+#             FIXME: Check this code is getting used or not
+#             customer = models.UserProfile(
 #                 user=user, gladmind_customer_id=gladmind_customer_id, phone_number=phone_number,
 #                 customer_name=customer_name, email_id=email_id,
 #                 registration_date=registration_date)
 #             customer.save()
-#         # Please update the template variable before updating the keyword-argument
-#         message = sms_parser.render_sms_template(status='send', keyword=sms_dict['keyword'], customer_id=gladmind_customer_id)
-#         phone_number = utils.get_phone_number_format(phone_number)
-#         logger.info("customer is registered with message %s" % message)
-#         if settings.ENABLE_AMAZON_SQS:           
-#             task_queue = utils.get_task_queue()
-#             task_queue.add("send_registration_detail", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
-#         else:
-#             send_registration_detail.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
-#         sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
-#         return True
+        # Please update the template variable before updating the keyword-argument
+        message = sms_parser.render_sms_template(status='send', keyword=sms_dict['keyword'], customer_id=gladmind_customer_id)
+        phone_number = utils.get_phone_number_format(phone_number)
+        logger.info("customer is registered with message %s" % message)
+        if settings.ENABLE_AMAZON_SQS:           
+            task_queue = utils.get_task_queue()
+            task_queue.add("send_registration_detail", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
+        else:
+            send_registration_detail.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
+        sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        return True
 
     @log_time
     def send_customer_detail(self, sms_dict, phone_number):

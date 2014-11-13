@@ -10,6 +10,7 @@ import json
 
 
 class GladmindsResourceTestCase(ResourceTestCase):
+    multi_db=True
 
     def setUp(self):
         super(GladmindsResourceTestCase, self).setUp()
@@ -77,9 +78,10 @@ class GladmindsResourceTestCase(ResourceTestCase):
 
     def get_service_advisor_obj(self, **kwargs):
         service_advisor_id = kwargs.get('service_advisor_id', None)
+        status = kwargs.get('status', 'Y')
         user_profile_obj = self.create_user_profile(**kwargs)
         service_advisor_obj = common.ServiceAdvisor(user=user_profile_obj, 
-                                                                service_advisor_id=service_advisor_id)
+                                                     status=status, service_advisor_id=service_advisor_id)
         service_advisor_obj.save()
         return service_advisor_obj
     
