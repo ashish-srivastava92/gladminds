@@ -23,9 +23,3 @@ insert into bajaj.bajaj_emailtemplate(id,template_key,sender,reciever,subject,bo
 gladminds_producttypedata
 insert into bajaj.bajaj_producttype(product_type_id,product_name,product_type,image_url,is_active) select gladminds_producttypedata.product_type_id, gladminds_producttypedata.product_name, gladminds_producttypedata.product_type,gladminds_producttypedata.product_image_loc,gladminds_producttypedata.isActive from gladminds_producttypedata;
 
-''' Write Script for these tables
-aftersell_ucnrecovery 
-id, reason, user_id, sap_customer_id, file_location, request_date, unique_service_coupon
-id, created_date, modified_date, reason, customer_id, file_location, unique_service_coupon
-
-gladminds_customertempregistration'''
