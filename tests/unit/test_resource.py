@@ -1,18 +1,15 @@
 import json, os
 from gladminds.bajaj import models as common
-from django.test.client import Client
 from django.conf import settings
 from django.contrib.auth.models import User
-from integration.base_integration import GladmindsResourceTestCase
+from integration.base_integration import GladmindsResourceTestCase, client
 from datetime import datetime, timedelta
 from gladminds.settings import COUPON_VALID_DAYS
 
-client = Client()
 
 class GladmindsResourcesTest(GladmindsResourceTestCase):
     def setUp(self):
         super(GladmindsResourcesTest, self).setUp()
-
         product_type_obj = self.get_product_type_obj(product_name='DISCO120', product_type='BIKE')
         dealer_obj = self.get_delear_obj(name='DEALER001')
         product_obj = self.get_product_obj(product_id="VINXXX001", product_type=product_type_obj,
