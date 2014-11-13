@@ -55,14 +55,8 @@ TEMPLATE_DIRS = (
 ENABLE_AMAZON_SQS = False
 
 FILE_CACHE_DURATION = 0
-SMS_CLIENT = "KAP"
-  
-# SMS_CLIENT_DETAIL = {
-#                      'OTP_TWILIO_ACCOUNT' : 'ACbb8cb45f6113b8f2f6243c8eaa5ff971',
-#                      'OTP_TWILIO_AUTH' : 'aa445a4f0a7e651738e89810601f8860',
-#                      'OTP_TWILIO_FROM' : '+1 469-513-9856',
-#                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/Messages.json'
-#                 }
+
+SMS_CLIENT="AIRTEL"
 ########################SQS Queue Name
 SQS_QUEUE_NAME = "gladminds-dev"
 ######################################
