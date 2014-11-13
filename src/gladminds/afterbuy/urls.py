@@ -16,6 +16,9 @@ api_v1.register(product_apis.PollutionCertificateResource())
 api_v1.register(product_apis.SupportResource())
 api_v1.register(product_apis.ProductTypeResource())
 api_v1.register(brand_apis.BrandResource())
+api_v1.register(brand_apis.IndustryResource())
+api_v1.register(brand_apis.BrandProductCategoryResource())
+
 
 urlpatterns = patterns('',
     (r'', include(api_v1.urls)),

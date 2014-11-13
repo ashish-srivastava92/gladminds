@@ -128,4 +128,3 @@ class SupportResource(CustomBaseModelResource):
         filtering = {
                      "brand" : ALL
                      }
-        
