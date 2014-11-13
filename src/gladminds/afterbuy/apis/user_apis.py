@@ -43,7 +43,7 @@ class ConsumerResource(CustomBaseModelResource):
 
     class Meta:
         queryset = afterbuy_model.Consumer.objects.all()
-        resource_name = "users"
+        resource_name = "consumers"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True

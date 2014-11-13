@@ -325,7 +325,7 @@ class ProductPurchaseFeed(BaseFeed):
                 if product_data.customer_phone_number and product_data.customer_id == product['sap_customer_id']:
                     post_save.disconnect(
                         update_coupon_data, sender=models.ProductData)
-                customer_address=product['city'] +','+ product['pin_no']+',' + product['state']
+                customer_address=product['city'] +',' + product['state']+','+ product['pin_no']
 
                 if not product_data.customer_id  or product_data.customer_id.find('T') == 0:
                     product_purchase_date = product['product_purchase_date']

@@ -128,11 +128,11 @@ def create_new_prod_version(version):
 def create_new_qa_version(version):
     upload_to_s3(BUCKET_NAME, version, FILE_NAME)
     create_version(APPLICATION_NAME, version)
-    ENVIRONMENT_NAME = 'gladminds-worker-qa2'
-    update_environment(ENVIRONMENT_NAME, version)
-    
-#     ENVIRONMENT_NAME = 'gladminds-webserver-qa'
+#     ENVIRONMENT_NAME = 'gladminds-worker-qa2'
 #     update_environment(ENVIRONMENT_NAME, version)
+    
+    ENVIRONMENT_NAME = 'gladminds-webserver-qa2'
+    update_environment(ENVIRONMENT_NAME, version)
 
 def upload_to_s3(bucket_name, key, file_name):
     conn = boto.connect_s3(ACCESS_KEY, SECRET_KEY)

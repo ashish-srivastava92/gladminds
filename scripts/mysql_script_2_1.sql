@@ -23,34 +23,9 @@ insert into bajaj.bajaj_emailtemplate(id,template_key,sender,reciever,subject,bo
 gladminds_producttypedata
 insert into bajaj.bajaj_producttype(product_type_id,product_name,product_type,image_url,is_active) select gladminds_producttypedata.product_type_id, gladminds_producttypedata.product_name, gladminds_producttypedata.product_type,gladminds_producttypedata.product_image_loc,gladminds_producttypedata.isActive from gladminds_producttypedata;
 
-gladminds_branddata 
-
 ''' Write Script for these tables
 aftersell_ucnrecovery 
 id, reason, user_id, sap_customer_id, file_location, request_date, unique_service_coupon
 id, created_date, modified_date, reason, customer_id, file_location, unique_service_coupon
 
-gladminds_productdata| gladminds_gladmindusers
-gladminds_coupondata  | gladminds_oldfscdata| gladminds_serviceadvisorcouponrelationship 
 gladminds_customertempregistration'''
-
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) DEFAULT NULL,
-  `gladmind_customer_id` varchar(215) DEFAULT NULL,
-  `customer_name` varchar(215) NOT NULL,
-  `email_id` varchar(215) DEFAULT NULL,
-  `phone_number` varchar(15) NOT NULL,
-  `registration_date` datetime NOT NULL,
-  `address` varchar(255) DEFAULT NULL,
-  `country` varchar(255) DEFAULT NULL,
-  `state` varchar(255) DEFAULT NULL,
-  `date_of_birth` varchar(255) DEFAULT NULL,
-  `img_url` varchar(100) NOT NULL,
-  `thumb_url` varchar(100) NOT NULL,
-  `isActive` tinyint(1) NOT NULL,
-  `accepted_terms` tinyint(1) NOT NULL,
-  `gender` varchar(2) NOT NULL,
-  `tshirt_size` varchar(2) NOT NULL,
-  `pincode` varchar(15) DEFAULT NULL,
-
-

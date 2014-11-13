@@ -93,3 +93,4 @@ VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 LOGGING['handlers']['gladminds_logs']['filename'] = 'log/gladminds.log'
 LOGGING['handlers']['afterbuy_logs']['filename'] = 'log/afterbuy.log'
 ENV = "local"
+LOGGING['handlers']['sql']['filename'] = 'log/sql.log'

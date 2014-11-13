@@ -17,13 +17,13 @@ db_new = MySQLdb.connect(host="localhost", # your host, usually localhost
 
 cur_new = db_new.cursor() 
 
-cur_old.execute("SELECT c.*, p.vin FROM gladminds_coupondata as c, gladminds_productdata as p\
-             where c.vin_id=p.id")
+cur_old.execute("SELECT c.*, p.vin, d.dealer_id FROM gladminds_oldfscdata as c, gladminds_productdata as p,\
+             aftersell_registereddealer as d where c.vin_id=p.id and c.servicing_dealer_id=d.id")
 coupon_data = cur_old.fetchall()
 
 
 def process_query(data):
-    print "--------------------coupons--------------", data.get('vin_id)'), data.get('unique_service_coupon)')
+    print "--------------------coupons--------------", data.get('unique_service_coupon')
     try:
         today = datetime.now()
         print "get the product", data.get('vin')
@@ -31,37 +31,29 @@ def process_query(data):
         cur_new.execute(query1, {'product_id': data.get('vin')})
         product = cur_new.fetchone()
         print "--------------- fetched associated product------------------------", product
+                    
+        print "get the dealer", data.get('dealer_id')
+        query2 = "select * from bajaj_dealer where dealer_id  = %(dealer_id)s"
+        cur_new.execute(query2, {'dealer_id': data.get('dealer_id')})
+        dealer = cur_new.fetchone()
+        print "--------------- fetched associated dealer----------------", dealer
         
-        sa=None
-        if data.get('sa_phone_number_id'):
-            print "get the old sa", data.get('sa_phone_number_id')
-            query2 = "select * from aftersell_serviceadvisor where id  = %(id)s"
-            cur_old.execute(query2, {'id': data.get('sa_phone_number_id')})
-            sa_old = cur_old.fetchone()
-            print "--------------- fetched associated sa_old------------------------", sa_old
-            
-            print "get the new sa", sa_old[1]
-            query3 = "select * from bajaj_serviceadvisor where service_advisor_id  = %(service_advisor_id)s"
-            cur_new.execute(query3, {'service_advisor_id': sa_old[1]})
-            sa_new = cur_new.fetchone()
-            print "--------------- fetched associated SA----------------", sa_new
-            sa=sa_new[4]
-        
-        print "---------------------sa------------------", sa    
-        cur_new.execute("INSERT INTO bajaj_coupondata (id, created_date, modified_date,\
+        print "-------creating old fsc-----------"
+        cur_new.execute("INSERT INTO bajaj_oldfscdata (id, created_date, modified_date,\
         unique_service_coupon, valid_days, valid_kms, service_type, status,\
         closed_date, mark_expired_on, actual_service_date, actual_kms, last_reminder_date,\
         schedule_reminder_date, extended_date, sent_to_sap,\
-        credit_date, credit_note, special_case, product_id, service_advisor_id) VALUES\
+        credit_date, credit_note, special_case, missing_field, missing_value,\
+        product_id, dealer_id) VALUES\
          (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,\
-        %s, %s, %s, %s, %s, %s, %s)",(data.get('id'),today, today,\
+        %s, %s, %s, %s, %s, %s, %s, %s, %s)",(data.get('id'),today, today,\
         data.get('unique_service_coupon'), data.get('valid_days'),
         data.get('valid_kms'), data.get('service_type'), data.get('status'),
         data.get('closed_date'), data.get('mark_expired_on'), data.get('actual_service_date'),
         data.get('actual_kms'), data.get('last_reminder_date'), data.get('schedule_reminder_date'),
         data.get('extended_date'), data.get('sent_to_sap'), data.get('credit_date'),
-        data.get('credit_note'),data.get('special_case'),product[0], sa))
-        
+        data.get('credit_note'),data.get('special_case'),data.get('missing_field'),
+        data.get('missing_value'), product[0], dealer[3]))
         db_new.commit()
         print "---------------DONE--------------------"
     except Exception as ex:
@@ -96,10 +88,12 @@ def format_data(coupon_data):
         temp['credit_date'] = data[18]
         temp['credit_note'] = data[19]
         temp['special_case'] = data[20]
-        temp['vin'] = data[21]
+        temp['missing_field'] = data[21]
+        temp['missing_value'] = data[22]
+        temp['vin'] = data[23]
+        temp['dealer_id'] = data[24]
         coupons.append(temp)
     pool.map(process_query, coupons)
     end_time = time.time()
-
 
 format_data(coupon_data)
