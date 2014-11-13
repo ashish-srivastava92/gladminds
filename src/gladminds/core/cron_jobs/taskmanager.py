@@ -37,14 +37,14 @@ def get_customers_to_send_reminder(*args, **kwargs):
     
 @transaction.commit_manually()  
 def get_customers_to_send_reminder_by_admin(*args, **kwargs):
-    from gladminds.sqs_tasks import send_reminder_message
+    from gladminds.core.cron_jobs.sqs_tasks import send_reminder_message
     today = datetime.now().date()
-    results = models.CouponData.objects.select_for_update().filter(schedule_reminder_date__day=today.day, schedule_reminder_date__month=today.month, schedule_reminder_date__year=today.year, status=1).select_related('vin', 'customer_phone_number__phone_number')
+    results = models.CouponData.objects.select_for_update().filter(schedule_reminder_date__day=today.day, schedule_reminder_date__month=today.month, schedule_reminder_date__year=today.year, status=1).select_related('product_id', 'customer_phone_number')
     for reminder in results:
-        product = reminder.vin
-        phone_number = product.customer_phone_number.phone_number
+        product_obj = reminder.product
+        phone_number = product_obj.customer_phone_number
         usc = reminder.unique_service_coupon
-        vin = product.vin
+        vin = product_obj.product_id
         expired_date = reminder.mark_expired_on.strftime('%d/%m/%Y')
         valid_kms = reminder.valid_kms
         message = templates.get_template('SEND_CUSTOMER_COUPON_REMINDER').format(usc=usc, vin=vin, expired_date=expired_date, valid_kms=valid_kms)

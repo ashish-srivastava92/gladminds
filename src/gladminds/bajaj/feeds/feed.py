@@ -498,7 +498,7 @@ class CouponRedeemFeedToSAP(BaseFeed):
 
     def export_data(self, start_date=None, end_date=None):
         results = models.CouponData.objects.filter(sent_to_sap=0,
-                            status=2).select_related('vin', 'customer_phone_number__phone_number')
+                            status=2).select_related('product_id', 'customer_phone_number')
         items = []
         total_failed = 0
         item_batch = {
@@ -506,16 +506,20 @@ class CouponRedeemFeedToSAP(BaseFeed):
         for redeem in results:
             try:
                 #added the condition only for the previous coupons with no servicing dealer details
-                if redeem.servicing_dealer:
-                    servicing_dealer = redeem.servicing_dealer.dealer_id
+                if redeem.service_advisor:
+                    if redeem.service_advisor.dealer:
+                        servicing_dealer = redeem.service_advisor.dealer.dealer_id
+                    else:
+                        servicing_dealer = redeem.service_advisor.asc.asc_id
                 else:
-                    servicing_dealer = redeem.vin.dealer_id.dealer_id
+                    servicing_dealer = redeem.product.dealer_id.dealer_id
+                
                 item = {
-                        "CHASSIS": redeem.vin.vin,
+                        "CHASSIS": redeem.product.product_id,
                         "GCP_KMS": redeem.actual_kms,
                         "GCP_KUNNR": servicing_dealer,
                         "GCP_UCN_NO": redeem.unique_service_coupon,
-                        "PRODUCT_TYPE": redeem.vin.product_type.product_type,
+                        "PRODUCT_TYPE": redeem.product.product_type.product_type,
                         "SERVICE_TYPE": str(redeem.service_type),
                         "SER_AVL_DT": redeem.actual_service_date.date().strftime("%Y-%m-%d"),
                     }                        
@@ -556,7 +560,7 @@ class CustomerRegistationFeedToSAP(BaseFeed):
         for redeem in results:
             try:
                 item = {
-                    "CHASSIS": redeem.product_data.vin,
+                    "CHASSIS": redeem.product_data.product_id,
                     "KUNNR": redeem.product_data.dealer_id.dealer_id,
                     "CUSTOMER_ID" : redeem.temp_customer_id,
                     "ENGINE" : redeem.product_data.engine,
