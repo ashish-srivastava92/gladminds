@@ -2,9 +2,6 @@ import MySQLdb
 import time
 from multiprocessing.dummy import Pool
 from datetime import datetime
-start_time = time.time()
-pool = Pool(1)
-count = 0
 
 db_old = MySQLdb.connect(host="localhost", # your host, usually localhost
                      user="root", # your username
@@ -77,10 +74,10 @@ def process_query(data):
           VALUES (%s, %s)",(dealer[0], dealer_group[0]))
         print "created user goup"
         db_new.commit()
+        print "---------------DONE--------------------"
     except Exception as ex:
         db_new.rollback()
-        print "something went wrong", ex
-    print "---------------DONE--------------------"
+        print "----------------------something went wrong--------------------", ex
 
 def format_data(dealer_data):
     start_time = time.time()
