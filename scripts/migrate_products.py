@@ -19,7 +19,7 @@ cur_new = db_new.cursor()
 cur_old.execute("SELECT p.*, d.dealer_id, t.product_type FROM gladminds_productdata as p, \
              aftersell_registereddealer as d, gladminds_producttypedata as t \
              where p.product_type_id=t.product_type_id\
-            and p.dealer_id_id=d.id limit 1000")
+            and p.dealer_id_id=d.id and p.id in (101964, 102344, 102664, 103889) limit 1000")
 product_data = cur_old.fetchall()
 
 
