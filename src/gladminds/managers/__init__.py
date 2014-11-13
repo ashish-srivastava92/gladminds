@@ -53,6 +53,11 @@ def save_update_feedback(feedback_obj, data, user,  host):
     else:
         assign_number = None
     assign = feedback_obj.assign_to
+    
+    if feedback_obj.due_date:
+        feedback_obj.due_date = data['due_date']
+        feedback_obj.save()
+
     if assign is None:
         assign_status = True
 
