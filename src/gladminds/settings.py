@@ -426,6 +426,9 @@ SMS_HEALTH_CHECK_INTERVAL = 6
 FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
 AIRTEL_IP = '54.84.243.77'
+
+SMS_CLIENT="AIRTEL"
+
 SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                               'pass':'bajaj',
                               'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',
@@ -434,7 +437,8 @@ SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                           'pass':'kap@user!23',
                           'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
                           'working_key': '2uj6gnnnlbx37x436cppq87176j660w9',
-                          'sender_id': 'GLADMS'}
+                          'sender_id': 'GLADMS',
+                          'params': 'kap'}
                   }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True
