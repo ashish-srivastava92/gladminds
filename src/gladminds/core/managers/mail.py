@@ -163,7 +163,7 @@ def send_feedback_received(data):
         template = Template(feed_temp)
         context = Context({"content": data['content']})
         body = template.render(context)
-        send_email(sender = data['sender'], receiver = data['reciever'], 
+        send_email(sender = data['sender'], receiver = data['receiver'], 
                    subject = data['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
@@ -228,7 +228,7 @@ def send_template_email(template_name, context, mail_detail,receiver=None):
     template = Template(feed_temp)
     body = template.render(context)
     if receiver is None:
-        receiver =  mail_detail['reciever']
+        receiver =  mail_detail['receiver']
     send_email(sender =  mail_detail['sender'], receiver = receiver, 
                subject = mail_detail['newsubject'], body = body, 
                smtp_server = settings.MAIL_SERVER)

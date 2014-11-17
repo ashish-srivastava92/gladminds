@@ -408,7 +408,7 @@ def update_coupon_data(sender, **kwargs):
                 phone_number=customer_phone_number, message=message, sms_client=settings.SMS_CLIENT)
  
             sms_log(
-                reciever=customer_phone_number, action='SEND TO QUEUE', message=message)
+                receiver=customer_phone_number, action='SEND TO QUEUE', message=message)
         except Exception as ex:
             logger.info("[Exception]: Signal-In Update Coupon Data %s" % ex)
 
