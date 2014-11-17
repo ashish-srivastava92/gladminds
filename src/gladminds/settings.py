@@ -270,7 +270,7 @@ INSTALLED_APPS = (
     'provider',
     'provider.oauth2',
    # 'debug_toolbar',
-    #'south'
+    'south'
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )

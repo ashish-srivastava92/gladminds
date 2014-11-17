@@ -19,6 +19,36 @@ DATABASES['demo']['NAME'] = os.path.join(OUT_DIR, 'demo.db')  # "/tmp/test.db"
 DATABASES['afterbuy']['ENGINE'] = 'django.db.backends.sqlite3'
 DATABASES['afterbuy']['NAME'] = os.path.join(OUT_DIR, 'afterbuy.db')  # "/tmp/test.db"
 
+INSTALLED_APPS = (
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django_extensions',
+    'suit',
+    'django.contrib.admin',
+    'import_export',
+    'gladminds',
+    'gladminds.gm',
+    'gladminds.core',
+    'gladminds.bajaj',
+    'gladminds.demo',
+    'gladminds.afterbuy',
+    'djcelery',
+    'corsheaders',
+    'storages',
+    'tastypie_swagger',
+    'django_otp',
+    'django_otp.plugins.otp_totp',
+    'provider',
+    'provider.oauth2',
+   # 'debug_toolbar',
+    #'south'
+    # Uncomment the next line to enable admin documentation:
+    # 'django.contrib.admindocs',
+)
 
 
 SECRET_KEY = 'testsecretkeyshouldntbeusedinproduction'
