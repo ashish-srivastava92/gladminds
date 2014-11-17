@@ -28,7 +28,7 @@ class TestServiceDeskFlow(BaseTestCase):
         system = self.system
         system.verify_result(input=feedback_obj[0].priority, output="High")
         system.verify_result(input=len(log_len_after), output=1)
-        system.verify_result(input=log_len_after[0].reciever, output="9999999998")
+        system.verify_result(input=log_len_after[0].receiver, output="9999999998")
  
     def test_get_feedback_sdo(self):
         initiator = self.system
@@ -58,9 +58,9 @@ class TestServiceDeskFlow(BaseTestCase):
         service_desk_manager.update_feedback(status='Open')
         log_len_after = logs.AuditLog.objects.all()
         system = self.system
-        system.verify_result(input=log_len_after[0].reciever, output="9999999998")
-        system.verify_result(input=log_len_after[1].reciever, output="9999999998")
-        system.verify_result(input=log_len_after[2].reciever, output="9999999999")
+        system.verify_result(input=log_len_after[0].receiver, output="9999999998")
+        system.verify_result(input=log_len_after[1].receiver, output="9999999998")
+        system.verify_result(input=log_len_after[2].receiver, output="9999999999")
  
     def test_sms_email_after_resolved(self):
         initiator = self.system

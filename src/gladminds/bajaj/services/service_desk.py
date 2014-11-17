@@ -89,5 +89,5 @@ def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=Non
             task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
         else:
             send_coupon.delay(phone_number=phone_number, message=message)
-    sms_log(reciever=phone_number, action='SEND TO QUEUE', message=message)
+    sms_log(receiver=phone_number, action='SEND TO QUEUE', message=message)
     return {'status': True, 'message': message}

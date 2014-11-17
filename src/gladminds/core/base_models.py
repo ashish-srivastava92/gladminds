@@ -35,7 +35,11 @@ class UserProfile(BaseModel):
                               blank=True, null=True)
 
     class Meta:
+        verbose_name_plural = "User Profile"
         abstract = True
+        
+    def __unicode__(self):
+        return self.phone_number or 'None'
 
 
 class Industry(BaseModel):
@@ -259,7 +263,7 @@ class EmailTemplate(BaseModel):
     template_key = models.CharField(max_length=255, unique=True, null=False,\
                                      blank=False)
     sender = models.CharField(max_length=512, null=False)
-    reciever = models.CharField(max_length=512, null=False)
+    receiver = models.CharField(max_length=512, null=False)
     subject = models.CharField(max_length=512, null=False)
     body = models.CharField(max_length=512, null=False)
     description = models.CharField(max_length=512, null=True)
@@ -349,7 +353,7 @@ class SMSLog(BaseModel):
     action = models.CharField(max_length=250)
     message = models.TextField(null=True, blank=True)
     sender = models.CharField(max_length=15)
-    reciever = models.CharField(max_length=15)
+    receiver = models.CharField(max_length=15)
 
     class Meta:
         abstract = True
@@ -359,7 +363,7 @@ class EmailLog(BaseModel):
     subject = models.CharField(max_length=250, null=True, blank=True)
     message = models.TextField(null=True, blank=True)
     sender = models.CharField(max_length=100, null=True, blank=True)
-    reciever = models.TextField()
+    receiver = models.TextField()
     cc = models.TextField(null=True, blank=True)
 
     class Meta:

@@ -85,7 +85,7 @@ class GladmindsResources(Resource):
                 logger.info('Message to send: ' + message)
         phone_number = utils.get_phone_number_format(phone_number)
         message = utils.format_message(message)
-        sms_log(action='RECIEVED', sender=phone_number, reciever='+1 469-513-9856', message=message)
+        sms_log(action='RECIEVED', sender=phone_number, receiver='+1 469-513-9856', message=message)
         logger.info('Recieved Message from phone number: {0} and message: {1}'.format(phone_number, message))
         try:
             sms_dict = sms_parser.sms_parser(message=message)
@@ -104,7 +104,7 @@ class GladmindsResources(Resource):
                     task_queue.add("send_invalid_keyword_message", {"phone_number":phone_number, "message":error_template, "sms_client":settings.SMS_CLIENT})
             else:
                 send_invalid_keyword_message.delay(phone_number=phone_number, message=error_template, sms_client=settings.SMS_CLIENT)
-            sms_log(reciever=phone_number, action=AUDIT_ACTION, message=error_template)
+            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=error_template)
             raise ImmediateHttpResponse(HttpBadRequest(error_message))
         handler = getattr(self, sms_dict['handler'], None)
         try:
@@ -134,6 +134,7 @@ class GladmindsResources(Resource):
 #                 customer_name=customer_name, email_id=email_id,
 #                 registration_date=registration_date)
 #             customer.save()
+
         # Please update the template variable before updating the keyword-argument
         message = sms_parser.render_sms_template(status='send', keyword=sms_dict['keyword'], customer_id=gladmind_customer_id)
         phone_number = utils.get_phone_number_format(phone_number)
@@ -180,7 +181,7 @@ class GladmindsResources(Resource):
             task_queue.add("customer_detail_recovery", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         else:
             customer_detail_recovery.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
-        sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
         return {'status': True, 'message': message}
 
     @log_time
@@ -216,7 +217,7 @@ class GladmindsResources(Resource):
             task_queue.add("send_service_detail", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         else:
             send_service_detail.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
-        sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
         return {'status': True, 'message': message}
 
     def get_customer_phone_number_from_vin(self, vin):
@@ -363,7 +364,7 @@ class GladmindsResources(Resource):
                 task_queue.add("send_coupon_detail_customer", {"phone_number":utils.get_phone_number_format(customer_phone_number), "message":customer_message, "sms_client":settings.SMS_CLIENT}, delay_seconds=customer_message_countdown)
             else:
                 send_coupon_detail_customer.apply_async( kwargs={ 'phone_number': utils.get_phone_number_format(customer_phone_number), 'message':customer_message, "sms_client":settings.SMS_CLIENT}, countdown=customer_message_countdown)
-            sms_log(reciever=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
+            sms_log(receiver=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
         except IndexError as ie:
             dealer_message = templates.get_template('SEND_INVALID_VIN_OR_FSC')
         except ObjectDoesNotExist as odne:
@@ -379,7 +380,7 @@ class GladmindsResources(Resource):
                 task_queue.add("send_service_detail", {"phone_number":phone_number, "message":dealer_message, "sms_client":settings.SMS_CLIENT})
             else:
                 send_service_detail.delay(phone_number=phone_number, message=dealer_message, sms_client=settings.SMS_CLIENT)
-            sms_log(reciever=phone_number, action=AUDIT_ACTION, message=dealer_message)
+            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=dealer_message)
         return {'status': True, 'message': dealer_message}
 
     
@@ -421,7 +422,7 @@ class GladmindsResources(Resource):
                 task_queue.add("send_coupon", {"phone_number":phone_number, "message": message, "sms_client":settings.SMS_CLIENT})
             else:
                 send_coupon.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
-            sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
         return {'status': True, 'message': message}
 
     def validate_service_advisor(self, phone_number):
@@ -482,7 +483,7 @@ class GladmindsResources(Resource):
                 task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
             else:
                 send_invalid_keyword_message.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
-            sms_log(reciever=sa_phone, action=AUDIT_ACTION, message=message)
+            sms_log(receiver=sa_phone, action=AUDIT_ACTION, message=message)
             logger.info("Message sent to SA : " + message)
             return False
         return True
@@ -502,7 +503,7 @@ class GladmindsResources(Resource):
         except Exception as ex:
             message = templates.get_template('SEND_INVALID_MESSAGE')
         send_brand_sms_customer.delay(phone_number=phone_number, message=message)
-        sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
         return {'status': True, 'message': message}
 
     def determine_format(self, request):
@@ -541,7 +542,7 @@ class GladmindsResources(Resource):
             send_feedback_received(context)
             context = utils.create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)
             send_servicedesk_feedback(context, gladminds_feedback_object)
-            sms_log(reciever=phone_number, action=AUDIT_ACTION, message = message)
+            sms_log(receiver=phone_number, action=AUDIT_ACTION, message = message)
         return {'status': True, 'message': message}
 
     def check_role_of_initiator(self, phone_number):
