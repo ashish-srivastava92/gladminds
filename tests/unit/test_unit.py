@@ -10,7 +10,7 @@ from unit.base_unit import RequestObject, GladmindsUnitTestCase
 from gladminds.core.utils import get_sa_list, get_coupon_info, get_customer_info,\
  get_list_from_set, get_token, create_feed_data , \
  validate_otp, update_pass, format_date_string
-from gladminds.bajaj import models as common
+from gladminds.bajaj import models
 import boto
 from gladminds.core.constants import FEEDBACK_TYPE, PRIORITY
 from tastypie.test import TestApiClient
@@ -43,14 +43,14 @@ class TestUtils(GladmindsUnitTestCase):
         self.asc_user = User(username='ASC001')
         self.asc_user.set_password('123')
         self.asc_user.save()
-        self.asc_user_profile = common.UserProfile(user=self.asc_user, phone_number="+911234567890")
+        self.asc_user_profile = models.UserProfile(user=self.asc_user, phone_number="+911234567890")
         self.asc_user_profile.save()
         self.get_asc_obj(user=self.asc_user_profile, asc_id="ASC0001")
   
   
     def test_get_customer_info(self):  
         request=RequestObject(data={'vin':'12345678999'})
-        product_info = common.ProductData(product_id = '12345678999', product_type=self.product_type_obj)
+        product_info = models.ProductData(product_id = '12345678999', product_type=self.product_type_obj)
         product_info.save()
         result=get_customer_info(request.POST)
         self.assertEqual("VIN '12345678999' has no associated customer. Please register the customer.",result['message'])
@@ -131,7 +131,7 @@ class TestFeedLogWithRemark(ResourceTestCase):
         
         self.api_client.post(url, data=xml_data,
                                     content_type='text/xml')
-        feed_logs_obj = common.DataFeedLog.objects.all()
+        feed_logs_obj = models.DataFeedLog.objects.all()
         self.assertEqual(len(feed_logs_obj), 1)
         remark = json.loads(feed_logs_obj[0].remarks)
         self.assertEqual(len(remark), 1)
