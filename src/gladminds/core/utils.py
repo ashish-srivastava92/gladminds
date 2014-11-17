@@ -93,7 +93,7 @@ def validate_otp(user, otp, phone):
 
 def update_pass(otp, password):
     token_obj = models.OTPToken.objects.filter(token=otp)[0]
-    user = token_obj.user
+    user = token_obj.user.user
     token_obj.delete()
     user.set_password(password)
     user.save()

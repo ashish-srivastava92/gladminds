@@ -316,7 +316,7 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
     redeem_obj = feed.CouponRedeemFeedToSAP()
     feed_export_data = redeem_obj.export_data()
     if len(feed_export_data[0]) > 0:
-        coupon_redeem = exportfeed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
+        coupon_redeem = export_feed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
                        'username'], password=settings.SAP_CRM_DETAIL['password'],
                       wsdl_url=settings.COUPON_WSDL_URL, feed_type='Coupon Redeem Feed')
         coupon_redeem.export(items=feed_export_data[0], item_batch=feed_export_data[
@@ -354,7 +354,7 @@ def export_asc_registeration_to_sap(*args, **kwargs):
     try:
         asc_registeration_data = feed.ASCRegistrationToSAP()
         feed_export_data = asc_registeration_data.export_data(phone_number)
-        export_obj = exportfeed.ExportCouponRedeemFeed(
+        export_obj = export_feed.ExportCouponRedeemFeed(
                username=settings.SAP_CRM_DETAIL['username'], password=settings
                .SAP_CRM_DETAIL['password'], wsdl_url=settings.ASC_WSDL_URL)
         export_obj.export(items=feed_export_data['item'],
@@ -402,7 +402,7 @@ def export_customer_reg_to_sap(*args, **kwargs):
     redeem_obj = feed.CustomerRegistationFeedToSAP()
     feed_export_data = redeem_obj.export_data()
     if len(feed_export_data[0]) > 0:
-        customer_registered = exportfeed.ExportCustomerRegistrationFeed(username=settings.SAP_CRM_DETAIL[
+        customer_registered = export_feed.ExportCustomerRegistrationFeed(username=settings.SAP_CRM_DETAIL[
                        'username'], password=settings.SAP_CRM_DETAIL['password'],
                       wsdl_url=settings.CUSTOMER_REGISTRATION_WSDL_URL, feed_type='Customer Registration Feed')
         customer_registered.export(items=feed_export_data[0], item_batch=feed_export_data[
@@ -410,29 +410,30 @@ def export_customer_reg_to_sap(*args, **kwargs):
     else:
         logger.info("tasks.py: No Customer registered since last feed")
         
-def send_sms(template_name, phone_number):
-    created_date = feedback_obj.created_date
-    try:
-        message = templates.get_template(template_name).format(type=feedback_obj.type,
-                                                               reporter=feedback_obj.reporter,
-                                                               message=feedback_obj.message,
-                                                               created_date=convert_utc_to_local_time(created_date),
-                                                               assign_to=feedback_obj.assign_to,
-                                                               priority=feedback_obj.priority)
-        if comment_obj and template_name == 'SEND_MSG_TO_ASSIGNEE':
-            message = message + 'Note :' + comment_obj.comments
-    except Exception as ex:
-        message = templates.get_template('SEND_INVALID_MESSAGE')
-    finally:
-        logger.info("Send complain message received successfully with %s" % message)
-        phone_number = utils.get_phone_number_format(phone_number)
-        if settings.ENABLE_AMAZON_SQS:
-            task_queue = utils.get_task_queue()
-            task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
-        else:
-            send_coupon.delay(phone_number=phone_number, message=message)
-    audit_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
-    return {'status': True, 'message': message}
+
+# def send_sms(template_name, phone_number):
+#     created_date = feedback_obj.created_date
+#     try:
+#         message = templates.get_template(template_name).format(type=feedback_obj.type,
+#                                                                reporter=feedback_obj.reporter,
+#                                                                message=feedback_obj.message,
+#                                                                created_date=convert_utc_to_local_time(created_date),
+#                                                                assign_to=feedback_obj.assign_to,
+#                                                                priority=feedback_obj.priority)
+#         if comment_obj and template_name == 'SEND_MSG_TO_ASSIGNEE':
+#             message = message + 'Note :' + comment_obj.comments
+#     except Exception as ex:
+#         message = templates.get_template('SEND_INVALID_MESSAGE')
+#     finally:
+#         logger.info("Send complain message received successfully with %s" % message)
+#         phone_number = utils.get_phone_number_format(phone_number)
+#         if settings.ENABLE_AMAZON_SQS:
+#             task_queue = utils.get_task_queue()
+#             task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
+#         else:
+#             send_coupon.delay(phone_number=phone_number, message=message)
+#     audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+#     return {'status': True, 'message': message}
 
     
 _tasks_map = {"send_registration_detail": send_registration_detail,
