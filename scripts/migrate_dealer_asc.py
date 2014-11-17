@@ -8,10 +8,11 @@ DB_HOST = os.environ.get('DB_HOST')
 DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
 
+MIGRATE_DB = os.environ.get('MIGRATE_DB','gladminds')
 db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
                      user=DB_USER, # your username
                       passwd=DB_PASSWORD, # your password
-                      db="gladminds") # name of the data base
+                      db=MIGRATE_DB) # name of the data base
 
 cur_old = db_old.cursor() 
 
@@ -25,7 +26,7 @@ cur_new = db_new.cursor()
 cur_old.execute("select d.*, a.* from aftersell_registereddealer as d, auth_user as a where d.dealer_id=a.username and d.role!='asc'")
 dealer_data = cur_old.fetchall()
 
-cur_old.execute("select d.*, a.* from aftersell_registereddealer as d, auth_user as a where d.dealer_id=a.username and d.role='asc' and d.id='1379'")
+cur_old.execute("select d.*, a.* from aftersell_registereddealer as d, auth_user as a where d.dealer_id=a.username and d.role='asc'")
 asc_data = cur_old.fetchall()
 
 def process_query(data):
