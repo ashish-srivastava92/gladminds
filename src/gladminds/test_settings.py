@@ -36,7 +36,9 @@ FEED_TYPE = 'CSV'
 LOGGING['handlers']['gladminds_logs']['filename'] = 'log/test_case.log'
 LOGGING['handlers']['afterbuy_logs']['filename'] = 'log/test_case.log'
 LOGGING['handlers']['sql']['filename'] = 'log/sql.log'
-
+LOGGING['loggers']['gladminds']['handlers'] = ['gladminds_logs'] 
+LOGGING['loggers']['spyne']['handlers'] = ['gladminds_logs'] 
+LOGGING['loggers']['afterbuy']['handlers'] = ['afterbuy_logs'] 
 
 FEED_FAILURE_MAIL_ENABLED = False
 
