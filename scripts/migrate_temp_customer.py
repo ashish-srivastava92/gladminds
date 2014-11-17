@@ -25,7 +25,7 @@ cur_new = db_new.cursor()
 
 cur_old.execute("SELECT c.*, p.vin FROM gladminds_customertempregistration as c, gladminds_productdata as p \
                where c.product_data_id=p.id and c.product_data_id in (101964, 102344, 102664, 103889)")
-coupon_data = cur_old.fetchall()
+customer_data = cur_old.fetchall()
 
 
 def process_query(data):
@@ -72,5 +72,6 @@ def format_data(coupon_data):
         coupons.append(temp)
     pool.map(process_query, coupons)
     end_time = time.time()
+    print "..........Total TIME TAKEN.........", end_time-start_time
 
-format_data(coupon_data)
+format_data(customer_data)

@@ -76,5 +76,6 @@ def format_data_ucnrecover(ucnrecover_data):
     print "------------------", ucnrecovers
     pool.map(process_query_ucnrecover, ucnrecovers)
     end_time = time.time()
+    print "..........Total TIME TAKEN.........", end_time-start_time
 
 format_data_ucnrecover(ucnrecover_data)

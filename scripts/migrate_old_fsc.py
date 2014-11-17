@@ -100,5 +100,6 @@ def format_data(coupon_data):
         coupons.append(temp)
     pool.map(process_query, coupons)
     end_time = time.time()
+    print "..........Total TIME TAKEN.........", end_time-start_time
 
 format_data(coupon_data)
