@@ -1,6 +1,11 @@
 # pylint: disable=W0401,W0614
 from gladminds.settings import *
 import os
+import warnings
+# added for removing warnings printed on console
+import exceptions
+warnings.filterwarnings("ignore", category=exceptions.RuntimeWarning, module='django.db.models.fields', lineno=903)
+
 
 OUT_DIR = os.path.join(BASE_DIR, "out")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/testdata")
