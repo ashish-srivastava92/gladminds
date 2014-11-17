@@ -8,10 +8,11 @@ DB_HOST = os.environ.get('DB_HOST')
 DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
 
+MIGRATE_DB = os.environ.get('MIGRATE_DB','gladminds')
 db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
                      user=DB_USER, # your username
                       passwd=DB_PASSWORD, # your password
-                      db="gladminds") # name of the data base
+                      db=MIGRATE_DB) # name of the data base
 
 cur_old = db_old.cursor() 
 
@@ -105,6 +106,7 @@ def format_data(coupon_data):
         coupons.append(temp)
     pool.map(process_query, coupons)
     end_time = time.time()
+    print "..........Total TIME TAKEN.........", end_time-start_time
 
 
 format_data(coupon_data)

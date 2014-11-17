@@ -7,11 +7,11 @@ from datetime import datetime
 DB_HOST = os.environ.get('DB_HOST')
 DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
-
+MIGRATE_DB = os.environ.get('MIGRATE_DB','gladminds')
 db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
                      user=DB_USER, # your username
                       passwd=DB_PASSWORD, # your password
-                      db="gladminds") # name of the data base
+                      db=MIGRATE_DB) # name of the data base
 
 cur_old = db_old.cursor() 
 
@@ -25,7 +25,7 @@ cur_new = db_new.cursor()
 cur_old.execute("SELECT p.*, d.dealer_id, t.product_type FROM gladminds_productdata as p, \
              aftersell_registereddealer as d, gladminds_producttypedata as t \
              where p.product_type_id=t.product_type_id\
-            and p.dealer_id_id=d.id and p.id in (101964, 102344, 102664, 103889) limit 1000")
+            and p.dealer_id_id=d.id")
 product_data = cur_old.fetchall()
 
 
@@ -119,4 +119,6 @@ def format_data(product_data):
         products.append(temp)
     pool.map(process_query, products)
     end_time = time.time()
-#print "..........Total TIME.........", end_time-start_time
+    print "..........Total TIME TAKEN.........", end_time-start_time
+
+format_data(product_data)

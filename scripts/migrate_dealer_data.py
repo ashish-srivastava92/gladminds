@@ -8,10 +8,11 @@ DB_HOST = os.environ.get('DB_HOST')
 DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
 
+MIGRATE_DB = os.environ.get('MIGRATE_DB','gladminds')
 db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
                      user=DB_USER, # your username
                       passwd=DB_PASSWORD, # your password
-                      db="gladminds") # name of the data base
+                      db=MIGRATE_DB) # name of the data base
 
 cur_old = db_old.cursor() 
 
@@ -24,9 +25,6 @@ cur_new = db_new.cursor()
 
 cur_old.execute("select d.*, a.* from aftersell_registereddealer as d, auth_user as a where d.dealer_id=a.username and d.role!='asc'")
 dealer_data = cur_old.fetchall()
-
-cur_old.execute("select d.*, a.* from aftersell_registereddealer as d, auth_user as a where d.dealer_id=a.username and d.role='asc' and d.id='1379'")
-asc_data = cur_old.fetchall()
 
 def process_query(data):
     print "----------------------------------", cur_new
@@ -55,22 +53,10 @@ def process_query(data):
         dealer_pro = cur_new.fetchall()[0]
         print "fetched dealer profile", dealer_pro[11]
          
-#         cur_new.execute("INSERT INTO bajaj_dealer (user_id, dealer_id, created_date, modified_date) VALUES (%s, %s, %s, %s)",(dealer_pro[11], data.get('dealer_id'), today, today))
-#         print "created dealer"
+        cur_new.execute("INSERT INTO bajaj_dealer (user_id, dealer_id, created_date, modified_date) VALUES (%s, %s, %s, %s)",(dealer_pro[11], data.get('dealer_id'), today, today))
+        print "created dealer"
 
-        dealer_dependent=data.get('dependent_on')
-        print "----------------", dealer_dependent
-        if dealer_dependent:
-            query3 = "select * from bajaj_dealer where dealer_id  = %(dealer_id)s"
-            cur_new.execute(query3, {'dealer_id': dealer_dependent})
-            dealer_dep = cur_new.fetchall()[0]
-            dealer_dependent=dealer_dep[3]
-            print "fetched dependent dealer profile", dealer_dependent
-        cur_new.execute("INSERT INTO bajaj_authorizedservicecenter (user_id, asc_id, created_date, modified_date, dealer_id) VALUES (%s, %s, %s, %s, %s)",(dealer_pro[11], data.get('dealer_id'), today, today, dealer_dependent))
-        print "created asc"
-# 
-        cur_new.execute("select * from auth_group where name = 'ascs'")       
-#         cur_new.execute("select * from auth_group where name = 'dealers'")
+        cur_new.execute("select * from auth_group where name = 'dealers'")
 
         dealer_group = cur_new.fetchall()[0]
         print "Fetched dealer group"
@@ -108,3 +94,6 @@ def format_data(dealer_data):
         dealers.append(temp)
     pool.map(process_query, dealers)
     end_time = time.time()
+    print "..........Total TIME TAKEN.........", end_time-start_time
+    
+format_data(dealer_data)
