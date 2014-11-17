@@ -14,6 +14,7 @@ from gladminds.bajaj import models as common
 import boto
 from gladminds.core.constants import FEEDBACK_TYPE, PRIORITY
 from tastypie.test import TestApiClient
+from integration.base_integration import client
         
 
 class TestAssertWorks(TestCase):
@@ -83,7 +84,7 @@ class TestUtils(GladmindsUnitTestCase):
         password='1234'
         token = get_token(self.asc_user_profile, phone_number)
         self.assertTrue(isinstance(token, int))
-        self.assertTrue(update_pass(token, password))   
+        self.assertTrue(update_pass(token, password))
     
     def test_otp(self):
         phone_number = '1234567890'
@@ -116,7 +117,7 @@ class TestFeedLogWithRemark(ResourceTestCase):
    
     def setUp(self):
         TestCase.setUp(self)
-        self.api_client = TestApiClient()
+        self.api_client = client
         user = User.objects.create_user('gladminds', 'gladminds@gladminds.co',
                                          'gladminds')
         user.save()
