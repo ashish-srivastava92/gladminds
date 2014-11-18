@@ -8,6 +8,7 @@ DB_HOST = os.environ.get('DB_HOST')
 DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
 MIGRATE_DB = os.environ.get('MIGRATE_DB','gladminds')
+total_start_time = time.time()
 db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
                      user=DB_USER, # your username
                       passwd=DB_PASSWORD, # your password
@@ -22,12 +23,7 @@ db_new = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
 
 cur_new = db_new.cursor() 
 
-cur_old.execute("SELECT p.*, d.dealer_id, t.product_type FROM gladminds_productdata as p, \
-             aftersell_registereddealer as d, gladminds_producttypedata as t \
-             where p.product_type_id=t.product_type_id\
-            and p.dealer_id_id=d.id")
-product_data = cur_old.fetchall()
-
+pool_main = Pool(1)
 
 def process_query(data):
     print "--------------------products--------------", data.get('vin')
@@ -119,6 +115,22 @@ def format_data(product_data):
         products.append(temp)
     pool.map(process_query, products)
     end_time = time.time()
-    print "..........Total TIME TAKEN.........", end_time-start_time
+    print "..........TIME TAKEN.........", end_time-start_time
 
-format_data(product_data)
+def get_data(offset=0):
+    query= "SELECT p.*, d.dealer_id, t.product_type FROM gladminds_productdata as p, \
+             aftersell_registereddealer as d, gladminds_producttypedata as t \
+             where p.product_type_id=t.product_type_id\
+            and p.dealer_id_id=d.id limit 10000 offset %(offset)s"
+    cur_old.execute(query, {'offset': offset})
+    product_data = cur_old.fetchall()
+    format_data(product_data)
+
+cur_old.execute('select count(*) from gladminds_productdata;')
+product_data_count = cur_old.fetchone()[0]
+i=0
+while i<=product_data_count:
+    get_data(offset=i)
+    i=i+1000
+total_end_time = time.time()
+print "..........Total TIME TAKEN.........", total_end_time-total_start_time
