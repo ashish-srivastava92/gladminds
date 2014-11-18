@@ -30,8 +30,9 @@ urlpatterns = patterns('',
 
     url(r'^aftersell/users/(?P<users>[a-zA-Z0-9]+)$', 'gladminds.core.views.users'),
     url(r'^aftersell/sa/(?P<id>[a-zA-Z0-9]+)/$', 'gladminds.core.views.get_sa_under_asc'),
-    url(r'^aftersell/(?P<role>[a-zA-Z0-9.-]+)/$', 'gladminds.core.views.brand_details'),
+    url(r'^report/(?P<role>[a-zA-Z0-9.-]+)/$', 'gladminds.core.views.brand_details'),
     url(r'^aftersell/reports/reconciliation$', 'gladminds.core.views.reports'),
+    url(r'^asc/report/$', 'gladminds.core.views.get_active_asc_report'),
      
     url(r'^aftersell/register/(?P<menu>[a-zA-Z0-9]+)$', 'gladminds.core.views.register'),
     url(r'^aftersell/exceptions/(?P<exception>[a-zA-Z0-9]+)$', 'gladminds.core.views.exceptions'),

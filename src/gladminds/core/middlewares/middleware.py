@@ -1,14 +1,33 @@
-from django.conf import settings
-from gladminds.models import common
-from gladminds.aftersell.models import common as aftersell_common
-from django.http import HttpResponseBadRequest
-from gladminds import utils
-from gladminds import smsparser
 import logging
-logger = logging.getLogger(__name__)
 
-__all__ = ['GladmindsMiddleware']
+from django.http import HttpResponseBadRequest
+from django.conf import settings
 
+from gladminds.bajaj import models as common
+from gladminds.core import utils
+from gladminds.core.managers import sms_parser
+
+logger = logging.getLogger('gladminds')
+
+__all__ = ['GladmindsMiddleware', 'GladmindsMessageMiddleware']
+SMS_CLIENT = settings.__dict__['_wrapped'].__class__.SMS_CLIENT =  utils.make_tls_property()
+
+"""
+Gladminds middleware to identify the IP from where the message request came
+and reply through the same platform
+"""
+
+class GladmindsMessageMiddleware(object):    
+    #If the request is come on message APIs, then based on the IP we set sms client
+    def process_request(self, request, **kwargs):
+        source_client = request.POST.get('source', None)
+        logger.info('Client is {0}'.format(source_client))
+        if source_client:
+            SMS_CLIENT.value = 'KAP'
+        else:
+            SMS_CLIENT.value = 'KAP'
+        logger.info('Client is {0}'.format(SMS_CLIENT.value))
+        
 """
 Gladminds middleware to identify the user type (i.e Customer, Service Advisor and Admin).
 And set the it into request object
@@ -30,7 +49,7 @@ class GladmindsMiddleware(object):
                 # Putting a random phone, will change once we get correct format of message
                 phone_number = '+91 7834671232'
                 message = request.body
-            message_args = smsparser.sms_parser(message=message)
+            message_args = sms_parser.sms_parser(message=message)
             auth_rule = message_args['auth_rule']
             if 'open' in auth_rule:
                 request.user['role'] = 'Customer'
@@ -38,16 +57,16 @@ class GladmindsMiddleware(object):
                 return
             elif 'sa' in auth_rule:
                 try:
-                    aftersell_common.ServiceAdvisor.objects.get(phone_number=phone_number)
+                    common.ServiceAdvisor.objects.get(phone_number=phone_number)
                     request.user['role'] = 'SA'
                     request.user['phone_number'] = phone_number
-                except aftersell_common.ServiceAdvisor.DoesNotExist:
+                except common.ServiceAdvisor.DoesNotExist:
                     raise HttpResponseBadRequest()
             elif 'customer' in auth_rule:
                 try:
-                    object = common.GladmindsUser.objects.get(phone_number=phone_number)
+                    object = common.UserProfile.objects.get(phone_number=phone_number)
                     request.user['role'] = 'Customer'
                     request.user['phone_number'] = phone_number
-                except common.GladmindsUser.DoesNotExist:
+                except common.UserProfile.DoesNotExist:
                     raise HttpResponseBadRequest()
         return

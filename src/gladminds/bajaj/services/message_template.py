@@ -58,5 +58,17 @@ def get_message_template_mapper():
                         'invalid':get_template('SEND_INVALID_MESSAGE'),
                         'handler':'send_customer_detail',
                         'auth_rule': ['open']
-                         }
+                         },
+            settings.ALLOWED_KEYWORDS['accumulate_point']:{
+                        'receive': get_template('RCV_ACCUMULATE_POINT'),
+                        'send':get_template('SEND_ACCUMULATED_POINT'),
+                        'invalid':get_template('SEND_INVALID_MESSAGE'),
+                        'handler':'accumulate_point',
+                        'auth_rule': ['open']},
+            settings.ALLOWED_KEYWORDS['redeem_point']:{
+                        'receive': get_template('RCV_REDEEM_POINT'),
+                        'send':get_template('SEND_REDEEM_POINT'),
+                        'invalid':get_template('SEND_INVALID_MESSAGE'),
+                        'handler':'redeem_point',
+                        'auth_rule': ['open']}
             }

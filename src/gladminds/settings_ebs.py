@@ -71,8 +71,6 @@ SQS_QUEUE_NAME = "gladminds-prod"
 ########################################################################
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail"
-#########################New relic file location########################
-NEW_RELIC_FILE_LOCATION = './src/newrelic.ini'
 ########################################################################
 ###################Change Mail Subject on Prod##########################
 MAIL_DETAIL["subject"]= "GladMinds Feed Report"
