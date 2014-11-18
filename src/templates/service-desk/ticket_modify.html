@@ -83,7 +83,7 @@
                         			<select id="assignee" class="form-control assignee" name="Assign_To"   {% if group == 'SDO' or group == 'dealers' %} onfocus="disable_func()" readonly {% endif %} onchange="dueDateRequire(this.options[this.selectedIndex].value)" >
                             			<option value=""></option>
                                			{% for type in servicedeskuser %}
-                      	          			<option {% if type == feedback.assign_to %} selected {% endif %} value="{{type}}">{{type.user.username}}({{type}})</option>
+                      	          			<option {% if type == feedback.assign_to %} selected {% endif %} value="{{type}}">{{type.username}}</option>
                                 		{% endfor %}
                                 		<option {% if feedback.assign_to_reporter %} selected {%endif%} value ='Assign to reporter'>Assign to reporter</option>
                             		</select>

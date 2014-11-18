@@ -8,7 +8,7 @@ from gladminds.bajaj.models import BrandProductCategory, ProductType,\
 UserProfile, Dealer, AuthorizedServiceCenter,\
 ServiceAdvisor, ProductData, CouponData, \
 ASCTempRegistration, SATempRegistration, CustomerTempRegistration,\
-SMSLog, EmailLog, DataFeedLog, MessageTemplate, EmailTemplate
+SMSLog, EmailLog, DataFeedLog, MessageTemplate, EmailTemplate, SLA
 from gladminds.core import utils
 
 class BajajAdminSite(AdminSite):
@@ -326,6 +326,15 @@ class EmailTemplateAdmin(ModelAdmin):
     def receivers(self, obj):
         return ' | '.join(obj.receiver.split(','))
 
+class SlaAdmin(ModelAdmin):
+    fieldsets = (
+        (None, {
+            'fields': (
+        'priority', ('response_time', 'response_unit'), ('reminder_time', 'reminder_unit'), ('resolution_time', 'resolution_unit'))
+        }),
+        )
+
+
 brand_admin = BajajAdminSite(name='bajaj')
 
 brand_admin.register(User)
@@ -352,3 +361,6 @@ brand_admin.register(CustomerTempRegistration, CustomerTempRegistrationAdmin)
 
 brand_admin.register(EmailTemplate, EmailTemplateAdmin)
 brand_admin.register(MessageTemplate, MessageTemplateAdmin)
+brand_admin.register(SLA, SlaAdmin)
+
+
