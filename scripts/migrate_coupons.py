@@ -23,11 +23,6 @@ db_new = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
 
 cur_new = db_new.cursor() 
 
-cur_old.execute("SELECT c.*, p.vin FROM gladminds_coupondata as c, gladminds_productdata as p\
-             where c.vin_id=p.id")
-coupon_data = cur_old.fetchall()
-
-
 def process_query(data):
     print "--------------------coupons--------------", data.get('vin_id)'), data.get('unique_service_coupon)')
     try:
@@ -106,7 +101,21 @@ def format_data(coupon_data):
         coupons.append(temp)
     pool.map(process_query, coupons)
     end_time = time.time()
-    print "..........Total TIME TAKEN.........", end_time-start_time
+    print "..........TIME TAKEN.........", end_time-start_time
 
 
-format_data(coupon_data)
+def get_data(offset=0):
+    query= "SELECT c.*, p.vin FROM gladminds_coupondata as c, gladminds_productdata as p\
+             where c.vin_id=p.id limit 10000 offset %(offset)s"
+    cur_old.execute(query, {'offset': offset})
+    coupon_data = cur_old.fetchall()
+    format_data(coupon_data)
+
+cur_old.execute('select count(*) from gladminds_coupondata;')
+coupon_data_count = cur_old.fetchone()[0]
+i=0
+while i<=coupon_data_count:
+    get_data(offset=i)
+    i=i+1000
+total_end_time = time.time()
+print "..........Total TIME TAKEN.........", total_end_time-total_start_time
