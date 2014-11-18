@@ -31,6 +31,11 @@ def get_feedback(feedback_id, user):
     else:
         return common.Feedback.objects.get(id=feedback_id)
 
+#FIXME: According to new model
+def get_servicedesk_users(designation):
+    pass
+
+
 def set_due_date(priority, created_date):
     sla_obj = common.SLA.objects.get(priority=priority)
     resolution_time = sla_obj.resolution_time

@@ -46,7 +46,7 @@ urlpatterns = patterns('',
     url(r'^aftersell/users/otp/update_pass', 'gladminds.core.views.update_pass', name='update_pass'),
     url(r'^aftersell/provider/change-password$', 'gladminds.core.views.change_password', name='change_password'),
     
-    url(r'^aftersell/servicedesk/(?P<servicedesk>[a-zA-Z0-9]+)$', 'gladminds.core.views.servicedesk'),
+    url(r'^aftersell/servicedesk/(?P<servicedesk>[a-zA-Z0-9]+)$', 'gladminds.core.views.service_desk'),
     url(r'^aftersell/servicedesk/$', 'gladminds.bajaj.services.service_desk.get_servicedesk_tickets', name='get_servicedesk_tickets'),
     url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/$', 'gladminds.bajaj.services.service_desk.modify_servicedesk_tickets', name='modify_servicedesk_tickets'),
     url(r'^aftersell/feedbackresponse/(?P<feedback_id>\d+)/$', 'gladminds.bajaj.services.service_desk.get_feedback_response', name='get_feedback_response'),
