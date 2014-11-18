@@ -1,7 +1,7 @@
 import logging
 import datetime
 
-from gladminds.bajaj import models as common
+from gladminds.bajaj import models as models
 from gladminds.core.exceptions import DataNotFoundError
 from gladminds.core.utils import create_context, get_list_from_set,\
     get_start_and_end_date, set_wait_time, convert_utc_to_local_time,\
@@ -16,20 +16,20 @@ logger = logging.getLogger('gladminds')
 def get_feedbacks(user):
     group = user.groups.all()[0]
     if group.name == 'SDM':
-        feedbacks = common.Feedback.objects.order_by('-created_date')
+        feedbacks = models.Feedback.objects.order_by('-created_date')
     if group.name == 'SDO':
-        servicedesk_obj = common.UserProfile.objects.filter(user=user)
-        feedbacks = common.Feedback.objects.filter(
+        servicedesk_obj = models.UserProfile.objects.filter(user=user)
+        feedbacks = models.Feedback.objects.filter(
                         assign_to=servicedesk_obj[0]).order_by('-created_date')
     return feedbacks
 
 def get_feedback(feedback_id, user):
     group = user.groups.all()[0]
     if group.name == 'SDO':
-        servicedesk_obj = common.UserProfile.objects.filter(user=user)
-        return common.Feedback.objects.filter(id=feedback_id,assign_to=servicedesk_obj[0])
+        servicedesk_obj = models.UserProfile.objects.filter(user=user)
+        return models.Feedback.objects.filter(id=feedback_id,assign_to=servicedesk_obj[0])
     else:
-        return common.Feedback.objects.get(id=feedback_id)
+        return models.Feedback.objects.get(id=feedback_id)
 
 #FIXME: According to new model
 def get_servicedesk_users(designation):
@@ -37,7 +37,7 @@ def get_servicedesk_users(designation):
 
 
 def set_due_date(priority, created_date):
-    sla_obj = common.SLA.objects.get(priority=priority)
+    sla_obj = models.SLA.objects.get(priority=priority)
     resolution_time = sla_obj.resolution_time
     resolution_unit = sla_obj.resolution_unit
     total_seconds = get_time_in_seconds(resolution_time, resolution_unit)
@@ -73,7 +73,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
 #             feedback_obj.assign_to_reporter = True
 #             feedback_obj.assign_to = previous_assignee
 #         else:
-#             servicedesk_assign_obj = aftersell_common.ServiceDeskUser.objects.filter(
+#             servicedesk_assign_obj = aftersell_models.ServiceDeskUser.objects.filter(
 #                                                             phone_number=data['Assign_To'])
 #             feedback_obj.assign_to = servicedesk_assign_obj[0]
 #             feedback_obj.assign_to_reporter = False
@@ -98,7 +98,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
 #                  feedback_obj)
 # 
 #     if feedback_obj.status == 'Resolved':
-#         servicedesk_obj_all = aftersell_common.ServiceDeskUser.objects.filter(
+#         servicedesk_obj_all = aftersell_models.ServiceDeskUser.objects.filter(
 #                                                     designation='SDM')
 #         feedback_obj.resolved_date = datetime.datetime.now()
 #         feedback_obj.resolved_date = datetime.datetime.now()
@@ -127,7 +127,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
 #         set_wait_time(feedback_obj)
 # 
 #     if data['comments']:
-#         comment_object = aftersell_common.Comments(
+#         comment_object = aftersell_models.Comments(
 #                                         comments=data['comments'],
 #                                         user=user, created_date=datetime.datetime.now(),
 #                                         feedback_object=feedback_obj)

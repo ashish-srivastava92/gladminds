@@ -510,19 +510,19 @@ class GladmindsResources(Resource):
     def determine_format(self, request):
         return 'application/json'
 
-    def get_complain_data(self, sms_dict, phone_number, with_detail=False):
+    def get_complain_data(self, sms_dict, phone_number, reporter_name, with_detail=False):
         ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
         try:
             role = self.check_role_of_initiator(phone_number)
             if with_detail:
-                gladminds_feedback_object = models.Feedback(reporter=phone_number,
+                gladminds_feedback_object = models.Feedback(reporter=phone_number, reporter_name=reporter_name,
                                                                 type=sms_dict['type'], 
                                                                 subject=sms_dict['subject'], message=sms_dict['message'],
                                                                 status="Open", created_date=datetime.now(),
                                                                 role=role
                                                                 )
             else:
-                gladminds_feedback_object = models.Feedback(reporter=phone_number,
+                gladminds_feedback_object = models.Feedback(reporter=phone_number, reporter_name=reporter_name,
                                                                 message=sms_dict['message'], status="Open",
                                                                 created_date=datetime.now(),
                                                                 role=role
