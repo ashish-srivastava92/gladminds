@@ -42,8 +42,8 @@
             "template_key": "INITIATOR_FEEDBACK_MAIL_DETAIL",
             "sender": "feed-report@gladminds.co",
             "reciever": "srv.sngh@gmail.com",
-            "subject": "Feedback  with reference-no-{id} Details",
-            "body": "Your {type} has been assigned to one of our technician.\n Severity:{priority}.The due date is:{due_date}.\n Once it resolved we will notify you.",
+            "subject": "Feedback  with reference-no-GM-{id} Details",
+            "body": "Your {type} has been assigned to our support team. We will update you by: {due_date}.",
             "description": "Feedback Detail mail"
         }
     },
@@ -54,8 +54,8 @@
             "template_key": "ASSIGNEE_FEEDBACK_MAIL_DETAIL",
             "sender": "feed-report@gladminds.co",
             "reciever": "srv.sngh@gmail.com",
-            "subject": "Feedback with reference-no-{id} Assign To You",
-            "body": "A GladMinds user has a {type} for us, which says:\n {message}. \n Its has been reported by {reporter} on {created_date}.\n It has been assigned to you and due date is: {due_date}\n Please address the issue as soon as possible.", 
+            "subject": "Feedback with reference-no-GM-{id} Assign To You",
+            "body": "Service Desk ticket id: GM-{id} for {type} created on {created_date} has been assigned to you with due date {due_date} Description : {message}",  
             "description": "Feedback Detail mail to assignee"
         }
     },
@@ -66,7 +66,7 @@
             "template_key": "INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL",
             "sender": "feed-report@gladminds.co",
             "reciever": "srv.sngh92@yahoo.com",
-            "subject": "Feedback  with reference-no-{id} Status",
+            "subject": "Feedback  with reference-no-GM-{id} Status",
             "body": "Your {type} has been resolved", 
             "description": "Feedback status mail"
         }
@@ -79,7 +79,7 @@
             "sender": "feed-report@gladminds.co",
             "reciever": "srv.sngh@gmail.com",
             "subject": "Feedback  with reference-no-{id}",
-            "body": "A GladMinds user has a {type} for us, which says:\n {message} \n Its has been reported by {reporter} on {created_date}.", 
+            "body": "A GladMinds user has a {type} for us, which says:\n {message}.\n It has been reported by {reporter} on {created_date}.", 
             "description": "Feedback  mail to Admin"
         }
     },    
@@ -90,8 +90,8 @@
             "template_key": "TICKET_RESOLVED_DETAIL_TO_BAJAJ",
             "sender": "feed-report@gladminds.co",
             "reciever": "srv.sngh92@yahoo.com",
-            "subject": "Feedback  with reference-no-{id} resolved",
-            "body": "The {type} reported by {reporter} on {created_date} has been resolved.\n The Feedback received by reporter is {remark},\n The root cause  is {root_cause} and the resolution is {resolution}", 
+            "subject": "Feedback  with reference-no-GM-{id} resolved",
+            "body": "The {type} reported by {reporter} on {created_date} has been resolved.\n The Feedback received by reporter is {remark},\n The root cause  is {root_cause} and the resolution is {resolution}. The total time spent to resolve the issue is {resolution_time}",   
             "description": "Feedback  mail to bajaj"
         }
     },
@@ -109,14 +109,14 @@
     },
     {
 		"model": "gladminds.emailtemplate",
-		"pk": 3,
-		"fields": {
-			"template_key": "VIN DOES NOT EXIST",
-			"sender": "support@gladminds.co",
-			"reciever": "gladminds@hashedin.com",
-			"subject": "Send Dispatch Feed",
-		    "body": "Request initiated from {2}-{0}. VIN/Frame No. {1} does not exist in GCP database. Request you to send a Dispatch feed for the same.",
-			"description": "Request for Dispatch feed"
-		}
+        "pk": 10,
+        "fields": {
+            "template_key": "VIN DOES NOT EXIST",
+            "sender": "support@gladminds.co",
+            "reciever": "gladminds@hashedin.com",
+            "subject": "Send Dispatch Feed", 
+            "body": "Request initiated from {2}-{0}. VIN/Frame No. {1} does not exist in GCP database. Request you to send a Dispatch feed for the same.",
+            "description": "Request for Dispatch feed"
+        }
 	}
 ]

@@ -80,6 +80,7 @@ TEMPLATE_DIRS = (
 #                 }
 FILE_CACHE_DURATION = 0
 
+SMS_CLIENT = "KAP"
 FEED_TYPE = 'CSV'
 
 #AfterBuy File Upload location configuration
@@ -107,6 +108,7 @@ SAP_CRM_DETAIL = {
                   }
 
 COUPON_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/redeem-feed/?wsdl&v0"
+COUPON_WSDL = 'qa_coupon_redeem.wsdl'
 ASC_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/asc-feed/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/customer-feed/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
@@ -133,8 +135,9 @@ SQS_QUEUE_NAME = "gladminds-qa"
 ######################################
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail QA"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail QA"
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 ###################Change Mail Subject on QA##########################
 MAIL_DETAIL["subject"] = "GladMinds Feed Report QA"
-MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com", 'sourabh.gupta@hashedin.com']
+MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 #######################################################################
 ENV = "qa"

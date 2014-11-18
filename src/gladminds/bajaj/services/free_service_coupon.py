@@ -1,11 +1,10 @@
 import logging
 from datetime import datetime, timedelta
 
-from django.conf.urls import url
-from django.core.exceptions import ObjectDoesNotExist
 import logging
-from datetime import datetime, timedelta
 
+from datetime import datetime, timedelta
+from string import upper
 
 from django.conf.urls import url
 from django.core.exceptions import ObjectDoesNotExist
@@ -31,7 +30,7 @@ from gladminds.bajaj import models
 from gladminds.core.cron_jobs.sqs_tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
     send_brand_sms_customer, send_close_sms_customer, \
-    send_invalid_keyword_message, customer_detail_recovery
+    send_invalid_keyword_message, customer_detail_recovery, send_point
 from gladminds.core import utils
 from gladminds.bajaj.feeds.feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
@@ -40,6 +39,8 @@ from gladminds.gm.models import GladmindsUser
 from gladminds.core.apis.base_apis import CustomBaseResource
 from gladminds.core.decorator import log_time
 from gladminds.core.utils import service_advisor_search
+
+
 
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -233,7 +234,7 @@ class GladmindsResources(Resource):
         updated_coupon = models.CouponData.objects\
                         .filter(Q(status=4) | Q(status=5), product=product, valid_kms__gt=kms)\
                         .update(status=1, service_advisor=None, actual_kms=None,
-                                actual_service_date=None)
+                                actual_service_date=None, servicing_dealer=None)
         logger.info("%s have higher KMS range" % updated_coupon)
 
     def update_exceed_limit_coupon(self, actual_kms, product):
@@ -556,7 +557,92 @@ class GladmindsResources(Resource):
             else:
                 return "other"
 
+    def update_points(self, mechanic, accumulate=0, redeem=0):
+        total_points = mechanic.total_points + accumulate -redeem
+        mechanic.total_points = total_points 
+        mechanic.save()
+        return total_points
+    
+#FIXME: Create models for all these like spares etc. and fix this code.
 
+#     def fetch_spare_products(self, spare_product_codes):
+#         spares = common.SparePart.objects.filter(unique_part_code__in=spare_product_codes)
+#         return spares
+#     
+#     def fetch_catalogue_products(self, product_codes):
+#         products = common.ProductCatalog.objects.filter(product_code__in=product_codes)
+#         return products
+#     
+#     def get_mechanic(self, phone_number):
+#         mechanic = common.Mechanic.objects.filter(phone_number=phone_number)
+#         return mechanic
+# 
+#     def accumulate_point(self, sms_dict, phone_number):
+#         unique_product_codes = sms_dict['ucp'].split()
+#         try:
+#             mechanic = self.get_mechanic(utils.mobile_format(phone_number))
+#             if not mechanic:
+#                 message=templates.get_template('UNREGISERED_USER')
+#                 raise ValueError('Unregistered user')
+#             spares=self.fetch_spare_products(unique_product_codes)
+#             added_points=0
+#         
+#             if len(spares)<len(unique_product_codes):
+#                message=templates.get_template('SEND_INVALID_UCP')
+#                raise ValueError('Invalid UCP')
+#             for spare in spares:
+#                 added_points=added_points+spare.points
+#             total_points=self.update_points(mechanic[0],accumulate=added_points)
+#             message=templates.get_template('SEND_ACCUMULATED_POINT').format(
+#                             mechanic_name=mechanic[0].name, added_points=added_points,
+#                             total_points=total_points)
+#         except Exception as ex:
+#             logger.error('[accumulate_point]:{0}:: {1}'.format(phone_number, ex))
+#         finally:
+#             phone_number = utils.get_phone_number_format(phone_number)
+#             if settings.ENABLE_AMAZON_SQS:
+#                 task_queue = get_task_queue()
+#                 task_queue.add("send_point", {"phone_number":phone_number, "message": message, "sms_client":settings.SMS_CLIENT})
+#             else:
+#                 send_point.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
+#             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+#         return {'status': True, 'message': message}
+#     
+#     def redeem_point(self, sms_dict, phone_number):
+#         
+#         product_codes = sms_dict['product_id'].upper().split()
+#         try:
+#             mechanic = self.get_mechanic(utils.mobile_format(phone_number))
+#             if not mechanic:
+#                 message=templates.get_template('UNREGISERED_USER')
+#                 raise ValueError('Unregistered user')
+#             products=self.fetch_catalogue_products(product_codes)
+#             redeem_points=0
+#             product_ids=''
+#             
+#             for product in products:
+#                 redeem_points=redeem_points+product.points
+#             left_points=mechanic[0].total_points-redeem_points
+#             if left_points>=0:
+#                 total_points=self.update_points(mechanic[0],redeem=redeem_points)
+#                 message=templates.get_template('SEND_REDEEM_POINT').format(
+#                                 mechanic_name=mechanic[0].name,
+#                                 product_code=sms_dict['product_id'],
+#                                 total_points=total_points)
+#             else:
+#                 message=templates.get_template('SEND_INSUFFICIENT_POINT').format(
+#                                 shortage_points=abs(left_points))
+#         except Exception as ex:
+#             logger.error('[redeem_point]:{0}:: {1}'.format(phone_number, ex))
+#         finally:    
+#             phone_number = utils.get_phone_number_format(phone_number)
+#             if settings.ENABLE_AMAZON_SQS:
+#                 task_queue = utils.get_task_queue()
+#                 task_queue.add("send_point", {"phone_number":phone_number, "message": message, "sms_client":settings.SMS_CLIENT})
+#             else:
+#                 send_point.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
+#             sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+#         return {'status': True, 'message': message}
 
 #########################AfterBuy Resources############################################
 
@@ -597,20 +683,20 @@ class UserResources(CustomBaseResource):
     
     def get_products(self, request, **kwargs):
         user_id = kwargs['pk']
-        products = common.ProductData.objects.filter(customer_phone_number__gladmind_customer_id=user_id).select_related('customer_phone_number')
+        products = models.ProductData.objects.filter(customer_phone_number__gladmind_customer_id=user_id).select_related('customer_phone_number')
         products = [model_to_dict(product) for product in products]
         to_be_serialized = {"products": products}
         return self.create_response(request, data=to_be_serialized)
     
     def dehydrate(self, bundle):
-        products = common.ProductData.objects.filter(customer_phone_number__id=bundle.data['id']).select_related('customer_phone_number')
+        products = models.ProductData.objects.filter(customer_phone_number__id=bundle.data['id']).select_related('customer_phone_number')
         bundle.data['products'] = [model_to_dict(product) for product in products]
         return bundle
     
     def process_otp(self, bundle, **kwargs):
         if bundle.GET.get('otp', None) and bundle.GET.get('user_id', None):
             try:
-                customer_phone = common.ProductData.objects.filter(sap_customer_id=bundle.GET['user_id'])[0]
+                customer_phone = models.ProductData.objects.filter(sap_customer_id=bundle.GET['user_id'])[0]
                 http_class=HttpResponse
                 data={'status':True}
             except:
@@ -619,7 +705,7 @@ class UserResources(CustomBaseResource):
         elif bundle.GET.get('user_id', None):
             try:
                 #TODO: Implement real API
-                customer_phone = common.ProductData.objects.filter(sap_customer_id=bundle.GET['user_id'])[0]
+                customer_phone = models.ProductData.objects.filter(sap_customer_id=bundle.GET['user_id'])[0]
                 http_class=HttpResponse
                 data={'message':'OTP has been sent to user mobile.'}
             except:

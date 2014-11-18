@@ -11,11 +11,15 @@ TEMPLATE_DIR = os.path.join(PROJECT_DIR, "templates")
 EMAIL_DIR = os.path.join(TEMPLATE_DIR, "email")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
 
+TIMEZONE = 'Asia/Kolkata'
+
 ALLOWED_HOSTS = ['*']
 
 ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
                     'service', 'check': 'a', 'close': 'c', 'brand': 'brand',
-                    'service_desk': 'sd', 'customer_detail_recovery': 'r'}
+                    'service_desk': 'sd', 'customer_detail_recovery': 'r',
+                    'accumulate_point':'ac', 'redeem_point':'rd'}
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -82,6 +86,10 @@ SUIT_CONFIG = {
                     {'model': 'feedback',
                      'label': 'Help Desk'},
                     'messagetemplate', 'emailtemplate', 'gladmindusers',)},
+        {'app': 'gladminds', 'label': 'Loyalty', 'icon': ' icon-folder-open',
+         'models': ({'model': 'mechanic', 'label': 'Mechanic'},
+                    {'model': 'sparepart', 'label': 'Spare Part'},
+                    {'model': 'productcatalog', 'label': 'Product Catalog'},)},
         {'app': 'afterbuy', 'label': 'AfterBuy', 'icon': ' icon-folder-open',
          'models': ({'model': 'usernotification', 'label': 'notification'},)},
         {'app': 'djcelery', 'label': 'Job Management', 'icon': 'icon-tasks'})
@@ -470,6 +478,7 @@ BRAND = 'demo'
 GM_BRAND = 'gm'
 BRANDS = ['bajaj', 'demo', 'afterbuy']
 ###############################################
+AIRTEL_IP = '54.84.243.77'
 SMS_CLIENT = "KAP"
 SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                               'pass':'bajaj',
@@ -488,3 +497,5 @@ ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},
           'gladminds': {'user': 'gladminds', 'password': 'gladminds',
                         'database': 'default'}
           }
+##################################################################################################
+ENABLE_SERVICE_DESK = True

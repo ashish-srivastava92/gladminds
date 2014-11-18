@@ -2,7 +2,6 @@ from __future__ import absolute_import
 from celery import shared_task
 from django.conf import settings
 from datetime import datetime, timedelta
-import logging
 
 from gladminds.bajaj import models as common
 from gladminds.core import utils, export_file
@@ -12,6 +11,10 @@ from gladminds.core.managers import mail
 from gladminds.core.cron_jobs import taskmanager
 from gladminds.bajaj.feeds import feed, export_feed
 from gladminds.bajaj.services import  message_template as templates
+from gladminds.core.utils import convert_utc_to_local_time
+
+import pytz
+import logging
 
 
 logger = logging.getLogger("gladminds")
@@ -262,6 +265,23 @@ def send_on_product_purchase(*args, **kwargs):
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         sms_log(action=status, reciever=phone_number, message=message)
+        
+
+@shared_task
+def send_point(*args, **kwargs):
+    status = "success"
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        logger.info("request for sending sms received {0} message {1}".format(phone_number, message))
+        set_gateway(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        logger.error("[Eception:send_point]:{0}".format(ex))
+        send_point.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        sms_log(status=status, reciever=phone_number, message=message)
+        
 
 """
 Crontab to send reminder sms to customer 
@@ -290,6 +310,14 @@ Crontab to set the is_expire=True for all those coupon which expire till current
 @shared_task
 def expire_service_coupon(*args, **kwargs):
     taskmanager.expire_service_coupon(*args, **kwargs)
+
+"""
+Crontab to import data from SAP to Gladminds Database
+"""
+
+@shared_task
+def mark_feeback_to_closed(*args, **kwargs):
+    taskmanager.mark_feeback_to_closed(*args, **kwargs)
 
 """
 Crontab to import data from SAP to Gladminds Database
@@ -410,29 +438,29 @@ def export_customer_reg_to_sap(*args, **kwargs):
     else:
         logger.info("tasks.py: No Customer registered since last feed")
         
-# def send_sms(template_name, phone_number):
-#     created_date = feedback_obj.created_date
-#     try:
-#         message = templates.get_template(template_name).format(type=feedback_obj.type,
-#                                                                reporter=feedback_obj.reporter,
-#                                                                message=feedback_obj.message,
-#                                                                created_date=convert_utc_to_local_time(created_date),
-#                                                                assign_to=feedback_obj.assign_to,
-#                                                                priority=feedback_obj.priority)
-#         if comment_obj and template_name == 'SEND_MSG_TO_ASSIGNEE':
-#             message = message + 'Note :' + comment_obj.comments
-#     except Exception as ex:
-#         message = templates.get_template('SEND_INVALID_MESSAGE')
-#     finally:
-#         logger.info("Send complain message received successfully with %s" % message)
-#         phone_number = utils.get_phone_number_format(phone_number)
-#         if settings.ENABLE_AMAZON_SQS:
-#             task_queue = utils.get_task_queue()
-#             task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
-#         else:
-#             send_coupon.delay(phone_number=phone_number, message=message)
-#     audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
-#     return {'status': True, 'message': message}
+def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
+    created_date = feedback_obj.created_date
+    try:
+        message = templates.get_template(template_name).format(type=feedback_obj.type,
+                                                               reporter=feedback_obj.reporter,
+                                                               message=feedback_obj.message,
+                                                               created_date=convert_utc_to_local_time(created_date),
+                                                               assign_to=feedback_obj.assign_to,
+                                                               priority=feedback_obj.priority)
+        if comment_obj and template_name == 'SEND_MSG_TO_ASSIGNEE':
+            message = message + 'Note :' + comment_obj.comments
+    except Exception as ex:
+        message = templates.get_template('SEND_INVALID_MESSAGE')
+    finally:
+        logger.info("Send complain message received successfully with %s" % message)
+        phone_number = utils.get_phone_number_format(phone_number)
+        if settings.ENABLE_AMAZON_SQS:
+            task_queue = utils.get_task_queue()
+            task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
+        else:
+            send_coupon.delay(phone_number=phone_number, message=message)
+    sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+    return {'status': True, 'message': message}
 
     
 _tasks_map = {"send_registration_detail": send_registration_detail,
@@ -477,6 +505,10 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "export_customer_reg_to_sap" : export_customer_reg_to_sap,
               
-              "customer_detail_recovery": customer_detail_recovery  
+              "mark_feeback_to_closed" : mark_feeback_to_closed,
+              
+              "customer_detail_recovery": customer_detail_recovery,
+              
+              "send_point": send_point
 
               }

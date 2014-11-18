@@ -82,7 +82,7 @@ class ASCRegisterationService(ServiceBase):
     __namespace__ = tns
 
     @srpc(ASCRegistrationModel, AuthenticationModel, _returns=Unicode)
-    def ascRegistration(ObjectList, Credential):
+    def ascRegistration(self, ObjectList, Credential):
         pass
 
 
@@ -90,7 +90,7 @@ class SARegisterationService(ServiceBase):
     __namespace__ = tns
 
     @srpc(SARegistrationModel, AuthenticationModel, _returns=Unicode)
-    def saRegistration(ObjectList, Credential):
+    def saRegistration(self, ObjectList, Credential):
         pass
 
 
@@ -98,7 +98,7 @@ class CustomerRegisterationService(ServiceBase):
     __namespace__ = tns
 
     @srpc(CustomerRegistrationModel, AuthenticationModel, _returns=Unicode)
-    def customerRegistration(ObjectList, Credential):
+    def customerRegistration(self, ObjectList, Credential):
         pass
 
 mock_app = Application([ASCRegisterationService, SARegisterationService, CustomerRegisterationService],
@@ -236,7 +236,7 @@ class BrandService(ServiceBase):
     __namespace__ = tns
 
     @srpc(BrandModelList, AuthenticationModel,  _returns=Unicode)
-    def postBrand(ObjectList, Credential):
+    def postBrand(self, ObjectList, Credential):
         try:
             brand_list = []
             for brand in ObjectList.BrandData:
@@ -256,7 +256,7 @@ class DealerService(ServiceBase):
     __namespace__ = tns
 
     @srpc(DealerModelList, AuthenticationModel, _returns=Unicode)
-    def postDealer(ObjectList, Credential):
+    def postDealer(self, ObjectList, Credential):
         dealer_list = []
         feed_remark = FeedLogWithRemark(len(ObjectList.DealerData),
                                         feed_type='Dealer Feed',
@@ -285,7 +285,7 @@ class ASCService(ServiceBase):
     __namespace__ = tns
 
     @srpc(ASCModelList, AuthenticationModel, _returns=Unicode)
-    def postASC(ObjectList, Credential):
+    def postASC(self, ObjectList, Credential):
         asc_list = []
         feed_remark = FeedLogWithRemark(len(ObjectList.ASCData),
                                         feed_type='ASC Feed',
@@ -314,7 +314,7 @@ class ProductDispatchService(ServiceBase):
     __namespace__ = tns
 
     @srpc(ProductDispatchModelList, AuthenticationModel, _returns=Unicode)
-    def postProductDispatch(ObjectList, Credential):
+    def postProductDispatch(self, ObjectList, Credential):
         feed_remark = FeedLogWithRemark(len(ObjectList.ProductDispatchData),
                                         feed_type='Dispatch Feed',
                                         action='Received', status=True)
@@ -348,7 +348,7 @@ class ProductPurchaseService(ServiceBase):
     __namespace__ = tns
 
     @srpc(ProductPurchaseModelList, AuthenticationModel, _returns=Unicode)
-    def postProductPurchase(ObjectList, Credential):
+    def postProductPurchase(self, ObjectList, Credential):
         feed_remark = FeedLogWithRemark(len(ObjectList.ProductPurchaseData),
                                         feed_type='Purchase Feed',
                                         action='Received', status=True)
@@ -382,7 +382,7 @@ class OldFscService(ServiceBase):
     __namespace__ = tns
 
     @srpc(OldFSCModelList, AuthenticationModel, _returns=Unicode)
-    def postOldFsc(ObjectList, Credential):
+    def postOldFsc(self, ObjectList, Credential):
         feed_remark = FeedLogWithRemark(len(ObjectList.OldFSCData.GT_OLD_FSC),
                                         feed_type='Old Fsc Feed',
                                         action='Received', status=True)
@@ -411,7 +411,7 @@ class CreditNoteService(ServiceBase):
     __namespace__ = tns
 
     @srpc(CreditNoteModelList, AuthenticationModel, _returns=Unicode)
-    def postCreditNote(ObjectList, Credential):
+    def postCreditNote(self, ObjectList, Credential):
         feed_remark = FeedLogWithRemark(len(ObjectList.CreditNoteData),
                                         feed_type='Credit Note Feed',
                                         action='Received', status=True)
