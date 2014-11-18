@@ -50,7 +50,7 @@ class Command(BaseCommand):
         for email_temp in email_templates:
             fields = email_temp['fields']
             temp_obj = EmailTemplate(template_key=fields['template_key']\
-                       , sender=fields['sender'], reciever=fields['reciever'],\
+                       , sender=fields['sender'], receiver=fields['receiver'],\
                         subject=fields['subject'], body=fields['body'],\
                         description=fields['description'])
             temp_obj.save()
