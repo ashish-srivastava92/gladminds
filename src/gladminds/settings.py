@@ -466,7 +466,7 @@ TEMP_SA_ID_PREFIX = 'SA'
 FEED_FAILURE_MAIL_ENABLED = True
 ##########################################################################
 #########################New relic file location########################
-NEW_RELIC_FILE_LOCATION = './src/newrelic_qa.ini'
+NEW_RELIC_FILE_LOCATION = './src/'
 ########################################################################
 #######################SMS_HEALTH_CHECK_INTERVAL
 SMS_HEALTH_CHECK_INTERVAL = 6
