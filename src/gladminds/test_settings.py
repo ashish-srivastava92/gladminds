@@ -19,7 +19,9 @@ DATABASES['demo']['NAME'] = os.path.join(OUT_DIR, 'demo.db')  # "/tmp/test.db"
 DATABASES['afterbuy']['ENGINE'] = 'django.db.backends.sqlite3'
 DATABASES['afterbuy']['NAME'] = os.path.join(OUT_DIR, 'afterbuy.db')  # "/tmp/test.db"
 
+TEST_IGNORE_APPS = ()
 
+INSTALLED_APPS = ALL_APPS + TEST_IGNORE_APPS
 
 SECRET_KEY = 'testsecretkeyshouldntbeusedinproduction'
 

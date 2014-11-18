@@ -113,7 +113,7 @@ class UCNRecovery(base_models.UCNRecovery):
 
 class OldFscData(base_models.OldFscData):
     product = models.ForeignKey(ProductData, null=False, editable=False)
-    servicing_dealer = models.ForeignKey(Dealer, null=True, blank=True)
+    dealer = models.ForeignKey(Dealer, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -173,7 +173,6 @@ class SparesData(base_models.SparesData):
 
 class UserPreferences(base_models.UserPreferences):
     user_profile = models.ForeignKey(UserProfile)
-
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "user preference"

@@ -248,7 +248,9 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-INSTALLED_APPS = (
+TEST_IGNORE_APPS = ('south',)
+
+ALL_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -274,10 +276,11 @@ INSTALLED_APPS = (
     'provider',
     'provider.oauth2',
    # 'debug_toolbar',
-    #'south'
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
+
+INSTALLED_APPS = ALL_APPS + TEST_IGNORE_APPS
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
