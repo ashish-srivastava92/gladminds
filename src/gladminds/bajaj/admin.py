@@ -1,5 +1,5 @@
 from django.contrib.admin import AdminSite, TabularInline
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.admin import ModelAdmin
 from suit.admin import SortableTabularInline
 from django.contrib.admin.views.main import ChangeList, ORDER_VAR
@@ -329,6 +329,7 @@ class EmailTemplateAdmin(ModelAdmin):
 brand_admin = BajajAdminSite(name='bajaj')
 
 brand_admin.register(User)
+brand_admin.register(Group)
 brand_admin.register(UserProfile, UserProfileAdmin)
 
 brand_admin.register(Dealer, DealerAdmin)
