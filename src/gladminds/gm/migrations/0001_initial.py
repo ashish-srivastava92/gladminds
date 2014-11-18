@@ -150,6 +150,7 @@ class Migration(SchemaMigration):
             ('message', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('sender', self.gf('django.db.models.fields.CharField')(max_length=15)),
             ('receiver', self.gf('django.db.models.fields.CharField')(max_length=15)),
+            ('status', self.gf('django.db.models.fields.CharField')(max_length=20)),
         ))
         db.send_create_signal('gm', ['SMSLog'])
 
@@ -403,7 +404,8 @@ class Migration(SchemaMigration):
             'message': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'modified_date': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'receiver': ('django.db.models.fields.CharField', [], {'max_length': '15'}),
-            'sender': ('django.db.models.fields.CharField', [], {'max_length': '15'})
+            'sender': ('django.db.models.fields.CharField', [], {'max_length': '15'}),
+            'status': ('django.db.models.fields.CharField', [], {'max_length': '20'})
         }
     }
 

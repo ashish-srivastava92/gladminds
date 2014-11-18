@@ -72,10 +72,11 @@ class Migration(SchemaMigration):
             ('created_date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('modified_date', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
             ('reporter', self.gf('django.db.models.fields.CharField')(max_length=15)),
+            ('reporter_name', self.gf('django.db.models.fields.CharField')(max_length=30)),
             ('reporter_email_id', self.gf('django.db.models.fields.CharField')(max_length=50, null=True, blank=True)),
             ('message', self.gf('django.db.models.fields.CharField')(max_length=512, null=True)),
             ('status', self.gf('django.db.models.fields.CharField')(max_length=12)),
-            ('priority', self.gf('django.db.models.fields.CharField')(max_length=12)),
+            ('priority', self.gf('django.db.models.fields.CharField')(default='Low', max_length=12)),
             ('type', self.gf('django.db.models.fields.CharField')(max_length=12)),
             ('subject', self.gf('django.db.models.fields.CharField')(max_length=512, null=True, blank=True)),
             ('closed_date', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
@@ -85,9 +86,10 @@ class Migration(SchemaMigration):
             ('wait_time', self.gf('django.db.models.fields.FloatField')(default='0.0', max_length=20, null=True, blank=True)),
             ('remarks', self.gf('django.db.models.fields.CharField')(max_length=512, null=True, blank=True)),
             ('ratings', self.gf('django.db.models.fields.CharField')(max_length=12)),
-            ('root_cause', self.gf('django.db.models.fields.CharField')(max_length=512, null=True, blank=True)),
+            ('root_cause', self.gf('django.db.models.fields.CharField')(max_length=12)),
             ('resolution', self.gf('django.db.models.fields.CharField')(max_length=512, null=True, blank=True)),
             ('role', self.gf('django.db.models.fields.CharField')(max_length=50, null=True, blank=True)),
+            ('assign_to_reporter', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('assign_to', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['bajaj.UserProfile'], null=True, blank=True)),
         ))
         db.send_create_signal('bajaj', ['Feedback'])
@@ -327,6 +329,7 @@ class Migration(SchemaMigration):
             ('message', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('sender', self.gf('django.db.models.fields.CharField')(max_length=15)),
             ('receiver', self.gf('django.db.models.fields.CharField')(max_length=15)),
+            ('status', self.gf('django.db.models.fields.CharField')(max_length=20)),
         ))
         db.send_create_signal('bajaj', ['SMSLog'])
 
@@ -370,6 +373,19 @@ class Migration(SchemaMigration):
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['bajaj.UserProfile'])),
         ))
         db.send_create_signal('bajaj', ['AuditLog'])
+
+        # Adding model 'SLA'
+        db.create_table(u'bajaj_sla', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('priority', self.gf('django.db.models.fields.CharField')(unique=True, max_length=12)),
+            ('response_time', self.gf('django.db.models.fields.PositiveIntegerField')()),
+            ('response_unit', self.gf('django.db.models.fields.CharField')(max_length=12)),
+            ('reminder_time', self.gf('django.db.models.fields.PositiveIntegerField')()),
+            ('reminder_unit', self.gf('django.db.models.fields.CharField')(max_length=12)),
+            ('resolution_time', self.gf('django.db.models.fields.PositiveIntegerField')()),
+            ('resolution_unit', self.gf('django.db.models.fields.CharField')(max_length=12)),
+        ))
+        db.send_create_signal('bajaj', ['SLA'])
 
 
     def backwards(self, orm):
@@ -450,6 +466,9 @@ class Migration(SchemaMigration):
 
         # Deleting model 'AuditLog'
         db.delete_table(u'bajaj_auditlog')
+
+        # Deleting model 'SLA'
+        db.delete_table(u'bajaj_sla')
 
 
     models = {
@@ -617,6 +636,7 @@ class Migration(SchemaMigration):
         'bajaj.feedback': {
             'Meta': {'object_name': 'Feedback'},
             'assign_to': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['bajaj.UserProfile']", 'null': 'True', 'blank': 'True'}),
+            'assign_to_reporter': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'closed_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'created_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'due_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
@@ -624,15 +644,16 @@ class Migration(SchemaMigration):
             'message': ('django.db.models.fields.CharField', [], {'max_length': '512', 'null': 'True'}),
             'modified_date': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'pending_from': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'priority': ('django.db.models.fields.CharField', [], {'max_length': '12'}),
+            'priority': ('django.db.models.fields.CharField', [], {'default': "'Low'", 'max_length': '12'}),
             'ratings': ('django.db.models.fields.CharField', [], {'max_length': '12'}),
             'remarks': ('django.db.models.fields.CharField', [], {'max_length': '512', 'null': 'True', 'blank': 'True'}),
             'reporter': ('django.db.models.fields.CharField', [], {'max_length': '15'}),
             'reporter_email_id': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
+            'reporter_name': ('django.db.models.fields.CharField', [], {'max_length': '30'}),
             'resolution': ('django.db.models.fields.CharField', [], {'max_length': '512', 'null': 'True', 'blank': 'True'}),
             'resolved_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'role': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
-            'root_cause': ('django.db.models.fields.CharField', [], {'max_length': '512', 'null': 'True', 'blank': 'True'}),
+            'root_cause': ('django.db.models.fields.CharField', [], {'max_length': '12'}),
             'status': ('django.db.models.fields.CharField', [], {'max_length': '12'}),
             'subject': ('django.db.models.fields.CharField', [], {'max_length': '512', 'null': 'True', 'blank': 'True'}),
             'type': ('django.db.models.fields.CharField', [], {'max_length': '12'}),
@@ -739,6 +760,17 @@ class Migration(SchemaMigration):
             'service_advisor': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['bajaj.ServiceAdvisor']"}),
             'unique_service_coupon': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['bajaj.CouponData']"})
         },
+        'bajaj.sla': {
+            'Meta': {'object_name': 'SLA'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'priority': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '12'}),
+            'reminder_time': ('django.db.models.fields.PositiveIntegerField', [], {}),
+            'reminder_unit': ('django.db.models.fields.CharField', [], {'max_length': '12'}),
+            'resolution_time': ('django.db.models.fields.PositiveIntegerField', [], {}),
+            'resolution_unit': ('django.db.models.fields.CharField', [], {'max_length': '12'}),
+            'response_time': ('django.db.models.fields.PositiveIntegerField', [], {}),
+            'response_unit': ('django.db.models.fields.CharField', [], {'max_length': '12'})
+        },
         'bajaj.smslog': {
             'Meta': {'object_name': 'SMSLog'},
             'action': ('django.db.models.fields.CharField', [], {'max_length': '250'}),
@@ -747,7 +779,8 @@ class Migration(SchemaMigration):
             'message': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'modified_date': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'receiver': ('django.db.models.fields.CharField', [], {'max_length': '15'}),
-            'sender': ('django.db.models.fields.CharField', [], {'max_length': '15'})
+            'sender': ('django.db.models.fields.CharField', [], {'max_length': '15'}),
+            'status': ('django.db.models.fields.CharField', [], {'max_length': '20'})
         },
         'bajaj.sparesdata': {
             'Meta': {'object_name': 'SparesData'},
