@@ -355,7 +355,7 @@ class SMSLog(BaseModel):
     action = models.CharField(max_length=250)
     message = models.TextField(null=True, blank=True)
     sender = models.CharField(max_length=15)
-    reciever = models.CharField(max_length=15)
+    receiver = models.CharField(max_length=15)
     status = models.CharField(max_length=20)
 
     class Meta:
