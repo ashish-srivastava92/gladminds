@@ -23,7 +23,10 @@ db_new = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
 
 cur_new = db_new.cursor() 
 
-cur_old.execute("SELECT r.*,c.unique_service_coupon,s.service_advisor_id FROM gladminds_serviceadvisorcouponrelationship as r, gladminds_coupondata as c, aftersell_serviceadvisor as s where r.unique_service_coupon_id=c.id and r.service_advisor_phone_id=s.id")
+cur_old.execute("SELECT r.*,c.unique_service_coupon,s.service_advisor_id FROM \
+                 gladminds_serviceadvisorcouponrelationship as r, \
+                 gladminds_coupondata as c, aftersell_serviceadvisor as s \
+                 where r.unique_service_coupon_id=c.id and r.service_advisor_phone_id=s.id")
 coupon_data = cur_old.fetchall()
 
 
