@@ -6,3 +6,4 @@ alter table gladminds_gladmindusers add column gender VARCHAR(6) NULL CHECK (gen
 alter table gladminds_producttypedata add warranty_email VARCHAR(215);
 alter table gladminds_producttypedata add warranty_phone VARCHAR(15);
 alter table aftersell_feedback add column closed_date datetime;
+ALTER TABLE aftersell_feedback ADD assign_to_reporter boolean default false;

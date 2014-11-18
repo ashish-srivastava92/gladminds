@@ -260,24 +260,14 @@
     "model": "gladminds.messagetemplate",
     "pk": 29,
     "fields": {
-      "template_key": "COUPON_ALREADY_INPROGRESS",
-      "template": "Free service {service_type} is already in-progress. Please proceed for the same for Customer ID {customer_id}",
-      "description": "Send in-progress coupon if it is available"
-    }
-  },
-  {
-    "model": "gladminds.messagetemplate",
-    "pk": 30,
-    "fields": {
       "template_key": "SEND_RCV_FEEDBACK",
       "template": "Thanks for providing {type}. We will get back to you soon.",
       "description": "Send this message when service advisor files complain successfully"
     }
   }, 
-
   {
     "model": "gladminds.messagetemplate",
-    "pk": 31,
+    "pk": 30,
     "fields": {
       "template_key": "RCV_USER_COMPLAINT",
       "template": "{message}",
@@ -286,7 +276,7 @@
   },
     {
     "model": "gladminds.messagetemplate",
-    "pk": 32,
+    "pk": 31,
     "fields": {
       "template_key": "SEND_MSG_TO_ASSIGNEE",
       "template": "A GladMinds user has a feedback for us, which says: {message} Its has been reported by {reporter} on {created_date}. It has been assigned to you. Please address the issue as soon as possible.",
@@ -295,23 +285,32 @@
   },
   {
     "model": "gladminds.messagetemplate",
-    "pk": 33,
+    "pk": 32,
     "fields": {
       "template_key": "INITIATOR_FEEDBACK_DETAILS",
       "template": "Your {type} has been assigned to one of our technician.Severity:{priority}.",
       "description": "Your feedback has been assigned to one of our technician  is looking into it."
-    }
-  },
+      }
+   },
   {
-    "model": "gladminds.messagetemplate",
-    "pk": 34,
+    "model": "gladminds.messagetemplate",   
+    "pk": 33,
     "fields": {
       "template_key": "INITIATOR_FEEDBACK_STATUS",
       "template": "Your {type} has been resolved.",
       "description": "Your Complaint has been resolved."
     }
   },
-{
+  {
+    "model": "gladminds.messagetemplate",   
+    "pk": 34,
+    "fields": {
+      "template_key": "COUPON_ALREADY_INPROGRESS",
+      "template": "Free service {service_type} is already in-progress. Please proceed for the same for Customer ID {customer_id}",
+      "description": "Send in-progress coupon if it is available"
+    }
+  },
+  {
     "model": "gladminds.messagetemplate",
     "pk": 35,
     "fields": {
@@ -346,5 +345,68 @@
       "template": "Incorrect {0} or no matching details.",
       "description": "Send on if customer id or VIN does not exits."
     }
-  } 
+  },
+   {
+    "model": "gladminds.messagetemplate",
+    "pk": 39,
+    "fields": {
+      "template_key":"RCV_ACCUMULATE_POINT",
+      "template":"{ucp}",
+      "description":"Receive this message when mechanic send spare to accumulate points"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 40,
+    "fields": {
+      "template_key":"SEND_ACCUMULATED_POINT",
+      "template":"Dear {mechanic_name}, {added_points} points updated. Total points: {total_points}. To Redeem, Send SMS with Code RD<SPACE><PRODUCT CODE> to 9561112809",
+      "description":"Send this message when mechanic send product to accumulate points"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 41,
+    "fields": {
+      "template_key":"SEND_INVALID_UCP",
+      "template":"Invalid Entry… UPC does not exist in our records. Please contact our Customer Care at: 9611545154",
+      "description":"Send this message when ucp does not exists in our records"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 42,
+    "fields": {
+      "template_key":"RCV_REDEEM_POINT",
+      "template":"{product_id}",
+      "description":"Receive this message when mechanic send product to redeem points"
+    }
+  },
+   {
+    "model": "gladminds.messagetemplate",
+    "pk": 43,
+    "fields": {
+      "template_key":"SEND_REDEEM_POINT",
+      "template":"Dear {mechanic_name}, redemption request for {product_code} received. We shall update you when your products are shipped. Total points: {total_points}",
+      "description":"Send this message when mechanic send product to redeem points"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 44,
+    "fields": {
+      "template_key":"SEND_INSUFFICIENT_POINT",
+      "template":"You have insufficient points… Please accumulate {shortage_points} points for the specified Redemption",
+      "description":"Send this message when mechanic does not have enough points"
+    }
+  },
+   {
+    "model": "gladminds.messagetemplate",
+    "pk": 45,
+    "fields": {
+      "template_key":"UNREGISERED_USER",
+      "template":"Unregistered user. Please register with Bajaj Auto Ltd. (Contact#: 9611545154) to accumulate and redeem points and get home exclusive gifts.",
+      "description":"Send this message when mechanic is unregistered"
+    }
+  }
 ]

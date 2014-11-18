@@ -206,3 +206,9 @@ class AuditLog(base_models.AuditLog):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Audit Log"
+
+class SLA(base_models.SLA):
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "SLA config"

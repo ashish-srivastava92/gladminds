@@ -11,11 +11,15 @@ TEMPLATE_DIR = os.path.join(PROJECT_DIR, "templates")
 EMAIL_DIR = os.path.join(TEMPLATE_DIR, "email")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
 
+TIMEZONE = 'Asia/Kolkata'
+
 ALLOWED_HOSTS = ['*']
 
 ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
                     'service', 'check': 'a', 'close': 'c', 'brand': 'brand',
-                    'service_desk': 'sd', 'customer_detail_recovery': 'r'}
+                    'service_desk': 'sd', 'customer_detail_recovery': 'r',
+                    'accumulate_point':'ac', 'redeem_point':'rd'}
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -465,7 +469,7 @@ TEMP_SA_ID_PREFIX = 'SA'
 FEED_FAILURE_MAIL_ENABLED = True
 ##########################################################################
 #########################New relic file location########################
-NEW_RELIC_FILE_LOCATION = './src/newrelic_qa.ini'
+NEW_RELIC_FILE_LOCATION = './src/'
 ########################################################################
 #######################SMS_HEALTH_CHECK_INTERVAL
 SMS_HEALTH_CHECK_INTERVAL = 6
@@ -476,6 +480,7 @@ BRAND = 'demo'
 GM_BRAND = 'gm'
 BRANDS = ['bajaj', 'demo', 'afterbuy']
 ###############################################
+AIRTEL_IP = '54.84.243.77'
 SMS_CLIENT = "KAP"
 SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                               'pass':'bajaj',
@@ -494,3 +499,5 @@ ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},
           'gladminds': {'user': 'gladminds', 'password': 'gladminds',
                         'database': 'default'}
           }
+##################################################################################################
+ENABLE_SERVICE_DESK = True
