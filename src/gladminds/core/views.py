@@ -405,7 +405,7 @@ def enable_servicedesk(request, servicedesk=None):
         return HttpResponseRedirect('http://support.gladminds.co/')
 
 def save_help_desk_data(request):
-    fields = ['message', 'priority', 'advisorMobile', 'type', 'subject']
+    fields = ['message', 'advisorMobile', 'type', 'subject']
     sms_dict = {}
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)

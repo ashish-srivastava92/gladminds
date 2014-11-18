@@ -28,7 +28,7 @@
 #         status = "failed"
 #         send_registration_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 #     finally:
-#         audit_log(status = status, reciever=phone_number, message=message)
+#         audit_log(status = status, receiver=phone_number, message=message)
 #         
 # """
 # This task send customer valid service detail
@@ -44,7 +44,7 @@
 #         status = "failed"
 #         send_service_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 #     finally:
-#         audit_log(status = status, reciever=phone_number, message=message)
+#         audit_log(status = status, receiver=phone_number, message=message)
 # 
 # """
 # This job send sms to service advisor, whether the coupon is valid or not 
@@ -60,7 +60,7 @@
 #         status = "failed"
 #         send_coupon_validity_detail.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 #     finally:
-#         audit_log(status = status, reciever=phone_number, message=message)
+#         audit_log(status = status, receiver=phone_number, message=message)
 # 
 # """
 # This job send sms to customer when SA send 
@@ -77,7 +77,7 @@
 #         status = "failed"
 #         send_coupon_detail_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 #     finally:
-#         audit_log(status = status, reciever=phone_number, message=message)
+#         audit_log(status = status, receiver=phone_number, message=message)
 # 
 # """
 # This job send reminder sms to customer
@@ -93,7 +93,7 @@
 #         status = "failed"
 #         send_reminder_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 #     finally:
-#         audit_log(status = status, reciever=phone_number, message=message)
+#         audit_log(status = status, receiver=phone_number, message=message)
 # 
 # """
 # This job send coupon close message
@@ -109,7 +109,7 @@
 #         status = "failed"
 #         send_coupon_close_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 #     finally:
-#         audit_log(status = status, reciever=phone_number, message=message)
+#         audit_log(status = status, receiver=phone_number, message=message)
 #         
 # @shared_task        
 # def send_coupon(*args, **kwargs):
@@ -122,7 +122,7 @@
 #         status = "failed"
 #         send_coupon.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 #     finally:
-#         audit_log(status = status, reciever=phone_number, message=message)
+#         audit_log(status = status, receiver=phone_number, message=message)
 # 
 # """
 # This job send coupon close message to customer
@@ -138,7 +138,7 @@
 #         status = "failed"
 #         send_close_sms_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 #     finally:
-#         audit_log(status = status, reciever=phone_number, message=message)
+#         audit_log(status = status, receiver=phone_number, message=message)
 # 
 # @shared_task
 # def send_brand_sms_customer(*args, **kwargs):
@@ -151,7 +151,7 @@
 #         status = "failed"
 #         send_brand_sms_customer.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 #     finally:
-#         audit_log(status = status, reciever=phone_number, message=message)
+#         audit_log(status = status, receiver=phone_number, message=message)
 # 
 # """
 # This task send Invalid Keyword message
@@ -167,7 +167,7 @@
 #         status = "failed"
 #         send_invalid_keyword_message.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 #     finally:
-#         audit_log(status = status, reciever=phone_number, message=message)
+#         audit_log(status = status, receiver=phone_number, message=message)
 # 
 # 
 # """
@@ -184,7 +184,7 @@
 #         status = "failed"
 #         send_on_product_purchase.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 #     finally:
-#         audit_log(status = status, reciever=phone_number, message=message)
+#         audit_log(status = status, receiver=phone_number, message=message)
 # 
 # """
 # Send OTP
@@ -200,7 +200,7 @@
 #         status = "failed"
 #         send_on_product_purchase.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
 #     finally:
-#         audit_log(status = status, reciever=phone_number, message=message)
+#         audit_log(status = status, receiver=phone_number, message=message)
 #   
 # """
 # Crontab to send reminder sms to customer 

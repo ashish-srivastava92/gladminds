@@ -3,13 +3,13 @@ from django.utils import timezone
 from gladminds.bajaj.models import SMSLog, DataFeedLog
 
 
-def sms_log(action='SENT', sender='+1 469-513-9856', reciever=None,
+def sms_log(action='SENT', sender='+1 469-513-9856', receiver=None,
               message=None, status='success'):
-    if reciever == '9999999999':
+    if receiver == '9999999999':
         status = 'fail'
 
     sms_log = SMSLog(action=action, sender=sender,
-                               reciever=reciever, status=status,
+                               receiver=receiver, status=status,
                                message=message)
     sms_log.save()
 

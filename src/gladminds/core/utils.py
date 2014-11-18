@@ -132,13 +132,13 @@ def get_customer_info(data):
         message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
         return {'message': message}
 
-def get_sa_list(request):
-    dealer = models.Dealer.objects.filter(dealer_id=request.user)[0]
+def get_sa_list(user):
+    dealer = models.Dealer.objects.filter(dealer_id=user)[0]
     service_advisors = models.ServiceAdvisor.objects\
                                 .filter(dealer=dealer, status='Y')
     sa_phone_list = []
     for service_advisor in service_advisors:
-        sa_phone_list.append(service_advisor.service_advisor_id)
+        sa_phone_list.append(service_advisor.user)
     return sa_phone_list
 
 
@@ -486,6 +486,7 @@ def convert_utc_to_local_time(date):
     return date.astimezone(timezone).replace(tzinfo=None)
 
 def total_time_spent(feedback_obj):
+    print "in func"
     wait_time = feedback_obj.wait_time
     if feedback_obj.resolved_date:
         start_date = convert_utc_to_local_time(feedback_obj.created_date)
@@ -495,11 +496,11 @@ def total_time_spent(feedback_obj):
         wait = end_date - start_date
         wait_time = wait.total_seconds() 
         wait_time = wait_time - feedback_obj.wait_time
-    minutes, seconds = divmod(wait_time, 60)
-    hours, minutes = divmod(minutes, 60)
-    days, hours = divmod(hours, 24)
-    weeks, days = divmod(days, 7)
-    return " {0} days ,{1}:{2}:{3}" .format(int(days),int(hours),int(minutes),int(seconds))
+        minutes, seconds = divmod(wait_time, 60)
+        hours, minutes = divmod(minutes, 60)
+        days, hours = divmod(hours, 24)
+        weeks, days = divmod(days, 7)
+        return " {0} days ,{1}:{2}:{3}" .format(int(days),int(hours),int(minutes),int(seconds))
 
 def asc_cuopon_data(asc_id, status_type):
     cuopon_details = models.CouponData.objects.filter(service_advisor__asc=asc_id, status=status_type)
