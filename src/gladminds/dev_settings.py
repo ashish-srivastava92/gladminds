@@ -77,6 +77,14 @@ TEMPLATE_DIRS = (
     TEMPLATE_DIR,
 )
 
+######################################################
+#ADDED SETTINGS TO TEST CAPSYSTEM ON DEV ENV
+###########################################################
+ENABLE_AMAZON_SQS = False
+
+FILE_CACHE_DURATION = 0
+SMS_CLIENT = "KAP"
+
 ########################SQS Queue Name
 SQS_QUEUE_NAME = "gladminds-dev"
 ######################################
@@ -90,4 +98,10 @@ MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail DEV"
 FEED_FAILURE_MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail DEV"
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["srv.sngh92@yahoo.com","priyanka.n@hashedin.com","somit@hashedin.com","suresh@hashedin.com","chandan.patel@hashedin.com","naureen.razi@hashedin.com"]
+
+#############################################################################
+LOGGING['handlers']['gladminds_logs']['filename'] = 'log/gladminds/app/gladminds.log'
+LOGGING['handlers']['afterbuy_logs']['filename'] = 'log/gladminds/app/afterbuy.log'
+
 ENV = "dev"
