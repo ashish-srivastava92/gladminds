@@ -101,7 +101,4 @@ UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail DEV"
 VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["srv.sngh92@yahoo.com","priyanka.n@hashedin.com","somit@hashedin.com","suresh@hashedin.com","chandan.patel@hashedin.com","naureen.razi@hashedin.com"]
 
 #############################################################################
-LOGGING['handlers']['gladminds_logs']['filename'] = 'log/gladminds/app/gladminds.log'
-LOGGING['handlers']['afterbuy_logs']['filename'] = 'log/gladminds/app/afterbuy.log'
-
 ENV = "dev"
