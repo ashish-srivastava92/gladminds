@@ -3,15 +3,15 @@ import datetime
 
 from gladminds.bajaj import models as models
 from gladminds.core.exceptions import DataNotFoundError
-from gladminds.core.utils import create_context, get_list_from_set,\
-    get_start_and_end_date, set_wait_time, convert_utc_to_local_time,\
+from gladminds.core.utils import create_context, get_list_from_set, \
+    get_start_and_end_date, set_wait_time, convert_utc_to_local_time, \
     get_time_in_seconds
 from gladminds.core.managers import mail
-from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
+from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, \
     TIME_FORMAT
 from django.contrib.auth.models import Group, User
 from gladminds.core.cron_jobs.sqs_tasks import send_sms
-#from gladminds.bajaj.services.service_desk import send_feedback_sms
+# from gladminds.bajaj.services.service_desk import send_feedback_sms
 
 logger = logging.getLogger('gladminds')
 
@@ -29,7 +29,7 @@ def get_feedback(feedback_id, user):
     group = user.groups.all()[0]
     if group.name == 'SDO':
         servicedesk_obj = models.UserProfile.objects.filter(user=user)
-        return models.Feedback.objects.filter(id=feedback_id,assign_to=servicedesk_obj[0])
+        return models.Feedback.objects.filter(id=feedback_id, assign_to=servicedesk_obj[0])
     else:
         return models.Feedback.objects.get(id=feedback_id)
 
@@ -46,9 +46,7 @@ def set_due_date(priority, created_date):
     due_date = created_date + datetime.timedelta(seconds=total_seconds)
     return due_date
 
-
-#FIXME: According to new models link this 
-def save_update_feedback(feedback_obj, data, user,  host):
+def save_update_feedback(feedback_obj, data, user, host):
     comment_object = None
     assign_status = False
     pending_status = False
@@ -72,7 +70,8 @@ def save_update_feedback(feedback_obj, data, user,  host):
     else:
         if data['reporter_status'] == 'true':
             feedback_obj.assign_to_reporter = True
-            feedback_obj.assign_to = previous_assignee
+            reporter = models.UserProfile.objects.filter(phone_number=feedback_obj.reporter)
+            feedback_obj.assign_to = reporter[0]
         else:
             if data['Assign_To'] :
                 user = User.objects.filter(username=data['Assign_To'])
@@ -100,7 +99,7 @@ def save_update_feedback(feedback_obj, data, user,  host):
                  feedback_obj)
  
     if feedback_obj.status == 'Resolved':
-        servicedesk_obj_all =  User.objects.filter(groups__name='sdm')
+        servicedesk_obj_all = User.objects.filter(groups__name='sdm')
         feedback_obj.resolved_date = datetime.datetime.now()
         feedback_obj.resolved_date = datetime.datetime.now()
         feedback_obj.root_cause = data['rootcause']
@@ -141,4 +140,4 @@ def save_update_feedback(feedback_obj, data, user,  host):
             mail.send_email_to_assignee(context, feedback_obj)
             send_sms('SEND_MSG_TO_ASSIGNEE',
                      feedback_obj.assign_to.phone_number,
-                     feedback_obj,  comment_object)
+                     feedback_obj, comment_object)
