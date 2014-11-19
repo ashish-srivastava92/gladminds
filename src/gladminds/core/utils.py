@@ -138,7 +138,7 @@ def get_sa_list(user):
                                 .filter(dealer=dealer, status='Y')
     sa_phone_list = []
     for service_advisor in service_advisors:
-        sa_phone_list.append(service_advisor.user)
+        sa_phone_list.append(service_advisor)
     return sa_phone_list
 
 

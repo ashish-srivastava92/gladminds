@@ -407,7 +407,7 @@ class Feedback(BaseModel):
     message = models.CharField(max_length=512, null=True, blank=False)
     status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
     priority = models.CharField(max_length=12, choices=PRIORITY, default='Low')
-    type = models.CharField(max_length=12, choices=FEEDBACK_TYPE)
+    type = models.CharField(max_length=20, choices=FEEDBACK_TYPE)
     subject = models.CharField(max_length=512, null=True, blank=True)
     closed_date = models.DateTimeField(null=True, blank=True)
     resolved_date = models.DateTimeField(null=True, blank=True)

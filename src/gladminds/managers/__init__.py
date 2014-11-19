@@ -35,8 +35,8 @@ def get_feedback(feedback_id, user):
 
 def get_servicedesk_users(designation):
     users = User.objects.filter(groups__name='sdo')
-    return users
-    
+    user_list = models.UserProfile.objects.filter(user__in=users)
+    return user_list
 
 def set_due_date(priority, created_date):
     sla_obj = models.SLA.objects.get(priority=priority)
@@ -74,8 +74,7 @@ def save_update_feedback(feedback_obj, data, user, host):
             feedback_obj.assign_to = reporter[0]
         else:
             if data['Assign_To'] :
-                user = User.objects.filter(username=data['Assign_To'])
-                servicedesk_assign_obj = models.UserProfile.objects.filter(user=user)
+                servicedesk_assign_obj = models.UserProfile.objects.filter(phone_number=data['Assign_To'])
                 feedback_obj.assign_to = servicedesk_assign_obj[0]
                 feedback_obj.assign_to_reporter = False
         feedback_obj.status = data['status']

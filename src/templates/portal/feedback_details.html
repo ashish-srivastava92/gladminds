@@ -97,7 +97,7 @@
                     <select class="form-control" name="advisorMobile" id="advisorMobile" required>
                       <option value="">Select mobile number</option>
                       {% for phone in data %}
-                      <option value="{{phone}}">{{phone.user.username}} ({{phone.phone_number}})</option>
+                      <option value="{{phone}}">{{phone.service_advisor_id}} ({{phone.user.phone_number}})</option>
                       {% endfor %}
                     </select>
                   </div>
