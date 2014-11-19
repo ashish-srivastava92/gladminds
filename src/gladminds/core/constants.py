@@ -83,3 +83,23 @@ ROOT_CAUSE = (('Data','Data'),
               ('External System','External System'))
 
 MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+GENDER_CHOICES = (
+    ('M', 'Male'),
+    ('F', 'Female'),
+    ('X', 'Other'),
+)
+
+SIZE_CHOICES = (
+    ('S', 'Small'),
+    ('M', 'Medium'),
+    ('L', 'Large'),
+    ('XL', 'Extra Large'),
+)
+
+FUEL_CHOICES = (
+    ('Petrol', 'Petrol'),
+    ('Diesel', 'Diesel'),
+    ('Electric', 'Electric'),
+    ('Other', 'Other'),
+)

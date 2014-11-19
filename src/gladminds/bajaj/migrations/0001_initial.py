@@ -77,7 +77,7 @@ class Migration(SchemaMigration):
             ('message', self.gf('django.db.models.fields.CharField')(max_length=512, null=True)),
             ('status', self.gf('django.db.models.fields.CharField')(max_length=12)),
             ('priority', self.gf('django.db.models.fields.CharField')(default='Low', max_length=12)),
-            ('type', self.gf('django.db.models.fields.CharField')(max_length=12)),
+            ('type', self.gf('django.db.models.fields.CharField')(max_length=20)),
             ('subject', self.gf('django.db.models.fields.CharField')(max_length=512, null=True, blank=True)),
             ('closed_date', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
             ('resolved_date', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
@@ -108,10 +108,9 @@ class Migration(SchemaMigration):
 
         # Adding model 'ProductType'
         db.create_table(u'bajaj_producttype', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('created_date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('modified_date', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-            ('product_type_id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('product_name', self.gf('django.db.models.fields.CharField')(max_length=255)),
             ('product_type', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
             ('image_url', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
             ('is_active', self.gf('django.db.models.fields.BooleanField')(default=True)),
@@ -126,9 +125,9 @@ class Migration(SchemaMigration):
             ('modified_date', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
             ('product_id', self.gf('django.db.models.fields.CharField')(unique=True, max_length=215)),
             ('customer_id', self.gf('django.db.models.fields.CharField')(max_length=215, unique=True, null=True, blank=True)),
-            ('customer_phone_number', self.gf('django.db.models.fields.CharField')(max_length=15, unique=True, null=True, blank=True)),
-            ('customer_name', self.gf('django.db.models.fields.CharField')(max_length=215, unique=True, null=True, blank=True)),
-            ('customer_address', self.gf('django.db.models.fields.CharField')(max_length=215, unique=True, null=True, blank=True)),
+            ('customer_phone_number', self.gf('django.db.models.fields.CharField')(max_length=15, null=True, blank=True)),
+            ('customer_name', self.gf('django.db.models.fields.CharField')(max_length=215, null=True, blank=True)),
+            ('customer_address', self.gf('django.db.models.fields.CharField')(max_length=215, null=True, blank=True)),
             ('purchase_date', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
             ('invoice_date', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
             ('engine', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
@@ -313,12 +312,12 @@ class Migration(SchemaMigration):
             ('modified_date', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
             ('key', self.gf('django.db.models.fields.CharField')(max_length=100)),
             ('value', self.gf('django.db.models.fields.CharField')(max_length=200)),
-            ('user_profile', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['bajaj.UserProfile'])),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['bajaj.UserProfile'])),
         ))
         db.send_create_signal('bajaj', ['UserPreferences'])
 
-        # Adding unique constraint on 'UserPreferences', fields ['user_profile', 'key']
-        db.create_unique(u'bajaj_userpreferences', ['user_profile_id', 'key'])
+        # Adding unique constraint on 'UserPreferences', fields ['user', 'key']
+        db.create_unique(u'bajaj_userpreferences', ['user_id', 'key'])
 
         # Adding model 'SMSLog'
         db.create_table(u'bajaj_smslog', (
@@ -389,8 +388,8 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        # Removing unique constraint on 'UserPreferences', fields ['user_profile', 'key']
-        db.delete_unique(u'bajaj_userpreferences', ['user_profile_id', 'key'])
+        # Removing unique constraint on 'UserPreferences', fields ['user', 'key']
+        db.delete_unique(u'bajaj_userpreferences', ['user_id', 'key'])
 
         # Deleting model 'BrandProductCategory'
         db.delete_table(u'bajaj_brandproductcategory')
@@ -656,7 +655,7 @@ class Migration(SchemaMigration):
             'root_cause': ('django.db.models.fields.CharField', [], {'max_length': '12'}),
             'status': ('django.db.models.fields.CharField', [], {'max_length': '12'}),
             'subject': ('django.db.models.fields.CharField', [], {'max_length': '512', 'null': 'True', 'blank': 'True'}),
-            'type': ('django.db.models.fields.CharField', [], {'max_length': '12'}),
+            'type': ('django.db.models.fields.CharField', [], {'max_length': '20'}),
             'wait_time': ('django.db.models.fields.FloatField', [], {'default': "'0.0'", 'max_length': '20', 'null': 'True', 'blank': 'True'})
         },
         'bajaj.messagetemplate': {
@@ -707,10 +706,10 @@ class Migration(SchemaMigration):
         'bajaj.productdata': {
             'Meta': {'object_name': 'ProductData'},
             'created_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'customer_address': ('django.db.models.fields.CharField', [], {'max_length': '215', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
+            'customer_address': ('django.db.models.fields.CharField', [], {'max_length': '215', 'null': 'True', 'blank': 'True'}),
             'customer_id': ('django.db.models.fields.CharField', [], {'max_length': '215', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
-            'customer_name': ('django.db.models.fields.CharField', [], {'max_length': '215', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
-            'customer_phone_number': ('django.db.models.fields.CharField', [], {'max_length': '15', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
+            'customer_name': ('django.db.models.fields.CharField', [], {'max_length': '215', 'null': 'True', 'blank': 'True'}),
+            'customer_phone_number': ('django.db.models.fields.CharField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
             'dealer_id': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['bajaj.Dealer']", 'null': 'True', 'blank': 'True'}),
             'engine': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -726,12 +725,11 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'ProductType'},
             'brand_product_category': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'bajaj_product_type'", 'null': 'True', 'to': "orm['bajaj.BrandProductCategory']"}),
             'created_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'image_url': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'modified_date': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'product_name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'product_type': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
-            'product_type_id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
+            'product_type': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'})
         },
         'bajaj.satempregistration': {
             'Meta': {'object_name': 'SATempRegistration'},
@@ -802,12 +800,12 @@ class Migration(SchemaMigration):
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'bajaj_ucn_recovery'", 'to': "orm['bajaj.UserProfile']"})
         },
         'bajaj.userpreferences': {
-            'Meta': {'unique_together': "(('user_profile', 'key'),)", 'object_name': 'UserPreferences'},
+            'Meta': {'unique_together': "(('user', 'key'),)", 'object_name': 'UserPreferences'},
             'created_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'key': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'modified_date': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'user_profile': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['bajaj.UserProfile']"}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['bajaj.UserProfile']"}),
             'value': ('django.db.models.fields.CharField', [], {'max_length': '200'})
         },
         'bajaj.userprofile': {

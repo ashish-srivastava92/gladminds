@@ -501,3 +501,5 @@ ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},
           }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True
+
+DEFAULT_IMAGE_ID = 'guest.png'
