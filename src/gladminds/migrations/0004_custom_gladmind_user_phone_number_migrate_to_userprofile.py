@@ -120,7 +120,7 @@ class Migration(SchemaMigration):
             'body': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'description': ('django.db.models.fields.CharField', [], {'max_length': '512', 'null': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'reciever': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
+            'receiver': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'sender': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'subject': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'template_key': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'})

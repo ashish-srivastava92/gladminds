@@ -145,7 +145,7 @@ class GladmindsResources(Resource):
             task_queue.add("send_registration_detail", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         else:
             send_registration_detail.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
-        sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
         return True
 
     @log_time
@@ -510,19 +510,19 @@ class GladmindsResources(Resource):
     def determine_format(self, request):
         return 'application/json'
 
-    def get_complain_data(self, sms_dict, phone_number, with_detail=False):
+    def get_complain_data(self, sms_dict, phone_number, reporter_name, with_detail=False):
         ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
         try:
             role = self.check_role_of_initiator(phone_number)
             if with_detail:
-                gladminds_feedback_object = models.Feedback(reporter=phone_number,
-                                                                priority=sms_dict['priority'] , type=sms_dict['type'], 
+                gladminds_feedback_object = models.Feedback(reporter=phone_number, reporter_name=reporter_name,
+                                                                type=sms_dict['type'], 
                                                                 subject=sms_dict['subject'], message=sms_dict['message'],
                                                                 status="Open", created_date=datetime.now(),
                                                                 role=role
                                                                 )
             else:
-                gladminds_feedback_object = models.Feedback(reporter=phone_number,
+                gladminds_feedback_object = models.Feedback(reporter=phone_number, reporter_name=reporter_name,
                                                                 message=sms_dict['message'], status="Open",
                                                                 created_date=datetime.now(),
                                                                 role=role
@@ -606,7 +606,7 @@ class GladmindsResources(Resource):
 #                 task_queue.add("send_point", {"phone_number":phone_number, "message": message, "sms_client":settings.SMS_CLIENT})
 #             else:
 #                 send_point.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
-#             audit.audit_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+#             audit.audit_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
 #         return {'status': True, 'message': message}
 #     
 #     def redeem_point(self, sms_dict, phone_number):
@@ -642,7 +642,7 @@ class GladmindsResources(Resource):
 #                 task_queue.add("send_point", {"phone_number":phone_number, "message": message, "sms_client":settings.SMS_CLIENT})
 #             else:
 #                 send_point.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
-#             sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+#             sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
 #         return {'status': True, 'message': message}
 
 #########################AfterBuy Resources############################################

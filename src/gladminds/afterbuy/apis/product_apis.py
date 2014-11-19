@@ -11,6 +11,7 @@ from gladminds.settings import API_FLAG, COUPON_URL
 from tastypie.utils.urls import trailing_slash
 from gladminds.afterbuy.apis.brand_apis import BrandResource
 from gladminds.afterbuy.apis.user_apis import ConsumerResource
+from django.forms.models import model_to_dict
 
 logger = logging.getLogger("gladminds")
 
@@ -34,6 +35,19 @@ class UserProductResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'delete','put']
         always_return_data = True
 
+    def dehydrate(self, bundle):
+        insurance = afterbuy_models.ProductInsuranceInfo.objects.filter(product=bundle.data['id'])
+        invoice = afterbuy_models.Invoice.objects.filter(product=bundle.data['id'])
+        license = afterbuy_models.License.objects.filter(product=bundle.data['id'])
+        registrations = afterbuy_models.RegistrationCertificate.objects.filter(product=bundle.data['id'])
+        pollution = afterbuy_models.PollutionCertificate.objects.filter(product=bundle.data['id'])
+        bundle.data['insurance'] = [model_to_dict(c) for c in insurance]
+        bundle.data['invoice'] = [model_to_dict(c) for c in invoice]
+        bundle.data['license'] = [model_to_dict(c) for c in license]
+        bundle.data['registrations'] = [model_to_dict(c) for c in registrations]
+        bundle.data['pollution'] = [model_to_dict(c) for c in pollution]
+        return bundle
+    
     def prepend_urls(self):
         return [
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/coupons%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_coupons'), name="get_product_coupons" )

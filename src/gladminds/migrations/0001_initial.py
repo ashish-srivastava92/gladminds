@@ -149,7 +149,7 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('template_key', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
             ('sender', self.gf('django.db.models.fields.CharField')(max_length=512)),
-            ('reciever', self.gf('django.db.models.fields.CharField')(max_length=512)),
+            ('receiver', self.gf('django.db.models.fields.CharField')(max_length=512)),
             ('subject', self.gf('django.db.models.fields.CharField')(max_length=512)),
             ('body', self.gf('django.db.models.fields.CharField')(max_length=512)),
             ('description', self.gf('django.db.models.fields.CharField')(max_length=512, null=True)),
@@ -364,7 +364,7 @@ class Migration(SchemaMigration):
             'body': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'description': ('django.db.models.fields.CharField', [], {'max_length': '512', 'null': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'reciever': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
+            'receiver': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'sender': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'subject': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'template_key': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'})

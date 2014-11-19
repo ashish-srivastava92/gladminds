@@ -46,10 +46,10 @@ def modify_servicedesk_tickets(request, feedback_id):
     servicedesk_users = get_servicedesk_users(designation='SDO')
     if request.method == 'POST':
         host = request.get_host()
-        save_update_feedback(feedback_obj[0], request.POST, request.user, host)
+        save_update_feedback(feedback_obj, request.POST, request.user, host)
     if feedback_obj:
         return render(request, 'service-desk/ticket_modify.html',\
-                  {"feedback": feedback_obj[0], "FEEDBACK_STATUS": status,\
+                  {"feedback": feedback_obj, "FEEDBACK_STATUS": status,\
                    "PRIORITY": priority_types,\
                     "FEEDBACK_TYPE": feedback_types,\
                     "ROOT_CAUSE" : root_cause,\

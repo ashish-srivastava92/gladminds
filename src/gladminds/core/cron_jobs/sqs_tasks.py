@@ -264,7 +264,7 @@ def send_on_product_purchase(*args, **kwargs):
         send_on_product_purchase.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(action=status, reciever=phone_number, message=message)
+        sms_log(action=status, receiver=phone_number, message=message)
         
 
 @shared_task
@@ -280,7 +280,7 @@ def send_point(*args, **kwargs):
         logger.error("[Eception:send_point]:{0}".format(ex))
         send_point.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, reciever=phone_number, message=message)
+        sms_log(status=status, receiver=phone_number, message=message)
         
 """
 Crontab to send reminder sms to customer 
@@ -459,7 +459,7 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
             task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
         else:
             send_coupon.delay(phone_number=phone_number, message=message)
-    sms_log(reciever=phone_number, action=AUDIT_ACTION, message=message)
+    sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
     return {'status': True, 'message': message}
 
     
