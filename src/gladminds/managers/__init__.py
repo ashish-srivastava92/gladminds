@@ -74,10 +74,11 @@ def save_update_feedback(feedback_obj, data, user,  host):
             feedback_obj.assign_to_reporter = True
             feedback_obj.assign_to = previous_assignee
         else:
-            user = User.objects.filter(username=data['Assign_To'])
-            servicedesk_assign_obj = models.UserProfile.objects.filter(user=user)
-            feedback_obj.assign_to = servicedesk_assign_obj[0]
-            feedback_obj.assign_to_reporter = False
+            if data['Assign_To'] :
+                user = User.objects.filter(username=data['Assign_To'])
+                servicedesk_assign_obj = models.UserProfile.objects.filter(user=user)
+                feedback_obj.assign_to = servicedesk_assign_obj[0]
+                feedback_obj.assign_to_reporter = False
         feedback_obj.status = data['status']
         feedback_obj.priority = data['Priority']
     if data['status'] == 'Pending':
