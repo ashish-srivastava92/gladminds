@@ -358,8 +358,7 @@ def get_feedbacks(user, status):
     if group.name == 'dealers':
         sa_list = utils.get_sa_list(user)
         if sa_list:
-            feedbacks = models.Feedback.objects.filter(reporter__in=sa_list, status__in=status).order_by('-created_date')
-            
+            feedbacks = models.Feedback.objects.filter(reporter_name__in=sa_list, status__in=status).order_by('-created_date')
     return feedbacks
 
 
@@ -409,8 +408,8 @@ def save_help_desk_data(request):
     sms_dict = {}
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)
-    user = models.UserProfile.objects.filter(phone_number=sms_dict['advisorMobile'])
-    return gladmindsResources.get_complain_data(sms_dict, sms_dict['advisorMobile'], user[0].user.username, with_detail=True)
+    user = models.ServiceAdvisor.objects.get(service_advisor_id=sms_dict['advisorMobile'])
+    return gladmindsResources.get_complain_data(sms_dict, user.user.phone_number, user, with_detail=True)
 
 def sqs_tasks_view(request):
     return render_to_response('trigger-sqs-tasks.html')
