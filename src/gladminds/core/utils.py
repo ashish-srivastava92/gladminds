@@ -486,7 +486,6 @@ def convert_utc_to_local_time(date):
     return date.astimezone(timezone).replace(tzinfo=None)
 
 def total_time_spent(feedback_obj):
-    print "in func"
     wait_time = feedback_obj.wait_time
     if feedback_obj.resolved_date:
         start_date = convert_utc_to_local_time(feedback_obj.created_date)
