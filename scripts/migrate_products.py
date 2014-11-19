@@ -4,10 +4,12 @@ import os
 from multiprocessing.dummy import Pool
 from datetime import datetime
 
+POOL = Pool(50)
 DB_HOST = os.environ.get('DB_HOST', 'localhost')
 DB_USER = os.environ.get('DB_USER', 'root')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
 MIGRATE_DB = os.environ.get('MIGRATE_DB','gladmindsdb')
+OFFSET = int(os.environ.get('OFFSET',0))
 TOTAL_START_TIME = time.time()
 
 
@@ -37,7 +39,6 @@ OLD_PRODUCTS_DATA={}
 for old_product in OLD_PRODUCTS:
     OLD_PRODUCTS_DATA[old_product[0]]=old_product[3]
 
-CUR_NEW = DB_NEW.cursor()
 CUR_NEW.execute('select * from bajaj_dealer')
 DEALERS = CUR_NEW.fetchall()
 DEALER_DATA={}
@@ -49,6 +50,7 @@ PRODUCTS = CUR_NEW.fetchall()
 PRODUCTS_DATA={}
 for product in PRODUCTS:
     PRODUCTS_DATA[product[4]]=product[2]
+
 DB_NEW.close()
 
 def process_query(data):
@@ -85,7 +87,7 @@ def process_query(data):
                 customer_address= customer_address + customer[9]+','
             if customer[14]:
                 customer_address= customer_address + customer[14]
-            cur_old.close()
+            db_old.close()
         
         cur_new.execute("INSERT INTO bajaj_productdata (id, created_date, modified_date, \
         product_id, customer_id, customer_phone_number, customer_name, customer_address,\
@@ -100,12 +102,11 @@ def process_query(data):
         db_new.commit()
     except Exception as ex:
         db_new.rollback()
-        print '[Erorr]:', data.get('vin'), ex
+        print '[Error]:', data.get('vin'), ex
     db_new.close()
 
 def format_data(product_data):
-    start_time = time.time()
-    pool = Pool(50)
+    
     products=[]
     for data in product_data:
         temp = {}
@@ -138,12 +139,8 @@ def format_data(product_data):
         temp['order'] = data[21]
         temp['veh_reg_no'] = data[22]
         
-#         temp['dealer_id'] = data[23]
-#         temp['product_type'] = data[24]
         products.append(temp)
-    pool.map(process_query, products)
-    end_time = time.time()
-    #print "..........TIME TAKEN.........", end_time-start_time
+    POOL.map(process_query, products)
 
 def get_data(offset=0):
     print "OFFSET:", offset
@@ -154,7 +151,7 @@ def get_data(offset=0):
 
     cur_old = db_old.cursor()
 
-    query= "SELECT * FROM gladminds_productdata ORDER BY id ASC limit 1000 offset %(offset)s"
+    query= "SELECT * FROM gladminds_productdata limit 1000 offset %(offset)s"
     cur_old.execute(query, {'offset': offset})
     product_data = cur_old.fetchall()
     format_data(product_data)
@@ -163,9 +160,8 @@ def get_data(offset=0):
 CUR_OLD.execute('select count(*) from gladminds_productdata;')
 DATA_COUNT = CUR_OLD.fetchone()[0]
 DB_OLD.close()
-i=0
-while i<=DATA_COUNT:
-    get_data(offset=i)
-    i=i+1000
+while OFFSET<=DATA_COUNT:
+    get_data(offset=OFFSET)
+    OFFSET=OFFSET+1000
 TOTAL_END_TIME = time.time()
 print "..........Total TIME TAKEN.........", TOTAL_END_TIME-TOTAL_START_TIME
