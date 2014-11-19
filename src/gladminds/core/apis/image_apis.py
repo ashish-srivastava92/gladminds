@@ -11,6 +11,7 @@ from django.views.decorators.http import require_http_methods
 
 serializerObj = Serializer()
 
+_KEYS_ALLOWED = ['consumers', 'products', 'brands', 'users']
 
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -18,8 +19,8 @@ def upload_files(request):
     keys = request.FILES.keys()
     if len(keys) != 1:
         return HttpResponse(serializerObj.to_json({"message":"only 1 image upload allowed"}), content_type="application/json", status=400)
-    if  keys[0] not in ['consumers', 'products', 'brands', 'users']:
-        return HttpResponse(serializerObj.to_json({"message":"key not found"}), content_type="application/json", status=400)
+    if  keys[0] not in _KEYS_ALLOWED:
+        return HttpResponse(serializerObj.to_json({"message":"key not found. Allowed keys: {0}".format(','.join(_KEYS_ALLOWED))}), content_type="application/json", status=400)
     try:
         conn = boto.connect_s3()
         bucket_name = settings.AWS_STORAGE_BUCKET_MAP.get(settings.BRAND,
