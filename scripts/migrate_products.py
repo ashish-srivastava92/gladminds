@@ -4,45 +4,76 @@ import os
 from multiprocessing.dummy import Pool
 from datetime import datetime
 
-DB_HOST = os.environ.get('DB_HOST')
-DB_USER = os.environ.get('DB_USER')
-DB_PASSWORD = os.environ.get('DB_PASSWORD')
-MIGRATE_DB = os.environ.get('MIGRATE_DB','gladminds')
-total_start_time = time.time()
-db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
+DB_HOST = os.environ.get('DB_HOST', 'localhost')
+DB_USER = os.environ.get('DB_USER', 'root')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
+MIGRATE_DB = os.environ.get('MIGRATE_DB','gladmindsdb')
+TOTAL_START_TIME = time.time()
+
+
+DB_OLD = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
                      user=DB_USER, # your username
                       passwd=DB_PASSWORD, # your password
                       db=MIGRATE_DB) # name of the data base
 
-cur_old = db_old.cursor() 
+CUR_OLD = DB_OLD.cursor()
 
-db_new = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
-                     user=DB_USER, # your username
-                      passwd=DB_PASSWORD, # your password
-                      db="bajaj") # name of the data base
+DB_NEW = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
+                         user=DB_USER, # your username
+                          passwd=DB_PASSWORD, # your password
+                          db="bajaj") # name of the data base
 
-cur_new = db_new.cursor() 
+CUR_NEW = DB_NEW.cursor()
 
-pool_main = Pool(1)
+CUR_OLD.execute('select * from aftersell_registereddealer')
+OLD_DEALERS = CUR_OLD.fetchall()
+OLD_DEALER_DATA={}
+for old_dealer in OLD_DEALERS:
+    OLD_DEALER_DATA[old_dealer[0]]=old_dealer[1]
+    
+CUR_OLD.execute('select * from gladminds_producttypedata')
+OLD_PRODUCTS = CUR_OLD.fetchall()
+OLD_PRODUCTS_DATA={}
+for old_product in OLD_PRODUCTS:
+    OLD_PRODUCTS_DATA[old_product[0]]=old_product[3]
+
+CUR_NEW = DB_NEW.cursor()
+CUR_NEW.execute('select * from bajaj_dealer')
+DEALERS = CUR_NEW.fetchall()
+DEALER_DATA={}
+for dealer in DEALERS:
+    DEALER_DATA[dealer[2]]=dealer[3]
+    
+CUR_NEW.execute('select * from bajaj_producttype')
+PRODUCTS = CUR_NEW.fetchall()
+PRODUCTS_DATA={}
+for product in PRODUCTS:
+    PRODUCTS_DATA[product[4]]=product[2]
+DB_NEW.close()
 
 def process_query(data):
-    print "--------------------products--------------", data.get('vin')
+    
+    db_new = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
+                         user=DB_USER, # your username
+                          passwd=DB_PASSWORD, # your password
+                          db="bajaj") # name of the data base
+    
+    cur_new = db_new.cursor()
     try:
-        print "get the dealer", data.get('dealer_id')
-        query1 = "select * from bajaj_dealer where dealer_id  = %(dealer_id)s"
-        cur_new.execute(query1, {'dealer_id': data.get('dealer_id')})
-        dealer = cur_new.fetchone()
-        print "--------------- fetched associated dealer------------------------", dealer
+                
+        old_dealer = OLD_DEALER_DATA[data.get('dealer_id_id')]
+        dealer = DEALER_DATA[old_dealer]
         
-        print "get the product type", data.get('product_type')
-        query2 = "select * from bajaj_producttype where product_type  = %(product_type)s"
-        cur_new.execute(query2, {'product_type': data.get('product_type')})
-        product_type = cur_new.fetchone()
-        print "--------------- fetched associated product type----------------", product_type
-        
+        old_product_type = OLD_PRODUCTS_DATA[data.get('product_type_id')]
+        product_type = PRODUCTS_DATA[old_product_type]
+         
         customer_number=customer_name=customer_address=None
         if data.get('customer_phone_number_id'):
-            print "get the customer", data.get('customer_phone_number_id')
+            db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
+                     user=DB_USER, # your username
+                      passwd=DB_PASSWORD, # your password
+                      db=MIGRATE_DB) # name of the data base
+            cur_old = db_old.cursor()
             query3 = "select * from gladminds_gladmindusers where id  = %(id)s"
             cur_old.execute(query3, {'id': data.get('customer_phone_number_id')})
             customer = cur_old.fetchone()
@@ -54,10 +85,8 @@ def process_query(data):
                 customer_address= customer_address + customer[9]+','
             if customer[14]:
                 customer_address= customer_address + customer[14]
-            print "--------------- fetched associated customer----------------", customer
+            cur_old.close()
         
-        print "-----------Customer details------", customer_number, customer_name, customer_address
-            
         cur_new.execute("INSERT INTO bajaj_productdata (id, created_date, modified_date, \
         product_id, customer_id, customer_phone_number, customer_name, customer_address,\
         purchase_date, invoice_date, engine, veh_reg_no, is_active,\
@@ -67,17 +96,16 @@ def process_query(data):
         customer_number, customer_name, customer_address,
         data.get('product_purchase_date'), data.get('invoice_date'),
         data.get('engine'), data.get('veh_reg_no'), data.get('isActive'),
-        product_type[2], dealer[3]))
-        
+        product_type, dealer))
         db_new.commit()
-        print "---------------DONE--------------------"
     except Exception as ex:
         db_new.rollback()
-        print "----------------------SOMETHING WENT WRONG--------------------", ex
+        print '[Erorr]:', data.get('vin'), ex
+    db_new.close()
 
 def format_data(product_data):
     start_time = time.time()
-    pool = Pool(1)
+    pool = Pool(50)
     products=[]
     for data in product_data:
         temp = {}
@@ -110,27 +138,34 @@ def format_data(product_data):
         temp['order'] = data[21]
         temp['veh_reg_no'] = data[22]
         
-        temp['dealer_id'] = data[23]
-        temp['product_type'] = data[24]
+#         temp['dealer_id'] = data[23]
+#         temp['product_type'] = data[24]
         products.append(temp)
     pool.map(process_query, products)
     end_time = time.time()
-    print "..........TIME TAKEN.........", end_time-start_time
+    #print "..........TIME TAKEN.........", end_time-start_time
 
 def get_data(offset=0):
-    query= "SELECT p.*, d.dealer_id, t.product_type FROM gladminds_productdata as p, \
-             aftersell_registereddealer as d, gladminds_producttypedata as t \
-             where p.product_type_id=t.product_type_id\
-            and p.dealer_id_id=d.id limit 10000 offset %(offset)s"
+    print "OFFSET:", offset
+    db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
+                     user=DB_USER, # your username
+                      passwd=DB_PASSWORD, # your password
+                      db=MIGRATE_DB) # name of the data base
+
+    cur_old = db_old.cursor()
+
+    query= "SELECT * FROM gladminds_productdata ORDER BY id ASC limit 1000 offset %(offset)s"
     cur_old.execute(query, {'offset': offset})
     product_data = cur_old.fetchall()
     format_data(product_data)
+    db_old.close()
 
-cur_old.execute('select count(*) from gladminds_productdata;')
-product_data_count = cur_old.fetchone()[0]
+CUR_OLD.execute('select count(*) from gladminds_productdata;')
+DATA_COUNT = CUR_OLD.fetchone()[0]
+DB_OLD.close()
 i=0
-while i<=product_data_count:
+while i<=DATA_COUNT:
     get_data(offset=i)
     i=i+1000
-total_end_time = time.time()
-print "..........Total TIME TAKEN.........", total_end_time-total_start_time
+TOTAL_END_TIME = time.time()
+print "..........Total TIME TAKEN.........", TOTAL_END_TIME-TOTAL_START_TIME

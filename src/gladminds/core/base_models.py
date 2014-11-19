@@ -153,11 +153,11 @@ class ProductData(BaseModel):
     customer_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
     customer_phone_number = models.CharField(
-        max_length=15, null=True, blank=True, unique=True)
+        max_length=15, null=True, blank=True)
     customer_name = models.CharField(
-        max_length=215, null=True, blank=True, unique=True)
+        max_length=215, null=True, blank=True)
     customer_address = models.CharField(
-        max_length=215, null=True, blank=True, unique=True)
+        max_length=215, null=True, blank=True)
     purchase_date = models.DateTimeField(null=True, blank=True)
     invoice_date = models.DateTimeField(null=True, blank=True)
     engine = models.CharField(max_length=255, null=True, blank=True)
