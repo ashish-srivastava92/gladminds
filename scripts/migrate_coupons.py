@@ -115,7 +115,7 @@ def get_data(offset=0):
 
     cur_old = db_old.cursor()
 
-    query= "SELECT * FROM gladminds_coupondata where order by id asc limit 10000 offset %(offset)s"
+    query= "SELECT * FROM gladminds_coupondata limit 10000 offset %(offset)s"
     cur_old.execute(query, {'offset': offset})
     product_data = cur_old.fetchall()
     format_data(product_data)
