@@ -305,8 +305,8 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('bajaj', ['SparesData'])
 
-        # Adding model 'UserPreferences'
-        db.create_table(u'bajaj_userpreferences', (
+        # Adding model 'UserPreference'
+        db.create_table(u'bajaj_userpreference', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('created_date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('modified_date', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
@@ -314,10 +314,10 @@ class Migration(SchemaMigration):
             ('value', self.gf('django.db.models.fields.CharField')(max_length=200)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['bajaj.UserProfile'])),
         ))
-        db.send_create_signal('bajaj', ['UserPreferences'])
+        db.send_create_signal('bajaj', ['UserPreference'])
 
-        # Adding unique constraint on 'UserPreferences', fields ['user', 'key']
-        db.create_unique(u'bajaj_userpreferences', ['user_id', 'key'])
+        # Adding unique constraint on 'UserPreference', fields ['user', 'key']
+        db.create_unique(u'bajaj_userpreference', ['user_id', 'key'])
 
         # Adding model 'SMSLog'
         db.create_table(u'bajaj_smslog', (
@@ -388,8 +388,8 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        # Removing unique constraint on 'UserPreferences', fields ['user', 'key']
-        db.delete_unique(u'bajaj_userpreferences', ['user_id', 'key'])
+        # Removing unique constraint on 'UserPreference', fields ['user', 'key']
+        db.delete_unique(u'bajaj_userpreference', ['user_id', 'key'])
 
         # Deleting model 'BrandProductCategory'
         db.delete_table(u'bajaj_brandproductcategory')
@@ -451,8 +451,8 @@ class Migration(SchemaMigration):
         # Deleting model 'SparesData'
         db.delete_table(u'bajaj_sparesdata')
 
-        # Deleting model 'UserPreferences'
-        db.delete_table(u'bajaj_userpreferences')
+        # Deleting model 'UserPreference'
+        db.delete_table(u'bajaj_userpreference')
 
         # Deleting model 'SMSLog'
         db.delete_table(u'bajaj_smslog')
@@ -799,8 +799,8 @@ class Migration(SchemaMigration):
             'unique_service_coupon': ('django.db.models.fields.CharField', [], {'max_length': '215', 'null': 'True', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'bajaj_ucn_recovery'", 'to': "orm['bajaj.UserProfile']"})
         },
-        'bajaj.userpreferences': {
-            'Meta': {'unique_together': "(('user', 'key'),)", 'object_name': 'UserPreferences'},
+        'bajaj.userpreference': {
+            'Meta': {'unique_together': "(('user', 'key'),)", 'object_name': 'UserPreference'},
             'created_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'key': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
