@@ -132,8 +132,6 @@ For 1 Brand there can be multiple Products
 
 
 class ProductType(BaseModel):
-    product_type_id = models.AutoField(primary_key=True)
-    product_name = models.CharField(max_length=255, null=False)
     product_type = models.CharField(max_length=255, unique=True, null=False)
     image_url = models.CharField(
                    max_length=200, blank=True, null=True)
@@ -329,12 +327,7 @@ class SparesData(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "spares data"
-    
-#########################################################################################
 
-"""
-Monkey-patch the Site object to include folder for template
-"""
 
 class UserPreferences(BaseModel):
     """
@@ -343,14 +336,18 @@ class UserPreferences(BaseModel):
     key = models.CharField(max_length=100)
     value = models.CharField(max_length=200)
 
-    def unicode(self):
-        return self.user_profile
-
     class Meta:
         abstract = True
         verbose_name_plural = "User Preferences"
-        
-        
+
+
+class BrandPreferences(UserPreferences):
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Brand Preferences"
+
+
 class SMSLog(BaseModel):
     action = models.CharField(max_length=250)
     message = models.TextField(null=True, blank=True)
@@ -388,7 +385,8 @@ class DataFeedLog(models.Model):
     class Meta:
         abstract = True
         verbose_name_plural = "Feed Log"
-        
+
+
 class AuditLog(BaseModel):
     device = models.CharField(max_length=250, null=True, blank=True)
     user_agent = models.CharField(max_length=250, null=True, blank=True)

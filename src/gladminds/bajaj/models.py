@@ -172,11 +172,12 @@ class SparesData(base_models.SparesData):
 
 
 class UserPreferences(base_models.UserPreferences):
-    user_profile = models.ForeignKey(UserProfile)
+    user = models.ForeignKey(UserProfile)
+
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "user preference"
-        unique_together = ("user_profile", "key")
+        unique_together = ("user", "key")
 
 
 class SMSLog(base_models.SMSLog):
