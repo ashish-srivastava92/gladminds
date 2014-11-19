@@ -1,34 +1,36 @@
 import os
 import boto
 from boto.s3.key import Key
-import sys
-from subprocess import Popen
+
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.http.response import HttpResponse
+from tastypie.serializers import Serializer
+from uuid import uuid4
+from django.views.decorators.http import require_http_methods
+
+serializerObj = Serializer()
 
 
-failed = open('failers', 'w')
-machine = sys.argv[1]
-
-
-def uploadResultToS3(awsid, awskey, bucket, source_folder):
-    c = boto.connect_s3(awsid, awskey)
-    b = c.get_bucket(bucket)
-    k = Key(b)
-
-    for key in b.list('qa_afterbuy/'):
-        key.delete()
-    for path, dir, files in os.walk(source_folder):
-        print path, dir
-        for upload_file in files:
-            relpath = os.path.relpath(os.path.join(path, upload_file))
-            if not b.get_key(relpath):
-                k.key = relpath
-                k.set_contents_from_filename(relpath)
-                try:
-                    k.set_acl('public-read')
-                except:
-                    failed.write(relpath + ', ')
-    failed.close()
-print machine
-
-uploadResultToS3('AKIAIL7IDCSTNCG2R6JA', '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A',\
-                  "afterbuy", '%s' % machine)
+@csrf_exempt
+@require_http_methods(["POST"])
+def upload_files(request):
+    keys = request.FILES.keys()
+    if len(keys) != 1:
+        return HttpResponse(serializerObj.to_json({"message":"only 1 image upload allowed"}), content_type="application/json", status=400)
+    if  keys[0] not in ['consumers', 'products', 'brands', 'users']:
+        return HttpResponse(serializerObj.to_json({"message":"key not found"}), content_type="application/json", status=400)
+    try:
+        conn = boto.connect_s3()
+        bucket_name = settings.AWS_STORAGE_BUCKET_MAP.get(settings.BRAND,
+                                                          settings.BRAND)
+        bucket = conn.get_bucket(bucket_name, validate=False)
+        full_key = os.path.join(settings.ENV, keys[0], str(uuid4())+request.FILES[keys[0]]._name)
+        k = Key(bucket)
+        data = request.FILES[keys[0]].read()
+        k.key = full_key
+        k.set_contents_from_string(data)
+        k.set_acl('public-read')
+    except Exception as e:
+        return HttpResponse(serializerObj.to_json({"message":e.message}), content_type="application/json", status=500)
+    return HttpResponse(serializerObj.to_json({"uid":full_key}), content_type="application/json")
