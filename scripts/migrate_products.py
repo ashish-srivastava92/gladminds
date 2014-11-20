@@ -27,7 +27,7 @@ DB_NEW = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
 
 CUR_NEW = DB_NEW.cursor()
 
-CUR_OLD.execute('select * from aftersell_registereddealer where role="asc"')
+CUR_OLD.execute('select * from aftersell_registereddealer where role="dealer"')
 OLD_DEALERS = CUR_OLD.fetchall()
 OLD_DEALER_DATA={}
 for old_dealer in OLD_DEALERS:
