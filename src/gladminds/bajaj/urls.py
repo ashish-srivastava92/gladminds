@@ -20,7 +20,6 @@ api_v1.register(preferences_apis.UserPreferenceResource())
 api_v1.register(preferences_apis.BrandPreferenceResource())
 
 api_v1.register(GladmindsResources())
-api_v1.register(preferences_apis.UserPreferenceResource())
 
 urlpatterns = patterns('',
     url(r'^site-info/$', 'gladminds.bajaj.views.site_info', name='site_info'),
