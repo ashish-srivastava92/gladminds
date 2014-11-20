@@ -27,7 +27,7 @@ DB_NEW = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
 
 CUR_NEW = DB_NEW.cursor()
 
-CUR_OLD.execute('select * from aftersell_registereddealer where role="asc"')
+CUR_OLD.execute('select * from aftersell_registereddealer where role="dealer"')
 OLD_DEALERS = CUR_OLD.fetchall()
 OLD_DEALER_DATA={}
 for old_dealer in OLD_DEALERS:
@@ -101,7 +101,7 @@ def process_query(data):
         product_type, dealer))
         db_new.commit()
     except Exception as ex:
-        e='[Error]: in step-{0} {1}'.format(data.get('vin'), ex)
+        e='[Error]: {0} {1}'.format(data.get('vin'), ex)
         db_new.rollback()
         if 'Duplicate entry' not in e:
             print e
