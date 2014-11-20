@@ -28,7 +28,7 @@
 					<th>Type</th>
 					<th>Status</th>
 					<th>Created</th>
-					<th>Resolved</th>
+					<th>Modified</th>
 					<th>Due</th>
 				</tr>
 			</thead>
@@ -63,7 +63,7 @@
 					<td>{{feedback.type|default_if_none:""}}</td>
 					<td>{{feedback.status|default_if_none:""}}</td>
 					<td>{{feedback.created_date|default_if_none:""}}</td>
-					<td>{{feedback.resolved_date|default_if_none:""}}</td>
+					<td>{{feedback.modified_date|default_if_none:""}}</td>
 					<td>{{feedback.due_date|default_if_none:""}}</td>
 			</tr>
 				{% endfor %}

@@ -4,7 +4,7 @@ import os
 from multiprocessing.dummy import Pool
 from datetime import datetime
 
-POOL = Pool(50)
+POOL = Pool(100)
 DB_HOST = os.environ.get('DB_HOST', 'localhost')
 DB_USER = os.environ.get('DB_USER', 'root')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
@@ -102,7 +102,6 @@ def process_query(data):
         db_new.commit()
     except Exception as ex:
         e='[Error]: {0} {1}'.format(data.get('vin'), ex)
-
         db_new.rollback()
         if 'Duplicate entry' not in e:
             print e

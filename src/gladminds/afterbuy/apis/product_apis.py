@@ -27,7 +27,7 @@ class ProductTypeResource(CustomBaseModelResource):
 class UserProductResource(CustomBaseModelResource):
     consumer = fields.ForeignKey(ConsumerResource, 'consumer', null=True, blank=True, full=True)
     brand = fields.ForeignKey(BrandResource, 'brand', null=True, blank=True, full=True)
-    product_type = fields.ForeignKey(ProductTypeResource, 'type', null=True, blank=True, full=True)
+    product_type = fields.ForeignKey(ProductTypeResource, 'product_type', null=True, blank=True, full=True)
 
     class Meta:
         queryset = afterbuy_models.UserProduct.objects.all()
