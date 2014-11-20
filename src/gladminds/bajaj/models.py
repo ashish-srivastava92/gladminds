@@ -171,12 +171,12 @@ class SparesData(base_models.SparesData):
         verbose_name_plural = "spare info"
 
 
-class UserPreferences(base_models.UserPreferences):
+class UserPreference(base_models.UserPreference):
     user = models.ForeignKey(UserProfile)
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "user preference"
+        verbose_name_plural = "user preferences"
         unique_together = ("user", "key")
 
 

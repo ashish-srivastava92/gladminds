@@ -49,7 +49,7 @@ CUR_NEW.execute('select * from bajaj_producttype')
 PRODUCTS = CUR_NEW.fetchall()
 PRODUCTS_DATA={}
 for product in PRODUCTS:
-    PRODUCTS_DATA[product[4]]=product[2]
+    PRODUCTS_DATA[product[3]]=product[0]
 
 DB_NEW.close()
 
@@ -101,8 +101,10 @@ def process_query(data):
         product_type, dealer))
         db_new.commit()
     except Exception as ex:
+        e='[Error]: {0} {1}'.format( data.get('vin'), ex)
         db_new.rollback()
-        print '[Error]:', data.get('vin'), ex
+        if 'Duplicate entry' not in e:
+            print e
     db_new.close()
 
 def format_data(product_data):
@@ -151,7 +153,7 @@ def get_data(offset=0):
 
     cur_old = db_old.cursor()
 
-    query= "SELECT * FROM gladminds_productdata limit 1000 offset %(offset)s"
+    query= "SELECT * FROM gladminds_productdata limit 10000 offset %(offset)s"
     cur_old.execute(query, {'offset': offset})
     product_data = cur_old.fetchall()
     format_data(product_data)
@@ -162,6 +164,6 @@ DATA_COUNT = CUR_OLD.fetchone()[0]
 DB_OLD.close()
 while OFFSET<=DATA_COUNT:
     get_data(offset=OFFSET)
-    OFFSET=OFFSET+1000
+    OFFSET=OFFSET+10000
 TOTAL_END_TIME = time.time()
 print "..........Total TIME TAKEN.........", TOTAL_END_TIME-TOTAL_START_TIME

@@ -21,7 +21,7 @@ class CustomBaseModelResource(ModelResource):
         return fmt
  
  
-class GladMindsObject(dict):
+class CustomApiObject(dict):
     """
     GladMindsObject is used because:-
     If we don't use the queryset then we need to specify the object_class

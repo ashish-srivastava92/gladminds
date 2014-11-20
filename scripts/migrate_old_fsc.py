@@ -52,7 +52,7 @@ def process_query(data):
     cur_new = db_new.cursor()
     try:
         today = datetime.now()
-        old_dealer = OLD_DEALER_DATA[data.get('dealer_id')]
+        old_dealer = OLD_DEALER_DATA[data.get('servicing_dealer_id')]
         dealer = DEALER_DATA[old_dealer]
         
         cur_new.execute("INSERT INTO bajaj_oldfscdata (id, created_date, modified_date,\

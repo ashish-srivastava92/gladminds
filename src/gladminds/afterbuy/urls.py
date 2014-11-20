@@ -2,6 +2,7 @@ from django.conf.urls import patterns, url, include
 from gladminds.afterbuy.admin import brand_admin
 from tastypie.api import Api
 from gladminds.afterbuy.apis import product_apis, brand_apis
+from gladminds.core.apis import preferences_apis
 from gladminds.afterbuy.apis import user_apis
 from gladminds.core.apis.image_apis import upload_files
 
@@ -19,6 +20,9 @@ api_v1.register(product_apis.ProductTypeResource())
 api_v1.register(brand_apis.BrandResource())
 api_v1.register(brand_apis.IndustryResource())
 api_v1.register(brand_apis.BrandProductCategoryResource())
+api_v1.register(preferences_apis.UserPreferenceResource())
+api_v1.register(preferences_apis.BrandPreferenceResource())
+
 
 
 urlpatterns = patterns('',

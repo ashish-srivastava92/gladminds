@@ -329,7 +329,7 @@ class SparesData(BaseModel):
         verbose_name_plural = "spares data"
 
 
-class UserPreferences(BaseModel):
+class UserPreference(BaseModel):
     """
     This model is used for storing user preferences
     """
@@ -341,7 +341,7 @@ class UserPreferences(BaseModel):
         verbose_name_plural = "User Preferences"
 
 
-class BrandPreferences(UserPreferences):
+class BrandPreference(UserPreference):
 
     class Meta:
         abstract = True
