@@ -4,7 +4,7 @@ import os
 from multiprocessing.dummy import Pool
 from datetime import datetime
 
-POOL = Pool(100)
+POOL = Pool(50)
 DB_HOST = os.environ.get('DB_HOST', 'localhost')
 DB_USER = os.environ.get('DB_USER', 'root')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
@@ -117,7 +117,7 @@ def get_data(offset=0):
 
     cur_old = db_old.cursor()
 
-    query= "SELECT * FROM gladminds_coupondata limit 1000 offset %(offset)s"
+    query= "SELECT * FROM gladminds_coupondata limit 10000 offset %(offset)s"
     cur_old.execute(query, {'offset': offset})
     product_data = cur_old.fetchall()
     format_data(product_data)
@@ -129,6 +129,6 @@ DB_OLD.close()
 
 while OFFSET<=DATA_COUNT:
     get_data(offset=OFFSET)
-    OFFSET=OFFSET+1000
+    OFFSET=OFFSET+10000
 TOTAL_END_TIME = time.time()
 print "..........Total TIME TAKEN.........", TOTAL_END_TIME-TOTAL_START_TIME

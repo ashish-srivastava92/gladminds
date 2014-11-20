@@ -27,7 +27,7 @@ DB_NEW = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
 
 CUR_NEW = DB_NEW.cursor()
 
-CUR_OLD.execute('select * from aftersell_registereddealer')
+CUR_OLD.execute('select * from aftersell_registereddealer where role="asc"')
 OLD_DEALERS = CUR_OLD.fetchall()
 OLD_DEALER_DATA={}
 for old_dealer in OLD_DEALERS:
@@ -65,10 +65,10 @@ def process_query(data):
                 
         old_dealer = OLD_DEALER_DATA[data.get('dealer_id_id')]
         dealer = DEALER_DATA[old_dealer]
-        
+        step = 1
         old_product_type = OLD_PRODUCTS_DATA[data.get('product_type_id')]
         product_type = PRODUCTS_DATA[old_product_type]
-         
+        step = 2 
         customer_number=customer_name=customer_address=None
         if data.get('customer_phone_number_id'):
             db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
@@ -88,7 +88,7 @@ def process_query(data):
             if customer[14]:
                 customer_address= customer_address + customer[14]
             db_old.close()
-        
+        step=3
         cur_new.execute("INSERT INTO bajaj_productdata (id, created_date, modified_date, \
         product_id, customer_id, customer_phone_number, customer_name, customer_address,\
         purchase_date, invoice_date, engine, veh_reg_no, is_active,\
@@ -101,7 +101,7 @@ def process_query(data):
         product_type, dealer))
         db_new.commit()
     except Exception as ex:
-        e='[Error]: {0} {1}'.format( data.get('vin'), ex)
+        e='[Error]: in step-{0} {1} {2}'.format(step, data.get('vin'), ex)
         db_new.rollback()
         if 'Duplicate entry' not in e:
             print e
@@ -153,7 +153,7 @@ def get_data(offset=0):
 
     cur_old = db_old.cursor()
 
-    query= "SELECT * FROM gladminds_productdata limit 1000 offset %(offset)s"
+    query= "SELECT * FROM gladminds_productdata limit 10000 offset %(offset)s"
     cur_old.execute(query, {'offset': offset})
     product_data = cur_old.fetchall()
     format_data(product_data)
@@ -164,6 +164,6 @@ DATA_COUNT = CUR_OLD.fetchone()[0]
 DB_OLD.close()
 while OFFSET<=DATA_COUNT:
     get_data(offset=OFFSET)
-    OFFSET=OFFSET+1000
+    OFFSET=OFFSET+10000
 TOTAL_END_TIME = time.time()
 print "..........Total TIME TAKEN.........", TOTAL_END_TIME-TOTAL_START_TIME
