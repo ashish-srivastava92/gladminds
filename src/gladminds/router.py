@@ -1,6 +1,6 @@
 from django.conf import settings
 
-_COMMON_APPS = ['auth', 'contenttypes', 'sessions', 'sites', 'admin', 'djcelery']
+_COMMON_APPS = ['auth', 'contenttypes', 'sessions', 'sites', 'admin', 'djcelery', 'django_otp']
 
 class DatabaseAppsRouter(object):
     """

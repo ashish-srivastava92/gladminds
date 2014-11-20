@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -40,7 +42,7 @@ class ProductType(base_models.ProductType):
 class Consumer(base_models.BaseModel):
     user = models.OneToOneField(User, primary_key=True)
     consumer_id = models.CharField(
-        max_length=50, unique=True)
+        max_length=50, unique=True, default=uuid4)
     phone_number = models.CharField(
                    max_length=15, blank=True, null=True)
     image_url = models.CharField(
@@ -237,7 +239,7 @@ class UserMobileInfo(base_models.BaseModel):
         verbose_name_plural = "Mobile Details"
 
 
-class UserPreference(base_models.UserPreferences):
+class UserPreference(base_models.UserPreference):
     user = models.ForeignKey(Consumer)
 
     class Meta:
@@ -246,7 +248,7 @@ class UserPreference(base_models.UserPreferences):
         unique_together = ("user", "key")
 
 
-class BrandPreference(base_models.BrandPreferences):
+class BrandPreference(base_models.BrandPreference):
     brand = models.ForeignKey(Brand)
 
     class Meta:
