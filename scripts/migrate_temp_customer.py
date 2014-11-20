@@ -63,7 +63,6 @@ def format_data(coupon_data):
         temp['sent_to_sap'] = data[6]
         temp['remarks'] = data[7]
         temp['tagged_sap_id'] = data[8]
-        temp['vin'] = data[9]
         coupons.append(temp)
     POOL.map(process_query, coupons)
     end_time = time.time()

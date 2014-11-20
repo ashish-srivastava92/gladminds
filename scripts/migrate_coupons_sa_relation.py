@@ -43,9 +43,15 @@ DB_OLD.close()
 DB_NEW.close()
 
 def process_query(data):
+    db_new = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
+                     user=DB_USER, # your username
+                      passwd=DB_PASSWORD, # your password
+                      db="bajaj") # name of the data base
+
+    cur_new = db_new.cursor()     
     try:
         today = datetime.now()        
-        old_sa = OLD_SA_DATA[data.get('service_advisor_id')]
+        old_sa = OLD_SA_DATA[data.get('service_advisor_phone_id')]
         sa = SA_DATA[old_sa]
         
         cur_new.execute("INSERT INTO bajaj_serviceadvisorcouponrelationship (id, created_date, modified_date,\

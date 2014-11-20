@@ -4,7 +4,7 @@ import os
 from multiprocessing.dummy import Pool
 from datetime import datetime
 
-POOL = Pool(50)
+POOL = Pool(100)
 DB_HOST = os.environ.get('DB_HOST', 'localhost')
 DB_USER = os.environ.get('DB_USER', 'root')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
@@ -70,8 +70,10 @@ def process_query(data):
         
         db_new.commit()
     except Exception as ex:
+        e='[Error]: {0} {1}'.format( data.get('vin'), ex)
         db_new.rollback()
-        print '[Error]:', data.get('unique_service_coupon'), ex
+        if 'Duplicate entry' not in e:
+            print e
     db_new.close()
     
  
@@ -127,6 +129,6 @@ DB_OLD.close()
 
 while OFFSET<=DATA_COUNT:
     get_data(offset=OFFSET)
-    OFFSET=OFFSET+1000
+    OFFSET=OFFSET+10000
 TOTAL_END_TIME = time.time()
 print "..........Total TIME TAKEN.........", TOTAL_END_TIME-TOTAL_START_TIME
