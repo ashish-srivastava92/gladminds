@@ -1,4 +1,4 @@
-from tastypie.constants import ALL_WITH_RELATIONS
+from tastypie.constants import ALL_WITH_RELATIONS, ALL
 from tastypie.authorization import Authorization
 from tastypie import fields
 from gladminds.bajaj.apis.product_apis import ProductDataResources
@@ -9,7 +9,7 @@ from gladminds.bajaj.apis.user_apis import ServiceAdvisorResources,\
   
 class CouponDataResources(CustomBaseModelResource):
     product = fields.ForeignKey(ProductDataResources, 'product', full=True)
-    sa_phone_number = fields.ForeignKey(ServiceAdvisorResources, 'sa_phone_number', full=True, null=True, blank=True)
+    service_advisor = fields.ForeignKey(ServiceAdvisorResources, 'service_advisor', full=True, null=True, blank=True)
 
     class Meta:
         queryset = CouponData.objects.all()
@@ -18,10 +18,10 @@ class CouponDataResources(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'delete']
         always_return_data = True
         filtering = {
-                        "service_type" : ALL_WITH_RELATIONS,
-                        "status" : ALL_WITH_RELATIONS,
+                        "service_type" : ALL,
+                        "status" : ALL,
                         "closed_date" : ['gte', 'lte'],
                         "product" : ALL_WITH_RELATIONS,
-                        "unique_service_coupon" : ALL_WITH_RELATIONS
+                        "unique_service_coupon" : ALL
                      }
 
