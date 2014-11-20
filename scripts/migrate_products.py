@@ -101,11 +101,8 @@ def process_query(data):
         product_type, dealer))
         db_new.commit()
     except Exception as ex:
-<<<<<<< Updated upstream
         e='[Error]: {0} {1}'.format(data.get('vin'), ex)
-=======
-        e='[Error]: {0} {1}'.format( data.get('vin'), ex)
->>>>>>> Stashed changes
+
         db_new.rollback()
         if 'Duplicate entry' not in e:
             print e

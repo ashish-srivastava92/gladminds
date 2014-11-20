@@ -18,7 +18,6 @@ def save_otp(token, **kwargs):
         afterbuy_model.OTPToken.objects.filter(phone_number=phone_number).delete()
         token_obj = afterbuy_model.OTPToken(token=str(token), request_date=datetime.now(), phone_number=phone_number)
     token_obj.save()
-    print "noooooooo"
 
 
 def generate_otp(phone_number):
@@ -32,10 +31,8 @@ def validate_otp(otp, **kwargs):
     if 'user' in kwargs.keys():
         token_obj = afterbuy_model.OTPToken.objects.filter(**kwargs)[0]
     else:
-        print "yes"
         phone_number = kwargs.get('phone_number')
         token_obj = afterbuy_model.OTPToken.objects.get(phone_number=phone_number)
-        print "sssssssssssssssss",token_obj.token
 
     if int(otp) == int(token_obj.token) and (timezone.now()-token_obj.request_date).seconds <= OTP_VALIDITY:
         return True

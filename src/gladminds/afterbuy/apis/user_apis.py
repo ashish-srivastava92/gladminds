@@ -64,9 +64,7 @@ class ConsumerResource(CustomBaseModelResource):
 
         bundle = self.full_hydrate(bundle)
         otp_token = bundle.data['otp_token']
-        print "otp_token",otp_token
         phone_number = bundle.data['phone_number']
-        print "otp_token",phone_number
         try:
             afterbuy_utils.validate_otp(otp_token, phone_number=mobile_format(phone_number))
         except OtpFailedException as e:
@@ -93,14 +91,13 @@ class ConsumerResource(CustomBaseModelResource):
             return HttpBadRequest("phone_number is required.")
         try:
             otp = afterbuy_utils.get_otp(phone_number=mobile_format(phone_number))
-            print otp
-#             message = afterbuy_utils.get_template('SEND_OTP').format(otp)
-#             if settings.ENABLE_AMAZON_SQS:
-#                 task_queue = get_task_queue()
-#                 task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
-#             else:
-#                 send_otp.delay(phone_number=phone_number, message=message)  # @UndefinedVariable
-#             logger.info('OTP sent to mobile {0}'.format(phone_number))
+            message = afterbuy_utils.get_template('SEND_OTP').format(otp)
+            if settings.ENABLE_AMAZON_SQS:
+                task_queue = get_task_queue()
+                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
+            else:
+                send_otp.delay(phone_number=phone_number, message=message)  # @UndefinedVariable
+            logger.info('OTP sent to mobile {0}'.format(phone_number))
             data = {'status': 1, 'message': "OTP sent_successfully"}
 
         except Exception as ex:
