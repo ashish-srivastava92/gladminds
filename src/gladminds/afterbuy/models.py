@@ -205,7 +205,7 @@ class Support (base_models.BaseModel):
 
 
 class OTPToken(base_models.OTPToken):
-    user = models.ForeignKey(Consumer)
+    user = models.ForeignKey(Consumer, blank=True, null=True)
 
     class Meta:
         app_label = _APP_NAME

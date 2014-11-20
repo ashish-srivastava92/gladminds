@@ -76,7 +76,8 @@ class BrandProductCategory(BaseModel):
 class OTPToken(BaseModel):
     token = models.CharField(max_length=256, null=False)
     request_date = models.DateTimeField(null=True, blank=True)
-    email = models.CharField(max_length=50, null=False)
+    email = models.CharField(max_length=50, null=True, blank=True)
+    phone_number = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True

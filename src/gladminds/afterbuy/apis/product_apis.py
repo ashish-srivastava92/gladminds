@@ -174,3 +174,31 @@ class ProductSupportResource(CustomBaseModelResource):
         filtering = {
                      "product": ALL,
                      }
+
+
+class SellInformationResource(CustomBaseModelResource):
+    product = fields.ForeignKey(UserProductResource, 'product', full=True, null=True)
+
+    class Meta:
+        queryset = afterbuy_models.SellInformation.objects.all()
+        resource_name = 'sell-information'
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'delete' ,'put']
+        always_return_data = True
+        filtering = {
+                     "product": ALL,
+                     }
+
+
+class UserProductImagesResource(CustomBaseModelResource):
+    product = fields.ForeignKey(UserProductResource, 'product', full=True, null=True)
+
+    class Meta:
+        queryset = afterbuy_models.UserProductImages.objects.all()
+        resource_name = 'product-images'
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'delete' ,'put']
+        always_return_data = True
+        filtering = {
+                     "product": ALL,
+                     }
