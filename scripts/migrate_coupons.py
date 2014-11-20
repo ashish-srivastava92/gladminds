@@ -4,7 +4,7 @@ import os
 from multiprocessing.dummy import Pool
 from datetime import datetime
 
-POOL = Pool(50)
+POOL = Pool(100)
 DB_HOST = os.environ.get('DB_HOST', 'localhost')
 DB_USER = os.environ.get('DB_USER', 'root')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
