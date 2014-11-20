@@ -4,46 +4,57 @@ import os
 from multiprocessing.dummy import Pool
 from datetime import datetime
 
-DB_HOST = os.environ.get('DB_HOST')
-DB_USER = os.environ.get('DB_USER')
-DB_PASSWORD = os.environ.get('DB_PASSWORD')
-MIGRATE_DB = os.environ.get('MIGRATE_DB','gladminds')
-db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
+POOL = Pool(50)
+DB_HOST = os.environ.get('DB_HOST', 'localhost')
+DB_USER = os.environ.get('DB_USER', 'root')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
+MIGRATE_DB = os.environ.get('MIGRATE_DB','gladmindsdb')
+
+
+DB_OLD = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
                      user=DB_USER, # your username
                       passwd=DB_PASSWORD, # your password
                       db=MIGRATE_DB) # name of the data base
 
-cur_old = db_old.cursor() 
+CUR_OLD = DB_OLD.cursor()
 
-db_new = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
-                     user=DB_USER, # your username
-                      passwd=DB_PASSWORD, # your password
-                      db="bajaj") # name of the data base
+DB_NEW = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
+                         user=DB_USER, # your username
+                          passwd=DB_PASSWORD, # your password
+                          db="bajaj") # name of the data base
 
-cur_new = db_new.cursor() 
+CUR_NEW = DB_NEW.cursor()
 
-cur_old.execute("SELECT c.*, p.vin, d.dealer_id FROM gladminds_oldfscdata as c, gladminds_productdata as p,\
-             aftersell_registereddealer as d where c.vin_id=p.id and c.servicing_dealer_id=d.id")
-coupon_data = cur_old.fetchall()
+CUR_OLD.execute("SELECT * FROM gladminds_oldfscdata")
+OLD_FSC_DATA = CUR_OLD.fetchall()
 
+CUR_OLD.execute('select * from aftersell_registereddealer')
+OLD_DEALERS = CUR_OLD.fetchall()
+OLD_DEALER_DATA={}
+for old_dealer in OLD_DEALERS:
+    OLD_DEALER_DATA[old_dealer[0]]=old_dealer[1]
+
+CUR_NEW.execute('select * from bajaj_dealer')
+DEALERS = CUR_NEW.fetchall()
+DEALER_DATA={}
+for dealer in DEALERS:
+    DEALER_DATA[dealer[2]]=dealer[3]
+
+DB_OLD.close()
+DB_NEW.close()
 
 def process_query(data):
-    print "--------------------coupons--------------", data.get('unique_service_coupon')
+    db_new = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
+                         user=DB_USER, # your username
+                          passwd=DB_PASSWORD, # your password
+                          db="bajaj") # name of the data base
+    
+    cur_new = db_new.cursor()
     try:
         today = datetime.now()
-        print "get the product", data.get('vin')
-        query1 = "select * from bajaj_productdata where product_id  = %(product_id)s"
-        cur_new.execute(query1, {'product_id': data.get('vin')})
-        product = cur_new.fetchone()
-        print "--------------- fetched associated product------------------------", product
-                    
-        print "get the dealer", data.get('dealer_id')
-        query2 = "select * from bajaj_dealer where dealer_id  = %(dealer_id)s"
-        cur_new.execute(query2, {'dealer_id': data.get('dealer_id')})
-        dealer = cur_new.fetchone()
-        print "--------------- fetched associated dealer----------------", dealer
+        old_dealer = OLD_DEALER_DATA[data.get('servicing_dealer_id')]
+        dealer = DEALER_DATA[old_dealer]
         
-        print "-------creating old fsc-----------"
         cur_new.execute("INSERT INTO bajaj_oldfscdata (id, created_date, modified_date,\
         unique_service_coupon, valid_days, valid_kms, service_type, status,\
         closed_date, mark_expired_on, actual_service_date, actual_kms, last_reminder_date,\
@@ -58,17 +69,16 @@ def process_query(data):
         data.get('actual_kms'), data.get('last_reminder_date'), data.get('schedule_reminder_date'),
         data.get('extended_date'), data.get('sent_to_sap'), data.get('credit_date'),
         data.get('credit_note'),data.get('special_case'),data.get('missing_field'),
-        data.get('missing_value'), product[0], dealer[3]))
+        data.get('missing_value'), data.get('vin_id'), dealer))
         db_new.commit()
-        print "---------------DONE--------------------"
     except Exception as ex:
         db_new.rollback()
-        print "----------------------SOMETHING WENT WRONG--------------------", ex
+        print '[Error]:', data.get('id'), ex
+    db_new.close()
     
  
 def format_data(coupon_data):
     start_time = time.time()
-    pool = Pool(1)
     coupons=[]
     for data in coupon_data:
         temp = {}
@@ -95,11 +105,9 @@ def format_data(coupon_data):
         temp['special_case'] = data[20]
         temp['missing_field'] = data[21]
         temp['missing_value'] = data[22]
-        temp['vin'] = data[23]
-        temp['dealer_id'] = data[24]
         coupons.append(temp)
-    pool.map(process_query, coupons)
+    POOL.map(process_query, coupons)
     end_time = time.time()
     print "..........Total TIME TAKEN.........", end_time-start_time
 
-format_data(coupon_data)
+format_data(OLD_FSC_DATA)

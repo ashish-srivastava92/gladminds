@@ -4,51 +4,56 @@ import os
 from multiprocessing.dummy import Pool
 from datetime import datetime
 
-DB_HOST = os.environ.get('DB_HOST')
-DB_USER = os.environ.get('DB_USER')
-DB_PASSWORD = os.environ.get('DB_PASSWORD')
+POOL = Pool(100)
+DB_HOST = os.environ.get('DB_HOST', 'localhost')
+DB_USER = os.environ.get('DB_USER', 'root')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
+MIGRATE_DB = os.environ.get('MIGRATE_DB','gladmindsdb')
+OFFSET = int(os.environ.get('OFFSET',0))
+TOTAL_START_TIME = time.time()
 
-MIGRATE_DB = os.environ.get('MIGRATE_DB','gladminds')
-db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
+
+DB_OLD = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
                      user=DB_USER, # your username
                       passwd=DB_PASSWORD, # your password
                       db=MIGRATE_DB) # name of the data base
 
-cur_old = db_old.cursor() 
+CUR_OLD = DB_OLD.cursor()
 
-db_new = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
-                     user=DB_USER, # your username
-                      passwd=DB_PASSWORD, # your password
-                      db="bajaj") # name of the data base
+DB_NEW = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
+                         user=DB_USER, # your username
+                          passwd=DB_PASSWORD, # your password
+                          db="bajaj") # name of the data base
 
-cur_new = db_new.cursor() 
+CUR_NEW = DB_NEW.cursor()
+
+CUR_OLD.execute('select * from aftersell_serviceadvisor')
+OLD_SA = CUR_OLD.fetchall()
+OLD_SA_DATA={}
+for old_sa in OLD_SA:
+    OLD_SA_DATA[old_sa[0]]=old_sa[1]
+
+CUR_NEW.execute('select * from bajaj_serviceadvisor')
+SA = CUR_NEW.fetchall()
+SA_DATA={}
+for sa in SA:
+    SA_DATA[sa[2]]=sa[4]
+
+DB_NEW.close()
 
 def process_query(data):
-    print "--------------------coupons--------------", data.get('vin_id)'), data.get('unique_service_coupon)')
+    db_new = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
+                         user=DB_USER, # your username
+                          passwd=DB_PASSWORD, # your password
+                          db="bajaj") # name of the data base
+    cur_new = db_new.cursor()
     try:
-        today = datetime.now()
-        print "get the product", data.get('vin')
-        query1 = "select * from bajaj_productdata where product_id  = %(product_id)s"
-        cur_new.execute(query1, {'product_id': data.get('vin')})
-        product = cur_new.fetchone()
-        print "--------------- fetched associated product------------------------", product
-        
         sa=None
+        today = datetime.now()
         if data.get('sa_phone_number_id'):
-            print "get the old sa", data.get('sa_phone_number_id')
-            query2 = "select * from aftersell_serviceadvisor where id  = %(id)s"
-            cur_old.execute(query2, {'id': data.get('sa_phone_number_id')})
-            sa_old = cur_old.fetchone()
-            print "--------------- fetched associated sa_old------------------------", sa_old
-            
-            print "get the new sa", sa_old[1]
-            query3 = "select * from bajaj_serviceadvisor where service_advisor_id  = %(service_advisor_id)s"
-            cur_new.execute(query3, {'service_advisor_id': sa_old[1]})
-            sa_new = cur_new.fetchone()
-            print "--------------- fetched associated SA----------------", sa_new
-            sa=sa_new[4]
+            old_sa = OLD_SA_DATA[data.get('sa_phone_number_id')]
+            sa = SA_DATA[old_sa]
         
-        print "---------------------sa------------------", sa    
         cur_new.execute("INSERT INTO bajaj_coupondata (id, created_date, modified_date,\
         unique_service_coupon, valid_days, valid_kms, service_type, status,\
         closed_date, mark_expired_on, actual_service_date, actual_kms, last_reminder_date,\
@@ -61,18 +66,19 @@ def process_query(data):
         data.get('closed_date'), data.get('mark_expired_on'), data.get('actual_service_date'),
         data.get('actual_kms'), data.get('last_reminder_date'), data.get('schedule_reminder_date'),
         data.get('extended_date'), data.get('sent_to_sap'), data.get('credit_date'),
-        data.get('credit_note'),data.get('special_case'),product[0], sa))
+        data.get('credit_note'),data.get('special_case'),data.get('vin_id'), sa))
         
         db_new.commit()
-        print "---------------DONE--------------------"
     except Exception as ex:
+        e='[Error]: {0} {1}'.format( data.get('vin'), ex)
         db_new.rollback()
-        print "----------------------SOMETHING WENT WRONG--------------------", ex
+        if 'Duplicate entry' not in e:
+            print e
+    db_new.close()
     
  
 def format_data(coupon_data):
-    start_time = time.time()
-    pool = Pool(1)
+    pool = Pool(50)
     coupons=[]
     for data in coupon_data:
         temp = {}
@@ -97,25 +103,32 @@ def format_data(coupon_data):
         temp['credit_date'] = data[18]
         temp['credit_note'] = data[19]
         temp['special_case'] = data[20]
-        temp['vin'] = data[21]
+        
         coupons.append(temp)
-    pool.map(process_query, coupons)
-    end_time = time.time()
-    print "..........TIME TAKEN.........", end_time-start_time
+    POOL.map(process_query, coupons)
 
 
 def get_data(offset=0):
-    query= "SELECT c.*, p.vin FROM gladminds_coupondata as c, gladminds_productdata as p\
-             where c.vin_id=p.id limit 10000 offset %(offset)s"
-    cur_old.execute(query, {'offset': offset})
-    coupon_data = cur_old.fetchall()
-    format_data(coupon_data)
+    print "OFFSET:", offset
+    db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
+                     user=DB_USER, # your username
+                      passwd=DB_PASSWORD, # your password
+                      db=MIGRATE_DB) # name of the data base
 
-cur_old.execute('select count(*) from gladminds_coupondata;')
-coupon_data_count = cur_old.fetchone()[0]
-i=0
-while i<=coupon_data_count:
-    get_data(offset=i)
-    i=i+1000
-total_end_time = time.time()
-print "..........Total TIME TAKEN.........", total_end_time-total_start_time
+    cur_old = db_old.cursor()
+
+    query= "SELECT * FROM gladminds_coupondata limit 10000 offset %(offset)s"
+    cur_old.execute(query, {'offset': offset})
+    product_data = cur_old.fetchall()
+    format_data(product_data)
+    db_old.close()
+
+CUR_OLD.execute('select count(*) from gladminds_coupondata;')
+DATA_COUNT = CUR_OLD.fetchone()[0]
+DB_OLD.close()
+
+while OFFSET<=DATA_COUNT:
+    get_data(offset=OFFSET)
+    OFFSET=OFFSET+10000
+TOTAL_END_TIME = time.time()
+print "..........Total TIME TAKEN.........", TOTAL_END_TIME-TOTAL_START_TIME
