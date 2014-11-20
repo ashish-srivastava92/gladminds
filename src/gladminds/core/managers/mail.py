@@ -16,6 +16,10 @@ def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER
 #   header = "To:{0}\nFrom:{1}\n{2}".format(", ".join(receiver),sender, subject)
 #   msg = "{0}\n{1}\n\n ".format(header, msg)
     msg['Subject'] = subject
+    if isinstance(receiver, list):
+        msg['To'] = ", ".join(receiver)
+    else:
+        msg['To'] = receiver
     msg['To'] = ", ".join(receiver)
     msg['From'] = "GCP_Bajaj_FSC_Feeds<%s>" % sender
     mail = smtplib.SMTP(smtp_server)
@@ -163,7 +167,7 @@ def send_feedback_received(data):
         template = Template(feed_temp)
         context = Context({"content": data['content']})
         body = template.render(context)
-        send_email(sender = data['sender'], receiver = data['reciever'], 
+        send_email(sender = data['sender'], receiver = data['receiver'], 
                    subject = data['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
@@ -228,7 +232,7 @@ def send_template_email(template_name, context, mail_detail,receiver=None):
     template = Template(feed_temp)
     body = template.render(context)
     if receiver is None:
-        receiver =  mail_detail['reciever']
+        receiver =  mail_detail['receiver']
     send_email(sender =  mail_detail['sender'], receiver = receiver, 
                subject = mail_detail['newsubject'], body = body, 
                smtp_server = settings.MAIL_SERVER)

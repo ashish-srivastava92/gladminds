@@ -1,23 +1,14 @@
 #!/bin/sh
 
-#Set Environment
 export DJANGO_SETTINGS_MODULE=gladminds.dev_settings
-
-#bin/django collectstatic
-# Pull latest code changes from Github
-#git pull origin master
-
-# Run buildout
 bin/buildout
-
-# Synchromize database
-bin/django syncdb --settings=$DJANGO_SETTINGS_MODULE
-
-# Run collectstatic
 echo  yes |bin/django collectstatic --settings=$DJANGO_SETTINGS_MODULE
 
+bin/django setup --settings=$DJANGO_SETTINGS_MODULE
+bin/django gm_migrate --settings=$DJANGO_SETTINGS_MODULE
+
 # Load the SMS Template
-bin/django loaddata etc/data/template.json --settings=$DJANGO_SETTINGS_MODULE
+#bin/django loaddata etc/data/template.json --settings=$DJANGO_SETTINGS_MODULE
 
 # TODO: Stop already running server
 output=`ps aux | grep "bin/django r[u]nserver 0.0.0.0:8000"`

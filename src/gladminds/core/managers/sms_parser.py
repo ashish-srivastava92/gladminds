@@ -1,7 +1,6 @@
 import logging
 logger = logging.getLogger('gladminds')
 from parse import *
-from gladminds.core import utils
 from gladminds.bajaj.services import message_template as templates
 
 class SmsException(Exception):

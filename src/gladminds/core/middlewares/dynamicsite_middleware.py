@@ -21,6 +21,7 @@ class DynamicSitesMiddleware(object):
         BRAND.value = self.get_fields(self.domain)
         if BRAND.value not in settings.BRANDS:
             BRAND.value = settings.GM_BRAND
+
         try:
             if BRAND.value not in settings.GM_BRAND:
                 request.urlconf = 'gladminds.{0}.urls'.format(BRAND.value)

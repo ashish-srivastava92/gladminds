@@ -4,15 +4,16 @@ from tastypie.authorization import Authorization
 from tastypie import fields
 from django.http.response import HttpResponseRedirect
 from django.conf.urls import url
-from django.contrib.auth.models import User
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.afterbuy import models as afterbuy_models
 from gladminds.settings import API_FLAG, COUPON_URL
 from tastypie.utils.urls import trailing_slash
 from gladminds.afterbuy.apis.brand_apis import BrandResource
 from gladminds.afterbuy.apis.user_apis import ConsumerResource
+from django.forms.models import model_to_dict
 
 logger = logging.getLogger("gladminds")
+
 
 class ProductTypeResource(CustomBaseModelResource):
     class Meta:
@@ -22,23 +23,42 @@ class ProductTypeResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
 
+
 class UserProductResource(CustomBaseModelResource):
     consumer = fields.ForeignKey(ConsumerResource, 'consumer', null=True, blank=True, full=True)
     brand = fields.ForeignKey(BrandResource, 'brand', null=True, blank=True, full=True)
-    type = fields.ForeignKey(ProductTypeResource, 'type', null=True, blank=True, full=True)
-    
+    product_type = fields.ForeignKey(ProductTypeResource, 'type', null=True, blank=True, full=True)
+
     class Meta:
         queryset = afterbuy_models.UserProduct.objects.all()
         resource_name = "products"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'delete','put']
+        detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
+        filtering = {
+                     "consumer": ALL,
+                     "product_type": ALL,
+                     "brand": ALL
+                     }
+
+    def dehydrate(self, bundle):
+        insurance = afterbuy_models.ProductInsuranceInfo.objects.filter(product=bundle.data['id'])
+        invoice = afterbuy_models.Invoice.objects.filter(product=bundle.data['id'])
+        license = afterbuy_models.License.objects.filter(product=bundle.data['id'])
+        registrations = afterbuy_models.RegistrationCertificate.objects.filter(product=bundle.data['id'])
+        pollution = afterbuy_models.PollutionCertificate.objects.filter(product=bundle.data['id'])
+        bundle.data['insurance'] = [model_to_dict(c) for c in insurance]
+        bundle.data['invoice'] = [model_to_dict(c) for c in invoice]
+        bundle.data['license'] = [model_to_dict(c) for c in license]
+        bundle.data['registrations'] = [model_to_dict(c) for c in registrations]
+        bundle.data['pollution'] = [model_to_dict(c) for c in pollution]
+        return bundle
 
     def prepend_urls(self):
         return [
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/coupons%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_coupons'), name="get_product_coupons" )
         ]
-        
+
     def get_product_coupons(self, request, **kwargs):
         port = request.META['SERVER_PORT']
         product_id = kwargs.get('product_id')
@@ -56,6 +76,7 @@ class UserProductResource(CustomBaseModelResource):
 
 class ProductInsuranceInfoResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', null=True, blank=True, full=True)
+
     class Meta:
         queryset = afterbuy_models.ProductInsuranceInfo.objects.all()
         resource_name = "insurances"
@@ -63,12 +84,15 @@ class ProductInsuranceInfoResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
         filtering = {
-                     "product" : ALL
+                     "product": ALL,
+                     "is_expired": ALL,
+                     "expiry_date": ALL
                      }
-    
-    
+
+
 class InvoiceResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', null=True, blank=True, full=True)
+
     class Meta:
         queryset = afterbuy_models.Invoice.objects.all()
         resource_name = "invoices"
@@ -76,11 +100,13 @@ class InvoiceResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
         filtering = {
-                     "product" : ALL
+                     "product": ALL
                      }
-        
+
+
 class LicenseResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', full=True, null=True)
+
     class Meta:
         queryset = afterbuy_models.License.objects.all()
         resource_name = 'licenses'
@@ -91,8 +117,10 @@ class LicenseResource(CustomBaseModelResource):
                      "product" : ALL
                      }
 
+
 class RegistrationCertificateResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', full=True, null=True)
+
     class Meta:
         queryset = afterbuy_models.RegistrationCertificate.objects.all()
         resource_name = 'registrations'
@@ -103,8 +131,10 @@ class RegistrationCertificateResource(CustomBaseModelResource):
                      "product" : ALL
                      }
 
+
 class PollutionCertificateResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', full=True, null=True)
+
     class Meta:
         queryset = afterbuy_models.PollutionCertificate.objects.all()
         resource_name = 'pollution'
@@ -114,11 +144,12 @@ class PollutionCertificateResource(CustomBaseModelResource):
         filtering = {
                      "product" : ALL
                      }
-        
+
 
 class SupportResource(CustomBaseModelResource):
     brand = fields.ForeignKey(BrandResource, 'brand', full=True, null=True)
     brand_product_category = fields.ForeignKey(BrandResource, 'brand_product_category', full=True, null=True)
+
     class Meta:
         queryset = afterbuy_models.Support.objects.all()
         resource_name = 'support'
@@ -126,5 +157,20 @@ class SupportResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data =True
         filtering = {
-                     "brand" : ALL
+                     "brand": ALL,
+                     "brand_product_category": ALL
+                     }
+
+
+class ProductSupportResource(CustomBaseModelResource):
+    product = fields.ForeignKey(UserProductResource, 'product', full=True, null=True)
+
+    class Meta:
+        queryset = afterbuy_models.ProductSupport.objects.all()
+        resource_name = 'product-support'
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'delete' ,'put']
+        always_return_data = True
+        filtering = {
+                     "product": ALL,
                      }

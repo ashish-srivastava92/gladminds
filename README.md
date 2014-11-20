@@ -122,11 +122,26 @@ create database demo;
 create database afterbuy;
 '''
 
+Command to sync data
+'''
+bin/django setup
+'''
+OR
 '''
 bin/django syncdb --database=bajaj      to create tables in bajaj
 bin/django syncdb --database=demo       to create tables in mock
 bin/django syncdb --database=afterbuy       to create tables in mock
 bin/django syncdb                       to create tables in gm
+'''
+
+Using migration of south ->
+To apply migration
+'''
+bin/django gm_migration
+'''
+To generate migration
+'''
+bin/django gm_schemamigration
 '''
 
 https://github.com/hashedin/gladminds/wiki/How-to-start-working-on-Stage-2.1

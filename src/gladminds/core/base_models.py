@@ -1,10 +1,12 @@
 from datetime import datetime
 
 from django.db import models
+from django.core.exceptions import ValidationError
+from composite_field.base import CompositeField
 
-from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, RATINGS
 from gladminds.core.managers import user_manager
-
+from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, RATINGS,\
+                            ROOT_CAUSE, SLA_PRIORITY, TIME_UNIT
 
 class BaseModel(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
@@ -35,7 +37,11 @@ class UserProfile(BaseModel):
                               blank=True, null=True)
 
     class Meta:
+        verbose_name_plural = "User Profile"
         abstract = True
+        
+    def __unicode__(self):
+        return self.phone_number or 'None'
 
 
 class Industry(BaseModel):
@@ -126,8 +132,6 @@ For 1 Brand there can be multiple Products
 
 
 class ProductType(BaseModel):
-    product_type_id = models.AutoField(primary_key=True)
-    product_name = models.CharField(max_length=255, null=False)
     product_type = models.CharField(max_length=255, unique=True, null=False)
     image_url = models.CharField(
                    max_length=200, blank=True, null=True)
@@ -147,11 +151,11 @@ class ProductData(BaseModel):
     customer_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
     customer_phone_number = models.CharField(
-        max_length=15, null=True, blank=True, unique=True)
+        max_length=15, null=True, blank=True)
     customer_name = models.CharField(
-        max_length=215, null=True, blank=True, unique=True)
+        max_length=215, null=True, blank=True)
     customer_address = models.CharField(
-        max_length=215, null=True, blank=True, unique=True)
+        max_length=215, null=True, blank=True)
     purchase_date = models.DateTimeField(null=True, blank=True)
     invoice_date = models.DateTimeField(null=True, blank=True)
     engine = models.CharField(max_length=255, null=True, blank=True)
@@ -259,7 +263,7 @@ class EmailTemplate(BaseModel):
     template_key = models.CharField(max_length=255, unique=True, null=False,\
                                      blank=False)
     sender = models.CharField(max_length=512, null=False)
-    reciever = models.CharField(max_length=512, null=False)
+    receiver = models.CharField(max_length=512, null=False)
     subject = models.CharField(max_length=512, null=False)
     body = models.CharField(max_length=512, null=False)
     description = models.CharField(max_length=512, null=True)
@@ -323,12 +327,7 @@ class SparesData(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "spares data"
-    
-#########################################################################################
 
-"""
-Monkey-patch the Site object to include folder for template
-"""
 
 class UserPreferences(BaseModel):
     """
@@ -337,19 +336,24 @@ class UserPreferences(BaseModel):
     key = models.CharField(max_length=100)
     value = models.CharField(max_length=200)
 
-    def unicode(self):
-        return self.user_profile
-
     class Meta:
         abstract = True
         verbose_name_plural = "User Preferences"
-        
-        
+
+
+class BrandPreferences(UserPreferences):
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Brand Preferences"
+
+
 class SMSLog(BaseModel):
     action = models.CharField(max_length=250)
     message = models.TextField(null=True, blank=True)
     sender = models.CharField(max_length=15)
-    reciever = models.CharField(max_length=15)
+    receiver = models.CharField(max_length=15)
+    status = models.CharField(max_length=20)
 
     class Meta:
         abstract = True
@@ -359,7 +363,7 @@ class EmailLog(BaseModel):
     subject = models.CharField(max_length=250, null=True, blank=True)
     message = models.TextField(null=True, blank=True)
     sender = models.CharField(max_length=100, null=True, blank=True)
-    reciever = models.TextField()
+    receiver = models.TextField()
     cc = models.TextField(null=True, blank=True)
 
     class Meta:
@@ -381,7 +385,8 @@ class DataFeedLog(models.Model):
     class Meta:
         abstract = True
         verbose_name_plural = "Feed Log"
-        
+
+
 class AuditLog(BaseModel):
     device = models.CharField(max_length=250, null=True, blank=True)
     user_agent = models.CharField(max_length=250, null=True, blank=True)
@@ -395,11 +400,12 @@ class AuditLog(BaseModel):
 
 class Feedback(BaseModel):
     reporter = models.CharField(max_length=15)
+    reporter_name = models.CharField(max_length=30)
     reporter_email_id = models.CharField(max_length=50, null=True, blank= True)
     message = models.CharField(max_length=512, null=True, blank=False)
     status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
-    priority = models.CharField(max_length=12, choices=PRIORITY)
-    type = models.CharField(max_length=12, choices=FEEDBACK_TYPE)
+    priority = models.CharField(max_length=12, choices=PRIORITY, default='Low')
+    type = models.CharField(max_length=20, choices=FEEDBACK_TYPE)
     subject = models.CharField(max_length=512, null=True, blank=True)
     closed_date = models.DateTimeField(null=True, blank=True)
     resolved_date = models.DateTimeField(null=True, blank=True)
@@ -408,9 +414,10 @@ class Feedback(BaseModel):
     wait_time = models.FloatField(max_length=20, null=True, blank=True, default = '0.0')
     remarks = models.CharField(max_length=512, null=True, blank=True)
     ratings = models.CharField(max_length=12, choices=RATINGS)
-    root_cause = models.CharField(max_length=512, null=True, blank=True)
+    root_cause = models.CharField(max_length=12, choices=ROOT_CAUSE)
     resolution = models.CharField(max_length=512, null=True, blank=True)
     role = models.CharField(max_length=50, null=True, blank=True)
+    assign_to_reporter = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -425,3 +432,38 @@ class Comments(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "aftersell comment info"
+
+class duration(CompositeField):
+    time = models.PositiveIntegerField()
+    unit = models.CharField(max_length=12, choices=TIME_UNIT, verbose_name = 'unit')
+
+
+class SLA(models.Model):
+    priority = models.CharField(max_length=12, choices=SLA_PRIORITY, unique=True)
+    response = duration()
+    reminder = duration()
+    resolution = duration()
+        
+    def get_time_in_seconds(self, time , unit):
+        if unit == 'days':
+            total_time = time * 86400
+        elif unit == 'hrs':
+            total_time = time * 3600
+        else:
+            total_time = time * 60
+        return total_time
+    
+    def clean(self, *args, **kwargs):
+        response_time = self.get_time_in_seconds(self.response_time, self.response_unit)
+        resolution_time = self.get_time_in_seconds(self.resolution_time, self.resolution_unit)
+        reminder_time = self.get_time_in_seconds(self.reminder_time, self.reminder_unit)
+        
+        if reminder_time > response_time and resolution_time > reminder_time:
+            super(SLA, self).clean(*args, **kwargs)
+        else:
+            raise ValidationError("Ensure that Reminder time is greater than Response time and Resolution time is greater than Reminder time")
+            
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "SLA info"

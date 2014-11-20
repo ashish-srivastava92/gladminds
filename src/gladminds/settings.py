@@ -11,11 +11,15 @@ TEMPLATE_DIR = os.path.join(PROJECT_DIR, "templates")
 EMAIL_DIR = os.path.join(TEMPLATE_DIR, "email")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
 
+TIMEZONE = 'Asia/Kolkata'
+
 ALLOWED_HOSTS = ['*']
 
 ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
                     'service', 'check': 'a', 'close': 'c', 'brand': 'brand',
-                    'service_desk': 'sd', 'customer_detail_recovery': 'r'}
+                    'service_desk': 'sd', 'customer_detail_recovery': 'r',
+                    'accumulate_point':'ac', 'redeem_point':'rd'}
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -50,41 +54,44 @@ SUIT_CONFIG = {
     'LIST_PER_PAGE': 20,
     'SHOW_REQUIRED_ASTERISK': True,
     'MENU': (
-        {'app': 'gm', 'label': 'Data', 'icon': ' icon-folder-open',
-         'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
+        {'app': 'bajaj', 'label': 'Users', 'icon': ' icon-folder-open',
+         'models': ('user', 'userprofile',
+                    {'model': 'dealer',
+                     'label': 'Dealer'},
+                    {'model': 'authorizedservicecenter',
+                     'label': 'Authorized Service Center'},
+                    {'model': 'serviceadvisor',
+                     'label': 'Service Advisor'},)},
+        {'app': 'bajaj', 'label': 'Products', 'icon': ' icon-folder-open',
+         'models':( {'model': 'brandproductcategory',
+                     'label': 'Brand Product Category'},
+                    {'model': 'producttype',
+                     'label': 'Product Type'},
                     {'model': 'dispatchedproduct',
-                     'label': 'Feed -> Product Dispatch'},
+                     'label': 'Product Dispatch'},
                     {'model': 'productdata',
-                     'label': 'Feed -> Product Purchase'},
+                     'label': 'Product Purchase'},
                     {'model': 'coupondata',
-                     'label': 'Feed -> Coupon Redemption'},
-                    {'model': 'ASCTempRegistration',
-                     'label': 'Save Form -> ASC'},
-                    {'model': 'auditlog', 'label': 'Audit Log'},
+                     'label': 'Coupon Redemption'},)},
+        {'app': 'bajaj', 'label': 'Logs', 'icon': ' icon-folder-open',
+         'models':(
+                    {'model': 'smslog',
+                     'label': 'SMS Log'},
+                   {'model': 'emaillog',
+                     'label': 'Email Log'},
                     {'model': 'datafeedlog',
-                     'label': 'Feed Log'}, 
+                     'label': 'Feed Log'},)},
+        {'app': 'bajaj', 'label': 'User Registrations', 'icon': ' icon-folder-open',
+         'models':(
+                    {'model': 'asctempregistration',
+                     'label': ' ASC registration'},
+                    {'model': 'satempregistration',
+                     'label': 'SA registration'},
                     {'model': 'customertempregistration',
-                     'label': ' Customer registration'},
-                    'messagetemplate', 'emailtemplate', 'gladmindusers',)},
-        {'app': 'aftersell', 'label': 'AfterSell', 'icon': ' icon-folder-open',
-         'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
-                    {'model': 'dispatchedproduct',
-                     'label': 'Feed -> Product Dispatch'},
-                    {'model': 'productdata',
-                     'label': 'Feed -> Product Purchase'},
-                    {'model': 'coupondata',
-                     'label': 'Feed -> Coupon Redemption'},
-                    {'model': 'ASCTempRegistration',
-                     'label': 'Save Form -> ASC'},
-                    {'model': 'auditlog', 'label': 'Audit Log'},
-                    {'model': 'datafeedlog',
-                     'label': 'Feed Log'},
-                    {'model': 'feedback',
-                     'label': 'Help Desk'},
-                    'messagetemplate', 'emailtemplate', 'gladmindusers',)},
-        {'app': 'afterbuy', 'label': 'AfterBuy', 'icon': ' icon-folder-open',
-         'models': ({'model': 'usernotification', 'label': 'notification'},)},
-        {'app': 'djcelery', 'label': 'Job Management', 'icon': 'icon-tasks'})
+                     'label': ' Customer registration'},)},
+        {'app': 'bajaj', 'label': 'Templates', 'icon': ' icon-folder-open',
+         'models':(
+                    'messagetemplate', 'emailtemplate',)},)
 }
 
 
@@ -241,7 +248,9 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-INSTALLED_APPS = (
+TEST_IGNORE_APPS = ('south',)
+
+ALL_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -267,10 +276,11 @@ INSTALLED_APPS = (
     'provider',
     'provider.oauth2',
    # 'debug_toolbar',
-    #'south'
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
+
+INSTALLED_APPS = ALL_APPS + TEST_IGNORE_APPS
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
@@ -425,7 +435,7 @@ MEDIA_URL = '/media/'
 
 # S3 Configuration
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_STORAGE_BUCKET_NAME = 'afterbuy'
+AWS_STORAGE_BUCKET_MAP = {'afterbuy': 'afterbuy'}
 # S3_URL = 'http://%s.s3-website-us-east-1.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 
 
@@ -459,7 +469,7 @@ TEMP_SA_ID_PREFIX = 'SA'
 FEED_FAILURE_MAIL_ENABLED = True
 ##########################################################################
 #########################New relic file location########################
-NEW_RELIC_FILE_LOCATION = './src/newrelic_qa.ini'
+NEW_RELIC_FILE_LOCATION = './src/'
 ########################################################################
 #######################SMS_HEALTH_CHECK_INTERVAL
 SMS_HEALTH_CHECK_INTERVAL = 6
@@ -470,6 +480,7 @@ BRAND = 'demo'
 GM_BRAND = 'gm'
 BRANDS = ['bajaj', 'demo', 'afterbuy']
 ###############################################
+AIRTEL_IP = '54.84.243.77'
 SMS_CLIENT = "KAP"
 SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                               'pass':'bajaj',
@@ -488,3 +499,7 @@ ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},
           'gladminds': {'user': 'gladminds', 'password': 'gladminds',
                         'database': 'default'}
           }
+##################################################################################################
+ENABLE_SERVICE_DESK = True
+
+DEFAULT_IMAGE_ID = 'guest.png'

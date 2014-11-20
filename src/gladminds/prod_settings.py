@@ -58,6 +58,8 @@ FILE_CACHE_DURATION = 1800
 
 FEED_TYPE = 'CSV'
 
+SMS_CLIENT = "KAP"
+
 #AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
 AFTERBUY_USER_LOC = os.path.join(AFTERBUY_LOC, "users")
@@ -75,7 +77,6 @@ MEDIA_URL = '/media/'
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 AWS_ACCESS_KEY_ID = 'AKIAIL7IDCSTNCG2R6JA'
 AWS_SECRET_ACCESS_KEY = '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'
-AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 
 SAP_CRM_DETAIL = {
                   'username':'pisuper',
@@ -83,6 +84,7 @@ SAP_CRM_DETAIL = {
                   }
 ASC_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/asc-feed/?wsdl&v0"
 COUPON_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/redeem-feed/?wsdl&v0"
+COUPON_WSDL = 'prod_coupon_redeem.wsdl'
 CUSTOMER_REGISTRATION_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/customer-feed/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL = 'prod_customer_registration.wsdl'
 
@@ -109,8 +111,7 @@ SQS_QUEUE_NAME = "gladminds-prod"
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail"
 UCN_RECOVERY_MAIL_DETAIL["receiver"] = ["gladminds@hashedin.com"," nvhasabnis@bajajauto.co.in","ssozarde@bajajauto.co.in","jojibabu.vege@gladminds.co","support@gladminds.co"]
-#########################New relic file location########################
-NEW_RELIC_FILE_LOCATION = './src/newrelic.ini'
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["jojibabu.vege@gladminds.co","ssozarde@bajajauto.co.in","skdixit@bajajauto.co.in","nvhasabnis@bajajauto.co.in"]
 ########################################################################
 ###################Change Mail Subject on Prod##########################
 MAIL_DETAIL["subject"] = "GladMinds Feed Report"
@@ -118,3 +119,5 @@ MAIL_DETAIL["subject"] = "GladMinds Feed Report"
 FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/dev/'
 FEED_FAILURE_BUCKET = 'gladminds'
 #######################################################################
+ENABLE_SERVICE_DESK = False
+ENV = "prod"

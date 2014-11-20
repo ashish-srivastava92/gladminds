@@ -1,11 +1,13 @@
 import logging
 import json
 import random
-from datetime import datetime
+import datetime
 
+from collections import OrderedDict
 from django.shortcuts import render_to_response, render
 from django.http.response import HttpResponseRedirect, HttpResponse,\
     HttpResponseBadRequest, Http404
+from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
@@ -13,6 +15,7 @@ from django.db import transaction
 from django.db.models.query_utils import Q
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import F
 
 from gladminds.bajaj import models
 from gladminds.bajaj.services import message_template
@@ -24,7 +27,9 @@ from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.bajaj.services.free_service_coupon import GladmindsResources
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
-    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU
+    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS,\
+    FEEDBACK_STATUS, FEEDBACK_TYPE
+    
 from gladminds.core.decorator import log_time
 
 gladmindsResources = GladmindsResources()
@@ -92,24 +97,27 @@ def change_password(request):
 def generate_otp(request):
     if request.method == 'POST':
         try:
-            phone_number = request.POST['mobile']
-            email = request.POST.get('email', '')
-            logger.info('OTP request received. Mobile: {0}'.format(phone_number))
-            user = models.AuthorizedServiceCenter.objects.filter(phone_number=utils.mobile_format(phone_number))[0].user
-            token = utils.get_token(user, phone_number, email=email)
+            username = request.POST['username']
+            user = User.objects.get(username=username)
+            phone_number = ''            
+            user_profile_obj = models.UserProfile.objects.filter(user=user) 
+            if user_profile_obj:
+                phone_number = (user_profile_obj[0]).phone_number
+            logger.info('OTP request received . username: {0}'.format(username))
+            token = utils.get_token(user, phone_number, email=user.email)
             message = message_template.get_template('SEND_OTP').format(token)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = utils.get_task_queue()
-                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
+                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message, 'sms_client':settings.SMS_CLIENT})
             else:
-                send_otp.delay(phone_number=phone_number, message=message)  # @UndefinedVariable
+                send_otp.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)  # @UndefinedVariable
             logger.info('OTP sent to mobile {0}'.format(phone_number))
             #Send email if email address exist
-            if email:
-                sent_otp_email(data=token, receiver=email, subject='Forgot Password')
-            return HttpResponseRedirect('/aftersell/users/otp/validate?phone='+phone_number)
-        except:
-            logger.error('Invalid details, mobile {0}'.format(request.POST.get('mobile', '')))
+            if user.email:
+                sent_otp_email(data=token, receiver=user.email, subject='Forgot Password')
+            return HttpResponseRedirect('/aftersell/users/otp/validate?username='+username)
+        except Exception as ex:
+            logger.error('Invalid details, mobile {0}'.format(phone_number))
             return HttpResponseRedirect('/aftersell/users/otp/generate?details=invalid')
     elif request.method == 'GET':
         return render(request, 'portal/get_otp.html')
@@ -121,14 +129,13 @@ def validate_otp(request):
     elif request.method == 'POST':
         try:
             otp = request.POST['otp']
-            phone_number = request.POST['phone']
-            logger.info('OTP {0} recieved for validation. Mobile {1}'.format(otp, phone_number))
-            user = models.AuthorizedServiceCenter.objects.filter(phone_number=utils.mobile_format(phone_number))[0].user
-            utils.validate_otp(user, otp, phone_number)
-            logger.info('OTP validated for mobile number {0}'.format(phone_number))
+            username = request.POST['username']
+            logger.info('OTP {0} recieved for validation. username {1}'.format(otp, username))
+            utils.validate_otp(otp, username)
+            logger.info('OTP validated for name {0}'.format(username))
             return render(request, 'portal/reset_pass.html', {'otp': otp})
         except:
-            logger.error('OTP validation failed for mobile number {0}'.format(phone_number))
+            logger.error('OTP validation failed for name {0}'.format(username))
             return HttpResponseRedirect('/aftersell/users/otp/generate?token=invalid')
 
 def update_pass(request):
@@ -140,7 +147,7 @@ def update_pass(request):
         return HttpResponseRedirect('/aftersell/asc/login?update=true')
     except:
         logger.error('Password update failed.')
-        return HttpResponseRedirect('/aftersell//asc/login?error=true')
+        return HttpResponseRedirect('/aftersell/asc/login?error=true')
 
 @login_required()
 def register(request, menu):
@@ -167,6 +174,7 @@ def register(request, menu):
         return HttpResponseBadRequest()
 
 ASC_REGISTER_SUCCESS = 'ASC registration is complete.'
+EXCEPTION_INVALID_DEALER = 'The dealer-id provided is not registered.'
 ALREADY_REGISTERED = 'Already Registered Number.'
 @log_time
 def save_asc_registration(request, groups=None):
@@ -236,10 +244,10 @@ def register_customer(request, group=None):
     data_source.append(utils.create_feed_data(post_data, product_obj[0], temp_customer_id))
 
     check_with_invoice_date = utils.subtract_dates(data_source[0]['product_purchase_date'], product_obj[0].invoice_date)    
-    check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.now())
+    check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.datetime.now())
     if not existing_customer and check_with_invoice_date.days < 0 or check_with_today_date.days > 0:
         message = "Product purchase date should be between {0} and {1}".\
-                format((product_obj[0].invoice_date).strftime("%d-%m-%Y"),(datetime.now()).strftime("%d-%m-%Y"))
+                format((product_obj[0].invoice_date).strftime("%d-%m-%Y"),(datetime.datetime.now()).strftime("%d-%m-%Y"))
         logger.info('[Temporary_cust_registration]:: {0} Entered date is: {1}'.format(message, str(data_source[0]['product_purchase_date'])))
         return json.dumps({"message": message})
 
@@ -279,9 +287,6 @@ def exceptions(request, exception=None):
     groups = utils.stringify_groups(request.user)
     if not ('ascs' in groups or 'dealers' in groups):
         return HttpResponseBadRequest()
-    if exception == 'report':
-        report_data = create_report(request.method, request.POST, request.user)
-        return render(request, 'portal/report.html', report_data)
     if request.method == 'GET':
         template = 'portal/exception.html'
         data = None
@@ -305,7 +310,8 @@ def exceptions(request, exception=None):
                 post_data['job_card']=request.FILES['jobCard']
             data = function_mapping[exception](post_data)
             return HttpResponse(content=json.dumps(data),  content_type='application/json')
-        except:
+        except Exception as ex:
+            logger.error(ex)
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
@@ -319,8 +325,8 @@ def users(request, users=None):
         template = 'portal/users.html'
         data=None
         data_mapping = {
-            'sa': get_sa_list_for_login_dealer,
-            'asc': get_asc_list_for_login_dealer
+            'sa': utils.get_sa_list_for_login_dealer,
+            'asc': utils.get_asc_list_for_login_dealer
         }
         try:
             data = data_mapping[users](request.user)
@@ -336,30 +342,46 @@ def get_sa_under_asc(request, id=None):
     template = 'portal/sa_list.html'
     data = None
     try:
-            data = get_sa_list_for_login_dealer(id)
+        data = utils.get_sa_list_for_login_dealer(id)
     except:
             #It is acceptable if there is no data_mapping defined for a function
         pass
     return render(request, template, {'active_menu':'sa',"data": data})
 
+def get_feedbacks(user, status):
+    group = user.groups.all()[0]
+    feedbacks = []
+    if not status:
+        status = ['Open', 'Pending', 'Progress']
+    else:
+        status = [status]
+    if group.name == 'dealers':
+        sa_list = utils.get_sa_list(user)
+        if sa_list:
+            feedbacks = models.Feedback.objects.filter(reporter_name__in=sa_list, status__in=status).order_by('-created_date')
+    return feedbacks
+
+
 @login_required()
-def servicedesk(request, servicedesk=None):
+def service_desk(request, servicedesk):
+    status = request.GET.get('status',None)
     groups = utils.stringify_groups(request.user)
     if request.method == 'GET':
-        template = 'portal/help_desk.html'
+        template = 'portal/feedback_details.html'
         data = None
         data_mapping = {
-            'helpdesk': get_sa_list
+            'helpdesk': utils.get_sa_list
             }
         try:
-            data = data_mapping[servicedesk](request)
-        except:
+            data = data_mapping[servicedesk](request.user)
+        except Exception as ex:
             #It is acceptable if there is no data_mapping defined for a function
             pass
-        return render(request, template, {'active_menu': servicedesk,
+        return render(request, template, {"feedbacks" : get_feedbacks(request.user, status),
+                                          'active_menu': servicedesk,
                                           "data": data, 'groups': groups,
-                     "types": utils.get_list_from_set(models.FEEDBACK_TYPE),
-                     "priorities": utils.get_list_from_set(models.PRIORITY)})
+                                          "status": utils.get_list_from_set(FEEDBACK_STATUS),
+                                          "types": utils.get_list_from_set(FEEDBACK_TYPE)})
     elif request.method == 'POST':
         function_mapping = {
             'helpdesk': save_help_desk_data
@@ -373,13 +395,21 @@ def servicedesk(request, servicedesk=None):
     else:
         return HttpResponseBadRequest()
 
+@login_required()
+def enable_servicedesk(request, servicedesk=None):
+    if settings.ENABLE_SERVICE_DESK:
+        response = service_desk(request, servicedesk)
+        return response
+    else:
+        return HttpResponseRedirect('http://support.gladminds.co/')
 
 def save_help_desk_data(request):
-    fields = ['message', 'priority', 'advisorMobile', 'type', 'subject']
+    fields = ['message', 'advisorMobile', 'type', 'subject']
     sms_dict = {}
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)
-    return gladmindsResources.get_complain_data(sms_dict, sms_dict['advisorMobile'], with_detail=True)
+    user = models.ServiceAdvisor.objects.get(service_advisor_id=sms_dict['advisorMobile'])
+    return gladmindsResources.get_complain_data(sms_dict, user.user.phone_number, user, with_detail=True)
 
 def sqs_tasks_view(request):
     return render_to_response('trigger-sqs-tasks.html')
@@ -470,102 +500,156 @@ def create_reconciliation_report(query_params, user):
     return report_data
 
 def brand_details(requests, role=None):
-    data = requests.GET
+    data = requests.GET.copy()
     data_list = []
     data_dict = {}
     limit = data.get('limit', 20)
     offset = data.get('offset', 0)
     limit = int(limit)
     offset = int(offset)
-    if role == 'asc':
-        asc_data = models.RegisteredDealer.objects.filter(role='asc')
-        data_dict['total_count'] = len(asc_data)
-        for asc in asc_data[offset:limit]:
-            asc_detail = {}
-            asc_detail['id'] = asc.dealer_id
-            asc_detail['address'] = asc.address
-            asc_details = get_state_city(asc_detail, asc.address)
-            data_list.append(asc_detail)
-        data_dict[role] = data_list
-    elif role == 'sa':
-        sa_data = models.ServiceAdvisor.objects.all()
-        data_dict['total_count'] = len(sa_data)
-        for sa in sa_data[offset:limit]:
-            sa_detail = {}
-            sa_detail = get_sa_details(sa_detail, sa )
-            sa_detail['id'] = sa.service_advisor_id
-            sa_detail['name'] = sa.name
-            sa_detail['phone_number'] = sa.phone_number
-            data_list.append(sa_detail)
-        data_dict[role] = data_list
-    elif role == 'customers':
-        customer_data = models.GladMindUsers.objects.all()
-        data_dict['total_count'] = len(customer_data)
-        for customer in customer_data[offset:limit]:
-            customer_product = models.ProductData.objects.filter(customer_phone_number=customer)
-            customer_detail = {}
-            if  customer_product:
-                customer_detail['vin'] = customer_product[0].vin
-                customer_detail['sap_id'] = customer_product[0].sap_customer_id
-            customer_detail['id'] = customer.gladmind_customer_id
-            customer_detail['name'] = customer.customer_name
-            customer_detail['phone_number'] = customer.phone_number
-            customer_detail['email_id'] = customer.email_id
-            customer_detail['address'] = customer.address
-            customer_detail = get_state_city(customer_detail, customer.address)
-            data_list.append(customer_detail)
-        data_dict[role] = data_list
-    elif role == 'active-asc':
-        active_asc_count = 0
-        asc_details = get_asc_data()
-        for asc_detail in asc_details:
-                active_ascs = {}
-                if asc_detail.date_joined != asc_detail.last_login:
-                    active_asc_count = active_asc_count + 1;
-                    asc_data = models.RegisteredDealer.objects.get(dealer_id=asc_detail.username)
-                    active_ascs['id'] = asc_data.dealer_id
-                    active_ascs['address'] = asc_data.address
-                    active_ascs = get_state_city(active_ascs, asc_data.address)
-                    active_ascs['cuopon_unused'] = asc_cuopon_details(asc_data.dealer_id, 1)
-                    active_ascs['cuopon_closed'] = asc_cuopon_details(asc_data.dealer_id, 2)
-                    active_ascs['cuopon_expired'] = asc_cuopon_details(asc_data.dealer_id, 3)
-                    active_ascs['cuopon_inprogress'] = asc_cuopon_details(asc_data.dealer_id, 4)
-                    active_ascs['cuopon_exceed_limit'] = asc_cuopon_details(asc_data.dealer_id, 5)
-                    active_ascs['cuopon_closed_old_fsc'] = asc_cuopon_details(asc_data.dealer_id, 6)
-                    data_list.append(active_ascs)
-        data_dict['count'] = active_asc_count
-        data_dict[role] = data_list
-    elif role == 'not-active-asc':
-        not_active_asc_count = 0
-        asc_details = get_asc_data()
-        for asc_detail in asc_details:
-                not_active_ascs = {}
-                if asc_detail.date_joined == asc_detail.last_login:
-                    not_active_asc_count = not_active_asc_count + 1;
-                    asc_data = models.RegisteredDealer.objects.get(dealer_id=asc_detail.username)
-                    not_active_ascs['id'] = asc_data.dealer_id
-                    data_list.append(not_active_ascs)
-        data_dict['count'] = not_active_asc_count
-        data_dict[role] = data_list
-    if data.get('city') or data.get('state') or data.get('sap_id'):
-        filter_data_list = []
-        filter_data_dict = {}
-        count = 0
-        for filter in data_dict[role]:
-            if filter.get("city", None) == data.get('city') or filter.get('state', None) == data.get('state') or filter.get('sap_id', None) == data.get('sap_id'):
-                count = count + 1
-                filter_data_list.append(filter)
-                filter_data_dict[role] = filter_data_list
-                filter_data_dict['count'] = count
-                return HttpResponse(json.dumps(filter_data_dict))
-            else:
-                return HttpResponse(json.dumps(filter_data_list))
-    return HttpResponse(json.dumps(data_dict))
+    function_mapping = {
+            'asc': get_asc_info,
+            'sa': get_sa_info,
+            'customers': get_customers_info,
+            'active-asc': get_active_asc_info,
+            'not-active-asc': get_not_active_asc_info
+        }
+    get_data = requests.GET
+    data = function_mapping[role](data, limit, offset , data_dict, data_list)
+    return HttpResponse(json.dumps(data), mimetype="application/json")
 
+#FIXME: Fix this according to new model
+def get_asc_info(data, limit, offset, data_dict, data_list):
+    '''get city and state from parameter'''
+    asc_details = {}
+    if data.has_key('city') and data.has_key('state'):
+        asc_details['address'] = ', '.join([data['city'].upper(), data['state'].upper()])
+    asc_details['role'] = 'asc'
+    asc_data = models.Dealer.objects.filter(**asc_details)
+    data_dict['total_count'] = len(asc_data)
+    for asc in asc_data[offset:limit]:
+        asc_detail = OrderedDict();
+        asc_detail['id'] = asc.dealer_id
+        asc_detail['address'] = asc.address
+        utils.get_state_city(asc_detail, asc.address)
+        data_list.append(asc_detail)
+    data_dict['asc'] = data_list
+    return data_dict
+
+#FIXME: Fix this according to new model
+def get_sa_info(data, limit, offset, data_dict, data_list):
+    sa_details = {}
+    if data.has_key('phone_number'):
+        sa_details['phone_number'] = utils.mobile_format(str(data['phone_number']))
+    sa_data = models.ServiceAdvisor.objects.filter(**sa_details)
+    data_dict['total_count'] = len(sa_data)
+    for sa in sa_data[offset:limit]:
+        sa_detail = OrderedDict();
+        sa_detail['id'] = sa.service_advisor_id
+        sa_detail['name'] = sa.name
+        sa_detail['phone_number'] = sa.phone_number
+        sa_detail = get_sa_details(sa_detail, sa)
+        data_list.append(sa_detail)
+    data_dict['sa'] = data_list
+    return data_dict
+
+#FIXME: Fix this according to new model
+def get_customers_info(data, limit, offset, data_dict, data_list):
+    kwargs = {}
+    if data.has_key('sap_id'):
+        kwargs['sap_customer_id'] = data['sap_id']
+    args = {~Q(product_purchase_date=None)}
+    customer_products = models.ProductData.objects.filter(*args, **kwargs)[offset:limit]
+    for customer in customer_products:
+        customer_detail = OrderedDict();
+        customer_detail['sap_id'] = customer.sap_customer_id
+        customer_detail['gcp_id'] = customer.customer_phone_number.gladmind_customer_id
+        customer_detail['vin'] = customer.vin
+        customer_detail['name'] = customer.customer_phone_number.customer_name
+        customer_detail['phone_number'] = customer.customer_phone_number.phone_number
+        customer_detail['email_id'] = customer.customer_phone_number.email_id
+        customer_detail['address'] = customer.customer_phone_number.address
+        customer_detail = utils.get_state_city(customer_detail, customer_detail['address'])
+        data_list.append(customer_detail)
+    data_dict['customers'] = data_list
+    return data_dict
+
+
+#FIXME: Fix this according to new model
+def get_active_asc_info(data, limit, offset, data_dict, data_list):
+    '''get city and state from parameter'''
+    asc_details = utils.get_asc_data(data)
+    active_asc_list = asc_details.filter(~Q(date_joined=F('last_login')))
+    active_ascs = active_asc_list.values_list('username', flat=True)
+    asc_obj = models.Dealer.objects.filter(dealer_id__in=active_ascs)
+    for asc_data in asc_obj[offset:limit]:
+        active_ascs = OrderedDict();
+        active_ascs['id'] = asc_data.dealer_id
+        active_ascs['address'] = asc_data.address
+        active_ascs = utils.get_state_city(active_ascs, asc_data.address)
+        active_ascs['coupon_closed'] = utils.asc_cuopon_data(asc_data, 2)
+        active_ascs['coupon_inprogress'] = utils.asc_cuopon_data(asc_data, 4)
+        active_ascs['coupon_closed_old_fsc'] = utils.asc_cuopon_data(asc_data, 6)
+        data_list.append(active_ascs)
+    data_dict['count'] = len(active_asc_list)
+    data_dict['active-asc'] = data_list
+    return data_dict
+
+#FIXME: Fix this according to new model
+def get_active_asc_report(request):
+    '''get city and state from parameter'''
+    data = request.GET.copy()
+    if data.has_key('month') and data.has_key('month') :
+        month = MONTHS.index(data['month']) + 1
+        year = data['year']
+    else:
+        now = datetime.datetime.now()
+        year = now.year
+        month = now.month
+    data_list = []
+    asc_details = utils.get_asc_data(data)
+    active_asc_list = asc_details.filter(~Q(date_joined=F('last_login')))
+    active_ascs = active_asc_list.values_list('username', flat=True)
+    asc_obj = models.Dealer.objects.filter(dealer_id__in=active_ascs)
+    for asc_data in asc_obj:
+        active_ascs = OrderedDict();
+        active_ascs['id'] = asc_data.dealer_id
+        active_ascs['address'] = asc_data.address
+        active_ascs = utils.get_state_city(active_ascs, asc_data.address)
+        active_ascs['coupon_closed'] = utils.asc_cuopon_details(asc_data, 2, year, month)
+        data_list.append(active_ascs)
+    years = utils.gernate_years()
+
+    return render(request, 'portal/asc_report.html',\
+                  {"data": data_list,
+                   "range": range(1,32),
+                   "month": MONTHS,
+                   "year": years,
+                   "mon": MONTHS[month-1]
+                   })
+    
+#FIXME: Fix this according to new model
+def get_not_active_asc_info(data, limit, offset, data_dict, data_list):
+    '''get city and state from parameter'''
+    asc_details = utils.get_asc_data(data)
+    not_active_asc_list = asc_details.filter(date_joined=F('last_login'))
+    not_active_ascs = not_active_asc_list.values_list('username', flat=True)
+    not_asc_obj = models.Dealer.objects.filter(dealer_id__in=not_active_ascs)
+    for asc in not_asc_obj[offset:limit]:
+        not_active_ascs = OrderedDict();
+        not_active_ascs['id'] = asc.dealer_id
+        not_active_ascs['address'] = asc.address
+        not_active_ascs = utils.get_state_city(not_active_ascs, asc.address)
+        data_list.append(not_active_ascs)
+    data_dict['count'] = len( not_active_asc_list)
+    data_dict['not-active-asc'] = data_list
+    return data_dict
+
+#FIXME: Fix this according to new model
 def get_sa_details(sa_details, id):
-    sa_detail = models.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id=id)
+    sa_detail = models.ServiceAdvisor.objects.filter(service_advisor_id=id)
     if sa_detail:
-        sa_dealer_details = models.RegisteredDealer.objects.get(id=sa_detail[0].dealer_id.id)
+        sa_dealer_details = models.Dealer.objects.get(id=sa_detail[0].dealer_id.id)
         if sa_dealer_details.role == None:
             sa_details['dealer'] = sa_dealer_details.dealer_id
         else:

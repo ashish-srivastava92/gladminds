@@ -38,9 +38,9 @@ class GladmindsUserAdmin(ModelAdmin):
 
 
 class AuditLogAdmin(ModelAdmin):
-    search_fields = ('status', 'sender', 'reciever', 'action')
+    search_fields = ('status', 'sender', 'receiver', 'action')
     list_display = (
-        'date', 'action', 'message', 'sender', 'reciever', 'status')
+        'date', 'action', 'message', 'sender', 'receiver', 'status')
 
     def has_add_permission(self, request):
         return False
@@ -68,12 +68,12 @@ class MessageTemplateAdmin(ModelAdmin):
 
 
 class EmailTemplateAdmin(ModelAdmin):
-    search_fields = ('template_key', 'sender', 'reciever')
-    list_display = ('template_key', 'sender', 'recievers', 'subject')
+    search_fields = ('template_key', 'sender', 'receiver')
+    list_display = ('template_key', 'sender', 'receivers', 'subject')
     readonly_fields = ('template_key',)
 
-    def recievers(self, obj):
-        return ' | '.join(obj.reciever.split(','))
+    def receivers(self, obj):
+        return ' | '.join(obj.receiver.split(','))
 
 ###################################################################
 

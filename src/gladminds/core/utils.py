@@ -1,24 +1,24 @@
 import os, logging, hashlib, uuid, mimetypes
 import boto
-from boto.s3.key import Key
+import pytz
 import datetime
+
+from boto.s3.key import Key
 from dateutil import tz
 from random import randint
 from django.utils import timezone
 from django.conf import settings
-from django.template import Context
 from django_otp.oath import TOTP
+from django.contrib.auth.models import User
 
-from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
+from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY, TIMEZONE
 from gladminds.core.base_models import STATUS_CHOICES
 from gladminds.bajaj import models
-from gladminds.core.cron_jobs.taskqueue import SqsTaskQueue
-from gladminds.core.managers.mail import send_ucn_request_alert
 from django.db.models.fields.files import FieldFile
-from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
-    TIME_FORMAT
+from gladminds.core.constants import TIME_FORMAT
 from gladminds.core.cron_jobs.taskqueue import SqsTaskQueue
 from gladminds.core.managers.mail import send_ucn_request_alert, send_mail_when_vin_does_not_exist
+from django.db.models import Count
 
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
@@ -93,7 +93,7 @@ def validate_otp(user, otp, phone):
 
 def update_pass(otp, password):
     token_obj = models.OTPToken.objects.filter(token=otp)[0]
-    user = token_obj.user
+    user = token_obj.user.user
     token_obj.delete()
     user.set_password(password)
     user.save()
@@ -132,26 +132,26 @@ def get_customer_info(data):
         message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
         return {'message': message}
 
-def get_sa_list(request):
-    dealer = models.Dealer.objects.filter(dealer_id=request.user)[0]
+def get_sa_list(user):
+    dealer = models.Dealer.objects.filter(dealer_id=user)[0]
     service_advisors = models.ServiceAdvisor.objects\
                                 .filter(dealer=dealer, status='Y')
     sa_phone_list = []
     for service_advisor in service_advisors:
-        sa_phone_list.append(service_advisor.service_advisor_id)
+        sa_phone_list.append(service_advisor)
     return sa_phone_list
 
 
 def get_sa_list_for_login_dealer(user):
     dealer = models.Dealer.objects.filter(
                 dealer_id=user)[0]
-    service_advisors = models.ServiceAdvisorDealer.objects\
+    service_advisors = models.ServiceAdvisor.objects\
                                 .filter(dealer=dealer, status='Y')
     return service_advisors
 
 def get_asc_list_for_login_dealer(user):
-    ascs = aftersell_common.RegisteredDealer.objects.filter(
-                dependent_on=user)
+    ascs = models.Dealer.objects.filter(
+                dealer_id=user)
     asc_list_with_detail = []
     for asc in ascs:
         asc_detail = User.objects.filter(username=asc.dealer_id)
@@ -314,10 +314,11 @@ def create_sa_feed_data(post_data, user_id, temp_sa_id):
 def create_context(email_template_name, feedback_obj):
     data = get_email_template(email_template_name)
     data['newsubject'] = data['subject'].format(id = feedback_obj.id)
-    data['content'] = data['body'].format(type = feedback_obj.type, reporter = feedback_obj.reporter, 
-                                          message = feedback_obj.message, created_date = feedback_obj.created_date, 
+    data['content'] = data['body'].format(id=feedback_obj.id, type = feedback_obj.type, reporter = feedback_obj.reporter, 
+                                          message = feedback_obj.message, created_date = convert_utc_to_local_time(feedback_obj.created_date), 
                                           assign_to = feedback_obj.assign_to,  priority =  feedback_obj.priority, remark = "",
-                                          root_cause = feedback_obj.root_cause, resolution = feedback_obj.resolution, due_date = "")
+                                          root_cause = feedback_obj.root_cause, resolution = feedback_obj.resolution,
+                                          due_date = "", resolution_time=total_time_spent(feedback_obj))
 
     return data
 
@@ -340,7 +341,7 @@ def search_details(data):
     product_obj = models.ProductData.objects.filter(**kwargs)
     if not product_obj or not product_obj[0].purchase_date:
         key = data.keys()
-        message = '''Customer details for {0} '{1}' not found. Please contact customer support: +91-9741775128.'''.format(key[0], data[key[0]])
+        message = '''{0} '{1}' has no associated customer. Please register the customer.'''.format(key[0], data[key[0]])            
         logger.info(message)
         return {'message': message}
     for product in product_obj:
@@ -369,18 +370,20 @@ def get_start_and_end_date(start_date, end_date, format):
     return start_date,end_date
 
 def get_min_and_max_filter_date():
+    import datetime
     return (datetime.date.today() - datetime.timedelta(6*365/12)).isoformat(), (datetime.date.today()).isoformat()
 
 #TODO Function needs to be refactored
 def set_wait_time(feedback_data):
     start_date = feedback_data.pending_from
     end_date = datetime.datetime.now()
+    start_date = convert_utc_to_local_time(start_date)
     start_date = start_date.strftime(TIME_FORMAT)
     end_date = end_date.strftime(TIME_FORMAT)
     start_date = datetime.datetime.strptime(start_date, TIME_FORMAT)
     end_date = datetime.datetime.strptime(end_date, TIME_FORMAT)
     wait = end_date - start_date
-    wait_time = float(wait.days) + float(wait.seconds) / float(86400)
+    wait_time = wait.total_seconds()
     previous_wait = feedback_data.wait_time
     models.Feedback.objects.filter(id = feedback_data.id).update(wait_time = wait_time+previous_wait)
 
@@ -477,19 +480,55 @@ def make_tls_property(default=None):
 
     return TLSProperty()
 
+def convert_utc_to_local_time(date):
+    utc = pytz.utc
+    timezone = pytz.timezone(TIMEZONE)
+    return date.astimezone(timezone).replace(tzinfo=None)
 
-def get_asc_data():
-    asc_data = aftersell_common.RegisteredDealer.objects.filter(role='asc')
-    asc_list = []
-    for asc in asc_data:
-        asc_detail = User.objects.get(username=asc.dealer_id)
-        asc_list.append(asc_detail)
-    return asc_list
+def total_time_spent(feedback_obj):
+    wait_time = feedback_obj.wait_time
+    if feedback_obj.resolved_date:
+        start_date = convert_utc_to_local_time(feedback_obj.created_date)
+        end_date = feedback_obj.resolved_date
+        start_date, end_date = get_start_and_end_date(start_date,
+                                                     end_date, TIME_FORMAT)
+        wait = end_date - start_date
+        wait_time = wait.total_seconds() 
+        wait_time = wait_time - feedback_obj.wait_time
+        minutes, seconds = divmod(wait_time, 60)
+        hours, minutes = divmod(minutes, 60)
+        days, hours = divmod(hours, 24)
+        weeks, days = divmod(days, 7)
+        return " {0} days ,{1}:{2}:{3}" .format(int(days),int(hours),int(minutes),int(seconds))
 
-
-def asc_cuopon_details(asc_id, status_type):
-    cuopon_details = common.CouponData.objects.filter(service_advisor__asc=asc_id, status=status_type)
+def asc_cuopon_data(asc_id, status_type):
+    cuopon_details = models.CouponData.objects.filter(service_advisor__asc=asc_id, status=status_type)
     return len(cuopon_details)
+
+
+#FIXME: Update according to new model
+def get_asc_data(data):
+#     asc_details = {}
+#     if data.has_key('city') and data.has_key('state'):
+#         asc_details['address'] = ', '.join([data['city'].upper(), data['state'].upper()])
+#     asc_details['role'] = 'asc'
+#     asc_data = models.Dealer.objects.filter(**asc_details)
+#     asc_ids = asc_data.values_list('dealer_id', flat=True)
+#     asc_list = User.objects.filter(username__in=asc_ids)
+#     return asc_list
+    pass
+
+
+def asc_cuopon_details(asc_id, status_type, year, month):
+    cuopon_details = models.CouponData.objects.filter(service_advisor__asc=asc_id, status=status_type,
+                                                      actual_service_date__range=[datetime.datetime(int(year),int(month),1,00,00,00),datetime.datetime(int(year),int(month)+1,1,00,00,00)])
+    cuopon_count = cuopon_details.values('actual_service_date').annotate(dcount=Count('actual_service_date'))
+    coupon_data = {}
+    for day in range(1,32):
+        coupon_data[day] = 0
+    for coupon in cuopon_count:
+        coupon_data[coupon['actual_service_date'].day] = coupon['dcount']
+    return coupon_data
 
 
 def get_state_city(details, address):
@@ -506,3 +545,22 @@ def get_state_city(details, address):
             details['state'] = 'Null'
 
     return details
+
+
+def gernate_years():
+    start_year = 2013
+    current_year = datetime.date.today().year
+    year_list = []
+    for date in range(start_year, current_year+1):
+        year_list.append(date)
+    return year_list
+
+
+def get_time_in_seconds(time, unit):
+    if unit == 'days':
+        total_seconds = time * 86400
+    elif unit == 'hrs':
+        total_seconds = time * 3600
+    else:
+        total_seconds = time * 60
+    return total_seconds

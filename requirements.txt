@@ -24,3 +24,4 @@ django-tastypie-swagger==0.1.2
 django_otp==0.2.7
 django-oauth2-provider
 newrelic==2.20.0.17
+django-composite-field

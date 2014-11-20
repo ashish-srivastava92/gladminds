@@ -1,34 +1,34 @@
 import MySQLdb
 import time
+import os
 from multiprocessing.dummy import Pool
 from datetime import datetime
-start_time = time.time()
-pool = Pool(1)
-count = 0
 
-db_old = MySQLdb.connect(host="localhost", # your host, usually localhost
-                     user="root", # your username
-                      passwd="gladminds", # your password
-                      db="gladmindsdb") # name of the data base
+POOL = Pool(50)
+DB_HOST = os.environ.get('DB_HOST', 'localhost')
+DB_USER = os.environ.get('DB_USER', 'root')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
+MIGRATE_DB = os.environ.get('MIGRATE_DB','gladmindsdb')
 
-cur_old = db_old.cursor() 
+DB_OLD = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
+                     user=DB_USER, # your username
+                      passwd=DB_PASSWORD, # your password
+                      db=MIGRATE_DB) # name of the data base
 
-db_new = MySQLdb.connect(host="localhost", # your host, usually localhost
-                     user="root", # your username
-                      passwd="gladminds", # your password
-                      db="bajaj") # name of the data base
+CUR_OLD = DB_OLD.cursor()
 
-cur_new = db_new.cursor() 
-
-cur_old.execute("select d.*, a.* from aftersell_registereddealer as d, auth_user as a where d.dealer_id=a.username and d.role!='asc'")
-dealer_data = cur_old.fetchall()
-
-cur_old.execute("select d.*, a.* from aftersell_registereddealer as d, auth_user as a where d.dealer_id=a.username and d.role='asc'")
-asc_data = cur_old.fetchall()
+CUR_OLD.execute("select d.*, a.* from aftersell_registereddealer as d,\
+                 auth_user as a where d.dealer_id=a.username and d.role='asc'")
+ASC_DATA = CUR_OLD.fetchall()
+DB_OLD.close()
 
 def process_query(data):
-    print "----------------------------------", cur_new
-    print "dealer", data.get('dealer_id')
+    db_new = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
+                     user=DB_USER, # your username
+                      passwd=DB_PASSWORD, # your password
+                      db="bajaj") # name of the data base
+
+    cur_new = db_new.cursor()
     try:
         today = datetime.now()
         cur_new.execute("INSERT INTO auth_user (password, last_login, is_superuser, \
@@ -38,53 +38,44 @@ def process_query(data):
                 data.get('first_name'), data.get('last_name'), data.get('email'),
                 data.get('is_staff'), data.get('is_active'),
                 data.get('date_joined')))
-        print "created user"
         
         query = "select id from auth_user where username  = %(username)s"
         cur_new.execute(query, {'username': data.get('username')})
         dealer = cur_new.fetchall()[0]
-        print "fetched dealer", dealer[0]
         
-        cur_new.execute("INSERT INTO bajaj_userprofile (user_id, address, created_date, modified_date) VALUES (%s, %s, %s, %s)",(dealer[0], data.get('address'), today, today))
-        print "created userprofile"
+        cur_new.execute("INSERT INTO bajaj_userprofile (user_id, address, created_date, modified_date) \
+                       VALUES (%s, %s, %s, %s)",(dealer[0], data.get('address'), today, today))
         
         query2 = "select * from bajaj_userprofile where user_id  = %(user_id)s"
         cur_new.execute(query2, {'user_id': dealer[0]})
         dealer_pro = cur_new.fetchall()[0]
-        print "fetched dealer profile", dealer_pro[11]
-         
-#         cur_new.execute("INSERT INTO bajaj_dealer (user_id, dealer_id, created_date, modified_date) VALUES (%s, %s, %s, %s)",(dealer_pro[11], data.get('dealer_id'), today, today))
-#         print "created dealer"
+
 
         dealer_dependent=data.get('dependent_on')
-        print "----------------", dealer_dependent
         if dealer_dependent:
             query3 = "select * from bajaj_dealer where dealer_id  = %(dealer_id)s"
             cur_new.execute(query3, {'dealer_id': dealer_dependent})
             dealer_dep = cur_new.fetchall()[0]
             dealer_dependent=dealer_dep[3]
-            print "fetched dependent dealer profile", dealer_dependent
-        cur_new.execute("INSERT INTO bajaj_authorizedservicecenter (user_id, asc_id, created_date, modified_date, dealer_id) VALUES (%s, %s, %s, %s, %s)",(dealer_pro[11], data.get('dealer_id'), today, today, dealer_dependent))
-        print "created asc"
 
+        cur_new.execute("INSERT INTO bajaj_authorizedservicecenter \
+        (user_id, asc_id, created_date, modified_date, dealer_id) \
+        VALUES (%s, %s, %s, %s, %s)",(dealer_pro[11], data.get('dealer_id'),
+                                      today, today, dealer_dependent))
+ 
         cur_new.execute("select * from auth_group where name = 'ascs'")       
-#         cur_new.execute("select * from auth_group where name = 'dealers'")
-
         dealer_group = cur_new.fetchall()[0]
-        print "Fetched dealer group"
         
         cur_new.execute("INSERT INTO auth_user_groups (user_id, group_id)\
           VALUES (%s, %s)",(dealer[0], dealer_group[0]))
-        print "created user goup"
         db_new.commit()
     except Exception as ex:
         db_new.rollback()
-        print "something went wrong", ex
-    print "---------------DONE--------------------"
+        print '[Error]:', data.get('dealer_id'), ex
+    db_new.close()
 
 def format_data(dealer_data):
     start_time = time.time()
-    pool = Pool(1)
     dealers=[]
     for data in dealer_data:
         temp = {}
@@ -104,5 +95,8 @@ def format_data(dealer_data):
         temp['is_active'] = data[14]
         temp['date_joined'] = data[15]
         dealers.append(temp)
-    pool.map(process_query, dealers)
+    POOL.map(process_query, dealers)
     end_time = time.time()
+    print "..........Total TIME TAKEN.........", end_time-start_time
+    
+format_data(ASC_DATA)

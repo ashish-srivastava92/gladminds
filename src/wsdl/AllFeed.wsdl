@@ -1,0 +1,429 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<wsdl:definitions xmlns:wsa="http://schemas.xmlsoap.org/ws/2003/03/addressing" xmlns:tns="http://api.gladmindsplatform.co/api/v1/bajaj/feed/" xmlns:plink="http://schemas.xmlsoap.org/ws/2003/05/partner-link/" xmlns:xop="http://www.w3.org/2004/08/xop/include" xmlns:senc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s12env="http://www.w3.org/2003/05/soap-envelope/" xmlns:s12enc="http://www.w3.org/2003/05/soap-encoding/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:senv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://api.gladmindsplatform.co/api/v1/bajaj/feed/" name="Application">
+    <wsdl:types>
+        <xs:schema targetNamespace="http://api.gladmindsplatform.co/api/v1/bajaj/feed/" elementFormDefault="qualified">
+            <xs:complexType name="postOldFsc">
+                <xs:sequence>
+                    <xs:element name="ObjectList" type="tns:OldFSCModelList" minOccurs="0" nillable="true" />
+                    <xs:element name="Credential" type="tns:AuthenticationModel" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="OldFSCModelList">
+                <xs:sequence>
+                    <xs:element name="OldFSCData" type="tns:OldFSCModelArray" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="postProductDispatchResponse">
+                <xs:sequence>
+                    <xs:element name="postProductDispatchResult" type="xs:string" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="postProductPurchaseResponse">
+                <xs:sequence>
+                    <xs:element name="postProductPurchaseResult" type="xs:string" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="postOldFscResponse">
+                <xs:sequence>
+                    <xs:element name="postOldFscResult" type="xs:string" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="postASC">
+                <xs:sequence>
+                    <xs:element name="ObjectList" type="tns:ASCModelList" minOccurs="0" nillable="true" />
+                    <xs:element name="Credential" type="tns:AuthenticationModel" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="postDealerResponse">
+                <xs:sequence>
+                    <xs:element name="postDealerResult" type="xs:string" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="postBrandResponse">
+                <xs:sequence>
+                    <xs:element name="postBrandResult" type="xs:string" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="postProductDispatch">
+                <xs:sequence>
+                    <xs:element name="ObjectList" type="tns:ProductDispatchModelList" minOccurs="0" nillable="true" />
+                    <xs:element name="Credential" type="tns:AuthenticationModel" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="ProductDispatchModelList">
+                <xs:sequence>
+                    <xs:element name="ProductDispatchData" type="tns:ProductDispatchModelArray" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="ProductDispatchModelArray">
+                <xs:sequence>
+                    <xs:element name="ProductDispatchModel" type="tns:ProductDispatchModel" minOccurs="0" maxOccurs="unbounded" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="ProductDispatchModel">
+                <xs:sequence>
+                    <xs:element name="PRODUCT_TYPE" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="KMS_TO" type="xs:decimal" minOccurs="0" nillable="true" />
+                    <xs:element name="TIMESTAMP" type="tns:ProductDispatchModel_TIMESTAMPType" minOccurs="0" nillable="true" />
+                    <xs:element name="VEC_DIS_DT" type="xs:date" minOccurs="0" nillable="true" />
+                    <xs:element name="DAYS_LIMIT_FROM" type="xs:decimal" minOccurs="0" nillable="true" />
+                    <xs:element name="CHASSIS" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="DAYS_LIMIT_TO" type="xs:decimal" minOccurs="0" nillable="true" />
+                    <xs:element name="KMS_FROM" type="xs:decimal" minOccurs="0" nillable="true" />
+                    <xs:element name="SERVICE_TYPE" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="UCN_NO" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="KUNNR" type="xs:string" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:simpleType name="ProductDispatchModel_TIMESTAMPType">
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="(\d{4})-(\d{2})-(\d{2})(\d{2})(\d{2})(\d{2})" />
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:complexType name="ASCModelList">
+                <xs:sequence>
+                    <xs:element name="ASCData" type="tns:ASCModelArray" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="postDealer">
+                <xs:sequence>
+                    <xs:element name="ObjectList" type="tns:DealerModelList" minOccurs="0" nillable="true" />
+                    <xs:element name="Credential" type="tns:AuthenticationModel" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="DealerModelList">
+                <xs:sequence>
+                    <xs:element name="DealerData" type="tns:DealerModelArray" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="DealerModelArray">
+                <xs:sequence>
+                    <xs:element name="DealerModel" type="tns:DealerModel" minOccurs="0" maxOccurs="unbounded" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="ASCModelArray">
+                <xs:sequence>
+                    <xs:element name="ASCModel" type="tns:ASCModel" minOccurs="0" maxOccurs="unbounded" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="ASCModel">
+                <xs:sequence>
+                    <xs:element name="ASC_EMAIL" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="ASC_ADDRESS" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="KUNNAR" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="ASC_ID" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="ASC_MOBILE" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="ASC_NAME" type="xs:string" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="OldFSCModelArray">
+                <xs:sequence>
+                    <xs:element name="OldFSCModel" type="tns:OldFSCModel" minOccurs="0" maxOccurs="unbounded" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="OldFSCModel">
+                <xs:sequence>
+                    <xs:element name="GT_OLD_FSC" type="tns:OldFscDataModel" minOccurs="0" nillable="true" />
+                    <xs:element name="GT_STATUS" type="tns:OldFscStatusModel" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="OldFscStatusModel">
+                <xs:sequence>
+                    <xs:element name="STATUS" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="TIMESTAMP" type="tns:OldFscStatusModel_TIMESTAMPType" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:simpleType name="OldFscStatusModel_TIMESTAMPType">
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="(\d{4})-(\d{2})-(\d{2})(\d{2})(\d{2})(\d{2})" />
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:complexType name="DealerModel">
+                <xs:sequence>
+                    <xs:element name="ACTIVE_FLAG" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="TIMESTAMP" type="tns:DealerModel_TIMESTAMPType" minOccurs="0" nillable="true" />
+                    <xs:element name="SER_ADV_MOBILE" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="SER_ADV_ID" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="ADDRESS" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="SER_ADV_NAME" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="KUNNR" type="xs:string" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:simpleType name="DealerModel_TIMESTAMPType">
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="(\d{4})-(\d{2})-(\d{2})(\d{2})(\d{2})(\d{2})" />
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:complexType name="postASCResponse">
+                <xs:sequence>
+                    <xs:element name="postASCResult" type="xs:string" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="postBrand">
+                <xs:sequence>
+                    <xs:element name="ObjectList" type="tns:BrandModelList" minOccurs="0" nillable="true" />
+                    <xs:element name="Credential" type="tns:AuthenticationModel" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="BrandModelList">
+                <xs:sequence>
+                    <xs:element name="BrandData" type="tns:BrandModelArray" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="BrandModelArray">
+                <xs:sequence>
+                    <xs:element name="BrandModel" type="tns:BrandModel" minOccurs="0" maxOccurs="unbounded" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="BrandModel">
+                <xs:sequence>
+                    <xs:element name="PRODUCT_TYPE" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="TIMESTAMP" type="tns:BrandModel_TIMESTAMPType" minOccurs="0" nillable="true" />
+                    <xs:element name="BRAND_NAME" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="BRAND_ID" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="PRODUCT_NAME" type="xs:string" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:simpleType name="BrandModel_TIMESTAMPType">
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="(\d{4})-(\d{2})-(\d{2})(\d{2})(\d{2})(\d{2})" />
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:complexType name="OldFscDataModel">
+                <xs:sequence>
+                    <xs:element name="MATNR" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="SERVICE" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="KUNNAR" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="CHASSIS" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="CHARG" type="xs:string" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="postProductPurchase">
+                <xs:sequence>
+                    <xs:element name="ObjectList" type="tns:ProductPurchaseModelList" minOccurs="0" nillable="true" />
+                    <xs:element name="Credential" type="tns:AuthenticationModel" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="AuthenticationModel">
+                <xs:sequence>
+                    <xs:element name="UserName" type="xs:string" />
+                    <xs:element name="Password" type="xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="ProductPurchaseModelList">
+                <xs:sequence>
+                    <xs:element name="ProductPurchaseData" type="tns:ProductPurchaseModelArray" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="ProductPurchaseModelArray">
+                <xs:sequence>
+                    <xs:element name="ProductPurchaseModel" type="tns:ProductPurchaseModel" minOccurs="0" maxOccurs="unbounded" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="ProductPurchaseModel">
+                <xs:sequence>
+                    <xs:element name="PIN_NO" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="CUST_MOBILE" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="VEH_SL_DLR" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="KUNNR" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="ENGINE" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="CITY" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="TIMESTAMP" type="tns:ProductPurchaseModel_TIMESTAMPType" minOccurs="0" nillable="true" />
+                    <xs:element name="VEH_REG_NO" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="STATE" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="CHASSIS" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="VEH_SL_DT" type="xs:date" minOccurs="0" nillable="true" />
+                    <xs:element name="CUSTOMER_ID" type="xs:string" minOccurs="0" nillable="true" />
+                    <xs:element name="CUSTOMER_NAME" type="xs:string" minOccurs="0" nillable="true" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:simpleType name="ProductPurchaseModel_TIMESTAMPType">
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="(\d{4})-(\d{2})-(\d{2})(\d{2})(\d{2})(\d{2})" />
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:element name="ProductPurchaseModel" type="tns:ProductPurchaseModel" />
+            <xs:element name="ProductPurchaseModelArray" type="tns:ProductPurchaseModelArray" />
+            <xs:element name="ProductPurchaseModelList" type="tns:ProductPurchaseModelList" />
+            <xs:element name="AuthenticationModel" type="tns:AuthenticationModel" />
+            <xs:element name="postProductPurchase" type="tns:postProductPurchase" />
+            <xs:element name="OldFscDataModel" type="tns:OldFscDataModel" />
+            <xs:element name="BrandModel" type="tns:BrandModel" />
+            <xs:element name="BrandModelArray" type="tns:BrandModelArray" />
+            <xs:element name="BrandModelList" type="tns:BrandModelList" />
+            <xs:element name="postBrand" type="tns:postBrand" />
+            <xs:element name="postASCResponse" type="tns:postASCResponse" />
+            <xs:element name="DealerModel" type="tns:DealerModel" />
+            <xs:element name="OldFscStatusModel" type="tns:OldFscStatusModel" />
+            <xs:element name="OldFSCModel" type="tns:OldFSCModel" />
+            <xs:element name="OldFSCModelArray" type="tns:OldFSCModelArray" />
+            <xs:element name="ASCModel" type="tns:ASCModel" />
+            <xs:element name="ASCModelArray" type="tns:ASCModelArray" />
+            <xs:element name="DealerModelArray" type="tns:DealerModelArray" />
+            <xs:element name="DealerModelList" type="tns:DealerModelList" />
+            <xs:element name="postDealer" type="tns:postDealer" />
+            <xs:element name="ASCModelList" type="tns:ASCModelList" />
+            <xs:element name="ProductDispatchModel" type="tns:ProductDispatchModel" />
+            <xs:element name="ProductDispatchModelArray" type="tns:ProductDispatchModelArray" />
+            <xs:element name="ProductDispatchModelList" type="tns:ProductDispatchModelList" />
+            <xs:element name="postProductDispatch" type="tns:postProductDispatch" />
+            <xs:element name="postBrandResponse" type="tns:postBrandResponse" />
+            <xs:element name="postDealerResponse" type="tns:postDealerResponse" />
+            <xs:element name="postASC" type="tns:postASC" />
+            <xs:element name="postOldFscResponse" type="tns:postOldFscResponse" />
+            <xs:element name="postProductPurchaseResponse" type="tns:postProductPurchaseResponse" />
+            <xs:element name="postProductDispatchResponse" type="tns:postProductDispatchResponse" />
+            <xs:element name="OldFSCModelList" type="tns:OldFSCModelList" />
+            <xs:element name="postOldFsc" type="tns:postOldFsc" />
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="postBrand">
+        <wsdl:part name="postBrand" element="tns:postBrand" />
+    </wsdl:message>
+    <wsdl:message name="postBrandResponse">
+        <wsdl:part name="postBrandResponse" element="tns:postBrandResponse" />
+    </wsdl:message>
+    <wsdl:message name="postDealer">
+        <wsdl:part name="postDealer" element="tns:postDealer" />
+    </wsdl:message>
+    <wsdl:message name="postDealerResponse">
+        <wsdl:part name="postDealerResponse" element="tns:postDealerResponse" />
+    </wsdl:message>
+    <wsdl:message name="postProductDispatch">
+        <wsdl:part name="postProductDispatch" element="tns:postProductDispatch" />
+    </wsdl:message>
+    <wsdl:message name="postProductDispatchResponse">
+        <wsdl:part name="postProductDispatchResponse" element="tns:postProductDispatchResponse" />
+    </wsdl:message>
+    <wsdl:message name="postProductPurchase">
+        <wsdl:part name="postProductPurchase" element="tns:postProductPurchase" />
+    </wsdl:message>
+    <wsdl:message name="postProductPurchaseResponse">
+        <wsdl:part name="postProductPurchaseResponse" element="tns:postProductPurchaseResponse" />
+    </wsdl:message>
+    <wsdl:message name="postASC">
+        <wsdl:part name="postASC" element="tns:postASC" />
+    </wsdl:message>
+    <wsdl:message name="postASCResponse">
+        <wsdl:part name="postASCResponse" element="tns:postASCResponse" />
+    </wsdl:message>
+    <wsdl:message name="postOldFsc">
+        <wsdl:part name="postOldFsc" element="tns:postOldFsc" />
+    </wsdl:message>
+    <wsdl:message name="postOldFscResponse">
+        <wsdl:part name="postOldFscResponse" element="tns:postOldFscResponse" />
+    </wsdl:message>
+    <wsdl:service name="BrandService">
+        <wsdl:port name="Application" binding="tns:Application">
+            <soap:address location="http://api-qa.gladmindsplatform.co/api/v1/bajaj/feed/" />
+        </wsdl:port>
+    </wsdl:service>
+    <wsdl:service name="DealerService">
+        <wsdl:port name="Application" binding="tns:Application">
+            <soap:address location="http://api-qa.gladmindsplatform.co/api/v1/bajaj/feed/" />
+        </wsdl:port>
+    </wsdl:service>
+    <wsdl:service name="ProductDispatchService">
+        <wsdl:port name="Application" binding="tns:Application">
+            <soap:address location="http://api-qa.gladmindsplatform.co/api/v1/bajaj/feed/" />
+        </wsdl:port>
+    </wsdl:service>
+    <wsdl:service name="ProductPurchaseService">
+        <wsdl:port name="Application" binding="tns:Application">
+            <soap:address location="http://api-qa.gladmindsplatform.co/api/v1/bajaj/feed/" />
+        </wsdl:port>
+    </wsdl:service>
+    <wsdl:service name="ASCService">
+        <wsdl:port name="Application" binding="tns:Application">
+            <soap:address location="http://api-qa.gladmindsplatform.co/api/v1/bajaj/feed/" />
+        </wsdl:port>
+    </wsdl:service>
+    <wsdl:service name="OldFscService">
+        <wsdl:port name="Application" binding="tns:Application">
+            <soap:address location="http://api-qa.gladmindsplatform.co/api/v1/bajaj/feed/" />
+        </wsdl:port>
+    </wsdl:service>
+    <wsdl:portType name="Application">
+        <wsdl:operation name="postBrand" parameterOrder="postBrand">
+            <wsdl:input name="postBrand" message="tns:postBrand" />
+            <wsdl:output name="postBrandResponse" message="tns:postBrandResponse" />
+        </wsdl:operation>
+        <wsdl:operation name="postDealer" parameterOrder="postDealer">
+            <wsdl:input name="postDealer" message="tns:postDealer" />
+            <wsdl:output name="postDealerResponse" message="tns:postDealerResponse" />
+        </wsdl:operation>
+        <wsdl:operation name="postProductDispatch" parameterOrder="postProductDispatch">
+            <wsdl:input name="postProductDispatch" message="tns:postProductDispatch" />
+            <wsdl:output name="postProductDispatchResponse" message="tns:postProductDispatchResponse" />
+        </wsdl:operation>
+        <wsdl:operation name="postProductPurchase" parameterOrder="postProductPurchase">
+            <wsdl:input name="postProductPurchase" message="tns:postProductPurchase" />
+            <wsdl:output name="postProductPurchaseResponse" message="tns:postProductPurchaseResponse" />
+        </wsdl:operation>
+        <wsdl:operation name="postASC" parameterOrder="postASC">
+            <wsdl:input name="postASC" message="tns:postASC" />
+            <wsdl:output name="postASCResponse" message="tns:postASCResponse" />
+        </wsdl:operation>
+        <wsdl:operation name="postOldFsc" parameterOrder="postOldFsc">
+            <wsdl:input name="postOldFsc" message="tns:postOldFsc" />
+            <wsdl:output name="postOldFscResponse" message="tns:postOldFscResponse" />
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="Application" type="tns:Application">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+        <wsdl:operation name="postBrand">
+            <soap:operation soapAction="postBrand" style="document" />
+            <wsdl:input name="postBrand">
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output name="postBrandResponse">
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="postDealer">
+            <soap:operation soapAction="postDealer" style="document" />
+            <wsdl:input name="postDealer">
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output name="postDealerResponse">
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="postProductDispatch">
+            <soap:operation soapAction="postProductDispatch" style="document" />
+            <wsdl:input name="postProductDispatch">
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output name="postProductDispatchResponse">
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="postProductPurchase">
+            <soap:operation soapAction="postProductPurchase" style="document" />
+            <wsdl:input name="postProductPurchase">
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output name="postProductPurchaseResponse">
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="postASC">
+            <soap:operation soapAction="postASC" style="document" />
+            <wsdl:input name="postASC">
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output name="postASCResponse">
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="postOldFsc">
+            <soap:operation soapAction="postOldFsc" style="document" />
+            <wsdl:input name="postOldFsc">
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output name="postOldFscResponse">
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+</wsdl:definitions>

@@ -113,8 +113,7 @@ class UCNRecovery(base_models.UCNRecovery):
 
 class OldFscData(base_models.OldFscData):
     product = models.ForeignKey(ProductData, null=False, editable=False)
-    service_advisor = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
-    servicing_dealer = models.ForeignKey(Dealer, null=True, blank=True)
+    dealer = models.ForeignKey(Dealer, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -173,12 +172,12 @@ class SparesData(base_models.SparesData):
 
 
 class UserPreferences(base_models.UserPreferences):
-    user_profile = models.ForeignKey(UserProfile)
+    user = models.ForeignKey(UserProfile)
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "user preference"
-        unique_together = ("user_profile", "key")
+        unique_together = ("user", "key")
 
 
 class SMSLog(base_models.SMSLog):
@@ -208,3 +207,9 @@ class AuditLog(base_models.AuditLog):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Audit Log"
+
+class SLA(base_models.SLA):
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "SLA config"

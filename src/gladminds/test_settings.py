@@ -1,6 +1,11 @@
 # pylint: disable=W0401,W0614
 from gladminds.settings import *
 import os
+import warnings
+# added for removing warnings printed on console
+import exceptions
+warnings.filterwarnings("ignore", category=exceptions.RuntimeWarning, module='django.db.models.fields', lineno=903)
+
 
 OUT_DIR = os.path.join(BASE_DIR, "out")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/testdata")
@@ -14,7 +19,9 @@ DATABASES['demo']['NAME'] = os.path.join(OUT_DIR, 'demo.db')  # "/tmp/test.db"
 DATABASES['afterbuy']['ENGINE'] = 'django.db.backends.sqlite3'
 DATABASES['afterbuy']['NAME'] = os.path.join(OUT_DIR, 'afterbuy.db')  # "/tmp/test.db"
 
+TEST_IGNORE_APPS = ()
 
+INSTALLED_APPS = ALL_APPS + TEST_IGNORE_APPS
 
 SECRET_KEY = 'testsecretkeyshouldntbeusedinproduction'
 
@@ -35,6 +42,10 @@ FEED_TYPE = 'CSV'
 
 LOGGING['handlers']['gladminds_logs']['filename'] = 'log/test_case.log'
 LOGGING['handlers']['afterbuy_logs']['filename'] = 'log/test_case.log'
+LOGGING['handlers']['sql']['filename'] = 'log/sql.log'
+LOGGING['loggers']['gladminds']['handlers'] = ['gladminds_logs'] 
+LOGGING['loggers']['spyne']['handlers'] = ['gladminds_logs'] 
+LOGGING['loggers']['afterbuy']['handlers'] = ['afterbuy_logs'] 
 
 FEED_FAILURE_MAIL_ENABLED = False
 
@@ -43,3 +54,5 @@ FEED_FAILURE_BUCKET = 'gladminds'
 JOBCARD_DIR = '{0}/jobcards/dev/'
 
 BRAND = 'bajaj'
+
+ENV = "test"

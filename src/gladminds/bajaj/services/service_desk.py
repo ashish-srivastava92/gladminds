@@ -2,7 +2,7 @@ import logging
 
 
 from django.shortcuts import render
-from django.http.response import HttpResponse
+from django.http.response import HttpResponse, HttpResponseNotFound
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.views.decorators.http import require_http_methods
@@ -12,7 +12,8 @@ from gladminds.core import utils
 from gladminds.core.utils import get_list_from_set
 from gladminds.bajaj import models as common
 from gladminds.bajaj.services.free_service_coupon import GladmindsResources
-from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE
+from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
+    ROOT_CAUSE
 from gladminds.managers import get_feedbacks, get_feedback,\
     get_servicedesk_users, save_update_feedback
 from gladminds.core.managers.audit_manager import sms_log
@@ -40,18 +41,23 @@ def modify_servicedesk_tickets(request, feedback_id):
     status = get_list_from_set(FEEDBACK_STATUS)
     priority_types = get_list_from_set(PRIORITY)
     feedback_types = get_list_from_set(FEEDBACK_TYPE)
-    feedback_obj = get_feedback(feedback_id)
+    root_cause = get_list_from_set(ROOT_CAUSE)
+    feedback_obj = get_feedback(feedback_id, request.user)
     servicedesk_users = get_servicedesk_users(designation='SDO')
     if request.method == 'POST':
         host = request.get_host()
         save_update_feedback(feedback_obj, request.POST, request.user, host)
-    return render(request, 'service-desk/ticket_modify.html',\
+    if feedback_obj:
+        return render(request, 'service-desk/ticket_modify.html',\
                   {"feedback": feedback_obj, "FEEDBACK_STATUS": status,\
                    "PRIORITY": priority_types,\
                     "FEEDBACK_TYPE": feedback_types,\
+                    "ROOT_CAUSE" : root_cause,\
                    "group": group_name[0].name,\
                    'servicedeskuser': servicedesk_users
                    })
+    else:
+        return HttpResponseNotFound()
 
 @require_http_methods(["POST"])
 def get_feedback_response(request, feedback_id):
@@ -89,5 +95,5 @@ def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=Non
             task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
         else:
             send_coupon.delay(phone_number=phone_number, message=message)
-    sms_log(reciever=phone_number, action='SEND TO QUEUE', message=message)
+    sms_log(receiver=phone_number, action='SEND TO QUEUE', message=message)
     return {'status': True, 'message': message}
