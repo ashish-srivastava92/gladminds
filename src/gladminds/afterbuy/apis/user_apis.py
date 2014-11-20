@@ -7,13 +7,11 @@ from tastypie.http import HttpBadRequest
 from tastypie.utils.urls import trailing_slash
 from django.contrib.auth.models import User
 from django.contrib.auth import  login
+from django.conf import settings
 from gladminds.core import utils
-
 from gladminds.afterbuy import utils as afterbuy_utils
 from gladminds.afterbuy import models as afterbuy_model
-
 from gladminds.core.apis.user_apis import AccessTokenAuthentication
-from gladminds import settings
 from tastypie import fields, http
 from gladminds.core.managers.mail import sent_otp_email
 from gladminds.core.apis.base_apis import CustomBaseModelResource
@@ -40,6 +38,7 @@ class DjangoUserResources(ModelResource):
             'username': ALL,
         }
 
+
 class ConsumerResource(CustomBaseModelResource):
 
     user = fields.ForeignKey(DjangoUserResources, 'user', null=True, blank=True, full=True)
@@ -53,6 +52,7 @@ class ConsumerResource(CustomBaseModelResource):
         filtering = {
                      "consumer_id" : ALL
                      }
+
     def obj_create(self, bundle, **kwargs):
         """
         A ORM-specific implementation of ``obj_create``.
@@ -66,8 +66,9 @@ class ConsumerResource(CustomBaseModelResource):
         otp_token = bundle.data['otp_token']
         phone_number = bundle.data['phone_number']
         try:
-            afterbuy_utils.validate_otp(otp_token, phone_number=mobile_format(phone_number))
-        except OtpFailedException as e:
+            if not (settings.ENV in ["dev", "local"] and otp_token in settings.HARCODED_OTPS):
+                afterbuy_utils.validate_otp(otp_token, phone_number=mobile_format(phone_number))
+        except OtpFailedException:
             raise ImmediateHttpResponse(
                 response=http.HttpBadRequest('Wrong OTP!'))
         return self.save(bundle)
