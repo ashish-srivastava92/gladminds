@@ -2,7 +2,7 @@ from tastypie.constants import ALL_WITH_RELATIONS
 from tastypie.authorization import Authorization
 from tastypie import fields
 from gladminds.bajaj.models import CouponData, ServiceAdvisor, Dealer,\
-    UserProfile
+    UserProfile, AuthorizedServiceCenter
 from django.contrib.auth.models import AnonymousUser, User
 from django.utils import timezone
 from tastypie.authentication import Authentication
@@ -10,7 +10,7 @@ from provider.oauth2.models import AccessToken
 import logging
 from gladminds.core.apis.base_apis import CustomBaseModelResource
   
-class SAProfileResource(CustomBaseModelResource):
+class UserProfileResource(CustomBaseModelResource):
     class Meta:
         queryset = UserProfile.objects.all()
         resource_name = "user_profile"
@@ -22,7 +22,15 @@ class SAProfileResource(CustomBaseModelResource):
 class DealerResources(CustomBaseModelResource):
     class Meta:
         queryset = Dealer.objects.all()
-        resource_name = "dealer"
+        resource_name = "dealers"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'delete']
+        always_return_data = True
+        
+class AuthorizedServiceCenterResources(CustomBaseModelResource):
+    class Meta:
+        queryset = AuthorizedServiceCenter.objects.all()
+        resource_name = "authorized-service-centers"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete']
         always_return_data = True
@@ -30,7 +38,7 @@ class DealerResources(CustomBaseModelResource):
 class ServiceAdvisorResources(CustomBaseModelResource):
     class Meta:
         queryset = ServiceAdvisor.objects.all()
-        resource_name = "serviceadvisor"
+        resource_name = "service-advisors"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete']
         always_return_data = True
