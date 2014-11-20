@@ -1,7 +1,6 @@
 from django.contrib.admin import AdminSite, TabularInline
 from django.contrib.auth.models import User, Group
 from django.contrib.admin import ModelAdmin
-from suit.admin import SortableTabularInline
 from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 
 from gladminds.bajaj.models import BrandProductCategory, ProductType,\
@@ -40,9 +39,9 @@ class BrandProductCategoryAdmin(ModelAdmin):
     list_display = ('name', 'description')
 
 class ProductTypeAdmin(ModelAdmin):
-    search_fields = ('product_name', 'product_type')
-    list_display = ('product_type_id', 'product_name',\
-                    'product_type', 'image_url', 'is_active')
+    search_fields = ('product_type',)
+    list_display = ('id', 'product_type',\
+                    'image_url', 'is_active')
 
 class DispatchedProduct(ProductData):
 
