@@ -22,7 +22,7 @@ CUR_OLD = DB_OLD.cursor()
 
 ''' To migrate UCN RECOVERY DATA'''
 
-CUR_OLD.execute("SELECT c.*, a.username FROM aftersell_ucnrecovery as u, auth_user as a where u.user_id=a.id")
+CUR_OLD.execute("SELECT u.*, a.username FROM aftersell_ucnrecovery as u, auth_user as a where u.user_id=a.id")
 ucnrecover_data = CUR_OLD.fetchall()
 
 DB_OLD.close()

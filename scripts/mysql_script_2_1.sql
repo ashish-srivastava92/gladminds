@@ -21,5 +21,5 @@ gladminds_emailtemplate
 insert into bajaj.bajaj_emailtemplate(id,template_key,sender,receiver,subject,body,description) select gladminds_emailtemplate.id, gladminds_emailtemplate.template_key, gladminds_emailtemplate.sender, gladminds_emailtemplate.reciever, gladminds_emailtemplate.subject, gladminds_emailtemplate.body, gladminds_emailtemplate.description from gladminds_emailtemplate;
 
 gladminds_producttypedata
-insert into bajaj.bajaj_producttype(product_type_id,product_name,product_type,image_url,is_active) select gladminds_producttypedata.product_type_id, gladminds_producttypedata.product_name, gladminds_producttypedata.product_type,gladminds_producttypedata.product_image_loc,gladminds_producttypedata.isActive from gladminds_producttypedata;
+insert into bajaj.bajaj_producttype(id,product_type,image_url,is_active) select gladminds_producttypedata.product_type_id, gladminds_producttypedata.product_type,gladminds_producttypedata.product_image_loc,gladminds_producttypedata.isActive from gladminds_producttypedata;
 
