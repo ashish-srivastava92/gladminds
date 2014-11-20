@@ -65,10 +65,10 @@ def process_query(data):
                 
         old_dealer = OLD_DEALER_DATA[data.get('dealer_id_id')]
         dealer = DEALER_DATA[old_dealer]
-        step = 1
+        
         old_product_type = OLD_PRODUCTS_DATA[data.get('product_type_id')]
         product_type = PRODUCTS_DATA[old_product_type]
-        step = 2 
+        
         customer_number=customer_name=customer_address=None
         if data.get('customer_phone_number_id'):
             db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
@@ -88,7 +88,7 @@ def process_query(data):
             if customer[14]:
                 customer_address= customer_address + customer[14]
             db_old.close()
-        step=3
+        
         cur_new.execute("INSERT INTO bajaj_productdata (id, created_date, modified_date, \
         product_id, customer_id, customer_phone_number, customer_name, customer_address,\
         purchase_date, invoice_date, engine, veh_reg_no, is_active,\
@@ -101,7 +101,7 @@ def process_query(data):
         product_type, dealer))
         db_new.commit()
     except Exception as ex:
-        e='[Error]: in step-{0} {1} {2}'.format(step, data.get('vin'), ex)
+        e='[Error]: in step-{0} {1}'.format(data.get('vin'), ex)
         db_new.rollback()
         if 'Duplicate entry' not in e:
             print e
