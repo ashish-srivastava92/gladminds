@@ -259,7 +259,6 @@ ALL_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
-    'django.contrib.contenttypes',
     'suit',
     'django.contrib.admin',
     'import_export',
