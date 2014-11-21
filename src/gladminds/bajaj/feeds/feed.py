@@ -366,7 +366,7 @@ class ProductServiceFeed(BaseFeed):
 
 
 def update_coupon_data(sender, **kwargs):
-    from gladminds.core.cron_jobs.sqs_tasks import send_on_product_purchase
+    from gladminds.sqs_tasks import send_on_product_purchase
     instance = kwargs['instance']
     logger.info("triggered update_coupon_data")
     if instance.customer_phone_number:
