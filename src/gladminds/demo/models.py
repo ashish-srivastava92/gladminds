@@ -1,9 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
-
-from gladminds.core import base_models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
+
+from gladminds.core import base_models
 
 _APP_NAME = 'demo'
 
@@ -62,8 +62,8 @@ class Reporter(base_models.Reporter):
 
 class Feedback(base_models.Feedback):
     assign_to = models.ForeignKey(ContentType, null=True, blank=True)
-    assigee_id = models.PositiveIntegerField()
-    content_object = generic.GenericForeignKey('assign_to', 'reporter') 
+    assignee_id = models.PositiveIntegerField()
+    assignee_object = generic.GenericForeignKey('assign_to', 'reporter') 
     
     class Meta:
         app_label = _APP_NAME
@@ -81,9 +81,13 @@ class Comment(base_models.Comment):
 class FeedbackEvent(base_models.FeedbackEvent):
     feedback = models.ForeignKey(Feedback, null=True, blank=True)
     assign_to = models.ForeignKey(ContentType, null=True, blank=True)
-    assigee_id = models.PositiveIntegerField()
-    content_object = generic.GenericForeignKey('assign_to', 'reporter')
+    assignee_id = models.PositiveIntegerField()
+    assignee_object = generic.GenericForeignKey('assign_to', 'reporter')
     comment = models.ForeignKey(Comment, null=True, blank=True)
+    user = models.ForeignKey(ContentType, null=True, blank=True)
+    user_id = models.PositiveIntegerField()
+    user_object = generic.GenericForeignKey('assign_to', 'reporter')
+    
     
     class Meta:
         app_label = _APP_NAME
