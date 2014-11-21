@@ -70,7 +70,7 @@ class Feedback(base_models.Feedback):
     
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "user feedback info"
+        verbose_name_plural = "user feedback"
 
 
 class Activity(base_models.Activity):
@@ -84,7 +84,7 @@ class Comment(base_models.Comment):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "user comment info"
+        verbose_name_plural = "user comments"
 
 
 class FeedbackEvent(base_models.FeedbackEvent):
@@ -96,7 +96,7 @@ class FeedbackEvent(base_models.FeedbackEvent):
      
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "user feedback event info"
+        verbose_name_plural = "user feedback event "
 
 
 class ProductType(base_models.ProductType):
