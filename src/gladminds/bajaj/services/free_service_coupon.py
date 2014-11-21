@@ -235,7 +235,7 @@ class GladmindsResources(Resource):
         updated_coupon = models.CouponData.objects\
                         .filter(Q(status=4) | Q(status=5), product=product, valid_kms__gt=kms)\
                         .update(status=1, service_advisor=None, actual_kms=None,
-                                actual_service_date=None, servicing_dealer=None)
+                                actual_service_date=None)
         logger.info("%s have higher KMS range" % updated_coupon)
 
     def update_exceed_limit_coupon(self, actual_kms, product):
