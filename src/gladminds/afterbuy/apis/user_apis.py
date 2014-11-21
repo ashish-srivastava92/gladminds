@@ -54,9 +54,12 @@ class ConsumerResource(CustomBaseModelResource):
                      }
 
     def hydrate(self, bundle):
+        if bundle.request.method != 'POST':
+            return bundle
+
         otp_token = bundle.data['otp_token']
         phone_number = bundle.data['phone_number']
-
+        
         try:
             if not (settings.ENV in ["dev", "local"] and otp_token in settings.HARCODED_OTPS):
                 afterbuy_utils.validate_otp(otp_token, phone_number=phone_number)
@@ -249,21 +252,18 @@ class ConsumerResource(CustomBaseModelResource):
             return HttpBadRequest("Phone Number/email_id and password  required.")
         try:
             if phone_number:
-                consumer_obj = afterbuy_model.Consumer.objects.get(phone_number
-                                                 =phone_number)
-                password = request.POST['password']
-                user = authenticate(username=str(consumer_obj.user.username),
-                                password=password)
+                user_obj = afterbuy_model.Consumer.objects.get(phone_number
+                                                 =phone_number).user
             elif email_id:
-                consumer_obj = User.objects.get(email
+                user_obj = User.objects.get(email
                                                  =email_id)
-                password = request.POST['password']
-                user = authenticate(username=str(consumer_obj.username),
+            password = request.POST['password']
+            user_auth = authenticate(username=str(user_obj.username),
                                 password=password)
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    data = {'status': 1, 'message': "login successfully", "user_id": user.id}
+            if user_auth is not None:
+                if user_auth.is_active:
+                    login(request, user_auth)
+                    data = {'status': 1, 'message': "login successfully", "user_id": user_auth.id}
             else:
                 data = {'status': 0, 'message': "login unsuccessfull"}
         except Exception as ex:
