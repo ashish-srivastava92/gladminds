@@ -17,7 +17,7 @@ AUDIT_ACTION = "SENT TO QUEUE"
 
 @transaction.commit_manually()
 def get_customers_to_send_reminder(*args, **kwargs):
-    from gladminds.core.cron_jobs.sqs_tasks import send_reminder_message
+    from gladminds.sqs_tasks import send_reminder_message
     day = kwargs.get('reminder_day', None)
     today_date = datetime.now().date()
     reminder_date = datetime.now().date()+timedelta(days=day)
@@ -44,7 +44,7 @@ def get_customers_to_send_reminder(*args, **kwargs):
     
 @transaction.commit_manually()  
 def get_customers_to_send_reminder_by_admin(*args, **kwargs):
-    from gladminds.core.cron_jobs.sqs_tasks import send_reminder_message
+    from gladminds.sqs_tasks import send_reminder_message
     today = datetime.now().date()
     results = models.CouponData.objects.filter(schedule_reminder_date__day=today.day, schedule_reminder_date__month=today.month, schedule_reminder_date__year=today.year, status=1).select_related('product_id', 'customer_phone_number')
     for reminder in results:

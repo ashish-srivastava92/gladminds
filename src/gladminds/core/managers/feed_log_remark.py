@@ -4,7 +4,7 @@ import logging
 import os
 from collections import Counter
 from django.conf import settings
-from gladminds.core.cron_jobs.sqs_tasks import send_report_mail_for_feed_failure
+from gladminds.sqs_tasks import send_report_mail_for_feed_failure
 from gladminds.core.managers.audit_manager import feed_log
 from gladminds.core.utils import uploadFileToS3
 

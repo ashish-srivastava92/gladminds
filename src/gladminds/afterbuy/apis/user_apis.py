@@ -16,7 +16,7 @@ from tastypie import fields, http
 from gladminds.core.managers.mail import sent_otp_email
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.utils import mobile_format, get_task_queue
-from gladminds.core.cron_jobs.sqs_tasks import send_otp
+from gladminds.sqs_tasks import send_otp
 from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
 from tastypie.authorization import Authorization

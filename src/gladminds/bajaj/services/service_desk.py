@@ -18,7 +18,7 @@ from gladminds.managers import get_feedbacks, get_feedback,\
     get_servicedesk_users, save_update_feedback
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services import message_template as templates
-from gladminds.core.cron_jobs.sqs_tasks import send_coupon
+from gladminds.sqs_tasks import send_coupon
 
 
 gladmindsResources = GladmindsResources()
