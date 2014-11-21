@@ -4,13 +4,14 @@ import os
 from multiprocessing.dummy import Pool
 from datetime import datetime
 
+TOTAL_START_TIME = time.time()
 POOL = Pool(50)
 DB_HOST = os.environ.get('DB_HOST', 'localhost')
 DB_USER = os.environ.get('DB_USER', 'root')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
 MIGRATE_DB = os.environ.get('MIGRATE_DB','gladmindsdb')
 OFFSET = int(os.environ.get('OFFSET',0))
-TOTAL_START_TIME = time.time()
+
 
 
 DB_OLD = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
@@ -24,6 +25,8 @@ CUR_OLD.execute("select d.*, a.* from aftersell_serviceadvisor as d, auth_user a
 SA_DATA = CUR_OLD.fetchall()
 DB_OLD.close()
 
+FILE = open('service_advisor.out', 'a+')
+
 def process_query(data):
     active_asc=active_dealer=None
     status='N'
@@ -33,6 +36,11 @@ def process_query(data):
                           db="bajaj") # name of the data base
     
     cur_new = db_new.cursor()
+    db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
+                     user=DB_USER, # your username
+                      passwd=DB_PASSWORD, # your password
+                      db=MIGRATE_DB) # name of the data base
+    cur_old = db_old.cursor()
     try:
         today = datetime.now()
         cur_new.execute("INSERT INTO auth_user (password, last_login, is_superuser, \
@@ -55,11 +63,7 @@ def process_query(data):
         cur_new.execute(query2, {'user_id': sa[0]})
         sa_pro = cur_new.fetchall()[0]
         
-        db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
-                     user=DB_USER, # your username
-                      passwd=DB_PASSWORD, # your password
-                      db=MIGRATE_DB) # name of the data base
-        cur_old = db_old.cursor()
+        
         #fetch the associated dealer
         query3 = "select dealer_id_id, status from \
         aftersell_serviceadvisordealerrelationship where\
@@ -97,12 +101,12 @@ def process_query(data):
         db_new.commit()
     except Exception as ex:
         db_new.rollback()
-        print '[Error]:', data.get('service_advisor_id'), ex
+        e='[Error]: {0} {1}'.format(data.get('service_advisor_id'), ex)
+        FILE.write(str(e) + '\n')
     db_new.close()
     db_old.close()
 
 def format_data(dealer_data):
-    start_time = time.time()
     dealers=[]
     for data in dealer_data:
         temp = {}
@@ -123,7 +127,8 @@ def format_data(dealer_data):
         temp['date_joined'] = data[15]
         dealers.append(temp)
     POOL.map(process_query, dealers)
-    end_time = time.time()
-    print "..........Total TIME TAKEN.........", end_time-start_time
 
 format_data(SA_DATA)
+TOTAL_END_TIME = time.time()
+FILE.write(str("..........Total TIME TAKEN......... {0}".format(TOTAL_END_TIME-TOTAL_START_TIME)) + '\n')
+FILE.close()

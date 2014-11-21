@@ -4,6 +4,7 @@ import os
 from multiprocessing.dummy import Pool
 from datetime import datetime
 
+TOTAL_START_TIME = time.time()
 POOL = Pool(50)
 DB_HOST = os.environ.get('DB_HOST', 'localhost')
 DB_USER = os.environ.get('DB_USER', 'root')
@@ -21,6 +22,8 @@ CUR_OLD.execute("select d.*, a.* from aftersell_registereddealer as d,\
                  auth_user as a where d.dealer_id=a.username and d.role='asc'")
 ASC_DATA = CUR_OLD.fetchall()
 DB_OLD.close()
+
+FILE = open('asc.out', 'a+')
 
 def process_query(data):
     db_new = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
@@ -71,7 +74,8 @@ def process_query(data):
         db_new.commit()
     except Exception as ex:
         db_new.rollback()
-        print '[Error]:', data.get('dealer_id'), ex
+        e='[Error]: {0} {1}'.format(data.get('dealer_id'), ex)
+        FILE.write(str(e) + '\n')
     db_new.close()
 
 def format_data(dealer_data):
@@ -96,7 +100,8 @@ def format_data(dealer_data):
         temp['date_joined'] = data[15]
         dealers.append(temp)
     POOL.map(process_query, dealers)
-    end_time = time.time()
-    print "..........Total TIME TAKEN.........", end_time-start_time
     
 format_data(ASC_DATA)
+TOTAL_END_TIME = time.time()
+FILE.write(str("..........Total TIME TAKEN......... {0}".format(TOTAL_END_TIME-TOTAL_START_TIME)) + '\n')
+FILE.close()
