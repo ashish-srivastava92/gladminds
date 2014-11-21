@@ -433,9 +433,10 @@ class GladmindsResources(Resource):
             sa_phone = utils.get_phone_number_format(phone_number)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = utils.get_task_queue()
-                task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
+                task_queue.add("send_service_detail", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_invalid_keyword_message.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
+                send_service_detail.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
+            sms_log(receiver=sa_phone, action=AUDIT_ACTION, message=message)
             return None
         service_advisor_obj = all_sa_dealer_obj[0]
         return service_advisor_obj
