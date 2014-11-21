@@ -44,7 +44,7 @@ class Consumer(base_models.BaseModel):
     consumer_id = models.CharField(
         max_length=50, unique=True, default=uuid4)
     phone_number = models.CharField(
-                   max_length=15, blank=True, null=True)
+                   max_length=15, null=True, blank=True)
     image_url = models.CharField(
                    max_length=200, default=settings.DEFAULT_IMAGE_ID)
     address = models.TextField(blank=True, null=True)
@@ -205,7 +205,7 @@ class Support (base_models.BaseModel):
 
 
 class OTPToken(base_models.OTPToken):
-    user = models.ForeignKey(Consumer)
+    user = models.ForeignKey(Consumer, blank=True, null=True)
 
     class Meta:
         app_label = _APP_NAME

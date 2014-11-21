@@ -4,7 +4,7 @@ import os
 from multiprocessing.dummy import Pool
 from datetime import datetime
 
-POOL = Pool(50)
+POOL = Pool(100)
 DB_HOST = os.environ.get('DB_HOST', 'localhost')
 DB_USER = os.environ.get('DB_USER', 'root')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
@@ -27,7 +27,7 @@ DB_NEW = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
 
 CUR_NEW = DB_NEW.cursor()
 
-CUR_OLD.execute('select * from aftersell_registereddealer')
+CUR_OLD.execute('select * from aftersell_registereddealer where role="dealer"')
 OLD_DEALERS = CUR_OLD.fetchall()
 OLD_DEALER_DATA={}
 for old_dealer in OLD_DEALERS:
@@ -68,7 +68,7 @@ def process_query(data):
         
         old_product_type = OLD_PRODUCTS_DATA[data.get('product_type_id')]
         product_type = PRODUCTS_DATA[old_product_type]
-         
+        
         customer_number=customer_name=customer_address=None
         if data.get('customer_phone_number_id'):
             db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
@@ -101,10 +101,10 @@ def process_query(data):
         product_type, dealer))
         db_new.commit()
     except Exception as ex:
-        e='[Error]: {0} {1}'.format( data.get('vin'), ex)
+        e='[Error]: {0} {1}'.format(data.get('vin'), ex)
         db_new.rollback()
         if 'Duplicate entry' not in e:
-            print e
+            FILE.write(str(e) + '\n')
     db_new.close()
 
 def format_data(product_data):
@@ -145,7 +145,7 @@ def format_data(product_data):
     POOL.map(process_query, products)
 
 def get_data(offset=0):
-    print "OFFSET:", offset
+    
     db_old = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
                      user=DB_USER, # your username
                       passwd=DB_PASSWORD, # your password
@@ -163,7 +163,12 @@ CUR_OLD.execute('select count(*) from gladminds_productdata;')
 DATA_COUNT = CUR_OLD.fetchone()[0]
 DB_OLD.close()
 while OFFSET<=DATA_COUNT:
+    FILE = open('product.out', 'a+')
+    FILE.write(str("OFFSET: {0}".format(OFFSET)) + '\n')
     get_data(offset=OFFSET)
     OFFSET=OFFSET+10000
+    FILE.close()
 TOTAL_END_TIME = time.time()
-print "..........Total TIME TAKEN.........", TOTAL_END_TIME-TOTAL_START_TIME
+FILE = open('product.out', 'a+')
+FILE.write(str("..........Total TIME TAKEN......... {0}".format(TOTAL_END_TIME-TOTAL_START_TIME)) + '\n')
+FILE.close()

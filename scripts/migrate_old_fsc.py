@@ -4,6 +4,7 @@ import os
 from multiprocessing.dummy import Pool
 from datetime import datetime
 
+TOTAL_START_TIME = time.time()
 POOL = Pool(50)
 DB_HOST = os.environ.get('DB_HOST', 'localhost')
 DB_USER = os.environ.get('DB_USER', 'root')
@@ -42,6 +43,7 @@ for dealer in DEALERS:
 
 DB_OLD.close()
 DB_NEW.close()
+FILE = open('old_fsc.out', 'a+')
 
 def process_query(data):
     db_new = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
@@ -73,12 +75,12 @@ def process_query(data):
         db_new.commit()
     except Exception as ex:
         db_new.rollback()
-        print '[Error]:', data.get('id'), ex
+        e='[Error]: {0} {1}'.format(data.get('id'), ex)
+        FILE.write(str(e) + '\n')
     db_new.close()
     
  
 def format_data(coupon_data):
-    start_time = time.time()
     coupons=[]
     for data in coupon_data:
         temp = {}
@@ -107,7 +109,8 @@ def format_data(coupon_data):
         temp['missing_value'] = data[22]
         coupons.append(temp)
     POOL.map(process_query, coupons)
-    end_time = time.time()
-    print "..........Total TIME TAKEN.........", end_time-start_time
 
 format_data(OLD_FSC_DATA)
+TOTAL_END_TIME = time.time()
+FILE.write(str("..........Total TIME TAKEN......... {0}".format(TOTAL_END_TIME-TOTAL_START_TIME)) + '\n')
+FILE.close()

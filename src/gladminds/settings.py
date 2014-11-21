@@ -29,6 +29,7 @@ COUPON_VALID_DAYS = 30
 COUPON_URL = 'local.bajaj.gladmindsplatform.co'
 TOTP_SECRET_KEY = '93424'
 OTP_VALIDITY = 120
+HARCODED_OTPS = ['GMDEV123']
 
 JOBCARD_DIR = '{0}/jobcards/prod/'
 JOBCARD_BUCKET = 'gladminds'

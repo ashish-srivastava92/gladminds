@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 
 from gladminds.afterbuy.models import Brand, Consumer, ProductType,\
 MessageTemplate, EmailTemplate, Industry, UserProduct, License,\
-    ProductInsuranceInfo, ProductWarrantyInfo, PollutionCertificate, BrandProductCategory
+    ProductInsuranceInfo, ProductWarrantyInfo, PollutionCertificate, BrandProductCategory,\
+    RegistrationCertificate
 
 
 class AfterbuyAdminSite(AdminSite):
@@ -22,6 +23,7 @@ brand_admin.register(ProductInsuranceInfo)
 brand_admin.register(ProductWarrantyInfo)
 brand_admin.register(PollutionCertificate)
 brand_admin.register(License)
+brand_admin.register(RegistrationCertificate)
 
 brand_admin.register(MessageTemplate)
 brand_admin.register(EmailTemplate)
