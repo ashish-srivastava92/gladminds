@@ -1,13 +1,13 @@
 from integration.base import BaseTestCase
 from django.test.client import Client
 
-from gladminds.aftersell.models import common as afterbuy_common
+from gladminds.bajaj import models as common
 
 
 class TestSaveFormRegistration(BaseTestCase):
 
     def setUp(self):
-        self.client = Client()
+        self.client = Client(SERVER_NAME='bajaj')
         pass
 
     def test_asc_registration(self):
@@ -22,9 +22,9 @@ class TestSaveFormRegistration(BaseTestCase):
 
         get_response = self.client.post('/aftersell/asc/self-register/', data=create_mock_data)
         self.assertEqual(get_response.status_code, 200)
-        self.assertEqual(afterbuy_common.ASCSaveForm.objects.count(), 1)
-        self.assertEqual(afterbuy_common
-                         .ASCSaveForm.objects.all()[0].phone_number,
+        self.assertEqual(common.ASCTempRegistration.objects.count(), 1)
+        self.assertEqual(common
+                         .ASCTempRegistration.objects.all()[0].phone_number,
                           create_mock_data['phone-number'])
 
     def test_fail_registration_mail(self):

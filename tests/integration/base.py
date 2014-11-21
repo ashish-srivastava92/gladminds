@@ -1,11 +1,10 @@
 from tastypie.test import ResourceTestCase
 from django.contrib.auth.models import User, Group
-from gladminds.models import common
-from gladminds.aftersell.models import common as aftersell_common
+from gladminds.bajaj import models as common
 from gladminds.management.commands import load_gm_migration_data
 from time import sleep
 from datetime import datetime
-
+ 
 from django.test.client import Client
 
 client = Client()
@@ -70,7 +69,7 @@ class BaseTestCase(ResourceTestCase):
             user_group = Group.objects.get(name=kwargs['group_name'])
             user.groups.add(user_group)
         if kwargs.get('group_name'):
-            user_profile = aftersell_common.UserProfile(user=user, phone_number=kwargs['phone_number'])
+            user_profile = common.UserProfile(user=user, phone_number=kwargs['phone_number'])
             user_profile.save()
             return user_profile
 
