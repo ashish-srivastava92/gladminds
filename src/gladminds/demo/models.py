@@ -62,7 +62,8 @@ class Reporter(base_models.Reporter):
 
 class Feedback(base_models.Feedback):
     reporter = models.ForeignKey(Reporter, null=True, blank=True)
-    assign_to = models.ForeignKey(ContentType, related_name='demo feedback assignee', null=True, blank=True)
+    limit = models.Q(app_label = _APP_NAME, model = 'userprofile') | models.Q(app_label = _APP_NAME, model = 'reporter')
+    assign_to = models.ForeignKey(ContentType, limit_choices_to = limit, related_name='demo feedback assignee', null=True, blank=True)
     assignee_id = models.PositiveIntegerField()
     assignee_object = generic.GenericForeignKey('assign_to', 'assignee_id')
     previous_assignee = models.ForeignKey(UserProfile, null=True, blank=True)
@@ -88,7 +89,8 @@ class Comment(base_models.Comment):
 
 class FeedbackEvent(base_models.FeedbackEvent):
     feedback = models.ForeignKey(Feedback, null=True, blank=True)
-    user_details = models.ForeignKey(ContentType, related_name='demo feedback event users', null=True, blank=True)
+    limit = models.Q(app_label = _APP_NAME, model = 'userprofile') | models.Q(app_label = _APP_NAME, model = 'reporter')
+    user_details = models.ForeignKey(ContentType, limit_choices_to = limit, related_name='demo feedback event users', null=True, blank=True)
     user_id = models.PositiveIntegerField()
     user_object = generic.GenericForeignKey('user', 'user_id')
     activity = models.ForeignKey(Activity, null=True, blank=True)
