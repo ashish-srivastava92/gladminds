@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from gladminds.core import base_models
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
 
 _APP_NAME = 'bajaj'
 
@@ -51,21 +53,42 @@ class ServiceAdvisor(base_models.ServiceAdvisor):
         verbose_name_plural = "Service Advisor Data"
 
 
-class Feedback(base_models.Feedback):
-    assign_to = models.ForeignKey(UserProfile, null=True, blank=True)
+class Reporter(base_models.Reporter):
+    user_profile = models.ForeignKey(UserProfile, null=True, blank=True)
 
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "reporter info"
+
+
+class Feedback(base_models.Feedback):
+    assign_to = models.ForeignKey(ContentType, null=True, blank=True)
+    assigee_id = models.PositiveIntegerField()
+    content_object = generic.GenericForeignKey('assign_to', 'reporter') 
+    
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "user feedback info"
 
 
-class Comments(base_models.Comments):
+class Comment(base_models.Comment):
     feedback_object = models.ForeignKey(Feedback, null=False, blank=False)
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "user comment info"
 
+
+class FeedbackEvent(base_models.FeedbackEvent):
+    feedback = models.ForeignKey(Feedback, null=True, blank=True)
+    assign_to = models.ForeignKey(ContentType, null=True, blank=True)
+    assigee_id = models.PositiveIntegerField()
+    content_object = generic.GenericForeignKey('assign_to', 'reporter')
+    comment = models.ForeignKey(Comment, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "user feedback event info"
 
 class ProductType(base_models.ProductType):
     brand_product_category = models.ForeignKey(

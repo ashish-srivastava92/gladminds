@@ -397,52 +397,64 @@ class AuditLog(BaseModel):
         abstract = True
         verbose_name_plural = "Audit log"
 
+class Reporter(BaseModel):
+    name = models.CharField(max_length=30)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    email = models.CharField(max_length=30, blank=True, null=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Reporter info"
+
 
 class Feedback(BaseModel):
-    reporter = models.CharField(max_length=15)
-    reporter_name = models.CharField(max_length=30)
-    reporter_email_id = models.CharField(max_length=50, null=True, blank= True)
-    message = models.CharField(max_length=512, null=True, blank=False)
+    summary = models.CharField(max_length=512, null=True, blank=True)
+    description = models.CharField(max_length=512, null=True, blank=False)
     status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
     priority = models.CharField(max_length=12, choices=PRIORITY, default='Low')
     type = models.CharField(max_length=20, choices=FEEDBACK_TYPE)
-    subject = models.CharField(max_length=512, null=True, blank=True)
     closed_date = models.DateTimeField(null=True, blank=True)
     resolved_date = models.DateTimeField(null=True, blank=True)
     pending_from = models.DateTimeField(null=True, blank=True)
     due_date = models.DateTimeField(null=True, blank=True)
     wait_time = models.FloatField(max_length=20, null=True, blank=True, default = '0.0')
     remarks = models.CharField(max_length=512, null=True, blank=True)
-    ratings = models.CharField(max_length=12, choices=RATINGS)
-    root_cause = models.CharField(max_length=12, choices=ROOT_CAUSE)
+    ratings = models.CharField(max_length=20, choices=RATINGS)
+    root_cause = models.CharField(max_length=20, choices=ROOT_CAUSE)
     resolution = models.CharField(max_length=512, null=True, blank=True)
     role = models.CharField(max_length=50, null=True, blank=True)
     assign_to_reporter = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
-        verbose_name_plural = "aftersell feedback info"
+        verbose_name_plural = "Feedback info"
 
 
-class Comments(BaseModel):
+class Comment(BaseModel):
     user = models.CharField(max_length=20, null=False, blank=False)
-    comments_str = models.CharField(max_length=100, null=True, blank=True)
-    isDeleted = models.BooleanField(default=False)
+    comment = models.CharField(max_length=100, null=True, blank=True)
+    file_location = models.CharField(max_length=215, null=True, blank=True)
 
     class Meta:
         abstract = True
-        verbose_name_plural = "aftersell comment info"
+        verbose_name_plural = "Comment info"
 
-class duration(CompositeField):
+class FeedbackEvent(BaseModel):
+    status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Feedback Event info"
+
+    
+class Duration(CompositeField):
     time = models.PositiveIntegerField()
     unit = models.CharField(max_length=12, choices=TIME_UNIT, verbose_name = 'unit')
 
-
 class SLA(models.Model):
     priority = models.CharField(max_length=12, choices=SLA_PRIORITY, unique=True)
-    response = duration()
-    reminder = duration()
-    resolution = duration()
+    response = Duration()
+    reminder = Duration()
+    resolution = Duration()
         
     def get_time_in_seconds(self, time , unit):
         if unit == 'days':
