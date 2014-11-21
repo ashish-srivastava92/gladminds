@@ -61,13 +61,21 @@ class Reporter(base_models.Reporter):
 
 
 class Feedback(base_models.Feedback):
-    assign_to = models.ForeignKey(ContentType, null=True, blank=True)
+    reporter = models.ForeignKey(Reporter, null=True, blank=True)
+    assign_to = models.ForeignKey(ContentType, related_name='demo feedback assignee', null=True, blank=True)
     assignee_id = models.PositiveIntegerField()
-    assignee_object = generic.GenericForeignKey('assign_to', 'reporter') 
+    assignee_object = generic.GenericForeignKey('assign_to', 'assignee_id')
+    previous_assignee = models.ForeignKey(UserProfile, null=True, blank=True)
     
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "user feedback info"
+
+
+class Activity(base_models.Activity):
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "user activity info"
 
 
 class Comment(base_models.Comment):
@@ -80,19 +88,14 @@ class Comment(base_models.Comment):
 
 class FeedbackEvent(base_models.FeedbackEvent):
     feedback = models.ForeignKey(Feedback, null=True, blank=True)
-    assign_to = models.ForeignKey(ContentType, null=True, blank=True)
-    assignee_id = models.PositiveIntegerField()
-    assignee_object = generic.GenericForeignKey('assign_to', 'reporter')
-    comment = models.ForeignKey(Comment, null=True, blank=True)
-    user = models.ForeignKey(ContentType, null=True, blank=True)
+    user_details = models.ForeignKey(ContentType, related_name='demo feedback event users', null=True, blank=True)
     user_id = models.PositiveIntegerField()
-    user_object = generic.GenericForeignKey('assign_to', 'reporter')
-    
-    
+    user_object = generic.GenericForeignKey('user', 'user_id')
+    activity = models.ForeignKey(Activity, null=True, blank=True)
+     
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "user feedback event info"
-
 
 
 class ProductType(base_models.ProductType):

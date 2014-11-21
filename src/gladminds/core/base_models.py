@@ -401,10 +401,20 @@ class Reporter(BaseModel):
     name = models.CharField(max_length=30)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     email = models.CharField(max_length=30, blank=True, null=True)
-    
+
     class Meta:
         abstract = True
         verbose_name_plural = "Reporter info"
+
+
+class Activity(BaseModel):
+    action = models.TextField(null=True, blank=True)
+    original_value = models.CharField(max_length=512, null=True, blank=True)
+    new_value = models.CharField(max_length=512, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Activity info"
 
 
 class Feedback(BaseModel):
@@ -440,7 +450,6 @@ class Comment(BaseModel):
         verbose_name_plural = "Comment info"
 
 class FeedbackEvent(BaseModel):
-    status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
     class Meta:
         abstract = True
         verbose_name_plural = "Feedback Event info"
