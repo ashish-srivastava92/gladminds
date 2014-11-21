@@ -47,11 +47,15 @@ class UserProductResource(CustomBaseModelResource):
         license = afterbuy_models.License.objects.filter(product=bundle.data['id'])
         registrations = afterbuy_models.RegistrationCertificate.objects.filter(product=bundle.data['id'])
         pollution = afterbuy_models.PollutionCertificate.objects.filter(product=bundle.data['id'])
+        support = afterbuy_models.Support.objects.filter(brand=bundle.data['id'])
+        product_image = afterbuy_models.UserProductImages.objects.filter(product=bundle.data['id'])
         bundle.data['insurance'] = [model_to_dict(c) for c in insurance]
         bundle.data['invoice'] = [model_to_dict(c) for c in invoice]
         bundle.data['license'] = [model_to_dict(c) for c in license]
         bundle.data['registrations'] = [model_to_dict(c) for c in registrations]
         bundle.data['pollution'] = [model_to_dict(c) for c in pollution]
+        bundle.data['support'] = [model_to_dict(c) for c in support]
+        bundle.data['product_image'] = [model_to_dict(c) for c in product_image]
         return bundle
 
     def prepend_urls(self):
