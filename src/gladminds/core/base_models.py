@@ -76,7 +76,8 @@ class BrandProductCategory(BaseModel):
 class OTPToken(BaseModel):
     token = models.CharField(max_length=256, null=False)
     request_date = models.DateTimeField(null=True, blank=True)
-    email = models.CharField(max_length=50, null=False)
+    email = models.CharField(max_length=50, null=True, blank=True)
+    phone_number = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -329,7 +330,7 @@ class SparesData(BaseModel):
         verbose_name_plural = "spares data"
 
 
-class UserPreferences(BaseModel):
+class UserPreference(BaseModel):
     """
     This model is used for storing user preferences
     """
@@ -341,7 +342,7 @@ class UserPreferences(BaseModel):
         verbose_name_plural = "User Preferences"
 
 
-class BrandPreferences(UserPreferences):
+class BrandPreference(UserPreference):
 
     class Meta:
         abstract = True

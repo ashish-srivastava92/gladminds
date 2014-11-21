@@ -2,6 +2,8 @@
 '''
 from integration import base_integration
 from django.test.client import Client
+from test_constants import AFTERBUY_PRODUCTS
+import json
 
 client  =  Client(SERVER_NAME='afterbuy')
 
@@ -62,4 +64,24 @@ class TestAfterbuyApi(base_integration.GladmindsResourceTestCase):
         uri = '/afterbuy/v1/consumers/1/products/'
         resp = client.get(uri, format='json', data=create_mock_data)
         self.assertEquals(200, resp.status_code)
+
+    def test_product_api(self):
+        #Checking post api
+        json_data = json.dumps(AFTERBUY_PRODUCTS)
+        resp = client.post('/afterbuy/v1/products/', json_data, content_type='application/json')
+        self.assertEquals(resp.status_code,201)
+        
+        #Checking get api
+        resp = client.get('/afterbuy/v1/products/1/')
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['nick_name'], "aaa")
+        self.assertEqual(len(self.deserialize(resp)), 17)
+        
+        #Cheking put api
+        json_data = json.dumps({"nick_name":"bbb"})
+        resp = client.put('/afterbuy/v1/products/1/',json_data, content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        resp = client.get('/afterbuy/v1/products/1/')
+        self.assertEqual(self.deserialize(resp)['nick_name'], "bbb")
+        
         

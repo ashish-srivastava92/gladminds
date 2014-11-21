@@ -27,7 +27,7 @@ class ProductTypeResource(CustomBaseModelResource):
 class UserProductResource(CustomBaseModelResource):
     consumer = fields.ForeignKey(ConsumerResource, 'consumer', null=True, blank=True, full=True)
     brand = fields.ForeignKey(BrandResource, 'brand', null=True, blank=True, full=True)
-    product_type = fields.ForeignKey(ProductTypeResource, 'type', null=True, blank=True, full=True)
+    product_type = fields.ForeignKey(ProductTypeResource, 'product_type', null=True, blank=True, full=True)
 
     class Meta:
         queryset = afterbuy_models.UserProduct.objects.all()
@@ -168,6 +168,34 @@ class ProductSupportResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.ProductSupport.objects.all()
         resource_name = 'product-support'
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'delete' ,'put']
+        always_return_data = True
+        filtering = {
+                     "product": ALL,
+                     }
+
+
+class SellInformationResource(CustomBaseModelResource):
+    product = fields.ForeignKey(UserProductResource, 'product', full=True, null=True)
+
+    class Meta:
+        queryset = afterbuy_models.SellInformation.objects.all()
+        resource_name = 'sell-information'
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'delete' ,'put']
+        always_return_data = True
+        filtering = {
+                     "product": ALL,
+                     }
+
+
+class UserProductImagesResource(CustomBaseModelResource):
+    product = fields.ForeignKey(UserProductResource, 'product', full=True, null=True)
+
+    class Meta:
+        queryset = afterbuy_models.UserProductImages.objects.all()
+        resource_name = 'product-images'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data = True

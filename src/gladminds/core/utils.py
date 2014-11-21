@@ -2,6 +2,7 @@ import os, logging, hashlib, uuid, mimetypes
 import boto
 import pytz
 import datetime
+from importlib import import_module
 
 from boto.s3.key import Key
 from dateutil import tz
@@ -23,6 +24,22 @@ from django.db.models import Count
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 logger = logging.getLogger('gladminds')
+
+
+def get_models():
+    try:
+        return import_module('gladminds.{0}.models'.format(settings.BRAND))
+    except:
+        #this should return a junk model
+        return None
+
+
+def get_model(model):
+
+    try:
+        return getattr(import_module('gladminds.{0}.models'.format(settings.BRAND)), model)
+    except:
+        return None
 
 
 def generate_unique_customer_id():

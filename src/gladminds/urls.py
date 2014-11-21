@@ -4,6 +4,7 @@ from tastypie.api import Api
 
 from gladminds.admin import admin
 from gladminds.gm.apis import brand_apis
+from gladminds.core.apis import preferences_apis
 
 api_v1 = Api(api_name="v1")
 api_v1.register(brand_apis.IndustryResource())
@@ -11,7 +12,7 @@ api_v1.register(brand_apis.BrandProductCategoryResource())
 api_v1.register(brand_apis.BrandResource())
 api_v1.register(brand_apis.ServiceResource())
 api_v1.register(brand_apis.ServiceTypeResource())
-
+api_v1.register(preferences_apis.BrandPreferenceResource())
 
 urlpatterns = patterns('',
 )

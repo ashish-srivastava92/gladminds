@@ -88,3 +88,67 @@ APP_PREFERENCE = {
                    "key" : "name",
                    "value" : "test_brand"
                 }
+
+AFTERBUY_PRODUCTS = {
+                     "brand": {
+                               "created_date": "2014-11-20T14:49:11",
+                               "description": "",
+                               "id": 1,
+                               "image_url": "a",
+                               "industry": {
+                                            "created_date": "2014-11-20T14:49:10",
+                                            "description": "a",
+                                            "id": 1,                                    
+                                            "modified_date": "2014-11-20T14:49:10",
+                                            "name": "Aruba",                            
+                                            "resource_uri": "/afterbuy/v1/industries/1/"
+                                            },
+                               "is_active": True,
+                               "modified_date": "2014-11-20T14:49:11",
+                               "name": "Aruba",
+                               "resource_uri": "/afterbuy/v1/brands/1/"
+                               },
+                     "brand_product_id": "11",
+                     "color": "red",
+                     "consumer": {
+                                  "accepted_terms": False,
+                                  "address": "",
+                                  "consumer_id": "2c099e10-043d-4b59-9243-8ece03b137d0",
+                                  "country": "",
+                                  "created_date": "2014-11-20T14:48:51",
+                                  "date_of_birth": None,
+                                  "gender": None,
+                                  "image_url": "guest.png",
+                                  "modified_date": "2014-11-20T14:48:51",
+                                  "phone_number": "9900776655",
+                                  "pincode": "",
+                                  "resource_uri": "/afterbuy/v1/consumers/2/",
+                                  "state": "h",
+                                  "tshirt_size": None,
+                                  "user": {
+                                           "date_joined": "2014-11-20T14:48:24",
+                                           "email":"",
+                                           "first_name": "",
+                                           "id": 2,                                   
+                                           "last_login": "2014-11-20T14:48:23",
+                                           "last_name": "",
+                                           "resource_uri": "",
+                                           "username": "test"
+                                           }
+                                  },
+                     "description": "",
+
+                     "image_url": "sss",
+                     "is_deleted": False,
+                     "nick_name": "aaa",
+                     "product_type": {
+                                      "created_date": "2014-11-20T14:49:20",
+                                      "id": 1,
+                                      "image_url": "a",
+                                      "is_active": True,
+                                      "modified_date": "2014-11-20T14:49:20",
+                                      "product_type": "aaa",
+                                      "resource_uri": "/afterbuy/v1/product-types/1/"
+                                      },
+                     "purchase_date": "2014-11-20T14:49:24"
+                     }
