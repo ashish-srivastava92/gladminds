@@ -30,7 +30,7 @@ class DjangoUserResources(ModelResource):
     class Meta:
         queryset = User.objects.all()
         resource_name = 'django'
-        excludes = ['password', 'is_active', 'is_staff', 'is_superuser']
+        excludes = ['is_active', 'is_staff', 'is_superuser']
         authorization = Authorization()
         detail_allowed_methods = ['get','post', 'delete', 'put']
         always_return_data = True
@@ -53,25 +53,30 @@ class ConsumerResource(CustomBaseModelResource):
                      "consumer_id" : ALL
                      }
 
-    def obj_create(self, bundle, **kwargs):
-        """
-        A ORM-specific implementation of ``obj_create``.
-        """
-        bundle.obj = self._meta.object_class()
-
-        for key, value in kwargs.items():
-            setattr(bundle.obj, key, value)
-
-        bundle = self.full_hydrate(bundle)
+    def hydrate(self, bundle):
         otp_token = bundle.data['otp_token']
         phone_number = bundle.data['phone_number']
+
         try:
             if not (settings.ENV in ["dev", "local"] and otp_token in settings.HARCODED_OTPS):
-                afterbuy_utils.validate_otp(otp_token, phone_number=mobile_format(phone_number))
-        except OtpFailedException:
+                afterbuy_utils.validate_otp(otp_token, phone_number=phone_number)
+        except Exception:
             raise ImmediateHttpResponse(
                 response=http.HttpBadRequest('Wrong OTP!'))
-        return self.save(bundle)
+
+        user_dict = bundle.data['user']
+        if isinstance(user_dict, dict) and 'pk' not in user_dict.keys():
+            username = user_dict['username']
+            password = user_dict['password']
+            email = user_dict.get('email')
+            first_name = user_dict.get('first_name', '')
+            last_name = user_dict.get('last_name', '')
+            user_obj = User.objects.create_user(username, email, password)
+            user_obj.first_name = first_name
+            user_obj.last_name = last_name
+            user_obj.save()
+            bundle.data['user'] = {"pk": user_obj.id}
+        return bundle
 
     def prepend_urls(self):
         return [
@@ -173,7 +178,7 @@ class ConsumerResource(CustomBaseModelResource):
         try:
             if phone_number:
                 logger.info('OTP request received. Mobile: {0}'.format(phone_number))
-                consumer = afterbuy_model.Consumer.objects.get(phone_number=mobile_format(phone_number))
+                consumer = afterbuy_model.Consumer.objects.get(phone_number=phone_number)
                 otp = afterbuy_utils.get_otp(user=consumer.user)
                 message = afterbuy_utils.get_template('SEND_OTP').format(otp)
                 if settings.ENABLE_AMAZON_SQS:
@@ -203,7 +208,7 @@ class ConsumerResource(CustomBaseModelResource):
             return HttpBadRequest("mobile and password required")
         try:
             if phone_number:
-                consumer = afterbuy_model.Consumer.objects.filter(phone_number=mobile_format(phone_number))[0]
+                consumer = afterbuy_model.Consumer.objects.filter(phone_number=phone_number)[0]
                 kwargs['id'] = consumer.user__id
             elif email:
                 kwargs['email'] = email
@@ -245,24 +250,24 @@ class ConsumerResource(CustomBaseModelResource):
         try:
             if phone_number:
                 consumer_obj = afterbuy_model.Consumer.objects.get(phone_number
-                                                 =mobile_format(phone_number))
+                                                 =phone_number)
                 password = request.POST['password']
-                user = authenticate(username=consumer_obj.consumer_id,
+                user = authenticate(username=str(consumer_obj.user.username),
                                 password=password)
             elif email_id:
                 consumer_obj = User.objects.get(email
                                                  =email_id)
                 password = request.POST['password']
-                user = authenticate(username=consumer_obj.username,
+                user = authenticate(username=str(consumer_obj.username),
                                 password=password)
             if user is not None:
                 if user.is_active:
                     login(request, user)
                     data = {'status': 1, 'message': "login successfully", "user_id": user.id}
             else:
-                data = {'status': 0, 'message': "login unsuccessfully"}
+                data = {'status': 0, 'message': "login unsuccessfull"}
         except Exception as ex:
-                data = {'status': 0, 'message': "login unsuccessfully"}
+                data = {'status': 0, 'message': "login unsuccessfull"}
                 logger.info("[Exception get_user_login_information]:{0}".
                             format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
@@ -276,7 +281,7 @@ class ConsumerResource(CustomBaseModelResource):
         try:
             if phone_number:
                 consumer = afterbuy_model.Consumer.objects.get(phone_number
-                                                     =mobile_format(phone_number))
+                                                     =phone_number)
                 afterbuy_utils.validate_otp(otp, user=consumer.user)
 
             elif email_id:
