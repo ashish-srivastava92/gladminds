@@ -24,8 +24,11 @@ class AccessTokenAuthentication(Authentication):
     
     def is_authenticated(self, request, **kwargs):
         try:
-            access_token_container = request.GET.urlencode().split('accessToken=')[1]
-            key = access_token_container.split('&')[0]
+            try:
+                access_token_container = request.GET.urlencode().split('access_token=')[1]
+                key = access_token_container.split('&')[0]
+            except:
+                key = request.META.get('HTTP_ACCESS_TOKEN')
             if not key:
                 logging.error('AccessTokenAuthentication. No Access Token found.')
                 return None
