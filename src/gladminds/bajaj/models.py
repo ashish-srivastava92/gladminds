@@ -85,7 +85,7 @@ class Comment(base_models.Comment):
 
 class FeedbackEvent(base_models.FeedbackEvent):
     feedback = models.ForeignKey(Feedback, null=True, blank=True)
-    user_object = models.ForeignKey(ServiceDeskUser, null=True, blank=True)
+    user = models.ForeignKey(ServiceDeskUser, null=True, blank=True)
     activity = models.ForeignKey(Activity, null=True, blank=True)
      
     class Meta:
