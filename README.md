@@ -104,10 +104,10 @@ Contributions and ideas are welcome. These are some ideas we would like to imple
 Edit /etc/hosts file
 add:-
 
-127.0.0.1       local.afterbuy.co
-127.0.0.1       local.admin.gladmindsplatform.co
-127.0.0.1       local.bajaj.gladmindsplatform.co
-127.0.0.1       local.demo.gladmindsplatform.co
+127.0.0.1       local.api.afterbuy.co
+127.0.0.1       local.admin.gladminds.co
+127.0.0.1       local.bajaj.gladminds.co
+127.0.0.1       local.demo.gladminds.co
 
 '''
 

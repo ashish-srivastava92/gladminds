@@ -6,6 +6,7 @@ from django.conf import settings
 
 from gladminds.core import base_models
 from gladminds.core.constants import GENDER_CHOICES, SIZE_CHOICES, FUEL_CHOICES
+from gladminds.core.model_helpers import PhoneField
 _APP_NAME = 'afterbuy'
 
 
@@ -43,8 +44,7 @@ class Consumer(base_models.BaseModel):
     user = models.OneToOneField(User, primary_key=True)
     consumer_id = models.CharField(
         max_length=50, unique=True, default=uuid4)
-    phone_number = models.CharField(
-                   max_length=15, null=True, blank=True)
+    phone_number = PhoneField(unique=True)
     image_url = models.CharField(
                    max_length=200, default=settings.DEFAULT_IMAGE_ID)
     address = models.TextField(blank=True, null=True)
