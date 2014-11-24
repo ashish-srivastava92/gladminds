@@ -16,3 +16,26 @@ insert into bajaj.bajaj_emailtemplate(id,template_key,sender,receiver,subject,bo
 
 insert into bajaj.bajaj_producttype(id,product_type,image_url,is_active) select gladminds_producttypedata.product_type_id, gladminds_producttypedata.product_type,gladminds_producttypedata.product_image_loc,gladminds_producttypedata.isActive from gladminds_producttypedata;
 
+alter table bajaj_oldfscdata change `product_id` `product_id` int(11) default null;
+
+"
+set the env varibales (QA)
+
+export DB_USER='gladminds'
+export DB_PASSWORD='gladmindsqa2'
+export DB_HOST='gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com'
+export MIGRATE_DB='gladminds'
+export OFFSET=0
+
+Run these commands
+nohup python scripts/migrate_dealer_data.py &
+nohup python scripts/migrate_asc_data.py &
+nohup python scripts/migrate_service_advisor.py &
+
+nohup python scripts/migrate_products.py &
+nohup python scripts/migrate_coupons.py &
+nohup python scripts/migrate_coupons_sa_relations.py &
+
+nohup python scripts/migrate_old_fsc.py &
+nohup python scripts/migrate_temp_customer.py &
+nohup python scripts/migrate_ucn_recovery.py &
