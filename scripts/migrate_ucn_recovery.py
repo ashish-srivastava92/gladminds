@@ -11,7 +11,7 @@ DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
 MIGRATE_DB = os.environ.get('MIGRATE_DB','gladmindsdb')
 OFFSET = int(os.environ.get('OFFSET',0))
 TOTAL_START_TIME = time.time()
-
+FILE = open('ucn_recovery.out', 'a+')
 
 DB_OLD = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
                      user=DB_USER, # your username
@@ -53,12 +53,12 @@ def process_query_ucnrecover(data):
         db_new.commit()        
     except Exception as ex:
         db_new.rollback()
-        print '[Error]:', data.get('id'), ex
+        e='[Error]: {0} {1}'.format(data.get('id'), ex)
+        FILE.write(str(e) + '\n')
     db_new.close()
     
  
 def format_data_ucnrecover(ucnrecover_data):
-    start_time = time.time()
     ucnrecovers=[]
     for data in ucnrecover_data:
         temp = {}
@@ -72,7 +72,8 @@ def format_data_ucnrecover(ucnrecover_data):
         temp['username'] = data[7]
         ucnrecovers.append(temp)
     POOL.map(process_query_ucnrecover, ucnrecovers)
-    end_time = time.time()
-    print "..........Total TIME TAKEN.........", end_time-start_time
 
 format_data_ucnrecover(ucnrecover_data)
+TOTAL_END_TIME = time.time()
+FILE.write(str("..........Total TIME TAKEN......... {0}".format(TOTAL_END_TIME-TOTAL_START_TIME)) + '\n')
+FILE.close()

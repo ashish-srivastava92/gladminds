@@ -231,6 +231,7 @@ MIDDLEWARE_CLASSES = (
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'gladminds.core.middlewares.middleware.GladmindsMessageMiddleware',
 #     'gladminds.middleware.GladmindsMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -493,7 +494,8 @@ SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                           'pass':'kap@user!23',
                           'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
                           'working_key': '2uj6gnnnlbx37x436cppq87176j660w9',
-                          'sender_id': 'GLADMS'}
+                          'sender_id': 'GLADMS',
+                          'params': 'kap'}
                   }
 
 ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},

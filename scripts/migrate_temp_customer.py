@@ -23,6 +23,7 @@ CUR_OLD = DB_OLD.cursor()
 CUR_OLD.execute("SELECT * FROM gladminds_customertempregistration")
 CUST_DATA = CUR_OLD.fetchall()
 DB_OLD.close()
+FILE = open('temp_cust.out', 'a+')
 
 def process_query(data):
     db_new = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
@@ -45,12 +46,12 @@ def process_query(data):
         db_new.commit()
     except Exception as ex:
         db_new.rollback()
-        print '[Error]:', data.get('id'), ex
+        e='[Error]: {0} {1}'.format(data.get('id'), ex)
+        FILE.write(str(e) + '\n')
     db_new.close()
     
 
 def format_data(coupon_data):
-    start_time = time.time()
     coupons=[]
     for data in coupon_data:
         temp = {}
@@ -65,7 +66,8 @@ def format_data(coupon_data):
         temp['tagged_sap_id'] = data[8]
         coupons.append(temp)
     POOL.map(process_query, coupons)
-    end_time = time.time()
-    print "..........Total TIME TAKEN.........", end_time-start_time
 
 format_data(CUST_DATA)
+TOTAL_END_TIME = time.time()
+FILE.write(str("..........Total TIME TAKEN......... {0}".format(TOTAL_END_TIME-TOTAL_START_TIME)) + '\n')
+FILE.close()

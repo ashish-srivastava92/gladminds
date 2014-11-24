@@ -1,7 +1,7 @@
 from integration.base_integration import GladmindsResourceTestCase
 from django.test.utils import override_settings
-from gladminds.core.cron_jobs import sqs_tasks
-from gladminds.core.cron_jobs.sqs_tasks import expire_service_coupon
+from gladminds import sqs_tasks
+from gladminds.sqs_tasks import expire_service_coupon
 from datetime import datetime, timedelta
 from unit.base_unit import GladmindsUnitTestCase
 from gladminds.core.utils import COUPON_STATUS
