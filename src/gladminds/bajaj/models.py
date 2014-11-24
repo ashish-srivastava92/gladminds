@@ -60,9 +60,9 @@ class ServiceDeskUser(base_models.ServiceDeskUser):
 
 
 class Feedback(base_models.Feedback):
-    reporter = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj feedback reporter')
-    assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj feedback assignee')
-    previous_assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj previous assignee')
+    reporter = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_feedback_reporter')
+    assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_feedback_assignee')
+    previous_assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_previous_assignee')
     
     class Meta:
         app_label = _APP_NAME
