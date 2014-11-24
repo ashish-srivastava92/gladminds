@@ -23,13 +23,13 @@ ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
-
 API_FLAG = False
 COUPON_VALID_DAYS = 30
 COUPON_URL = 'local.bajaj.gladmindsplatform.co'
 TOTP_SECRET_KEY = '93424'
 OTP_VALIDITY = 120
 HARCODED_OTPS = ['GMDEV123']
+HARCODED_TOKEN = ['e6281aa90743296987089ab013ee245dab66b27b']
 
 JOBCARD_DIR = '{0}/jobcards/prod/'
 JOBCARD_BUCKET = 'gladminds'
@@ -250,7 +250,8 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-TEST_IGNORE_APPS = ('south',)
+TEST_IGNORE_APPS = (#'south',
+                    )
 
 ALL_APPS = (
     'django.contrib.auth',
@@ -263,6 +264,8 @@ ALL_APPS = (
     'suit',
     'django.contrib.admin',
     'import_export',
+    'provider',
+    'provider.oauth2',
     'gladminds',
     'gladminds.gm',
     'gladminds.core',
@@ -275,8 +278,7 @@ ALL_APPS = (
     'tastypie_swagger',
     'django_otp',
     'django_otp.plugins.otp_totp',
-    'provider',
-    'provider.oauth2',
+    
    # 'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',

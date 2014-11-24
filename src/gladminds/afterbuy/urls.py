@@ -6,6 +6,9 @@ from gladminds.core.apis import preferences_apis
 from gladminds.afterbuy.apis import user_apis
 from gladminds.core.apis.image_apis import upload_files
 
+from provider.oauth2 import views
+from provider.oauth2 import urls
+
 api_v1 = Api(api_name="afterbuy/v1")
 api_v1.register(user_apis.ConsumerResource())
 api_v1.register(user_apis.InterestResource())
@@ -32,5 +35,6 @@ urlpatterns = patterns('',
     url(r'', include(api_v1.urls)),
     url(r'api/doc/', include('gladminds.core.api_docs.swagger_urls', namespace='tastypie_swagger')),
     url(r'^', include(brand_admin.urls)),
-    url(r'^afterbuy/v1/upload', upload_files)
+    url(r'^afterbuy/v1/upload', upload_files),
+    url(r'^oauth2/', include('provider.oauth2.urls', namespace = 'oauth2')),
 )
