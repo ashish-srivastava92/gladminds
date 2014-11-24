@@ -124,7 +124,7 @@ class ConsumerResource(CustomBaseModelResource):
 
     def validate_user_phone_number(self,phone_number, otp):
         if not otp and not phone_number :
-            return HttpBadRequest("otp and phone_number/email_id required")
+            return HttpBadRequest("otp and phone_number required")
         try:
             afterbuy_utils.validate_otp(otp, phone_number=phone_number)
 

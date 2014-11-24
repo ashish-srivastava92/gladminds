@@ -249,7 +249,8 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-TEST_IGNORE_APPS = ('south',)
+TEST_IGNORE_APPS = (#'south',
+                    )
 
 ALL_APPS = (
     'django.contrib.auth',
@@ -282,7 +283,7 @@ ALL_APPS = (
     # 'django.contrib.admindocs',
 )
 
-INSTALLED_APPS = ALL_APPS 
+INSTALLED_APPS = ALL_APPS + TEST_IGNORE_APPS
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
