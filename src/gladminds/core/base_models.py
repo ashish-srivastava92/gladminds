@@ -8,6 +8,7 @@ from gladminds.core.managers import user_manager
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, RATINGS,\
                             ROOT_CAUSE, SLA_PRIORITY, TIME_UNIT
 
+
 class BaseModel(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
