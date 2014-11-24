@@ -1,6 +1,7 @@
 from tastypie.constants import ALL_WITH_RELATIONS, ALL
 from tastypie.authorization import Authorization
 from tastypie import fields 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AnonymousUser, User
 from django.utils import timezone
@@ -41,8 +42,10 @@ class AccessTokenAuthentication(Authentication):
             logging.exception('Error in Authentication. {0}'.format(e))
             return False
         return True
-    
+
     def verify_access_token(self, key):
+        if  (settings.ENV in ["dev", "local"] and key in settings.HARCODED_TOKEN):
+                return key
         try:
             token = AccessToken.objects.get(token=key)
             # Check if token has expired
