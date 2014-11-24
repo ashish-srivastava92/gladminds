@@ -358,7 +358,7 @@ def get_feedbacks(user, status):
     if group.name == 'dealers':
         sa_list = utils.get_sa_list(user)
         if sa_list:
-            feedbacks = models.Feedback.objects.filter(reporter_name__in=sa_list, status__in=status).order_by('-created_date')
+            feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_list, status__in=status).order_by('-created_date')
     return feedbacks
 
 
@@ -404,7 +404,7 @@ def enable_servicedesk(request, servicedesk=None):
         return HttpResponseRedirect('http://support.gladminds.co/')
 
 def save_help_desk_data(request):
-    fields = ['message', 'advisorMobile', 'type', 'subject']
+    fields = ['description', 'advisorMobile', 'type', 'summary']
     sms_dict = {}
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)

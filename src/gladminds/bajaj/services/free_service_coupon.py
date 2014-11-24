@@ -514,15 +514,16 @@ class GladmindsResources(Resource):
         ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
         try:
             role = self.check_role_of_initiator(phone_number)
+            reporter_object = models.Reporter.objects.get(name=reporter_name, phone_number=phone_number)
             if with_detail:
-                gladminds_feedback_object = models.Feedback(reporter=phone_number, reporter_name=reporter_name,
+                gladminds_feedback_object = models.Feedback(reporter=reporter_object,
                                                                 type=sms_dict['type'], 
-                                                                subject=sms_dict['subject'], message=sms_dict['message'],
+                                                                summary=sms_dict['summary'], description=sms_dict['description'],
                                                                 status="Open", created_date=datetime.now(),
                                                                 role=role
                                                                 )
             else:
-                gladminds_feedback_object = models.Feedback(reporter=phone_number, reporter_name=reporter_name,
+                gladminds_feedback_object = models.Feedback(reporter=reporter_object,
                                                                 message=sms_dict['message'], status="Open",
                                                                 created_date=datetime.now(),
                                                                 role=role
