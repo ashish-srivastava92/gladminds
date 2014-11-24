@@ -1,3 +1,4 @@
+from uuid import uuid4
 import json
 import logging
 from django.forms.models import model_to_dict
@@ -97,33 +98,28 @@ class ConsumerResource(CustomBaseModelResource):
                 response=http.HttpBadRequest('Wrong OTP!'))
         phone_number = request.POST.get('phone_number')
         email_id = request.POST.get('email_id')
-        user_name = request.POST.get('username')
+        user_name = request.POST.get('username', uuid4()[:30])
         first_name = request.POST.get('name')
         last_name = request.POST.get('name','')
         password = request.POST.get('password')
-        if not phone_number or not email_id or not user_name or not password:
+        if not phone_number or not password:
             return HttpBadRequest("phone_number, username and password required.")
         try:
             afterbuy_model.Consumer.objects.get(
                                                 phone_number=phone_number)
             data = {'status': 0, 'message': 'phone number already registered'}
         except Exception as ex:
-                try:
-                    create_user = User.objects.get(email=email_id)
-                    data = {'status': 0, 'message': 'email id already registered'}
-                    return HttpResponse(json.dumps(data), content_type="application/json")
-                except Exception as ex:
-                    log_message = "new user :{0}".format(ex)
-                    logger.info(log_message)
-                    create_user = User.objects.create_user(user_name,
-                                                        email_id, password)
-                    create_user.first_name = first_name
-                    create_user.first_name = last_name
-                    create_user.save()
-                    user_register = afterbuy_model.Consumer(user=create_user,
-                                phone_number=phone_number)
-                    user_register.save()
-                    data = {'status': 1, 'message': 'succefully registered'}
+                log_message = "new user :{0}".format(ex)
+                logger.info(log_message)
+                create_user = User.objects.create_user(user_name,
+                                                    email_id, password)
+                create_user.first_name = first_name
+                create_user.first_name = last_name
+                create_user.save()
+                user_register = afterbuy_model.Consumer(user=create_user,
+                            phone_number=phone_number)
+                user_register.save()
+                data = {'status': 1, 'message': 'succefully registered'}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def validate_user_phone_number(self,phone_number, otp):
