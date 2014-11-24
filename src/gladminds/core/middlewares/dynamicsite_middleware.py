@@ -38,7 +38,9 @@ class DynamicSitesMiddleware(object):
 
     def get_fields(self, domain):
         fields = domain.split('.')
-        if fields[0] in ['local', 'dev', 'qa', 'staging']:
+        if fields[0] in ['local', 'dev', 'qa', 'staging', 'development']:
+            fields = fields[1:]
+        if fields[0] in ['api'] and fields[1] in ['afterbuy']:
             fields = fields[1:]
         return fields[0]
 
