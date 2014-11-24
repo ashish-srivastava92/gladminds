@@ -73,7 +73,7 @@ def process_query(data):
         e='[Error]: {0} {1}'.format( data.get('vin'), ex)
         db_new.rollback()
         if 'Duplicate entry' not in e:
-            print e
+            FILE.write(str(e) + '\n')
     db_new.close()
     
  
@@ -128,7 +128,12 @@ DATA_COUNT = CUR_OLD.fetchone()[0]
 DB_OLD.close()
 
 while OFFSET<=DATA_COUNT:
+    FILE = open('coupon.out', 'a+')
+    FILE.write(str("OFFSET: {0}".format(OFFSET)) + '\n')
     get_data(offset=OFFSET)
     OFFSET=OFFSET+10000
+    FILE.close()
 TOTAL_END_TIME = time.time()
-print "..........Total TIME TAKEN.........", TOTAL_END_TIME-TOTAL_START_TIME
+FILE = open('product.out', 'a+')
+FILE.write(str("..........Total TIME TAKEN......... {0}".format(TOTAL_END_TIME-TOTAL_START_TIME)) + '\n')
+FILE.close()

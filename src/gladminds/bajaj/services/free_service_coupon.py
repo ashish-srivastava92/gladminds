@@ -27,7 +27,7 @@ from gladminds.core.managers import sms_parser
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services import message_template as templates
 from gladminds.bajaj import models
-from gladminds.core.cron_jobs.sqs_tasks import send_registration_detail, send_service_detail, \
+from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
     send_brand_sms_customer, send_close_sms_customer, \
     send_invalid_keyword_message, customer_detail_recovery, send_point
@@ -235,7 +235,7 @@ class GladmindsResources(Resource):
         updated_coupon = models.CouponData.objects\
                         .filter(Q(status=4) | Q(status=5), product=product, valid_kms__gt=kms)\
                         .update(status=1, service_advisor=None, actual_kms=None,
-                                actual_service_date=None, servicing_dealer=None)
+                                actual_service_date=None)
         logger.info("%s have higher KMS range" % updated_coupon)
 
     def update_exceed_limit_coupon(self, actual_kms, product):
@@ -433,9 +433,10 @@ class GladmindsResources(Resource):
             sa_phone = utils.get_phone_number_format(phone_number)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = utils.get_task_queue()
-                task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
+                task_queue.add("send_service_detail", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
             else:
-                send_invalid_keyword_message.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
+                send_service_detail.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
+            sms_log(receiver=sa_phone, action=AUDIT_ACTION, message=message)
             return None
         service_advisor_obj = all_sa_dealer_obj[0]
         return service_advisor_obj

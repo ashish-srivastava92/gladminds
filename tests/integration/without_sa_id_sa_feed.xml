@@ -25,8 +25,8 @@
 				</ns1:DealerData>
 			</ns1:ObjectList>
 			<ns1:Credential>
-				<ns1:UserName>gladminds</ns1:UserName>
-				<ns1:Password>gladminds</ns1:Password>
+				<ns1:UserName>admin</ns1:UserName>
+				<ns1:Password>admin</ns1:Password>
 			</ns1:Credential>
 		</ns1:postDealer>
 	</SOAP-ENV:Body>

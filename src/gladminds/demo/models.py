@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
 
 from gladminds.core import base_models
 
@@ -50,21 +52,52 @@ class ServiceAdvisor(base_models.ServiceAdvisor):
         app_label = _APP_NAME
         verbose_name_plural = "Service Advisor Data"
 
+class Reporter(base_models.Reporter):
+    user_profile = models.ForeignKey(UserProfile, null=True, blank=True)
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "reporter info"
+
 
 class Feedback(base_models.Feedback):
-    assign_to = models.ForeignKey(UserProfile, null=True, blank=True)
-
+    reporter = models.ForeignKey(Reporter, null=True, blank=True)
+    limit = models.Q(app_label = _APP_NAME, model = 'userprofile') | models.Q(app_label = _APP_NAME, model = 'reporter')
+    assign_to = models.ForeignKey(ContentType, limit_choices_to = limit, related_name='demo feedback assignee', null=True, blank=True)
+    assignee_id = models.PositiveIntegerField(null=True, blank=True)
+    assignee_object = generic.GenericForeignKey('assign_to', 'assignee_id')
+    previous_assignee = models.ForeignKey(UserProfile, null=True, blank=True)
+    
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "user feedback info"
 
 
-class Comments(base_models.Comments):
-    feedback_object = models.ForeignKey(Feedback, null=False, blank=False)
+class Activity(base_models.Activity):
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "user activity info"
+
+
+class Comment(base_models.Comment):
+    feedback_object = models.ForeignKey(Feedback, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "user comment info"
+
+
+class FeedbackEvent(base_models.FeedbackEvent):
+    feedback = models.ForeignKey(Feedback, null=True, blank=True)
+    limit = models.Q(app_label = _APP_NAME, model = 'userprofile') | models.Q(app_label = _APP_NAME, model = 'reporter')
+    user_details = models.ForeignKey(ContentType, limit_choices_to = limit, related_name='demo feedback event users', null=True, blank=True)
+    user_id = models.PositiveIntegerField(null=True, blank=True)
+    user_object = generic.GenericForeignKey('user', 'user_id')
+    activity = models.ForeignKey(Activity, null=True, blank=True)
+     
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "user feedback event info"
 
 
 class ProductType(base_models.ProductType):
@@ -112,7 +145,7 @@ class UCNRecovery(base_models.UCNRecovery):
 
 
 class OldFscData(base_models.OldFscData):
-    product = models.ForeignKey(ProductData, null=False, editable=False)
+    product = models.ForeignKey(ProductData, null=True, blank=True)
     dealer = models.ForeignKey(Dealer, null=True, blank=True)
 
     class Meta:

@@ -189,8 +189,7 @@ class BrandProductTypeFeed(BaseFeed):
     def import_data(self):
         for product in self.data_source:
             try:
-                product_type = models.ProductType(product_name=product[
-                                                      'product_name'], product_type=product['product_type'])
+                product_type = models.ProductType(product_type=product['product_type'])
                 product_type.save()
             except Exception as ex:
                 logger.info(
@@ -367,7 +366,7 @@ class ProductServiceFeed(BaseFeed):
 
 
 def update_coupon_data(sender, **kwargs):
-    from gladminds.core.cron_jobs.sqs_tasks import send_on_product_purchase
+    from gladminds.sqs_tasks import send_on_product_purchase
     instance = kwargs['instance']
     logger.info("triggered update_coupon_data")
     if instance.customer_phone_number:
@@ -533,7 +532,7 @@ class CouponRedeemFeedToSAP(BaseFeed):
 class ASCRegistrationToSAP(BaseFeed):
 
     def export_data(self, asc_phone_number=None):
-        asc_form_obj = aftersell_models.ASCSaveForm.objects\
+        asc_form_obj = models.ASCTempRegistration.objects\
             .get(phone_number=asc_phone_number, status=1)
 
         item_batch = {

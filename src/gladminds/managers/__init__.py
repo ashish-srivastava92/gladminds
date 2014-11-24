@@ -10,7 +10,7 @@ from gladminds.core.managers import mail
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, \
     TIME_FORMAT
 from django.contrib.auth.models import Group, User
-from gladminds.core.cron_jobs.sqs_tasks import send_sms
+from gladminds.sqs_tasks import send_sms
 # from gladminds.bajaj.services.service_desk import send_feedback_sms
 
 logger = logging.getLogger('gladminds')

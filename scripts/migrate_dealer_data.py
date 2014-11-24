@@ -25,6 +25,7 @@ CUR_OLD.execute("select d.*, a.* from aftersell_registereddealer as d,\
 DEALER_DATA = CUR_OLD.fetchall()
 
 DB_OLD.close()
+FILE = open('dealer.out', 'a+')
 
 def process_query(data):
     db_new = MySQLdb.connect(host=DB_HOST, # your host, usually localhost
@@ -64,11 +65,11 @@ def process_query(data):
         db_new.commit()
     except Exception as ex:
         db_new.rollback()
-        print '[Error]:', data.get('dealer_id'), ex
+        e='[Error]: {0} {1}'.format(data.get('dealer_id'), ex)
+        FILE.write(str(e) + '\n')
     db_new.close()
 
 def format_data(dealer_data):
-    start_time = time.time()
     dealers=[]
     for data in dealer_data:
         temp = {}
@@ -89,7 +90,8 @@ def format_data(dealer_data):
         temp['date_joined'] = data[15]
         dealers.append(temp)
     POOL.map(process_query, dealers)
-    end_time = time.time()
-    print "..........Total TIME TAKEN.........", end_time-start_time
     
 format_data(DEALER_DATA)
+TOTAL_END_TIME = time.time()
+FILE.write(str("..........Total TIME TAKEN......... {0}".format(TOTAL_END_TIME-TOTAL_START_TIME)) + '\n')
+FILE.close()

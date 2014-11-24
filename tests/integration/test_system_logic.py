@@ -1,10 +1,11 @@
-from gladminds.models import common
-from gladminds.aftersell.models import common as aftersell_common
+from gladminds.bajaj import models as common
+from gladminds.gm import models as gm_common
+from gladminds.afterbuy import models as afterbuy_common
 from integration.base import BaseTestCase
 
 from django.test.client import Client
 
-client = Client()
+client = Client(SERVER_NAME='bajaj')
 
 
 class System(BaseTestCase):
@@ -13,12 +14,12 @@ class System(BaseTestCase):
 
     def create_gladmind_user(self):
         user_obj = self.create_user(username='glad', email='gm@gm.com', password='gladminds',phone_number='+9199999998')
-        glad_obj = common.GladMindUsers(user=user_obj, phone_number='+9199999998')
+        glad_obj = common.UserProfile(user=user_obj, phone_number='+9199999998')
         glad_obj.save()
         return glad_obj
 
     def get_brand_info(self, **kwargs):
-        brand_obj = common.BrandData.objects.get(**kwargs)
+        brand_obj = gm_common.Brand.objects.get(**kwargs)
         return brand_obj
 
     def get_product_info(self, **kwargs):
@@ -26,12 +27,12 @@ class System(BaseTestCase):
         return product_data
 
     def create_and_get_product_insurance_info(self, **kwargs):
-        product_insurance = common.ProductInsuranceInfo(**kwargs)
+        product_insurance = afterbuy_common.ProductInsuranceInfo(**kwargs)
         product_insurance.save()
         return product_insurance
 
     def create_and_get_product_warranty_info(self, **kwargs):
-        product_warranty = common.ProductWarrantyInfo(**kwargs)
+        product_warranty = afterbuy_common.ProductWarrantyInfo(**kwargs)
         product_warranty.save()
         return product_warranty
 
@@ -42,14 +43,11 @@ class System(BaseTestCase):
 
     def create_sdo(self, **kwargs):
         user_servicedesk_owner = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name='SDM', phone_number=kwargs['phone_number'])
-        service_desk_owner = aftersell_common.ServiceDeskUser(user=user_servicedesk_owner, phone_number="+919999999999", email_id="srv.sngh@gmail.com", designation='SDO' )
-        service_desk_owner.save()
-        return service_desk_owner
+        return user_servicedesk_owner
 
     def create_sdm(self, **kwargs):
         user_servicedesk_manager = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name='SDM', phone_number=kwargs['phone_number'])
-        service_desk_owner = aftersell_common.ServiceDeskUser(user=user_servicedesk_manager, phone_number="+911999999989", email_id="srv.sngh@gmail.com", designation='SDM' )
-        service_desk_owner.save()
+        user_servicedesk_manager.save()
 
     def get_temp_customer_obj(self, **kwargs):
         temp_customer_obj = common.CustomerTempRegistration.objects.get(**kwargs)
@@ -65,7 +63,7 @@ class System(BaseTestCase):
         data = {'username': 'DEALER01', 'password': 'DEALER01@123'}
         response = client.post("/aftersell/dealer/login/", data=data)
         self.tester.assertEqual(response.status_code, 302)
-        data = {"messsage":"test","priority":"High","advisorMobile":"+919999999998",
+        data = {"messsage":"test","reporter":"+919999999998",
                 "type":"Problem", "subject":"hello" }
         response = client.post("/aftersell/servicedesk/helpdesk", data=data)
         self.tester.assertEqual(response.status_code, 200)
@@ -104,7 +102,7 @@ class System(BaseTestCase):
         self.tester.assertEqual(response.status_code, 200)
 
     def get_temp_asc_obj(self, **kwargs):
-        temp_asc_obj = aftersell_common.ASCSaveForm.objects.get(**kwargs)
+        temp_asc_obj = common.ASCTempRegistration.objects.get(**kwargs)
         return temp_asc_obj
 
     def check_asc_exists(self, name, check_name, by):
