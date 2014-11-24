@@ -58,7 +58,7 @@ class Consumer(base_models.BaseModel):
     accepted_terms = models.BooleanField(default=False)
     tshirt_size = models.CharField(max_length=2, choices=SIZE_CHOICES,
                                    blank=True, null=True)
-    is_emai_verified = models.BooleanField(default=False)
+#     is_emai_verified = models.BooleanField(default=False)
 
     class Meta:
         app_label = _APP_NAME

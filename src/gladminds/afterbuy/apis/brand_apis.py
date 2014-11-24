@@ -1,19 +1,15 @@
-from tastypie.constants import ALL
 from tastypie.authorization import Authorization
 from tastypie import fields
-from django.http.response import HttpResponseRedirect
-from django.conf.urls import url
-from django.contrib.auth.models import User
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.afterbuy import models as afterbuy_models
-from gladminds.settings import API_FLAG, COUPON_URL
-from tastypie.utils.urls import trailing_slash
+from gladminds.bajaj.apis.user_apis import AccessTokenAuthentication
 
 
 class IndustryResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.Industry.objects.all()
         resource_name = 'industries'
+        authentication = AccessTokenAuthentication()
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data =True

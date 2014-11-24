@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import  login
 from django.conf import settings
 from gladminds.core import utils
-from gladminds.core.apis.authorization import CustomAuthorization
+# from gladminds.core.apis.authorization import CustomAuthorization
 from gladminds.afterbuy import utils as afterbuy_utils
 from gladminds.afterbuy import models as afterbuy_model
 from gladminds.core.apis.user_apis import AccessTokenAuthentication
@@ -23,6 +23,7 @@ from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
 from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.views import get_access_token
+from tastypie.authorization import Authorization
 
 logger = logging.getLogger("gladminds")
 
@@ -47,7 +48,7 @@ class ConsumerResource(CustomBaseModelResource):
         queryset = afterbuy_model.Consumer.objects.all()
         resource_name = "consumers"
         authentication = AccessTokenAuthentication()
-#         authorization = CustomAuthorization()
+        authorization = Authorization()
         detail_allowed_methods = ['get', 'delete', 'put']
         always_return_data = True
         filtering = {
