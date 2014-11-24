@@ -20,10 +20,8 @@ from gladminds.core.utils import mobile_format, get_task_queue
 from gladminds.core.cron_jobs.sqs_tasks import send_otp
 from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
-from tastypie.authorization import Authorization, DjangoAuthorization
-from gladminds.core.exceptions import OtpFailedException
 from tastypie.exceptions import ImmediateHttpResponse
-from gladminds.afterbuy.views import get_access_token
+from gladminds.core.views import get_access_token
 
 logger = logging.getLogger("gladminds")
 
@@ -54,33 +52,6 @@ class ConsumerResource(CustomBaseModelResource):
         filtering = {
                      "consumer_id" : ALL
                      }
-
-#     def hydrate(self, bundle):
-#         if bundle.request.method != 'POST':
-#             return bundle
-# 
-#         otp_token = bundle.data['otp_token']
-#         phone_number = bundle.data['phone_number']
-#         try:
-#             if not (settings.ENV in ["dev", "local"] and otp_token in settings.HARCODED_OTPS):
-#                 afterbuy_utils.validate_otp(otp_token, phone_number=phone_number)
-#         except Exception:
-#             raise ImmediateHttpResponse(
-#                 response=http.HttpBadRequest('Wrong OTP!'))
-# 
-#         user_dict = bundle.data['user']
-#         if isinstance(user_dict, dict) and 'pk' not in user_dict.keys():
-#             username = user_dict['username']
-#             password = user_dict['password']
-#             email = user_dict.get('email')
-#             first_name = user_dict.get('first_name', '')
-#             last_name = user_dict.get('last_name', '')
-#             user_obj = User.objects.create_user(username, email, password)
-#             user_obj.first_name = first_name
-#             user_obj.last_name = last_name
-#             user_obj.save()
-#             bundle.data['user'] = {"pk": user_obj.id}
-#         return bundle
 
     def prepend_urls(self):
         return [
@@ -212,7 +183,7 @@ class ConsumerResource(CustomBaseModelResource):
             logger.info(log_message)
             data = {'status': 0, 'message': log_message}
         return HttpResponse(json.dumps(data), content_type="application/json")
-    
+
     def authenticate_user_send_otp(self, request, **kwargs):
         data = request.POST
         phone_number = request.POST.get('phone_number')
@@ -345,8 +316,8 @@ class InterestResource(CustomBaseModelResource):
 
     class Meta:
         queryset = afterbuy_model.Interest.objects.all()
-        resource_name = "interest"
-        authorization = Authorization()
+        resource_name = "interests"
+        authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
         
