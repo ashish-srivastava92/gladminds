@@ -69,7 +69,13 @@ class ConsumerResource(CustomBaseModelResource):
         ]
 
     def sent_otp_user_phone_number(self, request, **kwargs):
-        phone_number = request.POST.get('phone_number')
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        phone_number = load.get('phone_number')
         if not phone_number:
             return HttpBadRequest("phone_number is required.")
         try:
@@ -89,20 +95,26 @@ class ConsumerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def user_registration(self, request, **kwargs):
-        otp_token = request.POST['otp_token']
-        phone_number = request.POST['phone_number']
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        otp_token = load['otp_token']
+        phone_number = load['phone_number']
         try:
             if not (settings.ENV in ["dev", "local"] and otp_token in settings.HARCODED_OTPS):
                 afterbuy_utils.validate_otp(otp_token, phone_number=phone_number)
         except Exception:
             raise ImmediateHttpResponse(
                 response=http.HttpBadRequest('Wrong OTP!'))
-        phone_number = request.POST.get('phone_number')
-        email_id = request.POST.get('email_id')
-        user_name = request.POST.get('username', uuid4()[:30])
-        first_name = request.POST.get('name')
-        last_name = request.POST.get('name','')
-        password = request.POST.get('password')
+        phone_number = load.get('phone_number')
+        email_id = load.get('email_id')
+        user_name = load.get('username', str(uuid4())[:30])
+        first_name = load.get('name')
+        last_name = load.get('name','')
+        password = load.get('password')
         if not phone_number or not password:
             return HttpBadRequest("phone_number, username and password required.")
         try:
@@ -254,9 +266,15 @@ class ConsumerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(cosumer_data), content_type="application/json")
 
     def auth_login(self, request, **kwargs):
-        phone_number = request.POST.get('phone_number')
-        email_id = request.POST.get('email_id')
-        password = request.POST.get('password')
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        phone_number = load.get('phone_number')
+        email_id = load.get('email_id')
+        password = load.get('password')
         if not phone_number and not email_id and password:
             return HttpBadRequest("Phone Number/email_id and password  required.")
         try:
@@ -266,7 +284,6 @@ class ConsumerResource(CustomBaseModelResource):
             elif email_id:
                 user_obj = User.objects.get(email
                                                  =email_id)
-            password = request.POST['password']
             http_host = request.META['HTTP_HOST']
             user_auth = authenticate(username=str(user_obj.username),
                                 password=password)
