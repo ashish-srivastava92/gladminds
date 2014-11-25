@@ -56,6 +56,6 @@ urlpatterns = patterns('',
     # Tasks URL
     url(r'^tasks-view/', 'gladminds.core.views.sqs_tasks_view'),
     url(r'^trigger-tasks/', 'gladminds.core.views.trigger_sqs_tasks'),
-    url(r'^tasks/', SqsHandler.as_view(task_map=_tasks_map)),
+    url(r'^tasks', SqsHandler.as_view(task_map=_tasks_map)),
 
 )
