@@ -23,7 +23,7 @@
 				    <th>Ticket</th>
 					<th>Customer</th>
 					<th>Assignee</th>
-					<th>Message</th>
+					<th>Description</th>
 					<th>Priority</th>
 					<th>Type</th>
 					<th>Status</th>
@@ -40,21 +40,21 @@
 							GM-{{feedback.id|default_if_none:""}}
 						</a>  
 					</td>
-					<td>{{feedback.reporter_name|default_if_none:""}}</td>
+					<td>{{feedback.reporter.name|default_if_none:""}}</td>
 					{% if feedback.assign_to_reporter %}
 						<td>Assigned to reporter</td>
 					{% else %}
-						<td>{{feedback.assign_to.user.username|default_if_none:""}}</td>
+						<td>{{feedback.assignee.user_profile.user.username|default_if_none:""}}</td>
 					{%endif%}
 					<td>
 					   <div>
-					       {% if feedback.message|length > 20 %}
+					       {% if feedback.description|length > 20 %}
 					         <span id="{{feedback.id}}" class="btn gladdesk-message ellips" 
-					            data-content="{{feedback.message|default_if_none:""}}" rel="popover" 
+					            data-content="{{feedback.description|default_if_none:""}}" rel="popover" 
 					            data-placement="bottom" data-trigger="hover"  onmouseover="showMessage({{feedback.id}})">
-					              {{feedback.message}}
+					              {{feedback.description}}
 					       {% else  %}
-                                  {{feedback.message}}
+                                  {{feedback.description}}
                            {% endif %}
                             </span>
                        </div>

@@ -400,7 +400,7 @@ class AuditLog(BaseModel):
         verbose_name_plural = "Audit log"
 
 class ServiceDeskUser(BaseModel):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=30, null=True, blank=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     email = models.CharField(max_length=30, blank=True, null=True)
 

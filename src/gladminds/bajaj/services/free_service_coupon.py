@@ -511,20 +511,30 @@ class GladmindsResources(Resource):
     def determine_format(self, request):
         return 'application/json'
 
-    def get_complain_data(self, sms_dict, phone_number, reporter_name, with_detail=False):
+    def get_complain_data(self, sms_dict, phone_number, email, name, with_detail=False):
         ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
         try:
             role = self.check_role_of_initiator(phone_number)
-            reporter_object = models.Reporter.objects.get(name=reporter_name, phone_number=phone_number)
+            user_profile = models.UserProfile.objects.filter(phone_number=phone_number)
+            if user_profile[0]:
+                servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
+                if servicedesk_user:
+                    servicedesk_user = servicedesk_user[0]
+                else:
+                    servicedesk_user = models.ServiceDeskUser(user_profile=user_profile[0], name=name)
+                    servicedesk_user.save()
+            else:
+                servicedesk_user = models.ServiceDeskUser(name=name, phone_number=phone_number, email=email)
+                servicedesk_user.save()
             if with_detail:
-                gladminds_feedback_object = models.Feedback(reporter=reporter_object,
+                gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
                                                                 type=sms_dict['type'], 
                                                                 summary=sms_dict['summary'], description=sms_dict['description'],
                                                                 status="Open", created_date=datetime.now(),
                                                                 role=role
                                                                 )
             else:
-                gladminds_feedback_object = models.Feedback(reporter=reporter_object,
+                gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
                                                                 message=sms_dict['message'], status="Open",
                                                                 created_date=datetime.now(),
                                                                 role=role
