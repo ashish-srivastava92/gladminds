@@ -5,6 +5,17 @@ from gladminds.afterbuy import models as afterbuy
 from django.conf import settings
 
 class CustomAuthorization(DjangoAuthorization):
+    
+    def base_checks(self, request, model_klass):
+        # If it doesn't look like a model, we can't check permissions.
+        if not model_klass or not getattr(model_klass, '_meta', None):
+            return False
+
+        # User must be logged in to check permissions.
+#         if not hasattr(request, 'user'):
+#             return False
+
+        return model_klass
 
     def create_detail(self, object_list, bundle):
         data = bundle.obj.__dict__
