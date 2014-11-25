@@ -38,6 +38,10 @@ def get_servicedesk_users(designation):
     servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile__in=user_list)
     return servicedesk_user
 
+def get_comments(feedback_id):
+    comments = models.Comment.objects.filter(feedback_object_id=feedback_id)
+    return comments
+
 def set_due_date(priority, created_date):
     sla_obj = models.SLA.objects.get(priority=priority)
     resolution_time = sla_obj.resolution_time
@@ -83,6 +87,7 @@ def save_update_feedback(feedback_obj, data, user, host):
      
     else:
         if data['reporter_status'] == 'true':
+            feedback_obj.previous_assignee = feedback_obj.assignee
             feedback_obj.assign_to_reporter = True
             feedback_obj.assignee = feedback_obj.reporter
             
@@ -95,6 +100,8 @@ def save_update_feedback(feedback_obj, data, user, host):
         feedback_obj.priority = data['Priority']
     if data['status'] == 'Pending':
         feedback_obj.pending_from = datetime.datetime.now()
+    if data['status'] == 'In-Progress':
+        feedback_obj.assignee = feedback_obj.previous_assignee
     if data['status'] == 'Closed':
         feedback_obj.closed_date = datetime.datetime.now()
     feedback_obj.save()

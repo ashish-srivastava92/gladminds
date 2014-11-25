@@ -88,6 +88,7 @@
                       	          			<option {% if type == feedback.assignee %} selected {% endif %} value="{{type.user_profile.phone_number}}">{{type.user_profile.user.username}}({{type.user_profile.phone_number}})</option>
                                 		{% endfor %}
                                 		<option {% if feedback.assign_to_reporter %} selected {%endif%} value ='Assign to reporter'>Assign to reporter</option>
+                                		<option value={{feedback.previous_assignee.user_profile.phone_number}}>Previous assignee</option>
                             		</select>
                       			</div>
                     		</div>
