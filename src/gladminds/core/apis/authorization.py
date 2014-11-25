@@ -23,7 +23,7 @@ class CustomAuthorization(DjangoAuthorization):
         if klass is False:
             raise Unauthorized("You are not allowed to access that resource.")
         try:
-            access_token_container = bundle.GET.urlencode().split('access_token=')[1]
+            access_token_container = bundle.request.urlencode().split('access_token=')[1]
             key = access_token_container.split('&')[0]
         except:
             key = bundle.request.META.get('HTTP_ACCESS_TOKEN')
@@ -67,11 +67,14 @@ class CustomAuthorization(DjangoAuthorization):
     def authorize_user(self, object_list, bundle):
         data = bundle.obj.__dict__
         klass = self.base_checks(bundle.request, bundle.obj.__class__)
+        print klass
         if klass is False:
             raise Unauthorized("You are not allowed to access that resource.")
         try:
-            access_token_container = bundle.GET.urlencode().split('access_token=')[1]
+            access_token_container = bundle.request.GET.urlencode().split('access_token=')[1]
+            print access_token_container
             key = access_token_container.split('&')[0]
+            print key
         except:
             key = bundle.request.META.get('HTTP_ACCESS_TOKEN')
 
