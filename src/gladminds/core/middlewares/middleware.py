@@ -27,7 +27,7 @@ class GladmindsMessageMiddleware(object):
         if source_client == settings.SMS_CLIENT_DETAIL['KAP']['params']:
             SMS_CLIENT.value = "KAP"
         else :
-            SMS_CLIENT.value = "AIRTEL"
+            SMS_CLIENT.value = "KAP"
         
         logger.info('[Middleware]: Client is {0}'.format(SMS_CLIENT.value)) 
     
