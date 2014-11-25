@@ -18,7 +18,10 @@ class CustomAuthorization(DjangoAuthorization):
             key = bundle.request.META.get('HTTP_ACCESS_TOKEN')
         if  (settings.ENV in ["dev", "local"] and key in settings.HARCODED_TOKEN):
                 return True
-        authorization = AccessToken.objects.filter(token=key)[0]
+        try:
+            authorization = AccessToken.objects.filter(token=key)[0]
+        except:
+                raise Unauthorized("You are not allowed to access that data.")
         user_id = int(authorization.user.id)
         if data.get('consumer_id'):
             try:
@@ -63,7 +66,10 @@ class CustomAuthorization(DjangoAuthorization):
 
         if (settings.ENV in ["dev", "local"] and key in settings.HARCODED_TOKEN):
                 return True
-        authorization = AccessToken.objects.filter(token=key)[0]
+        try:
+            authorization = AccessToken.objects.filter(token=key)[0]
+        except:
+                    raise Unauthorized("You are not allowed to access that data.")    
         user_id = int(authorization.user.id)
         if klass._meta.module_name == 'consumer':
             if user_id == data['user_id']:
