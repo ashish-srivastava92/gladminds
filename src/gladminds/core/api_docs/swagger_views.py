@@ -72,7 +72,7 @@ class SwaggerView(TastypieApiMixin, TemplateView):
     Display the swagger-ui page
     """
 
-    template_name = 'tastypie_swagger/index.html'
+    template_name = 'swagger/index.html'
 
 
 class ResourcesView(TastypieApiMixin, SwaggerApiDataMixin, JSONView):
