@@ -2,7 +2,7 @@ from tastypie.authorization import DjangoAuthorization
 from tastypie.exceptions import Unauthorized
 from provider.oauth2.models import AccessToken
 from gladminds.afterbuy import models as afterbuy
-
+from django.conf import settings
 
 class CustomAuthorization(DjangoAuthorization):
 
@@ -16,6 +16,8 @@ class CustomAuthorization(DjangoAuthorization):
             key = access_token_container.split('&')[0]
         except:
             key = bundle.request.META.get('HTTP_ACCESS_TOKEN')
+        if  (settings.ENV in ["dev", "local"] and key in settings.HARCODED_TOKEN):
+                return True
         authorization = AccessToken.objects.filter(token=key)[0]
         user_id = int(authorization.user.id)
         if data.get('consumer_id'):
@@ -58,6 +60,9 @@ class CustomAuthorization(DjangoAuthorization):
             key = access_token_container.split('&')[0]
         except:
             key = bundle.request.META.get('HTTP_ACCESS_TOKEN')
+
+        if (settings.ENV in ["dev", "local"] and key in settings.HARCODED_TOKEN):
+                return True
         authorization = AccessToken.objects.filter(token=key)[0]
         user_id = int(authorization.user.id)
         if klass._meta.module_name == 'consumer':
