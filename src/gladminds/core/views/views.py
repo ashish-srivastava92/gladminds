@@ -20,7 +20,7 @@ from django.db.models import F
 from gladminds.bajaj import models
 from gladminds.bajaj.services import message_template
 from gladminds.core import utils
-from gladminds.core.cron_jobs.sqs_tasks import send_otp
+from gladminds.sqs_tasks import send_otp
 from gladminds.core.managers.mail import sent_otp_email
 from gladminds.bajaj.feeds.feed import SAPFeed
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark

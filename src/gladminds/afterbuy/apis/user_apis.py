@@ -1,3 +1,4 @@
+from uuid import uuid4
 import json
 import logging
 from django.forms.models import model_to_dict
@@ -9,6 +10,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import  login
 from django.conf import settings
 from gladminds.core import utils
+# from gladminds.core.apis.authorization import CustomAuthorization
 from gladminds.afterbuy import utils as afterbuy_utils
 from gladminds.afterbuy import models as afterbuy_model
 from gladminds.core.apis.user_apis import AccessTokenAuthentication
@@ -16,12 +18,12 @@ from tastypie import fields, http
 from gladminds.core.managers.mail import sent_otp_email
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.utils import mobile_format, get_task_queue
-from gladminds.core.cron_jobs.sqs_tasks import send_otp
+from gladminds.sqs_tasks import send_otp
 from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
-from tastypie.authorization import Authorization
-from gladminds.core.exceptions import OtpFailedException
 from tastypie.exceptions import ImmediateHttpResponse
+from gladminds.core.views import get_access_token
+from tastypie.authorization import Authorization
 
 logger = logging.getLogger("gladminds")
 
@@ -31,7 +33,6 @@ class DjangoUserResources(ModelResource):
         queryset = User.objects.all()
         resource_name = 'django'
         excludes = ['is_active', 'is_staff', 'is_superuser']
-        authorization = Authorization()
         detail_allowed_methods = ['get','post', 'delete', 'put']
         always_return_data = True
         filtering = {
@@ -46,41 +47,17 @@ class ConsumerResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_model.Consumer.objects.all()
         resource_name = "consumers"
+        authentication = AccessTokenAuthentication()
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'delete', 'put']
+        detail_allowed_methods = ['get', 'delete', 'put']
         always_return_data = True
         filtering = {
                      "consumer_id" : ALL
                      }
 
-    def hydrate(self, bundle):
-        otp_token = bundle.data['otp_token']
-        phone_number = bundle.data['phone_number']
-
-        try:
-            if not (settings.ENV in ["dev", "local"] and otp_token in settings.HARCODED_OTPS):
-                afterbuy_utils.validate_otp(otp_token, phone_number=phone_number)
-        except Exception:
-            raise ImmediateHttpResponse(
-                response=http.HttpBadRequest('Wrong OTP!'))
-
-        user_dict = bundle.data['user']
-        if isinstance(user_dict, dict) and 'pk' not in user_dict.keys():
-            username = user_dict['username']
-            password = user_dict['password']
-            email = user_dict.get('email')
-            first_name = user_dict.get('first_name', '')
-            last_name = user_dict.get('last_name', '')
-            user_obj = User.objects.create_user(username, email, password)
-            user_obj.first_name = first_name
-            user_obj.last_name = last_name
-            user_obj.save()
-            bundle.data['user'] = {"pk": user_obj.id}
-        return bundle
-
     def prepend_urls(self):
         return [
-            url(r"^(?P<resource_name>%s)/registration%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('save_user_details'), name="save_user_details"),
+            url(r"^(?P<resource_name>%s)/registration%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('user_registration'), name="user_registration"),
             url(r"^(?P<resource_name>%s)/phone-number/send-otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('sent_otp_user_phone_number'), name="sent_otp_user_phone_number"),
             url(r"^(?P<resource_name>%s)/authenticate-email%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('authenticate_user_email_id'), name="authenticate_user_email_id"),
             url(r"^(?P<resource_name>%s)/send-otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('authenticate_user_send_otp'), name="authenticate_user_send_otp"),
@@ -92,7 +69,13 @@ class ConsumerResource(CustomBaseModelResource):
         ]
 
     def sent_otp_user_phone_number(self, request, **kwargs):
-        phone_number = request.POST.get('phone_number')
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        phone_number = load.get('phone_number')
         if not phone_number:
             return HttpBadRequest("phone_number is required.")
         try:
@@ -111,9 +94,50 @@ class ConsumerResource(CustomBaseModelResource):
             data = {'status': 0, 'message': ex}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
+    def user_registration(self, request, **kwargs):
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        otp_token = load['otp_token']
+        phone_number = load['phone_number']
+        try:
+            if not (settings.ENV in ["dev", "local"] and otp_token in settings.HARCODED_OTPS):
+                afterbuy_utils.validate_otp(otp_token, phone_number=phone_number)
+        except Exception:
+            raise ImmediateHttpResponse(
+                response=http.HttpBadRequest('Wrong OTP!'))
+        phone_number = load.get('phone_number')
+        email_id = load.get('email_id')
+        user_name = load.get('username', str(uuid4())[:30])
+        first_name = load.get('name')
+        last_name = load.get('name','')
+        password = load.get('password')
+        if not phone_number or not password:
+            return HttpBadRequest("phone_number, username and password required.")
+        try:
+            afterbuy_model.Consumer.objects.get(
+                                                phone_number=phone_number)
+            data = {'status': 0, 'message': 'phone number already registered'}
+        except Exception as ex:
+                log_message = "new user :{0}".format(ex)
+                logger.info(log_message)
+                create_user = User.objects.create_user(user_name,
+                                                    email_id, password)
+                create_user.first_name = first_name
+                create_user.first_name = last_name
+                create_user.save()
+                user_register = afterbuy_model.Consumer(user=create_user,
+                            phone_number=phone_number)
+                user_register.save()
+                data = {'status': 1, 'message': 'succefully registered'}
+        return HttpResponse(json.dumps(data), content_type="application/json")
+
     def validate_user_phone_number(self,phone_number, otp):
         if not otp and not phone_number :
-            return HttpBadRequest("otp and phone_number/email_id required")
+            return HttpBadRequest("otp and phone_number required")
         try:
             afterbuy_utils.validate_otp(otp, phone_number=phone_number)
 
@@ -168,7 +192,7 @@ class ConsumerResource(CustomBaseModelResource):
             logger.info(log_message)
             data = {'status': 0, 'message': log_message}
         return HttpResponse(json.dumps(data), content_type="application/json")
-    
+
     def authenticate_user_send_otp(self, request, **kwargs):
         data = request.POST
         phone_number = request.POST.get('phone_number')
@@ -242,28 +266,32 @@ class ConsumerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(cosumer_data), content_type="application/json")
 
     def auth_login(self, request, **kwargs):
-        phone_number = request.POST.get('phone_number')
-        email_id = request.POST.get('email_id')
-        password = request.POST.get('password')
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        phone_number = load.get('phone_number')
+        email_id = load.get('email_id')
+        password = load.get('password')
         if not phone_number and not email_id and password:
             return HttpBadRequest("Phone Number/email_id and password  required.")
         try:
             if phone_number:
-                consumer_obj = afterbuy_model.Consumer.objects.get(phone_number
-                                                 =phone_number)
-                password = request.POST['password']
-                user = authenticate(username=str(consumer_obj.user.username),
-                                password=password)
+                user_obj = afterbuy_model.Consumer.objects.get(phone_number
+                                                 =phone_number).user
             elif email_id:
-                consumer_obj = User.objects.get(email
+                user_obj = User.objects.get(email
                                                  =email_id)
-                password = request.POST['password']
-                user = authenticate(username=str(consumer_obj.username),
+            http_host = request.META['HTTP_HOST']
+            user_auth = authenticate(username=str(user_obj.username),
                                 password=password)
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    data = {'status': 1, 'message': "login successfully", "user_id": user.id}
+            if user_auth is not None:
+                access_token = get_access_token(user_auth, user_obj.username, password, http_host)
+                if user_auth.is_active:
+                    login(request, user_auth)
+                    data = {'status': 1, 'message': "login successfully", 'access_token': access_token['access_token'], "user_id": user_auth.id}
             else:
                 data = {'status': 0, 'message': "login unsuccessfull"}
         except Exception as ex:
@@ -302,8 +330,8 @@ class InterestResource(CustomBaseModelResource):
 
     class Meta:
         queryset = afterbuy_model.Interest.objects.all()
-        resource_name = "interest"
-        authorization = Authorization()
+        resource_name = "interests"
+        authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
         

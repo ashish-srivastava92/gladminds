@@ -63,10 +63,7 @@ class GladmindsResourceTestCase(ResourceTestCase):
         return user_profile_obj
 
     def get_delear_obj(self, **kwargs):
-        user_profile_obj = self.create_user_profile(**kwargs)
-        delear_data = common.Dealer(user=user_profile_obj, dealer_id=kwargs.get('name', None))
-        delear_data.save()
-        return delear_data
+        return self.create_user_profile(**kwargs)
 
     def get_product_type_obj(self, **kwargs):
         product_type_data_obj = common.ProductType(**kwargs)
