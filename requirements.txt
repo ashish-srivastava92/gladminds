@@ -25,3 +25,4 @@ django_otp==0.2.7
 django-oauth2-provider
 newrelic==2.20.0.17
 django-composite-field
+django-guardian==1.2.4
