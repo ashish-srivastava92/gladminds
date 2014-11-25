@@ -113,8 +113,8 @@ class ConsumerResource(CustomBaseModelResource):
         phone_number = load.get('phone_number')
         email_id = load.get('email_id')
         user_name = load.get('username', str(uuid4())[:30])
-        first_name = load.get('name')
-        last_name = load.get('name','')
+        first_name = load.get('first_name')
+        last_name = load.get('last_name','')
         password = load.get('password')
         if not phone_number or not password:
             return HttpBadRequest("phone_number, username and password required.")
