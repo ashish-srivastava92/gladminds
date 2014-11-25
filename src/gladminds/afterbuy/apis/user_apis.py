@@ -128,7 +128,7 @@ class ConsumerResource(CustomBaseModelResource):
                 create_user = User.objects.create_user(user_name,
                                                     email_id, password)
                 create_user.first_name = first_name
-                create_user.first_name = last_name
+                create_user.last_name = last_name
                 create_user.save()
                 user_register = afterbuy_model.Consumer(user=create_user,
                             phone_number=phone_number)
