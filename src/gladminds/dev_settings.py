@@ -102,3 +102,5 @@ VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["srv.sngh92@yahoo.com","priyanka.n@hash
 
 #############################################################################
 ENV = "dev"
+
+WSDL_TNS="http://dev.bajaj.gladminds.co:8000/api/v1/feed/"

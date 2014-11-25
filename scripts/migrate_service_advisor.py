@@ -56,8 +56,8 @@ def process_query(data):
         sa = cur_new.fetchall()[0]
         
         cur_new.execute("INSERT INTO bajaj_userprofile (user_id, address,\
-         created_date, modified_date) VALUES (%s, %s, %s, %s)",(sa[0],
-                                            data.get('address'), today, today))
+         created_date, modified_date, phone_number) VALUES (%s, %s, %s, %s, %s)",(sa[0],
+                                            data.get('address'), today, today, data.get('phone_number')))
         
         query2 = "select * from bajaj_userprofile where user_id  = %(user_id)s"
         cur_new.execute(query2, {'user_id': sa[0]})

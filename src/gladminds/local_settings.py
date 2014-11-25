@@ -95,3 +95,5 @@ LOGGING['handlers']['afterbuy_logs']['filename'] = 'log/afterbuy.log'
 LOGGING['handlers']['sql']['filename'] = 'log/sql.log'
 
 ENV = "local"
+
+WSDL_TNS="http://local.bajaj.gladminds.co:8000/api/v1/feed/"
