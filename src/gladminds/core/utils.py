@@ -332,7 +332,7 @@ def create_context(email_template_name, feedback_obj):
     data = get_email_template(email_template_name)
     data['newsubject'] = data['subject'].format(id = feedback_obj.id)
     data['content'] = data['body'].format(id=feedback_obj.id, type = feedback_obj.type, reporter = feedback_obj.reporter, 
-                                          message = feedback_obj.message, created_date = convert_utc_to_local_time(feedback_obj.created_date), 
+                                          message = feedback_obj.description, created_date = convert_utc_to_local_time(feedback_obj.created_date), 
                                           assign_to = feedback_obj.assign_to,  priority =  feedback_obj.priority, remark = "",
                                           root_cause = feedback_obj.root_cause, resolution = feedback_obj.resolution,
                                           due_date = "", resolution_time=total_time_spent(feedback_obj))

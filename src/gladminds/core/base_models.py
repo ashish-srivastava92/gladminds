@@ -399,14 +399,14 @@ class AuditLog(BaseModel):
         abstract = True
         verbose_name_plural = "Audit log"
 
-class Reporter(BaseModel):
+class ServiceDeskUser(BaseModel):
     name = models.CharField(max_length=30)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     email = models.CharField(max_length=30, blank=True, null=True)
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Reporter info"
+        verbose_name_plural = "Service Desk Users"
 
 
 class Activity(BaseModel):

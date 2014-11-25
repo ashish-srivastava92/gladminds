@@ -41,7 +41,7 @@
 				<tr>
 				    <th>Ticket</th>
 					<th>Reporter</th>
-					<th>Message</th>
+					<th>Description</th>
 					<th>Status</th>
 					<th>Created</th>
 				</tr>
@@ -54,16 +54,16 @@
 							GM-{{feedback.id|default_if_none:""}}
 						</a>  
 					</td>
-					<td>{{feedback.reporter_name|default_if_none:""}}</td>
+					<td>{{feedback.reporter.name|default_if_none:""}}</td>
 					<td>
 					   <div>
-					       {% if feedback.message|length > 20 %}
+					       {% if feedback.description|length > 20 %}
 					         <span id="{{feedback.id}}" class="btn gladdesk-message ellips" 
-					            data-content="{{feedback.message|default_if_none:""}}" rel="popover" 
+					            data-content="{{feedback.description|default_if_none:""}}" rel="popover" 
 					            data-placement="bottom" data-trigger="hover"  onmouseover="showMessage({{feedback.id}})">
-					              {{feedback.message}}
+					              {{feedback.description}}
 					       {% else  %}
-                                  {{feedback.message}}
+                                  {{feedback.description}}
                            {% endif %}
                             </span>
                        </div>
@@ -102,14 +102,7 @@
                     </select>
                   </div>
                 </div>
-                   <div class="row">
-                  <div class="col-md-4 form-group">
-                    <label class="control-label">Subject*:</label>
-                  </div>
-                  <div class="col-md-8 form-group">
-                    <input type="text" class="form-control" name="subject" id="subject" required>
-                  </div>
-                </div>
+                
                 <div class="row">
                   <div class="col-md-4 form-group">
                     <label class="control-label">Type*:</label>
@@ -123,13 +116,21 @@
                     </select>
                   </div>
                 </div>
-
+                
                 <div class="row">
                   <div class="col-md-4 form-group">
-                    <label class="control-label">Message*:</label>
+                    <label class="control-label">Summary*:</label>
                   </div>
                   <div class="col-md-8 form-group">
-                    <textarea class="form-control" name="message" id="message" required></textarea>
+                    <input type="text" class="form-control" name="summary" id="summary" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4 form-group">
+                    <label class="control-label">Description*:</label>
+                  </div>
+                  <div class="col-md-8 form-group">
+                    <textarea class="form-control" name="description" id="description" required></textarea>
                   </div>
                 </div> 
                 <div class="row">
