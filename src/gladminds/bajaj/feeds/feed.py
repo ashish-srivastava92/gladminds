@@ -324,7 +324,6 @@ class ProductPurchaseFeed(BaseFeed):
                 if product_data.customer_phone_number and product_data.customer_id == product['sap_customer_id']:
                     post_save.disconnect(
                         update_coupon_data, sender=models.ProductData)
-                customer_address=product['city'] +',' + product['state']+','+ product['pin_no']
 
                 if not product_data.customer_id  or product_data.customer_id.find('T') == 0:
                     product_purchase_date = product['product_purchase_date']
@@ -335,7 +334,9 @@ class ProductPurchaseFeed(BaseFeed):
                 
                 product_data.customer_phone_number = product['customer_phone_number']    
                 product_data.customer_name = product['customer_name']
-                product_data.customer_address = customer_address
+                product_data.customer_city = product['city']
+                product_data.customer_state = product['state']
+                product_data.customer_pincode = product['pin_no']
                 product_data.save()
                 
                 post_save.connect(
@@ -431,14 +432,14 @@ class OldFscFeed(BaseFeed):
                         logger.info(ex)
                         old_coupon_data = models.OldFscData(product=product_data, service_type = int(fsc['service']),
                                                          status=6, closed_date=datetime.now(), sent_to_sap = True,
-                                                         servicing_dealer = dealer_data)
+                                                         dealer = dealer_data)
                         old_coupon_data.save()
                 else:
                     cupon_details = coupon_data[0]
                     cupon_details.status = 6
                     cupon_details.closed_date = datetime.now()
                     cupon_details.sent_to_sap = True
-                    cupon_details.servicing_dealer = dealer_data
+                    cupon_details.dealer = dealer_data
                     cupon_details.save()
             except Exception as ex:
                 ex = "[Exception: OLD_FSC_FEED]: VIN {0} does not exist::{1}".format(

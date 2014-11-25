@@ -7,6 +7,7 @@ from composite_field.base import CompositeField
 from gladminds.core.managers import user_manager
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, RATINGS,\
                             ROOT_CAUSE, SLA_PRIORITY, TIME_UNIT
+from gladminds.core.model_helpers import PhoneField
 
 
 class BaseModel(models.Model):
@@ -152,12 +153,15 @@ class ProductData(BaseModel):
     product_id = models.CharField(max_length=215, unique=True)
     customer_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
-    customer_phone_number = models.CharField(
-        max_length=15, null=True, blank=True)
+    customer_phone_number = PhoneField(null=True, blank=True)
     customer_name = models.CharField(
         max_length=215, null=True, blank=True)
-    customer_address = models.CharField(
-        max_length=215, null=True, blank=True)
+    customer_city = models.CharField(
+        max_length=100, null=True, blank=True)
+    customer_state = models.CharField(
+        max_length=100, null=True, blank=True)
+    customer_pincode = models.CharField(
+        max_length=15, null=True, blank=True)
     purchase_date = models.DateTimeField(null=True, blank=True)
     invoice_date = models.DateTimeField(null=True, blank=True)
     engine = models.CharField(max_length=255, null=True, blank=True)
