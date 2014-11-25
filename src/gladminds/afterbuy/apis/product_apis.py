@@ -52,6 +52,7 @@ class UserProductResource(CustomBaseModelResource):
         registrations = afterbuy_models.RegistrationCertificate.objects.filter(product=bundle.data['id'])
         pollution = afterbuy_models.PollutionCertificate.objects.filter(product=bundle.data['id'])
         product_support = afterbuy_models.ProductSupport.objects.filter(product=bundle.data['id'])
+        sell_information = afterbuy_models.SellInformation.objects.filter(product=bundle.data['id'])
         brand_id = bundle.data['brand'].data['id']
         support = afterbuy_models.Support.objects.filter(brand=int(brand_id))
         product_image = afterbuy_models.UserProductImages.objects.filter(product=bundle.data['id'])
@@ -63,6 +64,7 @@ class UserProductResource(CustomBaseModelResource):
         bundle.data['support'] = [model_to_dict(c) for c in support]
         bundle.data['product_image'] = [model_to_dict(c) for c in product_image]
         bundle.data['product_support'] = [model_to_dict(c) for c in product_support]
+        bundle.data['sell_information'] = [model_to_dict(c) for c in sell_information]
         return bundle
 
     def prepend_urls(self):
