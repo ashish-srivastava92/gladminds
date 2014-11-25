@@ -23,7 +23,7 @@ class CustomAuthorization(DjangoAuthorization):
         if klass is False:
             raise Unauthorized("You are not allowed to access that resource.")
         try:
-            access_token_container = bundle.request.urlencode().split('access_token=')[1]
+            access_token_container = bundle.request.GET.urlencode().split('access_token=')[1]
             key = access_token_container.split('&')[0]
         except:
             key = bundle.request.META.get('HTTP_ACCESS_TOKEN')
