@@ -22,8 +22,9 @@ from gladminds.sqs_tasks import send_otp
 from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
 from tastypie.exceptions import ImmediateHttpResponse
-from gladminds.core.views import get_access_token
+from gladminds.core.views.auth_view import get_access_token
 from tastypie.authorization import Authorization
+from gladminds.core.apis.authorization import CustomAuthorization
 
 logger = logging.getLogger("gladminds")
 
@@ -48,7 +49,7 @@ class ConsumerResource(CustomBaseModelResource):
         queryset = afterbuy_model.Consumer.objects.all()
         resource_name = "consumers"
         authentication = AccessTokenAuthentication()
-        authorization = Authorization()
+        authorization = CustomAuthorization()
         detail_allowed_methods = ['get', 'delete', 'put']
         always_return_data = True
         filtering = {
