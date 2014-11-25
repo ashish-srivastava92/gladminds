@@ -32,6 +32,7 @@ nohup python scripts/migrate_dealer_data.py &
 nohup python scripts/migrate_asc_data.py &
 nohup python scripts/migrate_service_advisor.py &
 
+
 nohup python scripts/migrate_products.py &
 nohup python scripts/migrate_coupons.py &
 nohup python scripts/migrate_coupons_sa_relations.py &
@@ -39,3 +40,4 @@ nohup python scripts/migrate_coupons_sa_relations.py &
 nohup python scripts/migrate_old_fsc.py &
 nohup python scripts/migrate_temp_customer.py &
 nohup python scripts/migrate_ucn_recovery.py &
+
