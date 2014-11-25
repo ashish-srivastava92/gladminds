@@ -112,7 +112,7 @@ ASC_WSDL_URL = "http://qa.bajaj.gladmindsplatform.co/api/v1/asc-feed/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL_URL = "http://qa.bajaj.gladmindsplatform.co/api/v1/customer-feed/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
 
-WSDL_TNS="http://qa.bajaj.gladminds.co:8000/api/v1/feed/"
+WSDL_TNS="http://qa.bajaj.gladminds.co/api/v1/feed/"
 
 ENABLE_AMAZON_SQS = True
 
