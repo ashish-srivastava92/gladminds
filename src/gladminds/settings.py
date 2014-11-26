@@ -280,7 +280,7 @@ ALL_APPS = (
     'tastypie_swagger',
     'django_otp',
     'django_otp.plugins.otp_totp',
-    'guardian'
+    'constance.backends.database'
    # 'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
@@ -523,10 +523,9 @@ ENABLE_SERVICE_DESK = True
 
 DEFAULT_IMAGE_ID = 'guest.png'
 
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',  # default
-    'guardian.backends.ObjectPermissionBackend',
-)
+CONSTANCE_CONFIG = {
+    'THE_ANSWER': (42, 'Answer to the Ultimate Question of Life, '
+                       'The Universe, and Everything'),
+}
 
-ANONYMOUS_USER_ID = -1
-GUARDIAN_RENDER_403 = True
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
