@@ -10,8 +10,8 @@ OUT_DIR = os.path.join(BASE_DIR, "out")
 
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
 
-DEBUG = False
-ALLOWED_HOSTS = ['*']
+DEBUG = True
+#ALLOWED_HOSTS = ['*']
 TEMPLATE_DEBUG = DEBUG
 
 MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
