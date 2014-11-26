@@ -1,6 +1,5 @@
 from django.contrib.admin import AdminSite
 from django.contrib.auth.models import User, Group, Permission
-from constance.admin import Config, ConstanceAdmin
 
 from gladminds.afterbuy.models import Brand, Consumer, ProductType,\
 MessageTemplate, EmailTemplate, Industry, UserProduct, License,\
@@ -27,7 +26,6 @@ brand_admin.register(License)
 brand_admin.register(User)
 brand_admin.register(Group)
 brand_admin.register(Permission)
-brand_admin.register([Config])
 
 brand_admin.register(MessageTemplate)
 brand_admin.register(EmailTemplate)
