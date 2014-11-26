@@ -4,7 +4,7 @@ from django.contrib.auth.models import User, Group, Permission
 from gladminds.afterbuy.models import Brand, Consumer, ProductType,\
 MessageTemplate, EmailTemplate, Industry, UserProduct, License,\
     ProductInsuranceInfo, ProductWarrantyInfo, PollutionCertificate,\
-    BrandProductCategory, SMSLog, EmailLog
+    BrandProductCategory, SMSLog, EmailLog, OTPToken, EmailToken
 
 
 class AfterbuyAdminSite(AdminSite):
@@ -31,4 +31,6 @@ brand_admin.register(MessageTemplate)
 brand_admin.register(EmailTemplate)
 brand_admin.register(SMSLog)
 brand_admin.register(EmailLog)
+brand_admin.register(EmailToken)
+brand_admin.register(OTPToken)
 
