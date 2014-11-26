@@ -47,7 +47,7 @@ def process_query(data):
         username, first_name, last_name, email, is_staff, is_active, date_joined)\
             VALUES (%s, %s, %s, %s, %s, %s, %s,  %s, %s, %s)",(data.get('password'),
                 data.get('last_login'), data.get('is_superuser'),data.get('username'),
-                data.get('first_name'), data.get('last_name'), data.get('email'),
+                data.get('name'), data.get('last_name'), data.get('email'),
                 data.get('is_staff'), data.get('is_active'),
                 data.get('date_joined')))
         
