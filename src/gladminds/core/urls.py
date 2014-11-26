@@ -1,14 +1,10 @@
 from django.conf.urls import patterns, url, include
 from django.conf import settings
-from gladminds.bajaj.admin import brand_admin
-from gladminds.bajaj.feeds import webservice
 from gladminds.core.cron_jobs.taskqueue import SqsHandler
 from gladminds.sqs_tasks import _tasks_map
 
 
 urlpatterns = patterns('',
-    url(r'^site-info/$', 'gladminds.bajaj.views.site_info', name='site_info'),
-    url(r'', include(brand_admin.urls)),
     url(r'api/doc/', include('gladminds.core.api_docs.swagger_urls', namespace='tastypie_swagger')),
     url(r'^api/v1/mock-feed/$', 'gladminds.bajaj.feeds.webservice.mock_service'),
     url(r'^api/v1/mock-feed/\?wsdl$', 'gladminds.bajaj.feeds.webservice.mock_service'),
