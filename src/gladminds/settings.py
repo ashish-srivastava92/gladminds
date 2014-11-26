@@ -30,7 +30,8 @@ TOTP_SECRET_KEY = '93424'
 OTP_VALIDITY = 120
 HARCODED_OTPS = ['GMDEV123']
 HARCODED_TOKEN = ['e6281aa90743296987089ab013ee245dab66b27b']
-
+ACCOUNT_ACTIVATION_DAYS = 10
+DOMAIN_BASE_URL = '/afterbuy/v1/consumers/activate-email/'
 JOBCARD_DIR = '{0}/jobcards/prod/'
 JOBCARD_BUCKET = 'gladminds'
 
@@ -423,6 +424,18 @@ OTP_MAIL = {
                   "body": """""",
               }
 
+PASSWORD_RESET_MAIL = {
+                  "sender":"support@gladminds.co",
+                  "subject":"Reset Password",
+                  "receiver": [""],
+                  "body": """""",
+              }
+
+EMAIL_ACTIVATION_MAIL = {
+                  "sender":"srv.sngh@gmail.com",
+                  "subject":"Confirm your email address",
+                  "receiver": [""],
+                  "body": """""",}
 
 # AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")

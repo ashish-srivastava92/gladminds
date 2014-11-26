@@ -327,3 +327,7 @@ class AuditLog(base_models.AuditLog):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Audit Log"
+
+
+class EmailToken(base_models.EmailToken):
+    user = models.ForeignKey(Consumer)

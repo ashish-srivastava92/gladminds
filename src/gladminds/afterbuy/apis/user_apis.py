@@ -15,7 +15,7 @@ from gladminds.afterbuy import utils as afterbuy_utils
 from gladminds.afterbuy import models as afterbuy_model
 from gladminds.core.apis.user_apis import AccessTokenAuthentication
 from tastypie import fields, http
-from gladminds.core.managers.mail import sent_otp_email
+from gladminds.core.managers.mail import sent_password_reset_link
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.utils import mobile_format, get_task_queue
 from gladminds.sqs_tasks import send_otp
@@ -25,6 +25,9 @@ from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.views.auth_view import get_access_token
 from tastypie.authorization import Authorization
 from gladminds.core.apis.authorization import CustomAuthorization
+
+from registration.backends.default import urls
+from django.contrib.sites.models import RequestSite
 
 logger = logging.getLogger("gladminds")
 
@@ -59,6 +62,7 @@ class ConsumerResource(CustomBaseModelResource):
     def prepend_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/registration%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('user_registration'), name="user_registration"),
+            url(r"^(?P<resource_name>%s)/activate-email%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('activate_email'), name="activate_email"),
             url(r"^(?P<resource_name>%s)/phone-number/send-otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('sent_otp_user_phone_number'), name="sent_otp_user_phone_number"),
             url(r"^(?P<resource_name>%s)/authenticate-email%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('authenticate_user_email_id'), name="authenticate_user_email_id"),
             url(r"^(?P<resource_name>%s)/send-otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('authenticate_user_send_otp'), name="authenticate_user_send_otp"),
@@ -123,17 +127,33 @@ class ConsumerResource(CustomBaseModelResource):
                                                 phone_number=phone_number)
             data = {'status': 0, 'message': 'phone number already registered'}
         except Exception as ex:
-                log_message = "new user :{0}".format(ex)
-                logger.info(log_message)
-                create_user = User.objects.create_user(user_name,
-                                                    email_id, password)
-                create_user.first_name = first_name
-                create_user.last_name = last_name
-                create_user.save()
-                user_register = afterbuy_model.Consumer(user=create_user,
-                            phone_number=phone_number)
-                user_register.save()
-                data = {'status': 1, 'message': 'succefully registered'}
+                try:
+                    afterbuy_model.Consumer.objects.get(user__email=email_id, is_email_verified=True)
+                    data = {'status': 0, 'message': 'email id already registered'}
+                    return HttpResponse(json.dumps(data), content_type="application/json")
+                except Exception as ex:
+                        log_message = "new user :{0}".format(ex)
+                        logger.info(log_message)
+                        create_user = User.objects.create_user(user_name,
+                                                            email_id, password)
+                        create_user.first_name = first_name
+                        create_user.last_name = last_name
+                        create_user.save()
+                        user_register = afterbuy_model.Consumer(user=create_user,
+                                    phone_number=phone_number)
+                        user_register.save()
+                        site = RequestSite(request)
+                        afterbuy_model.EmailToken.objects.create_email_token(user_register, email_id, site)
+                        data = {'status': 1, 'message': 'succefully registered'}
+        return HttpResponse(json.dumps(data), content_type="application/json")
+
+    def activate_email(self, request, **kwargs):
+        activation_key = request.GET['activation_key']
+        activated_user = afterbuy_model.EmailToken.objects.activate_user(activation_key)
+        if activated_user:
+            data = {'status': 1, 'message': 'email-id validated'}
+        else:
+            data = {'status': 0, 'message': 'email-id not validated'}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def validate_user_phone_number(self,phone_number, otp):
@@ -183,21 +203,24 @@ class ConsumerResource(CustomBaseModelResource):
         if not email_id:
             return HttpBadRequest("email id is required")
         try:
-            user_email_id = User.objects.filter(email=email_id)
-            if len(user_email_id) > 0:
-                data = {'status': 1, 'message': 'authenticated email_id'}
-            else:
-                data = {'status': 0, 'message': 'unauthenticated email_id'}
+            afterbuy_model.Consumer.objects.get(user__email=email_id, is_email_verified=True)
+            data = {'status': 1, 'message': "emailid verified"}
+            return HttpResponse(json.dumps(data), content_type="application/json")
         except Exception as ex:
-            log_message = "unable to authenticate email_id :{0}".format(ex)
-            logger.info(log_message)
-            data = {'status': 0, 'message': log_message}
+                log_message = "new user :{0}".format(ex)
+                logger.info(log_message)
+                data = {'status': 0, 'message': "Either your email is not verified"}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def authenticate_user_send_otp(self, request, **kwargs):
-        data = request.POST
-        phone_number = request.POST.get('phone_number')
-        email = request.POST.get('email_id',None)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        email = load.get('email_id')
+        phone_number = load.get('phone_number')
         if not phone_number and not email:
             return HttpBadRequest("phone_number or email is required")
         try:
@@ -215,10 +238,15 @@ class ConsumerResource(CustomBaseModelResource):
                 data = {'status': 1, 'message': "OTP sent_successfully"}
                 #Send email if email address exist
             if email:
-                user_obj = User.objects.get(email=email)
-                otp = afterbuy_utils.get_otp(user=user_obj)
-                sent_otp_email(data=otp, receiver=email, subject='Your OTP')
-                data = {'status': 1, 'message': "OTP sent_successfully"}
+                try:
+                    afterbuy_model.Consumer.objects.get(user__email=email, is_email_verified=True)
+                    sent_password_reset_link(receiver=email)
+                    data = {'status': 1, 'message': "Password reset link sent successfully"}
+                    return HttpResponse(json.dumps(data), content_type="application/json")
+                except Exception as ex:
+                        log_message = "new user :{0}".format(ex)
+                        logger.info(log_message)
+                        data = {'status': 0, 'message': "Either your email is not verified or its not exist"}
         except Exception as ex:
             logger.error('Invalid details, mobile {0} and exception {1}'.format(request.POST.get('phone_number', ''),ex))
             data = {'status': 0, 'message': "inavlid phone_number/email_id"}
@@ -234,7 +262,7 @@ class ConsumerResource(CustomBaseModelResource):
         try:
             if phone_number:
                 consumer = afterbuy_model.Consumer.objects.filter(phone_number=phone_number)[0]
-                kwargs['id'] = consumer.user__id
+                kwargs['id'] = consumer.user.id
             elif email:
                 kwargs['email'] = email
             user = User.objects.filter(**kwargs)[0]
@@ -245,26 +273,6 @@ class ConsumerResource(CustomBaseModelResource):
             logger.error('Invalid details, mobile {0} and exception {1}'.format(request.POST.get('phone_number', ''),ex))
             data = {'status': 0, 'message': "inavlid phone_number/email"}
         return HttpResponse(json.dumps(data), content_type="application/json")
-
-    def get_user_details(self, request, **kwargs):
-        customer_id = kwargs['user_id']
-        cosumer_data = {}
-        if not id:
-            return HttpBadRequest("id is required.")
-        try:
-            customer_id = int(customer_id)
-            consumer_obj = afterbuy_model.Consumer.objects.get(
-                                                        user__id=customer_id)
-            cosumer_data['username'] = consumer_obj.user.username
-            cosumer_data['created_date'] = str(consumer_obj.created_date)
-            cosumer_data['email'] = consumer_obj.user.email
-            cosumer_data['phone_number'] = consumer_obj.phone_number
-            cosumer_data['password'] = consumer_obj.user.password
-            cosumer_data['name'] = consumer_obj.user.first_name
-        except Exception as ex:
-            logger.info("[Exception get_user_product_information]:{0}".format(ex))
-            return HttpBadRequest("Not a registered user")
-        return HttpResponse(json.dumps(cosumer_data), content_type="application/json")
 
     def auth_login(self, request, **kwargs):
         if request.method != 'POST':
@@ -283,8 +291,7 @@ class ConsumerResource(CustomBaseModelResource):
                 user_obj = afterbuy_model.Consumer.objects.get(phone_number
                                                  =phone_number).user
             elif email_id:
-                user_obj = User.objects.get(email
-                                                 =email_id)
+                    user_obj = afterbuy_model.Consumer.objects.get(user__email=email_id, is_email_verified=True).user
             http_host = request.META['HTTP_HOST']
             user_auth = authenticate(username=str(user_obj.username),
                                 password=password)
@@ -298,31 +305,6 @@ class ConsumerResource(CustomBaseModelResource):
         except Exception as ex:
                 data = {'status': 0, 'message': "login unsuccessfull"}
                 logger.info("[Exception get_user_login_information]:{0}".
-                            format(ex))
-        return HttpResponse(json.dumps(data), content_type="application/json")
-
-    def validate_otp(self, request, **kwargs):
-        otp = request.POST.get('otp')
-        phone_number = request.POST.get('phone_number')
-        email_id = request.POST.get('email_id')
-        if not otp and not email_id and not phone_number :
-            return HttpBadRequest("otp and phone_number/email_id required")
-        try:
-            if phone_number:
-                consumer = afterbuy_model.Consumer.objects.get(phone_number
-                                                     =phone_number)
-                afterbuy_utils.validate_otp(otp, user=consumer.user)
-
-            elif email_id:
-                consumer_obj = User.objects.get(email
-                                                 =email_id)
-                consumer = afterbuy_model.Consumer.objects.get(user
-                                                     = consumer_obj)
-            afterbuy_utils.validate_otp( otp, user=consumer.user)
-            data = {'status': 1, 'message': "valid OTP"}
-        except Exception as ex:
-                data = {'status': 0, 'message': "invalid OTP"}
-                logger.info("[Exception OTP]:{0}".
                             format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
 
