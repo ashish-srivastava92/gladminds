@@ -25,8 +25,6 @@ from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.views.auth_view import get_access_token
 from tastypie.authorization import Authorization
 from gladminds.core.apis.authorization import CustomAuthorization
-
-from registration.backends.default import urls
 from django.contrib.sites.models import RequestSite
 
 logger = logging.getLogger("gladminds")
@@ -98,7 +96,8 @@ class ConsumerResource(CustomBaseModelResource):
             logger.error('Invalid details, mobile {0} and exception {1}'.format(request.POST.get('phone_number', ''),ex))
             data = {'status': 0, 'message': ex}
         return HttpResponse(json.dumps(data), content_type="application/json")
-
+    
+    @require_http_methods(["GET", "POST"])
     def user_registration(self, request, **kwargs):
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
