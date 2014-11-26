@@ -146,3 +146,5 @@ FEED_FAILURE_BUCKET = 'gladminds'
 #######################################################################
 ENABLE_SERVICE_DESK = False
 ENV = "prod"
+
+WSDL_TNS="http://bajaj.gladminds.co/api/v1/feed/"
