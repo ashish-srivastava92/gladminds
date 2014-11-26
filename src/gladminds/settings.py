@@ -33,6 +33,7 @@ HARCODED_TOKEN = ['e6281aa90743296987089ab013ee245dab66b27b']
 PASSWORD_REST_URL = ''
 ACCOUNT_ACTIVATION_DAYS = 10
 DOMAIN_BASE_URL = '/afterbuy/v1/consumers/activate-email/'
+OAUTH_DELETE_EXPIRED = True
 JOBCARD_DIR = '{0}/jobcards/prod/'
 JOBCARD_BUCKET = 'gladminds'
 
