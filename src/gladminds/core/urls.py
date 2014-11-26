@@ -5,7 +5,6 @@ from gladminds.sqs_tasks import _tasks_map
 
 
 urlpatterns = patterns('',
-    url(r'^site-info/$', 'gladminds.bajaj.views.site_info', name='site_info'),
     url(r'api/doc/', include('gladminds.core.api_docs.swagger_urls', namespace='tastypie_swagger')),
     url(r'^api/v1/mock-feed/$', 'gladminds.bajaj.feeds.webservice.mock_service'),
     url(r'^api/v1/mock-feed/\?wsdl$', 'gladminds.bajaj.feeds.webservice.mock_service'),
