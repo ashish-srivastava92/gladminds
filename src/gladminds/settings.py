@@ -524,8 +524,7 @@ ENABLE_SERVICE_DESK = True
 DEFAULT_IMAGE_ID = 'guest.png'
 
 CONSTANCE_CONFIG = {
-    'THE_ANSWER': (42, 'Answer to the Ultimate Question of Life, '
-                       'The Universe, and Everything'),
+    'DEFAULT_IMAGE': ('guest.png', 'Default image to be used by any app'),
 }
 
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
