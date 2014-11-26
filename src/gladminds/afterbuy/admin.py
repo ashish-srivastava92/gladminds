@@ -1,5 +1,6 @@
 from django.contrib.admin import AdminSite
 from django.contrib.auth.models import User, Group, Permission
+from constance.admin import Config, ConstanceAdmin
 
 from gladminds.afterbuy.models import Brand, Consumer, ProductType,\
 MessageTemplate, EmailTemplate, Industry, UserProduct, License,\
@@ -33,4 +34,8 @@ brand_admin.register(SMSLog)
 brand_admin.register(EmailLog)
 brand_admin.register(EmailToken)
 brand_admin.register(OTPToken)
+
+#https://github.com/comoga/django-constance/issues/51
+setattr(Config._meta, 'object_name', 'Config')
+brand_admin.register([Config], ConstanceAdmin)
 
