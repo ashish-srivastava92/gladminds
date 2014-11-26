@@ -63,13 +63,14 @@ def get_reporter_details(reporter, value="phone_number"):
             return reporter.user_profile.phone_number
     
 def save_update_feedback(feedback_obj, data, user, host):
+    status = get_list_from_set(FEEDBACK_STATUS)
     comment_object = None
     assign_status = False
     pending_status = False
     reporter_email_id = get_reporter_details(feedback_obj.reporter,"email")
     reporter_phone_number = get_reporter_details(feedback_obj.reporter)
-
-    if feedback_obj.status == 'Pending':
+    #check if status is pending
+    if feedback_obj.status == status[4]:
         pending_status = True
  
     if feedback_obj.assignee:
@@ -80,7 +81,7 @@ def save_update_feedback(feedback_obj, data, user, host):
     if assign is None:
         assign_status = True
  
-    if data['Assign_To'] == '':
+    if data['assign_to'] == '':
         feedback_obj.status = data['status']
         feedback_obj.priority = data['Priority']
         feedback_obj.assignee = None
@@ -92,17 +93,20 @@ def save_update_feedback(feedback_obj, data, user, host):
             feedback_obj.assignee = feedback_obj.reporter
             
         else:
-            if data['Assign_To'] :
-                servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile__phone_number=data['Assign_To'])
+            if data['assign_to'] :
+                servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile__phone_number=data['assign_to'])
                 feedback_obj.assignee = servicedesk_user[0]
                 feedback_obj.assign_to_reporter = False
         feedback_obj.status = data['status']
         feedback_obj.priority = data['Priority']
-    if data['status'] == 'Pending':
+    #check if status is pending
+    if data['status'] == status[4]:
         feedback_obj.pending_from = datetime.datetime.now()
-    if data['status'] == 'In-Progress':
+    #check if status is progress
+    if data['status'] == status[3]:
         feedback_obj.assignee = feedback_obj.previous_assignee
-    if data['status'] == 'Closed':
+    #check if status is closed
+    if data['status'] == status[1]:
         feedback_obj.closed_date = datetime.datetime.now()
     feedback_obj.save()
     if assign_status and feedback_obj.assignee:
@@ -117,8 +121,8 @@ def save_update_feedback(feedback_obj, data, user, host):
             logger.info("Reporter emailId not found.")
         send_sms('INITIATOR_FEEDBACK_DETAILS', reporter_phone_number,
                  feedback_obj)
- 
-    if feedback_obj.status == 'Resolved':
+ #check if status is resolved
+    if feedback_obj.status == status[2]:
         servicedesk_obj_all = User.objects.filter(groups__name='sdm')
         feedback_obj.resolved_date = datetime.datetime.now()
         feedback_obj.resolved_date = datetime.datetime.now()
