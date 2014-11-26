@@ -19,16 +19,18 @@ def get_feedbacks(user):
     if group.name == 'SDM':
         feedbacks = models.Feedback.objects.order_by('-created_date')
     if group.name == 'SDO':
-        servicedesk_obj = models.UserProfile.objects.filter(user=user)
+        user_profile = models.UserProfile.objects.filter(user=user)
+        servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
         feedbacks = models.Feedback.objects.filter(
-                        assignee=servicedesk_obj[0]).order_by('-created_date')
+                        assignee=servicedesk_user[0]).order_by('-created_date')
     return feedbacks
 
 def get_feedback(feedback_id, user):
     group = user.groups.all()[0]
     if group.name == 'SDO':
-        servicedesk_obj = models.UserProfile.objects.filter(user=user)
-        return models.Feedback.objects.filter(id=feedback_id, assignee=servicedesk_obj[0])
+        user_profile = models.UserProfile.objects.filter(user=user)
+        servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
+        return models.Feedback.objects.get(id=feedback_id, assignee=servicedesk_user[0])
     else:
         return models.Feedback.objects.get(id=feedback_id)
 
