@@ -214,7 +214,7 @@ class OTPToken(base_models.OTPToken):
 
 
 class UserNotification(base_models.BaseModel):
-    user = models.ForeignKey(Consumer)
+    consumer = models.ForeignKey(Consumer)
     message = models.TextField()
     action = models.TextField(blank=True, null=True)
     notification_read = models.BooleanField(default=False)
@@ -225,7 +225,7 @@ class UserNotification(base_models.BaseModel):
 
 
 class UserMobileInfo(base_models.BaseModel):
-    user = models.ForeignKey(Consumer)
+    consumer = models.ForeignKey(Consumer)
     IMEI = models.CharField(max_length=50, null=True, blank=True, unique=True)
     ICCID = models.CharField(max_length=50, null=True, blank=True)
     phone_name = models.CharField(max_length=100, null=True, blank=True)
@@ -241,12 +241,12 @@ class UserMobileInfo(base_models.BaseModel):
 
 
 class UserPreference(base_models.UserPreference):
-    user = models.ForeignKey(Consumer)
+    consumer = models.ForeignKey(Consumer)
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Consumer Preferences"
-        unique_together = ("user", "key")
+        unique_together = ("consumer", "key")
 
 
 class BrandPreference(base_models.BrandPreference):
@@ -327,3 +327,7 @@ class AuditLog(base_models.AuditLog):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Audit Log"
+
+
+class EmailToken(base_models.EmailToken):
+    user = models.ForeignKey(Consumer)

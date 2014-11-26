@@ -34,10 +34,11 @@ def get_models():
         return None
 
 
-def get_model(model):
-
+def get_model(model, brand=None):
+    if not brand:
+        brand = settings.BRAND
     try:
-        return getattr(import_module('gladminds.{0}.models'.format(settings.BRAND)), model)
+        return getattr(import_module('gladminds.{0}.models'.format(brand)), model)
     except:
         return None
 
@@ -333,7 +334,7 @@ def create_context(email_template_name, feedback_obj):
     data['newsubject'] = data['subject'].format(id = feedback_obj.id)
     data['content'] = data['body'].format(id=feedback_obj.id, type = feedback_obj.type, reporter = feedback_obj.reporter, 
                                           message = feedback_obj.description, created_date = convert_utc_to_local_time(feedback_obj.created_date), 
-                                          assign_to = feedback_obj.assign_to,  priority =  feedback_obj.priority, remark = "",
+                                          assign_to = feedback_obj.assignee,  priority =  feedback_obj.priority, remark = "",
                                           root_cause = feedback_obj.root_cause, resolution = feedback_obj.resolution,
                                           due_date = "", resolution_time=total_time_spent(feedback_obj))
 

@@ -7,7 +7,8 @@ from gladminds.bajaj.models import BrandProductCategory, ProductType,\
 UserProfile, Dealer, AuthorizedServiceCenter,\
 ServiceAdvisor, ProductData, CouponData, \
 ASCTempRegistration, SATempRegistration, CustomerTempRegistration,\
-SMSLog, EmailLog, DataFeedLog, MessageTemplate, EmailTemplate, SLA
+SMSLog, EmailLog, DataFeedLog, MessageTemplate, EmailTemplate, SLA,\
+    ServiceDeskUser
 from gladminds.core import utils
 
 class BajajAdminSite(AdminSite):
@@ -342,6 +343,9 @@ class SlaAdmin(ModelAdmin):
         }),
         )
 
+class ServiceDeskUserAdmin(ModelAdmin):
+    list_display = ('user_profile', 'name', 'phone_number', 'email')
+
 
 brand_admin = BajajAdminSite(name='bajaj')
 
@@ -370,5 +374,4 @@ brand_admin.register(CustomerTempRegistration, CustomerTempRegistrationAdmin)
 brand_admin.register(EmailTemplate, EmailTemplateAdmin)
 brand_admin.register(MessageTemplate, MessageTemplateAdmin)
 brand_admin.register(SLA, SlaAdmin)
-
-
+brand_admin.register(ServiceDeskUser, ServiceDeskUserAdmin)

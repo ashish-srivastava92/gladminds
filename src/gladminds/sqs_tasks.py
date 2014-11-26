@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 from celery import shared_task
 from django.conf import settings
 from datetime import datetime, timedelta
@@ -172,6 +171,7 @@ def send_otp(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
+        brand = kwargs.get('brand', 'bajaj')
         set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"

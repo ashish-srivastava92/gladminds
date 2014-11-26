@@ -3,8 +3,6 @@ from django.core.management import call_command
 from django.contrib.auth.models import User
 from django.conf import settings
 
-from gladminds.admin import admin
-
 _DEMO = 'demo'
 _BAJAJ = 'bajaj'
 _AFTERBUY = 'afterbuy'

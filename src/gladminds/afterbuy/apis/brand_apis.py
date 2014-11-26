@@ -9,7 +9,6 @@ class IndustryResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.Industry.objects.all()
         resource_name = 'industries'
-        authentication = AccessTokenAuthentication()
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data =True

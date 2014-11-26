@@ -15,7 +15,7 @@ from gladminds.bajaj.services.free_service_coupon import GladmindsResources
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     ROOT_CAUSE
 from gladminds.managers import get_feedbacks, get_feedback,\
-    get_servicedesk_users, save_update_feedback
+    get_servicedesk_users, save_update_feedback, get_comments
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services import message_template as templates
 from gladminds.sqs_tasks import send_coupon
@@ -44,6 +44,7 @@ def modify_servicedesk_tickets(request, feedback_id):
     root_cause = get_list_from_set(ROOT_CAUSE)
     feedback_obj = get_feedback(feedback_id, request.user)
     servicedesk_users = get_servicedesk_users(designation='SDO')
+    comments = get_comments(feedback_id)
     if request.method == 'POST':
         host = request.get_host()
         save_update_feedback(feedback_obj, request.POST, request.user, host)
@@ -54,7 +55,8 @@ def modify_servicedesk_tickets(request, feedback_id):
                     "FEEDBACK_TYPE": feedback_types,\
                     "ROOT_CAUSE" : root_cause,\
                    "group": group_name[0].name,\
-                   'servicedeskuser': servicedesk_users
+                   'servicedeskuser': servicedesk_users,\
+                   'comments': comments 
                    })
     else:
         return HttpResponseNotFound()

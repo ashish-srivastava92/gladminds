@@ -8,6 +8,8 @@ from django.conf import settings
 from gladminds.bajaj.models import MessageTemplate, EmailTemplate
 from gladminds.bajaj import models as common
 from gladminds.bajaj.feeds import feed
+from gladminds.core.utils import get_model
+from django_extensions.management.utils import import_module
 
 BASIC_FEED = feed.BaseFeed()
 
@@ -34,27 +36,31 @@ class Command(BaseCommand):
         print "Loading sms template..."
         file_path = os.path.join(settings.PROJECT_DIR, 'template_data/template.json')
         message_templates = json.loads(open(file_path).read())
-        MessageTemplate.objects.all().delete()
-        for message_temp in message_templates:
-            fields = message_temp['fields']
-            temp_obj = MessageTemplate(template_key=fields['template_key']\
-                       , template=fields['template'], description=fields['description'])
-            temp_obj.save()
-        print "Loaded sms template..."
+        for app in ['bajaj', 'afterbuy','gm', 'demo']:
+            mt = getattr(import_module('gladminds.{0}.models'.format(app)), 'MessageTemplate')
+            mt.objects.all().delete()
+            for message_temp in message_templates:
+                fields = message_temp['fields']
+                temp_obj = mt(template_key=fields['template_key']\
+                           , template=fields['template'], description=fields['description'])
+                temp_obj.save()
+            print "Loaded sms template..."
     
     def add_email_template(self):
         print "Loading email template..."
         file_path = os.path.join(settings.PROJECT_DIR, 'template_data/email_template.json')
         email_templates = json.loads(open(file_path).read())
-        EmailTemplate.objects.all().delete()
-        for email_temp in email_templates:
-            fields = email_temp['fields']
-            temp_obj = EmailTemplate(template_key=fields['template_key']\
-                       , sender=fields['sender'], receiver=fields['receiver'],\
-                        subject=fields['subject'], body=fields['body'],\
-                        description=fields['description'])
-            temp_obj.save()
-        print "Loaded email template..."   
+        for app in ['bajaj', 'afterbuy','gm', 'demo']:
+            et = getattr(import_module('gladminds.{0}.models'.format(app)), 'EmailTemplate')
+            et.objects.all().delete()
+            for email_temp in email_templates:
+                fields = email_temp['fields']
+                temp_obj = et(template_key=fields['template_key']\
+                           , sender=fields['sender'], receiver=fields['receiver'],\
+                            subject=fields['subject'], body=fields['body'],\
+                            description=fields['description'])
+                temp_obj.save()
+            print "Loaded email template..."   
         
     def add_user_for_existing_dealer(self):
         print "Loading users for existing dealer...."
