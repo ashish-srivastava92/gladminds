@@ -28,7 +28,7 @@ sys.path.append(PROJECT_DIR)
 #Change the app_name.settings to your app_name, for example lithium.settings
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gladminds.settings")
 
-NEW_RELIC = os.environ.get('NEW_RELIC', 'newrelic_prod.ini')
+NEW_RELIC = os.environ.get('NEW_RELIC', 'newrelic.ini')
 from django.conf import settings
 NEW_RELIC_FILE = settings.NEW_RELIC_FILE_LOCATION + NEW_RELIC
 newrelic.agent.initialize(NEW_RELIC_FILE)
