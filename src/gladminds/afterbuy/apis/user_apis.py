@@ -82,7 +82,7 @@ class ConsumerResource(CustomBaseModelResource):
         if not phone_number:
             return HttpBadRequest("phone_number is required.")
         try:
-            otp = afterbuy_utils.get_otp(phone_number=mobile_format(phone_number))
+            otp = afterbuy_utils.get_otp(phone_number=phone_number)
             message = afterbuy_utils.get_template('SEND_OTP').format(otp)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
