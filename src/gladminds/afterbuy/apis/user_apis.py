@@ -308,9 +308,8 @@ class ConsumerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def logout(self, request, **kwargs):
-        access_token = request.GET.get('access_token')
-        print access_token
         from provider.oauth2.models import AccessToken
+        access_token = request.GET.get('access_token')
         if access_token:
             try:
                 at_obj = AccessToken.objects.using(settings.BRAND).get(token=access_token)
