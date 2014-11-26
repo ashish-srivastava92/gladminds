@@ -86,9 +86,9 @@ class ConsumerResource(CustomBaseModelResource):
             message = afterbuy_utils.get_template('SEND_OTP').format(otp)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = get_task_queue()
-                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message})
+                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message, 'sms_client':settings.SMS_CLIENT, 'brand':settings.BRAND})
             else:
-                send_otp.delay(phone_number=phone_number, message=message)  # @UndefinedVariable
+                send_otp.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT, brand=settings.BRAND)  # @UndefinedVariable
             logger.info('OTP sent to mobile {0}'.format(phone_number))
             data = {'status': 1, 'message': "OTP sent_successfully"}
 
