@@ -149,8 +149,7 @@ def sent_password_reset_link(data=None, receiver=None, subject=None):
         file_stream = open(settings.EMAIL_DIR+'/password_reset_email.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
-        data = 'xyzz'
-        context = Context({"link": data})
+        context = Context({"link": settings.PASSWORD_REST_URL})
         body = template.render(context)
         mail_detail = settings.PASSWORD_RESET_MAIL
         send_email(sender = mail_detail['sender'], receiver = receiver, 
