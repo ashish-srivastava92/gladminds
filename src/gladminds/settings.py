@@ -433,7 +433,7 @@ PASSWORD_RESET_MAIL = {
               }
 
 EMAIL_ACTIVATION_MAIL = {
-                  "sender":"srv.sngh@gmail.com",
+                  "sender":"support@gladminds.co",
                   "subject":"Confirm your email address",
                   "receiver": [""],
                   "body": """""", }
