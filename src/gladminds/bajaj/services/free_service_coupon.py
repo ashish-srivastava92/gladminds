@@ -39,6 +39,7 @@ from gladminds.gm.models import GladmindsUser
 from gladminds.core.apis.base_apis import CustomBaseResource
 from gladminds.core.decorator import log_time
 from gladminds.core.utils import service_advisor_search
+from gladminds.core.base_models import STATUS_CHOICES
 
 
 
@@ -288,7 +289,7 @@ class GladmindsResources(Resource):
         if not requested_coupon:
             status = "not available"
         else:
-            status = models.STATUS_CHOICES[requested_coupon[0].status - 1][1]
+            status = STATUS_CHOICES[requested_coupon[0].status - 1][1]
         return status
     
     @log_time

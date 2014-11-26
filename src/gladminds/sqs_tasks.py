@@ -44,7 +44,7 @@ def send_registration_detail(*args, **kwargs):
         send_registration_detail.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(action=status, receiver=phone_number, message=message)
+        sms_log(status=status, receiver=phone_number, message=message)
 
 
 """
@@ -63,7 +63,7 @@ def customer_detail_recovery(*args, **kwargs):
         customer_detail_recovery.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(action=status, receiver=phone_number, message=message)
+        sms_log(status=status, receiver=phone_number, message=message)
 
 
 """
@@ -83,7 +83,7 @@ def send_service_detail(*args, **kwargs):
         send_service_detail.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(action=status, receiver=phone_number, message=message)
+        sms_log(status=status, receiver=phone_number, message=message)
 
 """
 This job send sms to service advisor, whether the coupon is valid or not 
@@ -102,7 +102,7 @@ def send_coupon_validity_detail(*args, **kwargs):
         send_coupon_validity_detail.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(action=status, receiver=phone_number, message=message)
+        sms_log(status=status, receiver=phone_number, message=message)
 
 """
 This job send sms to customer when SA send 
@@ -122,7 +122,7 @@ def send_coupon_detail_customer(*args, **kwargs):
         send_coupon_detail_customer.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(action=status, receiver=phone_number, message=message)
+        sms_log(status=status, receiver=phone_number, message=message)
 
 """
 This job send reminder sms to customer
@@ -141,7 +141,7 @@ def send_reminder_message(*args, **kwargs):
         send_reminder_message.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(action=status, receiver=phone_number, message=message)
+        sms_log(status=status, receiver=phone_number, message=message)
 
 """
 This job send coupon close message
@@ -160,7 +160,7 @@ def send_coupon_close_message(*args, **kwargs):
         send_coupon_close_message.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(action=status, receiver=phone_number, message=message)
+        sms_log(status=status, receiver=phone_number, message=message)
 
 
 """
@@ -177,7 +177,7 @@ def send_otp(*args, **kwargs):
         status = "failed"
         send_otp.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(action = status, receiver=phone_number, message=message)
+        sms_log(status=status, receiver=phone_number, message=message)
 
 
 @shared_task
@@ -191,7 +191,7 @@ def send_coupon(*args, **kwargs):
         status = "failed"
         send_coupon.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(action=status, receiver=phone_number, message=message)
+        sms_log(status=status, receiver=phone_number, message=message)
 
 """
 This job send coupon close message to customer
@@ -210,7 +210,7 @@ def send_close_sms_customer(*args, **kwargs):
         send_close_sms_customer.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(action=status, receiver=phone_number, message=message)
+        sms_log(status=status, receiver=phone_number, message=message)
 
 
 @shared_task
@@ -225,7 +225,7 @@ def send_brand_sms_customer(*args, **kwargs):
         send_brand_sms_customer.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(action=status, receiver=phone_number, message=message)
+        sms_log(status=status, receiver=phone_number, message=message)
 
 """
 This task send Invalid Keyword message
@@ -244,7 +244,7 @@ def send_invalid_keyword_message(*args, **kwargs):
         send_invalid_keyword_message.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(action=status, receiver=phone_number, message=message)
+        sms_log(status=status, receiver=phone_number, message=message)
 
 
 """
@@ -264,7 +264,7 @@ def send_on_product_purchase(*args, **kwargs):
         send_on_product_purchase.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(action=status, receiver=phone_number, message=message)
+        sms_log(status=status, receiver=phone_number, message=message)
         
 
 @shared_task
