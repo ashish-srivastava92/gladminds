@@ -26,3 +26,4 @@ django-oauth2-provider
 newrelic==2.20.0.17
 django-composite-field
 django-guardian==1.2.4
+django-registration==1.0

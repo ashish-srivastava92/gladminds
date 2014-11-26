@@ -30,7 +30,9 @@ TOTP_SECRET_KEY = '93424'
 OTP_VALIDITY = 120
 HARCODED_OTPS = ['GMDEV123']
 HARCODED_TOKEN = ['e6281aa90743296987089ab013ee245dab66b27b']
-
+PASSWORD_REST_URL = ''
+ACCOUNT_ACTIVATION_DAYS = 10
+DOMAIN_BASE_URL = '/afterbuy/v1/consumers/activate-email/'
 JOBCARD_DIR = '{0}/jobcards/prod/'
 JOBCARD_BUCKET = 'gladminds'
 
@@ -64,7 +66,7 @@ SUIT_CONFIG = {
                     {'model': 'serviceadvisor',
                      'label': 'Service Advisor'},)},
         {'app': 'bajaj', 'label': 'Products', 'icon': ' icon-folder-open',
-         'models':( {'model': 'brandproductcategory',
+         'models':({'model': 'brandproductcategory',
                      'label': 'Brand Product Category'},
                     {'model': 'producttype',
                      'label': 'Product Type'},
@@ -250,7 +252,7 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-TEST_IGNORE_APPS = (#'south',
+TEST_IGNORE_APPS = (# 'south',
                     )
 
 ALL_APPS = (
@@ -357,16 +359,16 @@ LOGGING = {
             'propagate': True,
         },
         'gladminds': {
-            'handlers': ['gladminds_logs','console'],
+            'handlers': ['gladminds_logs', 'console'],
             'level': 'INFO',
             'propagate': True,
         },
         'spyne': {
-            'handlers': ['gladminds_logs','console'],
+            'handlers': ['gladminds_logs', 'console'],
             'level': 'WARN',
             'propagate': True,
         }, 'afterbuy': {
-            'handlers': ['afterbuy_logs','console'],
+            'handlers': ['afterbuy_logs', 'console'],
             'level': 'DEBUG',
             'propagate': True,
         }
@@ -390,7 +392,7 @@ MAIL_DETAIL = {
 FEED_FAILURE_MAIL_DETAIL = {
 
     "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds+alerts@hashedin.com","support@gladminds.co"],
+    "receiver": ["gladminds+alerts@hashedin.com", "support@gladminds.co"],
     "subject": "Gladminds Feed Failure Mail",
     "body": """""",
 }
@@ -423,6 +425,18 @@ OTP_MAIL = {
                   "body": """""",
               }
 
+PASSWORD_RESET_MAIL = {
+                  "sender":"support@gladminds.co",
+                  "subject":"Reset Password",
+                  "receiver": [""],
+                  "body": """""",
+              }
+
+EMAIL_ACTIVATION_MAIL = {
+                  "sender":"support@gladminds.co",
+                  "subject":"Confirm your email address",
+                  "receiver": [""],
+                  "body": """""", }
 
 # AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
@@ -510,7 +524,7 @@ ENABLE_SERVICE_DESK = True
 DEFAULT_IMAGE_ID = 'guest.png'
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend', # default
+    'django.contrib.auth.backends.ModelBackend',  # default
     'guardian.backends.ObjectPermissionBackend',
 )
 

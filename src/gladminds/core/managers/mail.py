@@ -10,7 +10,7 @@ from django.forms.models import model_to_dict
 logger = logging.getLogger("gladminds")
 
 
-def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER):
+def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER, title='GCP_Bajaj_FSC_Feeds'):
     msg = MIMEText(body, 'html', _charset='utf-8')
 #   subject = 'Subject: {0}\n'.format(subject)
 #   header = "To:{0}\nFrom:{1}\n{2}".format(", ".join(receiver),sender, subject)
@@ -20,11 +20,24 @@ def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER
         msg['To'] = ", ".join(receiver)
     else:
         msg['To'] = receiver
-    msg['To'] = ", ".join(receiver)
-    msg['From'] = "GCP_Bajaj_FSC_Feeds<%s>" % sender
+    msg['From'] = title + "<%s>"% sender
     mail = smtplib.SMTP(smtp_server)
     mail.sendmail(from_addr=sender, to_addrs=receiver, msg=msg.as_string())
     mail.quit()
+
+
+def send_email_activation(receiver_email, data=None):
+    file_stream = open(settings.EMAIL_DIR+'/activation_email.html')
+    feed_temp = file_stream.read()
+    template = Template(feed_temp)
+    context = Context(data)
+    body = template.render(context)
+    mail_detail = settings.EMAIL_ACTIVATION_MAIL
+    send_email(sender=mail_detail['sender'],
+               receiver=receiver_email,
+               subject=mail_detail['subject'], body=body,
+               smtp_server=settings.MAIL_SERVER, title='Support')
+
 
 
 def feed_report(feed_data = None):
@@ -128,7 +141,23 @@ def insurance_extend(data=None, receiver=None, subject=None):
                         smtp_server=settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception item insurance extend]: {0}".format(ex))
-        
+
+
+def sent_password_reset_link(data=None, receiver=None, subject=None):
+    try:
+        date = datetime.now().date()
+        file_stream = open(settings.EMAIL_DIR+'/password_reset_email.html')
+        feed_temp = file_stream.read()
+        template = Template(feed_temp)
+        context = Context({"link": settings.PASSWORD_REST_URL})
+        body = template.render(context)
+        mail_detail = settings.PASSWORD_RESET_MAIL
+        send_email(sender = mail_detail['sender'], receiver = receiver, 
+                   subject = mail_detail['subject'], body = body, 
+                   smtp_server = settings.MAIL_SERVER)
+    except Exception as ex:
+        logger.info("[Exception otp email]: {0}".format(ex))
+
 
 def sent_otp_email(data=None, receiver=None, subject=None):
     try:
