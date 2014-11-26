@@ -516,7 +516,7 @@ class GladmindsResources(Resource):
         try:
             role = self.check_role_of_initiator(phone_number)
             user_profile = models.UserProfile.objects.filter(phone_number=phone_number)
-            if user_profile[0]:
+            if len(user_profile)>0:
                 servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
                 if servicedesk_user:
                     servicedesk_user = servicedesk_user[0]
