@@ -11,7 +11,7 @@ OUT_DIR = os.path.join(BASE_DIR, "out")
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'hasher123')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'admin')
 
 DATABASES = {
     'default': {
