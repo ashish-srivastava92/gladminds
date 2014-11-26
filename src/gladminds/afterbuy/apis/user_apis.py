@@ -313,6 +313,25 @@ class InterestResource(CustomBaseModelResource):
         queryset = afterbuy_model.Interest.objects.all()
         resource_name = "interests"
         authentication = AccessTokenAuthentication()
+        authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
+
+
+class UserNotificationResource(CustomBaseModelResource):
+    consumer = fields.ForeignKey(ConsumerResource, 'consumer', null=True, blank=True, full=True)
+
+    class Meta:
+        queryset = afterbuy_model.UserNotification.objects.all()
+        resource_name = "notifications"
+        authentication = AccessTokenAuthentication()
+        authorization = CustomAuthorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_update_fields = ['notification_read']
+        always_return_data = True
+        filtering = {
+                     "consumer": ALL,
+                     "id": ALL
+                     }
+
         

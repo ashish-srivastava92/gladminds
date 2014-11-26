@@ -12,6 +12,7 @@ from provider.oauth2 import urls
 api_v1 = Api(api_name="afterbuy/v1")
 api_v1.register(user_apis.ConsumerResource())
 api_v1.register(user_apis.InterestResource())
+api_v1.register(user_apis.UserNotificationResource())
 api_v1.register(product_apis.ProductInsuranceInfoResource())
 api_v1.register(product_apis.InvoiceResource())
 api_v1.register(product_apis.LicenseResource())
