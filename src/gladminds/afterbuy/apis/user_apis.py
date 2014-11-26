@@ -69,6 +69,7 @@ class ConsumerResource(CustomBaseModelResource):
             url(r"^(?P<resource_name>%s)/(?P<user_id>\d+)/products%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('dispatch_dict'), name="api_dispatch_dict"),
             url(r"^(?P<resource_name>%s)/login%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('auth_login'), name="auth_login"),
             url(r"^(?P<resource_name>%s)/validate-otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('validate_otp'), name="validate_otp"),
+            url(r"^(?P<resource_name>%s)/logout%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('logout'), name="logout")
         ]
 
     def sent_otp_user_phone_number(self, request, **kwargs):
@@ -305,6 +306,23 @@ class ConsumerResource(CustomBaseModelResource):
                 logger.info("[Exception get_user_login_information]:{0}".
                             format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
+
+    def logout(self, request, **kwargs):
+        from provider.oauth2.models import AccessToken
+        access_token = request.GET.get('access_token')
+        if access_token:
+            try:
+                at_obj = AccessToken.objects.using(settings.BRAND).get(token=access_token)
+                if settings.OAUTH_DELETE_EXPIRED:
+                    at_obj.delete()
+                data = {'status': 0, 'message': "logout successfully"}
+            except Exception as ex:
+                data = {'status': 0, 'message': "access_token_not_valid"}
+                logger.info("[Exception get_user_login_information]:{0}".
+                            format(ex))
+        return HttpResponse(json.dumps(data), content_type="application/json")
+
+
 
 
 class InterestResource(CustomBaseModelResource):
