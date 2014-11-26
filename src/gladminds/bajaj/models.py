@@ -56,7 +56,7 @@ class ServiceDeskUser(base_models.ServiceDeskUser):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "reporter info"
+        verbose_name_plural = "Service Desk Users"
 
 
 class Feedback(base_models.Feedback):
