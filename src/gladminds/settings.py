@@ -33,6 +33,7 @@ HARCODED_TOKEN = ['e6281aa90743296987089ab013ee245dab66b27b']
 PASSWORD_REST_URL = ''
 ACCOUNT_ACTIVATION_DAYS = 10
 DOMAIN_BASE_URL = '/afterbuy/v1/consumers/activate-email/'
+OAUTH_DELETE_EXPIRED = True
 JOBCARD_DIR = '{0}/jobcards/prod/'
 JOBCARD_BUCKET = 'gladminds'
 
@@ -524,8 +525,7 @@ ENABLE_SERVICE_DESK = True
 DEFAULT_IMAGE_ID = 'guest.png'
 
 CONSTANCE_CONFIG = {
-    'THE_ANSWER': (42, 'Answer to the Ultimate Question of Life, '
-                       'The Universe, and Everything'),
+    'DEFAULT_IMAGE': ('guest.png', 'Default image to be used by any app'),
 }
 
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
