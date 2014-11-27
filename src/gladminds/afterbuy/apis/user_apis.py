@@ -64,7 +64,7 @@ class ConsumerResource(CustomBaseModelResource):
             url(r"^(?P<resource_name>%s)/phone-number/send-otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('sent_otp_user_phone_number'), name="sent_otp_user_phone_number"),
             url(r"^(?P<resource_name>%s)/authenticate-email%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('authenticate_user_email_id'), name="authenticate_user_email_id"),
             url(r"^(?P<resource_name>%s)/send-otp/forgot-password%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('authenticate_user_send_otp'), name="authenticate_user_send_otp"),
-            url(r"^(?P<resource_name>%s)/forgot-password%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('change_user_password'), name="change_user_password"),
+            url(r"^(?P<resource_name>%s)/forgot-password/(?P<type>[a-zA-Z0-9.-]+)%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('change_user_password'), name="change_user_password"),
             url(r"^(?P<resource_name>%s)/(?P<user_id>\d+)/details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_user_details'), name="get_user_details"),
             url(r"^(?P<resource_name>%s)/(?P<user_id>\d+)/products%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('dispatch_dict'), name="api_dispatch_dict"),
             url(r"^(?P<resource_name>%s)/login%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('auth_login'), name="auth_login"),
@@ -230,28 +230,27 @@ class ConsumerResource(CustomBaseModelResource):
             load = json.loads(request.body)
         except:
             return HttpResponse(content_type="application/json", status=404)
-        email = load.get('email_id')
+        type = kwargs['type']
         otp_token = load.get('otp_token')
-        phone_number = load.get('phone_number')
         password = load.get('password1')
         repassword = load.get('password2')
         auth_key = load.get('auth_key')
         user_details = {}
-        if not phone_number and not email:
+        if not type:
             return HttpBadRequest("phone_number or email is required")
         if password != repassword:
             return HttpBadRequest("password1 and password2 not matched")
         try:
-            if phone_number:
+            if type=='phone':
                 try:
                     if not (settings.ENV in ["dev", "local"] and otp_token in settings.HARCODED_OTPS):
-                        consumer = afterbuy_model.Consumer.objects.get(phone_number=phone_number)
+                        consumer = afterbuy_model.OTPToken.objects.get(token=otp_token).user
                         afterbuy_utils.validate_otp(otp_token, user=consumer)
                 except Exception:
                     raise ImmediateHttpResponse(
                         response=http.HttpBadRequest('Wrong OTP!'))
                 user_details['id'] = consumer.user.id
-            elif email:
+            elif type=='email':
                 try:
                     user_obj = afterbuy_model.EmailToken.objects.get(activation_key=auth_key).user
                 except Exception:
