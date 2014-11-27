@@ -45,20 +45,18 @@ def get_comments(feedback_id):
     return comments
 
 def set_due_date(priority, feedback_obj):
+    '''
+    Set all the dates as per SLA definition
+    due_date = created_date + resolution_time
+    reminder_date = due_date - reminder_time
+    '''
     created_date = feedback_obj.created_date
     sla_obj = models.SLA.objects.get(priority=priority)
-    resolution_time = sla_obj.resolution_time
-    resolution_unit = sla_obj.resolution_unit
-    reminder_time = sla_obj.reminder_time
-    reminder_unit = sla_obj.reminder_unit
-    total_seconds = get_time_in_seconds(reminder_time, reminder_unit)
-    reminder_date = created_date + datetime.timedelta(seconds=total_seconds)
-    total_seconds = get_time_in_seconds(resolution_time, resolution_unit)
+    total_seconds = get_time_in_seconds(sla_obj.resolution_time, sla_obj.resolution_unit)
     due_date = created_date + datetime.timedelta(seconds=total_seconds)
-    reminder_date = due_date-reminder_date
-    feedback_obj.reminder_date = due_date-reminder_date
-    feedback_obj.save() 
-    return due_date
+    total_seconds = get_time_in_seconds(sla_obj.reminder_time, sla_obj.reminder_unit)
+    reminder_date = due_date-datetime.timedelta(seconds=total_seconds)
+    return {'due_date':due_date, 'reminder_date':reminder_date}
 
 def get_reporter_details(reporter, value="phone_number"):
     if value == "email":
@@ -121,7 +119,9 @@ def save_update_feedback(feedback_obj, data, user, host):
     feedback_obj.save()
     if assign_status and feedback_obj.assignee:
         feedback_obj.assignee_created_date = datetime.datetime.now()
-        feedback_obj.due_date = set_due_date(data['Priority'], feedback_obj)
+        date = set_due_date(data['Priority'], feedback_obj)
+        feedback_obj.due_date = date['due_date']
+        feedback_obj.reminder_date = date['reminder_date'] 
         feedback_obj.save()
         context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL',
                                  feedback_obj)
