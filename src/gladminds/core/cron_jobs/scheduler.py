@@ -35,6 +35,9 @@ task_info = {
         "time_taken": 0
     },
     "delete_unused_otp": {
+    },
+    "send_reminders_for_servicedesk": {
+        "time_taken": 0
     }
 }
 
