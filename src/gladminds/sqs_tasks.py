@@ -462,6 +462,12 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
     sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
     return {'status': True, 'message': message}
 
+def send_reminders_for_servicedesk(*args, **kwargs):
+    # Write logic to filter the tickets and send mail
+    time = datetime.now()
+#     feedback_obj = common.Feedback.objects.filter()
+    return True
+
     
 _tasks_map = {"send_registration_detail": send_registration_detail,
 
@@ -509,6 +515,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "customer_detail_recovery": customer_detail_recovery,
               
-              "send_point": send_point
+              "send_point": send_point,
+              
+              "send_reminders_for_servicedesk": send_reminders_for_servicedesk
 
               }

@@ -25,7 +25,7 @@ urlpatterns += patterns('gladminds',
     url(r'api/doc/', include('gladminds.core.api_docs.swagger_urls', namespace='tastypie_swagger')),
     url(r'^', include(admin.urls)),
     url(r'^tasks-view/', sqs_tasks_view),
-    url(r'^trigger-tasks/', trigger_sqs_tasks),
+    url(r'^trigger-tasks', trigger_sqs_tasks),
     url(r'^tasks', SqsHandler.as_view(task_map=_tasks_map)),
 )
 
