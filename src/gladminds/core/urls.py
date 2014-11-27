@@ -1,12 +1,10 @@
 from django.conf.urls import patterns, url, include
 from django.conf import settings
-from gladminds.bajaj.admin import brand_admin
-from gladminds.bajaj.feeds import webservice
+from gladminds.core.cron_jobs.taskqueue import SqsHandler
+from gladminds.sqs_tasks import _tasks_map
 
 
 urlpatterns = patterns('',
-    url(r'^site-info/$', 'gladminds.bajaj.views.site_info', name='site_info'),
-    url(r'', include(brand_admin.urls)),
     url(r'api/doc/', include('gladminds.core.api_docs.swagger_urls', namespace='tastypie_swagger')),
     url(r'^api/v1/mock-feed/$', 'gladminds.bajaj.feeds.webservice.mock_service'),
     url(r'^api/v1/mock-feed/\?wsdl$', 'gladminds.bajaj.feeds.webservice.mock_service'),
@@ -50,4 +48,10 @@ urlpatterns = patterns('',
     url(r'^aftersell/servicedesk/$', 'gladminds.bajaj.services.service_desk.get_servicedesk_tickets', name='get_servicedesk_tickets'),
     url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/$', 'gladminds.bajaj.services.service_desk.modify_servicedesk_tickets', name='modify_servicedesk_tickets'),
     url(r'^aftersell/feedbackresponse/(?P<feedback_id>\d+)/$', 'gladminds.bajaj.services.service_desk.get_feedback_response', name='get_feedback_response'),
+
+    # Tasks URL
+    url(r'^tasks-view/', 'gladminds.core.views.sqs_tasks_view'),
+    url(r'^trigger-tasks/', 'gladminds.core.views.trigger_sqs_tasks'),
+    url(r'^tasks', SqsHandler.as_view(task_map=_tasks_map)),
+
 )

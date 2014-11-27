@@ -12,6 +12,7 @@ from gladminds.afterbuy.apis.brand_apis import BrandResource
 from gladminds.afterbuy.apis.user_apis import ConsumerResource
 from django.forms.models import model_to_dict
 from gladminds.core.apis.user_apis import AccessTokenAuthentication
+from gladminds.core.apis.authorization import CustomAuthorization
 
 logger = logging.getLogger("gladminds")
 
@@ -35,7 +36,7 @@ class UserProductResource(CustomBaseModelResource):
         queryset = afterbuy_models.UserProduct.objects.all()
         resource_name = "products"
         authentication = AccessTokenAuthentication()
-        authorization = Authorization()
+        authorization = CustomAuthorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
         filtering = {
@@ -50,7 +51,10 @@ class UserProductResource(CustomBaseModelResource):
         license = afterbuy_models.License.objects.filter(product=bundle.data['id'])
         registrations = afterbuy_models.RegistrationCertificate.objects.filter(product=bundle.data['id'])
         pollution = afterbuy_models.PollutionCertificate.objects.filter(product=bundle.data['id'])
-        support = afterbuy_models.Support.objects.filter(brand=bundle.data['id'])
+        product_support = afterbuy_models.ProductSupport.objects.filter(product=bundle.data['id'])
+        sell_information = afterbuy_models.SellInformation.objects.filter(product=bundle.data['id'])
+        brand_id = bundle.data['brand'].data['id']
+        support = afterbuy_models.Support.objects.filter(brand=int(brand_id))
         product_image = afterbuy_models.UserProductImages.objects.filter(product=bundle.data['id'])
         bundle.data['insurance'] = [model_to_dict(c) for c in insurance]
         bundle.data['invoice'] = [model_to_dict(c) for c in invoice]
@@ -59,6 +63,8 @@ class UserProductResource(CustomBaseModelResource):
         bundle.data['pollution'] = [model_to_dict(c) for c in pollution]
         bundle.data['support'] = [model_to_dict(c) for c in support]
         bundle.data['product_image'] = [model_to_dict(c) for c in product_image]
+        bundle.data['product_support'] = [model_to_dict(c) for c in product_support]
+        bundle.data['sell_information'] = [model_to_dict(c) for c in sell_information]
         return bundle
 
     def prepend_urls(self):
@@ -87,7 +93,7 @@ class ProductInsuranceInfoResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.ProductInsuranceInfo.objects.all()
         resource_name = "insurances"
-        authorization = Authorization()
+        authorization = CustomAuthorization()
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
@@ -104,7 +110,7 @@ class InvoiceResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.Invoice.objects.all()
         resource_name = "invoices"
-        authorization = Authorization()
+        authorization = CustomAuthorization()
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
@@ -119,7 +125,7 @@ class LicenseResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.License.objects.all()
         resource_name = 'licenses'
-        authorization = Authorization()
+        authorization = CustomAuthorization()
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data =True
@@ -134,7 +140,7 @@ class RegistrationCertificateResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.RegistrationCertificate.objects.all()
         resource_name = 'registrations'
-        authorization = Authorization()
+        authorization = CustomAuthorization()
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data =True
@@ -150,7 +156,7 @@ class PollutionCertificateResource(CustomBaseModelResource):
         queryset = afterbuy_models.PollutionCertificate.objects.all()
         resource_name = 'pollution'
         authentication = AccessTokenAuthentication()
-        authorization = Authorization()
+        authorization = CustomAuthorization()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data =True
         filtering = {
@@ -182,7 +188,7 @@ class ProductSupportResource(CustomBaseModelResource):
         queryset = afterbuy_models.ProductSupport.objects.all()
         resource_name = 'product-support'
         authentication = AccessTokenAuthentication()
-        authorization = Authorization()
+        authorization = CustomAuthorization()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data = True
         filtering = {
@@ -197,7 +203,7 @@ class SellInformationResource(CustomBaseModelResource):
         queryset = afterbuy_models.SellInformation.objects.all()
         resource_name = 'sell-information'
         authentication = AccessTokenAuthentication()
-        authorization = Authorization()
+        authorization = CustomAuthorization()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data = True
         filtering = {
@@ -212,7 +218,7 @@ class UserProductImagesResource(CustomBaseModelResource):
         queryset = afterbuy_models.UserProductImages.objects.all()
         resource_name = 'product-images'
         authentication = AccessTokenAuthentication()
-        authorization = Authorization()
+        authorization = CustomAuthorization()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data = True
         filtering = {

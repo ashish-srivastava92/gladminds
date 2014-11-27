@@ -237,9 +237,18 @@ class CouponChangeList(ChangeList):
         return ordering
 
 class SMSLogAdmin(ModelAdmin):
-    search_fields = ('status', 'sender', 'receiver', 'action')
+    search_fields = ('sender', 'receiver', 'action')
     list_display = (
         'created_date', 'action', 'message', 'sender', 'receiver')
+    
+    def suit_row_attributes(self, obj):
+        class_map = {
+            'success': 'success',
+            'failed': 'error',
+        }
+        css_class = class_map.get(str(obj.status))
+        if css_class:
+            return {'class': css_class}
     
     def action(self, obj):
         return obj.action

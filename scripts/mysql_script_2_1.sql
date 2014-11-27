@@ -6,7 +6,7 @@ insert into bajaj.bajaj_asctempregistration(id,name,password,phone_number,email,
 
 insert into bajaj.bajaj_satempregistration(id,name,phone_number,status) select gladminds_sasaveform.id, gladminds_sasaveform.name, gladminds_sasaveform.phone_number,gladminds_sasaveform.status from gladminds_sasaveform;
 
-insert into bajaj.bajaj_smslog(id, created_date, modified_date, action, message, sender, receiver) select aftersell_auditlog.id, aftersell_auditlog.date, aftersell_auditlog.date, aftersell_auditlog.action,aftersell_auditlog.message, aftersell_auditlog.sender, aftersell_auditlog.reciever from aftersell_auditlog;
+insert into bajaj.bajaj_smslog(id, created_date, modified_date, action, message, sender, receiver, status) select aftersell_auditlog.id, aftersell_auditlog.date, aftersell_auditlog.date, aftersell_auditlog.action,aftersell_auditlog.message, aftersell_auditlog.sender, aftersell_auditlog.reciever,aftersell_auditlog.status from aftersell_auditlog;
 
 insert into bajaj.bajaj_datafeedlog(data_feed_id, feed_type, total_data_count, failed_data_count, success_data_count, action, status, timestamp, remarks, file_location ) select aftersell_datafeedlog.data_feed_id, aftersell_datafeedlog.feed_type, aftersell_datafeedlog.total_data_count, aftersell_datafeedlog.failed_data_count, aftersell_datafeedlog.success_data_count, aftersell_datafeedlog.action, aftersell_datafeedlog.status, aftersell_datafeedlog.timestamp, aftersell_datafeedlog.remarks, aftersell_datafeedlog.file_location  from aftersell_datafeedlog;
 
@@ -32,6 +32,7 @@ nohup python scripts/migrate_dealer_data.py &
 nohup python scripts/migrate_asc_data.py &
 nohup python scripts/migrate_service_advisor.py &
 
+
 nohup python scripts/migrate_products.py &
 nohup python scripts/migrate_coupons.py &
 nohup python scripts/migrate_coupons_sa_relations.py &
@@ -39,3 +40,4 @@ nohup python scripts/migrate_coupons_sa_relations.py &
 nohup python scripts/migrate_old_fsc.py &
 nohup python scripts/migrate_temp_customer.py &
 nohup python scripts/migrate_ucn_recovery.py &
+

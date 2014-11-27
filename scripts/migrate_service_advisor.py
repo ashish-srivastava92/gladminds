@@ -47,7 +47,7 @@ def process_query(data):
         username, first_name, last_name, email, is_staff, is_active, date_joined)\
             VALUES (%s, %s, %s, %s, %s, %s, %s,  %s, %s, %s)",(data.get('password'),
                 data.get('last_login'), data.get('is_superuser'),data.get('username'),
-                data.get('first_name'), data.get('last_name'), data.get('email'),
+                data.get('name'), data.get('last_name'), data.get('email'),
                 data.get('is_staff'), data.get('is_active'),
                 data.get('date_joined')))
         
@@ -56,8 +56,8 @@ def process_query(data):
         sa = cur_new.fetchall()[0]
         
         cur_new.execute("INSERT INTO bajaj_userprofile (user_id, address,\
-         created_date, modified_date) VALUES (%s, %s, %s, %s)",(sa[0],
-                                            data.get('address'), today, today))
+         created_date, modified_date, phone_number) VALUES (%s, %s, %s, %s, %s)",(sa[0],
+                                            data.get('address'), today, today, data.get('phone_number')))
         
         query2 = "select * from bajaj_userprofile where user_id  = %(user_id)s"
         cur_new.execute(query2, {'user_id': sa[0]})

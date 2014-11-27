@@ -1,6 +1,8 @@
 from django.conf import settings
 
-_COMMON_APPS = ['auth', 'contenttypes', 'sessions', 'sites', 'admin', 'djcelery','provider','oauth2', 'django_otp']
+_COMMON_APPS = ['auth', 'contenttypes', 'sessions', 'sites', 'admin', 'djcelery', 'provider',
+                'oauth2', 'django_otp', 'permission', 'group', 'messages', 'staticfiles',
+                'database']
 
 class DatabaseAppsRouter(object):
     """
@@ -23,6 +25,11 @@ class DatabaseAppsRouter(object):
 
     def db_for_write(self, model, **hints):
         """Point all write operations to the specific database."""
+#         if model._meta.model_name in ['permission'] and model._meta.app_label in ['auth']:
+#             if hints['instance'].app_label in settings.BRANDS+[settings.GM_BRAND]:
+#                 print model._meta.model_name, model._meta.app_label, hints['instance'].app_label
+#                 print settings.DATABASE_APPS_MAPPING.get(hints['instance'].app_label)
+#                 return settings.DATABASE_APPS_MAPPING.get(hints['instance'].app_label)
         if model._meta.app_label in _COMMON_APPS:
             return settings.DATABASE_APPS_MAPPING.get(settings.BRAND)
         return settings.DATABASE_APPS_MAPPING.get(model._meta.app_label)

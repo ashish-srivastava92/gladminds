@@ -81,21 +81,19 @@ def process_query(data):
             customer = cur_old.fetchone()
             customer_name=customer[3]
             customer_number=customer[5]
-            if customer[7]:
-                customer_address=customer[7]+',' 
-            if customer[9]:
-                customer_address= customer_address + customer[9]+','
-            if customer[14]:
-                customer_address= customer_address + customer[14]
+            customer_city=customer[7] 
+            customer_state=customer[9]
+            customer_pincode= customer[14]
             db_old.close()
         
         cur_new.execute("INSERT INTO bajaj_productdata (id, created_date, modified_date, \
-        product_id, customer_id, customer_phone_number, customer_name, customer_address,\
+        product_id, customer_id, customer_phone_number, customer_name, \
+        customer_city,customer_state,customer_pincode\
         purchase_date, invoice_date, engine, veh_reg_no, is_active,\
         product_type_id, dealer_id_id ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,\
-        %s)",(data.get('id'),data.get('created_on'),
+        %s,%s, %s,)",(data.get('id'),data.get('created_on'),
         data.get('last_modified'), data.get('vin'), data.get('sap_customer_id'),
-        customer_number, customer_name, customer_address,
+        customer_number, customer_name, customer_city,customer_state,customer_pincode,
         data.get('product_purchase_date'), data.get('invoice_date'),
         data.get('engine'), data.get('veh_reg_no'), data.get('isActive'),
         product_type, dealer))
