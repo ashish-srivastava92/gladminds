@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 
 def save_otp(token, **kwargs):
     if 'user' in kwargs.keys():
-        user = afterbuy_model.Consumer.objects.get(kwargs.get('user'))
+        user = afterbuy_model.Consumer.objects.get(user = kwargs.get('user'))
         afterbuy_model.OTPToken.objects.filter(user=user).delete()
         token_obj = afterbuy_model.OTPToken(user=user, token=str(token), request_date=datetime.now(), email=user.user.email)
     else:
@@ -29,7 +29,7 @@ def generate_otp(phone_number):
 
 def validate_otp(otp, **kwargs):
     if 'user' in kwargs.keys():
-        token_obj = afterbuy_model.OTPToken.objects.filter(**kwargs)[0]
+        token_obj = afterbuy_model.OTPToken.objects.filter(user = kwargs.get('user'))[0]
     else:
         phone_number = kwargs.get('phone_number')
         token_obj = afterbuy_model.OTPToken.objects.get(phone_number=phone_number)
@@ -43,7 +43,7 @@ def validate_otp(otp, **kwargs):
 
 def get_otp(**kwargs):
     if 'user' in kwargs.keys():
-        phone_number = afterbuy_model.Consumer.objects.get(kwargs.get('user')).phone_number
+        phone_number = afterbuy_model.Consumer.objects.get(user = kwargs.get('user')).phone_number
     else:
         phone_number = kwargs.get('phone_number')
     otp = generate_otp(phone_number)

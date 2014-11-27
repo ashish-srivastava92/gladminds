@@ -42,7 +42,6 @@ class EmailTokenManager(models.Manager):
         if SHA1_RE.search(activation_key):
             try:
                 profile = self.get(activation_key=activation_key)
-                print profile
             except self.model.DoesNotExist:
                 return False
             if not profile.activation_key_expired():
@@ -54,7 +53,7 @@ class EmailTokenManager(models.Manager):
                 return user_profile
         return False
 
-    def create_email_token(self, user_profile, reciever_email ,site,send_email=True):
+    def create_email_token(self, user_profile, reciever_email , site, trigger_mail=None, send_email=True):
         salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
         username = user_profile.user.username
         if isinstance(username, unicode):
@@ -64,8 +63,7 @@ class EmailTokenManager(models.Manager):
                            activation_key=activation_key)
 
         if send_email:
-            print "mail"
-            email_token.send_activation_email(reciever_email,site)
+            email_token.send_activation_email(reciever_email, site, trigger_mail)
 
         return email_token
 

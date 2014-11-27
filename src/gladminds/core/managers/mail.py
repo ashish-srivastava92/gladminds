@@ -5,7 +5,6 @@ import smtplib
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 import logging
-from django.forms.models import model_to_dict
 
 logger = logging.getLogger("gladminds")
 
@@ -143,18 +142,17 @@ def insurance_extend(data=None, receiver=None, subject=None):
         logger.info("[Exception item insurance extend]: {0}".format(ex))
 
 
-def sent_password_reset_link(data=None, receiver=None, subject=None):
+def sent_password_reset_link(receiver=None, data=None):
     try:
-        date = datetime.now().date()
         file_stream = open(settings.EMAIL_DIR+'/password_reset_email.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
-        context = Context({"link": settings.PASSWORD_REST_URL})
+        context = Context(data)
         body = template.render(context)
         mail_detail = settings.PASSWORD_RESET_MAIL
         send_email(sender = mail_detail['sender'], receiver = receiver, 
-                   subject = mail_detail['subject'], body = body, 
-                   smtp_server = settings.MAIL_SERVER)
+                   subject = mail_detail['subject'], body = body,
+                   smtp_server = settings.MAIL_SERVER, title='Support')
     except Exception as ex:
         logger.info("[Exception otp email]: {0}".format(ex))
 
