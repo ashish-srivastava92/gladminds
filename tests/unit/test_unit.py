@@ -29,8 +29,7 @@ class TestUtils(GladmindsUnitTestCase):
     
     def setUp(self):
         super(TestUtils, self).setUp()
-        self.product_type_obj = self.get_product_type_obj(
-                                product_name='DISCO120', product_type='BIKE')
+        self.product_type_obj = self.get_product_type_obj(product_type='BIKE')
         dealer_obj = self.get_delear_obj(name='DEALER001')
         product_obj = self.get_product_obj(product_id="VINXXX001", product_type=self.product_type_obj, dealer_id=dealer_obj\
                                            , purchase_date=datetime.now(), customer_name='TestCustomer',
@@ -72,7 +71,7 @@ class TestUtils(GladmindsUnitTestCase):
     def test_get_sa_list(self):
         request = RequestObject(user='DEALER001', data={
                                 'customerId': 'SAP001', 'vin': 'VINXXX001'}, file={'jobCard': ''})
-        sa_list = get_sa_list(request)
+        sa_list = get_sa_list(request.user)
         self.assertEqual(len(sa_list), 1)
         coupon_info = get_coupon_info(request.POST)
         self.assertEqual(coupon_info.unique_service_coupon, 'COUPON005')
@@ -105,7 +104,7 @@ class TestUtils(GladmindsUnitTestCase):
            
     def test_get_list_from_set(self):
         data = get_list_from_set(FEEDBACK_TYPE)
-        self.assertEqual(len(data), 5) 
+        self.assertEqual(len(data), 4) 
         data = get_list_from_set(PRIORITY)
         self.assertEqual(len(data), 4) 
            

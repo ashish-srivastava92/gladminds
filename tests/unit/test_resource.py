@@ -10,7 +10,7 @@ from gladminds.settings import COUPON_VALID_DAYS
 class GladmindsResourcesTest(GladmindsResourceTestCase):
     def setUp(self):
         super(GladmindsResourcesTest, self).setUp()
-        product_type_obj = self.get_product_type_obj(product_name='DISCO120', product_type='BIKE')
+        product_type_obj = self.get_product_type_obj(product_type='BIKE')
         dealer_obj = self.get_delear_obj(name='DEALER001')
         product_obj = self.get_product_obj(product_id="VINXXX001", product_type=product_type_obj,
                                             dealer_id=dealer_obj, customer_phone_number='+919999999',
