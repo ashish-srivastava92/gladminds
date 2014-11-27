@@ -5,13 +5,15 @@ from django.core.exceptions import ValidationError
 from composite_field.base import CompositeField
 from django.conf import settings
 from django.utils.translation import gettext as _
+from constance import config
 
 from gladminds.core.managers import user_manager
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, RATINGS,\
                             ROOT_CAUSE, SLA_PRIORITY, TIME_UNIT
 from gladminds.core.model_helpers import PhoneField
 from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
-from gladminds.core.managers.mail import send_email_activation
+from gladminds.core.managers.mail import send_email_activation,\
+    sent_password_reset_link
 try:
     from django.utils.timezone import now as datetime_now
 except ImportError:
@@ -385,7 +387,7 @@ class EmailToken(models.Model):
                (self.user.user.date_joined + expiration_date <= datetime_now())
     activation_key_expired.boolean = True
 
-    def send_activation_email(self, reciever_email,site):
+    def send_activation_email(self, reciever_email, site, trigger_mail):
         """
         Send an activation email to the user associated with this
         The activation email will make use of two templates:
@@ -425,7 +427,12 @@ class EmailToken(models.Model):
                     'expiration_days': settings.ACCOUNT_ACTIVATION_DAYS,
                     'site': site,
                     'base_url':settings.DOMAIN_BASE_URL}
-        send_email_activation(reciever_email, ctx_dict)
+        if trigger_mail == 'forgot-password':
+            ctx_dict = {'activation_key': self.activation_key,
+                    'link': config.AFTERBUY_FORGOT_PASSWORD_URL}
+            sent_password_reset_link(reciever_email, ctx_dict)
+        else:
+            send_email_activation(reciever_email, ctx_dict)
 
 class UserPreference(BaseModel):
     """
