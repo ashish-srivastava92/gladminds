@@ -195,27 +195,26 @@
 	 			</div>
 	 		</form>
 	 	</div>  
-	 		
-	 	<div class="row hide">
+	 	<div class="row">
 	 		<div class="col-md-4"></div>
 	 		<div class="col-md-8">
-	 			{% for comment in comments %}
-		 		<div class="row">
-		 			<div class="col-sm-8 comment">
-		 				<div> 
-		 					<span class="glyphicon glyphicon-user blue"> {{comment.user}} </span>
-		 					added a comment -
-		 					<span>{{comment.created_date|date:'d/M/y h:m A'}}</span>
-		 					<a class="glyphicon glyphicon-pencil blue pull-right"data-toggle="modal" data-target="#myModal"></a>
-		 				</div>
-		 				<div>
-		 					<br/>
-		 					<p>{{comment.comment}}</p>
-		 					<br/>
-		 				</div>
-                	  </div>
+	 		{% for comment in comments %}
+		 	<div class="row">
+		 		<div class="col-sm-8 comment">
+		 			<div> 
+		 				<span class="glyphicon glyphicon-user  user-icon-color"> {{comment.user}} </span>
+		 				added a comment -
+		 				<span>{{comment.created_date|date:'d/M/y h:m A'}}</span>
+		 				<a class="glyphicon glyphicon-pencil blue pull-right"data-toggle="modal" data-target="#myModal"></a>
+		 			</div>
+				<div>
+					<br/>
+		 			<p>{{comment.comment}}</p>
+		 			<br/>
 		 		</div>
-		 		{% endfor %}
+              </div>
+		 	</div>
+		 {% endfor %}
 	 	</div>
 	 </div>
 	</div>	
