@@ -239,33 +239,32 @@ class ConsumerResource(CustomBaseModelResource):
         user_details = {}
         if not phone_number and not email:
             return HttpBadRequest("phone_number or email is required")
-        if password==repassword:
-            try:
-                if phone_number:
-                    try:
-                        if not (settings.ENV in ["dev", "local"] and otp_token in settings.HARCODED_OTPS):
-                            consumer = afterbuy_model.Consumer.objects.get(phone_number=phone_number)
-                            afterbuy_utils.validate_otp(otp_token, user=consumer)
-                    except Exception:
-                        raise ImmediateHttpResponse(
-                            response=http.HttpBadRequest('Wrong OTP!'))
-                    user_details['id'] = consumer.user.id
-                elif email:
-                    try:
-                        user_obj = afterbuy_model.EmailToken.objects.get(activation_key=auth_key).user
-                    except Exception:
-                        raise ImmediateHttpResponse(
-                            response=http.HttpBadRequest('invalid authentication key!'))
-                    user_details['email'] = user_obj.user.email
-                user = User.objects.filter(**user_details)[0]
-                user.set_password(password)
-                user.save()
-                data = {'status': 1, 'message': "password updated successfully"}
-            except Exception as ex:
-                logger.error('Invalid details, mobile {0} and exception {1}'.format(request.POST.get('phone_number', ''),ex))
-                data = {'status': 0, 'message': "password not updated"}
-            return HttpResponse(json.dumps(data), content_type="application/json")
-        data = {'status': 0, 'message': "password1 and password2 not matched"}
+        if password != repassword:
+            return HttpBadRequest("password1 and password2 not matched")
+        try:
+            if phone_number:
+                try:
+                    if not (settings.ENV in ["dev", "local"] and otp_token in settings.HARCODED_OTPS):
+                        consumer = afterbuy_model.Consumer.objects.get(phone_number=phone_number)
+                        afterbuy_utils.validate_otp(otp_token, user=consumer)
+                except Exception:
+                    raise ImmediateHttpResponse(
+                        response=http.HttpBadRequest('Wrong OTP!'))
+                user_details['id'] = consumer.user.id
+            elif email:
+                try:
+                    user_obj = afterbuy_model.EmailToken.objects.get(activation_key=auth_key).user
+                except Exception:
+                    raise ImmediateHttpResponse(
+                        response=http.HttpBadRequest('invalid authentication key!'))
+                user_details['email'] = user_obj.user.email
+            user = User.objects.filter(**user_details)[0]
+            user.set_password(password)
+            user.save()
+            data = {'status': 1, 'message': "password updated successfully"}
+        except Exception as ex:
+            logger.error('Invalid details, mobile {0} and exception {1}'.format(request.POST.get('phone_number', ''),ex))
+            data = {'status': 0, 'message': "password not updated"}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def auth_login(self, request, **kwargs):
