@@ -24,11 +24,15 @@ class GladmindsMessageMiddleware(object):
         source_client = request.GET.get('__gm_source', None)
         logger.info('[Middleware]: Source of client is {0}'.format(source_client))
         
+        if settings.ENV in 'test':
+            SMS_CLIENT.value = "MOCK"
+            return 
+
         if source_client == settings.SMS_CLIENT_DETAIL['KAP']['params']:
             SMS_CLIENT.value = "KAP"
         else :
             SMS_CLIENT.value = "KAP"
-        
+
         logger.info('[Middleware]: Client is {0}'.format(SMS_CLIENT.value)) 
     
 """
