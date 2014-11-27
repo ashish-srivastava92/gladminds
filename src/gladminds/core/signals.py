@@ -7,7 +7,6 @@ from django.dispatch.dispatcher import receiver
 def add_group(sender, **kwargs):
     app = kwargs['using']
     user = kwargs['instance']
-    print user.groups.all()
     is_created = kwargs['created']
     if is_created and app in ['afterbuy']:
         g = Group.objects.using(app).get(name='USERS')
