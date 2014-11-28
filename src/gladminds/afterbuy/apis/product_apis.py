@@ -1,5 +1,5 @@
 import logging
-from tastypie.constants import ALL
+from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.authorization import Authorization
 from tastypie import fields
 from django.http.response import HttpResponseRedirect
@@ -42,7 +42,7 @@ class UserProductResource(CustomBaseModelResource):
         filtering = {
                      "consumer": ALL,
                      "product_type": ALL,
-                     "brand": ALL
+                     "brand": ALL_WITH_RELATIONS
                      }
 
     def dehydrate(self, bundle):
