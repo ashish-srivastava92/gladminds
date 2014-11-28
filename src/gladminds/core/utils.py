@@ -588,6 +588,6 @@ def get_time_in_seconds(time, unit):
 def add_user_to_group(app, user_id, group_name):
     g = Group.objects.using(app).get(name=group_name)
     user = User.objects.using(app).get(id=user_id)
-    if not user.groups.filter(name=group_name).using(app).exists():
+    if not user.groups.using(app).filter(name=group_name).exists():
         user.groups.add(g)
         user.save(using=app)

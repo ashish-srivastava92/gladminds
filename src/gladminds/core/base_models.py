@@ -67,6 +67,9 @@ class Industry(BaseModel):
         abstract = True
         verbose_name_plural = "Industries"
 
+    def __unicode__(self):
+        return self.name
+
 
 class Brand(BaseModel):
     name = models.CharField(max_length=250)
@@ -77,6 +80,9 @@ class Brand(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "Brand Data"
+
+    def __unicode__(self):
+        return "Brand: "+self.name+" Industry: "+self.industry.name
 
 
 class BrandProductCategory(BaseModel):
@@ -97,6 +103,9 @@ class OTPToken(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "OTPs"
+
+    def __unicode__(self):
+        return self.email+" "+self.phone_number
 
 
 class Dealer(BaseModel):

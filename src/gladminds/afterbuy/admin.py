@@ -6,6 +6,8 @@ from gladminds.afterbuy.models import Brand, Consumer, ProductType,\
 MessageTemplate, EmailTemplate, Industry, UserProduct, License,\
     ProductInsuranceInfo, ProductWarrantyInfo, PollutionCertificate,\
     BrandProductCategory, SMSLog, EmailLog, OTPToken, EmailToken
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from gladminds.core.admin_helper import IndustryAdmin, BrandAdmin
 
 
 class AfterbuyAdminSite(AdminSite):
@@ -13,8 +15,8 @@ class AfterbuyAdminSite(AdminSite):
 
 brand_admin = AfterbuyAdminSite(name='afterbuy')
 
-brand_admin.register(Industry)
-brand_admin.register(Brand)
+brand_admin.register(Industry, IndustryAdmin)
+brand_admin.register(Brand, BrandAdmin)
 brand_admin.register(BrandProductCategory)
 brand_admin.register(Consumer)
 brand_admin.register(ProductType)
@@ -24,8 +26,8 @@ brand_admin.register(ProductWarrantyInfo)
 brand_admin.register(PollutionCertificate)
 brand_admin.register(License)
 
-brand_admin.register(User)
-brand_admin.register(Group)
+brand_admin.register(User, UserAdmin)
+brand_admin.register(Group, GroupAdmin)
 brand_admin.register(Permission)
 
 brand_admin.register(MessageTemplate)
