@@ -10,7 +10,7 @@ from random import randint
 from django.utils import timezone
 from django.conf import settings
 from django_otp.oath import TOTP
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY, TIMEZONE
 from gladminds.core.base_models import STATUS_CHOICES
@@ -492,6 +492,7 @@ def make_tls_property(default=None):
 
         def _get_value(self):
             return getattr(self.local, 'value', default)
+
         def _set_value(self, value):
             self.local.value = value
         value = property(_get_value, _set_value)
@@ -582,3 +583,11 @@ def get_time_in_seconds(time, unit):
     else:
         total_seconds = time * 60
     return total_seconds
+
+
+def add_user_to_group(app, user_id, group_name):
+    g = Group.objects.using(app).get(name=group_name)
+    user = User.objects.using(app).get(id=user_id)
+    if not user.groups.filter(name=group_name).using(app).exists():
+        user.groups.add(g)
+        user.save(using=app)

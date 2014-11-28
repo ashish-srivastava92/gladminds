@@ -7,6 +7,7 @@ from django.forms import ModelForm
 
 from gladminds.gm.models import Brand,\
     MessageTemplate, EmailTemplate, Industry, BrandProductCategory
+from django.contrib.auth.models import User, Group, Permission
 
 
 class GladmindsAdminSite(AdminSite):
@@ -156,3 +157,6 @@ admin.register(BrandProductCategory)
 #admin.register(GladmindsUser, GladmindsUserAdmin)
 admin.register(MessageTemplate)
 admin.register(EmailTemplate)
+admin.register(User)
+admin.register(Group)
+admin.register(Permission)
