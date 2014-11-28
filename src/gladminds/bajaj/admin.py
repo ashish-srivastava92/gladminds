@@ -10,6 +10,7 @@ ASCTempRegistration, SATempRegistration, CustomerTempRegistration,\
 SMSLog, EmailLog, DataFeedLog, MessageTemplate, EmailTemplate, SLA,\
     ServiceDeskUser
 from gladminds.core import utils
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
 
 class BajajAdminSite(AdminSite):
     pass
@@ -349,8 +350,8 @@ class ServiceDeskUserAdmin(ModelAdmin):
 
 brand_admin = BajajAdminSite(name='bajaj')
 
-brand_admin.register(User)
-brand_admin.register(Group)
+brand_admin.register(User, UserAdmin)
+brand_admin.register(Group, GroupAdmin)
 brand_admin.register(UserProfile, UserProfileAdmin)
 
 brand_admin.register(Dealer, DealerAdmin)

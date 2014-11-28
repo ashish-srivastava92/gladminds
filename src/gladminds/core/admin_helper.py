@@ -359,3 +359,11 @@ class ASCTempRegistrationAdmin(ModelAdmin):
             return {'class': css_class}    
 
 
+class BrandAdmin(ModelAdmin):
+    search_fields = ('name', 'industry__name')
+    list_display = ('name', 'industry')
+
+
+class IndustryAdmin(ModelAdmin):
+    search_fields = ('name',)
+    list_display = ('name',)
