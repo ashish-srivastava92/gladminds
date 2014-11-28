@@ -28,8 +28,18 @@ SECRET_KEY = 'testsecretkeyshouldntbeusedinproduction'
 INSTALLED_APPS = INSTALLED_APPS + ('django_nose',)
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
+
 SMS_CLIENT = "MOCK"
-SMS_CLIENT_DETAIL = {'MOCK': {'login':'mock',
+SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'mock',
+                              'pass':'mock',
+                              'authenticate_url':'',
+                              'message_url': ''},
+                  'KAP': {'login':'mock',
+                              'pass':'mock',
+                              'authenticate_url':'',
+                              'message_url': '',
+                              'params': 'KAP'},
+                  'MOCK': {'login':'mock',
                               'pass':'mock',
                               'authenticate_url':'',
                               'message_url': ''}
@@ -56,3 +66,5 @@ JOBCARD_DIR = '{0}/jobcards/dev/'
 BRAND = 'bajaj'
 
 ENV = "test"
+
+WSDL_TNS="http://local.bajaj.gladminds.co:8000/api/v1/feed/"

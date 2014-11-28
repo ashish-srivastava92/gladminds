@@ -151,9 +151,9 @@ def get_customer_info(data):
         return {'message': message}
 
 def get_sa_list(user):
-    dealer = models.Dealer.objects.filter(dealer_id=user)[0]
+    #dealer = models.Dealer.objects.filter(user=user)[0]
     service_advisors = models.ServiceAdvisor.objects\
-                                .filter(dealer=dealer, status='Y')
+                                .filter(user=user, status='Y')
     sa_phone_list = []
     for service_advisor in service_advisors:
         sa_phone_list.append(service_advisor)
@@ -248,7 +248,7 @@ def send_recovery_email_to_admin(file_obj, coupon_data):
     file_location = file_obj.file_location
     reason = file_obj.reason
     customer_id = file_obj.customer_id
-    requester = str(file_obj.user)
+    requester = str(file_obj.user.user.username)
     data = get_email_template('UCN_REQUEST_ALERT')['body'].format(requester,coupon_data.service_type,
                 customer_id, coupon_data.actual_kms, reason, file_location)
     send_ucn_request_alert(data=data)

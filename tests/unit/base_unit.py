@@ -44,6 +44,9 @@ class GladmindsUnitTestCase(TestCase):
 
     #TODO: Using _get_model_obj() does not work on below function
     def get_delear_obj(self, **kwargs):
+        if common.Dealer.objects.filter(dealer_id=kwargs.get('name', None)).count() >0:
+            return common.Dealer.objects.filter(dealer_id=kwargs.get('name', None))[0]
+
         user_profile_obj = self.create_user_profile(**kwargs)
         delear_data = common.Dealer(user=user_profile_obj, dealer_id=kwargs.get('name', None))
         delear_data.save()
