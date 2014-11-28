@@ -14,6 +14,8 @@ from gladminds.core.utils import convert_utc_to_local_time
 
 import pytz
 import logging
+from gladminds.core.managers.mail import send_due_date_exceeded,\
+    send_due_date_reminder
 
 
 logger = logging.getLogger("gladminds")
@@ -463,11 +465,23 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
     return {'status': True, 'message': message}
 
 def send_reminders_for_servicedesk(*args, **kwargs):
-    # Write logic to filter the tickets and send mail
     time = datetime.now()
-#     feedback_obj = common.Feedback.objects.filter()
-    return True
-
+    '''
+    send mail when reminder_date is less than current date or when due date is less than current date
+    '''
+    feedback_obj = common.Feedback.objects.filter(reminder_date__gte=time, reminder_flag=False) or common.Feedback.objects.filter(due_date__gte=time,resolution_flag=False)
+    for feedback in feedback_obj:
+        if not feedback.reminder_flag:
+            context = utils.create_context('DUE_DATE_REMINDER_MAIL_TO_MANAGER', feedback)
+            send_due_date_reminder(context)
+            feedback.reminder_flag = False
+         
+        if not feedback.resolution_flag:
+            context = utils.create_context('DUE_DATE_EXCEEDED_MAIL_TO_MANAGER', feedback)
+            send_due_date_exceeded(context)
+            feedback.resolution_flag = False
+        feedback.save()
+ 
     
 _tasks_map = {"send_registration_detail": send_registration_detail,
 

@@ -409,7 +409,8 @@ def save_help_desk_data(request):
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)
     service_advisor_obj = models.ServiceAdvisor.objects.get(service_advisor_id=sms_dict['advisorMobile'])
-    return gladmindsResources.get_complain_data(sms_dict, service_advisor_obj.user.phone_number, service_advisor_obj.user.user.email, service_advisor_obj.user.user.username, with_detail=True)
+    dealer_obj = models.Dealer.objects.get(dealer_id=request.user)
+    return gladmindsResources.get_complain_data(sms_dict, service_advisor_obj.user.phone_number, service_advisor_obj.user.user.email, service_advisor_obj.user.user.username, dealer_obj.user.user.email, with_detail=True)
 
 def sqs_tasks_view(request):
     return render_to_response('trigger-sqs-tasks.html')
