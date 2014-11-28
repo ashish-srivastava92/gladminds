@@ -17,6 +17,14 @@ _ALL_APPS = settings.BRANDS + [settings.GM_BRAND]
 
 _DATABASES = {'gm':settings.ADMIN_DETAILS['gladminds'].get('database')}
 
+_AFTERBUY_ADMINS = [{'email':'karthik.rajagopalan@gladminds.co', 'username': 'karthik.rajagopalan', 'phone':'9741200991'},
+                    {'email':'praveen.m@gladminds.co', 'username':'praveen.m', 'phone':'8867576306'}
+                    ]
+
+_AFTERBUY_SUPERADMINS = [{'email':'naveen.shankar@gladminds.co', 'username':'naveen.shankar@gladminds.co', 'phone':'9880747576'},
+                         {'email':'afterbuy@gladminds.co', 'username':'afterbuy', 'phone':'9999999999'}
+                    ]
+
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
@@ -27,14 +35,14 @@ class Command(BaseCommand):
         self.define_groups()
         self.create_admin(_DEMO)
         self.create_admin(_BAJAJ)
-        self.create_admin(_AFTERBUY)
         self.create_admin(_GM)
+        self.create_afterbuy_admins()
         #self.set_permissions()
 
     def set_permissions(self):
         try:
             for app in _ALL_APPS:
-                add_user_to_group(app, 1, 'SUPERADMINS')
+                add_user_to_group(app, 1, 'SuperAdmins')
             if not Consumer.objects.filter(user=1).exists():
                 Consumer(user__id=1, phone_number=9999999999).save()
         except:
@@ -73,3 +81,28 @@ class Command(BaseCommand):
             admin.is_superuser = True
             admin.is_staff = True
             admin.save(using=database)
+
+    def create_afterbuy_admins(self):
+        for details in _AFTERBUY_ADMINS:
+            self.create_consumer(details, 'Admins')
+        for details in _AFTERBUY_SUPERADMINS:
+            self.create_consumer(details, 'SuperAdmins')
+
+    def create_consumer(self, details, group):
+        app = 'afterbuy'
+        username = details['username']
+        phone = details['phone']
+        email = details['email']
+        password = settings.ADMIN_DETAILS[app]['password']
+        database = settings.ADMIN_DETAILS[app].get('database', app)
+
+        user = User.objects.filter(username=username).using(database).count()
+        if user == 0:
+            admin = User.objects.using(database).create(username=username)
+            admin.set_password(password)
+            admin.is_superuser = True
+            admin.is_staff = True
+            admin.email = email
+            admin.save(using=database)
+            Consumer(user=admin, phone_number=phone, is_email_verified=True).save()
+            add_user_to_group('afterbuy', admin.id, group)
