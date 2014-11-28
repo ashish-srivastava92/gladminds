@@ -139,13 +139,25 @@
             "sender": "feed-report@gladminds.co",
             "receiver": "",
             "subject": "Exceeded due date",
-            "body": "The due date for the ticket has been exceeded but the issue is not yet resolved",
+            "body": "The due date for the ticket which was assigned to {assignee} has been exceeded and the issue is not yet resolved",
             "description": "Due Date mail to manager"
         }
     },
     {
         "model": "gladminds.emailtemplate",
         "pk": 13,
+        "fields": {
+            "template_key": "DUE_DATE_EXCEEDED_MAIL_TO_AGENT",
+            "sender": "feed-report@gladminds.co",
+            "receiver": "",
+            "subject": "Exceeded due date",
+            "body": "The due date for the ticket which was assigned to you has been exceeded . Please address the issue",
+            "description": "Due Date mail to manager"
+        }
+    },
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 14,
         "fields": {
             "template_key": "DUE_DATE_REMINDER_MAIL_TO_MANAGER",
             "sender": "feed-report@gladminds.co",

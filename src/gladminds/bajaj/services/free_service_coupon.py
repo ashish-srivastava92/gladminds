@@ -516,6 +516,7 @@ class GladmindsResources(Resource):
 
     def get_complain_data(self, sms_dict, phone_number, email, name, dealer_email, with_detail=False):
         ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
+        manager_obj = User.objects.get(groups__name='sdm')
         try:
             role = self.check_role_of_initiator(phone_number)
             user_profile = models.UserProfile.objects.filter(phone_number=phone_number)
@@ -558,7 +559,7 @@ class GladmindsResources(Resource):
             send_dealer_feedback(context, dealer_email)
             #Check this 
             context = utils.create_context('FEEDBACK_DETAIL_TO_ADIM',  gladminds_feedback_object)
-            send_feedback_received(context)
+            send_feedback_received(context, manager_obj.email)
             context = utils.create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)
             send_servicedesk_feedback(context, get_reporter_details(gladminds_feedback_object.reporter,"email"))
             sms_log(receiver=phone_number, action=AUDIT_ACTION, message = message)

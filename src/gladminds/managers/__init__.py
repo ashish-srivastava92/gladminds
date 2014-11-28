@@ -132,7 +132,7 @@ def save_update_feedback(feedback_obj, data, user, host):
                                  feedback_obj)
         if reporter_email_id:
             mail.send_email_to_initiator_after_issue_assigned(context,
-                                                         feedback_obj)
+                                                         reporter_email_id)
         else:
             logger.info("Reporter emailId not found.")
         send_sms('INITIATOR_FEEDBACK_DETAILS', reporter_phone_number,
@@ -149,7 +149,7 @@ def save_update_feedback(feedback_obj, data, user, host):
             context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL',
                                   feedback_obj)
             mail.send_email_to_initiator_after_issue_resolved(context,
-                                                          feedback_obj, host)
+                                                          feedback_obj, host, reporter_email_id)
         else:
             logger.info("Reporter emailId not found.")
  
@@ -177,7 +177,7 @@ def save_update_feedback(feedback_obj, data, user, host):
         if assign_number != feedback_obj.assignee.user_profile.phone_number:
             context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL',
                                       feedback_obj)
-            mail.send_email_to_assignee(context, feedback_obj)
+            mail.send_email_to_assignee(context, feedback_obj.assignee.user_profile.user.email)
             send_sms('SEND_MSG_TO_ASSIGNEE',
                      feedback_obj.assignee.user_profile.phone_number,
                      feedback_obj, comment_object)
