@@ -50,8 +50,11 @@ inner join gladminds.aftersell_registereddealer old_dealer on p.dealer_id_id = o
 inner join bajaj.bajaj_dealer new_dealer on old_dealer.dealer_id = new_dealer.dealer_id
 left outer join gladminds.gladminds_gladmindusers u on p.customer_phone_number_id = u.id; 
 
-'''Query OK, 3937716 rows affected (3 min 43.85 sec)
-Records: 3937716  Duplicates: 0  Warnings: 0'''
+'''
+QA-Query OK, 3937716 rows affected (3 min 43.85 sec)
+Records: 3937716  Duplicates: 0  Warnings: 0
+PROD-Query OK, 4045143 rows affected (4 min 6.61 sec)
+Records: 4045143  Duplicates: 0  Warnings: 0'''
 
 insert into bajaj_coupondata(
 id, unique_service_coupon, valid_days, valid_kms, service_type, status,
@@ -67,12 +70,16 @@ from gladminds.gladminds_coupondata p
 left outer join gladminds.aftersell_serviceadvisor old_sa on p.sa_phone_number_id = old_sa.id
 left outer join bajaj.bajaj_serviceadvisor new_sa on old_sa.service_advisor_id = new_sa.service_advisor_id;
 
-'''Query OK, 8655736 rows affected, 2 warnings (7 min 26.12 sec)
-Records: 8655736  Duplicates: 0  Warnings: 2'''
+'''
+QA-Query OK, 8655736 rows affected, 2 warnings (7 min 26.12 sec)
+Records: 8655736  Duplicates: 0  Warnings: 2
+PROD-Query OK, 8976971 rows affected, 2 warnings (9 min 46.64 sec)
+Records: 8976971  Duplicates: 0  Warnings: 2
+'''
 
 
 '''
-nohup python scripts/migrate_coupons_sa_relations.py &
+nohup python scripts/migrate_coupons_sa_relation.py &
 
 nohup python scripts/migrate_old_fsc.py &
 nohup python scripts/migrate_temp_customer.py &
