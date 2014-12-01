@@ -352,7 +352,7 @@ def get_feedbacks(user, status):
     group = user.groups.all()[0]
     feedbacks = []
     if not status:
-        status = ['Open', 'Pending', 'Progress']
+        status = ['Open', 'Pending', 'In Progress']
     else:
         status = [status]
     if group.name == 'dealers':

@@ -84,11 +84,11 @@
                         		<div class="col-sm-8">
                         			<select id="assignee" class="form-control assignee" name="assign_to"   {% if group == 'SDO' or group == 'dealers' %} onfocus="disable_func()" readonly {% endif %} onchange="dueDateRequire(this.options[this.selectedIndex].value)" >
                             			<option value=""></option>
+                            			<option value={{feedback.previous_assignee.user_profile.phone_number}}>Previous assignee</option>
                                			{% for type in servicedeskuser %}
                       	          			<option {% if type == feedback.assignee %} selected {% endif %} value="{{type.user_profile.phone_number}}">{{type.user_profile.user.username}}({{type.user_profile.phone_number}})</option>
                                 		{% endfor %}
                                 		<option {% if feedback.assign_to_reporter %} selected {%endif%} value ='Assign to reporter'>Assign to reporter</option>
-                                		<option value={{feedback.previous_assignee.user_profile.phone_number}}>Previous assignee</option>
                             		</select>
                       			</div>
                     		</div>
@@ -195,7 +195,7 @@
 	 			</div>
 	 		</form>
 	 	</div>  
-	 	<div class="row">
+	 	<div class="hide row">
 	 		<div class="col-md-4"></div>
 	 		<div class="col-md-8">
 	 		{% for comment in comments %}
