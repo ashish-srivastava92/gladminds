@@ -9,6 +9,7 @@ from gladminds.bajaj.models import MessageTemplate, EmailTemplate
 from gladminds.bajaj import models as common
 from gladminds.bajaj.feeds import feed
 from gladminds.core.utils import get_model
+from gladminds.core.auth_helper import ALL_APPS
 
 BASIC_FEED = feed.BaseFeed()
 
@@ -35,7 +36,7 @@ class Command(BaseCommand):
         print "Loading sms template..."
         file_path = os.path.join(settings.PROJECT_DIR, 'template_data/template.json')
         message_templates = json.loads(open(file_path).read())
-        for app in ['bajaj', 'afterbuy','gm', 'demo']:
+        for app in ALL_APPS:
             mt = get_model('MessageTemplate', app)
             #mt = getattr(import_module('gladminds.{0}.models'.format(app)), 'MessageTemplate')
             mt.objects.all().delete()
@@ -50,7 +51,7 @@ class Command(BaseCommand):
         print "Loading email template..."
         file_path = os.path.join(settings.PROJECT_DIR, 'template_data/email_template.json')
         email_templates = json.loads(open(file_path).read())
-        for app in ['bajaj', 'afterbuy','gm', 'demo']:
+        for app in ALL_APPS:
             et = get_model('EmailTemplate', app)
             et.objects.all().delete()
             for email_temp in email_templates:

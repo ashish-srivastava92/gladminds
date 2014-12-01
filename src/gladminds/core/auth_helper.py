@@ -2,13 +2,15 @@
 this file contains all auth related code include group logic , etc
 '''
 from django.contrib.auth.models import Group, User
+from django.conf import settings
 
+ALL_APPS = settings.BRANDS + [settings.GM_BRAND]
 
 class GmApps():
     AFTERBUY = 'afterbuy'
     BAJAJ = 'bajaj'
     DEMO = 'demo'
-    GM = 'gm'
+    GM = 'default'
 
 
 class Roles():

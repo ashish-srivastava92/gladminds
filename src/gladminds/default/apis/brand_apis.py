@@ -2,7 +2,7 @@ from tastypie.authorization import Authorization
 from tastypie import fields
 
 from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.gm import models as gm_models
+from gladminds.default import models as gm_models
 from tastypie.constants import ALL
 
 

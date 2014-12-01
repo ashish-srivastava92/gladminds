@@ -3,7 +3,7 @@ from django.conf import settings
 from tastypie.api import Api
 
 from gladminds.admin import admin
-from gladminds.gm.apis import brand_apis
+from gladminds.default.apis import brand_apis
 from gladminds.core.apis import preferences_apis
 from gladminds.core.cron_jobs.taskqueue import SqsHandler
 from gladminds.sqs_tasks import _tasks_map
