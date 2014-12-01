@@ -21,6 +21,7 @@
                 <div class="col-md-8 form-group">
                 	<select class="form-control status" name="status" required>
                     	<option value="">Select Status</option>
+                    	<option value="All">All</option>
                       	{% for status in status %}
                      		 <option value="{{status}}">{{status}}</option>
                       	{% endfor %}

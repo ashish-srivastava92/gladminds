@@ -353,6 +353,8 @@ def get_feedbacks(user, status):
     feedbacks = []
     if not status:
         status = ['Open', 'Pending', 'In Progress']
+    elif status == 'All':
+        status = utils.get_list_from_set(FEEDBACK_STATUS)
     else:
         status = [status]
     if group.name == 'dealers':
