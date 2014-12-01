@@ -460,6 +460,10 @@ function rootCause(status){
 		document.getElementById('assignee').value='Assign to reporter';
 		comments.attr('required', true);
 	}
+	if (status === 'In Progress'){
+		document.getElementById('assignee').value=document.getElementById('assignee').options[1].value;
+		comments.attr('required', true);
+	}
 	
 }
 function disable_func(){

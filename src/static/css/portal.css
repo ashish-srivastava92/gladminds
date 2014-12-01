@@ -84,3 +84,11 @@ textarea {
 .style-username {
     margin-top:15px;
 }
+
+.comment:hover{
+background: white; /* make this whatever you want */
+}
+
+.user-icon-color {
+    color: #0066CC;
+ }

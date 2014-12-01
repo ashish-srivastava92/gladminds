@@ -34,12 +34,14 @@ from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
 from gladminds.core import utils
 from gladminds.bajaj.feeds.feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
-from gladminds.core.managers.mail import send_feedback_received,send_servicedesk_feedback
+from gladminds.core.managers.mail import send_feedback_received,send_servicedesk_feedback,\
+    send_dealer_feedback
 from gladminds.gm.models import GladmindsUser
 from gladminds.core.apis.base_apis import CustomBaseResource
 from gladminds.core.decorator import log_time
 from gladminds.core.utils import service_advisor_search
 from gladminds.core.base_models import STATUS_CHOICES
+from gladminds.managers import get_reporter_details
 
 
 
@@ -512,8 +514,9 @@ class GladmindsResources(Resource):
     def determine_format(self, request):
         return 'application/json'
 
-    def get_complain_data(self, sms_dict, phone_number, email, name, with_detail=False):
+    def get_complain_data(self, sms_dict, phone_number, email, name, dealer_email, with_detail=False):
         ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
+        manager_obj = User.objects.get(groups__name='sdm')
         try:
             role = self.check_role_of_initiator(phone_number)
             user_profile = models.UserProfile.objects.filter(phone_number=phone_number)
@@ -552,10 +555,12 @@ class GladmindsResources(Resource):
                 task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
             else:
                 send_coupon.delay(phone_number=phone_number, message=message)
+            context = utils.create_context('FEEDBACK_DETAIL_TO_DEALER',  gladminds_feedback_object)
+            send_dealer_feedback(context, dealer_email)
             context = utils.create_context('FEEDBACK_DETAIL_TO_ADIM',  gladminds_feedback_object)
-            send_feedback_received(context)
+            send_feedback_received(context, manager_obj.email)
             context = utils.create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)
-            send_servicedesk_feedback(context, gladminds_feedback_object)
+            send_servicedesk_feedback(context, get_reporter_details(gladminds_feedback_object.reporter,"email"))
             sms_log(receiver=phone_number, action=AUDIT_ACTION, message = message)
         return {'status': True, 'message': message}
 
