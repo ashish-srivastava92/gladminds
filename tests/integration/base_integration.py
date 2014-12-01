@@ -57,9 +57,9 @@ class GladmindsResourceTestCase(ResourceTestCase):
         name = kwargs.get('name', None)
         phone_number = kwargs.get('phone_number', None)
         user_obj = User(username=name, first_name=name)
-        user_obj.save()
+        user_obj.save(using='bajaj')
         user_profile_obj = common.UserProfile(user=user_obj, phone_number=phone_number)
-        user_profile_obj.save()
+        user_profile_obj.save(using='bajaj')
         return user_profile_obj
 
     def get_delear_obj(self, **kwargs):

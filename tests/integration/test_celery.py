@@ -6,11 +6,11 @@ import logging
 from django.conf import settings 
 from django.test.client import Client
 logger = logging.getLogger('gladminds')
-from integration.base_integration import GladmindsResourceTestCase
-client=Client()
+from integration import base_integration
+client=Client(SERVER_NAME='bajaj')
 
 
-class CeleryTestCaseBase(GladmindsResourceTestCase):
+class CeleryTestCaseBase(base_integration.GladmindsResourceTestCase):
     def setUp(self):
         super(CeleryTestCaseBase, self).setUp()
         self.applied_tasks = []
@@ -33,9 +33,8 @@ class CeleryTestCaseBase(GladmindsResourceTestCase):
     def test_delay_message(self):
         product_type_obj = self.get_product_type_obj(product_type='BIKE')
         self.dealer_obj = self.get_delear_obj(name='DEALER001', phone_number='+911111111111')
-        self.customer_obj = self.get_customer_obj(phone_number='232323232')
-        self.product_obj = self.get_product_obj(vin="VINXXX001", product_type=product_type_obj, dealer_id = self.dealer_obj, customer_phone_number = self.customer_obj, sap_customer_id='SAP001')
-        self.get_coupon_obj(unique_service_coupon='USC001', vin=self.product_obj, valid_days=30, valid_kms=500, service_type=1)
+        self.product_obj = self.get_product_obj(product_id="VINXXX001", product_type=product_type_obj, dealer_id = self.dealer_obj, customer_phone_number = '232323232', customer_id='SAP001')
+        self.get_coupon_obj(unique_service_coupon='USC001', product=self.product_obj, valid_days=30, valid_kms=500, service_type=1)
 
         sa_obj = self.get_service_advisor_obj(service_advisor_id='DEALER001SA001', name="SA001", phone_number='+919999999')
         self.get_dealer_service_advisor_obj(dealer_id=self.dealer_obj, service_advisor_id=sa_obj, status='Y')
