@@ -105,7 +105,7 @@ DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
 
 # Mapping is first app name then db name
 DATABASE_APPS_MAPPING = {
-                         'gm': 'default',
+                         'default': 'default',
                          'bajaj':'bajaj',
                          'demo': 'demo',
                          'afterbuy':'afterbuy'
