@@ -471,7 +471,7 @@ def send_reminders_for_servicedesk(*args, **kwargs):
     '''
     send mail when reminder_date is less than current date or when due date is less than current date
     '''
-    feedback_obj = models.Feedback.objects.filter(reminder_date__gte=time, reminder_flag=False) or models.Feedback.objects.filter(due_date__gte=time,resolution_flag=False)
+    feedback_obj = models.Feedback.objects.filter(reminder_date__lte=time, reminder_flag=False) or models.Feedback.objects.filter(due_date__lte=time,resolution_flag=False)
     for feedback in feedback_obj:
         if not feedback.reminder_flag:
             context = utils.create_context('DUE_DATE_EXCEEDED_MAIL_TO_AGENT', feedback)

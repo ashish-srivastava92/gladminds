@@ -557,7 +557,6 @@ class GladmindsResources(Resource):
                 send_coupon.delay(phone_number=phone_number, message=message)
             context = utils.create_context('FEEDBACK_DETAIL_TO_DEALER',  gladminds_feedback_object)
             send_dealer_feedback(context, dealer_email)
-            #Check this 
             context = utils.create_context('FEEDBACK_DETAIL_TO_ADIM',  gladminds_feedback_object)
             send_feedback_received(context, manager_obj.email)
             context = utils.create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)
