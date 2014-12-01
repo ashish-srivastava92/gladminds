@@ -151,9 +151,9 @@ def get_customer_info(data):
         return {'message': message}
 
 def get_sa_list(user):
-    #dealer = models.Dealer.objects.filter(user=user)[0]
+    dealer = models.Dealer.objects.filter(user=user)[0]
     service_advisors = models.ServiceAdvisor.objects\
-                                .filter(user=user, status='Y')
+                                .filter(dealer=dealer, status='Y')
     sa_phone_list = []
     for service_advisor in service_advisors:
         sa_phone_list.append(service_advisor)

@@ -24,4 +24,9 @@ def feed_log(feed_type=None, total_data_count=None, failed_data_count=None,
                                      status=status, action=action,
                                      remarks=remarks, file_location=file_location)
     data_feed_log.save()
+
+def email_log(subject, message, sender, receiver, brand='bajaj'):
+    email_model = get_model('EmailLog', brand=brand)
+    email_log = email_model(subject=subject, message=message, sender=sender, receiver=receiver)
+    email_log.save()
     
