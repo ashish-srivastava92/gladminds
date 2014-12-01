@@ -3,7 +3,7 @@ from tastypie import fields
 
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.afterbuy import models as afterbuy_models
-from gladminds.core.apis.user_apis import AccessTokenAuthentication
+from gladminds.core.apis.authentication import AccessTokenAuthentication
 
 
 class IndustryResource(CustomBaseModelResource):

@@ -11,8 +11,8 @@ from tastypie.utils.urls import trailing_slash
 from gladminds.afterbuy.apis.brand_apis import BrandResource
 from gladminds.afterbuy.apis.user_apis import ConsumerResource
 from django.forms.models import model_to_dict
-from gladminds.core.apis.user_apis import AccessTokenAuthentication
 from gladminds.core.apis.authorization import CustomAuthorization
+from gladminds.core.apis.authentication import AccessTokenAuthentication
 
 logger = logging.getLogger("gladminds")
 
