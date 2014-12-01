@@ -39,7 +39,7 @@ FEEDBACK_STATUS = (
         ('Open', 'Open'),
         ('Closed', 'Closed'),
         ('Resolved', 'Resolved'),
-        ('In-Progress', 'In-Progress'),
+        ('In Progress', 'In Progress'),
         ('Pending', 'Pending')
     )
 
@@ -52,7 +52,7 @@ PRIORITY = (
 
 FEEDBACK_TYPE = (('Problem', 'Problem'),
                  ('Question', 'Question'),
-                 ('Feature-Request', 'Feature-Request'),
+                 ('Feature Request', 'Feature Request'),
                  ('Suggestion', 'Suggestion'),)
 
 SLA_PRIORITY = (('Low', 'Low'),

@@ -548,6 +548,10 @@ class Feedback(BaseModel):
     resolution = models.CharField(max_length=512, null=True, blank=True)
     role = models.CharField(max_length=50, null=True, blank=True)
     assign_to_reporter = models.BooleanField(default=False)
+    assignee_created_date = models.DateTimeField(null=True, blank=True)
+    reminder_date = models.DateTimeField(null=True, blank=True)
+    reminder_flag = models.BooleanField(default=False)
+    resolution_flag = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
