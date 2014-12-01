@@ -1,6 +1,6 @@
 import logging
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
-from tastypie.authorization import Authorization
+from tastypie.authorization import Authorization, DjangoAuthorization
 from tastypie import fields
 from django.http.response import HttpResponseRedirect
 from django.conf.urls import url
@@ -22,7 +22,7 @@ class ProductTypeResource(CustomBaseModelResource):
         queryset = afterbuy_models.ProductType.objects.all()
         resource_name = "product-types"
         authentication = AccessTokenAuthentication()
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
 

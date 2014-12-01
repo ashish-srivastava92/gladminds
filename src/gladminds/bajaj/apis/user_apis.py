@@ -52,10 +52,10 @@ class AuthError(RuntimeError):
 
 
 class AccessTokenAuthentication(Authentication):
-    
+
     def is_authenticated(self, request, **kwargs):
         try:
-            access_token_container = request.GET.urlencode().split('accessToken=')[1]
+            access_token_container = request.GET.urlencode().split('access_token=')[1]
             key = access_token_container.split('&')[0]
             if not key:
                 logging.error('AccessTokenAuthentication. No Access Token found.')
