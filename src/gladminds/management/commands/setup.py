@@ -2,16 +2,15 @@ from django.core.management.base import BaseCommand
 from django.core.management import call_command
 from django.contrib.auth.models import User, Permission, Group
 from django.conf import settings
-from gladminds.core.utils import add_user_to_group
 from gladminds.afterbuy.models import Consumer
+from gladminds.core.auth_helper import AFTERBUY_GROUPS, add_user_to_group,\
+    OTHER_GROUPS, Roles, GmApps
 
-_DEMO = 'demo'
-_BAJAJ = 'bajaj'
-_AFTERBUY = 'afterbuy'
+_DEMO = GmApps.DEMO
+_BAJAJ = GmApps.BAJAJ
+_AFTERBUY = GmApps.AFTERBUY
 _GM = 'gladminds'
 
-_AFTERBUY_GROUPS = ['SuperAdmins', 'Admins', 'Users']
-_OTHER_GROUPS = ['SuperAdmins', 'CxoAdmins', 'FscSuperAdmins', 'SdSuperAdmins', 'FscAdmins', 'SdAdmins']
 
 _ALL_APPS = settings.BRANDS + [settings.GM_BRAND]
 
@@ -21,7 +20,7 @@ _AFTERBUY_ADMINS = [{'email':'karthik.rajagopalan@gladminds.co', 'username': 'ka
                     {'email':'praveen.m@gladminds.co', 'username':'praveen.m', 'phone':'8867576306'}
                     ]
 
-_AFTERBUY_SUPERADMINS = [{'email':'naveen.shankar@gladminds.co', 'username':'naveen.shankar@gladminds.co', 'phone':'9880747576'},
+_AFTERBUY_SUPERADMINS = [{'email':'naveen.shankar@gladminds.co', 'username':'naveen.shankar', 'phone':'9880747576'},
                          {'email':'afterbuy@gladminds.co', 'username':'afterbuy', 'phone':'9999999999'}
                     ]
 
@@ -42,18 +41,18 @@ class Command(BaseCommand):
     def set_permissions(self):
         try:
             for app in _ALL_APPS:
-                add_user_to_group(app, 1, 'SuperAdmins')
+                add_user_to_group(app, 1, Roles.SUPERADMINS)
             if not Consumer.objects.filter(user=1).exists():
                 Consumer(user__id=1, phone_number=9999999999).save()
         except:
             pass
 
     def define_groups(self):
-        for group in _AFTERBUY_GROUPS:
-            self.add_group('afterbuy', group)
+        for group in AFTERBUY_GROUPS:
+            self.add_group(GmApps.AFTERBUY, group)
 
-        for app in ['bajaj', 'demo', 'gladminds']:
-            for group in _OTHER_GROUPS:
+        for app in [GmApps.BAJAJ, GmApps.DEMO, 'gladminds']:
+            for group in OTHER_GROUPS:
                 self.add_group(app, group)
 
         for app in _ALL_APPS:
@@ -84,12 +83,12 @@ class Command(BaseCommand):
 
     def create_afterbuy_admins(self):
         for details in _AFTERBUY_ADMINS:
-            self.create_consumer(details, 'Admins')
+            self.create_consumer(details, Roles.ADMINS)
         for details in _AFTERBUY_SUPERADMINS:
-            self.create_consumer(details, 'SuperAdmins')
+            self.create_consumer(details, Roles.SUPERADMINS)
 
     def create_consumer(self, details, group):
-        app = 'afterbuy'
+        app = GmApps.AFTERBUY
         username = details['username']
         phone = details['phone']
         email = details['email']
@@ -105,4 +104,4 @@ class Command(BaseCommand):
             admin.email = email
             admin.save(using=database)
             Consumer(user=admin, phone_number=phone, is_email_verified=True).save()
-            add_user_to_group('afterbuy', admin.id, group)
+            add_user_to_group(app, admin.id, group)

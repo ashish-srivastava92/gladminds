@@ -8,12 +8,13 @@ MessageTemplate, EmailTemplate, Industry, UserProduct, License,\
     BrandProductCategory, SMSLog, EmailLog, OTPToken, EmailToken
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from gladminds.core.admin_helper import IndustryAdmin, BrandAdmin
+from gladminds.core.auth_helper import GmApps
 
 
 class AfterbuyAdminSite(AdminSite):
     pass
 
-brand_admin = AfterbuyAdminSite(name='afterbuy')
+brand_admin = AfterbuyAdminSite(name=GmApps.AFTERBUY)
 
 brand_admin.register(Industry, IndustryAdmin)
 brand_admin.register(Brand, BrandAdmin)
