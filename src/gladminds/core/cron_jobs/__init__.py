@@ -1,1 +1,1 @@
-from gladminds.gm.models import *
+from gladminds.default.models import *

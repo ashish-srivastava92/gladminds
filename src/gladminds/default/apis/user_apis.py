@@ -1,7 +1,7 @@
 #########################AfterBuy Resources############################################
 from gladminds.core.apis.base_apis import CustomBaseResource
 from tastypie import fields, http
-from gladminds.gm.models import GladmindsUser, UserProduct
+from gladminds.default.models import GladmindsUser, UserProduct
 from gladminds.core.resource.authentication import AccessTokenAuthentication
 from tastypie.utils.urls import trailing_slash
 from django.conf.urls import url

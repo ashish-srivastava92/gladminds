@@ -270,7 +270,7 @@ ALL_APPS = (
     'provider',
     'provider.oauth2',
     'gladminds',
-    'gladminds.gm',
+    'gladminds.default',
     'gladminds.core',
     'gladminds.bajaj',
     'gladminds.demo',
@@ -496,7 +496,7 @@ SMS_HEALTH_CHECK_INTERVAL = 6
 FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
 BRAND = 'demo'
-GM_BRAND = 'gm'
+GM_BRAND = 'default'
 BRANDS = ['bajaj', 'demo', 'afterbuy']
 ###############################################
 AIRTEL_IP = '54.84.243.77'
@@ -516,8 +516,7 @@ SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
 ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},
           'demo': {'user': 'demo', 'password': 'demo'},
           'afterbuy': {'user': 'afterbuy', 'password': 'afterbuy'},
-          'gladminds': {'user': 'gladminds', 'password': 'gladminds',
-                        'database': 'default'}
+          'default': {'user': 'gladminds', 'password': 'gladminds'}
           }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True

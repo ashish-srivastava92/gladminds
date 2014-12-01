@@ -5,7 +5,7 @@ from django.contrib.admin.sites import AdminSite
 from suit.widgets import EnclosedInput
 from django.forms import ModelForm
 
-from gladminds.gm.models import Brand,\
+from gladminds.default.models import Brand,\
     MessageTemplate, EmailTemplate, Industry, BrandProductCategory
 from django.contrib.auth.models import User, Group, Permission
 

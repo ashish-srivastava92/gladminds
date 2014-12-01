@@ -4,19 +4,16 @@ from django.contrib.auth.models import User, Permission, Group
 from django.conf import settings
 from gladminds.afterbuy.models import Consumer
 from gladminds.core.auth_helper import AFTERBUY_GROUPS, add_user_to_group,\
-    OTHER_GROUPS, Roles, GmApps, AFTERBUY_USER_MODELS
-from django.contrib import contenttypes
+    OTHER_GROUPS, Roles, GmApps, AFTERBUY_USER_MODELS, ALL_APPS
 from django.contrib.contenttypes.models import ContentType
 
 _DEMO = GmApps.DEMO
 _BAJAJ = GmApps.BAJAJ
 _AFTERBUY = GmApps.AFTERBUY
-_GM = 'gladminds'
+_GM = GmApps.GM
 
 
-_ALL_APPS = settings.BRANDS + [settings.GM_BRAND]
-
-_DATABASES = {'gm':settings.ADMIN_DETAILS['gladminds'].get('database')}
+_ALL_APPS = ALL_APPS
 
 _AFTERBUY_ADMINS = [{'email':'karthik.rajagopalan@gladminds.co', 'username': 'karthik.rajagopalan', 'phone':'9741200991'},
                     {'email':'praveen.m@gladminds.co', 'username':'praveen.m', 'phone':'8867576306'}
@@ -44,7 +41,7 @@ class Command(BaseCommand):
         for group in AFTERBUY_GROUPS:
             self.add_group(GmApps.AFTERBUY, group)
 
-        for app in [GmApps.BAJAJ, GmApps.DEMO, 'gladminds']:
+        for app in [GmApps.BAJAJ, GmApps.DEMO, GmApps.GM]:
             for group in OTHER_GROUPS:
                 self.add_group(app, group)
 
@@ -53,26 +50,25 @@ class Command(BaseCommand):
             for ap in _ALL_APPS:
                 if app != ap:
                     ignore_list.append(ap)
-            Permission.objects.filter(content_type__app_label__in=ignore_list).using(_DATABASES.get(app, app)).delete()
+            Permission.objects.filter(content_type__app_label__in=ignore_list).using(app).delete()
 
     def add_group(self, app, group):
-        group_count = Group.objects.filter(name=group).using(settings.ADMIN_DETAILS[app].get('database', app)).count()
+        group_count = Group.objects.filter(name=group).using(app).count()
         if group_count == 0:
             group_obj = Group(name=group)
-            group_obj.save(using=settings.ADMIN_DETAILS[app].get('database', app))
+            group_obj.save(using=app)
 
     def create_admin(self, app):
         name = settings.ADMIN_DETAILS[app]['user']
         password = settings.ADMIN_DETAILS[app]['password']
-        database = settings.ADMIN_DETAILS[app].get('database', app)
 
-        user = User.objects.filter(username=name).using(database).count()
+        user = User.objects.filter(username=name).using(app).count()
         if user == 0:
-            admin = User.objects.using(database).create(username=name)
+            admin = User.objects.using(app).create(username=name)
             admin.set_password(password)
             admin.is_superuser = True
             admin.is_staff = True
-            admin.save(using=database)
+            admin.save(using=app)
             add_user_to_group(app, admin.id, Roles.SUPERADMINS)
 
     def create_afterbuy_admins(self):
@@ -87,16 +83,15 @@ class Command(BaseCommand):
         phone = details['phone']
         email = details['email']
         password = settings.ADMIN_DETAILS[app]['password']
-        database = settings.ADMIN_DETAILS[app].get('database', app)
 
-        user = User.objects.filter(username=username).using(database).count()
+        user = User.objects.filter(username=username).using(app).count()
         if user == 0:
-            admin = User.objects.using(database).create(username=username)
+            admin = User.objects.using(app).create(username=username)
             admin.set_password(password)
             admin.is_superuser = True
             admin.is_staff = True
             admin.email = email
-            admin.save(using=database)
+            admin.save(using=app)
             Consumer(user=admin, phone_number=phone, is_email_verified=True).save()
             add_user_to_group(app, admin.id, group)
 
