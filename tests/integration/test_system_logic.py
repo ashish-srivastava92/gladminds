@@ -1,5 +1,5 @@
 from gladminds.bajaj import models as common
-from gladminds.gm import models as gm_common
+from gladminds.default import models as gm_common
 from gladminds.afterbuy import models as afterbuy_common
 from integration.base import BaseTestCase
 

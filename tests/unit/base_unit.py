@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 from gladminds.bajaj import models as common
-from gladminds.gm import models as gm_common
+from gladminds.default import models as gm_common
 from gladminds.management.commands import load_gm_migration_data
 
 

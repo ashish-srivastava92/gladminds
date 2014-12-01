@@ -10,7 +10,7 @@ from tastypie.utils.urls import trailing_slash
 
 from gladminds.bajaj import models as common
 from gladminds.core import utils
-from gladminds.gm import models as gm_common
+from gladminds.default import models as gm_common
 from gladminds.core.utils import mobile_format
 from gladminds.core.apis.base_apis import CustomBaseResource
 from gladminds.core.apis.user_apis import AccessTokenAuthentication

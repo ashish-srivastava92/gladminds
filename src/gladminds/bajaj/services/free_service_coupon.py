@@ -36,7 +36,7 @@ from gladminds.bajaj.feeds.feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
 from gladminds.core.managers.mail import send_feedback_received,send_servicedesk_feedback,\
     send_dealer_feedback
-from gladminds.gm.models import GladmindsUser
+from gladminds.default.models import GladmindsUser
 from gladminds.core.apis.base_apis import CustomBaseResource
 from gladminds.core.decorator import log_time
 from gladminds.core.utils import service_advisor_search
