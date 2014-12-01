@@ -20,24 +20,33 @@ class DatabaseAppsRouter(object):
     def db_for_read(self, model, **hints):
         """"Point all read operations to the specific database."""
         if model._meta.app_label in _COMMON_APPS:
-            return settings.DATABASE_APPS_MAPPING.get(settings.BRAND)
+            if 'instance' in hints.keys():
+                db = hints['instance']._state.db or settings.BRAND
+            else:
+                db = settings.BRAND
+            return settings.DATABASE_APPS_MAPPING.get(db)
         return settings.DATABASE_APPS_MAPPING.get(model._meta.app_label)
 
     def db_for_write(self, model, **hints):
         """Point all write operations to the specific database."""
-#         if model._meta.model_name in ['permission'] and model._meta.app_label in ['auth']:
-#             if hints['instance'].app_label in settings.BRANDS+[settings.GM_BRAND]:
-#                 print model._meta.model_name, model._meta.app_label, hints['instance'].app_label
-#                 print settings.DATABASE_APPS_MAPPING.get(hints['instance'].app_label)
-#                 return settings.DATABASE_APPS_MAPPING.get(hints['instance'].app_label)
         if model._meta.app_label in _COMMON_APPS:
-            return settings.DATABASE_APPS_MAPPING.get(settings.BRAND)
+            if 'instance' in hints.keys():
+                db = hints['instance']._state.db or settings.BRAND
+            else:
+                db = settings.BRAND
+            return settings.DATABASE_APPS_MAPPING.get(db)
         return settings.DATABASE_APPS_MAPPING.get(model._meta.app_label)
 
     def allow_relation(self, obj1, obj2, **hints):
         """Allow any relation between apps that use the same database."""
         db_obj1 = settings.DATABASE_APPS_MAPPING.get(obj1._meta.app_label)
         db_obj2 = settings.DATABASE_APPS_MAPPING.get(obj2._meta.app_label)
+
+        if db_obj1 is None:
+            db_obj1 = obj1._state.db
+        if db_obj2 is None:
+            db_obj2 = obj2._state.db
+
         if db_obj1 and db_obj2:
             if db_obj1 == db_obj2:
                 return True

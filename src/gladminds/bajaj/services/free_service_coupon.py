@@ -361,8 +361,6 @@ class GladmindsResources(Resource):
                                             req_service_type=service_type,
                                             req_status=requested_coupon_status,                                                     
                                             customer_id=sap_customer_id)
-                requested_coupon = models.CouponData.objects.get(product=product, service_type=service_type)
-                customer_message = templates.get_template('SEND_CUSTOMER_EXPIRED_COUPON').format(service_type=requested_coupon.service_type)
             if settings.ENABLE_AMAZON_SQS:
                 task_queue = utils.get_task_queue()
                 task_queue.add("send_coupon_detail_customer", {"phone_number":utils.get_phone_number_format(customer_phone_number), "message":customer_message, "sms_client":settings.SMS_CLIENT}, delay_seconds=customer_message_countdown)
@@ -370,11 +368,13 @@ class GladmindsResources(Resource):
                 send_coupon_detail_customer.apply_async( kwargs={ 'phone_number': utils.get_phone_number_format(customer_phone_number), 'message':customer_message, "sms_client":settings.SMS_CLIENT}, countdown=customer_message_countdown)
             sms_log(receiver=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
         except IndexError as ie:
+            logger.info('[validate_coupon]:IndexError : '.format(ie))
             dealer_message = templates.get_template('SEND_INVALID_VIN_OR_FSC')
         except ObjectDoesNotExist as odne:
+            logger.info('[validate_coupon]:ObjectDoesNotExist : '.format(odne))
             dealer_message = templates.get_template('SEND_INVALID_SERVICE_TYPE').format(service_type=service_type)
         except Exception as ex:
-            logger.info(ex)
+            logger.info('[validate_coupon]:Exception : '.format(ex))
             dealer_message = templates.get_template('SEND_INVALID_MESSAGE')
         finally:
             logger.info("validate message send to SA %s" % dealer_message)

@@ -38,4 +38,5 @@ urlpatterns = patterns('',
     url(r'^', include(brand_admin.urls)),
     url(r'^afterbuy/v1/upload', upload_files),
     url(r'^oauth2/', include('provider.oauth2.urls', namespace = 'oauth2')),
+    url(r'^site-info/$', 'gladminds.afterbuy.views.site_info', name='site_info')
 )

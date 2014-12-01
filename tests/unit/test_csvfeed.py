@@ -25,14 +25,14 @@ class CSVFeedTest(GladmindsUnitTestCase):
         obj = feed.BrandProductTypeFeed(data_source = self.brand_feed)
         obj.import_data()
         producttype_data = common.ProductType.objects.get(product_type = 'PRODUCTTYPE001_'+tmp)
-        self.assertEqual(producttype_data.product_name, 'PRODUCTNAME1_'+tmp, 'Product type not matched')
+        self.assertEqual(producttype_data.product_type, 'PRODUCTTYPE001_'+tmp, 'Product type not matched')
     
     def test_import_duplicate_feed(self):
         tmp=self.timestamp
         obj = feed.BrandProductTypeFeed(data_source = self.brand_feed_2)
         obj.import_data()
         producttype_data = common.ProductType.objects.get(product_type = 'PRODUCTTYPE003_'+tmp)
-        self.assertEqual(producttype_data.product_name, 'PRODUCTNAME3_'+tmp, 'Product type not matched')
+        self.assertEqual(producttype_data.product_type, 'PRODUCTTYPE003_'+tmp, 'Product type not matched')
           
         #Check Duplicate
         producttype_data = common.ProductType.objects.filter(product_type = 'PRODUCTTYPE002_'+tmp)

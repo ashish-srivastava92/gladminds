@@ -2,7 +2,6 @@ from tastypie.authorization import Authorization
 from tastypie import fields
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.afterbuy import models as afterbuy_models
-from gladminds.bajaj.apis.user_apis import AccessTokenAuthentication
 
 
 class IndustryResource(CustomBaseModelResource):

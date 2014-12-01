@@ -10,7 +10,7 @@ from random import randint
 from django.utils import timezone
 from django.conf import settings
 from django_otp.oath import TOTP
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY, TIMEZONE
 from gladminds.core.base_models import STATUS_CHOICES
@@ -151,9 +151,9 @@ def get_customer_info(data):
         return {'message': message}
 
 def get_sa_list(user):
-    dealer = models.Dealer.objects.filter(dealer_id=user)[0]
+    #dealer = models.Dealer.objects.filter(user=user)[0]
     service_advisors = models.ServiceAdvisor.objects\
-                                .filter(dealer=dealer, status='Y')
+                                .filter(user=user, status='Y')
     sa_phone_list = []
     for service_advisor in service_advisors:
         sa_phone_list.append(service_advisor)
@@ -248,7 +248,7 @@ def send_recovery_email_to_admin(file_obj, coupon_data):
     file_location = file_obj.file_location
     reason = file_obj.reason
     customer_id = file_obj.customer_id
-    requester = str(file_obj.user)
+    requester = str(file_obj.user.user.username)
     data = get_email_template('UCN_REQUEST_ALERT')['body'].format(requester,coupon_data.service_type,
                 customer_id, coupon_data.actual_kms, reason, file_location)
     send_ucn_request_alert(data=data)
@@ -492,6 +492,7 @@ def make_tls_property(default=None):
 
         def _get_value(self):
             return getattr(self.local, 'value', default)
+
         def _set_value(self, value):
             self.local.value = value
         value = property(_get_value, _set_value)
@@ -582,3 +583,11 @@ def get_time_in_seconds(time, unit):
     else:
         total_seconds = time * 60
     return total_seconds
+
+
+def add_user_to_group(app, user_id, group_name):
+    g = Group.objects.using(app).get(name=group_name)
+    user = User.objects.using(app).get(id=user_id)
+    if not user.groups.using(app).filter(name=group_name).exists():
+        user.groups.add(g)
+        user.save(using=app)

@@ -1,4 +1,4 @@
-from gladminds.sqs_tasks import expire_service_coupon, send_remoders_for_servicedesk
+from gladminds.sqs_tasks import expire_service_coupon
 from datetime import datetime, timedelta
 from unit.base_unit import GladmindsUnitTestCase
 from gladminds.core.utils import COUPON_STATUS
@@ -8,8 +8,7 @@ from gladminds.core.cron_jobs.taskmanager import get_data_feed_log_detail
 class TestCronjobs(GladmindsUnitTestCase):
  
     def setUp(self):
-        product_type_obj = self.get_product_type_obj(
-            product_name='DISCO120', product_type='BIKE')
+        product_type_obj = self.get_product_type_obj(product_type='BIKE')
         dealer_obj = self.get_delear_obj(name='DEALER001')
         product_obj = self.get_product_obj(product_id="VINXXX001", product_type=product_type_obj,
                                            dealer_id=dealer_obj, customer_phone_number='+911111111111', 

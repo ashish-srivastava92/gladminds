@@ -18,7 +18,7 @@ insert into bajaj.bajaj_producttype(id,product_type,image_url,is_active) select 
 
 alter table bajaj_oldfscdata change `product_id` `product_id` int(11) default null;
 
-"
+'''
 set the env varibales (QA)
 
 export DB_USER='gladminds'
@@ -31,13 +31,58 @@ Run these commands
 nohup python scripts/migrate_dealer_data.py &
 nohup python scripts/migrate_asc_data.py &
 nohup python scripts/migrate_service_advisor.py &
+'''
+
+use bajaj;
 
 
-nohup python scripts/migrate_products.py &
-nohup python scripts/migrate_coupons.py &
-nohup python scripts/migrate_coupons_sa_relations.py &
+insert into bajaj_productdata(
+id,created_date,modified_date,product_id,customer_id,
+customer_phone_number,customer_name,customer_city, customer_state, customer_pincode,
+purchase_date,invoice_date,engine,veh_reg_no,is_active,
+product_type_id,dealer_id_id)
+select p.id, p.created_on, p.last_modified, p.vin as product_id, p.sap_customer_id, 
+u.phone_number, u.customer_name, u.address, u.state, u.pincode,
+p.product_purchase_date, p.invoice_date, p.engine, p.veh_reg_no, p.isActive,
+p.product_type_id, new_dealer.user_id
+from gladminds.gladminds_productdata p
+inner join gladminds.aftersell_registereddealer old_dealer on p.dealer_id_id = old_dealer.id
+inner join bajaj.bajaj_dealer new_dealer on old_dealer.dealer_id = new_dealer.dealer_id
+left outer join gladminds.gladminds_gladmindusers u on p.customer_phone_number_id = u.id; 
+
+'''
+QA-Query OK, 3937716 rows affected (3 min 43.85 sec)
+Records: 3937716  Duplicates: 0  Warnings: 0
+PROD-Query OK, 4045143 rows affected (4 min 6.61 sec)
+Records: 4045143  Duplicates: 0  Warnings: 0'''
+
+insert into bajaj_coupondata(
+id, unique_service_coupon, valid_days, valid_kms, service_type, status,
+closed_date, mark_expired_on, actual_service_date, actual_kms, last_reminder_date,
+schedule_reminder_date, extended_date, sent_to_sap,
+credit_date, credit_note, special_case, product_id, service_advisor_id
+)
+select p.id, p.unique_service_coupon, p.valid_days, p.valid_kms, p.service_type, p.status,
+p.closed_date, p.mark_expired_on, p.actual_service_date,p.actual_kms, p.last_reminder_date,
+p.schedule_reminder_date, p.extended_date, p.sent_to_sap,
+p.credit_date, p.credit_note, p.special_case, p.vin_id, new_sa.user_id
+from gladminds.gladminds_coupondata p
+left outer join gladminds.aftersell_serviceadvisor old_sa on p.sa_phone_number_id = old_sa.id
+left outer join bajaj.bajaj_serviceadvisor new_sa on old_sa.service_advisor_id = new_sa.service_advisor_id;
+
+'''
+QA-Query OK, 8655736 rows affected, 2 warnings (7 min 26.12 sec)
+Records: 8655736  Duplicates: 0  Warnings: 2
+PROD-Query OK, 8976971 rows affected, 2 warnings (9 min 46.64 sec)
+Records: 8976971  Duplicates: 0  Warnings: 2
+'''
+
+
+'''
+nohup python scripts/migrate_coupons_sa_relation.py &
 
 nohup python scripts/migrate_old_fsc.py &
 nohup python scripts/migrate_temp_customer.py &
 nohup python scripts/migrate_ucn_recovery.py &
+'''
 
