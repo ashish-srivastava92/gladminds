@@ -342,7 +342,8 @@ class UserNotificationResource(CustomBaseModelResource):
         always_return_data = True
         filtering = {
                      "consumer": ALL,
-                     "id": ALL
+                     "id": ALL,
+                     "notification_read": ALL
                      }
 
         
