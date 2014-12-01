@@ -23,7 +23,7 @@ from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
 from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.views.auth_view import get_access_token
-from tastypie.authorization import Authorization
+from tastypie.authorization import Authorization, DjangoAuthorization
 from gladminds.core.apis.authorization import CustomAuthorization
 from django.contrib.sites.models import RequestSite
 
@@ -120,7 +120,7 @@ class ConsumerResource(CustomBaseModelResource):
         last_name = load.get('last_name','')
         password = load.get('password')
         if not phone_number or not password:
-            return HttpBadRequest("phone_number, username and password required.")
+            return HttpBadRequest("phone_number, password required.")
         try:
             afterbuy_model.Consumer.objects.get(
                                                 phone_number=phone_number)
@@ -324,7 +324,7 @@ class InterestResource(CustomBaseModelResource):
         queryset = afterbuy_model.Interest.objects.all()
         resource_name = "interests"
         authentication = AccessTokenAuthentication()
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
 

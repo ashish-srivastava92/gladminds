@@ -4,7 +4,9 @@ from django.contrib.auth.models import User, Permission, Group
 from django.conf import settings
 from gladminds.afterbuy.models import Consumer
 from gladminds.core.auth_helper import AFTERBUY_GROUPS, add_user_to_group,\
-    OTHER_GROUPS, Roles, GmApps
+    OTHER_GROUPS, Roles, GmApps, AFTERBUY_USER_MODELS
+from django.contrib import contenttypes
+from django.contrib.contenttypes.models import ContentType
 
 _DEMO = GmApps.DEMO
 _BAJAJ = GmApps.BAJAJ
@@ -36,16 +38,7 @@ class Command(BaseCommand):
         self.create_admin(_BAJAJ)
         self.create_admin(_GM)
         self.create_afterbuy_admins()
-        #self.set_permissions()
-
-    def set_permissions(self):
-        try:
-            for app in _ALL_APPS:
-                add_user_to_group(app, 1, Roles.SUPERADMINS)
-            if not Consumer.objects.filter(user=1).exists():
-                Consumer(user__id=1, phone_number=9999999999).save()
-        except:
-            pass
+        self.set_afterbuy_permissions()
 
     def define_groups(self):
         for group in AFTERBUY_GROUPS:
@@ -80,6 +73,7 @@ class Command(BaseCommand):
             admin.is_superuser = True
             admin.is_staff = True
             admin.save(using=database)
+            add_user_to_group(app, admin.id, Roles.SUPERADMINS)
 
     def create_afterbuy_admins(self):
         for details in _AFTERBUY_ADMINS:
@@ -105,3 +99,22 @@ class Command(BaseCommand):
             admin.save(using=database)
             Consumer(user=admin, phone_number=phone, is_email_verified=True).save()
             add_user_to_group(app, admin.id, group)
+
+    def set_afterbuy_permissions(self):
+        model_ids = []
+        for model in AFTERBUY_USER_MODELS:
+            model_ids.append(ContentType.objects.get(app_label__in=['afterbuy', 'auth'], model=model).id)
+        permissions = Permission.objects.using(GmApps.AFTERBUY).filter(content_type__id__in=model_ids)
+        group = Group.objects.using(GmApps.AFTERBUY).get(name=Roles.USERS)
+        for permission in permissions:
+            group.permissions.add(permission)
+        group.save(using=GmApps.AFTERBUY)
+
+        permissions = Permission.objects.using(GmApps.AFTERBUY).all()
+        group1 = Group.objects.using(GmApps.AFTERBUY).get(name=Roles.ADMINS)
+        group2 = Group.objects.using(GmApps.AFTERBUY).get(name=Roles.SUPERADMINS)
+        for permission in permissions:
+            group1.permissions.add(permission)
+            group2.permissions.add(permission)
+        group1.save(using=GmApps.AFTERBUY)
+        group2.save(using=GmApps.AFTERBUY)

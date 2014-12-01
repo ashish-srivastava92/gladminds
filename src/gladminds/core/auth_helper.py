@@ -25,6 +25,11 @@ AFTERBUY_GROUPS = [Roles.SUPERADMINS, Roles.ADMINS, Roles.USERS]
 OTHER_GROUPS = [Roles.SUPERADMINS, Roles.CXOADMINS, Roles.FSCSUPERADMINS,
                 Roles.SDSUPERADMINS, Roles.FSCSADMINS, Roles.SDADMINS]
 
+AFTERBUY_USER_MODELS = ['User', 'Consumer', 'UserProduct', 'ProductSupport', 'RegistrationCertificate',
+                        'ProductInsuranceInfo', 'ProductWarrantyInfo', 'PollutionCertificate',
+                        'License', 'Invoice', 'SellInformation', 'UserProductImages', 'UserPreference',
+                        'UserNotification']
+
 
 def add_user_to_group(app, user_id, group_name):
     g = Group.objects.using(app).get(name=group_name)
