@@ -1,5 +1,6 @@
-from tastypie.authorization import Authorization, DjangoAuthorization
+from tastypie.authorization import DjangoAuthorization
 from tastypie import fields
+
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.afterbuy import models as afterbuy_models
 from gladminds.core.apis.user_apis import AccessTokenAuthentication
@@ -11,7 +12,7 @@ class IndustryResource(CustomBaseModelResource):
         resource_name = 'industries'
         authorization = DjangoAuthorization()
         authentication = AccessTokenAuthentication()
-        detail_allowed_methods = ['get', 'post', 'delete' ,'put']
+        detail_allowed_methods = ['get', 'post', 'delete','put']
         always_return_data =True
 
 
@@ -29,6 +30,7 @@ class BrandResource(CustomBaseModelResource):
 
 class BrandProductCategoryResource(CustomBaseModelResource):
     brand = fields.ForeignKey(BrandResource, 'brand', full=True)
+
     class Meta:
         queryset = afterbuy_models.BrandProductCategory.objects.all()
         resource_name = "brand-categories"
@@ -36,5 +38,3 @@ class BrandProductCategoryResource(CustomBaseModelResource):
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
-
-
