@@ -131,7 +131,7 @@ AFTER_BUY_CONSTANTS = {
                        }
 
 ########################SQS Queue Name##################################
-SQS_QUEUE_NAME = "gladminds-prod"
+SQS_QUEUE_NAME = "gladminds-prod2"
 ########################################################################
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail"
