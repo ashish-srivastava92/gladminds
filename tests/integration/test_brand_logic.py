@@ -94,8 +94,8 @@ class Brand(object):
 
     def check_asc_feed_saved_to_database(self):
         self.send_asc_feed()
-        asc = common.Dealer.objects.get(dealer_id='ASC001')
-        self.tester.assertEquals('ASC001', asc.dealer_id)
+        asc = common.AuthorizedServiceCenter.objects.get(asc_id='ASC001')
+        self.tester.assertEquals('ASC001', asc.asc_id)
 
     def check_coupon(self, data, phone_number):
         data = 'A {1} {0} {2}'.format(data['kms'], data['sap_customer_id'], data['service_type'])
