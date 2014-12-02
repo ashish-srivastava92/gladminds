@@ -1,5 +1,5 @@
 import sys
-from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
+from scheduler import SqsTaskQueue
 
 QUEUE_NAME = sys.argv[2]
 taskqueue = SqsTaskQueue(QUEUE_NAME)
