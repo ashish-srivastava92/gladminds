@@ -22,7 +22,6 @@ from tastypie.utils.urls import trailing_slash
 from tastypie import http
 from tastypie.exceptions import ImmediateHttpResponse
 
-from gladminds.core.apis.user_apis import AccessTokenAuthentication
 from gladminds.core.managers import sms_parser
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services import message_template as templates
@@ -42,6 +41,7 @@ from gladminds.core.decorator import log_time
 from gladminds.core.utils import service_advisor_search
 from gladminds.core.base_models import STATUS_CHOICES
 from gladminds.managers import get_reporter_details
+from gladminds.core.apis.authentication import AccessTokenAuthentication
 
 
 
