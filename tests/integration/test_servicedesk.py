@@ -62,30 +62,34 @@ class TestServiceDeskFlow(BaseTestCase):
         initiator = self.system
         initiator.post_feedback()
         service_desk_manager = self.system
-        service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDO')
         SMSLog.objects.all().delete()
+        service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDO')
         service_desk_manager.update_feedback(status='Open')
         log_len_after = SMSLog.objects.all()
         system = self.system
         system.verify_result(input=log_len_after[0].receiver, output="9999999999")
         system.verify_result(input=log_len_after[1].receiver, output="1000000000")
  
-    @unittest.skip("skip the test")
     def test_sms_email_after_resolved(self):
         initiator = self.system
         initiator.post_feedback()
+        service_desk_manager = self.system
+        service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDO')
+        service_desk_manager.update_feedback(status='Open')
         service_desk_owner = self.system
         service_desk_owner.login(username='sdo', password='123', provider='desk', group_name='SDO')
-        service_desk_owner.update_feedback(status='resolved', assign_to='+919999999999')
+        service_desk_owner.update_feedback(status='resolved', assign_to='1000000000')
+        system = self.system
+        feedback_obj = Feedback.objects.all()
+        system.verify_result(input=feedback_obj[0].status, output="resolved")
  
-    @unittest.skip("skip the test")
     def test_updated_feedback(self):
         initiator = self.system
         initiator.post_feedback()
         service_desk_manager = self.system
         service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDM')
         service_desk_manager.update_feedback(status='Closed', assign_to='None')
-        feedbacks = Feedback.objects.filter(priority='High')
+        feedback_obj = Feedback.objects.all()
         system = self.system
-        system.verify_result(input=feedbacks[0].status, output='Closed')
+        system.verify_result(input=feedback_obj[0].status, output='Closed')
 
