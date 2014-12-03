@@ -22,6 +22,7 @@ from tastypie.utils.urls import trailing_slash
 from tastypie import http
 from tastypie.exceptions import ImmediateHttpResponse
 
+from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.managers import sms_parser
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services import message_template as templates
@@ -516,7 +517,7 @@ class GladmindsResources(Resource):
 
     def get_complain_data(self, sms_dict, phone_number, email, name, dealer_email, with_detail=False):
         ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
-        manager_obj = User.objects.get(groups__name='sdm')
+        manager_obj = User.objects.get(groups__name='SDM')
         try:
             role = self.check_role_of_initiator(phone_number)
             user_profile = models.UserProfile.objects.filter(phone_number=phone_number)
