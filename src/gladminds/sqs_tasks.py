@@ -443,16 +443,20 @@ def export_customer_reg_to_sap(*args, **kwargs):
 
 def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
     created_date = feedback_obj.created_date
+    reporter = None
     try:
+        if feedback_obj.reporter:
+            reporter = feedback_obj.reporter.user_profile
         message = templates.get_template(template_name).format(type=feedback_obj.type,
-                                                               reporter=feedback_obj.reporter,
-                                                               message=feedback_obj.message,
+                                                               reporter=reporter,
+                                                               message=feedback_obj.description,
                                                                created_date=convert_utc_to_local_time(created_date),
-                                                               assign_to=feedback_obj.assign_to,
+                                                               assign_to=feedback_obj.assignee,
                                                                priority=feedback_obj.priority)
         if comment_obj and template_name == 'SEND_MSG_TO_ASSIGNEE':
-            message = message + 'Note :' + comment_obj.comments
+            message = message + 'Note :' + comment_obj.comment
     except Exception as ex:
+        print "666666666666666666666", ex
         message = templates.get_template('SEND_INVALID_MESSAGE')
     finally:
         logger.info("Send complain message received successfully with %s" % message)

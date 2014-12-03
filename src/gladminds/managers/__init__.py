@@ -71,113 +71,116 @@ def get_reporter_details(reporter, value="phone_number"):
             return reporter.user_profile.phone_number
     
 def save_update_feedback(feedback_obj, data, user, host):
-    status = get_list_from_set(FEEDBACK_STATUS)
-    comment_object = None
-    assign_status = False
-    pending_status = False
-    reporter_email_id = get_reporter_details(feedback_obj.reporter,"email")
-    reporter_phone_number = get_reporter_details(feedback_obj.reporter)
-    #check if status is pending
-    if feedback_obj.status == status[4]:
-        pending_status = True
- 
-    if feedback_obj.assignee:
-        assign_number = feedback_obj.assignee.user_profile.phone_number
-    else:
-        assign_number = None
-    assign = feedback_obj.assignee
-    
-    if feedback_obj.due_date:
-        feedback_obj.due_date = data['due_date']
-        feedback_obj.save()
-        
-    if assign is None:
-        assign_status = True
- 
-    if data['assign_to'] == '':
-        feedback_obj.status = data['status']
-        feedback_obj.priority = data['Priority']
-        feedback_obj.assignee = None
+    try:
+        status = get_list_from_set(FEEDBACK_STATUS)
+        comment_object = None
+        assign_status = False
+        pending_status = False
+        reporter_email_id = get_reporter_details(feedback_obj.reporter,"email")
+        reporter_phone_number = get_reporter_details(feedback_obj.reporter)
+        #check if status is pending
+        if feedback_obj.status == status[4]:
+            pending_status = True
      
-    else:
-        if data['reporter_status'] == 'true':
-            feedback_obj.previous_assignee = feedback_obj.assignee
-            feedback_obj.assign_to_reporter = True
-            feedback_obj.assignee = feedback_obj.reporter
+        if feedback_obj.assignee:
+            assign_number = feedback_obj.assignee.user_profile.phone_number
+        else:
+            assign_number = None
+        assign = feedback_obj.assignee
+        
+        if feedback_obj.due_date:
+            feedback_obj.due_date = data['due_date']
+            feedback_obj.save()
             
+        if assign is None:
+            assign_status = True
+     
+        if data['assign_to'] == '':
+            feedback_obj.status = data['status']
+            feedback_obj.priority = data['Priority']
+            feedback_obj.assignee = None
+         
         else:
-            if data['assign_to'] :
-                servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile__phone_number=data['assign_to'])
-                feedback_obj.assignee = servicedesk_user[0]
-                feedback_obj.assign_to_reporter = False
-        feedback_obj.status = data['status']
-        feedback_obj.priority = data['Priority']
-    #check if status is pending
-    if data['status'] == status[4]:
-        feedback_obj.pending_from = datetime.datetime.now()
-    #check if status is progress
-    if data['status'] == status[3]:
-        feedback_obj.assignee = feedback_obj.previous_assignee
-    #check if status is closed
-    if data['status'] == status[1]:
-        feedback_obj.closed_date = datetime.datetime.now()
-    feedback_obj.save()
-    if assign_status and feedback_obj.assignee:
-        feedback_obj.assignee_created_date = datetime.datetime.now()
-        date = set_due_date(data['Priority'], feedback_obj)
-        feedback_obj.due_date = date['due_date']
-        feedback_obj.reminder_date = date['reminder_date'] 
+            if data['reporter_status'] == 'true':
+                feedback_obj.previous_assignee = feedback_obj.assignee
+                feedback_obj.assign_to_reporter = True
+                feedback_obj.assignee = feedback_obj.reporter
+                
+            else:
+                if data['assign_to'] :
+                    servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile__phone_number=data['assign_to'])
+                    feedback_obj.assignee = servicedesk_user[0]
+                    feedback_obj.assign_to_reporter = False
+            feedback_obj.status = data['status']
+            feedback_obj.priority = data['Priority']
+        #check if status is pending
+        if data['status'] == status[4]:
+            feedback_obj.pending_from = datetime.datetime.now()
+        #check if status is progress
+        if data['status'] == status[3]:
+            feedback_obj.assignee = feedback_obj.previous_assignee
+        #check if status is closed
+        if data['status'] == status[1]:
+            feedback_obj.closed_date = datetime.datetime.now()
         feedback_obj.save()
-        context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL',
-                                 feedback_obj)
-        if reporter_email_id:
-            mail.send_email_to_initiator_after_issue_assigned(context,
-                                                         reporter_email_id)
-        else:
-            logger.info("Reporter emailId not found.")
-        send_sms('INITIATOR_FEEDBACK_DETAILS', reporter_phone_number,
-                 feedback_obj)
- #check if status is resolved
-    if feedback_obj.status == status[2]:
-        servicedesk_obj_all = User.objects.filter(groups__name='sdm')
-        feedback_obj.resolved_date = datetime.datetime.now()
-        feedback_obj.resolved_date = datetime.datetime.now()
-        feedback_obj.root_cause = data['rootcause']
-        feedback_obj.resolution = data['resolution']
-        feedback_obj.save()
-        if reporter_email_id:
-            context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL',
-                                  feedback_obj)
-            mail.send_email_to_initiator_after_issue_resolved(context,
-                                                          feedback_obj, host, reporter_email_id)
-        else:
-            logger.info("Reporter emailId not found.")
- 
-        context = create_context('TICKET_RESOLVED_DETAIL_TO_BAJAJ',
-                                 feedback_obj)
-        mail.send_email_to_bajaj_after_issue_resolved(context)
-        context = create_context('TICKET_RESOLVED_DETAIL_TO_MANAGER',
-                                 feedback_obj)
-        mail.send_email_to_manager_after_issue_resolved(context,
-                                                        servicedesk_obj_all[0])
-        send_sms('INITIATOR_FEEDBACK_STATUS', reporter_phone_number,
-                 feedback_obj)
-  
-    if pending_status:
-        set_wait_time(feedback_obj)
- 
-    if data['comments']:
-        comment_object = models.Comment(
-                                        comment=data['comments'],
-                                        user=user, created_date=datetime.datetime.now(),
-                                        feedback_object=feedback_obj)
-        comment_object.save()
- 
-    if feedback_obj.assignee:
-        if assign_number != feedback_obj.assignee.user_profile.phone_number:
-            context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL',
+        if assign_status and feedback_obj.assignee:
+            feedback_obj.assignee_created_date = datetime.datetime.now()
+            date = set_due_date(data['Priority'], feedback_obj)
+            feedback_obj.due_date = date['due_date']
+            feedback_obj.reminder_date = date['reminder_date'] 
+            feedback_obj.save()
+            context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL',
+                                     feedback_obj)
+            if reporter_email_id:
+                mail.send_email_to_initiator_after_issue_assigned(context,
+                                                             reporter_email_id)
+            else:
+                logger.info("Reporter emailId not found.")
+            send_sms('INITIATOR_FEEDBACK_DETAILS', reporter_phone_number,
+                     feedback_obj)
+     #check if status is resolved
+        if feedback_obj.status == status[2]:
+            servicedesk_obj_all = User.objects.filter(groups__name='sdm')
+            feedback_obj.resolved_date = datetime.datetime.now()
+            feedback_obj.resolved_date = datetime.datetime.now()
+            feedback_obj.root_cause = data['rootcause']
+            feedback_obj.resolution = data['resolution']
+            feedback_obj.save()
+            if reporter_email_id:
+                context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL',
                                       feedback_obj)
-            mail.send_email_to_assignee(context, feedback_obj.assignee.user_profile.user.email)
-            send_sms('SEND_MSG_TO_ASSIGNEE',
-                     feedback_obj.assignee.user_profile.phone_number,
-                     feedback_obj, comment_object)
+                mail.send_email_to_initiator_after_issue_resolved(context,
+                                                              feedback_obj, host, reporter_email_id)
+            else:
+                logger.info("Reporter emailId not found.")
+     
+            context = create_context('TICKET_RESOLVED_DETAIL_TO_BAJAJ',
+                                     feedback_obj)
+            mail.send_email_to_bajaj_after_issue_resolved(context)
+            context = create_context('TICKET_RESOLVED_DETAIL_TO_MANAGER',
+                                     feedback_obj)
+            mail.send_email_to_manager_after_issue_resolved(context,
+                                                            servicedesk_obj_all[0])
+            send_sms('INITIATOR_FEEDBACK_STATUS', reporter_phone_number,
+                     feedback_obj)
+      
+        if pending_status:
+            set_wait_time(feedback_obj)
+     
+        if data['comments']:
+            comment_object = models.Comment(
+                                            comment=data['comments'],
+                                            user=user, created_date=datetime.datetime.now(),
+                                            feedback_object=feedback_obj)
+            comment_object.save()
+     
+        if feedback_obj.assignee:
+            if assign_number != feedback_obj.assignee.user_profile.phone_number:
+                context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL',
+                                          feedback_obj)
+                mail.send_email_to_assignee(context, feedback_obj.assignee.user_profile.user.email)
+                send_sms('SEND_MSG_TO_ASSIGNEE',
+                         feedback_obj.assignee.user_profile.phone_number,
+                         feedback_obj, comment_object)
+    except Exception as ex:
+        print "22222222222222222", ex
