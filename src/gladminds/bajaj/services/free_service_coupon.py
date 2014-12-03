@@ -42,6 +42,7 @@ from gladminds.core.decorator import log_time
 from gladminds.core.utils import service_advisor_search
 from gladminds.core.base_models import STATUS_CHOICES
 from gladminds.managers import get_reporter_details
+from gladminds.core.apis.authentication import AccessTokenAuthentication
 
 
 
