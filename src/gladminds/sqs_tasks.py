@@ -456,7 +456,7 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
         if comment_obj and template_name == 'SEND_MSG_TO_ASSIGNEE':
             message = message + 'Note :' + comment_obj.comment
     except Exception as ex:
-        print "666666666666666666666", ex
+        logger.info("send_sms: {0}".format(ex))
         message = templates.get_template('SEND_INVALID_MESSAGE')
     finally:
         logger.info("Send complain message received successfully with %s" % message)
