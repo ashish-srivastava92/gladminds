@@ -356,7 +356,7 @@ def get_feedbacks(user, status):
     else:
         status = [status]
     if group.name == 'dealers':
-        sa_list = utils.get_sa_list(user)
+        sa_list = models.ServiceAdvisor.objects.active_under_dealer(user)
         if sa_list:
             feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_list, status__in=status).order_by('-created_date')
     return feedbacks
