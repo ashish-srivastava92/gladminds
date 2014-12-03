@@ -1,8 +1,9 @@
 from django.test.client import Client
 import unittest
-from gladminds.bajaj.models import AuditLog, Feedback
+from gladminds.bajaj.models import AuditLog, Feedback, SMSLog
 from integration.base import BaseTestCase
 from integration.test_system_logic import System
+from integration.test_brand_logic import Brand
 from django.test import TestCase
 
 client = Client()
@@ -14,21 +15,25 @@ class TestServiceDeskFlow(BaseTestCase):
         BaseTestCase.setUp(self)
         self.client = Client()
         self.system = System(self)
+        self.brand = Brand(self)
+        brand = self.brand
         system = self.system
+        self.create_user(username='gladminds', email='gladminds@gladminds.co', password='gladminds')
         self.create_user(username='test', email='test@gladminds.co', password='test')
+        brand.send_service_advisor_feed()
         system.create_sdo(username='sdo', email='gm@gm.com', password='123', phone_number="+919999999999")
         system.create_sdm(username='sdm', email='gm@gm.com', password='123', phone_number="+911999999989")
 
-    @unittest.skip("skip the test")
     def test_send_servicedesk_feedback(self):
         initiator = self.system
+        #FIXME: need to know from where the extra messages are flowing
+        SMSLog.objects.all().delete()
         initiator.post_feedback()
-        log_len_after = AuditLog.objects.all()
+        log_len_after = SMSLog.objects.all()
         feedback_obj = Feedback.objects.all()
-        system = self.system
-        system.verify_result(input=feedback_obj[0].priority, output="High")
-        system.verify_result(input=len(log_len_after), output=1)
-        system.verify_result(input=log_len_after[0].receiver, output="9999999998")
+        initiator.verify_result(input=feedback_obj[0].priority, output="Low")
+        initiator.verify_result(input=len(log_len_after), output=1)
+        initiator.verify_result(input=log_len_after[0].receiver, output="+9155555")
  
     @unittest.skip("skip the test")
     def test_get_feedback_sdo(self):

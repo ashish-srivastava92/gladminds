@@ -124,6 +124,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         brand.check_coupon(create_sms_dict, "55555")
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
         system.verify_result(input=coupon_status.status, output=4)
+
 #     Need to find out how to write this test case because it creates cyclic dependency.
 #     def test_validate_dealer(self):
 #         self.assertEqual(common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")

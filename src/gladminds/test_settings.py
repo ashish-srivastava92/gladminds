@@ -66,5 +66,6 @@ JOBCARD_DIR = '{0}/jobcards/dev/'
 BRAND = 'bajaj'
 
 ENV = "test"
+MAIL_SERVER = 'localhost'
 
 WSDL_TNS="http://local.bajaj.gladminds.co:8000/api/v1/feed/"
