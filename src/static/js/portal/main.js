@@ -496,6 +496,7 @@ function rootCause(status){
         resolution.removeClass('hide');
         reason.attr('required', true);
         ticketResolution.attr('required', true);
+        comments.attr('required', true);
 	}
 	if (status !== 'Open'){
 		assignee.attr('required', true);

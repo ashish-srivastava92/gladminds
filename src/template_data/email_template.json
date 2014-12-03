@@ -67,7 +67,7 @@
             "sender": "feed-report@gladminds.co",
             "receiver": "srv.sngh92@yahoo.com",
             "subject": "Feedback  with reference-no-GM-{id} Status",
-            "body": "Your {type} has been resolved", 
+            "body": "Your {type} has been resolved. {assign_to} added a comment {comment}", 
             "description": "Feedback status mail"
         }
     },
@@ -91,7 +91,7 @@
             "sender": "feed-report@gladminds.co",
             "receiver": "srv.sngh92@yahoo.com",
             "subject": "Feedback  with reference-no-GM-{id} resolved",
-            "body": "The {type} reported by {reporter} on {created_date} has been resolved.\n The Feedback received by reporter is {remark},\n The root cause  is {root_cause} and the resolution is {resolution}. The total time spent to resolve the issue is {resolution_time}",   
+            "body": "The {type} reported by {reporter} on {created_date} has been resolved.\n The root cause  is {root_cause} and the resolution is {resolution}. The total time spent to resolve the issue is {resolution_time}",   
             "description": "Feedback  mail to bajaj"
         }
     },
