@@ -56,7 +56,8 @@ def modify_servicedesk_tickets(request, feedback_id):
                     "ROOT_CAUSE" : root_cause,\
                    "group": group_name[0].name,\
                    'servicedeskuser': servicedesk_users,\
-                   'comments': comments 
+                   'comments': comments,\
+                   'user':request.user 
                    })
     else:
         return HttpResponseNotFound()

@@ -544,17 +544,21 @@ $(document).on("click", ".open-AddCommentDialog", function (e) {
 	e.preventDefault();
 	
 	var _self = $(this);
-	var commentId = _self.data('id');
+	var commentId = _self.data('id'),
+		commentUser = _self.data('user'),
+	    commentDescription = _self.data('comment'),
+	    commentDate = _self.data('date'),
+	    comment = $('.commentDescription'),
+	    loginUser = _self.data('owner');
 	$("#commentId").val(commentId);
-	
-	var commentUser = _self.data('user');
 	$("#commentUser").val(commentUser);
-	
-	var commentDescription = _self.data('comment');
 	$("#commentDescription").val(commentDescription);
-	
-	var commentDate = _self.data('date');
 	$("#commentDate").val(commentDate);
+	comment.attr('readonly', false);
+	console.log(loginUser);
+	if (loginUser != commentUser){
+		comment.attr('readonly', true);
+	}
 	
 	$(_self.attr('href')).modal('show');
 	
