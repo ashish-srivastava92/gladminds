@@ -42,7 +42,7 @@ class System(BaseTestCase):
         return spare_data
 
     def create_sdo(self, **kwargs):
-        user_servicedesk_owner = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name='SDM', phone_number=kwargs['phone_number'])
+        user_servicedesk_owner = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name='SDO', phone_number=kwargs['phone_number'])
         return user_servicedesk_owner
 
     def create_sdm(self, **kwargs):
@@ -59,12 +59,11 @@ class System(BaseTestCase):
         self.tester.client.login(username='DEALER01', password='DEALER01@123')
 
     def post_feedback(self):
-        self.create_user(username='DEALER01', email='dealer@xyz.com', password='DEALER01@123', group_name='dealers', phone_number="+91776084042")
-        data = {'username': 'DEALER01', 'password': 'DEALER01@123'}
+        data = {'username': 'GMDEALER001', 'password': 'GMDEALER001@123'}
         response = client.post("/aftersell/dealer/login/", data=data)
         self.tester.assertEqual(response.status_code, 302)
-        data = {"messsage":"test","reporter":"+919999999998",
-                "type":"Problem", "subject":"hello" }
+        data = {"description":"test","advisorMobile":"+9155555",
+                "type":"Problem", "summary":"hello" }
         response = client.post("/aftersell/servicedesk/helpdesk", data=data)
         self.tester.assertEqual(response.status_code, 200)
 
