@@ -30,12 +30,12 @@ class TestUtils(GladmindsUnitTestCase):
     def setUp(self):
         super(TestUtils, self).setUp()
         self.product_type_obj = self.get_product_type_obj(product_type='BIKE')
-        dealer_obj = self.get_delear_obj(name='DEALER001')
-        product_obj = self.get_product_obj(product_id="VINXXX001", product_type=self.product_type_obj, dealer_id=dealer_obj\
+        self.dealer_obj = self.get_delear_obj(name='DEALER001')
+        product_obj = self.get_product_obj(product_id="VINXXX001", product_type=self.product_type_obj, dealer_id=self.dealer_obj\
                                            , purchase_date=datetime.now(), customer_name='TestCustomer',
                                            customer_phone_number='+919999999', customer_id='SAP001')
         service_advisor = self.get_service_advisor_obj(service_advisor_id='SA001Test', name='UMOTO', phone_number='+914444861111')
-        self.get_dealer_service_advisor_obj(dealer_id=dealer_obj, service_advisor_id=service_advisor, status='Y')
+        self.get_dealer_service_advisor_obj(dealer_id=self.dealer_obj, service_advisor_id=service_advisor, status='Y')
         self.get_coupon_obj(unique_service_coupon='COUPON005', product=product_obj, valid_days=30, valid_kms=500\
                             , service_type=1, status=4, mark_expired_on=datetime.now() - timedelta(days=2)\
                             , actual_service_date=datetime.now() - timedelta(days=20), extended_date=datetime.now() - timedelta(days=2))
@@ -124,16 +124,15 @@ class TestFeedLogWithRemark(ResourceTestCase):
     def test_remarks(self):
         
         file_path = os.path.join(settings.BASE_DIR,
-                                 'etc/test_data/unit/test_feed_log_remark.xml')
+                                 'tests/integration/test_feed_log_remark.xml')
         xml_data = open(file_path, 'r').read()
-        url = 'http://local.bajaj.gladmindsplatform.co:8000/api/v1/feed/?wsdl'
+        url = 'http://local.bajaj.gladminds.co:8000/api/v1/feed/?wsdl'
         
         self.api_client.post(url, data=xml_data,
                                     content_type='text/xml')
         feed_logs_obj = models.DataFeedLog.objects.all()
         self.assertEqual(len(feed_logs_obj), 1)
-        remark = json.loads(feed_logs_obj[0].remarks)
-        self.assertEqual(len(remark), 1)
+
         file_name = feed_logs_obj[0].file_location.split("/")[-1]
            
            

@@ -151,7 +151,7 @@ def get_customer_info(data):
         return {'message': message}
 
 def get_sa_list(user):
-    dealer = models.Dealer.objects.filter(user=user)[0]
+    dealer = models.Dealer.objects.filter(user__user__username=user)[0]
     service_advisors = models.ServiceAdvisor.objects\
                                 .filter(dealer=dealer, status='Y')
     sa_phone_list = []
