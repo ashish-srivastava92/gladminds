@@ -121,7 +121,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         brand = self.brand
         system = self.system
         create_sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(create_sms_dict, "55555")
+        brand.check_coupon(create_sms_dict, "9999999999")
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
         system.verify_result(input=coupon_status.status, output=4)
 
@@ -141,7 +141,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         brand.get_coupon_obj(unique_service_coupon='USC0002', product=self.product_obj, valid_days=30, valid_kms=2000, service_type=2)
         brand.get_coupon_obj(unique_service_coupon='USC0003', product=self.product_obj, valid_days=30, valid_kms=5000, service_type=3)
         create_sms_dict = {'kms': 2050, 'service_type': 3, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(create_sms_dict, '55555')
+        brand.check_coupon(create_sms_dict, '9999999999')
         system.verify_result(input=common.CouponData.objects.filter(unique_service_coupon='USC001')[0].status, output=5)
         system.verify_result(input=common.CouponData.objects.filter(unique_service_coupon='USC0002')[0].status, output=5)
         system.verify_result(input=common.CouponData.objects.filter(unique_service_coupon='USC0003')[0].status, output=4)
@@ -151,7 +151,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         brand.get_coupon_obj(unique_service_coupon='USC0002', product=self.product_obj, valid_days=30, valid_kms=2000, service_type=2)
         brand.get_coupon_obj(unique_service_coupon='USC0003', product=self.product_obj, valid_days=30, valid_kms=5000, service_type=3)
         data = 'C {0} {1}'.format('SAP004', 'USC002')
-        sms_dict = {'text': data, 'phoneNumber': '55555'}
+        sms_dict = {'text': data, 'phoneNumber': '9999999999'}
         response = brand.send_sms(url=self.MESSAGE_URL, message=sms_dict)
         result = json.loads(response.content)
         self.assertFalse(result['status'])
@@ -169,7 +169,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         '''Service Advisor Obj is not created as required'''
         system.verify_result(input=common.ServiceAdvisor.objects.count(), output=3)
         create_sms_dict = {'kms': 450, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(create_sms_dict, '55555')
+        brand.check_coupon(create_sms_dict, '9999999999')
   
         '''In-progress Coupon'''
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC002')
@@ -193,7 +193,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         system.verify_result(input=common.ServiceAdvisor.objects.count(), output=3)
  
         create_sms_dict = {'kms': 600, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(create_sms_dict, '55555')
+        brand.check_coupon(create_sms_dict, '9999999999')
  
         '''In-progress Coupon'''
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC0002')
@@ -222,7 +222,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         system.verify_result(input=common.ServiceAdvisor.objects.count(), output=3)
   
         create_sms_dict = {'kms': 1100, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(create_sms_dict, '55555')
+        brand.check_coupon(create_sms_dict, '9999999999')
   
         '''in_progess_coupon status should be 4'''
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
@@ -252,10 +252,10 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         system.verify_result(input=common.ServiceAdvisor.objects.count(), output=3)
   
         sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(sms_dict, '55555')
+        brand.check_coupon(sms_dict, '9999999999')
   
         sms_dict = {'kms': 1100, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(sms_dict, '55555')
+        brand.check_coupon(sms_dict, '9999999999')
   
         '''in_progess_coupon status should be 4'''
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
@@ -289,7 +289,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
  
         sms_dict = {'kms': 1100, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
         
-        brand.check_coupon(sms_dict, '55555')
+        brand.check_coupon(sms_dict, '9999999999')
                
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
         system.verify_result(input=coupon_status.status, output=5)
@@ -299,7 +299,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         system.verify_result(input=coupon_status.status, output=1)
  
         sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(sms_dict, '55555')
+        brand.check_coupon(sms_dict, '9999999999')
         
         
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
@@ -321,7 +321,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
             Mark 3 as exceed limit
         '''
         sms_dict = {'kms': 1550, 'service_type': 3, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(sms_dict, '55555')
+        brand.check_coupon(sms_dict, '9999999999')
   
         coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
         system.verify_result(input=coupon_status.status, output=5)

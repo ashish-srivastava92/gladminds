@@ -126,7 +126,7 @@ class Brand(object):
  
     def check_data_saved_to_database(self):
         sa_obj_1 = common.ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
-        self.tester.assertEquals('+9155555', sa_obj_1[0].user.phone_number)
+        self.tester.assertEquals('+919999999999', sa_obj_1[0].user.phone_number)
         dealer_obj_1 = common.Dealer.objects.filter(dealer_id='GMDEALER001')
         sa_dealer_rel_obj_1 = common.ServiceAdvisor.objects.get(service_advisor_id=sa_obj_1[0], dealer_id=dealer_obj_1[0])
         self.tester.assertEquals('N', sa_dealer_rel_obj_1.status)
@@ -164,7 +164,7 @@ class Brand(object):
     def service_advisor_database_upadted(self):
         sa_obj_1 = common.ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
         dealer_obj_1 = common.Dealer.objects.filter(dealer_id='GMDEALER001')
-        self.tester.assertEquals('+9155555', sa_obj_1[0].user.phone_number)
+        self.tester.assertEquals('+919999999999', sa_obj_1[0].user.phone_number)
         sa_dealer_rel_obj_2 = common.ServiceAdvisor.objects.get(service_advisor_id=sa_obj_1[0], dealer_id=dealer_obj_1[0])
         self.tester.assertEquals('N', sa_dealer_rel_obj_2.status)
         sa_obj_2 = common.ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA02')
