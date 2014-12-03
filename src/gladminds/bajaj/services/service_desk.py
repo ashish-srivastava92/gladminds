@@ -1,5 +1,5 @@
 import logging
-
+import datetime
 
 from django.shortcuts import render
 from django.http.response import HttpResponse, HttpResponseNotFound
@@ -10,7 +10,7 @@ from django.contrib.sites.models import get_current_site
 
 from gladminds.core import utils
 from gladminds.core.utils import get_list_from_set
-from gladminds.bajaj import models as common
+from gladminds.bajaj import models as models
 from gladminds.bajaj.services.free_service_coupon import GladmindsResources
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     ROOT_CAUSE
@@ -61,11 +61,25 @@ def modify_servicedesk_tickets(request, feedback_id):
     else:
         return HttpResponseNotFound()
 
+@login_required()
+@require_http_methods(["GET", "POST"])
+def modify_feedback_comments(request, feedback_id, comment_id):
+    data = request.POST
+    comment = models.Comment.objects.get(feedback_object_id=feedback_id, id=comment_id)
+    if request.method == 'POST':
+        comment.comment = data['commentDescription']
+        comment.modified_date = datetime.datetime.now() 
+        comment.save()
+        return HttpResponse("success")
+    else:
+        return HttpResponseNotFound()
+
+
 @require_http_methods(["POST"])
 def get_feedback_response(request, feedback_id):
         data = request.POST
         if data['feedbackresponse']:
-            common.Feedback.objects.filter(
+            models.Feedback.objects.filter(
                   id=feedback_id).update(ratings=str(data['feedbackresponse']))
             return render(request, 'service-desk/feedback_received.html')
         else:

@@ -42,7 +42,7 @@
 					</td>
 					<td>{{feedback.reporter.name|default_if_none:""}}</td>
 					{% if feedback.assign_to_reporter %}
-						<td>Assigned to reporter</td>
+						<td>{{feedback.reporter.name}}(Reporter)</td>
 					{% else %}
 						<td>{{feedback.assignee.user_profile.user.username|default_if_none:""}}</td>
 					{%endif%}

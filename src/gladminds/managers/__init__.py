@@ -170,6 +170,7 @@ def save_update_feedback(feedback_obj, data, user, host):
         comment_object = models.Comment(
                                         comment=data['comments'],
                                         user=user, created_date=datetime.datetime.now(),
+                                        modified_date=datetime.datetime.now(),
                                         feedback_object=feedback_obj)
         comment_object.save()
  

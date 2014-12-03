@@ -267,10 +267,9 @@
                 messageHeader.text('Thanks');
                 waitingModal.modal('hide');
                 messageModal.modal('show');
-                $('#message').val('');
-                $('#priority').val('');
+                $('#summary').val('');
                 $('#type').val('');
-                $('#subject').val('');
+                $('#description').val('');
                 $('#advisorMobile').val('');
                 setTimeout(function() {
                     parent.window.location='/aftersell/servicedesk/helpdesk';
@@ -287,6 +286,52 @@
         });
         return false;
     });
+
+    $('.comment-form').on('submit', function(e) {
+        var data = Utils.getFormData('.servicedesk'),
+            formData = new FormData($(this).get(0)),
+            comment_data = Utils.getFormData('.comment-form'),
+            url = '/aftersell/feedbackdetails/'+data.ticketId+'/comments/'+comment_data.commentId+'/',
+            messageModal = $('.modal.message-modal'),
+            messageBlock = $('.modal-body', messageModal),
+            messageHeader = $('.modal-title', messageModal),
+            waitingModal = $('.modal.waiting-dialog');
+
+        var jqXHR = $.ajax({
+            type: 'POST',
+            url: url,
+            data: formData,
+            cache: false,
+            processData: false,
+            contentType: false,
+            beforeSend: function(){
+                $(this).find('input[type="text"]').val('');
+                waitingModal.modal('show');
+            },
+            success: function(data){
+                messageBlock.text('Updated Successfully');
+                messageHeader.text('Save');
+                waitingModal.modal('hide');
+                messageModal.modal('show');
+	            $('#commentId').val('');
+	            $('#commentUser').val('');
+	            $('#commentDescription').val('');
+	            $('#commentDate').val('');
+                setTimeout(function() {
+                	parent.window.location='/aftersell/servicedesk/';
+                }, 2000);
+                
+            },
+            error: function() {
+                messageBlock.text('Invalid Data');
+                messageHeader.text('Invalid');
+                waitingModal.modal('hide');
+                messageModal.modal('show');
+            }
+        });
+        return false;
+    });
+
     
     $('.servicedesk').on('submit', function(e) {
         var data = Utils.getFormData('.servicedesk'),
@@ -493,3 +538,24 @@ function getDataByDate(){
     window.location.href = window.location.pathname + '?month='+month+'&'+'year='+year;
    
 }
+
+$(document).on("click", ".open-AddCommentDialog", function (e) {
+
+	e.preventDefault();
+	
+	var _self = $(this);
+	var commentId = _self.data('id');
+	$("#commentId").val(commentId);
+	
+	var commentUser = _self.data('user');
+	$("#commentUser").val(commentUser);
+	
+	var commentDescription = _self.data('comment');
+	$("#commentDescription").val(commentDescription);
+	
+	var commentDate = _self.data('date');
+	$("#commentDate").val(commentDate);
+	
+	$(_self.attr('href')).modal('show');
+	
+});
