@@ -352,7 +352,7 @@ def get_feedbacks(user, status, priority, type):
     group = user.groups.all()[0]
     feedbacks = []
     
-    if type == 'all' or type is None:
+    if type == 'all'or type is None:
         type_filter = utils.get_list_from_set(FEEDBACK_TYPE)
     else:
         type_filter = [type]
@@ -362,10 +362,13 @@ def get_feedbacks(user, status, priority, type):
     else:
         priority_filter = [priority]
             
-    if status == 'all' or status is None:
-        status_filter = utils.get_list_from_set(FEEDBACK_STATUS)
+    if status is None:
+        status_filter = ['Open', 'Pending', 'In Progress']
     else:
-        status_filter = [status]
+        if status == 'all':
+            status_filter = utils.get_list_from_set(FEEDBACK_STATUS)
+        else:
+            status_filter = [status]
                         
     if group.name == 'dealers':
         sa_list = models.ServiceAdvisor.objects.active_under_dealer(user)
