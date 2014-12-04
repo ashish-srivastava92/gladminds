@@ -46,9 +46,9 @@ def send_recycle_mail(sender_id, data=None):
     body = template.render(context)
     mail_detail = settings.RECYCLE_MAIL
     send_email(sender=sender_id,
-               receiver=mail_detail['recevier'],
+               receiver=mail_detail['receiver'],
                subject=mail_detail['subject'], body=body,
-               smtp_server=settings.MAIL_SERVER, title='Support')
+               smtp_server=settings.MAIL_SERVER, title='Recycle Product')
 
 
 
@@ -104,7 +104,7 @@ def send_registration_failure(feed_data=None,
         logger.info(settings.MAIL_SERVER)
         send_email(sender=mail_detail['sender'], receiver=mail_detail[
               'receiver'], subject=mail_detail['subject'], body=body,
-                   smtp_server=settings.MAIL_SERVER,title="Afterbuy")
+                   smtp_server=settings.MAIL_SERVER)
 
     except Exception as ex:
         logger.info("[Exception feed_report]: {0}".format(ex))
