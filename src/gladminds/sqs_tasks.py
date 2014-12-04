@@ -476,6 +476,8 @@ def send_reminders_for_servicedesk(*args, **kwargs):
     send mail when reminder_date is less than current date or when due date is less than current date
     '''
     feedback_obj = models.Feedback.objects.filter(reminder_date__lte=time, reminder_flag=False) or models.Feedback.objects.filter(due_date__lte=time,resolution_flag=False)
+    escalation_list = models.UserProfile.objects.filter(user__groups__name='escalation_authority')
+    escalation_mailing_list = utils.get_escalation_mailing_list(escalation_list)
     for feedback in feedback_obj:
         if not feedback.reminder_flag:
             context = utils.create_context('DUE_DATE_EXCEEDED_MAIL_TO_AGENT', feedback)
@@ -486,11 +488,11 @@ def send_reminders_for_servicedesk(*args, **kwargs):
          
         if not feedback.resolution_flag:
             context = utils.create_context('DUE_DATE_EXCEEDED_MAIL_TO_MANAGER', feedback)
-            send_due_date_exceeded(context)
+            send_due_date_exceeded(context, escalation_mailing_list)
             feedback.resolution_flag = False
         feedback.save()
  
-    
+
 _tasks_map = {"send_registration_detail": send_registration_detail,
 
               "send_service_detail": send_service_detail,
