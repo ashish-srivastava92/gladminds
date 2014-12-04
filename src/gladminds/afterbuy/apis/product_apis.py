@@ -94,7 +94,7 @@ class UserProductResource(CustomBaseModelResource):
             
     def mail_products_details(self, request, **kwargs):
         try:
-            product_id = kwargs.get('product_id')
+            product_id = kwargs['product_id']
             product_info = afterbuy_models.UserProduct.objects.get(id=product_id)
             context = {"id":product_info.id,
                        "brand":product_info.brand.name,
