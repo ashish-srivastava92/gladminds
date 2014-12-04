@@ -120,6 +120,7 @@ def save_update_feedback(feedback_obj, data, user, host):
         else:
             if data['assign_to'] :
                 servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile__phone_number=data['assign_to'])
+                feedback_obj.previous_assignee = feedback_obj.assignee
                 feedback_obj.assignee = servicedesk_user[0]
                 feedback_obj.assign_to_reporter = False
         feedback_obj.status = data['status']
