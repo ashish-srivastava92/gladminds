@@ -104,7 +104,7 @@ def send_registration_failure(feed_data=None,
         logger.info(settings.MAIL_SERVER)
         send_email(sender=mail_detail['sender'], receiver=mail_detail[
               'receiver'], subject=mail_detail['subject'], body=body,
-                   smtp_server=settings.MAIL_SERVER)
+                   smtp_server=settings.MAIL_SERVER,title="Afterbuy")
 
     except Exception as ex:
         logger.info("[Exception feed_report]: {0}".format(ex))
