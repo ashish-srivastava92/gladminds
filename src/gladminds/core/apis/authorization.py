@@ -31,7 +31,8 @@ class CustomAuthorization(DjangoAuthorization):
         except:
                 raise Unauthorized("You are not allowed to access that data.")
         user = authorization.user
-        # This assumes a ``QuerySet`` from ``ModelResource``.
+        # This assumes a ``QuerySet`` from ``ModelResource``
+        
         return object_list.filter(user=user)
 
     def read_detail(self, object_list, bundle):
@@ -86,9 +87,6 @@ class CustomAuthorization(DjangoAuthorization):
             raise Unauthorized("You are not allowed to access that data.")
         return True
 
-    def read_detail(self, object_list, bundle):
-        self.authorize_user(object_list, bundle)
-        return True
 
     def update_detail(self, object_list, bundle):
         self.authorize_user(object_list, bundle)
