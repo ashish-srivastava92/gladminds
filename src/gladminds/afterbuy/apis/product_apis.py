@@ -93,7 +93,6 @@ class UserProductResource(CustomBaseModelResource):
             logger.error('Invalid details')
             
     def mail_products_details(self, request, **kwargs):
-        product_id = kwargs.get('product_id')
         try:
             product_id = kwargs.get('product_id')
             product_info = afterbuy_models.UserProduct.objects.get(id=product_id)
