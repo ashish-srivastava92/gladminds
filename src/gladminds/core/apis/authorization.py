@@ -19,7 +19,6 @@ class CustomAuthorization(DjangoAuthorization):
 
         return model_klass
     def read_list(self, object_list, bundle):
-        print "dddddddddddddddddddddddDDDDDDD",object_list
         try:
             access_token_container = bundle.request.GET.urlencode().split('access_token=')[1]
             key = access_token_container.split('&')[0]
