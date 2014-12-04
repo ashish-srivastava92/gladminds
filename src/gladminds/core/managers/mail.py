@@ -200,14 +200,14 @@ def send_feedback_received(data, receiver_email):
     except Exception as ex:
         logger.info("[Exception feedback received email]: {0}".format(ex))
 
-def send_due_date_exceeded(data):
+def send_due_date_exceeded(data, receiver_email):
     try:
         file_stream = open(settings.EMAIL_DIR+'/base_email_template.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
         context = Context({"content": data['content']})
         body = template.render(context)
-        send_email(sender = data['sender'], receiver = data['receiver'], 
+        send_email(sender = data['sender'], receiver = receiver_email, 
                    subject = data['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
