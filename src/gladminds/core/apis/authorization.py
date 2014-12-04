@@ -19,6 +19,7 @@ class CustomAuthorization(DjangoAuthorization):
 
         return model_klass
     def read_list(self, object_list, bundle):
+        print "dddddddddddddddddddddddDDDDDDD",object_list
         try:
             access_token_container = bundle.request.GET.urlencode().split('access_token=')[1]
             key = access_token_container.split('&')[0]
@@ -32,8 +33,12 @@ class CustomAuthorization(DjangoAuthorization):
                 raise Unauthorized("You are not allowed to access that data.")
         user = authorization.user
         # This assumes a ``QuerySet`` from ``ModelResource``
-         
-        return object_list.filter(user=user)
+        if bundle.obj.__dict__.get('consumer_id'):
+            return object_list.filter(consumer__user=user)
+        elif bundle.obj.__dict__.get('product_id'):
+            return object_list.filter(product__consumer__user=user)
+        else:
+            return object_list.filter(user=user)
  
     def read_detail(self, object_list, bundle):
         try:
@@ -49,8 +54,13 @@ class CustomAuthorization(DjangoAuthorization):
                 raise Unauthorized("You are not allowed to access that data.")
         user = authorization.user
         # Is the requested object owned by the user?
-         
-        return bundle.obj.user == user
+        if bundle.obj.__dict__.get('consumer_id'):
+            return bundle.obj.consumer.user == user
+        elif bundle.obj.__dict__.get('product_id'):
+            return bundle.obj.product.consumer.user == user
+        else:
+            return bundle.obj.user == user
+            
 
     def create_detail(self, object_list, bundle):
         data = bundle.obj.__dict__
