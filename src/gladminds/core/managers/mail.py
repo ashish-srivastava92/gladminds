@@ -46,9 +46,9 @@ def send_recycle_mail(sender_id, data=None):
     body = template.render(context)
     mail_detail = settings.RECYCLE_MAIL
     send_email(sender=sender_id,
-               receiver=mail_detail['recevier'],
+               receiver=mail_detail['receiver'],
                subject=mail_detail['subject'], body=body,
-               smtp_server=settings.MAIL_SERVER, title='Support')
+               smtp_server=settings.MAIL_SERVER, title='Recycle Product')
 
 
 
