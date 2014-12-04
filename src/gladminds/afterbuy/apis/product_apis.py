@@ -95,23 +95,23 @@ class UserProductResource(CustomBaseModelResource):
     def mail_products_details(self, request, **kwargs):
         product_id = kwargs.get('product_id')
         try:
-            if product_id:
-                product_info = afterbuy_models.UserProduct.objects.get(id=product_id)
-                context = {"id":product_info.id,
-                           "brand":product_info.brand.name,
-                           "consumer_id":product_info.consumer.user.id,
-                           "consumer_name":product_info.consumer.user.first_name,
-                           "purchase_date":product_info.purchase_date,
-                           "brand_product_id":product_info.brand_product_id,
-                           "color":product_info.color,
-                           "description":product_info.description}
-                email_id = product_info.consumer.user.email
-                try:
-                    afterbuy_model.Consumer.objects.get(user__email=email_id, is_email_verified=True)
-                    send_recycle_mail(email_id, data=context)
-                    data = {'status': 1, 'message': 'email sent successfully'}
-                except Exception as ex:
-                    data = {'status': 0, 'message': 'email_id not active'}
+            product_id = kwargs.get('product_id')
+            product_info = afterbuy_models.UserProduct.objects.get(id=product_id)
+            context = {"id":product_info.id,
+                       "brand":product_info.brand.name,
+                       "consumer_id":product_info.consumer.user.id,
+                       "consumer_name":product_info.consumer.user.first_name,
+                       "purchase_date":product_info.purchase_date,
+                       "brand_product_id":product_info.brand_product_id,
+                       "color":product_info.color,
+                       "description":product_info.description}
+            email_id = product_info.consumer.user.email
+            try:
+                afterbuy_model.Consumer.objects.get(user__email=email_id, is_email_verified=True)
+                send_recycle_mail(email_id, data=context)
+                data = {'status': 1, 'message': 'email sent successfully'}
+            except Exception as ex:
+                data = {'status': 0, 'message': 'email_id not active'}
         except Exception as ex:
             logger.error('Invalid details')  
             data = {'status': 0, 'message': 'email not sent'}
