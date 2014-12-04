@@ -1,4 +1,6 @@
 import logging
+import json
+from django.http.response import HttpResponse
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.authorization import Authorization, DjangoAuthorization
 from tastypie import fields
@@ -9,11 +11,13 @@ from gladminds.afterbuy import models as afterbuy_models
 from gladminds.settings import API_FLAG, COUPON_URL
 from tastypie.utils.urls import trailing_slash
 from gladminds.afterbuy.apis.brand_apis import BrandResource
+from gladminds.afterbuy import models as afterbuy_model
 from gladminds.afterbuy.apis.user_apis import ConsumerResource
 from django.forms.models import model_to_dict
 from gladminds.core.apis.authorization import CustomAuthorization,\
     MultiAuthorization
 from gladminds.core.apis.authentication import AccessTokenAuthentication
+from gladminds.core.managers.mail import send_recycle_mail
 
 logger = logging.getLogger("gladminds")
 
@@ -70,7 +74,8 @@ class UserProductResource(CustomBaseModelResource):
 
     def prepend_urls(self):
         return [
-                url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/coupons%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_coupons'), name="get_product_coupons" )
+                url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/coupons%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_coupons'), name="get_product_coupons" ),
+                url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/recycle%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('mail_products_details'), name="mail_products_details" )
         ]
 
     def get_product_coupons(self, request, **kwargs):
@@ -86,6 +91,31 @@ class UserProductResource(CustomBaseModelResource):
                     return HttpResponseRedirect('http://'+COUPON_URL+'/v1/coupons/?product='+brand_product_id)
         except Exception as ex:
             logger.error('Invalid details')
+            
+    def mail_products_details(self, request, **kwargs):
+        product_id = kwargs.get('product_id')
+        try:
+            if product_id:
+                product_info = afterbuy_models.UserProduct.objects.get(id=product_id)
+                context = {"id":product_info.id,
+                           "brand":product_info.brand.name,
+                           "consumer_id":product_info.consumer.user.id,
+                           "consumer_name":product_info.consumer.user.first_name,
+                           "purchase_date":product_info.purchase_date,
+                           "brand_product_id":product_info.brand_product_id,
+                           "color":product_info.color,
+                           "description":product_info.description}
+                email_id = product_info.consumer.user.email
+                try:
+                    afterbuy_model.Consumer.objects.get(user__email=email_id, is_email_verified=True)
+                    send_recycle_mail(email_id, data=context)
+                    data = {'status': 1, 'message': 'email sent successfully'}
+                except Exception as ex:
+                    data = {'status': 0, 'message': 'email_id not active'}
+        except Exception as ex:
+            logger.error('Invalid details')  
+            data = {'status': 0, 'message': 'email not sent'}
+        return HttpResponse(json.dumps(data), content_type="application/json")          
 
 
 class ProductInsuranceInfoResource(CustomBaseModelResource):
