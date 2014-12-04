@@ -32,9 +32,7 @@ class CustomAuthorization(DjangoAuthorization):
                 raise Unauthorized("You are not allowed to access that data.")
         user = authorization.user
         # This assumes a ``QuerySet`` from ``ModelResource``
-        if bundle.obj.__dict__.get('consumer_id'):
-            return object_list.filter(consumer__user=user)
-        elif bundle.obj.__dict__.get('product_id'):
+        if bundle.obj.__dict__.get('product_id'):
             return object_list.filter(product__consumer__user=user)
         else:
             return object_list.filter(user=user)
@@ -53,9 +51,7 @@ class CustomAuthorization(DjangoAuthorization):
                 raise Unauthorized("You are not allowed to access that data.")
         user = authorization.user
         # Is the requested object owned by the user?
-        if bundle.obj.__dict__.get('consumer_id'):
-            return bundle.obj.consumer.user == user
-        elif bundle.obj.__dict__.get('product_id'):
+        if bundle.obj.__dict__.get('product_id'):
             return bundle.obj.product.consumer.user == user
         else:
             return bundle.obj.user == user
