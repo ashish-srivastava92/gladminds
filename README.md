@@ -110,7 +110,7 @@ add:-
 127.0.0.1       local.demo.gladminds.co
 
 '''
-
+GM app name is 'default'
 '''
 drop database gm;
 drop database bajaj;
