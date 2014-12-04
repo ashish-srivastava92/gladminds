@@ -1,8 +1,8 @@
 from gladminds.bajaj import models as common
-from gladminds.gm import models as gm_common
+from gladminds.default import models as gm_common
 from gladminds.afterbuy import models as afterbuy_common
 from integration.base import BaseTestCase
-
+from datetime import datetime
 from django.test.client import Client
 
 client = Client(SERVER_NAME='bajaj')
@@ -42,13 +42,21 @@ class System(BaseTestCase):
         return spare_data
 
     def create_sdo(self, **kwargs):
-        user_servicedesk_owner = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name='SDM', phone_number=kwargs['phone_number'])
+        user_servicedesk_owner_profile = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name='SDO', phone_number=kwargs['phone_number'])
+        user_servicedesk_owner = common.ServiceDeskUser(user_profile=user_servicedesk_owner_profile)
+        user_servicedesk_owner.save()
         return user_servicedesk_owner
 
     def create_sdm(self, **kwargs):
-        user_servicedesk_manager = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name='SDM', phone_number=kwargs['phone_number'])
+        user_servicedesk_manager_profile = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name='SDM', phone_number=kwargs['phone_number'])
+        user_servicedesk_manager = common.ServiceDeskUser(user_profile=user_servicedesk_manager_profile)
         user_servicedesk_manager.save()
-
+        return user_servicedesk_manager
+    
+    def create_sla(self, **kwargs):
+        sla_object = common.SLA(priority=kwargs['priority'], response_time=2,response_unit='mins', reminder_time=2, reminder_unit='hrs', resolution_time=10, resolution_unit='days')
+        sla_object.save()
+        
     def get_temp_customer_obj(self, **kwargs):
         temp_customer_obj = common.CustomerTempRegistration.objects.get(**kwargs)
         return temp_customer_obj
@@ -59,12 +67,11 @@ class System(BaseTestCase):
         self.tester.client.login(username='DEALER01', password='DEALER01@123')
 
     def post_feedback(self):
-        self.create_user(username='DEALER01', email='dealer@xyz.com', password='DEALER01@123', group_name='dealers', phone_number="+91776084042")
-        data = {'username': 'DEALER01', 'password': 'DEALER01@123'}
+        data = {'username': 'GMDEALER001', 'password': 'GMDEALER001@123'}
         response = client.post("/aftersell/dealer/login/", data=data)
         self.tester.assertEqual(response.status_code, 302)
-        data = {"messsage":"test","reporter":"+919999999998",
-                "type":"Problem", "subject":"hello" }
+        data = {"description":"test","advisorMobile":"+919999999999",
+                "type":"Problem", "summary":"hello" }
         response = client.post("/aftersell/servicedesk/helpdesk", data=data)
         self.tester.assertEqual(response.status_code, 200)
 
@@ -78,11 +85,14 @@ class System(BaseTestCase):
         self.tester.assertEqual(response.status_code, 200)
 
     def update_feedback(self, **kwargs):
-        data = {"Assign_To":"+919999999999", "status":"Open","Priority":"High", "comments":"ssss", "rootcause":"ssss", "resolution":"ssssss"  }
+        data = {"assign_to":"+91000000000",
+                "status":"Open","Priority":"High",
+                "comments":"testing", "rootcause":"testing",
+                "resolution":"testing", "reporter_status": False, "due_date":datetime.now()}
         if kwargs.get('status'):
             data['status'] = kwargs['status']
         if kwargs.get('assign_To'):
-            data['Assign_To'] = kwargs['assign_To']
+            data['assign_To'] = kwargs['assign_To']
         response = client.post("/aftersell/feedbackdetails/1/", data=data)
         self.tester.assertEqual(response.status_code, 200)
 

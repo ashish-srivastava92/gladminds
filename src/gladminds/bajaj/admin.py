@@ -11,6 +11,7 @@ SMSLog, EmailLog, DataFeedLog, MessageTemplate, EmailTemplate, SLA,\
     ServiceDeskUser
 from gladminds.core import utils
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from gladminds.core.auth_helper import GmApps
 
 class BajajAdminSite(AdminSite):
     pass
@@ -348,7 +349,7 @@ class ServiceDeskUserAdmin(ModelAdmin):
     list_display = ('user_profile', 'name', 'phone_number', 'email')
 
 
-brand_admin = BajajAdminSite(name='bajaj')
+brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
 
 brand_admin.register(User, UserAdmin)
 brand_admin.register(Group, GroupAdmin)

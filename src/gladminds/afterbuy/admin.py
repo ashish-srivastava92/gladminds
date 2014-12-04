@@ -1,24 +1,32 @@
 from django.contrib.admin import AdminSite
 from django.contrib.auth.models import User, Group, Permission
 from constance.admin import Config, ConstanceAdmin
+from django.contrib.admin.options import ModelAdmin
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
 
 from gladminds.afterbuy.models import Brand, Consumer, ProductType,\
 MessageTemplate, EmailTemplate, Industry, UserProduct, License,\
     ProductInsuranceInfo, ProductWarrantyInfo, PollutionCertificate,\
     BrandProductCategory, SMSLog, EmailLog, OTPToken, EmailToken
-from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from gladminds.core.admin_helper import IndustryAdmin, BrandAdmin
+from gladminds.core.auth_helper import GmApps
 
 
 class AfterbuyAdminSite(AdminSite):
     pass
 
-brand_admin = AfterbuyAdminSite(name='afterbuy')
+
+class ConsumerAdmin(ModelAdmin):
+    search_fields = ('phone_number',)
+    list_display = ('user', 'phone_number')
+
+
+brand_admin = AfterbuyAdminSite(name=GmApps.AFTERBUY)
 
 brand_admin.register(Industry, IndustryAdmin)
 brand_admin.register(Brand, BrandAdmin)
 brand_admin.register(BrandProductCategory)
-brand_admin.register(Consumer)
+brand_admin.register(Consumer, ConsumerAdmin)
 brand_admin.register(ProductType)
 brand_admin.register(UserProduct)
 brand_admin.register(ProductInsuranceInfo)

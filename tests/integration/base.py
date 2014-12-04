@@ -36,7 +36,7 @@ class BaseTestCase(ResourceTestCase):
 
     def setUp(self):
         super(BaseTestCase, self).setUp()
-        self.client = Client()
+        self.client = Client(SERVER_NAME='bajaj')
         self.access_token = 'testaccesstoken'
         load_email_obj = load_gm_migration_data.Command()
         load_email_obj.add_email_template()
@@ -68,7 +68,7 @@ class BaseTestCase(ResourceTestCase):
         if kwargs.get('group_name'):
             user_group = Group.objects.get(name=kwargs['group_name'])
             user.groups.add(user_group)
-        if kwargs.get('group_name'):
+        if kwargs.get('phone_number'):
             user_profile = common.UserProfile(user=user, phone_number=kwargs['phone_number'])
             user_profile.save()
             return user_profile

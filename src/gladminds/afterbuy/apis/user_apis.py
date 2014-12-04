@@ -1,7 +1,6 @@
 from uuid import uuid4
 import json
 import logging
-from django.forms.models import model_to_dict
 from django.http.response import HttpResponse
 from django.conf.urls import url
 from tastypie.http import HttpBadRequest
@@ -9,23 +8,21 @@ from tastypie.utils.urls import trailing_slash
 from django.contrib.auth.models import User
 from django.contrib.auth import  login
 from django.conf import settings
-from gladminds.core import utils
 # from gladminds.core.apis.authorization import CustomAuthorization
 from gladminds.afterbuy import utils as afterbuy_utils
 from gladminds.afterbuy import models as afterbuy_model
-from gladminds.core.apis.user_apis import AccessTokenAuthentication
 from tastypie import fields, http
-from gladminds.core.managers.mail import sent_password_reset_link
 from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.core.utils import mobile_format, get_task_queue
+from gladminds.core.utils import get_task_queue
 from gladminds.sqs_tasks import send_otp
 from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
 from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.views.auth_view import get_access_token
-from tastypie.authorization import Authorization
+from tastypie.authorization import DjangoAuthorization
 from gladminds.core.apis.authorization import CustomAuthorization
 from django.contrib.sites.models import RequestSite
+from gladminds.core.apis.authentication import AccessTokenAuthentication
 
 logger = logging.getLogger("gladminds")
 
@@ -120,7 +117,7 @@ class ConsumerResource(CustomBaseModelResource):
         last_name = load.get('last_name','')
         password = load.get('password')
         if not phone_number or not password:
-            return HttpBadRequest("phone_number, username and password required.")
+            return HttpBadRequest("phone_number, password required.")
         try:
             afterbuy_model.Consumer.objects.get(
                                                 phone_number=phone_number)
@@ -324,7 +321,7 @@ class InterestResource(CustomBaseModelResource):
         queryset = afterbuy_model.Interest.objects.all()
         resource_name = "interests"
         authentication = AccessTokenAuthentication()
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
 
@@ -342,7 +339,8 @@ class UserNotificationResource(CustomBaseModelResource):
         always_return_data = True
         filtering = {
                      "consumer": ALL,
-                     "id": ALL
+                     "id": ALL,
+                     "notification_read": ALL
                      }
 
         

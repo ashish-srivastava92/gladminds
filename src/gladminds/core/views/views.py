@@ -358,7 +358,7 @@ def get_feedbacks(user, status):
     else:
         status = [status]
     if group.name == 'dealers':
-        sa_list = utils.get_sa_list(user)
+        sa_list = models.ServiceAdvisor.objects.active_under_dealer(user)
         if sa_list:
             feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_list, status__in=status).order_by('-created_date')
     return feedbacks
@@ -371,14 +371,7 @@ def service_desk(request, servicedesk):
     if request.method == 'GET':
         template = 'portal/feedback_details.html'
         data = None
-        data_mapping = {
-            'helpdesk': utils.get_sa_list
-            }
-        try:
-            data = data_mapping[servicedesk](request.user)
-        except Exception as ex:
-            #It is acceptable if there is no data_mapping defined for a function
-            pass
+        data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
         return render(request, template, {"feedbacks" : get_feedbacks(request.user, status),
                                           'active_menu': servicedesk,
                                           "data": data, 'groups': groups,
@@ -410,7 +403,7 @@ def save_help_desk_data(request):
     sms_dict = {}
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)
-    service_advisor_obj = models.ServiceAdvisor.objects.get(service_advisor_id=sms_dict['advisorMobile'])
+    service_advisor_obj = models.ServiceAdvisor.objects.get(user__phone_number=sms_dict['advisorMobile'])
     dealer_obj = models.Dealer.objects.get(dealer_id=request.user)
     return gladmindsResources.get_complain_data(sms_dict, service_advisor_obj.user.phone_number, service_advisor_obj.user.user.email, service_advisor_obj.user.user.username, dealer_obj.user.user.email, with_detail=True)
 

@@ -2,8 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from gladminds.core import base_models
+from gladminds.core.auth_helper import GmApps
 
-_APP_NAME = 'demo'
+_APP_NAME = GmApps.DEMO
 
 
 class BrandProductCategory(base_models.BrandProductCategory):

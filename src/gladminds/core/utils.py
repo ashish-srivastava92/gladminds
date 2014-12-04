@@ -151,7 +151,7 @@ def get_customer_info(data):
         return {'message': message}
 
 def get_sa_list(user):
-    dealer = models.Dealer.objects.filter(user=user)[0]
+    dealer = models.Dealer.objects.filter(user__user__username=user)[0]
     service_advisors = models.ServiceAdvisor.objects\
                                 .filter(dealer=dealer, status='Y')
     sa_phone_list = []
@@ -593,11 +593,3 @@ def get_time_in_seconds(time, unit):
     else:
         total_seconds = time * 60
     return total_seconds
-
-
-def add_user_to_group(app, user_id, group_name):
-    g = Group.objects.using(app).get(name=group_name)
-    user = User.objects.using(app).get(id=user_id)
-    if not user.groups.using(app).filter(name=group_name).exists():
-        user.groups.add(g)
-        user.save(using=app)

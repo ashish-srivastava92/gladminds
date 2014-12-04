@@ -7,7 +7,9 @@ from django.conf import settings
 from gladminds.core import base_models
 from gladminds.core.constants import GENDER_CHOICES, SIZE_CHOICES, FUEL_CHOICES
 from gladminds.core.model_helpers import PhoneField
-_APP_NAME = 'afterbuy'
+from gladminds.core.auth_helper import GmApps
+
+_APP_NAME = GmApps.AFTERBUY
 
 
 class Industry(base_models.Industry):
