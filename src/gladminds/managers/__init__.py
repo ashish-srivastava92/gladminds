@@ -124,16 +124,20 @@ def save_update_feedback(feedback_obj, data, user, host):
                 feedback_obj.assign_to_reporter = False
         feedback_obj.status = data['status']
         feedback_obj.priority = data['Priority']
+
     #check if status is pending
     if data['status'] == status[4]:
         feedback_obj.pending_from = datetime.datetime.now()
+    
     #check if status is progress
     if data['status'] == status[3]:
         feedback_obj.assignee = feedback_obj.previous_assignee
+    
     #check if status is closed
     if data['status'] == status[1]:
         feedback_obj.closed_date = datetime.datetime.now()
     feedback_obj.save()
+
     if assign_status and feedback_obj.assignee:
         feedback_obj.assignee_created_date = datetime.datetime.now()
         date = set_due_date(data['Priority'], feedback_obj)
