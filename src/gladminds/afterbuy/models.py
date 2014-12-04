@@ -301,7 +301,7 @@ class ServiceType(base_models.BaseModel):
     
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "ServiceType" 
+        verbose_name_plural = "ServiceTypes" 
          
         
 class Service(base_models.BaseModel):
@@ -310,7 +310,7 @@ class Service(base_models.BaseModel):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "Service"              
+        verbose_name_plural = "Services"              
         
 
 
