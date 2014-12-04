@@ -521,6 +521,8 @@ ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},
 ##################################################################################################
 ENABLE_SERVICE_DESK = True
 
+SD_ESCALATION_GROUP = 'escalation_authority'
+
 DEFAULT_IMAGE_ID = 'guest.png'
 
 CONSTANCE_CONFIG = {
