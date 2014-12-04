@@ -1,6 +1,5 @@
 Django &amp; Buildout Project Template
 ==============================================
-
 A Django &amp; Project Template to integrate Django, Buildout, Pylint, JSHint, Sphinx etc. 
 Its a work in progress and expected to evolve further. The motivation to do this came from
 using Maven for Java projects.
