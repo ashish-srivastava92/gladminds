@@ -30,7 +30,7 @@ OTHER_GROUPS = [Roles.SUPERADMINS, Roles.CXOADMINS, Roles.FSCSUPERADMINS,
 AFTERBUY_USER_MODELS = ['User', 'Consumer', 'UserProduct', 'ProductSupport', 'RegistrationCertificate',
                         'ProductInsuranceInfo', 'ProductWarrantyInfo', 'PollutionCertificate',
                         'License', 'Invoice', 'SellInformation', 'UserProductImages', 'UserPreference',
-                        'UserNotification']
+                        'UserNotification','Service']
 
 
 def add_user_to_group(app, user_id, group_name):
