@@ -88,9 +88,20 @@ def save_update_feedback(feedback_obj, data, user, host):
     assign = feedback_obj.assignee
     
     if feedback_obj.due_date:
+        due_date = convert_utc_to_local_time(feedback_obj.due_date)
         feedback_obj.due_date = data['due_date']
         feedback_obj.due_date = datetime.datetime.strptime(data['due_date'], '%Y-%m-%d %H:%M:%S')   
         feedback_obj.save()
+        if due_date != feedback_obj.due_date:
+            if reporter_email_id:
+                context = create_context('DUE_DATE_MAIL_TO_INITIATOR',
+                                  feedback_obj)
+                mail.send_email_to_initiator_when_due_date_is_changed(context, reporter_email_id)
+            else:
+                logger.info("Reporter emailId not found.")  
+                 
+            send_sms('INITIATOR_FEEDBACK_DUE_DATE_CHANGE', reporter_phone_number,
+                 feedback_obj)
         
     if assign is None:
         assign_status = True

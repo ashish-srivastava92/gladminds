@@ -442,7 +442,11 @@ def export_customer_reg_to_sap(*args, **kwargs):
         
 
 def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
-    created_date = feedback_obj.created_date
+    created_date = convert_utc_to_local_time(feedback_obj.created_date).strftime("%Y-%m-%d")
+    if feedback_obj.due_date:
+        due_date = feedback_obj.due_date.strftime("%Y-%m-%d")
+    else: 
+        due_date = ""
     reporter = None
     try:
         if feedback_obj.reporter:
@@ -452,7 +456,8 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
                                                                message=feedback_obj.description,
                                                                created_date=convert_utc_to_local_time(created_date),
                                                                assign_to=feedback_obj.assignee,
-                                                               priority=feedback_obj.priority)
+                                                               priority=feedback_obj.priority,
+                                                               due_date = due_date)
         if comment_obj and template_name == 'SEND_MSG_TO_ASSIGNEE':
             message = message + 'Note :' + comment_obj.comment
     except Exception as ex:

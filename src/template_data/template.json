@@ -408,5 +408,14 @@
       "template":"Unregistered user. Please register with Bajaj Auto Ltd. (Contact#: 9611545154) to accumulate and redeem points and get home exclusive gifts.",
       "description":"Send this message when mechanic is unregistered"
     }
+  },
+  {
+    "model": "gladminds.messagetemplate",   
+    "pk": 33,
+    "fields": {
+      "template_key": "INITIATOR_FEEDBACK_DUE_DATE_CHANGE",
+      "template": "Your {type} will be resolved by {due_date}.",
+      "description": "Due Date has been changed"
+    }
   }
 ]

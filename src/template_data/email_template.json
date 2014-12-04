@@ -166,6 +166,18 @@
             "body": "The due date for the ticket is {due_date} . Please resolve it soon.",
             "description": "Due Date Reminder mail to manager"
         }
+    },
+     {
+        "model": "gladminds.emailtemplate",
+        "pk": 15,
+        "fields": {
+            "template_key": "DUE_DATE_MAIL_TO_INITIATOR",
+            "sender": "feed-report@gladminds.co",
+            "receiver": "",
+            "subject": "Change for due date",
+            "body": "Your {type} will be resolved within {due_date}",
+            "description": "Due Date change mail to initiator"
+        }
     }
     
 ]
