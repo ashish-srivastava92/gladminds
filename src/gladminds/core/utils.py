@@ -150,16 +150,6 @@ def get_customer_info(data):
         message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
         return {'message': message}
 
-def get_sa_list(user):
-    dealer = models.Dealer.objects.filter(user__user__username=user)[0]
-    service_advisors = models.ServiceAdvisor.objects\
-                                .filter(dealer=dealer, status='Y')
-    sa_phone_list = []
-    for service_advisor in service_advisors:
-        sa_phone_list.append(service_advisor)
-    return sa_phone_list
-
-
 def get_sa_list_for_login_dealer(user):
     dealer = models.Dealer.objects.filter(
                 dealer_id=user)[0]
