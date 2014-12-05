@@ -7,7 +7,8 @@ from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from gladminds.afterbuy.models import Brand, Consumer, ProductType,\
 MessageTemplate, EmailTemplate, Industry, UserProduct, License,\
     ProductInsuranceInfo, ProductWarrantyInfo, PollutionCertificate,\
-    BrandProductCategory, SMSLog, EmailLog, OTPToken, EmailToken
+    BrandProductCategory, SMSLog, EmailLog, OTPToken, EmailToken,\
+    ServiceType, Service, SellInformation
 from gladminds.core.admin_helper import IndustryAdmin, BrandAdmin
 from gladminds.core.auth_helper import GmApps
 
@@ -26,6 +27,9 @@ brand_admin = AfterbuyAdminSite(name=GmApps.AFTERBUY)
 brand_admin.register(Industry, IndustryAdmin)
 brand_admin.register(Brand, BrandAdmin)
 brand_admin.register(BrandProductCategory)
+brand_admin.register(ServiceType)
+brand_admin.register(Service)
+brand_admin.register(SellInformation)
 brand_admin.register(Consumer, ConsumerAdmin)
 brand_admin.register(ProductType)
 brand_admin.register(UserProduct)
