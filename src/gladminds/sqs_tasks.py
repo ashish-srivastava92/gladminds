@@ -443,10 +443,9 @@ def export_customer_reg_to_sap(*args, **kwargs):
 
 def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
     created_date = convert_utc_to_local_time(feedback_obj.created_date).strftime("%Y-%m-%d")
-    if feedback_obj.due_date:
-        due_date = feedback_obj.due_date.strftime("%Y-%m-%d")
-    else: 
-        due_date = ""
+    due_date = getattr(feedback_obj,"due_date") or ""
+    if due_date:
+        due_date = due_date.strftime("%Y-%m-%d")
     reporter = None
     try:
         if feedback_obj.reporter:
@@ -488,14 +487,18 @@ def send_reminders_for_servicedesk(*args, **kwargs):
             context = utils.create_context('DUE_DATE_REMINDER_MAIL_TO_MANAGER', feedback)
             send_due_date_reminder(context, manager_obj.email)
             feedback.reminder_flag = False
-         
+ 
         if not feedback.resolution_flag:
             context = utils.create_context('DUE_DATE_EXCEEDED_MAIL_TO_MANAGER', feedback)
-            send_due_date_exceeded(context)
+            escalation_list = models.UserProfile.objects.filter(user__groups__name=settings.SD_ESCALATION_GROUP)
+            escalation_list_detail = utils.get_escalation_mailing_list(escalation_list)
+            send_due_date_exceeded(context, escalation_list_detail['mail'])
+            for phone_number in escalation_list_detail['sms']: 
+                send_sms('DUE_DATE_EXCEEDED_ESCALATION', phone_number, feedback)
             feedback.resolution_flag = False
         feedback.save()
  
-    
+
 _tasks_map = {"send_registration_detail": send_registration_detail,
 
               "send_service_detail": send_service_detail,

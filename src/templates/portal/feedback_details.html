@@ -96,7 +96,7 @@
                     <label class="control-label">Reporter*:</label>
                   </div>
                   <div class="col-md-8 form-group">
-                    <select class="form-control" name="advisorMobile" id="advisorMobile" required>
+                    <select class="form-control advisorMobile" name="advisorMobile" required>
                       <option value="">Select mobile number</option>
                       {% for phone in data %}
                       <option value="{{phone.user.phone_number}}">{{phone.service_advisor_id}} ({{phone.user.phone_number}})</option>
@@ -110,7 +110,7 @@
                     <label class="control-label">Type*:</label>
                   </div>
                   <div class="col-md-8 form-group">
-                    <select class="form-control" name="type" id="type" required>
+                    <select class="form-control type" name="type" required>
                       <option value="">Select Type</option>
                       {% for type in types %}
                       <option value="{{type}}">{{type}}</option>
@@ -124,7 +124,7 @@
                     <label class="control-label">Summary*:</label>
                   </div>
                   <div class="col-md-8 form-group">
-                    <input type="text" class="form-control" name="summary" id="summary" required>
+                    <input type="text" class="form-control summary" name="summary" required>
                   </div>
                 </div>
                 <div class="row">
@@ -132,7 +132,7 @@
                     <label class="control-label">Description*:</label>
                   </div>
                   <div class="col-md-8 form-group">
-                    <textarea class="form-control" name="description" id="description" required></textarea>
+                    <textarea class="form-control description" name="description" required></textarea>
                   </div>
                 </div> 
                 <div class="row">

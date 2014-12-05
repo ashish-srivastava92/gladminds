@@ -18,6 +18,44 @@ class CustomAuthorization(DjangoAuthorization):
 #             return False
 
         return model_klass
+    def read_list(self, object_list, bundle):
+        try:
+            access_token_container = bundle.request.GET.urlencode().split('access_token=')[1]
+            key = access_token_container.split('&')[0]
+        except:
+            key = bundle.request.META.get('HTTP_ACCESS_TOKEN')
+        if  (settings.ENV in ["dev", "local"] and key in settings.HARCODED_TOKEN):
+                return True
+        try:
+            authorization = AccessToken.objects.filter(token=key)[0]
+        except:
+                raise Unauthorized("You are not allowed to access that data.")
+        user = authorization.user
+        # This assumes a ``QuerySet`` from ``ModelResource``
+        if bundle.obj.__dict__.get('product_id'):
+            return object_list.filter(product__consumer__user=user)
+        else:
+            return object_list.filter(user=user)
+ 
+    def read_detail(self, object_list, bundle):
+        try:
+            access_token_container = bundle.request.GET.urlencode().split('access_token=')[1]
+            key = access_token_container.split('&')[0]
+        except:
+            key = bundle.request.META.get('HTTP_ACCESS_TOKEN')
+        if  (settings.ENV in ["dev", "local"] and key in settings.HARCODED_TOKEN):
+                return True
+        try:
+            authorization = AccessToken.objects.filter(token=key)[0]
+        except:
+                raise Unauthorized("You are not allowed to access that data.")
+        user = authorization.user
+        # Is the requested object owned by the user?
+        if bundle.obj.__dict__.get('product_id'):
+            return bundle.obj.product.consumer.user == user
+        else:
+            return bundle.obj.user == user
+            
 
     def create_detail(self, object_list, bundle):
         data = bundle.obj.__dict__
@@ -54,9 +92,6 @@ class CustomAuthorization(DjangoAuthorization):
             raise Unauthorized("You are not allowed to access that data.")
         return True
 
-    def read_detail(self, object_list, bundle):
-        self.authorize_user(object_list, bundle)
-        return True
 
     def update_detail(self, object_list, bundle):
         self.authorize_user(object_list, bundle)

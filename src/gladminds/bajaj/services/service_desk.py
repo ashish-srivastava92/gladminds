@@ -64,18 +64,18 @@ def modify_servicedesk_tickets(request, feedback_id):
         return HttpResponseNotFound()
 
 @login_required()
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["POST"])
 def modify_feedback_comments(request, feedback_id, comment_id):
     data = request.POST
-    comment = models.Comment.objects.get(feedback_object_id=feedback_id, id=comment_id)
-    if request.method == 'POST':
+    try:
+        comment = models.Comment.objects.get(feedback_object_id=feedback_id, id=comment_id)
         comment.comment = data['commentDescription']
         comment.modified_date = datetime.datetime.now() 
         comment.save()
-        return HttpResponse("success")
-    else:
-        return HttpResponseNotFound()
-
+    except Exception as ex:
+        logger.info("[Exception comment not found]: {0}".format(ex))
+    
+    return HttpResponse()
 
 @require_http_methods(["POST"])
 def get_feedback_response(request, feedback_id):

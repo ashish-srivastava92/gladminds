@@ -321,15 +321,11 @@ def create_sa_feed_data(post_data, user_id, temp_sa_id):
 
 def create_context(email_template_name, feedback_obj, comment_obj=None):
     ''' feedback due date not defined when ticket is created'''
-    if comment_obj:
-        comment = comment_obj.comment
-    else:
-        comment = ""
+    comment_obj = getattr(comment_obj, "comment") or ""
     created_date = convert_utc_to_local_time(feedback_obj.created_date).strftime("%Y-%m-%d")
-    if feedback_obj.due_date:
-        due_date = feedback_obj.due_date.strftime("%Y-%m-%d")
-    else: 
-        due_date = ""
+    due_date = getattr(feedback_obj,"due_date") or ""
+    if due_date:
+        due_date = due_date.strftime("%Y-%m-%d")
     data = get_email_template(email_template_name)
     data['newsubject'] = data['subject'].format(id = feedback_obj.id)
     data['content'] = data['body'].format(id=feedback_obj.id, type = feedback_obj.type, reporter = feedback_obj.reporter, 
@@ -583,3 +579,11 @@ def get_time_in_seconds(time, unit):
     else:
         total_seconds = time * 60
     return total_seconds
+
+def get_escalation_mailing_list(escalation_list):
+    escalation_mailing_list = []
+    escalation_mobile_list = []
+    for element in escalation_list:
+        escalation_mailing_list.append(element.user.email)
+        escalation_mobile_list.append(element.phone_number)
+    return {'mail': escalation_mailing_list, 'sms': escalation_mobile_list}

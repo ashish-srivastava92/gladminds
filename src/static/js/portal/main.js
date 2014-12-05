@@ -267,10 +267,10 @@
                 messageHeader.text('Thanks');
                 waitingModal.modal('hide');
                 messageModal.modal('show');
-                $('#summary').val('');
-                $('#type').val('');
-                $('#description').val('');
-                $('#advisorMobile').val('');
+                $('.summary').val('');
+                $('.type').val('');
+                $('.description').val('');
+                $('.advisorMobile').val('');
                 setTimeout(function() {
                     parent.window.location='/aftersell/servicedesk/helpdesk';
                 }, 2000);
@@ -309,16 +309,17 @@
                 waitingModal.modal('show');
             },
             success: function(data){
+            	var data = Utils.getFormData('.servicedesk');
                 messageBlock.text('Updated Successfully');
                 messageHeader.text('Save');
                 waitingModal.modal('hide');
                 messageModal.modal('show');
-	            $('#commentId').val('');
-	            $('#commentUser').val('');
-	            $('#commentDescription').val('');
-	            $('#commentDate').val('');
+	            $('.comment-id').val('');
+	            $('.comment-user').val('');
+	            $('.comment-description').val('');
+	            $('.comment-date').val('');
                 setTimeout(function() {
-                	parent.window.location='/aftersell/servicedesk/';
+                	parent.window.location='/aftersell/feedbackdetails/'+data.ticketId+'/';
                 }, 2000);
                 
             },
@@ -549,14 +550,13 @@ $(document).on("click", ".open-AddCommentDialog", function (e) {
 		commentUser = _self.data('user'),
 	    commentDescription = _self.data('comment'),
 	    commentDate = _self.data('date'),
-	    comment = $('.commentDescription'),
+	    comment = $('.comment-description'),
 	    loginUser = _self.data('owner');
-	$("#commentId").val(commentId);
-	$("#commentUser").val(commentUser);
-	$("#commentDescription").val(commentDescription);
-	$("#commentDate").val(commentDate);
+	$(".comment-id").val(commentId);
+	$(".comment-user").val(commentUser);
+	$(".comment-description").val(commentDescription);
+	$(".comment-date").val(commentDate);
 	comment.attr('readonly', false);
-	console.log(loginUser);
 	if (loginUser != commentUser){
 		comment.attr('readonly', true);
 	}
