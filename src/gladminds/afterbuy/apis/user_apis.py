@@ -343,5 +343,33 @@ class UserNotificationResource(CustomBaseModelResource):
                      "id": ALL,
                      "notification_read": ALL
                      }
+        
+        
+class ServiceTypeResource(CustomBaseModelResource):
+
+    class Meta:
+        queryset = afterbuy_model.ServiceType.objects.all()
+        resource_name = "service-types"
+        authentication = AccessTokenAuthentication()
+        authorization = DjangoAuthorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+
+class ServiceResource(CustomBaseModelResource):
+    consumer = fields.ForeignKey(ConsumerResource, 'consumer')
+    service_type = fields.ForeignKey(ServiceTypeResource, 'service_type', full=True)
+
+    class Meta:
+        queryset = afterbuy_model.Service.objects.all()
+        resource_name = "services"
+        authentication = AccessTokenAuthentication()
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+        filtering = {
+                     "consumer": ALL,
+                     "service_type": ALL,
+                     }         
 
         

@@ -38,6 +38,19 @@ def send_email_activation(receiver_email, data=None):
                smtp_server=settings.MAIL_SERVER, title='Support')
 
 
+def send_recycle_mail(sender_id, data=None):
+    file_stream = open(settings.EMAIL_DIR+'/recycle_email.html')
+    feed_temp = file_stream.read()
+    template = Template(feed_temp)
+    context = Context(data)
+    body = template.render(context)
+    mail_detail = settings.RECYCLE_MAIL
+    send_email(sender=sender_id,
+               receiver=mail_detail['receiver'],
+               subject=mail_detail['subject'], body=body,
+               smtp_server=settings.MAIL_SERVER, title='Recycle Product')
+
+
 
 def feed_report(feed_data = None):
     try:    

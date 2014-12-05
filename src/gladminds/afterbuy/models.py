@@ -79,6 +79,7 @@ class UserProduct(models.Model):
     color = models.CharField(max_length=50)
     is_deleted = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
+    
 
     class Meta:
         app_label = _APP_NAME
@@ -293,6 +294,24 @@ class UserProductImages(base_models.BaseModel):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "UserProductImages"
+        
+class ServiceType(base_models.BaseModel):
+    name = models.CharField(max_length=40)
+    description = models.TextField(null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "ServiceTypes" 
+         
+        
+class Service(base_models.BaseModel):
+    consumer = models.ForeignKey(Consumer)
+    service_type = models.ForeignKey(ServiceType)
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Services"              
+        
 
 
 class MessageTemplate(base_models.MessageTemplate):

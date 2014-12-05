@@ -586,6 +586,8 @@ def get_time_in_seconds(time, unit):
 
 def get_escalation_mailing_list(escalation_list):
     escalation_mailing_list = []
+    escalation_mobile_list = []
     for element in escalation_list:
         escalation_mailing_list.append(element.user.email)
-    return escalation_mailing_list
+        escalation_mobile_list.append(element.phone_number)
+    return {'mail': escalation_mailing_list, 'sms': escalation_mobile_list}

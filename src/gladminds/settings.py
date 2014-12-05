@@ -439,6 +439,14 @@ EMAIL_ACTIVATION_MAIL = {
                   "receiver": [""],
                   "body": """""", }
 
+RECYCLE_MAIL = {
+                "sender":"",
+                "subject":"Product name for recycle",
+                "receiver": ["afterbuy@gladminds.co"],
+                "body": """""",
+                
+                }
+
 # AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
 AFTERBUY_USER_LOC = os.path.join(AFTERBUY_LOC, "users")
@@ -520,6 +528,8 @@ ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},
           }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True
+
+SD_ESCALATION_GROUP = 'escalation_authority'
 
 DEFAULT_IMAGE_ID = 'guest.png'
 
