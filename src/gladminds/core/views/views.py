@@ -28,7 +28,7 @@ from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.bajaj.services.free_service_coupon import GladmindsResources
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS,\
-    FEEDBACK_STATUS, FEEDBACK_TYPE
+    FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL
     
 from gladminds.core.decorator import log_time
 
@@ -348,38 +348,57 @@ def get_sa_under_asc(request, id=None):
         pass
     return render(request, template, {'active_menu':'sa',"data": data})
 
-def get_feedbacks(user, status):
+def get_feedbacks(user, status, priority, type):
     group = user.groups.all()[0]
     feedbacks = []
-    if not status:
-        status = ['Open', 'Pending', 'In Progress']
-    elif status == 'All':
-        status = utils.get_list_from_set(FEEDBACK_STATUS)
+    if type == ALL or type is None:
+        type_filter = utils.get_list_from_set(FEEDBACK_TYPE)
     else:
-        status = [status]
+        type_filter = [type]
+    
+    if priority == ALL or priority is None:
+        priority_filter = utils.get_list_from_set(PRIORITY)
+    else:
+        priority_filter = [priority]
+            
+    if status is None:
+        status_filter = ['Open', 'Pending', 'In Progress']
+    else:
+        if status == ALL:
+            status_filter = utils.get_list_from_set(FEEDBACK_STATUS)
+        else:
+            status_filter = [status]
+                        
     if group.name == 'dealers':
         sa_list = models.ServiceAdvisor.objects.active_under_dealer(user)
         if sa_list:
             sa_id_list = []
             for sa in sa_list:
                 sa_id_list.append(sa.service_advisor_id)
-            feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status).order_by('-created_date')
+            feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
+                                                       priority__in=priority_filter, type__in=type_filter
+                                                    ).order_by('-created_date')
     return feedbacks
 
 
 @login_required()
 def service_desk(request, servicedesk):
-    status = request.GET.get('status',None)
+    status = request.GET.get('status')
+    priority = request.GET.get('priority')
+    type = request.GET.get('type')
     groups = utils.stringify_groups(request.user)
     if request.method == 'GET':
         template = 'portal/feedback_details.html'
         data = None
         data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
-        return render(request, template, {"feedbacks" : get_feedbacks(request.user, status),
+        return render(request, template, {"feedbacks" : get_feedbacks(request.user, status, priority, type),
                                           'active_menu': servicedesk,
                                           "data": data, 'groups': groups,
                                           "status": utils.get_list_from_set(FEEDBACK_STATUS),
-                                          "types": utils.get_list_from_set(FEEDBACK_TYPE)})
+                                          "types": utils.get_list_from_set(FEEDBACK_TYPE),
+                                          "priorities": utils.get_list_from_set(PRIORITY),
+                                          "filter_params": {'status': status, 'priority': priority, 'type': type}}
+                                        )
     elif request.method == 'POST':
         function_mapping = {
             'helpdesk': save_help_desk_data
@@ -408,7 +427,10 @@ def save_help_desk_data(request):
         sms_dict[field] = request.POST.get(field, None)
     service_advisor_obj = models.ServiceAdvisor.objects.get(user__phone_number=sms_dict['advisorMobile'])
     dealer_obj = models.Dealer.objects.get(dealer_id=request.user)
-    return gladmindsResources.get_complain_data(sms_dict, service_advisor_obj.user.phone_number, service_advisor_obj.user.user.email, service_advisor_obj.user.user.username, dealer_obj.user.user.email, with_detail=True)
+    return gladmindsResources.get_complain_data(sms_dict, service_advisor_obj.user.phone_number,
+                                                service_advisor_obj.user.user.email,
+                                                service_advisor_obj.user.user.username, dealer_obj.user.user.email,
+                                                with_detail=True)
 
 def sqs_tasks_view(request):
     return render_to_response('trigger-sqs-tasks.html')

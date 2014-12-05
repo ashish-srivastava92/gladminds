@@ -5,24 +5,28 @@ import smtplib
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 import logging
+from gladminds.core.managers import *
 
 logger = logging.getLogger("gladminds")
 
 
 def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER, title='GCP_Bajaj_FSC_Feeds'):
-    msg = MIMEText(body, 'html', _charset='utf-8')
-#   subject = 'Subject: {0}\n'.format(subject)
-#   header = "To:{0}\nFrom:{1}\n{2}".format(", ".join(receiver),sender, subject)
-#   msg = "{0}\n{1}\n\n ".format(header, msg)
-    msg['Subject'] = subject
-    if isinstance(receiver, list):
-        msg['To'] = ", ".join(receiver)
-    else:
-        msg['To'] = receiver
-    msg['From'] = title + "<%s>"% sender
-    mail = smtplib.SMTP(smtp_server)
-    mail.sendmail(from_addr=sender, to_addrs=receiver, msg=msg.as_string())
-    mail.quit()
+    try:
+        msg = MIMEText(body, 'html', _charset='utf-8')
+        msg['Subject'] = subject
+        if isinstance(receiver, list):
+            msg['To'] = ", ".join(receiver)
+        else:
+            msg['To'] = receiver
+        msg['From'] = title + "<%s>"% sender
+        mail = smtplib.SMTP(smtp_server)
+        mail.sendmail(from_addr=sender, to_addrs=receiver, msg=msg.as_string())
+        mail.quit()
+        audit_manager.email_log(subject, body, sender, receiver);
+        return True
+    except Exception as ex:
+        logger.log('Exception while sending mail: {0}'.format(ex))
+        return False
 
 
 def send_email_activation(receiver_email, data=None):
@@ -118,7 +122,7 @@ def item_purchase_interest(data=None, receiver=None, subject=None):
         template = Template(item)
         context = Context({"user": data})
         body = template.render(context)
-        mail.send_email(sender=data['email_id'], receiver=receiver,
+        send_email(sender=data['email_id'], receiver=receiver,
                         subject=subject, body=body,
                         smtp_server=settings.MAIL_SERVER)
     except Exception as ex:
@@ -133,7 +137,7 @@ def warrenty_extend(data=None, receiver=None, subject=None):
         template = Template(item)
         context = Context({"user": data})
         body = template.render(context)
-        mail.send_email(sender=data['email_id'], receiver=receiver,
+        send_email(sender=data['email_id'], receiver=receiver,
                         subject=subject, body=body,
                         smtp_server=settings.MAIL_SERVER)
     except Exception as ex:
@@ -344,7 +348,6 @@ def send_mail_when_vin_does_not_exist(data=None):
 
 
 def send_asc_registration_mail(data=None):
-    from gladminds import mail
     try:
         file_stream = open(settings.TEMPLATE_DIR+'/asc_username_password_email.html')
         feed_temp = file_stream.read()
@@ -353,7 +356,7 @@ def send_asc_registration_mail(data=None):
         body = template.render(context)
         mail_detail = settings.REGISTER_ASC_MAIL_DETAIL
 
-        mail.send_email(sender = mail_detail['sender'], receiver = data['receiver'], 
+        send_email(sender = mail_detail['sender'], receiver = data['receiver'], 
                    subject = mail_detail['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:

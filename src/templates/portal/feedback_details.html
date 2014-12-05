@@ -6,31 +6,66 @@
 
 {% block body %}
 <div class="well">
-	<h3 class="text-center">Feedback Status</h3>
 	<div class="container">
 		<div class="row">
-			<div class="col-md-9">
-				<button class="btn btn-primary pull-left" data-toggle="modal" data-target="#myModal">
-  				Add Ticket
-				</button>
-			</div>	
+			<div class="col-md-offset-5 col-md-5">
+				<h3 class="">Feedback Status</h3>
+			</div>
+			<div class="col-md-2">
+				<button class="btn btn-primary pull-right add-feedback-btn" data-toggle="modal" data-target="#myModal">
+			 		Add Ticket
+			 	</button>
+		 	</div>
 		</div>
-		<div class="col-md-3">
-			<div class="row">
-            	<div class="col-md-4 form-group">
-                <label class="control-label">Status</label>
-                </div>
-                <div class="col-md-8 form-group">
-                	<select class="form-control status" name="status" required>
-                    	<option value="">Select Status</option>
-                    	<option value="All">All</option>
-                      	{% for status in status %}
-                     		 <option value="{{status}}">{{status}}</option>
-                      	{% endfor %}
-                    </select>
-                 </div>
-            </div>
+	
+		<div class="row feedback-filters">
+			<div class="col-md-4">
+				<div class="row">
+	            	<div class="col-md-3 form-group">
+	                <label class="control-label pull-right feedback-filters-label">Priority: </label>
+	                </div>
+	                <div class="col-md-8 form-group">
+	                	<select class="form-control feedback-filters-options" name="priority" required>
+	                    	<option value="all">All</option>
+	                      	{% for priority in priorities %}
+	                     		 <option {% if filter_params.priority == priority %} selected {% endif%} value="{{priority}}">{{priority}}</option>
+	                      	{% endfor %}
+	                    </select>
+	                 </div>
+	            </div>
+			</div>
+			<div class="col-md-4">
+				<div class="row">
+	            	<div class="col-md-3 form-group">
+	                <label class="control-label pull-right feedback-filters-label">Type: </label>
+	                </div>
+	                <div class="col-md-8 form-group">
+	                	<select class="form-control feedback-filters-options" name="type" required>
+	                    	<option value="all">All</option>
+	                      	{% for type in types %}
+	                     		 <option {% if filter_params.type == type %} selected {% endif%} value="{{type}}">{{type}}</option>
+	                      	{% endfor %}
+	                    </select>
+	                 </div>
+	            </div>
+			</div>
+			<div class="col-md-4">
+				<div class="row">
+	            	<div class="col-md-3 form-group">
+	                <label class="control-label pull-right feedback-filters-label">Status: </label>
+	                </div>
+	                <div class="col-md-8 form-group">
+	                	<select class="form-control feedback-filters-options" name="status" required>
+	                    	<option value="all">All</option>
+	                      	{% for status in status %}
+	                     		 <option {% if filter_params.status == status %} selected {% endif%} value="{{status}}">{{status}}</option>
+	                      	{% endfor %}
+	                    </select>
+	                 </div>
+	            </div>
+			</div>
 		</div>
+		
 		{% if not feedbacks %}
 		<h4 class='text-center'>
 		   {% if group == 'dealers' %}
@@ -170,7 +205,6 @@
 $(document).ready(function() {
     $('#gladmindDesk').dataTable();
     change_status();
-} );
-
+});
 </script>
 {% endblock dependency %}
