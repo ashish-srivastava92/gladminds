@@ -37,17 +37,14 @@ def get_servicedesk_tickets(request):
 @require_http_methods(["GET", "POST"])
 def modify_servicedesk_tickets(request, feedback_id):
     host = get_current_site(request)
-    group_name = request.user.groups.all()
+    group_name = request.user.groups.filter(name__in=['SDM','SDO'])
     status = get_list_from_set(FEEDBACK_STATUS)
-    try:
-        priority_types = get_list_from_set(PRIORITY)
-        feedback_types = get_list_from_set(FEEDBACK_TYPE)
-        root_cause = get_list_from_set(ROOT_CAUSE)
-        feedback_obj = get_feedback(feedback_id, request.user)
-        servicedesk_users = get_servicedesk_users(designation='SDO')
-        comments = get_comments(feedback_id)
-    except Exception as ex:
-        logger.info("[Exception modify service desk tickets]  {0}".format(ex)) 
+    priority_types = get_list_from_set(PRIORITY)
+    feedback_types = get_list_from_set(FEEDBACK_TYPE)
+    root_cause = get_list_from_set(ROOT_CAUSE)
+    feedback_obj = get_feedback(feedback_id, request.user)
+    servicedesk_users = get_servicedesk_users(designation='SDO')
+    comments = get_comments(feedback_id)
     
     if request.method == 'POST':
         host = request.get_host()
