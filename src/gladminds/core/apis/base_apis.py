@@ -26,6 +26,8 @@ class BaseCorsResource(Resource):
             allowed = []
 
         request_method = request.method.lower()
+        for i,method in enumerate(allowed):
+            allowed[i] = method.encode('ascii','ignore')
         allows = ','.join(map(str.upper, allowed))
 
         if request_method == 'options':
