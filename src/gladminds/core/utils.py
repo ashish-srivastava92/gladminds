@@ -321,9 +321,12 @@ def create_sa_feed_data(post_data, user_id, temp_sa_id):
 
 def create_context(email_template_name, feedback_obj, comment_obj=None):
     ''' feedback due date not defined when ticket is created'''
-    comment_obj = getattr(comment_obj, "comment") or ""
+    if comment_obj:
+        comment = comment_obj.comment
+    else:
+        comment = ""
     created_date = convert_utc_to_local_time(feedback_obj.created_date).strftime("%Y-%m-%d")
-    due_date = getattr(feedback_obj,"due_date") or ""
+    due_date = getattr(feedback_obj, "due_date") or ""
     if due_date:
         due_date = due_date.strftime("%Y-%m-%d")
     data = get_email_template(email_template_name)

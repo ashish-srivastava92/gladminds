@@ -368,7 +368,7 @@ def get_feedbacks(user, status, priority, type):
             status_filter = utils.get_list_from_set(FEEDBACK_STATUS)
         else:
             status_filter = [status]
-                        
+
     if group.name == 'dealers':
         sa_list = models.ServiceAdvisor.objects.active_under_dealer(user)
         if sa_list:
@@ -378,6 +378,15 @@ def get_feedbacks(user, status, priority, type):
             feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
                                                        priority__in=priority_filter, type__in=type_filter
                                                     ).order_by('-created_date')
+    if group.name == 'SDM':
+        feedbacks = models.Feedback.objects.filter(status__in=status_filter, priority__in=priority_filter,
+                                                   type__in=type_filter).order_by('-created_date')
+    if group.name == 'SDO':
+        user_profile = models.UserProfile.objects.filter(user=user)
+        servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
+        feedbacks = models.Feedback.objects.filter(assignee=servicedesk_user[0], status__in=status_filter,
+                                                   priority__in=priority_filter, type__in=type_filter).order_by('-created_date')
+    
     return feedbacks
 
 

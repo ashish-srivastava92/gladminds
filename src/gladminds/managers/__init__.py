@@ -14,17 +14,6 @@ from gladminds.sqs_tasks import send_sms
 
 logger = logging.getLogger('gladminds')
 
-def get_feedbacks(user):
-    group=user.groups.filter(name__in=['SDM','SDO'])[0]
-    if group.name == 'SDM':
-        feedbacks = models.Feedback.objects.order_by('-created_date')
-    if group.name == 'SDO':
-        user_profile = models.UserProfile.objects.filter(user=user)
-        servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
-        feedbacks = models.Feedback.objects.filter(
-                        assignee=servicedesk_user[0]).order_by('-created_date')
-    return feedbacks
-
 def get_feedback(feedback_id, user):
     group=user.groups.filter(name__in=['SDM','SDO'])[0]
     if group.name == 'SDO':
@@ -35,7 +24,7 @@ def get_feedback(feedback_id, user):
         return models.Feedback.objects.get(id=feedback_id)
 
 def get_servicedesk_users(designation):
-    users = User.objects.filter(groups__name='sdo')
+    users = User.objects.filter(groups__name=designation)
     if len(users)>0:
         user_list = models.UserProfile.objects.filter(user__in=users)
         return models.ServiceDeskUser.objects.filter(user_profile__in=user_list)
