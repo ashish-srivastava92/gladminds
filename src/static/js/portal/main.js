@@ -478,11 +478,14 @@ function showMessage(id){
 }
 
 function change_status(){
-	var status = window.location.search.split('?status=')[1];
-    $('.status').val(status);
-    $('.status').change(function() {
-    	status = $('.status').val();
-    	window.location.href = window.location.pathname + '?status='+status;
+	var url = window.location.pathname + '?';
+    $('.feedback-filters-options').change(function() {
+    	var selectedOptions = $('.feedback-filters-options'),
+    		filters = ['priority', 'type', 'status'];
+    	$.each(filters, function(index, val){
+    		url = url + val + '=' + selectedOptions[index].options[selectedOptions[index].selectedIndex].value + '&'
+    	});
+    	window.location.href = url;
     });
 	
 }
