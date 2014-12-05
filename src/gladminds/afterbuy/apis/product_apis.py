@@ -27,7 +27,8 @@ class ProductTypeResource(CustomBaseModelResource):
         queryset = afterbuy_models.ProductType.objects.all()
         resource_name = "product-types"
         authentication = AccessTokenAuthentication()
-        authorization = DjangoAuthorization()
+        authorization = Authorization()
+        #authorization = DjangoAuthorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
 
@@ -41,7 +42,8 @@ class UserProductResource(CustomBaseModelResource):
         queryset = afterbuy_models.UserProduct.objects.all()
         resource_name = "products"
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = Authorization()
+        #authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
         filtering = {
@@ -123,7 +125,8 @@ class ProductInsuranceInfoResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.ProductInsuranceInfo.objects.all()
         resource_name = "insurances"
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = Authorization()
+        #authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
@@ -140,7 +143,8 @@ class InvoiceResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.Invoice.objects.all()
         resource_name = "invoices"
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = Authorization()
+        #authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
@@ -155,7 +159,8 @@ class LicenseResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.License.objects.all()
         resource_name = 'licenses'
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = Authorization()
+        #authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data =True
@@ -170,7 +175,8 @@ class RegistrationCertificateResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.RegistrationCertificate.objects.all()
         resource_name = 'registrations'
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = Authorization()
+        #authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data =True
@@ -186,7 +192,8 @@ class PollutionCertificateResource(CustomBaseModelResource):
         queryset = afterbuy_models.PollutionCertificate.objects.all()
         resource_name = 'pollution'
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = Authorization()
+        #authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data =True
         filtering = {
@@ -202,7 +209,8 @@ class SupportResource(CustomBaseModelResource):
         queryset = afterbuy_models.Support.objects.all()
         resource_name = 'support'
         authentication = AccessTokenAuthentication()
-        authorization = DjangoAuthorization()
+        #authorization = DjangoAuthorization()
+        authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data =True
         filtering = {
@@ -218,7 +226,8 @@ class ProductSupportResource(CustomBaseModelResource):
         queryset = afterbuy_models.ProductSupport.objects.all()
         resource_name = 'product-support'
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = Authorization()
+        #authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data = True
         filtering = {
@@ -233,7 +242,8 @@ class SellInformationResource(CustomBaseModelResource):
         queryset = afterbuy_models.SellInformation.objects.all()
         resource_name = 'sell-information'
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = Authorization()
+        #authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data = True
         filtering = {
@@ -248,7 +258,8 @@ class UserProductImagesResource(CustomBaseModelResource):
         queryset = afterbuy_models.UserProductImages.objects.all()
         resource_name = 'product-images'
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = Authorization()
+        #authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data = True
         filtering = {
