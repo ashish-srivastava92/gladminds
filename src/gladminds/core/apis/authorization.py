@@ -58,7 +58,7 @@ class CustomAuthorization(DjangoAuthorization):
         try:
             authorization = AccessToken.objects.filter(token=key)[0]
         except:
-                raise Unauthorized("You are not allowed to access that data.")
+            raise Unauthorized("You are not allowed to access that data.")
         user_id = int(authorization.user.id)
         if data.get('consumer_id'):
             try:
