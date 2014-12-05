@@ -28,7 +28,7 @@ from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.bajaj.services.free_service_coupon import GladmindsResources
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS,\
-    FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY
+    FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL
     
 from gladminds.core.decorator import log_time
 
@@ -352,12 +352,12 @@ def get_feedbacks(user, status, priority, type):
     group = user.groups.all()[0]
     feedbacks = []
     
-    if type == 'all'or type is None:
+    if type == ALL or type is None:
         type_filter = utils.get_list_from_set(FEEDBACK_TYPE)
     else:
         type_filter = [type]
     
-    if priority == 'all' or priority is None:
+    if priority == ALL or priority is None:
         priority_filter = utils.get_list_from_set(PRIORITY)
     else:
         priority_filter = [priority]
@@ -365,7 +365,7 @@ def get_feedbacks(user, status, priority, type):
     if status is None:
         status_filter = ['Open', 'Pending', 'In Progress']
     else:
-        if status == 'all':
+        if status == ALL:
             status_filter = utils.get_list_from_set(FEEDBACK_STATUS)
         else:
             status_filter = [status]
@@ -381,9 +381,9 @@ def get_feedbacks(user, status, priority, type):
 
 @login_required()
 def service_desk(request, servicedesk):
-    status = request.GET.get('status', None)
-    priority = request.GET.get('priority', None)
-    type = request.GET.get('type', None)
+    status = request.GET.get('status')
+    priority = request.GET.get('priority')
+    type = request.GET.get('type')
     groups = utils.stringify_groups(request.user)
     if request.method == 'GET':
         template = 'portal/feedback_details.html'
