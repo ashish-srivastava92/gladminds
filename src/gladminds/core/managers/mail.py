@@ -42,6 +42,19 @@ def send_email_activation(receiver_email, data=None):
                smtp_server=settings.MAIL_SERVER, title='Support')
 
 
+def send_recycle_mail(sender_id, data=None):
+    file_stream = open(settings.EMAIL_DIR+'/recycle_email.html')
+    feed_temp = file_stream.read()
+    template = Template(feed_temp)
+    context = Context(data)
+    body = template.render(context)
+    mail_detail = settings.RECYCLE_MAIL
+    send_email(sender=sender_id,
+               receiver=mail_detail['receiver'],
+               subject=mail_detail['subject'], body=body,
+               smtp_server=settings.MAIL_SERVER, title='Recycle Product')
+
+
 
 def feed_report(feed_data = None):
     try:    
@@ -204,14 +217,14 @@ def send_feedback_received(data, receiver_email):
     except Exception as ex:
         logger.info("[Exception feedback received email]: {0}".format(ex))
 
-def send_due_date_exceeded(data):
+def send_due_date_exceeded(data, receiver_email):
     try:
         file_stream = open(settings.EMAIL_DIR+'/base_email_template.html')
         feed_temp = file_stream.read()
         template = Template(feed_temp)
         context = Context({"content": data['content']})
         body = template.render(context)
-        send_email(sender = data['sender'], receiver = data['receiver'], 
+        send_email(sender = data['sender'], receiver = receiver_email, 
                    subject = data['subject'], body = body, 
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:

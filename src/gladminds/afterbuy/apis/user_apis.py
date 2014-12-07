@@ -19,8 +19,9 @@ from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
 from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.views.auth_view import get_access_token
-from tastypie.authorization import DjangoAuthorization
-from gladminds.core.apis.authorization import CustomAuthorization
+from tastypie.authorization import DjangoAuthorization, Authorization
+from gladminds.core.apis.authorization import CustomAuthorization,\
+    MultiAuthorization
 from django.contrib.sites.models import RequestSite
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 
@@ -47,7 +48,8 @@ class ConsumerResource(CustomBaseModelResource):
         queryset = afterbuy_model.Consumer.objects.all()
         resource_name = "consumers"
         authentication = AccessTokenAuthentication()
-        authorization = CustomAuthorization()
+        authorization = Authorization()
+        #authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         detail_allowed_methods = ['get', 'delete', 'put']
         always_return_data = True
         filtering = {
@@ -342,5 +344,35 @@ class UserNotificationResource(CustomBaseModelResource):
                      "id": ALL,
                      "notification_read": ALL
                      }
+        
+        
+class ServiceTypeResource(CustomBaseModelResource):
+
+    class Meta:
+        queryset = afterbuy_model.ServiceType.objects.all()
+        resource_name = "service-types"
+        authentication = AccessTokenAuthentication()
+        #authorization = DjangoAuthorization()
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+
+class ServiceResource(CustomBaseModelResource):
+    consumer = fields.ForeignKey(ConsumerResource, 'consumer')
+    service_type = fields.ForeignKey(ServiceTypeResource, 'service_type', full=True)
+
+    class Meta:
+        queryset = afterbuy_model.Service.objects.all()
+        resource_name = "services"
+        authentication = AccessTokenAuthentication()
+        #authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+        filtering = {
+                     "consumer": ALL,
+                     "service_type": ALL,
+                     }         
 
         
