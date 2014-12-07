@@ -24,10 +24,6 @@ class UserProfileAdmin(ModelAdmin):
 class DealerAdmin(ModelAdmin):
     search_fields = ('dealer_id',)
     list_display = ('dealer_id', 'user')
-     
-class DealerAdmin(ModelAdmin):
-    search_fields = ('dealer_id',)
-    list_display = ('dealer_id', 'user')
 
 class AuthorizedServiceCenterAdmin(ModelAdmin):
     search_fields = ('asc_id', 'dealer__dealer_id')

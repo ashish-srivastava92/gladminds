@@ -19,6 +19,8 @@ from gladminds.managers import get_feedbacks, get_feedback,\
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services import message_template as templates
 from gladminds.sqs_tasks import send_coupon
+from gladminds.core.decorator import check_service
+from gladminds.core.service_handler import Services
 
 
 gladmindsResources = GladmindsResources()
@@ -26,6 +28,7 @@ logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 
 
+@check_service(Services.SERVICE_DESK)
 @login_required()
 @require_http_methods(["GET"])
 def get_servicedesk_tickets(request):
@@ -33,6 +36,7 @@ def get_servicedesk_tickets(request):
                   {"feedbacks": get_feedbacks(request.user)})
 
 
+@check_service(Services.SERVICE_DESK)
 @login_required()
 @require_http_methods(["GET", "POST"])
 def modify_servicedesk_tickets(request, feedback_id):
@@ -61,6 +65,7 @@ def modify_servicedesk_tickets(request, feedback_id):
     else:
         return HttpResponseNotFound()
 
+@check_service(Services.SERVICE_DESK)
 @require_http_methods(["POST"])
 def get_feedback_response(request, feedback_id):
         data = request.POST
