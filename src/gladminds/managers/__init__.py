@@ -8,15 +8,15 @@ from gladminds.core.utils import create_context, get_list_from_set, \
     get_time_in_seconds
 from gladminds.core.managers import mail
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, \
-    TIME_FORMAT, USER_GROUPS
+    TIME_FORMAT,SDM, SDO
 from django.contrib.auth.models import Group, User
 from gladminds.sqs_tasks import send_sms
 
 logger = logging.getLogger('gladminds')
 
 def get_feedback(feedback_id, user):
-    group=user.groups.filter(name__in=[USER_GROUPS[3],USER_GROUPS[4]])[0]
-    if group.name == USER_GROUPS[3]:
+    group=user.groups.filter(name__in=[SDM,SDO])[0]
+    if group.name == SDO:
         user_profile = models.UserProfile.objects.filter(user=user)
         servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
         return models.Feedback.objects.get(id=feedback_id, assignee=servicedesk_user[0])
@@ -157,7 +157,7 @@ def save_update_feedback(feedback_obj, data, user, host):
 
 #check if status is resolved
     if feedback_obj.status == status[2]:
-        servicedesk_obj_all = User.objects.filter(groups__name=USER_GROUPS[4])
+        servicedesk_obj_all = User.objects.filter(groups__name=SDM)
         feedback_obj.resolved_date = datetime.datetime.now()
         feedback_obj.resolved_date = datetime.datetime.now()
         feedback_obj.root_cause = data['rootcause']

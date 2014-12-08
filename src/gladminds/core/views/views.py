@@ -28,7 +28,7 @@ from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.bajaj.services.free_service_coupon import GladmindsResources
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS,\
-    FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL
+    FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL, DEALER, SDO, SDM
     
 from gladminds.core.decorator import log_time
 
@@ -369,7 +369,7 @@ def get_feedbacks(user, status, priority, type):
         else:
             status_filter = [status]
 
-    if group.name == USER_GROUPS[0]:
+    if group.name == DEALER:
         sa_list = models.ServiceAdvisor.objects.active_under_dealer(user)
         if sa_list:
             sa_id_list = []
@@ -378,10 +378,10 @@ def get_feedbacks(user, status, priority, type):
             feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
                                                        priority__in=priority_filter, type__in=type_filter
                                                     ).order_by('-created_date')
-    if group.name == USER_GROUPS[4]:
+    if group.name == SDM:
         feedbacks = models.Feedback.objects.filter(status__in=status_filter, priority__in=priority_filter,
                                                    type__in=type_filter).order_by('-created_date')
-    if group.name == USER_GROUPS[3]:
+    if group.name == SDO:
         user_profile = models.UserProfile.objects.filter(user=user)
         servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
         feedbacks = models.Feedback.objects.filter(assignee=servicedesk_user[0], status__in=status_filter,
