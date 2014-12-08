@@ -88,7 +88,7 @@ class System(BaseTestCase):
         data = {"assign_to":"+91000000000",
                 "status":"Open","Priority":"High",
                 "comments":"testing", "rootcause":"testing",
-                "resolution":"testing", "reporter_status": False, "due_date":datetime.now()}
+                "resolution":"testing", "reporter_status": False, "due_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         if kwargs.get('status'):
             data['status'] = kwargs['status']
         if kwargs.get('assign_To'):

@@ -292,6 +292,15 @@ def send_email_to_initiator_after_issue_resolved(data, feedback_obj, host, repor
                             data, receiver=reporter_email)
     except Exception as ex:
         logger.info("[Exception feedback initiator after issue resloved email]  {0}".format(ex))
+
+def send_email_to_initiator_when_due_date_is_changed(data, reporter_email):
+    try:
+        context = Context({"content": data['content']})
+        send_template_email("base_email_template.html", context,
+                            data, receiver=reporter_email)
+    except Exception as ex:
+        logger.info("[Exception feedback initiator on change of due date]  {0}".format(ex)) 
+
         
 def send_email_to_bajaj_after_issue_resolved(data):
     try:

@@ -150,16 +150,6 @@ def get_customer_info(data):
         message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
         return {'message': message}
 
-def get_sa_list(user):
-    dealer = models.Dealer.objects.filter(user__user__username=user)[0]
-    service_advisors = models.ServiceAdvisor.objects\
-                                .filter(dealer=dealer, status='Y')
-    sa_phone_list = []
-    for service_advisor in service_advisors:
-        sa_phone_list.append(service_advisor)
-    return sa_phone_list
-
-
 def get_sa_list_for_login_dealer(user):
     dealer = models.Dealer.objects.filter(
                 dealer_id=user)[0]
@@ -329,14 +319,23 @@ def create_sa_feed_data(post_data, user_id, temp_sa_id):
     data['address'] = None
     return data
 
-def create_context(email_template_name, feedback_obj):
+def create_context(email_template_name, feedback_obj, comment_obj=None):
+    ''' feedback due date not defined when ticket is created'''
+    if comment_obj:
+        comment = comment_obj.comment
+    else:
+        comment = ""
+    created_date = convert_utc_to_local_time(feedback_obj.created_date).strftime("%Y-%m-%d")
+    due_date = getattr(feedback_obj, "due_date") or ""
+    if due_date:
+        due_date = due_date.strftime("%Y-%m-%d")
     data = get_email_template(email_template_name)
     data['newsubject'] = data['subject'].format(id = feedback_obj.id)
     data['content'] = data['body'].format(id=feedback_obj.id, type = feedback_obj.type, reporter = feedback_obj.reporter, 
-                                          message = feedback_obj.description, created_date = convert_utc_to_local_time(feedback_obj.created_date), 
-                                          assign_to = feedback_obj.assignee,  priority =  feedback_obj.priority, remark = "",
+                                          message = feedback_obj.description, created_date = created_date, 
+                                          assign_to = feedback_obj.assignee,  priority =  feedback_obj.priority, comment = comment,
                                           root_cause = feedback_obj.root_cause, resolution = feedback_obj.resolution,
-                                          due_date = "", resolution_time=total_time_spent(feedback_obj))
+                                          due_date = due_date, resolution_time=total_time_spent(feedback_obj))
 
     return data
 

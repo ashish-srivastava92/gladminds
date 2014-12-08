@@ -127,11 +127,11 @@
       <div class="modal-body">
 		<form class="help-desk-form" role="search">
                 <div class="row">
-                  <div class="col-md-4 form-group">
+                  <div class="col-md-3 form-group">
                     <label class="control-label">Reporter*:</label>
                   </div>
-                  <div class="col-md-8 form-group">
-                    <select class="form-control" name="advisorMobile" id="advisorMobile" required>
+                  <div class="col-md-9 form-group">
+                    <select class="form-control advisorMobile" name="advisorMobile" required>
                       <option value="">Select mobile number</option>
                       {% for phone in data %}
                       <option value="{{phone.user.phone_number}}">{{phone.service_advisor_id}} ({{phone.user.phone_number}})</option>
@@ -141,11 +141,11 @@
                 </div>
                 
                 <div class="row">
-                  <div class="col-md-4 form-group">
+                  <div class="col-md-3 form-group">
                     <label class="control-label">Type*:</label>
                   </div>
-                  <div class="col-md-8 form-group">
-                    <select class="form-control" name="type" id="type" required>
+                  <div class="col-md-9 form-group">
+                    <select class="form-control type" name="type" required>
                       <option value="">Select Type</option>
                       {% for type in types %}
                       <option value="{{type}}">{{type}}</option>
@@ -155,19 +155,19 @@
                 </div>
                 
                 <div class="row">
-                  <div class="col-md-4 form-group">
+                  <div class="col-md-3 form-group">
                     <label class="control-label">Summary*:</label>
                   </div>
-                  <div class="col-md-8 form-group">
-                    <input type="text" class="form-control" name="summary" id="summary" required>
+                  <div class="col-md-9 form-group">
+                    <input type="text" class="form-control summary" name="summary" required>
                   </div>
                 </div>
                 <div class="row">
-                  <div class="col-md-4 form-group">
+                  <div class="col-md-3 form-group">
                     <label class="control-label">Description*:</label>
                   </div>
-                  <div class="col-md-8 form-group">
-                    <textarea class="form-control" name="description" id="description" required></textarea>
+                  <div class="col-md-9 form-group">
+                    <textarea rows="8" cols="100" class="form-control description" name="description" required></textarea>
                   </div>
                 </div> 
                 <div class="row">

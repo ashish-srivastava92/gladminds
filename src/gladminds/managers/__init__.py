@@ -8,26 +8,15 @@ from gladminds.core.utils import create_context, get_list_from_set, \
     get_time_in_seconds
 from gladminds.core.managers import mail
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, \
-    TIME_FORMAT
+    TIME_FORMAT,SDM, SDO, DEALER
 from django.contrib.auth.models import Group, User
 from gladminds.sqs_tasks import send_sms
 
 logger = logging.getLogger('gladminds')
 
-def get_feedbacks(user):
-    group = user.groups.all()[0]
-    if group.name == 'SDM':
-        feedbacks = models.Feedback.objects.order_by('-created_date')
-    if group.name == 'SDO':
-        user_profile = models.UserProfile.objects.filter(user=user)
-        servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
-        feedbacks = models.Feedback.objects.filter(
-                        assignee=servicedesk_user[0]).order_by('-created_date')
-    return feedbacks
-
 def get_feedback(feedback_id, user):
-    group = user.groups.all()[0]
-    if group.name == 'SDO':
+    group=user.groups.filter(name__in=[SDM, SDO, DEALER])[0]
+    if group.name == SDO:
         user_profile = models.UserProfile.objects.filter(user=user)
         servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
         return models.Feedback.objects.get(id=feedback_id, assignee=servicedesk_user[0])
@@ -35,10 +24,13 @@ def get_feedback(feedback_id, user):
         return models.Feedback.objects.get(id=feedback_id)
 
 def get_servicedesk_users(designation):
-    users = User.objects.filter(groups__name='sdo')
-    user_list = models.UserProfile.objects.filter(user__in=users)
-    servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile__in=user_list)
-    return servicedesk_user
+    users = User.objects.filter(groups__name=designation)
+    if len(users)>0:
+        user_list = models.UserProfile.objects.filter(user__in=users)
+        return models.ServiceDeskUser.objects.filter(user_profile__in=user_list)
+    else:
+        logger.info("No user with designation SDO exists")
+        return None
 
 def get_comments(feedback_id):
     comments = models.Comment.objects.filter(feedback_object_id=feedback_id)
@@ -88,8 +80,20 @@ def save_update_feedback(feedback_obj, data, user, host):
     assign = feedback_obj.assignee
     
     if feedback_obj.due_date:
+        due_date = convert_utc_to_local_time(feedback_obj.due_date)
         feedback_obj.due_date = data['due_date']
+        feedback_obj.due_date = datetime.datetime.strptime(data['due_date'], '%Y-%m-%d %H:%M:%S')
         feedback_obj.save()
+        if due_date != feedback_obj.due_date:
+            if reporter_email_id:
+                context = create_context('DUE_DATE_MAIL_TO_INITIATOR',
+                                  feedback_obj)
+                mail.send_email_to_initiator_when_due_date_is_changed(context, reporter_email_id)
+            else:
+                logger.info("Reporter emailId not found.")  
+                 
+            send_sms('INITIATOR_FEEDBACK_DUE_DATE_CHANGE', reporter_phone_number,
+                 feedback_obj)
         
     if assign is None:
         assign_status = True
@@ -108,20 +112,25 @@ def save_update_feedback(feedback_obj, data, user, host):
         else:
             if data['assign_to'] :
                 servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile__phone_number=data['assign_to'])
+                feedback_obj.previous_assignee = feedback_obj.assignee
                 feedback_obj.assignee = servicedesk_user[0]
                 feedback_obj.assign_to_reporter = False
         feedback_obj.status = data['status']
         feedback_obj.priority = data['Priority']
+
     #check if status is pending
     if data['status'] == status[4]:
         feedback_obj.pending_from = datetime.datetime.now()
+    
     #check if status is progress
     if data['status'] == status[3]:
         feedback_obj.assignee = feedback_obj.previous_assignee
+    
     #check if status is closed
     if data['status'] == status[1]:
         feedback_obj.closed_date = datetime.datetime.now()
     feedback_obj.save()
+
     if assign_status and feedback_obj.assignee:
         feedback_obj.assignee_created_date = datetime.datetime.now()
         date = set_due_date(data['Priority'], feedback_obj)
@@ -137,17 +146,27 @@ def save_update_feedback(feedback_obj, data, user, host):
             logger.info("Reporter emailId not found.")
         send_sms('INITIATOR_FEEDBACK_DETAILS', reporter_phone_number,
                  feedback_obj)
- #check if status is resolved
+
+    if data['comments']:
+        comment_object = models.Comment(
+                                        comment=data['comments'],
+                                        user=user, created_date=datetime.datetime.now(),
+                                        modified_date=datetime.datetime.now(),
+                                        feedback_object=feedback_obj)
+        comment_object.save()
+
+#check if status is resolved
     if feedback_obj.status == status[2]:
-        servicedesk_obj_all = User.objects.filter(groups__name='sdm')
+        servicedesk_obj_all = User.objects.filter(groups__name=SDM)
         feedback_obj.resolved_date = datetime.datetime.now()
         feedback_obj.resolved_date = datetime.datetime.now()
         feedback_obj.root_cause = data['rootcause']
         feedback_obj.resolution = data['resolution']
         feedback_obj.save()
+        comments = models.Comment.objects.filter(feedback_object=feedback_obj.id).order_by('-created_date')
         if reporter_email_id:
             context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL',
-                                  feedback_obj)
+                                  feedback_obj, comments[0])
             mail.send_email_to_initiator_after_issue_resolved(context,
                                                           feedback_obj, host, reporter_email_id)
         else:
@@ -165,13 +184,6 @@ def save_update_feedback(feedback_obj, data, user, host):
   
     if pending_status:
         set_wait_time(feedback_obj)
- 
-    if data['comments']:
-        comment_object = models.Comment(
-                                        comment=data['comments'],
-                                        user=user, created_date=datetime.datetime.now(),
-                                        feedback_object=feedback_obj)
-        comment_object.save()
  
     if feedback_obj.assignee:
         if assign_number != feedback_obj.assignee.user_profile.phone_number:

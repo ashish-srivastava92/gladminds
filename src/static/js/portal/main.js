@@ -267,11 +267,10 @@
                 messageHeader.text('Thanks');
                 waitingModal.modal('hide');
                 messageModal.modal('show');
-                $('#message').val('');
-                $('#priority').val('');
-                $('#type').val('');
-                $('#subject').val('');
-                $('#advisorMobile').val('');
+                $('.summary').val('');
+                $('.type').val('');
+                $('.description').val('');
+                $('.advisorMobile').val('');
                 setTimeout(function() {
                     parent.window.location='/aftersell/servicedesk/helpdesk';
                 }, 2000);
@@ -287,6 +286,53 @@
         });
         return false;
     });
+
+    $('.comment-form').on('submit', function(e) {
+        var data = Utils.getFormData('.servicedesk'),
+            formData = new FormData($(this).get(0)),
+            comment_data = Utils.getFormData('.comment-form'),
+            url = '/aftersell/feedbackdetails/'+data.ticketId+'/comments/'+comment_data.commentId+'/',
+            messageModal = $('.modal.message-modal'),
+            messageBlock = $('.modal-body', messageModal),
+            messageHeader = $('.modal-title', messageModal),
+            waitingModal = $('.modal.waiting-dialog');
+
+        var jqXHR = $.ajax({
+            type: 'POST',
+            url: url,
+            data: formData,
+            cache: false,
+            processData: false,
+            contentType: false,
+            beforeSend: function(){
+                $(this).find('input[type="text"]').val('');
+                waitingModal.modal('show');
+            },
+            success: function(data){
+            	var data = Utils.getFormData('.servicedesk');
+                messageBlock.text('Updated Successfully');
+                messageHeader.text('Save');
+                waitingModal.modal('hide');
+                messageModal.modal('show');
+	            $('.comment-id').val('');
+	            $('.comment-user').val('');
+	            $('.comment-description').val('');
+	            $('.comment-date').val('');
+                setTimeout(function() {
+                	parent.window.location='/aftersell/feedbackdetails/'+data.ticketId+'/';
+                }, 2000);
+                
+            },
+            error: function() {
+                messageBlock.text('Invalid Data');
+                messageHeader.text('Invalid');
+                waitingModal.modal('hide');
+                messageModal.modal('show');
+            }
+        });
+        return false;
+    });
+
     
     $('.servicedesk').on('submit', function(e) {
         var data = Utils.getFormData('.servicedesk'),
@@ -451,6 +497,7 @@ function rootCause(status){
         resolution.removeClass('hide');
         reason.attr('required', true);
         ticketResolution.attr('required', true);
+        comments.attr('required', true);
 	}
 	if (status !== 'Open'){
 		assignee.attr('required', true);
@@ -496,3 +543,27 @@ function getDataByDate(){
     window.location.href = window.location.pathname + '?month='+month+'&'+'year='+year;
    
 }
+
+$(document).on("click", ".open-add-comment-dialog", function (e) {
+
+	e.preventDefault();
+	
+	var _self = $(this);
+	var commentId = _self.data('id'),
+		commentUser = _self.data('user'),
+	    commentDescription = _self.data('comment'),
+	    commentDate = _self.data('date'),
+	    comment = $('.comment-description'),
+	    loginUser = _self.data('owner');
+	$(".comment-id").val(commentId);
+	$(".comment-user").val(commentUser);
+	$(".comment-description").val(commentDescription);
+	$(".comment-date").val(commentDate);
+	comment.attr('readonly', false);
+	if (loginUser != commentUser){
+		comment.attr('readonly', true);
+	}
+	
+	$(_self.attr('href')).modal('show');
+	
+});
