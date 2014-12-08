@@ -1,4 +1,4 @@
-from integration import base_integration
+from integration.bajaj import base_integration
 from django.test.client import Client
 import logging
 import json
@@ -8,7 +8,7 @@ logger = logging.getLogger('gladminds')
 client = Client()
 
 
-class TestSQSTasks(base_integration.GladmindsResourceTestCase):
+class TestSQSTasks(base_integration.BrandResourceTestCase):
 
     def setUp(self):
         pass

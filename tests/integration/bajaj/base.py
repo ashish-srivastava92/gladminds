@@ -1,6 +1,6 @@
 from tastypie.test import ResourceTestCase
 from django.contrib.auth.models import User, Group
-from gladminds.bajaj import models as common
+from gladminds.bajaj import models
 from gladminds.management.commands import load_gm_migration_data
 from time import sleep
 from datetime import datetime
@@ -69,7 +69,7 @@ class BaseTestCase(ResourceTestCase):
             user_group = Group.objects.get(name=kwargs['group_name'])
             user.groups.add(user_group)
         if kwargs.get('phone_number'):
-            user_profile = common.UserProfile(user=user, phone_number=kwargs['phone_number'])
+            user_profile = models.UserProfile(user=user, phone_number=kwargs['phone_number'])
             user_profile.save()
             return user_profile
 

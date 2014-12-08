@@ -1,8 +1,8 @@
-from gladminds.bajaj import models as common
-from gladminds.default import models as gm_common
-from gladminds.afterbuy import models as afterbuy_common
-from integration.base import BaseTestCase
-import datetime
+from gladminds.bajaj import models
+from gladminds.default import models as gm_models
+from gladminds.afterbuy import models as afterbuy_models
+from integration.bajaj.base import BaseTestCase
+from datetime import datetime
 from django.test.client import Client
 
 client = Client(SERVER_NAME='bajaj')
@@ -14,51 +14,51 @@ class System(BaseTestCase):
 
     def create_gladmind_user(self):
         user_obj = self.create_user(username='glad', email='gm@gm.com', password='gladminds',phone_number='+9199999998')
-        glad_obj = common.UserProfile(user=user_obj, phone_number='+9199999998')
+        glad_obj = models.UserProfile(user=user_obj, phone_number='+9199999998')
         glad_obj.save()
         return glad_obj
 
     def get_brand_info(self, **kwargs):
-        brand_obj = gm_common.Brand.objects.get(**kwargs)
+        brand_obj = gm_models.Brand.objects.get(**kwargs)
         return brand_obj
 
     def get_product_info(self, **kwargs):
-        product_data = common.ProductData.objects.get(**kwargs)
+        product_data = models.ProductData.objects.get(**kwargs)
         return product_data
 
     def create_and_get_product_insurance_info(self, **kwargs):
-        product_insurance = afterbuy_common.ProductInsuranceInfo(**kwargs)
+        product_insurance = afterbuy_models.ProductInsuranceInfo(**kwargs)
         product_insurance.save()
         return product_insurance
 
     def create_and_get_product_warranty_info(self, **kwargs):
-        product_warranty = afterbuy_common.ProductWarrantyInfo(**kwargs)
+        product_warranty = afterbuy_models.ProductWarrantyInfo(**kwargs)
         product_warranty.save()
         return product_warranty
 
     def create_and_get_spare_data(self, **kwargs):
-        spare_data = common.SparesData(**kwargs)
+        spare_data = models.SparesData(**kwargs)
         spare_data.save()
         return spare_data
 
     def create_sdo(self, **kwargs):
         user_servicedesk_owner_profile = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name='SDO', phone_number=kwargs['phone_number'])
-        user_servicedesk_owner = common.ServiceDeskUser(user_profile=user_servicedesk_owner_profile)
+        user_servicedesk_owner = models.ServiceDeskUser(user_profile=user_servicedesk_owner_profile)
         user_servicedesk_owner.save()
         return user_servicedesk_owner
 
     def create_sdm(self, **kwargs):
         user_servicedesk_manager_profile = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name='SDM', phone_number=kwargs['phone_number'])
-        user_servicedesk_manager = common.ServiceDeskUser(user_profile=user_servicedesk_manager_profile)
+        user_servicedesk_manager = models.ServiceDeskUser(user_profile=user_servicedesk_manager_profile)
         user_servicedesk_manager.save()
         return user_servicedesk_manager
     
     def create_sla(self, **kwargs):
-        sla_object = common.SLA(priority=kwargs['priority'], response_time=2,response_unit='mins', reminder_time=2, reminder_unit='hrs', resolution_time=10, resolution_unit='days')
+        sla_object = models.SLA(priority=kwargs['priority'], response_time=2,response_unit='mins', reminder_time=2, reminder_unit='hrs', resolution_time=10, resolution_unit='days')
         sla_object.save()
         
     def get_temp_customer_obj(self, **kwargs):
-        temp_customer_obj = common.CustomerTempRegistration.objects.get(**kwargs)
+        temp_customer_obj = models.CustomerTempRegistration.objects.get(**kwargs)
         return temp_customer_obj
 
     def dealer_login(self):
@@ -97,7 +97,7 @@ class System(BaseTestCase):
         self.tester.assertEqual(response.status_code, 200)
 
     def get_product_details(self, **kwargs):
-        product_data_obj = common.ProductData.objects.get(**kwargs)
+        product_data_obj = models.ProductData.objects.get(**kwargs)
         return product_data_obj
 
     def register_customer(self):
@@ -112,7 +112,7 @@ class System(BaseTestCase):
         self.tester.assertEqual(response.status_code, 200)
 
     def get_temp_asc_obj(self, **kwargs):
-        temp_asc_obj = common.ASCTempRegistration.objects.get(**kwargs)
+        temp_asc_obj = models.ASCTempRegistration.objects.get(**kwargs)
         return temp_asc_obj
 
     def check_asc_exists(self, name, check_name, by):

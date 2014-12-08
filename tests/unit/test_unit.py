@@ -14,7 +14,7 @@ from gladminds.bajaj import models
 import boto
 from gladminds.core.constants import FEEDBACK_TYPE, PRIORITY
 from tastypie.test import TestApiClient
-from integration.base_integration import client
+from integration.bajaj.base_integration import client
         
 
 class TestAssertWorks(TestCase):
@@ -114,7 +114,7 @@ class TestFeedLogWithRemark(ResourceTestCase):
     def test_remarks(self):
         
         file_path = os.path.join(settings.BASE_DIR,
-                                 'tests/integration/test_feed_log_remark.xml')
+                                 'tests/integration/bajaj/test_data/test_feed_log_remark.xml')
         xml_data = open(file_path, 'r').read()
         url = 'http://local.bajaj.gladminds.co:8000/api/v1/feed/?wsdl'
         

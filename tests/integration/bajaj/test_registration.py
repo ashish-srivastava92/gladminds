@@ -1,8 +1,8 @@
 from django.test import TestCase
 from django.test.client import Client
-from integration.base import BaseTestCase
-from integration.test_brand_logic import Brand
-from integration.test_system_logic import System
+from integration.bajaj.base import BaseTestCase
+from integration.bajaj.test_brand_logic import Brand
+from integration.bajaj.test_system_logic import System
 
 client  =  Client(SERVER_NAME='bajaj')
 
