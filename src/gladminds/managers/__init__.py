@@ -8,15 +8,15 @@ from gladminds.core.utils import create_context, get_list_from_set, \
     get_time_in_seconds
 from gladminds.core.managers import mail
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, \
-    TIME_FORMAT
+    TIME_FORMAT, USER_GROUPS
 from django.contrib.auth.models import Group, User
 from gladminds.sqs_tasks import send_sms
 
 logger = logging.getLogger('gladminds')
 
 def get_feedback(feedback_id, user):
-    group=user.groups.filter(name__in=['SDM','SDO'])[0]
-    if group.name == 'SDO':
+    group=user.groups.filter(name__in=[USER_GROUPS[3],USER_GROUPS[4]])[0]
+    if group.name == USER_GROUPS[3]:
         user_profile = models.UserProfile.objects.filter(user=user)
         servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
         return models.Feedback.objects.get(id=feedback_id, assignee=servicedesk_user[0])
@@ -82,7 +82,7 @@ def save_update_feedback(feedback_obj, data, user, host):
     if feedback_obj.due_date:
         due_date = convert_utc_to_local_time(feedback_obj.due_date)
         feedback_obj.due_date = data['due_date']
-        feedback_obj.due_date = datetime.datetime.strptime(data['due_date'], '%Y-%m-%d %H:%M:%S')   
+        feedback_obj.due_date = datetime.datetime.strptime(data['due_date'], '%Y-%m-%d %H:%M:%S')
         feedback_obj.save()
         if due_date != feedback_obj.due_date:
             if reporter_email_id:
@@ -157,7 +157,7 @@ def save_update_feedback(feedback_obj, data, user, host):
 
 #check if status is resolved
     if feedback_obj.status == status[2]:
-        servicedesk_obj_all = User.objects.filter(groups__name='sdm')
+        servicedesk_obj_all = User.objects.filter(groups__name=USER_GROUPS[4])
         feedback_obj.resolved_date = datetime.datetime.now()
         feedback_obj.resolved_date = datetime.datetime.now()
         feedback_obj.root_cause = data['rootcause']
