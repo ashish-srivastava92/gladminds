@@ -544,7 +544,7 @@ function getDataByDate(){
    
 }
 
-$(document).on("click", ".open-AddCommentDialog", function (e) {
+$(document).on("click", ".open-add-comment-dialog", function (e) {
 
 	e.preventDefault();
 	
