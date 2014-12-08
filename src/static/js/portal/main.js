@@ -429,6 +429,13 @@
         });
         return false;
     });
+    
+    $('.due-datetime-picker').datetimepicker({
+    	dayOfWeekStart : 1,
+    	lang:'en',
+    	format:'Y-m-d H:i:s',
+	});
+    
 })();
 
 function rootCause(status){
