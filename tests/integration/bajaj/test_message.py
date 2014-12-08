@@ -1,12 +1,12 @@
 import time
-from base_integration import GladmindsResourceTestCase
-from integration.base import BaseTestCase
-from integration.test_brand_logic import Brand
-from integration.test_system_logic import System
+from integration.bajaj.base_integration import BrandResourceTestCase
+from integration.bajaj.base import BaseTestCase
+from integration.bajaj.test_brand_logic import Brand
+from integration.bajaj.test_system_logic import System
 
 from django.test import TestCase
 
-from gladminds.bajaj import models as common
+from gladminds.bajaj import models
 from django.test.client import Client
 import logging
 import json
@@ -15,7 +15,7 @@ logger = logging.getLogger('gladminds')
 client = Client()
 
 
-class CustomerRegistrationTest(GladmindsResourceTestCase, BaseTestCase):
+class CustomerRegistrationTest(BrandResourceTestCase, BaseTestCase):
  
     def setUp(self):
         TestCase.setUp(self)
@@ -99,7 +99,7 @@ class CustomerServiceTest(BaseTestCase):
         system.verify_result(input=response.status_code, output=200)
 
 
-class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
+class CouponCheckAndClosure(BrandResourceTestCase, BaseTestCase):
 
     def setUp(self):
         '''
@@ -127,11 +127,11 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
 
 #     Need to find out how to write this test case because it creates cyclic dependency.
 #     def test_validate_dealer(self):
-#         self.assertEqual(common.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
+#         self.assertEqual(models.ServiceAdvisor.objects.count(), 1, "Service Advisor Obj is not created as required")
 #         obj = GladmindsResources()
 #         self.assertEqual(obj.validate_dealer("9999999999").phone_number, u"9999999999", "validate dealer")
-#         sa_obj = common.ServiceAdvisor.objects.filter(service_advisor_id='DEALER001SA001')
-#         sa_dealer_rel = common.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = sa_obj[0])[0]
+#         sa_obj = models.ServiceAdvisor.objects.filter(service_advisor_id='DEALER001SA001')
+#         sa_dealer_rel = models.ServiceAdvisorDealerRelationship.objects.filter(service_advisor_id = sa_obj[0])[0]
 #         sa_dealer_rel.status = 'N'
 #         sa_dealer_rel.save()
 
@@ -142,9 +142,9 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         brand.get_coupon_obj(unique_service_coupon='USC0003', product=self.product_obj, valid_days=30, valid_kms=5000, service_type=3)
         create_sms_dict = {'kms': 2050, 'service_type': 3, 'sap_customer_id': 'GMCUSTOMER01'}
         brand.check_coupon(create_sms_dict, '9999999999')
-        system.verify_result(input=common.CouponData.objects.filter(unique_service_coupon='USC001')[0].status, output=5)
-        system.verify_result(input=common.CouponData.objects.filter(unique_service_coupon='USC0002')[0].status, output=5)
-        system.verify_result(input=common.CouponData.objects.filter(unique_service_coupon='USC0003')[0].status, output=4)
+        system.verify_result(input=models.CouponData.objects.filter(unique_service_coupon='USC001')[0].status, output=5)
+        system.verify_result(input=models.CouponData.objects.filter(unique_service_coupon='USC0002')[0].status, output=5)
+        system.verify_result(input=models.CouponData.objects.filter(unique_service_coupon='USC0003')[0].status, output=4)
   
     def test_invalid_ucn_or_sap_id(self):
         brand = self.brand
@@ -167,7 +167,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         system = self.system
         brand.get_coupon_obj(unique_service_coupon='USC0003', product=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
         '''Service Advisor Obj is not created as required'''
-        system.verify_result(input=common.ServiceAdvisor.objects.count(), output=3)
+        system.verify_result(input=models.ServiceAdvisor.objects.count(), output=3)
         create_sms_dict = {'kms': 450, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
         brand.check_coupon(create_sms_dict, '9999999999')
   
@@ -190,7 +190,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         brand.get_coupon_obj(unique_service_coupon='USC0002', product=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
  
         '''Service Advisor Obj is not created as required'''
-        system.verify_result(input=common.ServiceAdvisor.objects.count(), output=3)
+        system.verify_result(input=models.ServiceAdvisor.objects.count(), output=3)
  
         create_sms_dict = {'kms': 600, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
         brand.check_coupon(create_sms_dict, '9999999999')
@@ -219,7 +219,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         brand.get_coupon_obj(unique_service_coupon='USC0002', product=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
   
         '''Service Advisor Obj is not created as required'''
-        system.verify_result(input=common.ServiceAdvisor.objects.count(), output=3)
+        system.verify_result(input=models.ServiceAdvisor.objects.count(), output=3)
   
         create_sms_dict = {'kms': 1100, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
         brand.check_coupon(create_sms_dict, '9999999999')
@@ -249,7 +249,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         brand.get_coupon_obj(unique_service_coupon='USC0002', product=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
   
         '''Service Advisor Obj is not created as required'''
-        system.verify_result(input=common.ServiceAdvisor.objects.count(), output=3)
+        system.verify_result(input=models.ServiceAdvisor.objects.count(), output=3)
   
         sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'GMCUSTOMER01'}
         brand.check_coupon(sms_dict, '9999999999')
@@ -331,7 +331,7 @@ class CouponCheckAndClosure(GladmindsResourceTestCase, BaseTestCase):
         system.verify_result(input=coupon_status.status, output=5)
 
 
-class BrandData(GladmindsResourceTestCase, BaseTestCase):
+class BrandData(BrandResourceTestCase, BaseTestCase):
  
     def setUp(self):
         TestCase.setUp(self)

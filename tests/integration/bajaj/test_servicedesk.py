@@ -1,9 +1,9 @@
 from django.test.client import Client
 import unittest
 from gladminds.bajaj.models import AuditLog, Feedback, SMSLog
-from integration.base import BaseTestCase
-from integration.test_system_logic import System
-from integration.test_brand_logic import Brand
+from integration.bajaj.base import BaseTestCase
+from integration.bajaj.test_system_logic import System
+from integration.bajaj.test_brand_logic import Brand
 from django.test import TestCase
 
 client = Client()

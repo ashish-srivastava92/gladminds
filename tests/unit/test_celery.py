@@ -1,11 +1,11 @@
-from integration.base_integration import GladmindsResourceTestCase
+from integration.bajaj.base_integration import BrandResourceTestCase
 from django.test.utils import override_settings
 from gladminds import sqs_tasks
 from unit.base_unit import GladmindsUnitTestCase
 import time
 
 
-class TestCelery(GladmindsResourceTestCase):
+class TestCelery(BrandResourceTestCase):
 
     @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
                        CELERY_ALWAYS_EAGER=True,
