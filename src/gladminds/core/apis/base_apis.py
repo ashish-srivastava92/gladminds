@@ -7,9 +7,45 @@ from tastypie.utils.mime import determine_format
 from tastypie.http import HttpBadRequest
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.fields import ApiField
+from django.http.response import HttpResponse
+from tastypie import http
 
 
-class CustomBaseModelResource(ModelResource):
+class BaseCorsResource(Resource):
+    """
+    Class implementing CORS
+    """
+    def create_response(self, *args, **kwargs):
+        response = super(BaseCorsResource, self).create_response(*args, **kwargs)
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Headers'] = 'Content-Type'
+        return response
+
+    def method_check(self, request, allowed=None):
+        if allowed is None:
+            allowed = []
+
+        request_method = request.method.lower()
+        for i,method in enumerate(allowed):
+            allowed[i] = method.encode('ascii','ignore')
+        allows = ','.join(map(str.upper, allowed))
+
+        if request_method == 'options':
+            response = HttpResponse(allows)
+            response['Access-Control-Allow-Origin'] = '*'
+            response['Access-Control-Allow-Headers'] = 'Content-Type'
+            response['Allow'] = allows
+            raise ImmediateHttpResponse(response=response)
+
+        if not request_method in allowed:
+            response = http.HttpMethodNotAllowed(allows)
+            response['Allow'] = allows
+            raise ImmediateHttpResponse(response=response)
+
+        return request_method
+
+
+class CustomBaseModelResource(BaseCorsResource, ModelResource):
     def determine_format(self, request):
         """
         return application/json as the default format

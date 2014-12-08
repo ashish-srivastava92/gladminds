@@ -29,7 +29,7 @@ class CustomAuthorization(DjangoAuthorization):
         try:
             authorization = AccessToken.objects.filter(token=key)[0]
         except:
-                raise Unauthorized("You are not allowed to access that data.")
+            raise Unauthorized("You are not allowed to access that data.")
         user = authorization.user
         # This assumes a ``QuerySet`` from ``ModelResource``
         if len(object_list)>0:
@@ -41,7 +41,7 @@ class CustomAuthorization(DjangoAuthorization):
                 return object_list.filter(product__consumer__user=user)
         else:
             return object_list
-                    
+                     
  
     def create_detail(self, object_list, bundle):
         data = bundle.obj.__dict__
@@ -58,13 +58,13 @@ class CustomAuthorization(DjangoAuthorization):
         try:
             authorization = AccessToken.objects.filter(token=key)[0]
         except:
-                raise Unauthorized("You are not allowed to access that data.")
+            raise Unauthorized("You are not allowed to access that data.")
         user_id = int(authorization.user.id)
         if data.get('consumer_id'):
             try:
                 update_obj = afterbuy.Consumer.objects.get(user=int(data['consumer_id']))
             except:
-                    raise Unauthorized("You are not allowed to access that data.")
+                raise Unauthorized("You are not allowed to access that data.")
             if user_id == update_obj.user.id:
                 return True
             raise Unauthorized("You are not allowed to access that data.")
@@ -72,7 +72,7 @@ class CustomAuthorization(DjangoAuthorization):
             try:
                 update_obj = afterbuy.UserProduct.objects.get(id=int(data['product_id']))
             except Exception as ex:
-                    raise Unauthorized("You are not allowed to access that data.")
+                raise Unauthorized("You are not allowed to access that data.")
             if user_id == update_obj.consumer.user.id:
                 return True
             raise Unauthorized("You are not allowed to access that data.")
@@ -99,11 +99,11 @@ class CustomAuthorization(DjangoAuthorization):
             key = bundle.request.META.get('HTTP_ACCESS_TOKEN')
 
         if (settings.ENV in ["dev", "local"] and key in settings.HARCODED_TOKEN):
-                return True
+            return True
         try:
             authorization = AccessToken.objects.filter(token=key)[0]
         except:
-                raise Unauthorized("You are not allowed to access that data.")
+            raise Unauthorized("You are not allowed to access that data.")
         user_id = int(authorization.user.id)
         if klass._meta.module_name == 'consumer':
             if user_id == data['user_id']:
@@ -114,7 +114,7 @@ class CustomAuthorization(DjangoAuthorization):
             try:
                 update_obj = klass.objects.get(id=int(data['id']))
             except:
-                    raise Unauthorized("You are not allowed to access that data.")
+                raise Unauthorized("You are not allowed to access that data.")
             if user_id == update_obj.consumer.user.id:
                 return True
             raise Unauthorized("You are not allowed to access that data.")
@@ -122,7 +122,7 @@ class CustomAuthorization(DjangoAuthorization):
             try:
                 update_obj = klass.objects.get(id=int(data['id']))
             except:
-                    raise Unauthorized("You are not allowed to access that data.")   
+                raise Unauthorized("You are not allowed to access that data.")   
             if user_id == update_obj.product.consumer.user.id:
                 return True
             raise Unauthorized("You are not allowed to access that data.")

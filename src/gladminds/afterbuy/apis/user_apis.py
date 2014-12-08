@@ -19,7 +19,7 @@ from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
 from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.views.auth_view import get_access_token
-from tastypie.authorization import DjangoAuthorization
+from tastypie.authorization import DjangoAuthorization, Authorization
 from gladminds.core.apis.authorization import CustomAuthorization,\
     MultiAuthorization
 from django.contrib.sites.models import RequestSite
@@ -48,7 +48,8 @@ class ConsumerResource(CustomBaseModelResource):
         queryset = afterbuy_model.Consumer.objects.all()
         resource_name = "consumers"
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = Authorization()
+        #authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         detail_allowed_methods = ['get', 'delete', 'put']
         always_return_data = True
         filtering = {
@@ -351,7 +352,8 @@ class ServiceTypeResource(CustomBaseModelResource):
         queryset = afterbuy_model.ServiceType.objects.all()
         resource_name = "service-types"
         authentication = AccessTokenAuthentication()
-        authorization = DjangoAuthorization()
+        #authorization = DjangoAuthorization()
+        authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
@@ -364,7 +366,8 @@ class ServiceResource(CustomBaseModelResource):
         queryset = afterbuy_model.Service.objects.all()
         resource_name = "services"
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        #authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
