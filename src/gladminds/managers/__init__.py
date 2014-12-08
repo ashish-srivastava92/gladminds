@@ -8,14 +8,14 @@ from gladminds.core.utils import create_context, get_list_from_set, \
     get_time_in_seconds
 from gladminds.core.managers import mail
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, \
-    TIME_FORMAT,SDM, SDO
+    TIME_FORMAT,SDM, SDO, DEALER
 from django.contrib.auth.models import Group, User
 from gladminds.sqs_tasks import send_sms
 
 logger = logging.getLogger('gladminds')
 
 def get_feedback(feedback_id, user):
-    group=user.groups.filter(name__in=[SDM,SDO])[0]
+    group=user.groups.filter(name__in=[SDM, SDO, DEALER])[0]
     if group.name == SDO:
         user_profile = models.UserProfile.objects.filter(user=user)
         servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
