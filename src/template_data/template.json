@@ -417,5 +417,14 @@
       "template":"The due date for the ticket which was assigned to {assign_to} has been exceeded and the issue is not yet resolved.",
       "description":"Send this message to escalation group if due date exceeds"
     }
-  }
+  },
+  {
+    "model": "gladminds.messagetemplate",   
+    "pk": 47,
+    "fields": {
+      "template_key": "INITIATOR_FEEDBACK_DUE_DATE_CHANGE",
+      "template": "Your {type} will be resolved by {due_date}.",
+      "description": "Due Date has been changed"
+      }
+    }
 ]

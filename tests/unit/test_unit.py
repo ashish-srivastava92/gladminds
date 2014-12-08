@@ -7,7 +7,7 @@ from tastypie.test import ResourceTestCase
 from django.test import TestCase
 from datetime import datetime, timedelta
 from unit.base_unit import RequestObject, GladmindsUnitTestCase
-from gladminds.core.utils import get_sa_list, get_coupon_info, get_customer_info,\
+from gladminds.core.utils import get_coupon_info, get_customer_info,\
  get_list_from_set, get_token, create_feed_data , \
  validate_otp, update_pass, format_date_string
 from gladminds.bajaj import models
@@ -68,16 +68,6 @@ class TestUtils(GladmindsUnitTestCase):
         result = get_coupon_info(request.POST)
         self.assertEqual(30,result.valid_days)
     
-    def test_get_sa_list(self):
-        request = RequestObject(user='DEALER001', data={
-                                'customerId': 'SAP001', 'vin': 'VINXXX001'}, file={'jobCard': ''})
-        sa_list = get_sa_list(request.user)
-        self.assertEqual(len(sa_list), 1)
-        coupon_info = get_coupon_info(request.POST)
-        self.assertEqual(coupon_info.unique_service_coupon, 'COUPON005')
-        customer = get_customer_info(request.POST)
-        self.assertEquals(len(customer.keys()), 5)
-  
     def test_save_pass(self):
         phone_number = '1234567890'
         password='1234'
