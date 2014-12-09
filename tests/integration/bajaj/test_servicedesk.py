@@ -172,12 +172,3 @@ class TestServiceDeskFlow(BaseTestCase):
         system.verify_result(input=Comment.objects.get(id=1).comment, output= 'test')
         self.assertEqual(response.status_code, 200)
 
-
-class EmailTest(TestCase):
-    def test_send_email(self):
-        mail.send_mail('Subject here', 'Here is the message.',
-            'from@example.com', ['to@example.com'],
-            fail_silently=False)
-        self.assertEquals(len(mail.outbox), 1)
-        self.assertEquals(mail.outbox[0].subject, 'Subject here')
-        
