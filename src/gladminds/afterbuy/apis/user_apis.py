@@ -31,6 +31,8 @@ class DjangoUserResources(ModelResource):
     class Meta:
         queryset = User.objects.all()
         resource_name = 'django'
+        authentication = AccessTokenAuthentication()
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         excludes = ['email', 'password', 'is_superuser']
         always_return_data = True
 
