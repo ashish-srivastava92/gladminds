@@ -3,6 +3,7 @@ from tastypie.test import ResourceTestCase
 from gladminds.management.commands import load_gm_migration_data, setup
 import json
 
+client  =  Client(SERVER_NAME='afterbuy')
 
 class AfterBuyResourceTestCase(ResourceTestCase):
 
