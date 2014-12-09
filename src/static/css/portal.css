@@ -105,3 +105,11 @@ textarea {
 .feedback-filters-label {
 	margin: 4px 0px 0px 0px;
 }
+
+.feedback-ticket-detail {
+	margin-top:10px;
+}
+
+.pegination-links {
+	float: right;
+}

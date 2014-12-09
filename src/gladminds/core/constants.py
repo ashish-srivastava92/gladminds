@@ -1,5 +1,8 @@
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
+PAGINATION_LINKS = 4
+RECORDS_PER_PAGE = 3
+
 ALL = 'all'
 
 PROVIDERS = ['asc', 'dasc', 'dealer', 'helpdesk']

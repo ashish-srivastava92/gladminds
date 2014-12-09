@@ -22,7 +22,7 @@
         Utils.submitForm(e, data, '/aftersell/register/asc');
         return false;
     });
-    
+        
     $('.asc-self-form').on('submit', function(e) {
         var data = Utils.getFormData('.asc-self-form');
         Utils.submitForm(e, data, '/aftersell/asc/self-register/');
@@ -482,7 +482,30 @@
     	format:'Y-m-d H:i:s',
 	});
     
+    $(".feedback-free-text-search").click(function(){
+    	change_url_by_filter();
+    })
+    
+    $('.feedback-filters-options').change(function() {
+    	change_url_by_filter();
+    })
+    
 })();
+
+
+function change_url_by_filter(){
+	var url = window.location.pathname + '?',
+		serch_text = $(".feedback-search-text").val(),
+    	selectedOptions = $('.feedback-filters-options'),
+    	filters = ['priority', 'type', 'status'];
+    	$.each(filters, function(index, val){
+    		url = url + val + '=' + selectedOptions[index].options[selectedOptions[index].selectedIndex].value + '&'
+    	});
+    	if(serch_text){
+    		url = url + "search=" + serch_text
+    	}
+    	window.location.href = url;
+}
 
 function rootCause(status){
 	'use strict';
@@ -529,19 +552,6 @@ function disable_func(){
 function showMessage(id){
 	'use strict';
 	$('#'+id).popover();
-}
-
-function change_status(){
-	var url = window.location.pathname + '?';
-    $('.feedback-filters-options').change(function() {
-    	var selectedOptions = $('.feedback-filters-options'),
-    		filters = ['priority', 'type', 'status'];
-    	$.each(filters, function(index, val){
-    		url = url + val + '=' + selectedOptions[index].options[selectedOptions[index].selectedIndex].value + '&'
-    	});
-    	window.location.href = url;
-    });
-	
 }
 
 function getDataByDate(){

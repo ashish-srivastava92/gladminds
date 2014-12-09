@@ -359,7 +359,7 @@ def get_sa_under_asc(request, id=None):
         pass
     return render(request, template, {'active_menu':'sa',"data": data})
 
-def get_feedbacks(user, status, priority, type):
+def get_feedbacks(user, status, priority, type, search=""):
     group = user.groups.all()[0]
     feedbacks = []
     if type == ALL or type is None:
