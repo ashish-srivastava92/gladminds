@@ -5,12 +5,13 @@ from celery.app.task import Task
 import logging
 from django.conf import settings 
 from django.test.client import Client
+from integration.bajaj import base_integration
+
 logger = logging.getLogger('gladminds')
-from integration import base_integration
 client=Client(SERVER_NAME='bajaj')
 
 
-class CeleryTestCaseBase(base_integration.GladmindsResourceTestCase):
+class CeleryTestCaseBase(base_integration.BrandResourceTestCase):
     def setUp(self):
         super(CeleryTestCaseBase, self).setUp()
         self.applied_tasks = []

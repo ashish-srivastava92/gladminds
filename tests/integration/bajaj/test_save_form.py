@@ -1,7 +1,7 @@
-from integration.base import BaseTestCase
+from integration.bajaj.base import BaseTestCase
 from django.test.client import Client
 
-from gladminds.bajaj import models as common
+from gladminds.bajaj import models
 
 
 class TestSaveFormRegistration(BaseTestCase):
@@ -22,8 +22,8 @@ class TestSaveFormRegistration(BaseTestCase):
 
         get_response = self.client.post('/aftersell/asc/self-register/', data=create_mock_data)
         self.assertEqual(get_response.status_code, 200)
-        self.assertEqual(common.ASCTempRegistration.objects.count(), 1)
-        self.assertEqual(common
+        self.assertEqual(models.ASCTempRegistration.objects.count(), 1)
+        self.assertEqual(models
                          .ASCTempRegistration.objects.all()[0].phone_number,
                           create_mock_data['phone-number'])
 

@@ -67,7 +67,7 @@
             "sender": "feed-report@gladminds.co",
             "receiver": "srv.sngh92@yahoo.com",
             "subject": "Feedback  with reference-no-GM-{id} Status",
-            "body": "Your {type} has been resolved", 
+            "body": "Your {type} has been resolved. {assign_to} added a comment {comment}", 
             "description": "Feedback status mail"
         }
     },
@@ -91,7 +91,7 @@
             "sender": "feed-report@gladminds.co",
             "receiver": "srv.sngh92@yahoo.com",
             "subject": "Feedback  with reference-no-GM-{id} resolved",
-            "body": "The {type} reported by {reporter} on {created_date} has been resolved.\n The Feedback received by reporter is {remark},\n The root cause  is {root_cause} and the resolution is {resolution}. The total time spent to resolve the issue is {resolution_time}",   
+            "body": "The {type} reported by {reporter} on {created_date} has been resolved.\n The root cause  is {root_cause} and the resolution is {resolution}. The total time spent to resolve the issue is {resolution_time}",   
             "description": "Feedback  mail to bajaj"
         }
     },
@@ -165,6 +165,18 @@
             "subject": "Reminder for due date",
             "body": "The due date for the ticket is {due_date} . Please resolve it soon.",
             "description": "Due Date Reminder mail to manager"
+        }
+    },
+     {
+        "model": "gladminds.emailtemplate",
+        "pk": 15,
+        "fields": {
+            "template_key": "DUE_DATE_MAIL_TO_INITIATOR",
+            "sender": "feed-report@gladminds.co",
+            "receiver": "",
+            "subject": "Change for due date",
+            "body": "Your {type} will be resolved within {due_date}",
+            "description": "Due Date change mail to initiator"
         }
     }
     

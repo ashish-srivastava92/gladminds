@@ -47,6 +47,7 @@ urlpatterns = patterns('',
     url(r'^aftersell/servicedesk/(?P<servicedesk>[a-zA-Z0-9]+)$', 'gladminds.core.views.service_desk'),
     url(r'^aftersell/servicedesk/$', 'gladminds.bajaj.services.service_desk.get_servicedesk_tickets', name='get_servicedesk_tickets'),
     url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/$', 'gladminds.bajaj.services.service_desk.modify_servicedesk_tickets', name='modify_servicedesk_tickets'),
+    url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/comments/(?P<comment_id>\d+)/$', 'gladminds.bajaj.services.service_desk.modify_feedback_comments', name='modify_feedback_comments'),
     url(r'^aftersell/feedbackresponse/(?P<feedback_id>\d+)/$', 'gladminds.bajaj.services.service_desk.get_feedback_response', name='get_feedback_response'),
 
     # Tasks URL

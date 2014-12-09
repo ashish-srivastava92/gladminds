@@ -1,14 +1,14 @@
 ''' Test Case for testing out the Afterbuy Api
 '''
 import unittest
-from integration import base_integration
+from integration.afterbuy import base_integration
 from django.test.client import Client
 from test_constants import AFTERBUY_PRODUCTS
 import json
 
 client  =  Client(SERVER_NAME='afterbuy')
 
-class TestAfterbuyApi(base_integration.GladmindsResourceTestCase):
+class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
     def setUp(self):
         super(TestAfterbuyApi, self).setUp()
 

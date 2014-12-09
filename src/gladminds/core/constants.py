@@ -105,3 +105,7 @@ FUEL_CHOICES = (
     ('Electric', 'Electric'),
     ('Other', 'Other'),
 )
+
+SDM = 'SDM'
+SDO = 'SDO'
+DEALER = 'dealers'

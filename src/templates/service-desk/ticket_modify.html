@@ -88,7 +88,7 @@
                                			{% for type in servicedeskuser %}
                       	          			<option {% if type == feedback.assignee %} selected {% endif %} value="{{type.user_profile.phone_number}}">{{type.user_profile.user.username}}({{type.user_profile.phone_number}})</option>
                                 		{% endfor %}
-                                		<option {% if feedback.assign_to_reporter %} selected {%endif%} value ='Assign to reporter'>Assign to reporter</option>
+                                		<option {% if feedback.assign_to_reporter %} selected {%endif%} value ='Assign to reporter'>{% if group == 'dealers' %} {{feedback.reporter.name}} {% else %} Assign to reporter {%endif%}</option>
                             		</select>
                       			</div>
                     		</div>
@@ -188,25 +188,23 @@
                  		    		<button type="button" class="btn btn-default">Cancel</button>
 		                		</a>
 								 {% endif %}                   				
-								 
-                   				
                    			</div>
                   		</div>
 	 				</div>
 	 			</div>
 	 		</form>
 	 	</div>  
-	 	<div class="hide row">
+	 	<div class="row">
 	 		<div class="col-md-4"></div>
 	 		<div class="col-md-8">
 	 		{% for comment in comments %}
 		 	<div class="row">
 		 		<div class="col-sm-8 comment">
 		 			<div> 
-		 				<span class="glyphicon glyphicon-user  user-icon-color"> {{comment.user}} </span>
+		 				<span class="glyphicon glyphicon-user user-icon-color"> {{comment.user}} </span>
 		 				added a comment -
-		 				<span>{{comment.created_date|date:'d/M/y h:m A'}}</span>
-		 				<a class="glyphicon glyphicon-pencil blue pull-right"data-toggle="modal" data-target="#myModal"></a>
+		 				<span>{{comment.modified_date|date:'d/M/y h:m A'}}</span>
+		 				<a class="glyphicon glyphicon-pencil blue pull-right open-add-comment-dialog" data-id={{comment.id}} data-comment="{{comment.comment}}" data-user="{{comment.user}}" data-date="{{comment.modified_date}}" data-owner={{user}} data-toggle="modal" href="#addCommentDialog"></a>
 		 			</div>
 				<div>
 					<br/>
@@ -220,30 +218,38 @@
 	 </div>
 	</div>	
 </div>	
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="addCommentDialog" tabindex="-1" role="dialog" aria-labelledby="myModal" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="myModalLabel">Edit Comment </h4>
+        <h4 class="modal-title" id="myModal">Edit Comment </h4>
       </div>
       <div class="modal-body">
 		<form class="comment-form" role="search">
+			<div class="hide row">
+                  <div class="col-md-4 form-group">
+                    <label class="control-label">Id</label>
+                  </div>
+                  <div class="col-md-8 form-group">
+                   <input type="text" class="form-control comment-id" name="commentId" value="" readonly>
+                  </div>
+                </div>
                 <div class="row">
                   <div class="col-md-4 form-group">
                     <label class="control-label">Author</label>
                   </div>
                   <div class="col-md-8 form-group">
-                  <input type="text" class="form-control" value={{comments.user}}>
-                  </div>
+                  <input type="text" class="form-control comment-user" name="commentUser" value="" readonly>
+                   </div>
                 </div>
                 
                 <div class="row">
                   <div class="col-md-4 form-group">
-                    <label class="control-label">Created on:</label>
+                    <label class="control-label">Edited on:</label>
                   </div>
                   <div class="col-md-8 form-group">
-                  	<input type="text" class="form-control">
+                  <input type="text" class="form-control comment-date " name="commentDate" value="" readonly>
                   </div>
                 </div>
                 
@@ -252,7 +258,7 @@
                     <label class="control-label">Comment:</label>
                   </div>
                   <div class="col-md-8 form-group">
-                    <textarea class="form-control"></textarea>
+                    <input type="text" class="form-control comment-description" name="commentDescription" value="">
                   </div>
                 </div> 
                 

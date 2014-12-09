@@ -4,7 +4,7 @@ from gladminds.settings import BASE_DIR
 import logging
 import json
 logger = logging.getLogger('test_case')
-from gladminds.bajaj import models as common
+from gladminds.bajaj import models
 from tastypie.test import ResourceTestCase
 from django.conf import settings
 from unit.base_unit import GladmindsUnitTestCase

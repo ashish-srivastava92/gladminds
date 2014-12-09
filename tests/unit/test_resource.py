@@ -1,15 +1,15 @@
 import json, os
-from gladminds.bajaj import models as common
+from gladminds.bajaj import models
 from django.conf import settings
 from django.contrib.auth.models import User
-from integration.base_integration import GladmindsResourceTestCase, client
+from integration.bajaj.base_integration import BrandResourceTestCase, client
 from datetime import datetime, timedelta
 from gladminds.settings import COUPON_VALID_DAYS
 
 
-class GladmindsResourcesTest(GladmindsResourceTestCase):
+class BrandResourcesTest(BrandResourceTestCase):
     def setUp(self):
-        super(GladmindsResourcesTest, self).setUp()
+        super(BrandResourcesTest, self).setUp()
         product_type_obj = self.get_product_type_obj(product_type='BIKE')
         dealer_obj = self.get_delear_obj(name='DEALER001')
         product_obj = self.get_product_obj(product_id="VINXXX001", product_type=product_type_obj,
@@ -157,7 +157,7 @@ class GladmindsResourcesTest(GladmindsResourceTestCase):
         result = client.post('/v1/messages', data={'text':settings.ALLOWED_KEYWORDS['check'] + ' SAP002 500 1', 'phoneNumber' : '4444861111'})
         self.assertHttpOK(result)
          
-class GladmindsUrlsTest(GladmindsResourceTestCase):
+class BrandUrlsTest(BrandResourceTestCase):
     def setUp(self):
-        super(GladmindsUrlsTest, self).setUp()
+        super(BrandUrlsTest, self).setUp()
 
