@@ -1,5 +1,4 @@
 from django.test.client import Client
-import unittest
 from gladminds.bajaj.models import AuditLog, Feedback, SMSLog, Comment
 from integration.bajaj.base import BaseTestCase
 from integration.bajaj.test_system_logic import System
@@ -7,7 +6,6 @@ from integration.bajaj.test_brand_logic import Brand
 from django.test import TestCase
 import datetime
 from time import sleep
-from gladminds.sqs_tasks import send_reminders_for_servicedesk
 
 client = Client(SERVER_NAME='bajaj')
 
@@ -74,7 +72,7 @@ class TestServiceDeskFlow(BaseTestCase):
         system = self.system
         system.verify_result(input=log_len_after[0].receiver, output="9999999999")
         system.verify_result(input=log_len_after[1].receiver, output="1000000000")
- 
+
     def test_sms_email_after_resolved(self):
         initiator = self.system
         initiator.post_feedback()
@@ -125,9 +123,7 @@ class TestServiceDeskFlow(BaseTestCase):
         sleep(50)
         response=service_desk_manager.update_feedback(status='Resolved')
         self.assertEqual(response.status_code, 200)
-        wait_time = Feedback.objects.get(id=1).wait_time
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(wait_time, 50.0)
+        self.assertTrue(Feedback.objects.get(id=1).wait_time >= 50.0)
         
     def test_assign_to_reporter_when_pending(self):
         initiator = self.system
@@ -136,9 +132,12 @@ class TestServiceDeskFlow(BaseTestCase):
         service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDM')
         response=service_desk_manager.update_feedback(status='Open', assign_to='1000000000')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(Feedback.objects.get(id=1).assignee.user_profile.user.username, 'sdo')
+        system = self.system
+        system.verify_result(input=Feedback.objects.get(id=1).assignee.user_profile.user.username,
+                             output= 'sdo')
         response=service_desk_manager.update_feedback(status='Pending', reporter_status="true")
-        self.assertEqual(Feedback.objects.get(id=1).assignee.user_profile.user.username, 'GMDEALER001SA01')
+        system.verify_result(input=Feedback.objects.get(id=1).assignee.user_profile.user.username,
+                             output= 'GMDEALER001SA01')
         self.assertEqual(response.status_code, 200)
         
     def test_assign_to_previous_assignee(self):
@@ -148,12 +147,16 @@ class TestServiceDeskFlow(BaseTestCase):
         service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDO')
         response=service_desk_manager.update_feedback(status='Open', assign_to='1000000000')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(Feedback.objects.get(id=1).assignee.user_profile.user.username, 'sdo')
+        system = self.system
+        system.verify_result(input=Feedback.objects.get(id=1).assignee.user_profile.user.username,
+                             output= 'sdo')
         response=service_desk_manager.update_feedback(status='Pending', reporter_status="true")
-        self.assertEqual(Feedback.objects.get(id=1).assignee.user_profile.user.username, 'GMDEALER001SA01')
+        system.verify_result(input=Feedback.objects.get(id=1).assignee.user_profile.user.username,
+                             output= 'GMDEALER001SA01')
         self.assertEqual(response.status_code, 200)
         response=service_desk_manager.update_feedback(status='In Progress')
-        self.assertEqual(Feedback.objects.get(id=1).assignee.user_profile.user.username, 'sdo')
+        system.verify_result(input=Feedback.objects.get(id=1).assignee.user_profile.user.username,
+                             output= 'sdo')
         self.assertEqual(response.status_code, 200)
         
     def test_edit_comment(self):
@@ -162,9 +165,19 @@ class TestServiceDeskFlow(BaseTestCase):
         service_desk_manager = self.system
         service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDM')
         response=service_desk_manager.update_feedback(status='Open', assign_to='1000000000', comments='hello')
-        self.assertEqual(Comment.objects.get(id=1).comment, 'hello')
+        system = self.system
+        system.verify_result(input=Comment.objects.get(id=1).comment, output= 'hello')
         self.assertEqual(response.status_code, 200)
         response=service_desk_manager.update_comment(commentDescription='test')
+        system.verify_result(input=Comment.objects.get(id=1).comment, output= 'test')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(Comment.objects.get(id=1).comment, 'test')
-       
+
+
+class EmailTest(TestCase):
+    def test_send_email(self):
+        mail.send_mail('Subject here', 'Here is the message.',
+            'from@example.com', ['to@example.com'],
+            fail_silently=False)
+        self.assertEquals(len(mail.outbox), 1)
+        self.assertEquals(mail.outbox[0].subject, 'Subject here')
+        
