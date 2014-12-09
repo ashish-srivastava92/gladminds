@@ -41,7 +41,7 @@ class AccessTokenAuthentication(Authentication):
         return True
 
     def verify_access_token(self, key):
-        if  (settings.ENV in ["dev", "local"] and key in settings.HARCODED_TOKEN):
+        if  (settings.ENV in settings.IGNORE_ENV and key in settings.HARCODED_TOKEN):
                 return key
         try:
             token = AccessToken.objects.get(token=key)
