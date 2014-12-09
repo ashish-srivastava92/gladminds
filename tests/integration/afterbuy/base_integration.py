@@ -11,7 +11,7 @@ from gladminds.management.commands import load_gm_migration_data
 from gladminds.bajaj import models as aftersell_common
 from integration.core.base_integration import CoreResourceTestCase
 
-client  =  Client(SERVER_NAME='bajaj')
+client  =  Client(SERVER_NAME='afterbuy')
 
 class AfterBuyResourceTestCase(CoreResourceTestCase):
 
