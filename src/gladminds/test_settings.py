@@ -5,6 +5,7 @@ import warnings
 # added for removing warnings printed on console
 import exceptions
 warnings.filterwarnings("ignore", category=exceptions.RuntimeWarning, module='django.db.models.fields', lineno=903)
+warnings.filterwarnings("ignore", category=exceptions.RuntimeWarning, module='django.db.models.fields', lineno=848)
 
 
 OUT_DIR = os.path.join(BASE_DIR, "out")
