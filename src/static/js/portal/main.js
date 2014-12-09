@@ -492,12 +492,23 @@
     
 })();
 
+function getUrl(current_page_num, no_of_link_in_page){
+	var url = window.location.pathname + '?page=',
+		diff = current_page_num - no_of_link_in_page;
+	
+		if (diff > 1){
+			url = url + diff 
+		}else{
+			url = url + 1
+		}
+		window.location.href = url;
+}
 
 function change_url_by_filter(){
 	var url = window.location.pathname + '?',
 		serch_text = $(".feedback-search-text").val(),
     	selectedOptions = $('.feedback-filters-options'),
-    	filters = ['priority', 'type', 'status'];
+    	filters = ['priority', 'type', 'status', 'count'];
     	$.each(filters, function(index, val){
     		url = url + val + '=' + selectedOptions[index].options[selectedOptions[index].selectedIndex].value + '&'
     	});

@@ -65,7 +65,24 @@
 		</h4>
 		{% elif feedbacks.length != 0 %}
 		<div class="row">
-			<div class="col-md-offset-9 col-md-3">
+			<div class="col-md-6">
+				<div class="row">
+	            	<div class="col-md-2 showing-rocord-text">
+	                	<span>Showing: </span>
+	                </div>
+	                <div class="col-md-2">
+	                	<select class="form-control feedback-filters-options rocord-count" name="status" required>
+	                      	{% for record_showing_count in record_showing_counts %}
+	                     		 <option {% if filter_params.count == record_showing_count  %} selected {% endif%} value="{{record_showing_count}}">{{record_showing_count}}</option>
+	                      	{% endfor %}
+	                    </select>
+	                 </div>
+	                 <div class="col-md-2 entry-text showing-rocord-text">
+	                	<span>entries </span>
+	                </div>
+	            </div>
+			</div>
+			<div class="col-md-offset-3 col-md-3">
 				<div class="input-group">
 				  	<input type="text" value="{{filter_params.search|default:''}}" class="form-control feedback-search-text" placeholder="Type word">
 				  	<span class="btn input-group-addon">
@@ -133,7 +150,7 @@
 			<div class="col-md-6">
 				<div class="pegination-links">
 					{% if feedbacks.has_previous %}
-			           <a href="?page={{ feedbacks.previous_page_number }}">Previous</a>
+						<a href="javascript:void(0);" onclick="getUrl({{feedbacks.number}}, {{pagination_links}})">Previous</a>
 			      	{% endif %}
 					
 					{% for page in feedbacks.paginator.page_range %}

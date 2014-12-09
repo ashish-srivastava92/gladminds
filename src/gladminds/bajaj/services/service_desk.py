@@ -14,7 +14,7 @@ from gladminds.core.utils import get_list_from_set, convert_utc_to_local_time
 from gladminds.bajaj import models as models
 from gladminds.bajaj.services.free_service_coupon import GladmindsResources
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
-    ROOT_CAUSE, SDM, SDO, DEALER, PAGINATION_LINKS, RECORDS_PER_PAGE
+    ROOT_CAUSE, SDM, SDO, DEALER, PAGINATION_LINKS, BY_DEFAULT_RECORDS_PER_PAGE, RECORDS_PER_PAGE
 from gladminds.managers import get_feedback,\
     get_servicedesk_users, save_update_feedback, get_comments
 from gladminds.core.managers.audit_manager import sms_log
@@ -40,12 +40,13 @@ def get_servicedesk_tickets(request):
     priority = request.GET.get('priority')
     type = request.GET.get('type')
     search = request.GET.get('search')
+    count = request.GET.get('count') or BY_DEFAULT_RECORDS_PER_PAGE
     page_details = {}
     if search:
         feedback_obects = get_feedbacks(request.user, status, priority, type, search)
     else:
         feedback_obects = get_feedbacks(request.user, status, priority, type)
-    paginator = Paginator(feedback_obects, RECORDS_PER_PAGE)
+    paginator = Paginator(feedback_obects, count)
     page = request.GET.get('page')
     try:
         feedbacks = paginator.page(page)
@@ -64,7 +65,9 @@ def get_servicedesk_tickets(request):
                                           "priorities": utils.get_list_from_set(PRIORITY),
                                           "pagination_links": PAGINATION_LINKS,
                                           "page_details": page_details,
-                                          "filter_params": {'status': status, 'priority': priority, 'type': type, 'search': search}}
+                                          "record_showing_counts": RECORDS_PER_PAGE,
+                                          "filter_params": {'status': status, 'priority': priority, 'type': type,
+                                                            'count': str(count), 'search': search}}
                                         )
 
 @check_service(Services.SERVICE_DESK)
