@@ -18,9 +18,9 @@ from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
 from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.views.auth_view import get_access_token
-from tastypie.authorization import DjangoAuthorization, Authorization
+from tastypie.authorization import DjangoAuthorization
 from gladminds.core.apis.authorization import CustomAuthorization,\
-    MultiAuthorization, CustomDjangoAuthorization
+    MultiAuthorization
 from django.contrib.sites.models import RequestSite
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 
@@ -48,7 +48,7 @@ class ConsumerResource(CustomBaseModelResource):
         resource_name = "consumers"
         authentication = AccessTokenAuthentication()
         #authorization = Authorization()
-        authorization = MultiAuthorization(CustomDjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         detail_allowed_methods = ['get', 'delete', 'put']
         always_return_data = True
         filtering = {
@@ -164,7 +164,6 @@ class ConsumerResource(CustomBaseModelResource):
                 logger.info("[Exception OTP]:{0}".
                             format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
-
 
     def authenticate_user_email_id(self, request, **kwargs):
         email_id = request.POST.get('email_id')
@@ -322,7 +321,7 @@ class InterestResource(CustomBaseModelResource):
         queryset = afterbuy_model.Interest.objects.all()
         resource_name = "interests"
         authentication = AccessTokenAuthentication()
-        authorization = CustomDjangoAuthorization()
+        authorization = DjangoAuthorization()
         detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
 
@@ -351,7 +350,7 @@ class ServiceTypeResource(CustomBaseModelResource):
         queryset = afterbuy_model.ServiceType.objects.all()
         resource_name = "service-types"
         authentication = AccessTokenAuthentication()
-        authorization = CustomDjangoAuthorization()
+        authorization = DjangoAuthorization()
         #authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -365,7 +364,7 @@ class ServiceResource(CustomBaseModelResource):
         queryset = afterbuy_model.Service.objects.all()
         resource_name = "services"
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(CustomDjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         #authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
