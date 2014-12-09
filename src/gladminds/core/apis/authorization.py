@@ -6,6 +6,14 @@ from django.conf import settings
 from gladminds.afterbuy import models as afterbuy
 
 
+class CustomDjangoAuthorization(DjangoAuthorization):
+    def base_checks(self, request, model_klass):
+        # If it doesn't look like a model, we can't check permissions.
+        if not model_klass or not getattr(model_klass, '_meta', None):
+            return False
+        return model_klass
+
+
 class CustomAuthorization(DjangoAuthorization):
 
     def base_checks(self, request, model_klass):
@@ -18,13 +26,14 @@ class CustomAuthorization(DjangoAuthorization):
 #             return False
 
         return model_klass
+
     def read_list(self, object_list, bundle):
         try:
             access_token_container = bundle.request.GET.urlencode().split('access_token=')[1]
             key = access_token_container.split('&')[0]
         except:
             key = bundle.request.META.get('HTTP_ACCESS_TOKEN')
-        if  (settings.ENV in ["dev", "local"] and key in settings.HARCODED_TOKEN):
+        if  (settings.ENV in settings.IGNORE_ENV and key in settings.HARCODED_TOKEN):
                 return True
         try:
             authorization = AccessToken.objects.filter(token=key)[0]
@@ -53,7 +62,7 @@ class CustomAuthorization(DjangoAuthorization):
             key = access_token_container.split('&')[0]
         except:
             key = bundle.request.META.get('HTTP_ACCESS_TOKEN')
-        if  (settings.ENV in ["dev", "local"] and key in settings.HARCODED_TOKEN):
+        if  (settings.ENV in settings.IGNORE_ENV and key in settings.HARCODED_TOKEN):
                 return True
         try:
             authorization = AccessToken.objects.filter(token=key)[0]
@@ -98,7 +107,7 @@ class CustomAuthorization(DjangoAuthorization):
         except:
             key = bundle.request.META.get('HTTP_ACCESS_TOKEN')
 
-        if (settings.ENV in ["dev", "local"] and key in settings.HARCODED_TOKEN):
+        if (settings.ENV in settings.IGNORE_ENV and key in settings.HARCODED_TOKEN):
             return True
         try:
             authorization = AccessToken.objects.filter(token=key)[0]
