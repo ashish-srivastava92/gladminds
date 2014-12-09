@@ -13,8 +13,7 @@ class IndustryResource(CustomBaseModelResource):
         resource_name = 'industries'
         authorization = DjangoAuthorization()
         authentication = AccessTokenAuthentication()
-        detail_allowed_methods = ['get', 'post', 'delete','put']
-        always_return_data =True
+        always_return_data = True
 
 
 class BrandResource(CustomBaseModelResource):
@@ -25,7 +24,6 @@ class BrandResource(CustomBaseModelResource):
         resource_name = "brands"
         authorization = DjangoAuthorization()
         authentication = AccessTokenAuthentication()
-        detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
         filtering = {
                      "industry": ALL_WITH_RELATIONS
@@ -40,5 +38,4 @@ class BrandProductCategoryResource(CustomBaseModelResource):
         resource_name = "brand-categories"
         authorization = DjangoAuthorization()
         authentication = AccessTokenAuthentication()
-        detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
