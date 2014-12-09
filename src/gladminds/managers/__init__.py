@@ -1,6 +1,6 @@
 import logging
 import datetime
-
+import json
 from gladminds.bajaj import models as models
 from gladminds.core.exceptions import DataNotFoundError
 from gladminds.core.utils import create_context, get_list_from_set, \
@@ -69,6 +69,7 @@ def save_update_feedback(feedback_obj, data, user, host):
     pending_status = False
     reporter_email_id = get_reporter_details(feedback_obj.reporter,"email")
     reporter_phone_number = get_reporter_details(feedback_obj.reporter)
+   
     #check if status is pending
     if feedback_obj.status == status[4]:
         pending_status = True
@@ -97,14 +98,13 @@ def save_update_feedback(feedback_obj, data, user, host):
         
     if assign is None:
         assign_status = True
- 
     if data['assign_to'] == '':
         feedback_obj.status = data['status']
         feedback_obj.priority = data['Priority']
         feedback_obj.assignee = None
      
     else:
-        if data['reporter_status'] == 'true':
+        if json.loads(data.get('reporter_status')):
             feedback_obj.previous_assignee = feedback_obj.assignee
             feedback_obj.assign_to_reporter = True
             feedback_obj.assignee = feedback_obj.reporter
@@ -112,7 +112,6 @@ def save_update_feedback(feedback_obj, data, user, host):
         else:
             if data['assign_to'] :
                 servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile__phone_number=data['assign_to'])
-                feedback_obj.previous_assignee = feedback_obj.assignee
                 feedback_obj.assignee = servicedesk_user[0]
                 feedback_obj.assign_to_reporter = False
         feedback_obj.status = data['status']
@@ -124,7 +123,8 @@ def save_update_feedback(feedback_obj, data, user, host):
     
     #check if status is progress
     if data['status'] == status[3]:
-        feedback_obj.assignee = feedback_obj.previous_assignee
+        if feedback_obj.previous_assignee:
+            feedback_obj.assignee = feedback_obj.previous_assignee
     
     #check if status is closed
     if data['status'] == status[1]:

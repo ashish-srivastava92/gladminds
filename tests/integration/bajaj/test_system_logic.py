@@ -2,8 +2,9 @@ from gladminds.bajaj import models
 from gladminds.default import models as gm_models
 from gladminds.afterbuy import models as afterbuy_models
 from integration.bajaj.base import BaseTestCase
-from datetime import datetime
+import datetime
 from django.test.client import Client
+from gladminds.bajaj.models import AuditLog, Feedback, SMSLog
 
 client = Client(SERVER_NAME='bajaj')
 
@@ -88,13 +89,17 @@ class System(BaseTestCase):
         data = {"assign_to":"+91000000000",
                 "status":"Open","Priority":"High",
                 "comments":"testing", "rootcause":"testing",
-                "resolution":"testing", "reporter_status": False, "due_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+                "resolution":"testing", "reporter_status": "false", "due_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         if kwargs.get('status'):
             data['status'] = kwargs['status']
         if kwargs.get('assign_To'):
             data['assign_To'] = kwargs['assign_To']
+        if kwargs.get('due_date'):
+            data['due_date'] = kwargs['due_date']
+        if kwargs.get('reporter_status'):
+            data['reporter_status'] = kwargs['reporter_status']
         response = client.post("/aftersell/feedbackdetails/1/", data=data)
-        self.tester.assertEqual(response.status_code, 200)
+        return response
 
     def get_product_details(self, **kwargs):
         product_data_obj = models.ProductData.objects.get(**kwargs)
