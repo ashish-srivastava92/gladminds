@@ -29,7 +29,8 @@ class AccessTokenAuthentication(Authentication):
             '''
             If verify_access_token() does not pass, it will raise an error
             '''
-            self.verify_access_token(key)
+            token_obj = self.verify_access_token(key)
+            request.user = token_obj.user
             return True
         except KeyError, e:
             logging.exception('Error in Authentication. {0}'.format(e))
@@ -41,7 +42,7 @@ class AccessTokenAuthentication(Authentication):
         return True
 
     def verify_access_token(self, key):
-        if  (settings.ENV in ["dev", "local"] and key in settings.HARCODED_TOKEN):
+        if  (settings.ENV in settings.IGNORE_ENV and key in settings.HARCODED_TOKEN):
                 return key
         try:
             token = AccessToken.objects.get(token=key)
