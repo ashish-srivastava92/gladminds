@@ -253,13 +253,3 @@ class InterestResource(CustomBaseModelResource):
         authentication = AccessTokenAuthentication()
         authorization = DjangoAuthorization()
         always_return_data = True
-
-
-class ServiceTypeResource(CustomBaseModelResource):
-
-    class Meta:
-        queryset = afterbuy_model.ServiceType.objects.all()
-        resource_name = "service-types"
-        authentication = AccessTokenAuthentication()
-        authorization = DjangoAuthorization()
-        always_return_data = True

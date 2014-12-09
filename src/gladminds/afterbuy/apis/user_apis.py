@@ -23,7 +23,6 @@ from gladminds.core.apis.authorization import CustomAuthorization,\
     MultiAuthorization
 from django.contrib.sites.models import RequestSite
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from gladminds.afterbuy.apis.product_apis import ServiceTypeResource
 
 logger = logging.getLogger("gladminds")
 
@@ -325,6 +324,16 @@ class UserNotificationResource(CustomBaseModelResource):
                      "id": ALL,
                      "notification_read": ALL
                      }
+
+
+class ServiceTypeResource(CustomBaseModelResource):
+
+    class Meta:
+        queryset = afterbuy_model.ServiceType.objects.all()
+        resource_name = "service-types"
+        authentication = AccessTokenAuthentication()
+        authorization = DjangoAuthorization()
+        always_return_data = True
 
 
 class ServiceResource(CustomBaseModelResource):
