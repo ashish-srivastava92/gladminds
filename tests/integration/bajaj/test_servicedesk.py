@@ -1,6 +1,6 @@
 from django.test.client import Client
 import unittest
-from gladminds.bajaj.models import AuditLog, Feedback, SMSLog
+from gladminds.bajaj.models import AuditLog, Feedback, SMSLog, Comment
 from integration.bajaj.base import BaseTestCase
 from integration.bajaj.test_system_logic import System
 from integration.bajaj.test_brand_logic import Brand
@@ -79,7 +79,7 @@ class TestServiceDeskFlow(BaseTestCase):
         initiator = self.system
         initiator.post_feedback()
         service_desk_manager = self.system
-        service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDO')
+        service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDM')
         response = service_desk_manager.update_feedback(status='Open')
         self.assertEqual(response.status_code, 200)
         service_desk_owner = self.system
@@ -109,7 +109,7 @@ class TestServiceDeskFlow(BaseTestCase):
         initiator = self.system
         initiator.post_feedback()
         service_desk_manager = self.system
-        service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDO')
+        service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDM')
         response = service_desk_manager.update_feedback(due_date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         self.assertEqual(response.status_code, 200)
         
@@ -117,7 +117,7 @@ class TestServiceDeskFlow(BaseTestCase):
         initiator = self.system
         initiator.post_feedback()
         service_desk_manager = self.system
-        service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDO')
+        service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDM')
         response=service_desk_manager.update_feedback(status='Open')
         self.assertEqual(response.status_code, 200)
         response=service_desk_manager.update_feedback(status='Pending')
@@ -133,7 +133,7 @@ class TestServiceDeskFlow(BaseTestCase):
         initiator = self.system
         initiator.post_feedback()
         service_desk_manager = self.system
-        service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDO')
+        service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDM')
         response=service_desk_manager.update_feedback(status='Open', assign_to='1000000000')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Feedback.objects.get(id=1).assignee.user_profile.user.username, 'sdo')
@@ -156,4 +156,15 @@ class TestServiceDeskFlow(BaseTestCase):
         self.assertEqual(Feedback.objects.get(id=1).assignee.user_profile.user.username, 'sdo')
         self.assertEqual(response.status_code, 200)
         
-        
+    def test_edit_comment(self):
+        initiator = self.system
+        initiator.post_feedback()
+        service_desk_manager = self.system
+        service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDM')
+        response=service_desk_manager.update_feedback(status='Open', assign_to='1000000000', comments='hello')
+        self.assertEqual(Comment.objects.get(id=1).comment, 'hello')
+        self.assertEqual(response.status_code, 200)
+        response=service_desk_manager.update_comment(commentDescription='test')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Comment.objects.get(id=1).comment, 'test')
+       

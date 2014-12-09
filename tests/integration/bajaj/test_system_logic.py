@@ -98,7 +98,18 @@ class System(BaseTestCase):
             data['due_date'] = kwargs['due_date']
         if kwargs.get('reporter_status'):
             data['reporter_status'] = kwargs['reporter_status']
+        if kwargs.get('comments'):
+            data['comments'] = kwargs['comments']
         response = client.post("/aftersell/feedbackdetails/1/", data=data)
+        return response
+    
+    def update_comment(self, **kwargs):
+        data = {"commentId":"1",
+                "commentUser":"sdm","commentDescription":"hello"
+                }
+        if kwargs.get('commentDescription'):
+            data['commentDescription'] = kwargs['commentDescription']
+        response = client.post("/aftersell/feedbackdetails/1/comments/1/", data=data)
         return response
 
     def get_product_details(self, **kwargs):
