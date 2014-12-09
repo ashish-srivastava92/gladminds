@@ -23,6 +23,7 @@ from gladminds.core.apis.authorization import CustomAuthorization,\
     MultiAuthorization
 from django.contrib.sites.models import RequestSite
 from gladminds.core.apis.authentication import AccessTokenAuthentication
+from gladminds.afterbuy.apis.product_apis import ServiceTypeResource
 
 logger = logging.getLogger("gladminds")
 
@@ -31,12 +32,8 @@ class DjangoUserResources(ModelResource):
     class Meta:
         queryset = User.objects.all()
         resource_name = 'django'
-        excludes = ['is_active', 'is_staff', 'is_superuser']
-        detail_allowed_methods = ['get','post', 'delete', 'put']
+        excludes = ['email', 'password', 'is_superuser']
         always_return_data = True
-        filtering = {
-            'username': ALL,
-        }
 
 
 class ConsumerResource(CustomBaseModelResource):
@@ -47,12 +44,11 @@ class ConsumerResource(CustomBaseModelResource):
         queryset = afterbuy_model.Consumer.objects.all()
         resource_name = "consumers"
         authentication = AccessTokenAuthentication()
-        #authorization = Authorization()
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         detail_allowed_methods = ['get', 'delete', 'put']
         always_return_data = True
         filtering = {
-                     "consumer_id" : ALL
+                     "consumer_id": ALL
                      }
 
     def prepend_urls(self):
@@ -313,19 +309,6 @@ class ConsumerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
 
 
-
-
-class InterestResource(CustomBaseModelResource):
-
-    class Meta:
-        queryset = afterbuy_model.Interest.objects.all()
-        resource_name = "interests"
-        authentication = AccessTokenAuthentication()
-        authorization = DjangoAuthorization()
-        detail_allowed_methods = ['get', 'post', 'delete', 'put']
-        always_return_data = True
-
-
 class UserNotificationResource(CustomBaseModelResource):
     consumer = fields.ForeignKey(ConsumerResource, 'consumer', null=True, blank=True, full=True)
 
@@ -342,18 +325,6 @@ class UserNotificationResource(CustomBaseModelResource):
                      "id": ALL,
                      "notification_read": ALL
                      }
-        
-        
-class ServiceTypeResource(CustomBaseModelResource):
-
-    class Meta:
-        queryset = afterbuy_model.ServiceType.objects.all()
-        resource_name = "service-types"
-        authentication = AccessTokenAuthentication()
-        authorization = DjangoAuthorization()
-        #authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
-        always_return_data = True
 
 
 class ServiceResource(CustomBaseModelResource):
@@ -365,12 +336,8 @@ class ServiceResource(CustomBaseModelResource):
         resource_name = "services"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
-        #authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "consumer": ALL,
                      "service_type": ALL,
-                     }         
-
-        
+                     }
