@@ -2,7 +2,7 @@ from gladminds.bajaj import models
 from gladminds.default import models as gm_models
 from gladminds.afterbuy import models as afterbuy_models
 from integration.bajaj.base import BaseTestCase
-from datetime import datetime
+import datetime
 from django.test.client import Client
 
 client = Client(SERVER_NAME='bajaj')
