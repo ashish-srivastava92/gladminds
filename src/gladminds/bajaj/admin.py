@@ -3,12 +3,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.admin import ModelAdmin
 from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 
-from gladminds.bajaj.models import BrandProductCategory, ProductType,\
-UserProfile, Dealer, AuthorizedServiceCenter,\
-ServiceAdvisor, ProductData, CouponData, \
-ASCTempRegistration, SATempRegistration, CustomerTempRegistration,\
-SMSLog, EmailLog, DataFeedLog, MessageTemplate, EmailTemplate, SLA,\
-    ServiceDeskUser
+from gladminds.bajaj import models
 from gladminds.core import utils
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from gladminds.core.auth_helper import GmApps
@@ -46,7 +41,7 @@ class ProductTypeAdmin(ModelAdmin):
     list_display = ('id', 'product_type',\
                     'image_url', 'is_active')
 
-class DispatchedProduct(ProductData):
+class DispatchedProduct(models.ProductData):
 
     class Meta:
         proxy = True
@@ -69,7 +64,7 @@ class ListDispatchedProduct(ModelAdmin):
         return query_set
 
     def UCN(self, obj):
-        coupons = CouponData.objects.filter(product=obj.id)
+        coupons = models.CouponData.objects.filter(product=obj.id)
         if coupons:
             return ' | '.join([str(ucn.unique_service_coupon) for ucn in coupons])
         else:
@@ -88,7 +83,7 @@ class ListDispatchedProduct(ModelAdmin):
 
 
 class Couponline(TabularInline):
-    model = CouponData
+    model = models.CouponData
     fields = ('unique_service_coupon', 'service_type', 'status', 'mark_expired_on', 'extended_date')
     extra = 0
     max_num = 0
@@ -119,14 +114,14 @@ class ProductDataAdmin(ModelAdmin):
         return query_set
 
     def UCN(self, obj):
-        coupons = CouponData.objects.filter(product=obj.id)
+        coupons = models.CouponData.objects.filter(product=obj.id)
         if coupons:
             return ' | '.join([str(ucn.unique_service_coupon) for ucn in coupons])
         else:
             return None
 
     def service_type(self, obj):
-        gm_coupon_data_obj = CouponData.objects.filter(product=obj.id)
+        gm_coupon_data_obj = models.CouponData.objects.filter(product=obj.id)
         coupon_service_type = ''
         if gm_coupon_data_obj:
             coupon_service_type = " | ".join(
@@ -348,32 +343,56 @@ class SlaAdmin(ModelAdmin):
 class ServiceDeskUserAdmin(ModelAdmin):
     list_display = ('user_profile', 'name', 'phone_number', 'email')
 
+class NSMAdmin(ModelAdmin):
+    list_display = ('nsm_id', 'user', 'territory')
+    
+class ASMAdmin(ModelAdmin):
+    list_display = ('asm_id', 'user')
+    
+class DistributorAdmin(ModelAdmin):
+    list_display = ('distributor_id', 'user')
+    
+class MechanicAdmin(ModelAdmin):
+    list_display = ('mechanic_id', 'user', 'total_points')
+    
+class SparePartAdmin(ModelAdmin):
+    list_display = ('unique_part_code', 'price', 'points')
+
+class AccumulationRequestAdmin(ModelAdmin):
+    list_display = ('transaction_id', 'member', 'upc', 'asm', 'points')
 
 brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
 
 brand_admin.register(User, UserAdmin)
 brand_admin.register(Group, GroupAdmin)
-brand_admin.register(UserProfile, UserProfileAdmin)
+brand_admin.register(models.UserProfile, UserProfileAdmin)
 
-brand_admin.register(Dealer, DealerAdmin)
-brand_admin.register(AuthorizedServiceCenter, AuthorizedServiceCenterAdmin)
-brand_admin.register(ServiceAdvisor, ServiceAdvisorAdmin)
+brand_admin.register(models.Dealer, DealerAdmin)
+brand_admin.register(models.AuthorizedServiceCenter, AuthorizedServiceCenterAdmin)
+brand_admin.register(models.ServiceAdvisor, ServiceAdvisorAdmin)
 
-brand_admin.register(BrandProductCategory, BrandProductCategoryAdmin)
-brand_admin.register(ProductType, ProductTypeAdmin)
+brand_admin.register(models.BrandProductCategory, BrandProductCategoryAdmin)
+brand_admin.register(models.ProductType, ProductTypeAdmin)
 brand_admin.register(DispatchedProduct, ListDispatchedProduct)
-brand_admin.register(ProductData, ProductDataAdmin)
-brand_admin.register(CouponData, CouponAdmin)
+brand_admin.register(models.ProductData, ProductDataAdmin)
+brand_admin.register(models.CouponData, CouponAdmin)
 
-brand_admin.register(SMSLog, SMSLogAdmin)
-brand_admin.register(EmailLog, SMSLogAdmin)
-brand_admin.register(DataFeedLog, FeedLogAdmin)
+brand_admin.register(models.SMSLog, SMSLogAdmin)
+brand_admin.register(models.EmailLog, SMSLogAdmin)
+brand_admin.register(models.DataFeedLog, FeedLogAdmin)
 
-brand_admin.register(ASCTempRegistration, ASCTempRegistrationAdmin)
-brand_admin.register(SATempRegistration, SATempRegistrationAdmin)
-brand_admin.register(CustomerTempRegistration, CustomerTempRegistrationAdmin)
+brand_admin.register(models.NationalSalesManager, NSMAdmin)
+brand_admin.register(models.AreaServiceManager, ASMAdmin)
+brand_admin.register(models.Distributor, DistributorAdmin)
+brand_admin.register(models.Mechanic, MechanicAdmin)
+brand_admin.register(models.SparePart, SparePartAdmin)
+brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
 
-brand_admin.register(EmailTemplate, EmailTemplateAdmin)
-brand_admin.register(MessageTemplate, MessageTemplateAdmin)
-brand_admin.register(SLA, SlaAdmin)
-brand_admin.register(ServiceDeskUser, ServiceDeskUserAdmin)
+brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)
+brand_admin.register(models.SATempRegistration, SATempRegistrationAdmin)
+brand_admin.register(models.CustomerTempRegistration, CustomerTempRegistrationAdmin)
+
+brand_admin.register(models.EmailTemplate, EmailTemplateAdmin)
+brand_admin.register(models.MessageTemplate, MessageTemplateAdmin)
+brand_admin.register(models.SLA, SlaAdmin)
+brand_admin.register(models.ServiceDeskUser, ServiceDeskUserAdmin)

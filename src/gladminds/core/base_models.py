@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from django.db import models
 from django.core.exceptions import ValidationError
 from composite_field.base import CompositeField
@@ -8,7 +7,8 @@ from django.utils.translation import gettext as _
 from constance import config
 
 from gladminds.core.managers import user_manager
-from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, RATINGS,\
+from gladminds.core.constants import FEEDBACK_STATUS, \
+                            PRIORITY, FEEDBACK_TYPE, RATINGS,\
                             ROOT_CAUSE, SLA_PRIORITY, TIME_UNIT
 from gladminds.core.model_helpers import PhoneField
 from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
@@ -20,10 +20,8 @@ except ImportError:
     datetime_now = datetime.datetime.now
 
 
-
-
-
 class BaseModel(models.Model):
+    '''Base model containing created date and modified date'''
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
 
@@ -32,6 +30,7 @@ class BaseModel(models.Model):
 
 
 class UserProfile(BaseModel):
+    '''User profile model to extend user'''
     phone_number = models.CharField(
                    max_length=15, blank=True, null=True)
     image_url = models.CharField(
@@ -54,12 +53,14 @@ class UserProfile(BaseModel):
     class Meta:
         verbose_name_plural = "User Profile"
         abstract = True
-        
+
     def __unicode__(self):
         return self.phone_number or 'None'
 
 
 class Industry(BaseModel):
+    '''Stores the different industries
+    a brand could belong to'''
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
 
@@ -72,6 +73,7 @@ class Industry(BaseModel):
 
 
 class Brand(BaseModel):
+    '''Details of brands signed up'''
     name = models.CharField(max_length=250)
     image_url = models.CharField(max_length=200, null=True, blank=True)
     is_active = models.BooleanField(default=True)
@@ -86,6 +88,7 @@ class Brand(BaseModel):
 
 
 class BrandProductCategory(BaseModel):
+    '''Different category of product a brand builds'''
     name = models.CharField(max_length=250)
     description = models.TextField(null=True, blank=True)
 
@@ -95,6 +98,7 @@ class BrandProductCategory(BaseModel):
 
 
 class OTPToken(BaseModel):
+    '''Stores the OTPs generated'''
     token = models.CharField(max_length=256, null=False)
     request_date = models.DateTimeField(null=True, blank=True)
     email = models.CharField(max_length=50, null=True, blank=True)
@@ -109,6 +113,7 @@ class OTPToken(BaseModel):
 
 
 class Dealer(BaseModel):
+    '''Details of Dealer'''
     dealer_id = models.CharField(
         max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
@@ -124,6 +129,7 @@ class Dealer(BaseModel):
 
 
 class AuthorizedServiceCenter(BaseModel):
+    '''Details of Authorized Service Center'''
     asc_id = models.CharField(
         max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
@@ -137,6 +143,7 @@ class AuthorizedServiceCenter(BaseModel):
 
 
 class ServiceAdvisor(BaseModel):
+    '''Details of Service Advisor'''
     service_advisor_id = models.CharField(
         max_length=15, blank=False, unique=True, null=False)
     status = models.CharField(max_length=10, blank=False, null=False)
@@ -157,6 +164,7 @@ For 1 Brand there can be multiple Products
 
 
 class ProductType(BaseModel):
+    '''Details of Product Type'''
     product_type = models.CharField(max_length=255, unique=True, null=False)
     image_url = models.CharField(
                    max_length=200, blank=True, null=True)
@@ -172,6 +180,7 @@ class ProductType(BaseModel):
 ####################################################################
 
 class ProductData(BaseModel):
+    '''Details of Product Data'''
     product_id = models.CharField(max_length=215, unique=True)
     customer_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
@@ -189,7 +198,7 @@ class ProductData(BaseModel):
     engine = models.CharField(max_length=255, null=True, blank=True)
     veh_reg_no = models.CharField(max_length=15, null=True, blank=True)
     is_active = models.BooleanField(default=True)
-        
+
     class Meta:
         abstract = True
         verbose_name_plural = "Product Data"
@@ -203,6 +212,7 @@ STATUS_CHOICES = ((1, 'Unused'), (2, 'Closed'), (
        5, 'Exceeds Limit'), (6, 'Closed Old Fsc'))
 
 class CouponData(BaseModel):
+    '''Details of Coupon Data'''
     unique_service_coupon = models.CharField(
         max_length=215, unique=True, null=False)
     valid_days = models.IntegerField(max_length=10, null=False)
@@ -229,28 +239,33 @@ class CouponData(BaseModel):
         return self.unique_service_coupon
 
 class ServiceAdvisorCouponRelationship(BaseModel):
-    
+    '''Details of SA Coupon Relationship'''
+
     class Meta:
         abstract = True
         verbose_name_plural = 'Service Advisor And Coupon Relationship'
 
 class UCNRecovery(BaseModel):
+    '''Details of UCN Recovery'''
     reason = models.TextField(null=False)
     customer_id = models.CharField(max_length=215, null=True, blank=True)
     file_location = models.CharField(max_length=215, null=True, blank=True)
-    unique_service_coupon = models.CharField(max_length=215, null=True, blank=True)
+    unique_service_coupon = models.CharField(max_length=215,
+                                            null=True, blank=True)
 
     class Meta:
         abstract = True
         verbose_name_plural = "UCN recovery logs"
-        
+
 class OldFscData(BaseModel):
+    '''Details of Old Fsc Data'''
     unique_service_coupon = models.CharField(
         max_length=215, null=True)
     valid_days = models.IntegerField(max_length=10, null=True)
     valid_kms = models.IntegerField(max_length=10, null=True)
     service_type = models.IntegerField(max_length=10, null=True)
-    status = models.SmallIntegerField(choices=STATUS_CHOICES, default=1, db_index=True)
+    status = models.SmallIntegerField(choices=STATUS_CHOICES,
+                                      default=1, db_index=True)
     closed_date = models.DateTimeField(null=True, blank=True)
     mark_expired_on = models.DateTimeField(null=True, blank=True)
     actual_service_date = models.DateTimeField(null=True, blank=True)
@@ -275,6 +290,7 @@ class OldFscData(BaseModel):
 
 
 class MessageTemplate(BaseModel):
+    '''Message Template used for SMS'''
     template_key = models.CharField(max_length=255, unique=True, null=False)
     template = models.CharField(max_length=512, null=False)
     description = models.CharField(max_length=512, null=True)
@@ -288,6 +304,7 @@ class MessageTemplate(BaseModel):
 
 
 class EmailTemplate(BaseModel):
+    '''Email Template used for email'''
     template_key = models.CharField(max_length=255, unique=True, null=False,\
                                      blank=False)
     sender = models.CharField(max_length=512, null=False)
@@ -303,6 +320,7 @@ class EmailTemplate(BaseModel):
 ########################## TempRegistration #########################
 
 class ASCTempRegistration(BaseModel):
+    '''Details of ASC registration'''
     name = models.CharField(max_length=255, null=False)
     password = models.CharField(max_length=255, null=False, blank=False)
     phone_number = models.CharField(max_length=15, null=False, blank=False,
@@ -318,20 +336,24 @@ class ASCTempRegistration(BaseModel):
         verbose_name_plural = "ASC Save Form"
 
 class SATempRegistration(BaseModel):
+    '''Details of SA registration'''
     name = models.CharField(max_length=255, null=False)
-    phone_number = models.CharField(max_length=15, null=False, blank=False, unique=True)
+    phone_number = models.CharField(max_length=15,
+                                null=False, blank=False, unique=True)
     status = models.CharField(max_length=10, blank=False, null=False)
 
     class Meta:
         abstract = True
         verbose_name_plural = "SA Save Form"
-    
+
 
 class CustomerTempRegistration(BaseModel):
+    '''Details of customer registration'''
     new_customer_name = models.CharField(max_length=50, null=True, blank=True)
     new_number = models.CharField(max_length=15)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
-    temp_customer_id = models.CharField(max_length=50, null=False, blank=False, unique=True)
+    temp_customer_id = models.CharField(max_length=50,
+                                null=False, blank=False, unique=True)
     sent_to_sap = models.BooleanField(default=False)
     remarks = models.CharField(max_length=500, null=True, blank=True)
     tagged_sap_id = models.CharField(
@@ -345,18 +367,6 @@ class CustomerTempRegistration(BaseModel):
 
     def __unicode__(self):
         return self.new_customer_name
-
-#############################################################
-
-
-class SparesData(BaseModel):
-    spare_name = models.CharField(max_length=50, null=True, blank=True)
-    spare_contact = models.CharField(max_length=50, null=True, blank=True)
-
-    class Meta:
-        abstract = True
-        verbose_name_plural = "spares data"
-
 
 class EmailToken(models.Model):
     ACTIVATED = u"ALREADY_ACTIVATED"
@@ -456,13 +466,14 @@ class UserPreference(BaseModel):
 
 
 class BrandPreference(UserPreference):
-
+    '''stores the preferences of a brand'''
     class Meta:
         abstract = True
         verbose_name_plural = "Brand Preferences"
 
 
 class SMSLog(BaseModel):
+    '''details of the sms sent and received'''
     action = models.CharField(max_length=250)
     message = models.TextField(null=True, blank=True)
     sender = models.CharField(max_length=15)
@@ -474,6 +485,7 @@ class SMSLog(BaseModel):
         verbose_name_plural = "SMS Log"
 
 class EmailLog(BaseModel):
+    '''details of the email sent and received'''
     subject = models.CharField(max_length=250, null=True, blank=True)
     message = models.TextField(null=True, blank=True)
     sender = models.CharField(max_length=100, null=True, blank=True)
@@ -485,6 +497,7 @@ class EmailLog(BaseModel):
         verbose_name_plural = "Email Log"
 
 class DataFeedLog(models.Model):
+    '''details of the feeds sent and received'''
     data_feed_id = models.AutoField(primary_key=True)
     feed_type = models.CharField(max_length=50, null=False)
     total_data_count = models.IntegerField(null=False)
@@ -502,6 +515,7 @@ class DataFeedLog(models.Model):
 
 
 class AuditLog(BaseModel):
+    '''details of the requests received'''
     device = models.CharField(max_length=250, null=True, blank=True)
     user_agent = models.CharField(max_length=250, null=True, blank=True)
     urls = models.CharField(max_length=250)
@@ -512,6 +526,7 @@ class AuditLog(BaseModel):
         verbose_name_plural = "Audit log"
 
 class ServiceDeskUser(BaseModel):
+    '''details of Service-Desk User'''
     name = models.CharField(max_length=30, null=True, blank=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     email = models.CharField(max_length=30, blank=True, null=True)
@@ -522,6 +537,7 @@ class ServiceDeskUser(BaseModel):
 
 
 class Activity(BaseModel):
+    '''details of activities done by service-desk user'''
     action = models.TextField(null=True, blank=True)
     original_value = models.CharField(max_length=512, null=True, blank=True)
     new_value = models.CharField(max_length=512, null=True, blank=True)
@@ -532,6 +548,7 @@ class Activity(BaseModel):
 
 
 class Feedback(BaseModel):
+    '''details of feedback received'''
     summary = models.CharField(max_length=512, null=True, blank=True)
     description = models.CharField(max_length=512, null=True, blank=False)
     status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
@@ -559,6 +576,7 @@ class Feedback(BaseModel):
 
 
 class Comment(BaseModel):
+    '''details of comments given for a feedback'''
     user = models.CharField(max_length=20, null=False, blank=False)
     comment = models.CharField(max_length=100, null=True, blank=True)
     file_location = models.CharField(max_length=215, null=True, blank=True)
@@ -606,3 +624,125 @@ class SLA(models.Model):
     class Meta:
         abstract = True
         verbose_name_plural = "SLA info"
+        
+#######################LOYALTY TABLES#################################
+
+class NationalSalesManager(models.Model):
+    '''details of National Sales Manager'''
+    nsm_id = models.CharField(max_length=50, unique=True)
+    territory = models.CharField(max_length=50, null=True, blank=True, unique=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "national sales manager"
+
+    def __unicode__(self):
+        return self.nsm_id
+
+class AreaServiceManager(models.Model):
+    '''details of Area Service Manager'''
+    asm_id = models.CharField(max_length=50, unique=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "area service manager"
+
+    def __unicode__(self):
+        return self.asm_id
+
+class Distributor(models.Model):
+    '''details of Distributor'''
+    distributor_id = models.CharField(max_length=50, unique=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "distributor"
+
+    def __unicode__(self):
+        return self.distributor_id
+
+class Mechanic(models.Model):
+    '''details of Mechanic'''
+    mechanic_id = models.CharField(max_length=50, unique=True)
+    total_points = models.IntegerField(max_length=50, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "mechanics"
+
+    def _unicode_(self):
+        return self.mechanic_id
+
+
+class SparePart(models.Model):
+    '''details of Spare Part'''
+    unique_part_code = models.CharField(max_length=50, unique=True)
+    part_serial_number = models.IntegerField(max_length=100,
+                                             null=True, blank=True)
+    points = models.IntegerField(max_length=50, null=True, blank=True)
+    price = models.IntegerField(max_length=50, null=True, blank=True)
+    part_model = models.CharField(max_length=50, null=True, blank=True)
+    description = models.CharField(max_length=50, null=True, blank=True)
+    validity_from =  models.DateTimeField(null=True, blank= True)
+    validity_to =  models.DateTimeField(null=True, blank= True)
+    type = models.CharField(max_length=50, null=True, blank=True)
+    category = models.CharField(max_length=50, null=True, blank=True)
+    segment = models.CharField(max_length=50, null=True, blank=True)
+    territory = models.CharField(max_length=50, null=True, blank=True)
+    supplier = models.CharField(max_length=50, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "spare parts"
+
+    def _unicode_(self):
+        return self.unique_part_code
+
+class AccumulationRequest(models.Model):
+    '''details of Spare Part'''
+    transaction_id = models.CharField(max_length=50, unique=True)
+    points = models.IntegerField(max_length=50)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "accumulation request"
+
+#     class RedemptionPartner(models.Model):
+#     class Meta:
+#         abstract = True
+#         verbose_name_plural = "Redemption partner"
+
+# class ProductCatalog(models.Model):
+#     product_id = models.CharField(max_length=50, unique=True)
+#     #should be a foreign key from redemption partners
+#     partner = models.CharField(max_length=50, null=True, blank=True)
+#     price = models.IntegerField(max_length=50, null=True, blank=True)
+#     name = models.CharField(max_length=50, null=True, blank=True)
+#     points = models.IntegerField(max_length=50, null=True, blank=True)
+#     description = models.CharField(max_length=100, null=True, blank=True)
+#     variation = models.CharField(max_length=50, null=True, blank=True)
+#     brand = models.CharField(max_length=50, null=True, blank=True)
+#     model = models.CharField(max_length=50, null=True, blank=True)
+#     image_url = models.CharField(
+#                    max_length=200, blank=True, null=True)
+#     category = models.CharField(max_length=50, null=True, blank=True)
+#     sub_category = models.CharField(max_length=50, null=True, blank=True)
+#
+#
+#     class Meta:
+#         abstract = True
+#         verbose_name_plural = "product catalog"
+
+# class ReedemptionRequest(models.Model):
+#     '''details of Spare Part'''
+#     transaction_id = models.CharField(max_length=50,
+#                                 null=True, blank=True, unique=True)
+#     points = models.IntegerField(max_length=50, null=True, blank=True)
+#     status = models.CharField(max_length=50, null=True, blank=True)
+#     #should be a foreign key from redemption partners and mechanic
+#     partner = models.CharField(max_length=50, null=True, blank=True)
+#     mechanic = models.CharField(max_length=50, null=True, blank=True)
+#
+#     class Meta:
+#         abstract = True
+#         verbose_name_plural = "Accumulation Request"
