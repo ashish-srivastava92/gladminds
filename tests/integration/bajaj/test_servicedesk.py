@@ -1,11 +1,13 @@
 from django.test.client import Client
-from gladminds.bajaj.models import AuditLog, Feedback, SMSLog, Comment
+from gladminds.bajaj.models import AuditLog, Feedback, SMSLog, Comment, EmailLog,\
+    ServiceAdvisor, UserProfile
 from integration.bajaj.base import BaseTestCase
 from integration.bajaj.test_system_logic import System
 from integration.bajaj.test_brand_logic import Brand
 from django.test import TestCase
 import datetime
 from time import sleep
+from django.contrib.auth.models import User
 
 client = Client(SERVER_NAME='bajaj')
 
@@ -31,14 +33,17 @@ class TestServiceDeskFlow(BaseTestCase):
 
     def test_send_servicedesk_feedback(self):
         initiator = self.system
-#         #FIXME: need to know from where the extra messages are flowing
         SMSLog.objects.all().delete()
+        EmailLog.objects.all().delete()
         initiator.post_feedback()
-        log_len_after = SMSLog.objects.all()
+        sms_log_len_after = SMSLog.objects.all()
+        email_log_len_after = EmailLog.objects.all()
         feedback_obj = Feedback.objects.all()
         initiator.verify_result(input=feedback_obj[0].priority, output="Low")
-        initiator.verify_result(input=len(log_len_after), output=1)
-        initiator.verify_result(input=log_len_after[0].receiver, output="9999999999")
+        initiator.verify_result(input=len(sms_log_len_after), output=1)
+        initiator.verify_result(input=sms_log_len_after[0].receiver, output="9999999999")
+        initiator.verify_result(input=len(email_log_len_after), output=1)
+        initiator.verify_result(input=email_log_len_after[0].receiver, output="gm@gm.com")
     
     def test_get_feedback_sdo(self):
         initiator = self.system
@@ -49,6 +54,7 @@ class TestServiceDeskFlow(BaseTestCase):
         feedback_obj = Feedback.objects.all()
         system = self.system
         system.verify_result(input=feedback_obj[0].priority, output="Low")
+
     
     def test_get_feedback_sdm(self):
         initiator = self.system
@@ -62,19 +68,25 @@ class TestServiceDeskFlow(BaseTestCase):
  
     def test_sms_email_assignee_after_feedback_assigned(self):
         initiator = self.system
+        EmailLog.objects.all().delete()
         initiator.post_feedback()
         service_desk_manager = self.system
         SMSLog.objects.all().delete()
         service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDO')
         response = service_desk_manager.update_feedback(status='Open')
         self.assertEqual(response.status_code, 200)
-        log_len_after = SMSLog.objects.all()
+        sms_log_len_after = SMSLog.objects.all()
+        email_log_len_after = EmailLog.objects.all()
         system = self.system
-        system.verify_result(input=log_len_after[0].receiver, output="9999999999")
-        system.verify_result(input=log_len_after[1].receiver, output="1000000000")
+        system.verify_result(input=len(email_log_len_after), output=2)
+        system.verify_result(input=email_log_len_after[0].receiver, output="gm@gm.com")
+        system.verify_result(input=email_log_len_after[1].receiver, output="gm@gm.com")
+        system.verify_result(input=sms_log_len_after[0].receiver, output="9999999999")
+        system.verify_result(input=sms_log_len_after[1].receiver, output="1000000000")
 
     def test_sms_email_after_resolved(self):
         initiator = self.system
+        EmailLog.objects.all().delete()
         initiator.post_feedback()
         service_desk_manager = self.system
         service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDM')
@@ -84,7 +96,11 @@ class TestServiceDeskFlow(BaseTestCase):
         service_desk_owner.login(username='sdo', password='123', provider='desk', group_name='SDO')
         response = service_desk_owner.update_feedback(status='resolved', assign_to='1000000000')
         self.assertEqual(response.status_code, 200)
+        email_log_len_after = EmailLog.objects.all()
         system = self.system
+        system.verify_result(input=len(email_log_len_after), output=2)
+        system.verify_result(input=email_log_len_after[0].receiver, output="gm@gm.com")
+        system.verify_result(input=email_log_len_after[1].receiver, output="gm@gm.com")
         feedback_obj = Feedback.objects.all()
         system.verify_result(input=feedback_obj[0].status, output="resolved")
  
@@ -108,8 +124,25 @@ class TestServiceDeskFlow(BaseTestCase):
         initiator.post_feedback()
         service_desk_manager = self.system
         service_desk_manager.login(username='sdm', password='123', provider='desk', group_name='SDM')
-        response = service_desk_manager.update_feedback(due_date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        response = service_desk_manager.update_feedback()
         self.assertEqual(response.status_code, 200)
+        sleep(2)
+        EmailLog.objects.all().delete()
+        response = service_desk_manager.update_feedback(due_date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        email_log_len_after = EmailLog.objects.all()
+        system = self.system
+        system.verify_result(input=len(email_log_len_after), output=0)
+        user = User.objects.get(username='GMDEALER001SA01')
+        user.email = 'sa@sa.com'
+        user.save()
+        EmailLog.objects.all().delete()
+        sleep(2)
+        response = service_desk_manager.update_feedback(due_date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        email_log_len_after = EmailLog.objects.all()
+        system = self.system
+        system.verify_result(input=len(email_log_len_after), output=1)
+        self.assertEqual(response.status_code, 200)
+        
         
     def test_pending_time(self):
         initiator = self.system
