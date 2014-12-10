@@ -18,8 +18,6 @@ try:
 except ImportError:
     datetime_now = datetime.datetime.now
 
-
-
 _APP_NAME = GmApps.AFTERBUY
 
 
@@ -78,7 +76,7 @@ class Consumer(base_models.BaseModel):
         verbose_name_plural = "Consumers"
 
 
-class UserProduct(models.Model):
+class UserProduct(base_models.BaseModel):
     consumer = models.ForeignKey(Consumer)
     brand = models.ForeignKey(Brand)
     nick_name = models.CharField(max_length=100, default="")
@@ -90,7 +88,6 @@ class UserProduct(models.Model):
     color = models.CharField(max_length=50)
     is_deleted = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
-    
 
     class Meta:
         app_label = _APP_NAME
@@ -305,24 +302,24 @@ class UserProductImages(base_models.BaseModel):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "UserProductImages"
-        
+
+
 class ServiceType(base_models.BaseModel):
     name = models.CharField(max_length=40)
     description = models.TextField(null=True, blank=True)
-    
+
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "ServiceTypes" 
-         
-        
+
+
 class Service(base_models.BaseModel):
     consumer = models.ForeignKey(Consumer)
     service_type = models.ForeignKey(ServiceType)
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "Services"              
-        
+        verbose_name_plural = "Services"
 
 
 class MessageTemplate(base_models.MessageTemplate):
@@ -375,7 +372,6 @@ class EmailToken(models.Model):
             return u"Registration information for %s" % self.user
 
     def activation_key_expired(self):
-        import datetime
         """
         Determine whether this ``RegistrationProfile``'s activation
         key has expired, returning a boolean -- ``True`` if the key
@@ -438,7 +434,7 @@ class EmailToken(models.Model):
         ctx_dict = {'activation_key': self.activation_key,
                     'expiration_days': settings.ACCOUNT_ACTIVATION_DAYS,
                     'site': site,
-                    'base_url':settings.DOMAIN_BASE_URL}
+                    'base_url': settings.DOMAIN_BASE_URL}
         if trigger_mail == 'forgot-password':
             ctx_dict = {'activation_key': self.activation_key,
                     'link': config.AFTERBUY_FORGOT_PASSWORD_URL}

@@ -1,6 +1,6 @@
 from tastypie.authorization import DjangoAuthorization
 from tastypie import fields
-from tastypie.constants import ALL_WITH_RELATIONS
+from tastypie.constants import ALL_WITH_RELATIONS, ALL
 
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.afterbuy import models as afterbuy_models
@@ -14,6 +14,9 @@ class IndustryResource(CustomBaseModelResource):
         authorization = DjangoAuthorization()
         authentication = AccessTokenAuthentication()
         always_return_data = True
+        filtering = {
+                     "name": ALL
+                     }
 
 
 class BrandResource(CustomBaseModelResource):
@@ -26,7 +29,8 @@ class BrandResource(CustomBaseModelResource):
         authentication = AccessTokenAuthentication()
         always_return_data = True
         filtering = {
-                     "industry": ALL_WITH_RELATIONS
+                     "industry": ALL_WITH_RELATIONS,
+                     "name": ALL
                      }
 
 
