@@ -6,7 +6,8 @@ from suit.widgets import EnclosedInput
 from django.forms import ModelForm
 
 from gladminds.default.models import Brand,\
-    MessageTemplate, EmailTemplate, Industry, BrandProductCategory
+    MessageTemplate, EmailTemplate, Industry, BrandProductCategory, Service,\
+    ServiceType, BrandService
 from django.contrib.auth.models import User, Group, Permission
 
 
@@ -160,3 +161,6 @@ admin.register(EmailTemplate)
 admin.register(User)
 admin.register(Group)
 admin.register(Permission)
+admin.register(Service)
+admin.register(ServiceType)
+admin.register(BrandService)

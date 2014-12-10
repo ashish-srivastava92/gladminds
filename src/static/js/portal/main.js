@@ -22,7 +22,7 @@
         Utils.submitForm(e, data, '/aftersell/register/asc');
         return false;
     });
-    
+        
     $('.asc-self-form').on('submit', function(e) {
         var data = Utils.getFormData('.asc-self-form');
         Utils.submitForm(e, data, '/aftersell/asc/self-register/');
@@ -475,7 +475,48 @@
         });
         return false;
     });
+    
+    $('.due-datetime-picker').datetimepicker({
+    	dayOfWeekStart : 1,
+    	lang:'en',
+    	format:'Y-m-d H:i:s',
+	});
+    
+    $(".feedback-free-text-search").click(function(){
+    	change_url_by_filter();
+    })
+    
+    $('.feedback-filters-options').change(function() {
+    	change_url_by_filter();
+    })
+    
 })();
+
+function getUrl(current_page_num, no_of_link_in_page){
+	var url = window.location.pathname + '?page=',
+		diff = current_page_num - no_of_link_in_page;
+	
+		if (diff > 1){
+			url = url + diff 
+		}else{
+			url = url + 1
+		}
+		window.location.href = url;
+}
+
+function change_url_by_filter(){
+	var url = window.location.pathname + '?',
+		serch_text = $(".feedback-search-text").val(),
+    	selectedOptions = $('.feedback-filters-options'),
+    	filters = ['priority', 'type', 'status', 'count'];
+    	$.each(filters, function(index, val){
+    		url = url + val + '=' + selectedOptions[index].options[selectedOptions[index].selectedIndex].value + '&'
+    	});
+    	if(serch_text){
+    		url = url + "search=" + serch_text
+    	}
+    	window.location.href = url;
+}
 
 function rootCause(status){
 	'use strict';
@@ -522,19 +563,6 @@ function disable_func(){
 function showMessage(id){
 	'use strict';
 	$('#'+id).popover();
-}
-
-function change_status(){
-	var url = window.location.pathname + '?';
-    $('.feedback-filters-options').change(function() {
-    	var selectedOptions = $('.feedback-filters-options'),
-    		filters = ['priority', 'type', 'status'];
-    	$.each(filters, function(index, val){
-    		url = url + val + '=' + selectedOptions[index].options[selectedOptions[index].selectedIndex].value + '&'
-    	});
-    	window.location.href = url;
-    });
-	
 }
 
 function getDataByDate(){
