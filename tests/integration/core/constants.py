@@ -8,9 +8,9 @@ def add_slashes(data):
 
 
 class Constants():
-        BRAND = 'testbrand'
-        INDUSTRY = 'testindustry'
-        PRODUCT_TYPE = 'testproducttype'
+        BRAND = "testbrand"
+        INDUSTRY = "testindustry"
+        PRODUCT_TYPE = "testproducttype"
 
 
 class AfterbuyUrls():
