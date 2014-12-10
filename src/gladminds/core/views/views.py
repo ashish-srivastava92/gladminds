@@ -7,7 +7,6 @@ from collections import OrderedDict
 from django.shortcuts import render_to_response, render
 from django.http.response import HttpResponseRedirect, HttpResponse,\
     HttpResponseBadRequest, Http404
-from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
@@ -17,6 +16,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import F
 
+from gladminds.core.service_handler import Services 
 from gladminds.bajaj import models
 from gladminds.bajaj.services import message_template
 from gladminds.core import utils
@@ -31,7 +31,7 @@ from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS,\
     FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL, DEALER, SDO, SDM
     
-from gladminds.core.decorator import log_time
+from gladminds.core.decorator import log_time, check_service
 from gladminds.core.utils import get_email_template, format_product_object
 
 gladmindsResources = GladmindsResources()
@@ -40,6 +40,7 @@ TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
 
 
+@check_service(Services.FREE_SERVICE_COUPON)
 def auth_login(request, provider):
     if request.method == 'GET':
             if provider not in PROVIDERS:
@@ -56,6 +57,7 @@ def auth_login(request, provider):
                 return HttpResponseRedirect('/aftersell/provider/redirect')
     return HttpResponseRedirect(request.path_info+'?auth_error=true')
 
+@check_service(Services.FREE_SERVICE_COUPON)
 def redirect_user(request):
     user_groups = utils.get_user_groups(request.user)
     for group in USER_GROUPS:
@@ -63,6 +65,7 @@ def redirect_user(request):
             return HttpResponseRedirect(REDIRECT_USER.get(group))
     return HttpResponseBadRequest()
 
+@check_service(Services.FREE_SERVICE_COUPON)
 def user_logout(request):
     if request.method == 'GET':
         #TODO: Implement brand restrictions.
@@ -75,6 +78,7 @@ def user_logout(request):
         return HttpResponseBadRequest()
     return HttpResponseBadRequest('Not Allowed')
 
+@check_service(Services.FREE_SERVICE_COUPON)
 @login_required()
 def change_password(request): 
     if request.method == 'GET':
@@ -96,6 +100,7 @@ def change_password(request):
         else:
             return HttpResponseBadRequest('Not Allowed')
 
+@check_service(Services.FREE_SERVICE_COUPON)
 def generate_otp(request):
     if request.method == 'POST':
         try:
@@ -124,7 +129,7 @@ def generate_otp(request):
     elif request.method == 'GET':
         return render(request, 'portal/get_otp.html')
 
-
+@check_service(Services.FREE_SERVICE_COUPON)
 def validate_otp(request):
     if request.method == 'GET':
         return render(request, 'portal/validate_otp.html')
@@ -140,6 +145,7 @@ def validate_otp(request):
             logger.error('OTP validation failed for name {0}'.format(username))
             return HttpResponseRedirect('/aftersell/users/otp/generate?token=invalid')
 
+@check_service(Services.FREE_SERVICE_COUPON)
 def update_pass(request):
     try:
         otp = request.POST['otp']
@@ -151,6 +157,7 @@ def update_pass(request):
         logger.error('Password update failed.')
         return HttpResponseRedirect('/aftersell/asc/login?error=true')
 
+@check_service(Services.FREE_SERVICE_COUPON)
 @login_required()
 def register(request, menu):
     groups = utils.stringify_groups(request.user)
@@ -178,6 +185,7 @@ def register(request, menu):
 ASC_REGISTER_SUCCESS = 'ASC registration is complete.'
 EXCEPTION_INVALID_DEALER = 'The dealer-id provided is not registered.'
 ALREADY_REGISTERED = 'Already Registered Number.'
+@check_service(Services.FREE_SERVICE_COUPON)
 @log_time
 def save_asc_registration(request, groups=None):
     if request.method == 'GET':
@@ -284,6 +292,7 @@ def register_customer(request, group=None):
         return json.dumps({'message': CUST_UPDATE_SUCCESS})
     return json.dumps({'message': CUST_REGISTER_SUCCESS + temp_customer_id})
 
+@check_service(Services.FREE_SERVICE_COUPON)
 def recover_coupon_info(data):
     print data
     customer_id = data['customerId']
@@ -354,6 +363,7 @@ def exceptions(request, exception=None):
     else:
         return HttpResponseBadRequest()
 
+@check_service(Services.FREE_SERVICE_COUPON)
 @login_required()
 def users(request, users=None):
     groups = utils.stringify_groups(request.user)
@@ -375,6 +385,7 @@ def users(request, users=None):
     else:
         return HttpResponseBadRequest()
 
+@check_service(Services.FREE_SERVICE_COUPON)
 @login_required()
 def get_sa_under_asc(request, id=None):
     template = 'portal/sa_list.html'
@@ -386,7 +397,7 @@ def get_sa_under_asc(request, id=None):
         pass
     return render(request, template, {'active_menu':'sa',"data": data})
 
-def get_feedbacks(user, status, priority, type):
+def get_feedbacks(user, status, priority, type, search=""):
     group = user.groups.all()[0]
     feedbacks = []
     if type == ALL or type is None:
@@ -428,6 +439,7 @@ def get_feedbacks(user, status, priority, type):
     return feedbacks
 
 
+@check_service(Services.SERVICE_DESK)
 @login_required()
 def service_desk(request, servicedesk):
     status = request.GET.get('status')
@@ -479,6 +491,7 @@ def save_help_desk_data(request):
                                                 service_advisor_obj.user.user.username, dealer_obj.user.user.email,
                                                 with_detail=True)
 
+
 def sqs_tasks_view(request):
     return render_to_response('trigger-sqs-tasks.html')
 
@@ -505,6 +518,7 @@ def site_info(request):
     return HttpResponse(json.dumps({'brand': brand}), content_type='application/json')
 
 
+@check_service(Services.FREE_SERVICE_COUPON)
 @login_required()
 def reports(request):
     groups = utils.stringify_groups(request.user)
@@ -568,6 +582,7 @@ def create_reconciliation_report(query_params, user):
         report_data.append(coupon_data_dict)
     return report_data
 
+@check_service(Services.FREE_SERVICE_COUPON)
 def brand_details(requests, role=None):
     data = requests.GET.copy()
     data_list = []
@@ -665,6 +680,7 @@ def get_active_asc_info(data, limit, offset, data_dict, data_list):
     return data_dict
 
 #FIXME: Fix this according to new model
+@check_service(Services.FREE_SERVICE_COUPON)
 def get_active_asc_report(request):
     '''get city and state from parameter'''
     data = request.GET.copy()
