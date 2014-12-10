@@ -16,4 +16,4 @@ class CoreResourceTestCase(ResourceTestCase):
     multi_db=True
 
     def setUp(self):
-        pass
+        super(CoreResourceTestCase, self).setUp()

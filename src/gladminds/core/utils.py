@@ -18,7 +18,6 @@ from gladminds.bajaj import models
 from django.db.models.fields.files import FieldFile
 from gladminds.core.constants import TIME_FORMAT
 from gladminds.core.cron_jobs.taskqueue import SqsTaskQueue
-from gladminds.core.managers.mail import send_ucn_request_alert, send_mail_when_vin_does_not_exist
 from django.db.models import Count
 
 
@@ -130,25 +129,25 @@ def format_product_object(product_obj):
             'purchase_date': purchase_date,
             'vin': product_obj.product_id}
 
-def get_customer_info(data):
-    try:
-        product_obj = models.ProductData.objects.get(product_id=data['vin'])
-    except Exception as ex:
-        logger.info(ex)
-        message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
-        if data['groups'][0] == "dealers":
-            data['groups'][0] = "Dealer"
-        else:
-            data['groups'][0] = "ASC"
-        template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
-        send_mail_when_vin_does_not_exist(data=template)
-        return {'message': message, 'status': 'fail'}
-    if product_obj.purchase_date:
-        product_data = format_product_object(product_obj)
-        return product_data
-    else:
-        message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
-        return {'message': message}
+# def get_customer_info(data):
+#     try:
+#         product_obj = models.ProductData.objects.get(product_id=data['vin'])
+#     except Exception as ex:
+#         logger.info(ex)
+#         message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
+#         if data['groups'][0] == "dealers":
+#             data['groups'][0] = "Dealer"
+#         else:
+#             data['groups'][0] = "ASC"
+#         template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
+#         send_mail_when_vin_does_not_exist(data=template)
+#         return {'message': message, 'status': 'fail'}
+#     if product_obj.purchase_date:
+#         product_data = format_product_object(product_obj)
+#         return product_data
+#     else:
+#         message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
+#         return {'message': message}
 
 def get_sa_list_for_login_dealer(user):
     dealer = models.Dealer.objects.filter(
@@ -167,19 +166,19 @@ def get_asc_list_for_login_dealer(user):
     return asc_list_with_detail
 
 
-def recover_coupon_info(data):
-    customer_id = data['customerId']
-    logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, data['current_user']))
-    coupon_data = get_coupon_info(data)
-    if coupon_data:
-        ucn_recovery_obj = upload_file(data, coupon_data.unique_service_coupon)
-        send_recovery_email_to_admin(ucn_recovery_obj, coupon_data)
-        message = 'UCN for customer {0} is {1}.'.format(customer_id,
-                                                    coupon_data.unique_service_coupon)
-        return {'status': True, 'message': message}
-    else:
-        message = 'No coupon in progress for customerID {0}.'.format(customer_id) 
-        return {'status': False, 'message': message}
+# def recover_coupon_info(data):
+#     customer_id = data['customerId']
+#     logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, data['current_user']))
+#     coupon_data = get_coupon_info(data)
+#     if coupon_data:
+#         ucn_recovery_obj = upload_file(data, coupon_data.unique_service_coupon)
+#         send_recovery_email_to_admin(ucn_recovery_obj, coupon_data)
+#         message = 'UCN for customer {0} is {1}.'.format(customer_id,
+#                                                     coupon_data.unique_service_coupon)
+#         return {'status': True, 'message': message}
+#     else:
+#         message = 'No coupon in progress for customerID {0}.'.format(customer_id) 
+#         return {'status': False, 'message': message}
     
 def get_coupon_info(data):
     customer_id = get_updated_customer_id(data['customerId'])
@@ -234,14 +233,14 @@ def stringify_groups(user):
     return groups
 
 
-def send_recovery_email_to_admin(file_obj, coupon_data):
-    file_location = file_obj.file_location
-    reason = file_obj.reason
-    customer_id = file_obj.customer_id
-    requester = str(file_obj.user.user.username)
-    data = get_email_template('UCN_REQUEST_ALERT')['body'].format(requester,coupon_data.service_type,
-                customer_id, coupon_data.actual_kms, reason, file_location)
-    send_ucn_request_alert(data=data)
+# def send_recovery_email_to_admin(file_obj, coupon_data):
+#     file_location = file_obj.file_location
+#     reason = file_obj.reason
+#     customer_id = file_obj.customer_id
+#     requester = str(file_obj.user.user.username)
+#     data = get_email_template('UCN_REQUEST_ALERT')['body'].format(requester,coupon_data.service_type,
+#                 customer_id, coupon_data.actual_kms, reason, file_location)
+#     send_ucn_request_alert(data=data)
 
 
 def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=None,

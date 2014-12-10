@@ -21,7 +21,8 @@ from gladminds.bajaj import models
 from gladminds.bajaj.services import message_template
 from gladminds.core import utils
 from gladminds.sqs_tasks import send_otp
-from gladminds.core.managers.mail import sent_otp_email
+from gladminds.core.managers.mail import sent_otp_email,\
+    send_recovery_email_to_admin, send_mail_when_vin_does_not_exist
 from gladminds.bajaj.feeds.feed import SAPFeed
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
@@ -31,6 +32,7 @@ from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,
     FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL, DEALER, SDO, SDM
     
 from gladminds.core.decorator import log_time, check_service
+from gladminds.core.utils import get_email_template, format_product_object
 
 gladmindsResources = GladmindsResources()
 logger = logging.getLogger('gladminds')
@@ -291,6 +293,42 @@ def register_customer(request, group=None):
     return json.dumps({'message': CUST_REGISTER_SUCCESS + temp_customer_id})
 
 @check_service(Services.FREE_SERVICE_COUPON)
+def recover_coupon_info(data):
+    print data
+    customer_id = data['customerId']
+    logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, data['current_user']))
+    coupon_data = utils.get_coupon_info(data)
+    if coupon_data:
+        ucn_recovery_obj = utils.upload_file(data, coupon_data.unique_service_coupon)
+        send_recovery_email_to_admin(ucn_recovery_obj, coupon_data)
+        message = 'UCN for customer {0} is {1}.'.format(customer_id,
+                                                    coupon_data.unique_service_coupon)
+        return {'status': True, 'message': message}
+    else:
+        message = 'No coupon in progress for customerID {0}.'.format(customer_id) 
+        return {'status': False, 'message': message}
+
+def get_customer_info(data):
+    try:
+        product_obj = models.ProductData.objects.get(product_id=data['vin'])
+    except Exception as ex:
+        logger.info(ex)
+        message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
+        if data['groups'][0] == "dealers":
+            data['groups'][0] = "Dealer"
+        else:
+            data['groups'][0] = "ASC"
+        template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
+        send_mail_when_vin_does_not_exist(data=template)
+        return {'message': message, 'status': 'fail'}
+    if product_obj.purchase_date:
+        product_data = format_product_object(product_obj)
+        return product_data
+    else:
+        message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
+        return {'message': message}
+
+
 @login_required()
 def exceptions(request, exception=None):
     groups = utils.stringify_groups(request.user)
@@ -305,8 +343,8 @@ def exceptions(request, exception=None):
                                            "data": data, 'groups': groups})
     elif request.method == 'POST':
         function_mapping = {
-            'customer': utils.get_customer_info,
-            'recover': utils.recover_coupon_info,
+            'customer': get_customer_info,
+            'recover': recover_coupon_info,
             'search': utils.search_details,
             'status': utils.services_search_details,
             'serviceadvisor': utils.service_advisor_search
