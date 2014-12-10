@@ -23,7 +23,7 @@ class Command(BaseCommand):
                 service_obj = models.ServiceType.objects.get(name=service)
                 print "service type {0} already exists.".format(service)
             except:
-                print "service type {0} does not exists, creating that.",format(service)
+                print "service type {0} does not exists, creating that.".format(service)
                 service_obj = models.ServiceType(name=service)
                 service_obj.save()
     
@@ -47,8 +47,8 @@ class Command(BaseCommand):
                 industry_obj = models.Industry.objects.get(name=industry)
                 print "Industry {0} already exists.".format(industry)
             except:
-                print "Industry {0} does not exists, creating that.",format(industry)
-                industry_obj = models.ServiceType(name=industry)
+                print "Industry {0} does not exists, creating that.".format(industry)
+                industry_obj = models.Industry(name=industry)
                 industry_obj.save()
                 
     def create_brands(self):
