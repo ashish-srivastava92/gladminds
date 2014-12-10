@@ -365,7 +365,6 @@ class EmailToken(models.Model):
     objects = EmailTokenManager()
 
     class Meta:
-        abstract = True
         verbose_name_plural = 'email_tokens'
 
         def __unicode__(self):
