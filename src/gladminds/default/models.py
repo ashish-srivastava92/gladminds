@@ -21,6 +21,9 @@ class ServiceType(base_models.BaseModel):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Service Types"
+        
+    def __unicode__(self):
+        return self.name
 
 
 class Service(base_models.BaseModel):
@@ -31,6 +34,9 @@ class Service(base_models.BaseModel):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Services"
+        
+    def __unicode__(self):
+        return self.name
 
 
 class Brand(base_models.Brand):
@@ -59,7 +65,9 @@ class BrandService(base_models.BaseModel):
 
     class Meta:
         app_label = _APP_NAME
-
+        
+    def __unicode__(self):
+        return str(self.brand) + str(self.service) or 'None'
 
 class GladmindsUser(base_models.UserProfile):
     user = models.OneToOneField(User, primary_key=True,
