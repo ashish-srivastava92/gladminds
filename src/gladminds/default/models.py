@@ -23,7 +23,7 @@ class ServiceType(base_models.BaseModel):
         verbose_name_plural = "Service Types"
         
     def __unicode__(self):
-        return self.name or 'None'
+        return self.name
 
 
 class Service(base_models.BaseModel):
@@ -36,7 +36,7 @@ class Service(base_models.BaseModel):
         verbose_name_plural = "Services"
         
     def __unicode__(self):
-        return self.name or 'None'
+        return self.name
 
 
 class Brand(base_models.Brand):

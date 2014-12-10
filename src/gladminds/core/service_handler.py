@@ -14,11 +14,13 @@ class Services():
 
 class ServiceHandler(object):
     
-    def check_service_enabled(self, service_name):
-        brand_service_data = BrandService.objects.filter(service__name=service_name, brand__name=settings.BRAND,
+    def check_service_enabled(self, service_name, brand=None):
+        if not brand:
+            brand = settings.BRAND
+        brand_service_data = BrandService.objects.filter(service__name=service_name, brand__name=brand,
                                                                active=True)        
         if len(brand_service_data)>0:
             return True
-        else:
-            return False
+        
+        return False
     
