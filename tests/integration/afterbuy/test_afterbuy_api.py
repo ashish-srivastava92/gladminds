@@ -11,9 +11,8 @@ from test_constants import AFTERBUY_PRODUCTS
 from integration.afterbuy import base_integration
 from gladminds.afterbuy import models
 
-client  =  Client(SERVER_NAME='afterbuy')
+client = Client(SERVER_NAME='afterbuy')
 
-from django.utils.unittest.case import skip
 
 class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
     def setUp(self):
@@ -33,7 +32,7 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
         uri = '/afterbuy/v1/consumers/registration/'
         resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
         self.assertEquals(200, resp.status_code)
-    
+
     @unittest.skip('failin')
     def test_user_login(self):
         login_data = {"phone_number":"7760814041", "password":"123"}
