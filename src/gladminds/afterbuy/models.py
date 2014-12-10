@@ -361,7 +361,7 @@ class AuditLog(base_models.AuditLog):
 class EmailToken(models.Model):
     ACTIVATED = u"ALREADY_ACTIVATED"
     activation_key = models.CharField(_('activation key'), max_length=40)
-
+    user = models.ForeignKey(Consumer)
     objects = EmailTokenManager()
 
     class Meta:
