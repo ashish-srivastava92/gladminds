@@ -75,6 +75,9 @@ class Consumer(base_models.BaseModel):
         app_label = _APP_NAME
         verbose_name_plural = "Consumers"
 
+    def __unicode__(self):
+        return self.phone_number + " "+ self.user.first_name
+
 
 class UserProduct(base_models.BaseModel):
     consumer = models.ForeignKey(Consumer)
