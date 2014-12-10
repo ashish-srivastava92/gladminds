@@ -18,9 +18,9 @@ from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
 from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.views.auth_view import get_access_token
-from tastypie.authorization import DjangoAuthorization, Authorization
+from tastypie.authorization import DjangoAuthorization
 from gladminds.core.apis.authorization import CustomAuthorization,\
-    MultiAuthorization, CustomDjangoAuthorization
+    MultiAuthorization
 from django.contrib.sites.models import RequestSite
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 
@@ -31,12 +31,10 @@ class DjangoUserResources(ModelResource):
     class Meta:
         queryset = User.objects.all()
         resource_name = 'django'
-        excludes = ['is_active', 'is_staff', 'is_superuser']
-        detail_allowed_methods = ['get','post', 'delete', 'put']
+        authentication = AccessTokenAuthentication()
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        excludes = ['email', 'password', 'is_superuser']
         always_return_data = True
-        filtering = {
-            'username': ALL,
-        }
 
 
 class ConsumerResource(CustomBaseModelResource):
@@ -47,12 +45,11 @@ class ConsumerResource(CustomBaseModelResource):
         queryset = afterbuy_model.Consumer.objects.all()
         resource_name = "consumers"
         authentication = AccessTokenAuthentication()
-        #authorization = Authorization()
-        authorization = MultiAuthorization(CustomDjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         detail_allowed_methods = ['get', 'delete', 'put']
         always_return_data = True
         filtering = {
-                     "consumer_id" : ALL
+                     "consumer_id": ALL
                      }
 
     def prepend_urls(self):
@@ -164,7 +161,6 @@ class ConsumerResource(CustomBaseModelResource):
                 logger.info("[Exception OTP]:{0}".
                             format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
-
 
     def authenticate_user_email_id(self, request, **kwargs):
         email_id = request.POST.get('email_id')
@@ -314,19 +310,6 @@ class ConsumerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
 
 
-
-
-class InterestResource(CustomBaseModelResource):
-
-    class Meta:
-        queryset = afterbuy_model.Interest.objects.all()
-        resource_name = "interests"
-        authentication = AccessTokenAuthentication()
-        authorization = CustomDjangoAuthorization()
-        detail_allowed_methods = ['get', 'post', 'delete', 'put']
-        always_return_data = True
-
-
 class UserNotificationResource(CustomBaseModelResource):
     consumer = fields.ForeignKey(ConsumerResource, 'consumer', null=True, blank=True, full=True)
 
@@ -343,17 +326,15 @@ class UserNotificationResource(CustomBaseModelResource):
                      "id": ALL,
                      "notification_read": ALL
                      }
-        
-        
+
+
 class ServiceTypeResource(CustomBaseModelResource):
 
     class Meta:
         queryset = afterbuy_model.ServiceType.objects.all()
         resource_name = "service-types"
         authentication = AccessTokenAuthentication()
-        authorization = CustomDjangoAuthorization()
-        #authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        authorization = DjangoAuthorization()
         always_return_data = True
 
 
@@ -365,13 +346,9 @@ class ServiceResource(CustomBaseModelResource):
         queryset = afterbuy_model.Service.objects.all()
         resource_name = "services"
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(CustomDjangoAuthorization(), CustomAuthorization())
-        #authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         always_return_data = True
         filtering = {
                      "consumer": ALL,
                      "service_type": ALL,
-                     }         
-
-        
+                     }

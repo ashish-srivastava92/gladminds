@@ -7,18 +7,22 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.contrib.sites.models import get_current_site
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from gladminds.core import utils
 from gladminds.core.utils import get_list_from_set, convert_utc_to_local_time
 from gladminds.bajaj import models as models
 from gladminds.bajaj.services.free_service_coupon import GladmindsResources
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
-    ROOT_CAUSE, SDM, SDO, DEALER
+    ROOT_CAUSE, SDM, SDO, DEALER, PAGINATION_LINKS, BY_DEFAULT_RECORDS_PER_PAGE, RECORDS_PER_PAGE
 from gladminds.managers import get_feedback,\
     get_servicedesk_users, save_update_feedback, get_comments
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services import message_template as templates
 from gladminds.sqs_tasks import send_coupon
+from gladminds.core.decorator import check_service
+from gladminds.core.service_handler import Services
+
 from gladminds.core.views.views import get_feedbacks
 
 
@@ -27,20 +31,46 @@ logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 
 
+
+@check_service(Services.SERVICE_DESK)
 @login_required()
 @require_http_methods(["GET"])
-
 def get_servicedesk_tickets(request):
     status = request.GET.get('status')
     priority = request.GET.get('priority')
     type = request.GET.get('type')
-    return render(request, 'service-desk/tickets.html', {"feedbacks" : get_feedbacks(request.user, status, priority, type),
+    search = request.GET.get('search')
+    count = request.GET.get('count') or BY_DEFAULT_RECORDS_PER_PAGE
+    page_details = {}
+    if search:
+        feedback_obects = get_feedbacks(request.user, status, priority, type, search)
+    else:
+        feedback_obects = get_feedbacks(request.user, status, priority, type)
+    paginator = Paginator(feedback_obects, count)
+    page = request.GET.get('page')
+    try:
+        feedbacks = paginator.page(page)
+    except PageNotAnInteger:
+        feedbacks = paginator.page(1)
+    except EmptyPage:
+        feedbacks = paginator.page(paginator.num_pages)
+    
+    page_details['total_objects'] = paginator.count
+    page_details['from'] = feedbacks.start_index()
+    page_details['to'] = feedbacks.end_index()
+        
+    return render(request, 'service-desk/tickets.html', {"feedbacks" : feedbacks,
                                           "status": utils.get_list_from_set(FEEDBACK_STATUS),
                                           "types": utils.get_list_from_set(FEEDBACK_TYPE),
                                           "priorities": utils.get_list_from_set(PRIORITY),
-                                          "filter_params": {'status': status, 'priority': priority, 'type': type}}
+                                          "pagination_links": PAGINATION_LINKS,
+                                          "page_details": page_details,
+                                          "record_showing_counts": RECORDS_PER_PAGE,
+                                          "filter_params": {'status': status, 'priority': priority, 'type': type,
+                                                            'count': str(count), 'search': search}}
                                         )
 
+@check_service(Services.SERVICE_DESK)
 @login_required()
 @require_http_methods(["GET", "POST"])
 def modify_servicedesk_tickets(request, feedback_id):
@@ -71,6 +101,7 @@ def modify_servicedesk_tickets(request, feedback_id):
     else:
         return HttpResponseNotFound()
 
+@check_service(Services.SERVICE_DESK)
 @login_required()
 @require_http_methods(["POST"])
 def modify_feedback_comments(request, feedback_id, comment_id):

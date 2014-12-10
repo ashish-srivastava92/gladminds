@@ -6,15 +6,12 @@ from gladminds.core.apis import preferences_apis
 from gladminds.afterbuy.apis import user_apis
 from gladminds.core.apis.image_apis import upload_files
 
-from provider.oauth2 import views
-from provider.oauth2 import urls
 
 api_v1 = Api(api_name="afterbuy/v1")
 api_v1.register(user_apis.ConsumerResource())
-api_v1.register(user_apis.InterestResource())
 api_v1.register(user_apis.UserNotificationResource())
-api_v1.register(user_apis.ServiceTypeResource())
 api_v1.register(user_apis.ServiceResource())
+api_v1.register(user_apis.ServiceTypeResource())
 api_v1.register(product_apis.ProductInsuranceInfoResource())
 api_v1.register(product_apis.InvoiceResource())
 api_v1.register(product_apis.LicenseResource())
@@ -26,6 +23,7 @@ api_v1.register(product_apis.ProductSupportResource())
 api_v1.register(product_apis.ProductTypeResource())
 api_v1.register(product_apis.SellInformationResource())
 api_v1.register(product_apis.UserProductImagesResource())
+api_v1.register(product_apis.InterestResource())
 api_v1.register(brand_apis.BrandResource())
 api_v1.register(brand_apis.IndustryResource())
 api_v1.register(brand_apis.BrandProductCategoryResource())

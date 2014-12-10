@@ -7,13 +7,11 @@ from django.utils.translation import gettext as _
 from constance import config
 
 from gladminds.core.managers import user_manager
+from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
 from gladminds.core.constants import FEEDBACK_STATUS, \
                             PRIORITY, FEEDBACK_TYPE, RATINGS,\
                             ROOT_CAUSE, SLA_PRIORITY, TIME_UNIT
 from gladminds.core.model_helpers import PhoneField
-from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
-from gladminds.core.managers.mail import send_email_activation,\
-    sent_password_reset_link
 try:
     from django.utils.timezone import now as datetime_now
 except ImportError:

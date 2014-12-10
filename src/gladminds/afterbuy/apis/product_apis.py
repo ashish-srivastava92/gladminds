@@ -2,7 +2,7 @@ import logging
 import json
 from django.http.response import HttpResponse
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
-from tastypie.authorization import Authorization, DjangoAuthorization
+from tastypie.authorization import DjangoAuthorization
 from tastypie import fields
 from django.http.response import HttpResponseRedirect
 from django.conf.urls import url
@@ -15,7 +15,7 @@ from gladminds.afterbuy import models as afterbuy_model
 from gladminds.afterbuy.apis.user_apis import ConsumerResource
 from django.forms.models import model_to_dict
 from gladminds.core.apis.authorization import CustomAuthorization,\
-    MultiAuthorization, CustomDjangoAuthorization
+    MultiAuthorization
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.managers.mail import send_recycle_mail
 
@@ -27,9 +27,7 @@ class ProductTypeResource(CustomBaseModelResource):
         queryset = afterbuy_models.ProductType.objects.all()
         resource_name = "product-types"
         authentication = AccessTokenAuthentication()
-        #authorization = Authorization()
-        authorization = CustomDjangoAuthorization()
-        detail_allowed_methods = ['get', 'post', 'delete', 'put']
+        authorization = DjangoAuthorization()
         always_return_data = True
 
 
@@ -42,9 +40,7 @@ class UserProductResource(CustomBaseModelResource):
         queryset = afterbuy_models.UserProduct.objects.all()
         resource_name = "products"
         authentication = AccessTokenAuthentication()
-        #authorization = Authorization()
-        authorization = MultiAuthorization(CustomDjangoAuthorization(), CustomAuthorization())
-        detail_allowed_methods = ['get', 'post', 'delete', 'put']
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         always_return_data = True
         filtering = {
                      "consumer": ALL,
@@ -93,19 +89,19 @@ class UserProductResource(CustomBaseModelResource):
                     return HttpResponseRedirect('http://'+COUPON_URL+'/v1/coupons/?product='+brand_product_id)
         except Exception as ex:
             logger.error('Invalid details')
-            
+
     def mail_products_details(self, request, **kwargs):
         try:
             product_id = kwargs['product_id']
             product_info = afterbuy_models.UserProduct.objects.get(id=product_id)
-            context = {"id":product_info.id,
-                       "brand":product_info.brand.name,
-                       "consumer_id":product_info.consumer.user.id,
-                       "consumer_name":product_info.consumer.user.first_name,
-                       "purchase_date":product_info.purchase_date,
-                       "brand_product_id":product_info.brand_product_id,
-                       "color":product_info.color,
-                       "description":product_info.description}
+            context = {"id": product_info.id,
+                       "brand": product_info.brand.name,
+                       "consumer_id": product_info.consumer.user.id,
+                       "consumer_name": product_info.consumer.user.first_name,
+                       "purchase_date": product_info.purchase_date,
+                       "brand_product_id": product_info.brand_product_id,
+                       "color": product_info.color,
+                       "description": product_info.description}
             email_id = product_info.consumer.user.email
             try:
                 afterbuy_model.Consumer.objects.get(user__email=email_id, is_email_verified=True)
@@ -116,7 +112,7 @@ class UserProductResource(CustomBaseModelResource):
         except Exception as ex:
             logger.error('Invalid details')  
             data = {'status': 0, 'message': 'email not sent'}
-        return HttpResponse(json.dumps(data), content_type="application/json")          
+        return HttpResponse(json.dumps(data), content_type="application/json")
 
 
 class ProductInsuranceInfoResource(CustomBaseModelResource):
@@ -125,10 +121,8 @@ class ProductInsuranceInfoResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.ProductInsuranceInfo.objects.all()
         resource_name = "insurances"
-        #authorization = Authorization()
-        authorization = MultiAuthorization(CustomDjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         authentication = AccessTokenAuthentication()
-        detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
         filtering = {
                      "product": ALL,
@@ -143,10 +137,8 @@ class InvoiceResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.Invoice.objects.all()
         resource_name = "invoices"
-        #authorization = Authorization()
-        authorization = MultiAuthorization(CustomDjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         authentication = AccessTokenAuthentication()
-        detail_allowed_methods = ['get', 'post', 'delete', 'put']
         always_return_data = True
         filtering = {
                      "product": ALL
@@ -159,10 +151,8 @@ class LicenseResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.License.objects.all()
         resource_name = 'licenses'
-        #authorization = Authorization()
-        authorization = MultiAuthorization(CustomDjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         authentication = AccessTokenAuthentication()
-        detail_allowed_methods = ['get', 'post', 'delete' ,'put']
         always_return_data =True
         filtering = {
                      "product" : ALL
@@ -175,13 +165,11 @@ class RegistrationCertificateResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.RegistrationCertificate.objects.all()
         resource_name = 'registrations'
-        #authorization = Authorization()
-        authorization = MultiAuthorization(CustomDjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         authentication = AccessTokenAuthentication()
-        detail_allowed_methods = ['get', 'post', 'delete' ,'put']
-        always_return_data =True
+        always_return_data = True
         filtering = {
-                     "product" : ALL
+                     "product": ALL
                      }
 
 
@@ -192,12 +180,10 @@ class PollutionCertificateResource(CustomBaseModelResource):
         queryset = afterbuy_models.PollutionCertificate.objects.all()
         resource_name = 'pollution'
         authentication = AccessTokenAuthentication()
-        #authorization = Authorization()
-        authorization = MultiAuthorization(CustomDjangoAuthorization(), CustomAuthorization())
-        detail_allowed_methods = ['get', 'post', 'delete' ,'put']
-        always_return_data =True
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        always_return_data = True
         filtering = {
-                     "product" : ALL
+                     "product": ALL
                      }
 
 
@@ -209,10 +195,8 @@ class SupportResource(CustomBaseModelResource):
         queryset = afterbuy_models.Support.objects.all()
         resource_name = 'support'
         authentication = AccessTokenAuthentication()
-        authorization = CustomDjangoAuthorization()
-        #authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'delete' ,'put']
-        always_return_data =True
+        authorization = DjangoAuthorization()
+        always_return_data = True
         filtering = {
                      "brand": ALL,
                      "brand_product_category": ALL
@@ -226,9 +210,7 @@ class ProductSupportResource(CustomBaseModelResource):
         queryset = afterbuy_models.ProductSupport.objects.all()
         resource_name = 'product-support'
         authentication = AccessTokenAuthentication()
-        #authorization = Authorization()
-        authorization = MultiAuthorization(CustomDjangoAuthorization(), CustomAuthorization())
-        detail_allowed_methods = ['get', 'post', 'delete' ,'put']
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         always_return_data = True
         filtering = {
                      "product": ALL,
@@ -242,9 +224,7 @@ class SellInformationResource(CustomBaseModelResource):
         queryset = afterbuy_models.SellInformation.objects.all()
         resource_name = 'sell-information'
         authentication = AccessTokenAuthentication()
-        #authorization = Authorization()
-        authorization = MultiAuthorization(CustomDjangoAuthorization(), CustomAuthorization())
-        detail_allowed_methods = ['get', 'post', 'delete' ,'put']
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         always_return_data = True
         filtering = {
                      "product": ALL,
@@ -258,10 +238,18 @@ class UserProductImagesResource(CustomBaseModelResource):
         queryset = afterbuy_models.UserProductImages.objects.all()
         resource_name = 'product-images'
         authentication = AccessTokenAuthentication()
-        #authorization = Authorization()
-        authorization = MultiAuthorization(CustomDjangoAuthorization(), CustomAuthorization())
-        detail_allowed_methods = ['get', 'post', 'delete' ,'put']
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         always_return_data = True
         filtering = {
                      "product": ALL,
                      }
+
+
+class InterestResource(CustomBaseModelResource):
+
+    class Meta:
+        queryset = afterbuy_model.Interest.objects.all()
+        resource_name = "interests"
+        authentication = AccessTokenAuthentication()
+        authorization = DjangoAuthorization()
+        always_return_data = True

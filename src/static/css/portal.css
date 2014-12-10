@@ -105,3 +105,23 @@ textarea {
 .feedback-filters-label {
 	margin: 4px 0px 0px 0px;
 }
+
+.feedback-ticket-detail {
+	margin-top:10px;
+}
+
+.pegination-links {
+	float: right;
+}
+
+.rocord-count {
+	margin-left: -36px;
+}
+
+.showing-rocord-text {
+	margin-top: 6px;
+}
+
+.entry-text {
+	margin-left: -57px;
+}

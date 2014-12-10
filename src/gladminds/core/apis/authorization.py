@@ -1,4 +1,4 @@
-from tastypie.authorization import DjangoAuthorization, Authorization
+from tastypie.authorization import Authorization
 from tastypie.exceptions import Unauthorized
 from provider.oauth2.models import AccessToken
 from django.conf import settings
@@ -6,26 +6,7 @@ from django.conf import settings
 from gladminds.afterbuy import models as afterbuy
 
 
-class CustomDjangoAuthorization(DjangoAuthorization):
-    def base_checks(self, request, model_klass):
-        # If it doesn't look like a model, we can't check permissions.
-        if not model_klass or not getattr(model_klass, '_meta', None):
-            return False
-        return model_klass
-
-
-class CustomAuthorization(DjangoAuthorization):
-
-    def base_checks(self, request, model_klass):
-        # If it doesn't look like a model, we can't check permissions.
-        if not model_klass or not getattr(model_klass, '_meta', None):
-            return False
-
-        # User must be logged in to check permissions.
-#         if not hasattr(request, 'user'):
-#             return False
-
-        return model_klass
+class CustomAuthorization(Authorization):
 
     def read_list(self, object_list, bundle):
         try:
@@ -50,13 +31,13 @@ class CustomAuthorization(DjangoAuthorization):
                 return object_list.filter(product__consumer__user=user)
         else:
             return object_list
-                     
- 
+
+    def read_detail(self, object_list, bundle):
+        if self.read_list(object_list, bundle):
+            return True
+
     def create_detail(self, object_list, bundle):
         data = bundle.obj.__dict__
-        klass = self.base_checks(bundle.request, bundle.obj.__class__)
-        if klass is False:
-            raise Unauthorized("You are not allowed to access that resource.")
         try:
             access_token_container = bundle.request.GET.urlencode().split('access_token=')[1]
             key = access_token_container.split('&')[0]
@@ -87,7 +68,6 @@ class CustomAuthorization(DjangoAuthorization):
             raise Unauthorized("You are not allowed to access that data.")
         return True
 
-
     def update_detail(self, object_list, bundle):
         self.authorize_user(object_list, bundle)
         return True
@@ -98,9 +78,7 @@ class CustomAuthorization(DjangoAuthorization):
 
     def authorize_user(self, object_list, bundle):
         data = bundle.obj.__dict__
-        klass = self.base_checks(bundle.request, bundle.obj.__class__)
-        if klass is False:
-            raise Unauthorized("You are not allowed to access that resource.")
+        klass = bundle.obj.__class__
         try:
             access_token_container = bundle.request.GET.urlencode().split('access_token=')[1]
             key = access_token_container.split('&')[0]
@@ -114,6 +92,7 @@ class CustomAuthorization(DjangoAuthorization):
         except:
             raise Unauthorized("You are not allowed to access that data.")
         user_id = int(authorization.user.id)
+
         if klass._meta.module_name == 'consumer':
             if user_id == data['user_id']:
                 update_obj = klass.objects.get(user__id=user_id)
@@ -131,7 +110,7 @@ class CustomAuthorization(DjangoAuthorization):
             try:
                 update_obj = klass.objects.get(id=int(data['id']))
             except:
-                raise Unauthorized("You are not allowed to access that data.")   
+                raise Unauthorized("You are not allowed to access that data.")
             if user_id == update_obj.product.consumer.user.id:
                 return True
             raise Unauthorized("You are not allowed to access that data.")
