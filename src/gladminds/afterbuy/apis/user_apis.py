@@ -355,4 +355,5 @@ class ServiceResource(CustomBaseModelResource):
         filtering = {
                      "consumer": ALL,
                      "service_type": ALL,
+                     "is_active": ALL
                      }
