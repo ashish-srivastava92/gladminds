@@ -45,7 +45,8 @@ class UserProductResource(CustomBaseModelResource):
         filtering = {
                      "consumer": ALL,
                      "product_type": ALL,
-                     "brand": ALL_WITH_RELATIONS
+                     "brand": ALL_WITH_RELATIONS,
+                     "is_deleted": ALL
                      }
 
     def dehydrate(self, bundle):
