@@ -456,7 +456,7 @@ EMAIL_ACTIVATION_MAIL = {
 
 RECYCLE_MAIL = {
                 "sender":"",
-                "subject":"Product name for recycle",
+                "subject":"Product for recycle",
                 "receiver": ["demosupport@gladminds.co"],
                 "body": """""",
                 
