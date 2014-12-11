@@ -35,7 +35,7 @@ class DjangoUserResources(ModelResource):
         resource_name = 'django'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
-        excludes = ['email', 'password', 'is_superuser']
+        excludes = ['password', 'is_superuser']
         always_return_data = True
 
 

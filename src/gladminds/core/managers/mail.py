@@ -50,18 +50,18 @@ def send_recycle_mail(sender_id, data=None):
     file_stream = open(settings.EMAIL_DIR+'/recycle_email.html')
     feed_temp = file_stream.read()
     template = Template(feed_temp)
-    context = Context(data)
+    context = Context({'product_info': data})
     body = template.render(context)
     mail_detail = settings.RECYCLE_MAIL
     send_email(sender=mail_detail['sender'],
-               receiver=config.AFTERBUY_RECYCLE_EMAIL_RECIPIENT,
+               receiver=mail_detail['receiver'],
                subject=mail_detail['subject'], body=body,
                smtp_server=settings.MAIL_SERVER, title='Recycle Product',
                brand=GmApps.AFTERBUY)
 
 
-def feed_report(feed_data = None):
-    try:    
+def feed_report(feed_data=None):
+    try:
         yesterday = datetime.now().date() - timedelta(days=1)
         file_stream = open(settings.EMAIL_DIR+'/feed_report.html')
         feed_temp = file_stream.read()
