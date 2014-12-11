@@ -6,12 +6,15 @@ from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 import logging
 from gladminds.core.managers import audit_manager
+from constance import config
 from gladminds.core.utils import get_email_template
+from gladminds.core.auth_helper import GmApps
 
 logger = logging.getLogger("gladminds")
 
 
-def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER, title='GCP_Bajaj_FSC_Feeds'):
+def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER, title='GCP_Bajaj_FSC_Feeds'
+               , brand='bajaj'):
     try:
         msg = MIMEText(body, 'html', _charset='utf-8')
         msg['Subject'] = subject
@@ -23,7 +26,7 @@ def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER
         mail = smtplib.SMTP(smtp_server)
         mail.sendmail(from_addr=sender, to_addrs=receiver, msg=msg.as_string())
         mail.quit()
-        audit_manager.email_log(subject, body, sender, receiver);
+        audit_manager.email_log(subject, body, sender, receiver, brand=brand);
         return True
     except Exception as ex:
         logger.error('Exception while sending mail: {0}'.format(ex))
@@ -50,11 +53,11 @@ def send_recycle_mail(sender_id, data=None):
     context = Context(data)
     body = template.render(context)
     mail_detail = settings.RECYCLE_MAIL
-    send_email(sender=sender_id,
-               receiver=mail_detail['receiver'],
+    send_email(sender=mail_detail['sender'],
+               receiver=config.AFTERBUY_RECYCLE_EMAIL_RECIPIENT,
                subject=mail_detail['subject'], body=body,
-               smtp_server=settings.MAIL_SERVER, title='Recycle Product')
-
+               smtp_server=settings.MAIL_SERVER, title='Recycle Product',
+               brand=GmApps.AFTERBUY)
 
 
 def feed_report(feed_data = None):
