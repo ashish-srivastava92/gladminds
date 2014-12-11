@@ -1,5 +1,5 @@
 from uuid import uuid4
-from datetime import datetime
+import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
