@@ -112,6 +112,8 @@ def save_update_feedback(feedback_obj, data, user, host):
         else:
             if data['assign_to'] :
                 servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile__phone_number=data['assign_to'])
+                if feedback_obj.assign_to_reporter == False:
+                    feedback_obj.previous_assignee = feedback_obj.assignee
                 feedback_obj.assignee = servicedesk_user[0]
                 feedback_obj.assign_to_reporter = False
         feedback_obj.status = data['status']
@@ -132,6 +134,7 @@ def save_update_feedback(feedback_obj, data, user, host):
     feedback_obj.save()
 
     if assign_status and feedback_obj.assignee:
+        feedback_obj.previous_assignee = feedback_obj.assignee
         feedback_obj.assignee_created_date = datetime.datetime.now()
         date = set_due_date(data['Priority'], feedback_obj)
         feedback_obj.due_date = date['due_date']

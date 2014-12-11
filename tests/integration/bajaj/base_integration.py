@@ -6,7 +6,7 @@ from django.test.client import Client
 from tastypie.test import ResourceTestCase
 from django.core import management
 from django.contrib.auth.models import User
-from gladminds.management.commands import load_gm_migration_data
+from gladminds.management.commands import load_gm_migration_data, service_setup
 from gladminds.bajaj import models
 from integration.core.base_integration import CoreResourceTestCase
 
@@ -21,6 +21,13 @@ class BrandResourceTestCase(CoreResourceTestCase):
         load_email_obj.add_email_template()
         load_email_obj.add_sms_template()
         load_email_obj.add_group()
+        load_services = service_setup.Command()
+        load_services.create_service_types()
+        load_services.create_services()
+        load_services.create_industries()
+        load_services.create_brands()
+        load_services.create_brands_services()
+        
         self.MESSAGE_URL = "/v1/messages"
 
         #old implementation of test case;

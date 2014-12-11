@@ -14,7 +14,7 @@ class AfterBuyResourceTestCase(ResourceTestCase):
         load_email_obj.add_sms_template()
         load_email_obj.add_group()
         setup_obj = setup.Command()
-        setup_obj.handle()
+#         setup_obj.handle()
         self.client = Client(SERVER_NAME='afterbuy')
         self.MESSAGE_URL = "/v1/messages"
 
