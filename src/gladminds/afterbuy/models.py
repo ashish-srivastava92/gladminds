@@ -319,7 +319,6 @@ class ServiceType(base_models.BaseModel):
 class Service(base_models.BaseModel):
     consumer = models.ForeignKey(Consumer)
     service_type = models.ForeignKey(ServiceType)
-    is_active = models.BooleanField(default=True)
 
     class Meta:
         app_label = _APP_NAME

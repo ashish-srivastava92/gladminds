@@ -354,6 +354,5 @@ class ServiceResource(CustomBaseModelResource):
         always_return_data = True
         filtering = {
                      "consumer": ALL,
-                     "service_type": ALL,
-                     "is_active": ALL
+                     "service_type": ALL
                      }
