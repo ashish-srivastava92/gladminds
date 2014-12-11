@@ -370,8 +370,8 @@ class EmailToken(models.Model):
     class Meta:
         verbose_name_plural = 'email_tokens'
 
-        def __unicode__(self):
-            return u"Registration information for %s" % self.user
+    def __unicode__(self):
+        return u"Registration information for %s" % self.user
 
     def activation_key_expired(self):
         """
