@@ -369,7 +369,7 @@
     "pk": 41,
     "fields": {
       "template_key":"SEND_INVALID_UCP",
-      "template":"Invalid Entry… UPC does not exist in our records. Please contact our Customer Care at: 9611545154",
+      "template":"Invalid Entry... UPC does not exist in our records. Please contact our Customer Care at: 9611545154",
       "description":"Send this message when ucp does not exists in our records"
     }
   },
@@ -396,7 +396,7 @@
     "pk": 44,
     "fields": {
       "template_key":"SEND_INSUFFICIENT_POINT",
-      "template":"You have insufficient points… Please accumulate {shortage_points} points for the specified Redemption",
+      "template":"You have insufficient points... Please accumulate {shortage_points} points for the specified Redemption",
       "description":"Send this message when mechanic does not have enough points"
     }
   },
