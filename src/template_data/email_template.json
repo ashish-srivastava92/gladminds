@@ -175,9 +175,34 @@
             "sender": "feed-report@gladminds.co",
             "receiver": "",
             "subject": "Change for due date",
-            "body": "Your {type} will be resolved within {due_date}",
+            "body": "Your {type} will be resolved by{due_date}",
             "description": "Due Date change mail to initiator"
         }
+    },
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 16,
+        "fields": {
+            "template_key": "INITIATOR_FEEDBACK_MAIL_DETAIL_TO_DEALER",
+            "sender": "feed-report@gladminds.co",
+            "receiver": "srv.sngh@gmail.com",
+            "subject": "Feedback  with reference-no-GM-{id} Details",
+            "body": "Your {type} has been assigned to our support team. We will update you by: {due_date}. ",
+            "description": "Feedback Detail mail"
+        }
+    },
+         {
+        "model": "gladminds.emailtemplate",
+        "pk": 17,
+        "fields": {
+            "template_key": "DUE_DATE_MAIL_TO_DEALER",
+            "sender": "feed-report@gladminds.co",
+            "receiver": "",
+            "subject": "Change for due date",
+            "body": "Your {type} will be resolved by {due_date}",
+            "description": "Due Date change mail to dealer"
+        }
     }
+  
     
 ]

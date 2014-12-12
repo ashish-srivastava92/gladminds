@@ -115,3 +115,4 @@ FUEL_CHOICES = (
 SDM = 'SDM'
 SDO = 'SDO'
 DEALER = 'dealers'
+ASC = 'ascs'

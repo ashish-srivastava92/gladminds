@@ -340,6 +340,8 @@ class SlaAdmin(ModelAdmin):
         'priority', ('response_time', 'response_unit'), ('reminder_time', 'reminder_unit'), ('resolution_time', 'resolution_unit'))
         }),
         )
+    list_display = ('priority','response_time', 'response_unit', 'reminder_time', 'reminder_unit', 'resolution_time', 'resolution_unit')
+
 
 class ServiceDeskUserAdmin(ModelAdmin):
     list_display = ('user_profile', 'name', 'phone_number', 'email')

@@ -30,7 +30,7 @@ from gladminds.bajaj.services.free_service_coupon import GladmindsResources
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS,\
     FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL, DEALER, SDO, SDM,\
-    BY_DEFAULT_RECORDS_PER_PAGE, PAGINATION_LINKS, RECORDS_PER_PAGE
+    BY_DEFAULT_RECORDS_PER_PAGE, PAGINATION_LINKS, RECORDS_PER_PAGE, ASC
     
 from gladminds.core.decorator import log_time, check_service
 from gladminds.core.utils import get_email_template, format_product_object
@@ -429,6 +429,15 @@ def get_feedbacks(user, status, priority, type, search=""):
             feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
                                                        priority__in=priority_filter, type__in=type_filter
                                                     ).order_by('-created_date')
+    if group.name == ASC:
+        sa_list = models.ServiceAdvisor.objects.active_under_asc(user)
+        if sa_list:
+            sa_id_list = []
+            for sa in sa_list:
+                sa_id_list.append(sa.service_advisor_id)
+            feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
+                                                       priority__in=priority_filter, type__in=type_filter
+                                                    ).order_by('-created_date')
     if group.name == SDM:
         feedbacks = models.Feedback.objects.filter(status__in=status_filter, priority__in=priority_filter,
                                                    type__in=type_filter).order_by('-created_date')
@@ -471,7 +480,10 @@ def service_desk(request, servicedesk):
     if request.method == 'GET':
         template = 'portal/feedback_details.html'
         data = None
-        data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
+        if request.user.groups.all()[0].name == DEALER:
+            data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
+        else:
+            data = models.ServiceAdvisor.objects.active_under_asc(request.user)
         return render(request, template, {"feedbacks" : feedbacks,
                                           'active_menu': servicedesk,
                                           "data": data, 'groups': groups,
@@ -492,7 +504,7 @@ def service_desk(request, servicedesk):
             data = function_mapping[servicedesk](request)
             return HttpResponse(content=json.dumps(data),
                                 content_type='application/json')
-        except:
+        except Exception as ex:
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
@@ -511,10 +523,15 @@ def save_help_desk_data(request):
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)
     service_advisor_obj = models.ServiceAdvisor.objects.get(user__phone_number=sms_dict['advisorMobile'])
-    dealer_obj = models.Dealer.objects.get(dealer_id=request.user)
+    if request.user.groups.all()[0].name == DEALER:
+        dealer_obj = models.Dealer.objects.get(dealer_id=request.user)
+        email_id =  dealer_obj.user.user.email
+    else:
+        asc_obj = models.AuthorizedServiceCenter.objects.get(asc_id=request.user)
+        email_id =  asc_obj.user.user.email
     return gladmindsResources.get_complain_data(sms_dict, service_advisor_obj.user.phone_number,
                                                 service_advisor_obj.user.user.email,
-                                                service_advisor_obj.user.user.username, dealer_obj.user.user.email,
+                                                service_advisor_obj.user.user.username, email_id,
                                                 with_detail=True)
 
 

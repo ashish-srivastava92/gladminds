@@ -8,14 +8,14 @@ from gladminds.core.utils import create_context, get_list_from_set, \
     get_time_in_seconds
 from gladminds.core.managers import mail
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, \
-    TIME_FORMAT,SDM, SDO, DEALER
+    TIME_FORMAT,SDM, SDO, DEALER, ASC
 from django.contrib.auth.models import Group, User
 from gladminds.sqs_tasks import send_sms
 
 logger = logging.getLogger('gladminds')
 
 def get_feedback(feedback_id, user):
-    group=user.groups.filter(name__in=[SDM, SDO, DEALER])[0]
+    group=user.groups.filter(name__in=[SDM, SDO, DEALER, ASC])[0]
     if group.name == SDO:
         user_profile = models.UserProfile.objects.filter(user=user)
         servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
@@ -62,6 +62,15 @@ def get_reporter_details(reporter, value="phone_number"):
         else:
             return reporter.user_profile.phone_number
     
+
+def send_mail_to_reporter(reporter_email_id, feedback_obj, template):
+    context = create_context(template, feedback_obj)
+    mail.send_email_to_initiator_when_due_date_is_changed(context, reporter_email_id)
+
+def send_mail_to_dealer(feedback_obj, email_id, template):
+    context = create_context(template, feedback_obj)
+    mail.send_email_to_dealer_after_issue_assigned(context, email_id)
+
 def save_update_feedback(feedback_obj, data, user, host):
     status = get_list_from_set(FEEDBACK_STATUS)
     comment_object = None
@@ -69,7 +78,7 @@ def save_update_feedback(feedback_obj, data, user, host):
     pending_status = False
     reporter_email_id = get_reporter_details(feedback_obj.reporter,"email")
     reporter_phone_number = get_reporter_details(feedback_obj.reporter)
-   
+    previous_status = feedback_obj.status
     #check if status is pending
     if feedback_obj.status == status[4]:
         pending_status = True
@@ -87,12 +96,38 @@ def save_update_feedback(feedback_obj, data, user, host):
         feedback_obj.save()
         if due_date != feedback_obj.due_date:
             if reporter_email_id:
-                context = create_context('DUE_DATE_MAIL_TO_INITIATOR',
-                                  feedback_obj)
-                mail.send_email_to_initiator_when_due_date_is_changed(context, reporter_email_id)
+                send_mail_to_reporter(reporter_email_id, feedback_obj, 'DUE_DATE_MAIL_TO_INITIATOR')
             else:
-                logger.info("Reporter emailId not found.")  
-                 
+                logger.info("Reporter emailId not found.")
+                dealer_asc_obj = models.ServiceAdvisor.objects.get_dealer_asc_obj(feedback_obj.reporter)
+                if dealer_asc_obj.user.user.email:
+                    send_mail_to_dealer(feedback_obj, dealer_asc_obj.user.user.email, 'DUE_DATE_MAIL_TO_DEALER')
+                else:
+                    logger.info("Dealer / Asc emailId not found.")
+
+            send_sms('INITIATOR_FEEDBACK_DUE_DATE_CHANGE', reporter_phone_number,
+                 feedback_obj)
+    
+    if feedback_obj.priority:
+        priotity = feedback_obj.priority
+        feedback_obj.priority = data['Priority']
+        feedback_obj.save()
+        if priotity != feedback_obj.priority:
+            due_date = feedback_obj.due_date
+            date = set_due_date(data['Priority'], feedback_obj)
+            feedback_obj.due_date = date['due_date']
+            feedback_obj.reminder_date = date['reminder_date'] 
+            feedback_obj.save()
+            if due_date != convert_utc_to_local_time(feedback_obj.due_date):
+                if reporter_email_id:
+                    send_mail_to_reporter(reporter_email_id, feedback_obj, 'DUE_DATE_MAIL_TO_INITIATOR')
+            else:
+                logger.info("Reporter emailId not found.")
+                dealer_asc_obj = models.ServiceAdvisor.objects.get_dealer_asc_obj(feedback_obj.reporter)
+                if dealer_asc_obj.user.user.email:
+                    send_mail_to_dealer(feedback_obj, dealer_asc_obj.user.user.email, 'DUE_DATE_MAIL_TO_DEALER')
+                else:
+                    logger.info("Dealer / Asc emailId not found.")
             send_sms('INITIATOR_FEEDBACK_DUE_DATE_CHANGE', reporter_phone_number,
                  feedback_obj)
         
@@ -112,8 +147,6 @@ def save_update_feedback(feedback_obj, data, user, host):
         else:
             if data['assign_to'] :
                 servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile__phone_number=data['assign_to'])
-                if feedback_obj.assign_to_reporter == False:
-                    feedback_obj.previous_assignee = feedback_obj.assignee
                 feedback_obj.assignee = servicedesk_user[0]
                 feedback_obj.assign_to_reporter = False
         feedback_obj.status = data['status']
@@ -125,7 +158,7 @@ def save_update_feedback(feedback_obj, data, user, host):
     
     #check if status is progress
     if data['status'] == status[3]:
-        if feedback_obj.previous_assignee:
+        if previous_status == 'Pending':
             feedback_obj.assignee = feedback_obj.previous_assignee
     
     #check if status is closed
@@ -147,6 +180,15 @@ def save_update_feedback(feedback_obj, data, user, host):
                                                          reporter_email_id)
         else:
             logger.info("Reporter emailId not found.")
+            dealer_asc_obj = models.ServiceAdvisor.objects.get_dealer_asc_obj(feedback_obj.reporter)
+            if dealer_asc_obj.user.user.email:
+                context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL_TO_DEALER',
+                                 feedback_obj)
+                mail.send_email_to_dealer_after_issue_assigned(context,
+                                                         dealer_asc_obj.user.user.email)
+            else:
+                logger.info("Dealer / Asc emailId not found.")
+
         send_sms('INITIATOR_FEEDBACK_DETAILS', reporter_phone_number,
                  feedback_obj)
 
@@ -174,7 +216,15 @@ def save_update_feedback(feedback_obj, data, user, host):
                                                           feedback_obj, host, reporter_email_id)
         else:
             logger.info("Reporter emailId not found.")
- 
+            dealer_asc_obj = models.ServiceAdvisor.objects.get_dealer_asc_obj(feedback_obj.reporter)
+            if dealer_asc_obj.user.user.email:
+                context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL_TO_DEALER',
+                                 feedback_obj)
+                mail.send_email_to_dealer_after_issue_assigned(context,
+                                                         dealer_asc_obj.user.user.email)
+            else:
+                logger.info("Dealer / Asc emailId not found.")
+                    
         context = create_context('TICKET_RESOLVED_DETAIL_TO_BAJAJ',
                                  feedback_obj)
         mail.send_email_to_bajaj_after_issue_resolved(context)

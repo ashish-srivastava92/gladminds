@@ -68,7 +68,7 @@
 		
 		{% if not feedbacks %}
 		<h4 class='text-center'>
-		   {% if group == 'dealers' %}
+		   {% if group == 'dealers' or 'ascs'  %}
 			Hi {{request.user.username}} You dont have any feedback yet.
 			{% endif %}
 		</h4>

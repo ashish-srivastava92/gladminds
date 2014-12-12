@@ -14,7 +14,8 @@ from gladminds.core.utils import get_list_from_set, convert_utc_to_local_time
 from gladminds.bajaj import models as models
 from gladminds.bajaj.services.free_service_coupon import GladmindsResources
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
-    ROOT_CAUSE, SDM, SDO, DEALER, PAGINATION_LINKS, BY_DEFAULT_RECORDS_PER_PAGE, RECORDS_PER_PAGE
+    ROOT_CAUSE, SDM, SDO, DEALER, PAGINATION_LINKS, BY_DEFAULT_RECORDS_PER_PAGE, RECORDS_PER_PAGE,\
+    ASC
 from gladminds.managers import get_feedback,\
     get_servicedesk_users, save_update_feedback, get_comments
 from gladminds.core.managers.audit_manager import sms_log
@@ -75,7 +76,7 @@ def get_servicedesk_tickets(request):
 @require_http_methods(["GET", "POST"])
 def modify_servicedesk_tickets(request, feedback_id):
     host = get_current_site(request)
-    group_name = request.user.groups.filter(name__in=[SDM, SDO, DEALER])
+    group_name = request.user.groups.filter(name__in=[SDM, SDO, DEALER, ASC])
     status = get_list_from_set(FEEDBACK_STATUS)
     priority_types = get_list_from_set(PRIORITY)
     feedback_types = get_list_from_set(FEEDBACK_TYPE)
