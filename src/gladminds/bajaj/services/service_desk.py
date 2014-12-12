@@ -227,7 +227,7 @@ class SDResources(Resource):
                 gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
                                                                 type=sms_dict['type'], 
                                                                 summary=sms_dict['summary'], description=sms_dict['description'],
-                                                                status="Open", created_date=datetime.now(),
+                                                                status="Open", created_date=datetime.datetime.now(),
                                                                 role=role
                                                                 )
             else:
