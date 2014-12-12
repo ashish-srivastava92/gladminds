@@ -483,24 +483,28 @@
 	});
     
     $(".feedback-free-text-search").click(function(){
-    	change_url_by_filter();
+    	window.location.href = change_url_by_filter();
     })
     
     $('.feedback-filters-options').change(function() {
-    	change_url_by_filter();
+    	window.location.href = change_url_by_filter();
     })
     
 })();
 
-function getUrl(current_page_num, no_of_link_in_page){
-	var url = window.location.pathname + '?page=',
-		diff = current_page_num - no_of_link_in_page;
-	
-		if (diff > 1){
-			url = url + diff 
+function getUrl(current_page_num, no_of_link_in_page, flage){
+	var url = change_url_by_filter() + 'page=';
+		if (flage == 'true'){
+			url = url +  current_page_num
 		}else{
-			url = url + 1
+			var diff = current_page_num - no_of_link_in_page;
+				if (diff > 1){
+					url = url + diff 
+				}else{
+					url = url + 1
+				}
 		}
+		
 		window.location.href = url;
 }
 
@@ -512,10 +516,11 @@ function change_url_by_filter(){
     	$.each(filters, function(index, val){
     		url = url + val + '=' + selectedOptions[index].options[selectedOptions[index].selectedIndex].value + '&'
     	});
+    	
     	if(serch_text){
     		url = url + "search=" + serch_text
     	}
-    	window.location.href = url;
+    	return url;
 }
 
 function rootCause(status){

@@ -412,7 +412,7 @@ def get_feedbacks(user, status, priority, type, search=""):
     else:
         priority_filter = [priority]
             
-    if status is None:
+    if status is None or status == 'active':
         status_filter = ['Open', 'Pending', 'In Progress']
     else:
         if status == ALL:
