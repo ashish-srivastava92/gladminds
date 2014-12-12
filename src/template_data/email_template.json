@@ -185,7 +185,7 @@
         "fields": {
             "template_key": "INITIATOR_FEEDBACK_MAIL_DETAIL_TO_DEALER",
             "sender": "feed-report@gladminds.co",
-            "receiver": "srv.sngh@gmail.com",
+            "receiver": "",
             "subject": "Feedback  with reference-no-GM-{id} Details",
             "body": "Your {type} has been assigned to our support team. We will update you by: {due_date}. ",
             "description": "Feedback Detail mail"
@@ -201,6 +201,18 @@
             "subject": "Change for due date",
             "body": "Your {type} will be resolved by {due_date}",
             "description": "Due Date change mail to dealer"
+        }
+    },
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 18,
+        "fields": {
+            "template_key": "FEEDBACK_RESOLVED_MAIL_TO_DEALER",
+            "sender": "feed-report@gladminds.co",
+            "receiver": "",
+            "subject": "Feedback  with reference-no-GM-{id} Status",
+            "body": "The {type}  which was reported by {reporter} has been resolved. {assign_to} added a comment {comment}", 
+            "description": "Feedback status mail"
         }
     }
   

@@ -218,7 +218,7 @@ def save_update_feedback(feedback_obj, data, user, host):
             logger.info("Reporter emailId not found.")
             dealer_asc_obj = models.ServiceAdvisor.objects.get_dealer_asc_obj(feedback_obj.reporter)
             if dealer_asc_obj.user.user.email:
-                context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL_TO_DEALER',
+                context = create_context('FEEDBACK_RESOLVED_MAIL_TO_DEALER',
                                  feedback_obj)
                 mail.send_email_to_dealer_after_issue_assigned(context,
                                                          dealer_asc_obj.user.user.email)
