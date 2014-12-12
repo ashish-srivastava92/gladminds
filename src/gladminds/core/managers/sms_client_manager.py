@@ -1,9 +1,8 @@
 from django.conf import settings
-import json
 import logging
 import requests
 
-logger = logging.getLogger("gladminds")
+LOGGER = logging.getLogger("gladminds")
 
 __all__ = ['KapSmsClient', 'AirtelSmsClient', 'TwilioSmsClient']
 
@@ -20,9 +19,9 @@ def load_gateway(sms_client):
         return TwilioSmsClient(**client)
     elif sms_client == 'KAP':
         return KapSmsClient(**client)
-        
+
 class SmsClientExcetion(Exception):
-    
+
     def __init__(self, message, args = []):
         Exception.__init__(self, message)
         self.args = args
@@ -37,7 +36,7 @@ class SmsClientMessageFailted(Exception):{}
 class MessageSentFailed(Exception):{}
 
 class SmsClientBaseObject(object):
-    
+
     def __init__(self, *args, **kwargs):
         """Set username and password"""
         self.login = kwargs['login']
@@ -45,11 +44,11 @@ class SmsClientBaseObject(object):
         self.authenticate_url = kwargs['authenticate_url']
         self.message_url = kwargs['message_url']
         self.session_id = None
-        
+
     """Authenticate the user and return session Id"""
     def authenticate(self):
         return
-        
+
     def send(self, type, **kwargs):
         return_data = None
         if type=="stateless":
@@ -57,24 +56,24 @@ class SmsClientBaseObject(object):
         else:
             return_data = self.send_stateful(**kwargs)
         return return_data
-    
+
     """"This method doesn't require http session, username and password mendatory"""
-    def send_stateless(self, **kwargs): 
-        return 
-    
+    def send_stateless(self, **kwargs):
+        return
+
     """Send the message using Http session"""
     def send_stateful(self, **kwargs):
         return
-    
+
     def bulk_sms(self, **kwargs):
-        return 
-    
+        return
+
     def _get_session_id(self):
         return self.session_id
-    
+
     def _set_session_id(self, session_id):
         self.session_id = session_id
-        
+
 class KapSmsClient(SmsClientBaseObject):
     
     def __init__(self, *args, **kwargs):
@@ -83,32 +82,38 @@ class KapSmsClient(SmsClientBaseObject):
         self.login = kwargs['login']
         self.password = kwargs['pass']
         self.message_url = kwargs['message_url']
-        
+
     def authenticate(self):
-        return    
-    
+        return
+
     def send_stateless(self, **kwargs):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
-        logger.info(
+        LOGGER.info(
             '[INFO]: sending message {0} to {1} through kap'.format(message, phone_number))
-        params = {'to' : phone_number, 'message' : message, 'workingkey' : self.working_key, 'sender': self.sender_id}
+        params = {'to' : phone_number,
+                  'message' : message,
+                  'workingkey' : self.working_key,
+                  'sender': self.sender_id}
         return self.send_request(url = self.message_url, params = params)
-        
+
     def send_stateful(self, **kwargs):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
-        logger.info(
+        LOGGER.info(
             '[INFO]: sending message {0} to {1} through kap'.format(message, phone_number))
-        params = {'workingkey' : self.working_key, 'sender': self.sender_id, 'to' : phone_number, 'message' : message}
+        params = {'workingkey' : self.working_key,
+                  'sender': self.sender_id,
+                  'to' : phone_number,
+                  'message' : message}
         return self.send_request(url = self.message_url, params = params)
-    
+
     def send_request(self, url, params):
-        logger.info(
-            '[INFO]: sending message to KAP url {0}'.format(url))        
+        LOGGER.info(
+            '[INFO]: sending message to KAP url {0}'.format(url))
         resp = requests.get(url = url, params = params)
-        logger.info(
-            '[INFO]: Response from KAP url {0} {1}'.format(resp.content, resp.status_code))          
+        LOGGER.info(
+            '[INFO]: Response from KAP url {0} {1}'.format(resp.content, resp.status_code))
         assert resp.status_code==200
 #         json = import_json()
 #         data = resp.content
@@ -127,56 +132,62 @@ class AirtelSmsClient(SmsClientBaseObject):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
         session_id = self._get_session_id()
-        logger.info(
-            '[INFO]: sending message {0} to {1} through airtel'.format(message, phone_number))        
-        params = {'mob_no' : phone_number, 'text' : message, 'login' : self.login, 'pass': self.password}
+        LOGGER.info(
+            '[INFO]: sending message {0} to {1} through airtel'.format(message, phone_number))
+        params = {'mob_no' : phone_number,
+                  'text' : message,
+                  'login' : self.login,
+                  'pass': self.password}
         return self.send_request(url = self.message_url, params = params)
-    
+
     def send_stateful(self, **kwargs):
         phone_number = kwargs['phone_number']
         message = kwargs['message']
         session_id = self._get_session_id()
-        logger.info(
+        LOGGER.info(
             '[INFO]: sending message {0} to {1} through airtel'.format(message, phone_number))         
-        params = {'mob_no' : phone_number, 'text' : message, 'sessionID' : session_id}
+        params = {'mob_no' : phone_number,
+                  'text' : message,
+                  'sessionID' : session_id}
         return self.send_request(url = self.message_url, params = params)
-    
+
     def send_request(self, url, params):
-        logger.info(
-            '[INFO]: sending message to Airtel url {0}'.format(url))               
+        LOGGER.info(
+            '[INFO]: sending message to Airtel url {0}'.format(url))
         resp = requests.get(url = url, params = params)
-        logger.info(
-            '[INFO]: Response from Airtel url {0} {1}'.format(resp.content, resp.status_code))          
+        LOGGER.info(
+            '[INFO]: Response from Airtel url {0} {1}'.format(resp.content, resp.status_code))
         assert resp.status_code==200
-#         json = import_json()
-#         data = resp.content
         return resp.status_code
-    
+
 class MockSmsClient(SmsClientBaseObject):
-    
+
     def __init__(self, *args, **kwargs):
         pass
-    
+
     def authenticate(self, **kwargs):
         return {"sessionID":"23ef53u78s090df9ac0vvg011f"}
-    
+
     def send_stateless(self, **kwargs):
         return {"jobId":695, "message":"Your message has been sent to {0}".format(kwargs['phone_number']), "messagesLeft":99999862}
-    
+
     def send_stateful(self, **kwargs):
-        return {"sessionID":"23ef53u78s090df9ac0vvg011f", "jobId":695, "message":"Your message has been successfully sent", "messagesLeft":99999862}
-        
+        return {"sessionID":"23ef53u78s090df9ac0vvg011f",
+                "jobId":695,
+                "message":"Your message has been successfully sent",
+                "messagesLeft":99999862}
+
 class TwilioSmsClient(SmsClientBaseObject):
-    
+
     def __init__(self, *args, **kwargs):
         self.account_key  = kwargs['OTP_TWILIO_ACCOUNT']
         self.auth_key = kwargs['OTP_TWILIO_AUTH']
         self.sender = kwargs['OTP_TWILIO_FROM']
         self.uri = kwargs['OTP_TWILIO_URI']
-    
+
     def authenticate(self, **kwargs):
         return {"sessionID":"23ef53u78s090df9ac0vvg011f"}
-    
+
     def send_stateless(self, **kwargs):
         url = self.uri.format(self.account_key)
         data = {
@@ -184,11 +195,13 @@ class TwilioSmsClient(SmsClientBaseObject):
             'To': str(kwargs['phone_number']),
             'Body': kwargs['message'],
         }
-        response = requests.post(url = url, data=data, auth=(self.account_key, self.auth_key))
+        response = requests.post(url = url,
+                                 data=data,
+                                 auth=(self.account_key, self.auth_key))
         status_code = response.status_code
-        if (status_code>=400):
+        if status_code>=400:
             raise MessageSentFailed("Not able to sent sms")
-        
+
     def send_stateful(self, **kwargs):
         url = self.uri.format(self.account_key)
         data = {
@@ -196,4 +209,6 @@ class TwilioSmsClient(SmsClientBaseObject):
             'To': str(kwargs['phone_number']),
             'Body': kwargs['message'],
         }
-        response = requests.post(url = url, data=data, auth=(self.account_key, self.auth_key))
+        response = requests.post(url = url,
+                                 data=data,
+                                 auth=(self.account_key, self.auth_key))

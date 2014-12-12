@@ -1,5 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
-from gladminds.bajaj import models 
+from gladminds.bajaj import models
 from django.conf import settings
 
 def get_template(template_key):

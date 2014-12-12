@@ -8,29 +8,73 @@ from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.contrib.sites.models import get_current_site
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth.models import User
+from tastypie.resources import Resource
 
 from gladminds.core import utils
 from gladminds.core.utils import get_list_from_set, convert_utc_to_local_time
 from gladminds.bajaj import models as models
-from gladminds.bajaj.services.free_service_coupon import GladmindsResources
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     ROOT_CAUSE, SDM, SDO, DEALER, PAGINATION_LINKS, BY_DEFAULT_RECORDS_PER_PAGE, RECORDS_PER_PAGE
 from gladminds.managers import get_feedback,\
     get_servicedesk_users, save_update_feedback, get_comments
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services import message_template as templates
+from gladminds.bajaj.services.free_service_coupon import FSCResources
 from gladminds.sqs_tasks import send_coupon
 from gladminds.core.decorator import check_service
 from gladminds.core.service_handler import Services
+from gladminds.core.managers.mail import send_feedback_received,\
+     send_servicedesk_feedback, send_dealer_feedback
+from gladminds.managers import get_reporter_details
+from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
+    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS,\
+    FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL, DEALER, SDO, SDM
 
-from gladminds.core.views.views import get_feedbacks
-
-
-gladmindsResources = GladmindsResources()
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 
+def get_feedbacks(user, status, priority, type, search=""):
+    group = user.groups.all()[0]
+    feedbacks = []
+    if type == ALL or type is None:
+        type_filter = utils.get_list_from_set(FEEDBACK_TYPE)
+    else:
+        type_filter = [type]
 
+    if priority == ALL or priority is None:
+        priority_filter = utils.get_list_from_set(PRIORITY)
+    else:
+        priority_filter = [priority]
+    
+    if status is None:
+        status_filter = ['Open', 'Pending', 'In Progress']
+    else:
+        if status == ALL:
+            status_filter = utils.get_list_from_set(FEEDBACK_STATUS)
+        else:
+            status_filter = [status]
+
+    if group.name == DEALER:
+        sa_list = models.ServiceAdvisor.objects.active_under_dealer(user)
+        if sa_list:
+            sa_id_list = []
+            for sa in sa_list:
+                sa_id_list.append(sa.service_advisor_id)
+            feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
+                                                       priority__in=priority_filter, type__in=type_filter
+                                                    ).order_by('-created_date')
+    if group.name == SDM:
+        feedbacks = models.Feedback.objects.filter(status__in=status_filter, priority__in=priority_filter,
+                                                   type__in=type_filter).order_by('-created_date')
+    if group.name == SDO:
+        user_profile = models.UserProfile.objects.filter(user=user)
+        servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
+        feedbacks = models.Feedback.objects.filter(assignee=servicedesk_user[0], status__in=status_filter,
+                                                   priority__in=priority_filter,
+                                                   type__in=type_filter).order_by('-created_date')
+
+    return feedbacks
 
 @check_service(Services.SERVICE_DESK)
 @login_required()
@@ -151,3 +195,78 @@ def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=Non
             send_coupon.delay(phone_number=phone_number, message=message)
     sms_log(receiver=phone_number, action='SEND TO QUEUE', message=message)
     return {'status': True, 'message': message}
+
+
+__all__ = ['GladmindsTaskManager']
+AUDIT_ACTION = 'SEND TO QUEUE'
+angular_format = lambda x: x.replace('{', '<').replace('}', '>')
+
+
+class SDResources(Resource):
+
+    class Meta:
+        resource_name = 'handler'
+        
+    def get_complain_data(self, sms_dict, phone_number, email, name, dealer_email, with_detail=False):
+        ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
+        manager_obj = User.objects.get(groups__name='SDM')
+        try:
+            role = self.check_role_of_initiator(phone_number)
+            user_profile = models.UserProfile.objects.filter(phone_number=phone_number)
+            if len(user_profile)>0:
+                servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
+                if servicedesk_user:
+                    servicedesk_user = servicedesk_user[0]
+                else:
+                    servicedesk_user = models.ServiceDeskUser(user_profile=user_profile[0], name=name)
+                    servicedesk_user.save()
+            else:
+                servicedesk_user = models.ServiceDeskUser(name=name, phone_number=phone_number, email=email)
+                servicedesk_user.save()
+            if with_detail:
+                gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
+                                                                type=sms_dict['type'], 
+                                                                summary=sms_dict['summary'], description=sms_dict['description'],
+                                                                status="Open", created_date=datetime.now(),
+                                                                role=role
+                                                                )
+            else:
+                gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
+                                                                message=sms_dict['message'], status="Open",
+                                                                created_date=datetime.datetime.now(),
+                                                                role=role
+                                                                )
+            gladminds_feedback_object.save()
+            message = templates.get_template('SEND_RCV_FEEDBACK').format(type=gladminds_feedback_object.type)
+        except Exception as ex:
+            logger.error(ex)
+            message = templates.get_template('SEND_INVALID_MESSAGE')
+        finally:
+            logger.info("Send complain message received successfully with %s" % message)
+            phone_number = utils.get_phone_number_format(phone_number)
+            if settings.ENABLE_AMAZON_SQS:
+                task_queue = utils.get_task_queue()
+                task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
+            else:
+                send_coupon.delay(phone_number=phone_number, message=message)
+            context = utils.create_context('FEEDBACK_DETAIL_TO_DEALER',  gladminds_feedback_object)
+            send_dealer_feedback(context, dealer_email)
+            context = utils.create_context('FEEDBACK_DETAIL_TO_ADIM',  gladminds_feedback_object)
+            send_feedback_received(context, manager_obj.email)
+            context = utils.create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)
+            send_servicedesk_feedback(context, get_reporter_details(gladminds_feedback_object.reporter,"email"))
+            sms_log(receiver=phone_number, action=AUDIT_ACTION, message = message)
+        return {'status': True, 'message': message}
+
+    def check_role_of_initiator(self, phone_number):
+        fsc_resource = FSCResources()
+        active_sa = fsc_resource.validate_service_advisor(phone_number)
+        if  active_sa:
+            return "SA"
+        else:
+            check_customer_obj = models.ProductData.objects.filter(
+                                            customer_phone_number=phone_number)
+            if check_customer_obj:
+                return "Customer"
+            else:
+                return "other"
