@@ -25,6 +25,8 @@ from django.contrib.sites.models import RequestSite
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from django.db.transaction import atomic
 from gladminds.core.auth_helper import GmApps
+from gladminds.afterbuy.apis.validations import ConsumerValidation,\
+    UserValidation
 
 logger = logging.getLogger("gladminds")
 
@@ -32,8 +34,9 @@ logger = logging.getLogger("gladminds")
 class DjangoUserResources(ModelResource):
     class Meta:
         queryset = User.objects.all()
-        resource_name = 'django'
+        resource_name = 'users'
         authentication = AccessTokenAuthentication()
+        validation = UserValidation()
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         excludes = ['password', 'is_superuser']
         always_return_data = True
@@ -47,6 +50,7 @@ class ConsumerResource(CustomBaseModelResource):
         queryset = afterbuy_model.Consumer.objects.all()
         resource_name = "consumers"
         authentication = AccessTokenAuthentication()
+        validation = ConsumerValidation()
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         detail_allowed_methods = ['get', 'delete', 'put']
         always_return_data = True
