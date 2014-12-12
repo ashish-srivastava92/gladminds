@@ -442,14 +442,14 @@ def export_customer_reg_to_sap(*args, **kwargs):
         
 
 def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
-    created_date = convert_utc_to_local_time(feedback_obj.created_date).strftime("%Y-%m-%d")
+    created_date = convert_utc_to_local_time(feedback_obj.created_date).strftime("%d-%m-%Y %H:%M")
     due_date = getattr(feedback_obj,"due_date") or ""
     if due_date:
-        due_date = due_date.strftime("%Y-%m-%d")
+        due_date = due_date.strftime("%d-%m-%Y %H:%M")
     reporter = None
     try:
         if feedback_obj.reporter:
-            reporter = feedback_obj.reporter.user_profile
+            reporter = feedback_obj.reporter.user_profile.user.username
         message = templates.get_template(template_name).format(type=feedback_obj.type,
                                                                reporter=reporter,
                                                                message=feedback_obj.description,
