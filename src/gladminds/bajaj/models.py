@@ -190,14 +190,6 @@ class CustomerTempRegistration(base_models.CustomerTempRegistration):
         app_label = _APP_NAME
         verbose_name_plural = "Customer temporary info"
 
-
-class SparesData(base_models.SparesData):
-
-    class Meta:
-        app_label = _APP_NAME
-        verbose_name_plural = "spare info"
-
-
 class UserPreference(base_models.UserPreference):
     user = models.ForeignKey(UserProfile)
 
@@ -240,3 +232,59 @@ class SLA(base_models.SLA):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "SLA config"
+
+class NationalSalesManager(base_models.NationalSalesManager):
+    '''details of National Sales Manager'''
+    user = models.OneToOneField(UserProfile, primary_key=True,
+                                related_name='bajaj_national_sales_manager')
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "national sales manager"
+
+class AreaServiceManager(base_models.AreaServiceManager):
+    '''details of Area Service Manager'''
+    user = models.OneToOneField(UserProfile, primary_key=True,
+                                related_name='bajaj_area_service_manager')
+    nsm = models.ForeignKey(NationalSalesManager, null=True, blank=True)
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "area service manager"
+
+class Distributor(base_models.Distributor):
+    '''details of Distributor'''
+    user = models.OneToOneField(UserProfile, primary_key=True,
+                                related_name='bajaj_distributor')
+    asm = models.ForeignKey(AreaServiceManager, null=True, blank=True)
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "distributor"
+
+class Mechanic(base_models.Mechanic):
+    '''details of Mechanic'''
+    user = models.OneToOneField(UserProfile, primary_key=True,
+                                related_name='bajaj_mechanic')    
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "mechanics"
+
+class SparePart(base_models.SparePart):
+    '''details of Spare Part'''
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "spare parts"
+
+class AccumulationRequest(base_models.AccumulationRequest):
+    '''details of Spare Part'''
+    
+    member = models.ForeignKey(Mechanic)
+    upc = models.ForeignKey(SparePart)
+    asm = models.ForeignKey(AreaServiceManager, null=True, blank=True)
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "accumulation request"

@@ -1,5 +1,5 @@
 from uuid import uuid4
-from datetime import datetime
+import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -319,6 +319,7 @@ class ServiceType(base_models.BaseModel):
 class Service(base_models.BaseModel):
     consumer = models.ForeignKey(Consumer)
     service_type = models.ForeignKey(ServiceType)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -370,8 +371,8 @@ class EmailToken(models.Model):
     class Meta:
         verbose_name_plural = 'email_tokens'
 
-        def __unicode__(self):
-            return u"Registration information for %s" % self.user
+    def __unicode__(self):
+        return u"Registration information for %s" % self.user
 
     def activation_key_expired(self):
         """

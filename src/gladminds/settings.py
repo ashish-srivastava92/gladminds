@@ -86,6 +86,20 @@ SUIT_CONFIG = {
                      'label': 'Email Log'},
                     {'model': 'datafeedlog',
                      'label': 'Feed Log'},)},
+        {'app': 'bajaj', 'label': 'Loyalty', 'icon': ' icon-folder-open',
+         'models':(
+                    {'model': 'nationalsalesmanager',
+                     'label': 'National Sales Manager'},
+                   {'model': 'areaservicemanager',
+                     'label': 'Area Service Manager'},
+                    {'model': 'distributor',
+                     'label': 'Distributor'},
+                   {'model': 'mechanic',
+                     'label': 'Mechanic'},
+                   {'model': 'sparepart',
+                     'label': 'Spare Part'},
+                   {'model': 'accumulationrequest',
+                     'label': 'Accumulation Request'},)},
         {'app': 'bajaj', 'label': 'User Registrations', 'icon': ' icon-folder-open',
          'models':(
                     {'model': 'asctempregistration',
@@ -441,8 +455,8 @@ EMAIL_ACTIVATION_MAIL = {
                   "body": """""", }
 
 RECYCLE_MAIL = {
-                "sender":"",
-                "subject":"Product name for recycle",
+                "sender":"support@gladminds.co",
+                "subject":"Product for recycle",
                 "receiver": ["demosupport@gladminds.co"],
                 "body": """""",
                 
@@ -537,6 +551,7 @@ DEFAULT_IMAGE_ID = 'guest.png'
 CONSTANCE_CONFIG = {
     'DEFAULT_IMAGE': ('guest.png', 'Default image to be used by any app'),
     'AFTERBUY_FORGOT_PASSWORD_URL': ('http://afterbuy.co/demo/staging_qw741qaz5/change-password.php', 'Afterbuy forgot password url'),
+    'AFTERBUY_RECYCLE_EMAIL_RECIPIENT' : ('demosupport@gladminds.co', 'Default Email for recycle')
 }
 
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
