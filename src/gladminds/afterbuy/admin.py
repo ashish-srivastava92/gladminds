@@ -22,6 +22,11 @@ class ConsumerAdmin(ModelAdmin):
     list_display = ('user', 'phone_number')
 
 
+class ProductTypeAdmin(ModelAdmin):
+    search_fields = ('product_type',)
+    list_display = ('product_type', 'image_url')
+
+
 brand_admin = AfterbuyAdminSite(name=GmApps.AFTERBUY)
 
 brand_admin.register(Industry, IndustryAdmin)
@@ -31,7 +36,7 @@ brand_admin.register(ServiceType)
 brand_admin.register(Service)
 brand_admin.register(SellInformation)
 brand_admin.register(Consumer, ConsumerAdmin)
-brand_admin.register(ProductType)
+brand_admin.register(ProductType, ProductTypeAdmin)
 brand_admin.register(UserProduct)
 brand_admin.register(ProductInsuranceInfo)
 brand_admin.register(ProductWarrantyInfo)

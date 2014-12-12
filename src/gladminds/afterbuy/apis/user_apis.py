@@ -23,6 +23,8 @@ from gladminds.core.apis.authorization import CustomAuthorization,\
     MultiAuthorization
 from django.contrib.sites.models import RequestSite
 from gladminds.core.apis.authentication import AccessTokenAuthentication
+from django.db.transaction import atomic
+from gladminds.core.auth_helper import GmApps
 
 logger = logging.getLogger("gladminds")
 
@@ -33,7 +35,7 @@ class DjangoUserResources(ModelResource):
         resource_name = 'django'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
-        excludes = ['email', 'password', 'is_superuser']
+        excludes = ['password', 'is_superuser']
         always_return_data = True
 
 
@@ -93,6 +95,7 @@ class ConsumerResource(CustomBaseModelResource):
             data = {'status': 0, 'message': ex}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
+    @atomic(using=GmApps.AFTERBUY)
     def user_registration(self, request, **kwargs):
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
@@ -128,11 +131,12 @@ class ConsumerResource(CustomBaseModelResource):
                 except Exception as ex:
                         log_message = "new user :{0}".format(ex)
                         logger.info(log_message)
-                        create_user = User.objects.create_user(user_name,
-                                                            email_id, password)
+                        create_user = User.objects.using(GmApps.AFTERBUY).create(username=user_name)
+                        create_user.set_password(password)
+                        create_user.email = email_id
                         create_user.first_name = first_name
                         create_user.last_name = last_name
-                        create_user.save()
+                        create_user.save(using=GmApps.AFTERBUY)
                         user_register = afterbuy_model.Consumer(user=create_user,
                                     phone_number=phone_number)
                         user_register.save()
@@ -351,4 +355,5 @@ class ServiceResource(CustomBaseModelResource):
         filtering = {
                      "consumer": ALL,
                      "service_type": ALL,
+                     "is_active": ALL
                      }

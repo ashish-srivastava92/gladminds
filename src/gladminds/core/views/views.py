@@ -29,10 +29,12 @@ from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.bajaj.services.service_desk import SDResources, get_feedbacks
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS,\
-    FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL, DEALER, SDO, SDM
+    FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL, DEALER, SDO, SDM,\
+    BY_DEFAULT_RECORDS_PER_PAGE, PAGINATION_LINKS, RECORDS_PER_PAGE
     
 from gladminds.core.decorator import log_time, check_service
 from gladminds.core.utils import get_email_template, format_product_object
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 handlerResources = SDResources()
 logger = logging.getLogger('gladminds')
@@ -404,18 +406,42 @@ def service_desk(request, servicedesk):
     status = request.GET.get('status')
     priority = request.GET.get('priority')
     type = request.GET.get('type')
+    search = request.GET.get('search')
+    count = request.GET.get('count') or BY_DEFAULT_RECORDS_PER_PAGE
+    page_details = {}
+    if search:
+        feedback_obects = get_feedbacks(request.user, status, priority, type, search)
+    else:
+        feedback_obects = get_feedbacks(request.user, status, priority, type)
+    paginator = Paginator(feedback_obects, count)
+    page = request.GET.get('page')
+    try:
+        feedbacks = paginator.page(page)
+    except PageNotAnInteger:
+        feedbacks = paginator.page(1)
+    except EmptyPage:
+        feedbacks = paginator.page(paginator.num_pages)
+    
+    page_details['total_objects'] = paginator.count
+    page_details['from'] = feedbacks.start_index()
+    page_details['to'] = feedbacks.end_index()
+    
     groups = utils.stringify_groups(request.user)
     if request.method == 'GET':
         template = 'portal/feedback_details.html'
         data = None
         data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
-        return render(request, template, {"feedbacks" : get_feedbacks(request.user, status, priority, type),
+        return render(request, template, {"feedbacks" : feedbacks,
                                           'active_menu': servicedesk,
                                           "data": data, 'groups': groups,
                                           "status": utils.get_list_from_set(FEEDBACK_STATUS),
+                                          "pagination_links": PAGINATION_LINKS,
+                                          "page_details": page_details,
+                                          "record_showing_counts": RECORDS_PER_PAGE,
                                           "types": utils.get_list_from_set(FEEDBACK_TYPE),
                                           "priorities": utils.get_list_from_set(PRIORITY),
-                                          "filter_params": {'status': status, 'priority': priority, 'type': type}}
+                                          "filter_params": {'status': status, 'priority': priority, 'type': type,
+                                                            'count': str(count), 'search': search}}
                                         )
     elif request.method == 'POST':
         function_mapping = {

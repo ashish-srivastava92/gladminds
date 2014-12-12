@@ -297,6 +297,8 @@ class MessageTemplate(BaseModel):
         abstract = True
         verbose_name_plural = "Message Template"
 
+    def __unicode__(self):
+        return self.template_key
 ##################################################################
 ####################Message Template DB Storage###################
 
@@ -314,6 +316,10 @@ class EmailTemplate(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "Email Template"
+
+    def __unicode__(self):
+        return self.template_key+"- "+ self.subject
+
 
 ########################## TempRegistration #########################
 

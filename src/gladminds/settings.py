@@ -455,8 +455,8 @@ EMAIL_ACTIVATION_MAIL = {
                   "body": """""", }
 
 RECYCLE_MAIL = {
-                "sender":"",
-                "subject":"Product name for recycle",
+                "sender":"support@gladminds.co",
+                "subject":"Product for recycle",
                 "receiver": ["demosupport@gladminds.co"],
                 "body": """""",
                 
@@ -551,6 +551,7 @@ DEFAULT_IMAGE_ID = 'guest.png'
 CONSTANCE_CONFIG = {
     'DEFAULT_IMAGE': ('guest.png', 'Default image to be used by any app'),
     'AFTERBUY_FORGOT_PASSWORD_URL': ('http://afterbuy.co/demo/staging_qw741qaz5/change-password.php', 'Afterbuy forgot password url'),
+    'AFTERBUY_RECYCLE_EMAIL_RECIPIENT' : ('demosupport@gladminds.co', 'Default Email for recycle')
 }
 
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'

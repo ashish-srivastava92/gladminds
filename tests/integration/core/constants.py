@@ -7,6 +7,15 @@ def add_slashes(data):
     return data
 
 
+class Constants():
+        BRAND = "testbrand"
+        INDUSTRY = "testindustry"
+        PRODUCT_TYPE = "testproducttype"
+
+
 class AfterbuyUrls():
         REGISTRATION = 'consumers/registration/'
+        LOGIN = 'consumers/login/'
+        BRAND = 'brands/'
+        INDUSTRY = 'industries/'
 

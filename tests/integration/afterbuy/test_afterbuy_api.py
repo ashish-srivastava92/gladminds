@@ -11,9 +11,8 @@ from test_constants import AFTERBUY_PRODUCTS
 from integration.afterbuy import base_integration
 from gladminds.afterbuy import models
 
-client  =  Client(SERVER_NAME='afterbuy')
+client = Client(SERVER_NAME='afterbuy')
 
-from django.utils.unittest.case import skip
 
 class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
     def setUp(self):
@@ -32,22 +31,20 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
                             "otp_token":"000000"}
         uri = '/afterbuy/v1/consumers/registration/'
         resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
-        self.assertEquals(200, resp.status_code)
-    
-    @unittest.skip('failin')
+        self.assertEquals(resp.status_code, 200)
+
     def test_user_login(self):
         login_data = {"phone_number":"7760814041", "password":"123"}
         uri = '/afterbuy/v1/consumers/login/'
-        resp = self.client.post(uri, format='json', data=login_data)
-        self.assertEquals(200, resp.status_code)
-         
+        resp = client.post(uri, data=json.dumps(login_data), content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+          
         # Checking login by email id
         login_data = {"email_id":"test.ab@gmail.com", "password":"123"}
         uri = '/afterbuy/v1/consumers/login/'
-        resp = self.client.post(uri, format='json', data=login_data)
-        self.assertEquals(200, resp.status_code)
-    
-    @unittest.skip('failin')
+        resp = client.post(uri, data=json.dumps(login_data), content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        
     def test_user_emailid_exists(self):
         create_mock_data = {"email_id":"test.ab@gmail.com"}
         uri = '/afterbuy/v1/consumers/authenticate-email/'
@@ -55,28 +52,22 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
         self.assertEquals(200, resp.status_code)
 
     
-    @unittest.skip('failin')
     def test_user_send_otp(self):
         create_mock_data = {"phone_number":"7760814041"}
-        uri = '/afterbuy/v1/consumers/send-otp/'
-        resp = self.client.post(uri, format='json', data=create_mock_data)
-        self.assertEquals(200, resp.status_code)
+        uri = '/afterbuy/v1/consumers/phone-number/send-otp/'
+        resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
         
-    @unittest.skip('failin')
     def test_change_user_password(self):
-        create_mock_data = {"phone_number":"7760814041", "password": "1234"}
-        uri = '/afterbuy/v1/consumers/forgot-password/'
-        resp = self.client.post(uri, format='json', data=create_mock_data)
-        self.assertEquals(200, resp.status_code)
-#   
-    @unittest.skip('failin')
-    def test_fetch_user_detail(self):
-        self.test_user_registration()
-        create_mock_data = {'email_id':'srv.sngh@gmail.com'}
-        uri = '/afterbuy/v1/consumers/1/details/'
-        resp = self.client.get(uri, format='json', data=create_mock_data)
-        self.assertEquals(200, resp.status_code)
-    
+        create_mock_data = {"password1": "1234",  "password2": "1234", "otp_token":"000000",
+                            "auth_key": "e6281aa90743296987089ab013ee245dab66b27b"}
+        uri = '/afterbuy/v1/consumers/forgot-password/phone/'
+        resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        uri = '/afterbuy/v1/consumers/forgot-password/email/'
+        resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+
     @unittest.skip('failin')
     def test_add_product(self):
         self.test_user_registration()

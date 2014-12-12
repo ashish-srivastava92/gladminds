@@ -3,24 +3,44 @@ Product details for recycle are as below:<br/>
 <table border=1px style="width: 60%">
 	<tbody>
 		<tr>
-			<th>Product Id</th>
-			<th>Brand Name</th>
-			<th>Consumer Id</th>
-			<th>Consumer Name</th>
-			<th>Purchase Date</th>
-			<th>Brand Product Id</th>
-			<th>Color</th>
-			<th>Description</th>
+		  <th>Product Id</th>
+		  <td>{{product_info.id}}</td>
 		</tr>
 		<tr>
-			<td>{{id}}</td>
-			<td>{{brand}}</td>
-			<td>{{consumer_id}}</td>
-			<td>{{consumer_name}}</td>
-			<td>{{purchase_date}}</td>
-			<td>{{brand_product_id}}</td>
-			<td>{{color}}</td>
-			<td>{{description}}</td>
+		  <th>Brand Name</th>
+		  <td>{{product_info.brand.name|capfirst}}</td>
+		</tr>
+		<tr>
+		  <th>Consumer Id</th>
+		  <td>{{product_info.consumer.user.id}}</td>
+		</tr>
+		<tr>
+		  <th>Consumer Name</th>
+		  <td>{{product_info.consumer.user.first_name|capfirst}}</td>
+		</tr>
+		<tr>
+		  <th>Consumer Email</th>
+		  <td>{{product_info.consumer.user.email}}</td>
+		</tr>
+		<tr>
+		  <th>Consumer Phone</th>
+		  <td>{{product_info.consumer.phone_number}}</td>
+		</tr>
+		<tr>
+		  <th>Purchase Date</th>
+		  <td>{{product_info.purchase_date|default:'-'}}</td>
+		</tr>
+		<tr>
+		  <th>Brand Product Id</th>
+		  <td>{{product_info.brand_product_id|default:'-'}}</td>
+		</tr>
+		<tr>
+		  <th>Color</th>
+		  <td>{{product_info.color|default:'-'}}</td>
+		</tr>
+		<tr>
+		  <th>Description</th>
+		  <td>{{product_info.description|default:'-'}}</td>
 		</tr>
 	</tbody>
 </table>

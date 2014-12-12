@@ -1,5 +1,5 @@
 from uuid import uuid4
-from datetime import datetime
+import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -17,8 +17,6 @@ try:
     from django.utils.timezone import now as datetime_now
 except ImportError:
     datetime_now = datetime.datetime.now
-
-
 
 _APP_NAME = GmApps.AFTERBUY
 
@@ -77,8 +75,11 @@ class Consumer(base_models.BaseModel):
         app_label = _APP_NAME
         verbose_name_plural = "Consumers"
 
+    def __unicode__(self):
+        return self.phone_number + " "+ self.user.first_name
 
-class UserProduct(models.Model):
+
+class UserProduct(base_models.BaseModel):
     consumer = models.ForeignKey(Consumer)
     brand = models.ForeignKey(Brand)
     nick_name = models.CharField(max_length=100, default="")
@@ -90,7 +91,6 @@ class UserProduct(models.Model):
     color = models.CharField(max_length=50)
     is_deleted = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
-    
 
     class Meta:
         app_label = _APP_NAME
@@ -305,24 +305,25 @@ class UserProductImages(base_models.BaseModel):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "UserProductImages"
-        
+
+
 class ServiceType(base_models.BaseModel):
     name = models.CharField(max_length=40)
     description = models.TextField(null=True, blank=True)
-    
-    class Meta:
-        app_label = _APP_NAME
-        verbose_name_plural = "ServiceTypes" 
-         
-        
-class Service(base_models.BaseModel):
-    consumer = models.ForeignKey(Consumer)
-    service_type = models.ForeignKey(ServiceType)
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "Services"              
-        
+        verbose_name_plural = "ServiceTypes" 
+
+
+class Service(base_models.BaseModel):
+    consumer = models.ForeignKey(Consumer)
+    service_type = models.ForeignKey(ServiceType)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Services"
 
 
 class MessageTemplate(base_models.MessageTemplate):
@@ -364,18 +365,16 @@ class AuditLog(base_models.AuditLog):
 class EmailToken(models.Model):
     ACTIVATED = u"ALREADY_ACTIVATED"
     activation_key = models.CharField(_('activation key'), max_length=40)
-
+    user = models.ForeignKey(Consumer)
     objects = EmailTokenManager()
 
     class Meta:
-        abstract = True
         verbose_name_plural = 'email_tokens'
 
-        def __unicode__(self):
-            return u"Registration information for %s" % self.user
+    def __unicode__(self):
+        return u"Registration information for %s" % self.user
 
     def activation_key_expired(self):
-        import datetime
         """
         Determine whether this ``RegistrationProfile``'s activation
         key has expired, returning a boolean -- ``True`` if the key
@@ -438,7 +437,7 @@ class EmailToken(models.Model):
         ctx_dict = {'activation_key': self.activation_key,
                     'expiration_days': settings.ACCOUNT_ACTIVATION_DAYS,
                     'site': site,
-                    'base_url':settings.DOMAIN_BASE_URL}
+                    'base_url': settings.DOMAIN_BASE_URL}
         if trigger_mail == 'forgot-password':
             ctx_dict = {'activation_key': self.activation_key,
                     'link': config.AFTERBUY_FORGOT_PASSWORD_URL}
