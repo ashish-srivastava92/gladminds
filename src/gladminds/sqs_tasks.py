@@ -449,7 +449,7 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
     reporter = None
     try:
         if feedback_obj.reporter:
-            reporter = feedback_obj.reporter.user_profile.user.username
+            reporter = feedback_obj.reporter.user_profile
         message = templates.get_template(template_name).format(type=feedback_obj.type,
                                                                reporter=reporter,
                                                                message=feedback_obj.description,

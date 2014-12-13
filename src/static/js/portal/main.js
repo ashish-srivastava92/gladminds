@@ -563,6 +563,7 @@ function disable_func(){
 	$("#type").prop("disabled", true);
 	$("#priority").prop("disabled", true);
 	$("#assignee").prop("disabled", true);
+	$("#status").prop("disabled", true);
 }
 
 function showMessage(id){

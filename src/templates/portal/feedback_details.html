@@ -56,7 +56,8 @@
 	                </div>
 	                <div class="col-md-8 form-group">
 	                	<select class="form-control feedback-filters-options" name="status" required>
-	                    	<option value="all">All</option>
+	                		<option {% if filter_params.status == 'active' %} selected {% endif%}  value="active">Default Filter</option>
+	                    	<option {% if filter_params.status == 'all' %} selected {% endif%} value="all">All</option>
 	                      	{% for status in status %}
 	                     		 <option {% if filter_params.status == status %} selected {% endif%} value="{{status}}">{{status}}</option>
 	                      	{% endfor %}
@@ -113,12 +114,12 @@
         <tbody>
 				{% for feedback in feedbacks %}
 				<tr> 
-				    <td>
+				    <td nowrap>
 				       <a href="/aftersell/feedbackdetails/{{feedback.id}}/">
 							GM-{{feedback.id|default_if_none:""}}
 						</a>  
 					</td>
-					<td>{{feedback.reporter.name|default_if_none:""}}</td>
+					<td nowrap>{{feedback.reporter.name|default_if_none:""}}</td>
 					<td>
 					   <div>
 					       {% if feedback.description|length > 20 %}

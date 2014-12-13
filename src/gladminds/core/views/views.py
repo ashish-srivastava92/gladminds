@@ -296,7 +296,6 @@ def register_customer(request, group=None):
 
 @check_service(Services.FREE_SERVICE_COUPON)
 def recover_coupon_info(data):
-    print data
     customer_id = data['customerId']
     logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, data['current_user']))
     coupon_data = utils.get_coupon_info(data)
