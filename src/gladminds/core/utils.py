@@ -41,6 +41,15 @@ def get_model(model, brand=None):
     except:
         return None
 
+def get_handler(handler, brand=None):
+    if not brand:
+        brand = settings.BRAND
+    try:
+        rel_path = '.'.join(handler.split('.')[:-1])
+        func_handler = '.'.join(handler.split('.')[-1:])
+        return getattr(import_module('gladminds.{0}.services.{1}'.format(brand, rel_path)), func_handler)
+    except:
+        return None
 
 def generate_unique_customer_id():
     bytes_str = os.urandom(24)

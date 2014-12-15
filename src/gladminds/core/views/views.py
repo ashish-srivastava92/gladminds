@@ -26,7 +26,7 @@ from gladminds.core.managers.mail import sent_otp_email,\
 from gladminds.bajaj.feeds.feed import SAPFeed
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
-from gladminds.bajaj.services.service_desk import SDResources, get_feedbacks
+from gladminds.bajaj.services.service_desk import get_complain_data, get_feedbacks
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS,\
     FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL, DEALER, SDO, SDM,\
@@ -36,7 +36,6 @@ from gladminds.core.decorator import log_time, check_service
 from gladminds.core.utils import get_email_template, format_product_object
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
-handlerResources = SDResources()
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
@@ -471,7 +470,7 @@ def save_help_desk_data(request):
         sms_dict[field] = request.POST.get(field, None)
     service_advisor_obj = models.ServiceAdvisor.objects.get(user__phone_number=sms_dict['advisorMobile'])
     dealer_obj = models.Dealer.objects.get(dealer_id=request.user)
-    return handlerResources.get_complain_data(sms_dict, service_advisor_obj.user.phone_number,
+    return get_complain_data(sms_dict, service_advisor_obj.user.phone_number,
                                                 service_advisor_obj.user.user.email,
                                                 service_advisor_obj.user.user.username, dealer_obj.user.user.email,
                                                 with_detail=True)

@@ -694,6 +694,7 @@ class SparePart(models.Model):
     segment = models.CharField(max_length=50, null=True, blank=True)
     territory = models.CharField(max_length=50, null=True, blank=True)
     supplier = models.CharField(max_length=50, null=True, blank=True)
+    is_used = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
