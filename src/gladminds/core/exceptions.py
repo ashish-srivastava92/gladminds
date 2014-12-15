@@ -10,5 +10,9 @@ class DataNotFoundError(Exception):
 
 class OtpFailedException(Exception):
     def __init__(self, arg):
-        # Set some exception infomation
         self.msg = arg
+
+
+class ParamToBeFunctionException(Exception):
+    def __init__(self, message="Param should be a function not a string or other type"):
+        self.msg = message
