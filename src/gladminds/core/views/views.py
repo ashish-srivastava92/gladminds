@@ -460,18 +460,11 @@ def service_desk(request):
     page_details = {}
     feedback_obects = get_feedbacks(request.user, status, priority, type, search)
     paginator = Paginator(feedback_obects, count)
-    page = request.GET.get('page')
-    try:
-        feedbacks = paginator.page(page)
-    except PageNotAnInteger:
-        feedbacks = paginator.page(1)
-    except EmptyPage:
-        feedbacks = paginator.page(paginator.num_pages)
-    
+    page = request.GET.get('page', 1)
+    feedbacks = paginator.page(page)
     page_details['total_objects'] = paginator.count
     page_details['from'] = feedbacks.start_index()
     page_details['to'] = feedbacks.end_index()
-    
     groups = utils.stringify_groups(request.user)
     if request.method == 'GET':
         template = 'portal/feedback_details.html'
