@@ -22,10 +22,11 @@ class Roles():
     SDSUPERADMINS = 'SdSuperAdmins'
     FSCSADMINS = 'FscAdmins'
     SDADMINS = 'SdAdmins'
-    SDMANAGERS = 'SDM'
-    SDOWNERS = 'SDO'
-    DEALERS = 'dealers'
-    ASCS = 'ascs'
+    SDMANAGERS = 'SdManagers'
+    SDOWNERS = 'SdOwners'
+    DEALERS = 'Dealers'
+    ASCS = 'AuthorisedServiceCenters'
+    DASCS = 'DependentAuthorisedServiceCenters'
 
 AFTERBUY_ADMIN_GROUPS = [Roles.SUPERADMINS, Roles.ADMINS]
 AFTERBUY_GROUPS = [Roles.SUPERADMINS, Roles.ADMINS, Roles.USERS]

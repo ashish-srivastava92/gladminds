@@ -1,3 +1,4 @@
+from gladminds.core.auth_helper import Roles
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 DATE_FORMAT = '%d-%m-%Y %H:%M' 
@@ -18,20 +19,20 @@ PROVIDER_MAPPING = {
                  }
 
 GROUP_MAPPING = {
-                'dealers' : '/aftersell/dealer/login',
-                'ascs' : '/aftersell/asc/login',
-                'dascs' :'/aftersell/asc/login',
-                'SDO' :'/aftersell/helpdesk/login',
-                'SDM' : '/aftersell/helpdesk/login'
+                Roles.DEALERS : '/aftersell/dealer/login',
+                Roles.ASCS : '/aftersell/asc/login',
+                Roles.DASCS :'/aftersell/asc/login',
+                Roles.SDOWNERS :'/aftersell/helpdesk/login',
+                Roles.SDMANAGERS : '/aftersell/helpdesk/login'
                 }
 
-USER_GROUPS = [ 'dealers', 'ascs', 'dascs', 'SDO', 'SDM']
+USER_GROUPS = [ Roles.DEALERS, Roles.ASCS, Roles.DASCS, Roles.SDOWNERS, Roles.SDMANAGERS]
 
 REDIRECT_USER ={
-                'dealers' : '/aftersell/register/asc',
-                'ascs' : '/aftersell/register/sa',
-                'SDO' : '/aftersell/servicedesk/',
-                'SDM' : '/aftersell/servicedesk/'
+                 Roles.DEALERS : '/aftersell/register/asc',
+                 Roles.ASCS : '/aftersell/register/sa',
+                 Roles.SDOWNERS : '/aftersell/servicedesk/',
+                 Roles.SDMANAGERS : '/aftersell/servicedesk/'
                 }
 
 TEMPLATE_MAPPING = {
@@ -74,10 +75,6 @@ TIME_UNIT = (('mins', 'mins'),
              ('hrs', 'hrs'),
              ('days', 'days'),)
 
-USER_DESIGNATION = (
-                    ('SDO','Owner'),
-                    ('SDM','Manager')
-                    )
 RATINGS = (
            ('1','Glad'),
            ('2','Very Glad'),
@@ -113,8 +110,3 @@ FUEL_CHOICES = (
     ('Electric', 'Electric'),
     ('Other', 'Other'),
 )
-
-SDM = 'SDM'
-SDO = 'SDO'
-DEALER = 'dealers'
-ASC = 'ascs'

@@ -29,13 +29,12 @@ from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.bajaj.services.free_service_coupon import GladmindsResources
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS,\
-    FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL, DEALER, SDO, SDM,\
-    BY_DEFAULT_RECORDS_PER_PAGE, PAGINATION_LINKS, RECORDS_PER_PAGE, ASC
-    
+    FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL, BY_DEFAULT_RECORDS_PER_PAGE, PAGINATION_LINKS,\
+    RECORDS_PER_PAGE
 from gladminds.core.decorator import log_time, check_service
 from gladminds.core.utils import get_email_template, format_product_object
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.template.context import RequestContext
+from django.core.paginator import Paginator
+from gladminds.core.auth_helper import Roles
 
 gladmindsResources = GladmindsResources()
 logger = logging.getLogger('gladminds')
@@ -88,7 +87,7 @@ def change_password(request):
         return render(request, 'portal/change_password.html')
     if request.method == 'POST':
         groups = utils.stringify_groups(request.user)
-        if 'dealers' in groups or 'ascs' in groups:
+        if Roles.DEALERS in groups or Roles.ASCS in groups:
             user = User.objects.get(username=request.user)
             old_password = request.POST.get('oldPassword')
             new_password = request.POST.get('newPassword')
@@ -164,7 +163,7 @@ def update_pass(request):
 @login_required()
 def register(request, menu):
     groups = utils.stringify_groups(request.user)
-    if not ('ascs' in groups or 'dealers' in groups):
+    if not (Roles.ASCS in groups or Roles.DEALERS in groups):
         return HttpResponseBadRequest()
     if request.method == 'GET':
         user_id = request.user
@@ -316,7 +315,7 @@ def get_customer_info(data):
     except Exception as ex:
         logger.info(ex)
         message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
-        if data['groups'][0] == "dealers":
+        if data['groups'][0] == Roles.DEALERS:
             data['groups'][0] = "Dealer"
         else:
             data['groups'][0] = "ASC"
@@ -334,7 +333,7 @@ def get_customer_info(data):
 @login_required()
 def exceptions(request, exception=None):
     groups = utils.stringify_groups(request.user)
-    if not ('ascs' in groups or 'dealers' in groups):
+    if not (Roles.ASCS in groups or Roles.DEALERS in groups):
         return HttpResponseBadRequest()
     if request.method == 'GET':
         template = 'portal/exception.html'
@@ -369,7 +368,7 @@ def exceptions(request, exception=None):
 @login_required()
 def users(request, users=None):
     groups = utils.stringify_groups(request.user)
-    if not ('ascs' in groups or 'dealers' in groups):
+    if not (Roles.ASCS in groups or Roles.DEALERS in groups):
         return HttpResponseBadRequest()
     if request.method == 'GET':
         template = 'portal/users.html'
@@ -400,7 +399,6 @@ def get_sa_under_asc(request, id=None):
     return render(request, template, {'active_menu':'sa',"data": data})
 
 def get_feedbacks(user, status, priority, type, search=None):
-    group = user.groups.all()[0]
     feedbacks = []
     if type == ALL or type is None:
         type_filter = utils.get_list_from_set(FEEDBACK_TYPE)
@@ -420,7 +418,7 @@ def get_feedbacks(user, status, priority, type, search=None):
         else:
             status_filter = [status]
 
-    if group.name == DEALER:
+    if user.groups.filter(name=Roles.DEALERS).exists():
         sa_list = models.ServiceAdvisor.objects.active_under_dealer(user)
         if sa_list:
             sa_id_list = []
@@ -429,7 +427,7 @@ def get_feedbacks(user, status, priority, type, search=None):
             feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
                                                        priority__in=priority_filter, type__in=type_filter
                                                     ).order_by('-created_date')
-    if group.name == ASC:
+    if user.groups.filter(name=Roles.ASCS).exists():
         sa_list = models.ServiceAdvisor.objects.active_under_asc(user)
         if sa_list:
             sa_id_list = []
@@ -438,10 +436,10 @@ def get_feedbacks(user, status, priority, type, search=None):
             feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
                                                        priority__in=priority_filter, type__in=type_filter
                                                     ).order_by('-created_date')
-    if group.name == SDM:
+    if user.groups.filter(name=Roles.SDMANAGERS).exists():
         feedbacks = models.Feedback.objects.filter(status__in=status_filter, priority__in=priority_filter,
                                                    type__in=type_filter).order_by('-created_date')
-    if group.name == SDO:
+    if user.groups.filter(name=Roles.SDOWNERS).exists():
         user_profile = models.UserProfile.objects.filter(user=user)
         servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
         feedbacks = models.Feedback.objects.filter(assignee=servicedesk_user[0], status__in=status_filter,
@@ -470,7 +468,7 @@ def service_desk(request):
     if request.method == 'GET':
         template = 'portal/feedback_details.html'
         data = None
-        if request.user.groups.filter(name=DEALER).exists():
+        if request.user.groups.filter(name=Roles.DEALERS).exists():
             data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
         else:
             data = models.ServiceAdvisor.objects.active_under_asc(request.user)
@@ -484,8 +482,7 @@ def service_desk(request):
                                           "types": utils.get_list_from_set(FEEDBACK_TYPE),
                                           "priorities": utils.get_list_from_set(PRIORITY),
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
-                                                            'count': str(count), 'search': search}},
-                                          context_instance=RequestContext(request)
+                                                            'count': str(count), 'search': search}}
                                         )
     elif request.method == 'POST':
         try:
@@ -512,7 +509,7 @@ def save_help_desk_data(request):
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)
     service_advisor_obj = models.ServiceAdvisor.objects.get(user__phone_number=sms_dict['advisorMobile'])
-    if request.user.groups.all()[0].name == DEALER:
+    if request.user.groups.all()[0].name == Roles.DEALERS:
         dealer_obj = models.Dealer.objects.get(dealer_id=request.user)
         email_id =  dealer_obj.user.user.email
     else:
@@ -555,7 +552,7 @@ def site_info(request):
 def reports(request):
     groups = utils.stringify_groups(request.user)
     report_data=[]
-    if not ('ascs' in groups or 'dealers' in groups):
+    if not (Roles.ASCS in groups or Roles.DEALERS in groups):
         return HttpResponseBadRequest()
     status_options = {'4': 'In Progress', '2':'Closed'}
     report_options = {'reconciliation': 'Reconciliation', 'credit':'Credit Note'}  

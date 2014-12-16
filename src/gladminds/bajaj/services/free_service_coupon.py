@@ -41,6 +41,7 @@ from gladminds.core.decorator import log_time
 from gladminds.core.base_models import STATUS_CHOICES
 from gladminds.managers import get_reporter_details
 from gladminds.core.apis.authentication import AccessTokenAuthentication
+from gladminds.core.auth_helper import Roles
 
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -513,7 +514,7 @@ class GladmindsResources(Resource):
 
     def get_complain_data(self, sms_dict, phone_number, email, name, dealer_or_asc_email, with_detail=False):
         ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
-        manager_obj = User.objects.get(groups__name='SDM')
+        manager_obj = User.objects.get(groups__name=Roles.SDMANAGERS)
         try:
             role = self.check_role_of_initiator(phone_number)
             user_profile = models.UserProfile.objects.filter(phone_number=phone_number)

@@ -58,7 +58,7 @@
 		</div>
 		{% if not feedbacks %}
 		<h4 class='text-center'>
-		   {% if group == 'SDM' %}
+		   {% if group == CONSTANTS.SD_CONSTANTS.SD_MANAGER %}
 			Hi {{request.user.username}} You dont have any feedback yet.
 			{% endif %}
 			Hi {{request.user.username}} you have not been assign any ticket

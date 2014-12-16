@@ -20,6 +20,7 @@ from gladminds.core.constants import TIME_FORMAT, DATE_FORMAT
 from gladminds.core.cron_jobs.taskqueue import SqsTaskQueue
 from django.db.models import Count
 from gladminds.core.exceptions import ParamToBeFunctionException
+from gladminds.core.auth_helper import Roles
 
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
@@ -255,7 +256,7 @@ def upload_file(data, unique_service_coupon):
 
 def get_file_name(data, file_obj):
     requester = data['current_user']
-    if 'dealers' in requester.groups.all():
+    if Roles.DEALERS in requester.groups.all():
         filename_prefix = requester
     else:
         #TODO: Implement dealerId in prefix when we have Dealer and ASC relationship
@@ -543,10 +544,10 @@ def make_tls_property(default=None):
 
     return TLSProperty()
 
-def convert_utc_to_local_time(date, format=False):
+def convert_utc_to_local_time(date, to_string=False):
     utc = pytz.utc
     timezone = pytz.timezone(TIMEZONE)
-    if format:
+    if to_string:
         return date.astimezone(timezone).replace(tzinfo=None).strftime(DATE_FORMAT)
     else:
         return date.astimezone(timezone).replace(tzinfo=None)

@@ -14,5 +14,5 @@ def gm_constants(request):
             'SD_OWNER' : Roles.SDOWNERS, 
             'DEALER' : Roles.DEALERS,
             'ASC': Roles.ASCS}
-    return { 'constants' :constants }
+    return { 'CONSTANTS' :constants }
 
