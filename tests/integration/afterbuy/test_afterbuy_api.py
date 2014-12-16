@@ -23,11 +23,6 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
                                  email='test.ab@gmail.com',
                                  phone_number='7760814041')
         token.save()
-        user = User(username='test')
-        user.save()
-        print user
-        access_token = AccessToken(user=user, token=settings.HARCODED_TOKEN[0])
-        access_token.save()
         group = Group(id=7,name='Users')
         group.save(using='afterbuy')
 

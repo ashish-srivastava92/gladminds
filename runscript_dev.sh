@@ -11,7 +11,7 @@ bin/django load_gm_migration_data --settings=$DJANGO_SETTINGS_MODULE
 #bin/django loaddata etc/data/template.json --settings=$DJANGO_SETTINGS_MODULE
 
 #load services
-bin/django service_setup
+bin/django service_setup --settings=$DJANGO_SETTINGS_MODULE
 
 # TODO: Stop already running server
 output=`ps aux | grep "bin/django r[u]nserver 0.0.0.0:8000"`
