@@ -97,6 +97,8 @@ SUIT_CONFIG = {
                      'label': 'Distributor'},
                    {'model': 'mechanic',
                      'label': 'Mechanic'},
+                   {'model': 'sparepartmasterdata',
+                     'label': 'Spare Part Master Data'},
                    {'model': 'sparepart',
                      'label': 'Spare Part'},
                    {'model': 'accumulationrequest',
@@ -556,3 +558,6 @@ CONSTANCE_CONFIG = {
 }
 
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+################################################################
+MAX_UCP_ALLOWED=10

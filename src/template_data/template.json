@@ -360,7 +360,7 @@
     "pk": 40,
     "fields": {
       "template_key":"SEND_ACCUMULATED_POINT",
-      "template":"Dear {mechanic_name}, {added_points} points updated. Total points: {total_points}. To Redeem, Send SMS with Code RD<SPACE><PRODUCT CODE> to 9561112809",
+      "template":"Dear {mechanic_name}, {added_points} points updated. Total points: {total_points}.{invalid_upcs} To Redeem, Send SMS with Code RD<SPACE><PRODUCT CODE> to 9561112809",
       "description":"Send this message when mechanic send product to accumulate points"
     }
   },
@@ -424,6 +424,15 @@
     "fields": {
       "template_key": "INITIATOR_FEEDBACK_DUE_DATE_CHANGE",
       "template": "Your {type} will be resolved by {due_date}.",
+      "description": "Due Date has been changed"
+      }
+    },
+  {
+    "model": "gladminds.messagetemplate",   
+    "pk": 48,
+    "fields": {
+      "template_key": "MAX_ALLOWED_UCP",
+      "template": "Maximum allowed part code is {max_limit}",
       "description": "Due Date has been changed"
       }
     }

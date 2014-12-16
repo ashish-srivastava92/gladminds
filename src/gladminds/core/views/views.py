@@ -26,7 +26,7 @@ from gladminds.core.managers.mail import sent_otp_email,\
 from gladminds.bajaj.feeds.feed import SAPFeed
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
-from gladminds.bajaj.services.free_service_coupon import GladmindsResources
+from gladminds.bajaj.services.service_desk import get_complain_data, get_feedbacks
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS,\
     FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL, BY_DEFAULT_RECORDS_PER_PAGE, PAGINATION_LINKS,\
@@ -36,7 +36,6 @@ from gladminds.core.utils import get_email_template, format_product_object
 from django.core.paginator import Paginator
 from gladminds.core.auth_helper import Roles
 
-gladmindsResources = GladmindsResources()
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
@@ -398,56 +397,6 @@ def get_sa_under_asc(request, id=None):
         pass
     return render(request, template, {'active_menu':'sa',"data": data})
 
-def get_feedbacks(user, status, priority, type, search=None):
-    feedbacks = []
-    if type == ALL or type is None:
-        type_filter = utils.get_list_from_set(FEEDBACK_TYPE)
-    else:
-        type_filter = [type]
-    
-    if priority == ALL or priority is None:
-        priority_filter = utils.get_list_from_set(PRIORITY)
-    else:
-        priority_filter = [priority]
-            
-    if status is None or status == 'active':
-        status_filter = ['Open', 'Pending', 'In Progress']
-    else:
-        if status == ALL:
-            status_filter = utils.get_list_from_set(FEEDBACK_STATUS)
-        else:
-            status_filter = [status]
-
-    if user.groups.filter(name=Roles.DEALERS).exists():
-        sa_list = models.ServiceAdvisor.objects.active_under_dealer(user)
-        if sa_list:
-            sa_id_list = []
-            for sa in sa_list:
-                sa_id_list.append(sa.service_advisor_id)
-            feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
-                                                       priority__in=priority_filter, type__in=type_filter
-                                                    ).order_by('-created_date')
-    if user.groups.filter(name=Roles.ASCS).exists():
-        sa_list = models.ServiceAdvisor.objects.active_under_asc(user)
-        if sa_list:
-            sa_id_list = []
-            for sa in sa_list:
-                sa_id_list.append(sa.service_advisor_id)
-            feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
-                                                       priority__in=priority_filter, type__in=type_filter
-                                                    ).order_by('-created_date')
-    if user.groups.filter(name=Roles.SDMANAGERS).exists():
-        feedbacks = models.Feedback.objects.filter(status__in=status_filter, priority__in=priority_filter,
-                                                   type__in=type_filter).order_by('-created_date')
-    if user.groups.filter(name=Roles.SDOWNERS).exists():
-        user_profile = models.UserProfile.objects.filter(user=user)
-        servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
-        feedbacks = models.Feedback.objects.filter(assignee=servicedesk_user[0], status__in=status_filter,
-                                                   priority__in=priority_filter, type__in=type_filter).order_by('-created_date')
-    
-    return feedbacks
-
-
 @check_service(Services.SERVICE_DESK)
 @login_required()
 def service_desk(request):
@@ -509,6 +458,10 @@ def save_help_desk_data(request):
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)
     service_advisor_obj = models.ServiceAdvisor.objects.get(user__phone_number=sms_dict['advisorMobile'])
+<<<<<<< HEAD
+    dealer_obj = models.Dealer.objects.get(dealer_id=request.user)
+    return get_complain_data(sms_dict, service_advisor_obj.user.phone_number,
+=======
     if request.user.groups.all()[0].name == Roles.DEALERS:
         dealer_obj = models.Dealer.objects.get(dealer_id=request.user)
         email_id =  dealer_obj.user.user.email
@@ -516,6 +469,7 @@ def save_help_desk_data(request):
         asc_obj = models.AuthorizedServiceCenter.objects.get(asc_id=request.user)
         email_id =  asc_obj.user.user.email
     return gladmindsResources.get_complain_data(sms_dict, service_advisor_obj.user.phone_number,
+>>>>>>> upstream/gm_2_1
                                                 service_advisor_obj.user.user.email,
                                                 service_advisor_obj.user.user.username, email_id,
                                                 with_detail=True)

@@ -7,6 +7,7 @@ from gladminds.bajaj import models
 class TestSaveFormRegistration(BaseTestCase):
 
     def setUp(self):
+        BaseTestCase.setUp(self)
         self.client = Client(SERVER_NAME='bajaj')
         pass
 

@@ -631,85 +631,130 @@ class SLA(models.Model):
         
 #######################LOYALTY TABLES#################################
 
-class NationalSalesManager(models.Model):
+class NationalSalesManager(BaseModel):
     '''details of National Sales Manager'''
     nsm_id = models.CharField(max_length=50, unique=True)
     territory = models.CharField(max_length=50, null=True, blank=True, unique=True)
 
     class Meta:
         abstract = True
-        verbose_name_plural = "national sales manager"
+        verbose_name_plural = "national sales managers"
 
     def __unicode__(self):
         return self.nsm_id
 
-class AreaServiceManager(models.Model):
+class AreaServiceManager(BaseModel):
     '''details of Area Service Manager'''
     asm_id = models.CharField(max_length=50, unique=True)
 
     class Meta:
         abstract = True
-        verbose_name_plural = "area service manager"
+        verbose_name_plural = "area service managers"
 
     def __unicode__(self):
         return self.asm_id
 
-class Distributor(models.Model):
+class Distributor(BaseModel):
     '''details of Distributor'''
     distributor_id = models.CharField(max_length=50, unique=True)
+    distributor_code = models.CharField(max_length=50, unique=True)
 
     class Meta:
         abstract = True
-        verbose_name_plural = "distributor"
+        verbose_name_plural = "distributors"
 
     def __unicode__(self):
         return self.distributor_id
+    
+class Retailer(BaseModel):
+    '''details of Distributor'''
+    retailer_id = models.CharField(max_length=50, unique=True)
 
-class Mechanic(models.Model):
+    class Meta:
+        abstract = True
+        verbose_name_plural = "retailers"
+
+    def __unicode__(self):
+        return self.retailer_id
+
+class Mechanic(BaseModel):
     '''details of Mechanic'''
     mechanic_id = models.CharField(max_length=50, unique=True)
-    total_points = models.IntegerField(max_length=50, null=True, blank=True)
+    total_points = models.IntegerField(max_length=50, null=True, blank=True, default=0)
+
+    form_number = models.IntegerField(max_length=50, null=True, blank=True)
+    registered_date = models.DateTimeField(null=True, blank= True)
+    shop_number = models.CharField(max_length=50, null=True, blank=True)
+    shop_name = models.CharField(max_length=50, null=True, blank=True)
+    shop_address = models.CharField(max_length=50, null=True, blank=True)
+    locality = models.CharField(max_length=50, null=True, blank=True)
+    tehsil = models.CharField(max_length=50, null=True, blank=True)
+    district = models.CharField(max_length=50, null=True, blank=True)
+    state = models.CharField(max_length=50, null=True, blank=True)
+    pincode = models.CharField(max_length=50, null=True, blank=True)
+    shop_wall_length = models.IntegerField(max_length=50, null=True, blank=True)
+    shop_wall_width = models.IntegerField(max_length=50, null=True, blank=True)
+    two_stroke_serviced = models.IntegerField(max_length=50, null=True, blank=True)
+    four_stroke_serviced = models.IntegerField(max_length=50, null=True, blank=True)
+    cng_lpg_serviced = models.IntegerField(max_length=50, null=True, blank=True)
+    diesel_serviced = models.IntegerField(max_length=50, null=True, blank=True)
+    genuine_parts_used = models.IntegerField(max_length=50, null=True, blank=True)
+    
+    objects = user_manager.MechanicManager()
 
     class Meta:
         abstract = True
         verbose_name_plural = "mechanics"
 
-    def _unicode_(self):
+    def __unicode__(self):
         return self.mechanic_id
 
-
-class SparePart(models.Model):
+class SparePartMasterData(BaseModel):
     '''details of Spare Part'''
-    unique_part_code = models.CharField(max_length=50, unique=True)
-    part_serial_number = models.IntegerField(max_length=100,
-                                             null=True, blank=True)
-    points = models.IntegerField(max_length=50, null=True, blank=True)
-    price = models.IntegerField(max_length=50, null=True, blank=True)
+    serial_number = models.IntegerField(max_length=100, unique=True)
     part_model = models.CharField(max_length=50, null=True, blank=True)
     description = models.CharField(max_length=50, null=True, blank=True)
+    category = models.CharField(max_length=50, null=True, blank=True)
+    segment_type = models.CharField(max_length=50, null=True, blank=True)
+    supplier = models.CharField(max_length=50, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "spare parts master"
+
+    def __unicode__(self):
+        return str(self.serial_number)
+
+class SparePart(BaseModel):
+    '''details of Spare Part'''
+    unique_part_code = models.CharField(max_length=50, unique=True)
+    points = models.IntegerField(max_length=50, null=True, blank=True)
+    price = models.FloatField(max_length=50, null=True, blank=True)
     validity_from =  models.DateTimeField(null=True, blank= True)
     validity_to =  models.DateTimeField(null=True, blank= True)
-    type = models.CharField(max_length=50, null=True, blank=True)
-    category = models.CharField(max_length=50, null=True, blank=True)
-    segment = models.CharField(max_length=50, null=True, blank=True)
     territory = models.CharField(max_length=50, null=True, blank=True)
-    supplier = models.CharField(max_length=50, null=True, blank=True)
+    is_used = models.BooleanField(default=False)
+    
+    objects = user_manager.SparePartManager()
 
     class Meta:
         abstract = True
         verbose_name_plural = "spare parts"
 
-    def _unicode_(self):
+    def __unicode__(self):
         return self.unique_part_code
 
-class AccumulationRequest(models.Model):
+class AccumulationRequest(BaseModel):
     '''details of Spare Part'''
-    transaction_id = models.CharField(max_length=50, unique=True)
+    transaction_id = models.AutoField(primary_key=True)
     points = models.IntegerField(max_length=50)
 
     class Meta:
         abstract = True
         verbose_name_plural = "accumulation request"
+
+    def __unicode__(self):
+        return str(self.transaction_id)
 
 #     class RedemptionPartner(models.Model):
 #     class Meta:

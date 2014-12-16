@@ -157,7 +157,7 @@ class CouponAdmin(ModelAdmin):
     
     def associated_with(self, obj):
         if obj.service_advisor:
-            sa = ServiceAdvisor.objects.filter(service_advisor_id=obj.service_advisor.service_advisor_id).select_related('dealer', 'authorizedservicecenter')[0]
+            sa = models.ServiceAdvisor.objects.filter(service_advisor_id=obj.service_advisor.service_advisor_id).select_related('dealer', 'authorizedservicecenter')[0]
             if sa.dealer:
                 return sa.dealer.dealer_id + ' (D)'
             elif sa.asc:
@@ -287,14 +287,14 @@ class ASCTempRegistrationAdmin(ModelAdmin):
     list_display = (
         'name', 'phone_number', 'email', 'pincode',
         'address', 'timestamp', 'dealer_id')
-    
+
 class SATempRegistrationAdmin(ModelAdmin):
     search_fields = (
         'name', 'phone_number')
 
     list_display = (
         'name', 'phone_number', 'status')
-     
+
 class CustomerTempRegistrationAdmin(ModelAdmin):
     search_fields = (
         'product_data__vin', 'new_customer_name', 'new_number', 'temp_customer_id', 'sent_to_sap')
@@ -332,7 +332,9 @@ class SlaAdmin(ModelAdmin):
     fieldsets = (
         (None, {
             'fields': (
-        'priority', ('response_time', 'response_unit'), ('reminder_time', 'reminder_unit'), ('resolution_time', 'resolution_unit'))
+        'priority', ('response_time', 'response_unit'),
+        ('reminder_time', 'reminder_unit'),
+        ('resolution_time', 'resolution_unit'))
         }),
         )
     def response_time(self):
@@ -351,21 +353,38 @@ class ServiceDeskUserAdmin(ModelAdmin):
 
 class NSMAdmin(ModelAdmin):
     list_display = ('nsm_id', 'user', 'territory')
-    
+
 class ASMAdmin(ModelAdmin):
     list_display = ('asm_id', 'user')
-    
+
 class DistributorAdmin(ModelAdmin):
     list_display = ('distributor_id', 'user')
-    
+
 class MechanicAdmin(ModelAdmin):
     list_display = ('mechanic_id', 'user', 'total_points')
-    
+
+class SparePartMasterAdmin(ModelAdmin):
+    list_display = ('serial_number', 'part_model',
+                    'description', 'product_type', 'category',
+                    'segment_type', 'supplier')
+
 class SparePartAdmin(ModelAdmin):
-    list_display = ('unique_part_code', 'price', 'points')
+    list_display = ('unique_part_code', 'price',
+                    'part_number', 'points', 'is_used')
+
+class SparePartline(TabularInline):
+    model = models.AccumulationRequest.upcs.through
 
 class AccumulationRequestAdmin(ModelAdmin):
-    list_display = ('transaction_id', 'member', 'upc', 'asm', 'points')
+    list_display = ('transaction_id', 'member', 'UPCS', 'asm', 'points')
+    inlines = (SparePartline,)
+    
+    def UPCS(self, obj):
+        upcs = obj.upcs.all()
+        if upcs:
+            return ' | '.join([str(upc.unique_part_code) for upc in upcs])
+        else:
+            return None
 
 brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
 
@@ -391,6 +410,9 @@ brand_admin.register(models.NationalSalesManager, NSMAdmin)
 brand_admin.register(models.AreaServiceManager, ASMAdmin)
 brand_admin.register(models.Distributor, DistributorAdmin)
 brand_admin.register(models.Mechanic, MechanicAdmin)
+
+
+brand_admin.register(models.SparePartMasterData, SparePartMasterAdmin)
 brand_admin.register(models.SparePart, SparePartAdmin)
 brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
 

@@ -262,17 +262,37 @@ class Distributor(base_models.Distributor):
         app_label = _APP_NAME
         verbose_name_plural = "distributor"
 
+class Retailer(base_models.Distributor):
+    '''details of Distributor'''
+    user = models.OneToOneField(UserProfile, primary_key=True,
+                                related_name='bajaj_retailer')
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "retailers"
+
 class Mechanic(base_models.Mechanic):
     '''details of Mechanic'''
     user = models.OneToOneField(UserProfile, primary_key=True,
-                                related_name='bajaj_mechanic')    
+                                related_name='bajaj_mechanic')
+    registered_by = models.ForeignKey(Distributor, null=True, blank=True)
+    preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "mechanics"
 
+class SparePartMasterData(base_models.SparePartMasterData):
+    '''details of Spare Part'''
+    product_type = models.ForeignKey(ProductType, null=True, blank=True)
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "spare parts master"
+
 class SparePart(base_models.SparePart):
     '''details of Spare Part'''
+    part_number = models.ForeignKey(SparePartMasterData)
 
     class Meta:
         app_label = _APP_NAME
@@ -280,9 +300,9 @@ class SparePart(base_models.SparePart):
 
 class AccumulationRequest(base_models.AccumulationRequest):
     '''details of Spare Part'''
-    
+
     member = models.ForeignKey(Mechanic)
-    upc = models.ForeignKey(SparePart)
+    upcs = models.ManyToManyField(SparePart)
     asm = models.ForeignKey(AreaServiceManager, null=True, blank=True)
 
     class Meta:
