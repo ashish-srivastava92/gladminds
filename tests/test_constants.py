@@ -127,7 +127,7 @@ AFTERBUY_PRODUCTS = {
                                   "tshirt_size": None,
                                   "user": {
                                            "date_joined": "2014-11-20T14:48:24",
-                                           "email":"",
+                                           "email":"test.ab@gmail.com",
                                            "first_name": "",
                                            "id": 2,                                   
                                            "last_login": "2014-11-20T14:48:23",

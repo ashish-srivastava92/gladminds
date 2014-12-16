@@ -43,7 +43,7 @@ class AccessTokenAuthentication(Authentication):
 
     def verify_access_token(self, key):
         if  (settings.ENV in settings.IGNORE_ENV and key in settings.HARCODED_TOKEN):
-                return key
+            return key
         try:
             token = AccessToken.objects.get(token=key)
             # Check if token has expired
