@@ -61,19 +61,23 @@ class SqsHandler(View):
         handler = self.task_map[str(task_name)]
         handler(**params)
 
+
 class SqsTaskQueue(TaskQueue):
-    def __init__(self, sqs_name):
+    def __init__(self, sqs_name, brand):
         self._conn = SQSConnection()
         self._q = self._conn.get_queue(sqs_name)
+        self.brand = self.brand
 
     def add(self, task_name, task_params=None, delay_seconds=None, **kwargs):
         task_params = task_params or {}
+        task_params.update({"brand": self.brand})
         payload = {
                    "task_name": task_name,
                    "params": task_params
                    }
         payload_as_str = json.dumps(payload)
         self._conn.send_message(self._q, payload_as_str, delay_seconds=delay_seconds)
+
 
 class MultiProcessQueue(TaskQueue):
     """ A simple implementation of a background jobs, FOR DEVELOPMENT USE ONLY

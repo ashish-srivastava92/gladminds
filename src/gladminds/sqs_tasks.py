@@ -181,7 +181,7 @@ def send_otp(*args, **kwargs):
         status = "failed"
         send_otp.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(status=status, receiver=phone_number, message=message, brand=brand)
 
 
 @shared_task

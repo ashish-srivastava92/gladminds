@@ -44,12 +44,14 @@ task_info = {
 
 class SqsTaskQueue(TaskQueue):
 
-    def __init__(self, sqs_name):
+    def __init__(self, sqs_name, brand):
         self._conn = SQSConnection(ACCESS_KEY, SECRET_KEY)
         self._q = self._conn.get_queue(sqs_name)
+        self.brand = brand
 
-    def add(self, task_name, task_params=None, **kwargs):
+    def add(self, task_name, brand, task_params=None, **kwargs):
         task_params = task_info[task_name] or {}
+        task_params.update({"brand": self.brand})
         payload = {
             "task_name": task_name,
             "params": task_params
