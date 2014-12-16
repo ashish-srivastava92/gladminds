@@ -39,6 +39,8 @@ class UserProductResource(CustomBaseModelResource):
 
     class Meta:
         queryset = afterbuy_models.UserProduct.objects.all()
+        print "here"
+        print "set", queryset
         resource_name = "products"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())

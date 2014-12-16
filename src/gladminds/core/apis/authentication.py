@@ -21,6 +21,8 @@ class AccessTokenAuthentication(Authentication):
             try:
                 access_token_container = request.GET.urlencode().split('access_token=')[1]
                 key = access_token_container.split('&')[0]
+                print "acc", access_token_container
+                print "key", key
             except:
                 key = request.META.get('HTTP_ACCESS_TOKEN')
             if not key:
@@ -30,6 +32,7 @@ class AccessTokenAuthentication(Authentication):
             If verify_access_token() does not pass, it will raise an error
             '''
             token_obj = self.verify_access_token(key)
+            print token_obj
             request.user = token_obj.user
             return True
         except KeyError, e:
@@ -43,7 +46,7 @@ class AccessTokenAuthentication(Authentication):
 
     def verify_access_token(self, key):
         if  (settings.ENV in settings.IGNORE_ENV and key in settings.HARCODED_TOKEN):
-                return key
+            return key
         try:
             token = AccessToken.objects.get(token=key)
             # Check if token has expired
