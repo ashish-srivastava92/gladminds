@@ -107,7 +107,7 @@ class OTPToken(BaseModel):
         verbose_name_plural = "OTPs"
 
     def __unicode__(self):
-        return self.email+" "+self.phone_number
+        return self.phone_number + " " + self.token
 
 
 class Dealer(BaseModel):

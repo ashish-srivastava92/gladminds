@@ -12,7 +12,7 @@ from gladminds.afterbuy import utils as afterbuy_utils
 from gladminds.afterbuy import models as afterbuy_model
 from tastypie import fields, http
 from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.core.utils import get_task_queue
+from gladminds.core.utils import send_job_to_queue
 from gladminds.sqs_tasks import send_otp
 from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
@@ -25,6 +25,8 @@ from django.contrib.sites.models import RequestSite
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from django.db.transaction import atomic
 from gladminds.core.auth_helper import GmApps
+from gladminds.afterbuy.apis.validations import ConsumerValidation,\
+    UserValidation
 
 logger = logging.getLogger("gladminds")
 
@@ -32,8 +34,9 @@ logger = logging.getLogger("gladminds")
 class DjangoUserResources(ModelResource):
     class Meta:
         queryset = User.objects.all()
-        resource_name = 'django'
+        resource_name = 'users'
         authentication = AccessTokenAuthentication()
+        validation = UserValidation()
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         excludes = ['password', 'is_superuser']
         always_return_data = True
@@ -47,6 +50,7 @@ class ConsumerResource(CustomBaseModelResource):
         queryset = afterbuy_model.Consumer.objects.all()
         resource_name = "consumers"
         authentication = AccessTokenAuthentication()
+        validation = ConsumerValidation()
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         detail_allowed_methods = ['get', 'delete', 'put']
         always_return_data = True
@@ -82,11 +86,7 @@ class ConsumerResource(CustomBaseModelResource):
         try:
             otp = afterbuy_utils.get_otp(phone_number=phone_number)
             message = afterbuy_utils.get_template('SEND_OTP').format(otp)
-            if settings.ENABLE_AMAZON_SQS:
-                task_queue = get_task_queue()
-                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message, 'sms_client':settings.SMS_CLIENT, 'brand':settings.BRAND})
-            else:
-                send_otp.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT, brand=settings.BRAND)  # @UndefinedVariable
+            send_job_to_queue(send_otp, {'phone_number':phone_number, 'message':message, 'sms_client':settings.SMS_CLIENT})
             logger.info('OTP sent to mobile {0}'.format(phone_number))
             data = {'status': 1, 'message': "OTP sent_successfully"}
 
@@ -197,11 +197,8 @@ class ConsumerResource(CustomBaseModelResource):
                 user_obj = afterbuy_model.Consumer.objects.get(phone_number=phone_number).user
                 otp = afterbuy_utils.get_otp(user=user_obj)
                 message = afterbuy_utils.get_template('SEND_OTP').format(otp)
-                if settings.ENABLE_AMAZON_SQS:
-                    task_queue = get_task_queue()
-                    task_queue.add('send_otp', {'phone_number':phone_number, 'message':message,"sms_client":settings.SMS_CLIENT, 'brand': settings.BRAND})
-                else:
-                    send_otp.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT, brand=settings.BRAND)  # @UndefinedVariable
+                send_job_to_queue('send_otp', {'phone_number': phone_number,
+                                             'message': message, "sms_client": settings.SMS_CLIENT})
                 logger.info('OTP sent to mobile {0}'.format(phone_number))
                 data = {'status': 1, 'message': "OTP sent_successfully"}
                 #Send email if email address exist

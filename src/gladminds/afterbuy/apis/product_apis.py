@@ -18,6 +18,7 @@ from gladminds.core.apis.authorization import CustomAuthorization,\
     MultiAuthorization
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.managers.mail import send_recycle_mail
+from gladminds.afterbuy.apis.validations import ProductValidation
 
 logger = logging.getLogger("gladminds")
 
@@ -41,6 +42,7 @@ class UserProductResource(CustomBaseModelResource):
         resource_name = "products"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        validation = ProductValidation()
         always_return_data = True
         filtering = {
                      "consumer": ALL,
