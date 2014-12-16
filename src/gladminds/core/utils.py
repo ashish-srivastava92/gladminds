@@ -370,7 +370,7 @@ def create_context(email_template_name, feedback_obj, comment_obj=None):
         comment = comment_obj.comment
     else:
         comment = ""
-    created_date = convert_utc_to_local_time(feedback_obj.created_date).strftime(DATE_FORMAT)
+    created_date = convert_utc_to_local_time(feedback_obj.created_date, True)
     due_date = getattr(feedback_obj, "due_date") or ""
     if due_date:
         due_date = due_date.strftime(DATE_FORMAT)
@@ -543,10 +543,13 @@ def make_tls_property(default=None):
 
     return TLSProperty()
 
-def convert_utc_to_local_time(date):
+def convert_utc_to_local_time(date, format=False):
     utc = pytz.utc
     timezone = pytz.timezone(TIMEZONE)
-    return date.astimezone(timezone).replace(tzinfo=None)
+    if format:
+        return date.astimezone(timezone).replace(tzinfo=None).strftime(DATE_FORMAT)
+    else:
+        return date.astimezone(timezone).replace(tzinfo=None)
 
 def total_time_spent(feedback_obj):
     wait_time = feedback_obj.wait_time
