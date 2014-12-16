@@ -21,6 +21,11 @@ def update_points(mechanic, accumulate=0, redeem=0):
     mechanic.save()
     return total_points
 
+def fetch_catalogue_products(product_codes):
+    '''Fetches all the products with given upc'''
+    products = models.ProductCatalog.objects.filter(product_id__in=product_codes)
+    return products
+
 def accumulate_point(sms_dict, phone_number):
     '''accumulate points with given upc'''
     unique_product_codes = sms_dict['ucp'].split()
@@ -31,16 +36,14 @@ def accumulate_point(sms_dict, phone_number):
             message=templates.get_template('MAX_ALLOWED_UCP').format(
                                     max_limit=settings.MAX_UCP_ALLOWED)
             raise ValueError('Maximum allowed ucp exceeded')
-        mech_number = utils.mobile_format(phone_number)
-        mechanic = models.Mechanic.objects.filter(user__phone_number=mech_number)
+        mechanic = models.Mechanic.objects.get_mechanic(utils.mobile_format(phone_number))
         accumulation_log=models.AccumulationRequest(member=mechanic[0],
                                                     points=0)
         accumulation_log.save()
         if not mechanic:
             message=templates.get_template('UNREGISERED_USER')
             raise ValueError('Unregistered user')
-        spares = models.SparePart.objects.filter(unique_part_code__in=unique_product_codes,
-                                             is_used=False)
+        spares = models.SparePart.objects.get_spare_parts(unique_product_codes)
         added_points=0
 
         for spare in spares:
@@ -80,12 +83,11 @@ def redeem_point(sms_dict, phone_number):
     '''redeem points with given upc'''
     product_codes = sms_dict['product_id'].upper().split()
     try:
-        mech_number = utils.mobile_format(phone_number)
-        mechanic = models.Mechanic.objects.filter(user__phone_number=mech_number)
+        mechanic = models.Mechanic.objects.get_mechanic(utils.mobile_format(phone_number))
         if not mechanic:
             message=templates.get_template('UNREGISERED_USER')
             raise ValueError('Unregistered user')
-        products = models.ProductCatalog.objects.filter(product_id__in=product_codes)
+        products=fetch_catalogue_products(product_codes)
         redeem_points=0
 
         for product in products:

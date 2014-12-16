@@ -19,3 +19,11 @@ class CustomerTempRegistrationManager(models.Manager):
             if temp_customer_obj:
                 customer_id = temp_customer_obj[0].product_data.customer_id
         return customer_id
+
+class MechanicManager(models.Manager):
+    def get_mechanic(self, phone_number):
+        return super(MechanicManager, self).get_query_set().filter(user__phone_number=phone_number)
+
+class SparePartManager(models.Manager):
+    def get_spare_parts(self, spare_product_codes):
+        return super(SparePartManager, self).get_query_set().filter(unique_part_code__in=spare_product_codes,is_used=False)

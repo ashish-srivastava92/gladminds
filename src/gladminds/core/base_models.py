@@ -699,6 +699,8 @@ class Mechanic(BaseModel):
     cng_lpg_serviced = models.IntegerField(max_length=50, null=True, blank=True)
     diesel_serviced = models.IntegerField(max_length=50, null=True, blank=True)
     genuine_parts_used = models.IntegerField(max_length=50, null=True, blank=True)
+    
+    objects = user_manager.MechanicManager()
 
     class Meta:
         abstract = True
@@ -732,6 +734,8 @@ class SparePart(BaseModel):
     validity_to =  models.DateTimeField(null=True, blank= True)
     territory = models.CharField(max_length=50, null=True, blank=True)
     is_used = models.BooleanField(default=False)
+    
+    objects = user_manager.SparePartManager()
 
     class Meta:
         abstract = True
