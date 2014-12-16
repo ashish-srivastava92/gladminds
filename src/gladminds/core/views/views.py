@@ -504,6 +504,7 @@ def service_desk(request, servicedesk):
             return HttpResponse(content=json.dumps(data),
                                 content_type='application/json')
         except Exception as ex:
+            logger.error('Exception while saving data : {0}'.format(ex))
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()

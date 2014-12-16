@@ -1,8 +1,10 @@
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
+DATE_FORMAT = '%d-%m-%Y %H:%M' 
+
 PAGINATION_LINKS = 3
 
-RECORDS_PER_PAGE = ['2', '4', '25', '50']
+RECORDS_PER_PAGE = ['5', '10', '25', '50']
 
 BY_DEFAULT_RECORDS_PER_PAGE = RECORDS_PER_PAGE[0]
 

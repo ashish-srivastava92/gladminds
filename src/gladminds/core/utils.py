@@ -16,7 +16,7 @@ from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY, TIMEZONE
 from gladminds.core.base_models import STATUS_CHOICES
 from gladminds.bajaj import models
 from django.db.models.fields.files import FieldFile
-from gladminds.core.constants import TIME_FORMAT
+from gladminds.core.constants import TIME_FORMAT, DATE_FORMAT
 from gladminds.core.cron_jobs.taskqueue import SqsTaskQueue
 from django.db.models import Count
 
@@ -324,10 +324,10 @@ def create_context(email_template_name, feedback_obj, comment_obj=None):
         comment = comment_obj.comment
     else:
         comment = ""
-    created_date = convert_utc_to_local_time(feedback_obj.created_date).strftime("%d-%m-%Y %H:%M")
+    created_date = convert_utc_to_local_time(feedback_obj.created_date).strftime(DATE_FORMAT)
     due_date = getattr(feedback_obj, "due_date") or ""
     if due_date:
-        due_date = due_date.strftime("%d-%m-%Y %H:%M")
+        due_date = due_date.strftime(DATE_FORMAT)
     data = get_email_template(email_template_name)
     data['newsubject'] = data['subject'].format(id = feedback_obj.id)
     data['content'] = data['body'].format(id=feedback_obj.id, type = feedback_obj.type, reporter = feedback_obj.reporter.user_profile.user.username, 

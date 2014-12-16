@@ -17,6 +17,7 @@ import logging
 from gladminds.core.managers.mail import send_due_date_exceeded,\
     send_due_date_reminder
 from django.contrib.auth.models import User
+from gladminds.core.constants import DATE_FORMAT
 
 
 logger = logging.getLogger("gladminds")
@@ -442,10 +443,10 @@ def export_customer_reg_to_sap(*args, **kwargs):
         
 
 def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
-    created_date = convert_utc_to_local_time(feedback_obj.created_date).strftime("%d-%m-%Y %H:%M")
+    created_date = convert_utc_to_local_time(feedback_obj.created_date).strftime(DATE_FORMAT)
     due_date = getattr(feedback_obj,"due_date") or ""
     if due_date:
-        due_date = due_date.strftime("%d-%m-%Y %H:%M")
+        due_date = due_date.strftime(DATE_FORMAT)
     reporter = None
     try:
         if feedback_obj.reporter:
