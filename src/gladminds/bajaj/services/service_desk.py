@@ -25,6 +25,7 @@ from gladminds.core.decorator import check_service
 from gladminds.core.service_handler import Services
 
 from gladminds.core.views.views import get_feedbacks
+from django.template.context import RequestContext
 
 
 gladmindsResources = GladmindsResources()
@@ -68,7 +69,8 @@ def get_servicedesk_tickets(request):
                                           "page_details": page_details,
                                           "record_showing_counts": RECORDS_PER_PAGE,
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
-                                                            'count': str(count), 'search': search}}
+                                                            'count': str(count), 'search': search}},
+                                         context_instance=RequestContext(request)
                                         )
 
 @check_service(Services.SERVICE_DESK)

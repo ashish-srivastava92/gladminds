@@ -35,6 +35,7 @@ from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,
 from gladminds.core.decorator import log_time, check_service
 from gladminds.core.utils import get_email_template, format_product_object
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.template.context import RequestContext
 
 gladmindsResources = GladmindsResources()
 logger = logging.getLogger('gladminds')
@@ -483,7 +484,8 @@ def service_desk(request):
                                           "types": utils.get_list_from_set(FEEDBACK_TYPE),
                                           "priorities": utils.get_list_from_set(PRIORITY),
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
-                                                            'count': str(count), 'search': search}}
+                                                            'count': str(count), 'search': search}},
+                                          context_instance=RequestContext(request)
                                         )
     elif request.method == 'POST':
         try:
