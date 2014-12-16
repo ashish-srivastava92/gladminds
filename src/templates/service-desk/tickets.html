@@ -46,7 +46,8 @@
 	                </div>
 	                <div class="col-md-8 form-group">
 	                	<select class="form-control feedback-filters-options" name="status" required>
-	                    	<option value="all">All</option>
+	                		<option {% if filter_params.status == 'active' %} selected {% endif%}  value="active">Default Filter</option>
+	                    	<option {% if filter_params.status == 'all' %} selected {% endif%} value="all">All</option>
 	                      	{% for status in status %}
 	                     		 <option {% if filter_params.status == status %} selected {% endif%} value="{{status}}">{{status}}</option>
 	                      	{% endfor %}
@@ -57,7 +58,7 @@
 		</div>
 		{% if not feedbacks %}
 		<h4 class='text-center'>
-		   {% if group == 'SDM' %}
+		   {% if group == CONSTANTS.SD_CONSTANTS.SD_MANAGER %}
 			Hi {{request.user.username}} You dont have any feedback yet.
 			{% endif %}
 			Hi {{request.user.username}} you have not been assign any ticket
@@ -109,16 +110,16 @@
         <tbody>
 				{% for feedback in feedbacks %}
 				<tr> 
-				    <td>
+				    <td nowrap >
 				       <a href="/aftersell/feedbackdetails/{{feedback.id}}/">
 							GM-{{feedback.id|default_if_none:""}}
 						</a>  
 					</td>
-					<td>{{feedback.reporter.name|default_if_none:""}}</td>
+					<td  nowrap>{{feedback.reporter.name|default_if_none:""}}</td>
 					{% if feedback.assign_to_reporter %}
-						<td>{{feedback.reporter.name}}(Reporter)</td>
+						<td nowrap>{{feedback.reporter.name}}(Reporter)</td>
 					{% else %}
-						<td>{{feedback.assignee.user_profile.user.username|default_if_none:""}}</td>
+						<td nowrap>{{feedback.assignee.user_profile.user.username|default_if_none:""}}</td>
 					{%endif%}
 					<td>
 					   <div>
@@ -150,7 +151,7 @@
 			<div class="col-md-6">
 				<div class="pegination-links">
 					{% if feedbacks.has_previous %}
-						<a href="javascript:void(0);" onclick="getUrl({{feedbacks.number}}, {{pagination_links}})">Previous</a>
+						<a href="javascript:void(0);" onclick="getUrl({{feedbacks.number}}, {{pagination_links}}, 'false')">Previous</a>
 			      	{% endif %}
 					
 					{% for page in feedbacks.paginator.page_range %}
@@ -159,11 +160,11 @@
 					  	{% endif %}
 					  	
 					  	{% if page > feedbacks.number and page < feedbacks.number|add:pagination_links %}
-					  			<a href="?page={{ page }}">{{ page }}</a>
+					  			<a href="javascript:void(0);" onclick="getUrl({{page}}, {{pagination_links}}, 'true')">{{ page }}</a>
 					  	{% endif %}
 					  	
 					  	{% if page == feedbacks.number|add:pagination_links %}
-					  			<a href="?page={{ page }}">Next</a>
+					  			<a href="javascript:void(0);" onclick="getUrl({{page}}, {{pagination_links}}, 'true')">Next</a>
 					  	{% endif %}
 					{% endfor %}
 				</div>

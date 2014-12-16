@@ -16,10 +16,11 @@ from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY, TIMEZONE
 from gladminds.core.base_models import STATUS_CHOICES
 from gladminds.bajaj import models
 from django.db.models.fields.files import FieldFile
-from gladminds.core.constants import TIME_FORMAT
+from gladminds.core.constants import TIME_FORMAT, DATE_FORMAT
 from gladminds.core.cron_jobs.taskqueue import SqsTaskQueue
 from django.db.models import Count
 from gladminds.core.exceptions import ParamToBeFunctionException
+from gladminds.core.auth_helper import Roles
 
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
@@ -255,7 +256,7 @@ def upload_file(data, unique_service_coupon):
 
 def get_file_name(data, file_obj):
     requester = data['current_user']
-    if 'dealers' in requester.groups.all():
+    if Roles.DEALERS in requester.groups.all():
         filename_prefix = requester
     else:
         #TODO: Implement dealerId in prefix when we have Dealer and ASC relationship
@@ -370,13 +371,13 @@ def create_context(email_template_name, feedback_obj, comment_obj=None):
         comment = comment_obj.comment
     else:
         comment = ""
-    created_date = convert_utc_to_local_time(feedback_obj.created_date).strftime("%Y-%m-%d")
+    created_date = convert_utc_to_local_time(feedback_obj.created_date, True)
     due_date = getattr(feedback_obj, "due_date") or ""
     if due_date:
-        due_date = due_date.strftime("%Y-%m-%d")
+        due_date = due_date.strftime(DATE_FORMAT)
     data = get_email_template(email_template_name)
     data['newsubject'] = data['subject'].format(id = feedback_obj.id)
-    data['content'] = data['body'].format(id=feedback_obj.id, type = feedback_obj.type, reporter = feedback_obj.reporter, 
+    data['content'] = data['body'].format(id=feedback_obj.id, type = feedback_obj.type, reporter = feedback_obj.reporter.user_profile.user.username, 
                                           message = feedback_obj.description, created_date = created_date, 
                                           assign_to = feedback_obj.assignee,  priority =  feedback_obj.priority, comment = comment,
                                           root_cause = feedback_obj.root_cause, resolution = feedback_obj.resolution,
@@ -543,10 +544,13 @@ def make_tls_property(default=None):
 
     return TLSProperty()
 
-def convert_utc_to_local_time(date):
+def convert_utc_to_local_time(date, to_string=False):
     utc = pytz.utc
     timezone = pytz.timezone(TIMEZONE)
-    return date.astimezone(timezone).replace(tzinfo=None)
+    if to_string:
+        return date.astimezone(timezone).replace(tzinfo=None).strftime(DATE_FORMAT)
+    else:
+        return date.astimezone(timezone).replace(tzinfo=None)
 
 def total_time_spent(feedback_obj):
     wait_time = feedback_obj.wait_time

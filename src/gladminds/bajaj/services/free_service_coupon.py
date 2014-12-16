@@ -41,6 +41,7 @@ from gladminds.core.decorator import log_time
 from gladminds.core.base_models import STATUS_CHOICES
 from gladminds.managers import get_reporter_details
 from gladminds.core.apis.authentication import AccessTokenAuthentication
+from gladminds.core.auth_helper import Roles
 
 logger = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -511,9 +512,9 @@ class GladmindsResources(Resource):
     def determine_format(self, request):
         return 'application/json'
 
-    def get_complain_data(self, sms_dict, phone_number, email, name, dealer_email, with_detail=False):
+    def get_complain_data(self, sms_dict, phone_number, email, name, dealer_or_asc_email, with_detail=False):
         ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
-        manager_obj = User.objects.get(groups__name='SDM')
+        manager_obj = User.objects.get(groups__name=Roles.SDMANAGERS)
         try:
             role = self.check_role_of_initiator(phone_number)
             user_profile = models.UserProfile.objects.filter(phone_number=phone_number)
@@ -553,7 +554,7 @@ class GladmindsResources(Resource):
             else:
                 send_coupon.delay(phone_number=phone_number, message=message)
             context = utils.create_context('FEEDBACK_DETAIL_TO_DEALER',  gladminds_feedback_object)
-            send_dealer_feedback(context, dealer_email)
+            send_dealer_feedback(context, dealer_or_asc_email)
             context = utils.create_context('FEEDBACK_DETAIL_TO_ADIM',  gladminds_feedback_object)
             send_feedback_received(context, manager_obj.email)
             context = utils.create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)
