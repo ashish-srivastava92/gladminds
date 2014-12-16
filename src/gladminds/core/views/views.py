@@ -29,12 +29,12 @@ from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.bajaj.services.service_desk import get_complain_data, get_feedbacks
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS,\
-    FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL, DEALER, SDO, SDM,\
-    BY_DEFAULT_RECORDS_PER_PAGE, PAGINATION_LINKS, RECORDS_PER_PAGE
-    
+    FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL, BY_DEFAULT_RECORDS_PER_PAGE, PAGINATION_LINKS,\
+    RECORDS_PER_PAGE
 from gladminds.core.decorator import log_time, check_service
 from gladminds.core.utils import get_email_template, format_product_object
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.core.paginator import Paginator
+from gladminds.core.auth_helper import Roles
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
@@ -86,7 +86,7 @@ def change_password(request):
         return render(request, 'portal/change_password.html')
     if request.method == 'POST':
         groups = utils.stringify_groups(request.user)
-        if 'dealers' in groups or 'ascs' in groups:
+        if Roles.DEALERS in groups or Roles.ASCS in groups:
             user = User.objects.get(username=request.user)
             old_password = request.POST.get('oldPassword')
             new_password = request.POST.get('newPassword')
@@ -162,7 +162,7 @@ def update_pass(request):
 @login_required()
 def register(request, menu):
     groups = utils.stringify_groups(request.user)
-    if not ('ascs' in groups or 'dealers' in groups):
+    if not (Roles.ASCS in groups or Roles.DEALERS in groups):
         return HttpResponseBadRequest()
     if request.method == 'GET':
         user_id = request.user
@@ -295,7 +295,6 @@ def register_customer(request, group=None):
 
 @check_service(Services.FREE_SERVICE_COUPON)
 def recover_coupon_info(data):
-    print data
     customer_id = data['customerId']
     logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, data['current_user']))
     coupon_data = utils.get_coupon_info(data)
@@ -315,7 +314,7 @@ def get_customer_info(data):
     except Exception as ex:
         logger.info(ex)
         message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
-        if data['groups'][0] == "dealers":
+        if data['groups'][0] == Roles.DEALERS:
             data['groups'][0] = "Dealer"
         else:
             data['groups'][0] = "ASC"
@@ -333,7 +332,7 @@ def get_customer_info(data):
 @login_required()
 def exceptions(request, exception=None):
     groups = utils.stringify_groups(request.user)
-    if not ('ascs' in groups or 'dealers' in groups):
+    if not (Roles.ASCS in groups or Roles.DEALERS in groups):
         return HttpResponseBadRequest()
     if request.method == 'GET':
         template = 'portal/exception.html'
@@ -368,7 +367,7 @@ def exceptions(request, exception=None):
 @login_required()
 def users(request, users=None):
     groups = utils.stringify_groups(request.user)
-    if not ('ascs' in groups or 'dealers' in groups):
+    if not (Roles.ASCS in groups or Roles.DEALERS in groups):
         return HttpResponseBadRequest()
     if request.method == 'GET':
         template = 'portal/users.html'
@@ -398,40 +397,32 @@ def get_sa_under_asc(request, id=None):
         pass
     return render(request, template, {'active_menu':'sa',"data": data})
 
-
 @check_service(Services.SERVICE_DESK)
 @login_required()
-def service_desk(request, servicedesk):
+def service_desk(request):
     status = request.GET.get('status')
     priority = request.GET.get('priority')
     type = request.GET.get('type')
     search = request.GET.get('search')
     count = request.GET.get('count') or BY_DEFAULT_RECORDS_PER_PAGE
     page_details = {}
-    if search:
-        feedback_obects = get_feedbacks(request.user, status, priority, type, search)
-    else:
-        feedback_obects = get_feedbacks(request.user, status, priority, type)
+    feedback_obects = get_feedbacks(request.user, status, priority, type, search)
     paginator = Paginator(feedback_obects, count)
-    page = request.GET.get('page')
-    try:
-        feedbacks = paginator.page(page)
-    except PageNotAnInteger:
-        feedbacks = paginator.page(1)
-    except EmptyPage:
-        feedbacks = paginator.page(paginator.num_pages)
-    
+    page = request.GET.get('page', 1)
+    feedbacks = paginator.page(page)
     page_details['total_objects'] = paginator.count
     page_details['from'] = feedbacks.start_index()
     page_details['to'] = feedbacks.end_index()
-    
     groups = utils.stringify_groups(request.user)
     if request.method == 'GET':
         template = 'portal/feedback_details.html'
         data = None
-        data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
+        if request.user.groups.filter(name=Roles.DEALERS).exists():
+            data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
+        else:
+            data = models.ServiceAdvisor.objects.active_under_asc(request.user)
         return render(request, template, {"feedbacks" : feedbacks,
-                                          'active_menu': servicedesk,
+                                          'active_menu': 'support',
                                           "data": data, 'groups': groups,
                                           "status": utils.get_list_from_set(FEEDBACK_STATUS),
                                           "pagination_links": PAGINATION_LINKS,
@@ -443,14 +434,12 @@ def service_desk(request, servicedesk):
                                                             'count': str(count), 'search': search}}
                                         )
     elif request.method == 'POST':
-        function_mapping = {
-            'helpdesk': save_help_desk_data
-        }
         try:
-            data = function_mapping[servicedesk](request)
+            data = save_help_desk_data(request)
             return HttpResponse(content=json.dumps(data),
                                 content_type='application/json')
-        except:
+        except Exception as ex:
+            logger.error('Exception while saving data : {0}'.format(ex))
             return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
@@ -469,10 +458,20 @@ def save_help_desk_data(request):
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)
     service_advisor_obj = models.ServiceAdvisor.objects.get(user__phone_number=sms_dict['advisorMobile'])
+<<<<<<< HEAD
     dealer_obj = models.Dealer.objects.get(dealer_id=request.user)
     return get_complain_data(sms_dict, service_advisor_obj.user.phone_number,
+=======
+    if request.user.groups.all()[0].name == Roles.DEALERS:
+        dealer_obj = models.Dealer.objects.get(dealer_id=request.user)
+        email_id =  dealer_obj.user.user.email
+    else:
+        asc_obj = models.AuthorizedServiceCenter.objects.get(asc_id=request.user)
+        email_id =  asc_obj.user.user.email
+    return gladmindsResources.get_complain_data(sms_dict, service_advisor_obj.user.phone_number,
+>>>>>>> upstream/gm_2_1
                                                 service_advisor_obj.user.user.email,
-                                                service_advisor_obj.user.user.username, dealer_obj.user.user.email,
+                                                service_advisor_obj.user.user.username, email_id,
                                                 with_detail=True)
 
 
@@ -507,7 +506,7 @@ def site_info(request):
 def reports(request):
     groups = utils.stringify_groups(request.user)
     report_data=[]
-    if not ('ascs' in groups or 'dealers' in groups):
+    if not (Roles.ASCS in groups or Roles.DEALERS in groups):
         return HttpResponseBadRequest()
     status_options = {'4': 'In Progress', '2':'Closed'}
     report_options = {'reconciliation': 'Reconciliation', 'credit':'Credit Note'}  

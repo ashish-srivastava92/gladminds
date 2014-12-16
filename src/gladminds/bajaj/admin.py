@@ -337,7 +337,17 @@ class SlaAdmin(ModelAdmin):
         ('resolution_time', 'resolution_unit'))
         }),
         )
-
+    def response_time(self):
+        return str(self.response_time) + ' ' + self.response_unit
+    
+    def reminder_time(self):
+        return str(self.reminder_time) + ' ' + self.reminder_unit
+    
+    def resolution_time(self):
+        return str(self.resolution_time) + ' ' + self.resolution_unit
+    
+    list_display = ('priority', response_time, reminder_time, resolution_time)
+    
 class ServiceDeskUserAdmin(ModelAdmin):
     list_display = ('user_profile', 'name', 'phone_number', 'email')
 

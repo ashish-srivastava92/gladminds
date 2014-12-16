@@ -12,6 +12,17 @@ class ServiceAdvisorManager(models.Manager):
     def active_under_dealer(self, dealer):
         return super(ServiceAdvisorManager, self).get_query_set().filter(dealer=dealer, status='Y')
 
+    def active_under_asc(self, asc):
+        return super(ServiceAdvisorManager, self).get_query_set().filter(asc=asc, status='Y')
+    
+    def get_dealer_asc_obj(self, reporter):
+        service_advisor_obj = super(ServiceAdvisorManager, self).select_related('dealer, asc').get(user=reporter.user_profile)
+        if service_advisor_obj.dealer:
+            return service_advisor_obj.dealer
+        else:
+            return service_advisor_obj.asc
+
+
 class CustomerTempRegistrationManager(models.Manager):
     def get_updated_customer_id(self, customer_id):
         if customer_id and customer_id.find('T') == 0:

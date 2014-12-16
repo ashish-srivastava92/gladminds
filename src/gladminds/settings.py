@@ -47,6 +47,7 @@ S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 
 TEMPLATE_CONTEXT_PROCESSORS = TCP + (
+    'gladminds.core.context_processors.gm_constants',
     'django.core.context_processors.request',
 )
 

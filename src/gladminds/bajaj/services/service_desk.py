@@ -14,10 +14,9 @@ from django.contrib.auth.models import User
 from gladminds.core import utils
 from gladminds.core.utils import get_list_from_set, convert_utc_to_local_time
 from gladminds.bajaj import models as models
-from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, \
-    FEEDBACK_TYPE, ROOT_CAUSE, SDM, SDO, DEALER,\
-    PAGINATION_LINKS, BY_DEFAULT_RECORDS_PER_PAGE,\
-    RECORDS_PER_PAGE, ALL
+from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
+    ROOT_CAUSE, PAGINATION_LINKS, BY_DEFAULT_RECORDS_PER_PAGE, RECORDS_PER_PAGE,\
+    ALL, DEALER, SDM, SDO
 from gladminds.managers import get_feedback,\
     get_servicedesk_users, save_update_feedback, get_comments
 from gladminds.core.managers.audit_manager import sms_log
@@ -30,6 +29,7 @@ from gladminds.core.managers.mail import send_feedback_received,\
      send_servicedesk_feedback, send_dealer_feedback
 from gladminds.managers import get_reporter_details
 
+from gladminds.core.auth_helper import Roles
 LOG = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 __all__ = ['GladmindsTaskManager']
@@ -127,13 +127,13 @@ def get_servicedesk_tickets(request):
 @require_http_methods(["GET", "POST"])
 def modify_servicedesk_tickets(request, feedback_id):
     host = get_current_site(request)
-    group_name = request.user.groups.filter(name__in=[SDM, SDO, DEALER])
+    group_name = request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.SDOWNERS, Roles.DEALERS, Roles.ASCS])
     status = get_list_from_set(FEEDBACK_STATUS)
     priority_types = get_list_from_set(PRIORITY)
     feedback_types = get_list_from_set(FEEDBACK_TYPE)
     root_cause = get_list_from_set(ROOT_CAUSE)
     feedback_obj = get_feedback(feedback_id, request.user)
-    servicedesk_users = get_servicedesk_users(designation=SDO)
+    servicedesk_users = get_servicedesk_users(designation=Roles.SDOWNERS)
     comments = get_comments(feedback_id)
     
     if request.method == 'POST':

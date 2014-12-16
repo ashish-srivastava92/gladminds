@@ -7,7 +7,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.conf import settings
 from django.db.models import Q
-from tastypie.resources import Resource
 
 from gladminds.core.managers import sms_parser
 from gladminds.core.managers.audit_manager import sms_log
@@ -371,7 +370,6 @@ def is_sa_initiator(coupon_id, service_advisor, phone_number):
         else:
             send_invalid_keyword_message.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
     return False
-    
 
 def is_valid_data(customer_id=None, coupon=None, sa_phone=None):
     '''
