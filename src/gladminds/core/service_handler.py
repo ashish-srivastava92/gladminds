@@ -5,12 +5,13 @@ this file contains logic for handling services enabled by brands .
 from gladminds.default.models import BrandService 
 from django.conf import settings
 
+
 class Services():
     FREE_SERVICE_COUPON = 'free_service_coupon'
     SERVICE_DESK = 'service_desk'
-    LOYALITY = 'loyality'
+    LOYALTY = 'loyalty'
     AFTERBUY = 'afterbuy'
-    
+
 
 class ServiceHandler(object):
     

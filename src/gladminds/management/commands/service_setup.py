@@ -4,7 +4,7 @@ from gladminds.core.service_handler import Services
 from gladminds.default import models
 
 
-_SERVICES = [Services.AFTERBUY, Services.FREE_SERVICE_COUPON, Services.LOYALITY, Services.SERVICE_DESK]
+_SERVICES = [Services.AFTERBUY, Services.FREE_SERVICE_COUPON, Services.LOYALTY, Services.SERVICE_DESK]
 _INDUSTRIES = ['automobiles']
 _BRANDS = {'bajaj': [_INDUSTRIES[0]]}
 

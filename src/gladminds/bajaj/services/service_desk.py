@@ -16,7 +16,7 @@ from gladminds.core.utils import get_list_from_set, convert_utc_to_local_time
 from gladminds.bajaj import models as models
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     ROOT_CAUSE, PAGINATION_LINKS, BY_DEFAULT_RECORDS_PER_PAGE, RECORDS_PER_PAGE,\
-    ALL, DEALER, SDM, SDO
+    ALL
 from gladminds.managers import get_feedback,\
     get_servicedesk_users, save_update_feedback, get_comments
 from gladminds.core.managers.audit_manager import sms_log
