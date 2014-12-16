@@ -15,8 +15,8 @@ from gladminds.core import utils
 from gladminds.core.utils import get_list_from_set, convert_utc_to_local_time
 from gladminds.bajaj import models as models
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
-    ROOT_CAUSE, PAGINATION_LINKS, BY_DEFAULT_RECORDS_PER_PAGE, RECORDS_PER_PAGE,\
-    ALL
+    ROOT_CAUSE, PAGINATION_LINKS, BY_DEFAULT_RECORDS_PER_PAGE,\
+    RECORDS_PER_PAGE, ALL
 from gladminds.managers import get_feedback,\
     get_servicedesk_users, save_update_feedback, get_comments
 from gladminds.core.managers.audit_manager import sms_log
@@ -35,20 +35,19 @@ TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 __all__ = ['GladmindsTaskManager']
 AUDIT_ACTION = 'SEND TO QUEUE'
 
-def get_feedbacks(user, status, priority, type, search=""):
-    group = user.groups.all()[0]
+def get_feedbacks(user, status, priority, type, search=None):
     feedbacks = []
     if type == ALL or type is None:
         type_filter = utils.get_list_from_set(FEEDBACK_TYPE)
     else:
         type_filter = [type]
-
+    
     if priority == ALL or priority is None:
         priority_filter = utils.get_list_from_set(PRIORITY)
     else:
         priority_filter = [priority]
-
-    if status is None:
+            
+    if status is None or status == 'active':
         status_filter = ['Open', 'Pending', 'In Progress']
     else:
         if status == ALL:
@@ -56,31 +55,33 @@ def get_feedbacks(user, status, priority, type, search=""):
         else:
             status_filter = [status]
 
-    if group.name == DEALER:
+    if user.groups.filter(name=Roles.DEALERS).exists():
         sa_list = models.ServiceAdvisor.objects.active_under_dealer(user)
         if sa_list:
             sa_id_list = []
             for sa in sa_list:
                 sa_id_list.append(sa.service_advisor_id)
-            feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list,
-                                                status__in=status_filter,
-                                                priority__in=priority_filter,
-                                                type__in=type_filter
-                                                ).order_by('-created_date')
-    if group.name == SDM:
-        feedbacks = models.Feedback.objects.filter(status__in=status_filter,
-                                                priority__in=priority_filter,
-                                                type__in=type_filter
-                                                ).order_by('-created_date')
-    if group.name == SDO:
+            feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
+                                                       priority__in=priority_filter, type__in=type_filter
+                                                    ).order_by('-created_date')
+    if user.groups.filter(name=Roles.ASCS).exists():
+        sa_list = models.ServiceAdvisor.objects.active_under_asc(user)
+        if sa_list:
+            sa_id_list = []
+            for sa in sa_list:
+                sa_id_list.append(sa.service_advisor_id)
+            feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
+                                                       priority__in=priority_filter, type__in=type_filter
+                                                    ).order_by('-created_date')
+    if user.groups.filter(name=Roles.SDMANAGERS).exists():
+        feedbacks = models.Feedback.objects.filter(status__in=status_filter, priority__in=priority_filter,
+                                                   type__in=type_filter).order_by('-created_date')
+    if user.groups.filter(name=Roles.SDOWNERS).exists():
         user_profile = models.UserProfile.objects.filter(user=user)
         servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
-        feedbacks = models.Feedback.objects.filter(assignee=servicedesk_user[0],
-                                                status__in=status_filter,
-                                                priority__in=priority_filter,
-                                                type__in=type_filter
-                                                ).order_by('-created_date')
-
+        feedbacks = models.Feedback.objects.filter(assignee=servicedesk_user[0], status__in=status_filter,
+                                                   priority__in=priority_filter, type__in=type_filter).order_by('-created_date')
+    
     return feedbacks
 
 @check_service(Services.SERVICE_DESK)
