@@ -458,10 +458,6 @@ def save_help_desk_data(request):
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)
     service_advisor_obj = models.ServiceAdvisor.objects.get(user__phone_number=sms_dict['advisorMobile'])
-<<<<<<< HEAD
-    dealer_obj = models.Dealer.objects.get(dealer_id=request.user)
-    return get_complain_data(sms_dict, service_advisor_obj.user.phone_number,
-=======
     if request.user.groups.all()[0].name == Roles.DEALERS:
         dealer_obj = models.Dealer.objects.get(dealer_id=request.user)
         email_id =  dealer_obj.user.user.email
@@ -469,7 +465,6 @@ def save_help_desk_data(request):
         asc_obj = models.AuthorizedServiceCenter.objects.get(asc_id=request.user)
         email_id =  asc_obj.user.user.email
     return gladmindsResources.get_complain_data(sms_dict, service_advisor_obj.user.phone_number,
->>>>>>> upstream/gm_2_1
                                                 service_advisor_obj.user.user.email,
                                                 service_advisor_obj.user.user.username, email_id,
                                                 with_detail=True)
