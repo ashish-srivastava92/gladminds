@@ -398,7 +398,7 @@ def get_sa_under_asc(request, id=None):
         pass
     return render(request, template, {'active_menu':'sa',"data": data})
 
-def get_feedbacks(user, status, priority, type, search=""):
+def get_feedbacks(user, status, priority, type, search=None):
     group = user.groups.all()[0]
     feedbacks = []
     if type == ALL or type is None:
@@ -451,17 +451,14 @@ def get_feedbacks(user, status, priority, type, search=""):
 
 @check_service(Services.SERVICE_DESK)
 @login_required()
-def service_desk(request, servicedesk):
+def service_desk(request):
     status = request.GET.get('status')
     priority = request.GET.get('priority')
     type = request.GET.get('type')
     search = request.GET.get('search')
     count = request.GET.get('count') or BY_DEFAULT_RECORDS_PER_PAGE
     page_details = {}
-    if search:
-        feedback_obects = get_feedbacks(request.user, status, priority, type, search)
-    else:
-        feedback_obects = get_feedbacks(request.user, status, priority, type)
+    feedback_obects = get_feedbacks(request.user, status, priority, type, search)
     paginator = Paginator(feedback_obects, count)
     page = request.GET.get('page')
     try:
@@ -479,12 +476,12 @@ def service_desk(request, servicedesk):
     if request.method == 'GET':
         template = 'portal/feedback_details.html'
         data = None
-        if request.user.groups.all()[0].name == DEALER:
+        if request.user.groups.filter(name=DEALER).exists():
             data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
         else:
             data = models.ServiceAdvisor.objects.active_under_asc(request.user)
         return render(request, template, {"feedbacks" : feedbacks,
-                                          'active_menu': servicedesk,
+                                          'active_menu': 'support',
                                           "data": data, 'groups': groups,
                                           "status": utils.get_list_from_set(FEEDBACK_STATUS),
                                           "pagination_links": PAGINATION_LINKS,
@@ -496,11 +493,8 @@ def service_desk(request, servicedesk):
                                                             'count': str(count), 'search': search}}
                                         )
     elif request.method == 'POST':
-        function_mapping = {
-            'helpdesk': save_help_desk_data
-        }
         try:
-            data = function_mapping[servicedesk](request)
+            data = save_help_desk_data(request)
             return HttpResponse(content=json.dumps(data),
                                 content_type='application/json')
         except Exception as ex:
