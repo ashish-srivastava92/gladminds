@@ -21,22 +21,6 @@ def update_points(mechanic, accumulate=0, redeem=0):
     mechanic.save()
     return total_points
 
-def fetch_spare_products(spare_product_codes):
-    '''Fetches all the spare parts with given upc'''
-    spares = models.SparePart.objects.filter(unique_part_code__in=spare_product_codes,
-                                             is_used=False)
-    return spares
-
-def fetch_catalogue_products(product_codes):
-    '''Fetches all the products with given upc'''
-    products = models.ProductCatalog.objects.filter(product_id__in=product_codes)
-    return products
-
-def get_mechanic(phone_number):
-    '''Fetches detail of mechanic with given mobile number'''
-    mechanic = models.Mechanic.objects.filter(user__phone_number=phone_number)
-    return mechanic
-
 def accumulate_point(sms_dict, phone_number):
     '''accumulate points with given upc'''
     unique_product_codes = sms_dict['ucp'].split()
@@ -47,17 +31,24 @@ def accumulate_point(sms_dict, phone_number):
             message=templates.get_template('MAX_ALLOWED_UCP').format(
                                     max_limit=settings.MAX_UCP_ALLOWED)
             raise ValueError('Maximum allowed ucp exceeded')
-        mechanic = get_mechanic(utils.mobile_format(phone_number))
+        mech_number = utils.mobile_format(phone_number)
+        mechanic = models.Mechanic.objects.filter(user__phone_number=mech_number)
+        accumulation_log=models.AccumulationRequest(member=mechanic[0],
+                                                    points=0)
+        accumulation_log.save()
         if not mechanic:
             message=templates.get_template('UNREGISERED_USER')
             raise ValueError('Unregistered user')
-        spares=fetch_spare_products(unique_product_codes)
+        spares = models.SparePart.objects.filter(unique_part_code__in=unique_product_codes,
+                                             is_used=False)
         added_points=0
 
         for spare in spares:
             added_points=added_points+spare.points
             valid_ucp.append(spare.unique_part_code)
+            accumulation_log.upcs.add(spare)
         total_points=update_points(mechanic[0],accumulate=added_points)
+        accumulation_log.points=total_points
         invalid_upcs = list(set(unique_product_codes).difference(valid_ucp))
         if invalid_upcs:
             invalid_upcs_message=' List of invalid part code: {0}.'.format(
@@ -82,17 +73,19 @@ def accumulate_point(sms_dict, phone_number):
                              message=message,
                              sms_client=settings.SMS_CLIENT)
         sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        accumulation_log.save()
     return {'status': True, 'message': message}
 
 def redeem_point(sms_dict, phone_number):
     '''redeem points with given upc'''
     product_codes = sms_dict['product_id'].upper().split()
     try:
-        mechanic = get_mechanic(utils.mobile_format(phone_number))
+        mech_number = utils.mobile_format(phone_number)
+        mechanic = models.Mechanic.objects.filter(user__phone_number=mech_number)
         if not mechanic:
             message=templates.get_template('UNREGISERED_USER')
             raise ValueError('Unregistered user')
-        products=fetch_catalogue_products(product_codes)
+        products = models.ProductCatalog.objects.filter(product_id__in=product_codes)
         redeem_points=0
 
         for product in products:
