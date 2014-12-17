@@ -3,7 +3,7 @@ import csv
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from gladminds.core.utils import get_model
+from gladminds.core.loaders.module_loader import get_model
 APP='bajaj'
 
 class Command(BaseCommand):

@@ -37,7 +37,7 @@ def accumulate_point(sms_dict, phone_number):
             message=templates.get_template('MAX_ALLOWED_UCP').format(
                                     max_limit=settings.MAX_UCP_ALLOWED)
             raise ValueError('Maximum allowed ucp exceeded')
-        mechanic = models.Mechanic.objects.get_mechanic(utils.mobile_format(phone_number))
+        mechanic = models.Mechanic.objects.filter(phone_number=utils.mobile_format(phone_number))
         accumulation_log=models.AccumulationRequest(member=mechanic[0],
                                                     points=0)
         accumulation_log.save()
@@ -58,7 +58,7 @@ def accumulate_point(sms_dict, phone_number):
             invalid_upcs_message=' List of invalid part code: {0}.'.format(
                                                     (', '.join(invalid_upcs)))
         message=templates.get_template('SEND_ACCUMULATED_POINT').format(
-                        mechanic_name=mechanic[0].user.user.first_name,
+                        mechanic_name=mechanic[0].first_name,
                         added_points=added_points,
                         total_points=total_points,
                         invalid_upcs=invalid_upcs_message)
@@ -76,6 +76,7 @@ def accumulate_point(sms_dict, phone_number):
             send_point.delay(phone_number=phone_number,
                              message=message,
                              sms_client=settings.SMS_CLIENT)
+
         sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
         accumulation_log.save()
     return {'status': True, 'message': message}
@@ -84,7 +85,7 @@ def redeem_point(sms_dict, phone_number):
     '''redeem points with given upc'''
     product_codes = sms_dict['product_id'].upper().split()
     try:
-        mechanic = models.Mechanic.objects.get_mechanic(utils.mobile_format(phone_number))
+        mechanic = models.Mechanic.objects.filter(phone_number=utils.mobile_format(phone_number))
         if not mechanic:
             message=templates.get_template('UNREGISERED_USER')
             raise ValueError('Unregistered user')
@@ -97,7 +98,7 @@ def redeem_point(sms_dict, phone_number):
         if left_points>=0:
             total_points=update_points(mechanic[0],redeem=redeem_points)
             message=templates.get_template('SEND_REDEEM_POINT').format(
-                            mechanic_name=mechanic[0].name,
+                            mechanic_name=mechanic[0].first_name,
                             product_code=sms_dict['product_id'],
                             total_points=total_points)
         else:
