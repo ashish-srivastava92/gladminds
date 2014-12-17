@@ -43,28 +43,24 @@ class Command(BaseCommand):
                     temp['supplier'] = row_list[6].strip()
                     spare_list.append(temp)
         for spare in spare_list:
-            try:
-                spare_object = spare_master.objects.filter(serial_number=spare['part_no'])
-                if not spare_object:
-                    spare_type_object = spare_type.objects.filter(product_type=spare['type'])
-                    if not spare_type_object:
-                        spare_type_object = spare_type(product_type=spare['type'])
-                    else:
-                        spare_type_object = spare_type_object[0]
-                    spare_object = spare_master(
-                                                product_type=spare_type_object,
-                                                serial_number = spare['part_no'],
-                                                part_model = spare['model'],
-                                                description = spare['desc'],
-                                                category = spare['category'],
-                                                segment_type = spare['segment'],
-                                                supplier = spare['supplier']
-                                    )
-                    spare_object.save()
-                    file.write("success part number is..." + spare['part_no']+'\n')
+            spare_object = spare_master.objects.filter(serial_number=spare['part_no'])
+            if not spare_object:
+                spare_type_object = spare_type.objects.filter(product_type=spare['type'])
+                if not spare_type_object:
+                    spare_type_object = spare_type(product_type=spare['type'])
                 else:
-                    file.write("already exist part number is..." + spare['part_no'] +'\n')
-            except Exception as ex:
-                ex = "{0}: {1} /n".format(spare['part_no'], ex)
-                file.write(ex)
+                    spare_type_object = spare_type_object[0]
+                spare_object = spare_master(
+                                            product_type=spare_type_object,
+                                            serial_number = spare['part_no'],
+                                            part_model = spare['model'],
+                                            description = spare['desc'],
+                                            category = spare['category'],
+                                            segment_type = spare['segment'],
+                                            supplier = spare['supplier']
+                                )
+                spare_object.save()
+                file.write("success part number is..." + spare['part_no']+'\n')
+            else:
+                file.write("already exist part number is..." + spare['part_no'] +'\n')
         file.close()
