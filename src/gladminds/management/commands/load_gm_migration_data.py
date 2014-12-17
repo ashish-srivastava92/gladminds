@@ -8,8 +8,8 @@ from django.conf import settings
 from gladminds.bajaj.models import MessageTemplate, EmailTemplate
 from gladminds.bajaj import models as common
 from gladminds.bajaj.feeds import feed
-from gladminds.core.utils import get_model
 from gladminds.core.auth_helper import ALL_APPS
+from gladminds.core.loaders.module_loader import get_model
 
 BASIC_FEED = feed.BaseFeed()
 
