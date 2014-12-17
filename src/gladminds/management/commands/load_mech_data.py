@@ -10,18 +10,59 @@ APP='bajaj'
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        self.upload_asc_data()
+        self.upload_dist_data()
+        self.upload_mech_data()
     
+    def upload_dist_data(self):
+        print "Started uploading distributor..."
+        file_list = ['DIST_DATA.csv']
+        dealer_list = []
+        asm = get_model('AreaServiceManager', APP)
+        dist = get_model('Distributor', APP)
+        user_profile = get_model('UserProfile', APP)
+
+        for i in range(0, 1):
+            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
+                spamreader = csv.reader(csvfile, delimiter=',')
+                next(spamreader)
+                for row_list in spamreader:
+                    temp ={}
+                    temp['asm_id'] = row_list[0].strip()
+                    temp['id'] = row_list[1].strip()
+                    temp['name'] = row_list[2].strip()
+                    temp['email'] = row_list[4].strip()  
+                    temp['mobile'] = row_list[5].strip()
+                    temp['city'] = row_list[6].strip()  
+                    dealer_list.append(temp)
+        
+        for dealer in dealer_list:
+            dist_object = dist.objects.filter(distributor_id=dealer['id'])
+            if not dist_object:
+                password=dealer['id']+'@123'
+                dist_user_object = User.objects.using(APP).create(username=dealer['id'])
+                dist_user_object.set_password(password)
+                dist_user_object.email = dealer['email']
+                dist_user_object.first_name = dealer['name']
+                dist_user_object.save(using=APP)
+                dist_user_pro_object = user_profile(user=dist_user_object,
+                                        phone_number=dealer['mobile'],
+                                        address=dealer['city'])
+                dist_user_pro_object.save()
+                asm_object = asm.objects.get(asm_id=dealer['asm_id'])
+                dist_object = dist(distributor_id=dealer['id'],
+                                          asm=asm_object,
+                                          user=dist_user_pro_object)
+                dist_object.save()
+
     def empty_to_none(self, value):
         if value=='':
             return None
         else:
             return int(value)
 
-    def upload_asc_data(self):
-        print "Started running function..."
+    def upload_mech_data(self):
+        print "Started uploading mech data..."
         file_list = ['MECHANIC_DATA.csv']
-        file = open("mech_data.txt", "w")
         mech_list = []
         retailer = get_model('Retailer', APP)
         dist = get_model('Distributor', APP)
@@ -82,8 +123,6 @@ class Command(BaseCommand):
                     mech_id = generate_temp_id('TME')
                 else:
                     mech_id=mechanic['mech_id']
-                print "MECH ID", mech_id
-                
                 if mechanic['dist_id']:
                     dist_object = dist.objects.get(distributor_id=mechanic['dist_id'])
                 else:
@@ -125,7 +164,3 @@ class Command(BaseCommand):
                                 form_status = mechanic['complete']
                                 )
                 mech_object.save()
-                file.write("success mechanic id is..." + mech_id+'\n')
-            else:
-                file.write("already exist mechanic id is..." + mechanic['mech_id'] +'\n')
-        file.close()
