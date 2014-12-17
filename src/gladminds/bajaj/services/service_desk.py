@@ -224,7 +224,6 @@ def check_role_of_initiator(phone_number):
 
 def get_complain_data(sms_dict, phone_number, email, name, dealer_email, with_detail=False):
     ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
-    return
     manager_obj = User.objects.get(groups__name='SDM')
     try:
         role = check_role_of_initiator(phone_number)

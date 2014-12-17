@@ -262,10 +262,8 @@ class Distributor(base_models.Distributor):
         app_label = _APP_NAME
         verbose_name_plural = "distributor"
 
-class Retailer(base_models.Distributor):
-    '''details of Distributor'''
-    user = models.OneToOneField(UserProfile, primary_key=True,
-                                related_name='bajaj_retailer')
+class Retailer(base_models.Retailer):
+    '''details of retailer'''
 
     class Meta:
         app_label = _APP_NAME
@@ -273,8 +271,6 @@ class Retailer(base_models.Distributor):
 
 class Mechanic(base_models.Mechanic):
     '''details of Mechanic'''
-    user = models.OneToOneField(UserProfile, primary_key=True,
-                                related_name='bajaj_mechanic')
     registered_by = models.ForeignKey(Distributor, null=True, blank=True)
     preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
 

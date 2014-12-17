@@ -1,6 +1,8 @@
 import os
 import datetime
 from importlib import import_module
+import base64
+import re
 
 from dateutil import tz
 from random import randint
@@ -24,6 +26,14 @@ from gladminds.core.managers.mail import get_email_template
 
 logger = logging.getLogger('gladminds')
 
+def generate_temp_id(prefix_value):
+    for x in range(5):
+        key = base64.b64encode(hashlib.sha256(str(datetime.datetime.now())).digest())
+        key = re.sub("[a-z/=+]", "", key)
+        if len(key) < 6:
+            continue
+        return "%s%s" % (prefix_value, key[:6])
+    logger.log('Could not generate SAP ID after 5 attempts')
 
 def get_handler(handler, brand=None):
     if not brand:
