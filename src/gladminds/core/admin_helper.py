@@ -1,13 +1,23 @@
 from django.contrib.admin.options import ModelAdmin
-from django.conf import settings
 from suit.admin import SortableTabularInline
 from suit.widgets import EnclosedInput, AutosizedTextarea
 from django.forms.models import ModelForm
 from django.contrib.admin.views.main import ORDER_VAR, ChangeList
-
+from django.core.exceptions import PermissionDenied
 from gladminds.core import utils
 from gladminds.bajaj import models
 
+
+class GmModelAdmin(ModelAdmin):
+    groups_update_not_allowed = []
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        if request.method == 'POST' and not "_saveasnew" in request.POST:
+            if request.user.groups.filter(name__in=self.groups_update_not_allowed).exists():
+                raise PermissionDenied
+        return super(GmModelAdmin, self).change_view(request, object_id,
+                                                     form_url=form_url,
+                                                     extra_context=extra_context)
 
 class ServiceAdvisorAdmin(ModelAdmin):
     search_fields = (

@@ -6,16 +6,19 @@ from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from gladminds.bajaj import models
 from gladminds.core import utils
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
-from gladminds.core.auth_helper import GmApps
+from gladminds.core.auth_helper import GmApps, Roles
+from gladminds.core.admin_helper import GmModelAdmin
+
 
 class BajajAdminSite(AdminSite):
     pass
+
 
 class UserProfileAdmin(ModelAdmin):
     search_fields = ('user__username', 'phone_number')
     list_display = ('user', 'phone_number', 'status', 'address',
                     'state', 'country', 'pincode', 'date_of_birth', 'gender')
-        
+    
 class DealerAdmin(ModelAdmin):
     search_fields = ('dealer_id',)
     list_display = ('dealer_id', 'user')
@@ -387,7 +390,8 @@ class MechanicAdmin(ModelAdmin):
         if css_class:
             return {'class': css_class}
 
-class SparePartMasterAdmin(ModelAdmin):
+class SparePartMasterAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.ASMS]
     search_fields = ('serial_number', 'category',
                      'segment_type', 'supplier',
                      'product_type__product_type')
@@ -395,7 +399,8 @@ class SparePartMasterAdmin(ModelAdmin):
                     'description', 'product_type', 'category',
                     'segment_type', 'supplier')
 
-class SparePartAdmin(ModelAdmin):
+class SparePartAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.ASMS]
     search_fields = ('unique_part_code',
                      'part_number', 'points', 'is_used')
     list_display = ('unique_part_code', 'price',
