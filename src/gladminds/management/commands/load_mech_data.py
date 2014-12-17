@@ -75,61 +75,57 @@ class Command(BaseCommand):
                     temp['mech_id'] = row_list[32].strip()
                     mech_list.append(temp)
         for mechanic in mech_list:
-            try:
-                mobile = mobile_format(mechanic['mobile'])
-                mech_object = mech.objects.filter(phone_number=mobile)
-                if not mech_object:
-                    if not mechanic['mech_id']:
-                        mech_id = generate_temp_id('TME')
-                    else:
-                        mech_id=mechanic['mech_id']
-                    print "MECH ID", mech_id
-                    
-                    if mechanic['dist_id']:
-                        dist_object = dist.objects.get(distributor_id=mechanic['dist_id'])
-                    else:
-                        dist_object = None
- 
-                    ret_obj = retailer.objects.filter(retailer_name=mechanic['ret_name'])
-                    if not ret_obj:
-                        ret_obj = retailer(retailer_name=mechanic['ret_name'],
-                                 retailer_town=mechanic['ret_town'])
-                        ret_obj.save()
-                    else:
-                        ret_obj = ret_obj[0]
-                    
-                    mech_object = mech(registered_by=dist_object,
-                                    preferred_retailer=ret_obj,
-                                    mechanic_id=mech_id,
-                                    first_name = mechanic['first_name'],
-                                    last_name = mechanic['last_name'],
-                                    date_of_birth=mechanic['dob'],
-                                    phone_number=mobile,           
-                                    form_number=mechanic['form_no'],
-                                    registered_date=mechanic['reg_date'],
-                                    shop_number =  mechanic['shop_no'],
-                                    shop_name =  mechanic['shop_name'],
-                                    shop_address =  mechanic['shop_address'],
-                                    locality =  mechanic['locality'],
-                                    tehsil =  mechanic['tehsil'],
-                                    district =  mechanic['district'],
-                                    state =  mechanic['state'],
-                                    pincode =  mechanic['pincode'],
-                                    shop_wall_length =  mechanic['wall_len'],
-                                    shop_wall_width =  mechanic['wall_width'],
-                                    two_stroke_serviced =  mechanic['two_stroke'],
-                                    four_stroke_serviced =  mechanic['four_stroke'],
-                                    cng_lpg_serviced =  mechanic['cng_lpg'],
-                                    diesel_serviced =  mechanic['diesel'],
-                                    spare_per_month =  mechanic['spare_month'],
-                                    genuine_parts_used =  mechanic['genuine'],
-                                    form_status = mechanic['complete']
-                                    )
-                    mech_object.save()
-                    file.write("success mechanic id is..." + mech_id+'\n')
+            mobile = mobile_format(mechanic['mobile'])
+            mech_object = mech.objects.filter(phone_number=mobile)
+            if not mech_object:
+                if not mechanic['mech_id']:
+                    mech_id = generate_temp_id('TME')
                 else:
-                    file.write("already exist mechanic id is..." + mechanic['mech_id'] +'\n')
-            except Exception as ex:
-                ex = "{0}: {1} /n".format(mechanic['mech_id'], ex)
-                file.write(ex)
+                    mech_id=mechanic['mech_id']
+                print "MECH ID", mech_id
+                
+                if mechanic['dist_id']:
+                    dist_object = dist.objects.get(distributor_id=mechanic['dist_id'])
+                else:
+                    dist_object = None
+                
+                ret_obj = retailer.objects.filter(retailer_name=mechanic['ret_name'])
+                if not ret_obj:
+                    ret_obj = retailer(retailer_name=mechanic['ret_name'],
+                             retailer_town=mechanic['ret_town'])
+                    ret_obj.save()
+                else:
+                    ret_obj = ret_obj[0]
+                
+                mech_object = mech(registered_by=dist_object,
+                                preferred_retailer=ret_obj,
+                                mechanic_id=mech_id,
+                                first_name = mechanic['first_name'],
+                                last_name = mechanic['last_name'],
+                                date_of_birth=mechanic['dob'],
+                                phone_number=mobile,           
+                                form_number=mechanic['form_no'],
+                                registered_date=mechanic['reg_date'],
+                                shop_number =  mechanic['shop_no'],
+                                shop_name =  mechanic['shop_name'],
+                                shop_address =  mechanic['shop_address'],
+                                locality =  mechanic['locality'],
+                                tehsil =  mechanic['tehsil'],
+                                district =  mechanic['district'],
+                                state =  mechanic['state'],
+                                pincode =  mechanic['pincode'],
+                                shop_wall_length =  mechanic['wall_len'],
+                                shop_wall_width =  mechanic['wall_width'],
+                                two_stroke_serviced =  mechanic['two_stroke'],
+                                four_stroke_serviced =  mechanic['four_stroke'],
+                                cng_lpg_serviced =  mechanic['cng_lpg'],
+                                diesel_serviced =  mechanic['diesel'],
+                                spare_per_month =  mechanic['spare_month'],
+                                genuine_parts_used =  mechanic['genuine'],
+                                form_status = mechanic['complete']
+                                )
+                mech_object.save()
+                file.write("success mechanic id is..." + mech_id+'\n')
+            else:
+                file.write("already exist mechanic id is..." + mechanic['mech_id'] +'\n')
         file.close()
