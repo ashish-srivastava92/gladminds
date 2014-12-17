@@ -202,7 +202,7 @@ def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=Non
         LOG.info("Send complain message received successfully with {0}".format(message))
         phone_number = utils.get_phone_number_format(phone_number)
         if settings.ENABLE_AMAZON_SQS:
-            task_queue = utils.get_task_queue()
+            task_queue = get_task_queue()
             task_queue.add("send_coupon", {"phone_number":phone_number,
                                            "message": message})
         else:
