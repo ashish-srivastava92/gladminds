@@ -657,7 +657,7 @@ class AreaServiceManager(BaseModel):
 class Distributor(BaseModel):
     '''details of Distributor'''
     distributor_id = models.CharField(max_length=50, unique=True)
-    distributor_code = models.CharField(max_length=50, unique=True)
+    distributor_code = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -668,19 +668,26 @@ class Distributor(BaseModel):
     
 class Retailer(BaseModel):
     '''details of Distributor'''
-    retailer_id = models.CharField(max_length=50, unique=True)
+    retailer_name = models.CharField(max_length=50)
+    retailer_town = models.CharField(max_length=50, null=True, blank=True)
+    
 
     class Meta:
         abstract = True
         verbose_name_plural = "retailers"
 
     def __unicode__(self):
-        return self.retailer_id
+        return self.retailer_name
 
 class Mechanic(BaseModel):
     '''details of Mechanic'''
-    mechanic_id = models.CharField(max_length=50, unique=True)
+    mechanic_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
     total_points = models.IntegerField(max_length=50, null=True, blank=True, default=0)
+
+    date_of_birth = models.DateTimeField(null=True, blank= True)
+    first_name = models.CharField(max_length=50, null=True, blank=True)
+    last_name = models.CharField(max_length=50, null=True, blank=True)
+    phone_number = PhoneField(null=True, blank=True)
 
     form_number = models.IntegerField(max_length=50, null=True, blank=True)
     registered_date = models.DateTimeField(null=True, blank= True)
@@ -698,8 +705,16 @@ class Mechanic(BaseModel):
     four_stroke_serviced = models.IntegerField(max_length=50, null=True, blank=True)
     cng_lpg_serviced = models.IntegerField(max_length=50, null=True, blank=True)
     diesel_serviced = models.IntegerField(max_length=50, null=True, blank=True)
+    spare_per_month = models.IntegerField(max_length=50, null=True, blank=True)
     genuine_parts_used = models.IntegerField(max_length=50, null=True, blank=True)
-    
+
+    FORM_STATUS_CHOICES = (
+                           ('Complete', 'Complete'),
+                           ('Incomplete', 'Incomplete'),
+                           )
+    form_status = models.CharField(max_length=15, choices=FORM_STATUS_CHOICES,
+                              default='Incomplete')
+
     objects = user_manager.MechanicManager()
 
     class Meta:

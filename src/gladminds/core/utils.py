@@ -3,6 +3,8 @@ import boto
 import pytz
 import datetime
 from importlib import import_module
+import base64
+import re
 
 from boto.s3.key import Key
 from dateutil import tz
@@ -10,7 +12,7 @@ from random import randint
 from django.utils import timezone
 from django.conf import settings
 from django_otp.oath import TOTP
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY, TIMEZONE
 from gladminds.core.base_models import STATUS_CHOICES
@@ -26,6 +28,14 @@ from gladminds.core.auth_helper import Roles
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 logger = logging.getLogger('gladminds')
 
+def generate_temp_id(prefix_value):
+    for x in range(5):
+        key = base64.b64encode(hashlib.sha256(str(datetime.datetime.now())).digest())
+        key = re.sub("[a-z/=+]", "", key)
+        if len(key) < 6:
+            continue
+        return "%s%s" % (prefix_value, key[:6])
+    logger.log('Could not generate SAP ID after 5 attempts')
 
 def get_models():
     try:

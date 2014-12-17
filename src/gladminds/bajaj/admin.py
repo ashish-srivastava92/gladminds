@@ -352,23 +352,52 @@ class ServiceDeskUserAdmin(ModelAdmin):
     list_display = ('user_profile', 'name', 'phone_number', 'email')
 
 class NSMAdmin(ModelAdmin):
+    search_fields = ('nsm_id', 'territory',
+                     'user__phone_number')
     list_display = ('nsm_id', 'user', 'territory')
 
 class ASMAdmin(ModelAdmin):
-    list_display = ('asm_id', 'user')
+    search_fields = ('asm_id', 'nsm__nsm_id',
+                     'user__phone_number')
+    list_display = ('asm_id', 'user', 'nsm')
 
 class DistributorAdmin(ModelAdmin):
-    list_display = ('distributor_id', 'user')
+    search_fields = ('distributor_id', 'asm__asm_id',
+                     'user__phone_number')
+    list_display = ('distributor_id', 'user', 'asm')
+    
+class RetailerAdmin(ModelAdmin):
+    search_fields = ('retailer_name', 'retailer_town')
+    list_display = ('retailer_name', 'retailer_town')
 
 class MechanicAdmin(ModelAdmin):
-    list_display = ('mechanic_id', 'user', 'total_points')
+    search_fields = ('mechanic_id', 'form_status',
+                     'phone_number')
+    list_display = ('mechanic_id', 'first_name', 'phone_number', 'total_points',
+                    'form_number', 'registered_date', 'two_stroke_serviced',
+                    'four_stroke_serviced', 'cng_lpg_serviced',
+                    'diesel_serviced', 'spare_per_month',
+                    'genuine_parts_used')
+
+    def suit_row_attributes(self, obj):
+        class_map = {
+            'Incomplete': 'error'
+        }
+        css_class = class_map.get(str(obj.form_status))
+        if css_class:
+            return {'class': css_class}
 
 class SparePartMasterAdmin(ModelAdmin):
+    search_fields = ('serial_number', 'category',
+                     'segment_type', 'supplier',
+                     'product_type__product_type')
     list_display = ('serial_number', 'part_model',
                     'description', 'product_type', 'category',
                     'segment_type', 'supplier')
 
 class SparePartAdmin(ModelAdmin):
+    search_fields = ('unique_part_code',
+                     'part_number', 'points', 'is_used')
     list_display = ('unique_part_code', 'price',
                     'part_number', 'points', 'is_used')
 
@@ -409,6 +438,7 @@ brand_admin.register(models.DataFeedLog, FeedLogAdmin)
 brand_admin.register(models.NationalSalesManager, NSMAdmin)
 brand_admin.register(models.AreaServiceManager, ASMAdmin)
 brand_admin.register(models.Distributor, DistributorAdmin)
+brand_admin.register(models.Retailer, RetailerAdmin)
 brand_admin.register(models.Mechanic, MechanicAdmin)
 
 
