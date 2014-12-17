@@ -722,7 +722,7 @@ class Mechanic(BaseModel):
 
 class SparePartMasterData(BaseModel):
     '''details of Spare Part'''
-    serial_number = models.IntegerField(max_length=100, unique=True)
+    serial_number = models.CharField(max_length=100, unique=True)
     part_model = models.CharField(max_length=50, null=True, blank=True)
     description = models.CharField(max_length=50, null=True, blank=True)
     category = models.CharField(max_length=50, null=True, blank=True)

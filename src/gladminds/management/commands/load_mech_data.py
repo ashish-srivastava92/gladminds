@@ -3,7 +3,8 @@ import datetime
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from gladminds.core.utils import get_model, generate_temp_id, mobile_format
+from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.utils import generate_temp_id, mobile_format
 APP='bajaj'
 
 class Command(BaseCommand):
@@ -21,7 +22,7 @@ class Command(BaseCommand):
         print "Started running function..."
         file_list = ['MECHANIC_DATA.csv']
         file = open("mech_data.txt", "w")
-        dealer_list = []
+        mech_list = []
         retailer = get_model('Retailer', APP)
         dist = get_model('Distributor', APP)
         user_profile = get_model('UserProfile', APP)
@@ -72,27 +73,27 @@ class Command(BaseCommand):
 
                     temp['complete'] = row_list[31].strip()
                     temp['mech_id'] = row_list[32].strip()
-                    dealer_list.append(temp)
-        for dealer in dealer_list:
+                    mech_list.append(temp)
+        for mechanic in mech_list:
             try:
-                mobile = mobile_format(dealer['mobile'])
+                mobile = mobile_format(mechanic['mobile'])
                 mech_object = mech.objects.filter(phone_number=mobile)
                 if not mech_object:
-                    if not dealer['mech_id']:
+                    if not mechanic['mech_id']:
                         mech_id = generate_temp_id('TME')
                     else:
-                        mech_id=dealer['mech_id']
+                        mech_id=mechanic['mech_id']
                     print "MECH ID", mech_id
                     
-                    if dealer['dist_id']:
-                        dist_object = dist.objects.get(distributor_id=dealer['dist_id'])
+                    if mechanic['dist_id']:
+                        dist_object = dist.objects.get(distributor_id=mechanic['dist_id'])
                     else:
                         dist_object = None
  
-                    ret_obj = retailer.objects.filter(retailer_name=dealer['ret_name'])
+                    ret_obj = retailer.objects.filter(retailer_name=mechanic['ret_name'])
                     if not ret_obj:
-                        ret_obj = retailer(retailer_name=dealer['ret_name'],
-                                 retailer_town=dealer['ret_town'])
+                        ret_obj = retailer(retailer_name=mechanic['ret_name'],
+                                 retailer_town=mechanic['ret_town'])
                         ret_obj.save()
                     else:
                         ret_obj = ret_obj[0]
@@ -100,37 +101,35 @@ class Command(BaseCommand):
                     mech_object = mech(registered_by=dist_object,
                                     preferred_retailer=ret_obj,
                                     mechanic_id=mech_id,
-                                    first_name = dealer['first_name'],
-                                    last_name = dealer['last_name'],
-                                    date_of_birth=dealer['dob'],
+                                    first_name = mechanic['first_name'],
+                                    last_name = mechanic['last_name'],
+                                    date_of_birth=mechanic['dob'],
                                     phone_number=mobile,           
-                                    form_number=dealer['form_no'],
-                                    registered_date=dealer['reg_date'],
-                                    shop_number =  dealer['shop_no'],
-                                    shop_name =  dealer['shop_name'],
-                                    shop_address =  dealer['shop_address'],
-                                    locality =  dealer['locality'],
-                                    tehsil =  dealer['tehsil'],
-                                    district =  dealer['district'],
-                                    state =  dealer['state'],
-                                    pincode =  dealer['pincode'],
-                                    shop_wall_length =  dealer['wall_len'],
-                                    shop_wall_width =  dealer['wall_width'],
-                                    two_stroke_serviced =  dealer['two_stroke'],
-                                    four_stroke_serviced =  dealer['four_stroke'],
-                                    cng_lpg_serviced =  dealer['cng_lpg'],
-                                    diesel_serviced =  dealer['diesel'],
-                                    spare_per_month =  dealer['spare_month'],
-                                    genuine_parts_used =  dealer['genuine'],
-                                    form_status = dealer['complete']
+                                    form_number=mechanic['form_no'],
+                                    registered_date=mechanic['reg_date'],
+                                    shop_number =  mechanic['shop_no'],
+                                    shop_name =  mechanic['shop_name'],
+                                    shop_address =  mechanic['shop_address'],
+                                    locality =  mechanic['locality'],
+                                    tehsil =  mechanic['tehsil'],
+                                    district =  mechanic['district'],
+                                    state =  mechanic['state'],
+                                    pincode =  mechanic['pincode'],
+                                    shop_wall_length =  mechanic['wall_len'],
+                                    shop_wall_width =  mechanic['wall_width'],
+                                    two_stroke_serviced =  mechanic['two_stroke'],
+                                    four_stroke_serviced =  mechanic['four_stroke'],
+                                    cng_lpg_serviced =  mechanic['cng_lpg'],
+                                    diesel_serviced =  mechanic['diesel'],
+                                    spare_per_month =  mechanic['spare_month'],
+                                    genuine_parts_used =  mechanic['genuine'],
+                                    form_status = mechanic['complete']
                                     )
                     mech_object.save()
-                    file.write("success dealer id is..." + mech_id+'\n')
+                    file.write("success mechanic id is..." + mech_id+'\n')
                 else:
-                    file.write("already exist dealer id is..." + dealer['mech_id'] +'\n')
+                    file.write("already exist mechanic id is..." + mechanic['mech_id'] +'\n')
             except Exception as ex:
-                ex = "{0}: {1} /n".format(dealer['mech_id'], ex)
+                ex = "{0}: {1} /n".format(mechanic['mech_id'], ex)
                 file.write(ex)
-                break
-#                 file.write("Failed dealer id is..." + dealer['id'])
         file.close()
