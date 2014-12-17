@@ -70,11 +70,14 @@ class Command(BaseCommand):
                     temp['UPC'] = row_list[1].strip()
                     spare_list.append(temp)
         for spare in spare_list:
-            spare_master_object = spare_master.objects.filter(serial_number=spare['part_no'])
-            spare_object = spare_part(
-                                        part_number=spare_master_object[0],
-                                        unique_part_code = spare['UPC'])
-            spare_object.save()
+            spare_object = spare_part.objects.filter(unique_part_code = spare['UPC'])
+            if not spare_object:
+                spare_master_object = spare_master.objects.filter(serial_number=spare['part_no'])
+                
+                spare_object = spare_part(
+                                            part_number=spare_master_object[0],
+                                            unique_part_code = spare['UPC'])
+                spare_object.save()
 
     def upload_part_point_data(self):
         print "Started uploading part points..."
