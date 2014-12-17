@@ -22,7 +22,7 @@ class GmModelAdmin(ModelAdmin):
                 post_url_continue = reverse('admin:%s_%s_changelist' %
                                    (opts.app_label, opts.model_name),
                                    current_app=self.admin_site.name)
-            return HttpResponseRedirect(post_url_continue)
+                return HttpResponseRedirect(post_url_continue)
         return super(GmModelAdmin, self).change_view(request, object_id,
                                                      form_url=form_url,
                                                      extra_context=extra_context)
