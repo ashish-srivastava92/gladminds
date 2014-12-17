@@ -1,5 +1,4 @@
-from gladminds.bajaj.models import DataFeedLog
-from gladminds.core.utils import get_model
+from gladminds.core.loaders.module_loader import get_model
 
 
 def sms_log(action='SENT', sender='+1 469-513-9856', receiver=None,

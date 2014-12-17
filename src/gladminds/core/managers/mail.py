@@ -6,11 +6,15 @@ from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 import logging
 from gladminds.core.managers import audit_manager
-from constance import config
-from gladminds.core.utils import get_email_template
 from gladminds.core.auth_helper import GmApps
+from gladminds.core.loaders.module_loader import get_model
 
 logger = logging.getLogger("gladminds")
+
+
+def get_email_template(key):
+    template_object = get_model('EmailTemplate').objects.filter(template_key=key).values()
+    return template_object[0]
 
 
 def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER, title='GCP_Bajaj_FSC_Feeds'
@@ -373,7 +377,7 @@ def send_asc_registration_mail(data=None):
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception asc registration email]: {0}".format(ex))
-        
+
 def send_recovery_email_to_admin(file_obj, coupon_data):
     file_location = file_obj.file_location
     reason = file_obj.reason
