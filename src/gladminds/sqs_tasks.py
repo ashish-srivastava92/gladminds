@@ -10,7 +10,6 @@ from gladminds.core.managers import mail
 from gladminds.core.cron_jobs import taskmanager
 from gladminds.bajaj.feeds import feed, export_feed
 from gladminds.bajaj.services import  message_template as templates
-from gladminds.core.utils import convert_utc_to_local_time
 
 import pytz
 import logging
@@ -18,6 +17,8 @@ from gladminds.core.managers.mail import send_due_date_exceeded,\
     send_due_date_reminder
 from django.contrib.auth.models import User
 from gladminds.core.constants import DATE_FORMAT
+from gladminds.core.cron_jobs.queue_utils import get_task_queue
+from gladminds.core.core_utils.date_utils import convert_utc_to_local_time
 
 
 logger = logging.getLogger("gladminds")
@@ -440,7 +441,7 @@ def export_customer_reg_to_sap(*args, **kwargs):
                              1], total_failed_on_feed=feed_export_data[2])
     else:
         logger.info("tasks.py: No Customer registered since last feed")
-        
+
 
 def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
     created_date = convert_utc_to_local_time(feedback_obj.created_date, True)
@@ -467,12 +468,13 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
         logger.info("Send complain message received successfully with %s" % message)
         phone_number = utils.get_phone_number_format(phone_number)
         if settings.ENABLE_AMAZON_SQS:
-            task_queue = utils.get_task_queue()
+            task_queue = get_task_queue()
             task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
         else:
             send_coupon.delay(phone_number=phone_number, message=message)
     sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
     return {'status': True, 'message': message}
+
 
 def send_reminders_for_servicedesk(*args, **kwargs):
     manager_obj = User.objects.get(groups__name='sdm')

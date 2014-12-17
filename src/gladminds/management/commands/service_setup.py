@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from gladminds.core.service_handler import Services
+from gladminds.core.auth.service_handler import Services
 from gladminds.default import models
 
 
