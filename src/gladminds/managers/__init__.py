@@ -3,8 +3,8 @@ import datetime
 import json
 from gladminds.bajaj import models as models
 from gladminds.core.exceptions import DataNotFoundError
-from gladminds.core.utils import create_context, get_list_from_set, \
-    get_start_and_end_date, set_wait_time, convert_utc_to_local_time, \
+from gladminds.core.utils import create_context, get_list_from_set, set_wait_time
+from gladminds.core.core_utils.date_utils import get_start_and_end_date, convert_utc_to_local_time, \
     get_time_in_seconds
 from gladminds.core.managers import mail
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, \

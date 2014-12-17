@@ -1,12 +1,9 @@
-import os, logging, hashlib, uuid, mimetypes
-import boto
-import pytz
+import os
 import datetime
 from importlib import import_module
 import base64
 import re
 
-from boto.s3.key import Key
 from dateutil import tz
 from random import randint
 from django.utils import timezone
@@ -14,18 +11,19 @@ from django.conf import settings
 from django_otp.oath import TOTP
 from django.contrib.auth.models import User
 
-from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY, TIMEZONE
+from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from gladminds.core.base_models import STATUS_CHOICES
 from gladminds.bajaj import models
 from django.db.models.fields.files import FieldFile
 from gladminds.core.constants import TIME_FORMAT, DATE_FORMAT
-from gladminds.core.cron_jobs.taskqueue import SqsTaskQueue
 from django.db.models import Count
-from gladminds.core.exceptions import ParamToBeFunctionException
 from gladminds.core.auth_helper import Roles
+import logging
+from gladminds.core.apis.image_apis import uploadFileToS3
+import hashlib
+from gladminds.core.core_utils.date_utils import convert_utc_to_local_time
+from gladminds.core.managers.mail import get_email_template
 
-
-COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 logger = logging.getLogger('gladminds')
 
 def generate_temp_id(prefix_value):
@@ -36,22 +34,6 @@ def generate_temp_id(prefix_value):
             continue
         return "%s%s" % (prefix_value, key[:6])
     logger.log('Could not generate SAP ID after 5 attempts')
-
-def get_models():
-    try:
-        return import_module('gladminds.{0}.models'.format(settings.BRAND))
-    except:
-        #this should return a junk model
-        return None
-
-
-def get_model(model, brand=None):
-    if not brand:
-        brand = settings.BRAND
-    try:
-        return getattr(import_module('gladminds.{0}.models'.format(brand)), model)
-    except:
-        return None
 
 def get_handler(handler, brand=None):
     if not brand:
@@ -133,55 +115,6 @@ def update_pass(otp, password):
     user.set_password(password)
     user.save()
     return True
-
-
-def get_task_queue(brand=None):
-    if brand is None:
-        brand = settings.BRAND
-    queue_name = settings.SQS_QUEUE_NAME
-    return SqsTaskQueue(queue_name, brand)
-
-
-def check_celery_running():
-    '''
-    Check whether celery is running or not
-    '''
-    try:
-        from celery.task.control import inspect
-        insp = inspect()
-        d = insp.stats()
-        if d:
-            return True
-    except:
-        pass
-    return False
-
-
-def send_job_to_queue(task, task_params, brand=None):
-    '''
-    Sends a job to queue
-    :param task_name:
-    :type string:
-    :param task_params:
-    :type dict:
-    :param brand:
-    :type string:
-    '''
-    if not hasattr(task, '__call__'):
-        raise ParamToBeFunctionException
-    if brand is None:
-        brand = settings.BRAND
-    task_params.update({'brand': brand})
-
-    if settings.ENABLE_AMAZON_SQS:
-        queue_name = settings.SQS_QUEUE_NAME
-        task_name = task.__name__
-        SqsTaskQueue(queue_name, brand).add(task_name, task_params)
-    else:
-        if check_celery_running():
-            task.delay(**task_params)
-        else:
-            task(**task_params)
 
 
 def format_product_object(product_obj):
@@ -304,35 +237,6 @@ def stringify_groups(user):
 #     data = get_email_template('UCN_REQUEST_ALERT')['body'].format(requester,coupon_data.service_type,
 #                 customer_id, coupon_data.actual_kms, reason, file_location)
 #     send_ucn_request_alert(data=data)
-
-
-def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=None,
-                   destination='', file_obj=None, logger_msg=None, file_mimetype=None):
-    '''
-    The function uploads the file-object to S3 bucket.
-    '''
-    
-    connection = boto.connect_s3(awsid, awskey)
-    s3_bucket = connection.get_bucket(bucket)
-    s3_key = Key(s3_bucket)
-    if file_mimetype:
-        s3_key.content_type = file_mimetype
-        
-    else:
-        s3_key.content_type = mimetypes.guess_type(file_obj.name)[0]
-    
-    s3_key.key = destination+file_obj.name
-    s3_key.set_contents_from_string(file_obj.read())
-    s3_key.set_acl('public-read')
-    path = s3_key.generate_url(expires_in=0, query_auth=False)
-    logger.info('{1}: {0} has been uploaded'.format(s3_key.key, logger_msg))
-    return path
-
-
-def get_email_template(key):
-    template_object = models.EmailTemplate.objects.filter(template_key=key).values()
-    return template_object[0]
-
 
 def format_date_string(date_string, date_format='%d/%m/%Y'):
     '''
@@ -536,38 +440,6 @@ def service_advisor_search(data):
     return {'message': message, 'status': 'fail'}
 
 
-def make_tls_property(default=None):
-    """Creates a class-wide instance property with a thread-specific value."""
-    class TLSProperty(object):
-        def __init__(self):
-            from threading import local
-            self.local = local()
-
-        def __get__(self, instance, cls):
-            if not instance:
-                return self
-            return self.value
-
-        def __set__(self, instance, value):
-            self.value = value
-
-        def _get_value(self):
-            return getattr(self.local, 'value', default)
-
-        def _set_value(self, value):
-            self.local.value = value
-        value = property(_get_value, _set_value)
-
-    return TLSProperty()
-
-def convert_utc_to_local_time(date, to_string=False):
-    utc = pytz.utc
-    timezone = pytz.timezone(TIMEZONE)
-    if to_string:
-        return date.astimezone(timezone).replace(tzinfo=None).strftime(DATE_FORMAT)
-    else:
-        return date.astimezone(timezone).replace(tzinfo=None)
-
 def total_time_spent(feedback_obj):
     wait_time = feedback_obj.wait_time
     if feedback_obj.resolved_date:
@@ -628,25 +500,6 @@ def get_state_city(details, address):
             details['state'] = 'Null'
 
     return details
-
-
-def gernate_years():
-    start_year = 2013
-    current_year = datetime.date.today().year
-    year_list = []
-    for date in range(start_year, current_year+1):
-        year_list.append(date)
-    return year_list
-
-
-def get_time_in_seconds(time, unit):
-    if unit == 'days':
-        total_seconds = time * 86400
-    elif unit == 'hrs':
-        total_seconds = time * 3600
-    else:
-        total_seconds = time * 60
-    return total_seconds
 
 def get_escalation_mailing_list(escalation_list):
     escalation_mailing_list = []

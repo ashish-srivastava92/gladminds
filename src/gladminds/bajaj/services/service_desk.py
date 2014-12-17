@@ -12,7 +12,6 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.models import User
 
 from gladminds.core import utils
-from gladminds.core.utils import get_list_from_set, convert_utc_to_local_time
 from gladminds.bajaj import models as models
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE,\
     ROOT_CAUSE, PAGINATION_LINKS, BY_DEFAULT_RECORDS_PER_PAGE,\
@@ -23,27 +22,31 @@ from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services import message_template as templates
 from gladminds.bajaj.services import free_service_coupon as fsc
 from gladminds.sqs_tasks import send_coupon
-from gladminds.core.decorator import check_service
-from gladminds.core.service_handler import Services
 from gladminds.core.managers.mail import send_feedback_received,\
      send_servicedesk_feedback, send_dealer_feedback
 from gladminds.managers import get_reporter_details
 
 from gladminds.core.auth_helper import Roles
+from gladminds.core.auth.service_handler import Services,check_service_active
+from gladminds.core.utils import get_list_from_set
+from gladminds.core.cron_jobs.queue_utils import get_task_queue
+
 LOG = logging.getLogger('gladminds')
+
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 __all__ = ['GladmindsTaskManager']
 AUDIT_ACTION = 'SEND TO QUEUE'
 
+
 def get_feedbacks(user, status, priority, type, search=None):
     feedbacks = []
     if type == ALL or type is None:
-        type_filter = utils.get_list_from_set(FEEDBACK_TYPE)
+        type_filter = get_list_from_set(FEEDBACK_TYPE)
     else:
         type_filter = [type]
     
     if priority == ALL or priority is None:
-        priority_filter = utils.get_list_from_set(PRIORITY)
+        priority_filter = get_list_from_set(PRIORITY)
     else:
         priority_filter = [priority]
             
@@ -51,7 +54,7 @@ def get_feedbacks(user, status, priority, type, search=None):
         status_filter = ['Open', 'Pending', 'In Progress']
     else:
         if status == ALL:
-            status_filter = utils.get_list_from_set(FEEDBACK_STATUS)
+            status_filter = get_list_from_set(FEEDBACK_STATUS)
         else:
             status_filter = [status]
 
@@ -81,10 +84,10 @@ def get_feedbacks(user, status, priority, type, search=None):
         servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
         feedbacks = models.Feedback.objects.filter(assignee=servicedesk_user[0], status__in=status_filter,
                                                    priority__in=priority_filter, type__in=type_filter).order_by('-created_date')
-    
+
     return feedbacks
 
-@check_service(Services.SERVICE_DESK)
+@check_service_active(Services.SERVICE_DESK)
 @login_required()
 @require_http_methods(["GET"])
 def get_servicedesk_tickets(request):
@@ -123,7 +126,7 @@ def get_servicedesk_tickets(request):
                                                             'count': str(count), 'search': search}}
                                         )
 
-@check_service(Services.SERVICE_DESK)
+@check_service_active(Services.SERVICE_DESK)
 @login_required()
 @require_http_methods(["GET", "POST"])
 def modify_servicedesk_tickets(request, feedback_id):
@@ -154,7 +157,7 @@ def modify_servicedesk_tickets(request, feedback_id):
     else:
         return HttpResponseNotFound()
 
-@check_service(Services.SERVICE_DESK)
+@check_service_active(Services.SERVICE_DESK)
 @login_required()
 @require_http_methods(["POST"])
 def modify_feedback_comments(request, feedback_id, comment_id):
@@ -199,7 +202,7 @@ def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=Non
         LOG.info("Send complain message received successfully with {0}".format(message))
         phone_number = utils.get_phone_number_format(phone_number)
         if settings.ENABLE_AMAZON_SQS:
-            task_queue = utils.get_task_queue()
+            task_queue = get_task_queue()
             task_queue.add("send_coupon", {"phone_number":phone_number,
                                            "message": message})
         else:
@@ -257,7 +260,7 @@ def get_complain_data(sms_dict, phone_number, email, name, dealer_email, with_de
         LOG.info("Send complain message received successfully with %s" % message)
         phone_number = utils.get_phone_number_format(phone_number)
         if settings.ENABLE_AMAZON_SQS:
-            task_queue = utils.get_task_queue()
+            task_queue = get_task_queue()
             task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
         else:
             send_coupon.delay(phone_number=phone_number, message=message)

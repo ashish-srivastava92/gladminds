@@ -1,16 +1,14 @@
-from django.db import models, transaction
+from django.db import transaction
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Q
-from django.conf import settings
 
 from gladminds.core.managers.audit_manager import sms_log
-from gladminds.core import utils
 from gladminds.bajaj.services import message_template as templates
 from gladminds.bajaj import models
 from gladminds.afterbuy import models as afterbuy_models
-from gladminds.core.base_models import CouponData, STATUS_CHOICES
-from gladminds.core.utils import COUPON_STATUS
+from gladminds.core.base_models import CouponData
+from gladminds.core.constants import COUPON_STATUS
 
 AUDIT_ACTION = "SENT TO QUEUE"
 
@@ -77,7 +75,7 @@ def expire_service_coupon(*args, **kwargs):
         else:
             coupon.status = COUPON_STATUS['Expired']
             coupon.save()
-            
+
 def mark_feeback_to_closed(*args, **kwargs):
     feedback_closed_date = datetime.now()-timedelta(days=2)
     models.Feedback.objects.filter(status = 'Resolved', resloved_date__lte = feedback_closed_date )\

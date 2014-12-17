@@ -9,10 +9,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth import  login
 from django.conf import settings
 from gladminds.afterbuy import utils as afterbuy_utils
+from gladminds.core.auth import otp_handler
 from gladminds.afterbuy import models as afterbuy_model
 from tastypie import fields, http
 from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.core.utils import send_job_to_queue
 from gladminds.sqs_tasks import send_otp
 from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
@@ -27,6 +27,7 @@ from django.db.transaction import atomic
 from gladminds.core.auth_helper import GmApps
 from gladminds.afterbuy.apis.validations import ConsumerValidation,\
     UserValidation
+from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 
 logger = logging.getLogger("gladminds")
 
@@ -84,7 +85,7 @@ class ConsumerResource(CustomBaseModelResource):
         if not phone_number:
             return HttpBadRequest("phone_number is required.")
         try:
-            otp = afterbuy_utils.get_otp(phone_number=phone_number)
+            otp = otp_handler.get_otp(phone_number=phone_number)
             message = afterbuy_utils.get_template('SEND_OTP').format(otp)
             send_job_to_queue(send_otp, {'phone_number':phone_number, 'message':message, 'sms_client':settings.SMS_CLIENT})
             logger.info('OTP sent to mobile {0}'.format(phone_number))
@@ -107,7 +108,7 @@ class ConsumerResource(CustomBaseModelResource):
         phone_number = load['phone_number']
         try:
             if not (settings.ENV in ["dev", "local"] and otp_token in settings.HARCODED_OTPS):
-                afterbuy_utils.validate_otp(otp_token, phone_number=phone_number)
+                otp_handler.validate_otp(otp_token, phone_number=phone_number)
         except Exception:
             raise ImmediateHttpResponse(
                 response=http.HttpBadRequest('Wrong OTP!'))
@@ -158,7 +159,7 @@ class ConsumerResource(CustomBaseModelResource):
         if not otp and not phone_number :
             return HttpBadRequest("otp and phone_number required")
         try:
-            afterbuy_utils.validate_otp(otp, phone_number=phone_number)
+            otp_handler.validate_otp(otp, phone_number=phone_number)
 
         except Exception as ex:
                 data = {'status': 0, 'message': "invalid OTP"}
@@ -195,7 +196,7 @@ class ConsumerResource(CustomBaseModelResource):
             if phone_number:
                 logger.info('OTP request received. Mobile: {0}'.format(phone_number))
                 user_obj = afterbuy_model.Consumer.objects.get(phone_number=phone_number).user
-                otp = afterbuy_utils.get_otp(user=user_obj)
+                otp = otp_handler.get_otp(user=user_obj)
                 message = afterbuy_utils.get_template('SEND_OTP').format(otp)
                 send_job_to_queue('send_otp', {'phone_number': phone_number,
                                              'message': message, "sms_client": settings.SMS_CLIENT})
@@ -240,7 +241,7 @@ class ConsumerResource(CustomBaseModelResource):
                 try:
                     if not (settings.ENV in ["dev", "local"] and otp_token in settings.HARCODED_OTPS):
                         consumer = afterbuy_model.OTPToken.objects.get(token=otp_token).user
-                        afterbuy_utils.validate_otp(otp_token, user=consumer)
+                        otp_handler.validate_otp(otp_token, user=consumer)
                 except Exception:
                     raise ImmediateHttpResponse(
                         response=http.HttpBadRequest('Wrong OTP!'))

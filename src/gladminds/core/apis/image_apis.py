@@ -8,6 +8,9 @@ from django.http.response import HttpResponse
 from tastypie.serializers import Serializer
 from uuid import uuid4
 from django.views.decorators.http import require_http_methods
+import mimetypes
+import logging
+logger = logging.getLogger('gladminds')
 
 serializerObj = Serializer()
 
@@ -35,3 +38,26 @@ def upload_files(request):
     except Exception as e:
         return HttpResponse(serializerObj.to_json({"message":e.message}), content_type="application/json", status=500)
     return HttpResponse(serializerObj.to_json({"uid":full_key}), content_type="application/json")
+
+
+def uploadFileToS3(awsid=settings.S3_ID, awskey=settings.S3_KEY, bucket=None,
+                   destination='', file_obj=None, logger_msg=None, file_mimetype=None):
+    '''
+    The function uploads the file-object to S3 bucket.
+    '''
+    
+    connection = boto.connect_s3(awsid, awskey)
+    s3_bucket = connection.get_bucket(bucket)
+    s3_key = Key(s3_bucket)
+    if file_mimetype:
+        s3_key.content_type = file_mimetype
+        
+    else:
+        s3_key.content_type = mimetypes.guess_type(file_obj.name)[0]
+    
+    s3_key.key = destination+file_obj.name
+    s3_key.set_contents_from_string(file_obj.read())
+    s3_key.set_acl('public-read')
+    path = s3_key.generate_url(expires_in=0, query_auth=False)
+    logger.info('{1}: {0} has been uploaded'.format(s3_key.key, logger_msg))
+    return path

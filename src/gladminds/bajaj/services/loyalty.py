@@ -8,6 +8,7 @@ from gladminds.bajaj.services import message_template as templates
 from gladminds.bajaj import models
 from gladminds.sqs_tasks import send_point
 from gladminds.core import utils
+from gladminds.core.cron_jobs.queue_utils import get_task_queue
 
 LOG = logging.getLogger('gladminds')
 
@@ -67,7 +68,7 @@ def accumulate_point(sms_dict, phone_number):
     finally:
         phone_number = utils.get_phone_number_format(phone_number)
         if settings.ENABLE_AMAZON_SQS:
-            task_queue = utils.get_task_queue()
+            task_queue = get_task_queue()
             task_queue.add("send_point", {"phone_number":phone_number,
                                           "message": message,
                                           "sms_client":settings.SMS_CLIENT})
@@ -107,7 +108,7 @@ def redeem_point(sms_dict, phone_number):
     finally:
         phone_number = utils.get_phone_number_format(phone_number)
         if settings.ENABLE_AMAZON_SQS:
-            task_queue = utils.get_task_queue()
+            task_queue = get_task_queue()
             task_queue.add("send_point", {"phone_number":phone_number,
                                           "message": message,
                                           "sms_client":settings.SMS_CLIENT})

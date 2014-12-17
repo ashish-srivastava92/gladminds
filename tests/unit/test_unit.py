@@ -7,7 +7,7 @@ from tastypie.test import ResourceTestCase
 from django.test import TestCase
 from datetime import datetime, timedelta
 from unit.base_unit import RequestObject, GladmindsUnitTestCase
-from gladminds.core.utils import get_coupon_info, get_customer_info,\
+from gladminds.core.utils import get_coupon_info,\
  get_list_from_set, get_token, create_feed_data , \
  validate_otp, update_pass, format_date_string
 from gladminds.bajaj import models
@@ -15,6 +15,7 @@ import boto
 from gladminds.core.constants import FEEDBACK_TYPE, PRIORITY
 from tastypie.test import TestApiClient
 from integration.bajaj.base_integration import client
+from gladminds.core.views.views import get_customer_info
         
 
 class TestAssertWorks(TestCase):
