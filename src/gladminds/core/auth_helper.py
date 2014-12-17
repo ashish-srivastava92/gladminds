@@ -6,6 +6,7 @@ from django.conf import settings
 
 ALL_APPS = settings.BRANDS + [settings.GM_BRAND]
 
+
 class GmApps():
     AFTERBUY = 'afterbuy'
     BAJAJ = 'bajaj'
@@ -20,6 +21,9 @@ class Roles():
     CXOADMINS = 'CxoAdmins'
     FSCSUPERADMINS = 'FscSuperAdmins'
     SDSUPERADMINS = 'SdSuperAdmins'
+    LOYALTYSUPERADMINS = 'LoyaltySuperAdmins'
+    NSMS = 'NationalSalesManagers'
+    ASMS = 'AreaServiceManagers'
     FSCSADMINS = 'FscAdmins'
     SDADMINS = 'SdAdmins'
     SDMANAGERS = 'SdManagers'
@@ -28,10 +32,10 @@ class Roles():
     ASCS = 'AuthorisedServiceCenters'
     DASCS = 'DependentAuthorisedServiceCenters'
 
+
 AFTERBUY_ADMIN_GROUPS = [Roles.SUPERADMINS, Roles.ADMINS]
 AFTERBUY_GROUPS = [Roles.SUPERADMINS, Roles.ADMINS, Roles.USERS]
-OTHER_GROUPS = [Roles.SUPERADMINS, Roles.CXOADMINS, Roles.FSCSUPERADMINS,
-                Roles.SDSUPERADMINS, Roles.FSCSADMINS, Roles.SDADMINS]
+OTHER_GROUPS = [getattr(Roles,x) for x in dir(Roles) if not x.startswith("__")]
 
 AFTERBUY_USER_MODELS = ['User', 'Consumer', 'UserProduct', 'ProductSupport', 'RegistrationCertificate',
                         'ProductInsuranceInfo', 'ProductWarrantyInfo', 'PollutionCertificate',
