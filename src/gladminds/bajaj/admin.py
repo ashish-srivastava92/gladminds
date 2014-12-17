@@ -7,6 +7,8 @@ from gladminds.bajaj import models
 from gladminds.core import utils
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from gladminds.core.auth_helper import GmApps
+from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.utils import generate_temp_id
 
 class BajajAdminSite(AdminSite):
     pass
@@ -386,6 +388,25 @@ class MechanicAdmin(ModelAdmin):
         css_class = class_map.get(str(obj.form_status))
         if css_class:
             return {'class': css_class}
+
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('mechanic_id','form_status')
+        form = super(MechanicAdmin, self).get_form(request, obj, **kwargs)
+        return form
+
+    def save_model(self, request, obj, form, change):
+        if not obj.mechanic_id:
+            obj.mechanic_id=generate_temp_id('TME')
+        form_status=True
+        for field in obj._meta.fields:
+            if field.name!='total_points' and not getattr(obj, field.name):
+                form_status = False
+
+        if not form_status:
+            obj.form_status='Incomplete'
+        else:
+            obj.form_status='Complete'
+        super(MechanicAdmin, self).save_model(request, obj, form, change)    
 
 class SparePartMasterAdmin(ModelAdmin):
     search_fields = ('serial_number', 'category',
