@@ -23,7 +23,8 @@ class Services():
 
 
 class ServiceHandler(object):
-
+    
+    @classmethod
     def check_service_enabled(self, service_name, brand=None):
         if not brand:
             brand = settings.BRAND

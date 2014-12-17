@@ -71,6 +71,7 @@ class Feedback(base_models.Feedback):
 
 
 class Activity(base_models.Activity):
+    feedback = models.ForeignKey(Feedback, null=True, blank=True)
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "user activity info"
