@@ -27,8 +27,8 @@ _AFTERBUY_SUPERADMINS = [{'email':'naveen.shankar@gladminds.co', 'username':'nav
 _BAJAJ_LOYALTY_SUPERADMINS = [('gladminds', '', 'gladminds!123'),
                               ('kumarashish@bajajauto.co.in', 'kumarashish@bajajauto.co.in',
                                'kumarashish!123')]
-_BAJAJ_LOYALTY_NSM = [('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123')]
-_BAJAJ_LOYALTY_ASM = [('spremnath@bajajauto.co.in', 'spremnath@bajajauto.co.in', 'spremnath!123')]
+_BAJAJ_LOYALTY_NSM = [('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123', 'NSM002')]
+_BAJAJ_LOYALTY_ASM = [('spremnath@bajajauto.co.in', 'spremnath@bajajauto.co.in', 'spremnath!123', 'ASM004')]
 
 class Command(BaseCommand):
 
@@ -94,15 +94,15 @@ class Command(BaseCommand):
             print "create loyalty nsm", details
             profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.NSMS)
             try: 
-                nsm_obj = NationalSalesManager.objects.get(user=profile_obj)
+                nsm_obj = NationalSalesManager.objects.get(user=profile_obj, nsm_id=details[3])
             except:
-                nsm_obj = NationalSalesManager(user=profile_obj)
+                nsm_obj = NationalSalesManager(user=profile_obj, nsm_id=details[3])
                 nsm_obj.save()
         for details in _BAJAJ_LOYALTY_ASM:
             print "create loyalty asm", details
             profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.ASMS)
-            if not AreaServiceManager.objects.filter(user=profile_obj, nsm=nsm_obj).exists():
-                asm_obj = AreaServiceManager(nsm=nsm_obj, user=profile_obj)
+            if not AreaServiceManager.objects.filter(user=profile_obj, nsm=nsm_obj, asm_id=details[3]).exists():
+                asm_obj = AreaServiceManager(nsm=nsm_obj, user=profile_obj, asm_id=details[3])
                 asm_obj.save()
 
     def create_user_profile(self, details, app, group=None):
