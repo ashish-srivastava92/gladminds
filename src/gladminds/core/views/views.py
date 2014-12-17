@@ -464,7 +464,7 @@ def save_help_desk_data(request):
     else:
         asc_obj = models.AuthorizedServiceCenter.objects.get(asc_id=request.user)
         email_id =  asc_obj.user.user.email
-    return gladmindsResources.get_complain_data(sms_dict, service_advisor_obj.user.phone_number,
+    return get_complain_data(sms_dict, service_advisor_obj.user.phone_number,
                                                 service_advisor_obj.user.user.email,
                                                 service_advisor_obj.user.user.username, email_id,
                                                 with_detail=True)
