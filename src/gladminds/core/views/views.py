@@ -25,14 +25,10 @@ from gladminds.core.managers.mail import sent_otp_email,\
 from gladminds.bajaj.feeds.feed import SAPFeed
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
-from gladminds.bajaj.services.service_desk import get_complain_data, get_feedbacks
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
-    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS,\
-    FEEDBACK_STATUS, FEEDBACK_TYPE, PRIORITY, ALL, BY_DEFAULT_RECORDS_PER_PAGE, PAGINATION_LINKS,\
-    RECORDS_PER_PAGE
+    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS
 from gladminds.core.decorator import log_time
 from gladminds.core.utils import get_email_template, format_product_object
-from django.core.paginator import Paginator
 from gladminds.core.auth_helper import Roles
 from gladminds.core.auth.service_handler import check_service_active, Services
 
@@ -396,78 +392,6 @@ def get_sa_under_asc(request, id=None):
             #It is acceptable if there is no data_mapping defined for a function
         pass
     return render(request, template, {'active_menu':'sa',"data": data})
-
-@check_service_active(Services.SERVICE_DESK)
-@login_required()
-def service_desk(request):
-    status = request.GET.get('status')
-    priority = request.GET.get('priority')
-    type = request.GET.get('type')
-    search = request.GET.get('search')
-    count = request.GET.get('count') or BY_DEFAULT_RECORDS_PER_PAGE
-    page_details = {}
-    feedback_obects = get_feedbacks(request.user, status, priority, type, search)
-    paginator = Paginator(feedback_obects, count)
-    page = request.GET.get('page', 1)
-    feedbacks = paginator.page(page)
-    page_details['total_objects'] = paginator.count
-    page_details['from'] = feedbacks.start_index()
-    page_details['to'] = feedbacks.end_index()
-    groups = utils.stringify_groups(request.user)
-    if request.method == 'GET':
-        template = 'portal/feedback_details.html'
-        data = None
-        if request.user.groups.filter(name=Roles.DEALERS).exists():
-            data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
-        else:
-            data = models.ServiceAdvisor.objects.active_under_asc(request.user)
-        return render(request, template, {"feedbacks" : feedbacks,
-                                          'active_menu': 'support',
-                                          "data": data, 'groups': groups,
-                                          "status": utils.get_list_from_set(FEEDBACK_STATUS),
-                                          "pagination_links": PAGINATION_LINKS,
-                                          "page_details": page_details,
-                                          "record_showing_counts": RECORDS_PER_PAGE,
-                                          "types": utils.get_list_from_set(FEEDBACK_TYPE),
-                                          "priorities": utils.get_list_from_set(PRIORITY),
-                                          "filter_params": {'status': status, 'priority': priority, 'type': type,
-                                                            'count': str(count), 'search': search}}
-                                        )
-    elif request.method == 'POST':
-        try:
-            data = save_help_desk_data(request)
-            return HttpResponse(content=json.dumps(data),
-                                content_type='application/json')
-        except Exception as ex:
-            logger.error('Exception while saving data : {0}'.format(ex))
-            return HttpResponseBadRequest()
-    else:
-        return HttpResponseBadRequest()
-
-@login_required()
-def enable_servicedesk(request, servicedesk=None):
-    if settings.ENABLE_SERVICE_DESK:
-        response = service_desk(request, servicedesk)
-        return response
-    else:
-        return HttpResponseRedirect('http://support.gladminds.co/')
-
-def save_help_desk_data(request):
-    fields = ['description', 'advisorMobile', 'type', 'summary']
-    sms_dict = {}
-    for field in fields:
-        sms_dict[field] = request.POST.get(field, None)
-    service_advisor_obj = models.ServiceAdvisor.objects.get(user__phone_number=sms_dict['advisorMobile'])
-    if request.user.groups.all()[0].name == Roles.DEALERS:
-        dealer_obj = models.Dealer.objects.get(dealer_id=request.user)
-        email_id =  dealer_obj.user.user.email
-    else:
-        asc_obj = models.AuthorizedServiceCenter.objects.get(asc_id=request.user)
-        email_id =  asc_obj.user.user.email
-    return get_complain_data(sms_dict, service_advisor_obj.user.phone_number,
-                                                service_advisor_obj.user.user.email,
-                                                service_advisor_obj.user.user.username, email_id,
-                                                with_detail=True)
 
 
 def sqs_tasks_view(request):
