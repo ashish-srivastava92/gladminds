@@ -95,6 +95,8 @@ SUIT_CONFIG = {
                      'label': 'Area Service Manager'},
                     {'model': 'distributor',
                      'label': 'Distributor'},
+                   {'model': 'retailer',
+                     'label': 'Retailer'},
                    {'model': 'mechanic',
                      'label': 'Mechanic'},
                    {'model': 'sparepartmasterdata',
