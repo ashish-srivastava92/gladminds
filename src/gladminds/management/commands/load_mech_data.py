@@ -10,7 +10,7 @@ APP='bajaj'
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        self.upload_asc_data()
+        self.upload_mech_data()
     
     def empty_to_none(self, value):
         if value=='':
@@ -18,7 +18,7 @@ class Command(BaseCommand):
         else:
             return int(value)
 
-    def upload_asc_data(self):
+    def upload_mech_data(self):
         print "Started running function..."
         file_list = ['MECHANIC_DATA.csv']
         file = open("mech_data.txt", "w")

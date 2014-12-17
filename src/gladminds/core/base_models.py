@@ -741,6 +741,7 @@ class SparePart(BaseModel):
     unique_part_code = models.CharField(max_length=50, unique=True)
     points = models.IntegerField(max_length=50, null=True, blank=True)
     price = models.FloatField(max_length=50, null=True, blank=True)
+    mrp = models.FloatField(max_length=50, null=True, blank=True)
     validity_from =  models.DateTimeField(null=True, blank= True)
     validity_to =  models.DateTimeField(null=True, blank= True)
     territory = models.CharField(max_length=50, null=True, blank=True)

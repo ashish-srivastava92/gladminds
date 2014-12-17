@@ -10,17 +10,9 @@ APP='bajaj'
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        self.upload_asc_data()
-    
-    def empty_to_none(self, value):
-        if value=='':
-            return None
-        else:
-            return int(value)
+        self.upload_part_master_data()
 
-#Part No    Desc    Type    Category     Segment    Model    Supplier
-
-    def upload_asc_data(self):
+    def upload_part_master_data(self):
         print "Started running function..."
         file_list = ['PART_MASTER_DATA.csv']
         file = open("part_master_data.txt", "w")

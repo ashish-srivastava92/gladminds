@@ -397,7 +397,7 @@ class SparePartMasterAdmin(ModelAdmin):
 
 class SparePartAdmin(ModelAdmin):
     search_fields = ('unique_part_code',
-                     'part_number', 'points', 'is_used')
+                     'part_number__serial_number', 'points', 'is_used')
     list_display = ('unique_part_code', 'price',
                     'part_number', 'points', 'is_used')
 
