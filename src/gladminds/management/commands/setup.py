@@ -6,6 +6,7 @@ from gladminds.afterbuy.models import Consumer
 from gladminds.core.auth_helper import AFTERBUY_GROUPS, add_user_to_group,\
     OTHER_GROUPS, Roles, GmApps, AFTERBUY_USER_MODELS, ALL_APPS
 from django.contrib.contenttypes.models import ContentType
+from gladminds.core.utils import get_model
 
 _DEMO = GmApps.DEMO
 _BAJAJ = GmApps.BAJAJ
@@ -23,6 +24,12 @@ _AFTERBUY_SUPERADMINS = [{'email':'naveen.shankar@gladminds.co', 'username':'nav
                          {'email':'afterbuy@gladminds.co', 'username':'afterbuy', 'phone':'9999999999'}
                     ]
 
+_BAJAJ_LOYALTY_SUPERADMINS = [('gladminds', '', 'gladminds!123'),
+                              ('kumarashish@bajajauto.co.in', 'kumarashish@bajajauto.co.in',
+                               'kumarashish!123')]
+_BAJAJ_LOYALTY_NSM = [('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123', 'NSM002')]
+_BAJAJ_LOYALTY_ASM = [('spremnath@bajajauto.co.in', 'spremnath@bajajauto.co.in', 'spremnath!123', 'ASM004')]
+
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
@@ -35,6 +42,7 @@ class Command(BaseCommand):
         self.create_admin(_BAJAJ)
         self.create_admin(_GM)
         self.create_afterbuy_admins()
+        self.create_bajaj_admins()
         self.set_afterbuy_permissions()
 
     def define_groups(self):
@@ -76,6 +84,46 @@ class Command(BaseCommand):
             self.create_consumer(details, Roles.ADMINS)
         for details in _AFTERBUY_SUPERADMINS:
             self.create_consumer(details, Roles.SUPERADMINS)
+
+    def create_bajaj_admins(self):
+        from gladminds.bajaj.models import AreaServiceManager, NationalSalesManager
+        for details in _BAJAJ_LOYALTY_SUPERADMINS:
+            print "create loyalty superadmin", details
+            self.create_user_profile(details, GmApps.BAJAJ, Roles.LOYALTYSUPERADMINS)
+        for details in _BAJAJ_LOYALTY_NSM:
+            print "create loyalty nsm", details
+            profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.NSMS)
+            try: 
+                nsm_obj = NationalSalesManager.objects.get(user=profile_obj, nsm_id=details[3])
+            except:
+                nsm_obj = NationalSalesManager(user=profile_obj, nsm_id=details[3])
+                nsm_obj.save()
+        for details in _BAJAJ_LOYALTY_ASM:
+            print "create loyalty asm", details
+            profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.ASMS)
+            if not AreaServiceManager.objects.filter(user=profile_obj, nsm=nsm_obj, asm_id=details[3]).exists():
+                asm_obj = AreaServiceManager(nsm=nsm_obj, user=profile_obj, asm_id=details[3])
+                asm_obj.save()
+
+    def create_user_profile(self, details, app, group=None):
+        users = User.objects.filter(username=details[0]).using(app)
+        if len(users) > 0:
+            admin = users[0]
+        if len(users) == 0:
+            admin = User.objects.using(app).create(username=details[0])
+            admin.set_password(details[2])
+            admin.is_staff = True
+            admin.email = details[1]
+            admin.save(using=app)
+            if group:
+                add_user_to_group(app, admin.id, group)
+        UserProfile = get_model('UserProfile', app)
+        try:
+            return UserProfile.objects.get(user=admin)
+        except:
+            profile_obj = UserProfile(user=admin)
+            profile_obj.save()
+            return profile_obj
 
     def create_consumer(self, details, group):
         app = GmApps.AFTERBUY
