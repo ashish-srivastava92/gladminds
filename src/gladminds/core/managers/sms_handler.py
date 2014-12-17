@@ -6,7 +6,6 @@ import logging
 from django.conf.urls import url
 from django.db import transaction
 from django.conf import settings
-from importlib import import_module
 from tastypie.http import HttpBadRequest
 from tastypie.resources import Resource
 from tastypie.exceptions import ImmediateHttpResponse
@@ -15,6 +14,7 @@ from gladminds.core.managers import sms_parser
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.sqs_tasks import send_invalid_keyword_message
 from gladminds.core import utils
+from gladminds.core.cron_jobs.queue_utils import get_task_queue
 
 LOGGER = logging.getLogger('gladminds')
 ANGULAR_FORMAT = lambda x: x.replace('{', '<').replace('}', '>')
@@ -73,7 +73,7 @@ class SMSResources(Resource):
             error_message = inf.message
         if error_template:
             if settings.ENABLE_AMAZON_SQS:
-                task_queue = utils.get_task_queue()
+                task_queue = get_task_queue()
                 task_queue.add("send_invalid_keyword_message",
                             {"phone_number":phone_number,
                              "message":error_template,
@@ -84,6 +84,7 @@ class SMSResources(Resource):
             sms_log(receiver=phone_number,
                     action=AUDIT_ACTION, message=error_template)
             raise ImmediateHttpResponse(HttpBadRequest(error_message))
+        to_be_serialized = {}
         try:
             handler = utils.get_handler(sms_dict['handler'])
             with transaction.atomic():

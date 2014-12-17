@@ -10,7 +10,7 @@ from gladminds.core.managers import user_manager
 from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
 from gladminds.core.constants import FEEDBACK_STATUS, \
                             PRIORITY, FEEDBACK_TYPE, RATINGS,\
-                            ROOT_CAUSE, SLA_PRIORITY, TIME_UNIT
+                            ROOT_CAUSE, SLA_PRIORITY, TIME_UNIT, STATUS_CHOICES
 from gladminds.core.model_helpers import PhoneField
 try:
     from django.utils.timezone import now as datetime_now
@@ -204,10 +204,6 @@ class ProductData(BaseModel):
     def __unicode__(self):
         return self.product_id
 
-
-STATUS_CHOICES = ((1, 'Unused'), (2, 'Closed'), (
-    3, 'Expired'), (4, 'In Progress'), (
-       5, 'Exceeds Limit'), (6, 'Closed Old Fsc'))
 
 class CouponData(BaseModel):
     '''Details of Coupon Data'''

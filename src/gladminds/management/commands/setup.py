@@ -6,7 +6,7 @@ from gladminds.afterbuy.models import Consumer
 from gladminds.core.auth_helper import AFTERBUY_GROUPS, add_user_to_group,\
     OTHER_GROUPS, Roles, GmApps, AFTERBUY_USER_MODELS, ALL_APPS
 from django.contrib.contenttypes.models import ContentType
-from gladminds.core.utils import get_model
+from gladminds.core.loaders.module_loader import get_model
 
 _DEMO = GmApps.DEMO
 _BAJAJ = GmApps.BAJAJ

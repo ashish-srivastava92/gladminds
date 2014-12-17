@@ -16,3 +16,8 @@ class OtpFailedException(Exception):
 class ParamToBeFunctionException(Exception):
     def __init__(self, message="Param should be a function not a string or other type"):
         self.msg = message
+
+
+class ServiceNotActiveException(Exception):
+    def __init__(self, message="Service Not Active."):
+        self.msg = message

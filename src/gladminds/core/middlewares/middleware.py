@@ -4,13 +4,13 @@ from django.http import HttpResponseBadRequest
 from django.conf import settings
 
 from gladminds.bajaj import models as common
-from gladminds.core import utils
 from gladminds.core.managers import sms_parser
+from gladminds.core.middlewares.dynamicsite_middleware import make_tls_property
 
 logger = logging.getLogger('gladminds')
 
 __all__ = ['GladmindsMiddleware', 'GladmindsMessageMiddleware']
-SMS_CLIENT = settings.__dict__['_wrapped'].__class__.SMS_CLIENT =  utils.make_tls_property()
+SMS_CLIENT = settings.__dict__['_wrapped'].__class__.SMS_CLIENT =  make_tls_property()
 
 """
 Gladminds middleware to identify the IP from where the message request came

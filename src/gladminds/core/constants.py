@@ -1,4 +1,5 @@
 from gladminds.core.auth_helper import Roles
+
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 DATE_FORMAT = '%d-%m-%Y %H:%M' 
@@ -110,3 +111,10 @@ FUEL_CHOICES = (
     ('Electric', 'Electric'),
     ('Other', 'Other'),
 )
+
+STATUS_CHOICES = ((1, 'Unused'), (2, 'Closed'), (
+    3, 'Expired'), (4, 'In Progress'), (
+       5, 'Exceeds Limit'), (6, 'Closed Old Fsc'))
+
+
+COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())

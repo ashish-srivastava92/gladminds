@@ -21,6 +21,7 @@ from gladminds.bajaj.feeds.feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
 from gladminds.core.decorator import log_time
 from gladminds.core.base_models import STATUS_CHOICES
+from gladminds.core.cron_jobs.queue_utils import get_task_queue
 
 LOG = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -55,7 +56,7 @@ def register_customer(sms_dict, phone_number):
     phone_number = utils.get_phone_number_format(phone_number)
     logger.info("customer is registered with message %s" % message)
     if settings.ENABLE_AMAZON_SQS:           
-        task_queue = utils.get_task_queue()
+        task_queue = get_task_queue()
         task_queue.add("send_registration_detail", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     else:
         send_registration_detail.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
@@ -92,7 +93,7 @@ def send_customer_detail(sms_dict, phone_number):
         message = templates.get_template('SEND_INVALID_MESSAGE')
     
     if settings.ENABLE_AMAZON_SQS:
-        task_queue = utils.get_task_queue()
+        task_queue = get_task_queue()
         task_queue.add("customer_detail_recovery", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     else:
         customer_detail_recovery.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
@@ -128,7 +129,7 @@ def customer_service_detail(sms_dict, phone_number):
     LOG.info("Send Service detail %s" % message)
     phone_number = utils.get_phone_number_format(phone_number)
     if settings.ENABLE_AMAZON_SQS:
-        task_queue = utils.get_task_queue()
+        task_queue = get_task_queue()
         task_queue.add("send_service_detail", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     else:
         send_service_detail.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
@@ -273,7 +274,7 @@ def validate_coupon(sms_dict, phone_number):
                                         req_status=requested_coupon_status,                                                     
                                         customer_id=sap_customer_id)
         if settings.ENABLE_AMAZON_SQS:
-            task_queue = utils.get_task_queue()
+            task_queue = get_task_queue()
             task_queue.add("send_coupon_detail_customer", {"phone_number":utils.get_phone_number_format(customer_phone_number), "message":customer_message, "sms_client":settings.SMS_CLIENT}, delay_seconds=customer_message_countdown)
         else:
             send_coupon_detail_customer.apply_async( kwargs={ 'phone_number': utils.get_phone_number_format(customer_phone_number), 'message':customer_message, "sms_client":settings.SMS_CLIENT}, countdown=customer_message_countdown)
@@ -291,7 +292,7 @@ def validate_coupon(sms_dict, phone_number):
         LOG.info("validate message send to SA %s" % dealer_message)
         phone_number = utils.get_phone_number_format(phone_number)
         if settings.ENABLE_AMAZON_SQS:
-            task_queue = utils.get_task_queue()
+            task_queue = get_task_queue()
             task_queue.add("send_service_detail", {"phone_number":phone_number, "message":dealer_message, "sms_client":settings.SMS_CLIENT})
         else:
             send_service_detail.delay(phone_number=phone_number, message=dealer_message, sms_client=settings.SMS_CLIENT)
@@ -333,7 +334,7 @@ def close_coupon(sms_dict, phone_number):
         LOG.info("Close coupon with message %s" % message)
         phone_number = utils.get_phone_number_format(phone_number)
         if settings.ENABLE_AMAZON_SQS:
-            task_queue = utils.get_task_queue()
+            task_queue = get_task_queue()
             task_queue.add("send_coupon", {"phone_number":phone_number, "message": message, "sms_client":settings.SMS_CLIENT})
         else:
             send_coupon.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
@@ -346,7 +347,7 @@ def validate_service_advisor(phone_number):
         message=templates.get_template('UNAUTHORISED_SA')
         sa_phone = utils.get_phone_number_format(phone_number)
         if settings.ENABLE_AMAZON_SQS:
-            task_queue = utils.get_task_queue()
+            task_queue = get_task_queue()
             task_queue.add("send_service_detail", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
         else:
             send_service_detail.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
@@ -365,7 +366,7 @@ def is_sa_initiator(coupon_id, service_advisor, phone_number):
         sa_phone = utils.get_phone_number_format(phone_number)
         message = "SA is not the coupon initiator."
         if settings.ENABLE_AMAZON_SQS:
-            task_queue = utils.get_task_queue()
+            task_queue = get_task_queue()
             task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
         else:
             send_invalid_keyword_message.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
@@ -394,7 +395,7 @@ def is_valid_data(customer_id=None, coupon=None, sa_phone=None):
     if message:
         sa_phone = utils.get_phone_number_format(sa_phone)
         if settings.ENABLE_AMAZON_SQS:
-            task_queue = utils.get_task_queue()
+            task_queue = get_task_queue()
             task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
         else:
             send_invalid_keyword_message.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
