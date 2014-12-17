@@ -71,6 +71,8 @@ def send_mail_to_dealer(feedback_obj, email_id, template):
     context = create_context(template, feedback_obj)
     mail.send_email_to_dealer_after_issue_assigned(context, email_id)
 
+def update_feedback_activities(feedback):
+    
 def save_update_feedback(feedback_obj, data, user, host):
     status = get_list_from_set(FEEDBACK_STATUS)
     comment_object = None
@@ -79,6 +81,7 @@ def save_update_feedback(feedback_obj, data, user, host):
     reporter_email_id = get_reporter_details(feedback_obj.reporter,"email")
     reporter_phone_number = get_reporter_details(feedback_obj.reporter)
     previous_status = feedback_obj.status
+    
     #check if status is pending
     if feedback_obj.status == status[4]:
         pending_status = True
