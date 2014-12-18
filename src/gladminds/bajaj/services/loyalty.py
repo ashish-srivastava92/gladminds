@@ -23,8 +23,12 @@ def send_welcome_sms(mech):
                     mechanic_name=mech.first_name,)
     sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
     send_job_to_queue(send_loyalty_sms, {'phone_number': phone_number,
-                                'message': message, "sms_client": settings.SMS_CLIENT})
+                            'message': message, "sms_client": settings.SMS_CLIENT})
+
 def send_welcome_message(request):
+    if  (settings.ENV in settings.IGNORE_ENV):
+        return HttpResponse(json.dumps({'msg': 'Messages not to be sent in this env'}),
+                            content_type='application/json')
     phone_list=[]
     mechanics = models.Mechanic.objects.all()
     for mech in mechanics:
