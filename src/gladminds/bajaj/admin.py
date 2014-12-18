@@ -402,7 +402,7 @@ class MechanicAdmin(ModelAdmin):
         return form
 
     def save_model(self, request, obj, form, change):
-        if not obj.sent_sms:
+        if not obj.mechanic_id:
             send_welcome_sms(obj)
             obj.sent_sms=True
         super(MechanicAdmin, self).save_model(request, obj, form, change)    
