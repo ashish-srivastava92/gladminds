@@ -722,7 +722,7 @@ class Mechanic(BaseModel):
 
 class SparePartMasterData(BaseModel):
     '''details of Spare Part'''
-    serial_number = models.IntegerField(max_length=100, unique=True)
+    serial_number = models.CharField(max_length=100, unique=True)
     part_model = models.CharField(max_length=50, null=True, blank=True)
     description = models.CharField(max_length=50, null=True, blank=True)
     category = models.CharField(max_length=50, null=True, blank=True)
@@ -741,6 +741,7 @@ class SparePart(BaseModel):
     unique_part_code = models.CharField(max_length=50, unique=True)
     points = models.IntegerField(max_length=50, null=True, blank=True)
     price = models.FloatField(max_length=50, null=True, blank=True)
+    mrp = models.FloatField(max_length=50, null=True, blank=True)
     validity_from =  models.DateTimeField(null=True, blank= True)
     validity_to =  models.DateTimeField(null=True, blank= True)
     territory = models.CharField(max_length=50, null=True, blank=True)

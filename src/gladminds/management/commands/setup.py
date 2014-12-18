@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
+
 from django.contrib.auth.models import User, Permission, Group
 from django.conf import settings
 from gladminds.afterbuy.models import Consumer
@@ -7,6 +8,8 @@ from gladminds.core.auth_helper import AFTERBUY_GROUPS, add_user_to_group,\
     OTHER_GROUPS, Roles, GmApps, AFTERBUY_USER_MODELS, ALL_APPS
 from django.contrib.contenttypes.models import ContentType
 from gladminds.core.loaders.module_loader import get_model
+from gladminds.management.commands.load_mech_data import Command as mech_cmd
+from gladminds.management.commands.load_part_data import Command as part_cmd
 
 _DEMO = GmApps.DEMO
 _BAJAJ = GmApps.BAJAJ
@@ -44,6 +47,8 @@ class Command(BaseCommand):
         self.create_afterbuy_admins()
         self.create_bajaj_admins()
         self.set_afterbuy_permissions()
+        self.upload_loyalty_user()
+        self.upload_part_data()
 
     def define_groups(self):
         for group in AFTERBUY_GROUPS:
@@ -161,3 +166,17 @@ class Command(BaseCommand):
             group2.permissions.add(permission)
         group1.save(using=GmApps.AFTERBUY)
         group2.save(using=GmApps.AFTERBUY)
+
+    def upload_loyalty_user(self):
+        '''
+        Uploads distributor and mechanic data
+        '''
+        mech_data = mech_cmd()
+        mech_data.handle()
+
+    def upload_part_data(self):
+        '''
+        uploads parts data
+        '''
+        part_data = part_cmd()
+        part_data.handle()
