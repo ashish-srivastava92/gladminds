@@ -62,7 +62,7 @@ class Command(BaseCommand):
 
     def upload_mech_data(self):
         print "Started uploading mech data..."
-        file_list = ['MOCK_MECHANIC_DATA.csv']
+        file_list = ['MECHANIC_DATA.csv']
         mech_list = []
         retailer = get_model('Retailer', APP)
         dist = get_model('Distributor', APP)
