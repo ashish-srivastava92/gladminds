@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 
 from gladminds.core import base_models
 from gladminds.core.auth_helper import GmApps
+from django.conf import settings
+from gladminds.core.model_helpers import validate_image
 
 _APP_NAME = GmApps.BAJAJ
 
@@ -274,6 +276,9 @@ class Mechanic(base_models.Mechanic):
     '''details of Mechanic'''
     registered_by = models.ForeignKey(Distributor, null=True, blank=True)
     preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
+    image_url = models.ImageField(upload_to='{0}/bajaj/mechanics'.format(settings.ENV),
+                                  max_length=255, null=True, blank=True,
+                                  validators=[validate_image])
 
     class Meta:
         app_label = _APP_NAME

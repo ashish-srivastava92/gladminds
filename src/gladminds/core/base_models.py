@@ -704,6 +704,11 @@ class Mechanic(BaseModel):
     spare_per_month = models.IntegerField(max_length=50, null=True, blank=True)
     genuine_parts_used = models.IntegerField(max_length=50, null=True, blank=True)
 
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+    image_tag.short_description = 'Mechanic Image'
+    image_tag.allow_tags = True
+
     FORM_STATUS_CHOICES = (
                            ('Complete', 'Complete'),
                            ('Incomplete', 'Incomplete'),
