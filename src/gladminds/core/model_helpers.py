@@ -16,6 +16,17 @@ phone_re = re.compile(r'^\+?1?\d{9,15}$')
 validate_phone = RegexValidator(phone_re, _("Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."), 'invalid')
 
 
+def get_phone_number_format(phone_number):
+    '''
+    This is used to format phone
+    '''
+    phone_number = phone_number.strip()
+    if phone_number.startswith('+91'):
+        phone_number = phone_number[3:]
+    numbers = re.compile('\d+(?:\d+)?')
+    return '+91' + ''.join(numbers.findall(phone_number))
+
+
 class PhoneInput(TextInput):
     input_type = 'phone'
 
@@ -26,6 +37,7 @@ class PhoneNoField(fields.CharField):
 
     def clean(self, value):
         value = self.to_python(value).strip()
+        value = get_phone_number_format(value)
         return super(PhoneNoField, self).clean(value)
 
 
@@ -49,6 +61,11 @@ class PhoneField(models.CharField):
 
 def validate_image(fieldfile_obj):
         filesize = fieldfile_obj.file.size
+        content = fieldfile_obj.file.content_type
+        content_type = content.split('/')[1]
+        if content_type not in settings.ALLOWED_IMAGE_TYPES:
+            raise ValidationError("Only these image types are allowed %s" % ','.join(settings.ALLOWED_IMAGE_TYPES))
+
         megabyte_limit = settings.MAX_UPLOAD_IMAGE_SIZE
         if filesize > megabyte_limit*1024*1024:
             raise ValidationError("Image size cannot exceed %sMB" % str(megabyte_limit))

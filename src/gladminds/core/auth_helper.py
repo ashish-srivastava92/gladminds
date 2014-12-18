@@ -23,7 +23,7 @@ class Roles():
     SDSUPERADMINS = 'SdSuperAdmins'
     LOYALTYSUPERADMINS = 'LoyaltySuperAdmins'
     NSMS = 'NationalSalesManagers'
-    ASMS = 'AreaServiceManagers'
+    ASMS = 'AreaSalesManagers'
     FSCSADMINS = 'FscAdmins'
     SDADMINS = 'SdAdmins'
     SDMANAGERS = 'SdManagers'

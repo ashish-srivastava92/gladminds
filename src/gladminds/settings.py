@@ -485,7 +485,7 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 AWS_STORAGE_BUCKET_MAP = {'afterbuy': 'afterbuy'}
 AWS_STORAGE_BUCKET_NAME = 'gladminds-brands'
 S3_BASE_URL = 'https://%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
-IMAGE_CONTENT_TYPES = ['jpg', 'jpeg', 'png', 'gif']
+ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif']
 MAX_UPLOAD_IMAGE_SIZE = 4.0
 
 

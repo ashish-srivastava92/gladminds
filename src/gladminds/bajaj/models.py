@@ -228,13 +228,13 @@ class AuditLog(base_models.AuditLog):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "Audit Log"
+
 
 class SLA(base_models.SLA):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "SLA config"
+
 
 class NationalSalesManager(base_models.NationalSalesManager):
     '''details of National Sales Manager'''
@@ -242,7 +242,7 @@ class NationalSalesManager(base_models.NationalSalesManager):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "national sales manager"
+
 
 class AreaSalesManager(base_models.AreaSalesManager):
     '''details of Area Service Manager'''
@@ -252,24 +252,23 @@ class AreaSalesManager(base_models.AreaSalesManager):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "area service manager"
+
 
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
-    '''details of National Sales Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
     asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "distributor"
+
 
 class Retailer(base_models.Retailer):
     '''details of retailer'''
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "retailers"
+
 
 class Mechanic(base_models.Mechanic):
     '''details of Mechanic'''
@@ -281,7 +280,7 @@ class Mechanic(base_models.Mechanic):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "mechanics"
+
 
 class SparePartMasterData(base_models.SparePartMasterData):
     '''details of Spare Part'''
@@ -289,7 +288,7 @@ class SparePartMasterData(base_models.SparePartMasterData):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "spare parts master"
+
 
 class SpareUPCData(base_models.SpareUPCData):
     '''details of Spare Part'''
@@ -297,8 +296,7 @@ class SpareUPCData(base_models.SpareUPCData):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "spare parts ucp data"
-        
+
 
 class SparePointData(base_models.SparePointData):
     '''details of Spare Part'''
@@ -306,7 +304,7 @@ class SparePointData(base_models.SparePointData):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "spare parts points data"
+
 
 class AccumulationRequest(base_models.AccumulationRequest):
     '''details of Spare Part'''
@@ -317,4 +315,3 @@ class AccumulationRequest(base_models.AccumulationRequest):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "accumulation request"

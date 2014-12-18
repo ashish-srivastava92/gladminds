@@ -51,6 +51,7 @@ class Command(BaseCommand):
         self.set_afterbuy_permissions()
         self.upload_loyalty_user()
         self.upload_part_data()
+        self.set_bajaj_permissions()
 
     def define_groups(self):
         for group in AFTERBUY_GROUPS:
@@ -189,3 +190,23 @@ class Command(BaseCommand):
         '''
         part_data = part_cmd()
         part_data.handle()
+
+    def set_bajaj_permissions(self):
+        brand = GmApps.BAJAJ
+        for group in [Roles.ASMS, Roles.NSMS]:
+            model_ids = []
+            for model in ['Distributor', 'Retailer', 'Mechanic']:
+                model_ids.append(ContentType.objects.get(app_label__in=['bajaj', 'auth'], model=model).id)
+            permissions = Permission.objects.using(brand).filter(content_type__id__in=model_ids)
+            group = Group.objects.using(brand).get(name=group)
+            for permission in permissions:
+                group.permissions.add(permission)
+            model_ids = []
+            for model in ['SparePartMasterData', 'SpareUPCData', 'SparePointData',
+                          'AccumulationRequest']:
+                model_ids.append(ContentType.objects.get(app_label__in=['bajaj', 'auth'], model=model).id)
+            permissions = Permission.objects.using(brand).filter(content_type__id__in=model_ids,
+                                                                 codename__contains='change_')
+            for permission in permissions:
+                group.permissions.add(permission)
+            group.save(using=brand)
