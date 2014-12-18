@@ -55,6 +55,7 @@ def accumulate_point(sms_dict, phone_number):
     '''accumulate points with given upc'''
     unique_product_codes = (sms_dict['ucp'].upper()).split()
     valid_ucp=[]
+    valid_product_number=[]
     invalid_upcs_message=''
     try:
         if len(unique_product_codes)>constants.MAX_UCP_ALLOWED:
@@ -62,19 +63,22 @@ def accumulate_point(sms_dict, phone_number):
                                     max_limit=constants.MAX_UCP_ALLOWED)
             raise ValueError('Maximum allowed ucp exceeded')
         mechanic = models.Mechanic.objects.filter(phone_number=utils.mobile_format(phone_number))
-        accumulation_log=models.AccumulationRequest(member=mechanic[0],
-                                                    points=0)
-        accumulation_log.save()
         if not mechanic:
             message=templates.get_template('UNREGISERED_USER')
             raise ValueError('Unregistered user')
-        spares = models.SparePart.objects.get_spare_parts(unique_product_codes)
+        accumulation_log=models.AccumulationRequest(member=mechanic[0],
+                                                    points=0,total_points=0)
+        accumulation_log.save()
+        spares = models.SpareUPCData.objects.get_spare_parts(unique_product_codes)
         added_points=0
 
         for spare in spares:
-            added_points=added_points+spare.points
+            valid_product_number.append(spare.part_number)
             valid_ucp.append(spare.unique_part_code)
             accumulation_log.upcs.add(spare)
+        spare_points = models.SparePointData.objects.get_part_number(valid_product_number)
+        for spare_point in spare_points:
+            added_points=added_points+spare_point.points
         total_points=update_points(mechanic[0],accumulate=added_points)
         accumulation_log.points=added_points
         invalid_upcs = list(set(unique_product_codes).difference(valid_ucp))
@@ -87,6 +91,8 @@ def accumulate_point(sms_dict, phone_number):
                         total_points=total_points,
                         invalid_upcs=invalid_upcs_message)
         spares.update(is_used=True)
+        accumulation_log.total_points=total_points
+        accumulation_log.save()
     except Exception as ex:
         LOG.error('[accumulate_point]:{0}:: {1}'.format(phone_number, ex))
     finally:
@@ -94,8 +100,6 @@ def accumulate_point(sms_dict, phone_number):
         sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
         send_job_to_queue(send_point, {'phone_number': phone_number,
                         'message': message, "sms_client": settings.SMS_CLIENT})
-        accumulation_log.total_points=total_points
-        accumulation_log.save()
     return {'status': True, 'message': message}
 
 def redeem_point(sms_dict, phone_number):

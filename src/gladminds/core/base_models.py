@@ -775,7 +775,7 @@ class SpareUPCData(BaseModel):
     unique_part_code = models.CharField(max_length=50, unique=True)
     is_used = models.BooleanField(default=False)
     
-    objects = user_manager.SparePartManager()
+    objects = user_manager.SpareUPCDataManager()
 
     class Meta:
         abstract = True
@@ -792,7 +792,9 @@ class SparePointData(BaseModel):
     validity_from =  models.DateTimeField(null=True, blank= True)
     validity_to =  models.DateTimeField(null=True, blank= True)
     territory = models.CharField(max_length=50, null=True, blank=True)
-
+    
+    objects = user_manager.SparePointDataManager()
+    
     class Meta:
         abstract = True
         verbose_name_plural = "Spare Points Data"
