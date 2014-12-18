@@ -22,6 +22,7 @@ from gladminds.core.cron_jobs.queue_utils import get_task_queue
 from gladminds.core.core_utils.date_utils import convert_utc_to_local_time,\
     get_time_in_seconds
 from gladminds.core.managers import mail
+from django.db.transaction import atomic
 
 LOG = logging.getLogger('gladminds')
 
@@ -29,6 +30,14 @@ TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 __all__ = ['GladmindsTaskManager']
 AUDIT_ACTION = 'SEND TO QUEUE'
 
+
+class SDActions():
+    PRIORITY = 'changed priority'
+    STATUS = 'changed status'
+    ASSIGNEE = 'changed assignee'
+    COMMENT = "added comment"
+    COMMENT_UPDATE = "updated comment"
+    DUE_DATE = "changed due_date"
 
 def get_feedbacks(user, status, priority, type, search=None):
     feedbacks = []
@@ -229,7 +238,8 @@ def update_feedback_activities(feedback, action, original_value, new_value):
     feedback_activity = models.Activity(feedback=feedback, action=action, original_value=original_value,
                                         new_value=new_value)
     feedback_activity.save()
-    
+ 
+@atomic   
 def save_update_feedback(feedback_obj, data, user, host):
     status = get_list_from_set(FEEDBACK_STATUS)
     comment_object = None
@@ -255,7 +265,7 @@ def save_update_feedback(feedback_obj, data, user, host):
         feedback_obj.due_date = datetime.datetime.strptime(data['due_date'], '%Y-%m-%d %H:%M:%S')
         feedback_obj.save()
         if due_date != feedback_obj.due_date:
-            update_feedback_activities(feedback_obj, "changed due_date", due_date, feedback_obj.due_date)
+            update_feedback_activities(feedback_obj, SDActions.DUE_DATE, due_date, feedback_obj.due_date)
             if reporter_email_id:
                 send_mail_to_reporter(reporter_email_id, feedback_obj, 'DUE_DATE_MAIL_TO_INITIATOR')
             else:
@@ -270,17 +280,17 @@ def save_update_feedback(feedback_obj, data, user, host):
                  feedback_obj)
     
     if feedback_obj.priority:
-        priotity = feedback_obj.priority
+        priority = feedback_obj.priority
         feedback_obj.priority = data['Priority']
         feedback_obj.save()
-        if priotity != feedback_obj.priority:
+        if priority != feedback_obj.priority:
             due_date = feedback_obj.due_date
             date = set_due_date(data['Priority'], feedback_obj)
             feedback_obj.due_date = date['due_date']
             feedback_obj.reminder_date = date['reminder_date'] 
             feedback_obj.save()
-            update_feedback_activities(feedback_obj, "changed priority", priotity, feedback_obj.priority)
-            update_feedback_activities(feedback_obj, "changed due_date", due_date, feedback_obj.due_date)
+            update_feedback_activities(feedback_obj, SDActions.PRIORITY, priority, feedback_obj.priority)
+            update_feedback_activities(feedback_obj, SDActions.DUE_DATE, due_date, feedback_obj.due_date)
             if due_date != convert_utc_to_local_time(feedback_obj.due_date):
                 if reporter_email_id:
                     send_mail_to_reporter(reporter_email_id, feedback_obj, 'DUE_DATE_MAIL_TO_INITIATOR')
@@ -336,7 +346,7 @@ def save_update_feedback(feedback_obj, data, user, host):
         feedback_obj.due_date = date['due_date']
         feedback_obj.reminder_date = date['reminder_date'] 
         feedback_obj.save()
-        update_feedback_activities(feedback_obj, "changed status", None, data['status'])
+        update_feedback_activities(feedback_obj, SDActions.STATUS, None, data['status'])
         context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL',
                                  feedback_obj)
         if reporter_email_id:
@@ -363,7 +373,7 @@ def save_update_feedback(feedback_obj, data, user, host):
                                         modified_date=datetime.datetime.now(),
                                         feedback_object=feedback_obj)
         comment_object.save()
-        update_feedback_activities(feedback_obj, "added comment", None, data['comments'])
+        update_feedback_activities(feedback_obj, SDActions.COMMENT, None, data['comments'])
 
 #check if status is resolved
     if feedback_obj.status == status[2]:
@@ -401,14 +411,14 @@ def save_update_feedback(feedback_obj, data, user, host):
                  feedback_obj)
     
     if previous_status!= feedback_obj.status:
-        update_feedback_activities(feedback_obj, "changed status", previous_status, feedback_obj.status)
+        update_feedback_activities(feedback_obj, SDActions.STATUS, previous_status, feedback_obj.status)
         
     if pending_status:
         set_wait_time(feedback_obj)
  
     if feedback_obj.assignee:
         if assign_number != feedback_obj.assignee.user_profile.phone_number:
-            update_feedback_activities(feedback_obj, "changed assignee", assign_number,
+            update_feedback_activities(feedback_obj, SDActions.ASSIGNEE, assign_number,
                                        feedback_obj.assignee.user_profile.phone_number)
             context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL',
                                       feedback_obj)

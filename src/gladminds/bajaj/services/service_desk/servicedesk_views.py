@@ -19,7 +19,7 @@ from gladminds.core.utils import get_list_from_set
 import datetime
 from gladminds.bajaj.services.service_desk.servicedesk_manager import get_feedbacks,\
     get_complain_data, get_feedback, get_servicedesk_users, get_comments,\
-    save_update_feedback, update_feedback_activities
+    save_update_feedback, update_feedback_activities, SDActions
 
 LOG = logging.getLogger('gladminds')
 
@@ -167,7 +167,7 @@ def modify_feedback_comments(request, feedback_id, comment_id):
         comment.comment = data['commentDescription']
         comment.modified_date = datetime.datetime.now()
         comment.save()
-        update_feedback_activities(feedback_obj, "modified comment", previous_comment, data['commentDescription'])
+        update_feedback_activities(feedback_obj, SDActions.COMMENT_UPDATE, previous_comment, data['commentDescription'])
         return HttpResponse("Success")
 
     except Exception as ex:
