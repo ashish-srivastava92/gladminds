@@ -87,3 +87,4 @@ nohup python scripts/migrate_ucn_recovery.py &
 '''
 ##############################################################
 alter table bajaj_sparepart add column is_used bool default 0;
+ALTER TABLE bajaj_mechanic ADD sent_sms boolean default false;

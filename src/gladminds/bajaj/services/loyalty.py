@@ -30,10 +30,11 @@ def send_welcome_message(request):
         return HttpResponse(json.dumps({'msg': 'Messages not to be sent in this env'}),
                             content_type='application/json')
     phone_list=[]
-    mechanics = models.Mechanic.objects.all()
+    mechanics = models.Mechanic.objects.filter(sent_sms=False)
     for mech in mechanics:
         send_welcome_sms(mech)
         phone_list.append(mech.phone_number)
+    mechanics.update(sent_sms=True)
     response = 'Message sent to {0} mechanics with phone numbers {1}'.format(len(phone_list), (', '.join(phone_list)))
     return HttpResponse(json.dumps({'msg': response}), content_type='application/json')
 
