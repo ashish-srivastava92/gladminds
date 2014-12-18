@@ -360,32 +360,32 @@ class ServiceDeskUserAdmin(ModelAdmin):
     list_display = ('user_profile', 'name', 'phone_number', 'email')
 
 class NSMAdmin(ModelAdmin):
-    search_fields = ('nsm_id', 'territory',
-                     'user__phone_number')
-    list_display = ('nsm_id', 'user', 'territory')
+    search_fields = ('nsm_id', 'name', 'phone_number', 'territory')
+    list_display = ('nsm_id', 'name', 'email', 'phone_number','territory')
 
 class ASMAdmin(ModelAdmin):
-    search_fields = ('asm_id', 'nsm__nsm_id',
-                     'user__phone_number')
-    list_display = ('asm_id', 'user', 'nsm')
+    search_fields = ('asm_id', 'nsm__name',
+                     'phone_number', 'state')
+    list_display = ('asm_id', 'name', 'email',
+                     'phone_number', 'state', 'nsm')
 
 class DistributorAdmin(ModelAdmin):
     search_fields = ('distributor_id', 'asm__asm_id',
-                     'user__phone_number')
-    list_display = ('distributor_id', 'user', 'asm')
+                     'phone_number', 'city')
+    list_display = ('distributor_id', 'name', 'email',
+                    'phone_number', 'city', 'asm')
     
 class RetailerAdmin(ModelAdmin):
     search_fields = ('retailer_name', 'retailer_town')
     list_display = ('retailer_name', 'retailer_town')
 
 class MechanicAdmin(ModelAdmin):
-    search_fields = ('mechanic_id', 'form_status',
-                     'phone_number')
-    list_display = ('mechanic_id', 'first_name', 'phone_number', 'total_points',
-                    'form_number', 'registered_date', 'two_stroke_serviced',
-                    'four_stroke_serviced', 'cng_lpg_serviced',
-                    'diesel_serviced', 'spare_per_month',
-                    'genuine_parts_used')
+    list_filter = ('form_status',)
+    search_fields = ('mechanic_id', 'state', 'district', 
+                     'phone_number', 'first_name')
+    list_display = ('mechanic_id','first_name', 'date_of_birth',
+                    'phone_number', 'shop_name', 'district',
+                    'state', 'pincode', 'registered_by_distributor')
     readonly_fields = ('image_tag',)
 
     def suit_row_attributes(self, obj):
@@ -397,7 +397,7 @@ class MechanicAdmin(ModelAdmin):
             return {'class': css_class}
 
     def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('mechanic_id','form_status')
+        self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points')
         form = super(MechanicAdmin, self).get_form(request, obj, **kwargs)
         return form
 
@@ -406,6 +406,7 @@ class MechanicAdmin(ModelAdmin):
             obj.mechanic_id=generate_temp_id('TME')
             send_welcome_sms(obj)
             obj.sent_sms=True
+        obj.phone_number=utils.mobile_format(obj.phone_number)
         form_status=True
         for field in obj._meta.fields:
             if field.name in constants.MANDATORY_MECHANIC_FIELDS and not getattr(obj, field.name):
@@ -419,19 +420,26 @@ class MechanicAdmin(ModelAdmin):
 
 class SparePartMasterAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS]
-    search_fields = ('serial_number', 'category',
+    search_fields = ('part_number', 'category',
                      'segment_type', 'supplier',
                      'product_type__product_type')
-    list_display = ('serial_number', 'part_model',
-                    'description', 'product_type', 'category',
-                    'segment_type', 'supplier')
+    list_display = ('part_number', 'description',
+                    'product_type', 'category',
+                    'segment_type',  'part_model', 'supplier')
 
-class SparePartAdmin(GmModelAdmin):
+class SpareUPCDataAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS]
-    search_fields = ('unique_part_code',
-                     'part_number__serial_number', 'points', 'is_used')
-    list_display = ('unique_part_code', 'price',
-                    'part_number', 'points', 'is_used')
+    search_fields = ('part_number__part_number', 'unique_part_code')
+    list_display = ('unique_part_code', 'part_number')
+
+
+class SparePointDataAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.ASMS]
+    search_fields = ('part_number__part_number', 'points', 'territory')
+    list_display = ('part_number', 'MRP',
+                    'validity_to', 'validity_from',
+                    'territory', 'price',
+                    'points')
 
 class SparePartline(TabularInline):
     model = models.AccumulationRequest.upcs.through
@@ -442,7 +450,8 @@ class AccumulationRequestAdmin(ModelAdmin):
     )
     search_fields = ('created_date',
                      'member__phone_number', 'points')
-    list_display = ('transaction_id', 'created_date', 'member', 'UPCS', 'asm', 'points')
+    list_display = ('created_date', 'member',
+                    'UPCS', 'asm', 'points', 'total_points')
     inlines = (SparePartline,)
     
     def UPCS(self, obj):
@@ -473,14 +482,15 @@ brand_admin.register(models.EmailLog, SMSLogAdmin)
 brand_admin.register(models.DataFeedLog, FeedLogAdmin)
 
 brand_admin.register(models.NationalSalesManager, NSMAdmin)
-brand_admin.register(models.AreaServiceManager, ASMAdmin)
+brand_admin.register(models.AreaSalesManager, ASMAdmin)
 brand_admin.register(models.Distributor, DistributorAdmin)
 brand_admin.register(models.Retailer, RetailerAdmin)
 brand_admin.register(models.Mechanic, MechanicAdmin)
 
 
 brand_admin.register(models.SparePartMasterData, SparePartMasterAdmin)
-brand_admin.register(models.SparePart, SparePartAdmin)
+brand_admin.register(models.SpareUPCData, SpareUPCDataAdmin)
+brand_admin.register(models.SparePointData, SparePointDataAdmin)
 brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
 
 brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)

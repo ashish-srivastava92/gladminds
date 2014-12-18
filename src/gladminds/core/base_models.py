@@ -53,7 +53,7 @@ class UserProfile(BaseModel):
         abstract = True
 
     def __unicode__(self):
-        return self.phone_number or 'None'
+        return str(self.phone_number or '') + self.user.username
 
 
 class Industry(BaseModel):
@@ -629,35 +629,48 @@ class SLA(models.Model):
 
 class NationalSalesManager(BaseModel):
     '''details of National Sales Manager'''
-    nsm_id = models.CharField(max_length=50, unique=True)
+    nsm_id = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, null=True, blank=True)
+    email = models.CharField(max_length=50, null=True, blank=True)
+    phone_number = PhoneField(null=True, blank=True)
     territory = models.CharField(max_length=50, null=True, blank=True, unique=True)
 
     class Meta:
         abstract = True
         verbose_name_plural = "national sales managers"
+        unique_together = ("nsm_id", "territory")
 
     def __unicode__(self):
-        return self.nsm_id
+        return self.name
 
-class AreaServiceManager(BaseModel):
+class AreaSalesManager(BaseModel):
     '''details of Area Service Manager'''
-    asm_id = models.CharField(max_length=50, unique=True)
+    asm_id = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, null=True, blank=True)
+    email = models.CharField(max_length=50, null=True, blank=True)
+    phone_number = PhoneField(null=True, blank=True)
+    state = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
         verbose_name_plural = "area service managers"
+        unique_together = ("asm_id", "state")
 
     def __unicode__(self):
-        return self.asm_id
+        return self.name
 
 class Distributor(BaseModel):
     '''details of Distributor'''
-    distributor_id = models.CharField(max_length=50, unique=True)
-    distributor_code = models.CharField(max_length=50, null=True, blank=True)
+    distributor_id = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, null=True, blank=True)
+    email = models.CharField(max_length=50, null=True, blank=True)
+    phone_number = PhoneField(null=True, blank=True)
+    city = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
         verbose_name_plural = "distributors"
+        unique_together = ("distributor_id", "city")
 
     def __unicode__(self):
         return self.distributor_id
@@ -680,10 +693,10 @@ class Mechanic(BaseModel):
     mechanic_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
     total_points = models.IntegerField(max_length=50, null=True, blank=True, default=0)
 
-    date_of_birth = models.DateTimeField(null=True, blank= True)
     first_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(null=True, blank=True)
+    date_of_birth = models.DateTimeField(null=True, blank= True)
 
     form_number = models.IntegerField(max_length=50, null=True, blank=True)
     registered_date = models.DateTimeField(null=True, blank= True)
@@ -697,10 +710,10 @@ class Mechanic(BaseModel):
     pincode = models.CharField(max_length=50, null=True, blank=True)
     shop_wall_length = models.IntegerField(max_length=50, null=True, blank=True)
     shop_wall_width = models.IntegerField(max_length=50, null=True, blank=True)
-    two_stroke_serviced = models.IntegerField(max_length=50, null=True, blank=True)
-    four_stroke_serviced = models.IntegerField(max_length=50, null=True, blank=True)
-    cng_lpg_serviced = models.IntegerField(max_length=50, null=True, blank=True)
-    diesel_serviced = models.IntegerField(max_length=50, null=True, blank=True)
+    serviced_4S = models.IntegerField(max_length=50, null=True, blank=True)
+    serviced_2S = models.IntegerField(max_length=50, null=True, blank=True)
+    serviced_CNG_LPG = models.IntegerField(max_length=50, null=True, blank=True)
+    serviced_diesel = models.IntegerField(max_length=50, null=True, blank=True)
     spare_per_month = models.IntegerField(max_length=50, null=True, blank=True)
     genuine_parts_used = models.IntegerField(max_length=50, null=True, blank=True)
 
@@ -728,7 +741,7 @@ class Mechanic(BaseModel):
 
 class SparePartMasterData(BaseModel):
     '''details of Spare Part'''
-    serial_number = models.CharField(max_length=100, unique=True)
+    part_number = models.CharField(max_length=100, unique=True)
     part_model = models.CharField(max_length=50, null=True, blank=True)
     description = models.CharField(max_length=50, null=True, blank=True)
     category = models.CharField(max_length=50, null=True, blank=True)
@@ -740,20 +753,30 @@ class SparePartMasterData(BaseModel):
         verbose_name_plural = "spare parts master"
 
     def __unicode__(self):
-        return str(self.serial_number)
-
-class SparePart(BaseModel):
+        return str(self.part_number)
+    
+class SpareUPCData(BaseModel):
     '''details of Spare Part'''
     unique_part_code = models.CharField(max_length=50, unique=True)
-    points = models.IntegerField(max_length=50, null=True, blank=True)
-    price = models.FloatField(max_length=50, null=True, blank=True)
-    mrp = models.FloatField(max_length=50, null=True, blank=True)
-    validity_from =  models.DateTimeField(null=True, blank= True)
-    validity_to =  models.DateTimeField(null=True, blank= True)
-    territory = models.CharField(max_length=50, null=True, blank=True)
     is_used = models.BooleanField(default=False)
     
     objects = user_manager.SparePartManager()
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "spare parts"
+
+    def __unicode__(self):
+        return self.unique_part_code
+
+class SparePointData(BaseModel):
+    '''details of Spare Part'''
+    points = models.IntegerField(max_length=50, null=True, blank=True)
+    price = models.FloatField(max_length=50, null=True, blank=True)
+    MRP = models.FloatField(max_length=50, null=True, blank=True)
+    validity_from =  models.DateTimeField(null=True, blank= True)
+    validity_to =  models.DateTimeField(null=True, blank= True)
+    territory = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -766,6 +789,7 @@ class AccumulationRequest(BaseModel):
     '''details of Spare Part'''
     transaction_id = models.AutoField(primary_key=True)
     points = models.IntegerField(max_length=50)
+    total_points = models.IntegerField(max_length=50)
 
     class Meta:
         abstract = True

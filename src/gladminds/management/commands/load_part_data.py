@@ -36,16 +36,17 @@ class Command(BaseCommand):
                     temp['supplier'] = row_list[6].strip()
                     spare_list.append(temp)
         for spare in spare_list:
-            spare_object = spare_master.objects.filter(serial_number=spare['part_no'])
+            spare_object = spare_master.objects.filter(part_number=spare['part_no'])
             if not spare_object:
                 spare_type_object = spare_type.objects.filter(product_type=spare['type'])
                 if not spare_type_object:
                     spare_type_object = spare_type(product_type=spare['type'])
+                    spare_type_object.save()
                 else:
                     spare_type_object = spare_type_object[0]
                 spare_object = spare_master(
                                             product_type=spare_type_object,
-                                            serial_number = spare['part_no'],
+                                            part_number = spare['part_no'],
                                             part_model = spare['model'],
                                             description = spare['desc'],
                                             category = spare['category'],
@@ -59,7 +60,7 @@ class Command(BaseCommand):
         file_list = ['PART_UPC_DATA.csv']
         spare_list = []
         spare_master = get_model('SparePartMasterData', APP)
-        spare_part = get_model('SparePart', APP)
+        spare_upc = get_model('SpareUPCData', APP)
         for i in range(0, 1):
             with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
@@ -67,14 +68,14 @@ class Command(BaseCommand):
                 for row_list in spamreader:
                     temp ={}
                     temp['part_no'] = row_list[0].strip()
-                    temp['UPC'] = row_list[1].strip()
+                    temp['UPC'] = (row_list[1].strip()).upper()
                     spare_list.append(temp)
         for spare in spare_list:
-            spare_object = spare_part.objects.filter(unique_part_code = spare['UPC'])
+            spare_object = spare_upc.objects.filter(unique_part_code = spare['UPC'])
             if not spare_object:
-                spare_master_object = spare_master.objects.filter(serial_number=spare['part_no'])
+                spare_master_object = spare_master.objects.filter(part_number=spare['part_no'])
                 
-                spare_object = spare_part(
+                spare_object = spare_upc(
                                             part_number=spare_master_object[0],
                                             unique_part_code = spare['UPC'])
                 spare_object.save()
@@ -84,7 +85,7 @@ class Command(BaseCommand):
         file_list = ['PART_POINTS_DATA.csv']
         spare_list = []
         spare_master = get_model('SparePartMasterData', APP)
-        spare_part = get_model('SparePart', APP)
+        spare_part = get_model('SparePointData', APP)
         for i in range(0, 1):
             with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
@@ -100,11 +101,15 @@ class Command(BaseCommand):
                     temp['points'] = row_list[6].strip()
                     spare_list.append(temp)
         for spare in spare_list:
-            spare_object = spare_part.objects.get(part_number__serial_number=spare['part_no'])
-            spare_object.points = spare['points']
-            spare_object.price = spare['price']
-            spare_object.mrp = spare['MRP']
-            spare_object.validity_from = spare['valid_from']
-            spare_object.validity_to = spare['valid_to']
-            spare_object.territory = spare['territory']
-            spare_object.save()
+            spare_master_object = spare_master.objects.filter(part_number=spare['part_no'])
+            spare_object = spare_part.objects.filter(part_number=spare_master_object[0],
+                                                     territory=spare['territory'])
+            if not spare_object:
+                spare_object = spare_part(part_number = spare_master_object[0],
+                                          points = spare['points'],
+                                          price = spare['price'],
+                                          MRP = spare['MRP'],
+                                          validity_from = spare['valid_from'],
+                                          validity_to = spare['valid_to'],
+                                          territory = spare['territory'])
+                spare_object.save()
