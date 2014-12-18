@@ -563,3 +563,4 @@ CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
 ################################################################
 MAX_UCP_ALLOWED=10
+MANDATORY_MECHANIC_FIELDS = ['first_name', 'date_of_birth', 'phone_number', 'shop_name', 'district', 'state', 'pincode', 'registered_by']

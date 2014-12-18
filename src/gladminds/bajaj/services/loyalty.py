@@ -17,17 +17,19 @@ LOG = logging.getLogger('gladminds')
 __all__ = ['GladmindsTaskManager']
 AUDIT_ACTION = 'SEND TO QUEUE'
 
+def welcome_sms(mech):
+    phone_number=utils.get_phone_number_format(mech.phone_number)
+    message=templates.get_template('WELCOME_MESSAGE').format(
+                    mechanic_name=mech.first_name,)
+    sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+    send_job_to_queue(send_loyalty_sms, {'phone_number': phone_number,
+                                'message': message, "sms_client": settings.SMS_CLIENT})
 def send_welcome_message(request):
     phone_list=[]
     mechanics = models.Mechanic.objects.all()
     for mech in mechanics:
-        phone_number=utils.get_phone_number_format(mech.phone_number)
-        message=templates.get_template('WELCOME_MESSAGE').format(
-                        mechanic_name=mech.first_name,)
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
-        send_job_to_queue(send_loyalty_sms, {'phone_number': phone_number,
-                                'message': message, "sms_client": settings.SMS_CLIENT})
-        phone_list.append(phone_number)
+        welcome_sms(mech)
+        phone_list.append(mech.phone_number)
     response = 'Message sent to {0} mechanics with phone numbers {1}'.format(len(phone_list), (', '.join(phone_list)))
     return HttpResponse(json.dumps({'msg': response}), content_type='application/json')
 

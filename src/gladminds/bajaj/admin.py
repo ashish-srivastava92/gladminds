@@ -2,8 +2,10 @@ from django.contrib.admin import AdminSite, TabularInline
 from django.contrib.auth.models import User, Group
 from django.contrib.admin import ModelAdmin
 from django.contrib.admin.views.main import ChangeList, ORDER_VAR
-
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from django.conf import settings
 from gladminds.bajaj import models
+from gladminds.bajaj.services.loyalty import welcome_sms
 from gladminds.core import utils
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
 
@@ -400,9 +402,10 @@ class MechanicAdmin(ModelAdmin):
     def save_model(self, request, obj, form, change):
         if not obj.mechanic_id:
             obj.mechanic_id=generate_temp_id('TME')
+            welcome_sms(obj)
         form_status=True
         for field in obj._meta.fields:
-            if field.name!='total_points' and not getattr(obj, field.name):
+            if field.name in settings.MANDATORY_MECHANIC_FIELDS and not getattr(obj, field.name):
                 form_status = False
 
         if not form_status:
