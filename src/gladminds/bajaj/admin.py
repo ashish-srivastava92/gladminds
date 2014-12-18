@@ -402,20 +402,9 @@ class MechanicAdmin(ModelAdmin):
         return form
 
     def save_model(self, request, obj, form, change):
-        if not obj.mechanic_id:
-            obj.mechanic_id=generate_temp_id('TME')
+        if not obj.sent_sms:
             send_welcome_sms(obj)
             obj.sent_sms=True
-        obj.phone_number=utils.mobile_format(obj.phone_number)
-        form_status=True
-        for field in obj._meta.fields:
-            if field.name in constants.MANDATORY_MECHANIC_FIELDS and not getattr(obj, field.name):
-                form_status = False
-
-        if not form_status:
-            obj.form_status='Incomplete'
-        else:
-            obj.form_status='Complete'
         super(MechanicAdmin, self).save_model(request, obj, form, change)    
 
 class SparePartMasterAdmin(GmModelAdmin):

@@ -12,6 +12,8 @@ from gladminds.core.constants import FEEDBACK_STATUS, \
                             PRIORITY, FEEDBACK_TYPE, RATINGS,\
                             ROOT_CAUSE, SLA_PRIORITY, TIME_UNIT, STATUS_CHOICES
 from gladminds.core.model_helpers import PhoneField
+from gladminds.core import constants
+from gladminds.core.core_utils.utils import generate_mech_id
 try:
     from django.utils.timezone import now as datetime_now
 except ImportError:
@@ -631,7 +633,7 @@ class NationalSalesManager(BaseModel):
     '''details of National Sales Manager'''
     nsm_id = models.CharField(max_length=50)
     name = models.CharField(max_length=50, null=True, blank=True)
-    email = models.CharField(max_length=50, null=True, blank=True)
+    email = models.EmailField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(null=True, blank=True)
     territory = models.CharField(max_length=50, null=True, blank=True, unique=True)
 
@@ -647,7 +649,7 @@ class AreaSalesManager(BaseModel):
     '''details of Area Service Manager'''
     asm_id = models.CharField(max_length=50)
     name = models.CharField(max_length=50, null=True, blank=True)
-    email = models.CharField(max_length=50, null=True, blank=True)
+    email = models.EmailField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(null=True, blank=True)
     state = models.CharField(max_length=50, null=True, blank=True)
 
@@ -663,7 +665,7 @@ class Distributor(BaseModel):
     '''details of Distributor'''
     distributor_id = models.CharField(max_length=50)
     name = models.CharField(max_length=50, null=True, blank=True)
-    email = models.CharField(max_length=50, null=True, blank=True)
+    email = models.EmailField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(null=True, blank=True)
     city = models.CharField(max_length=50, null=True, blank=True)
 
@@ -690,7 +692,7 @@ class Retailer(BaseModel):
 
 class Mechanic(BaseModel):
     '''details of Mechanic'''
-    mechanic_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    mechanic_id = models.CharField(max_length=50, unique=True, default=generate_mech_id)
     total_points = models.IntegerField(max_length=50, null=True, blank=True, default=0)
 
     first_name = models.CharField(max_length=50, null=True, blank=True)
@@ -731,6 +733,19 @@ class Mechanic(BaseModel):
     sent_sms = models.BooleanField(default=False)
 
     objects = user_manager.MechanicManager()
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        form_status=True
+        for field in self._meta.fields:
+            if field.name in constants.MANDATORY_MECHANIC_FIELDS and not getattr(self, field.name):
+                form_status = False
+
+        if not form_status:
+            self.form_status='Incomplete'
+        else:
+            self.form_status='Complete'
+        return super(Mechanic, self).save(force_insert=force_insert, force_update=force_update,
+                              using=using, update_fields=update_fields)
 
     class Meta:
         abstract = True
