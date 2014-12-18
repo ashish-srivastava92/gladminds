@@ -192,22 +192,21 @@ class Command(BaseCommand):
         part_data.handle()
 
     def set_bajaj_permissions(self):
-        model_ids = []
         brand = GmApps.BAJAJ
         for group in [Roles.ASMS, Roles.NSMS]:
+            model_ids = []
             for model in ['Distributor', 'Retailer', 'Mechanic']:
                 model_ids.append(ContentType.objects.get(app_label__in=['bajaj', 'auth'], model=model).id)
             permissions = Permission.objects.using(brand).filter(content_type__id__in=model_ids)
             group = Group.objects.using(brand).get(name=group)
             for permission in permissions:
                 group.permissions.add(permission)
-            group.save(using=brand)
+            model_ids = []
             for model in ['SparePartMasterData', 'SpareUPCData', 'SparePointData',
                           'AccumulationRequest']:
                 model_ids.append(ContentType.objects.get(app_label__in=['bajaj', 'auth'], model=model).id)
             permissions = Permission.objects.using(brand).filter(content_type__id__in=model_ids,
-                                                                 name__contains='Can change')
-            group = Group.objects.using(brand).get(name=group)
+                                                                 codename__contains='change_')
             for permission in permissions:
                 group.permissions.add(permission)
             group.save(using=brand)
