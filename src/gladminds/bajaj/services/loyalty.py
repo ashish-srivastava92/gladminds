@@ -53,7 +53,7 @@ def fetch_catalogue_products(product_codes):
 
 def accumulate_point(sms_dict, phone_number):
     '''accumulate points with given upc'''
-    unique_product_codes = sms_dict['ucp'].split()
+    unique_product_codes = (sms_dict['ucp'].upper()).split()
     valid_ucp=[]
     invalid_upcs_message=''
     try:
@@ -76,7 +76,7 @@ def accumulate_point(sms_dict, phone_number):
             valid_ucp.append(spare.unique_part_code)
             accumulation_log.upcs.add(spare)
         total_points=update_points(mechanic[0],accumulate=added_points)
-        accumulation_log.points=total_points
+        accumulation_log.points=added_points
         invalid_upcs = list(set(unique_product_codes).difference(valid_ucp))
         if invalid_upcs:
             invalid_upcs_message=' List of invalid part code: {0}.'.format(
@@ -94,6 +94,7 @@ def accumulate_point(sms_dict, phone_number):
         sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
         send_job_to_queue(send_point, {'phone_number': phone_number,
                         'message': message, "sms_client": settings.SMS_CLIENT})
+        accumulation_log.total_points=total_points
         accumulation_log.save()
     return {'status': True, 'message': message}
 

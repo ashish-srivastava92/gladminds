@@ -238,17 +238,16 @@ class SLA(base_models.SLA):
 
 class NationalSalesManager(base_models.NationalSalesManager):
     '''details of National Sales Manager'''
-    user = models.OneToOneField(UserProfile, primary_key=True,
-                                related_name='bajaj_national_sales_manager')
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "national sales manager"
 
-class AreaServiceManager(base_models.AreaServiceManager):
+class AreaSalesManager(base_models.AreaSalesManager):
     '''details of Area Service Manager'''
-    user = models.OneToOneField(UserProfile, primary_key=True,
-                                related_name='bajaj_area_service_manager')
+    '''details of National Sales Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
     nsm = models.ForeignKey(NationalSalesManager, null=True, blank=True)
 
     class Meta:
@@ -257,9 +256,9 @@ class AreaServiceManager(base_models.AreaServiceManager):
 
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
-    user = models.OneToOneField(UserProfile, primary_key=True,
-                                related_name='bajaj_distributor')
-    asm = models.ForeignKey(AreaServiceManager, null=True, blank=True)
+    '''details of National Sales Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -274,7 +273,7 @@ class Retailer(base_models.Retailer):
 
 class Mechanic(base_models.Mechanic):
     '''details of Mechanic'''
-    registered_by = models.ForeignKey(Distributor, null=True, blank=True)
+    registered_by_distributor = models.ForeignKey(Distributor, null=True, blank=True)
     preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
     image_url = models.ImageField(upload_to='{0}/bajaj/mechanics'.format(settings.ENV),
                                   max_length=255, null=True, blank=True,
@@ -292,20 +291,29 @@ class SparePartMasterData(base_models.SparePartMasterData):
         app_label = _APP_NAME
         verbose_name_plural = "spare parts master"
 
-class SparePart(base_models.SparePart):
+class SpareUPCData(base_models.SpareUPCData):
     '''details of Spare Part'''
     part_number = models.ForeignKey(SparePartMasterData)
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "spare parts"
+        verbose_name_plural = "spare parts ucp data"
+        
+
+class SparePointData(base_models.SparePointData):
+    '''details of Spare Part'''
+    part_number = models.ForeignKey(SparePartMasterData)
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "spare parts points data"
 
 class AccumulationRequest(base_models.AccumulationRequest):
     '''details of Spare Part'''
 
     member = models.ForeignKey(Mechanic)
-    upcs = models.ManyToManyField(SparePart)
-    asm = models.ForeignKey(AreaServiceManager, null=True, blank=True)
+    upcs = models.ManyToManyField(SpareUPCData)
+    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME

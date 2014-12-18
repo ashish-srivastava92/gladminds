@@ -17,7 +17,7 @@ class Command(BaseCommand):
         print "Started uploading distributor..."
         file_list = ['DIST_DATA.csv']
         dealer_list = []
-        asm = get_model('AreaServiceManager', APP)
+        asm = get_model('AreaSalesManager', APP)
         dist = get_model('Distributor', APP)
         user_profile = get_model('UserProfile', APP)
 
@@ -36,22 +36,30 @@ class Command(BaseCommand):
                     dealer_list.append(temp)
         
         for dealer in dealer_list:
-            dist_object = dist.objects.filter(distributor_id=dealer['id'])
+            dist_object = dist.objects.filter(distributor_id=dealer['id'], city=dealer['city'])
             if not dist_object:
-                password=dealer['id']+'@123'
-                dist_user_object = User.objects.using(APP).create(username=dealer['id'])
-                dist_user_object.set_password(password)
-                dist_user_object.email = dealer['email']
-                dist_user_object.first_name = dealer['name']
-                dist_user_object.save(using=APP)
-                dist_user_pro_object = user_profile(user=dist_user_object,
-                                        phone_number=dealer['mobile'],
-                                        address=dealer['city'])
-                dist_user_pro_object.save()
-                asm_object = asm.objects.get(asm_id=dealer['asm_id'])
+                dist_user_pro_object = user_profile.objects.filter(user__username=dealer['id'])
+                if not dist_user_pro_object:
+                    password=dealer['id']+'@123'
+                    dist_user_object = User.objects.using(APP).create(username=dealer['id'])
+                    dist_user_object.set_password(password)
+                    dist_user_object.email = dealer['email']
+                    dist_user_object.first_name = dealer['name']
+                    dist_user_object.save(using=APP)
+                    dist_user_pro_object = user_profile(user=dist_user_object,
+                                                phone_number=dealer['mobile'],
+                                                address=dealer['city'])
+                    dist_user_pro_object.save()
+                else:
+                    dist_user_pro_object = dist_user_pro_object[0]
+                asm_object = asm.objects.get(asm_id=dealer['asm_id'], state='Tamil Nadu')
                 dist_object = dist(distributor_id=dealer['id'],
                                           asm=asm_object,
-                                          user=dist_user_pro_object)
+                                          user=dist_user_pro_object,
+                                          name=dealer['name'],
+                                          email=dealer['email'],
+                                          phone_number=dealer['mobile'],
+                                          city=dealer['city'])
                 dist_object.save()
 
     def empty_to_none(self, value):
@@ -90,7 +98,7 @@ class Command(BaseCommand):
                     temp['locality'] = row_list[8].strip()
                     temp['tehsil'] = row_list[9].strip()
 
-                    temp['district'] = row_list[11].strip()
+                    temp['district'] = (row_list[11].strip()).upper()
                     temp['state'] = row_list[12].strip()
                     temp['pincode'] = row_list[13].strip()
                     temp['dist_id'] = row_list[14].strip()
@@ -124,7 +132,7 @@ class Command(BaseCommand):
                 else:
                     mech_id=mechanic['mech_id']
                 if mechanic['dist_id']:
-                    dist_object = dist.objects.get(distributor_id=mechanic['dist_id'])
+                    dist_object = dist.objects.get(distributor_id=mechanic['dist_id'], city=mechanic['district'])
                 else:
                     dist_object = None
                 
@@ -136,7 +144,7 @@ class Command(BaseCommand):
                 else:
                     ret_obj = ret_obj[0]
                 
-                mech_object = mech(registered_by=dist_object,
+                mech_object = mech(registered_by_distributor=dist_object,
                                 preferred_retailer=ret_obj,
                                 mechanic_id=mech_id,
                                 first_name = mechanic['first_name'],
@@ -155,10 +163,10 @@ class Command(BaseCommand):
                                 pincode =  mechanic['pincode'],
                                 shop_wall_length =  mechanic['wall_len'],
                                 shop_wall_width =  mechanic['wall_width'],
-                                two_stroke_serviced =  mechanic['two_stroke'],
-                                four_stroke_serviced =  mechanic['four_stroke'],
-                                cng_lpg_serviced =  mechanic['cng_lpg'],
-                                diesel_serviced =  mechanic['diesel'],
+                                serviced_2S =  mechanic['two_stroke'],
+                                serviced_4S =  mechanic['four_stroke'],
+                                serviced_CNG_LPG =  mechanic['cng_lpg'],
+                                serviced_diesel =  mechanic['diesel'],
                                 spare_per_month =  mechanic['spare_month'],
                                 genuine_parts_used =  mechanic['genuine'],
                                 form_status = mechanic['complete']

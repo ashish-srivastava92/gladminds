@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
-
+from django.db.transaction import atomic
 from django.contrib.auth.models import User, Permission, Group
 from django.conf import settings
 from gladminds.afterbuy.models import Consumer
@@ -30,8 +30,10 @@ _AFTERBUY_SUPERADMINS = [{'email':'naveen.shankar@gladminds.co', 'username':'nav
 _BAJAJ_LOYALTY_SUPERADMINS = [('gladminds', '', 'gladminds!123'),
                               ('kumarashish@bajajauto.co.in', 'kumarashish@bajajauto.co.in',
                                'kumarashish!123')]
-_BAJAJ_LOYALTY_NSM = [('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123', 'NSM002')]
-_BAJAJ_LOYALTY_ASM = [('spremnath@bajajauto.co.in', 'spremnath@bajajauto.co.in', 'spremnath!123', 'ASM004')]
+_BAJAJ_LOYALTY_NSM = [('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123', 'NSM002', 'south', 'Raghunath'),
+                      ('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123', 'NSM002', 'west', 'Raghunath'),]
+_BAJAJ_LOYALTY_ASM = [('spremnath@bajajauto.co.in', 'spremnath@bajajauto.co.in', 'spremnath!123', 'ASM004', 'PREM NATH', '+919176339712', 'Tamil Nadu'),
+                      ('spremnath@bajajauto.co.in', 'spremnath@bajajauto.co.in', 'spremnath!123', 'ASM004', 'PREM NATH', '+919176339712', 'Karnataka')]
 
 class Command(BaseCommand):
 
@@ -89,9 +91,10 @@ class Command(BaseCommand):
             self.create_consumer(details, Roles.ADMINS)
         for details in _AFTERBUY_SUPERADMINS:
             self.create_consumer(details, Roles.SUPERADMINS)
-
+    
+    @atomic
     def create_bajaj_admins(self):
-        from gladminds.bajaj.models import AreaServiceManager, NationalSalesManager
+        from gladminds.bajaj.models import AreaSalesManager, NationalSalesManager
         for details in _BAJAJ_LOYALTY_SUPERADMINS:
             print "create loyalty superadmin", details
             self.create_user_profile(details, GmApps.BAJAJ, Roles.LOYALTYSUPERADMINS)
@@ -99,15 +102,20 @@ class Command(BaseCommand):
             print "create loyalty nsm", details
             profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.NSMS)
             try: 
-                nsm_obj = NationalSalesManager.objects.get(user=profile_obj, nsm_id=details[3])
+                nsm_obj = NationalSalesManager.objects.get(user=profile_obj, nsm_id=details[3],
+                                                           territory=details[4])
             except:
-                nsm_obj = NationalSalesManager(user=profile_obj, nsm_id=details[3])
+                nsm_obj = NationalSalesManager(user=profile_obj, nsm_id=details[3],
+                                               name=details[5], email=details[0],
+                                                           territory=details[4])
                 nsm_obj.save()
         for details in _BAJAJ_LOYALTY_ASM:
             print "create loyalty asm", details
             profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.ASMS)
-            if not AreaServiceManager.objects.filter(user=profile_obj, nsm=nsm_obj, asm_id=details[3]).exists():
-                asm_obj = AreaServiceManager(nsm=nsm_obj, user=profile_obj, asm_id=details[3])
+            if not AreaSalesManager.objects.filter(user=profile_obj, asm_id=details[3], state=details[6]).exists():
+                asm_obj = AreaSalesManager(nsm=nsm_obj, user=profile_obj, asm_id=details[3],
+                                             name=details[4], email=details[0],
+                                             phone_number=details[5], state=details[6])
                 asm_obj.save()
 
     def create_user_profile(self, details, app, group=None):
@@ -122,12 +130,13 @@ class Command(BaseCommand):
             admin.save(using=app)
             if group:
                 add_user_to_group(app, admin.id, group)
-        UserProfile = get_model('UserProfile', app)
+        user_profile_class = get_model('UserProfile', app)
         try:
-            return UserProfile.objects.get(user=admin)
+            return user_profile_class.objects.get(user=admin.id)
         except:
-            profile_obj = UserProfile(user=admin)
+            profile_obj = user_profile_class(user=admin)
             profile_obj.save()
+            print "3333", profile_obj
             return profile_obj
 
     def create_consumer(self, details, group):
