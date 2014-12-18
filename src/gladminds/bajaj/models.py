@@ -262,6 +262,7 @@ class Distributor(base_models.Distributor):
     class Meta:
         app_label = _APP_NAME
 
+
 class Retailer(base_models.Retailer):
     '''details of retailer'''
 

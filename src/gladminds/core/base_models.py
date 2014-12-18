@@ -798,7 +798,7 @@ class SparePointData(BaseModel):
         verbose_name_plural = "Spare Points Data"
 
     def __unicode__(self):
-        return self.unique_part_code
+        return self.territory + ":" + str(self.points)
 
 class AccumulationRequest(BaseModel):
     '''details of Spare Part'''
