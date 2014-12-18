@@ -11,7 +11,6 @@ from gladminds.bajaj import models
 from gladminds.bajaj.services.loyalty import send_welcome_sms
 from gladminds.core import utils, constants
 from gladminds.core.loaders.module_loader import get_model
-from gladminds.core.utils import generate_temp_id
 from gladminds.core.auth_helper import GmApps, Roles
 from gladminds.core.admin_helper import GmModelAdmin
 
@@ -405,6 +404,7 @@ class MechanicAdmin(ModelAdmin):
         if not obj.mechanic_id:
             send_welcome_sms(obj)
             obj.sent_sms=True
+        obj.phone_number=utils.mobile_format(obj.phone_number)
         super(MechanicAdmin, self).save_model(request, obj, form, change)    
 
 class SparePartMasterAdmin(GmModelAdmin):
