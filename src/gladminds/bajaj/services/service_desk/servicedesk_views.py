@@ -19,7 +19,7 @@ from gladminds.core.utils import get_list_from_set
 import datetime
 from gladminds.bajaj.services.service_desk.servicedesk_manager import get_feedbacks,\
     get_complain_data, get_feedback, get_servicedesk_users, get_comments,\
-    save_update_feedback
+    save_update_feedback, update_feedback_activities, SDActions
 
 LOG = logging.getLogger('gladminds')
 
@@ -160,11 +160,14 @@ def modify_servicedesk_tickets(request, feedback_id):
 @require_http_methods(["POST"])
 def modify_feedback_comments(request, feedback_id, comment_id):
     data = request.POST
+    feedback_obj = models.Feedback.objects.get(id=feedback_id)
     try:
         comment = models.Comment.objects.get(feedback_object_id=feedback_id, id=comment_id)
+        previous_comment = comment.comment
         comment.comment = data['commentDescription']
         comment.modified_date = datetime.datetime.now()
         comment.save()
+        update_feedback_activities(feedback_obj, SDActions.COMMENT_UPDATE, previous_comment, data['commentDescription'])
         return HttpResponse("Success")
 
     except Exception as ex:
