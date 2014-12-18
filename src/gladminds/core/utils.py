@@ -292,6 +292,9 @@ def create_context(email_template_name, feedback_obj, comment_obj=None):
     else:
         comment = ""
     created_date = convert_utc_to_local_time(feedback_obj.created_date, True)
+    assignee = getattr(feedback_obj, "assignee") or ""
+    if assignee:
+        assignee = feedback_obj.assignee.user_profile.user.username
     due_date = getattr(feedback_obj, "due_date") or ""
     if due_date:
         due_date = due_date.strftime(DATE_FORMAT)
@@ -299,7 +302,7 @@ def create_context(email_template_name, feedback_obj, comment_obj=None):
     data['newsubject'] = data['subject'].format(id = feedback_obj.id)
     data['content'] = data['body'].format(id=feedback_obj.id, type = feedback_obj.type, reporter = feedback_obj.reporter.user_profile.user.username, 
                                           message = feedback_obj.description, created_date = created_date, 
-                                          assign_to = feedback_obj.assignee,  priority =  feedback_obj.priority, comment = comment,
+                                          assign_to = assignee ,  priority =  feedback_obj.priority, comment = comment,
                                           root_cause = feedback_obj.root_cause, resolution = feedback_obj.resolution,
                                           due_date = due_date, resolution_time=total_time_spent(feedback_obj))
 
