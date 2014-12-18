@@ -9,6 +9,7 @@ from gladminds.bajaj import models
 from django.core.urlresolvers import reverse
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.http.response import HttpResponseRedirect
+from django.contrib import messages
 
 
 class GmModelAdmin(ModelAdmin):
@@ -22,6 +23,7 @@ class GmModelAdmin(ModelAdmin):
                 post_url_continue = reverse('admin:%s_%s_changelist' %
                                    (opts.app_label, opts.model_name),
                                    current_app=self.admin_site.name)
+                self.message_user(request, "Sorry, you do not have permission to update.", level=messages.ERROR)
                 return HttpResponseRedirect(post_url_continue)
         return super(GmModelAdmin, self).change_view(request, object_id,
                                                      form_url=form_url,
