@@ -639,7 +639,7 @@ class NationalSalesManager(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "national sales managers"
+        verbose_name_plural = "National Sales Managers"
         unique_together = ("nsm_id", "territory")
 
     def __unicode__(self):
@@ -655,7 +655,7 @@ class AreaSalesManager(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "area service managers"
+        verbose_name_plural = "Area Sales Managers"
         unique_together = ("asm_id", "state")
 
     def __unicode__(self):
@@ -671,7 +671,7 @@ class Distributor(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "distributors"
+        verbose_name_plural = "Distributors"
         unique_together = ("distributor_id", "city")
 
     def __unicode__(self):
@@ -685,7 +685,7 @@ class Retailer(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "retailers"
+        verbose_name_plural = "Retailers"
 
     def __unicode__(self):
         return self.retailer_name
@@ -749,7 +749,7 @@ class Mechanic(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "mechanics"
+        verbose_name_plural = "Mechanics"
 
     def __unicode__(self):
         return self.mechanic_id
@@ -765,7 +765,7 @@ class SparePartMasterData(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "spare parts master"
+        verbose_name_plural = "Spare Parts Master Data"
 
     def __unicode__(self):
         return str(self.part_number)
@@ -779,7 +779,7 @@ class SpareUPCData(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "spare parts"
+        verbose_name_plural = "Spare Parts"
 
     def __unicode__(self):
         return self.unique_part_code
@@ -795,7 +795,7 @@ class SparePointData(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "spare parts"
+        verbose_name_plural = "Spare Points Data"
 
     def __unicode__(self):
         return self.unique_part_code
@@ -808,7 +808,7 @@ class AccumulationRequest(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "accumulation request"
+        verbose_name_plural = "Accumulation Requests"
 
     def __unicode__(self):
         return str(self.transaction_id)
