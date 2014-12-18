@@ -275,7 +275,7 @@ class Mechanic(base_models.Mechanic):
     '''details of Mechanic'''
     registered_by_distributor = models.ForeignKey(Distributor, null=True, blank=True)
     preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
-    image_url = models.ImageField(upload_to='{0}/bajaj/mechanics'.format(settings.ENV),
+    image_url = models.FileField(upload_to='{0}/bajaj/mechanics'.format(settings.ENV),
                                   max_length=255, null=True, blank=True,
                                   validators=[validate_image])
 
