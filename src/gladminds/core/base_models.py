@@ -710,6 +710,7 @@ class Mechanic(BaseModel):
                            )
     form_status = models.CharField(max_length=15, choices=FORM_STATUS_CHOICES,
                               default='Incomplete')
+    sent_sms = models.BooleanField(default=False)
 
     objects = user_manager.MechanicManager()
 

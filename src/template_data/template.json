@@ -433,7 +433,16 @@
     "fields": {
       "template_key": "MAX_ALLOWED_UCP",
       "template": "Maximum allowed part code is {max_limit}",
-      "description": "Due Date has been changed"
+      "description": "maximim allowed ucps"
+      }
+    },
+  {
+    "model": "gladminds.messagetemplate",   
+    "pk": 49,
+    "fields": {
+      "template_key": "WELCOME_MESSAGE",
+      "template": "Dear {mechanic_name}, Congratulations! Welcome to the Bajaj loyalty program. To Accumulate, Send SMS with Code AC UPC to 9561112809",
+      "description": "welcome message to mechanic"
       }
     }
 ]
