@@ -8,6 +8,8 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.forms.widgets import TextInput
 from django.forms import fields
+from django.core.exceptions import ValidationError
+from django.conf import settings
 
 
 phone_re = re.compile(r'^\+?1?\d{9,15}$')
@@ -43,3 +45,10 @@ class PhoneField(models.CharField):
         }
         defaults.update(kwargs)
         return super(PhoneField, self).formfield(**defaults)
+
+
+def validate_image(fieldfile_obj):
+        filesize = fieldfile_obj.file.size
+        megabyte_limit = settings.MAX_UPLOAD_IMAGE_SIZE
+        if filesize > megabyte_limit*1024*1024:
+            raise ValidationError("Image size cannot exceed %sMB" % str(megabyte_limit))

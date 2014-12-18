@@ -21,7 +21,7 @@ ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
                     'accumulate_point':'ac', 'redeem_point':'rd'}
 
 ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
+    ('somit', 'somit@hashedin.com'),
 )
 API_FLAG = False
 COUPON_VALID_DAYS = 30
@@ -483,7 +483,10 @@ MEDIA_URL = '/media/'
 # S3 Configuration
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 AWS_STORAGE_BUCKET_MAP = {'afterbuy': 'afterbuy'}
-# S3_URL = 'http://%s.s3-website-us-east-1.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+AWS_STORAGE_BUCKET_NAME = 'gladminds-brands'
+S3_BASE_URL = 'https://%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+IMAGE_CONTENT_TYPES = ['jpg', 'jpeg', 'png', 'gif']
+MAX_UPLOAD_IMAGE_SIZE = 4.0
 
 
 DEFAULT_COUPON_STATUS = 1

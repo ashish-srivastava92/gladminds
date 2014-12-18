@@ -386,6 +386,7 @@ class MechanicAdmin(ModelAdmin):
                     'four_stroke_serviced', 'cng_lpg_serviced',
                     'diesel_serviced', 'spare_per_month',
                     'genuine_parts_used')
+    readonly_fields = ('image_tag',)
 
     def suit_row_attributes(self, obj):
         class_map = {
