@@ -286,7 +286,24 @@ def send_point(*args, **kwargs):
         send_point.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
-        
+
+"""
+Send loyalty sms
+"""
+@shared_task
+def send_loyalty_sms(*args, **kwargs):
+    status = "success"
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        brand = kwargs.get('brand', 'bajaj')
+        set_gateway(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        send_loyalty_sms.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        sms_log(status=status, receiver=phone_number, message=message, brand=brand)
+
 """
 Crontab to send reminder sms to customer 
 """

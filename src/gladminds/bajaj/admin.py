@@ -2,13 +2,18 @@ from django.contrib.admin import AdminSite, TabularInline
 from django.contrib.auth.models import User, Group
 from django.contrib.admin import ModelAdmin
 from django.contrib.admin.views.main import ChangeList, ORDER_VAR
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from django.conf import settings
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from django.contrib.admin import DateFieldListFilter
 
 from gladminds.bajaj import models
-from gladminds.core import utils
-from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from gladminds.bajaj.services.loyalty import send_welcome_sms
+from gladminds.core import utils, constants
+from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.utils import generate_temp_id
 from gladminds.core.auth_helper import GmApps, Roles
 from gladminds.core.admin_helper import GmModelAdmin
-
 
 class BajajAdminSite(AdminSite):
     pass
@@ -390,6 +395,27 @@ class MechanicAdmin(ModelAdmin):
         if css_class:
             return {'class': css_class}
 
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('mechanic_id','form_status')
+        form = super(MechanicAdmin, self).get_form(request, obj, **kwargs)
+        return form
+
+    def save_model(self, request, obj, form, change):
+        if not obj.mechanic_id:
+            obj.mechanic_id=generate_temp_id('TME')
+            send_welcome_sms(obj)
+            obj.sent_sms=True
+        form_status=True
+        for field in obj._meta.fields:
+            if field.name in constants.MANDATORY_MECHANIC_FIELDS and not getattr(obj, field.name):
+                form_status = False
+
+        if not form_status:
+            obj.form_status='Incomplete'
+        else:
+            obj.form_status='Complete'
+        super(MechanicAdmin, self).save_model(request, obj, form, change)    
+
 class SparePartMasterAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS]
     search_fields = ('serial_number', 'category',
@@ -410,7 +436,12 @@ class SparePartline(TabularInline):
     model = models.AccumulationRequest.upcs.through
 
 class AccumulationRequestAdmin(ModelAdmin):
-    list_display = ('transaction_id', 'member', 'UPCS', 'asm', 'points')
+    list_filter = (
+        ('created_date', DateFieldListFilter),
+    )
+    search_fields = ('created_date',
+                     'member__phone_number', 'points')
+    list_display = ('transaction_id', 'created_date', 'member', 'UPCS', 'asm', 'points')
     inlines = (SparePartline,)
     
     def UPCS(self, obj):

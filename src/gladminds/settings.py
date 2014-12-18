@@ -560,6 +560,3 @@ CONSTANCE_CONFIG = {
 }
 
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
-
-################################################################
-MAX_UCP_ALLOWED=10
