@@ -5,8 +5,8 @@ from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.conf import settings
 from gladminds.bajaj import models
-from gladminds.bajaj.services.loyalty import welcome_sms
-from gladminds.core import utils
+from gladminds.bajaj.services.loyalty import send_welcome_sms
+from gladminds.core import utils, constants
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
 
 from gladminds.core.loaders.module_loader import get_model
@@ -402,10 +402,10 @@ class MechanicAdmin(ModelAdmin):
     def save_model(self, request, obj, form, change):
         if not obj.mechanic_id:
             obj.mechanic_id=generate_temp_id('TME')
-            welcome_sms(obj)
+            send_welcome_sms(obj)
         form_status=True
         for field in obj._meta.fields:
-            if field.name in settings.MANDATORY_MECHANIC_FIELDS and not getattr(obj, field.name):
+            if field.name in constants.MANDATORY_MECHANIC_FIELDS and not getattr(obj, field.name):
                 form_status = False
 
         if not form_status:

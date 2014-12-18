@@ -9,7 +9,7 @@ from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services import message_template as templates
 from gladminds.bajaj import models
 from gladminds.sqs_tasks import send_point, send_loyalty_sms
-from gladminds.core import utils
+from gladminds.core import utils, constants
 from gladminds.core.cron_jobs.queue_utils import get_task_queue, send_job_to_queue
 
 LOG = logging.getLogger('gladminds')
@@ -17,7 +17,7 @@ LOG = logging.getLogger('gladminds')
 __all__ = ['GladmindsTaskManager']
 AUDIT_ACTION = 'SEND TO QUEUE'
 
-def welcome_sms(mech):
+def send_welcome_sms(mech):
     phone_number=utils.get_phone_number_format(mech.phone_number)
     message=templates.get_template('WELCOME_MESSAGE').format(
                     mechanic_name=mech.first_name,)
@@ -28,7 +28,7 @@ def send_welcome_message(request):
     phone_list=[]
     mechanics = models.Mechanic.objects.all()
     for mech in mechanics:
-        welcome_sms(mech)
+        send_welcome_sms(mech)
         phone_list.append(mech.phone_number)
     response = 'Message sent to {0} mechanics with phone numbers {1}'.format(len(phone_list), (', '.join(phone_list)))
     return HttpResponse(json.dumps({'msg': response}), content_type='application/json')
@@ -52,9 +52,9 @@ def accumulate_point(sms_dict, phone_number):
     valid_ucp=[]
     invalid_upcs_message=''
     try:
-        if len(unique_product_codes)>settings.MAX_UCP_ALLOWED:
+        if len(unique_product_codes)>constants.MAX_UCP_ALLOWED:
             message=templates.get_template('MAX_ALLOWED_UCP').format(
-                                    max_limit=settings.MAX_UCP_ALLOWED)
+                                    max_limit=constants.MAX_UCP_ALLOWED)
             raise ValueError('Maximum allowed ucp exceeded')
         mechanic = models.Mechanic.objects.filter(phone_number=utils.mobile_format(phone_number))
         accumulation_log=models.AccumulationRequest(member=mechanic[0],
