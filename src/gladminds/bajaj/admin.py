@@ -434,8 +434,8 @@ class SpareUPCDataAdmin(GmModelAdmin):
 class SparePointDataAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
     search_fields = ('part_number__part_number', 'points', 'territory')
-    list_display = ('part_number', 'MRP', 'validity_from',
-                    'validity_to', 'territory', 'price', 'points')
+    list_display = ('part_number', 'validity_from', 'points',
+                    'validity_to', 'territory', 'price', 'MRP')
 
 class SparePartline(TabularInline):
     model = models.AccumulationRequest.upcs.through
