@@ -643,7 +643,7 @@ class NationalSalesManager(BaseModel):
         unique_together = ("nsm_id", "territory")
 
     def __unicode__(self):
-        return self.name
+        return self.name + "(" + self.territory + ")"
 
 class AreaSalesManager(BaseModel):
     '''details of Area Service Manager'''
@@ -659,7 +659,7 @@ class AreaSalesManager(BaseModel):
         unique_together = ("asm_id", "state")
 
     def __unicode__(self):
-        return self.name
+        return self.name + "(" + self.state + ")"
 
 class Distributor(BaseModel):
     '''details of Distributor'''
@@ -675,7 +675,7 @@ class Distributor(BaseModel):
         unique_together = ("distributor_id", "city")
 
     def __unicode__(self):
-        return self.distributor_id
+        return self.distributor_id + "(" + self.city + ")"
     
 class Retailer(BaseModel):
     '''details of Distributor'''
