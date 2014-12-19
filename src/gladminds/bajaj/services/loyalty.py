@@ -66,6 +66,9 @@ def accumulate_point(sms_dict, phone_number):
         if not mechanic:
             message=templates.get_template('UNREGISERED_USER')
             raise ValueError('Unregistered user')
+        elif mechanic and  mechanic[0].form_status=='Incomplete':
+            message=templates.get_template('INCOMPLETE_FORM')
+            raise ValueError('Incomplete user details')
         accumulation_log=models.AccumulationRequest(member=mechanic[0],
                                                     points=0,total_points=0)
         accumulation_log.save()

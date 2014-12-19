@@ -444,5 +444,14 @@
       "template": "Dear {mechanic_name}, Congratulations! Welcome to the Bajaj loyalty program. To Accumulate, Send SMS with Code AC UPC to 9561112809",
       "description": "welcome message to mechanic"
       }
+    },
+   {
+    "model": "gladminds.messagetemplate",
+    "pk": 50,
+    "fields": {
+      "template_key":"INCOMPLETE_FORM",
+      "template":"Incomplete form status. Please contact our customer care 9611545154 to complete the form",
+      "description":"Send this message when mechanic has incomplete form"
     }
+  }
 ]

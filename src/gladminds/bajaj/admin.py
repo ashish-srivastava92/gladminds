@@ -392,6 +392,13 @@ class MechanicAdmin(ModelAdmin):
         css_class = class_map.get(str(obj.form_status))
         if css_class:
             return {'class': css_class}
+        
+    def changelist_view(self, request, extra_context=None):
+        custom_search_mapping = {'District' : '^district',
+                                 'Distributor Id': '^registered_by_distributor__distributor_id',}
+        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping,
+                         'searchable_fields': 'District and  Distributor id'}
+        return super(MechanicAdmin, self).changelist_view(request, extra_context=extra_context)
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points')
@@ -399,7 +406,7 @@ class MechanicAdmin(ModelAdmin):
         return form
 
     def save_model(self, request, obj, form, change):
-        if not obj.mechanic_id:
+        if not obj.id:
             send_welcome_sms(obj)
             obj.sent_sms=True
         obj.phone_number=utils.mobile_format(obj.phone_number)
@@ -427,10 +434,8 @@ class SpareUPCDataAdmin(GmModelAdmin):
 class SparePointDataAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
     search_fields = ('part_number__part_number', 'points', 'territory')
-    list_display = ('part_number', 'MRP',
-                    'validity_to', 'validity_from',
-                    'territory', 'price',
-                    'points')
+    list_display = ('part_number', 'MRP', 'validity_from',
+                    'validity_to', 'territory', 'price', 'points')
 
 class SparePartline(TabularInline):
     model = models.AccumulationRequest.upcs.through
@@ -440,11 +445,10 @@ class AccumulationRequestAdmin(GmModelAdmin):
     list_filter = (
         ('created_date', DateFieldListFilter),
     )
-    search_fields = ('created_date',
-                     'member__phone_number', 'points')
-    list_display = ('created_date', 'member',
-                    'UPCS', 'asm', 'points', 'total_points')
-    inlines = (SparePartline,)
+    search_fields = ('member__phone_number', 'points')
+    list_display = ( 'member',  'asm', 'UPCS', 'points',
+                     'total_points', 'created_date')
+#     inlines = (SparePartline,)
     
     def UPCS(self, obj):
         upcs = obj.upcs.all()

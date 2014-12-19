@@ -14,6 +14,12 @@ class Command(BaseCommand):
         self.upload_part_upc_data()
         self.upload_part_point_data()
 
+    def empty_to_none(self, value):
+        if value=='':
+            return None
+        else:
+            return int(value)
+
     def upload_part_master_data(self):
         print "Started uploading part master..."
         file_list = ['PART_MASTER_DATA.csv']
@@ -93,11 +99,11 @@ class Command(BaseCommand):
                 for row_list in spamreader:
                     temp ={}
                     temp['part_no'] = row_list[0].strip()
-                    temp['MRP'] = row_list[1].strip()
-                    temp['valid_from'] = datetime.datetime.strptime(row_list[2].strip(), '%m/%d/%Y')
-                    temp['valid_to'] = datetime.datetime.strptime(row_list[3].strip(), '%m/%d/%Y')
+                    temp['MRP'] = self.empty_to_none(row_list[1].strip())
+                    temp['valid_from'] = datetime.datetime.strptime(row_list[2].strip(), '%d/%m/%Y')
+                    temp['valid_to'] = datetime.datetime.strptime(row_list[3].strip(), '%d/%m/%Y')
                     temp['territory'] = row_list[4].strip()
-                    temp['price'] = row_list[5].strip()
+                    temp['price'] = self.empty_to_none(row_list[5].strip())
                     temp['points'] = row_list[6].strip()
                     spare_list.append(temp)
         for spare in spare_list:
