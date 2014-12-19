@@ -419,6 +419,10 @@ class SpareUPCDataAdmin(GmModelAdmin):
     search_fields = ('part_number__part_number', 'unique_part_code')
     list_display = ('unique_part_code', 'part_number')
 
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('is_used',)
+        form = super(SpareUPCDataAdmin, self).get_form(request, obj, **kwargs)
+        return form
 
 class SparePointDataAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
