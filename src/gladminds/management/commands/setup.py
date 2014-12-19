@@ -30,10 +30,8 @@ _AFTERBUY_SUPERADMINS = [{'email':'naveen.shankar@gladminds.co', 'username':'nav
 _BAJAJ_LOYALTY_SUPERADMINS = [('gladminds', '', 'gladminds!123'),
                               ('kumarashish@bajajauto.co.in', 'kumarashish@bajajauto.co.in',
                                'kumarashish!123')]
-_BAJAJ_LOYALTY_NSM = [('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123', 'NSM002', 'south', 'Raghunath'),
-                      ('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123', 'NSM002', 'west', 'Raghunath'),]
-_BAJAJ_LOYALTY_ASM = [('spremnath@bajajauto.co.in', 'spremnath@bajajauto.co.in', 'spremnath!123', 'ASM004', 'PREM NATH', '+919176339712', 'Tamil Nadu'),
-                      ('spremnath@bajajauto.co.in', 'spremnath@bajajauto.co.in', 'spremnath!123', 'ASM004', 'PREM NATH', '+919176339712', 'Karnataka')]
+_BAJAJ_LOYALTY_NSM = [('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123', 'NSM002', 'south', 'Raghunath')]
+_BAJAJ_LOYALTY_ASM = [('spremnath@bajajauto.co.in', 'spremnath@bajajauto.co.in', 'spremnath!123', 'ASM004', 'PREM NATH', '+919176339712', 'Tamil Nadu')]
 
 class Command(BaseCommand):
 
@@ -103,8 +101,7 @@ class Command(BaseCommand):
             print "create loyalty nsm", details
             profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.NSMS)
             try: 
-                nsm_obj = NationalSalesManager.objects.get(user=profile_obj, nsm_id=details[3],
-                                                           territory=details[4])
+                nsm_obj = NationalSalesManager.objects.get(user=profile_obj, nsm_id=details[3])
             except:
                 nsm_obj = NationalSalesManager(user=profile_obj, nsm_id=details[3],
                                                name=details[5], email=details[0],
@@ -113,7 +110,7 @@ class Command(BaseCommand):
         for details in _BAJAJ_LOYALTY_ASM:
             print "create loyalty asm", details
             profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.ASMS)
-            if not AreaSalesManager.objects.filter(user=profile_obj, asm_id=details[3], state=details[6]).exists():
+            if not AreaSalesManager.objects.filter(user=profile_obj, asm_id=details[3]).exists():
                 asm_obj = AreaSalesManager(nsm=nsm_obj, user=profile_obj, asm_id=details[3],
                                              name=details[4], email=details[0],
                                              phone_number=details[5], state=details[6])

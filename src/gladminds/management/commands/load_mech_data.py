@@ -36,7 +36,7 @@ class Command(BaseCommand):
                     dealer_list.append(temp)
         
         for dealer in dealer_list:
-            dist_object = dist.objects.filter(distributor_id=dealer['id'], city=dealer['city'])
+            dist_object = dist.objects.filter(distributor_id=dealer['id'])
             if not dist_object:
                 dist_user_pro_object = user_profile.objects.filter(user__username=dealer['id'])
                 if not dist_user_pro_object:
@@ -52,7 +52,7 @@ class Command(BaseCommand):
                     dist_user_pro_object.save()
                 else:
                     dist_user_pro_object = dist_user_pro_object[0]
-                asm_object = asm.objects.get(asm_id=dealer['asm_id'], state='Tamil Nadu')
+                asm_object = asm.objects.get(asm_id=dealer['asm_id'])
                 dist_object = dist(distributor_id=dealer['id'],
                                           asm=asm_object,
                                           user=dist_user_pro_object,
@@ -132,7 +132,7 @@ class Command(BaseCommand):
                 else:
                     mech_id=mechanic['mech_id']
                 if mechanic['dist_id']:
-                    dist_object = dist.objects.get(distributor_id=mechanic['dist_id'], city=mechanic['district'])
+                    dist_object = dist.objects.get(distributor_id=mechanic['dist_id'])
                 else:
                     dist_object = None
                 

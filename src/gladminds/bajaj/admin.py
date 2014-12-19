@@ -399,7 +399,7 @@ class MechanicAdmin(ModelAdmin):
         return form
 
     def save_model(self, request, obj, form, change):
-        if not obj.mechanic_id:
+        if not obj.id:
             send_welcome_sms(obj)
             obj.sent_sms=True
         obj.phone_number=utils.mobile_format(obj.phone_number)
