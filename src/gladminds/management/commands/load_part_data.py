@@ -66,7 +66,7 @@ class Command(BaseCommand):
         file_list = ['PART_UPC_DATA.csv']
         spare_list = []
         spare_master = get_model('SparePartMasterData', APP)
-        spare_upc = get_model('SpareUPCData', APP)
+        spare_upc = get_model('SparePartUPC', APP)
         for i in range(0, 1):
             with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
@@ -91,7 +91,7 @@ class Command(BaseCommand):
         file_list = ['PART_POINTS_DATA.csv']
         spare_list = []
         spare_master = get_model('SparePartMasterData', APP)
-        spare_part = get_model('SparePointData', APP)
+        spare_part = get_model('SparePartPoint', APP)
         for i in range(0, 1):
             with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
@@ -115,7 +115,7 @@ class Command(BaseCommand):
                                           points = spare['points'],
                                           price = spare['price'],
                                           MRP = spare['MRP'],
-                                          validity_from = spare['valid_from'],
-                                          validity_to = spare['valid_to'],
+                                          valid_from = spare['valid_from'],
+                                          valid_till = spare['valid_to'],
                                           territory = spare['territory'])
                 spare_object.save()

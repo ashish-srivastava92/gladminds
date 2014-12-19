@@ -72,14 +72,14 @@ def accumulate_point(sms_dict, phone_number):
         accumulation_log=models.AccumulationRequest(member=mechanic[0],
                                                     points=0,total_points=0)
         accumulation_log.save()
-        spares = models.SpareUPCData.objects.get_spare_parts(unique_product_codes)
+        spares = models.SparePartUPC.objects.get_spare_parts(unique_product_codes)
         added_points=0
 
         for spare in spares:
             valid_product_number.append(spare.part_number)
             valid_ucp.append(spare.unique_part_code)
             accumulation_log.upcs.add(spare)
-        spare_points = models.SparePointData.objects.get_part_number(valid_product_number)
+        spare_points = models.SparePartPoint.objects.get_part_number(valid_product_number)
         for spare_point in spare_points:
             added_points=added_points+spare_point.points
         total_points=update_points(mechanic[0],accumulate=added_points)

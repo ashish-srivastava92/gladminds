@@ -421,21 +421,21 @@ class SparePartMasterAdmin(GmModelAdmin):
                     'product_type', 'category',
                     'segment_type',  'part_model', 'supplier')
 
-class SpareUPCDataAdmin(GmModelAdmin):
+class SparePartUPCAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
     search_fields = ('part_number__part_number', 'unique_part_code')
     list_display = ('unique_part_code', 'part_number')
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('is_used',)
-        form = super(SpareUPCDataAdmin, self).get_form(request, obj, **kwargs)
+        form = super(SparePartUPCAdmin, self).get_form(request, obj, **kwargs)
         return form
 
-class SparePointDataAdmin(GmModelAdmin):
+class SparePartPointAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
     search_fields = ('part_number__part_number', 'points', 'territory')
-    list_display = ('part_number', 'validity_from', 'points',
-                    'validity_to', 'territory', 'price', 'MRP')
+    list_display = ('part_number', 'points', 'valid_from',
+                    'valid_till', 'territory', 'price', 'MRP')
 
 class SparePartline(TabularInline):
     model = models.AccumulationRequest.upcs.through
@@ -483,8 +483,8 @@ brand_admin.register(models.Distributor, DistributorAdmin)
 brand_admin.register(models.Mechanic, MechanicAdmin)
 
 brand_admin.register(models.SparePartMasterData, SparePartMasterAdmin)
-brand_admin.register(models.SpareUPCData, SpareUPCDataAdmin)
-brand_admin.register(models.SparePointData, SparePointDataAdmin)
+brand_admin.register(models.SparePartUPC, SparePartUPCAdmin)
+brand_admin.register(models.SparePartPoint, SparePartPointAdmin)
 brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
 
 brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)

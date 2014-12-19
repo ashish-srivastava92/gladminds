@@ -199,7 +199,7 @@ class Command(BaseCommand):
             for permission in permissions:
                 group.permissions.add(permission)
             model_ids = []
-            for model in ['SparePartMasterData', 'SpareUPCData', 'SparePointData',
+            for model in ['SparePartMasterData', 'SparePartUPC', 'SparePartPoint',
                           'AccumulationRequest']:
                 model_ids.append(ContentType.objects.get(app_label__in=['bajaj', 'auth'], model=model).id)
             permissions = Permission.objects.using(brand).filter(content_type__id__in=model_ids,

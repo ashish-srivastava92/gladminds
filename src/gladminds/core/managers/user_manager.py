@@ -36,12 +36,12 @@ class MechanicManager(models.Manager):
     def get_mechanic(self, phone_number):
         return super(MechanicManager, self).get_query_set().filter(user__phone_number=phone_number)
 
-class SpareUPCDataManager(models.Manager):
+class SparePartUPCManager(models.Manager):
 
     def get_spare_parts(self, spare_product_codes):
-        return super(SpareUPCDataManager, self).get_query_set().filter(unique_part_code__in=spare_product_codes,is_used=False)
+        return super(SparePartUPCManager, self).get_query_set().filter(unique_part_code__in=spare_product_codes,is_used=False)
 
-class SparePointDataManager(models.Manager):
+class SparePartPointManager(models.Manager):
 
     def get_part_number(self, valid_product_number):
-        return super(SparePointDataManager, self).get_query_set().filter(part_number__in=valid_product_number)
+        return super(SparePartPointManager, self).get_query_set().filter(part_number__in=valid_product_number)
