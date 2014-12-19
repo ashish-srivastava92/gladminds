@@ -675,7 +675,7 @@ class Distributor(BaseModel):
         unique_together = ("distributor_id", "city")
 
     def __unicode__(self):
-        return self.distributor_id
+        return self.name
     
 class Retailer(BaseModel):
     '''details of Distributor'''
@@ -770,34 +770,34 @@ class SparePartMasterData(BaseModel):
     def __unicode__(self):
         return self.part_number
     
-class SpareUPCData(BaseModel):
+class SparePartUPC(BaseModel):
     '''details of Spare Part'''
     unique_part_code = models.CharField(max_length=50, unique=True)
     is_used = models.BooleanField(default=False)
     
-    objects = user_manager.SpareUPCDataManager()
+    objects = user_manager.SparePartUPCManager()
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Spare Parts"
+        verbose_name_plural = "Spare Part UPC"
 
     def __unicode__(self):
         return self.unique_part_code
 
-class SparePointData(BaseModel):
+class SparePartPoint(BaseModel):
     '''details of Spare Part'''
     points = models.IntegerField(max_length=50, null=True, blank=True)
     price = models.FloatField(max_length=50, null=True, blank=True)
     MRP = models.FloatField(max_length=50, null=True, blank=True)
-    validity_from =  models.DateTimeField(null=True, blank= True)
-    validity_to =  models.DateTimeField(null=True, blank= True)
+    valid_from =  models.DateTimeField(null=True, blank= True)
+    valid_till =  models.DateTimeField(null=True, blank= True)
     territory = models.CharField(max_length=50, null=True, blank=True)
     
-    objects = user_manager.SparePointDataManager()
+    objects = user_manager.SparePartPointManager()
     
     class Meta:
         abstract = True
-        verbose_name_plural = "Spare Points Data"
+        verbose_name_plural = "Spare Part Points"
 
     def __unicode__(self):
         return self.territory + ":" + str(self.points)

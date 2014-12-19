@@ -290,7 +290,7 @@ class SparePartMasterData(base_models.SparePartMasterData):
         app_label = _APP_NAME
 
 
-class SpareUPCData(base_models.SpareUPCData):
+class SparePartUPC(base_models.SparePartUPC):
     '''details of Spare Part'''
     part_number = models.ForeignKey(SparePartMasterData)
 
@@ -298,7 +298,7 @@ class SpareUPCData(base_models.SpareUPCData):
         app_label = _APP_NAME
 
 
-class SparePointData(base_models.SparePointData):
+class SparePartPoint(base_models.SparePartPoint):
     '''details of Spare Part'''
     part_number = models.ForeignKey(SparePartMasterData)
 
@@ -310,7 +310,7 @@ class AccumulationRequest(base_models.AccumulationRequest):
     '''details of Spare Part'''
 
     member = models.ForeignKey(Mechanic)
-    upcs = models.ManyToManyField(SpareUPCData)
+    upcs = models.ManyToManyField(SparePartUPC)
     asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
 
     class Meta:
