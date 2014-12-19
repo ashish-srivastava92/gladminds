@@ -364,14 +364,13 @@ class NSMAdmin(GmModelAdmin):
     list_display = ('nsm_id', 'name', 'email', 'phone_number','territory')
 
 class ASMAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.ASMS]
     search_fields = ('asm_id', 'nsm__name',
                      'phone_number', 'state')
     list_display = ('asm_id', 'name', 'email',
                      'phone_number', 'state', 'nsm')
 
 class DistributorAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
     search_fields = ('distributor_id', 'asm__asm_id',
                      'phone_number', 'city')
     list_display = ('distributor_id', 'name', 'email',
@@ -407,7 +406,7 @@ class MechanicAdmin(ModelAdmin):
         super(MechanicAdmin, self).save_model(request, obj, form, change)    
 
 class SparePartMasterAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
     search_fields = ('part_number', 'category',
                      'segment_type', 'supplier',
                      'product_type__product_type')
@@ -416,13 +415,13 @@ class SparePartMasterAdmin(GmModelAdmin):
                     'segment_type',  'part_model', 'supplier')
 
 class SpareUPCDataAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
     search_fields = ('part_number__part_number', 'unique_part_code')
     list_display = ('unique_part_code', 'part_number')
 
 
 class SparePointDataAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
     search_fields = ('part_number__part_number', 'points', 'territory')
     list_display = ('part_number', 'MRP',
                     'validity_to', 'validity_from',
@@ -433,7 +432,7 @@ class SparePartline(TabularInline):
     model = models.AccumulationRequest.upcs.through
 
 class AccumulationRequestAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
     list_filter = (
         ('created_date', DateFieldListFilter),
     )
