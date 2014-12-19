@@ -634,7 +634,7 @@ class NationalSalesManager(BaseModel):
     nsm_id = models.CharField(max_length=50)
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
-    phone_number = PhoneField(null=True, blank=True)
+    phone_number = PhoneField(skip_check=True, null=True, blank=True)
     territory = models.CharField(max_length=50, null=True, blank=True, unique=True)
 
     class Meta:
@@ -650,7 +650,7 @@ class AreaSalesManager(BaseModel):
     asm_id = models.CharField(max_length=50)
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
-    phone_number = PhoneField(null=True, blank=True)
+    phone_number = PhoneField(skip_check=True, null=True, blank=True)
     state = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
@@ -666,7 +666,7 @@ class Distributor(BaseModel):
     distributor_id = models.CharField(max_length=50)
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
-    phone_number = PhoneField(null=True, blank=True)
+    phone_number = PhoneField(skip_check=True, null=True, blank=True)
     city = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
@@ -697,7 +697,7 @@ class Mechanic(BaseModel):
 
     first_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True, blank=True)
-    phone_number = PhoneField(null=True, blank=True)
+    phone_number = PhoneField(skip_check=True, null=True, blank=True)
     date_of_birth = models.DateTimeField(null=True, blank= True)
 
     form_number = models.IntegerField(max_length=50, null=True, blank=True)
