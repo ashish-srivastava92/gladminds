@@ -168,8 +168,9 @@ def get_complain_data(sms_dict, phone_number, email, name, dealer_email, with_de
             task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
         else:
             send_coupon.delay(phone_number=phone_number, message=message)
-        context = utils.create_context('FEEDBACK_DETAIL_TO_DEALER',  gladminds_feedback_object)
-        send_dealer_feedback(context, dealer_email)
+        if dealer_email:
+            context = utils.create_context('FEEDBACK_DETAIL_TO_DEALER',  gladminds_feedback_object)
+            send_dealer_feedback(context, dealer_email)
         context = utils.create_context('FEEDBACK_DETAIL_TO_ADIM',  gladminds_feedback_object)
         send_feedback_received(context, manager_obj.email)
         context = utils.create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)
