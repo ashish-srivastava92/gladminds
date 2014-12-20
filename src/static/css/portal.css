@@ -125,8 +125,3 @@ textarea {
 .entry-text {
 	margin-left: -57px;
 }
-
-.form-horizontal .control-group .controls .mandatory-field
-{
-    border: 1px solid #F09C9C !important;
-}
