@@ -69,21 +69,25 @@ def accumulate_point(sms_dict, phone_number):
         elif mechanic and  mechanic[0].form_status=='Incomplete':
             message=templates.get_template('INCOMPLETE_FORM')
             raise ValueError('Incomplete user details')
-        accumulation_log=models.AccumulationRequest(member=mechanic[0],
-                                                    points=0,total_points=0)
-        accumulation_log.save()
         spares = models.SparePartUPC.objects.get_spare_parts(unique_product_codes)
         added_points=0
-
-        for spare in spares:
-            valid_product_number.append(spare.part_number)
-            valid_ucp.append(spare.unique_part_code)
-            accumulation_log.upcs.add(spare)
-        spare_points = models.SparePartPoint.objects.get_part_number(valid_product_number)
-        for spare_point in spare_points:
-            added_points=added_points+spare_point.points
-        total_points=update_points(mechanic[0],accumulate=added_points)
-        accumulation_log.points=added_points
+        total_points=mechanic[0].total_points
+        if spares:
+            accumulation_log=models.AccumulationRequest(member=mechanic[0],
+                                                    points=0,total_points=0)
+            accumulation_log.save()
+            for spare in spares:
+                valid_product_number.append(spare.part_number)
+                valid_ucp.append(spare.unique_part_code)
+                accumulation_log.upcs.add(spare)
+            spare_points = models.SparePartPoint.objects.get_part_number(valid_product_number)
+            for spare_point in spare_points:
+                added_points=added_points+spare_point.points
+            total_points=update_points(mechanic[0],accumulate=added_points)
+            accumulation_log.points=added_points
+            spares.update(is_used=True)
+            accumulation_log.total_points=total_points
+            accumulation_log.save()
         invalid_upcs = list(set(unique_product_codes).difference(valid_ucp))
         if invalid_upcs:
             invalid_upcs_message=' List of invalid part code: {0}.'.format(
@@ -93,9 +97,7 @@ def accumulate_point(sms_dict, phone_number):
                         added_points=added_points,
                         total_points=total_points,
                         invalid_upcs=invalid_upcs_message)
-        spares.update(is_used=True)
-        accumulation_log.total_points=total_points
-        accumulation_log.save()
+        
     except Exception as ex:
         LOG.error('[accumulate_point]:{0}:: {1}'.format(phone_number, ex))
     finally:

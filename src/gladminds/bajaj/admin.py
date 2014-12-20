@@ -440,16 +440,26 @@ class AccumulationRequestAdmin(GmModelAdmin):
         ('created_date', DateFieldListFilter),
     )
     search_fields = ('member__phone_number', 'points')
-    list_display = ( 'member',  'asm', 'UPCS', 'points',
+    list_display = ( 'member',  'get_mechanic_name', 'get_mechanic_city',
+                     'asm', 'get_upcs', 'points',
                      'total_points', 'created_date')
-#     inlines = (SparePartline,)
+
+    def get_mechanic_name(self, obj):
+        return obj.member.first_name
     
-    def UPCS(self, obj):
+    def get_mechanic_city(self, obj):
+        return obj.member.district
+    
+    def get_upcs(self, obj):
         upcs = obj.upcs.all()
         if upcs:
             return ' | '.join([str(upc.unique_part_code) for upc in upcs])
         else:
             return None
+    
+    get_mechanic_name.short_description = 'Name'
+    get_mechanic_city.short_description = 'City'
+    get_upcs.short_description = 'UPC'
 
 brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
 
