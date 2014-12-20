@@ -376,10 +376,11 @@ class DistributorAdmin(GmModelAdmin):
     list_display = ('distributor_id', 'name', 'email',
                     'phone_number', 'city', 'asm')
 
-class MechanicAdmin(ModelAdmin):
+class MechanicAdmin(GmModelAdmin):
     list_filter = ('form_status',)
-    search_fields = ('mechanic_id', 'state', 'district', 
-                     'phone_number', 'first_name')
+    search_fields = ('mechanic_id',
+                     'phone_number', 'first_name',
+                     'state', 'district')
     list_display = ('mechanic_id','first_name', 'date_of_birth',
                     'phone_number', 'shop_name', 'district',
                     'state', 'pincode', 'registered_by_distributor')
@@ -392,13 +393,6 @@ class MechanicAdmin(ModelAdmin):
         css_class = class_map.get(str(obj.form_status))
         if css_class:
             return {'class': css_class}
-        
-    def changelist_view(self, request, extra_context=None):
-        custom_search_mapping = {'District' : '^district',
-                                 'Distributor Id': '^registered_by_distributor__distributor_id',}
-        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping,
-                         'searchable_fields': 'District and  Distributor id'}
-        return super(MechanicAdmin, self).changelist_view(request, extra_context=extra_context)
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points')
