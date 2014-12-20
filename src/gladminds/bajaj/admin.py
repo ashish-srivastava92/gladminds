@@ -6,6 +6,7 @@ from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.conf import settings
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.contrib.admin import DateFieldListFilter
+from django import forms
 
 from gladminds.bajaj import models
 from gladminds.bajaj.services.loyalty import send_welcome_sms
@@ -376,8 +377,18 @@ class DistributorAdmin(GmModelAdmin):
     list_display = ('distributor_id', 'name', 'email',
                     'phone_number', 'city', 'asm')
 
+class MechanicForm(forms.ModelForm):
+    class Meta:
+        model = models.Mechanic
+
+    def __init__(self, *args, **kwargs):
+        super(MechanicForm, self).__init__(*args, **kwargs)
+        for field in constants.MANDATORY_MECHANIC_FIELDS:
+            self.fields[field].widget.attrs.update({'class' : 'mandatory-field'})
+
 class MechanicAdmin(GmModelAdmin):
     list_filter = ('form_status',)
+    form = MechanicForm
     search_fields = ('mechanic_id',
                      'phone_number', 'first_name',
                      'state', 'district')
