@@ -216,6 +216,6 @@ class Command(BaseCommand):
                                                                      codename__contains='change_')
                 for permission in permissions:
                     group.permissions.add(permission)
-            group.save(using=brand)
+                group.save(using=brand)
         except Exception as ex:
-            print "[set_bajaj_permissions]: ", ex
+            print "[upload_part_data]: ", ex
