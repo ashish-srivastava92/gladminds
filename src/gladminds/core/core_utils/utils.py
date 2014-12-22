@@ -21,3 +21,16 @@ def generate_temp_id(prefix_value):
 def generate_mech_id():
     mechanic_id=generate_temp_id('TME')
     return mechanic_id
+
+
+def debug(fn):
+    '''
+    Use as print utility
+    :param fn:
+    :type fn:
+    '''
+    def wrapper(*args, **kwargs):
+        result = fn(*args, **kwargs)
+        print 'name:{0} args:{1} kwargs:{2} result: {3}'.format(fn.__name__, args, kwargs, result)
+        return result
+    return wrapper
