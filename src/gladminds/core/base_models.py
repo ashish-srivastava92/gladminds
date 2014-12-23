@@ -516,6 +516,15 @@ class DataFeedLog(models.Model):
         verbose_name_plural = "Feed Log"
 
 
+class FeedFailureLog(models.Model):
+    '''details of all the feeds that failed'''
+    feed_type = models.CharField(max_length=50, null=False)
+    reason = models.CharField(max_length=2048, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Feed failure log"
+
 class AuditLog(BaseModel):
     '''details of the requests received'''
     device = models.CharField(max_length=250, null=True, blank=True)

@@ -223,6 +223,13 @@ class DataFeedLog(base_models.DataFeedLog):
         verbose_name_plural = "Feed Log"
 
 
+class FeedFailureLog(base_models.FeedFailureLog):
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Feed Failure Log"
+
+
 class AuditLog(base_models.AuditLog):
     user = models.ForeignKey(UserProfile)
 

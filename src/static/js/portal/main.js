@@ -71,7 +71,7 @@
             success: function(data){
               if (data['phone']) {
                   $('.customer-phone').val(data['phone']).attr('readOnly', true);
-            	  if (data['group']=='AuthorisedServiceCenters'){
+            	  if (data['group']=='AuthorisedServiceCenters' || data['group']=='Dealers'){
             		  $('.customer-phone').val(data['phone']).attr('readOnly', false);
             	}
                   $('.customer-name').val(data['name']).attr('readOnly', true);
