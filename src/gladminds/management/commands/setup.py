@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
-
+from django.db.transaction import atomic
 from django.contrib.auth.models import User, Permission, Group
 from django.conf import settings
 from gladminds.afterbuy.models import Consumer
@@ -30,8 +30,8 @@ _AFTERBUY_SUPERADMINS = [{'email':'naveen.shankar@gladminds.co', 'username':'nav
 _BAJAJ_LOYALTY_SUPERADMINS = [('gladminds', '', 'gladminds!123'),
                               ('kumarashish@bajajauto.co.in', 'kumarashish@bajajauto.co.in',
                                'kumarashish!123')]
-_BAJAJ_LOYALTY_NSM = [('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123', 'NSM002')]
-_BAJAJ_LOYALTY_ASM = [('spremnath@bajajauto.co.in', 'spremnath@bajajauto.co.in', 'spremnath!123', 'ASM004')]
+_BAJAJ_LOYALTY_NSM = [('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123', 'NSM002', 'south', 'Raghunath')]
+_BAJAJ_LOYALTY_ASM = [('spremnath@bajajauto.co.in', 'spremnath@bajajauto.co.in', 'spremnath!123', 'ASM004', 'PREM NATH', '+919176339712', 'Tamil Nadu')]
 
 class Command(BaseCommand):
 
@@ -49,6 +49,7 @@ class Command(BaseCommand):
         self.set_afterbuy_permissions()
         self.upload_loyalty_user()
         self.upload_part_data()
+        self.set_bajaj_permissions()
 
     def define_groups(self):
         for group in AFTERBUY_GROUPS:
@@ -89,26 +90,34 @@ class Command(BaseCommand):
             self.create_consumer(details, Roles.ADMINS)
         for details in _AFTERBUY_SUPERADMINS:
             self.create_consumer(details, Roles.SUPERADMINS)
-
+    
+    @atomic
     def create_bajaj_admins(self):
-        from gladminds.bajaj.models import AreaServiceManager, NationalSalesManager
-        for details in _BAJAJ_LOYALTY_SUPERADMINS:
-            print "create loyalty superadmin", details
-            self.create_user_profile(details, GmApps.BAJAJ, Roles.LOYALTYSUPERADMINS)
-        for details in _BAJAJ_LOYALTY_NSM:
-            print "create loyalty nsm", details
-            profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.NSMS)
-            try: 
-                nsm_obj = NationalSalesManager.objects.get(user=profile_obj, nsm_id=details[3])
-            except:
-                nsm_obj = NationalSalesManager(user=profile_obj, nsm_id=details[3])
-                nsm_obj.save()
-        for details in _BAJAJ_LOYALTY_ASM:
-            print "create loyalty asm", details
-            profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.ASMS)
-            if not AreaServiceManager.objects.filter(user=profile_obj, nsm=nsm_obj, asm_id=details[3]).exists():
-                asm_obj = AreaServiceManager(nsm=nsm_obj, user=profile_obj, asm_id=details[3])
-                asm_obj.save()
+        from gladminds.bajaj.models import AreaSalesManager, NationalSalesManager
+        try:
+            for details in _BAJAJ_LOYALTY_SUPERADMINS:
+                print "create loyalty superadmin", details
+                self.create_user_profile(details, GmApps.BAJAJ, Roles.LOYALTYSUPERADMINS)
+            for details in _BAJAJ_LOYALTY_NSM:
+                print "create loyalty nsm", details
+                profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.NSMS)
+                try: 
+                    nsm_obj = NationalSalesManager.objects.get(user=profile_obj, nsm_id=details[3])
+                except:
+                    nsm_obj = NationalSalesManager(user=profile_obj, nsm_id=details[3],
+                                                   name=details[5], email=details[0],
+                                                               territory=details[4])
+                    nsm_obj.save()
+            for details in _BAJAJ_LOYALTY_ASM:
+                print "create loyalty asm", details
+                profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.ASMS)
+                if not AreaSalesManager.objects.filter(user=profile_obj, asm_id=details[3]).exists():
+                    asm_obj = AreaSalesManager(nsm=nsm_obj, user=profile_obj, asm_id=details[3],
+                                                 name=details[4], email=details[0],
+                                                 phone_number=details[5], state=details[6])
+                    asm_obj.save()
+        except Exception as ex:
+            print "[create_bajaj_admins]: ", ex
 
     def create_user_profile(self, details, app, group=None):
         users = User.objects.filter(username=details[0]).using(app)
@@ -122,11 +131,11 @@ class Command(BaseCommand):
             admin.save(using=app)
             if group:
                 add_user_to_group(app, admin.id, group)
-        UserProfile = get_model('UserProfile', app)
+        user_profile_class = get_model('UserProfile', app)
         try:
-            return UserProfile.objects.get(user=admin)
+            return user_profile_class.objects.get(user=admin.id)
         except:
-            profile_obj = UserProfile(user=admin)
+            profile_obj = user_profile_class(user=admin)
             profile_obj.save()
             return profile_obj
 
@@ -171,12 +180,42 @@ class Command(BaseCommand):
         '''
         Uploads distributor and mechanic data
         '''
-        mech_data = mech_cmd()
-        mech_data.handle()
+        try:
+            mech_data = mech_cmd()
+            mech_data.handle()
+        except Exception as ex:
+            print "[upload_loyalty_user]: ", ex
+        
 
     def upload_part_data(self):
         '''
         uploads parts data
         '''
-        part_data = part_cmd()
-        part_data.handle()
+        try:
+            part_data = part_cmd()
+            part_data.handle()
+        except Exception as ex:
+            print "[upload_part_data]: ", ex
+
+    def set_bajaj_permissions(self):
+        try:
+            brand = GmApps.BAJAJ
+            for group in [Roles.ASMS, Roles.NSMS]:
+                model_ids = []
+                for model in ['Distributor', 'Retailer', 'Mechanic']:
+                    model_ids.append(ContentType.objects.get(app_label__in=['bajaj', 'auth'], model=model).id)
+                permissions = Permission.objects.using(brand).filter(content_type__id__in=model_ids)
+                group = Group.objects.using(brand).get(name=group)
+                for permission in permissions:
+                    group.permissions.add(permission)
+                model_ids = []
+                for model in ['SparePartMasterData', 'SparePartUPC', 'SparePartPoint',
+                              'AccumulationRequest']:
+                    model_ids.append(ContentType.objects.get(app_label__in=['bajaj', 'auth'], model=model).id)
+                permissions = Permission.objects.using(brand).filter(content_type__id__in=model_ids,
+                                                                     codename__contains='change_')
+                for permission in permissions:
+                    group.permissions.add(permission)
+                group.save(using=brand)
+        except Exception as ex:
+            print "[upload_part_data]: ", ex

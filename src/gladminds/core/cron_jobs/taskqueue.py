@@ -66,7 +66,7 @@ class SqsTaskQueue(TaskQueue):
     def __init__(self, sqs_name, brand):
         self._conn = SQSConnection()
         self._q = self._conn.get_queue(sqs_name)
-        self.brand = self.brand
+        self.brand = brand
 
     def add(self, task_name, task_params=None, delay_seconds=None, **kwargs):
         task_params = task_params or {}

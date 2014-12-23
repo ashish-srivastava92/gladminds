@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 
 from gladminds.core import base_models
 from gladminds.core.auth_helper import GmApps
+from django.conf import settings
+from gladminds.core.model_helpers import validate_image
 
 _APP_NAME = GmApps.BAJAJ
 
@@ -226,58 +228,59 @@ class AuditLog(base_models.AuditLog):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "Audit Log"
+
 
 class SLA(base_models.SLA):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "SLA config"
+
 
 class NationalSalesManager(base_models.NationalSalesManager):
     '''details of National Sales Manager'''
-    user = models.OneToOneField(UserProfile, primary_key=True,
-                                related_name='bajaj_national_sales_manager')
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "national sales manager"
 
-class AreaServiceManager(base_models.AreaServiceManager):
+
+class AreaSalesManager(base_models.AreaSalesManager):
     '''details of Area Service Manager'''
-    user = models.OneToOneField(UserProfile, primary_key=True,
-                                related_name='bajaj_area_service_manager')
+    '''details of National Sales Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
     nsm = models.ForeignKey(NationalSalesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "area service manager"
+
 
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
-    user = models.OneToOneField(UserProfile, primary_key=True,
-                                related_name='bajaj_distributor')
-    asm = models.ForeignKey(AreaServiceManager, null=True, blank=True)
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "distributor"
+
 
 class Retailer(base_models.Retailer):
     '''details of retailer'''
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "retailers"
+
 
 class Mechanic(base_models.Mechanic):
     '''details of Mechanic'''
-    registered_by = models.ForeignKey(Distributor, null=True, blank=True)
+    registered_by_distributor = models.ForeignKey(Distributor, null=True, blank=True)
     preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
+    image_url = models.FileField(upload_to='{0}/bajaj/mechanics'.format(settings.ENV),
+                                  max_length=255, null=True, blank=True,
+                                  validators=[validate_image])
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "mechanics"
+
 
 class SparePartMasterData(base_models.SparePartMasterData):
     '''details of Spare Part'''
@@ -285,23 +288,30 @@ class SparePartMasterData(base_models.SparePartMasterData):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "spare parts master"
 
-class SparePart(base_models.SparePart):
+
+class SparePartUPC(base_models.SparePartUPC):
     '''details of Spare Part'''
     part_number = models.ForeignKey(SparePartMasterData)
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "spare parts"
+
+
+class SparePartPoint(base_models.SparePartPoint):
+    '''details of Spare Part'''
+    part_number = models.ForeignKey(SparePartMasterData)
+
+    class Meta:
+        app_label = _APP_NAME
+
 
 class AccumulationRequest(base_models.AccumulationRequest):
     '''details of Spare Part'''
 
     member = models.ForeignKey(Mechanic)
-    upcs = models.ManyToManyField(SparePart)
-    asm = models.ForeignKey(AreaServiceManager, null=True, blank=True)
+    upcs = models.ManyToManyField(SparePartUPC)
+    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "accumulation request"
