@@ -226,6 +226,7 @@ class CouponData(BaseModel):
     credit_date = models.DateTimeField(null=True, blank=True)
     credit_note = models.CharField(max_length=50, null=True, blank=True)
     special_case = models.BooleanField(default=False)
+    servicing_dealer = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -278,8 +279,17 @@ class OldFscData(BaseModel):
 
     class Meta:
         abstract = True
-        app_label = "gladminds"
         verbose_name_plural = "Old Coupon Information"
+
+class CDMSData(BaseModel):
+    received_date = models.DateTimeField(null=True, blank=True)
+    cdms_date = models.DateTimeField(null=True, blank=True)
+    cdms_doc_number = models.CharField(max_length=25, null=True, blank=True)
+    remarks = models.CharField(max_length=250, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "CDMS Information"
 
 ##################################################################
 ####################Message Template DB Storage###################
