@@ -17,7 +17,7 @@ def get_email_template(key):
     return template_object[0]
 
 
-def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER, title='GCP_Bajaj_FSC_Feeds'
+def send_email(sender, receiver, subject, body, message=None,smtp_server=settings.MAIL_SERVER, title='GCP_Bajaj_FSC_Feeds'
                , brand='bajaj'):
     try:
         msg = MIMEText(body, 'html', _charset='utf-8')
@@ -30,7 +30,7 @@ def send_email(sender, receiver, subject, body, smtp_server=settings.MAIL_SERVER
         mail = smtplib.SMTP(smtp_server)
         mail.sendmail(from_addr=sender, to_addrs=receiver, msg=msg.as_string())
         mail.quit()
-        audit_manager.email_log(subject, body, sender, receiver, brand=brand);
+        audit_manager.email_log(subject, message, sender, receiver, brand=brand);
         return True
     except Exception as ex:
         logger.error('Exception while sending mail: {0}'.format(ex))
@@ -212,7 +212,7 @@ def send_ucn_request_alert(data=None):
     except Exception as ex:
         logger.info("[Exception ucn request email]: {0}".format(ex))
     
-def send_feedback_received(data, receiver_email):
+def send_feedback_received(data, receiver_email, message):
     try:
         file_stream = open(settings.EMAIL_DIR+'/base_email_template.html')
         feed_temp = file_stream.read()
@@ -220,12 +220,12 @@ def send_feedback_received(data, receiver_email):
         context = Context({"content": data['content']})
         body = template.render(context)
         send_email(sender = data['sender'], receiver = receiver_email, 
-                   subject = data['subject'], body = body, 
+                   subject = data['subject'], body = body, message=message,
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception feedback received email]: {0}".format(ex))
 
-def send_due_date_exceeded(data, receiver_email):
+def send_due_date_exceeded(data, receiver_email, message):
     try:
         file_stream = open(settings.EMAIL_DIR+'/base_email_template.html')
         feed_temp = file_stream.read()
@@ -233,13 +233,13 @@ def send_due_date_exceeded(data, receiver_email):
         context = Context({"content": data['content']})
         body = template.render(context)
         send_email(sender = data['sender'], receiver = receiver_email, 
-                   subject = data['subject'], body = body, 
+                   subject = data['subject'], body = body, message=message,
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception due date exceeded email]: {0}".format(ex))
 
 
-def send_due_date_reminder(data, receiver_email):
+def send_due_date_reminder(data, receiver_email, message):
     try:
         file_stream = open(settings.EMAIL_DIR+'/base_email_template.html')
         feed_temp = file_stream.read()
@@ -247,20 +247,20 @@ def send_due_date_reminder(data, receiver_email):
         context = Context({"content": data['content']})
         body = template.render(context)
         send_email(sender = data['sender'], receiver = receiver_email, 
-                   subject = data['subject'], body = body, 
+                   subject = data['subject'], body = body, message=message,
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception due date reminder email]: {0}".format(ex))
         
-def send_servicedesk_feedback(data, reporter_email_id):
+def send_servicedesk_feedback(data, reporter_email_id, message):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                            data, receiver= reporter_email_id)
+                            data, receiver= reporter_email_id, message=message)
     except Exception as ex:
         logger.info("[Exception feedback initiator email]  {0}".format(ex))
 
-def send_dealer_feedback(data, dealer_email):
+def send_dealer_feedback(data, dealer_email, message):
     try:
         file_stream = open(settings.EMAIL_DIR+'/base_email_template.html')
         feed_temp = file_stream.read()
@@ -268,72 +268,72 @@ def send_dealer_feedback(data, dealer_email):
         context = Context({"content": data['content']})
         body = template.render(context)
         send_email(sender = data['sender'], receiver = dealer_email, 
-                   subject = data['subject'], body = body, 
+                   subject = data['subject'], body = body, message=message,
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception dealer feedback email]: {0}".format(ex))
         
 
-def send_email_to_assignee(data, assignee_email):
+def send_email_to_assignee(data, assignee_email, message):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                             data, receiver = assignee_email)
+                             data, receiver = assignee_email, message=message)
     except Exception as ex:
         logger.info("[Exception feedback receiver email]  {0}".format(ex)) 
         
-def send_email_to_initiator_after_issue_assigned(data, reporter_email):
+def send_email_to_initiator_after_issue_assigned(data, reporter_email, message):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                            data, receiver=reporter_email)
+                            data, receiver=reporter_email, message=message)
     except Exception as ex:
         logger.info("[Exception feedback initiator after issue assigned email]  {0}".format(ex)) 
 
-def send_email_to_dealer_after_issue_assigned(data, dealer_email):
+def send_email_to_dealer_after_issue_assigned(data, dealer_email, message):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                            data, receiver=dealer_email)
+                            data, receiver=dealer_email, message=message)
     except Exception as ex:
         logger.info("[Exception feedback initiator after issue assigned email]  {0}".format(ex)) 
 
-def send_email_to_initiator_after_issue_resolved(data, feedback_obj, host, reporter_email):
+def send_email_to_initiator_after_issue_resolved(data, feedback_obj, host, reporter_email, message):
     try:
         context = Context({"content": data['content'],
                             "id":feedback_obj.id,
                             "url":host,
                             })
         send_template_email("initiator_feedback_resolved.html", context,
-                            data, receiver=reporter_email)
+                            data, receiver=reporter_email, message=message)
     except Exception as ex:
         logger.info("[Exception feedback initiator after issue resloved email]  {0}".format(ex))
 
-def send_email_to_initiator_when_due_date_is_changed(data, reporter_email):
+def send_email_to_initiator_when_due_date_is_changed(data, reporter_email, message):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                            data, receiver=reporter_email)
+                            data, receiver=reporter_email, message=message)
     except Exception as ex:
         logger.info("[Exception feedback initiator on change of due date]  {0}".format(ex)) 
 
         
-def send_email_to_bajaj_after_issue_resolved(data):
+def send_email_to_bajaj_after_issue_resolved(data, message):
     try:
         context = Context({"content": data['content']})
-        send_template_email("base_email_template.html", context, data)
+        send_template_email("base_email_template.html", context, data, message=message)
     except Exception as ex:
         logger.info("[Exception fail to send mail to bajaj]  {0}".format(ex)) 
 
-def send_email_to_manager_after_issue_resolved(data, manager_obj):
+def send_email_to_manager_after_issue_resolved(data, manager_obj, message):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                             data, receiver = manager_obj.email_id)
+                             data, receiver = manager_obj.email_id, message=message,)
     except Exception as ex:
         logger.info("[Exception fail to send mail to manager]  {0}".format(ex))         
            
-def send_template_email(template_name, context, mail_detail,receiver=None): 
+def send_template_email(template_name, context, mail_detail,receiver=None, message=None): 
     '''generic function use for send mail for any html template'''
     
     file_stream = open(settings.EMAIL_DIR+'/'+ template_name)
@@ -343,7 +343,7 @@ def send_template_email(template_name, context, mail_detail,receiver=None):
     if receiver is None:
         receiver =  mail_detail['receiver']
     send_email(sender =  mail_detail['sender'], receiver = receiver, 
-               subject = mail_detail['newsubject'], body = body, 
+               subject = mail_detail['newsubject'], body = body, message=message,
                smtp_server = settings.MAIL_SERVER)
     logger.info("Mail sent successfully")
     #TODO We have to remove hard code receiver
