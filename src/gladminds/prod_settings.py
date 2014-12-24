@@ -107,7 +107,7 @@ SAP_CRM_DETAIL = {
                   'username':'pisuper',
                   'password':'welcome123'
                   }
-ASC_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/asc-feed/?wsdl&v0"
+ASC_WSDL_URL = "http://bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
 COUPON_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/redeem-feed/?wsdl&v0"
 COUPON_WSDL = 'prod_coupon_redeem.wsdl'
 CUSTOMER_REGISTRATION_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/customer-feed/?wsdl&v0"
