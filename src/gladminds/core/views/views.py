@@ -409,7 +409,7 @@ def trigger_sqs_tasks(request):
     }
 
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)
-    taskqueue.add(sqs_tasks[request.POST['task']])
+    taskqueue.add(sqs_tasks[request.POST['task']], settings.BRAND)
     return HttpResponse()
 
 
