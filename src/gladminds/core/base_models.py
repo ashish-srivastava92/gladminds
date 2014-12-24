@@ -55,7 +55,7 @@ class UserProfile(BaseModel):
         abstract = True
 
     def __unicode__(self):
-        return str(self.phone_number or '') + self.user.username
+        return str(self.phone_number or ' ') + self.user.username
 
 
 class Industry(BaseModel):
