@@ -408,7 +408,7 @@ def trigger_sqs_tasks(request):
         'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk'
     }
 
-    taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME)
+    taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)
     taskqueue.add(sqs_tasks[request.POST['task']])
     return HttpResponse()
 
