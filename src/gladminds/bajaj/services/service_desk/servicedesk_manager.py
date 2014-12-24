@@ -170,12 +170,11 @@ def get_complain_data(sms_dict, phone_number, email, name, dealer_email, with_de
             send_coupon.delay(phone_number=phone_number, message=message)
         if dealer_email:
             context = utils.create_context('FEEDBACK_DETAIL_TO_DEALER', gladminds_feedback_object)
-            send_dealer_feedback(context, dealer_email, context['content'])
+            send_dealer_feedback(context, dealer_email)
         context = utils.create_context('FEEDBACK_DETAIL_TO_ADIM', gladminds_feedback_object)
-        send_feedback_received(context, manager_obj.email, context['content'])
+        send_feedback_received(context, manager_obj.email)
         context = utils.create_context('FEEDBACK_CONFIRMATION', gladminds_feedback_object)
-        send_servicedesk_feedback(context, get_reporter_details(gladminds_feedback_object.reporter, "email"),
-                                  context['content'])
+        send_servicedesk_feedback(context, get_reporter_details(gladminds_feedback_object.reporter, "email"))
         sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
     return {'status': True, 'message': message}
 
@@ -230,11 +229,11 @@ def get_reporter_details(reporter, value="phone_number"):
 
 def send_mail_to_reporter(reporter_email_id, feedback_obj, template):
     context = create_context(template, feedback_obj)
-    mail.send_email_to_initiator_when_due_date_is_changed(context, reporter_email_id, context['content'])
+    mail.send_email_to_initiator_when_due_date_is_changed(context, reporter_email_id)
 
 def send_mail_to_dealer(feedback_obj, email_id, template):
     context = create_context(template, feedback_obj)
-    mail.send_email_to_dealer_after_issue_assigned(context, email_id, context['content'])
+    mail.send_email_to_dealer_after_issue_assigned(context, email_id)
 
 def update_feedback_activities(feedback, action, original_value, new_value):
     feedback_activity = models.Activity(feedback=feedback, action=action, original_value=original_value,
@@ -353,7 +352,7 @@ def save_update_feedback(feedback_obj, data, user, host):
                                  feedback_obj)
         if reporter_email_id:
             mail.send_email_to_initiator_after_issue_assigned(context,
-                                                         reporter_email_id, context['content'])
+                                                         reporter_email_id)
         else:
             LOG.info("Reporter emailId not found.")
             dealer_asc_obj = models.ServiceAdvisor.objects.get_dealer_asc_obj(feedback_obj.reporter)
@@ -361,7 +360,7 @@ def save_update_feedback(feedback_obj, data, user, host):
                 context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL_TO_DEALER',
                                  feedback_obj)
                 mail.send_email_to_dealer_after_issue_assigned(context,
-                                                         dealer_asc_obj.user.user.email, context['content'])
+                                                         dealer_asc_obj.user.user.email)
             else:
                 LOG.info("Dealer / Asc emailId not found.")
 
@@ -390,7 +389,7 @@ def save_update_feedback(feedback_obj, data, user, host):
             context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL',
                                   feedback_obj, comments[0])
             mail.send_email_to_initiator_after_issue_resolved(context,
-                                                          feedback_obj, host, reporter_email_id, context['content'])
+                                                          feedback_obj, host, reporter_email_id)
         else:
             LOG.info("Reporter emailId not found.")
             dealer_asc_obj = models.ServiceAdvisor.objects.get_dealer_asc_obj(feedback_obj.reporter)
@@ -398,16 +397,16 @@ def save_update_feedback(feedback_obj, data, user, host):
                 context = create_context('FEEDBACK_RESOLVED_MAIL_TO_DEALER',
                                  feedback_obj)
                 mail.send_email_to_dealer_after_issue_assigned(context,
-                                                         dealer_asc_obj.user.user.email, context['content'])
+                                                         dealer_asc_obj.user.user.email)
             else:
                 LOG.info("Dealer / Asc emailId not found.")
                     
         context = create_context('TICKET_RESOLVED_DETAIL_TO_BAJAJ',
                                  feedback_obj)
-        mail.send_email_to_bajaj_after_issue_resolved(context, context['content'])
+        mail.send_email_to_bajaj_after_issue_resolved(context)
         context = create_context('TICKET_RESOLVED_DETAIL_TO_MANAGER',
                                  feedback_obj)
-        mail.send_email_to_manager_after_issue_resolved(context, servicedesk_obj_all[0], context['content'])
+        mail.send_email_to_manager_after_issue_resolved(context, servicedesk_obj_all[0])
         send_sms('INITIATOR_FEEDBACK_STATUS', reporter_phone_number,
                  feedback_obj)
     
@@ -423,7 +422,7 @@ def save_update_feedback(feedback_obj, data, user, host):
                                        feedback_obj.assignee.user_profile.phone_number)
             context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL',
                                       feedback_obj)
-            mail.send_email_to_assignee(context, feedback_obj.assignee.user_profile.user.email, context['content'])
+            mail.send_email_to_assignee(context, feedback_obj.assignee.user_profile.user.email)
             send_sms('SEND_MSG_TO_ASSIGNEE',
                      feedback_obj.assignee.user_profile.phone_number,
                      feedback_obj, comment_object)
