@@ -498,7 +498,7 @@ class EmailLog(BaseModel):
         abstract = True
         verbose_name_plural = "Email Log"
 
-class DataFeedLog(models.Model):
+class DataFeedLog(BaseModel):
     '''details of the feeds sent and received'''
     data_feed_id = models.AutoField(primary_key=True)
     feed_type = models.CharField(max_length=50, null=False)
@@ -516,7 +516,7 @@ class DataFeedLog(models.Model):
         verbose_name_plural = "Feed Log"
 
 
-class FeedFailureLog(models.Model):
+class FeedFailureLog(BaseModel):
     '''details of all the feeds that failed'''
     feed_type = models.CharField(max_length=50, null=False)
     reason = models.CharField(max_length=2048, null=True, blank=True)

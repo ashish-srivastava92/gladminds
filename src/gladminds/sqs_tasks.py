@@ -389,6 +389,46 @@ def send_report_mail_for_feed(*args, **kwargs):
     mail.feed_report(feed_data=feed_data)
 
 '''
+Cron Job to send dispatch feed failure email
+'''
+
+def send_mail_for_dispatch_feed_failure(*args, **kwargs):
+    day = kwargs['day_duration']
+    today = datetime.now().date()
+    start_date = today - timedelta(days=day)
+    end_date = today + timedelta(days=1)
+    feed_data = taskmanager.get_feed_failure_log_detail(
+        start_date=start_date, end_date=end_date, type='Dispatch Feed')
+    mail.feed_failure(feed_data=feed_data)
+
+'''
+Cron Job to send purchase feed failure email
+'''
+
+def send_mail_for_purchase_feed_failure(*args, **kwargs):
+    day = kwargs['day_duration']
+    today = datetime.now().date()
+    start_date = today - timedelta(days=day)
+    end_date = today + timedelta(days=1)
+    feed_data = taskmanager.get_feed_failure_log_detail(
+        start_date=start_date, end_date=end_date, type='Purchase Feed')
+    mail.feed_failure(feed_data=feed_data)
+
+'''
+Cron Job to send Credit Note feed failure email
+'''
+
+def send_mail_for_credit_note_feed_failure(*args, **kwargs):
+    day = kwargs['day_duration']
+    today = datetime.now().date()
+    start_date = today - timedelta(days=day)
+    end_date = today + timedelta(days=1)
+    feed_data = taskmanager.get_feed_failure_log_detail(
+        start_date=start_date, end_date=end_date, type='Credit Note Feed')
+    mail.feed_failure(feed_data=feed_data)
+
+
+'''
 Cron Job to send ASC Registeration to BAJAJ
 '''
 
@@ -572,6 +612,12 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "send_point": send_point,
               
-              "send_reminders_for_servicedesk": send_reminders_for_servicedesk
+              "send_reminders_for_servicedesk": send_reminders_for_servicedesk,
+              
+              "send_mail_for_dispatch_feed_failure" : send_mail_for_dispatch_feed_failure,
+              
+              "send_mail_for_purchase_feed_failure" : send_mail_for_purchase_feed_failure,
+              
+              "send_mail_for_credit_note_feed_failure" : send_mail_for_credit_note_feed_failure
 
               }

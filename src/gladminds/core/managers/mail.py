@@ -1,10 +1,12 @@
+import StringIO
+import csv
+import smtplib
+import logging
+from django.core.mail.message import EmailMessage
 from django.conf import settings
 from django.template import Context, Template
-
-import smtplib
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
-import logging
 from gladminds.core.managers import audit_manager
 from gladminds.core.auth_helper import GmApps
 from gladminds.core.loaders.module_loader import get_model
@@ -80,6 +82,24 @@ def feed_report(feed_data=None):
 
     except Exception as ex:
         logger.info("[Exception feed_report]: {0}".format(ex))
+
+
+def feed_failure(feed_data=None):
+    try:
+        mail_detail = settings.FEED_FAILURE
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        today = datetime.now().date()
+        csvwriter.writerow(["Timestamp", "FeedType", "Reason"])
+        for feed in feed_data:
+            csvwriter.writerow([feed['created_date'], feed['feed_type'], feed['reason']])
+        message = EmailMessage(mail_detail['subject'], "The feed failures on " +str(today),
+                               mail_detail['sender'], mail_detail['receiver'])
+        message.attach('feed_failure.csv ' + str(today), csvfile.getvalue(), 'text/csv')
+        message.send()
+    except Exception as ex:
+        logger.info("[Exception feed_fail_report]: {0}".format(ex))
+
 
 
 def feed_failure_report(remarks = None, feed_type=None):

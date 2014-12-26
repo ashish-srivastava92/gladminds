@@ -6,6 +6,9 @@ sudo crontab -l | (cat;echo "00 19 * * *  python /opt/app/gladminds/src/gladmind
 sudo crontab -l | (cat;echo "00 19 * * *  python /opt/app/gladminds/src/gladminds/core/cron_jobs/trigger_sqs_tasks.py import_data gladminds-qa2") | sudo crontab
 sudo crontab -l | (cat;echo "00 19 * * *  python /opt/app/gladminds/src/gladminds/core/cron_jobs/trigger_sqs_tasks.py send_schedule_reminder gladminds-qa2") | sudo crontab
 sudo crontab -l | (cat;echo "00 19 * * *  python /opt/app/gladminds/src/gladminds/core/cron_jobs/trigger_sqs_tasks.py delete_unused_otp gladminds-qa2") | sudo crontab
+sudo crontab -l | (cat;echo "00 19 * * *  python /opt/app/gladminds/src/gladminds/core/cron_jobs/trigger_sqs_tasks.py send_mail_for_dispatch_feed_failure gladminds-qa2") | sudo crontab
+sudo crontab -l | (cat;echo "00 19 * * *  python /opt/app/gladminds/src/gladminds/core/cron_jobs/trigger_sqs_tasks.py send_mail_for_purchase_feed_failure gladminds-qa2") | sudo crontab
+sudo crontab -l | (cat;echo "00 19 * * *  python /opt/app/gladminds/src/gladminds/core/cron_jobs/trigger_sqs_tasks.py send_mail_for_credit_note_feed_failure gladminds-qa2") | sudo crontab
 
 
 sudo crontab -l | (cat;echo "00 00 * * *  python /opt/app/gladminds/src/gladminds/core/cron_jobs/trigger_sqs_tasks.py expire_service_coupon gladminds-prod2") | sudo  crontab
@@ -16,3 +19,6 @@ sudo crontab -l | (cat;echo "00 00 * * *  python /opt/app/gladminds/src/gladmind
 sudo crontab -l | (cat;echo "00 00 * * *  python /opt/app/gladminds/src/gladminds/core/cron_jobs/trigger_sqs_tasks.py import_data gladminds-prod2") | sudo crontab
 sudo crontab -l | (cat;echo "00 00 * * *  python /opt/app/gladminds/src/gladminds/core/cron_jobs/trigger_sqs_tasks.py send_schedule_reminder gladminds-prod2") | sudo crontab
 sudo crontab -l | (cat;echo "00 00 * * *  python /opt/app/gladminds/src/gladminds/core/cron_jobs/trigger_sqs_tasks.py delete_unused_otp gladminds-prod2") | sudo crontab
+sudo crontab -l | (cat;echo "00 00 * * *  python /opt/app/gladminds/src/gladminds/core/cron_jobs/trigger_sqs_tasks.py send_mail_for_dispatch_feed_failure gladminds-prod2") | sudo crontab
+sudo crontab -l | (cat;echo "00 00 * * *  python /opt/app/gladminds/src/gladminds/core/cron_jobs/trigger_sqs_tasks.py send_mail_for_purchase_feed_failure gladminds-prod2") | sudo crontab
+sudo crontab -l | (cat;echo "00 00 * * *  python /opt/app/gladminds/src/gladminds/core/cron_jobs/trigger_sqs_tasks.py send_mail_for_credit_note_feed_failure gladminds-prod2") | sudo crontab
