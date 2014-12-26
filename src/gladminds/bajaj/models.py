@@ -149,6 +149,12 @@ class OldFscData(base_models.OldFscData):
         app_label = _APP_NAME
         verbose_name_plural = "Old Coupon Information"
 
+class CDMSData(base_models.CDMSData):
+    unique_service_coupon = models.ForeignKey(CouponData, null=True, editable=False)
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "CDMS Information"
 
 class OTPToken(base_models.OTPToken):
     user = models.ForeignKey(UserProfile, null=True, blank=True, related_name='bajaj_otp_token')
