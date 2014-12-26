@@ -75,7 +75,7 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
     @unittest.skip('failin')
     def test_fetch_user_products(self):
         self.test_user_registration()
-        create_mock_data = {'email_id':'srv.sngh@gmail.com'}
+        create_mock_data = {'email_id':'test@gmail.com'}
         uri = '/afterbuy/v1/consumers/1/products/'
         resp = self.client.get(uri, format='json', data=create_mock_data)
         self.assertEquals(200, resp.status_code)

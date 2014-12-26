@@ -235,7 +235,7 @@ def save_sa_registration(request, groups):
         return json.dumps({'message': SA_UPDATE_SUCCESS})
     return json.dumps({'message': SA_REGISTER_SUCCESS})
 
-CUST_UPDATE_SUCCESS = 'Customer phone number has been updated.'
+CUST_UPDATE_SUCCESS = 'Customer information has been updated.'
 CUST_REGISTER_SUCCESS = 'Customer has been registered with ID: '
 @log_time
 def register_customer(request, group=None):
@@ -244,7 +244,7 @@ def register_customer(request, group=None):
     existing_customer = False
     product_obj = models.ProductData.objects.filter(product_id=post_data['customer-vin'])
     if not post_data['customer-id']:
-        temp_customer_id = utils.generate_temp_sap_id(TEMP_ID_PREFIX)
+        temp_customer_id = utils.generate_temp_id(TEMP_ID_PREFIX)
     else:
         temp_customer_id = post_data['customer-id']
         existing_customer = True
@@ -264,6 +264,8 @@ def register_customer(request, group=None):
             if customer_obj:
                 customer_obj = customer_obj[0]
                 customer_obj.new_number = data_source[0]['customer_phone_number']
+                customer_obj.new_customer_name = data_source[0]['customer_name']
+                customer_obj.product_data = product_obj[0]
                 customer_obj.sent_to_sap = False
             else:
                 customer_obj = models.CustomerTempRegistration(product_data=product_obj[0], 
