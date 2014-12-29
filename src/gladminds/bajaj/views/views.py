@@ -31,6 +31,7 @@ from gladminds.core.utils import get_email_template, format_product_object
 from gladminds.core.auth_helper import Roles
 from gladminds.core.auth.service_handler import check_service_active, Services
 from gladminds.core.core_utils.utils import log_time
+from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
@@ -54,6 +55,7 @@ def auth_login(request, provider):
                 return HttpResponseRedirect('/aftersell/provider/redirect')
     return HttpResponseRedirect(request.path_info+'?auth_error=true')
 
+
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def redirect_user(request):
     user_groups = utils.get_user_groups(request.user)
@@ -61,6 +63,7 @@ def redirect_user(request):
         if group in user_groups:
             return HttpResponseRedirect(REDIRECT_USER.get(group))
     return HttpResponseBadRequest()
+
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def user_logout(request):
@@ -74,6 +77,7 @@ def user_logout(request):
 
         return HttpResponseBadRequest()
     return HttpResponseBadRequest('Not Allowed')
+
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
 @login_required()
@@ -97,6 +101,7 @@ def change_password(request):
         else:
             return HttpResponseBadRequest('Not Allowed')
 
+
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def generate_otp(request):
     if request.method == 'POST':
@@ -110,11 +115,8 @@ def generate_otp(request):
             logger.info('OTP request received . username: {0}'.format(username))
             token = utils.get_token(user, phone_number, email=user.email)
             message = message_template.get_template('SEND_OTP').format(token)
-            if settings.ENABLE_AMAZON_SQS:
-                task_queue = utils.get_task_queue()
-                task_queue.add('send_otp', {'phone_number':phone_number, 'message':message, 'sms_client':settings.SMS_CLIENT})
-            else:
-                send_otp.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)  # @UndefinedVariable
+            send_job_to_queue(send_otp, {'phone_number': phone_number, 'message': message,
+                                         'sms_client': settings.SMS_CLIENT})
             logger.info('OTP sent to mobile {0}'.format(phone_number))
             #Send email if email address exist
             if user.email:
@@ -125,6 +127,7 @@ def generate_otp(request):
             return HttpResponseRedirect('/aftersell/users/otp/generate?details=invalid')
     elif request.method == 'GET':
         return render(request, 'portal/get_otp.html')
+
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def validate_otp(request):
@@ -142,6 +145,7 @@ def validate_otp(request):
             logger.error('OTP validation failed for name {0}'.format(username))
             return HttpResponseRedirect('/aftersell/users/otp/generate?token=invalid')
 
+
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def update_pass(request):
     try:
@@ -153,6 +157,7 @@ def update_pass(request):
     except:
         logger.error('Password update failed.')
         return HttpResponseRedirect('/aftersell/asc/login?error=true')
+
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
 @login_required()
@@ -182,6 +187,8 @@ def register(request, menu):
 ASC_REGISTER_SUCCESS = 'ASC registration is complete.'
 EXCEPTION_INVALID_DEALER = 'The dealer-id provided is not registered.'
 ALREADY_REGISTERED = 'Already Registered Number.'
+
+
 @check_service_active(Services.FREE_SERVICE_COUPON)
 @log_time
 def save_asc_registration(request, groups=None):
@@ -237,6 +244,8 @@ def save_sa_registration(request, groups):
 
 CUST_UPDATE_SUCCESS = 'Customer phone number has been updated.'
 CUST_REGISTER_SUCCESS = 'Customer has been registered with ID: '
+
+
 @log_time
 def register_customer(request, group=None):
     post_data = request.POST
@@ -289,6 +298,7 @@ def register_customer(request, group=None):
         return json.dumps({'message': CUST_UPDATE_SUCCESS})
     return json.dumps({'message': CUST_REGISTER_SUCCESS + temp_customer_id})
 
+
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def recover_coupon_info(data):
     customer_id = data['customerId']
@@ -303,6 +313,7 @@ def recover_coupon_info(data):
     else:
         message = 'No coupon in progress for customerID {0}.'.format(customer_id) 
         return {'status': False, 'message': message}
+
 
 def get_customer_info(data):
     try:
@@ -359,6 +370,7 @@ def exceptions(request, exception=None):
     else:
         return HttpResponseBadRequest()
 
+
 @check_service_active(Services.FREE_SERVICE_COUPON)
 @login_required()
 def users(request, users=None):
@@ -380,6 +392,7 @@ def users(request, users=None):
         return render(request, template, {'active_menu' : users, "data" : data, 'groups': groups})
     else:
         return HttpResponseBadRequest()
+
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
 @login_required()
@@ -443,6 +456,7 @@ def reports(request):
         report_data['records'] = create_reconciliation_report(report_data['params'], request.user)
     return render(request, template_rendered, report_data)
 
+
 @log_time
 def create_reconciliation_report(query_params, user):
     report_data = []
@@ -484,6 +498,7 @@ def create_reconciliation_report(query_params, user):
         report_data.append(coupon_data_dict)
     return report_data
 
+
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def brand_details(requests, role=None):
     data = requests.GET.copy()
@@ -504,6 +519,7 @@ def brand_details(requests, role=None):
     data = function_mapping[role](data, limit, offset , data_dict, data_list)
     return HttpResponse(json.dumps(data), mimetype="application/json")
 
+
 #FIXME: Fix this according to new model
 def get_asc_info(data, limit, offset, data_dict, data_list):
     '''get city and state from parameter'''
@@ -522,6 +538,7 @@ def get_asc_info(data, limit, offset, data_dict, data_list):
     data_dict['asc'] = data_list
     return data_dict
 
+
 #FIXME: Fix this according to new model
 def get_sa_info(data, limit, offset, data_dict, data_list):
     sa_details = {}
@@ -538,6 +555,7 @@ def get_sa_info(data, limit, offset, data_dict, data_list):
         data_list.append(sa_detail)
     data_dict['sa'] = data_list
     return data_dict
+
 
 #FIXME: Fix this according to new model
 def get_customers_info(data, limit, offset, data_dict, data_list):
@@ -581,6 +599,7 @@ def get_active_asc_info(data, limit, offset, data_dict, data_list):
     data_dict['active-asc'] = data_list
     return data_dict
 
+
 #FIXME: Fix this according to new model
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def get_active_asc_report(request):
@@ -614,7 +633,8 @@ def get_active_asc_report(request):
                    "year": years,
                    "mon": MONTHS[month-1]
                    })
-    
+
+
 #FIXME: Fix this according to new model
 def get_not_active_asc_info(data, limit, offset, data_dict, data_list):
     '''get city and state from parameter'''
@@ -631,6 +651,7 @@ def get_not_active_asc_info(data, limit, offset, data_dict, data_list):
     data_dict['count'] = len( not_active_asc_list)
     data_dict['not-active-asc'] = data_list
     return data_dict
+
 
 #FIXME: Fix this according to new model
 def get_sa_details(sa_details, id):
