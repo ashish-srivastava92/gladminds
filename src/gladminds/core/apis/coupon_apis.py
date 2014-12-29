@@ -10,6 +10,7 @@ from gladminds.core.apis.authentication import AccessTokenAuthentication,\
 from gladminds.core.apis.authorization import MultiAuthorization
 from tastypie.authentication import MultiAuthentication
 from gladminds.core.auth.service_handler import Services
+from gladminds.core.loaders.module_loader import get_model
 
 
 class CouponDataResources(CustomBaseModelResource):
@@ -18,11 +19,11 @@ class CouponDataResources(CustomBaseModelResource):
                                         full=True, null=True, blank=True)
 
     class Meta:
-        queryset = CouponData.objects.all()
+        queryset = get_model('CouponData').objects.all()
         resource_name = "coupons"
         authorization = MultiAuthorization(Authorization())
         authentication = MultiAuthentication(GladmindsServiceAuthentication(Services.FREE_SERVICE_COUPON))
-        detail_allowed_methods = ['get']
+        detail_allowed_methods = ['get', 'post', 'delete']
         always_return_data = True
         filtering = {
                         "service_type": ALL,

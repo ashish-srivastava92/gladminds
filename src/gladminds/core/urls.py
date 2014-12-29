@@ -1,12 +1,18 @@
 from django.conf.urls import patterns, url, include
-from django.conf import settings
 from gladminds.core.cron_jobs.taskqueue import SqsHandler
 from gladminds.sqs_tasks import _tasks_map
 
+from tastypie.api import Api
+from gladminds.core.apis import coupon_apis
+
+api_v1 = Api(api_name="v1")
+# api_v1.register(audit_api.AuditResources())
+# api_v1.register(user_apis.UserProfileResource())
+api_v1.register(coupon_apis.CouponDataResources())
 
 urlpatterns = patterns('',
     url(r'api/doc/', include('gladminds.core.api_docs.swagger_urls', namespace='tastypie_swagger')),
-    
+    url(r'', include(api_v1.urls)),
     url(r'^aftersell/users/(?P<users>[a-zA-Z0-9]+)$', 'gladminds.core.views.users'),
     url(r'^aftersell/sa/(?P<id>[a-zA-Z0-9]+)/$', 'gladminds.core.views.get_sa_under_asc'),
     url(r'^report/(?P<role>[a-zA-Z0-9.-]+)/$', 'gladminds.core.views.brand_details'),
