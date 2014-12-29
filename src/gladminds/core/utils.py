@@ -3,6 +3,7 @@ import datetime
 from importlib import import_module
 import base64
 import re
+import calendar
 
 from dateutil import tz
 from random import randint
@@ -333,7 +334,7 @@ def set_wait_time(feedback_data):
 
 def services_search_details(data):
     key = data.keys()
-    message = '''No Service Details available for {0} '{1}'. Please contact customer support: +91-9741775128.'''.format(key[0], data[key[0]])
+    message = '''No Service Details available for {0} '{1}'. Please register the customer.'''.format(key[0], data[key[0]])
     kwargs = {}
     response = {}
     search_results = []
@@ -420,31 +421,35 @@ def asc_cuopon_data(asc_id, status_type):
     cuopon_details = models.CouponData.objects.filter(service_advisor__asc=asc_id, status=status_type)
     return len(cuopon_details)
 
-
-#FIXME: Update according to new model
-def get_asc_data(data):
-#     asc_details = {}
-#     if data.has_key('city') and data.has_key('state'):
-#         asc_details['address'] = ', '.join([data['city'].upper(), data['state'].upper()])
-#     asc_details['role'] = 'asc'
-#     asc_data = models.Dealer.objects.filter(**asc_details)
-#     asc_ids = asc_data.values_list('dealer_id', flat=True)
-#     asc_list = User.objects.filter(username__in=asc_ids)
-#     return asc_list
-    pass
-
+def get_asc_data(data, role):
+    asc_details = {}
+    if data.has_key('city') and data.has_key('state'):
+        asc_details['user__address'] = ', '.join([data['city'].upper(), data['state'].upper()])
+    asc_data = models.AuthorizedServiceCenter.objects.filter(**asc_details)
+    asc_ids = asc_data.values_list('asc_id', flat=True)
+    asc_list = User.objects.filter(username__in=asc_ids)
+    return asc_list
 
 def asc_cuopon_details(asc_id, status_type, year, month):
-    cuopon_details = models.CouponData.objects.filter(service_advisor__asc=asc_id, status=status_type,
-                                                      actual_service_date__range=[datetime.datetime(int(year),int(month),1,00,00,00),datetime.datetime(int(year),int(month)+1,1,00,00,00)])
-    cuopon_count = cuopon_details.values('actual_service_date').annotate(dcount=Count('actual_service_date'))
+    if month == 12:
+        cuopon_details = models.CouponData.objects.filter(asc=asc_id,
+                                                          status=status_type,
+                                                          closed_date__range=[datetime.datetime(int(year),int(month),1,00,00,00),datetime.datetime(int(year)+1,1,1,00,00,00)])  
+    else:
+        cuopon_details = common.CouponData.objects.filter(asc=asc_id,
+                                                          status=status_type,
+                                                          closed_date__range=[datetime.datetime(int(year),int(month),1,00,00,00),datetime.datetime(int(year),int(month)+1,1,00,00,00)])
+    cuopon_count = cuopon_details.extra({"closed_date":"date(closed_date)"}).values('closed_date').annotate(dcount=Count('closed_date'))
     coupon_data = {}
-    for day in range(1,32):
+    no_of_days = get_number_of_days(year, month)
+    for day in range(1, no_of_days):
         coupon_data[day] = 0
     for coupon in cuopon_count:
-        coupon_data[coupon['actual_service_date'].day] = coupon['dcount']
+        coupon_data[coupon['closed_date'].day] = coupon['dcount']
     return coupon_data
 
+def total_coupon_closed(coupon_data):
+    return sum(coupon_data.values())
 
 def get_state_city(details, address):
     if address == None or address == '':
@@ -460,6 +465,26 @@ def get_state_city(details, address):
             details['state'] = 'Null'
 
     return details
+
+def gernate_years():
+    start_year = 2013
+    current_year = datetime.date.today().year
+    year_list = []
+    for date in range(start_year, current_year+1):
+        year_list.append(str(date))
+    return year_list
+
+def get_time_in_seconds(time, unit):
+    if unit == 'days':
+        total_seconds = time * 86400
+    elif unit == 'hrs':
+        total_seconds = time * 3600
+    else:
+        total_seconds = time * 60
+    return total_seconds
+
+def get_number_of_days(year, month):
+    return calendar.monthrange(int(year), int(month))[1] + 1
 
 def get_escalation_mailing_list(escalation_list):
     escalation_mailing_list = []

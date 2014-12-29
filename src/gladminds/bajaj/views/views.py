@@ -441,7 +441,7 @@ def reports(request):
     if not (Roles.ASCS in groups or Roles.DEALERS in groups):
         return HttpResponseBadRequest()
     status_options = {'4': 'In Progress', '2':'Closed'}
-    report_options = {'reconciliation': 'Reconciliation', 'credit':'Credit Note'}  
+    report_options = {'reconciliation': 'Reconciliation', 'credit':'Credit Note'}
     min_date, max_date = utils.get_min_and_max_filter_date()
     template_rendered = 'portal/reconciliation_report.html'
     report_data =  {'status_options': status_options,
@@ -520,66 +520,60 @@ def brand_details(requests, role=None):
     return HttpResponse(json.dumps(data), mimetype="application/json")
 
 
-#FIXME: Fix this according to new model
 def get_asc_info(data, limit, offset, data_dict, data_list):
     '''get city and state from parameter'''
     asc_details = {}
     if data.has_key('city') and data.has_key('state'):
-        asc_details['address'] = ', '.join([data['city'].upper(), data['state'].upper()])
-    asc_details['role'] = 'asc'
-    asc_data = models.Dealer.objects.filter(**asc_details)
+        asc_details['user__address'] = ', '.join([data['city'].upper(), data['state'].upper()])
+    asc_data = models.AuthorizedServiceCenter.objects.filter(**asc_details)
     data_dict['total_count'] = len(asc_data)
     for asc in asc_data[offset:limit]:
         asc_detail = OrderedDict();
-        asc_detail['id'] = asc.dealer_id
-        asc_detail['address'] = asc.address
-        utils.get_state_city(asc_detail, asc.address)
+        asc_detail['id'] = asc.dealer.dealer_id
+        asc_detail['address'] = asc.user.address
+        utils.get_state_city(asc_detail, asc.user.address)
         data_list.append(asc_detail)
     data_dict['asc'] = data_list
     return data_dict
 
 
-#FIXME: Fix this according to new model
 def get_sa_info(data, limit, offset, data_dict, data_list):
     sa_details = {}
     if data.has_key('phone_number'):
-        sa_details['phone_number'] = utils.mobile_format(str(data['phone_number']))
+        sa_details['user__phone_number'] = utils.mobile_format(str(data['phone_number']))
     sa_data = models.ServiceAdvisor.objects.filter(**sa_details)
     data_dict['total_count'] = len(sa_data)
     for sa in sa_data[offset:limit]:
         sa_detail = OrderedDict();
         sa_detail['id'] = sa.service_advisor_id
-        sa_detail['name'] = sa.name
-        sa_detail['phone_number'] = sa.phone_number
+        sa_detail['name'] = sa.user.user.first_name
+        sa_detail['phone_number'] = sa.user.phone_number
         sa_detail = get_sa_details(sa_detail, sa)
         data_list.append(sa_detail)
     data_dict['sa'] = data_list
     return data_dict
 
 
-#FIXME: Fix this according to new model
 def get_customers_info(data, limit, offset, data_dict, data_list):
     kwargs = {}
     if data.has_key('sap_id'):
-        kwargs['sap_customer_id'] = data['sap_id']
+        kwargs['customer_id'] = data['sap_id']
     args = {~Q(product_purchase_date=None)}
     customer_products = models.ProductData.objects.filter(*args, **kwargs)[offset:limit]
     for customer in customer_products:
         customer_detail = OrderedDict();
-        customer_detail['sap_id'] = customer.sap_customer_id
-        customer_detail['gcp_id'] = customer.customer_phone_number.gladmind_customer_id
-        customer_detail['vin'] = customer.vin
-        customer_detail['name'] = customer.customer_phone_number.customer_name
-        customer_detail['phone_number'] = customer.customer_phone_number.phone_number
-        customer_detail['email_id'] = customer.customer_phone_number.email_id
-        customer_detail['address'] = customer.customer_phone_number.address
-        customer_detail = utils.get_state_city(customer_detail, customer_detail['address'])
+        customer_detail['sap_id'] = customer.customer_id
+        customer_detail['vin'] = customer.product_id
+        customer_detail['name'] = customer.customer_name
+        customer_detail['phone_number'] = customer.customer_phone_number
+        customer_detail['city'] = customer.customer_city
+        customer_detail['state'] = customer.customer_state
         data_list.append(customer_detail)
     data_dict['customers'] = data_list
     return data_dict
 
 
-#FIXME: Fix this according to new model
+ 
 def get_active_asc_info(data, limit, offset, data_dict, data_list):
     '''get city and state from parameter'''
     asc_details = utils.get_asc_data(data)
@@ -616,52 +610,50 @@ def get_active_asc_report(request):
     asc_details = utils.get_asc_data(data)
     active_asc_list = asc_details.filter(~Q(date_joined=F('last_login')))
     active_ascs = active_asc_list.values_list('username', flat=True)
-    asc_obj = models.Dealer.objects.filter(dealer_id__in=active_ascs)
+    asc_obj = models.AuthorizedServiceCenter.objects.filter(asc_id__in=active_ascs)
     for asc_data in asc_obj:
         active_ascs = OrderedDict();
         active_ascs['id'] = asc_data.dealer_id
-        active_ascs['address'] = asc_data.address
+        active_ascs['address'] = asc_data.user.address
         active_ascs = utils.get_state_city(active_ascs, asc_data.address)
         active_ascs['coupon_closed'] = utils.asc_cuopon_details(asc_data, 2, year, month)
+        active_ascs['total_coupon_closed'] = utils.total_coupon_closed(active_ascs['coupon_closed'])
         data_list.append(active_ascs)
+    no_of_days = utils.get_number_of_days(year, month)
     years = utils.gernate_years()
-
     return render(request, 'portal/asc_report.html',\
                   {"data": data_list,
-                   "range": range(1,32),
+                   "range": range(1, no_of_days),
                    "month": MONTHS,
-                   "year": years,
-                   "mon": MONTHS[month-1]
+                   "years": years,
+                   "mon": MONTHS[month-1],
+                   "cyear": str(year),
+                   "role": role
                    })
 
-
-#FIXME: Fix this according to new model
 def get_not_active_asc_info(data, limit, offset, data_dict, data_list):
     '''get city and state from parameter'''
     asc_details = utils.get_asc_data(data)
     not_active_asc_list = asc_details.filter(date_joined=F('last_login'))
     not_active_ascs = not_active_asc_list.values_list('username', flat=True)
-    not_asc_obj = models.Dealer.objects.filter(dealer_id__in=not_active_ascs)
+    not_asc_obj = models.AuthorizedServiceCenter.objects.filter(asc_id__in=not_active_ascs)
     for asc in not_asc_obj[offset:limit]:
         not_active_ascs = OrderedDict();
-        not_active_ascs['id'] = asc.dealer_id
-        not_active_ascs['address'] = asc.address
-        not_active_ascs = utils.get_state_city(not_active_ascs, asc.address)
+        not_active_ascs['id'] = asc.asc_id
+        not_active_ascs['address'] = asc.user.address
+        not_active_ascs = utils.get_state_city(not_active_ascs, asc.user.address)
         data_list.append(not_active_ascs)
     data_dict['count'] = len( not_active_asc_list)
     data_dict['not-active-asc'] = data_list
     return data_dict
 
-
-#FIXME: Fix this according to new model
 def get_sa_details(sa_details, id):
     sa_detail = models.ServiceAdvisor.objects.filter(service_advisor_id=id)
     if sa_detail:
-        sa_dealer_details = models.Dealer.objects.get(id=sa_detail[0].dealer_id.id)
-        if sa_dealer_details.role == None:
-            sa_details['dealer'] = sa_dealer_details.dealer_id
-        else:
-            sa_details['asc'] = sa_dealer_details.dealer_id
+        if sa_detail.dealer:
+            sa_details['dealer'] = sa_detail.dealer.dealer_id
+        elif sa_detail.asc:
+            sa_details['asc'] = sa_detail.asc.asc_id
     else:
         sa_details['dealer/asc'] = 'Null'
     return sa_details

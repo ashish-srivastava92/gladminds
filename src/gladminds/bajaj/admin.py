@@ -5,7 +5,7 @@ from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib.admin import DateFieldListFilter
 
 from gladminds.bajaj import models
-from gladminds.bajaj.services.loyalty import send_welcome_sms
+from gladminds.bajaj.services.loyalty.loyalty import send_welcome_sms
 from gladminds.core import utils
 from gladminds.core.auth_helper import GmApps, Roles
 from gladminds.core.admin_helper import GmModelAdmin

@@ -570,10 +570,26 @@ function showMessage(id){
 	$('#'+id).popover();
 }
 
+function change_status(){
+	var status = window.location.search.split('?status=')[1];
+    $('.status').val(status);
+    $('.status').change(function() {
+    	status = $('.status').val();
+    	window.location.href = window.location.pathname + '?status='+status;
+    });
+	
+}
+
 function getDataByDate(){
     var month = $('#month').val(),
         year =  $('#year').val();
+    if(month=='' || year==''){
+    	window.location.href = window.location.pathname
+    	
+    }
+    else{
     window.location.href = window.location.pathname + '?month='+month+'&'+'year='+year;
+    }
    
 }
 
