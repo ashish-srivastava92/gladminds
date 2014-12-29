@@ -29,7 +29,7 @@ class TestAfterbuyAdminApi(base_integration.AfterBuyResourceTestCase):
 #    def test_get_add_product_type(self):
 #     def test_user_registration(self):
 #         mock_data = {'first_name': 'test', 'phone_number': '7760814041',
-#                      'email_id': 'srv.sngh@gmail.com', 'password': '123',
+#                      'email_id': 'test@gmail.com', 'password': '123',
 #                      'otp_token': 'GMDEV123'}
 #         uri = AfterbuyUrls.REGISTRATION
 #         resp = self.post(uri, data=mock_data)

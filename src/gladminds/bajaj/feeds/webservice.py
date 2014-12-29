@@ -19,6 +19,7 @@ from django.conf import settings
 import json
 from gladminds.core import utils
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
+from gladminds.core.managers.audit_manager import feed_failure_log
 
 
 logger = logging.getLogger("gladminds")
@@ -450,8 +451,13 @@ class CreditNoteService(ServiceBase):
         return get_response(feed_remark)
 
 def get_response(feed_remark):
-    return FAILED if feed_remark.failed_feeds > 0 else SUCCESS
-
+    if feed_remark.failed_feeds > 0:
+        remarks = feed_remark.remarks.elements()
+        for remark in remarks:
+            feed_failure_log(feed_type=feed_remark.feed_type, reason=remark)
+        return FAILED
+    else:
+        return SUCCESS
 
 def save_to_db(feed_type=None, data_source=[], feed_remark=None):
     sap_obj = SAPFeed()

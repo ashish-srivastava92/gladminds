@@ -479,7 +479,7 @@ brand_admin.register(models.ProductData, ProductDataAdmin)
 brand_admin.register(models.CouponData, CouponAdmin)
 
 brand_admin.register(models.SMSLog, SMSLogAdmin)
-brand_admin.register(models.EmailLog, SMSLogAdmin)
+brand_admin.register(models.EmailLog, EmailLogAdmin)
 brand_admin.register(models.DataFeedLog, FeedLogAdmin)
 
 brand_admin.register(models.NationalSalesManager, NSMAdmin)

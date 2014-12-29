@@ -69,20 +69,15 @@
             url: '/aftersell/exceptions/customer',
             data: {'vin': vin},
             success: function(data){
-              if (data['phone'] && user=="d123") {
-                  $('.customer-phone').val(data['phone']).attr('readOnly', false);
+              if (data['phone']) {
+                  $('.customer-phone').val(data['phone']).attr('readOnly', true);
+            	  if (data['group']=='AuthorisedServiceCenters' || data['group']=='Dealers'){
+            		  $('.customer-phone').val(data['phone']).attr('readOnly', false);
+            	}
                   $('.customer-name').val(data['name']).attr('readOnly', true);
                   $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
                   $('.customer-id').val(data['id']).attr('readOnly', true);
                   $('.customer-submit').attr('disabled', false);
-              }	
-              
-              else if (data['phone']) {
-                  $('.customer-phone').val(data['phone']).attr('readOnly', true);
-                  $('.customer-name').val(data['name']).attr('readOnly', true);
-                  $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
-                  $('.customer-id').val(data['id']).attr('readOnly', true);
-                  $('.customer-submit').attr('disabled', true);
               }	
               else if (data['message']) {
                   $('.customer-phone').val('').attr('readOnly', false);

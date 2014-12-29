@@ -88,3 +88,10 @@ nohup python scripts/migrate_ucn_recovery.py &
 ##############################################################
 alter table bajaj_sparepart add column is_used bool default 0;
 ALTER TABLE bajaj_mechanic ADD sent_sms boolean default false;
+
+
+
+update gladminds_coupondata c inner join (select d2.id as old_id , d.id as new_id from aftersell_registereddealer as d, aftersell_registereddealer as d2 where d2.dealer_id like concat('00000',d.dealer_id)) a on c.servicing_dealer_id = a.old_id set c.servicing_dealer_id=a.new_id;
+
+update gladminds_oldfscdata c inner join (select d2.id as old_id , d.id as new_id from aftersell_registereddealer as d, aftersell_registereddealer as d2 where d2.dealer_id like concat('00000',d.dealer_id)) a on c.servicing_dealer_id = a.old_id set c.servicing_dealer_id=a.new_id;
+

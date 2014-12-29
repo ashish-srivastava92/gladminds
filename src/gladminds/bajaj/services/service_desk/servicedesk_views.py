@@ -85,14 +85,17 @@ def save_help_desk_data(request):
         sms_dict[field] = request.POST.get(field, None)
     service_advisor_obj = models.ServiceAdvisor.objects.get(user__phone_number=sms_dict['advisorMobile'])
     if request.user.groups.filter(name=Roles.DEALERS).exists():
-        dealer_obj = models.Dealer.objects.get(dealer_id=request.user)
-        email_id =  dealer_obj.user.user.email
+        dealer_asc_obj = models.Dealer.objects.get(dealer_id=request.user)
     else:
-        asc_obj = models.AuthorizedServiceCenter.objects.get(asc_id=request.user)
-        email_id =  asc_obj.user.user.email
+        dealer_asc_obj = models.AuthorizedServiceCenter.objects.get(asc_id=request.user)
+        
+    if dealer_asc_obj.user.user.email:
+        dealer_asc_email = dealer_asc_obj.user.user.email
+    else:
+        dealer_asc_email = None
     return get_complain_data(sms_dict, service_advisor_obj.user.phone_number,
                                                 service_advisor_obj.user.user.email,
-                                                service_advisor_obj.user.user.username, email_id,
+                                                service_advisor_obj.user.user.username, dealer_asc_email,
                                                 with_detail=True)
 
 @check_service_active(Services.SERVICE_DESK)
