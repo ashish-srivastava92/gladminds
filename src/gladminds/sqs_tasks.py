@@ -16,7 +16,7 @@ import logging
 from gladminds.core.managers.mail import send_due_date_exceeded,\
     send_due_date_reminder
 from django.contrib.auth.models import User
-from gladminds.core.constants import DATE_FORMAT
+from gladminds.core.constants import DATE_FORMAT, FEED_TYPES
 from gladminds.core.cron_jobs.queue_utils import get_task_queue
 from gladminds.core.core_utils.date_utils import convert_utc_to_local_time
 
@@ -389,6 +389,20 @@ def send_report_mail_for_feed(*args, **kwargs):
     mail.feed_report(feed_data=feed_data)
 
 '''
+Cron Job to send dispatch feed failure email
+'''
+
+def send_mail_for_feed_failure(*args, **kwargs):
+    day = kwargs['day_duration']
+    today = datetime.now().date()
+    start_date = today - timedelta(days=day)
+    end_date = today + timedelta(days=1)
+    for feed_type in FEED_TYPES:
+        feed_data = taskmanager.get_feed_failure_log_detail(
+            start_date=start_date, end_date=end_date, type=feed_type)
+        mail.feed_failure(feed_data=feed_data)
+
+'''
 Cron Job to send ASC Registeration to BAJAJ
 '''
 
@@ -572,6 +586,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "send_point": send_point,
               
-              "send_reminders_for_servicedesk": send_reminders_for_servicedesk
+              "send_reminders_for_servicedesk": send_reminders_for_servicedesk,
+              
+              "send_mail_for_feed_failure" : send_mail_for_feed_failure
 
               }

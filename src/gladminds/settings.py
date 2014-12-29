@@ -410,6 +410,13 @@ MAIL_DETAIL = {
     "body": """""",
 }
 
+FEED_FAILURE = {
+    "sender": "feed-report@gladminds.co",
+    "receiver": ["priyanka.n@hashedin.com"],
+    "subject": "Gladminds Feed Failure Report DEV",
+    "body": """""",
+}
+
 FEED_FAILURE_MAIL_DETAIL = {
 
     "sender": "feed-report@gladminds.co",

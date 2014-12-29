@@ -1,4 +1,5 @@
 from gladminds.core.loaders.module_loader import get_model
+import datetime
 
 
 def sms_log(action='SENT', sender='+1 469-513-9856', receiver=None,
@@ -28,4 +29,11 @@ def email_log(subject, message, sender, receiver, brand='bajaj'):
     email_model = get_model('EmailLog', brand=brand)
     email_log = email_model(subject=subject, message=message, sender=sender, receiver=receiver)
     email_log.save()
+
+def feed_failure_log(feed_type=None, reason=None, brand='bajaj'):
+
+    feed_failure_log_model = get_model('FeedFailureLog', brand=brand)
+    feed_failure_log = feed_failure_log_model(feed_type=feed_type,
+                                     reason=reason, created_date=datetime.datetime.now())
+    feed_failure_log.save()
     

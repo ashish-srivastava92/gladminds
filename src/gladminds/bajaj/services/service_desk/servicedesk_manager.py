@@ -13,13 +13,13 @@ from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services import message_template as templates
 from gladminds.bajaj.services import free_service_coupon as fsc
 from gladminds.sqs_tasks import send_coupon, send_sms
-from gladminds.core.managers.mail import send_feedback_received,\
+from gladminds.core.managers.mail import send_feedback_received, \
      send_servicedesk_feedback, send_dealer_feedback
 from gladminds.core.auth_helper import Roles
-from gladminds.core.utils import get_list_from_set, create_context,\
+from gladminds.core.utils import get_list_from_set, create_context, \
     set_wait_time
 from gladminds.core.cron_jobs.queue_utils import get_task_queue
-from gladminds.core.core_utils.date_utils import convert_utc_to_local_time,\
+from gladminds.core.core_utils.date_utils import convert_utc_to_local_time, \
     get_time_in_seconds
 from gladminds.core.managers import mail
 from django.db.transaction import atomic
@@ -132,7 +132,7 @@ def get_complain_data(sms_dict, phone_number, email, name, dealer_email, with_de
     try:
         role = check_role_of_initiator(phone_number)
         user_profile = models.UserProfile.objects.filter(phone_number=phone_number)
-        if len(user_profile)>0:
+        if len(user_profile) > 0:
             servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
             if servicedesk_user:
                 servicedesk_user = servicedesk_user[0]
@@ -144,7 +144,7 @@ def get_complain_data(sms_dict, phone_number, email, name, dealer_email, with_de
             servicedesk_user.save()
         if with_detail:
             gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
-                                                            type=sms_dict['type'], 
+                                                            type=sms_dict['type'],
                                                             summary=sms_dict['summary'], description=sms_dict['description'],
                                                             status="Open", created_date=datetime.datetime.now(),
                                                             role=role
@@ -168,13 +168,14 @@ def get_complain_data(sms_dict, phone_number, email, name, dealer_email, with_de
             task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
         else:
             send_coupon.delay(phone_number=phone_number, message=message)
-        context = utils.create_context('FEEDBACK_DETAIL_TO_DEALER',  gladminds_feedback_object)
-        send_dealer_feedback(context, dealer_email)
-        context = utils.create_context('FEEDBACK_DETAIL_TO_ADIM',  gladminds_feedback_object)
+        if dealer_email:
+            context = utils.create_context('FEEDBACK_DETAIL_TO_DEALER', gladminds_feedback_object)
+            send_dealer_feedback(context, dealer_email)
+        context = utils.create_context('FEEDBACK_DETAIL_TO_ADIM', gladminds_feedback_object)
         send_feedback_received(context, manager_obj.email)
-        context = utils.create_context('FEEDBACK_CONFIRMATION',  gladminds_feedback_object)
-        send_servicedesk_feedback(context, get_reporter_details(gladminds_feedback_object.reporter,"email"))
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message = message)
+        context = utils.create_context('FEEDBACK_CONFIRMATION', gladminds_feedback_object)
+        send_servicedesk_feedback(context, get_reporter_details(gladminds_feedback_object.reporter, "email"))
+        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
     return {'status': True, 'message': message}
 
 
@@ -188,7 +189,7 @@ def get_feedback(feedback_id, user):
 
 def get_servicedesk_users(designation):
     users = User.objects.filter(groups__name=designation)
-    if len(users)>0:
+    if len(users) > 0:
         user_list = models.UserProfile.objects.filter(user__in=users)
         return models.ServiceDeskUser.objects.filter(user_profile__in=user_list)
     else:
@@ -210,7 +211,7 @@ def set_due_date(priority, feedback_obj):
     total_seconds = get_time_in_seconds(sla_obj.resolution_time, sla_obj.resolution_unit)
     due_date = created_date + datetime.timedelta(seconds=total_seconds)
     total_seconds = get_time_in_seconds(sla_obj.reminder_time, sla_obj.reminder_unit)
-    reminder_date = due_date-datetime.timedelta(seconds=total_seconds)
+    reminder_date = due_date - datetime.timedelta(seconds=total_seconds)
     return {'due_date':due_date, 'reminder_date':reminder_date}
 
 def get_reporter_details(reporter, value="phone_number"):
@@ -245,11 +246,11 @@ def save_update_feedback(feedback_obj, data, user, host):
     comment_object = None
     assign_status = False
     pending_status = False
-    reporter_email_id = get_reporter_details(feedback_obj.reporter,"email")
+    reporter_email_id = get_reporter_details(feedback_obj.reporter, "email")
     reporter_phone_number = get_reporter_details(feedback_obj.reporter)
     previous_status = feedback_obj.status
     
-    #check if status is pending
+    # check if status is pending
     if feedback_obj.status == status[4]:
         pending_status = True
  
@@ -325,16 +326,16 @@ def save_update_feedback(feedback_obj, data, user, host):
         feedback_obj.status = data['status']
         feedback_obj.priority = data['Priority']
 
-    #check if status is pending
+    # check if status is pending
     if data['status'] == status[4]:
         feedback_obj.pending_from = datetime.datetime.now()
     
-    #check if status is progress
+    # check if status is progress
     if data['status'] == status[3]:
         if previous_status == 'Pending':
             feedback_obj.assignee = feedback_obj.previous_assignee
     
-    #check if status is closed
+    # check if status is closed
     if data['status'] == status[1]:
         feedback_obj.closed_date = datetime.datetime.now()
     feedback_obj.save()
@@ -375,7 +376,7 @@ def save_update_feedback(feedback_obj, data, user, host):
         comment_object.save()
         update_feedback_activities(feedback_obj, SDActions.COMMENT, None, data['comments'])
 
-#check if status is resolved
+# check if status is resolved
     if feedback_obj.status == status[2]:
         servicedesk_obj_all = User.objects.filter(groups__name=Roles.SDMANAGERS)
         feedback_obj.resolved_date = datetime.datetime.now()
@@ -405,12 +406,11 @@ def save_update_feedback(feedback_obj, data, user, host):
         mail.send_email_to_bajaj_after_issue_resolved(context)
         context = create_context('TICKET_RESOLVED_DETAIL_TO_MANAGER',
                                  feedback_obj)
-        mail.send_email_to_manager_after_issue_resolved(context,
-                                                        servicedesk_obj_all[0])
+        mail.send_email_to_manager_after_issue_resolved(context, servicedesk_obj_all[0])
         send_sms('INITIATOR_FEEDBACK_STATUS', reporter_phone_number,
                  feedback_obj)
     
-    if previous_status!= feedback_obj.status:
+    if previous_status != feedback_obj.status:
         update_feedback_activities(feedback_obj, SDActions.STATUS, previous_status, feedback_obj.status)
         
     if pending_status:

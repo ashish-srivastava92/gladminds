@@ -453,5 +453,14 @@
       "template":"Incomplete form status. Please contact our customer care 9611545154 to complete the form",
       "description":"Send this message when mechanic has incomplete form"
     }
-  }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 51,
+    "fields": {
+      "template_key": "FAILED_UPDATE_PHONE_NUMBER",
+      "template": "Mobile number {phone_number} already exists. Please contact Customer support at 9611545154",
+      "description": "Send this message when customer phone number cannot be updated"
+    }
+  } 
 ]

@@ -31,6 +31,7 @@ from gladminds.core.decorator import log_time
 from gladminds.core.utils import get_email_template, format_product_object
 from gladminds.core.auth_helper import Roles
 from gladminds.core.auth.service_handler import check_service_active, Services
+from gladminds.bajaj.services.message_template import get_template
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
@@ -263,11 +264,18 @@ def register_customer(request, group=None):
             customer_obj = models.CustomerTempRegistration.objects.filter(temp_customer_id = temp_customer_id)
             if customer_obj:
                 customer_obj = customer_obj[0]
+                if customer_obj.new_number != data_source[0]['customer_phone_number']:
+                    if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']):
+                        message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
+                        return json.dumps({'message': message})
                 customer_obj.new_number = data_source[0]['customer_phone_number']
                 customer_obj.new_customer_name = data_source[0]['customer_name']
                 customer_obj.product_data = product_obj[0]
                 customer_obj.sent_to_sap = False
             else:
+                if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']):
+                    message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
+                    return json.dumps({'message': message})
                 customer_obj = models.CustomerTempRegistration(product_data=product_obj[0], 
                                                                new_customer_name = data_source[0]['customer_name'],
                                                                new_number = data_source[0]['customer_phone_number'],
@@ -321,6 +329,7 @@ def get_customer_info(data):
         return {'message': message, 'status': 'fail'}
     if product_obj.purchase_date:
         product_data = format_product_object(product_obj)
+        product_data['group'] = data['groups'][0] 
         return product_data
     else:
         message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
