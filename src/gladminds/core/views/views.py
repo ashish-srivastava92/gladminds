@@ -62,7 +62,6 @@ def redirect_user(request):
             return HttpResponseRedirect(REDIRECT_USER.get(group))
     return HttpResponseBadRequest()
 
-@check_service_active(Services.FREE_SERVICE_COUPON)
 def user_logout(request):
     if request.method == 'GET':
         #TODO: Implement brand restrictions.

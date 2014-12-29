@@ -13,6 +13,9 @@ class GmApps():
     DEMO = 'demo'
     GM = 'default'
 
+ALL_BRANDS = [getattr(GmApps, x) for x in dir(GmApps) if (not x.startswith("__") and getattr(GmApps, x)
+                                                          not in [GmApps.AFTERBUY, GmApps.GM])]
+
 
 class Roles():
     SUPERADMINS = 'SuperAdmins'

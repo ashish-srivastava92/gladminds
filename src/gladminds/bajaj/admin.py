@@ -2,17 +2,15 @@ from django.contrib.admin import AdminSite, TabularInline
 from django.contrib.auth.models import User, Group
 from django.contrib.admin import ModelAdmin
 from django.contrib.admin.views.main import ChangeList, ORDER_VAR
-from django.contrib.auth.admin import UserAdmin, GroupAdmin
-from django.conf import settings
-from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.contrib.admin import DateFieldListFilter
 
 from gladminds.bajaj import models
 from gladminds.bajaj.services.loyalty import send_welcome_sms
-from gladminds.core import utils, constants
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core import utils
 from gladminds.core.auth_helper import GmApps, Roles
 from gladminds.core.admin_helper import GmModelAdmin
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
+
 
 class BajajAdminSite(AdminSite):
     pass

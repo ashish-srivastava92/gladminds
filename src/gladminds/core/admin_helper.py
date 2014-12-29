@@ -4,10 +4,10 @@ from suit.widgets import EnclosedInput, AutosizedTextarea
 from django.forms.models import ModelForm
 from django.contrib.admin.views.main import ORDER_VAR, ChangeList
 from gladminds.core import utils
-from gladminds.bajaj import models
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect
 from django.contrib import messages
+from gladminds.core.model_fetcher import models
 
 
 class GmModelAdmin(ModelAdmin):
