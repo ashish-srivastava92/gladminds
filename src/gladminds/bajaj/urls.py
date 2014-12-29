@@ -22,7 +22,7 @@ api_v1.register(preferences_apis.BrandPreferenceResource())
 api_v1.register(SMSResources())
 
 urlpatterns = patterns('',
-    url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
+    url(r'^sms/','gladminds.bajaj.services.coupons.feed_views.send_sms', name='send_sms'),
     url(r'', include(core_urls)),
     url(r'', include(brand_admin.urls)),
     url(r'', include(api_v1.urls)),
@@ -49,8 +49,8 @@ urlpatterns = patterns('',
     url(r'^api/v1/bajaj/old-fsc-feed/\?wsdl$', 'gladminds.bajaj.feeds.webservice.old_fsc_service'),
     url(r'^api/v1/bajaj/old-fsc-feed/$', 'gladminds.bajaj.feeds.webservice.old_fsc_service'),
     url(r'^api/v1/bajaj/credit-note-feed/$', 'gladminds.bajaj.feeds.webservice.credit_note_service'), 
-    url(r'^api/v1/redeem-feed/$', 'gladminds.bajaj.services.feed_views.views_coupon_redeem_wsdl', {'document_root': settings.WSDL_COUPON_REDEEM_LOC}),
-    url(r'^api/v1/customer-feed/$', 'gladminds.bajaj.services.feed_views.views_customer_registration_wsdl', {'document_root': settings.WSDL_CUSTOMER_REGISTRATION_LOC}),
+    url(r'^api/v1/redeem-feed/$', 'gladminds.bajaj.services.coupons.feed_views.views_coupon_redeem_wsdl', {'document_root': settings.WSDL_COUPON_REDEEM_LOC}),
+    url(r'^api/v1/customer-feed/$', 'gladminds.bajaj.services.coupons.feed_views.views_customer_registration_wsdl', {'document_root': settings.WSDL_CUSTOMER_REGISTRATION_LOC}),
 
     
 

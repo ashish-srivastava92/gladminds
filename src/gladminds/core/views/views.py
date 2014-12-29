@@ -27,11 +27,10 @@ from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS
-from gladminds.core.decorator import log_time
 from gladminds.core.utils import get_email_template, format_product_object
 from gladminds.core.auth_helper import Roles
 from gladminds.core.auth.service_handler import check_service_active, Services
-from gladminds.bajaj.services.message_template import get_template
+from gladminds.core.core_utils.utils import log_time
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
@@ -236,7 +235,7 @@ def save_sa_registration(request, groups):
         return json.dumps({'message': SA_UPDATE_SUCCESS})
     return json.dumps({'message': SA_REGISTER_SUCCESS})
 
-CUST_UPDATE_SUCCESS = 'Customer information has been updated.'
+CUST_UPDATE_SUCCESS = 'Customer phone number has been updated.'
 CUST_REGISTER_SUCCESS = 'Customer has been registered with ID: '
 @log_time
 def register_customer(request, group=None):
@@ -245,7 +244,7 @@ def register_customer(request, group=None):
     existing_customer = False
     product_obj = models.ProductData.objects.filter(product_id=post_data['customer-vin'])
     if not post_data['customer-id']:
-        temp_customer_id = utils.generate_temp_id(TEMP_ID_PREFIX)
+        temp_customer_id = utils.generate_temp_sap_id(TEMP_ID_PREFIX)
     else:
         temp_customer_id = post_data['customer-id']
         existing_customer = True
@@ -264,18 +263,9 @@ def register_customer(request, group=None):
             customer_obj = models.CustomerTempRegistration.objects.filter(temp_customer_id = temp_customer_id)
             if customer_obj:
                 customer_obj = customer_obj[0]
-                if customer_obj.new_number != data_source[0]['customer_phone_number']:
-                    if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']):
-                        message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
-                        return json.dumps({'message': message})
                 customer_obj.new_number = data_source[0]['customer_phone_number']
-                customer_obj.new_customer_name = data_source[0]['customer_name']
-                customer_obj.product_data = product_obj[0]
                 customer_obj.sent_to_sap = False
             else:
-                if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']):
-                    message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
-                    return json.dumps({'message': message})
                 customer_obj = models.CustomerTempRegistration(product_data=product_obj[0], 
                                                                new_customer_name = data_source[0]['customer_name'],
                                                                new_number = data_source[0]['customer_phone_number'],
@@ -329,7 +319,6 @@ def get_customer_info(data):
         return {'message': message, 'status': 'fail'}
     if product_obj.purchase_date:
         product_data = format_product_object(product_obj)
-        product_data['group'] = data['groups'][0] 
         return product_data
     else:
         message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
