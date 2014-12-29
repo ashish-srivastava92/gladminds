@@ -52,26 +52,12 @@ app.conf.CELERYBEAT_SCHEDULE = {
         'schedule': crontab(minute=0, hour=0),
         'kwargs': {'day_duration':1}
     },
-    #Job to send daily mail about dispatch feed failure
+    #Job to send daily mail about feed failure
     'cronjob-send-report-mail-on-data-feed': {
-        'task': 'gladminds.sqs_tasks.send_mail_for_dispatch_feed_failure',
+        'task': 'gladminds.sqs_tasks.send_mail_for_feed_failure',
         'schedule': crontab(minute=0, hour=0),
         'kwargs': {'day_duration':1}
     },
-#Job to send daily mail about purchase feed failure
-    'cronjob-send-report-mail-on-data-feed': {
-        'task': 'gladminds.sqs_tasks.send_mail_for_purchase_feed_failure',
-        'schedule': crontab(minute=0, hour=0),
-        'kwargs': {'day_duration':1}
-    },
-#Job to send daily mail about credit note feed failure
-    'cronjob-send-report-mail-on-data-feed': {
-        'task': 'gladminds.sqs_tasks.send_mail_for_credit_note_feed_failure',
-        'schedule': crontab(minute=0, hour=0),
-        'kwargs': {'day_duration':1}
-    },
-
-    
     #Job to delete all the unused OTPs
     'cronjob-delete-unused-otp': {
         'task': 'gladminds.sqs_tasks.delete_unused_otp',

@@ -265,7 +265,7 @@ class ProductDispatchFeed(BaseFeed):
                     product_data = models.ProductData(
                         product_id=product['vin'], product_type=producttype_data, invoice_date=invoice_date, dealer_id=dealer_data)
                     product_data.save()
-                    logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN-{0}'.format(product['vin'], product['unique_service_coupon']))
+                    logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN-{0} UCN-{1}'.format(product['vin'], product['unique_service_coupon']))
                 except Exception as ex:
                     ex = '''[Exception: ProductDispatchFeed_product_data_save]:{0} VIN - {1}'''.format(ex, product['vin'])
                     self.feed_remark.fail_remarks(ex)
