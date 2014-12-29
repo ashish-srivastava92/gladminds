@@ -22,7 +22,7 @@ api_v1.register(preferences_apis.BrandPreferenceResource())
 api_v1.register(SMSResources())
 
 urlpatterns = patterns('',
-    url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
+    url(r'^sms/','gladminds.bajaj.services.coupons.feed_views.send_sms', name='send_sms'),
     url(r'', include(core_urls)),
     url(r'', include(brand_admin.urls)),
     url(r'', include(api_v1.urls)),
@@ -49,8 +49,25 @@ urlpatterns = patterns('',
     url(r'^api/v1/bajaj/old-fsc-feed/\?wsdl$', 'gladminds.bajaj.feeds.webservice.old_fsc_service'),
     url(r'^api/v1/bajaj/old-fsc-feed/$', 'gladminds.bajaj.feeds.webservice.old_fsc_service'),
     url(r'^api/v1/bajaj/credit-note-feed/$', 'gladminds.bajaj.feeds.webservice.credit_note_service'), 
-    url(r'^api/v1/redeem-feed/$', 'gladminds.bajaj.services.feed_views.views_coupon_redeem_wsdl', {'document_root': settings.WSDL_COUPON_REDEEM_LOC}),
-    url(r'^api/v1/customer-feed/$', 'gladminds.bajaj.services.feed_views.views_customer_registration_wsdl', {'document_root': settings.WSDL_CUSTOMER_REGISTRATION_LOC}),
+    url(r'^api/v1/redeem-feed/$', 'gladminds.bajaj.services.coupons.feed_views.views_coupon_redeem_wsdl', {'document_root': settings.WSDL_COUPON_REDEEM_LOC}),
+    url(r'^api/v1/customer-feed/$', 'gladminds.bajaj.services.coupons.feed_views.views_customer_registration_wsdl', {'document_root': settings.WSDL_CUSTOMER_REGISTRATION_LOC}),
+    url(r'^aftersell/users/(?P<users>[a-zA-Z0-9]+)$', 'gladminds.bajaj.views.users'),
+    url(r'^aftersell/sa/(?P<id>[a-zA-Z0-9]+)/$', 'gladminds.bajaj.views.get_sa_under_asc'),
+    url(r'^report/(?P<role>[a-zA-Z0-9.-]+)/$', 'gladminds.bajaj.views.brand_details'),
+    url(r'^aftersell/reports/reconciliation$', 'gladminds.bajaj.views.reports'),
+    url(r'^asc/report/$', 'gladminds.bajaj.views.get_active_asc_report'),
+     
+    url(r'^aftersell/register/(?P<menu>[a-zA-Z0-9]+)$', 'gladminds.bajaj.views.register'),
+    url(r'^aftersell/exceptions/(?P<exception>[a-zA-Z0-9]+)$', 'gladminds.bajaj.views.exceptions'),
+    url(r'^aftersell/asc/self-register/$', 'gladminds.bajaj.views.save_asc_registration'),
+    
+    url(r'^aftersell/(?P<provider>[a-zA-Z]+)/login/$', 'gladminds.bajaj.views.auth_login', name='user_login'),
+    url(r'^aftersell/provider/logout$', 'gladminds.bajaj.views.user_logout', name='user_logout'),
+    url(r'^aftersell/provider/redirect$', 'gladminds.bajaj.views.redirect_user'),
+    url(r'^aftersell/users/otp/generate$', 'gladminds.bajaj.views.generate_otp', name='generate_otp'),
+    url(r'^aftersell/users/otp/validate', 'gladminds.bajaj.views.validate_otp', name='validate_otp'),
+    url(r'^aftersell/users/otp/update_pass', 'gladminds.bajaj.views.update_pass', name='update_pass'),
+    url(r'^aftersell/provider/change-password$', 'gladminds.bajaj.views.change_password', name='change_password'),
 
     
 

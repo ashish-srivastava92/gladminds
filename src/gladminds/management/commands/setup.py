@@ -5,7 +5,7 @@ from django.contrib.auth.models import User, Permission, Group
 from django.conf import settings
 from gladminds.afterbuy.models import Consumer
 from gladminds.core.auth_helper import AFTERBUY_GROUPS, add_user_to_group,\
-    OTHER_GROUPS, Roles, GmApps, AFTERBUY_USER_MODELS, ALL_APPS
+    OTHER_GROUPS, Roles, GmApps, AFTERBUY_USER_MODELS, ALL_APPS, ALL_BRANDS
 from django.contrib.contenttypes.models import ContentType
 from gladminds.core.loaders.module_loader import get_model
 from gladminds.management.commands.load_mech_data import Command as mech_cmd
@@ -49,7 +49,8 @@ class Command(BaseCommand):
         self.set_afterbuy_permissions()
         self.upload_loyalty_user()
         self.upload_part_data()
-        self.set_bajaj_permissions()
+        for brand in ALL_BRANDS:
+            self.set_brand_permissions(brand)
 
     def define_groups(self):
         for group in AFTERBUY_GROUPS:
@@ -197,13 +198,12 @@ class Command(BaseCommand):
         except Exception as ex:
             print "[upload_part_data]: ", ex
 
-    def set_bajaj_permissions(self):
+    def set_brand_permissions(self, brand):
         try:
-            brand = GmApps.BAJAJ
             for group in [Roles.ASMS, Roles.NSMS]:
                 model_ids = []
                 for model in ['Distributor', 'Retailer', 'Mechanic']:
-                    model_ids.append(ContentType.objects.get(app_label__in=['bajaj', 'auth'], model=model).id)
+                    model_ids.append(ContentType.objects.get(app_label__in=[brand, 'auth'], model=model).id)
                 permissions = Permission.objects.using(brand).filter(content_type__id__in=model_ids)
                 group = Group.objects.using(brand).get(name=group)
                 for permission in permissions:
@@ -211,7 +211,7 @@ class Command(BaseCommand):
                 model_ids = []
                 for model in ['SparePartMasterData', 'SparePartUPC', 'SparePartPoint',
                               'AccumulationRequest']:
-                    model_ids.append(ContentType.objects.get(app_label__in=['bajaj', 'auth'], model=model).id)
+                    model_ids.append(ContentType.objects.get(app_label__in=[brand, 'auth'], model=model).id)
                 permissions = Permission.objects.using(brand).filter(content_type__id__in=model_ids,
                                                                      codename__contains='change_')
                 for permission in permissions:

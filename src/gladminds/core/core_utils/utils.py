@@ -2,6 +2,10 @@ import base64
 import hashlib
 import datetime
 import re
+import time
+import logging
+
+LOG = logging.getLogger('gladminds')
 
 
 def get_list_from_set(set_data):
@@ -34,3 +38,33 @@ def debug(fn):
         print 'name:{0} args:{1} kwargs:{2} result: {3}'.format(fn.__name__, args, kwargs, result)
         return result
     return wrapper
+
+
+def log_time(func_to_decorate):
+    '''
+    Decorator generator that logs the time it takes a function to execute
+    :param func_to_decorate:
+    :type func_to_decorate:
+    '''
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func_to_decorate(*args, **kwargs)
+        elapsed = (time.time() - start)
+        LOG.info("[TIMING]:%s - %s" % (func_to_decorate.__name__, elapsed))
+        return result
+    wrapper.__doc__ = func_to_decorate.__doc__
+    wrapper.__name__ = func_to_decorate.__name__
+    return wrapper
+
+
+def get_search_query_params(request, class_self):
+    custom_search_enabled = False
+    if 'custom_search' in request.GET and 'val' in request.GET:
+        class_self.search_fields = ()
+        request.GET = request.GET.copy()
+        class_self.search_fields = (request.GET.pop("custom_search")[0],)
+        search_value = request.GET.pop("val")[0]
+        request.GET["q"] = search_value
+        request.META['QUERY_STRING'] = 'q=%s'% search_value
+        custom_search_enabled = True
+    return custom_search_enabled
