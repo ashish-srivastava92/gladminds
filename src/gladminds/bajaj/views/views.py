@@ -274,14 +274,14 @@ def register_customer(request, group=None):
             if customer_obj:
                 customer_obj = customer_obj[0]
                 if customer_obj.new_number != data_source[0]['customer_phone_number']:
-                    if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']):
+                    if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']) or models.ProductData.objects.filter(customer_phone_number=data_source[0]['customer_phone_number']):
                         message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
                         return json.dumps({'message': message})
                 customer_obj.new_number = data_source[0]['customer_phone_number']
                 customer_obj.product_data = product_obj[0]
                 customer_obj.sent_to_sap = False
             else:
-                if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']):
+                if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']) or models.ProductData.objects.filter(customer_phone_number=data_source[0]['customer_phone_number']):
                     message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
                     return json.dumps({'message': message})
                 customer_obj = models.CustomerTempRegistration(product_data=product_obj[0], 
