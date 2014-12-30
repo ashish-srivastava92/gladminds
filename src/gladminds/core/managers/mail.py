@@ -95,7 +95,7 @@ def feed_failure(feed_data=None):
             csvwriter.writerow([feed['created_date'], feed['feed_type'], feed['reason']])
         message = EmailMessage(mail_detail['subject'], "The feed failures on " +str(today),
                                mail_detail['sender'], mail_detail['receiver'])
-        message.attach('feed_failure.csv ' + str(today), csvfile.getvalue(), 'text/csv')
+        message.attach('feed_failure_' + today.strftime("%d_%m_%Y") +'.csv', csvfile.getvalue(), 'text/csv')
         message.send()
     except Exception as ex:
         logger.info("[Exception feed_fail_report]: {0}".format(ex))
