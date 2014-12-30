@@ -240,7 +240,7 @@ def send_feedback_received(data, receiver_email):
         context = Context({"content": data['content']})
         body = template.render(context)
         send_email(sender = data['sender'], receiver = receiver_email, 
-                   subject = data['subject'], body = body, message=data['content'],
+                   subject = data['newsubject'], body = body, message=data['content'],
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception feedback received email]: {0}".format(ex))
@@ -349,7 +349,7 @@ def send_email_to_manager_after_issue_resolved(data, manager_obj):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                             data, receiver = manager_obj.email_id, message=data['content'],)
+                             data, receiver = manager_obj.email_id, message=data['content'])
     except Exception as ex:
         logger.info("[Exception fail to send mail to manager]  {0}".format(ex))         
            
