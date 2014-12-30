@@ -276,12 +276,6 @@ def validate_coupon(sms_dict, phone_number):
                           delay_seconds=customer_message_countdown)
 
         sms_log(receiver=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
-    except IndexError as ie:
-        LOG.info('[validate_coupon]:IndexError : '.format(ie))
-        dealer_message = templates.get_template('SEND_INVALID_VIN_OR_FSC')
-    except ObjectDoesNotExist as odne:
-        LOG.info('[validate_coupon]:ObjectDoesNotExist : '.format(odne))
-        dealer_message = templates.get_template('SEND_INVALID_SERVICE_TYPE').format(service_type=service_type)
     except Exception as ex:
         LOG.info('[validate_coupon]:Exception : '.format(ex))
         dealer_message = templates.get_template('SEND_INVALID_MESSAGE')
