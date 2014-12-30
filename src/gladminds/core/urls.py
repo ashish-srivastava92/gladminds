@@ -1,12 +1,18 @@
 from django.conf.urls import patterns, url, include
-from django.conf import settings
 from gladminds.core.cron_jobs.taskqueue import SqsHandler
 from gladminds.sqs_tasks import _tasks_map
 
+from tastypie.api import Api
+from gladminds.core.apis import coupon_apis
+
+api_v1 = Api(api_name="v1")
+# api_v1.register(audit_api.AuditResources())
+# api_v1.register(user_apis.UserProfileResource())
+api_v1.register(coupon_apis.CouponDataResources())
 
 urlpatterns = patterns('',
     url(r'api/doc/', include('gladminds.core.api_docs.swagger_urls', namespace='tastypie_swagger')),
-    
+    url(r'', include(api_v1.urls)),
     url(r'^aftersell/users/(?P<users>[a-zA-Z0-9]+)$', 'gladminds.core.views.users'),
     url(r'^aftersell/sa/(?P<id>[a-zA-Z0-9]+)/$', 'gladminds.core.views.get_sa_under_asc'),
     url(r'^report/(?P<role>[a-zA-Z0-9.-]+)/$', 'gladminds.core.views.brand_details'),
@@ -24,7 +30,12 @@ urlpatterns = patterns('',
     url(r'^aftersell/users/otp/validate', 'gladminds.core.views.validate_otp', name='validate_otp'),
     url(r'^aftersell/users/otp/update_pass', 'gladminds.core.views.update_pass', name='update_pass'),
     url(r'^aftersell/provider/change-password$', 'gladminds.core.views.change_password', name='change_password'),
-
+    url(r'^aftersell/servicedesk/helpdesk$', 'gladminds.core.services.service_desk.servicedesk_views.service_desk', name='service_desk'),
+    url(r'^aftersell/servicedesk/$', 'gladminds.core.services.service_desk.servicedesk_views.get_servicedesk_tickets', name='get_servicedesk_tickets'),
+    url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/$', 'gladminds.core.services.service_desk.servicedesk_views.modify_servicedesk_tickets', name='modify_servicedesk_tickets'),
+    url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/comments/(?P<comment_id>\d+)/$', 'gladminds.core.services.service_desk.servicedesk_views.modify_feedback_comments', name='modify_feedback_comments'),
+    url(r'^aftersell/feedbackresponse/(?P<feedback_id>\d+)/$', 'gladminds.core.services.service_desk.servicedesk_views.get_feedback_response', name='get_feedback_response'),
+    
     # Tasks URL
     url(r'^welcome', 'gladminds.bajaj.services.loyalty.send_welcome_message', name='send_welcome_message'),
     url(r'^tasks-view/', 'gladminds.core.views.sqs_tasks_view'),

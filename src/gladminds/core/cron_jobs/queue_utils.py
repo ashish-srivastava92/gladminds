@@ -25,7 +25,7 @@ def check_celery_running():
     return False
 
 
-def send_job_to_queue(task, task_params, brand=None):
+def send_job_to_queue(task, task_params, delay_seconds=None, brand=None):
     '''
     Sends a job to queue
     :param task_name:
@@ -44,9 +44,13 @@ def send_job_to_queue(task, task_params, brand=None):
     if settings.ENABLE_AMAZON_SQS:
         queue_name = settings.SQS_QUEUE_NAME
         task_name = task.__name__
-        SqsTaskQueue(queue_name, brand).add(task_name, task_params)
+        SqsTaskQueue(queue_name, brand).add(task_name, task_params,
+                                            delay_seconds=delay_seconds)
     else:
         if check_celery_running():
-            task.delay(**task_params)
+            if delay_seconds is None:
+                task.delay(**task_params)
+            else:
+                task.apply_async(kwargs=task_params, countdown=delay_seconds)
         else:
             task(**task_params)

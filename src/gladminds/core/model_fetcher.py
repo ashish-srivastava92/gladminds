@@ -6,9 +6,13 @@ class ModelFetcher(object):
     """
     The global config wrapper that handles the backend.
     """
-    def __init__(self, model_name=None):
-        self.model_name = model_name
+    def __init__(self, brand=None):
+        super(ModelFetcher, self).__init__()
+        self.brand = brand
 
     def __getattr__(self, key):
-        if key in ['objects']:
-            return getattr(import_module('gladminds.{0}.models'.format(settings.BRAND)), self.model_name).objects
+        if self.brand is None:
+            brand = settings.BRAND
+        return getattr(import_module('gladminds.{0}.models'.format(brand)), key)
+
+models = ModelFetcher()

@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 
 from gladminds.core import base_models
 from gladminds.core.auth_helper import GmApps
+from django.conf import settings
+from gladminds.core.model_helpers import validate_image
 
 _APP_NAME = GmApps.DEMO
 
@@ -60,7 +62,6 @@ class ServiceDeskUser(base_models.ServiceDeskUser):
         verbose_name_plural = "Service Desk Users"
 
 
-
 class Feedback(base_models.Feedback):
     reporter = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='demo_feedback_reporter')
     assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='demo_feedback_assignee')
@@ -72,13 +73,14 @@ class Feedback(base_models.Feedback):
 
 
 class Activity(base_models.Activity):
+    feedback = models.ForeignKey(Feedback, null=True, blank=True)
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "user activity info"
 
 
 class Comment(base_models.Comment):
-    feedback_object = models.ForeignKey(Feedback, null=True, blank=True)
+    feedback_object = models.ForeignKey(Feedback,null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -147,6 +149,12 @@ class OldFscData(base_models.OldFscData):
         app_label = _APP_NAME
         verbose_name_plural = "Old Coupon Information"
 
+class CDMSData(base_models.CDMSData):
+    unique_service_coupon = models.ForeignKey(CouponData, null=True, editable=False)
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "CDMS Information"
 
 class OTPToken(base_models.OTPToken):
     user = models.ForeignKey(UserProfile, null=True, blank=True, related_name='demo_otp_token')
@@ -233,10 +241,90 @@ class AuditLog(base_models.AuditLog):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "Audit Log"
+
 
 class SLA(base_models.SLA):
 
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "SLA config"
+
+
+class NationalSalesManager(base_models.NationalSalesManager):
+    '''details of National Sales Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+
+    class Meta:
+        app_label = _APP_NAME
+
+
+class AreaSalesManager(base_models.AreaSalesManager):
+    '''details of Area Service Manager'''
+    '''details of National Sales Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    nsm = models.ForeignKey(NationalSalesManager, null=True, blank=True)
+
+    class Meta:
+        app_label = _APP_NAME
+
+
+class Distributor(base_models.Distributor):
+    '''details of Distributor'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
+
+    class Meta:
+        app_label = _APP_NAME
+
+
+class Retailer(base_models.Retailer):
+    '''details of retailer'''
+
+    class Meta:
+        app_label = _APP_NAME
+
+
+class Mechanic(base_models.Mechanic):
+    '''details of Mechanic'''
+    registered_by_distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
+    image_url = models.FileField(upload_to='{0}/demo/mechanics'.format(settings.ENV),
+                                  max_length=255, null=True, blank=True,
+                                  validators=[validate_image])
+
+    class Meta:
+        app_label = _APP_NAME
+
+
+class SparePartMasterData(base_models.SparePartMasterData):
+    '''details of Spare Part'''
+    product_type = models.ForeignKey(ProductType, null=True, blank=True)
+
+    class Meta:
+        app_label = _APP_NAME
+
+
+class SparePartUPC(base_models.SparePartUPC):
+    '''details of Spare Part'''
+    part_number = models.ForeignKey(SparePartMasterData)
+
+    class Meta:
+        app_label = _APP_NAME
+
+
+class SparePartPoint(base_models.SparePartPoint):
+    '''details of Spare Part'''
+    part_number = models.ForeignKey(SparePartMasterData)
+
+    class Meta:
+        app_label = _APP_NAME
+
+
+class AccumulationRequest(base_models.AccumulationRequest):
+    '''details of Spare Part'''
+
+    member = models.ForeignKey(Mechanic)
+    upcs = models.ManyToManyField(SparePartUPC)
+    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
+
+    class Meta:
+        app_label = _APP_NAME

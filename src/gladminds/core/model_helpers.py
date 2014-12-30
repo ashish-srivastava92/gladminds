@@ -15,8 +15,7 @@ from django.conf import settings
 phone_re = re.compile(r'^\+?1?\d{9,15}$')
 validate_phone = RegexValidator(phone_re, _("Phone number must be entered in the format: '+919999999999'. Up to 15 digits allowed."), 'invalid')
 
-
-def get_phone_number_format(phone_number):
+def format_phone_number(phone_number):
     '''
     This is used to format phone
     '''
@@ -39,7 +38,7 @@ class PhoneNoField(fields.CharField):
 
     def clean(self, value):
         value = self.to_python(value).strip()
-        value = get_phone_number_format(value)
+        value = format_phone_number(value)
         return super(PhoneNoField, self).clean(value)
 
 

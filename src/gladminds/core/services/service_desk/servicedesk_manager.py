@@ -7,22 +7,22 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 from gladminds.core import utils
-from gladminds.bajaj import models as models
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, ALL
 from gladminds.core.managers.audit_manager import sms_log
-from gladminds.bajaj.services import message_template as templates
-from gladminds.bajaj.services.coupons import free_service_coupon as fsc
 from gladminds.sqs_tasks import send_coupon, send_sms
 from gladminds.core.managers.mail import send_feedback_received, \
      send_servicedesk_feedback, send_dealer_feedback
 from gladminds.core.auth_helper import Roles
 from gladminds.core.utils import get_list_from_set, create_context, \
     set_wait_time
-from gladminds.core.cron_jobs.queue_utils import get_task_queue
+from gladminds.core.cron_jobs.queue_utils import get_task_queue,\
+    send_job_to_queue
 from gladminds.core.core_utils.date_utils import convert_utc_to_local_time, \
     get_time_in_seconds
 from gladminds.core.managers import mail
 from django.db.transaction import atomic
+from gladminds.core.model_fetcher import models
+from gladminds.core.services.coupon.free_service_coupon import validate_service_advisor
 
 LOG = logging.getLogger('gladminds')
 
@@ -39,13 +39,14 @@ class SDActions():
     COMMENT_UPDATE = "updated comment"
     DUE_DATE = "changed due_date"
 
+
 def get_feedbacks(user, status, priority, type, search=None):
     feedbacks = []
     if type == ALL or type is None:
         type_filter = get_list_from_set(FEEDBACK_TYPE)
     else:
         type_filter = [type]
-    
+
     if priority == ALL or priority is None:
         priority_filter = get_list_from_set(PRIORITY)
     else:
@@ -88,10 +89,11 @@ def get_feedbacks(user, status, priority, type, search=None):
 
     return feedbacks
 
+
 def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=None):
     created_date = convert_utc_to_local_time(feedback_obj.created_date)
     try:
-        message = templates.get_template(template_name).format(
+        message = models.MessageTemplate.objects.get(template_key=template_name).format(
                                         type=feedback_obj.type,
                                         reporter=feedback_obj.reporter,
                                         message=feedback_obj.message,
@@ -101,21 +103,18 @@ def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=Non
         if comment_obj and template_name == 'SEND_MSG_TO_ASSIGNEE':
             message = message + 'Note :' + comment_obj.comments
     except Exception as ex:
-        message = templates.get_template('SEND_INVALID_MESSAGE')
+        message = models.MessageTemplate.objects.get(template_key='SEND_INVALID_MESSAGE')
     finally:
         LOG.info("Send complain message received successfully with {0}".format(message))
         phone_number = utils.get_phone_number_format(phone_number)
-        if settings.ENABLE_AMAZON_SQS:
-            task_queue = get_task_queue()
-            task_queue.add("send_coupon", {"phone_number":phone_number,
+        send_job_to_queue(send_coupon, {"phone_number":phone_number,
                                            "message": message})
-        else:
-            send_coupon.delay(phone_number=phone_number, message=message)
     sms_log(receiver=phone_number, action='SEND TO QUEUE', message=message)
     return {'status': True, 'message': message}
 
+
 def check_role_of_initiator(phone_number):
-    active_sa = fsc.validate_service_advisor(phone_number)
+    active_sa = validate_service_advisor(phone_number)
     if  active_sa:
         return "SA"
     else:
@@ -125,6 +124,7 @@ def check_role_of_initiator(phone_number):
             return "Customer"
         else:
             return "other"
+
 
 def get_complain_data(sms_dict, phone_number, email, name, dealer_email, with_detail=False):
     ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
@@ -156,18 +156,15 @@ def get_complain_data(sms_dict, phone_number, email, name, dealer_email, with_de
                                                             role=role
                                                             )
         gladminds_feedback_object.save()
-        message = templates.get_template('SEND_RCV_FEEDBACK').format(type=gladminds_feedback_object.type)
+        message = models.MessageTemplate.objects.get(template_key='SEND_RCV_FEEDBACK').format(type=gladminds_feedback_object.type)
     except Exception as ex:
         LOG.error(ex)
-        message = templates.get_template('SEND_INVALID_MESSAGE')
+        message = models.MessageTemplate.objects.get(template_key='SEND_INVALID_MESSAGE')
     finally:
         LOG.info("Send complain message received successfully with %s" % message)
         phone_number = utils.get_phone_number_format(phone_number)
-        if settings.ENABLE_AMAZON_SQS:
-            task_queue = get_task_queue()
-            task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
-        else:
-            send_coupon.delay(phone_number=phone_number, message=message)
+        send_job_to_queue(send_coupon, {"phone_number":phone_number, "message": message})
+
         if dealer_email:
             context = utils.create_context('FEEDBACK_DETAIL_TO_DEALER', gladminds_feedback_object)
             send_dealer_feedback(context, dealer_email)
@@ -195,6 +192,7 @@ def get_servicedesk_users(designation):
     else:
         LOG.info("No user with designation SDO exists")
         return None
+
 
 def get_comments(feedback_id):
     comments = models.Comment.objects.filter(feedback_object_id=feedback_id)

@@ -216,7 +216,7 @@ class OldFSCModel(ComplexModel):
     __namespace__ = tns
     GT_OLD_FSC = Array(OldFscItem)
     GT_STATUS = OldFscStatusModel
-    
+
 class OldFSCModelList(ComplexModel):
     __namespace__ = tns
     OldFSCData = OldFSCModel
@@ -224,10 +224,16 @@ class OldFSCModelList(ComplexModel):
 class CreditNoteModel(ComplexModel):
     __namespace__ = tns
     CHASSIS = Unicode
-    UCN_NO = Unicode
+    GCP_KUNNR = Unicode
+    GCP_KMS = Unicode(default=None)
+    GCP_UCN_NO = Unicode
     SERVICE_TYPE = Unicode
-    CREDIT_NOTE = Unicode
-    CREDIT_DATE = Date
+    SER_AVL_DT = Date(default=None)
+    GCPDATA_RECV_DT = Date(default=None)
+    CREDIT_NOTE = Unicode(default=None)
+    CREDIT_DATE = Date(default=None)
+    CDMS_DOC_NO = Unicode(default=None)
+    CDMS_DT = Date(default=None)
 
 class CreditNoteModelList(ComplexModel):
     __namespace__ = tns
@@ -421,10 +427,16 @@ class CreditNoteService(ServiceBase):
             try:
                 credit_note_list.append({
                     'vin': credit_note.CHASSIS,
-                    'unique_service_coupon': credit_note.UCN_NO,
+                    'dealer': credit_note.GCP_KUNNR,
+                    'actual_kms': credit_note.GCP_KMS,
+                    'unique_service_coupon': credit_note.GCP_UCN_NO,
                     'service_type': credit_note.SERVICE_TYPE,
+                    'actual_service_date': credit_note.SER_AVL_DT,
+                    'received_date': credit_note.GCPDATA_RECV_DT,
                     'credit_note': credit_note.CREDIT_NOTE,
                     'credit_date': credit_note.CREDIT_DATE,
+                    'cdms_doc_number': credit_note.CDMS_DOC_NO,
+                    'cdms_date': credit_note.CDMS_DT
                 })
 
             except Exception as ex:

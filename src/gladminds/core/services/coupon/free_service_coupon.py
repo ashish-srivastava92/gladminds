@@ -8,20 +8,20 @@ from django.utils import timezone
 from django.conf import settings
 from django.db.models import Q
 
-from gladminds.core.managers import sms_parser
-from gladminds.core.managers.audit_manager import sms_log
-from gladminds.bajaj.services import message_template as templates
-from gladminds.bajaj import models
 from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \
     send_brand_sms_customer, send_invalid_keyword_message,\
     customer_detail_recovery
 from gladminds.core import utils
-from gladminds.bajaj.feeds.feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
-from gladminds.core.decorator import log_time
 from gladminds.core.base_models import STATUS_CHOICES
-from gladminds.core.cron_jobs.queue_utils import get_task_queue
+from gladminds.core.model_fetcher import models
+from gladminds.core.core_utils.utils import log_time
+from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
+from gladminds.core.managers.audit_manager import sms_log
+from gladminds.bajaj.feeds.feed import BaseFeed
+from gladminds.core.managers import sms_parser
+from gladminds.core.model_helpers import format_phone_number
 
 LOG = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -54,12 +54,8 @@ def register_customer(sms_dict, phone_number):
     # Please update the template variable before updating the keyword-argument
     message = sms_parser.render_sms_template(status='send', keyword=sms_dict['keyword'], customer_id=gladmind_customer_id)
     phone_number = utils.get_phone_number_format(phone_number)
-    logger.info("customer is registered with message %s" % message)
-    if settings.ENABLE_AMAZON_SQS:           
-        task_queue = get_task_queue()
-        task_queue.add("send_registration_detail", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
-    else:
-        send_registration_detail.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
+    LOG.info("customer is registered with message %s" % message)
+    send_job_to_queue(send_registration_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
     return True
 
@@ -68,7 +64,7 @@ def send_customer_detail(sms_dict, phone_number):
     keyword = sms_dict['params']
     value = sms_dict['message']
     kwargs = {}
-    kwargs['customer_phone_number__endswith'] = utils.get_phone_number_format(phone_number)
+    kwargs['customer_phone_number__endswith'] = format_phone_number(phone_number)
     if value and len(value)>5 and keyword in ['vin', 'id']:
         if keyword == 'id':
             kwargs['customer_id'] = value
@@ -85,18 +81,14 @@ def send_customer_detail(sms_dict, phone_number):
                 message = templates.get_template('SEND_CUSTOMER_DETAILS').format(model_key, getattr(product_object, search_key))
             else:
                 message = templates.get_template('INVALID_RECOVERY_MESSAGE').format(keyword)
-        
+
         except Exception as ex:
             LOG.info('Details not found with message %s' % ex)
             message = templates.get_template('INVALID_RECOVERY_MESSAGE').format(keyword)
     else:
         message = templates.get_template('SEND_INVALID_MESSAGE')
-    
-    if settings.ENABLE_AMAZON_SQS:
-        task_queue = get_task_queue()
-        task_queue.add("customer_detail_recovery", {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
-    else:
-        customer_detail_recovery.delay(phone_number=phone_number, message=message, sms_client=settings.SMS_CLIENT)
+
+    send_job_to_queue(customer_detail_recovery, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
     return {'status': True, 'message': message}
 
@@ -365,11 +357,7 @@ def is_sa_initiator(coupon_id, service_advisor, phone_number):
     else:
         sa_phone = utils.get_phone_number_format(phone_number)
         message = "SA is not the coupon initiator."
-        if settings.ENABLE_AMAZON_SQS:
-            task_queue = get_task_queue()
-            task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
-        else:
-            send_invalid_keyword_message.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
+        send_job_to_queue(send_invalid_keyword_message, {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
     return False
 
 def is_valid_data(customer_id=None, coupon=None, sa_phone=None):
@@ -385,20 +373,16 @@ def is_valid_data(customer_id=None, coupon=None, sa_phone=None):
         customer_obj = models.ProductData.objects.filter(customer_id=customer_id)
     if ((customer_obj and coupon_obj and coupon_obj[0].product.product_id != customer_obj[0].product_id) or\
         (not customer_obj and not coupon_obj)):
-        message=templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')
+        message = models.MessageTemplate.objects.get(template_key='SEND_SA_WRONG_CUSTOMER_UCN')
 
     elif customer_id and not customer_obj:
-        message=templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')
+        message = models.MessageTemplate.objects.get(template_key='SEND_SA_WRONG_CUSTOMER_UCN')
     elif coupon and not coupon_obj:
-        message=templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')
+        message = models.MessageTemplate.objects.get(template_key='SEND_SA_WRONG_CUSTOMER_UCN')
 
     if message:
         sa_phone = utils.get_phone_number_format(sa_phone)
-        if settings.ENABLE_AMAZON_SQS:
-            task_queue = get_task_queue()
-            task_queue.add("send_invalid_keyword_message", {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
-        else:
-            send_invalid_keyword_message.delay(phone_number=sa_phone, message=message, sms_client=settings.SMS_CLIENT)
+        send_job_to_queue(send_invalid_keyword_message, {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
         sms_log(receiver=sa_phone, action=AUDIT_ACTION, message=message)
         LOG.info("Message sent to SA : " + message)
         return False

@@ -420,7 +420,7 @@ FEED_FAILURE = {
 FEED_FAILURE_MAIL_DETAIL = {
 
     "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds+alerts@hashedin.com", "support@gladminds.co"],
+    "receiver": ["gladminds+alerts@hashedin.com", "support@gladminds.co", "jojibabu.vege@gladminds.co"],
     "subject": "Gladminds Feed Failure Mail",
     "body": """""",
 }

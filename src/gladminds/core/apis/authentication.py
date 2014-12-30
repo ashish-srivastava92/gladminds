@@ -4,6 +4,7 @@ from django.utils import timezone
 from tastypie.authentication import Authentication
 from provider.oauth2.models import AccessToken
 import logging
+from gladminds.core.auth.service_handler import ServiceHandler
 
 
 class AuthError(RuntimeError):
@@ -55,3 +56,13 @@ class AccessTokenAuthentication(Authentication):
 
         logging.info('Valid access')
         return token
+
+
+class GladmindsServiceAuthentication(Authentication):
+    def __init__(self, service):
+        self.service = service
+
+    def is_authenticated(self, request, **kwargs):
+        if ServiceHandler.check_service_enabled(self.service):
+            return True
+        return False

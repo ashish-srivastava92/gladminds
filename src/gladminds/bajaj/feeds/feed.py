@@ -449,22 +449,55 @@ class CreditNoteFeed(BaseFeed):
     def import_data(self):
         for credit_note in self.data_source:
             try:
-                coupon_data = models.CouponData.objects.get(product__product_id=credit_note['vin'],
-                                    unique_service_coupon=credit_note['unique_service_coupon'],
-                                    service_type=int(credit_note['service_type']))
-                coupon_data.credit_note = credit_note['credit_note']
-                coupon_data.credit_date = credit_note['credit_date']
-                coupon_data.save()
+                message=coupon_data=dealer_data=None
+                if credit_note['dealer']:
+                    dealer_data = self.check_or_create_dealer(dealer_id=credit_note['dealer'])
+                product_data = models.ProductData.objects.filter(product_id=credit_note['vin'])
+                if not product_data:
+                    message='VIN: {0} does not exits'.format(credit_note['vin'])
+                    raise ValueError(message)
+                else:
+                    coupon_data = models.CouponData.objects.filter(product__product_id=credit_note['vin'],
+                                    unique_service_coupon=credit_note['unique_service_coupon'])
+                    if not coupon_data:
+                        message='VIN: {0} coupon:{1}:: coupon does not exists'.format(credit_note['vin'],
+                                                            credit_note['unique_service_coupon'])
+                        raise ValueError(message)
+                    elif coupon_data[0].service_type!=int(credit_note['service_type']):
+                        message='VIN: {0} coupon:{1}:: service type does not match'.format(credit_note['vin'],
+                                                            credit_note['unique_service_coupon'])
+                        raise ValueError(message)
+                    else:
+                        valid_coupon = coupon_data[0]
+                        valid_coupon.status = 2
+                        valid_coupon.actual_kms = credit_note['actual_kms']
+                        valid_coupon.actual_service_date = credit_note['actual_service_date']
+                        valid_coupon.credit_note = credit_note['credit_note']
+                        valid_coupon.credit_date = credit_note['credit_date']
+                        valid_coupon.servicing_dealer = credit_note['dealer']
+                        valid_coupon.save()
                 logger.info("updated credit details:: vin : {0} coupon : {1} service_type : {2}".format(
-                            credit_note['vin'], credit_note['unique_service_coupon'],
-                            credit_note['service_type']))
+                                credit_note['vin'], credit_note['unique_service_coupon'],
+                                credit_note['service_type']))
             except Exception as ex:
-                ex = "[Exception: CREDIT_NOTE_FEED]: For VIN {0} with coupon {1} of service type {2}:: {3}".format(
-                            credit_note['vin'], credit_note['unique_service_coupon'],
-                            credit_note['service_type'], ex)
+                ex = "[Exception: CREDIT_NOTE_FEED]:{0}".format(ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
+            if credit_note['cdms_doc_number']:
+                self.save_cdms_data(credit_note, coupon_data, message)
         return self.feed_remark
+
+    def save_cdms_data(self, credit_note, coupon_data, message):
+        valid_coupon=None
+        if coupon_data:
+            valid_coupon=coupon_data[0]
+
+        cdms_data=models.CDMSData(unique_service_coupon=valid_coupon,
+                        received_date=credit_note['received_date'],
+                        cdms_date=credit_note['cdms_date'],
+                        cdms_doc_number=credit_note['cdms_doc_number'],
+                        remarks=message)
+        cdms_data.save()
 
 class ASCFeed(BaseFeed):
     def import_data(self):
