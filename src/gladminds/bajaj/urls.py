@@ -23,7 +23,6 @@ api_v1.register(SMSResources())
 
 urlpatterns = patterns('',
     url(r'^sms/','gladminds.bajaj.services.coupons.feed_views.send_sms', name='send_sms'),
-    url(r'', include(core_urls)),
     url(r'', include(brand_admin.urls)),
     url(r'', include(api_v1.urls)),
     url(r'^site-info/$', 'gladminds.bajaj.views.site_info', name='site_info'),
@@ -68,7 +67,7 @@ urlpatterns = patterns('',
     url(r'^aftersell/users/otp/validate', 'gladminds.bajaj.views.views.validate_otp', name='validate_otp'),
     url(r'^aftersell/users/otp/update_pass', 'gladminds.bajaj.views.views.update_pass', name='update_pass'),
     url(r'^aftersell/provider/change-password$', 'gladminds.bajaj.views.views.change_password', name='change_password'),
-
+    url(r'', include(core_urls)),
     
 
 )

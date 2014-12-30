@@ -243,7 +243,7 @@ def register_customer(request, group=None):
     existing_customer = False
     product_obj = models.ProductData.objects.filter(product_id=post_data['customer-vin'])
     if not post_data['customer-id']:
-        temp_customer_id = utils.generate_temp_sap_id(TEMP_ID_PREFIX)
+        temp_customer_id = utils.generate_temp_id(TEMP_ID_PREFIX)
     else:
         temp_customer_id = post_data['customer-id']
         existing_customer = True
