@@ -14,7 +14,7 @@ from gladminds.bajaj.services import message_template as templates
 from gladminds.core import utils
 from gladminds.bajaj import models
 from gladminds.core.managers.audit_manager import feed_log, sms_log
-from gladminds.core.cron_jobs.queue_utils import get_task_queue
+from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 
 logger = logging.getLogger("gladminds")
 USER_GROUP = {'dealer': 'dealers', 'ASC': 'ascs', 'SA':'sas', 'customer':"customer"}
@@ -394,16 +394,7 @@ def update_coupon_data(sender, **kwargs):
             else:
                 message = templates.get_template('SEND_CUSTOMER_ON_PRODUCT_PURCHASE').format(
                     customer_name=customer_name, sap_customer_id=customer_id)
-            
-            if settings.ENABLE_AMAZON_SQS:
-                task_queue = get_task_queue()
-                task_queue.add("send_on_product_purchase", {"phone_number": 
-                                customer_phone_number, "message":message,
-                                "sms_client":settings.SMS_CLIENT})
-            else:
-                send_on_product_purchase.delay(
-                phone_number=customer_phone_number, message=message, sms_client=settings.SMS_CLIENT)
- 
+            send_job_to_queue(send_on_product_purchase, {"phone_number":customer_phone_number, "message":message, "sms_client":settings.SMS_CLIENT}) 
             sms_log(
                 receiver=customer_phone_number, action='SEND TO QUEUE', message=message)
         except Exception as ex:
