@@ -34,6 +34,7 @@ class Roles():
     DEALERS = 'Dealers'
     ASCS = 'AuthorisedServiceCenters'
     DASCS = 'DependentAuthorisedServiceCenters'
+    SERVICEADVISOR = 'ServiceAdvisors'
 
 
 AFTERBUY_ADMIN_GROUPS = [Roles.SUPERADMINS, Roles.ADMINS]
