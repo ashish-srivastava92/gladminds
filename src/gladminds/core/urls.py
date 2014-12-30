@@ -37,7 +37,7 @@ urlpatterns = patterns('',
     url(r'^aftersell/feedbackresponse/(?P<feedback_id>\d+)/$', 'gladminds.core.services.service_desk.servicedesk_views.get_feedback_response', name='get_feedback_response'),
     
     # Tasks URL
-    url(r'^welcome', 'gladminds.bajaj.services.loyalty.send_welcome_message', name='send_welcome_message'),
+    url(r'^welcome', 'gladminds.bajaj.services.loyalty.loyalty.send_welcome_message', name='send_welcome_message'),
     url(r'^tasks-view/', 'gladminds.core.views.sqs_tasks_view'),
     url(r'^trigger-tasks', 'gladminds.core.views.trigger_sqs_tasks'),
     url(r'^tasks', SqsHandler.as_view(task_map=_tasks_map)),

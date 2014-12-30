@@ -5,27 +5,31 @@
 {% endblock %}
 
 {% block body %}
-	<h3 class="text-center">ASC-Monthly Coupon Details </h3>
+     
+	<h3 class="text-center"> DFSC Daily Progress Tracker </h3>
 	<div class="container">
-	   <div class="col-md-3">
+	   <div class="col-md-3 home-button-style">
+  		     <a class="btn btn-primary anchor-style"  href="/">
+  		          Home
+  		     </a>
 	   </div>
 		<div class="col-md-9">
 			<div class="row">
-            	<div class="col-md-3 form-group">
+              <div class="col-md-3 form-group">
                 <label class="control-label">Month</label>
                 <select class="form-control" name="month" id="month" required>
-                    	<option value="">Select Month</option>
+                    	<option value="">Select Month </option>
                       	{% for month in month %}
-                     		 <option value="{{month}}">{{month}}</option>
+                     		 <option {% if month == mon %}  selected {% endif %} value="{{month}}">{{month}}</option>
                       	{% endfor %}
-                    </select>
-                </div>
+                </select>
+               </div>
                 <div class="col-md-3 form-group">
                    <label class="control-label">Year</label>
                    <select class="form-control" name="year" id="year" required>
                     	<option value="">Select Year</option>
-                      	{% for year in year %}
-                     		 <option value="{{year}}">{{year}}</option>
+                      	{% for year in years %}
+                     		 <option {% if year == cyear %} selected {% endif %} value="{{year}}">{{year}}</option>
                       	{% endfor %}
                     </select>
                  </div>
@@ -38,35 +42,44 @@
 		</div>
 		{% if not data %}
 		<h4 class='text-center'>
-			Sorry, NO Data Available.
-			yet.
+			Sorry, No Data Available.
 		</h4>
-		{% elif data.length != 0 %}
-		  <table id="ascReport" class="table  table-bordered" >
-            <thead>
-				<tr>
-				    <th>ASC Id</th>
-					<th>Address</th>
-				{% for date in range %}	
-					<th width="70%" id="#{{date}}">{{date}}{{mon}}</th>
-			    {% endfor %}		
-				</tr>
+	  {% elif data.length != 0 %}
+		 <div class="table-responsive">
+		   <table  class="table table-striped table-bordered text-center ascReport" >
+             <thead>
+				 <tr>
+				   {% if role = 'asc' %}
+				      <th class="text-center">ASC Id</th>
+				    {% else %} 
+				       <th class="text-center">Dealer Id</th>
+				    {% endif %}
+					<th><div class="asc-report-address-style text-center">Address</div></th>
+				    {% for date in range %}	
+					  <th class="text-center" id="#{{date}}"><div class="asc-report-th-style">{{date}} {{mon}}</div></th>
+			        {% endfor %}
+			          <th class="text-center" ><div class="asc-report-th-style">Total</div></th> 		
+				 </tr>
 			</thead>
-        <tbody>
+        	<tbody>
 				{% for coupons in data %}
-				<tr> 
+				<tr class="asc-report-td-style"> 
 				    <td>
 					  {{coupons.id|default_if_none:""}}
 					</td>
-					<td>{{coupons.address|default_if_none:""}}</td>
+					<td class="text-left">{{coupons.address|default_if_none:""}}</td>
 					{% for key,values in coupons.coupon_closed.items %}
 					   <td>{{values|default_if_none:""}}</td> 
 					{% endfor %}
-			</tr>
+					<td>
+					   {{coupons.total_coupon_closed|default_if_none:""}}
+					</td>
+			    </tr>
 				{% endfor %}
-		</tbody>
-		</table>
-		{% endif %}
+		  </tbody>
+		  </table>
+		 </div>
+	  {% endif %}
 	</div>
 
 {% endblock %} 
@@ -77,9 +90,10 @@
 
 <script>
 $(document).ready(function() {
-    $('#ascReport').dataTable();
+	$('.password').hide();
+	$(".logout").attr('href','/logout');
+    $('.ascReport').dataTable();
 } );
-
 $(function() {
 	$('.monthYearPicker').datepicker({
 		changeMonth: true,
