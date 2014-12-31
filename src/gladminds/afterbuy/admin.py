@@ -9,12 +9,21 @@ MessageTemplate, EmailTemplate, Industry, UserProduct, License,\
     ProductInsuranceInfo, ProductWarrantyInfo, PollutionCertificate,\
     BrandProductCategory, SMSLog, EmailLog, OTPToken, EmailToken,\
     ServiceType, Service, SellInformation
-from gladminds.core.admin_helper import IndustryAdmin, BrandAdmin
 from gladminds.core.auth_helper import GmApps
 
 
 class AfterbuyAdminSite(AdminSite):
     pass
+
+
+class BrandAdmin(ModelAdmin):
+    search_fields = ('name', 'industry__name')
+    list_display = ('name', 'industry')
+
+
+class IndustryAdmin(ModelAdmin):
+    search_fields = ('name',)
+    list_display = ('name',)
 
 
 class ConsumerAdmin(ModelAdmin):

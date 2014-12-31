@@ -35,7 +35,7 @@ def get_message_template_mapper():
                             'receive': get_template('RCV_SA_COUPON_COMPLETE'),
                             'send':get_template('SEND_SA_CLOSE_COUPON'),
                             'invalid':get_template('SEND_INVALID_MESSAGE'),
-                            'handler':'free_service_coupon.close_coupon',
+                            'handler':'coupons.free_service_coupon.close_coupon',
                             'auth_rule': ['sa']
                             },
             settings.ALLOWED_KEYWORDS['brand']:{

@@ -56,7 +56,7 @@ def process_query(data):
          
         cur_new.execute("INSERT INTO bajaj_dealer (user_id, dealer_id, created_date, modified_date) VALUES (%s, %s, %s, %s)",(dealer_pro[11], data.get('dealer_id'), today, today))
 
-        cur_new.execute("select * from auth_group where name = 'dealers'")
+        cur_new.execute("select * from auth_group where name = 'Dealers'")
 
         dealer_group = cur_new.fetchall()[0]
         
