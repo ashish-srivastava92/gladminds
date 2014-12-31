@@ -362,7 +362,9 @@ class SATempRegistration(BaseModel):
 class CustomerTempRegistration(BaseModel):
     '''Details of customer registration'''
     new_customer_name = models.CharField(max_length=50, null=True, blank=True)
-    new_number = models.CharField(max_length=15)
+    new_number = models.CharField(max_length=15, null=True, blank=True)
+    old_number = models.CharField(max_length=15)
+    dealer_asc_id = models.CharField(max_length=15, null=True, blank=True)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
     temp_customer_id = models.CharField(max_length=50,
                                 null=False, blank=False, unique=True)

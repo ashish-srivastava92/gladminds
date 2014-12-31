@@ -4,7 +4,7 @@ This file contains all utils related to date
 from datetime import datetime
 import pytz
 from gladminds.settings import TIMEZONE
-from gladminds.core.constants import DATE_FORMAT
+from gladminds.core.constants import DATE_FORMAT, TIME_FORMAT
 
 
 def get_current_date():

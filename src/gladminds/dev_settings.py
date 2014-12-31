@@ -98,6 +98,7 @@ MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail DEV"
 FEED_FAILURE_MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
 FEED_FAILURE["receiver"] = ["priyanka.n@hashedin.com","somit@hashedin.com","suresh@hashedin.com"]
+CUSTOMER_PHONE_NUMBER_UPDATE["receiver"] = ["priyanka.n@hashedin.com","somit@hashedin.com","suresh@hashedin.com"]
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail DEV"
 VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["priyanka.n@hashedin.com","somit@hashedin.com","suresh@hashedin.com","chandan.patel@hashedin.com","naureen.razi@hashedin.com"]
 

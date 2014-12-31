@@ -389,7 +389,7 @@ def send_report_mail_for_feed(*args, **kwargs):
     mail.feed_report(feed_data=feed_data)
 
 '''
-Cron Job to send dispatch feed failure email
+Cron Job to send feed failure email
 '''
 
 def send_mail_for_feed_failure(*args, **kwargs):
@@ -401,6 +401,20 @@ def send_mail_for_feed_failure(*args, **kwargs):
         feed_data = taskmanager.get_feed_failure_log_detail(
             start_date=start_date, end_date=end_date, type=feed_type)
         mail.feed_failure(feed_data=feed_data)
+
+
+'''
+Cron Job to send customer phone number update email
+'''
+
+def send_mail_for_customer_phone_number_update(*args, **kwargs):
+    day = kwargs['day_duration']
+    today = datetime.now().date()
+    start_date = today - timedelta(days=day)
+    end_date = today + timedelta(days=1)
+    customer_details = taskmanager.get_customer_details(
+        start_date=start_date, end_date=end_date)
+    mail.customer_phone_number_update(customer_details=customer_details)
 
 '''
 Cron Job to send ASC Registeration to BAJAJ
