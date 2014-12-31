@@ -100,8 +100,6 @@ MEDIA_URL = '/media/'
 
 #S3 Configuration
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_ACCESS_KEY_ID = 'AKIAIL7IDCSTNCG2R6JA'
-AWS_SECRET_ACCESS_KEY = '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'
 
 SAP_CRM_DETAIL = {
                   'username':'pisuper',
