@@ -63,6 +63,19 @@ class PhoneField(models.CharField):
         return super(PhoneField, self).formfield(**defaults)
 
 
+try:
+    from south.modelsinspector import add_introspection_rules
+    add_introspection_rules([
+        (
+            [PhoneField],
+            [],
+            {},
+        ),
+    ], ["gladminds\.core\.model_helpers\.PhoneField"])
+except ImportError:
+    pass
+
+from south.management.commands import convert_to_south
 def validate_image(fieldfile_obj):
         if not hasattr(fieldfile_obj.file, 'content_type'):
             return
