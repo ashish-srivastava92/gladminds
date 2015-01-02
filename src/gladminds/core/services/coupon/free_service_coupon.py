@@ -19,7 +19,7 @@ from gladminds.core.model_fetcher import models
 from gladminds.core.core_utils.utils import log_time
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.managers.audit_manager import sms_log
-from gladminds.bajaj.feeds.feed import BaseFeed
+from gladminds.bajaj.services.coupons.import_feed import BaseFeed
 from gladminds.core.managers import sms_parser
 from gladminds.core.model_helpers import format_phone_number
 

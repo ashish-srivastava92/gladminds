@@ -12,7 +12,7 @@ from spyne.server.wsgi import WsgiApplication
 from spyne.service import ServiceBase
 from spyne.util.wsgi_wrapper import WsgiMounter
 
-from gladminds.bajaj.feeds.feed import SAPFeed
+from gladminds.bajaj.services.coupons.import_feed import SAPFeed
 from gladminds.core.soap_authentication import AuthenticationService
 import logging
 from django.conf import settings
@@ -479,62 +479,3 @@ ProductDispatchService.event_manager.add_listener(
     'method_call', _on_method_call)
 ProductPurchaseService.event_manager.add_listener(
     'method_call', _on_method_call)
-
-all_app = Application([BrandService, DealerService, ProductDispatchService,
-                       ProductPurchaseService, ASCService,
-                       OldFscService, CreditNoteService],
-                      tns=tns,
-                      in_protocol=Soap11(validator='lxml'),
-                      out_protocol=Soap11()
-                      )
-
-brand_app = Application([BrandService],
-                        tns=tns,
-                        in_protocol=Soap11(validator='lxml'),
-                        out_protocol=Soap11()
-                        )
-
-dealer_app = Application([DealerService],
-                         tns=tns,
-                         in_protocol=Soap11(validator='lxml'),
-                         out_protocol=Soap11()
-                         )
-
-asc_app = Application([ASCService],
-                         tns=tns,
-                         in_protocol=Soap11(validator='lxml'),
-                         out_protocol=Soap11()
-                         )
-
-dispatch_app = Application([ProductDispatchService],
-                           tns=tns,
-                           in_protocol=Soap11(validator='lxml'),
-                           out_protocol=Soap11()
-                           )
-
-purchase_app = Application([ProductPurchaseService],
-                           tns=tns,
-                           in_protocol=Soap11(validator='lxml'),
-                           out_protocol=Soap11()
-                           )
-
-old_fsc_app = Application([OldFscService],
-                           tns=tns,
-                           in_protocol=Soap11(validator='lxml'),
-                           out_protocol=Soap11()
-                           )
-
-credit_note_app = Application([CreditNoteService],
-                           tns=tns,
-                           in_protocol=Soap11(validator='lxml'),
-                           out_protocol=Soap11()
-                           )
-
-all_service = csrf_exempt(DjangoApplication(all_app))
-brand_service = csrf_exempt(DjangoApplication(brand_app))
-dealer_service = csrf_exempt(DjangoApplication(dealer_app))
-asc_service = csrf_exempt(DjangoApplication(asc_app))
-dispatch_service = csrf_exempt(DjangoApplication(dispatch_app))
-purchase_service = csrf_exempt(DjangoApplication(purchase_app))
-old_fsc_service = csrf_exempt(DjangoApplication(old_fsc_app))
-credit_note_service = csrf_exempt(DjangoApplication(credit_note_app))

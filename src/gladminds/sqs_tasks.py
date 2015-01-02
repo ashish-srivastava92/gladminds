@@ -8,7 +8,7 @@ from gladminds.core.managers.audit_manager import sms_log, feed_log
 from gladminds.core.managers.sms_client_manager import load_gateway, MessageSentFailed
 from gladminds.core.managers import mail
 from gladminds.core.cron_jobs import taskmanager
-from gladminds.bajaj.feeds import feed, export_feed
+from gladminds.bajaj.services.coupons import import_feed, export_feed
 from gladminds.bajaj.services import  message_template as templates
 
 import pytz
@@ -347,7 +347,7 @@ Crontab to import data from SAP to Gladminds Database
 
 @shared_task
 def import_data(*args, **kwargs):
-    feed.load_feed()
+    import_feed.load_feed()
 
 
 '''
@@ -362,12 +362,11 @@ def export_close_coupon_data(*args, **kwargs):
 
 @shared_task
 def export_coupon_redeem_to_sap(*args, **kwargs):
-    redeem_obj = feed.CouponRedeemFeedToSAP()
-    feed_export_data = redeem_obj.export_data()
+    coupon_redeem = export_feed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
+                   'username'], password=settings.SAP_CRM_DETAIL['password'],
+                  wsdl_url=settings.COUPON_WSDL_URL, feed_type='Coupon Redeem Feed')
+    feed_export_data = coupon_redeem.export_data()
     if len(feed_export_data[0]) > 0:
-        coupon_redeem = export_feed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
-                       'username'], password=settings.SAP_CRM_DETAIL['password'],
-                      wsdl_url=settings.COUPON_WSDL_URL, feed_type='Coupon Redeem Feed')
         coupon_redeem.export(items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:
@@ -415,11 +414,10 @@ def export_asc_registeration_to_sap(*args, **kwargs):
 
     status = "success"
     try:
-        asc_registeration_data = feed.ASCRegistrationToSAP()
-        feed_export_data = asc_registeration_data.export_data(phone_number)
         export_obj = export_feed.ExportCouponRedeemFeed(
                username=settings.SAP_CRM_DETAIL['username'], password=settings
                .SAP_CRM_DETAIL['password'], wsdl_url=settings.ASC_WSDL_URL)
+        feed_export_data = export_obj.export_data(phone_number)
         export_obj.export(items=feed_export_data['item'],
                           item_batch=feed_export_data['item_batch'])
     except Exception as ex:
@@ -462,12 +460,11 @@ Cron Job to send info of registered customer
 
 @shared_task
 def export_customer_reg_to_sap(*args, **kwargs):
-    redeem_obj = feed.CustomerRegistationFeedToSAP()
-    feed_export_data = redeem_obj.export_data()
+    customer_registered = export_feed.ExportCustomerRegistrationFeed(username=settings.SAP_CRM_DETAIL[
+                   'username'], password=settings.SAP_CRM_DETAIL['password'],
+                  wsdl_url=settings.CUSTOMER_REGISTRATION_WSDL_URL, feed_type='Customer Registration Feed')
+    feed_export_data = customer_registered.export_data()
     if len(feed_export_data[0]) > 0:
-        customer_registered = export_feed.ExportCustomerRegistrationFeed(username=settings.SAP_CRM_DETAIL[
-                       'username'], password=settings.SAP_CRM_DETAIL['password'],
-                      wsdl_url=settings.CUSTOMER_REGISTRATION_WSDL_URL, feed_type='Customer Registration Feed')
         customer_registered.export(items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:

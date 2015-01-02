@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
-from gladminds.bajaj.feeds.feed import SAPFeed
+from gladminds.bajaj.services.coupons.import_feed import SAPFeed
 
 class Command(BaseCommand):
     

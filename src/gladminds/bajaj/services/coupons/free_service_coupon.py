@@ -17,7 +17,7 @@ from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
     send_brand_sms_customer, send_invalid_keyword_message,\
     customer_detail_recovery
 from gladminds.core import utils
-from gladminds.bajaj.feeds.feed import BaseFeed
+from gladminds.bajaj.services.coupons.import_feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
 from gladminds.core.base_models import STATUS_CHOICES
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
