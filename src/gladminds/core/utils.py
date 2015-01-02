@@ -4,6 +4,7 @@ from importlib import import_module
 import base64
 import re
 import calendar
+import uuid
 
 from dateutil import tz
 from random import randint
