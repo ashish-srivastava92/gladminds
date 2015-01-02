@@ -414,7 +414,7 @@ def export_asc_registeration_to_sap(*args, **kwargs):
 
     status = "success"
     try:
-        export_obj = export_feed.ExportCouponRedeemFeed(
+        export_obj = export_feed.ExportASCRegistrationFeed(
                username=settings.SAP_CRM_DETAIL['username'], password=settings
                .SAP_CRM_DETAIL['password'], wsdl_url=settings.ASC_WSDL_URL)
         feed_export_data = export_obj.export_data(phone_number)

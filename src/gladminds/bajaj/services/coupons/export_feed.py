@@ -70,7 +70,6 @@ class ExportCouponRedeemFeed(BaseExportFeed):
             "Export {0}".format(self.feed_type))
         client = self.get_client()
         total_failed = total_failed_on_feed
-        export_status=True
         for item in items:
             logger.info("Trying to send SAP the coupon: {0}"\
                         .format(item))
@@ -118,14 +117,14 @@ class ExportASCRegistrationFeed(BaseExportFeed):
         }
         return {"item": item, "item_batch": item_batch}
 
-    def export(self, item=None, item_batch=None):
+    def export(self, items=None, item_batch=None, total_failed_on_feed=0):
         logger.info(
             "Export {2}: Item:{0} and Item_batch: {1}"\
-            .format(item, item_batch, self.feed_type))
+            .format(items, item_batch, self.feed_type))
         client = self.get_client()
 
         result = client.service.postASC(
-            ITEM=[item], ITEM_BATCH=item_batch)
+            ITEM=[items], ITEM_BATCH=item_batch)
         if not result[1]['I_STATUS'] == 'SUCCESS':
             raise
         return

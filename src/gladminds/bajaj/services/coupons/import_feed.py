@@ -89,34 +89,18 @@ class CSVFeed(object):
 class SAPFeed(object):
 
     def import_to_db(self, feed_type=None, data_source=[], feed_remark=None):
-        if feed_type == 'brand':
-            brand_obj = BrandProductTypeFeed(data_source=data_source,
+        function_mapping = {
+            'brand': BrandProductTypeFeed,
+            'dealer': DealerAndServiceAdvisorFeed,
+            'dispatch': ProductDispatchFeed,
+            'purchase': ProductPurchaseFeed,
+            'ASC': ASCFeed,
+            'old_fsc': OldFscFeed,
+            'credit_note': CreditNoteFeed
+        }
+        feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
-            return brand_obj.import_data()
-        elif feed_type == 'dealer':
-            dealer_obj = DealerAndServiceAdvisorFeed(data_source=data_source,
-                                                     feed_remark=feed_remark)
-            return dealer_obj.import_data()
-        elif feed_type == 'dispatch':
-            dispatch_obj = ProductDispatchFeed(data_source=data_source,
-                                               feed_remark=feed_remark)
-            return dispatch_obj.import_data()
-        elif feed_type == 'purchase':
-            purchase_obj = ProductPurchaseFeed(data_source=data_source,
-                                               feed_remark=feed_remark)
-            return purchase_obj.import_data()
-        elif feed_type == 'ASC':
-            asc_obj = ASCFeed(data_source=data_source,
-                                               feed_remark=feed_remark)
-            return asc_obj.import_data()
-        elif feed_type == 'old_fsc':
-            fsc_obj = OldFscFeed(data_source=data_source,
-                                               feed_remark=feed_remark)
-            return fsc_obj.import_data()
-        elif feed_type == 'credit_note':
-            credit_note_obj = CreditNoteFeed(data_source=data_source,
-                                               feed_remark=feed_remark)
-            return credit_note_obj.import_data()
+        return feed_obj.import_data()
 
 
 class BaseFeed(object):
