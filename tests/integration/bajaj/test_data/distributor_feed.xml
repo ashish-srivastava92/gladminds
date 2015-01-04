@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://local.bajaj.gladminds.co:8000/api/v1/feed/">
+  <SOAP-ENV:Body>
+    <ns1:postDistributor>
+      <ns1:ObjectList>
+        <ns1:DistributorData>
+          <ns1:DistributorModel>
+            <ns1:PHONE_NUMBER>1234567890</ns1:PHONE_NUMBER>
+            <ns1:CITY>bangalore</ns1:CITY>
+            <ns1:NAME>testDIST3</ns1:NAME>
+            <ns1:ASM_ID>asm004</ns1:ASM_ID>
+            <ns1:DISTRIBUTOR_ID>dist004</ns1:DISTRIBUTOR_ID>
+            <ns1:EMAIL>test3@gmail.com</ns1:EMAIL>
+          </ns1:DistributorModel>
+        </ns1:DistributorData>
+      </ns1:ObjectList>
+      <ns1:Credential>
+        <ns1:UserName>bajaj</ns1:UserName>
+        <ns1:Password>bajaj</ns1:Password>
+      </ns1:Credential>
+    </ns1:postDistributor>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

@@ -26,7 +26,7 @@ class LoyaltyFeed(object):
             'part_master': PartMasterFeed,
             'part_upc': PartUPCFeed,
             'part_point': PartPointFeed,
-#             'distributor': DistributorFeed,
+            'distributor': DistributorFeed,
 #             'mechanic': MechanicFeed
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
@@ -120,6 +120,44 @@ class PartPointFeed(BaseFeed):
             except Exception as ex:
                 total_failed += 1
                 ex = "[PartPointFeed]: part-{0} :: {1}".format(spare['part_number'], ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+                continue
+
+        return self.feed_remark
+
+class DistributorFeed(BaseFeed):
+
+    def import_data(self):
+        total_failed = 0
+        for distributor in self.data_source:
+            try:
+                dist_object = models.Distributor.objects.filter(distributor_id=distributor['id'])
+                if not dist_object:
+                    password=distributor['id']+'@123'
+                    dist_user_object = User.objects.using(settings.BRAND).create(username=distributor['id'])
+                    dist_user_object.set_password(password)
+                    dist_user_object.email = distributor['email']
+                    dist_user_object.first_name = distributor['name']
+                    dist_user_object.save(using=settings.BRAND)
+                    dist_user_pro_object = models.UserProfile(user=dist_user_object,
+                                                phone_number=distributor['mobile'],
+                                                address=distributor['city'])
+                    dist_user_pro_object.save()
+                    asm_object = models.AreaSalesManager.objects.get(asm_id=distributor['asm_id'])
+                    dist_object = models.Distributor(distributor_id=distributor['id'],
+                                              asm=asm_object,
+                                              user=dist_user_pro_object,
+                                              name=distributor['name'],
+                                              email=distributor['email'],
+                                              phone_number=distributor['mobile'],
+                                              city=distributor['city'])
+                    dist_object.save()
+                else:
+                    raise ValueError('Distributor ID already exists: ' + distributor['id'])
+            except Exception as ex:
+                total_failed += 1
+                ex = "[DistributorFeed]: part-{0} :: {1}".format(distributor['id'], ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
                 continue

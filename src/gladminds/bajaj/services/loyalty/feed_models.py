@@ -77,17 +77,18 @@ class PartPointModelList(ComplexModel):
     PartPointData = Array(PartPointModel)    
 
 
-class DitributorModel(ComplexModel):
+class DistributorModel(ComplexModel):
     __namespace__ = tns
     DISTRIBUTOR_ID = Unicode
     NAME = Unicode
-    EMAIL = Date
+    EMAIL = Unicode
     PHONE_NUMBER = Unicode
     CITY = Unicode
+    ASM_ID = Unicode
 
-class DitributorModelList(ComplexModel):
+class DistributorModelList(ComplexModel):
     __namespace__ = tns
-    DitributorData = Array(DitributorModel)
+    DistributorData = Array(DistributorModel)
 
 
 class PartMasterService(ServiceBase):
@@ -176,6 +177,35 @@ class PartPointService(ServiceBase):
 
         feed_remark.save_to_feed_log()
         return get_response(feed_remark)
+    
+class DistributorService(ServiceBase):
+    __namespace__ = tns
+
+    @srpc(DistributorModelList, AuthenticationModel, _returns=Unicode)
+    def postDistributor(ObjectList, Credential):
+        distributor_list = []
+        feed_remark = FeedLogWithRemark(len(ObjectList.DistributorData),
+                                        feed_type='Distributor Feed',
+                                        action='Received', status=True)
+        for distributor in ObjectList.DistributorData:
+            try:
+                distributor_list.append({
+                    'id': distributor.DISTRIBUTOR_ID.upper(),
+                    'name': distributor.NAME.upper(),
+                    'email': distributor.EMAIL,
+                    'mobile': utils.mobile_format(distributor.PHONE_NUMBER),
+                    'city': distributor.CITY.upper(),
+                    'asm_id': distributor.ASM_ID
+                })
+            except Exception as ex:
+                ex = "DistributorService: {0}  Error on Validating {1}".format(distributor, ex)
+                feed_remark.fail_remarks(ex)
+                logger.error(ex)
+        feed_remark = save_to_db(feed_type='distributor', data_source=distributor_list,
+                              feed_remark=feed_remark)
+
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
 
 def get_response(feed_remark):
     if feed_remark.failed_feeds > 0:
@@ -203,3 +233,4 @@ def _on_method_call(ctx):
 PartMasterService.event_manager.add_listener('method_call', _on_method_call)
 PartUPCService.event_manager.add_listener('method_call', _on_method_call)
 PartPointService.event_manager.add_listener('method_call', _on_method_call)
+DistributorService.event_manager.add_listener('method_call', _on_method_call)
