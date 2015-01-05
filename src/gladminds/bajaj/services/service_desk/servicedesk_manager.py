@@ -160,11 +160,9 @@ def get_complain_data(sms_dict, phone_number, email, name, dealer_email, with_de
     finally:
         LOG.info("Send complain message received successfully with %s" % message)
         phone_number = utils.get_phone_number_format(phone_number)
-        if settings.ENABLE_AMAZON_SQS:
-            task_queue = get_task_queue()
-            task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
-        else:
-            send_coupon.delay(phone_number=phone_number, message=message)
+        phone_number = utils.get_phone_number_format(phone_number)
+        send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
+        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
         if dealer_email:
             context = utils.create_context('FEEDBACK_DETAIL_TO_DEALER', gladminds_feedback_object)
             send_dealer_feedback(context, dealer_email)

@@ -17,7 +17,8 @@ from gladminds.core.managers.mail import send_due_date_exceeded,\
     send_due_date_reminder
 from django.contrib.auth.models import User
 from gladminds.core.constants import DATE_FORMAT, FEED_TYPES
-from gladminds.core.cron_jobs.queue_utils import get_task_queue
+from gladminds.core.cron_jobs.queue_utils import get_task_queue,\
+    send_job_to_queue
 from gladminds.core.core_utils.date_utils import convert_utc_to_local_time
 
 
@@ -528,7 +529,7 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
                                                                created_date=created_date,
                                                                assign_to=assignee,
                                                                priority=feedback_obj.priority,
-                                                               due_date = due_date)
+                                                               due_date = due_date, id=feedback_obj.id)
         if comment_obj and template_name == 'SEND_MSG_TO_ASSIGNEE':
             message = message + 'Note :' + comment_obj.comment
     except Exception as ex:
@@ -537,12 +538,8 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
     finally:
         logger.info("Send complain message received successfully with %s" % message)
         phone_number = utils.get_phone_number_format(phone_number)
-        if settings.ENABLE_AMAZON_SQS:
-            task_queue = get_task_queue()
-            task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
-        else:
-            send_coupon.delay(phone_number=phone_number, message=message)
-    sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     return {'status': True, 'message': message}
 
 

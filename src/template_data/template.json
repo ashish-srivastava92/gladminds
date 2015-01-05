@@ -279,7 +279,7 @@
     "pk": 31,
     "fields": {
       "template_key": "SEND_MSG_TO_ASSIGNEE",
-      "template": "A GladMinds user has a feedback for us, which says: {message} Its has been reported by {reporter} on {created_date}. It has been assigned to you. Please address the issue as soon as possible.",
+      "template": "A GladDesk ticket GM-{id} has been assigned to you, which says: {message} Its has been reported by {reporter} on {created_date}. Please address the issue as soon as possible.",
       "description": "You have been assigned this task. "
     }
   },
