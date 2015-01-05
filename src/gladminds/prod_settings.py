@@ -83,7 +83,7 @@ FILE_CACHE_DURATION = 1800
 
 FEED_TYPE = 'CSV'
 
-SMS_CLIENT = "KAP"
+SMS_CLIENT = "AIRTEL"
 
 #AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
