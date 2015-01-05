@@ -398,7 +398,7 @@ class EmailToken(models.Model):
                (self.user.user.date_joined + expiration_date <= datetime_now())
     activation_key_expired.boolean = True
 
-    def send_activation_email(self, reciever_email, site, trigger_mail):
+    def send_activation_email(self, receiver_email, site, trigger_mail):
         """
         Send an activation email to the user associated with this
         The activation email will make use of two templates:
@@ -441,6 +441,8 @@ class EmailToken(models.Model):
         if trigger_mail == 'forgot-password':
             ctx_dict = {'activation_key': self.activation_key,
                     'link': config.AFTERBUY_FORGOT_PASSWORD_URL}
-            sent_password_reset_link(reciever_email, ctx_dict)
+            sent_password_reset_link(receiver_email, data=ctx_dict,
+                                     brand=GmApps.AFTERBUY)
         else:
-            send_email_activation(reciever_email, ctx_dict)
+            send_email_activation(receiver_email, data=ctx_dict,
+                                  brand=GmApps.AFTERBUY)
