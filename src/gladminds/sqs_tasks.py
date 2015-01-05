@@ -133,8 +133,6 @@ def send_coupon_detail_customer(*args, **kwargs):
 """
 This job send sms in service desk 
 """
-
-
 @shared_task
 def send_servicedesk_feedback_detail(*args, **kwargs):
     status = "success"
@@ -167,6 +165,26 @@ def send_reminder_message(*args, **kwargs):
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
+
+
+"""
+This job send reminder sms to customer
+"""
+
+@shared_task
+def send_customer_phone_number_update_message(*args, **kwargs):
+    status = "success"
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        set_gateway(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        send_reminder_message.retry(
+            exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        sms_log(status=status, receiver=phone_number, message=message)
+
 
 """
 This job send coupon close message
@@ -621,6 +639,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "send_mail_for_feed_failure" : send_mail_for_feed_failure,
               
-              "send_servicedesk_feedback_detail" : send_servicedesk_feedback_detail
+              "send_servicedesk_feedback_detail" : send_servicedesk_feedback_detail,
+              
+              "send_customer_phone_number_update_message" : send_customer_phone_number_update_message
 
               }
