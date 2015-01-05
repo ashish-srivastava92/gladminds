@@ -17,7 +17,8 @@ from gladminds.core.managers.mail import send_due_date_exceeded,\
     send_due_date_reminder
 from django.contrib.auth.models import User
 from gladminds.core.constants import DATE_FORMAT, FEED_TYPES
-from gladminds.core.cron_jobs.queue_utils import get_task_queue
+from gladminds.core.cron_jobs.queue_utils import get_task_queue,\
+    send_job_to_queue
 from gladminds.core.core_utils.date_utils import convert_utc_to_local_time
 
 
@@ -124,6 +125,26 @@ def send_coupon_detail_customer(*args, **kwargs):
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_detail_customer.retry(
+            exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        sms_log(status=status, receiver=phone_number, message=message)
+
+
+"""
+This job send sms in service desk 
+"""
+
+
+@shared_task
+def send_servicedesk_feedback_detail(*args, **kwargs):
+    status = "success"
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        set_gateway(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        send_servicedesk_feedback_detail.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
@@ -388,7 +409,7 @@ def send_report_mail_for_feed(*args, **kwargs):
     mail.feed_report(feed_data=feed_data)
 
 '''
-Cron Job to send dispatch feed failure email
+Cron Job to send feed failure email
 '''
 
 def send_mail_for_feed_failure(*args, **kwargs):
@@ -400,6 +421,20 @@ def send_mail_for_feed_failure(*args, **kwargs):
         feed_data = taskmanager.get_feed_failure_log_detail(
             start_date=start_date, end_date=end_date, type=feed_type)
         mail.feed_failure(feed_data=feed_data)
+
+
+'''
+Cron Job to send customer phone number update email
+'''
+
+def send_mail_for_customer_phone_number_update(*args, **kwargs):
+    day = kwargs['day_duration']
+    today = datetime.now().date()
+    start_date = today - timedelta(days=day)
+    end_date = today + timedelta(days=1)
+    customer_details = taskmanager.get_customer_details(
+        start_date=start_date, end_date=end_date)
+    mail.customer_phone_number_update(customer_details=customer_details)
 
 '''
 Cron Job to send ASC Registeration to BAJAJ
@@ -491,7 +526,7 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
                                                                created_date=created_date,
                                                                assign_to=assignee,
                                                                priority=feedback_obj.priority,
-                                                               due_date = due_date)
+                                                               due_date = due_date, id=feedback_obj.id)
         if comment_obj and template_name == 'SEND_MSG_TO_ASSIGNEE':
             message = message + 'Note :' + comment_obj.comment
     except Exception as ex:
@@ -500,12 +535,8 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
     finally:
         logger.info("Send complain message received successfully with %s" % message)
         phone_number = utils.get_phone_number_format(phone_number)
-        if settings.ENABLE_AMAZON_SQS:
-            task_queue = get_task_queue()
-            task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
-        else:
-            send_coupon.delay(phone_number=phone_number, message=message)
-    sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     return {'status': True, 'message': message}
 
 
@@ -585,6 +616,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "send_reminders_for_servicedesk": send_reminders_for_servicedesk,
               
-              "send_mail_for_feed_failure" : send_mail_for_feed_failure
+              "send_mail_for_feed_failure" : send_mail_for_feed_failure,
+              
+              "send_servicedesk_feedback_detail" : send_servicedesk_feedback_detail
 
               }

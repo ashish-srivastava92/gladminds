@@ -47,8 +47,9 @@ class Command(BaseCommand):
         self.create_afterbuy_admins()
         self.create_bajaj_admins()
         self.set_afterbuy_permissions()
-        self.upload_loyalty_user()
-        self.upload_part_data()
+        if settings.ENV not in ['prod']:
+            self.upload_loyalty_user()
+            self.upload_part_data()
         for brand in ALL_BRANDS:
             self.set_brand_permissions(brand)
 

@@ -95,3 +95,6 @@ update gladminds_coupondata c inner join (select d2.id as old_id , d.id as new_i
 
 update gladminds_oldfscdata c inner join (select d2.id as old_id , d.id as new_id from aftersell_registereddealer as d, aftersell_registereddealer as d2 where d2.dealer_id like concat('00000',d.dealer_id)) a on c.servicing_dealer_id = a.old_id set c.servicing_dealer_id=a.new_id;
 
+alter table bajaj_customertempregistration modify new_number VARCHAR(15) null;
+alter table bajaj_customertempregistration add dealer_asc_id VARCHAR(15) null;
+alter table bajaj_customertempregistration add old_number VARCHAR(15) not null;	

@@ -46,7 +46,7 @@ class AccessTokenAuthentication(Authentication):
         if  (settings.ENV in settings.IGNORE_ENV and key in settings.HARCODED_TOKEN):
             return key
         try:
-            token = AccessToken.objects.get(token=key)
+            token = AccessToken.objects.using(settings.BRAND).get(token=key)
             # Check if token has expired
             if token.expires < timezone.now():
                 raise AuthError('AccessToken has expired.')

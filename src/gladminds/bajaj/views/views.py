@@ -33,11 +33,12 @@ from gladminds.core.auth.service_handler import check_service_active, Services
 from gladminds.core.core_utils.utils import log_time
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.bajaj.services.message_template import get_template
+from gladminds.core.managers.audit_manager import sms_log
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
-
+AUDIT_ACTION = 'SEND TO QUEUE'
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def auth_login(request, provider):
@@ -274,19 +275,22 @@ def register_customer(request, group=None):
             if customer_obj:
                 customer_obj = customer_obj[0]
                 if customer_obj.new_number != data_source[0]['customer_phone_number']:
-                    if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']):
+                    if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']) or models.ProductData.objects.filter(customer_phone_number=data_source[0]['customer_phone_number']):
                         message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
                         return json.dumps({'message': message})
-                customer_obj.new_number = data_source[0]['customer_phone_number']
-                customer_obj.product_data = product_obj[0]
-                customer_obj.sent_to_sap = False
+                    customer_obj.old_number = customer_obj.new_number
+                    customer_obj.new_number = data_source[0]['customer_phone_number']
+                    customer_obj.product_data = product_obj[0]
+                    customer_obj.sent_to_sap = False
+                    customer_obj.dealer_asc_id = str(request.user)
             else:
-                if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']):
+                if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']) or models.ProductData.objects.filter(customer_phone_number=data_source[0]['customer_phone_number']):
                     message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
                     return json.dumps({'message': message})
                 customer_obj = models.CustomerTempRegistration(product_data=product_obj[0], 
                                                                new_customer_name = data_source[0]['customer_name'],
                                                                new_number = data_source[0]['customer_phone_number'],
+                                                               old_number = data_source[0]['customer_phone_number'],
                                                                product_purchase_date = data_source[0]['product_purchase_date'],
                                                                temp_customer_id = temp_customer_id)
             customer_obj.save()

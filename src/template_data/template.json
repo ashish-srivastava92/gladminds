@@ -279,7 +279,7 @@
     "pk": 31,
     "fields": {
       "template_key": "SEND_MSG_TO_ASSIGNEE",
-      "template": "A GladMinds user has a feedback for us, which says: {message} Its has been reported by {reporter} on {created_date}. It has been assigned to you. Please address the issue as soon as possible.",
+      "template": "A GladDesk ticket GM-{id} has been assigned to you, which says: {message} Its has been reported by {reporter} on {created_date}. Please address the issue as soon as possible.",
       "description": "You have been assigned this task. "
     }
   },
@@ -460,6 +460,15 @@
     "fields": {
       "template_key": "FAILED_UPDATE_PHONE_NUMBER",
       "template": "Mobile number {phone_number} already exists. Please contact Customer support at 9611545154",
+      "description": "Send this message when customer phone number cannot be updated"
+    }
+  } ,
+    {
+    "model": "gladminds.messagetemplate",
+    "pk": 52,
+    "fields": {
+      "template_key": "CUSTOMER_PHONE_NUMBER_UPDATE",
+      "template": "Mobile number of {customer_id} was changed from {old_number} to {new_number} by {dealer_asc_id}",
       "description": "Send this message when customer phone number cannot be updated"
     }
   } 

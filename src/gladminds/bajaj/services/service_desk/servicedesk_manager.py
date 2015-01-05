@@ -12,13 +12,15 @@ from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, A
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services import message_template as templates
 from gladminds.bajaj.services.coupons import free_service_coupon as fsc
-from gladminds.sqs_tasks import send_coupon, send_sms
+from gladminds.sqs_tasks import send_coupon, send_sms,\
+    send_servicedesk_feedback_detail
 from gladminds.core.managers.mail import send_feedback_received, \
      send_servicedesk_feedback, send_dealer_feedback
 from gladminds.core.auth_helper import Roles
 from gladminds.core.utils import get_list_from_set, create_context, \
     set_wait_time
-from gladminds.core.cron_jobs.queue_utils import get_task_queue
+from gladminds.core.cron_jobs.queue_utils import get_task_queue,\
+    send_job_to_queue
 from gladminds.core.core_utils.date_utils import convert_utc_to_local_time, \
     get_time_in_seconds
 from gladminds.core.managers import mail
@@ -105,13 +107,8 @@ def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=Non
     finally:
         LOG.info("Send complain message received successfully with {0}".format(message))
         phone_number = utils.get_phone_number_format(phone_number)
-        if settings.ENABLE_AMAZON_SQS:
-            task_queue = get_task_queue()
-            task_queue.add("send_coupon", {"phone_number":phone_number,
-                                           "message": message})
-        else:
-            send_coupon.delay(phone_number=phone_number, message=message)
-    sms_log(receiver=phone_number, action='SEND TO QUEUE', message=message)
+        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     return {'status': True, 'message': message}
 
 def check_role_of_initiator(phone_number):
@@ -163,19 +160,17 @@ def get_complain_data(sms_dict, phone_number, email, name, dealer_email, with_de
     finally:
         LOG.info("Send complain message received successfully with %s" % message)
         phone_number = utils.get_phone_number_format(phone_number)
-        if settings.ENABLE_AMAZON_SQS:
-            task_queue = get_task_queue()
-            task_queue.add("send_coupon", {"phone_number":phone_number, "message": message})
-        else:
-            send_coupon.delay(phone_number=phone_number, message=message)
+        phone_number = utils.get_phone_number_format(phone_number)
+        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         if dealer_email:
             context = utils.create_context('FEEDBACK_DETAIL_TO_DEALER', gladminds_feedback_object)
             send_dealer_feedback(context, dealer_email)
         context = utils.create_context('FEEDBACK_DETAIL_TO_ADIM', gladminds_feedback_object)
         send_feedback_received(context, manager_obj.email)
         context = utils.create_context('FEEDBACK_CONFIRMATION', gladminds_feedback_object)
-        send_servicedesk_feedback(context, get_reporter_details(gladminds_feedback_object.reporter, "email"))
         sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        send_servicedesk_feedback(context, get_reporter_details(gladminds_feedback_object.reporter, "email"))
     return {'status': True, 'message': message}
 
 

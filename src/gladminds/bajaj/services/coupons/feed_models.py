@@ -422,6 +422,9 @@ class CreditNoteService(ServiceBase):
         feed_remark = FeedLogWithRemark(len(ObjectList.CreditNoteData),
                                         feed_type='Credit Note Feed',
                                         action='Received', status=True)
+        cdms_feed_remark = FeedLogWithRemark(len(ObjectList.CreditNoteData),
+                                        feed_type='CDMS Feed',
+                                        action='Received', status=True)
         credit_note_list = []
         for credit_note in ObjectList.CreditNoteData:
             try:
@@ -443,8 +446,12 @@ class CreditNoteService(ServiceBase):
                 ex = "CreditNoteService: {0} Error on Validating {1}".format(credit_note, ex)
                 feed_remark.fail_remarks(ex)
                 logger.error(ex)
-
-        feed_remark = save_to_db(
+        if credit_note.CDMS_DOC_NO:
+            feed_remark = save_to_db(
+                                    feed_type='credit_note', data_source=credit_note_list,
+                                        feed_remark=cdms_feed_remark)
+        else:
+            feed_remark = save_to_db(
             feed_type='credit_note', data_source=credit_note_list,
                                         feed_remark=feed_remark)
         feed_remark.save_to_feed_log()
