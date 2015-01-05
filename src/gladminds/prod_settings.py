@@ -162,3 +162,53 @@ ADMIN_DETAILS = {'bajaj': {'user': 'bajaj001', 'password': 'bajaj001'},
           'afterbuy': {'user': 'afterbuy', 'password': 'afterbuy'},
           'default': {'user': 'gladminds', 'password': 'gladminds'}
           }
+
+
+SUIT_CONFIG = {
+    'ADMIN_NAME': 'GladMinds',
+    'CONFIRM_UNSAVED_CHANGES': True,
+    'SEARCH_URL': '',
+    'MENU_EXCLUDE': ('auth.group', 'auth', 'sites'),
+    'MENU_OPEN_FIRST_CHILD': True,
+    'LIST_PER_PAGE': 20,
+    'SHOW_REQUIRED_ASTERISK': True,
+    'MENU': (
+        {'app': 'bajaj', 'label': 'Users', 'icon': ' icon-folder-open',
+         'models': ('user', 'userprofile',
+                    {'model': 'dealer',
+                     'label': 'Dealer'},
+                    {'model': 'authorizedservicecenter',
+                     'label': 'Authorized Service Center'},
+                    {'model': 'serviceadvisor',
+                     'label': 'Service Advisor'},)},
+        {'app': 'bajaj', 'label': 'Products', 'icon': ' icon-folder-open',
+         'models':({'model': 'brandproductcategory',
+                     'label': 'Brand Product Category'},
+                    {'model': 'producttype',
+                     'label': 'Product Type'},
+                    {'model': 'dispatchedproduct',
+                     'label': 'Product Dispatch'},
+                    {'model': 'productdata',
+                     'label': 'Product Purchase'},
+                    {'model': 'coupondata',
+                     'label': 'Coupon Redemption'},)},
+        {'app': 'bajaj', 'label': 'Logs', 'icon': ' icon-folder-open',
+         'models':(
+                    {'model': 'smslog',
+                     'label': 'SMS Log'},
+                   {'model': 'emaillog',
+                     'label': 'Email Log'},
+                    {'model': 'datafeedlog',
+                     'label': 'Feed Log'},)},
+        {'app': 'bajaj', 'label': 'User Registrations', 'icon': ' icon-folder-open',
+         'models':(
+                    {'model': 'asctempregistration',
+                     'label': ' ASC registration'},
+                    {'model': 'satempregistration',
+                     'label': 'SA registration'},
+                    {'model': 'customertempregistration',
+                     'label': ' Customer registration'},)},
+        {'app': 'bajaj', 'label': 'Templates', 'icon': ' icon-folder-open',
+         'models':(
+                    'messagetemplate', 'emailtemplate',)},)
+}
