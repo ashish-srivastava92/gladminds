@@ -23,7 +23,6 @@ def send_email_with_file_attachment(sender, receiver, subject, body, filename, c
     message = EmailMessage(subject, body + today.strftime("%d-%m-%Y"), sender, receiver)
     message.attach(filename + today.strftime("%d_%m_%Y") +'.csv', content.getvalue(), 'text/csv')
     message.send()
-
     
 
 def send_email(sender, receiver, subject, body, message=None,smtp_server=settings.MAIL_SERVER, title='GCP_Bajaj_FSC_Feeds'
@@ -121,24 +120,6 @@ def feed_failure(feed_data=None):
                                           "The feed failures on ", 'feed_failure_', csvfile )
     except Exception as ex:
         logger.info("[Exception feed_fail_report]: {0}".format(ex))
-
-
-
-def feed_failure_report(remarks = None, feed_type=None):
-    try:
-        file_stream = open(settings.EMAIL_DIR+'/feed_failure_report.html')
-        feed_temp = file_stream.read()
-        template = Template(feed_temp)
-        context = Context({"remarks": remarks, "feed_type": feed_type})
-        body = template.render(context)
-        mail_detail = settings.FEED_FAILURE_MAIL_DETAIL
-        send_email(sender=mail_detail['sender'],
-                   receiver=mail_detail['receiver'],
-                   subject=mail_detail['subject'], body=body,
-                   smtp_server=settings.MAIL_SERVER)
-
-    except Exception as ex:
-        logger.info("[Exception feed_failure_report]: {0}".format(ex))
 
 
 def send_registration_failure(feed_data=None,

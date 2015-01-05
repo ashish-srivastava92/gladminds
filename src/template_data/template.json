@@ -468,7 +468,7 @@
     "pk": 52,
     "fields": {
       "template_key": "CUSTOMER_PHONE_NUMBER_UPDATE",
-      "template": "Mobile number of {customer_id} was changed from {old_number} to {new_number} by {dealer_asc_id}",
+      "template": "Mobile number of customer-id : {customer_id} was changed from {old_number} to {new_number} by {dealer_asc_id}",
       "description": "Send this message when customer phone number cannot be updated"
     }
   } 
