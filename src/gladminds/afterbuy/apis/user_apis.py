@@ -108,7 +108,7 @@ class ConsumerResource(CustomBaseModelResource):
         otp_token = load['otp_token']
         phone_number = load['phone_number']
         try:
-            if not (settings.ENV in ["dev", "local"] and otp_token in settings.HARCODED_OTPS):
+            if not (settings.ENV in settings.IGNORE_ENV and otp_token in settings.HARCODED_OTPS):
                 otp_handler.validate_otp(otp_token, phone_number=phone_number)
         except Exception:
             raise ImmediateHttpResponse(
@@ -241,7 +241,7 @@ class ConsumerResource(CustomBaseModelResource):
         try:
             if type=='phone':
                 try:
-                    if not (settings.ENV in ["dev", "local"] and otp_token in settings.HARCODED_OTPS):
+                    if not (settings.ENV in settings.IGNORE_ENV and otp_token in settings.HARCODED_OTPS):
                         consumer = afterbuy_model.OTPToken.objects.get(token=otp_token).user
                         otp_handler.validate_otp(otp_token, user=consumer)
                 except Exception:
