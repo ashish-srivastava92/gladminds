@@ -15,9 +15,12 @@ from gladminds.core import utils
 from gladminds.bajaj import models
 from gladminds.core.managers.audit_manager import feed_log, sms_log
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
-
+from gladminds.core.auth_helper import Roles
 logger = logging.getLogger("gladminds")
-USER_GROUP = {'dealer': 'dealers', 'ASC': 'ascs', 'SA':'sas', 'customer':"customer"}
+
+USER_GROUP = {'dealer': Roles.DEALERS,
+              'ASC': Roles.ASCS,
+              'SA':Roles.SERVICEADVISOR}
 
 def load_feed():
     FEED_TYPE = settings.FEED_TYPE
