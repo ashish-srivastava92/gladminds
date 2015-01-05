@@ -4,7 +4,6 @@ import logging
 import os
 from collections import Counter
 from django.conf import settings
-from gladminds.sqs_tasks import send_report_mail_for_feed_failure
 from gladminds.core.managers.audit_manager import feed_log
 from gladminds.core.apis.image_apis import uploadFileToS3
 
@@ -31,9 +30,7 @@ class FeedLogWithRemark():
 
         path = ""
         if self.failed_feeds and settings.FEED_FAILURE_MAIL_ENABLED:
-            send_report_mail_for_feed_failure(remarks=remarks, 
-                                              feed_type = self.feed_type)
-        
+                 
             try:
                 path = self.upload_file(remarks)
             except Exception as ex :

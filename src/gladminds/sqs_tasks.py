@@ -499,15 +499,6 @@ def delete_unused_otp(*args, **kwargs):
     models.OTPToken.objects.all().delete()
 
 '''
-Cron Job to send report email for data feed
-'''
-@shared_task
-def send_report_mail_for_feed_failure(*args, **kwargs):
-    remarks = kwargs['remarks']
-    feed_type = kwargs['feed_type']
-    mail.feed_failure_report(remarks = remarks, feed_type=feed_type)
-    
-'''
 Cron Job to send info of registered customer
 '''
 
