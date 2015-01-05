@@ -90,6 +90,21 @@ class DistributorModelList(ComplexModel):
     __namespace__ = tns
     DistributorData = Array(DistributorModel)
 
+class MechanicModel(ComplexModel):
+    __namespace__ = tns
+    FIRST_NAME = Unicode
+    LAST_NAME = Unicode(default=None)
+    PHONE_NUMBER = Unicode
+    DOB = Date
+    SHOP_NAME = Unicode
+    DISTRICT = Unicode
+    STATE = Unicode
+    PINCODE = Unicode
+    DIST_ID = Unicode
+
+class MechanicModelList(ComplexModel):
+    __namespace__ = tns
+    MechanicData = Array(MechanicModel)
 
 class PartMasterService(ServiceBase):
     __namespace__ = tns
@@ -139,7 +154,7 @@ class PartUPCService(ServiceBase):
                     'UPC': part.PART_UPC,
                 })
             except Exception as ex:
-                ex = "DealerService: {0}  Error on Validating {1}".format(part, ex)
+                ex = "PartUPCService: {0}  Error on Validating {1}".format(part, ex)
                 feed_remark.fail_remarks(ex)
                 logger.error(ex)
         feed_remark = save_to_db(feed_type='part_upc', data_source=part_point_list,
@@ -169,7 +184,7 @@ class PartPointService(ServiceBase):
                     'territory': part.TERRITORY,
                 })
             except Exception as ex:
-                ex = "DealerService: {0}  Error on Validating {1}".format(part, ex)
+                ex = "PartPointService: {0}  Error on Validating {1}".format(part, ex)
                 feed_remark.fail_remarks(ex)
                 logger.error(ex)
         feed_remark = save_to_db(feed_type='part_point', data_source=part_upc_list,
@@ -202,6 +217,38 @@ class DistributorService(ServiceBase):
                 feed_remark.fail_remarks(ex)
                 logger.error(ex)
         feed_remark = save_to_db(feed_type='distributor', data_source=distributor_list,
+                              feed_remark=feed_remark)
+
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
+    
+class MechanicService(ServiceBase):
+    __namespace__ = tns
+
+    @srpc(MechanicModelList, AuthenticationModel, _returns=Unicode)
+    def postMechanic(ObjectList, Credential):
+        mechanic_list = []
+        feed_remark = FeedLogWithRemark(len(ObjectList.MechanicData),
+                                        feed_type='Mechanic Feed',
+                                        action='Received', status=True)
+        for mechanic in ObjectList.MechanicData:
+            try:
+                mechanic_list.append({
+                    'first_name': mechanic.FIRST_NAME.upper(),
+                    'last_name': mechanic.LAST_NAME.upper(),
+                    'mobile': utils.mobile_format(mechanic.PHONE_NUMBER),
+                    'shop_name': mechanic.SHOP_NAME.upper(),
+                    'dob': mechanic.DOB,
+                    'district': mechanic.DISTRICT.upper(),
+                    'state': mechanic.STATE.upper(),
+                    'pincode': mechanic.PINCODE,
+                    'dist_id': mechanic.DIST_ID
+                })
+            except Exception as ex:
+                ex = "MechanicService: {0}  Error on Validating {1}".format(mechanic, ex)
+                feed_remark.fail_remarks(ex)
+                logger.error(ex)
+        feed_remark = save_to_db(feed_type='mechanic', data_source=mechanic_list,
                               feed_remark=feed_remark)
 
         feed_remark.save_to_feed_log()

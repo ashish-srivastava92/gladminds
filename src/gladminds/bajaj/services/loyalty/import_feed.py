@@ -27,7 +27,7 @@ class LoyaltyFeed(object):
             'part_upc': PartUPCFeed,
             'part_point': PartPointFeed,
             'distributor': DistributorFeed,
-#             'mechanic': MechanicFeed
+            'mechanic': MechanicFeed
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
@@ -69,7 +69,7 @@ class PartMasterFeed(BaseFeed):
                     spare_object.save()
                 except Exception as ex:
                     total_failed += 1
-                    ex = "{0}".format(ex)
+                    ex = "[PartMasterFeed]: part-{0} :: {1}".format(spare['part_number'], ex)
                     logger.error(ex)
                     self.feed_remark.fail_remarks(ex)
                     continue
@@ -154,10 +154,43 @@ class DistributorFeed(BaseFeed):
                                               city=distributor['city'])
                     dist_object.save()
                 else:
-                    raise ValueError('Distributor ID already exists: ' + distributor['id'])
+                    raise ValueError('Distributor ID already exists')
             except Exception as ex:
                 total_failed += 1
-                ex = "[DistributorFeed]: part-{0} :: {1}".format(distributor['id'], ex)
+                ex = "[DistributorFeed]: id-{0} :: {1}".format(distributor['id'], ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+                continue
+
+        return self.feed_remark
+
+class MechanicFeed(BaseFeed):
+
+    def import_data(self):
+        total_failed = 0
+        for mechanic in self.data_source:
+            try:
+                mech_object = models.Mechanic.objects.filter(phone_number=mechanic['mobile'])
+                if not mech_object:
+                    mech_id = utils.generate_temp_id('TME')
+                    if mechanic['dist_id']:
+                        dist_object = models.Distributor.objects.get(distributor_id=mechanic['dist_id'])
+                    mech_object = models.Mechanic(registered_by_distributor=dist_object,
+                                    mechanic_id=mech_id,
+                                    first_name = mechanic['first_name'],
+                                    last_name = mechanic['last_name'],
+                                    date_of_birth=mechanic['dob'],
+                                    phone_number=mechanic['mobile'],
+                                    shop_name =  mechanic['shop_name'],
+                                    state =  mechanic['state'],
+                                    pincode =  mechanic['pincode'],
+                                    )
+                    mech_object.save()
+                else:
+                    raise ValueError('Mechanic number already exists')
+            except Exception as ex:
+                total_failed += 1
+                ex = "[MechanicFeed]: id-{0} :: {1}".format(mechanic['mobile'], ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
                 continue

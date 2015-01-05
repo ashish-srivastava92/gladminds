@@ -18,7 +18,8 @@ all_app = Application([fsc_feed.BrandService,
                        loyalty_feed.PartMasterService,
                        loyalty_feed.PartUPCService,
                        loyalty_feed.PartPointService,
-                       loyalty_feed.DistributorService],
+                       loyalty_feed.DistributorService,
+                       loyalty_feed.MechanicService],
                       tns=tns,
                       in_protocol=Soap11(validator='lxml'),
                       out_protocol=Soap11()
@@ -90,6 +91,12 @@ distributor_app = Application([loyalty_feed.DistributorService],
                            out_protocol=Soap11()
                            )
 
+mechanic_app = Application([loyalty_feed.MechanicService],
+                           tns=tns,
+                           in_protocol=Soap11(validator='lxml'),
+                           out_protocol=Soap11()
+                           )
+
 all_service = csrf_exempt(DjangoApplication(all_app))
 brand_service = csrf_exempt(DjangoApplication(brand_app))
 dealer_service = csrf_exempt(DjangoApplication(dealer_app))
@@ -102,4 +109,4 @@ part_master_service = csrf_exempt(DjangoApplication(part_master_app))
 part_upc_service = csrf_exempt(DjangoApplication(part_upc_app))
 part_point_service = csrf_exempt(DjangoApplication(part_point_app))
 distributor_service = csrf_exempt(DjangoApplication(distributor_app))
-
+mechanic_service = csrf_exempt(DjangoApplication(mechanic_app))
