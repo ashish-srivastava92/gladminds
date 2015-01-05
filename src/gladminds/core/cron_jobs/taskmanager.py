@@ -112,3 +112,19 @@ def get_feed_failure_log_detail(start_date=None, end_date=None, type=None):
         data['created_date'] = feed.created_date
         feed_data.append(data)
     return feed_data
+
+def get_customer_details(start_date=None, end_date=None, type=None):
+    start_date = start_date
+    end_date = end_date
+    customer_details = models.CustomerTempRegistration.objects.filter(modified_date__range=(start_date, end_date),
+                                                                      dealer_asc_id__isnull=False)
+    customer_data = []
+    for customer in customer_details:
+        data = {}
+        data['dealer_asc_id'] = customer.dealer_asc_id
+        data['customer_id'] = customer.temp_customer_id
+        data['customer_name'] = customer.new_customer_name
+        data['new_number'] = customer.new_number
+        data['old_number'] = customer.old_number
+        customer_data.append(data)
+    return customer_data
