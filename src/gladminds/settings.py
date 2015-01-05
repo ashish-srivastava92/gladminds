@@ -425,6 +425,14 @@ FEED_FAILURE_MAIL_DETAIL = {
     "body": """""",
 }
 
+CUSTOMER_PHONE_NUMBER_UPDATE = {
+
+    "sender": "feed-report@gladminds.co",
+    "receiver": ["gladminds@hashedin.com"],
+    "subject": "Gladminds customer phone number update",
+    "body": """""",
+}
+
 UCN_RECOVERY_MAIL_DETAIL = {
                             "sender": "feed-report@gladminds.co",
                             "receiver": ["gladminds@hashedin.com"],

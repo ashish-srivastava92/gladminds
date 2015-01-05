@@ -18,6 +18,13 @@ def get_email_template(key):
     template_object = get_model('EmailTemplate').objects.filter(template_key=key).values()
     return template_object[0]
 
+def send_email_with_file_attachment(sender, receiver, subject, body, filename, content):
+    today = datetime.now()
+    message = EmailMessage(subject, body + today.strftime("%d-%m-%Y"), sender, receiver)
+    message.attach(filename + today.strftime("%d_%m_%Y") +'.csv', content.getvalue(), 'text/csv')
+    message.send()
+
+    
 
 def send_email(sender, receiver, subject, body, message=None,smtp_server=settings.MAIL_SERVER, title='GCP_Bajaj_FSC_Feeds'
                , brand='bajaj'):
@@ -84,19 +91,33 @@ def feed_report(feed_data=None):
         logger.info("[Exception feed_report]: {0}".format(ex))
 
 
+def customer_phone_number_update(customer_details=None):
+    try:
+        mail_detail = settings.CUSTOMER_PHONE_NUMBER_UPDATE
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(["DEALER/ASC ID", "CUSTOMER ID", "CUSTOMER NAME", "OLD NUMBER", "NEW NUMBER"])
+
+        for customer in customer_details:
+            csvwriter.writerow([customer['dealer_asc_id'], customer['customer_id'], customer['customer_name'],
+                                customer['old_number'], customer['new_number']])
+        
+        send_email_with_file_attachment(mail_detail['sender'], mail_detail['receiver'], mail_detail['subject'],
+                                          "The customer phone number updates on ", 'customer_phone_number_update_',
+                                          csvfile )
+    except Exception as ex:
+        logger.info("[Exception customer phone number update]: {0}".format(ex))
+
 def feed_failure(feed_data=None):
     try:
         mail_detail = settings.FEED_FAILURE
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
-        today = datetime.now().date()
         csvwriter.writerow(["Timestamp", "FeedType", "Reason"])
         for feed in feed_data:
             csvwriter.writerow([feed['created_date'], feed['feed_type'], feed['reason']])
-        message = EmailMessage(mail_detail['subject'], "The feed failures on " +str(today),
-                               mail_detail['sender'], mail_detail['receiver'])
-        message.attach('feed_failure_' + today.strftime("%d_%m_%Y") +'.csv', csvfile.getvalue(), 'text/csv')
-        message.send()
+        send_email_with_file_attachment(mail_detail['sender'], mail_detail['receiver'], mail_detail['subject'],
+                                          "The feed failures on ", 'feed_failure_', csvfile )
     except Exception as ex:
         logger.info("[Exception feed_fail_report]: {0}".format(ex))
 
@@ -240,7 +261,7 @@ def send_feedback_received(data, receiver_email):
         context = Context({"content": data['content']})
         body = template.render(context)
         send_email(sender = data['sender'], receiver = receiver_email, 
-                   subject = data['subject'], body = body, message=data['content'],
+                   subject = data['newsubject'], body = body, message=data['content'],
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception feedback received email]: {0}".format(ex))
@@ -349,7 +370,7 @@ def send_email_to_manager_after_issue_resolved(data, manager_obj):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                             data, receiver = manager_obj.email_id, message=data['content'],)
+                             data, receiver = manager_obj.email_id, message=data['content'])
     except Exception as ex:
         logger.info("[Exception fail to send mail to manager]  {0}".format(ex))         
            
