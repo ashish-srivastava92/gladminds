@@ -133,13 +133,22 @@ SQS_QUEUE_NAME = "gladminds-prod2"
 ########################################################################
 FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail"
-UCN_RECOVERY_MAIL_DETAIL["receiver"] = ["gladminds@hashedin.com"," nvhasabnis@bajajauto.co.in","ssozarde@bajajauto.co.in","jojibabu.vege@gladminds.co","support@gladminds.co"]
+UCN_RECOVERY_MAIL_DETAIL["receiver"] = ["gladminds@hashedin.com", "nvhasabnis@bajajauto.co.in", "ssozarde@bajajauto.co.in","jojibabu.vege@gladminds.co","support@gladminds.co"]
 VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["jojibabu.vege@gladminds.co","ssozarde@bajajauto.co.in","skdixit@bajajauto.co.in","nvhasabnis@bajajauto.co.in","gladminds+alerts@hashedin.com"]
-FEED_FAILURE["receiver"] = ["jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in", "nvhasabnis@bajajauto.co.in", "gladminds+alerts@hashedin.com"]
-CUSTOMER_PHONE_NUMBER_UPDATE["receiver"] = ["jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in", "nvhasabnis@bajajauto.co.in", "gladminds+alerts@hashedin.com"]
+FEED_FAILURE["receiver"] = ["jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in", "skolluri@bajajauto.co.in",
+                            "sudhir.patil@gladminds.co", "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
+                            "gladminds+alerts@hashedin.com"]
+CUSTOMER_PHONE_NUMBER_UPDATE["receiver"] = ["jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in",
+                                            "skolluri@bajajauto.co.in", "sudhir.patil@gladminds.co",
+                                            "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
+                                            "gladminds+alerts@hashedin.com"]
 ########################################################################
 ###################Change Mail Subject on Prod##########################
 MAIL_DETAIL["subject"] = "GladMinds Feed Report"
+MAIL_DETAIL["receiver"] = ["jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in", "skolluri@bajajauto.co.in",
+                            "sudhir.patil@gladminds.co", "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
+                            "gladminds+alerts@hashedin.com"]
+
 #######################Feed Fail Failure Info###########################
 FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/dev/'
 FEED_FAILURE_BUCKET = 'gladminds'
