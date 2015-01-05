@@ -107,8 +107,8 @@ def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=Non
     finally:
         LOG.info("Send complain message received successfully with {0}".format(message))
         phone_number = utils.get_phone_number_format(phone_number)
-        send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     return {'status': True, 'message': message}
 
 def check_role_of_initiator(phone_number):
@@ -169,8 +169,8 @@ def get_complain_data(sms_dict, phone_number, email, name, dealer_email, with_de
         context = utils.create_context('FEEDBACK_DETAIL_TO_ADIM', gladminds_feedback_object)
         send_feedback_received(context, manager_obj.email)
         context = utils.create_context('FEEDBACK_CONFIRMATION', gladminds_feedback_object)
-        send_servicedesk_feedback(context, get_reporter_details(gladminds_feedback_object.reporter, "email"))
         sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        send_servicedesk_feedback(context, get_reporter_details(gladminds_feedback_object.reporter, "email"))
     return {'status': True, 'message': message}
 
 
