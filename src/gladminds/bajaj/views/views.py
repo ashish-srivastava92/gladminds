@@ -19,7 +19,7 @@ from django.db.models import F
 from gladminds.bajaj import models
 from gladminds.bajaj.services import message_template
 from gladminds.core import utils
-from gladminds.sqs_tasks import send_otp
+from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message
 from gladminds.core.managers.mail import sent_otp_email,\
     send_recovery_email_to_admin, send_mail_when_vin_does_not_exist
 from gladminds.bajaj.services.coupons.import_feed import SAPFeed
@@ -283,6 +283,15 @@ def register_customer(request, group=None):
                     customer_obj.product_data = product_obj[0]
                     customer_obj.sent_to_sap = False
                     customer_obj.dealer_asc_id = str(request.user)
+                    if models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS).exists():
+                        message = get_template('CUSTOMER_PHONE_NUMBER_UPDATE').format(customer_id=customer_obj.temp_customer_id, old_number=customer_obj.old_number, 
+                                                                                  new_number=customer_obj.new_number, dealer_asc_id=customer_obj.dealer_asc_id)
+                        managers = models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS)
+                        for manager in managers:
+                            phone_number = utils.get_phone_number_format(manager.phone_number)
+                            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+                            send_job_to_queue(send_customer_phone_number_update_message, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
+
             else:
                 if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']) or models.ProductData.objects.filter(customer_phone_number=data_source[0]['customer_phone_number']):
                     message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])

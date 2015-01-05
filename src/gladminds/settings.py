@@ -417,14 +417,6 @@ FEED_FAILURE = {
     "body": """""",
 }
 
-FEED_FAILURE_MAIL_DETAIL = {
-
-    "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds+alerts@hashedin.com", "support@gladminds.co", "jojibabu.vege@gladminds.co"],
-    "subject": "Gladminds Feed Failure Mail",
-    "body": """""",
-}
-
 CUSTOMER_PHONE_NUMBER_UPDATE = {
 
     "sender": "feed-report@gladminds.co",
@@ -566,8 +558,6 @@ ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},
           }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True
-
-SD_ESCALATION_GROUP = 'escalation_authority'
 
 DEFAULT_IMAGE_ID = 'guest.png'
 
