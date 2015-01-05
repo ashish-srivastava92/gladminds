@@ -28,6 +28,7 @@ from gladminds.core.auth_helper import GmApps
 from gladminds.afterbuy.apis.validations import ConsumerValidation,\
     UserValidation
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
+from gladminds.core.model_helpers import format_phone_number
 
 logger = logging.getLogger("gladminds")
 
@@ -194,6 +195,7 @@ class ConsumerResource(CustomBaseModelResource):
             return HttpBadRequest("phone_number or email is required")
         try:
             if phone_number:
+                phone_number = format_phone_number(phone_number)
                 logger.info('OTP request received. Mobile: {0}'.format(phone_number))
                 user_obj = afterbuy_model.Consumer.objects.get(phone_number=phone_number).user
                 otp = otp_handler.get_otp(user=user_obj)

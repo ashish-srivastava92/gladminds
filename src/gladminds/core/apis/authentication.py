@@ -5,6 +5,7 @@ from tastypie.authentication import Authentication
 from provider.oauth2.models import AccessToken
 import logging
 from gladminds.core.auth.service_handler import ServiceHandler
+from gladminds.core.loaders.module_loader import get_model
 
 
 class AuthError(RuntimeError):
@@ -46,7 +47,7 @@ class AccessTokenAuthentication(Authentication):
         if  (settings.ENV in settings.IGNORE_ENV and key in settings.HARCODED_TOKEN):
             return key
         try:
-            token = AccessToken.objects.get(token=key)
+            token = get_model('AccessToken').objects.get(token=key)
             # Check if token has expired
             if token.expires < timezone.now():
                 raise AuthError('AccessToken has expired.')
