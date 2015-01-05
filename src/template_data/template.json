@@ -462,5 +462,14 @@
       "template": "Mobile number {phone_number} already exists. Please contact Customer support at 9611545154",
       "description": "Send this message when customer phone number cannot be updated"
     }
+  } ,
+    {
+    "model": "gladminds.messagetemplate",
+    "pk": 52,
+    "fields": {
+      "template_key": "CUSTOMER_PHONE_NUMBER_UPDATE",
+      "template": "Mobile number of {customer_id} was changed from {old_number} to {new_number} by {dealer_asc_id}",
+      "description": "Send this message when customer phone number cannot be updated"
+    }
   } 
 ]
