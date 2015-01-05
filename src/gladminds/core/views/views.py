@@ -404,7 +404,9 @@ def trigger_sqs_tasks(request):
         'expire-service-coupon': 'expire_service_coupon',
         'send-reminder': 'send_reminder',
         'export-customer-registered': 'export_customer_reg_to_sap',
-        'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk'
+        'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk',
+        'send_mail_for_feed_failure' : 'send_mail_for_feed_failure',
+
     }
 
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)
