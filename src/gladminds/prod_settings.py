@@ -157,3 +157,9 @@ ENABLE_SERVICE_DESK = False
 ENV = "prod"
 
 WSDL_TNS="http://bajaj.gladminds.co/api/v1/feed/"
+
+ADMIN_DETAILS = {'bajaj': {'user': 'bajaj001', 'password': 'bajaj001'},
+          'demo': {'user': 'demo', 'password': 'demo'},
+          'afterbuy': {'user': 'afterbuy', 'password': 'afterbuy'},
+          'default': {'user': 'gladminds', 'password': 'gladminds'}
+          }
