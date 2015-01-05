@@ -72,9 +72,9 @@ def service_desk(request):
         return HttpResponseBadRequest()
 
 @login_required()
-def enable_servicedesk(request, servicedesk=None):
+def enable_servicedesk(request):
     if settings.ENABLE_SERVICE_DESK:
-        response = service_desk(request, servicedesk)
+        response = service_desk(request)
         return response
     else:
         return HttpResponseRedirect('http://support.gladminds.co/')
