@@ -3,7 +3,7 @@ import csv
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
-from gladminds.bajaj.feeds.feed import SAPFeed
+from gladminds.bajaj.services.coupons.import_feed import SAPFeed
 from gladminds.core.managers.mail import send_asc_registration_mail
 
 class Command(BaseCommand):

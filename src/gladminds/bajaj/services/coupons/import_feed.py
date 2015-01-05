@@ -15,9 +15,12 @@ from gladminds.core import utils
 from gladminds.bajaj import models
 from gladminds.core.managers.audit_manager import feed_log, sms_log
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
-
+from gladminds.core.auth_helper import Roles
 logger = logging.getLogger("gladminds")
-USER_GROUP = {'dealer': 'dealers', 'ASC': 'ascs', 'SA':'sas', 'customer':"customer"}
+
+USER_GROUP = {'dealer': Roles.DEALERS,
+              'ASC': Roles.ASCS,
+              'SA':Roles.SERVICEADVISOR}
 
 def load_feed():
     FEED_TYPE = settings.FEED_TYPE
@@ -89,34 +92,18 @@ class CSVFeed(object):
 class SAPFeed(object):
 
     def import_to_db(self, feed_type=None, data_source=[], feed_remark=None):
-        if feed_type == 'brand':
-            brand_obj = BrandProductTypeFeed(data_source=data_source,
+        function_mapping = {
+            'brand': BrandProductTypeFeed,
+            'dealer': DealerAndServiceAdvisorFeed,
+            'dispatch': ProductDispatchFeed,
+            'purchase': ProductPurchaseFeed,
+            'ASC': ASCFeed,
+            'old_fsc': OldFscFeed,
+            'credit_note': CreditNoteFeed
+        }
+        feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
-            return brand_obj.import_data()
-        elif feed_type == 'dealer':
-            dealer_obj = DealerAndServiceAdvisorFeed(data_source=data_source,
-                                                     feed_remark=feed_remark)
-            return dealer_obj.import_data()
-        elif feed_type == 'dispatch':
-            dispatch_obj = ProductDispatchFeed(data_source=data_source,
-                                               feed_remark=feed_remark)
-            return dispatch_obj.import_data()
-        elif feed_type == 'purchase':
-            purchase_obj = ProductPurchaseFeed(data_source=data_source,
-                                               feed_remark=feed_remark)
-            return purchase_obj.import_data()
-        elif feed_type == 'ASC':
-            asc_obj = ASCFeed(data_source=data_source,
-                                               feed_remark=feed_remark)
-            return asc_obj.import_data()
-        elif feed_type == 'old_fsc':
-            fsc_obj = OldFscFeed(data_source=data_source,
-                                               feed_remark=feed_remark)
-            return fsc_obj.import_data()
-        elif feed_type == 'credit_note':
-            credit_note_obj = CreditNoteFeed(data_source=data_source,
-                                               feed_remark=feed_remark)
-            return credit_note_obj.import_data()
+        return feed_obj.import_data()
 
 
 class BaseFeed(object):
@@ -512,85 +499,3 @@ class ASCFeed(BaseFeed):
                 ex = "[Exception: ASCFeed_dealer_data] asc_id {0} already exists".format(asc['asc_id'])
                 logger.error(ex)
         return self.feed_remark
-    
-#TODO: fix and test cron jobs for coupon and customer registration
-class CouponRedeemFeedToSAP(BaseFeed):
-
-    def export_data(self, start_date=None, end_date=None):
-        results = models.CouponData.objects.filter(sent_to_sap=0,
-                            status=2).select_related('product_id', 'customer_phone_number')
-        items = []
-        total_failed = 0
-        item_batch = {
-            'TIMESTAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
-        for redeem in results:
-            try:
-                #added the condition only for the previous coupons with no servicing dealer details
-                if redeem.service_advisor:
-                    if redeem.service_advisor.dealer:
-                        servicing_dealer = redeem.service_advisor.dealer.dealer_id
-                    else:
-                        servicing_dealer = redeem.service_advisor.asc.asc_id
-                else:
-                    servicing_dealer = redeem.product.dealer_id.dealer_id
-                
-                item = {
-                        "CHASSIS": redeem.product.product_id,
-                        "GCP_KMS": redeem.actual_kms,
-                        "GCP_KUNNR": servicing_dealer,
-                        "GCP_UCN_NO": redeem.unique_service_coupon,
-                        "PRODUCT_TYPE": redeem.product.product_type.product_type,
-                        "SERVICE_TYPE": str(redeem.service_type),
-                        "SER_AVL_DT": redeem.actual_service_date.date().strftime("%Y-%m-%d"),
-                    }                        
-                items.append(item)
-            except Exception as ex:
-                logger.error("error on data coupon data from db %s" % str(ex))
-                total_failed = total_failed + 1
-        return items, item_batch, total_failed
-
-
-class ASCRegistrationToSAP(BaseFeed):
-
-    def export_data(self, asc_phone_number=None):
-        asc_form_obj = models.ASCTempRegistration.objects\
-            .get(phone_number=asc_phone_number, status=1)
-
-        item_batch = {
-            'TIMESTAMP': asc_form_obj.timestamp.strftime("%Y-%m-%dT%H:%M:%S")}
-
-        item = {
-            "ASC_NAME": asc_form_obj.name,
-            "ASC_MOBILE": asc_form_obj.phone_number,
-            "ASC_EMAIL": asc_form_obj.email,
-            "ASC_ADDRESS": asc_form_obj.address,
-            "ASC_ADDRESS_PINCODE": asc_form_obj.pincode,
-            "KUNNAR": "hardcoded",
-        }
-        return {"item": item, "item_batch": item_batch}
-
-class CustomerRegistationFeedToSAP(BaseFeed):
-
-    def export_data(self, start_date=None, end_date=None):
-        results = models.CustomerTempRegistration.objects.filter(sent_to_sap=False).select_related('product_data')
-        items = []
-        total_failed = 0
-        item_batch = {
-            'TIME_STAMP': datetime.now().strftime("%Y%m%d%H%M%S")}
-        for redeem in results:
-            try:
-                item = {
-                    "CHASSIS": redeem.product_data.product_id,
-                    "KUNNR": redeem.product_data.dealer_id.dealer_id,
-                    "CUSTOMER_ID" : redeem.temp_customer_id,
-                    "ENGINE" : redeem.product_data.engine,
-                    "VEH_SL_DT": redeem.product_purchase_date.date().strftime("%Y-%m-%d"),
-                    "CUSTOMER_NAME": redeem.new_customer_name,
-                    "CUST_MOBILE": redeem.new_number,
-                    
-                }
-                items.append(item)
-            except Exception as ex:
-                logger.error("error on customer info from db %s" % str(ex))
-                total_failed = total_failed + 1
-        return items, item_batch, total_failed

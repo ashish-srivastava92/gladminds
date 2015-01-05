@@ -106,9 +106,9 @@ SAP_CRM_DETAIL = {
                   'password':'welcome123'
                   }
 ASC_WSDL_URL = "http://bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
-COUPON_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/redeem-feed/?wsdl&v0"
+COUPON_WSDL_URL = "http://bajaj.gladminds.co/api/v1/redeem-feed/?wsdl&v0"
 COUPON_WSDL = 'prod_coupon_redeem.wsdl'
-CUSTOMER_REGISTRATION_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/customer-feed/?wsdl&v0"
+CUSTOMER_REGISTRATION_WSDL_URL = "http://bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL = 'prod_customer_registration.wsdl'
 
 ENABLE_AMAZON_SQS = True
@@ -157,3 +157,9 @@ ENABLE_SERVICE_DESK = False
 ENV = "prod"
 
 WSDL_TNS="http://bajaj.gladminds.co/api/v1/feed/"
+
+ADMIN_DETAILS = {'bajaj': {'user': 'bajaj001', 'password': 'bajaj001'},
+          'demo': {'user': 'demo', 'password': 'demo'},
+          'afterbuy': {'user': 'afterbuy', 'password': 'afterbuy'},
+          'default': {'user': 'gladminds', 'password': 'gladminds'}
+          }

@@ -46,7 +46,7 @@ def send_email(sender, receiver, subject, body, message=None,smtp_server=setting
         return False
 
 
-def send_email_activation(receiver_email, data=None):
+def send_email_activation(receiver_email, data=None, brand=None):
     file_stream = open(settings.EMAIL_DIR+'/activation_email.html')
     feed_temp = file_stream.read()
     template = Template(feed_temp)
@@ -56,7 +56,8 @@ def send_email_activation(receiver_email, data=None):
     send_email(sender=mail_detail['sender'],
                receiver=receiver_email,
                subject=mail_detail['subject'], body=body,
-               smtp_server=settings.MAIL_SERVER, title='Support')
+               smtp_server=settings.MAIL_SERVER, title='Support',
+               brand=brand)
 
 
 def send_recycle_mail(sender_id, data=None):
@@ -208,7 +209,7 @@ def insurance_extend(data=None, receiver=None, subject=None):
         logger.info("[Exception item insurance extend]: {0}".format(ex))
 
 
-def sent_password_reset_link(receiver=None, data=None):
+def sent_password_reset_link(receiver=None, data=None, brand=None):
     try:
         file_stream = open(settings.EMAIL_DIR+'/password_reset_email.html')
         feed_temp = file_stream.read()
@@ -218,7 +219,8 @@ def sent_password_reset_link(receiver=None, data=None):
         mail_detail = settings.PASSWORD_RESET_MAIL
         send_email(sender = mail_detail['sender'], receiver = receiver, 
                    subject = mail_detail['subject'], body = body,
-                   smtp_server = settings.MAIL_SERVER, title='Support')
+                   smtp_server = settings.MAIL_SERVER, title='Support',
+                   brand = brand)
     except Exception as ex:
         logger.info("[Exception otp email]: {0}".format(ex))
 
