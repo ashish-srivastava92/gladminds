@@ -207,7 +207,7 @@ class ExportUnsyncProductFeed(BaseExportFeed):
                     .format(data['vin']))
         try:
             result = client.service.SI_GCPONL_Sync(
-                DT_ONL=[{"CHASSIS": data['vin']},{"DEALER": data['current_user'].username}])
+                DT_ONL=[{"CHASSIS": data['vin'],"DEALER": data['current_user'].username}])
             logger.info("Response from SAP: {0}".format(result))
             x=result[1][0]['RETURN_CODE']
             if x:
