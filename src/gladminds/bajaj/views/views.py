@@ -2,6 +2,7 @@ import logging
 import json
 import random
 import datetime
+import operator
 
 from collections import OrderedDict
 from django.shortcuts import render_to_response, render
@@ -492,23 +493,25 @@ def create_reconciliation_report(query_params, user):
     report_data = []
     filter = {}
     params = {}
+    coupon_filter =[]
+    args = [Q(status=4), Q(status=2), Q(status=6)]
     if user.groups.filter(name=Roles.DEALERS).exists():
         dealer = models.Dealer.objects.filter(dealer_id=user)
-        filter['service_advisor__dealer'] = dealer[0]
+        coupon_filter=[Q(service_advisor__dealer = dealer[0]), Q(servicing_dealer=dealer[0].dealer_id)]
     else:
         ascs = models.AuthorizedServiceCenter.objects.filter(user=user)
-        filter['service_advisor__asc'] = ascs[0]
-    args = { Q(status=4) | Q(status=2) | Q(status=6)}
+        coupon_filter=[Q(service_advisor__asc = ascs[0]), Q(servicing_dealer=dealer[0].asc_id)]
+    
     status = query_params.get('status')
     from_date = query_params.get('from')
     to_date = query_params.get('to')
     filter['actual_service_date__range'] = (str(from_date) + ' 00:00:00', str(to_date) +' 23:59:59')
 
     if status:
-        args = { Q(status=status) }
+        args = [Q(status=status)]
         if status=='2':
-            args = { Q(status=2) | Q(status=6)}   
-    all_coupon_data = models.CouponData.objects.filter(*args, **filter).order_by('-actual_service_date')
+            args = [Q(status=2),Q(status=6)]
+    all_coupon_data = models.CouponData.objects.filter(reduce(operator.or_, args), reduce(operator.or_, coupon_filter), **filter).order_by('-actual_service_date')
     map_status = {'6': 'Closed', '4': 'In Progress', '2':'Closed'}
     for coupon_data in all_coupon_data:
         coupon_data_dict = {}
@@ -517,7 +520,7 @@ def create_reconciliation_report(query_params, user):
         try:
             coupon_data_dict['sa_phone_name'] = sa.user.phone_number
         except:
-            coupon_data_dict['sa_phone_name'] = "-"
+            coupon_data_dict['sa_phone_name'] = None
         coupon_data_dict['service_avil_date'] = coupon_data.actual_service_date
         coupon_data_dict['closed_date'] = coupon_data.closed_date
         coupon_data_dict['service_status'] = map_status[str(coupon_data.status)]
