@@ -492,12 +492,18 @@ def create_reconciliation_report(query_params, user):
     report_data = []
     filter = {}
     params = {}
-    user = models.Dealer.objects.filter(dealer_id=user)
+    if user.groups.filter(name=Roles.DEALERS).exists():
+        dealer = models.Dealer.objects.filter(dealer_id=user)
+        filter['service_advisor__dealer'] = dealer[0]
+    else:
+        ascs = models.AuthorizedServiceCenter.objects.filter(user=user)
+        filter['service_advisor__asc'] = ascs[0]
     args = { Q(status=4) | Q(status=2) | Q(status=6)}
     status = query_params.get('status')
     from_date = query_params.get('from')
     to_date = query_params.get('to')
     filter['actual_service_date__range'] = (str(from_date) + ' 00:00:00', str(to_date) +' 23:59:59')
+
     if status:
         args = { Q(status=status) }
         if status=='2':
@@ -507,8 +513,11 @@ def create_reconciliation_report(query_params, user):
     for coupon_data in all_coupon_data:
         coupon_data_dict = {}
         coupon_data_dict['vin'] = coupon_data.product.product_id
-        user = coupon_data.service_advisor
-        coupon_data_dict['sa_phone_name'] = user.user.phone_number
+        sa = coupon_data.service_advisor
+        try:
+            coupon_data_dict['sa_phone_name'] = sa.user.phone_number
+        except:
+            coupon_data_dict['sa_phone_name'] = "-"
         coupon_data_dict['service_avil_date'] = coupon_data.actual_service_date
         coupon_data_dict['closed_date'] = coupon_data.closed_date
         coupon_data_dict['service_status'] = map_status[str(coupon_data.status)]
