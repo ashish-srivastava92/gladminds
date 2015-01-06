@@ -33,6 +33,7 @@ class SMSResources(Resource):
     def render_sms(self, request, **kwargs):
         sms_dict = {}
         error_template = None
+        phone_number = ""
         if request.POST.get('text'):
             message = request.POST.get('text')
             phone_number = request.POST.get('phoneNumber')
