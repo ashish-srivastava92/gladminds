@@ -500,7 +500,7 @@ def create_reconciliation_report(query_params, user):
         coupon_filter=[Q(service_advisor__dealer = dealer[0]), Q(servicing_dealer=dealer[0].dealer_id)]
     else:
         ascs = models.AuthorizedServiceCenter.objects.filter(user=user)
-        coupon_filter=[Q(service_advisor__asc = ascs[0]), Q(servicing_dealer=dealer[0].asc_id)]
+        coupon_filter=[Q(service_advisor__asc = ascs[0]), Q(servicing_dealer=ascs[0].asc_id)]
     
     status = query_params.get('status')
     from_date = query_params.get('from')
