@@ -104,11 +104,16 @@ SAP_CRM_DETAIL = {
                   'password':'welcome123'
                   }
 
+ASC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
+
 COUPON_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/redeem-feed/?wsdl&v0"
 COUPON_WSDL = 'qa_coupon_redeem.wsdl'
-ASC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
+
 CUSTOMER_REGISTRATION_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
+
+VIN_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/vin-sync-feed/?wsdl&v0"
+VIN_SYNC_WSDL='qa_vin_sync.wsdl'
 
 WSDL_TNS="http://qa.bajaj.gladminds.co/api/v1/feed/"
 

@@ -399,10 +399,9 @@ LOGGING = {
 }
 
 
-WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR + '/coupon_redeem.wsdl'
-
-WSDL_CUSTOMER_REGISTRATION_LOC = TEMPLATE_DIR + '/customer_registration.wsdl'
 CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
+COUPON_WSDL = 'qa_coupon_redeem.wsdl'
+VIN_SYNC_WSDL='qa_vin_sync.wsdl'
 
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
