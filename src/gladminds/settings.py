@@ -22,6 +22,8 @@ ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
 
 ADMINS = (
     ('somit', 'somit@hashedin.com'),
+    ('naureen', 'naureen.razi@hashedin.com'),
+    ('priyanka', 'priyanka.n@hashedin.com')
 )
 API_FLAG = False
 COUPON_VALID_DAYS = 30
