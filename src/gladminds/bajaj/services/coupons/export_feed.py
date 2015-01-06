@@ -193,3 +193,29 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
+
+class ExportUnsyncProductFeed(BaseExportFeed):
+
+    def export(self, data=None):
+        message="some error occurred, please try again later."
+        logger.info(
+            "Export {1}: Items:{0}"\
+            .format(data, self.feed_type))
+        client = self.get_client()
+
+        logger.info("Trying to send product details the ID: {0}"\
+                    .format(data['vin']))
+        try:
+            result = client.service.SI_GCPONL_Sync(
+                DT_ONL=[{"CHASSIS": data['vin']},{"DEALER": data['current_user']}])
+            logger.info("Response from SAP: {0}".format(result))
+            x=result[1][0]['RETURN_CODE']
+            if x:
+                if result[1][0]['RETURN_CODE'].upper() == 'S':
+                    message='The data exists main database, please try after sometime'
+                elif result[1][0]['RETURN_CODE'].upper() == 'E':
+                    message='This Chassis is not available in Main database, please type the correct chassis number'
+        except Exception as ex:
+            logger.error("Failed to send the details to sap")
+            logger.error(ex)
+        return message
