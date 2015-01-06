@@ -271,7 +271,7 @@ class DealerService(ServiceBase):
         for dealer in ObjectList.DealerData:
             try:
                 dealer_list.append({
-                    'dealer_id': dealer.KUNNR,
+                    'id': dealer.KUNNR,
                     'address': dealer.ADDRESS,
                     'service_advisor_id': dealer.SER_ADV_ID,
                     'name': dealer.SER_ADV_NAME,

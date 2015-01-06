@@ -229,11 +229,15 @@ def save_sa_registration(request, groups):
         service_advisor_id = TEMP_SA_ID_PREFIX + str(random.randint(10**5, 10**6))
     data_source.append(utils.create_sa_feed_data(data, request.user, service_advisor_id))
     logger.info('[Temporary_sa_registration]:: Initiating dealer-sa feed for ID' + service_advisor_id)
+    if Roles.ASCS in groups:
+        feed_type='asc_sa'
+    else:
+        feed_type='dealer'
     feed_remark = FeedLogWithRemark(len(data_source),
                                                 feed_type='Dealer Feed',
                                                 action='Received', status=True)
     sap_obj = SAPFeed()
-    feed_response = sap_obj.import_to_db(feed_type='dealer',
+    feed_response = sap_obj.import_to_db(feed_type=feed_type,
                         data_source=data_source, feed_remark=feed_remark)
     if feed_response.failed_feeds > 0:
         failure_msg = list(feed_response.remarks.elements())[0]
@@ -359,7 +363,10 @@ def exceptions(request, exception=None):
         template = 'portal/exception.html'
         data = None
         if exception in ['close', 'check']:
-            data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
+            if Roles.ASCS in groups:
+                data = models.ServiceAdvisor.objects.active_under_asc(request.user)
+            else:
+                data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
         return render(request, template, {'active_menu': exception,
                                            "data": data, 'groups': groups})
     elif request.method == 'POST':
