@@ -234,7 +234,7 @@ def create_feed_data(post_data, product_data, temp_customer_id):
 
 def create_sa_feed_data(post_data, user_id, temp_sa_id):
     data ={}
-    data['dealer_id'] = user_id
+    data['id'] = user_id
     data['phone_number'] = mobile_format(post_data['phone-number'])
     data['service_advisor_id'] = temp_sa_id
     data['name'] = post_data['name'].upper()
@@ -378,15 +378,24 @@ def get_updated_customer_id(customer_id):
     return customer_id
 
 
+#FIXME: write better logic
 def service_advisor_search(data):
-    dealer_data = models.Dealer.objects.get(
-                dealer_id=data['current_user'])
     phone_number = mobile_format(data['phone_number'])
     message = phone_number + ' is active under another dealer.' 
-    sa_details = models.ServiceAdvisor.objects.filter(user__phone_number=phone_number, dealer=dealer_data)
-    sa_mobile_active = models.ServiceAdvisor.objects.filter(
-                                user__phone_number=phone_number,
-                                status='Y').exclude(dealer=dealer_data)
+    if Roles.ASCS in data['groups']:
+        asc_data = models.AuthorizedServiceCenter.objects.get(
+                    asc_id=data['current_user'])
+        sa_details = models.ServiceAdvisor.objects.filter(user__phone_number=phone_number, asc=asc_data)
+        sa_mobile_active = models.ServiceAdvisor.objects.filter(
+                                    user__phone_number=phone_number,
+                                    status='Y').exclude(asc=asc_data)
+    else:
+        dealer_data = models.Dealer.objects.get(
+                    dealer_id=data['current_user'])
+        sa_details = models.ServiceAdvisor.objects.filter(user__phone_number=phone_number, dealer=dealer_data)
+        sa_mobile_active = models.ServiceAdvisor.objects.filter(
+                                    user__phone_number=phone_number,
+                                    status='Y').exclude(dealer=dealer_data)
     if not sa_details and not sa_mobile_active:
         message = 'Service advisor is not associated, Please register the service advisor.'
         return {'message': message}

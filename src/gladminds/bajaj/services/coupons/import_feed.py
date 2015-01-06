@@ -99,7 +99,8 @@ class SAPFeed(object):
             'purchase': ProductPurchaseFeed,
             'ASC': ASCFeed,
             'old_fsc': OldFscFeed,
-            'credit_note': CreditNoteFeed
+            'credit_note': CreditNoteFeed,
+            'asc_sa': ASCAndServiceAdvisorFeed,
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
@@ -189,7 +190,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
     def import_data(self):
         total_failed = 0
         for dealer in self.data_source:
-            dealer_data = self.check_or_create_dealer(dealer_id=dealer['dealer_id'],
+            dealer_data = self.check_or_create_dealer(dealer_id=dealer['id'],
                                 address=dealer['address'])
             try:
                 mobile_number_active = self.check_mobile_active(dealer, dealer_data)
@@ -499,3 +500,54 @@ class ASCFeed(BaseFeed):
                 ex = "[Exception: ASCFeed_dealer_data] asc_id {0} already exists".format(asc['asc_id'])
                 logger.error(ex)
         return self.feed_remark
+    
+class ASCAndServiceAdvisorFeed(BaseFeed):
+
+    def import_data(self):
+        total_failed = 0
+        for asc in self.data_source:
+            try:
+                asc_data = models.AuthorizedServiceCenter.objects.get(asc_id=asc['id'])
+            except ObjectDoesNotExist as ex:
+                asc_obj = self.register_user('ASC', username=asc['id'])
+                asc_data = models.AuthorizedServiceCenter(user=asc_obj,asc_id=asc['id'])
+            try:
+                mobile_number_active = self.check_mobile_active(asc, asc_data)
+                if mobile_number_active and asc['status']=='Y':
+                    raise ValueError(asc['phone_number'] + ' is active under another dealer')
+                try:
+                    service_advisor = models.ServiceAdvisor.objects.select_related('user__user').get(
+                                        service_advisor_id=asc['service_advisor_id'])
+                    if service_advisor.user.phone_number != asc['phone_number']:
+                        service_advisor.user.phone_number = asc['phone_number']
+                        logger.info(
+                        "[Info: DealerAndServiceAdvisorFeed_sa]: Updated phone number for {0}"
+                        .format(asc['service_advisor_id']))
+                except ObjectDoesNotExist as odne:
+                    logger.info(
+                    "[Exception:  DealerAndServiceAdvisorFeed_sa]: {0}"
+                    .format(odne))
+                    sa_user = self.register_user('SA', username=asc['service_advisor_id'],
+                                                 first_name=asc['name'],
+                                                 phone_number=asc['phone_number'])
+                    service_advisor = models.ServiceAdvisor(
+                                            service_advisor_id=asc['service_advisor_id'], 
+                                            asc=asc_data, user=sa_user)
+                service_advisor.status = unicode(asc['status'])
+                service_advisor.save()
+            except Exception as ex:
+                total_failed += 1
+                ex = "{0}".format(ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+                continue
+
+        return self.feed_remark
+
+    def check_mobile_active(self, asc, asc_data):
+        list_mobile = models.ServiceAdvisor.objects.active(asc['phone_number'])
+        list_active_mobile = list_mobile.exclude(asc=asc_data,
+                                                 service_advisor_id=asc['service_advisor_id'])
+        if list_active_mobile:
+            return True
+        return False
