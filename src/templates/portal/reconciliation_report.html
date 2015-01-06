@@ -28,9 +28,9 @@
 					{{record.coupon_no}} {% endif%}</td>
 				<td>{{record.service_avil_date}}</td>
 				<td>{% if record.service_status == "Closed" %}
-					{{record.closed_date|default_if_none:""}} {% else %} n/a {% endif%}
+					{{record.closed_date|default_if_none:""}} {% else %} N/A {% endif%}
 				</td>
-				<td>{{record.sa_phone_name|default_if_none:""}}</td>
+				<td>{{record.sa_phone_name|default_if_none:"N/A"}}</td>
 				<td>{{record.kms|default_if_none:""}}</td>
 				<td>{{record.service_type|default_if_none:""}}</td>
 				<td>{{record.service_status|default_if_none:""}}</td>
@@ -39,6 +39,7 @@
 			{% endfor %}
 		</tbody>
 	</table>
+	<div>*N/A under "SA Mobile" indicates CDMS data that has no Service Advisor details.</div>
 	{% elif params %}
 	<div class="text-center bg-info">No coupons found matching the request</div>
 	{% endif %}
