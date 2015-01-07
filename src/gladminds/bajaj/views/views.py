@@ -109,10 +109,10 @@ def change_password(request):
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def generate_otp(request):
     if request.method == 'POST':
+        phone_number = '' 
         try:
             username = request.POST['username']
             user = User.objects.get(username=username)
-            phone_number = ''            
             user_profile_obj = models.UserProfile.objects.filter(user=user) 
             if user_profile_obj:
                 phone_number = (user_profile_obj[0]).phone_number
@@ -290,8 +290,13 @@ def register_customer(request, group=None):
                     customer_obj.sent_to_sap = False
                     customer_obj.dealer_asc_id = str(request.user)
                     if models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS).exists():
+                        groups = utils.stringify_groups(request.user)
+                        if Roles.ASCS in groups:
+                            dealer_asc_id = "asc : " + customer_obj.dealer_asc_id
+                        else:
+                            dealer_asc_id = "dealer : " + customer_obj.dealer_asc_id
                         message = get_template('CUSTOMER_PHONE_NUMBER_UPDATE').format(customer_id=customer_obj.temp_customer_id, old_number=customer_obj.old_number, 
-                                                                                  new_number=customer_obj.new_number, dealer_asc_id=customer_obj.dealer_asc_id)
+                                                                                  new_number=customer_obj.new_number, dealer_asc_id=dealer_asc_id)
                         managers = models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS)
                         for manager in managers:
                             phone_number = utils.get_phone_number_format(manager.phone_number)
