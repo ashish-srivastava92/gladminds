@@ -94,7 +94,7 @@ def get_data_feed_log_detail(start_date=None, end_date=None):
                                                                   total_failed_data_count=Sum('failed_data_count'))
 
 def get_feed_failure_log_detail(type=None):
-    feed_logs = models.FeedFailureLog.objects.filter(email_sent=False, feed_type=type)
+    feed_logs = models.FeedFailureLog.objects.filter(email_flag=False, feed_type=type)
     feed_data = []
     for feed in feed_logs:
         data = {}
@@ -102,7 +102,7 @@ def get_feed_failure_log_detail(type=None):
         data['reason'] = feed.reason
         data['created_date'] = feed.created_date
         feed_data.append(data)
-    feed_logs.update(email_sent=True)
+    feed_logs.update(email_flag=True)
     return feed_data
 
 def get_customer_details(start_date=None, end_date=None, type=None):

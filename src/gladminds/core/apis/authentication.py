@@ -5,14 +5,7 @@ from tastypie.authentication import Authentication
 from provider.oauth2.models import AccessToken
 import logging
 from gladminds.core.auth.service_handler import ServiceHandler
-
-
-class AuthError(RuntimeError):
-    '''
-    General exception class.
-    '''
-    def __init__(self, message='OAuth error occured.'):
-        self.message = message
+from gladminds.core.exceptions import AuthError
 
 
 class AccessTokenAuthentication(Authentication):
