@@ -532,7 +532,7 @@ class FeedFailureLog(BaseModel):
     '''details of all the feeds that failed'''
     feed_type = models.CharField(max_length=50, null=False)
     reason = models.CharField(max_length=2048, null=True, blank=True)
-    sent_to_sap = models.BooleanField(default=False)
+    email_flag = models.BooleanField(default=False)
     
     class Meta:
         abstract = True
