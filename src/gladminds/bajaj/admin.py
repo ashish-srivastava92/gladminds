@@ -479,6 +479,7 @@ brand_admin.register(models.CouponData, CouponAdmin)
 brand_admin.register(models.SMSLog, SMSLogAdmin)
 brand_admin.register(models.EmailLog, EmailLogAdmin)
 brand_admin.register(models.DataFeedLog, FeedLogAdmin)
+brand_admin.register(models.FeedFailureLog)
 
 brand_admin.register(models.NationalSalesManager, NSMAdmin)
 brand_admin.register(models.AreaSalesManager, ASMAdmin)
