@@ -431,14 +431,10 @@ Cron Job to send feed failure email
 '''
 
 def send_mail_for_feed_failure(*args, **kwargs):
-    day = kwargs['day_duration']
-    today = datetime.now().date()
-    start_date = today - timedelta(days=day)
-    end_date = today + timedelta(days=1)
     for feed_type in FEED_TYPES:
-        feed_data = taskmanager.get_feed_failure_log_detail(
-            start_date=start_date, end_date=end_date, type=feed_type)
-        mail.feed_failure(feed_data=feed_data)
+        feed_data = taskmanager.get_feed_failure_log_detail(type=feed_type)
+        if feed_data:
+            mail.feed_failure(feed_data=feed_data)
 
 
 '''

@@ -18,11 +18,17 @@ def get_email_template(key):
     template_object = get_model('EmailTemplate').objects.filter(template_key=key).values()
     return template_object[0]
 
-def send_email_with_file_attachment(sender, receiver, subject, body, filename, content):
-    today = datetime.now()
-    message = EmailMessage(subject, body + today.strftime("%d-%m-%Y"), sender, receiver)
-    message.attach(filename + today.strftime("%d_%m_%Y") +'.csv', content.getvalue(), 'text/csv')
-    message.send()
+def send_email_with_file_attachment(sender, receiver, subject, body, filename, content, brand='bajaj'):
+    try:
+        yesterday = datetime.now().date() - timedelta(days=1)
+        message = EmailMessage(subject, body, sender, receiver)
+        message.attach(filename + yesterday.strftime("%d_%m_%Y") +'.csv', content.getvalue(), 'text/csv')
+        message.send()
+        audit_manager.email_log(subject," ", sender, receiver, brand=brand);
+        return True
+    except Exception as ex:
+        logger.error('Exception while sending mail {0}'.format(ex))
+        return False
     
 
 def send_email(sender, receiver, subject, body, message=None,smtp_server=settings.MAIL_SERVER, title='GCP_Bajaj_FSC_Feeds'
@@ -93,6 +99,7 @@ def feed_report(feed_data=None):
 
 def customer_phone_number_update(customer_details=None):
     try:
+        yesterday = datetime.now().date() - timedelta(days=1)
         mail_detail = settings.CUSTOMER_PHONE_NUMBER_UPDATE
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
@@ -103,8 +110,8 @@ def customer_phone_number_update(customer_details=None):
                                 customer['old_number'], customer['new_number']])
         
         send_email_with_file_attachment(mail_detail['sender'], mail_detail['receiver'], mail_detail['subject'],
-                                          "The customer phone number updates on ", 'customer_phone_number_update_',
-                                          csvfile )
+                                          "The customer phone number updates on "+ yesterday.strftime("%d-%m-%Y"), 'customer_phone_number_update_',
+                                          csvfile)
     except Exception as ex:
         logger.info("[Exception customer phone number update]: {0}".format(ex))
 
@@ -114,10 +121,18 @@ def feed_failure(feed_data=None):
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(["Timestamp", "FeedType", "Reason"])
+        feed_type = ''
+        feed_log_time = ''
         for feed in feed_data:
             csvwriter.writerow([feed['created_date'], feed['feed_type'], feed['reason']])
-        send_email_with_file_attachment(mail_detail['sender'], mail_detail['receiver'], mail_detail['subject'],
-                                          "The feed failures on ", 'feed_failure_', csvfile )
+            feed_type = feed['feed_type']
+        try:
+            feed_log_time = get_model('EmailLog').objects.filter(subject='Gladminds Failure Report - '+feed_type).order_by('-id')[0]
+            feed_log_time = feed_log_time.created_date.strftime("%d_%m_%Y") 
+        except:
+            feed_log_time = datetime.now().strftime("%d_%m_%Y")
+        send_email_with_file_attachment(mail_detail['sender'], mail_detail['receiver'], mail_detail['subject'] + feed_type,
+                                          "The feed failures since " + feed_log_time, 'feed_failure_', csvfile)
     except Exception as ex:
         logger.info("[Exception feed_fail_report]: {0}".format(ex))
 
