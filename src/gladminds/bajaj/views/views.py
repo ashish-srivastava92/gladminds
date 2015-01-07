@@ -109,10 +109,10 @@ def change_password(request):
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def generate_otp(request):
     if request.method == 'POST':
+        phone_number = '' 
         try:
             username = request.POST['username']
             user = User.objects.get(username=username)
-            phone_number = ''            
             user_profile_obj = models.UserProfile.objects.filter(user=user) 
             if user_profile_obj:
                 phone_number = (user_profile_obj[0]).phone_number
