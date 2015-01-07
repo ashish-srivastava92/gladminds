@@ -17,7 +17,7 @@ from gladminds.sqs_tasks import send_otp
 from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
 from tastypie.exceptions import ImmediateHttpResponse
-from gladminds.core.views.auth_view import get_access_token
+from gladminds.core.views.auth_view import get_access_token, create_access_token
 from tastypie.authorization import DjangoAuthorization
 from gladminds.core.apis.authorization import CustomAuthorization,\
     MultiAuthorization
@@ -68,8 +68,6 @@ class ConsumerResource(CustomBaseModelResource):
             url(r"^(?P<resource_name>%s)/authenticate-email%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('authenticate_user_email_id'), name="authenticate_user_email_id"),
             url(r"^(?P<resource_name>%s)/send-otp/forgot-password%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('authenticate_user_send_otp'), name="authenticate_user_send_otp"),
             url(r"^(?P<resource_name>%s)/forgot-password/(?P<type>[a-zA-Z0-9.-]+)%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('change_user_password'), name="change_user_password"),
-            url(r"^(?P<resource_name>%s)/(?P<user_id>\d+)/details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_user_details'), name="get_user_details"),
-            url(r"^(?P<resource_name>%s)/(?P<user_id>\d+)/products%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('dispatch_dict'), name="api_dispatch_dict"),
             url(r"^(?P<resource_name>%s)/login%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('auth_login'), name="auth_login"),
             url(r"^(?P<resource_name>%s)/validate-otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('validate_otp'), name="validate_otp"),
             url(r"^(?P<resource_name>%s)/logout%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('logout'), name="logout")
@@ -282,14 +280,14 @@ class ConsumerResource(CustomBaseModelResource):
                                                  =phone_number).user
             elif email_id:
                     user_obj = afterbuy_model.Consumer.objects.get(user__email=email_id, is_email_verified=True).user
-            http_host = request.META['HTTP_HOST']
+            http_host = request.META.get('HTTP_HOST', 'localhost')
             user_auth = authenticate(username=str(user_obj.username),
                                 password=password)
             if user_auth is not None:
-                access_token = get_access_token(user_auth, user_obj.username, password, http_host)
+                access_token = create_access_token(user_auth, user_obj.username, password, http_host)
                 if user_auth.is_active:
                     login(request, user_auth)
-                    data = {'status': 1, 'message': "login successfully", 'access_token': access_token['access_token'], "user_id": user_auth.id}
+                    data = {'status': 1, 'message': "login successfully", 'access_token': access_token, "user_id": user_auth.id}
             else:
                 data = {'status': 0, 'message': "login unsuccessfull"}
         except Exception as ex:
