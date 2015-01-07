@@ -88,7 +88,9 @@ SUIT_CONFIG = {
                    {'model': 'emaillog',
                      'label': 'Email Log'},
                     {'model': 'datafeedlog',
-                     'label': 'Feed Log'},)},
+                     'label': 'Feed Log'},
+                   {'model': 'feedFailureLog',
+                     'label': 'Feed Failure Log'})},
         {'app': 'bajaj', 'label': 'Loyalty', 'icon': ' icon-folder-open',
          'models':(
                     {'model': 'nationalsalesmanager',
