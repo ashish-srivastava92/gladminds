@@ -430,6 +430,7 @@ def send_report_mail_for_feed(*args, **kwargs):
 Cron Job to send feed failure email
 '''
 
+@shared_task
 def send_mail_for_feed_failure(*args, **kwargs):
     for feed_type in FEED_TYPES:
         feed_data = taskmanager.get_feed_failure_log_detail(type=feed_type)
