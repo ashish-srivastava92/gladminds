@@ -10,6 +10,7 @@ from gladminds.core import utils
 from gladminds.core.auth_helper import GmApps, Roles
 from gladminds.core.admin_helper import GmModelAdmin
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from django.conf import settings
 
 
 class BajajAdminSite(AdminSite):
@@ -481,15 +482,16 @@ brand_admin.register(models.EmailLog, EmailLogAdmin)
 brand_admin.register(models.DataFeedLog, FeedLogAdmin)
 brand_admin.register(models.FeedFailureLog)
 
-brand_admin.register(models.NationalSalesManager, NSMAdmin)
-brand_admin.register(models.AreaSalesManager, ASMAdmin)
-brand_admin.register(models.Distributor, DistributorAdmin)
-brand_admin.register(models.Mechanic, MechanicAdmin)
+if settings.ENV not in ['prod']:
+    brand_admin.register(models.NationalSalesManager, NSMAdmin)
+    brand_admin.register(models.AreaSalesManager, ASMAdmin)
+    brand_admin.register(models.Distributor, DistributorAdmin)
+    brand_admin.register(models.Mechanic, MechanicAdmin)
 
-brand_admin.register(models.SparePartMasterData, SparePartMasterAdmin)
-brand_admin.register(models.SparePartUPC, SparePartUPCAdmin)
-brand_admin.register(models.SparePartPoint, SparePartPointAdmin)
-brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
+    brand_admin.register(models.SparePartMasterData, SparePartMasterAdmin)
+    brand_admin.register(models.SparePartUPC, SparePartUPCAdmin)
+    brand_admin.register(models.SparePartPoint, SparePartPointAdmin)
+    brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
 
 brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)
 brand_admin.register(models.SATempRegistration, SATempRegistrationAdmin)

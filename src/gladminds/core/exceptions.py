@@ -21,3 +21,12 @@ class ParamToBeFunctionException(Exception):
 class ServiceNotActiveException(Exception):
     def __init__(self, message="Service Not Active."):
         self.msg = message
+
+
+class AuthError(RuntimeError):
+    '''
+    General exception class.
+    '''
+    def __init__(self, message='OAuth error occured.'):
+        self.message = message
+
