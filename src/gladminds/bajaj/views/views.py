@@ -354,19 +354,26 @@ def get_customer_info(data):
     except Exception as ex:
         logger.info(ex)
         message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
-        try:
-            vin_sync_feed = export_feed.ExportUnsyncProductFeed(username=settings.SAP_CRM_DETAIL[
-                       'username'], password=settings.SAP_CRM_DETAIL['password'],
-                      wsdl_url=settings.VIN_SYNC_WSDL_URL, feed_type='VIN sync Feed')
-            message = vin_sync_feed.export(data=data)
-    #         if data['groups'][0] == Roles.DEALERS:
-    #             data['groups'][0] = "Dealer"
-    #         else:
-    #             data['groups'][0] = "ASC"
-    #         template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
-    #         send_mail_when_vin_does_not_exist(data=template)
-        except Exception as ex:
-            logger.info(ex)
+
+        if data['groups'][0] == Roles.DEALERS:
+            data['groups'][0] = "Dealer"
+        else:
+            data['groups'][0] = "ASC"
+        template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
+        send_mail_when_vin_does_not_exist(data=template)
+#         try:
+#             vin_sync_feed = export_feed.ExportUnsyncProductFeed(username=settings.SAP_CRM_DETAIL[
+#                        'username'], password=settings.SAP_CRM_DETAIL['password'],
+#                       wsdl_url=settings.VIN_SYNC_WSDL_URL, feed_type='VIN sync Feed')
+#             message = vin_sync_feed.export(data=data)
+#     #         if data['groups'][0] == Roles.DEALERS:
+#     #             data['groups'][0] = "Dealer"
+#     #         else:
+#     #             data['groups'][0] = "ASC"
+#     #         template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
+#     #         send_mail_when_vin_does_not_exist(data=template)
+#         except Exception as ex:
+#             logger.info(ex)
         return {'message': message, 'status': 'fail'}
     if product_obj.purchase_date:
         product_data = format_product_object(product_obj)
