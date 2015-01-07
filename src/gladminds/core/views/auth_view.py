@@ -1,5 +1,5 @@
 from django.views.decorators.csrf import csrf_exempt
-from provider.oauth2.models import Client
+from provider.oauth2.models import Client, AccessToken
 import json
 import urllib
 import urllib2
@@ -26,3 +26,17 @@ def get_access_token(user_auth, username, password, http_host):
     oath_request = urllib2.Request(page, params)
     response = urllib2.urlopen(oath_request)
     return json.load(response)
+
+@csrf_exempt
+def create_access_token(user_auth, username, password, http_host):
+    secret_cli = Client(user=user_auth, name='client', client_type=1, url='')
+    secret_cli.save(using=GmApps.AFTERBUY)
+
+    access_token = AccessToken(
+        user=user_auth,
+        client=secret_cli,
+        scope= 6  
+    )
+    AccessToken.objects.filter(user=user_auth, client=secret_cli, scope=6).using(GmApps.AFTERBUY).delete()
+    access_token.save(using=GmApps.AFTERBUY)
+    return access_token.token
