@@ -20,7 +20,8 @@ from django.db.models import F
 from gladminds.bajaj import models
 from gladminds.bajaj.services import message_template
 from gladminds.core import utils
-from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message
+from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message,\
+    send_mail_for_feed_failure
 from gladminds.core.managers.mail import sent_otp_email,\
     send_recovery_email_to_admin, send_mail_when_vin_does_not_exist
 from gladminds.bajaj.services.coupons.import_feed import SAPFeed
@@ -478,6 +479,8 @@ def trigger_sqs_tasks(request):
 
 
 def site_info(request):
+    if settings.ENV in ['qa']:
+        send_mail_for_feed_failure()
     if request.method != 'GET':
         raise Http404
     brand = settings.BRAND

@@ -132,6 +132,8 @@ def feed_failure(feed_data=None):
             feed_log_time = feed_log_time.created_date.strftime("%d_%m_%Y") 
         except:
             feed_log_time = datetime.now().strftime("%d_%m_%Y")
+
+        logger.info("Sending out feed_failure emails")
         send_email_with_file_attachment(mail_detail['sender'], mail_detail['receiver'], mail_detail['subject'] + feed_type,
                                           "The feed failures since " + feed_log_time, 'feed_failure_', csvfile)
     except Exception as ex:
