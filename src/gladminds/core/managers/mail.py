@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from gladminds.core.managers import audit_manager
 from gladminds.core.auth_helper import GmApps
 from gladminds.core.loaders.module_loader import get_model
+from gladminds.bajaj.models import EmailLog
 
 logger = logging.getLogger("gladminds")
 
@@ -127,7 +128,7 @@ def feed_failure(feed_data=None):
             csvwriter.writerow([feed['created_date'], feed['feed_type'], feed['reason']])
             feed_type = feed['feed_type']
         try:
-            feed_log_time = get_model('EmailLog').objects.filter(subject='Gladminds Failure Report - '+feed_type).order_by('-id')[0]
+            feed_log_time = EmailLog.objects.filter(subject='Gladminds Failure Report - '+feed_type).order_by('-id')[0]
             feed_log_time = feed_log_time.created_date.strftime("%d_%m_%Y") 
         except:
             feed_log_time = datetime.now().strftime("%d_%m_%Y")
