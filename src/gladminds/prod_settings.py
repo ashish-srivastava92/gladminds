@@ -83,7 +83,7 @@ FILE_CACHE_DURATION = 1800
 
 FEED_TYPE = 'CSV'
 
-SMS_CLIENT = "KAP"
+SMS_CLIENT = "AIRTEL"
 
 #AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
@@ -106,9 +106,9 @@ SAP_CRM_DETAIL = {
                   'password':'welcome123'
                   }
 ASC_WSDL_URL = "http://bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
-COUPON_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/redeem-feed/?wsdl&v0"
+COUPON_WSDL_URL = "http://bajaj.gladminds.co/api/v1/redeem-feed/?wsdl&v0"
 COUPON_WSDL = 'prod_coupon_redeem.wsdl'
-CUSTOMER_REGISTRATION_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/customer-feed/?wsdl&v0"
+CUSTOMER_REGISTRATION_WSDL_URL = "http://bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL = 'prod_customer_registration.wsdl'
 
 ENABLE_AMAZON_SQS = True
@@ -131,7 +131,6 @@ AFTER_BUY_CONSTANTS = {
 ########################SQS Queue Name##################################
 SQS_QUEUE_NAME = "gladminds-prod2"
 ########################################################################
-FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail"
 UCN_RECOVERY_MAIL_DETAIL["receiver"] = ["gladminds@hashedin.com", "nvhasabnis@bajajauto.co.in", "ssozarde@bajajauto.co.in","jojibabu.vege@gladminds.co","support@gladminds.co"]
 VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["jojibabu.vege@gladminds.co","ssozarde@bajajauto.co.in","skdixit@bajajauto.co.in","nvhasabnis@bajajauto.co.in","gladminds+alerts@hashedin.com"]
@@ -157,3 +156,59 @@ ENABLE_SERVICE_DESK = False
 ENV = "prod"
 
 WSDL_TNS="http://bajaj.gladminds.co/api/v1/feed/"
+
+ADMIN_DETAILS = {'bajaj': {'user': 'bajaj001', 'password': 'bajaj001'},
+          'demo': {'user': 'demo', 'password': 'demo'},
+          'afterbuy': {'user': 'afterbuy', 'password': 'afterbuy'},
+          'default': {'user': 'gladminds', 'password': 'gladminds'}
+          }
+
+
+SUIT_CONFIG = {
+    'ADMIN_NAME': 'GladMinds',
+    'CONFIRM_UNSAVED_CHANGES': True,
+    'SEARCH_URL': '',
+    'MENU_EXCLUDE': ('auth.group', 'auth', 'sites'),
+    'MENU_OPEN_FIRST_CHILD': True,
+    'LIST_PER_PAGE': 20,
+    'SHOW_REQUIRED_ASTERISK': True,
+    'MENU': (
+        {'app': 'bajaj', 'label': 'Users', 'icon': ' icon-folder-open',
+         'models': ('user', 'userprofile',
+                    {'model': 'dealer',
+                     'label': 'Dealer'},
+                    {'model': 'authorizedservicecenter',
+                     'label': 'Authorized Service Center'},
+                    {'model': 'serviceadvisor',
+                     'label': 'Service Advisor'},)},
+        {'app': 'bajaj', 'label': 'Products', 'icon': ' icon-folder-open',
+         'models':({'model': 'brandproductcategory',
+                     'label': 'Brand Product Category'},
+                    {'model': 'producttype',
+                     'label': 'Product Type'},
+                    {'model': 'dispatchedproduct',
+                     'label': 'Product Dispatch'},
+                    {'model': 'productdata',
+                     'label': 'Product Purchase'},
+                    {'model': 'coupondata',
+                     'label': 'Coupon Redemption'},)},
+        {'app': 'bajaj', 'label': 'Logs', 'icon': ' icon-folder-open',
+         'models':(
+                    {'model': 'smslog',
+                     'label': 'SMS Log'},
+                   {'model': 'emaillog',
+                     'label': 'Email Log'},
+                    {'model': 'datafeedlog',
+                     'label': 'Feed Log'},)},
+        {'app': 'bajaj', 'label': 'User Registrations', 'icon': ' icon-folder-open',
+         'models':(
+                    {'model': 'asctempregistration',
+                     'label': ' ASC registration'},
+                    {'model': 'satempregistration',
+                     'label': 'SA registration'},
+                    {'model': 'customertempregistration',
+                     'label': ' Customer registration'},)},
+        {'app': 'bajaj', 'label': 'Templates', 'icon': ' icon-folder-open',
+         'models':(
+                    'messagetemplate', 'emailtemplate',)},)
+}

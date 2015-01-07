@@ -5,7 +5,6 @@ from tastypie.authentication import Authentication
 from provider.oauth2.models import AccessToken
 import logging
 from gladminds.core.auth.service_handler import ServiceHandler
-from gladminds.core.loaders.module_loader import get_model
 
 
 class AuthError(RuntimeError):

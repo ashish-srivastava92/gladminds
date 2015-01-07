@@ -22,7 +22,7 @@ from gladminds.core import utils
 from gladminds.sqs_tasks import send_otp
 from gladminds.core.managers.mail import sent_otp_email,\
     send_recovery_email_to_admin, send_mail_when_vin_does_not_exist
-from gladminds.bajaj.feeds.feed import SAPFeed
+from gladminds.bajaj.services.coupons.import_feed import SAPFeed
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
@@ -404,7 +404,9 @@ def trigger_sqs_tasks(request):
         'expire-service-coupon': 'expire_service_coupon',
         'send-reminder': 'send_reminder',
         'export-customer-registered': 'export_customer_reg_to_sap',
-        'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk'
+        'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk',
+        'send_mail_for_feed_failure' : 'send_mail_for_feed_failure',
+
     }
 
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)

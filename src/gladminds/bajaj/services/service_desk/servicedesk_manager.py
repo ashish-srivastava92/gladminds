@@ -169,7 +169,6 @@ def get_complain_data(sms_dict, phone_number, email, name, dealer_email, with_de
         context = utils.create_context('FEEDBACK_DETAIL_TO_ADIM', gladminds_feedback_object)
         send_feedback_received(context, manager_obj.email)
         context = utils.create_context('FEEDBACK_CONFIRMATION', gladminds_feedback_object)
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
         send_servicedesk_feedback(context, get_reporter_details(gladminds_feedback_object.reporter, "email"))
     return {'status': True, 'message': message}
 

@@ -27,7 +27,7 @@ class Roles():
     LOYALTYSUPERADMINS = 'LoyaltySuperAdmins'
     NSMS = 'NationalSalesManagers'
     ASMS = 'AreaSalesManagers'
-    FSCSADMINS = 'FscAdmins'
+    FSCADMINS = 'FscAdmins'
     SDADMINS = 'SdAdmins'
     SDMANAGERS = 'SdManagers'
     SDOWNERS = 'SdOwners'
@@ -35,6 +35,8 @@ class Roles():
     ASCS = 'AuthorisedServiceCenters'
     DASCS = 'DependentAuthorisedServiceCenters'
     SERVICEADVISOR = 'ServiceAdvisors'
+    SDESCALATION = 'EscalationAuthority'
+    BRANDMANAGERS = 'BrandManagers'
 
 
 AFTERBUY_ADMIN_GROUPS = [Roles.SUPERADMINS, Roles.ADMINS]

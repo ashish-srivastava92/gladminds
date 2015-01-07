@@ -8,7 +8,7 @@ from gladminds.core.managers.audit_manager import sms_log, feed_log
 from gladminds.core.managers.sms_client_manager import load_gateway, MessageSentFailed
 from gladminds.core.managers import mail
 from gladminds.core.cron_jobs import taskmanager
-from gladminds.bajaj.feeds import feed, export_feed
+from gladminds.bajaj.services.coupons import import_feed, export_feed
 from gladminds.bajaj.services import  message_template as templates
 
 import pytz
@@ -133,8 +133,6 @@ def send_coupon_detail_customer(*args, **kwargs):
 """
 This job send sms in service desk 
 """
-
-
 @shared_task
 def send_servicedesk_feedback_detail(*args, **kwargs):
     status = "success"
@@ -167,6 +165,26 @@ def send_reminder_message(*args, **kwargs):
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
+
+
+"""
+This job send reminder sms to customer
+"""
+
+@shared_task
+def send_customer_phone_number_update_message(*args, **kwargs):
+    status = "success"
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        set_gateway(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        send_reminder_message.retry(
+            exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        sms_log(status=status, receiver=phone_number, message=message)
+
 
 """
 This job send coupon close message
@@ -368,7 +386,7 @@ Crontab to import data from SAP to Gladminds Database
 
 @shared_task
 def import_data(*args, **kwargs):
-    feed.load_feed()
+    import_feed.load_feed()
 
 
 '''
@@ -383,12 +401,11 @@ def export_close_coupon_data(*args, **kwargs):
 
 @shared_task
 def export_coupon_redeem_to_sap(*args, **kwargs):
-    redeem_obj = feed.CouponRedeemFeedToSAP()
-    feed_export_data = redeem_obj.export_data()
+    coupon_redeem = export_feed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
+                   'username'], password=settings.SAP_CRM_DETAIL['password'],
+                  wsdl_url=settings.COUPON_WSDL_URL, feed_type='Coupon Redeem Feed')
+    feed_export_data = coupon_redeem.export_data()
     if len(feed_export_data[0]) > 0:
-        coupon_redeem = export_feed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
-                       'username'], password=settings.SAP_CRM_DETAIL['password'],
-                      wsdl_url=settings.COUPON_WSDL_URL, feed_type='Coupon Redeem Feed')
         coupon_redeem.export(items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:
@@ -414,14 +431,10 @@ Cron Job to send feed failure email
 '''
 
 def send_mail_for_feed_failure(*args, **kwargs):
-    day = kwargs['day_duration']
-    today = datetime.now().date()
-    start_date = today - timedelta(days=day)
-    end_date = today + timedelta(days=1)
     for feed_type in FEED_TYPES:
-        feed_data = taskmanager.get_feed_failure_log_detail(
-            start_date=start_date, end_date=end_date, type=feed_type)
-        mail.feed_failure(feed_data=feed_data)
+        feed_data = taskmanager.get_feed_failure_log_detail(type=feed_type)
+        if feed_data:
+            mail.feed_failure(feed_data=feed_data)
 
 
 '''
@@ -450,11 +463,10 @@ def export_asc_registeration_to_sap(*args, **kwargs):
 
     status = "success"
     try:
-        asc_registeration_data = feed.ASCRegistrationToSAP()
-        feed_export_data = asc_registeration_data.export_data(phone_number)
-        export_obj = export_feed.ExportCouponRedeemFeed(
+        export_obj = export_feed.ExportASCRegistrationFeed(
                username=settings.SAP_CRM_DETAIL['username'], password=settings
                .SAP_CRM_DETAIL['password'], wsdl_url=settings.ASC_WSDL_URL)
+        feed_export_data = export_obj.export_data(phone_number)
         export_obj.export(items=feed_export_data['item'],
                           item_batch=feed_export_data['item_batch'])
     except Exception as ex:
@@ -483,26 +495,16 @@ def delete_unused_otp(*args, **kwargs):
     models.OTPToken.objects.all().delete()
 
 '''
-Cron Job to send report email for data feed
-'''
-@shared_task
-def send_report_mail_for_feed_failure(*args, **kwargs):
-    remarks = kwargs['remarks']
-    feed_type = kwargs['feed_type']
-    mail.feed_failure_report(remarks = remarks, feed_type=feed_type)
-    
-'''
 Cron Job to send info of registered customer
 '''
 
 @shared_task
 def export_customer_reg_to_sap(*args, **kwargs):
-    redeem_obj = feed.CustomerRegistationFeedToSAP()
-    feed_export_data = redeem_obj.export_data()
+    customer_registered = export_feed.ExportCustomerRegistrationFeed(username=settings.SAP_CRM_DETAIL[
+                   'username'], password=settings.SAP_CRM_DETAIL['password'],
+                  wsdl_url=settings.CUSTOMER_REGISTRATION_WSDL_URL, feed_type='Customer Registration Feed')
+    feed_export_data = customer_registered.export_data()
     if len(feed_export_data[0]) > 0:
-        customer_registered = export_feed.ExportCustomerRegistrationFeed(username=settings.SAP_CRM_DETAIL[
-                       'username'], password=settings.SAP_CRM_DETAIL['password'],
-                      wsdl_url=settings.CUSTOMER_REGISTRATION_WSDL_URL, feed_type='Customer Registration Feed')
         customer_registered.export(items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:
@@ -621,6 +623,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "send_mail_for_feed_failure" : send_mail_for_feed_failure,
               
-              "send_servicedesk_feedback_detail" : send_servicedesk_feedback_detail
+              "send_servicedesk_feedback_detail" : send_servicedesk_feedback_detail,
+              
+              "send_customer_phone_number_update_message" : send_customer_phone_number_update_message
 
               }

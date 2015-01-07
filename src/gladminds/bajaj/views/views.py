@@ -2,6 +2,7 @@ import logging
 import json
 import random
 import datetime
+import operator
 
 from collections import OrderedDict
 from django.shortcuts import render_to_response, render
@@ -19,10 +20,10 @@ from django.db.models import F
 from gladminds.bajaj import models
 from gladminds.bajaj.services import message_template
 from gladminds.core import utils
-from gladminds.sqs_tasks import send_otp
+from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message
 from gladminds.core.managers.mail import sent_otp_email,\
     send_recovery_email_to_admin, send_mail_when_vin_does_not_exist
-from gladminds.bajaj.feeds.feed import SAPFeed
+from gladminds.bajaj.services.coupons.import_feed import SAPFeed
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
@@ -33,11 +34,13 @@ from gladminds.core.auth.service_handler import check_service_active, Services
 from gladminds.core.core_utils.utils import log_time
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.bajaj.services.message_template import get_template
+from gladminds.core.managers.audit_manager import sms_log
+from gladminds.bajaj.services.coupons import export_feed
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
-
+AUDIT_ACTION = 'SEND TO QUEUE'
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def auth_login(request, provider):
@@ -106,10 +109,10 @@ def change_password(request):
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def generate_otp(request):
     if request.method == 'POST':
+        phone_number = '' 
         try:
             username = request.POST['username']
             user = User.objects.get(username=username)
-            phone_number = ''            
             user_profile_obj = models.UserProfile.objects.filter(user=user) 
             if user_profile_obj:
                 phone_number = (user_profile_obj[0]).phone_number
@@ -228,11 +231,15 @@ def save_sa_registration(request, groups):
         service_advisor_id = TEMP_SA_ID_PREFIX + str(random.randint(10**5, 10**6))
     data_source.append(utils.create_sa_feed_data(data, request.user, service_advisor_id))
     logger.info('[Temporary_sa_registration]:: Initiating dealer-sa feed for ID' + service_advisor_id)
+    if Roles.ASCS in groups:
+        feed_type='asc_sa'
+    else:
+        feed_type='dealer'
     feed_remark = FeedLogWithRemark(len(data_source),
                                                 feed_type='Dealer Feed',
                                                 action='Received', status=True)
     sap_obj = SAPFeed()
-    feed_response = sap_obj.import_to_db(feed_type='dealer',
+    feed_response = sap_obj.import_to_db(feed_type=feed_type,
                         data_source=data_source, feed_remark=feed_remark)
     if feed_response.failed_feeds > 0:
         failure_msg = list(feed_response.remarks.elements())[0]
@@ -273,7 +280,7 @@ def register_customer(request, group=None):
             customer_obj = models.CustomerTempRegistration.objects.filter(temp_customer_id = temp_customer_id)
             if customer_obj:
                 customer_obj = customer_obj[0]
-                if customer_obj.old_number != data_source[0]['customer_phone_number']:
+                if customer_obj.new_number != data_source[0]['customer_phone_number']:
                     if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']) or models.ProductData.objects.filter(customer_phone_number=data_source[0]['customer_phone_number']):
                         message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
                         return json.dumps({'message': message})
@@ -282,6 +289,20 @@ def register_customer(request, group=None):
                     customer_obj.product_data = product_obj[0]
                     customer_obj.sent_to_sap = False
                     customer_obj.dealer_asc_id = str(request.user)
+                    if models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS).exists():
+                        groups = utils.stringify_groups(request.user)
+                        if Roles.ASCS in groups:
+                            dealer_asc_id = "asc : " + customer_obj.dealer_asc_id
+                        else:
+                            dealer_asc_id = "dealer : " + customer_obj.dealer_asc_id
+                        message = get_template('CUSTOMER_PHONE_NUMBER_UPDATE').format(customer_id=customer_obj.temp_customer_id, old_number=customer_obj.old_number, 
+                                                                                  new_number=customer_obj.new_number, dealer_asc_id=dealer_asc_id)
+                        managers = models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS)
+                        for manager in managers:
+                            phone_number = utils.get_phone_number_format(manager.phone_number)
+                            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+                            send_job_to_queue(send_customer_phone_number_update_message, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
+
             else:
                 if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']) or models.ProductData.objects.filter(customer_phone_number=data_source[0]['customer_phone_number']):
                     message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
@@ -333,12 +354,19 @@ def get_customer_info(data):
     except Exception as ex:
         logger.info(ex)
         message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
-        if data['groups'][0] == Roles.DEALERS:
-            data['groups'][0] = "Dealer"
-        else:
-            data['groups'][0] = "ASC"
-        template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
-        send_mail_when_vin_does_not_exist(data=template)
+        try:
+            vin_sync_feed = export_feed.ExportUnsyncProductFeed(username=settings.SAP_CRM_DETAIL[
+                       'username'], password=settings.SAP_CRM_DETAIL['password'],
+                      wsdl_url=settings.VIN_SYNC_WSDL_URL, feed_type='VIN sync Feed')
+            message = vin_sync_feed.export(data=data)
+    #         if data['groups'][0] == Roles.DEALERS:
+    #             data['groups'][0] = "Dealer"
+    #         else:
+    #             data['groups'][0] = "ASC"
+    #         template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
+    #         send_mail_when_vin_does_not_exist(data=template)
+        except Exception as ex:
+            logger.info(ex)
         return {'message': message, 'status': 'fail'}
     if product_obj.purchase_date:
         product_data = format_product_object(product_obj)
@@ -358,7 +386,10 @@ def exceptions(request, exception=None):
         template = 'portal/exception.html'
         data = None
         if exception in ['close', 'check']:
-            data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
+            if Roles.ASCS in groups:
+                data = models.ServiceAdvisor.objects.active_under_asc(request.user)
+            else:
+                data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
         return render(request, template, {'active_menu': exception,
                                            "data": data, 'groups': groups})
     elif request.method == 'POST':
@@ -475,23 +506,34 @@ def create_reconciliation_report(query_params, user):
     report_data = []
     filter = {}
     params = {}
-    user = models.Dealer.objects.filter(dealer_id=user)
-    args = { Q(status=4) | Q(status=2) | Q(status=6)}
+    coupon_filter =[]
+    args = [Q(status=4), Q(status=2), Q(status=6)]
+    if user.groups.filter(name=Roles.DEALERS).exists():
+        dealer = models.Dealer.objects.filter(dealer_id=user)
+        coupon_filter=[Q(service_advisor__dealer = dealer[0]), Q(servicing_dealer=dealer[0].dealer_id)]
+    else:
+        ascs = models.AuthorizedServiceCenter.objects.filter(user=user)
+        coupon_filter=[Q(service_advisor__asc = ascs[0]), Q(servicing_dealer=ascs[0].asc_id)]
+    
     status = query_params.get('status')
     from_date = query_params.get('from')
     to_date = query_params.get('to')
     filter['actual_service_date__range'] = (str(from_date) + ' 00:00:00', str(to_date) +' 23:59:59')
+
     if status:
-        args = { Q(status=status) }
+        args = [Q(status=status)]
         if status=='2':
-            args = { Q(status=2) | Q(status=6)}   
-    all_coupon_data = models.CouponData.objects.filter(*args, **filter).order_by('-actual_service_date')
+            args = [Q(status=2),Q(status=6)]
+    all_coupon_data = models.CouponData.objects.filter(reduce(operator.or_, args), reduce(operator.or_, coupon_filter), **filter).order_by('-actual_service_date')
     map_status = {'6': 'Closed', '4': 'In Progress', '2':'Closed'}
     for coupon_data in all_coupon_data:
         coupon_data_dict = {}
         coupon_data_dict['vin'] = coupon_data.product.product_id
-        user = coupon_data.service_advisor
-        coupon_data_dict['sa_phone_name'] = user.user.phone_number
+        sa = coupon_data.service_advisor
+        try:
+            coupon_data_dict['sa_phone_name'] = sa.user.phone_number
+        except:
+            coupon_data_dict['sa_phone_name'] = None
         coupon_data_dict['service_avil_date'] = coupon_data.actual_service_date
         coupon_data_dict['closed_date'] = coupon_data.closed_date
         coupon_data_dict['service_status'] = map_status[str(coupon_data.status)]

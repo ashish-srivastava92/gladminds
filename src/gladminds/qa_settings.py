@@ -80,7 +80,7 @@ TEMPLATE_DIRS = (
 #                 }
 FILE_CACHE_DURATION = 0
 
-SMS_CLIENT = "KAP"
+SMS_CLIENT = "AIRTEL"
 FEED_TYPE = 'CSV'
 
 #AfterBuy File Upload location configuration
@@ -104,11 +104,16 @@ SAP_CRM_DETAIL = {
                   'password':'welcome123'
                   }
 
+ASC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
+
 COUPON_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/redeem-feed/?wsdl&v0"
 COUPON_WSDL = 'qa_coupon_redeem.wsdl'
-ASC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
+
 CUSTOMER_REGISTRATION_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
+
+VIN_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/vin-sync-feed/?wsdl&v0"
+VIN_SYNC_WSDL='qa_vin_sync.wsdl'
 
 WSDL_TNS="http://qa.bajaj.gladminds.co/api/v1/feed/"
 
@@ -132,9 +137,10 @@ AFTER_BUY_CONSTANTS = {
 ########################SQS Queue Name
 SQS_QUEUE_NAME = "gladminds-qa2"
 ######################################
-FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail QA"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail QA"
 VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]
+FEED_FAILURE["receiver"] = ["gmdev@hashedin.com"]
+
 ###################Change Mail Subject on QA##########################
 MAIL_DETAIL["subject"] = "GladMinds Feed Report QA"
 MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]

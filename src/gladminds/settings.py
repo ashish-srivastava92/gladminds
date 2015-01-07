@@ -22,6 +22,8 @@ ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
 
 ADMINS = (
     ('somit', 'somit@hashedin.com'),
+    ('naureen', 'naureen.razi@hashedin.com'),
+    ('priyanka', 'priyanka.n@hashedin.com')
 )
 API_FLAG = False
 COUPON_VALID_DAYS = 30
@@ -397,10 +399,9 @@ LOGGING = {
 }
 
 
-WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR + '/coupon_redeem.wsdl'
-
-WSDL_CUSTOMER_REGISTRATION_LOC = TEMPLATE_DIR + '/customer_registration.wsdl'
 CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
+COUPON_WSDL = 'qa_coupon_redeem.wsdl'
+VIN_SYNC_WSDL='qa_vin_sync.wsdl'
 
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
@@ -413,15 +414,7 @@ MAIL_DETAIL = {
 FEED_FAILURE = {
     "sender": "feed-report@gladminds.co",
     "receiver": ["gladminds@hashedin.com"],
-    "subject": "Gladminds Feed Failure Report DEV",
-    "body": """""",
-}
-
-FEED_FAILURE_MAIL_DETAIL = {
-
-    "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds+alerts@hashedin.com", "support@gladminds.co", "jojibabu.vege@gladminds.co"],
-    "subject": "Gladminds Feed Failure Mail",
+    "subject": "Gladminds Failure Report - ",
     "body": """""",
 }
 
@@ -546,7 +539,7 @@ GM_BRAND = 'default'
 BRANDS = ['bajaj', 'demo', 'afterbuy']
 ###############################################
 AIRTEL_IP = '54.84.243.77'
-SMS_CLIENT = "KAP"
+SMS_CLIENT = "AIRTEL"
 SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                               'pass':'bajaj',
                               'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',
@@ -566,8 +559,6 @@ ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},
           }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True
-
-SD_ESCALATION_GROUP = 'escalation_authority'
 
 DEFAULT_IMAGE_ID = 'guest.png'
 

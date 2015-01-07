@@ -9,6 +9,7 @@ from gladminds.bajaj import models
 from gladminds.afterbuy import models as afterbuy_models
 from gladminds.core.base_models import CouponData
 from gladminds.core.constants import COUPON_STATUS
+from django.db.models.aggregates import Sum
 
 AUDIT_ACTION = "SENT TO QUEUE"
 
@@ -88,22 +89,12 @@ def get_data_feed_log_detail(start_date=None, end_date=None):
     start_date = start_date
     end_date = end_date
     feed_logs = models.DataFeedLog.objects.filter(timestamp__range=(start_date, end_date))
-    feed_data = []
-    for feed in feed_logs:
-        data = {}
-        data['feed_type'] = feed.feed_type
-        data['total_feed_count'] = feed.total_data_count
-        data['total_failed_count'] = feed.failed_data_count
-        data['total_success_count'] = feed.success_data_count
-        data['timestamp'] = feed.timestamp
-        data['action'] = feed.action
-        feed_data.append(data)
-    return feed_data
+    return feed_logs.values('feed_type','action').annotate(total_count=Sum('total_data_count'),
+                                                                  total_success_data_count=Sum('success_data_count'),
+                                                                  total_failed_data_count=Sum('failed_data_count'))
 
-def get_feed_failure_log_detail(start_date=None, end_date=None, type=None):
-    start_date = start_date
-    end_date = end_date
-    feed_logs = models.FeedFailureLog.objects.filter(created_date__range=(start_date, end_date),feed_type=type)
+def get_feed_failure_log_detail(type=None):
+    feed_logs = models.FeedFailureLog.objects.filter(email_sent=False, feed_type=type)
     feed_data = []
     for feed in feed_logs:
         data = {}
@@ -111,6 +102,7 @@ def get_feed_failure_log_detail(start_date=None, end_date=None, type=None):
         data['reason'] = feed.reason
         data['created_date'] = feed.created_date
         feed_data.append(data)
+    feed_logs.update(email_sent=True)
     return feed_data
 
 def get_customer_details(start_date=None, end_date=None, type=None):

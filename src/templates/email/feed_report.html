@@ -4,7 +4,6 @@ The summary of the feeds received /sent on {{yesterday}} are as below:<br/>
 <table border=1px style="width: 60%">
 	<tbody>
 		<tr>
-			<th>Timestamp</th>
 			<th>Feed Type</th>
 			<th>Total Feed</th>
 			<th>Failed Count</th>
@@ -13,11 +12,10 @@ The summary of the feeds received /sent on {{yesterday}} are as below:<br/>
 		</tr>
 		{% for data in feed_logs %}
 		<tr>
-			<td>{{data.timestamp}}</td>
 			<td>{{data.feed_type}}</td>
-			<td>{{data.total_feed_count}}</td>
-			<td>{{data.total_failed_count}}</td>
-			<td>{{data.total_success_count}}</td>
+			<td>{{data.total_count}}</td>
+			<td>{{data.total_failed_data_count}}</td>
+			<td>{{data.total_success_data_count}}</td>
 			<td>{{data.action}}</td>
 		</tr>
 	   {% endfor %}

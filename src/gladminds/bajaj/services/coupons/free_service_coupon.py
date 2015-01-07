@@ -17,7 +17,7 @@ from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
     send_brand_sms_customer, send_invalid_keyword_message,\
     customer_detail_recovery
 from gladminds.core import utils
-from gladminds.bajaj.feeds.feed import BaseFeed
+from gladminds.bajaj.services.coupons.import_feed import BaseFeed
 from gladminds.settings import COUPON_VALID_DAYS
 from gladminds.core.base_models import STATUS_CHOICES
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
@@ -56,8 +56,8 @@ def register_customer(sms_dict, phone_number):
     message = sms_parser.render_sms_template(status='send', keyword=sms_dict['keyword'], customer_id=gladmind_customer_id)
     phone_number = utils.get_phone_number_format(phone_number)
     LOG.info("customer is registered with message %s" % message)
-    send_job_to_queue(send_registration_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+    send_job_to_queue(send_registration_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     return True
 
 
@@ -90,8 +90,8 @@ def send_customer_detail(sms_dict, phone_number):
     else:
         message = templates.get_template('SEND_INVALID_MESSAGE')
 
-    send_job_to_queue(customer_detail_recovery, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+    send_job_to_queue(customer_detail_recovery, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     return {'status': True, 'message': message}
 
 
@@ -123,8 +123,8 @@ def customer_service_detail(sms_dict, phone_number):
         message = sms_parser.render_sms_template(status='invalid', keyword=sms_dict['keyword'], sap_customer_id=customer_id)
     LOG.info("Send Service detail %s" % message)
     phone_number = utils.get_phone_number_format(phone_number)
-    send_job_to_queue(send_service_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+    send_job_to_queue(send_service_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     return {'status': True, 'message': message}
 
 
@@ -272,20 +272,20 @@ def validate_coupon(sms_dict, phone_number):
                                         req_status=requested_coupon_status,
                                         customer_id=sap_customer_id)
 
+        sms_log(receiver=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
         send_job_to_queue(send_coupon_detail_customer, {"phone_number":utils.get_phone_number_format(customer_phone_number), "message":customer_message, "sms_client":settings.SMS_CLIENT},
                           delay_seconds=customer_message_countdown)
 
-        sms_log(receiver=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
     except Exception as ex:
         LOG.info('[validate_coupon]:Exception : '.format(ex))
         dealer_message = templates.get_template('SEND_INVALID_MESSAGE')
     finally:
         LOG.info("validate message send to SA %s" % dealer_message)
         phone_number = utils.get_phone_number_format(phone_number)
+        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=dealer_message)
         send_job_to_queue(send_service_detail, {"phone_number": phone_number,
                                                 "message": dealer_message,
                                                 "sms_client": settings.SMS_CLIENT})
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=dealer_message)
     return {'status': True, 'message': dealer_message}
 
 
@@ -322,8 +322,8 @@ def close_coupon(sms_dict, phone_number):
     finally:
         LOG.info("Close coupon with message %s" % message)
         phone_number = utils.get_phone_number_format(phone_number)
-        send_job_to_queue(send_coupon, {"phone_number":phone_number, "message": message, "sms_client":settings.SMS_CLIENT})
         sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        send_job_to_queue(send_coupon, {"phone_number":phone_number, "message": message, "sms_client":settings.SMS_CLIENT})
     return {'status': True, 'message': message}
 
 
@@ -332,8 +332,8 @@ def validate_service_advisor(phone_number):
     if len(all_sa_dealer_obj) == 0:
         message=templates.get_template('UNAUTHORISED_SA')
         sa_phone = utils.get_phone_number_format(phone_number)
-        send_job_to_queue(send_service_detail, {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
         sms_log(receiver=sa_phone, action=AUDIT_ACTION, message=message)
+        send_job_to_queue(send_service_detail, {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
         return None
     service_advisor_obj = all_sa_dealer_obj[0]
     return service_advisor_obj
@@ -348,6 +348,7 @@ def is_sa_initiator(coupon_id, service_advisor, phone_number):
     else:
         sa_phone = utils.get_phone_number_format(phone_number)
         message = "SA is not the coupon initiator."
+        sms_log(receiver=sa_phone, action=AUDIT_ACTION, message=message)
         send_job_to_queue(send_invalid_keyword_message, {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
     return False
 
@@ -375,8 +376,8 @@ def is_valid_data(customer_id=None, coupon=None, sa_phone=None):
 
     if message:
         sa_phone = utils.get_phone_number_format(sa_phone)
-        send_job_to_queue(send_invalid_keyword_message, {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
         sms_log(receiver=sa_phone, action=AUDIT_ACTION, message=message)
+        send_job_to_queue(send_invalid_keyword_message, {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
         LOG.info("Message sent to SA : " + message)
         return False
     return True
@@ -395,7 +396,7 @@ def get_brand_data(sms_dict, phone_number):
             raise Exception
     except Exception as ex:
         message = templates.get_template('SEND_INVALID_MESSAGE')
+    sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
     send_job_to_queue(send_brand_sms_customer, {"phone_number": phone_number,
                                                 "message": message})
-    sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
     return {'status': True, 'message': message}

@@ -77,14 +77,33 @@ PROD-Query OK, 8976971 rows affected, 2 warnings (9 min 46.64 sec)
 Records: 8976971  Duplicates: 0  Warnings: 2
 '''
 
+INSERT INTO bajaj_oldfscdata(id,
+ unique_service_coupon, valid_days, valid_kms, service_type, status,
+ closed_date, mark_expired_on, actual_service_date, actual_kms, last_reminder_date,
+ schedule_reminder_date, extended_date, sent_to_sap,
+ credit_date, credit_note, special_case, missing_field, missing_value,
+ product_id, dealer_id)
+ select p.id,
+ p.unique_service_coupon, p.valid_days,
+ p.valid_kms, p.service_type, p.status,
+ p.closed_date, p.mark_expired_on, p.actual_service_date,
+ p.actual_kms, p.last_reminder_date, p.schedule_reminder_date,
+ p.extended_date, p.sent_to_sap, p.credit_date,
+ p.credit_note,p.special_case,p.missing_field,
+ p.missing_value, p.vin_id, new_dealer.user_id from gladminds.gladminds_oldfscdata p
+ inner join gladminds.aftersell_registereddealer old_dealer on p.servicing_dealer_id= old_dealer.id
+ inner join bajaj.bajaj_dealer new_dealer on old_dealer.dealer_id = new_dealer.dealer_id;
 
 '''
 nohup python scripts/migrate_coupons_sa_relation.py &
-
-nohup python scripts/migrate_old_fsc.py &
 nohup python scripts/migrate_temp_customer.py &
 nohup python scripts/migrate_ucn_recovery.py &
 '''
+ 
+insert into bajaj_cdmsdata(id, created_date, received_date, cdms_date, cdms_doc_number,
+remarks, unique_service_coupon_id) select c.id, c.created_on, c.received_date, c.cdms_date,
+c.cdms_doc_number, c.remarks, c.unique_service_coupon_id from gladminds.gladminds_cdmsdata c;
+
 ##############################################################
 alter table bajaj_sparepart add column is_used bool default 0;
 ALTER TABLE bajaj_mechanic ADD sent_sms boolean default false;
@@ -98,3 +117,4 @@ update gladminds_oldfscdata c inner join (select d2.id as old_id , d.id as new_i
 alter table bajaj_customertempregistration modify new_number VARCHAR(15) null;
 alter table bajaj_customertempregistration add dealer_asc_id VARCHAR(15) null;
 alter table bajaj_customertempregistration add old_number VARCHAR(15) not null;	
+alter table bajaj_feedfailurelog add column email_sent boolean default false;
