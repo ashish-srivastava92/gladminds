@@ -50,7 +50,7 @@ class SqsTaskQueue(TaskQueue):
         self.brand = brand
 
     def add(self, task_name, brand, task_params=None, **kwargs):
-        task_params = task_info[task_name] or {}
+        task_params = task_info.get(task_name, {})
         task_params.update({"brand": self.brand})
         payload = {
             "task_name": task_name,
