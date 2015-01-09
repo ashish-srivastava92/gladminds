@@ -659,7 +659,7 @@ def get_active_asc_info(data, limit, offset, data_dict, data_list):
     return data_dict
 
 
-#FIXME: Fix this according to new model
+#FIXME: Refactor the code
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def get_active_asc_report(request, role=None):
     '''get city and state from parameter'''
