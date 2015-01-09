@@ -69,7 +69,16 @@
             url: '/aftersell/exceptions/customer',
             data: {'vin': vin},
             success: function(data){
-              if (data['phone']) {
+            	if (data['phone']) {
+            		if (data['phone'] && user=="d123") {
+            			$('.customer-phone').val(data['phone']).attr('readOnly', false);
+            		    $('.customer-name').val(data['name']).attr('readOnly', false);
+            		    $('.purchase-date').val(data['purchase_date']).attr('readOnly', false);
+            		    $('.customer-id').val(data['id']).attr('readOnly', true);
+            		    $('.customer-submit').attr('disabled', false);
+            		 	}
+            	}
+            	else if (data['phone']) {
                   $('.customer-phone').val(data['phone']).attr('readOnly', true);
             	  if (data['group']=='AuthorisedServiceCenters' || data['group']=='Dealers'){
             		  $('.customer-phone').val(data['phone']).attr('readOnly', false);
