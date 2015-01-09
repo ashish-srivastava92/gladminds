@@ -661,7 +661,7 @@ def get_active_asc_info(data, limit, offset, data_dict, data_list):
 
 #FIXME: Fix this according to new model
 @check_service_active(Services.FREE_SERVICE_COUPON)
-def get_active_asc_report(request):
+def get_active_asc_report(request, role=None):
     '''get city and state from parameter'''
     data = request.GET.copy()
     if data.has_key('month') and data.has_key('month') :
@@ -672,16 +672,17 @@ def get_active_asc_report(request):
         year = now.year
         month = now.month
     data_list = []
-    asc_details = utils.get_asc_data(data)
+    asc_details = utils.get_asc_data(data, role)
     active_asc_list = asc_details.filter(~Q(date_joined=F('last_login')))
     active_ascs = active_asc_list.values_list('username', flat=True)
-    asc_obj = models.AuthorizedServiceCenter.objects.filter(asc_id__in=active_ascs)
-    for asc_data in asc_obj:
+    print "details", asc_details
+    active_user_profile = models.UserProfile.objects.filter(user__username__in=active_ascs)
+    for asc_data in active_user_profile:
         active_ascs = OrderedDict();
-        active_ascs['id'] = asc_data.dealer_id
-        active_ascs['address'] = asc_data.user.address
+        active_ascs['id'] = asc_data.user.username
+        active_ascs['address'] = asc_data.address
         active_ascs = utils.get_state_city(active_ascs, asc_data.address)
-        active_ascs['coupon_closed'] = utils.asc_cuopon_details(asc_data, 2, year, month)
+        active_ascs['coupon_closed'] = utils.asc_cuopon_details(asc_data, 2, year, month,role)
         active_ascs['total_coupon_closed'] = utils.total_coupon_closed(active_ascs['coupon_closed'])
         data_list.append(active_ascs)
     no_of_days = utils.get_number_of_days(year, month)

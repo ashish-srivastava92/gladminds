@@ -15,7 +15,6 @@
     {% get_menu request as app_list %}
     {% if app_list %}
       {% for app in app_list %}
-      {% if app.models %}
         {% if app.separator %}
           <li class="separator"></li>
         {% else %}
@@ -32,8 +31,16 @@
             {% endif %}
           </li>
         {% endif %}
-        {% endif %}
       {% endfor %}
+       <li {{ model.is_active|yesno:' class=active,' }}><a><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>DFSC Report
+	     </a>
+	    <ul>
+	       <li{{ model.is_active|yesno:' class=active,' }}>
+	           <a href="/coupon/report/asc">ASC Report</a>
+	           <a href="/coupon/report/dealer">Dealer Report</a>
+	       </li>
+	     </ul>
+     </li>
     {% endif %}
   </ul>
 </div>

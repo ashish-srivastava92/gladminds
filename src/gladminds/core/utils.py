@@ -25,6 +25,8 @@ from gladminds.core.apis.image_apis import uploadFileToS3
 import hashlib
 from gladminds.core.core_utils.date_utils import convert_utc_to_local_time
 from gladminds.core.managers.mail import get_email_template
+from django.db.models.query_utils import Q
+import operator
 
 logger = logging.getLogger('gladminds')
 
@@ -432,21 +434,29 @@ def asc_cuopon_data(asc_id, status_type):
     return len(cuopon_details)
 
 def get_asc_data(data, role):
-    asc_details = {}
+    location_details = {}
     if data.has_key('city') and data.has_key('state'):
-        asc_details['user__address'] = ', '.join([data['city'].upper(), data['state'].upper()])
-    asc_data = models.AuthorizedServiceCenter.objects.filter(**asc_details)
-    asc_ids = asc_data.values_list('asc_id', flat=True)
-    asc_list = User.objects.filter(username__in=asc_ids)
-    return asc_list
+        location_details['user__address'] = ', '.join([data['city'].upper(), data['state'].upper()])
+    if role == 'asc':
+        user_data = models.AuthorizedServiceCenter.objects.filter(**location_details)
+        user_ids = user_data.values_list('asc_id', flat=True)
+    else:
+        user_data = models.Dealer.objects.filter(**location_details)
+        user_ids = user_data.values_list('dealer_id', flat=True)
+    user_list = User.objects.filter(username__in=user_ids)
+    return user_list
 
-def asc_cuopon_details(asc_id, status_type, year, month):
+def asc_cuopon_details(asc_id, status_type, year, month,role=None):
+    if role == 'asc':
+        asc_filter=[Q(service_advisor__asc__user = asc_id), Q(servicing_dealer=asc_id.user.username)]
+    else:
+        asc_filter=[Q(service_advisor__dealer__user = asc_id), Q(servicing_dealer=asc_id.user.username)]
     if month == 12:
-        cuopon_details = models.CouponData.objects.filter(asc=asc_id,
+        cuopon_details = models.CouponData.objects.filter(reduce(operator.or_, asc_filter),
                                                           status=status_type,
                                                           closed_date__range=[datetime.datetime(int(year),int(month),1,00,00,00),datetime.datetime(int(year)+1,1,1,00,00,00)])  
     else:
-        cuopon_details = common.CouponData.objects.filter(asc=asc_id,
+        cuopon_details = models.CouponData.objects.filter(reduce(operator.or_, asc_filter),
                                                           status=status_type,
                                                           closed_date__range=[datetime.datetime(int(year),int(month),1,00,00,00),datetime.datetime(int(year),int(month)+1,1,00,00,00)])
     cuopon_count = cuopon_details.extra({"closed_date":"date(closed_date)"}).values('closed_date').annotate(dcount=Count('closed_date'))
