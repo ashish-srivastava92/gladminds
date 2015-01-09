@@ -8,10 +8,11 @@ from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect
 from django.contrib import messages
 from gladminds.core.model_fetcher import models
+from gladminds.core.auth_helper import Roles
 
 
 class GmModelAdmin(ModelAdmin):
-    groups_update_not_allowed = []
+    groups_update_not_allowed = [Roles.READONLY]
     
     def changelist_view(self, request, extra_context=None):
         searchable_fields=[]

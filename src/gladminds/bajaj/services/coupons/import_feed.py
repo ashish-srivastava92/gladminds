@@ -312,12 +312,12 @@ class ProductPurchaseFeed(BaseFeed):
                         update_coupon_data, sender=models.ProductData)
 
                 if not product_data.customer_id  or product_data.customer_id.find('T') == 0:
-                    product_purchase_date = product['product_purchase_date']
                     product_data.customer_id = product['sap_customer_id']
-                    product_data.purchase_date = product_purchase_date
                     product_data.engine = product["engine"]
                     product_data.veh_reg_no =  product['veh_reg_no']
                 
+                product_purchase_date = product['product_purchase_date']
+                product_data.purchase_date = product_purchase_date
                 product_data.customer_phone_number = product['customer_phone_number']    
                 product_data.customer_name = product['customer_name']
                 product_data.customer_city = product['city']

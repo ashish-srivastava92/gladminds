@@ -27,6 +27,7 @@ from gladminds.core.core_utils.date_utils import convert_utc_to_local_time
 from gladminds.core.managers.mail import get_email_template
 from django.db.models.query_utils import Q
 import operator
+import pytz
 
 logger = logging.getLogger('gladminds')
 
@@ -204,7 +205,6 @@ def format_date_string(date_string, date_format='%d/%m/%Y'):
     date = datetime.datetime.strptime(date_string, date_format)
     return date
 
-
 def get_dict_from_object(object):
     temp_dict = {}
     for key in object:
@@ -225,7 +225,8 @@ def get_list_from_set(set_data):
 def create_feed_data(post_data, product_data, temp_customer_id):
     data = {}
     data['sap_customer_id'] = temp_customer_id
-    data['product_purchase_date'] = format_date_string(post_data['purchase-date'])
+    product_purchase_date = format_date_string(post_data['purchase-date'])
+    data['product_purchase_date'] = product_purchase_date.replace(tzinfo=pytz.utc)  
     data['customer_phone_number'] = mobile_format(post_data['customer-phone'])
     data['customer_name'] = post_data['customer-name']
     data['engine'] = product_data.engine
