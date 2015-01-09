@@ -54,6 +54,7 @@
 				    {% else %} 
 				       <th class="text-center">Dealer Id</th>
 				    {% endif %}
+				    <th class="text-center">Name</th>
 					<th><div class="asc-report-address-style text-center">Address</div></th>
 				    {% for date in range %}	
 					  <th class="text-center" id="#{{date}}"><div class="asc-report-th-style">{{date}} {{mon}}</div></th>
@@ -66,6 +67,9 @@
 				<tr class="asc-report-td-style"> 
 				    <td>
 					  {{coupons.id|default_if_none:""}}
+					</td>
+					<td>
+					  {{coupons.name|default_if_none:""}}
 					</td>
 					<td class="text-left">{{coupons.address|default_if_none:""}}</td>
 					{% for key,values in coupons.coupon_closed.items %}

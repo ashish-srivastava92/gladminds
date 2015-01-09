@@ -675,11 +675,11 @@ def get_active_asc_report(request, role=None):
     asc_details = utils.get_asc_data(data, role)
     active_asc_list = asc_details.filter(~Q(date_joined=F('last_login')))
     active_ascs = active_asc_list.values_list('username', flat=True)
-    print "details", asc_details
     active_user_profile = models.UserProfile.objects.filter(user__username__in=active_ascs)
     for asc_data in active_user_profile:
         active_ascs = OrderedDict();
         active_ascs['id'] = asc_data.user.username
+        active_ascs['name'] = asc_data.user.first_name
         active_ascs['address'] = asc_data.address
         active_ascs = utils.get_state_city(active_ascs, asc_data.address)
         active_ascs['coupon_closed'] = utils.asc_cuopon_details(asc_data, 2, year, month,role)
