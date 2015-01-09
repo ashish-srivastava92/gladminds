@@ -10,6 +10,7 @@ STATIC_DIR = os.path.join(PROJECT_DIR, "static")
 TEMPLATE_DIR = os.path.join(PROJECT_DIR, "templates")
 EMAIL_DIR = os.path.join(TEMPLATE_DIR, "email")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
+LOG_BASE_PATH = '/var/log/gladminds'
 
 TIMEZONE = 'Asia/Kolkata'
 
@@ -354,20 +355,20 @@ LOGGING = {
         },
         'sql': {
             'level': 'DEBUG',
-            'filename': '/var/log/gladminds/sql.log',
-            'class': 'logging.FileHandler',
+            'filename': 'sql.log',
+            'class': 'gladminds.core.loaders.custom_logging.CustomFileHandler',
             'formatter': 'verbose',
         },
         'gladminds_logs': {
             'level': 'INFO',
-            'filename': '/var/log/gladminds/gladminds.log',
-            'class': 'logging.FileHandler',
+            'filename': 'gladminds.log',
+            'class': 'gladminds.core.loaders.custom_logging.CustomFileHandler',
             'formatter': 'verbose',
         },
         'afterbuy_logs': {
             'level': 'INFO',
-            'filename': '/var/log/gladminds/afterbuy.log',
-            'class': 'logging.FileHandler',
+            'filename': 'afterbuy.log',
+            'class': 'gladminds.core.loaders.custom_logging.CustomFileHandler',
             'formatter': 'verbose',
         }
     },
@@ -536,7 +537,7 @@ SMS_HEALTH_CHECK_INTERVAL = 6
 #######################FEED_HEALTH_CHECK_INTERVAL
 FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
-BRAND = 'bajaj'
+BRAND = None
 GM_BRAND = 'default'
 BRANDS = ['bajaj', 'demo', 'afterbuy']
 ###############################################
