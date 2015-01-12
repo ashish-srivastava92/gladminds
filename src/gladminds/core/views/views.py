@@ -601,7 +601,7 @@ def get_active_asc_report(request):
     asc_obj = models.Dealer.objects.filter(dealer_id__in=active_ascs)
     for asc_data in asc_obj:
         active_ascs = OrderedDict();
-        active_ascs['id'] = asc_data.dealer_id
+        active_ascs['id'] = asc_data.asc_id
         active_ascs['address'] = asc_data.address
         active_ascs = utils.get_state_city(active_ascs, asc_data.address)
         active_ascs['coupon_closed'] = utils.asc_cuopon_details(asc_data, 2, year, month)

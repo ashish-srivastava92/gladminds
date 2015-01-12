@@ -37,6 +37,7 @@ class Roles():
     SERVICEADVISOR = 'ServiceAdvisors'
     SDESCALATION = 'EscalationAuthority'
     BRANDMANAGERS = 'BrandManagers'
+    READONLY = 'ReadOnly'
 
 
 AFTERBUY_ADMIN_GROUPS = [Roles.SUPERADMINS, Roles.ADMINS]

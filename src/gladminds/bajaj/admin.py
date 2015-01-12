@@ -17,28 +17,28 @@ class BajajAdminSite(AdminSite):
     pass
 
 
-class UserProfileAdmin(ModelAdmin):
+class UserProfileAdmin(GmModelAdmin):
     search_fields = ('user__username', 'phone_number')
     list_display = ('user', 'phone_number', 'status', 'address',
                     'state', 'country', 'pincode', 'date_of_birth', 'gender')
     
-class DealerAdmin(ModelAdmin):
+class DealerAdmin(GmModelAdmin):
     search_fields = ('dealer_id',)
     list_display = ('dealer_id', 'user')
 
-class AuthorizedServiceCenterAdmin(ModelAdmin):
+class AuthorizedServiceCenterAdmin(GmModelAdmin):
     search_fields = ('asc_id', 'dealer__dealer_id')
     list_display = ('asc_id', 'user', 'dealer')
 
-class ServiceAdvisorAdmin(ModelAdmin):
+class ServiceAdvisorAdmin(GmModelAdmin):
     search_fields = ('service_advisor_id', 'dealer__dealer_id', 'asc__asc_id')
     list_display = ('service_advisor_id', 'user', 'dealer', 'asc', 'status')
 
-class BrandProductCategoryAdmin(ModelAdmin):
+class BrandProductCategoryAdmin(GmModelAdmin):
     search_fields = ('name',)
     list_display = ('name', 'description')
 
-class ProductTypeAdmin(ModelAdmin):
+class ProductTypeAdmin(GmModelAdmin):
     search_fields = ('product_type',)
     list_display = ('id', 'product_type',\
                     'image_url', 'is_active')
@@ -48,7 +48,7 @@ class DispatchedProduct(models.ProductData):
     class Meta:
         proxy = True
 
-class ListDispatchedProduct(ModelAdmin):
+class ListDispatchedProduct(GmModelAdmin):
     search_fields = ('^product_id', '^dealer_id__dealer_id')
     list_display = (
         'product_id', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
@@ -92,7 +92,7 @@ class Couponline(TabularInline):
     readonly_fields = ('unique_service_coupon','service_type', 'status', 'mark_expired_on', 'extended_date')
 
 
-class ProductDataAdmin(ModelAdmin):
+class ProductDataAdmin(GmModelAdmin):
     search_fields = ('^product_id', '^customer_id', '^customer_phone_number',
                      '^customer_name')
     list_display = ('product_id', 'customer_id', "UCN", 'customer_name',
@@ -141,7 +141,7 @@ class ProductDataAdmin(ModelAdmin):
         return super(ProductDataAdmin, self).changelist_view(request, extra_context=extra_context)
 
 
-class CouponAdmin(ModelAdmin):
+class CouponAdmin(GmModelAdmin):
     search_fields = (
         '^unique_service_coupon', '^product__product_id', 'status')
     list_display = ('product', 'unique_service_coupon', 'actual_service_date',
@@ -235,7 +235,7 @@ class CouponChangeList(ChangeList):
 
         return ordering
 
-class SMSLogAdmin(ModelAdmin):
+class SMSLogAdmin(GmModelAdmin):
     search_fields = ('sender', 'receiver', 'action')
     list_display = (
         'created_date', 'action', 'message', 'sender', 'receiver')
@@ -255,12 +255,12 @@ class SMSLogAdmin(ModelAdmin):
     def has_add_permission(self, request):
         return False
     
-class EmailLogAdmin(ModelAdmin):
+class EmailLogAdmin(GmModelAdmin):
     search_fields = ('subject', 'sender', 'receiver')
     list_display = (
         'created_date', 'subject', 'message', 'sender', 'receiver', 'cc')
 
-class FeedLogAdmin(ModelAdmin):
+class FeedLogAdmin(GmModelAdmin):
     search_fields = ('status', 'data_feed_id', 'feed_type', 'action')
     list_display = ('timestamp', 'feed_type', 'action',
                     'total_data_count', 'success_data_count',
@@ -286,7 +286,7 @@ class FeedLogAdmin(ModelAdmin):
         if css_class:
             return {'class': css_class}
 
-class ASCTempRegistrationAdmin(ModelAdmin):
+class ASCTempRegistrationAdmin(GmModelAdmin):
     search_fields = (
         'name', 'phone_number', 'email', 'dealer_id')
 
@@ -294,14 +294,14 @@ class ASCTempRegistrationAdmin(ModelAdmin):
         'name', 'phone_number', 'email', 'pincode',
         'address', 'timestamp', 'dealer_id')
 
-class SATempRegistrationAdmin(ModelAdmin):
+class SATempRegistrationAdmin(GmModelAdmin):
     search_fields = (
         'name', 'phone_number')
 
     list_display = (
         'name', 'phone_number', 'status')
 
-class CustomerTempRegistrationAdmin(ModelAdmin):
+class CustomerTempRegistrationAdmin(GmModelAdmin):
     search_fields = (
         'product_data__vin', 'new_customer_name', 'new_number', 'temp_customer_id', 'sent_to_sap')
 
@@ -323,18 +323,18 @@ class CustomerTempRegistrationAdmin(ModelAdmin):
         form = super(CustomerTempRegistrationAdmin, self).get_form(request, obj, **kwargs)
         return form
 
-class MessageTemplateAdmin(ModelAdmin):
+class MessageTemplateAdmin(GmModelAdmin):
     search_fields = ('template_key', 'template')
     list_display = ('template_key', 'template', 'description')
 
-class EmailTemplateAdmin(ModelAdmin):
+class EmailTemplateAdmin(GmModelAdmin):
     search_fields = ('template_key', 'sender', 'receiver', 'subject')
     list_display = ('template_key', 'sender', 'receivers', 'subject')
 
     def receivers(self, obj):
         return ' | '.join(obj.receiver.split(','))
 
-class SlaAdmin(ModelAdmin):
+class SlaAdmin(GmModelAdmin):
     fieldsets = (
         (None, {
             'fields': (
@@ -354,7 +354,7 @@ class SlaAdmin(ModelAdmin):
     
     list_display = ('priority', response_time, reminder_time, resolution_time)
     
-class ServiceDeskUserAdmin(ModelAdmin):
+class ServiceDeskUserAdmin(GmModelAdmin):
     list_display = ('user_profile', 'name', 'phone_number', 'email')
 
 class NSMAdmin(GmModelAdmin):
