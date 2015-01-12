@@ -22,8 +22,6 @@ def get_email_template(key):
 def get_mail_receiver(template_name, mail_detail):
     if  (settings.ENV not in settings.IGNORE_ENV):
             receivers = settings.template_name['receiver']
-    elif settings.ENV is 'qa':
-            receivers = settings.template_name['receiver']
     else:
             receivers = []
             receivers.append(mail_detail['receiver'])
@@ -149,7 +147,6 @@ def feed_failure(feed_data=None):
     try:
         mail_detail = get_email_template('FEED_FAILURE')
         receivers = get_mail_receiver('FEED_FAILURE', mail_detail)
-#         mail_detail = settings.FEED_FAILURE
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(["Timestamp", "FeedType", "Reason"])
@@ -166,7 +163,7 @@ def feed_failure(feed_data=None):
 
         logger.info("Sending out feed_failure emails")
         send_email_with_file_attachment(mail_detail['sender'], receivers, mail_detail['subject'] + feed_type,
-                                          "The feed failures since " + feed_log_time, 'feed_failure_', csvfile)
+                                          mail_detail['body'] + feed_log_time, 'feed_failure_', csvfile)
     except Exception as ex:
         logger.info("[Exception feed_fail_report]: {0}".format(ex))
 

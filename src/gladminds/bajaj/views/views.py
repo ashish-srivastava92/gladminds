@@ -407,8 +407,6 @@ def get_customer_info_test(data):
         message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
         return {'message': message}
 
-
-
 @login_required()
 def exceptions(request, exception=None):
     groups = utils.stringify_groups(request.user)
@@ -425,13 +423,22 @@ def exceptions(request, exception=None):
         return render(request, template, {'active_menu': exception,
                                            "data": data, 'groups': groups})
     elif request.method == 'POST':
-        function_mapping = {
-            'customer': get_customer_info_test,
-            'recover': recover_coupon_info,
-            'search': utils.search_details,
-            'status': utils.services_search_details,
-            'serviceadvisor': utils.service_advisor_search
-        }
+        if exception == 'customer' and (settings.ENV in ['local', 'qa']):
+            function_mapping = {
+                'customer': get_customer_info_test,
+                'recover': recover_coupon_info,
+                'search': utils.search_details,
+                'status': utils.services_search_details,
+                'serviceadvisor': utils.service_advisor_search
+                }
+        else:
+            function_mapping = {
+                'customer': get_customer_info,
+                'recover': recover_coupon_info,
+                'search': utils.search_details,
+                'status': utils.services_search_details,
+                'serviceadvisor': utils.service_advisor_search
+            }
         try:
             post_data = request.POST.copy()
             post_data['current_user'] = request.user

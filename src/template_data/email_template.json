@@ -241,7 +241,7 @@
     },
     {
         "model": "gladminds.emailtemplate",
-        "pk:21,
+        "pk":21,
         "fields": {
             "template_key": "FEED_FAILURE",
             "sender": "feed-report@gladminds.co",
@@ -251,7 +251,4 @@
             "description": "Customer phone number update mail"
         }
     }
-    
-    
-	    
 ]

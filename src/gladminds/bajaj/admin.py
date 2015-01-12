@@ -303,7 +303,7 @@ class SATempRegistrationAdmin(GmModelAdmin):
 
 class CustomerTempRegistrationAdmin(GmModelAdmin):
     search_fields = (
-        'product_data__vin', 'new_customer_name', 'new_number', 'temp_customer_id', 'sent_to_sap')
+        'product_data__product_id', 'new_customer_name', 'new_number', 'temp_customer_id', 'sent_to_sap')
 
     list_display = (
         'temp_customer_id', 'product_data', 'new_customer_name', 'new_number',

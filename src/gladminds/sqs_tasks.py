@@ -421,9 +421,8 @@ def send_report_mail_for_feed(*args, **kwargs):
     day = kwargs['day_duration']
     today = datetime.now().date()
     start_date = today - timedelta(days=day)
-    end_date = today + timedelta(days=1)
     feed_data = taskmanager.get_data_feed_log_detail(
-        start_date=start_date, end_date=end_date)
+        start_date=start_date, end_date=today)
     mail.feed_report(feed_data=feed_data)
 
 '''

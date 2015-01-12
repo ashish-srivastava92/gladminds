@@ -44,7 +44,6 @@ urlpatterns = patterns('',
     url(r'^report/(?P<role>[a-zA-Z0-9.-]+)/$', 'gladminds.bajaj.views.views.brand_details'),
     url(r'^aftersell/reports/reconciliation$', 'gladminds.bajaj.views.views.reports'),
     url(r'^coupon/report/(?P<role>[a-zA-Z0-9.-]+)/$', 'gladminds.bajaj.views.views.get_active_asc_report'),
-     
     url(r'^aftersell/register/(?P<menu>[a-zA-Z0-9]+)$', 'gladminds.bajaj.views.views.register'),
     url(r'^aftersell/exceptions/(?P<exception>[a-zA-Z0-9]+)$', 'gladminds.bajaj.views.views.exceptions'),
     url(r'^aftersell/asc/self-register/$', 'gladminds.bajaj.views.views.save_asc_registration'),
