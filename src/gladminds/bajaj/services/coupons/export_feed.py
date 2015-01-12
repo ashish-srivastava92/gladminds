@@ -1,10 +1,14 @@
 from suds.client import Client
 from suds.transport.http import HttpAuthenticated
 from datetime import datetime
-from gladminds.core.managers.audit_manager import feed_log
+from gladminds.core.managers.audit_manager import feed_log, feed_failure_log
 from gladminds.bajaj import models
 from django.conf import settings
 import logging
+from gladminds.core import utils
+from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
+from gladminds.bajaj.services.coupons.import_feed import SAPFeed
+import json
 logger = logging.getLogger("gladminds")
 
 
@@ -197,6 +201,7 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
 class ExportUnsyncProductFeed(BaseExportFeed):
 
     def export(self, data=None):
+        data_source = []
         message="some error occurred, please try again later."
         logger.info(
             "Export {1}: Items:{0}"\
@@ -206,16 +211,44 @@ class ExportUnsyncProductFeed(BaseExportFeed):
         logger.info("Trying to send product details the ID: {0}"\
                     .format(data['vin']))
         try:
-            result = client.service.SI_GCPONL_Sync(
-                DT_ONL=[{"CHASSIS": data['vin'],"DEALER": data['current_user'].username}])
+#             result = client.service.SI_GCPONL_Sync(
+#                 DT_ONL=[{"CHASSIS": data['vin'],"DEALER": data['current_user'].username}])
+            result = [[{"UCN_NO": "14521101",
+                                "CHASSIS":"MD2A14AZ5ERK68801",
+                                "SERV_TYP" : "1",
+                                "VEH_DIS_DT" : "1000-09-30",
+                                "KUNNR" : "1010000",
+                                "PRDT_TYPE" : "3700DHFS",
+                                "KMS_FRM" : "0000000000",
+                                "KMS_TO" : "0000000000",
+                                "DAYS_LIMIT_FRM" : "00000",
+                                "DAYS_LIMIT_TO" : "00000"}],[{'RETURN_CODE':'S'}]]
             logger.info("Response from SAP: {0}".format(result))
-            x=result[1][0]['RETURN_CODE']
-            if x:
+            return_code = result[1][0]['RETURN_CODE']
+            
+            if return_code:
+                vin_sync_feed = models.VinSyncFeedLog(product_id = data['vin'], dealer_asc_id=data['current_user'].username, status_code=result[1][0]['RETURN_CODE'])
+                vin_sync_feed.save()
                 if result[1][0]['RETURN_CODE'].upper() == 'S':
-                    message='The data exists main database, please try after sometime'
+                    message='This Chassis is not available in the current database, please wait while the Main database is being scanned.'
+                    data_source.append(utils.create_dispatch_feed_data(result[0][0]))
+                    feed_remark = FeedLogWithRemark(len(data_source),
+                                                feed_type='Vin Sync Feed',
+                                                action='Sent', status=True)
+                    sap_obj = SAPFeed()
+                    feed_response = sap_obj.import_to_db(feed_type='dispatch', data_source=data_source,
+                                                         feed_remark=feed_remark)
+                    if feed_response.failed_feeds > 0:
+                        remarks = feed_response.remarks.elements()
+                        for remark in remarks:
+                            feed_failure_log(feed_type='Vin Sync Feed', reason=remark)
+                        logger.info('[vin sync]:: ' + json.dumps(feed_response.remarks))
+                        raise ValueError('dispatch feed failed!')
+                    logger.info('[vin sync ]:: dispatch feed completed')
                 elif result[1][0]['RETURN_CODE'].upper() == 'E':
                     message='This Chassis is not available in Main database, please type the correct chassis number'
         except Exception as ex:
+            print "exception",ex
             logger.error("Failed to send the details to sap")
             logger.error(ex)
         return message

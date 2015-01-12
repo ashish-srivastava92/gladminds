@@ -266,7 +266,7 @@ def register_customer(request, group=None):
     else:
         temp_customer_id = post_data['customer-id']
         existing_customer = True
-    data_source.append(utils.create_feed_data(post_data, product_obj[0], temp_customer_id))
+    data_source.append(utils.create_purchase_feed_data(post_data, product_obj[0], temp_customer_id))
 
     check_with_invoice_date = utils.subtract_dates(data_source[0]['product_purchase_date'], product_obj[0].invoice_date)    
     check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.datetime.now())
@@ -355,26 +355,12 @@ def get_customer_info(data):
     except Exception as ex:
         logger.info(ex)
         message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
-
         if data['groups'][0] == Roles.DEALERS:
             data['groups'][0] = "Dealer"
         else:
             data['groups'][0] = "ASC"
         template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
         send_mail_when_vin_does_not_exist(data=template)
-#         try:
-#             vin_sync_feed = export_feed.ExportUnsyncProductFeed(username=settings.SAP_CRM_DETAIL[
-#                        'username'], password=settings.SAP_CRM_DETAIL['password'],
-#                       wsdl_url=settings.VIN_SYNC_WSDL_URL, feed_type='VIN sync Feed')
-#             message = vin_sync_feed.export(data=data)
-#     #         if data['groups'][0] == Roles.DEALERS:
-#     #             data['groups'][0] = "Dealer"
-#     #         else:
-#     #             data['groups'][0] = "ASC"
-#     #         template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
-#     #         send_mail_when_vin_does_not_exist(data=template)
-#         except Exception as ex:
-#             logger.info(ex)
         return {'message': message, 'status': 'fail'}
     if product_obj.purchase_date:
         product_data = format_product_object(product_obj)
@@ -383,6 +369,44 @@ def get_customer_info(data):
     else:
         message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
         return {'message': message}
+    
+def get_customer_info_test(data):
+    try:
+        product_obj = models.ProductData.objects.get(product_id=data['vin'])
+    except Exception as ex:
+        logger.info(ex)
+        message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
+# 
+#         if data['groups'][0] == Roles.DEALERS:
+#             data['groups'][0] = "Dealer"
+#         else:
+#             data['groups'][0] = "ASC"
+#         template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
+#         send_mail_when_vin_does_not_exist(data=template)
+        try:
+            message = "VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.".format(data['vin'])
+            vin_sync_feed = export_feed.ExportUnsyncProductFeed(username=settings.SAP_CRM_DETAIL[
+                       'username'], password=settings.SAP_CRM_DETAIL['password'],
+                      wsdl_url=settings.VIN_SYNC_WSDL_URL, feed_type='VIN sync Feed')
+            message = vin_sync_feed.export(data=data)
+            print "message",message
+#     #         if data['groups'][0] == Roles.DEALERS:
+#     #             data['groups'][0] = "Dealer"
+#     #         else:
+#     #             data['groups'][0] = "ASC"
+#     #         template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
+#     #         send_mail_when_vin_does_not_exist(data=template)
+        except Exception as ex:
+            logger.info(ex)
+        return {'message': message, 'status': 'fail'}
+    if product_obj.purchase_date:
+        product_data = format_product_object(product_obj)
+        product_data['group'] = data['groups'][0] 
+        return product_data
+    else:
+        message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
+        return {'message': message}
+
 
 
 @login_required()
@@ -402,7 +426,7 @@ def exceptions(request, exception=None):
                                            "data": data, 'groups': groups})
     elif request.method == 'POST':
         function_mapping = {
-            'customer': get_customer_info,
+            'customer': get_customer_info_test,
             'recover': recover_coupon_info,
             'search': utils.search_details,
             'status': utils.services_search_details,

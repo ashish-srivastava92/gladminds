@@ -8,7 +8,7 @@ from django.test import TestCase
 from datetime import datetime, timedelta
 from unit.base_unit import RequestObject, GladmindsUnitTestCase
 from gladminds.core.utils import get_coupon_info,\
- get_list_from_set, get_token, create_feed_data , \
+ get_list_from_set, get_token, create_purchase_feed_data , \
  validate_otp, update_pass, format_date_string
 from gladminds.bajaj import models
 import boto
@@ -90,7 +90,7 @@ class TestUtils(GladmindsUnitTestCase):
         product_objs = self.get_product_obj(product_id="VINXXX0011", engine='manga')
         post_data = {'purchase-date':'07/08/1992','customer-phone':'7760814041','customer-name':'saurav'}
         temp_customer_id='123456'
-        data = create_feed_data(post_data, product_objs, temp_customer_id)   
+        data = create_purchase_feed_data(post_data, product_objs, temp_customer_id)   
         self.assertEqual(data['vin'], 'VINXXX0011') 
            
     def test_get_list_from_set(self):

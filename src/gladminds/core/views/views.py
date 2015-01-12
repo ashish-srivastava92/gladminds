@@ -247,7 +247,7 @@ def register_customer(request, group=None):
     else:
         temp_customer_id = post_data['customer-id']
         existing_customer = True
-    data_source.append(utils.create_feed_data(post_data, product_obj[0], temp_customer_id))
+    data_source.append(utils.create_purchase_feed_data(post_data, product_obj[0], temp_customer_id))
 
     check_with_invoice_date = utils.subtract_dates(data_source[0]['product_purchase_date'], product_obj[0].invoice_date)    
     check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.datetime.now())

@@ -437,11 +437,18 @@ def send_mail_for_feed_failure(*args, **kwargs):
         if feed_data:
             mail.feed_failure(feed_data=feed_data)
 
+''' Cron job to send vin sync feeds'''
+
+@shared_task
+def send_vin_sync_feed_details(*args, **kwargs):
+    feed_data = taskmanager.get_vin_sync_feeds_detail()
+    if feed_data:
+        mail.send_vin_sync_feed_report(feed_data=feed_data)
 
 '''
 Cron Job to send customer phone number update email
 '''
-
+@shared_task
 def send_mail_for_customer_phone_number_update(*args, **kwargs):
     day = kwargs['day_duration']
     today = datetime.now().date()
@@ -626,6 +633,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "send_servicedesk_feedback_detail" : send_servicedesk_feedback_detail,
               
-              "send_customer_phone_number_update_message" : send_customer_phone_number_update_message
+              "send_customer_phone_number_update_message" : send_customer_phone_number_update_message,
+              
+              "send_vin_sync_feed_details" : send_vin_sync_feed_details
 
               }
