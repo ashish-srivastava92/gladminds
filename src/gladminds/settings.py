@@ -331,15 +331,18 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+            'format': '%(brand)s %(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
         },
         'simple': {
-            'format': '%(name)-20s: %(levelname)-8s %(message)s'
+            'format': '%(brand)s %(name)-20s: %(levelname)-8s %(message)s'
         },
     },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
+        },
+        'custom_filter': {
+            '()': 'gladminds.core.loaders.custom_logging.CustomFilter'
         }
     },
     'handlers': {
@@ -350,24 +353,28 @@ LOGGING = {
         },
          'console':{
             'level': 'DEBUG',
+            'filters': ['require_debug_false', 'custom_filter'],
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
         'sql': {
             'level': 'DEBUG',
             'filename': 'sql.log',
+            'filters': ['custom_filter'],
             'class': 'gladminds.core.loaders.custom_logging.CustomFileHandler',
             'formatter': 'verbose',
         },
         'gladminds_logs': {
             'level': 'INFO',
             'filename': 'gladminds.log',
+            'filters': ['custom_filter'],
             'class': 'gladminds.core.loaders.custom_logging.CustomFileHandler',
             'formatter': 'verbose',
         },
         'afterbuy_logs': {
             'level': 'INFO',
             'filename': 'afterbuy.log',
+            'filters': ['custom_filter'],
             'class': 'gladminds.core.loaders.custom_logging.CustomFileHandler',
             'formatter': 'verbose',
         }

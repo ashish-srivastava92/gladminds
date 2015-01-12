@@ -1,10 +1,13 @@
 from logging import FileHandler, StreamHandler
 import os
 from django.conf import settings
+import logging
 try:
     import codecs
 except ImportError:
     codecs = None
+
+_BRAND = 'brand'
 
 
 class CustomFileHandler(FileHandler):
@@ -28,21 +31,26 @@ class CustomFileHandler(FileHandler):
         If the stream was not opened because 'delay' was specified in the
         constructor, open it before calling the superclass's emit.
         """
-        key = settings.BRAND + self.baseFilename
+        brand = settings.BRAND
+        if brand is None:
+            brand = getattr(record, _BRAND)
+        key = brand + self.baseFilename
         if self.stream_cache.get(key) is None:
-            self.stream_cache[key] = self._open()
+            self.stream_cache[key] = self._open_file(brand)
         self.stream = self.stream_cache[key]
+        if hasattr(record, _BRAND) is None:
+            record.__dict__[_BRAND] = 'BACKGROUND-JOB'
         StreamHandler.emit(self, record)
 
-    def _open(self):
+    def _open_file(self, brand):
         """
         Open the current base file with the (original) mode and encoding.
         Return the resulting stream.
         """
         filepath = self.baseFilename
-        if settings.BRAND is not None:
+        if brand is not None:
             path = '{0}/{1}/{2}'.format(settings.LOG_BASE_PATH,
-                                               settings.BRAND, self.filename)
+                                               brand, self.filename)
             if not os.path.exists(path):
                 try:
                     os.makedirs('/'.join(path.split('/')[:-1]))
@@ -56,3 +64,10 @@ class CustomFileHandler(FileHandler):
         else:
             stream = codecs.open(filepath, self.mode, self.encoding)
         return stream
+
+
+class CustomFilter(logging.Filter):
+    def filter(self, record):
+        if not hasattr(record.__dict__, _BRAND):
+            record.__dict__[_BRAND] = settings.BRAND or None
+        return True
