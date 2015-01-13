@@ -123,3 +123,12 @@ MAX_UCP_ALLOWED=10
 MANDATORY_MECHANIC_FIELDS = ['first_name', 'date_of_birth', 'phone_number', 'shop_name', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url']
 
 FEED_TYPES = ['Dispatch Feed', 'Purchase Feed', 'Credit Note Feed', 'CDMS Feed']
+
+REDEMPTION_STATUS = (
+        ('Open', 'Open'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+        ('Packed', 'Packed'),
+        ('Shipped', 'Shipped'),
+        ('Delivered', 'Delivered')
+    )

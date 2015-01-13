@@ -92,8 +92,8 @@ def format_data(dealer_data):
         temp['last_login'] = data[7]
         temp['is_superuser'] = data[8]
         temp['username'] = data[9]
-        temp['first_name'] = ' '
-        temp['last_name'] = ' '
+        temp['first_name'] = data[10]
+        temp['last_name'] = data[11]
         temp['email'] = data[12]
         temp['is_staff'] = data[13]
         temp['is_active'] = data[14]

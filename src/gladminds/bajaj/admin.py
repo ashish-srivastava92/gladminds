@@ -5,7 +5,7 @@ from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib.admin import DateFieldListFilter
 
 from gladminds.bajaj import models
-from gladminds.bajaj.services.loyalty.loyalty import send_welcome_sms
+from gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
 from gladminds.core import utils
 from gladminds.core.auth_helper import GmApps, Roles
 from gladminds.core.admin_helper import GmModelAdmin
@@ -401,7 +401,8 @@ class MechanicAdmin(GmModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if not obj.id:
-            send_welcome_sms(obj)
+            service_handler=LoyaltyService()
+            service_handler.send_welcome_sms(obj)
             obj.sent_sms=True
         obj.phone_number=utils.mobile_format(obj.phone_number)
         super(MechanicAdmin, self).save_model(request, obj, form, change)    
@@ -461,6 +462,52 @@ class AccumulationRequestAdmin(GmModelAdmin):
     get_mechanic_city.short_description = 'City'
     get_upcs.short_description = 'UPC'
 
+class ProductCatalogAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
+    list_filter = ('is_active',)
+    search_fields = ('partner__partner_id', 'product_id',
+                    'brand', 'model', 'category',
+                    'sub_category')
+
+    list_display = ('partner', 'product_id', 'points', 'price',
+                    'description', 'variation',
+                    'brand', 'model', 'category',
+                    'sub_category')
+    
+class RedemptionPartnerAdmin(GmModelAdmin):
+    search_fields = ('partner_id', 'name')
+
+    list_display = ('partner_id','name')
+
+class ReedemptionRequestAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
+    list_filter = (
+        ('created_date', DateFieldListFilter),
+    )
+    search_fields = ('member__phone_number', 'partner__partner_id')
+    list_display = ( 'member',  'get_mechanic_name',
+                     'delivery_address', 'get_mechanic_pincode',
+                     'get_mechanic_city', 'get_mechanic_state',
+                     'partner', 'created_date', 'transaction_id',
+                     'expected_delivery_date', 'status')
+    
+    def get_mechanic_name(self, obj):
+        return obj.member.first_name
+    
+    def get_mechanic_pincode(self, obj):
+        return obj.member.pincode
+    
+    def get_mechanic_city(self, obj):
+        return obj.member.city
+    
+    def get_mechanic_state(self, obj):
+        return obj.member.state
+    
+    get_mechanic_name.short_description = 'Name'
+    get_mechanic_pincode.short_description = 'Pincode'
+    get_mechanic_city.short_description = 'City'
+    get_mechanic_state.short_description = 'State'
+
 brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
 
 brand_admin.register(User, UserAdmin)
@@ -492,6 +539,10 @@ if settings.ENV not in ['prod']:
     brand_admin.register(models.SparePartUPC, SparePartUPCAdmin)
     brand_admin.register(models.SparePartPoint, SparePartPointAdmin)
     brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
+
+brand_admin.register(models.RedemptionPartner, RedemptionPartnerAdmin)
+brand_admin.register(models.ProductCatalog, ProductCatalogAdmin)
+brand_admin.register(models.ReedemptionRequest, ReedemptionRequestAdmin)
 
 brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)
 brand_admin.register(models.SATempRegistration, SATempRegistrationAdmin)

@@ -10,7 +10,7 @@ from gladminds.core import utils
 from gladminds.bajaj import models as models
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, ALL
 from gladminds.core.managers.audit_manager import sms_log
-from gladminds.bajaj.services import message_template as templates
+from gladminds.core.services import message_template as templates
 from gladminds.bajaj.services.coupons import free_service_coupon as fsc
 from gladminds.sqs_tasks import send_coupon, send_sms,\
     send_servicedesk_feedback_detail

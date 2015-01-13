@@ -10,7 +10,8 @@ from gladminds.core.managers import user_manager
 from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
 from gladminds.core.constants import FEEDBACK_STATUS, \
                             PRIORITY, FEEDBACK_TYPE, RATINGS,\
-                            ROOT_CAUSE, SLA_PRIORITY, TIME_UNIT, STATUS_CHOICES
+                            ROOT_CAUSE, SLA_PRIORITY, TIME_UNIT,\
+                            STATUS_CHOICES, REDEMPTION_STATUS
 from gladminds.core.model_helpers import PhoneField
 from gladminds.core import constants
 from gladminds.core.core_utils.utils import generate_mech_id
@@ -837,42 +838,48 @@ class AccumulationRequest(BaseModel):
     def __unicode__(self):
         return str(self.transaction_id)
 
-#     class RedemptionPartner(models.Model):
-#     class Meta:
-#         abstract = True
-#         verbose_name_plural = "Redemption partner"
+class RedemptionPartner(BaseModel):
+    partner_id = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50, null=True, blank=True)
 
-# class ProductCatalog(models.Model):
-#     product_id = models.CharField(max_length=50, unique=True)
-#     #should be a foreign key from redemption partners
-#     partner = models.CharField(max_length=50, null=True, blank=True)
-#     price = models.IntegerField(max_length=50, null=True, blank=True)
-#     name = models.CharField(max_length=50, null=True, blank=True)
-#     points = models.IntegerField(max_length=50, null=True, blank=True)
-#     description = models.CharField(max_length=100, null=True, blank=True)
-#     variation = models.CharField(max_length=50, null=True, blank=True)
-#     brand = models.CharField(max_length=50, null=True, blank=True)
-#     model = models.CharField(max_length=50, null=True, blank=True)
-#     image_url = models.CharField(
-#                    max_length=200, blank=True, null=True)
-#     category = models.CharField(max_length=50, null=True, blank=True)
-#     sub_category = models.CharField(max_length=50, null=True, blank=True)
-#
-#
-#     class Meta:
-#         abstract = True
-#         verbose_name_plural = "product catalog"
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Redemption partner"
+        
+    def __unicode__(self):
+        return str(self.partner_id)
 
-# class ReedemptionRequest(models.Model):
-#     '''details of Spare Part'''
-#     transaction_id = models.CharField(max_length=50,
-#                                 null=True, blank=True, unique=True)
-#     points = models.IntegerField(max_length=50, null=True, blank=True)
-#     status = models.CharField(max_length=50, null=True, blank=True)
-#     #should be a foreign key from redemption partners and mechanic
-#     partner = models.CharField(max_length=50, null=True, blank=True)
-#     mechanic = models.CharField(max_length=50, null=True, blank=True)
-#
-#     class Meta:
-#         abstract = True
-#         verbose_name_plural = "Accumulation Request"
+
+class ProductCatalog(BaseModel):
+    product_id = models.CharField(max_length=50, unique=True)
+    points = models.IntegerField(max_length=50, null=True, blank=True)
+    price = models.IntegerField(max_length=50, null=True, blank=True)
+    description = models.CharField(max_length=100, null=True, blank=True)
+    variation = models.CharField(max_length=50, null=True, blank=True)
+    brand = models.CharField(max_length=50, null=True, blank=True)
+    model = models.CharField(max_length=50, null=True, blank=True)
+    image_url = models.CharField(
+                   max_length=200, blank=True, null=True)
+    category = models.CharField(max_length=50, null=True, blank=True)
+    sub_category = models.CharField(max_length=50, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "product catalog"
+        
+    def __unicode__(self):
+        return str(self.product_id)
+
+class ReedemptionRequest(BaseModel):
+    '''details of Spare Part'''
+    delivery_address = models.CharField(max_length=50, null=True, blank=True)
+    transaction_id = models.CharField(max_length=50,
+                                null=True, blank=True, unique=True)
+    expected_delivery_date =  models.DateTimeField(null=True, blank= True)
+    status = models.CharField(max_length=12, choices=REDEMPTION_STATUS, default='Open')
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Accumulation Request"

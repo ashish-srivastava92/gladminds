@@ -40,12 +40,21 @@ def generate_temp_id(prefix_value):
         return "%s%s" % (prefix_value, key[:6])
     logger.log('Could not generate SAP ID after 5 attempts')
 
+#FIXME: need to make class for coupon service as well
 def get_handler(handler, brand=None):
     if not brand:
         brand = settings.BRAND
-    rel_path = '.'.join(handler.split('.')[:-1])
     func_handler = '.'.join(handler.split('.')[-1:])
-    return getattr(import_module('gladminds.{0}.services.{1}'.format(brand, rel_path)), func_handler)
+    service_handler = '.'.join(handler.split('.')[-2:-1])
+    if service_handler=='LoyaltyService':
+        rel_path = '.'.join(handler.split('.')[:-2])
+        service_module=import_module('gladminds.{0}.services.{1}'.format(brand, rel_path))
+        service_class=getattr(service_module, service_handler)
+        service_class_obj=service_class()
+        return getattr(service_class_obj, func_handler)
+    else:
+        rel_path = '.'.join(handler.split('.')[:-1])
+        return getattr(import_module('gladminds.{0}.services.{1}'.format(brand, rel_path)), func_handler)
 
 def generate_unique_customer_id():
     bytes_str = os.urandom(24)

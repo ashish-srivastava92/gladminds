@@ -118,3 +118,6 @@ alter table bajaj_customertempregistration modify new_number VARCHAR(15) null;
 alter table bajaj_customertempregistration add dealer_asc_id VARCHAR(15) null;
 alter table bajaj_customertempregistration add old_number VARCHAR(15) not null;	
 alter table bajaj_feedfailurelog add column email_flag boolean default false;
+
+update bajaj.auth_user new_user inner join gladminds.auth_user p on p.username=new_user.username set new_user.first_name=p.first_name where p.first_name!='';
+

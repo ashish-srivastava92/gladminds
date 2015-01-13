@@ -19,7 +19,8 @@ ALLOWED_HOSTS = ['*']
 ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
                     'service', 'check': 'a', 'close': 'c', 'brand': 'brand',
                     'service_desk': 'sd', 'customer_detail_recovery': 'r',
-                    'accumulate_point':'ac', 'redeem_point':'rd'}
+                    'accumulate_point':'ac', 'redeem_point':'rd',
+                    'check_point_balance':'chkbal'}
 
 ADMINS = (
     ('somit', 'somit@hashedin.com'),
@@ -109,7 +110,11 @@ SUIT_CONFIG = {
                    {'model': 'sparepartpoint',
                      'label': 'Spare Part Point'},
                    {'model': 'accumulationrequest',
-                     'label': 'Accumulation Request'},)},
+                     'label': 'Accumulation Request'},
+                   {'model': 'productcatalog',
+                     'label': 'Product Catalog'},
+                   {'model': 'reedemptionrequest',
+                     'label': 'Reedemption Request'},)},
         {'app': 'bajaj', 'label': 'User Registrations', 'icon': ' icon-folder-open',
          'models':(
                     {'model': 'asctempregistration',

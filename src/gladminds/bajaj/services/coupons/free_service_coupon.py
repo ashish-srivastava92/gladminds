@@ -10,7 +10,7 @@ from django.db.models import Q
 
 from gladminds.core.managers import sms_parser
 from gladminds.core.managers.audit_manager import sms_log
-from gladminds.bajaj.services import message_template as templates
+from gladminds.core.services import message_template as templates
 from gladminds.bajaj import models
 from gladminds.sqs_tasks import send_registration_detail, send_service_detail, \
     send_coupon_detail_customer, send_coupon, \

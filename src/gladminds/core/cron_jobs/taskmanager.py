@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.db.models import Q
 
 from gladminds.core.managers.audit_manager import sms_log
-from gladminds.bajaj.services import message_template as templates
+from gladminds.core.services import message_template as templates
 from gladminds.bajaj import models
 from gladminds.afterbuy import models as afterbuy_models
 from gladminds.core.base_models import CouponData

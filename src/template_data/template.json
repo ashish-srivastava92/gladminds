@@ -471,5 +471,23 @@
       "template": "Mobile number of customer-id : {customer_id} was changed from {old_number} to {new_number} by {dealer_asc_id}",
       "description": "Send this message when customer phone number cannot be updated"
     }
+  } ,
+    {
+    "model": "gladminds.messagetemplate",
+    "pk": 53,
+    "fields": {
+      "template_key": "RCV_CHK_BAL_POINT",
+      "template": "{member}",
+      "description": "Receive this message when user wants to check his points balance"
+    }
+  } ,
+    {
+    "model": "gladminds.messagetemplate",
+    "pk": 54,
+    "fields": {
+      "template_key": "SEND_BALANCE_POINT",
+      "template": "Dear {mechanic_name}, Total Points as of {today} is {total_points}. Please contact Customer Care 9611545154 for any queries.",
+      "description": "Send this message when customer phone number cannot be updated"
+    }
   } 
 ]
