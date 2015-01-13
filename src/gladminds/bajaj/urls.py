@@ -9,7 +9,7 @@ from gladminds.core.managers.sms_handler import SMSResources
 
 api_v1 = Api(api_name="v1")
 # api_v1.register(audit_api.AuditResources())
-# api_v1.register(user_apis.UserProfileResource())
+api_v1.register(user_apis.UserProfileResource())
 api_v1.register(user_apis.DealerResources())
 api_v1.register(user_apis.AuthorizedServiceCenterResources())
 api_v1.register(user_apis.ServiceAdvisorResources())
