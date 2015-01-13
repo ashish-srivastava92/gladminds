@@ -6,7 +6,6 @@ def get_template(template_key):
     return object.template
 
 RCV_MESSAGE_FORMAT = "{key} {message}"
-RCV_KEYWORD_FORMAT = "{key}"
 
 def get_message_template_mapper():
     return {
