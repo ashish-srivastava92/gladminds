@@ -1,16 +1,16 @@
 from tastypie.constants import ALL_WITH_RELATIONS, ALL
-from tastypie.authorization import Authorization, DjangoAuthorization
+from tastypie.authorization import DjangoAuthorization
 from tastypie import fields
 from gladminds.bajaj.apis.product_apis import ProductDataResources
-from gladminds.bajaj.models import CouponData
 from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.bajaj.apis.user_apis import ServiceAdvisorResources
-from gladminds.core.apis.authentication import AccessTokenAuthentication,\
-    GladmindsServiceAuthentication
-from gladminds.core.apis.authorization import MultiAuthorization
+from gladminds.core.apis.authentication import GladmindsServiceAuthentication,\
+    AccessTokenAuthentication
+from gladminds.core.apis.authorization import MultiAuthorization,\
+    CustomAuthorization
 from tastypie.authentication import MultiAuthentication
 from gladminds.core.auth.service_handler import Services
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import models
+from gladminds.core.apis.user_apis import ServiceAdvisorResources
 
 
 class CouponDataResources(CustomBaseModelResource):
@@ -19,10 +19,11 @@ class CouponDataResources(CustomBaseModelResource):
                                         full=True, null=True, blank=True)
 
     class Meta:
-        queryset = get_model('CouponData').objects.all()
+        queryset = models.CouponData.objects.all()
         resource_name = "coupons"
-        authorization = MultiAuthorization(Authorization())
-        authentication = MultiAuthentication(GladmindsServiceAuthentication(Services.FREE_SERVICE_COUPON))
+        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authentication = MultiAuthentication(GladmindsServiceAuthentication(Services.FREE_SERVICE_COUPON),
+                                             AccessTokenAuthentication())
         detail_allowed_methods = ['get', 'post', 'delete']
         always_return_data = True
         filtering = {
@@ -32,4 +33,3 @@ class CouponDataResources(CustomBaseModelResource):
                         "product": ALL_WITH_RELATIONS,
                         "unique_service_coupon": ALL
                      }
-

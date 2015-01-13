@@ -108,3 +108,36 @@ class UserProfileResource(CustomBaseModelResource):
             logger.info("[Exception get_user_login_information]:{0}".
                         format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
+
+
+class DealerResources(CustomBaseModelResource):
+    class Meta:
+        queryset = models.Dealer.objects.all()
+        resource_name = "dealers"
+        authentication = AccessTokenAuthentication()
+        authorization = MultiAuthorization(DjangoAuthorization(),
+                                           CustomAuthorization())
+        detail_allowed_methods = ['get']
+        always_return_data = True
+
+
+class AuthorizedServiceCenterResources(CustomBaseModelResource):
+    class Meta:
+        queryset = models.AuthorizedServiceCenter.objects.all()
+        resource_name = "authorized-service-centers"
+        authentication = AccessTokenAuthentication()
+        authorization = MultiAuthorization(DjangoAuthorization(),
+                                           CustomAuthorization())
+        detail_allowed_methods = ['get']
+        always_return_data = True
+
+
+class ServiceAdvisorResources(CustomBaseModelResource):
+    class Meta:
+        queryset = models.ServiceAdvisor.objects.all()
+        resource_name = "service-advisors"
+        authentication = AccessTokenAuthentication()
+        authorization = MultiAuthorization(DjangoAuthorization(),
+                                           CustomAuthorization())
+        detail_allowed_methods = ['get']
+        always_return_data = True

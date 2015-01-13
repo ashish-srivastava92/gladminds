@@ -3,7 +3,7 @@ from tastypie.authorization import Authorization
 from tastypie import fields 
 from gladminds.bajaj.models import ProductData, ProductType
 from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.bajaj.apis.user_apis import DealerResources
+from gladminds.core.apis.user_apis import DealerResources
 
 
 class ProductTypeDataResources(CustomBaseModelResource):
