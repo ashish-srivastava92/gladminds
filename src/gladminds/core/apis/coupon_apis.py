@@ -1,7 +1,6 @@
 from tastypie.constants import ALL_WITH_RELATIONS, ALL
 from tastypie.authorization import DjangoAuthorization
 from tastypie import fields
-from gladminds.bajaj.apis.product_apis import ProductDataResources
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.apis.authentication import GladmindsServiceAuthentication,\
     AccessTokenAuthentication
@@ -11,10 +10,11 @@ from tastypie.authentication import MultiAuthentication
 from gladminds.core.auth.service_handler import Services
 from gladminds.core.model_fetcher import models
 from gladminds.core.apis.user_apis import ServiceAdvisorResources
+from gladminds.core.apis.product_apis import ProductResource
 
 
 class CouponDataResources(CustomBaseModelResource):
-    product = fields.ForeignKey(ProductDataResources, 'product', full=True)
+    product = fields.ForeignKey(ProductResource, 'product', full=True)
     service_advisor = fields.ForeignKey(ServiceAdvisorResources, 'service_advisor',
                                         full=True, null=True, blank=True)
 

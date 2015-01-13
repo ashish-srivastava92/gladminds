@@ -1,14 +1,13 @@
 from tastypie.constants import  ALL
-from gladminds.aftersell.models import logs
-from gladminds.apis.baseresource import CustomBaseResource
-
 
 '''Contains audit log sms details'''
+from gladminds.core.model_fetcher import models
+from gladminds.core.apis.base_apis import CustomBaseModelResource
 
 
-class AuditResources(CustomBaseResource):
+class AuditResources(CustomBaseModelResource):
     class Meta:
-            queryset = logs.AuditLog.objects.all()
+            queryset = models.AuditLog.objects.all()
             resource_name = 'audit'
             detail_allowed_methods = ['get']
             filtering = {
