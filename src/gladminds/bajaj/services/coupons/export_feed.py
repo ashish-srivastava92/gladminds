@@ -220,24 +220,24 @@ class ExportUnsyncProductFeed(BaseExportFeed):
                 vin_sync_feed = models.VinSyncFeedLog(product_id = data['vin'], dealer_asc_id=data['current_user'].username, status_code=result[1][0]['RETURN_CODE'])
                 vin_sync_feed.save()
                 if result[1][0]['RETURN_CODE'].upper() == 'S':
-                    message='This Chassis is not available in the current database, please wait while the Main database is being scanned.'
+                    message='The Chassis was found in the main database. Please try after sometime.'
                     for results in result[0]:
                         data_source.append(utils.create_dispatch_feed_data(results))
-                        feed_remark = FeedLogWithRemark(len(data_source),
-                                                feed_type='Vin Sync Feed',
-                                                action='Sent', status=True)
-                        sap_obj = SAPFeed()
-                        feed_response = sap_obj.import_to_db(feed_type='dispatch', data_source=data_source,
-                                                         feed_remark=feed_remark)
-                        if feed_response.failed_feeds > 0:
-                            remarks = feed_response.remarks.elements()
-                            for remark in remarks:
-                                feed_failure_log(feed_type='Vin Sync Feed', reason=remark)
-                                logger.info('[vin sync]:: ' + json.dumps(feed_response.remarks))
-                                raise ValueError('dispatch feed failed!')
-                            logger.info('[vin sync ]:: dispatch feed completed')
-                        elif result[1][0]['RETURN_CODE'].upper() == 'E':
-                            message='This Chassis is not available in Main database, please type the correct chassis number'
+                    feed_remark = FeedLogWithRemark(len(data_source),
+                                            feed_type='VIN sync Feed',
+                                            action='Sent', status=True)
+                    sap_obj = SAPFeed()
+                    feed_response = sap_obj.import_to_db(feed_type='dispatch', data_source=data_source,
+                                                     feed_remark=feed_remark)
+                    if feed_response.failed_feeds > 0:
+                        remarks = feed_response.remarks.elements()
+                        for remark in remarks:
+                            feed_failure_log(feed_type='VIN Sync Feed', reason=remark)
+                            logger.info('[vin sync]:: ' + json.dumps(feed_response.remarks))
+                            raise ValueError('dispatch feed failed!')
+                        logger.info('[vin sync ]:: dispatch feed completed')
+                elif result[1][0]['RETURN_CODE'].upper() == 'E':
+                    message='This Chassis is not available in Main database, please type the correct chassis number'
         except Exception as ex:
             logger.error("Failed to send the details to sap")
             logger.error(ex)

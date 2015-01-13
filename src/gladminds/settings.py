@@ -496,13 +496,6 @@ MEDIA_URL = '/media/'
 
 # S3 Configuration
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-SAP_CRM_DETAIL = {
-                  'username':'pisuper',
-                  'password':'welcome123'
-                  }
-FILE_CACHE_DURATION = 0
-VIN_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/vin-sync-feed/?wsdl&v0"
-VIN_SYNC_WSDL='qa_vin_sync.wsdl'
 
 AWS_STORAGE_BUCKET_MAP = {'afterbuy': 'afterbuy'}
 AWS_STORAGE_BUCKET_NAME = 'gladminds-brands'
