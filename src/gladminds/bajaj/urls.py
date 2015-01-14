@@ -1,25 +1,7 @@
 from django.conf.urls import patterns, url, include
-from django.conf import settings
 from gladminds.bajaj.admin import brand_admin
-from tastypie.api import Api
 from gladminds.core import urls as core_urls
-from gladminds.core.apis import preferences_apis
-from gladminds.bajaj.apis import user_apis, product_apis, coupon_apis
-from gladminds.core.managers.sms_handler import SMSResources
-
-api_v1 = Api(api_name="v1")
-# api_v1.register(audit_api.AuditResources())
-# api_v1.register(user_apis.UserProfileResource())
-api_v1.register(user_apis.DealerResources())
-api_v1.register(user_apis.AuthorizedServiceCenterResources())
-api_v1.register(user_apis.ServiceAdvisorResources())
-api_v1.register(product_apis.ProductTypeDataResources())
-api_v1.register(product_apis.ProductDataResources())
-api_v1.register(coupon_apis.CouponDataResources())
-api_v1.register(preferences_apis.UserPreferenceResource())
-api_v1.register(preferences_apis.BrandPreferenceResource())
-
-api_v1.register(SMSResources())
+from gladminds.core.urls import api_v1
 
 urlpatterns = patterns('',
     url(r'^sms/','gladminds.bajaj.services.coupons.feed_views.send_sms', name='send_sms'),
@@ -34,17 +16,17 @@ urlpatterns = patterns('',
 
     url(r'^api/v1/feed/\?wsdl$', 'gladminds.bajaj.webservice.all_service'),
     url(r'^api/v1/feed/$', 'gladminds.bajaj.webservice.all_service'),
-    
+
     url(r'^api/v1/redeem-feed/$', 'gladminds.bajaj.services.coupons.feed_views.views_coupon_redeem_wsdl'),
     url(r'^api/v1/customer-feed/$', 'gladminds.bajaj.services.coupons.feed_views.views_customer_registration_wsdl'),
     url(r'^api/v1/vin-sync-feed/$', 'gladminds.bajaj.services.coupons.feed_views.views_vin_sync_wsdl'),
-    
+
     url(r'^aftersell/users/(?P<users>[a-zA-Z0-9]+)$', 'gladminds.bajaj.views.views.users'),
     url(r'^aftersell/sa/(?P<id>[a-zA-Z0-9]+)/$', 'gladminds.bajaj.views.views.get_sa_under_asc'),
     url(r'^report/(?P<role>[a-zA-Z0-9.-]+)/$', 'gladminds.bajaj.views.views.brand_details'),
     url(r'^aftersell/reports/reconciliation$', 'gladminds.bajaj.views.views.reports'),
     url(r'^coupon/report/(?P<role>[a-zA-Z0-9.-]+)/$', 'gladminds.bajaj.views.views.get_active_asc_report'),
-     
+
     url(r'^aftersell/register/(?P<menu>[a-zA-Z0-9]+)$', 'gladminds.bajaj.views.views.register'),
     url(r'^aftersell/exceptions/(?P<exception>[a-zA-Z0-9]+)$', 'gladminds.bajaj.views.views.exceptions'),
     url(r'^aftersell/asc/self-register/$', 'gladminds.bajaj.views.views.save_asc_registration'),
@@ -57,6 +39,4 @@ urlpatterns = patterns('',
     url(r'^aftersell/users/otp/update_pass', 'gladminds.bajaj.views.views.update_pass', name='update_pass'),
     url(r'^aftersell/provider/change-password$', 'gladminds.bajaj.views.views.change_password', name='change_password'),
     url(r'', include(core_urls)),
-    
-
 )
