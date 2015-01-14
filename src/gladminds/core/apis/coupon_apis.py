@@ -3,8 +3,7 @@ from tastypie.authorization import DjangoAuthorization
 from tastypie import fields
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from gladminds.core.apis.authorization import MultiAuthorization,\
-    CustomAuthorization
+from gladminds.core.apis.authorization import MultiAuthorization
 from tastypie.authentication import MultiAuthentication
 from gladminds.core.model_fetcher import models
 from gladminds.core.apis.user_apis import ServiceAdvisorResources
