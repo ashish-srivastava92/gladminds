@@ -3,7 +3,8 @@ from gladminds.core.cron_jobs.taskqueue import SqsHandler
 from gladminds.sqs_tasks import _tasks_map
 
 from tastypie.api import Api
-from gladminds.core.apis import user_apis, preferences_apis, coupon_apis, product_apis
+from gladminds.core.apis import user_apis, preferences_apis, coupon_apis, product_apis,\
+    audit_apis
 from gladminds.core.managers.sms_handler import SMSResources
 
 api_v1 = Api(api_name="v1")
@@ -16,6 +17,7 @@ api_v1.register(user_apis.AuthorizedServiceCenterResources())
 api_v1.register(user_apis.ServiceAdvisorResources())
 api_v1.register(preferences_apis.UserPreferenceResource())
 api_v1.register(preferences_apis.BrandPreferenceResource())
+api_v1.register(audit_apis.SMSLogResource())
 
 api_v1.register(SMSResources())
 
