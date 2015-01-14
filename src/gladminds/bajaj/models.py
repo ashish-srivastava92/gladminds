@@ -236,6 +236,13 @@ class FeedFailureLog(base_models.FeedFailureLog):
         verbose_name_plural = "Feed Failure Log"
 
 
+class VinSyncFeedLog(base_models.VinSyncFeedLog):
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Vin Sycn Feed"
+
+
 class AuditLog(base_models.AuditLog):
     user = models.ForeignKey(UserProfile)
 

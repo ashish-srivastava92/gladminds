@@ -1,3 +1,4 @@
+
 # Django settings for gladminds project.
 import os
 import djcelery
@@ -336,18 +337,15 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '%(brand)s %(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
         },
         'simple': {
-            'format': '%(brand)s %(name)-20s: %(levelname)-8s %(message)s'
+            'format': '%(name)-20s: %(levelname)-8s %(message)s'
         },
     },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
-        },
-        'custom_filter': {
-            '()': 'gladminds.core.loaders.custom_logging.CustomFilter'
         }
     },
     'handlers': {
@@ -358,29 +356,25 @@ LOGGING = {
         },
          'console':{
             'level': 'DEBUG',
-            'filters': ['require_debug_false', 'custom_filter'],
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
         'sql': {
             'level': 'DEBUG',
-            'filename': 'sql.log',
-            'filters': ['custom_filter'],
-            'class': 'gladminds.core.loaders.custom_logging.CustomFileHandler',
+            'filename': '/var/log/gladminds/sql.log',
+            'class': 'logging.FileHandler',
             'formatter': 'verbose',
         },
         'gladminds_logs': {
             'level': 'INFO',
-            'filename': 'gladminds.log',
-            'filters': ['custom_filter'],
-            'class': 'gladminds.core.loaders.custom_logging.CustomFileHandler',
+            'filename': '/var/log/gladminds/gladminds.log',
+            'class': 'logging.FileHandler',
             'formatter': 'verbose',
         },
         'afterbuy_logs': {
             'level': 'INFO',
-            'filename': 'afterbuy.log',
-            'filters': ['custom_filter'],
-            'class': 'gladminds.core.loaders.custom_logging.CustomFileHandler',
+            'filename': '/var/log/gladminds/afterbuy.log',
+            'class': 'logging.FileHandler',
             'formatter': 'verbose',
         }
     },
@@ -409,6 +403,10 @@ LOGGING = {
             'handlers': ['afterbuy_logs', 'console'],
             'level': 'DEBUG',
             'propagate': True,
+        }, 'suds.client': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
         }
     }
 }
@@ -432,6 +430,10 @@ FEED_FAILURE = {
     "subject": "Gladminds Failure Report - ",
     "body": """""",
 }
+
+VIN_SYNC_FEED = {
+                 "receiver": ["priyanka.n@hashedin.com"],
+                 }
 
 CUSTOMER_PHONE_NUMBER_UPDATE = {
 
@@ -505,6 +507,7 @@ MEDIA_URL = '/media/'
 
 # S3 Configuration
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+
 AWS_STORAGE_BUCKET_MAP = {'afterbuy': 'afterbuy'}
 AWS_STORAGE_BUCKET_NAME = 'gladminds-brands'
 S3_BASE_URL = 'https://%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME

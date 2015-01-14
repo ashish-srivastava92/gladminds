@@ -1,11 +1,8 @@
-from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
-from django.utils import timezone
 from tastypie.authentication import Authentication
-from provider.oauth2.models import AccessToken
 import logging
 from gladminds.core.auth.service_handler import ServiceHandler
-from gladminds.core.exceptions import AuthError
+from gladminds.core.auth.access_token_handler import verify_access_token
 
 
 class AccessTokenAuthentication(Authentication):
@@ -23,7 +20,8 @@ class AccessTokenAuthentication(Authentication):
             '''
             If verify_access_token() does not pass, it will raise an error
             '''
-            token_obj = self.verify_access_token(key)
+            token_obj = verify_access_token(key)
+            request.META['HTTP_ACCESS_TOKEN'] = key
             request.user = token_obj.user
             return True
         except KeyError, e:
@@ -34,21 +32,6 @@ class AccessTokenAuthentication(Authentication):
             logging.exception('Error in Authentication. {0}'.format(e))
             return False
         return True
-
-    def verify_access_token(self, key):
-        if  (settings.ENV in settings.IGNORE_ENV and key in settings.HARCODED_TOKEN):
-            return key
-        try:
-            token = AccessToken.objects.get(token=key)
-            # Check if token has expired
-            if token.expires < timezone.now():
-                raise AuthError('AccessToken has expired.')
-        except AccessToken.DoesNotExist, e:
-            logging.info('InValid access : {0}'.format(e))
-            raise AuthError('AccessToken not found at all.')
-
-        logging.info('Valid access')
-        return token
 
 
 class GladmindsServiceAuthentication(Authentication):

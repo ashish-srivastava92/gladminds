@@ -9,18 +9,7 @@ from gladminds.afterbuy import models as afterbuy
 class CustomAuthorization(Authorization):
 
     def read_list(self, object_list, bundle):
-        try:
-            access_token_container = bundle.request.GET.urlencode().split('access_token=')[1]
-            key = access_token_container.split('&')[0]
-        except:
-            key = bundle.request.META.get('HTTP_ACCESS_TOKEN')
-        if  (settings.ENV in settings.IGNORE_ENV and key in settings.HARCODED_TOKEN):
-                return True
-        try:
-            authorization = AccessToken.objects.filter(token=key)[0]
-        except:
-            raise Unauthorized("You are not allowed to access that data.")
-        user = authorization.user
+        user = bundle.request.user
         # This assumes a ``QuerySet`` from ``ModelResource``
         if len(object_list)>0:
             if hasattr(object_list[0], 'consumer'):

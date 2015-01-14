@@ -142,6 +142,8 @@ CUSTOMER_PHONE_NUMBER_UPDATE["receiver"] = ["jojibabu.vege@gladminds.co", "ssoza
                                             "skolluri@bajajauto.co.in", "sudhir.patil@gladminds.co",
                                             "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
                                             "gladminds+alerts@hashedin.com"]
+VIN_SYNC_FEED["receiver"] = ["rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in", "ssozarde@bajajauto.co.in", "gladminds+alerts@hashedin.com"]
+
 ########################################################################
 ###################Change Mail Subject on Prod##########################
 MAIL_DETAIL["subject"] = "Report: GladMinds Feed Summary"

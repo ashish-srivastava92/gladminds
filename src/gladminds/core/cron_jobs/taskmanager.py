@@ -10,6 +10,7 @@ from gladminds.afterbuy import models as afterbuy_models
 from gladminds.core.base_models import CouponData
 from gladminds.core.constants import COUPON_STATUS
 from django.db.models.aggregates import Sum
+from email import email
 
 AUDIT_ACTION = "SENT TO QUEUE"
 
@@ -120,3 +121,18 @@ def get_customer_details(start_date=None, end_date=None, type=None):
         data['old_number'] = customer.old_number
         customer_data.append(data)
     return customer_data
+
+def get_vin_sync_feeds_detail():
+    feed_logs = models.VinSyncFeedLog.objects.filter(email_flag=False)
+    feed_data = []
+    for feed in feed_logs:
+        data = {}
+        data['vin'] = feed.product_id
+        data['dealer_asc_id'] = feed.dealer_asc_id
+        data['status_code'] = feed.status_code
+        feed_data.append(data)
+    feed_logs.update(email_flag=True)
+    return feed_data
+
+    
+    

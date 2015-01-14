@@ -265,7 +265,7 @@ def register_customer(request, group=None):
     else:
         temp_customer_id = post_data['customer-id']
         existing_customer = True
-    data_source.append(utils.create_feed_data(post_data, product_obj[0], temp_customer_id))
+    data_source.append(utils.create_purchase_feed_data(post_data, product_obj[0], temp_customer_id))
 
     check_with_invoice_date = utils.subtract_dates(data_source[0]['product_purchase_date'], product_obj[0].invoice_date)    
     check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.datetime.now())
@@ -289,12 +289,20 @@ def register_customer(request, group=None):
                     customer_obj.product_data = product_obj[0]
                     customer_obj.sent_to_sap = False
                     customer_obj.dealer_asc_id = str(request.user)
+
+                    message = get_template('CUSTOMER_MOBILE_NUMBER_UPDATE').format(customer_name=customer_obj.new_customer_name, new_number=customer_obj.new_number)
+                    for phone_number in [customer_obj.new_number, customer_obj.old_number]:
+                        phone_number = utils.get_phone_number_format(phone_number)
+                        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+                        send_job_to_queue(send_customer_phone_number_update_message, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
+                            
                     if models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS).exists():
                         groups = utils.stringify_groups(request.user)
                         if Roles.ASCS in groups:
                             dealer_asc_id = "asc : " + customer_obj.dealer_asc_id
                         else:
                             dealer_asc_id = "dealer : " + customer_obj.dealer_asc_id
+                        
                         message = get_template('CUSTOMER_PHONE_NUMBER_UPDATE').format(customer_id=customer_obj.temp_customer_id, old_number=customer_obj.old_number, 
                                                                                   new_number=customer_obj.new_number, dealer_asc_id=dealer_asc_id)
                         managers = models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS)
@@ -354,26 +362,12 @@ def get_customer_info(data):
     except Exception as ex:
         logger.info(ex)
         message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
-
         if data['groups'][0] == Roles.DEALERS:
             data['groups'][0] = "Dealer"
         else:
             data['groups'][0] = "ASC"
         template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
         send_mail_when_vin_does_not_exist(data=template)
-#         try:
-#             vin_sync_feed = export_feed.ExportUnsyncProductFeed(username=settings.SAP_CRM_DETAIL[
-#                        'username'], password=settings.SAP_CRM_DETAIL['password'],
-#                       wsdl_url=settings.VIN_SYNC_WSDL_URL, feed_type='VIN sync Feed')
-#             message = vin_sync_feed.export(data=data)
-#     #         if data['groups'][0] == Roles.DEALERS:
-#     #             data['groups'][0] = "Dealer"
-#     #         else:
-#     #             data['groups'][0] = "ASC"
-#     #         template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
-#     #         send_mail_when_vin_does_not_exist(data=template)
-#         except Exception as ex:
-#             logger.info(ex)
         return {'message': message, 'status': 'fail'}
     if product_obj.purchase_date:
         product_data = format_product_object(product_obj)
@@ -383,6 +377,34 @@ def get_customer_info(data):
         message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
         return {'message': message}
 
+def vin_sync_feed(request):
+    message=''
+    post_data = request.POST.copy()
+    post_data['current_user'] = request.user
+    try:
+        vin_sync_feed = export_feed.ExportUnsyncProductFeed(username=settings.SAP_CRM_DETAIL[
+                       'username'], password=settings.SAP_CRM_DETAIL['password'],
+                      wsdl_url=settings.VIN_SYNC_WSDL_URL, feed_type='VIN sync Feed')
+        message = vin_sync_feed.export(data=post_data)
+    except Exception as ex:
+        logger.info(ex)
+
+    return HttpResponse(content=json.dumps({'message':message}),  content_type='application/json')
+    
+def get_customer_info_test(data):
+    try:
+        product_obj = models.ProductData.objects.get(product_id=data['vin'])
+    except Exception as ex:
+        logger.info(ex)
+        message = "The Chassis {0} is not available in the current database, please wait while the Main database is being scanned.".format(data['vin'])
+        return {'message': message, 'status': 'fail', 'vin': data['vin']}
+    if product_obj.purchase_date:
+        product_data = format_product_object(product_obj)
+        product_data['group'] = data['groups'][0] 
+        return product_data
+    else:
+        message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
+        return {'message': message}
 
 @login_required()
 def exceptions(request, exception=None):
@@ -400,13 +422,22 @@ def exceptions(request, exception=None):
         return render(request, template, {'active_menu': exception,
                                            "data": data, 'groups': groups})
     elif request.method == 'POST':
-        function_mapping = {
-            'customer': get_customer_info,
-            'recover': recover_coupon_info,
-            'search': utils.search_details,
-            'status': utils.services_search_details,
-            'serviceadvisor': utils.service_advisor_search
-        }
+        if exception == 'customer' and (settings.ENV in ['local', 'qa']):
+            function_mapping = {
+                'customer': get_customer_info_test,
+                'recover': recover_coupon_info,
+                'search': utils.search_details,
+                'status': utils.services_search_details,
+                'serviceadvisor': utils.service_advisor_search
+                }
+        else:
+            function_mapping = {
+                'customer': get_customer_info,
+                'recover': recover_coupon_info,
+                'search': utils.search_details,
+                'status': utils.services_search_details,
+                'serviceadvisor': utils.service_advisor_search
+            }
         try:
             post_data = request.POST.copy()
             post_data['current_user'] = request.user

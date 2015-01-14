@@ -79,8 +79,8 @@ class ListDispatchedProduct(GmModelAdmin):
     def changelist_view(self, request, extra_context=None):
         custom_search_mapping = {'Product Id' : '^product_id',
                                  'Dealer Id': '^dealer_id__dealer_id',}
-        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping,
-                         'searchable_fields': 'Vin and  Dealer id'}
+        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping
+                        }
         return super(ListDispatchedProduct, self).changelist_view(request, extra_context=extra_context)
 
 
@@ -135,8 +135,7 @@ class ProductDataAdmin(GmModelAdmin):
                                  'Customer ID':'^customer_id',
                                  'Customer Name': '^customer_name',
                                  'Customer Phone Number': '^customer_phone_number'}
-        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping,
-                         'searchable_fields': 'Product Id, Customer Id, Customer Phone Number and Customer Name'
+        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping
                         }
         return super(ProductDataAdmin, self).changelist_view(request, extra_context=extra_context)
 
@@ -175,8 +174,7 @@ class CouponAdmin(GmModelAdmin):
         custom_search_mapping = {'Unique Service Coupon' : '^unique_service_coupon',
                                  'Product Id': '^product__product_id',
                                  'Status': 'status'}
-        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping,
-                         'searchable_fields': 'Unique Service Coupon, Product Id and Status'
+        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping
                         }
         return super(CouponAdmin, self).changelist_view(request, extra_context=extra_context)
 
@@ -303,7 +301,7 @@ class SATempRegistrationAdmin(GmModelAdmin):
 
 class CustomerTempRegistrationAdmin(GmModelAdmin):
     search_fields = (
-        'product_data__vin', 'new_customer_name', 'new_number', 'temp_customer_id', 'sent_to_sap')
+        'product_data__product_id', 'new_customer_name', 'new_number', 'temp_customer_id', 'sent_to_sap')
 
     list_display = (
         'temp_customer_id', 'product_data', 'new_customer_name', 'new_number',

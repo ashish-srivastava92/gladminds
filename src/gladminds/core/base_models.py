@@ -539,6 +539,17 @@ class FeedFailureLog(BaseModel):
         abstract = True
         verbose_name_plural = "Feed failure log"
 
+class VinSyncFeedLog(BaseModel):
+    ''''details of all vins not found in gladminds db'''
+    product_id = models.CharField(max_length=215, null=True, blank=True)
+    dealer_asc_id = models.CharField(max_length=15, null=True, blank=True)
+    status_code = models.CharField(max_length=15, null=True, blank=True)
+    email_flag = models.BooleanField(default=False)
+    
+    class Meta:
+        abstract =True
+        verbose_name_plural = "Vin Sync Feed"
+        
 class AuditLog(BaseModel):
     '''details of the requests received'''
     device = models.CharField(max_length=250, null=True, blank=True)

@@ -487,6 +487,15 @@
     "fields": {
       "template_key": "SEND_BALANCE_POINT",
       "template": "Dear {mechanic_name}, Total Points as of {today} is {total_points}. Please contact Customer Care 9611545154 for any queries.",
+      "description": "Send this message when user checks his balance points"
+     }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 55,
+    "fields": {
+      "template_key": "CUSTOMER_MOBILE_NUMBER_UPDATE",
+      "template": "Dear {customer_name}, your registered mobile number with Bajaj Auto has been changed to {new_number}. If you notice any discrepancy please contact 9611545154",
       "description": "Send this message when customer phone number cannot be updated"
     }
   } 

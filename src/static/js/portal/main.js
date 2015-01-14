@@ -99,6 +99,9 @@
                 	  $('.customer-id').val('').attr('readOnly', true);
                 	  $('.customer-submit').attr('disabled', false);
                   }
+                  else {
+                	  vinSyncFeed(data);
+                  }
               }
             },
             error: function() {
@@ -108,6 +111,26 @@
         });
         return false;
     });
+
+function vinSyncFeed(data){
+    var messageModal = $('.modal.message-modal'),
+    	messageBlock = $('.modal-body', messageModal);
+    var jqXHR = $.ajax({
+        type: 'POST',
+        url: '/aftersell/feeds/vin-sync/',
+        data : data,
+        success: function(data){
+        if (data['message']) {
+            messageBlock.text(data.message);
+            messageModal.modal('show');
+            }
+        },
+        error: function() {
+            messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
+            messageModal.modal('show');
+        }
+    });
+    }
 
     $('.service-status-search').on('submit', function() {
     	var table = $(".status-search-results tbody .search-detail");
