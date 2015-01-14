@@ -12,13 +12,4 @@ select count(*) from bajaj_coupondata where status not in (2,6) and service_type
 select count(*) from bajaj_coupondata where status not in (2,6) and service_type = 3 and (valid_kms!=15000 or valid_days!=730);
 
 
-109304  service_type = 1 and (valid_kms!=2000 or valid_days!=365);
-238386  service_type = 2 and (valid_kms!=8000 or valid_days!=730);
-138791  service_type = 3 and (valid_kms!=15000 or valid_days!=730);
-				
-matched    affected
-7585673		498834
 
-1135304		29109
-			
-1135307	    29487

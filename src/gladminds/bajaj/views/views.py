@@ -290,12 +290,20 @@ def register_customer(request, group=None):
                     customer_obj.product_data = product_obj[0]
                     customer_obj.sent_to_sap = False
                     customer_obj.dealer_asc_id = str(request.user)
+
+                    message = get_template('CUSTOMER_MOBILE_NUMBER_UPDATE').format(customer_name=customer_obj.new_customer_name, new_number=customer_obj.new_number)
+                    for phone_number in [customer_obj.new_number, customer_obj.old_number]:
+                        phone_number = utils.get_phone_number_format(phone_number)
+                        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+                        send_job_to_queue(send_customer_phone_number_update_message, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
+                            
                     if models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS).exists():
                         groups = utils.stringify_groups(request.user)
                         if Roles.ASCS in groups:
                             dealer_asc_id = "asc : " + customer_obj.dealer_asc_id
                         else:
                             dealer_asc_id = "dealer : " + customer_obj.dealer_asc_id
+                        
                         message = get_template('CUSTOMER_PHONE_NUMBER_UPDATE').format(customer_id=customer_obj.temp_customer_id, old_number=customer_obj.old_number, 
                                                                                   new_number=customer_obj.new_number, dealer_asc_id=dealer_asc_id)
                         managers = models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS)
