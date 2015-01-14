@@ -379,6 +379,7 @@ def get_customer_info(data):
         return {'message': message}
 
 def vin_sync_feed(request):
+    message=''
     post_data = request.POST.copy()
     post_data['current_user'] = request.user
     try:

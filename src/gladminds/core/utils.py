@@ -238,16 +238,16 @@ def create_purchase_feed_data(post_data, product_data, temp_customer_id):
 def create_dispatch_feed_data(product_data):
     data = {}
     data['vin'] = product_data['CHASSIS']
-    data['product_type'] = product_data['PRD_TY']
-    data['invoice_date'] = product_data['VEH_DISP_DT']
+    data['product_type'] = product_data['PRDT_TYPE']
+    data['invoice_date'] = product_data['VEH_DIS_DT']
     data['dealer_id'] = product_data['KUNNR']
     data['unique_service_coupon'] = product_data['UCN_NO']
-    data['valid_days'] = product_data['DYS_LMT_TO']
+    data['valid_days'] = product_data['DAYS_LIMIT_TO']
     data['valid_kms'] = product_data['KMS_TO']
-    data['service_type'] = product_data['SERV_TY']
+    data['service_type'] = product_data['SERV_TYP']
     data['coupon_status'] = settings.DEFAULT_COUPON_STATUS
     return data
-
+    
 def create_sa_feed_data(post_data, user_id, temp_sa_id):
     data ={}
     data['id'] = user_id

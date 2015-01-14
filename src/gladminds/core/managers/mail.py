@@ -128,6 +128,7 @@ def customer_phone_number_update(customer_details=None):
 
 def send_vin_sync_feed_report(feed_data=None):
     try:
+        yesterday = datetime.now().date() - timedelta(days=1)
         mail_detail = get_email_template('VIN_SYNC_FEED')
         receivers = get_mail_receiver('VIN_SYNC_FEED', mail_detail)
         csvfile = StringIO.StringIO()
@@ -138,7 +139,7 @@ def send_vin_sync_feed_report(feed_data=None):
 
         logger.info("Sending out feed_failure emails")
         send_email_with_file_attachment(mail_detail['sender'], receivers, mail_detail['subject'],
-                                          mail_detail['body'] , 'vin_sync_feed_', csvfile)
+                                          mail_detail['body'] + yesterday.strftime("%d-%m-%Y"), 'vin_sync_feed_', csvfile)
     except Exception as ex:
         logger.info("[Exception feed_fail_report]: {0}".format(ex))
 

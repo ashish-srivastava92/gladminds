@@ -203,17 +203,29 @@ class ExportUnsyncProductFeed(BaseExportFeed):
     def export(self, data=None):
         data_source = []
         message="some error occurred, please try again later."
-        logger.info(
-            "Export {1}: Items:{0}"\
-            .format(data, self.feed_type))
+#         logger.info(
+#             "Export {1}: Items:{0}"\
+#             .format(data, self.feed_type))
         client = self.get_client()
 
-        logger.info("Trying to send product details the ID: {0}"\
-                    .format(data['vin']))
+#         logger.info("Trying to send product details the ID: {0}"\
+#                     .format(data['vin']))
+        item={"UCN_NO": "",
+                    "CHASSIS":"",
+                    "SERV_TY":"",
+                    "VEH_DISP_DT":"2014-12-12",
+                    "KUNNR":"",
+                    "PRD_TY":"",  
+                    "KMS_FRM":"",
+                    "KMS_TO":"",
+                    "DYS_LMT_FRM":"",
+                    "DYS_LMT_TO":""}
+        result = client.service.SI_GCPONL_Sync(
+                DT_ONL=[{"CHASSIS": data['vin'],"DEALER": data['current_user'].username}], DT_DISPATCH={"item":item})
+
         try:
-            result = client.service.SI_GCPONL_Sync(
-                DT_ONL=[{"CHASSIS": data['vin'],"DEALER": data['current_user'].username}])
-            logger.info("Response from SAP: {0}".format(result))
+            
+            #logger.info("Response from SAP: {0}".format(result))
             return_code = result[1][0]['RETURN_CODE']
             
             if return_code:

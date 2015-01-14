@@ -1,3 +1,4 @@
+
 # Django settings for gladminds project.
 import os
 import djcelery
@@ -395,6 +396,10 @@ LOGGING = {
             'propagate': True,
         }, 'afterbuy': {
             'handlers': ['afterbuy_logs', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }, 'suds.client': {
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
         }
