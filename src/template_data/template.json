@@ -471,5 +471,14 @@
       "template": "Mobile number of customer-id : {customer_id} was changed from {old_number} to {new_number} by {dealer_asc_id}",
       "description": "Send this message when customer phone number cannot be updated"
     }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 53,
+    "fields": {
+      "template_key": "CUSTOMER_MOBILE_NUMBER_UPDATE",
+      "template": "Dear {customer_name}, your registered mobile number with Bajaj Auto has been changed to {new_number}. If you notice any discrepancy please contact 9611545154",
+      "description": "Send this message when customer phone number cannot be updated"
+    }
   } 
 ]

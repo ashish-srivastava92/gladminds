@@ -14,13 +14,11 @@ from gladminds.core.auth_helper import Roles
 class GmModelAdmin(ModelAdmin):
     groups_update_not_allowed = [Roles.READONLY]
     
-    def changelist_view(self, request, extra_context=None):
+    def changelist_view(self, request, extra_context={}):
         searchable_fields=[]
         for field in self.search_fields:
-            searchable_fields.append(field.split('__')[0].replace('_', ' ').title())
-        extra_context = {
-                         'searchable_fields': ', '.join(searchable_fields),
-                        }
+            searchable_fields.append(field.split('__')[0].replace('_', ' ',).replace('^','').title())
+        extra_context['searchable_fields'] = ', '.join(searchable_fields)
         return super(GmModelAdmin, self).changelist_view(request, extra_context=extra_context)     
 
     def change_view(self, request, object_id, form_url='', extra_context=None):

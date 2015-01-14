@@ -1,3 +1,4 @@
+
 # Django settings for gladminds project.
 import os
 import djcelery
@@ -397,6 +398,10 @@ LOGGING = {
             'handlers': ['afterbuy_logs', 'console'],
             'level': 'DEBUG',
             'propagate': True,
+        }, 'suds.client': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
         }
     }
 }
@@ -420,6 +425,10 @@ FEED_FAILURE = {
     "subject": "Gladminds Failure Report - ",
     "body": """""",
 }
+
+VIN_SYNC_FEED = {
+                 "receiver": ["priyanka.n@hashedin.com"],
+                 }
 
 CUSTOMER_PHONE_NUMBER_UPDATE = {
 
@@ -493,6 +502,7 @@ MEDIA_URL = '/media/'
 
 # S3 Configuration
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+
 AWS_STORAGE_BUCKET_MAP = {'afterbuy': 'afterbuy'}
 AWS_STORAGE_BUCKET_NAME = 'gladminds-brands'
 S3_BASE_URL = 'https://%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
