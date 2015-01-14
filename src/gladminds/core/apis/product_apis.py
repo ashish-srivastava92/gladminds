@@ -16,7 +16,8 @@ class ProductTypeResource(CustomBaseModelResource):
     class Meta:
         queryset = models.ProductType.objects.all()
         resource_name = "product-types"
-        authorization = Authorization()
+        authentication = AccessTokenAuthentication()
+        authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
         always_return_data = True
 
@@ -30,9 +31,8 @@ class ProductResource(CustomBaseModelResource):
     class Meta:
         queryset = models.ProductData.objects.all()
         resource_name = "products"
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
-        authentication = MultiAuthentication(GladmindsServiceAuthentication(Services.FREE_SERVICE_COUPON),
-                                             AccessTokenAuthentication())
+        authentication = AccessTokenAuthentication()
+        authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
         filtering = {
                      "product_id":  ALL,
