@@ -10,6 +10,7 @@ STATIC_DIR = os.path.join(PROJECT_DIR, "static")
 TEMPLATE_DIR = os.path.join(PROJECT_DIR, "templates")
 EMAIL_DIR = os.path.join(TEMPLATE_DIR, "email")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
+LOG_BASE_PATH = '/var/log/gladminds'
 
 TIMEZONE = 'Asia/Kolkata'
 
@@ -330,15 +331,18 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+            'format': '%(brand)s %(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
         },
         'simple': {
-            'format': '%(name)-20s: %(levelname)-8s %(message)s'
+            'format': '%(brand)s %(name)-20s: %(levelname)-8s %(message)s'
         },
     },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
+        },
+        'custom_filter': {
+            '()': 'gladminds.core.loaders.custom_logging.CustomFilter'
         }
     },
     'handlers': {
@@ -349,25 +353,29 @@ LOGGING = {
         },
          'console':{
             'level': 'DEBUG',
+            'filters': ['require_debug_false', 'custom_filter'],
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
         'sql': {
             'level': 'DEBUG',
-            'filename': '/var/log/gladminds/sql.log',
-            'class': 'logging.FileHandler',
+            'filename': 'sql.log',
+            'filters': ['custom_filter'],
+            'class': 'gladminds.core.loaders.custom_logging.CustomFileHandler',
             'formatter': 'verbose',
         },
         'gladminds_logs': {
             'level': 'INFO',
-            'filename': '/var/log/gladminds/gladminds.log',
-            'class': 'logging.FileHandler',
+            'filename': 'gladminds.log',
+            'filters': ['custom_filter'],
+            'class': 'gladminds.core.loaders.custom_logging.CustomFileHandler',
             'formatter': 'verbose',
         },
         'afterbuy_logs': {
             'level': 'INFO',
-            'filename': '/var/log/gladminds/afterbuy.log',
-            'class': 'logging.FileHandler',
+            'filename': 'afterbuy.log',
+            'filters': ['custom_filter'],
+            'class': 'gladminds.core.loaders.custom_logging.CustomFileHandler',
             'formatter': 'verbose',
         }
     },
@@ -541,7 +549,7 @@ SMS_HEALTH_CHECK_INTERVAL = 6
 #######################FEED_HEALTH_CHECK_INTERVAL
 FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
-BRAND = 'bajaj'
+BRAND = None
 GM_BRAND = 'default'
 BRANDS = ['bajaj', 'demo', 'afterbuy']
 ###############################################
