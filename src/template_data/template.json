@@ -370,7 +370,7 @@
     "fields": {
       "template_key":"SEND_INVALID_UCP",
       "template":"Invalid Entry... UPC does not exist in our records. Please contact our Customer Care at: 9611545154",
-      "description":"Send this message when ucp does not exists in our records"
+      "description":"Send this message when single ucp does not exists in our records"
     }
   },
   {
@@ -378,7 +378,7 @@
     "pk": 42,
     "fields": {
       "template_key":"RCV_REDEEM_POINT",
-      "template":"{product_id}",
+      "template":"{member_id} {product_id}",
       "description":"Receive this message when mechanic send product to redeem points"
     }
   },
@@ -387,7 +387,7 @@
     "pk": 43,
     "fields": {
       "template_key":"SEND_REDEEM_POINT",
-      "template":"Dear {mechanic_name}, redemption request for {product_code} received. We shall update you when your products are shipped. Total points: {total_points}",
+      "template":"Dear {mechanic_name}, Your  request is submitted to Bajaj for Approval. Req ID:{transaction_id}. We shall update you when your products are shipped. Balance Points : {total_points}",
       "description":"Send this message when mechanic send product to redeem points"
     }
   },
@@ -395,17 +395,17 @@
     "model": "gladminds.messagetemplate",
     "pk": 44,
     "fields": {
-      "template_key":"SEND_INSUFFICIENT_POINT",
-      "template":"You have insufficient points... Please accumulate {shortage_points} points for the specified Redemption",
-      "description":"Send this message when mechanic does not have enough points"
+      "template_key":"SEND_INSUFFICIENT_POINT_MULTIPLE",
+      "template":"Dear {mechanic_name}, Sorry, you need {shortage_points} more points for these products. Please check catalog and submit new request.",
+      "description":"Send this message when user does not have enough points to redeem a multiple product"
     }
   },
    {
     "model": "gladminds.messagetemplate",
     "pk": 45,
     "fields": {
-      "template_key":"UNREGISERED_USER",
-      "template":"Unregistered user. Please register with Bajaj Auto Ltd. (Contact#: 9611545154) to accumulate and redeem points and get home exclusive gifts.",
+      "template_key":"UNREGISTERED_USER",
+      "template":"You have not registered for the loyalty program. Please contact our Customer Care 9611545154",
       "description":"Send this message when mechanic is unregistered"
     }
   },
@@ -498,5 +498,32 @@
       "template": "Dear {customer_name}, your registered mobile number with Bajaj Auto has been changed to {new_number}. If you notice any discrepancy please contact 9611545154",
       "description": "Send this message when customer phone number cannot be updated"
     }
-  } 
+  },
+    {
+    "model": "gladminds.messagetemplate",
+    "pk": 56,
+    "fields": {
+      "template_key": "SEND_INSUFFICIENT_POINT_SINGLE",
+      "template": "Dear {mechanic_name}, Sorry, you need {shortage_points} more points for this product. Please check catalog for {total_points} points.",
+      "description": "Send this message when user does not have enough points to redeem a single product"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 57,
+    "fields": {
+      "template_key":"INVALID_PRODUCT_ID",
+      "template":"Invalid Entry... Product ID does not exist in our records. Please contact our Customer Care at: 9611545154",
+      "description":"Send this message when redemption product-ID does not exists in our records"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 58,
+    "fields": {
+      "template_key":"INVALID_MEMBER_ID",
+      "template":"Dear {mechanic_name}, Invalid MembershipID. Please refer Membership card for your ID.",
+      "description":"Send this message when member-ID does not match our records"
+    }
+  }
 ]

@@ -477,16 +477,16 @@ class RedemptionPartnerAdmin(GmModelAdmin):
 
     list_display = ('partner_id','name')
 
-class ReedemptionRequestAdmin(GmModelAdmin):
+class RedemptionRequestAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
     list_filter = (
         ('created_date', DateFieldListFilter),
     )
-    search_fields = ('member__phone_number', 'partner__partner_id')
+    search_fields = ('member__phone_number', 'product__product_id')
     list_display = ( 'member',  'get_mechanic_name',
                      'delivery_address', 'get_mechanic_pincode',
-                     'get_mechanic_city', 'get_mechanic_state',
-                     'partner', 'created_date', 'transaction_id',
+                     'get_mechanic_district', 'get_mechanic_state',
+                     'product', 'created_date', 'transaction_id',
                      'expected_delivery_date', 'status')
     
     def get_mechanic_name(self, obj):
@@ -495,15 +495,15 @@ class ReedemptionRequestAdmin(GmModelAdmin):
     def get_mechanic_pincode(self, obj):
         return obj.member.pincode
     
-    def get_mechanic_city(self, obj):
-        return obj.member.city
+    def get_mechanic_district(self, obj):
+        return obj.member.district
     
     def get_mechanic_state(self, obj):
         return obj.member.state
     
     get_mechanic_name.short_description = 'Name'
     get_mechanic_pincode.short_description = 'Pincode'
-    get_mechanic_city.short_description = 'City'
+    get_mechanic_district.short_description = 'City'
     get_mechanic_state.short_description = 'State'
 
 brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
@@ -540,7 +540,7 @@ if settings.ENV not in ['prod']:
 
 brand_admin.register(models.RedemptionPartner, RedemptionPartnerAdmin)
 brand_admin.register(models.ProductCatalog, ProductCatalogAdmin)
-brand_admin.register(models.ReedemptionRequest, ReedemptionRequestAdmin)
+brand_admin.register(models.RedemptionRequest, RedemptionRequestAdmin)
 
 brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)
 brand_admin.register(models.SATempRegistration, SATempRegistrationAdmin)

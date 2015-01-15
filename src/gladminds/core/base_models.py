@@ -883,11 +883,10 @@ class ProductCatalog(BaseModel):
     def __unicode__(self):
         return str(self.product_id)
 
-class ReedemptionRequest(BaseModel):
+class RedemptionRequest(BaseModel):
     '''details of Spare Part'''
     delivery_address = models.CharField(max_length=50, null=True, blank=True)
-    transaction_id = models.CharField(max_length=50,
-                                null=True, blank=True, unique=True)
+    transaction_id = models.AutoField(primary_key=True)
     expected_delivery_date =  models.DateTimeField(null=True, blank= True)
     status = models.CharField(max_length=12, choices=REDEMPTION_STATUS, default='Open')
 

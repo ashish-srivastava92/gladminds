@@ -76,7 +76,7 @@ def get_message_template_mapper():
                         'receive': get_template('RCV_REDEEM_POINT'),
                         'send':get_template('SEND_REDEEM_POINT'),
                         'invalid':get_template('SEND_INVALID_MESSAGE'),
-                        'handler':'loyalty.redeem_point',
+                        'handler':'loyalty.loyalty.LoyaltyService.redeem_point',
                         'auth_rule': ['open']
                         }
             }

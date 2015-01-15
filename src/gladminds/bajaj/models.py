@@ -349,9 +349,9 @@ class ProductCatalog(base_models.ProductCatalog):
     class Meta:
         app_label = _APP_NAME
         
-class ReedemptionRequest(base_models.ReedemptionRequest):
+class RedemptionRequest(base_models.RedemptionRequest):
     '''details of retailer'''
-    partner = models.ForeignKey(RedemptionPartner)
+    product = models.ForeignKey(ProductCatalog)
     member = models.ForeignKey(Mechanic)
 
     class Meta:

@@ -2,8 +2,9 @@ from django.conf.urls import patterns, url, include
 from gladminds.bajaj.admin import brand_admin
 from gladminds.core import urls as core_urls
 from gladminds.core.urls import api_v1
+from gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
 
-loyalty = LoyaltyService()
+loyalty = LoyaltyService
 
 urlpatterns = patterns('',
     url(r'^sms/','gladminds.bajaj.services.coupons.feed_views.send_sms', name='send_sms'),

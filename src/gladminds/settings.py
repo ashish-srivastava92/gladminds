@@ -114,8 +114,8 @@ SUIT_CONFIG = {
                      'label': 'Accumulation Request'},
                    {'model': 'productcatalog',
                      'label': 'Product Catalog'},
-                   {'model': 'reedemptionrequest',
-                     'label': 'Reedemption Request'},)},
+                   {'model': 'redemptionrequest',
+                     'label': 'Redemption Request'},)},
         {'app': 'bajaj', 'label': 'User Registrations', 'icon': ' icon-folder-open',
          'models':(
                     {'model': 'asctempregistration',
@@ -557,7 +557,7 @@ GM_BRAND = 'default'
 BRANDS = ['bajaj', 'demo', 'afterbuy']
 ###############################################
 AIRTEL_IP = '54.84.243.77'
-SMS_CLIENT = "AIRTEL"
+SMS_CLIENT = "MOCK"
 SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                               'pass':'bajaj',
                               'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',
@@ -567,7 +567,8 @@ SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                           'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
                           'working_key': '2uj6gnnnlbx37x436cppq87176j660w9',
                           'sender_id': 'GLADMS',
-                          'params': 'kap'}
+                          'params': 'kap'},
+                  'MOCK': {}
                   }
 
 ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},
@@ -587,3 +588,11 @@ CONSTANCE_CONFIG = {
 }
 
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+SAP_CRM_DETAIL = {
+                  'username':'pisuper',
+                  'password':'welcome123'
+                  }
+FILE_CACHE_DURATION = 0
+VIN_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/vin-sync-feed/?wsdl&v0"
+VIN_SYNC_WSDL='qa_vin_sync.wsdl'

@@ -50,11 +50,10 @@ def get_handler(handler, brand=None):
         rel_path = '.'.join(handler.split('.')[:-1])
         return getattr(import_module('gladminds.{0}.services.{1}'.format(brand, rel_path)), func_handler)
     except Exception as ex:
+        logger.error(ex)
         rel_path = '.'.join(handler.split('.')[:-2])
-        service_module=import_module('gladminds.{0}.services.{1}'.format(brand, rel_path))
-        service_class=getattr(service_module, service_handler)
-        service_class_obj=service_class()
-        return getattr(service_class_obj, func_handler)
+        service_class = getattr(import_module('gladminds.{0}.services.{1}'.format(brand, rel_path)), service_handler)
+        return getattr(service_class, func_handler)
 
 def generate_unique_customer_id():
     bytes_str = os.urandom(24)
