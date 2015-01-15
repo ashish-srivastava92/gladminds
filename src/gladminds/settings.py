@@ -256,6 +256,20 @@ TEMPLATE_LOADERS = (
                     #  'django.template.loaders.eggs.Loader',
                    )
 
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+#         'LOCATION': 'log/django_cache',
+#     }
+# }
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'gm-dashboard'
+    }
+}
+
 MIDDLEWARE_CLASSES = (
     'gladminds.core.middlewares.dynamicsite_middleware.DynamicSitesMiddleware',
     'django.middleware.common.CommonMiddleware',
