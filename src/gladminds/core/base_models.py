@@ -889,6 +889,18 @@ class RedemptionRequest(BaseModel):
     transaction_id = models.AutoField(primary_key=True)
     expected_delivery_date =  models.DateTimeField(null=True, blank= True)
     status = models.CharField(max_length=12, choices=REDEMPTION_STATUS, default='Open')
+    is_approved = models.BooleanField(default=False)
+    
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        for field in self._meta.fields:
+            if field.name=='status':
+                if getattr(self, field.name)=='Approved':
+                    self.is_approved=True
+                elif getattr(self, field.name) in ['Rejected', 'Open'] :
+                    self.is_approved=False
+
+        return super(RedemptionRequest, self).save(force_insert=force_insert, force_update=force_update,
+                              using=using, update_fields=update_fields)
 
     class Meta:
         abstract = True

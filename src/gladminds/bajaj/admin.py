@@ -1,3 +1,5 @@
+import copy
+from django import forms
 from django.contrib.admin import AdminSite, TabularInline
 from django.contrib.auth.models import User, Group
 from django.contrib.admin import ModelAdmin
@@ -11,7 +13,8 @@ from gladminds.core.auth_helper import GmApps, Roles
 from gladminds.core.admin_helper import GmModelAdmin
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.conf import settings
-
+from gladminds.core.auth_helper import Roles
+from gladminds.core import constants
 
 class BajajAdminSite(AdminSite):
     pass
@@ -471,14 +474,14 @@ class ProductCatalogAdmin(GmModelAdmin):
                     'description', 'variation',
                     'brand', 'model', 'category',
                     'sub_category')
-    
+
 class RedemptionPartnerAdmin(GmModelAdmin):
     search_fields = ('partner_id', 'name')
 
     list_display = ('partner_id','name')
 
 class RedemptionRequestAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
+    groups_update_not_allowed = [Roles.NSMS, Roles.LOYALTYSUPERADMINS]
     list_filter = (
         ('created_date', DateFieldListFilter),
     )
@@ -489,15 +492,49 @@ class RedemptionRequestAdmin(GmModelAdmin):
                      'product', 'created_date', 'transaction_id',
                      'expected_delivery_date', 'status')
     
+    def queryset(self, request):
+        """
+        Returns a QuerySet of all model instances that can be edited by the
+        admin site. This is used by changelist_view.
+        """
+        query_set = self.model._default_manager.get_query_set()
+        if not request.user.groups.filter(name=Roles.ASMS).exists():
+            query_set=query_set.filter(is_approved=True)
+
+        return query_set
+
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('is_approved',)
+        form = super(RedemptionRequestAdmin, self).get_form(request, obj, **kwargs)
+        form = copy.deepcopy(form)
+
+        if request.user.groups.filter(name=Roles.ASMS).exists():
+            form.base_fields['status'].choices = constants.ASM_REDEMPTION_STATUS
+        else:
+            form.base_fields['status'].choices = constants.GP_REDEMPTION_STATUS    
+        return form
+
+    def suit_row_attributes(self, obj):
+        class_map = {
+            'Rejected': 'error',
+            'Approved': 'success',
+            'Delivered': 'warning',
+            'Packed': 'info',
+            'Shipped': 'info',
+        }
+        css_class = class_map.get(str(obj.status))
+        if css_class:
+            return {'class': css_class}
+
     def get_mechanic_name(self, obj):
         return obj.member.first_name
-    
+
     def get_mechanic_pincode(self, obj):
         return obj.member.pincode
-    
+
     def get_mechanic_district(self, obj):
         return obj.member.district
-    
+
     def get_mechanic_state(self, obj):
         return obj.member.state
     
@@ -538,9 +575,9 @@ if settings.ENV not in ['prod']:
     brand_admin.register(models.SparePartPoint, SparePartPointAdmin)
     brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
 
-brand_admin.register(models.RedemptionPartner, RedemptionPartnerAdmin)
-brand_admin.register(models.ProductCatalog, ProductCatalogAdmin)
-brand_admin.register(models.RedemptionRequest, RedemptionRequestAdmin)
+    brand_admin.register(models.RedemptionPartner, RedemptionPartnerAdmin)
+    brand_admin.register(models.ProductCatalog, ProductCatalogAdmin)
+    brand_admin.register(models.RedemptionRequest, RedemptionRequestAdmin)
 
 brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)
 brand_admin.register(models.SATempRegistration, SATempRegistrationAdmin)

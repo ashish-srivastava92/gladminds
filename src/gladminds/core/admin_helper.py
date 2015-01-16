@@ -24,6 +24,7 @@ class GmModelAdmin(ModelAdmin):
     def change_view(self, request, object_id, form_url='', extra_context=None):
         model = self.model
         opts = model._meta
+        self.groups_update_not_allowed.append(Roles.READONLY)
         if request.method == 'POST' and not "_saveasnew" in request.POST:
             if request.user.groups.filter(name__in=self.groups_update_not_allowed).exists():
                 post_url_continue = reverse('admin:%s_%s_changelist' %
