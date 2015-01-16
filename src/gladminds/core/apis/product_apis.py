@@ -1,15 +1,11 @@
 from tastypie.constants import ALL
-from tastypie.authorization import Authorization, DjangoAuthorization
+from tastypie.authorization import DjangoAuthorization
 from tastypie import fields 
 from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.core.apis.user_apis import DealerResources
 from gladminds.core.model_fetcher import models
-from gladminds.core.apis.authorization import MultiAuthorization,\
-    CustomAuthorization
-from tastypie.authentication import MultiAuthentication
-from gladminds.core.apis.authentication import GladmindsServiceAuthentication,\
-    AccessTokenAuthentication
-from gladminds.core.auth.service_handler import Services
+from gladminds.core.apis.authorization import MultiAuthorization
+from gladminds.core.apis.authentication import AccessTokenAuthentication
+from gladminds.core.apis.user_apis import DealerResource
 
 
 class ProductTypeResource(CustomBaseModelResource):
@@ -25,7 +21,7 @@ class ProductTypeResource(CustomBaseModelResource):
 class ProductResource(CustomBaseModelResource):
     product_type = fields.ForeignKey(ProductTypeResource, 'product_type',
                                      null=True, blank=True, full=True)
-    dealer_id = fields.ForeignKey(DealerResources, 'dealer_id',
+    dealer_id = fields.ForeignKey(DealerResource, 'dealer_id',
                                   null=True, blank=True, full=True)
 
     class Meta:
@@ -43,3 +39,15 @@ class ProductResource(CustomBaseModelResource):
                      "purchase_date": ['gte', 'lte'],
                      "invoice_date": ['gte', 'lte']
                      }
+
+
+class CustomerTempRegistrationResource(CustomBaseModelResource):
+    product_data = fields.ForeignKey(ProductResource, 'product_data', null=True, blank=True, full=True)
+
+    class Meta:
+        queryset = models.CustomerTempRegistration.objects.all()
+        resource_name = "customer-changes"
+        authentication = AccessTokenAuthentication()
+        authorization = MultiAuthorization(DjangoAuthorization())
+        detail_allowed_methods = ['get']
+        always_return_data = True

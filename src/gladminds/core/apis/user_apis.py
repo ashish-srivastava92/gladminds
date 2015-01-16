@@ -10,6 +10,7 @@ from tastypie import fields
 from django.http.response import HttpResponse
 from tastypie.http import HttpBadRequest
 from django.contrib.auth import authenticate, login
+from django.conf import settings
 
 from gladminds.core.model_fetcher import models
 from gladminds.core.auth.access_token_handler import create_access_token,\
@@ -18,7 +19,6 @@ from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import CustomAuthorization,\
     MultiAuthorization
-from django.conf import settings
 
 logger = logging.getLogger('gladminds')
 
@@ -110,7 +110,7 @@ class UserProfileResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
 
 
-class DealerResources(CustomBaseModelResource):
+class DealerResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Dealer.objects.all()
         resource_name = "dealers"
@@ -121,7 +121,7 @@ class DealerResources(CustomBaseModelResource):
         always_return_data = True
 
 
-class AuthorizedServiceCenterResources(CustomBaseModelResource):
+class AuthorizedServiceCenterResource(CustomBaseModelResource):
     class Meta:
         queryset = models.AuthorizedServiceCenter.objects.all()
         resource_name = "authorized-service-centers"
@@ -132,7 +132,7 @@ class AuthorizedServiceCenterResources(CustomBaseModelResource):
         always_return_data = True
 
 
-class ServiceAdvisorResources(CustomBaseModelResource):
+class ServiceAdvisorResource(CustomBaseModelResource):
     class Meta:
         queryset = models.ServiceAdvisor.objects.all()
         resource_name = "service-advisors"
