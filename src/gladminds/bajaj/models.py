@@ -199,6 +199,7 @@ class CustomerTempRegistration(base_models.CustomerTempRegistration):
         app_label = _APP_NAME
         verbose_name_plural = "Customer temporary info"
 
+
 class UserPreference(base_models.UserPreference):
     user = models.ForeignKey(UserProfile)
 

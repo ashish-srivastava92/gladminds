@@ -6,7 +6,8 @@ from django.conf import settings
 from django.utils.translation import gettext as _
 from constance import config
 
-from gladminds.core.managers import user_manager
+from gladminds.core.managers import user_manager, coupon_manager,\
+    service_desk_manager
 from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
 from gladminds.core.constants import FEEDBACK_STATUS, \
                             PRIORITY, FEEDBACK_TYPE, RATINGS,\
@@ -134,6 +135,8 @@ class AuthorizedServiceCenter(BaseModel):
         max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
 
+    objects = user_manager.AuthorizedServiceCenterManager()
+
     class Meta:
         abstract = True
         verbose_name_plural = "Service Center Data"
@@ -227,6 +230,8 @@ class CouponData(BaseModel):
     credit_note = models.CharField(max_length=50, null=True, blank=True)
     special_case = models.BooleanField(default=False)
     servicing_dealer = models.CharField(max_length=50, null=True, blank=True)
+
+    objects = coupon_manager.CouponDataManager()
 
     class Meta:
         abstract = True
@@ -604,6 +609,7 @@ class Feedback(BaseModel):
     reminder_date = models.DateTimeField(null=True, blank=True)
     reminder_flag = models.BooleanField(default=False)
     resolution_flag = models.BooleanField(default=False)
+    objects = service_desk_manager.FeedbackManager()
 
     class Meta:
         abstract = True
