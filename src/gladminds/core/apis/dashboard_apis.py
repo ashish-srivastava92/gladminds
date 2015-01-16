@@ -7,11 +7,20 @@ from gladminds.core.model_fetcher import models
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from django.core.cache import cache
 from tastypie.constants import ALL
+from gladminds.core.constants import FEED_TYPES, FeedStatus
 
 
 def get_vins():
     return models.ProductData.objects.all().count()
 
+
+def get_success_and_failure_counts(objects):
+    fail = 0
+    success = 0
+    for data in objects:
+        fail = fail + int(data.failed_data_count)
+        success = success + int(data.success_data_count)
+    return success, fail
 
 def get_set_cache(key, data_func, timeout=15):
     '''
@@ -34,6 +43,7 @@ _KEYS = ["id", "name", "value"]
 
 def create_dict(values, keys=_KEYS):
     return dict(zip(keys, values))
+
 
 
 class OverallStatusResource(CustomBaseResource):
@@ -97,13 +107,21 @@ class OverallStatusResource(CustomBaseResource):
                    )
 
 
+_KEYS_FEED = ["status", "type", "success_count", "failure_count"]
+
+
+def create_feed_dict(values, keys=_KEYS_FEED):
+    return dict(zip(keys, values))
+
+
 class FeedStatusResource(CustomBaseResource):
     """
     It is a preferences resource
     """
-    id = fields.CharField(attribute="id")
-    name = fields.CharField(attribute="name")
-    value = fields.CharField(attribute='value', null=True)
+    status = fields.CharField(attribute="status")
+    feed_type = fields.CharField(attribute="type")
+    success = fields.CharField(attribute="success_count")
+    failure = fields.CharField(attribute="failure_count")
 
     class Meta:
         resource_name = 'feeds-status'
@@ -113,10 +131,24 @@ class FeedStatusResource(CustomBaseResource):
     def obj_get_list(self, bundle, **kwargs):
         self.is_authenticated(bundle.request)
         filters = {}
+        params = {}
         if hasattr(bundle.request, 'GET'):
-            filters = bundle.request.GET.copy()
-        dtstart = filters.get('from')
-        dtend = filters.get('to')
-        return map(CustomApiObject, [
-                                     ]
-                   )
+            params = bundle.request.GET.copy()
+        dtstart = params.get('created_date__gte')
+        dtend = params.get('created_date__lte')
+        if dtstart:
+            filters['created_date__gte'] = dtstart
+        if dtend:
+            filters['created_date__lte'] = dtend
+
+        data = []
+        for status in [FeedStatus.SENT, FeedStatus.RECEIVED]:
+            filters['status'] = status
+            for feed_type in FEED_TYPES:
+                filters['feed_type'] = feed_type
+                success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
+                data.append(create_feed_dict([status,
+                                              feed_type,
+                                              success_count,
+                                              failure_count]))
+        return map(CustomApiObject, data)
