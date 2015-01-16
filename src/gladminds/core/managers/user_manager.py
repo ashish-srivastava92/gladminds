@@ -3,10 +3,10 @@ from django.db import models
 
 class DealerManager(models.Manager):
     def active(self):
-        return super(DealerManager, self).get_query_set().filter(user__user__is_active=0)
+        return super(DealerManager, self).get_query_set().filter(user__user__is_active=1)
 
     def active_count(self):
-        return super(DealerManager, self).get_query_set().filter(user__user__is_active=0).count()
+        return super(DealerManager, self).get_query_set().filter(user__user__is_active=1).count()
 
     def count(self):
         return super(DealerManager, self).get_query_set().all().count()
