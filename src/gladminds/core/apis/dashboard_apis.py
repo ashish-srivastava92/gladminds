@@ -2,13 +2,48 @@
 This contains the dasboards apis
 '''
 from gladminds.core.apis.base_apis import CustomBaseResource, CustomApiObject
-from tastypie.bundle import Bundle
 from tastypie import fields
-from tastypie.authorization import Authorization
 from gladminds.core.model_fetcher import models
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from django.views.decorators.cache import cache_page
 from django.core.cache import cache
+from tastypie.constants import ALL
+from gladminds.core.constants import FEED_TYPES, FeedStatus
+
+
+def get_vins():
+    return models.ProductData.objects.all().count()
+
+
+def get_success_and_failure_counts(objects):
+    fail = 0
+    success = 0
+    for data in objects:
+        fail = fail + int(data.failed_data_count)
+        success = success + int(data.success_data_count)
+    return success, fail
+
+def get_set_cache(key, data_func, timeout=15):
+    '''
+    Used for putting data in cache .. specified on a timeout
+    :param key:
+    :type string:
+    :param data:
+    :type queryset result:
+    :param timeout:
+    :type int:
+    '''
+    result = cache.get(key)
+    if result is None:
+        result = data_func()
+        cache.set(key, result, timeout*60)
+    return result
+
+_KEYS = ["id", "name", "value"]
+
+
+def create_dict(values, keys=_KEYS):
+    return dict(zip(keys, values))
+
 
 
 class OverallStatusResource(CustomBaseResource):
@@ -24,61 +59,96 @@ class OverallStatusResource(CustomBaseResource):
         authentication = AccessTokenAuthentication()
         object_class = CustomApiObject
 
-    def detail_uri_kwargs(self, bundle_or_obj):
-        """
-        Overriding the details_uri_kwargs and setting kwargs to Null
-        It will be using for POST methods
-        """
-        kwargs = {}
-
-        if isinstance(bundle_or_obj, Bundle):
-            kwargs['pk'] = bundle_or_obj.obj.id
-        else:
-            kwargs['pk'] = bundle_or_obj.id
-        return kwargs
-
     def obj_get_list(self, bundle, **kwargs):
         self.is_authenticated(bundle.request)
-        vins = cache.get('gm_vins')
-        coupons_closed = cache.get('gm_coupons_closed')
-        coupons_progress = cache.get('gm_coupons_progress')
-        coupons_expired = cache.get('gm_coupons_expired')
-        tickets_raised = cache.get('gm_ticket_raised')
-        tickets_progress = cache.get('gm_ticket_progress')
+        vins = get_set_cache('gm_vins', get_vins)
+        coupons_closed = get_set_cache('gm_coupons_closed',
+                                       models.CouponData.objects.closed_count,
+                                       timeout=13)
+        coupons_progress = get_set_cache('gm_coupons_progress',
+                                         models.CouponData.objects.inprogress_count,
+                                         timeout=11)
+        coupons_expired = get_set_cache('gm_coupons_expired',
+                                        models.CouponData.objects.expired_count,
+                                        timeout=16)
+        tickets_raised = get_set_cache('gm_ticket_raised',
+                                       models.Feedback.objects.raised_count)
+        tickets_progress = get_set_cache('gm_ticket_progress',
+                                         models.Feedback.objects.inprogress_count)
+        dealers = get_set_cache('gm_dealers',
+                               models.Dealer.objects.count)
+        dealers_active = get_set_cache('gm_dealers_active',
+                               models.AuthorizedServiceCenter.objects.active_count)
+        ascs = get_set_cache('gm_ascs',
+                               models.AuthorizedServiceCenter.objects.count)
+        ascs_active = get_set_cache('gm_ascs_active',
+                               models.AuthorizedServiceCenter.objects.active_count)
 
-        if not vins:
-            vins = set_cache('gm_vins', models.ProductData.objects.all().count())
-        if not coupons_closed:
-            coupons_closed = set_cache('gm_coupons_closed',
-                                       models.CouponData.objects.filter(status=2).count())
-        if not coupons_progress:
-            coupons_progress = set_cache('gm_coupons_progress',
-                                         models.CouponData.objects.filter(status=4).count())
-        if not coupons_expired:
-            coupons_expired = set_cache('gm_coupons_expired',
-                                        models.CouponData.objects.filter(status=3).count())
-        if not tickets_raised:
-            tickets_raised = set_cache('gm_ticket_raised',
-                                       models.Feedback.objects.all().count())
-        if not tickets_progress:
-            tickets_progress = set_cache('gm_ticket_progress',
-                                       models.Feedback.objects.filter(status="In Progress").count())
-
-        return map(CustomApiObject, [{"id": "1", "name": "#of Vins", "value": vins},
-                                     {"id": "2", "name": "Service Coupons Closed",
-                                      "value": coupons_closed},
-                                     {"id": "3", "name": "Service Coupons In Progress",
-                                      "value": coupons_progress},
-                                     {"id": "4", "name": "Service Coupons Expired",
-                                      "value": coupons_expired},
-                                     {"id": "5", "name": "Tickets Raised",
-                                      "value": tickets_raised},
-                                     {"id": "6", "name": "Tickets In Progress",
-                                      "value": tickets_progress}
+        return map(CustomApiObject, [create_dict(["1", "#of Vins", vins]),
+                                     create_dict(["2", "Service Coupons Closed",
+                                                  coupons_closed]),
+                                     create_dict(["3", "Service Coupons In Progress",
+                                                  coupons_progress]),
+                                     create_dict(["4", "Service Coupons Expired",
+                                                  coupons_expired]),
+                                     create_dict(["5", "Tickets Raised",
+                                                  tickets_raised]),
+                                     create_dict(["6", "Tickets In Progress",
+                                                  tickets_progress]),
+                                     create_dict(["7", "# of Dealers",
+                                                  dealers]),
+                                     create_dict(["8", "# of Active Dealers",
+                                                  dealers_active]),
+                                     create_dict(["7", "# of ASCs",
+                                                  ascs]),
+                                     create_dict(["8", "# of Active ASCs",
+                                                  ascs_active])
                                      ]
                    )
 
 
-def set_cache(key, data, timeout=60*15):
-    cache.set(key, data, timeout)
-    return data
+_KEYS_FEED = ["status", "type", "success_count", "failure_count"]
+
+
+def create_feed_dict(values, keys=_KEYS_FEED):
+    return dict(zip(keys, values))
+
+
+class FeedStatusResource(CustomBaseResource):
+    """
+    It is a preferences resource
+    """
+    status = fields.CharField(attribute="status")
+    feed_type = fields.CharField(attribute="type")
+    success = fields.CharField(attribute="success_count")
+    failure = fields.CharField(attribute="failure_count")
+
+    class Meta:
+        resource_name = 'feeds-status'
+        authentication = AccessTokenAuthentication()
+        object_class = CustomApiObject
+
+    def obj_get_list(self, bundle, **kwargs):
+        self.is_authenticated(bundle.request)
+        filters = {}
+        params = {}
+        if hasattr(bundle.request, 'GET'):
+            params = bundle.request.GET.copy()
+        dtstart = params.get('created_date__gte')
+        dtend = params.get('created_date__lte')
+        if dtstart:
+            filters['created_date__gte'] = dtstart
+        if dtend:
+            filters['created_date__lte'] = dtend
+
+        data = []
+        for status in [FeedStatus.SENT, FeedStatus.RECEIVED]:
+            filters['status'] = status
+            for feed_type in FEED_TYPES:
+                filters['feed_type'] = feed_type
+                success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
+                data.append(create_feed_dict([status,
+                                              feed_type,
+                                              success_count,
+                                              failure_count]))
+        return map(CustomApiObject, data)

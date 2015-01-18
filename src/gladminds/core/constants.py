@@ -147,3 +147,8 @@ GP_REDEMPTION_STATUS = (
         ('Shipped', 'Shipped'),
         ('Delivered', 'Delivered')
     )
+
+class FeedStatus():
+    RECEIVED = 'Received'
+    SENT = 'Sent'
+    

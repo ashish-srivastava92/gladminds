@@ -6,13 +6,13 @@ from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import MultiAuthorization
 from tastypie.authentication import MultiAuthentication
 from gladminds.core.model_fetcher import models
-from gladminds.core.apis.user_apis import ServiceAdvisorResources
 from gladminds.core.apis.product_apis import ProductResource
+from gladminds.core.apis.user_apis import ServiceAdvisorResource
 
 
 class CouponDataResources(CustomBaseModelResource):
     product = fields.ForeignKey(ProductResource, 'product', full=True)
-    service_advisor = fields.ForeignKey(ServiceAdvisorResources, 'service_advisor',
+    service_advisor = fields.ForeignKey(ServiceAdvisorResource, 'service_advisor',
                                         full=True, null=True, blank=True)
 
     class Meta:
