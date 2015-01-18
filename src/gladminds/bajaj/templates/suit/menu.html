@@ -15,6 +15,7 @@
     {% get_menu request as app_list %}
     {% if app_list %}
       {% for app in app_list %}
+      {% if app.models %}
         {% if app.separator %}
           <li class="separator"></li>
         {% else %}
@@ -30,6 +31,7 @@
               </ul>
             {% endif %}
           </li>
+        {% endif %}
         {% endif %}
       {% endfor %}
        <li {{ model.is_active|yesno:' class=active,' }}><a><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>DFSC Report

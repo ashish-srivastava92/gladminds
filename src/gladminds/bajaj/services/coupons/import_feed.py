@@ -10,7 +10,7 @@ from django.db.models.signals import post_save
 from django.contrib.auth.models import User, Group
 from django.db.models import signals
 
-from gladminds.bajaj.services import message_template as templates
+from gladminds.core.services import message_template as templates
 from gladminds.core import utils
 from gladminds.bajaj import models
 from gladminds.core.managers.audit_manager import feed_log, sms_log

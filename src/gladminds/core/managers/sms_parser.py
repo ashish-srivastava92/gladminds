@@ -1,7 +1,7 @@
 import logging
 logger = logging.getLogger('gladminds')
 from parse import *
-from gladminds.bajaj.services import message_template as templates
+from gladminds.core.services import message_template as templates
 
 class SmsException(Exception):
     def __init__(self, message=None, template=None):
@@ -17,7 +17,11 @@ def sms_parser(*args, **kwargs):
     message = kwargs['message']
 
     parse_message = parse(templates.RCV_MESSAGE_FORMAT, message)
-
+    #FIXME: Find a generic way to handle message
+    if not parse_message:
+        message = message + " message"
+        parse_message = parse(templates.RCV_MESSAGE_FORMAT, message)
+        
     keyword = None
     try:
         keyword = parse_message['key']

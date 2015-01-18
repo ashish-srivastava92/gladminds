@@ -9,7 +9,7 @@ from gladminds.core.managers.sms_client_manager import load_gateway, MessageSent
 from gladminds.core.managers import mail
 from gladminds.core.cron_jobs import taskmanager
 from gladminds.bajaj.services.coupons import import_feed, export_feed
-from gladminds.bajaj.services import  message_template as templates
+from gladminds.core.services import  message_template as templates
 
 import pytz
 import logging

@@ -18,7 +18,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import F
 
 from gladminds.bajaj import models
-from gladminds.bajaj.services import message_template
 from gladminds.core import utils
 from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message,\
     send_mail_for_feed_failure
@@ -34,7 +33,7 @@ from gladminds.core.auth_helper import Roles
 from gladminds.core.auth.service_handler import check_service_active, Services
 from gladminds.core.core_utils.utils import log_time
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
-from gladminds.bajaj.services.message_template import get_template
+from gladminds.core.services.message_template import get_template
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services.coupons import export_feed
 
@@ -119,7 +118,7 @@ def generate_otp(request):
                 phone_number = (user_profile_obj[0]).phone_number
             logger.info('OTP request received . username: {0}'.format(username))
             token = utils.get_token(user, phone_number, email=user.email)
-            message = message_template.get_template('SEND_OTP').format(token)
+            message = get_template('SEND_OTP').format(token)
             send_job_to_queue(send_otp, {'phone_number': phone_number, 'message': message,
                                          'sms_client': settings.SMS_CLIENT})
             logger.info('OTP sent to mobile {0}'.format(phone_number))

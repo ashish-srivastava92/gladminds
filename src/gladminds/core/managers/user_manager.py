@@ -60,3 +60,4 @@ class SparePartUPCManager(models.Manager):
 class SparePartPointManager(models.Manager):
     def get_part_number(self, valid_product_number):
         return super(SparePartPointManager, self).get_query_set().filter(part_number__in=valid_product_number)
+
