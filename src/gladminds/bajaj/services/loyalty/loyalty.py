@@ -21,11 +21,23 @@ AUDIT_ACTION = 'SEND TO QUEUE'
 class LoyaltyService(CoreLoyaltyService):
     '''Class for loyalty service'''
 
+    def send_request_status_sms(self, redemption_request):
+        '''Send redemption request sms to mechanics'''
+        member = redemption_request.member
+        phone_number=utils.get_phone_number_format(member.phone_number)
+        message=get_template('REDEMPTION_PRODUCT_STATUS').format(
+                        mechanic_name=member.first_name,
+                        transaction_id=redemption_request.transaction_id,
+                        status=redemption_request.status.lower())
+        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
+                    'message': message, "sms_client": settings.SMS_CLIENT})
+
     def send_welcome_sms(self, mech):
         '''Send welcome sms to mechanics when registered'''
         phone_number=utils.get_phone_number_format(mech.phone_number)
         message=get_template('WELCOME_MESSAGE').format(
-                        mechanic_name=mech.first_name,)
+                        mechanic_name=mech.first_name)
         sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
         self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})

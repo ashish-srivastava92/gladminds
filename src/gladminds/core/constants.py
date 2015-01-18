@@ -122,7 +122,14 @@ COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 MAX_UCP_ALLOWED=10
 MANDATORY_MECHANIC_FIELDS = ['first_name', 'date_of_birth', 'phone_number', 'shop_name', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url']
 
+FORM_STATUS_CHOICES = (
+                       ('Complete', 'Complete'),
+                       ('Incomplete', 'Incomplete'),
+                       )
+
 FEED_TYPES = ['Dispatch Feed', 'Purchase Feed', 'Credit Note Feed', 'CDMS Feed']
+
+STATUS_TO_NOTIFY = ['Approved', 'Rejected', 'Accepted', 'Shipped', 'Delivered']
 
 REDEMPTION_STATUS = (
         ('Open', 'Open'),

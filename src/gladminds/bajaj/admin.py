@@ -402,8 +402,7 @@ class MechanicAdmin(GmModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if not obj.id:
-            service_handler=LoyaltyService()
-            service_handler.send_welcome_sms(obj)
+            LoyaltyService.send_welcome_sms(obj)
             obj.sent_sms=True
         obj.phone_number=utils.mobile_format(obj.phone_number)
         super(MechanicAdmin, self).save_model(request, obj, form, change)    
@@ -491,7 +490,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
                      'get_mechanic_district', 'get_mechanic_state',
                      'product', 'created_date', 'transaction_id',
                      'expected_delivery_date', 'status')
-    
+
     def queryset(self, request):
         """
         Returns a QuerySet of all model instances that can be edited by the
@@ -513,6 +512,11 @@ class RedemptionRequestAdmin(GmModelAdmin):
         else:
             form.base_fields['status'].choices = constants.GP_REDEMPTION_STATUS    
         return form
+
+    def save_model(self, request, obj, form, change):
+        super(RedemptionRequestAdmin, self).save_model(request, obj, form, change)
+        if 'status' in form.changed_data and obj.status in constants.STATUS_TO_NOTIFY:
+            LoyaltyService.send_request_status_sms(obj)
 
     def suit_row_attributes(self, obj):
         class_map = {

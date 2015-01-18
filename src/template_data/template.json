@@ -450,7 +450,7 @@
     "pk": 50,
     "fields": {
       "template_key":"INCOMPLETE_FORM",
-      "template":"Incomplete form status. Please contact our customer care 9611545154 to complete the form",
+      "template":"Incomplete form status. Please contact our customer care 9611545154 to complete the form.",
       "description":"Send this message when mechanic has incomplete form"
     }
   },
@@ -523,6 +523,15 @@
     "fields": {
       "template_key":"INVALID_MEMBER_ID",
       "template":"Dear {mechanic_name}, Invalid MembershipID. Please refer Membership card for your ID.",
+      "description":"Send this message when member-ID does not match our records"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 59,
+    "fields": {
+      "template_key":"REDEMPTION_PRODUCT_STATUS",
+      "template":"Dear {mechanic_name}, Ref Req ID - {transaction_id}, your request is {status}.",
       "description":"Send this message when member-ID does not match our records"
     }
   }
