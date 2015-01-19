@@ -28,7 +28,7 @@ class ServiceAdvisorManager(models.Manager):
         return super(ServiceAdvisorManager, self).get_query_set().all().count()
 
     def active_count(self):
-        return super(ServiceAdvisorManager, self).get_query_set().filter(status='Y')
+        return super(ServiceAdvisorManager, self).get_query_set().filter(status='Y').count()
 
     def active_under_dealer(self, dealer):
         return super(ServiceAdvisorManager, self).get_query_set().filter(dealer=dealer, status='Y')
