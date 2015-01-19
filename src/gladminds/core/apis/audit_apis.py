@@ -44,5 +44,5 @@ class DataFeedLogResource(CustomBaseModelResource):
         always_return_data = True
         filtering = {
                         "feed_type": ALL,
-                        "status": ALL
+                        "action": ALL
                      }
