@@ -10,7 +10,7 @@ from gladminds.core.apis.product_apis import ProductResource
 from gladminds.core.apis.user_apis import ServiceAdvisorResource
 
 
-class CouponDataResources(CustomBaseModelResource):
+class CouponDataResource(CustomBaseModelResource):
     product = fields.ForeignKey(ProductResource, 'product', full=True)
     service_advisor = fields.ForeignKey(ServiceAdvisorResource, 'service_advisor',
                                         full=True, null=True, blank=True)
