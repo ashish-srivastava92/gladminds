@@ -1,0 +1,20 @@
+#!/usr/bin/python
+
+import sys, os, string, re
+
+# return true or false if this passed string is a valid comment
+def check(comment):
+    comment = str(comment)
+    #define regular expression
+    p = re.match("^[G,g][M,m][:,-][0-9]", comment)
+    return (p != None) #returns false if doesn't match
+
+def result():
+    print "Comments must have the format: Beginning with Gladminds jira id followed by comment eg .GM-{id} Bla bla\n"
+
+
+if __name__ == '__main__':
+    comment = open(sys.argv[1], 'r').read()
+    if not check(comment):
+        result()
+        sys.exit(1)

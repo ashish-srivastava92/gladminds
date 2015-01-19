@@ -1,3 +1,4 @@
+
 # Django settings for gladminds project.
 import os
 import djcelery
@@ -10,6 +11,7 @@ STATIC_DIR = os.path.join(PROJECT_DIR, "static")
 TEMPLATE_DIR = os.path.join(PROJECT_DIR, "templates")
 EMAIL_DIR = os.path.join(TEMPLATE_DIR, "email")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
+LOG_BASE_PATH = '/var/log/gladminds'
 
 TIMEZONE = 'Asia/Kolkata'
 
@@ -18,15 +20,26 @@ ALLOWED_HOSTS = ['*']
 ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
                     'service', 'check': 'a', 'close': 'c', 'brand': 'brand',
                     'service_desk': 'sd', 'customer_detail_recovery': 'r',
-                    'accumulate_point':'ac', 'redeem_point':'rd'}
-ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
-)
-COUPON_VALID_DAYS = 30
+                    'accumulate_point':'ac', 'redeem_point':'rd',
+                    'check_point_balance':'chkbal'}
 
+ADMINS = (
+    ('somit', 'somit@hashedin.com'),
+    ('naureen', 'naureen.razi@hashedin.com'),
+    ('priyanka', 'priyanka.n@hashedin.com')
+)
+API_FLAG = False
+COUPON_VALID_DAYS = 30
+COUPON_URL = 'local.bajaj.gladmindsplatform.co'
 TOTP_SECRET_KEY = '93424'
 OTP_VALIDITY = 120
-
+HARCODED_OTPS = ['000000']
+HARCODED_TOKEN = ['e6281aa90743296987089ab013ee245dab66b27b']
+IGNORE_ENV = ['dev', 'local', 'test']
+PASSWORD_REST_URL = ''
+ACCOUNT_ACTIVATION_DAYS = 10
+DOMAIN_BASE_URL = '/afterbuy/v1/consumers/activate-email/'
+OAUTH_DELETE_EXPIRED = True
 JOBCARD_DIR = '{0}/jobcards/prod/'
 JOBCARD_BUCKET = 'gladminds'
 
@@ -39,6 +52,7 @@ S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 
 TEMPLATE_CONTEXT_PROCESSORS = TCP + (
+    'gladminds.core.context_processors.gm_constants',
     'django.core.context_processors.request',
 )
 
@@ -51,56 +65,115 @@ SUIT_CONFIG = {
     'LIST_PER_PAGE': 20,
     'SHOW_REQUIRED_ASTERISK': True,
     'MENU': (
-        {'app': 'gladminds', 'label': 'Data', 'icon': ' icon-folder-open',
-         'models': ({'model': 'dispatchedproduct',
-                     'label': 'Feed -> Product Dispatch'},
+        {'app': 'bajaj', 'label': 'Users', 'icon': ' icon-folder-open',
+         'models': ('user', 'userprofile',
+                    {'model': 'dealer',
+                     'label': 'Dealer'},
+                    {'model': 'authorizedservicecenter',
+                     'label': 'Authorized Service Center'},
+                    {'model': 'serviceadvisor',
+                     'label': 'Service Advisor'},)},
+        {'app': 'bajaj', 'label': 'Products', 'icon': ' icon-folder-open',
+         'models':({'model': 'brandproductcategory',
+                     'label': 'Brand Product Category'},
+                    {'model': 'producttype',
+                     'label': 'Product Type'},
+                    {'model': 'dispatchedproduct',
+                     'label': 'Product Dispatch'},
                     {'model': 'productdata',
-                     'label': 'Feed -> Product Purchase'},
+                     'label': 'Product Purchase'},
                     {'model': 'coupondata',
-                     'label': 'Feed -> Coupon Redemption'},
-                    {'model': 'ascsaveform',
-                     'label': 'Save Form -> ASC'},
-                    {'model': 'auditlog', 'label': 'Audit Log'},
+                     'label': 'Coupon Redemption'},)},
+        {'app': 'bajaj', 'label': 'Logs', 'icon': ' icon-folder-open',
+         'models':(
+                    {'model': 'smslog',
+                     'label': 'SMS Log'},
+                   {'model': 'emaillog',
+                     'label': 'Email Log'},
                     {'model': 'datafeedlog',
                      'label': 'Feed Log'},
+                   {'model': 'feedFailureLog',
+                     'label': 'Feed Failure Log'})},
+        {'app': 'bajaj', 'label': 'Loyalty', 'icon': ' icon-folder-open',
+         'models':(
+                    {'model': 'nationalsalesmanager',
+                     'label': 'National Sales Manager'},
+                   {'model': 'areasalesmanager',
+                     'label': 'Area Sales Manager'},
+                    {'model': 'distributor',
+                     'label': 'Distributor'},
+                   {'model': 'mechanic',
+                     'label': 'Mechanic'},
+                   {'model': 'sparepartmasterdata',
+                     'label': 'Spare Part Master Data'},
+                   {'model': 'sparepartupc',
+                     'label': 'Spare Part UPC'},
+                   {'model': 'sparepartpoint',
+                     'label': 'Spare Part Point'},
+                   {'model': 'accumulationrequest',
+                     'label': 'Accumulation Request'},
+                   {'model': 'productcatalog',
+                     'label': 'Product Catalog'},
+                   {'model': 'redemptionrequest',
+                     'label': 'Redemption Request'},)},
+        {'app': 'bajaj', 'label': 'User Registrations', 'icon': ' icon-folder-open',
+         'models':(
+                    {'model': 'asctempregistration',
+                     'label': ' ASC registration'},
+                    {'model': 'satempregistration',
+                     'label': 'SA registration'},
                     {'model': 'customertempregistration',
-                     'label': ' Customer registration'}, 'uploadproductcsv',
-                    'messagetemplate', 'emailtemplate', 'gladmindusers',)},
-        {'app': 'aftersell', 'label': 'AfterSell', 'icon': ' icon-folder-open',
-         'models': ({'model': 'serviceadvisordealerrelationship', 'label': 'Feed -> Service Advisor'},
-                    {'model': 'ascsaveform',
-                     'label': 'Save Form -> ASC'},
-                    {'model': 'auditlog', 'label': 'Audit Log'},
-                    {'model': 'datafeedlog',
-                     'label': 'Feed Log'},
-                    {'model': 'feedback',
-                     'label': 'Help Desk'}, 'uploadproductcsv',
-                    'messagetemplate', 'emailtemplate', 'gladmindusers',)},
-        {'app': 'gladminds', 'label': 'Loyalty', 'icon': ' icon-folder-open',
-         'models': ({'model': 'mechanic', 'label': 'Mechanic'},
-				    {'model': 'sparepart', 'label': 'Spare Part'},
-				    {'model': 'productcatalog', 'label': 'Product Catalog'},)},
-        {'app': 'afterbuy', 'label': 'AfterBuy', 'icon': ' icon-folder-open',
-         'models': ({'model': 'usernotification', 'label': 'notification'},)},
-        {'app': 'djcelery', 'label': 'Job Management', 'icon': 'icon-tasks'})
+                     'label': ' Customer registration'},)},
+        {'app': 'bajaj', 'label': 'Templates', 'icon': ' icon-folder-open',
+         'models':(
+                    'messagetemplate', 'emailtemplate',)},)
 }
 
 
 MANAGERS = ADMINS
 
+DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
+
+# Mapping is first app name then db name
+DATABASE_APPS_MAPPING = {
+                         'default': 'default',
+                         'bajaj':'bajaj',
+                         'demo': 'demo',
+                         'afterbuy':'afterbuy'
+                    }
+
 DATABASES = {
     'default': {
-        # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'ENGINE': 'django.db.backends.sqlite3',
-        # Or path to database file if using sqlite3.
-        'NAME': 'gladminds.db',
-        # The following settings are not used with sqlite3:
+        'NAME': 'gm',
         'USER': '',
         'PASSWORD': '',
-        # Empty for localhost through domain sockets or '127.0.0.1' for
-        # localhost through TCP.
         'HOST': '',
-        'PORT': '',  # Set to empty string for default.
+        'PORT': '',
+    },
+    'bajaj': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'bajaj',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    },
+    'demo': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'demo',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    },
+    'afterbuy': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'afterbuy',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
     }
 }
 
@@ -161,6 +234,7 @@ STATICFILES_DIRS = (
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
+   # 'gladminds.core.custom_staticfiles_loader.FileSystemFinder',                   
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
@@ -176,23 +250,40 @@ TEMPLATE_LOADERS = (
                     #         'django.template.loaders.filesystem.Loader',
                     #         'django.template.loaders.app_directories.Loader',
                     #     )),
+                    'gladminds.core.loaders.custom_template_loader.Loader',
                     'django.template.loaders.filesystem.Loader',
                     'django.template.loaders.app_directories.Loader',
                     #  'django.template.loaders.eggs.Loader',
                    )
 
-MIDDLEWARE_CLASSES = ('django.middleware.common.CommonMiddleware',
-                      'django.contrib.sessions.middleware.SessionMiddleware',
-                      'django.contrib.auth.middleware.AuthenticationMiddleware',
-                      'django_otp.middleware.OTPMiddleware',
-                      # 'django.middleware.csrf.CsrfViewMiddleware',
-                      'django.contrib.messages.middleware.MessageMiddleware',
-                      'corsheaders.middleware.CorsMiddleware',
-                      'gladminds.middleware.GladmindsMessageMiddleware'
-                      # 'gladminds.middleware.GladmindsMiddleware'
-                      # Uncomment the next line for simple clickjacking protection:
-                      # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-                   )
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+#         'LOCATION': 'log/django_cache',
+#     }
+# }
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'gm-dashboard'
+    }
+}
+
+MIDDLEWARE_CLASSES = (
+    'gladminds.core.middlewares.dynamicsite_middleware.DynamicSitesMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django_otp.middleware.OTPMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'gladminds.core.middlewares.middleware.GladmindsMessageMiddleware',
+#     'gladminds.middleware.GladmindsMiddleware'
+    # Uncomment the next line for simple clickjacking protection:
+    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+                     )
 
 CORS_ORIGIN_ALLOW_ALL = True
 ROOT_URLCONF = 'gladminds.urls'
@@ -207,33 +298,41 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-INSTALLED_APPS = (
+TEST_IGNORE_APPS = (# 'south',
+                    )
+
+ALL_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
     'suit',
     'django.contrib.admin',
     'import_export',
-    'gladminds.models',
-    'gladminds.superadmin',
-    'gladminds.afterbuy',
-    'gladminds.aftersell',
+    'provider',
+    'provider.oauth2',
     'gladminds',
+    'gladminds.default',
+    'gladminds.core',
+    'gladminds.bajaj',
+    'gladminds.demo',
+    'gladminds.afterbuy',
     'djcelery',
     'corsheaders',
     'storages',
     'tastypie_swagger',
     'django_otp',
     'django_otp.plugins.otp_totp',
-    'provider',
-    'provider.oauth2',
-    'debug_toolbar',
+    'constance.backends.database'
+   # 'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
+
+INSTALLED_APPS = ALL_APPS + TEST_IGNORE_APPS
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
@@ -306,48 +405,64 @@ LOGGING = {
             'propagate': True,
         },
         'gladminds': {
-            'handlers': ['gladminds_logs','console'],
+            'handlers': ['gladminds_logs', 'console'],
             'level': 'INFO',
             'propagate': True,
         },
         'spyne': {
-            'handlers': ['gladminds_logs','console'],
+            'handlers': ['gladminds_logs', 'console'],
             'level': 'WARN',
             'propagate': True,
         }, 'afterbuy': {
-            'handlers': ['afterbuy_logs','console'],
+            'handlers': ['afterbuy_logs', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }, 'suds.client': {
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
         }
     }
 }
 
-WSDL_COUPON_REDEEM_LOC = TEMPLATE_DIR + '/coupon_redeem.wsdl'
 
-WSDL_CUSTOMER_REGISTRATION_LOC = TEMPLATE_DIR + '/customer_registration.wsdl'
+CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
+COUPON_WSDL = 'qa_coupon_redeem.wsdl'
+VIN_SYNC_WSDL='qa_vin_sync.wsdl'
 
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
     "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds@hashedin.com", "naveen.shankar@gladminds.co", "support@gladminds.co","jojibabu.vege@gladminds.co"],
+    "receiver": ["gladminds@hashedin.com", "naveen.shankar@gladminds.co"],
     "subject": "Gladminds Feed Report",
     "body": """""",
 }
 
-FEED_FAILURE_MAIL_DETAIL = {
+FEED_FAILURE = {
+    "sender": "feed-report@gladminds.co",
+    "receiver": ["gladminds@hashedin.com"],
+    "subject": "Gladminds Failure Report - ",
+    "body": """""",
+}
+
+VIN_SYNC_FEED = {
+                 "receiver": ["priyanka.n@hashedin.com"],
+                 }
+
+CUSTOMER_PHONE_NUMBER_UPDATE = {
 
     "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds+alerts@hashedin.com", "support@gladminds.co"],
-    "subject": "Gladminds Feed Failure Mail",
+    "receiver": ["gladminds@hashedin.com"],
+    "subject": "Gladminds customer phone number update",
     "body": """""",
 }
 
 UCN_RECOVERY_MAIL_DETAIL = {
-    "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds@hashedin.com"],
-    "subject": "Gladminds UCN Recovery Mail",
-    "body": """""",
-}
+                            "sender": "feed-report@gladminds.co",
+                            "receiver": ["gladminds@hashedin.com"],
+                            "subject": "Gladminds UCN Recovery Mail",
+                            "body": """""",
+                           }
 
 VIN_DOES_NOT_EXIST_DETAIL = {
     "sender": "support@gladminds.co",
@@ -363,11 +478,33 @@ REGISTER_ASC_MAIL_DETAIL = {
     "body": """""",
 }
 
-OTP_MAIL = {"sender":"support@gladminds.co",
-            "subject":"Reset Password",
-            "receiver": [""],
-            "body": """""",}
+OTP_MAIL = {
+                  "sender":"support@gladminds.co",
+                  "subject":"Reset Password",
+                  "receiver": [""],
+                  "body": """""",
+              }
 
+PASSWORD_RESET_MAIL = {
+                  "sender":"support@gladminds.co",
+                  "subject":"Reset Password",
+                  "receiver": [""],
+                  "body": """""",
+              }
+
+EMAIL_ACTIVATION_MAIL = {
+                  "sender":"support@gladminds.co",
+                  "subject":"Confirm your email address",
+                  "receiver": [""],
+                  "body": """""", }
+
+RECYCLE_MAIL = {
+                "sender":"support@gladminds.co",
+                "subject":"Product for recycle",
+                "receiver": ["demosupport@gladminds.co"],
+                "body": """""",
+                
+                }
 
 # AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
@@ -384,8 +521,12 @@ MEDIA_URL = '/media/'
 
 # S3 Configuration
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_STORAGE_BUCKET_NAME = 'afterbuy'
-# S3_URL = 'http://%s.s3-website-us-east-1.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+
+AWS_STORAGE_BUCKET_MAP = {'afterbuy': 'afterbuy'}
+AWS_STORAGE_BUCKET_NAME = 'gladminds-brands'
+S3_BASE_URL = 'https://%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif']
+MAX_UPLOAD_IMAGE_SIZE = 4.0
 
 
 DEFAULT_COUPON_STATUS = 1
@@ -425,10 +566,12 @@ SMS_HEALTH_CHECK_INTERVAL = 6
 #######################FEED_HEALTH_CHECK_INTERVAL
 FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
+BRAND = None
+GM_BRAND = 'default'
+BRANDS = ['bajaj', 'demo', 'afterbuy']
+###############################################
 AIRTEL_IP = '54.84.243.77'
-
-SMS_CLIENT="AIRTEL"
-
+SMS_CLIENT = "MOCK"
 SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                               'pass':'bajaj',
                               'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',
@@ -438,7 +581,32 @@ SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                           'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
                           'working_key': '2uj6gnnnlbx37x436cppq87176j660w9',
                           'sender_id': 'GLADMS',
-                          'params': 'kap'}
+                          'params': 'kap'},
+                  'MOCK': {}
                   }
+
+ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},
+          'demo': {'user': 'demo', 'password': 'demo'},
+          'afterbuy': {'user': 'afterbuy', 'password': 'afterbuy'},
+          'default': {'user': 'gladminds', 'password': 'gladminds'}
+          }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True
+
+DEFAULT_IMAGE_ID = 'guest.png'
+
+CONSTANCE_CONFIG = {
+    'DEFAULT_IMAGE': ('guest.png', 'Default image to be used by any app'),
+    'AFTERBUY_FORGOT_PASSWORD_URL': ('http://afterbuy.co/demo/staging_qw741qaz5/change-password.php', 'Afterbuy forgot password url'),
+    'AFTERBUY_RECYCLE_EMAIL_RECIPIENT' : ('demosupport@gladminds.co', 'Default Email for recycle')
+}
+
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+SAP_CRM_DETAIL = {
+                  'username':'pisuper',
+                  'password':'welcome123'
+                  }
+FILE_CACHE_DURATION = 0
+VIN_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/vin-sync-feed/?wsdl&v0"
+VIN_SYNC_WSDL='qa_vin_sync.wsdl'

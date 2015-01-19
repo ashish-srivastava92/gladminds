@@ -15,7 +15,7 @@ FILE_NAME = 'build.zip'
 
 version = "build_"+str(int(time.time()))
 APPLICATION_NAME = 'Gladminds' #Replace this with the elastic beanstalk application, ask from admin
-ENVIRONMENT_NAME = 'gladminds-worker-prod'#Replace this with the elastic beanstalk dev environment name, ask from admin
+ENVIRONMENT_NAME = 'gladminds-web-prod-2-1'#Replace this with the elastic beanstalk dev environment name, ask from admin
 
 ACCESS_KEY = 'AKIAIL7IDCSTNCG2R6JA'
 SECRET_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
@@ -98,7 +98,11 @@ def test_unit():
     '''Runs All Tests in tests/unit package'''
     test('unit')
 
-
+@task()
+def test_smoke(package):
+    '''Runs All Tests in tests/integration package'''
+    COVERAGE_ENABLED = False
+    test('smoke.{0}'.format(package))
     
 
 # Include new commands for deployment to elastic beanstalk
@@ -118,20 +122,22 @@ def create_new_version(version):
 def create_new_prod_version(version):
     upload_to_s3(BUCKET_NAME, version, FILE_NAME)
     create_version(APPLICATION_NAME, version)
-    ENVIRONMENT_NAME = 'gladminds-worker-prod'
-    update_environment(ENVIRONMENT_NAME, version)
     
-    ENVIRONMENT_NAME = 'gladminds-web-prod'
+    ENVIRONMENT_NAME = 'gladminds-work-prod-2-1'
+    update_environment(ENVIRONMENT_NAME, version)
+
+    ENVIRONMENT_NAME = 'gladminds-web-prod-2-1'
     update_environment(ENVIRONMENT_NAME, version)
 
 @task()
 def create_new_qa_version(version):
     upload_to_s3(BUCKET_NAME, version, FILE_NAME)
     create_version(APPLICATION_NAME, version)
-    ENVIRONMENT_NAME = 'gladminds-worker-qa'
+
+    ENVIRONMENT_NAME = 'gladminds-worker-qa2'
     update_environment(ENVIRONMENT_NAME, version)
     
-    ENVIRONMENT_NAME = 'gladminds-webserver-qa'
+    ENVIRONMENT_NAME = 'gladminds-webserver-qa2'
     update_environment(ENVIRONMENT_NAME, version)
 
 def upload_to_s3(bucket_name, key, file_name):

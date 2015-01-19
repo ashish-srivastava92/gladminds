@@ -8,6 +8,7 @@ STATIC_DIR = os.path.join(BASE_DIR, "src/static")
 TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
+DB_PASSWORD = os.environ.get('DB_PASSWORD')
 
 DEBUG = False
 ALLOWED_HOSTS = ['*']
@@ -18,10 +19,34 @@ MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gladmindsdb',
+        'NAME': 'gm',
         'USER': 'gladminds',
-        'PASSWORD': 'gladminds123',
-        'HOST': 'gladminds-production.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': 'gladminds-prod.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'PORT': '3306',
+    },
+    'bajaj': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'bajaj',
+        'USER': 'gladminds',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': 'gladminds-prod.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'PORT': '3306',
+    },
+    'demo': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'demo',
+        'USER': 'gladminds',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': 'gladminds-prod.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'PORT': '3306',
+    },
+    'afterbuy': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'afterbuy',
+        'USER': 'gladminds',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': 'gladminds-prod.chnnvvffqwop.us-east-1.rds.amazonaws.com',
         'PORT': '3306',
     }
 }
@@ -54,11 +79,11 @@ TEMPLATE_DIRS = (
 #                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/Messages.json'
 #                 }
 
-FILE_CACHE_DURATION = 0
-
-SMS_CLIENT="AIRTEL"
+FILE_CACHE_DURATION = 1800
 
 FEED_TYPE = 'CSV'
+
+SMS_CLIENT = "AIRTEL"
 
 #AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
@@ -75,19 +100,21 @@ MEDIA_URL = '/media/'
 
 #S3 Configuration
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 
-SAP_CRM_DETAIL = {'username':'pisuper',
-                  'password':'welcome123'}
-ASC_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/bajaj/asc-feed/?wsdl&v0"
-COUPON_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl&v0"
+SAP_CRM_DETAIL = {
+                  'username':'pisuper',
+                  'password':'welcome123'
+                  }
+ASC_WSDL_URL = "http://bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
+COUPON_WSDL_URL = "http://bajaj.gladminds.co/api/v1/redeem-feed/?wsdl&v0"
 COUPON_WSDL = 'prod_coupon_redeem.wsdl'
-CUSTOMER_REGISTRATION_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/bajaj/customer-feed/?wsdl&v0"
+CUSTOMER_REGISTRATION_WSDL_URL = "http://bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL = 'prod_customer_registration.wsdl'
 
 ENABLE_AMAZON_SQS = True
 
-AFTER_BUY_CONSTANTS = {"username": 'support@gladminds.com',
+AFTER_BUY_CONSTANTS = {
+                       "username": 'support@gladminds.com',
                        "password": 'gladminds123',
                        "key_prefix": 'qa',
                        "app_path": 'afterbuy_script/afterbuy.zip',
@@ -98,20 +125,95 @@ AFTER_BUY_CONSTANTS = {"username": 'support@gladminds.com',
                        "create_method": "file",
                        "package": "com.gladminds.afterbuyv1",
                        "version": "0.1.0",
-                       "title": "Afterbuy V1 App"}
+                       "title": "Afterbuy V1 App"
+                       }
 
 ########################SQS Queue Name##################################
-SQS_QUEUE_NAME = "gladminds-prod"
+SQS_QUEUE_NAME = "gladminds-prod2"
 ########################################################################
-FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail"
-UCN_RECOVERY_MAIL_DETAIL["receiver"] = ["gladminds@hashedin.com"," nvhasabnis@bajajauto.co.in","ssozarde@bajajauto.co.in","jojibabu.vege@gladminds.co","support@gladminds.co"]
-VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["jojibabu.vege@gladminds.co","ssozarde@bajajauto.co.in","skdixit@bajajauto.co.in","nvhasabnis@bajajauto.co.in"]
+UCN_RECOVERY_MAIL_DETAIL["receiver"] = ["gladminds@hashedin.com", "nvhasabnis@bajajauto.co.in", "ssozarde@bajajauto.co.in","jojibabu.vege@gladminds.co","support@gladminds.co"]
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["jojibabu.vege@gladminds.co","ssozarde@bajajauto.co.in","skdixit@bajajauto.co.in","nvhasabnis@bajajauto.co.in","gladminds+alerts@hashedin.com"]
+FEED_FAILURE["subject"] = "Consolidated Report: GladMinds Feed Failure - "
+FEED_FAILURE["receiver"] = ["jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in", "skolluri@bajajauto.co.in",
+                            "sudhir.patil@gladminds.co", "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
+                            "gladminds+alerts@hashedin.com", "naveen.shankar@gladminds.co"]
+CUSTOMER_PHONE_NUMBER_UPDATE["receiver"] = ["jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in",
+                                            "skolluri@bajajauto.co.in", "sudhir.patil@gladminds.co",
+                                            "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
+                                            "gladminds+alerts@hashedin.com"]
+VIN_SYNC_FEED["receiver"] = ["rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in", "ssozarde@bajajauto.co.in", "gladminds+alerts@hashedin.com"]
+
 ########################################################################
 ###################Change Mail Subject on Prod##########################
-MAIL_DETAIL["subject"] = "GladMinds Feed Report"
+MAIL_DETAIL["subject"] = "Report: GladMinds Feed Summary"
+MAIL_DETAIL["receiver"] = ["jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in", "skolluri@bajajauto.co.in",
+                            "sudhir.patil@gladminds.co", "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
+                            "gladminds+alerts@hashedin.com", "naveen.shankar@gladminds.co", "sudhir.patil@gladminds.co"]
+
 #######################Feed Fail Failure Info###########################
 FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/dev/'
 FEED_FAILURE_BUCKET = 'gladminds'
 #######################################################################
 ENABLE_SERVICE_DESK = False
+ENV = "prod"
+
+WSDL_TNS="http://bajaj.gladminds.co/api/v1/feed/"
+
+ADMIN_DETAILS = {'bajaj': {'user': 'bajaj001', 'password': 'bajaj001'},
+          'demo': {'user': 'demo', 'password': 'demo'},
+          'afterbuy': {'user': 'afterbuy', 'password': 'afterbuy'},
+          'default': {'user': 'gladminds', 'password': 'gladminds'}
+          }
+
+
+SUIT_CONFIG = {
+    'ADMIN_NAME': 'GladMinds',
+    'CONFIRM_UNSAVED_CHANGES': True,
+    'SEARCH_URL': '',
+    'MENU_EXCLUDE': ('auth.group', 'auth', 'sites'),
+    'MENU_OPEN_FIRST_CHILD': True,
+    'LIST_PER_PAGE': 20,
+    'SHOW_REQUIRED_ASTERISK': True,
+    'MENU': (
+        {'app': 'bajaj', 'label': 'Users', 'icon': ' icon-folder-open',
+         'models': ('user', 'userprofile',
+                    {'model': 'dealer',
+                     'label': 'Dealer'},
+                    {'model': 'authorizedservicecenter',
+                     'label': 'Authorized Service Center'},
+                    {'model': 'serviceadvisor',
+                     'label': 'Service Advisor'},)},
+        {'app': 'bajaj', 'label': 'Products', 'icon': ' icon-folder-open',
+         'models':({'model': 'brandproductcategory',
+                     'label': 'Brand Product Category'},
+                    {'model': 'producttype',
+                     'label': 'Product Type'},
+                    {'model': 'dispatchedproduct',
+                     'label': 'Product Dispatch'},
+                    {'model': 'productdata',
+                     'label': 'Product Purchase'},
+                    {'model': 'coupondata',
+                     'label': 'Coupon Redemption'},)},
+        {'app': 'bajaj', 'label': 'Logs', 'icon': ' icon-folder-open',
+         'models':(
+                    {'model': 'smslog',
+                     'label': 'SMS Log'},
+                   {'model': 'emaillog',
+                     'label': 'Email Log'},
+                    {'model': 'datafeedlog',
+                     'label': 'Feed Log'},
+                   {'model': 'feedFailureLog',
+                     'label': 'Feed Failure Log'})},
+        {'app': 'bajaj', 'label': 'User Registrations', 'icon': ' icon-folder-open',
+         'models':(
+                    {'model': 'asctempregistration',
+                     'label': ' ASC registration'},
+                    {'model': 'satempregistration',
+                     'label': 'SA registration'},
+                    {'model': 'customertempregistration',
+                     'label': ' Customer registration'},)},
+        {'app': 'bajaj', 'label': 'Templates', 'icon': ' icon-folder-open',
+         'models':(
+                    'messagetemplate', 'emailtemplate',)},)
+}

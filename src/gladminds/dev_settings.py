@@ -11,18 +11,46 @@ OUT_DIR = os.path.join(BASE_DIR, "out")
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds123')
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gladmindsdb',
+        'NAME': 'gm',
         'USER': 'gladminds',
-        'PASSWORD': 'gladminds123',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    },
+    'bajaj': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'bajaj',
+        'USER': 'gladminds',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    },
+    'demo': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'demo',
+        'USER': 'gladminds',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    },
+    'afterbuy': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'afterbuy',
+        'USER': 'gladminds',
+        'PASSWORD': DB_PASSWORD,
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }
 
 
+COUPON_URL = 'bajaj.gladmindsplatform.co'
 BROKER_URL = 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
 
@@ -55,8 +83,8 @@ TEMPLATE_DIRS = (
 ENABLE_AMAZON_SQS = False
 
 FILE_CACHE_DURATION = 0
+SMS_CLIENT = "AIRTEL"
 
-SMS_CLIENT="AIRTEL"
 ########################SQS Queue Name
 SQS_QUEUE_NAME = "gladminds-dev"
 ######################################
@@ -67,11 +95,12 @@ FEED_FAILURE_MAIL_ENABLED = True
 MAIL_DETAIL["subject"] = "GladMinds Feed Report DEV"
 MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
 
-FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail DEV"
-FEED_FAILURE_MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
+FEED_FAILURE["receiver"] = ["priyanka.n@hashedin.com","somit@hashedin.com","suresh@hashedin.com", "naureen.razi@hashedin.com"]
+CUSTOMER_PHONE_NUMBER_UPDATE["receiver"] = ["priyanka.n@hashedin.com", "naureen.razi@hashedin.com", "somit@hashedin.com","suresh@hashedin.com"]
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail DEV"
-VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["srv.sngh92@yahoo.com","priyanka.n@hashedin.com","somit@hashedin.com","suresh@hashedin.com","chandan.patel@hashedin.com","naureen.razi@hashedin.com"]
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["priyanka.n@hashedin.com","somit@hashedin.com","suresh@hashedin.com", "naureen.razi@hashedin.com"]
 
 #############################################################################
-LOGGING['handlers']['gladminds_logs']['filename'] = 'log/gladminds/app/gladminds.log'
-LOGGING['handlers']['afterbuy_logs']['filename'] = 'log/gladminds/app/afterbuy.log'
+ENV = "dev"
+
+WSDL_TNS="http://dev.bajaj.gladminds.co/api/v1/feed/"

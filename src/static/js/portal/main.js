@@ -22,7 +22,7 @@
         Utils.submitForm(e, data, '/aftersell/register/asc');
         return false;
     });
-    
+        
     $('.asc-self-form').on('submit', function(e) {
         var data = Utils.getFormData('.asc-self-form');
         Utils.submitForm(e, data, '/aftersell/asc/self-register/');
@@ -69,20 +69,23 @@
             url: '/aftersell/exceptions/customer',
             data: {'vin': vin},
             success: function(data){
-              if (data['phone'] && user=="d123") {
-                  $('.customer-phone').val(data['phone']).attr('readOnly', false);
+            		if (data['phone'] && user=="d123") {
+            			$('.customer-phone').val(data['phone']).attr('readOnly', false);
+            		    $('.customer-name').val(data['name']).attr('readOnly', false);
+            		    $('.purchase-date').val(data['purchase_date']).attr('readOnly', false);
+            		    $('.customer-id').val(data['id']).attr('readOnly', true);
+            		    $('.customer-submit').attr('disabled', false);
+            		 	}
+            	
+            else if (data['phone']) {
+                  $('.customer-phone').val(data['phone']).attr('readOnly', true);
+            	  if (data['group']=='AuthorisedServiceCenters' || data['group']=='Dealers'){
+            		  $('.customer-phone').val(data['phone']).attr('readOnly', false);
+            	}
                   $('.customer-name').val(data['name']).attr('readOnly', true);
                   $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
                   $('.customer-id').val(data['id']).attr('readOnly', true);
                   $('.customer-submit').attr('disabled', false);
-              }	
-              
-              else if (data['phone']) {
-                  $('.customer-phone').val(data['phone']).attr('readOnly', true);
-                  $('.customer-name').val(data['name']).attr('readOnly', true);
-                  $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
-                  $('.customer-id').val(data['id']).attr('readOnly', true);
-                  $('.customer-submit').attr('disabled', true);
               }	
               else if (data['message']) {
                   $('.customer-phone').val('').attr('readOnly', false);
@@ -96,6 +99,9 @@
                 	  $('.customer-id').val('').attr('readOnly', true);
                 	  $('.customer-submit').attr('disabled', false);
                   }
+                  else {
+                	  vinSyncFeed(data);
+                  }
               }
             },
             error: function() {
@@ -105,6 +111,26 @@
         });
         return false;
     });
+
+function vinSyncFeed(data){
+    var messageModal = $('.modal.message-modal'),
+    	messageBlock = $('.modal-body', messageModal);
+    var jqXHR = $.ajax({
+        type: 'POST',
+        url: '/aftersell/feeds/vin-sync/',
+        data : data,
+        success: function(data){
+        if (data['message']) {
+            messageBlock.text(data.message);
+            messageModal.modal('show');
+            }
+        },
+        error: function() {
+            messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
+            messageModal.modal('show');
+        }
+    });
+    }
 
     $('.service-status-search').on('submit', function() {
     	var table = $(".status-search-results tbody .search-detail");
@@ -267,11 +293,10 @@
                 messageHeader.text('Thanks');
                 waitingModal.modal('hide');
                 messageModal.modal('show');
-                $('#message').val('');
-                $('#priority').val('');
-                $('#type').val('');
-                $('#subject').val('');
-                $('#advisorMobile').val('');
+                $('.summary').val('');
+                $('.type').val('');
+                $('.description').val('');
+                $('.advisorMobile').val('');
                 setTimeout(function() {
                     parent.window.location='/aftersell/servicedesk/helpdesk';
                 }, 2000);
@@ -287,6 +312,53 @@
         });
         return false;
     });
+
+    $('.comment-form').on('submit', function(e) {
+        var data = Utils.getFormData('.servicedesk'),
+            formData = new FormData($(this).get(0)),
+            comment_data = Utils.getFormData('.comment-form'),
+            url = '/aftersell/feedbackdetails/'+data.ticketId+'/comments/'+comment_data.commentId+'/',
+            messageModal = $('.modal.message-modal'),
+            messageBlock = $('.modal-body', messageModal),
+            messageHeader = $('.modal-title', messageModal),
+            waitingModal = $('.modal.waiting-dialog');
+
+        var jqXHR = $.ajax({
+            type: 'POST',
+            url: url,
+            data: formData,
+            cache: false,
+            processData: false,
+            contentType: false,
+            beforeSend: function(){
+                $(this).find('input[type="text"]').val('');
+                waitingModal.modal('show');
+            },
+            success: function(data){
+            	var data = Utils.getFormData('.servicedesk');
+                messageBlock.text('Updated Successfully');
+                messageHeader.text('Save');
+                waitingModal.modal('hide');
+                messageModal.modal('show');
+	            $('.comment-id').val('');
+	            $('.comment-user').val('');
+	            $('.comment-description').val('');
+	            $('.comment-date').val('');
+                setTimeout(function() {
+                	parent.window.location='/aftersell/feedbackdetails/'+data.ticketId+'/';
+                }, 2000);
+                
+            },
+            error: function() {
+                messageBlock.text('Invalid Data');
+                messageHeader.text('Invalid');
+                waitingModal.modal('hide');
+                messageModal.modal('show');
+            }
+        });
+        return false;
+    });
+
     
     $('.servicedesk').on('submit', function(e) {
         var data = Utils.getFormData('.servicedesk'),
@@ -296,7 +368,7 @@
             messageBlock = $('.modal-body', messageModal),
             messageHeader = $('.modal-title', messageModal),
             waitingModal = $('.modal.waiting-dialog');
-        if (data.Assign_To === 'Assign to reporter'){
+        if (data.assign_to === 'Assign to reporter'){
             formData.append('reporter_status',true);
         }
         else{
@@ -345,10 +417,6 @@
         }
     });
     
-    $(document).ready(function() {
-    	
-    });
-
     $('.report-type-dropdown').on('change', function() {
         var reportType = $(this),
             couponStatus = $('.coupon-status');
@@ -433,7 +501,53 @@
         });
         return false;
     });
+    
+    $('.due-datetime-picker').datetimepicker({
+    	dayOfWeekStart : 1,
+    	lang:'en',
+    	format:'Y-m-d H:i:s',
+	});
+    
+    $(".feedback-free-text-search").click(function(){
+    	window.location.href = change_url_by_filter();
+    })
+    
+    $('.feedback-filters-options').change(function() {
+    	window.location.href = change_url_by_filter();
+    })
+    
 })();
+
+function getUrl(current_page_num, no_of_link_in_page, flage){
+	var url = change_url_by_filter() + 'page=';
+		if (flage == 'true'){
+			url = url +  current_page_num
+		}else{
+			var diff = current_page_num - no_of_link_in_page;
+				if (diff > 1){
+					url = url + diff 
+				}else{
+					url = url + 1
+				}
+		}
+		
+		window.location.href = url;
+}
+
+function change_url_by_filter(){
+	var url = window.location.pathname + '?',
+		serch_text = $(".feedback-search-text").val(),
+    	selectedOptions = $('.feedback-filters-options'),
+    	filters = ['priority', 'type', 'status', 'count'];
+    	$.each(filters, function(index, val){
+    		url = url + val + '=' + selectedOptions[index].options[selectedOptions[index].selectedIndex].value + '&'
+    	});
+    	
+    	if(serch_text){
+    		url = url + "search=" + serch_text
+    	}
+    	return url;
+}
 
 function rootCause(status){
 	'use strict';
@@ -455,6 +569,7 @@ function rootCause(status){
         resolution.removeClass('hide');
         reason.attr('required', true);
         ticketResolution.attr('required', true);
+        comments.attr('required', true);
 	}
 	if (status !== 'Open'){
 		assignee.attr('required', true);
@@ -464,12 +579,21 @@ function rootCause(status){
 		document.getElementById('assignee').value='Assign to reporter';
 		comments.attr('required', true);
 	}
+	if (status === 'In Progress'){
+		document.getElementById('assignee').value=document.getElementById('assignee').options[1].value;
+		comments.attr('required', true);
+	}
 	
 }
-function disable_func(){
-	$("#type").prop("disabled", true);
-	$("#priority").prop("disabled", true);
-	$("#assignee").prop("disabled", true);
+function disable_func(group){
+	if (group === 'Manager'){
+		$("#type").prop("disabled", true);
+	}else{
+		$("#type").prop("disabled", true);
+		$("#priority").prop("disabled", true);
+		$("#assignee").prop("disabled", true);
+		$("#status").prop("disabled", true);
+	}
 }
 
 function showMessage(id){
@@ -490,6 +614,36 @@ function change_status(){
 function getDataByDate(){
     var month = $('#month').val(),
         year =  $('#year').val();
+    if(month=='' || year==''){
+    	window.location.href = window.location.pathname
+    	
+    }
+    else{
     window.location.href = window.location.pathname + '?month='+month+'&'+'year='+year;
+    }
    
 }
+
+$(document).on("click", ".open-add-comment-dialog", function (e) {
+
+	e.preventDefault();
+	
+	var _self = $(this);
+	var commentId = _self.data('id'),
+		commentUser = _self.data('user'),
+	    commentDescription = _self.data('comment'),
+	    commentDate = _self.data('date'),
+	    comment = $('.comment-description'),
+	    loginUser = _self.data('owner');
+	$(".comment-id").val(commentId);
+	$(".comment-user").val(commentUser);
+	$(".comment-description").val(commentDescription);
+	$(".comment-date").val(commentDate);
+	comment.attr('readonly', false);
+	if (loginUser != commentUser){
+		comment.attr('readonly', true);
+	}
+	
+	$(_self.attr('href')).modal('show');
+	
+});

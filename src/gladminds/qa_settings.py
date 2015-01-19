@@ -8,6 +8,7 @@ STATIC_DIR = os.path.join(BASE_DIR, "src/static")
 TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladmindsqa2')
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -17,10 +18,34 @@ MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gladmindsdb',
+        'NAME': 'gm',
         'USER': 'gladminds',
-        'PASSWORD': 'GmqaHash123',
-        'HOST': 'gladminds-qa.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'PORT': '3306',
+    },
+    'bajaj': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'bajaj',
+        'USER': 'gladminds',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'PORT': '3306',
+    },
+    'demo': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'demo',
+        'USER': 'gladminds',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'PORT': '3306',
+    },
+    'afterbuy': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'afterbuy',
+        'USER': 'gladminds',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com',
         'PORT': '3306',
     }
 }
@@ -55,8 +80,7 @@ TEMPLATE_DIRS = (
 #                 }
 FILE_CACHE_DURATION = 0
 
-SMS_CLIENT="AIRTEL"
-
+SMS_CLIENT = "AIRTEL"
 FEED_TYPE = 'CSV'
 
 #AfterBuy File Upload location configuration
@@ -74,20 +98,29 @@ MEDIA_URL = '/media/'
 
 #S3 Configuration
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 
-SAP_CRM_DETAIL = {'username':'pisuper',
-                  'password':'welcome123'}
+SAP_CRM_DETAIL = {
+                  'username':'pisuper',
+                  'password':'welcome123'
+                  }
 
-COUPON_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl&v0"
+ASC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
+
+COUPON_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/redeem-feed/?wsdl&v0"
 COUPON_WSDL = 'qa_coupon_redeem.wsdl'
-ASC_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/asc-feed/?wsdl&v0"
-CUSTOMER_REGISTRATION_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/customer-feed/?wsdl&v0"
+
+CUSTOMER_REGISTRATION_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
+
+VIN_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/vin-sync-feed/?wsdl&v0"
+VIN_SYNC_WSDL='qa_vin_sync.wsdl'
+
+WSDL_TNS="http://qa.bajaj.gladminds.co/api/v1/feed/"
 
 ENABLE_AMAZON_SQS = True
 
-AFTER_BUY_CONSTANTS = {"username": 'support@gladminds.com',
+AFTER_BUY_CONSTANTS = {
+                       "username": 'support@gladminds.com',
                        "password": 'gladminds123',
                        "key_prefix": 'qa',
                        "app_path": 'afterbuy_script/afterbuy.zip',
@@ -98,16 +131,18 @@ AFTER_BUY_CONSTANTS = {"username": 'support@gladminds.com',
                        "create_method": "file",
                        "package": "com.gladminds.afterbuyv1",
                        "version": "0.1.0",
-                       "title": "Afterbuy V1 App"}
+                       "title": "Afterbuy V1 App"
+                       }
 
 ########################SQS Queue Name
-SQS_QUEUE_NAME = "gladminds-qa"
+SQS_QUEUE_NAME = "gladminds-qa2"
 ######################################
-FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail QA"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail QA"
 VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]
+FEED_FAILURE["receiver"] = ["gmdev@hashedin.com"]
+VIN_SYNC_FEED["receiver"] = ["gmdev@hashedin.com"]
 ###################Change Mail Subject on QA##########################
 MAIL_DETAIL["subject"] = "GladMinds Feed Report QA"
-
 MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 #######################################################################
+ENV = "qa"
