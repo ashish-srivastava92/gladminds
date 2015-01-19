@@ -1,12 +1,14 @@
 '''Contains audit log sms details'''
-
-from tastypie.constants import  ALL
+from tastypie.constants import ALL_WITH_RELATIONS, ALL
 from tastypie.authorization import DjangoAuthorization
-
-from gladminds.core.model_fetcher import models
+from tastypie import fields
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import MultiAuthorization
+from tastypie.authentication import MultiAuthentication
+from gladminds.core.model_fetcher import models
+from gladminds.core.apis.product_apis import ProductResource
+from gladminds.core.apis.user_apis import ServiceAdvisorResource
 
 _FILTERING = {"created_date": ALL}
 
@@ -30,3 +32,17 @@ class SMSLogResource(CustomBaseModelResource):
         detail_allowed_methods = ['get']
         filtering = _FILTERING
         ordering = ['created_date']
+
+
+class DataFeedLogResource(CustomBaseModelResource):
+    class Meta:
+        queryset = models.DataFeedLog.objects.all()
+        resource_name = "feed-logs"
+        authorization = MultiAuthorization(DjangoAuthorization())
+        authentication = MultiAuthentication(AccessTokenAuthentication())
+        detail_allowed_methods = ['get']
+        always_return_data = True
+        filtering = {
+                        "feed_type": ALL,
+                        "status": ALL
+                     }
