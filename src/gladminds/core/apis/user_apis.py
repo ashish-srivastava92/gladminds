@@ -17,8 +17,7 @@ from gladminds.core.auth.access_token_handler import create_access_token,\
     delete_access_token
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from gladminds.core.apis.authorization import CustomAuthorization,\
-    MultiAuthorization
+from gladminds.core.apis.authorization import MultiAuthorization
 
 logger = logging.getLogger('gladminds')
 
@@ -29,9 +28,11 @@ class UserResource(CustomBaseModelResource):
         resource_name = 'users'
         excludes = ['password', 'is_superuser']
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization(),
-                                           CustomAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
+        filtering = {
+                     "is_active": ALL
+                     }
         always_return_data = True
 
 
@@ -41,8 +42,7 @@ class UserProfileResource(CustomBaseModelResource):
     class Meta:
         queryset = models.UserProfile.objects.all()
         resource_name = 'gm-users'
-        authorization = MultiAuthorization(DjangoAuthorization(),
-                                           CustomAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization())
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get']
         filtering = {
@@ -111,33 +111,48 @@ class UserProfileResource(CustomBaseModelResource):
 
 
 class DealerResource(CustomBaseModelResource):
+    user = fields.ForeignKey(UserProfileResource, 'user', full=True)
+
     class Meta:
         queryset = models.Dealer.objects.all()
         resource_name = "dealers"
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization(),
-                                           CustomAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
+        filtering = {
+                     "user": ALL_WITH_RELATIONS
+                     }
         always_return_data = True
 
 
 class AuthorizedServiceCenterResource(CustomBaseModelResource):
+    user = fields.ForeignKey(UserProfileResource, 'user', full=True)
+    dealer = fields.ForeignKey(DealerResource, 'dealer', null=True, blank=True, full=True)
+
     class Meta:
         queryset = models.AuthorizedServiceCenter.objects.all()
         resource_name = "authorized-service-centers"
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization(),
-                                           CustomAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
+        filtering = {
+                     "user": ALL_WITH_RELATIONS
+                     }
         always_return_data = True
 
 
 class ServiceAdvisorResource(CustomBaseModelResource):
+    user = fields.ForeignKey(UserProfileResource, 'user', full=True)
+    dealer = fields.ForeignKey(DealerResource, 'dealer', null=True, blank=True, full=True)
+    asc = fields.ForeignKey(AuthorizedServiceCenterResource, 'asc', null=True, blank=True, full=True)
+
     class Meta:
         queryset = models.ServiceAdvisor.objects.all()
         resource_name = "service-advisors"
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization(),
-                                           CustomAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
+        filtering = {
+                     "user": ALL_WITH_RELATIONS
+                     }
         always_return_data = True
