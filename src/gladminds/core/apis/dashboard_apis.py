@@ -143,7 +143,7 @@ class FeedStatusResource(CustomBaseResource):
 
         data = []
         for status in [FeedStatus.SENT, FeedStatus.RECEIVED]:
-            filters['status'] = status
+            filters['action'] = status
             for feed_type in FEED_TYPES:
                 filters['feed_type'] = feed_type
                 success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
