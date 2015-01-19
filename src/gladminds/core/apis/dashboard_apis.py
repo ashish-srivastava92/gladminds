@@ -83,6 +83,10 @@ class OverallStatusResource(CustomBaseResource):
                                models.AuthorizedServiceCenter.objects.count)
         ascs_active = get_set_cache('gm_ascs_active',
                                models.AuthorizedServiceCenter.objects.active_count)
+        sas = get_set_cache('gm_sas',
+                            models.ServiceAdvisor.objects.count)
+        sas_active = get_set_cache('gm_sas_active',
+                            models.ServiceAdvisor.objects.active_count)
 
         return map(CustomApiObject, [create_dict(["1", "#of Vins", vins]),
                                      create_dict(["2", "Service Coupons Closed",
@@ -104,9 +108,9 @@ class OverallStatusResource(CustomBaseResource):
                                      create_dict(["8", "# of Active ASCs",
                                                   ascs_active]),
                                      create_dict(["9", "# of SAs",
-                                                  0]),
+                                                  sas]),
                                      create_dict(["10", "# of Active SAs",
-                                                  0])
+                                                  sas_active])
                                      ]
                    )
 
