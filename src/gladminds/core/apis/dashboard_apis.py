@@ -103,13 +103,13 @@ class OverallStatusResource(CustomBaseResource):
                                                   dealers]),
                                      create_dict(["8", "# of Active Dealers",
                                                   dealers_active]),
-                                     create_dict(["7", "# of ASCs",
+                                     create_dict(["9", "# of ASCs",
                                                   ascs]),
-                                     create_dict(["8", "# of Active ASCs",
+                                     create_dict(["10", "# of Active ASCs",
                                                   ascs_active]),
-                                     create_dict(["9", "# of SAs",
+                                     create_dict(["11", "# of SAs",
                                                   sas]),
-                                     create_dict(["10", "# of Active SAs",
+                                     create_dict(["12", "# of Active SAs",
                                                   sas_active])
                                      ]
                    )
