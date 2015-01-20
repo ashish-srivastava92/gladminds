@@ -150,7 +150,7 @@ class FeedStatusResource(CustomBaseResource):
             filters['created_date__lte'] = dtend
 
         data = []
-        for status in [FeedStatus.SENT, FeedStatus.RECEIVED]:
+        for status in [FeedStatus.RECEIVED]:
             filters['action'] = status
             for feed_type in FEED_TYPES:
                 filters['feed_type'] = feed_type
