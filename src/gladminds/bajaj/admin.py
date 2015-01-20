@@ -401,11 +401,15 @@ class MechanicAdmin(GmModelAdmin):
         return form
 
     def save_model(self, request, obj, form, change):
-        if not obj.id:
+        form_status = True
+        for field in obj._meta.fields:
+            if field.name in constants.MANDATORY_MECHANIC_FIELDS and not getattr(obj, field.name):
+                form_status = False
+        if form_status and not obj.sent_sms:
             LoyaltyService.send_welcome_sms(obj)
             obj.sent_sms=True
         obj.phone_number=utils.mobile_format(obj.phone_number)
-        super(MechanicAdmin, self).save_model(request, obj, form, change)    
+        super(MechanicAdmin, self).save_model(request, obj, form, change)
 
 class SparePartMasterAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]

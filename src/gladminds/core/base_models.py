@@ -777,6 +777,7 @@ class Mechanic(BaseModel):
             self.form_status='Incomplete'
         else:
             self.form_status='Complete'
+            
         return super(Mechanic, self).save(force_insert=force_insert, force_update=force_update,
                               using=using, update_fields=update_fields)
 
