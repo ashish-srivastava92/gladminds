@@ -5,41 +5,40 @@ from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib.admin import DateFieldListFilter
 
 from gladminds.bajaj import models
-from gladminds.bajaj.services.loyalty.loyalty import send_welcome_sms
+from gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
 from gladminds.core import utils
 from gladminds.core.auth_helper import GmApps, Roles
 from gladminds.core.admin_helper import GmModelAdmin
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.conf import settings
-
+from gladminds.core.auth_helper import Roles
+from gladminds.core import constants
 
 class BajajAdminSite(AdminSite):
     pass
 
 
-class UserProfileAdmin(ModelAdmin):
+class UserProfileAdmin(GmModelAdmin):
     search_fields = ('user__username', 'phone_number')
     list_display = ('user', 'phone_number', 'status', 'address',
                     'state', 'country', 'pincode', 'date_of_birth', 'gender')
     
-class DealerAdmin(ModelAdmin):
+class DealerAdmin(GmModelAdmin):
     search_fields = ('dealer_id',)
     list_display = ('dealer_id', 'user')
 
-class AuthorizedServiceCenterAdmin(ModelAdmin):
+class AuthorizedServiceCenterAdmin(GmModelAdmin):
     search_fields = ('asc_id', 'dealer__dealer_id')
     list_display = ('asc_id', 'user', 'dealer')
 
-class ServiceAdvisorAdmin(ModelAdmin):
+class ServiceAdvisorAdmin(GmModelAdmin):
     search_fields = ('service_advisor_id', 'dealer__dealer_id', 'asc__asc_id')
     list_display = ('service_advisor_id', 'user', 'dealer', 'asc', 'status')
 
-class BrandProductCategoryAdmin(ModelAdmin):
-    search_fields = ('name',)
+class BrandProductCategoryAdmin(GmModelAdmin):
     list_display = ('name', 'description')
 
-class ProductTypeAdmin(ModelAdmin):
-    search_fields = ('product_type',)
+class ProductTypeAdmin(GmModelAdmin):
     list_display = ('id', 'product_type',\
                     'image_url', 'is_active')
 
@@ -48,7 +47,7 @@ class DispatchedProduct(models.ProductData):
     class Meta:
         proxy = True
 
-class ListDispatchedProduct(ModelAdmin):
+class ListDispatchedProduct(GmModelAdmin):
     search_fields = ('^product_id', '^dealer_id__dealer_id')
     list_display = (
         'product_id', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
@@ -79,8 +78,8 @@ class ListDispatchedProduct(ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         custom_search_mapping = {'Product Id' : '^product_id',
                                  'Dealer Id': '^dealer_id__dealer_id',}
-        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping,
-                         'searchable_fields': 'Vin and  Dealer id'}
+        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping
+                        }
         return super(ListDispatchedProduct, self).changelist_view(request, extra_context=extra_context)
 
 
@@ -92,7 +91,7 @@ class Couponline(TabularInline):
     readonly_fields = ('unique_service_coupon','service_type', 'status', 'mark_expired_on', 'extended_date')
 
 
-class ProductDataAdmin(ModelAdmin):
+class ProductDataAdmin(GmModelAdmin):
     search_fields = ('^product_id', '^customer_id', '^customer_phone_number',
                      '^customer_name')
     list_display = ('product_id', 'customer_id', "UCN", 'customer_name',
@@ -135,14 +134,12 @@ class ProductDataAdmin(ModelAdmin):
                                  'Customer ID':'^customer_id',
                                  'Customer Name': '^customer_name',
                                  'Customer Phone Number': '^customer_phone_number'}
-        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping,
-                         'searchable_fields': 'Product Id, Customer Id, Customer Phone Number and Customer Name'
+        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping
                         }
         return super(ProductDataAdmin, self).changelist_view(request, extra_context=extra_context)
 
 
-class CouponAdmin(ModelAdmin):
-    search_fields = (
+class CouponAdmin(GmModelAdmin):
         '^unique_service_coupon', '^product__product_id', 'status')
     list_display = ('product', 'unique_service_coupon', 'actual_service_date',
                     'actual_kms', 'status', 'service_type','service_advisor', 'associated_with')
@@ -175,8 +172,7 @@ class CouponAdmin(ModelAdmin):
         custom_search_mapping = {'Unique Service Coupon' : '^unique_service_coupon',
                                  'Product Id': '^product__product_id',
                                  'Status': 'status'}
-        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping,
-                         'searchable_fields': 'Unique Service Coupon, Product Id and Status'
+        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping
                         }
         return super(CouponAdmin, self).changelist_view(request, extra_context=extra_context)
 
@@ -235,8 +231,7 @@ class CouponChangeList(ChangeList):
 
         return ordering
 
-class SMSLogAdmin(ModelAdmin):
-    search_fields = ('sender', 'receiver', 'action')
+class SMSLogAdmin(GmModelAdmin):
     list_display = (
         'created_date', 'action', 'message', 'sender', 'receiver')
     
@@ -255,12 +250,11 @@ class SMSLogAdmin(ModelAdmin):
     def has_add_permission(self, request):
         return False
     
-class EmailLogAdmin(ModelAdmin):
-    search_fields = ('subject', 'sender', 'receiver')
+class EmailLogAdmin(GmModelAdmin):
     list_display = (
         'created_date', 'subject', 'message', 'sender', 'receiver', 'cc')
 
-class FeedLogAdmin(ModelAdmin):
+class FeedLogAdmin(GmModelAdmin):
     search_fields = ('status', 'data_feed_id', 'feed_type', 'action')
     list_display = ('timestamp', 'feed_type', 'action',
                     'total_data_count', 'success_data_count',
@@ -286,24 +280,22 @@ class FeedLogAdmin(ModelAdmin):
         if css_class:
             return {'class': css_class}
 
-class ASCTempRegistrationAdmin(ModelAdmin):
-    search_fields = (
+class ASCTempRegistrationAdmin(GmModelAdmin):
         'name', 'phone_number', 'email', 'dealer_id')
 
     list_display = (
         'name', 'phone_number', 'email', 'pincode',
         'address', 'timestamp', 'dealer_id')
 
-class SATempRegistrationAdmin(ModelAdmin):
-    search_fields = (
+class SATempRegistrationAdmin(GmModelAdmin):
         'name', 'phone_number')
 
     list_display = (
         'name', 'phone_number', 'status')
 
-class CustomerTempRegistrationAdmin(ModelAdmin):
+class CustomerTempRegistrationAdmin(GmModelAdmin):
     search_fields = (
-        'product_data__vin', 'new_customer_name', 'new_number', 'temp_customer_id', 'sent_to_sap')
+        'product_data__product_id', 'new_customer_name', 'new_number', 'temp_customer_id', 'sent_to_sap')
 
     list_display = (
         'temp_customer_id', 'product_data', 'new_customer_name', 'new_number',
@@ -323,18 +315,18 @@ class CustomerTempRegistrationAdmin(ModelAdmin):
         form = super(CustomerTempRegistrationAdmin, self).get_form(request, obj, **kwargs)
         return form
 
-class MessageTemplateAdmin(ModelAdmin):
+class MessageTemplateAdmin(GmModelAdmin):
     search_fields = ('template_key', 'template')
     list_display = ('template_key', 'template', 'description')
 
-class EmailTemplateAdmin(ModelAdmin):
+class EmailTemplateAdmin(GmModelAdmin):
     search_fields = ('template_key', 'sender', 'receiver', 'subject')
     list_display = ('template_key', 'sender', 'receivers', 'subject')
 
     def receivers(self, obj):
         return ' | '.join(obj.receiver.split(','))
 
-class SlaAdmin(ModelAdmin):
+class SlaAdmin(GmModelAdmin):
     fieldsets = (
         (None, {
             'fields': (
@@ -353,7 +345,7 @@ class SlaAdmin(ModelAdmin):
         return str(self.resolution_time) + ' ' + self.resolution_unit
     
     list_display = ('priority', response_time, reminder_time, resolution_time)
-
+    
 class LoyaltySlaAdmin(ModelAdmin):
     fieldsets = (
         (None, {
@@ -434,7 +426,7 @@ class MechanicAdmin(GmModelAdmin):
             send_welcome_sms(obj)
             obj.sent_sms=True
         obj.phone_number=utils.mobile_format(obj.phone_number)
-        super(MechanicAdmin, self).save_model(request, obj, form, change)    
+        super(MechanicAdmin, self).save_model(request, obj, form, change)
 
 class SparePartMasterAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
@@ -491,6 +483,91 @@ class AccumulationRequestAdmin(GmModelAdmin):
     get_mechanic_city.short_description = 'City'
     get_upcs.short_description = 'UPC'
 
+class ProductCatalogAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
+    list_filter = ('is_active',)
+    search_fields = ('partner__partner_id', 'product_id',
+                    'brand', 'model', 'category',
+                    'sub_category')
+
+    list_display = ('partner', 'product_id', 'points', 'price',
+                    'description', 'variation',
+                    'brand', 'model', 'category',
+                    'sub_category')
+
+class RedemptionPartnerAdmin(GmModelAdmin):
+    search_fields = ('partner_id', 'name')
+
+    list_display = ('partner_id','name')
+
+class RedemptionRequestAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.NSMS, Roles.LOYALTYSUPERADMINS]
+    list_filter = (
+        ('created_date', DateFieldListFilter),
+    )
+    search_fields = ('member__phone_number', 'product__product_id')
+    list_display = ( 'member',  'get_mechanic_name',
+                     'delivery_address', 'get_mechanic_pincode',
+                     'get_mechanic_district', 'get_mechanic_state',
+                     'product', 'created_date', 'transaction_id',
+                     'expected_delivery_date', 'status')
+
+    def queryset(self, request):
+        """
+        Returns a QuerySet of all model instances that can be edited by the
+        admin site. This is used by changelist_view.
+        """
+        query_set = self.model._default_manager.get_query_set()
+        if not request.user.groups.filter(name=Roles.ASMS).exists():
+            query_set=query_set.filter(is_approved=True)
+
+        return query_set
+
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('is_approved',)
+        form = super(RedemptionRequestAdmin, self).get_form(request, obj, **kwargs)
+        form = copy.deepcopy(form)
+
+        if request.user.groups.filter(name=Roles.ASMS).exists():
+            form.base_fields['status'].choices = constants.ASM_REDEMPTION_STATUS
+        else:
+            form.base_fields['status'].choices = constants.GP_REDEMPTION_STATUS    
+        return form
+
+    def save_model(self, request, obj, form, change):
+        super(RedemptionRequestAdmin, self).save_model(request, obj, form, change)
+        if 'status' in form.changed_data and obj.status in constants.STATUS_TO_NOTIFY:
+            LoyaltyService.send_request_status_sms(obj)
+
+    def suit_row_attributes(self, obj):
+        class_map = {
+            'Rejected': 'error',
+            'Approved': 'success',
+            'Delivered': 'warning',
+            'Packed': 'info',
+            'Shipped': 'info',
+        }
+        css_class = class_map.get(str(obj.status))
+        if css_class:
+            return {'class': css_class}
+
+    def get_mechanic_name(self, obj):
+        return obj.member.first_name
+
+    def get_mechanic_pincode(self, obj):
+        return obj.member.pincode
+
+    def get_mechanic_district(self, obj):
+        return obj.member.district
+
+    def get_mechanic_state(self, obj):
+        return obj.member.state
+    
+    get_mechanic_name.short_description = 'Name'
+    get_mechanic_pincode.short_description = 'Pincode'
+    get_mechanic_district.short_description = 'City'
+    get_mechanic_state.short_description = 'State'
+
 brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
 
 brand_admin.register(User, UserAdmin)
@@ -523,7 +600,11 @@ if settings.ENV not in ['prod']:
     brand_admin.register(models.SparePartPoint, SparePartPointAdmin)
     brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
     brand_admin.register(models.LoyaltySLA, LoyaltySlaAdmin)
-    
+
+    brand_admin.register(models.RedemptionPartner, RedemptionPartnerAdmin)
+    brand_admin.register(models.ProductCatalog, ProductCatalogAdmin)
+    brand_admin.register(models.RedemptionRequest, RedemptionRequestAdmin)
+
 brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)
 brand_admin.register(models.SATempRegistration, SATempRegistrationAdmin)
 brand_admin.register(models.CustomerTempRegistration, CustomerTempRegistrationAdmin)

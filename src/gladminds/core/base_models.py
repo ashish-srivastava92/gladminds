@@ -6,12 +6,10 @@ from django.conf import settings
 from django.utils.translation import gettext as _
 from constance import config
 
-from gladminds.core.managers import user_manager
+from gladminds.core.managers import user_manager, coupon_manager,\
+    service_desk_manager
 from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
-from gladminds.core.constants import FEEDBACK_STATUS,\
-                            PRIORITY, FEEDBACK_TYPE, RATINGS,\
-                            ROOT_CAUSE, SLA_PRIORITY, TIME_UNIT, STATUS_CHOICES,\
-                            ADMIN_ROLE
+from gladminds.core import constants
 from gladminds.core.model_helpers import PhoneField
 from gladminds.core import constants
 from gladminds.core.core_utils.utils import generate_mech_id
@@ -19,7 +17,7 @@ try:
     from django.utils.timezone import now as datetime_now
 except ImportError:
     datetime_now = datetime.datetime.now
-
+STATUS_CHOICES=constants.STATUS_CHOICES
 
 class BaseModel(models.Model):
     '''Base model containing created date and modified date'''
@@ -135,6 +133,8 @@ class AuthorizedServiceCenter(BaseModel):
         max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
 
+    objects = user_manager.AuthorizedServiceCenterManager()
+
     class Meta:
         abstract = True
         verbose_name_plural = "Service Center Data"
@@ -228,6 +228,8 @@ class CouponData(BaseModel):
     credit_note = models.CharField(max_length=50, null=True, blank=True)
     special_case = models.BooleanField(default=False)
     servicing_dealer = models.CharField(max_length=50, null=True, blank=True)
+
+    objects = coupon_manager.CouponDataManager()
 
     class Meta:
         abstract = True
@@ -539,6 +541,17 @@ class FeedFailureLog(BaseModel):
         abstract = True
         verbose_name_plural = "Feed failure log"
 
+class VinSyncFeedLog(BaseModel):
+    ''''details of all vins not found in gladminds db'''
+    product_id = models.CharField(max_length=215, null=True, blank=True)
+    dealer_asc_id = models.CharField(max_length=15, null=True, blank=True)
+    status_code = models.CharField(max_length=15, null=True, blank=True)
+    email_flag = models.BooleanField(default=False)
+    
+    class Meta:
+        abstract =True
+        verbose_name_plural = "Vin Sync Feed"
+        
 class AuditLog(BaseModel):
     '''details of the requests received'''
     device = models.CharField(max_length=250, null=True, blank=True)
@@ -576,17 +589,17 @@ class Feedback(BaseModel):
     '''details of feedback received'''
     summary = models.CharField(max_length=512, null=True, blank=True)
     description = models.CharField(max_length=512, null=True, blank=False)
-    status = models.CharField(max_length=12, choices=FEEDBACK_STATUS)
-    priority = models.CharField(max_length=12, choices=PRIORITY, default='Low')
-    type = models.CharField(max_length=20, choices=FEEDBACK_TYPE)
+    status = models.CharField(max_length=12, choices=constants.FEEDBACK_STATUS)
+    priority = models.CharField(max_length=12, choices=constants.PRIORITY, default='Low')
+    type = models.CharField(max_length=20, choices=constants.FEEDBACK_TYPE)
     closed_date = models.DateTimeField(null=True, blank=True)
     resolved_date = models.DateTimeField(null=True, blank=True)
     pending_from = models.DateTimeField(null=True, blank=True)
     due_date = models.DateTimeField(null=True, blank=True)
     wait_time = models.FloatField(max_length=20, null=True, blank=True, default = '0.0')
     remarks = models.CharField(max_length=512, null=True, blank=True)
-    ratings = models.CharField(max_length=20, choices=RATINGS)
-    root_cause = models.CharField(max_length=20, choices=ROOT_CAUSE)
+    ratings = models.CharField(max_length=20, choices=constants.RATINGS)
+    root_cause = models.CharField(max_length=20, choices=constants.ROOT_CAUSE)
     resolution = models.CharField(max_length=512, null=True, blank=True)
     role = models.CharField(max_length=50, null=True, blank=True)
     assign_to_reporter = models.BooleanField(default=False)
@@ -594,6 +607,7 @@ class Feedback(BaseModel):
     reminder_date = models.DateTimeField(null=True, blank=True)
     reminder_flag = models.BooleanField(default=False)
     resolution_flag = models.BooleanField(default=False)
+    objects = service_desk_manager.FeedbackManager()
 
     class Meta:
         abstract = True
@@ -618,10 +632,10 @@ class FeedbackEvent(BaseModel):
     
 class Duration(CompositeField):
     time = models.PositiveIntegerField()
-    unit = models.CharField(max_length=12, choices=TIME_UNIT, verbose_name = 'unit')
+    unit = models.CharField(max_length=12, choices=constants.TIME_UNIT, verbose_name = 'unit')
 
 class SLA(models.Model):
-    priority = models.CharField(max_length=12, choices=SLA_PRIORITY, unique=True)
+    priority = models.CharField(max_length=12, choices=constants.SLA_PRIORITY, unique=True)
     response = Duration()
     reminder = Duration()
     resolution = Duration()
@@ -786,11 +800,7 @@ class Mechanic(BaseModel):
     image_tag.short_description = 'Mechanic Image'
     image_tag.allow_tags = True
 
-    FORM_STATUS_CHOICES = (
-                           ('Complete', 'Complete'),
-                           ('Incomplete', 'Incomplete'),
-                           )
-    form_status = models.CharField(max_length=15, choices=FORM_STATUS_CHOICES,
+    form_status = models.CharField(max_length=15, choices=constants.FORM_STATUS_CHOICES,
                               default='Incomplete')
     sent_sms = models.BooleanField(default=False)
 
@@ -806,6 +816,7 @@ class Mechanic(BaseModel):
             self.form_status='Incomplete'
         else:
             self.form_status='Complete'
+            
         return super(Mechanic, self).save(force_insert=force_insert, force_update=force_update,
                               using=using, update_fields=update_fields)
 
@@ -877,42 +888,59 @@ class AccumulationRequest(BaseModel):
     def __unicode__(self):
         return str(self.transaction_id)
 
-#     class RedemptionPartner(models.Model):
-#     class Meta:
-#         abstract = True
-#         verbose_name_plural = "Redemption partner"
+class RedemptionPartner(BaseModel):
+    partner_id = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50, null=True, blank=True)
 
-# class ProductCatalog(models.Model):
-#     product_id = models.CharField(max_length=50, unique=True)
-#     #should be a foreign key from redemption partners
-#     partner = models.CharField(max_length=50, null=True, blank=True)
-#     price = models.IntegerField(max_length=50, null=True, blank=True)
-#     name = models.CharField(max_length=50, null=True, blank=True)
-#     points = models.IntegerField(max_length=50, null=True, blank=True)
-#     description = models.CharField(max_length=100, null=True, blank=True)
-#     variation = models.CharField(max_length=50, null=True, blank=True)
-#     brand = models.CharField(max_length=50, null=True, blank=True)
-#     model = models.CharField(max_length=50, null=True, blank=True)
-#     image_url = models.CharField(
-#                    max_length=200, blank=True, null=True)
-#     category = models.CharField(max_length=50, null=True, blank=True)
-#     sub_category = models.CharField(max_length=50, null=True, blank=True)
-#
-#
-#     class Meta:
-#         abstract = True
-#         verbose_name_plural = "product catalog"
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Redemption partner"
+        
+    def __unicode__(self):
+        return str(self.partner_id)
 
-# class ReedemptionRequest(models.Model):
-#     '''details of Spare Part'''
-#     transaction_id = models.CharField(max_length=50,
-#                                 null=True, blank=True, unique=True)
-#     points = models.IntegerField(max_length=50, null=True, blank=True)
-#     status = models.CharField(max_length=50, null=True, blank=True)
-#     #should be a foreign key from redemption partners and mechanic
-#     partner = models.CharField(max_length=50, null=True, blank=True)
-#     mechanic = models.CharField(max_length=50, null=True, blank=True)
-#
-#     class Meta:
-#         abstract = True
-#         verbose_name_plural = "Accumulation Request"
+
+class ProductCatalog(BaseModel):
+    product_id = models.CharField(max_length=50, unique=True)
+    points = models.IntegerField(max_length=50, null=True, blank=True)
+    price = models.IntegerField(max_length=50, null=True, blank=True)
+    description = models.CharField(max_length=100, null=True, blank=True)
+    variation = models.CharField(max_length=50, null=True, blank=True)
+    brand = models.CharField(max_length=50, null=True, blank=True)
+    model = models.CharField(max_length=50, null=True, blank=True)
+    image_url = models.CharField(
+                   max_length=200, blank=True, null=True)
+    category = models.CharField(max_length=50, null=True, blank=True)
+    sub_category = models.CharField(max_length=50, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "product catalog"
+        
+    def __unicode__(self):
+        return str(self.product_id)
+
+class RedemptionRequest(BaseModel):
+    '''details of Spare Part'''
+    delivery_address = models.CharField(max_length=50, null=True, blank=True)
+    transaction_id = models.AutoField(primary_key=True)
+    expected_delivery_date =  models.DateTimeField(null=True, blank= True)
+    status = models.CharField(max_length=12, choices=constants.REDEMPTION_STATUS, default='Open')
+    is_approved = models.BooleanField(default=False)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        for field in self._meta.fields:
+            if field.name=='status':
+                if getattr(self, field.name)=='Approved':
+                    self.is_approved=True
+                elif getattr(self, field.name) in ['Rejected', 'Open'] :
+                    self.is_approved=False
+
+        return super(RedemptionRequest, self).save(force_insert=force_insert, force_update=force_update,
+                              using=using, update_fields=update_fields)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Accumulation Request"

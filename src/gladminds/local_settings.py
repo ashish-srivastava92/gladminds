@@ -11,12 +11,38 @@ OUT_DIR = os.path.join(BASE_DIR, "out")
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'admin')
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gladmindsdb',
+        'NAME': 'gm',
         'USER': 'root',
-        'PASSWORD': 'hasher123',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    },
+    'bajaj': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'bajaj',
+        'USER': 'root',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    },
+    'demo': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'demo',
+        'USER': 'root',
+        'PASSWORD': DB_PASSWORD,
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+    },
+    'afterbuy': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'afterbuy',
+        'USER': 'root',
+        'PASSWORD': DB_PASSWORD,
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }
@@ -48,8 +74,6 @@ TEMPLATE_DIRS = (
     TEMPLATE_DIR,
 )
 
-SMS_CLIENT="AIRTEL"
-
 ########################SQS Queue Name
 SQS_QUEUE_NAME = "gladminds-dev"
 ######################################
@@ -58,14 +82,20 @@ FEED_TYPE = 'CSV'
 FEED_FAILURE_MAIL_ENABLED = True
 
 MAIL_DETAIL["subject"] = "GladMinds Feed Report DEV"
-MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
+MAIL_DETAIL["receiver"] = ["priyanka.n@hashedin.com"]
 
-FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail DEV"
-FEED_FAILURE_MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail DEV"
 VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 
-
-
+LOG_BASE_PATH = 'log'
 LOGGING['handlers']['gladminds_logs']['filename'] = 'log/gladminds.log'
 LOGGING['handlers']['afterbuy_logs']['filename'] = 'log/afterbuy.log'
+LOGGING['handlers']['sql']['filename'] = 'log/sql.log'
+LOGGING['loggers']['gladminds']['handlers']=['gladminds_logs']
+
+ENV = "local"
+
+WSDL_TNS="http://local.bajaj.gladminds.co:8000/api/v1/feed/"
+
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+

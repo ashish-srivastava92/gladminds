@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+    xmlns:ns1="http://local.bajaj.gladminds.co:8000/api/v1/feed/">
+    <SOAP-ENV:Body>
+        <ns1:postDealer>
+            <ns1:ObjectList>
+                <ns1:DealerData>
+                    <ns1:DealerModel>
+                        <ns1:ACTIVE_FLAG>Y</ns1:ACTIVE_FLAG>
+                        <ns1:TIMESTAMP>2005-08-01000000</ns1:TIMESTAMP>
+                        <ns1:SER_ADV_MOBILE>55555</ns1:SER_ADV_MOBILE>
+                        <ns1:SER_ADV_ID>GMDEALER001SA01</ns1:SER_ADV_ID>
+                        <ns1:ADDRESS>HSR LAYOUT</ns1:ADDRESS>
+                        <ns1:SER_ADV_NAME>TestUser01</ns1:SER_ADV_NAME>
+                        <ns1:KUNNR>GMDEALER001</ns1:KUNNR>
+                    </ns1:DealerModel>
+                </ns1:DealerData>
+            </ns1:ObjectList>
+            <ns1:Credential>
+                <ns1:UserName>testuser</ns1:UserName>
+                <ns1:Password>testuserpassword</ns1:Password>
+            </ns1:Credential>
+        </ns1:postDealer>
+    </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

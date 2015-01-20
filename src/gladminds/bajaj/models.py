@@ -199,6 +199,7 @@ class CustomerTempRegistration(base_models.CustomerTempRegistration):
         app_label = _APP_NAME
         verbose_name_plural = "Customer temporary info"
 
+
 class UserPreference(base_models.UserPreference):
     user = models.ForeignKey(UserProfile)
 
@@ -234,6 +235,13 @@ class FeedFailureLog(base_models.FeedFailureLog):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Feed Failure Log"
+
+
+class VinSyncFeedLog(base_models.VinSyncFeedLog):
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Vin Sycn Feed"
 
 
 class AuditLog(base_models.AuditLog):
@@ -329,6 +337,27 @@ class AccumulationRequest(base_models.AccumulationRequest):
     member = models.ForeignKey(Mechanic)
     upcs = models.ManyToManyField(SparePartUPC)
     asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
+
+    class Meta:
+        app_label = _APP_NAME
+
+class RedemptionPartner(base_models.RedemptionPartner):
+    '''details of retailer'''
+
+    class Meta:
+        app_label = _APP_NAME
+
+class ProductCatalog(base_models.ProductCatalog):
+    '''details of retailer'''
+    partner = models.ForeignKey(RedemptionPartner, null=True, blank=True)
+
+    class Meta:
+        app_label = _APP_NAME
+        
+class RedemptionRequest(base_models.RedemptionRequest):
+    '''details of retailer'''
+    product = models.ForeignKey(ProductCatalog)
+    member = models.ForeignKey(Mechanic)
 
     class Meta:
         app_label = _APP_NAME

@@ -26,7 +26,7 @@ DATABASES = {
 
 
 
-BROKER_URL = 'redis://localhost:6379'
+BROKER_URL= 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
 
 
@@ -44,15 +44,24 @@ TEMPLATE_DIRS = (
     TEMPLATE_DIR,
 )
 
-SMS_CLIENT = "AIRTEL"
+# SMS_CLIENT = "TWILIO"
+#
+# SMS_CLIENT_DETAIL = {
+#                      'OTP_TWILIO_ACCOUNT' : 'ACbb8cb45f6113b8f2f6243c8eaa5ff971',
+#                      'OTP_TWILIO_AUTH' : 'aa445a4f0a7e651738e89810601f8860',
+#                      'OTP_TWILIO_FROM' : '+1 469-513-9856',
+#                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/Messages.json'
+#                 }
 
 FEED_TYPE = 'CSV'
 
-SAP_CRM_DETAIL = {'username':'pisuper',
-                  'password':'welcome123'}
-COUPON_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl&v0"
-ASC_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/bajaj/asc-feed/?wsdl&v0"
-CUSTOMER_REGISTRATION_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/bajaj/customer-feed/?wsdl&v0"
+SAP_CRM_DETAIL = {
+                  'username':'pisuper',
+                  'password':'welcome123'
+                  }
+COUPON_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/redeem-feed/?wsdl&v0"
+ASC_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/asc-feed/?wsdl&v0"
+CUSTOMER_REGISTRATION_WSDL_URL = "http://api.gladmindsplatform.co/api/v1/customer-feed/?wsdl&v0"
 
 
 ENABLE_AMAZON_SQS = True
@@ -60,11 +69,10 @@ ENABLE_AMAZON_SQS = True
 ########################SQS Queue Name##################################
 SQS_QUEUE_NAME = "gladminds-prod"
 ########################################################################
-FEED_FAILURE_MAIL_DETAIL["subject"] = "GladMinds Feed Failure Mail"
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail"
 ########################################################################
 ###################Change Mail Subject on Prod##########################
-MAIL_DETAIL["subject"] = "GladMinds Feed Report"
+MAIL_DETAIL["subject"]= "GladMinds Feed Report"
 #######################################################################
 #######################Feed Fail Failure Info###########################
 FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/dev/'
