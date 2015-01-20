@@ -158,4 +158,12 @@ GP_REDEMPTION_STATUS = (
 class FeedStatus():
     RECEIVED = 'Received'
     SENT = 'Sent'
-    
+
+
+class FeedSentType():
+    COUPON_REDEEM = 'Coupon Redeem Feed'
+    CUSTOMER_REGISTRATION = 'Customer Registration Feed'
+
+FEED_SENT_TYPES = [getattr(FeedSentType, x) for x in dir(FeedSentType) if (not x.startswith("__"))]
+
+

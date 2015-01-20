@@ -7,7 +7,7 @@ from gladminds.core.model_fetcher import models
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from django.core.cache import cache
 from tastypie.constants import ALL
-from gladminds.core.constants import FEED_TYPES, FeedStatus
+from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES
 
 
 def get_vins():
@@ -150,13 +150,20 @@ class FeedStatusResource(CustomBaseResource):
             filters['created_date__lte'] = dtend
 
         data = []
-        for status in [FeedStatus.RECEIVED]:
-            filters['action'] = status
-            for feed_type in FEED_TYPES:
-                filters['feed_type'] = feed_type
-                success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
-                data.append(create_feed_dict([status,
-                                              feed_type,
-                                              success_count,
-                                              failure_count]))
+        filters['action'] = FeedStatus.RECEIVED
+        for feed_type in FEED_TYPES:
+            filters['feed_type'] = feed_type
+            success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
+            data.append(create_feed_dict([FeedStatus.RECEIVED,
+                                          feed_type,
+                                          success_count,
+                                          failure_count]))
+        filters['action'] = FeedStatus.SENT
+        for feed_type in FEED_SENT_TYPES:
+            filters['feed_type'] = feed_type
+            success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
+            data.append(create_feed_dict([FeedStatus.SENT,
+                                          feed_type,
+                                          success_count,
+                                          failure_count]))
         return map(CustomApiObject, data)
