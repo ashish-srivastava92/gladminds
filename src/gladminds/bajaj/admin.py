@@ -1,3 +1,5 @@
+import copy        
+from django import forms
 from django.contrib.admin import AdminSite, TabularInline
 from django.contrib.auth.models import User, Group
 from django.contrib.admin import ModelAdmin
@@ -36,9 +38,11 @@ class ServiceAdvisorAdmin(GmModelAdmin):
     list_display = ('service_advisor_id', 'user', 'dealer', 'asc', 'status')
 
 class BrandProductCategoryAdmin(GmModelAdmin):
+    search_fields = ('name',)
     list_display = ('name', 'description')
 
 class ProductTypeAdmin(GmModelAdmin):
+    search_fields = ('product_type',)
     list_display = ('id', 'product_type',\
                     'image_url', 'is_active')
 
@@ -140,6 +144,7 @@ class ProductDataAdmin(GmModelAdmin):
 
 
 class CouponAdmin(GmModelAdmin):
+    search_fields = (
         '^unique_service_coupon', '^product__product_id', 'status')
     list_display = ('product', 'unique_service_coupon', 'actual_service_date',
                     'actual_kms', 'status', 'service_type','service_advisor', 'associated_with')
@@ -232,6 +237,7 @@ class CouponChangeList(ChangeList):
         return ordering
 
 class SMSLogAdmin(GmModelAdmin):
+    search_fields = ('sender', 'receiver', 'action')
     list_display = (
         'created_date', 'action', 'message', 'sender', 'receiver')
     
@@ -251,6 +257,7 @@ class SMSLogAdmin(GmModelAdmin):
         return False
     
 class EmailLogAdmin(GmModelAdmin):
+    search_fields = ('subject', 'sender', 'receiver')
     list_display = (
         'created_date', 'subject', 'message', 'sender', 'receiver', 'cc')
 
@@ -281,6 +288,7 @@ class FeedLogAdmin(GmModelAdmin):
             return {'class': css_class}
 
 class ASCTempRegistrationAdmin(GmModelAdmin):
+    search_fields = (
         'name', 'phone_number', 'email', 'dealer_id')
 
     list_display = (
@@ -288,6 +296,7 @@ class ASCTempRegistrationAdmin(GmModelAdmin):
         'address', 'timestamp', 'dealer_id')
 
 class SATempRegistrationAdmin(GmModelAdmin):
+    search_fields = (
         'name', 'phone_number')
 
     list_display = (
@@ -422,8 +431,12 @@ class MechanicAdmin(GmModelAdmin):
         return form
 
     def save_model(self, request, obj, form, change):
-        if not obj.id:
-            send_welcome_sms(obj)
+        form_status = True
+        for field in obj._meta.fields:
+            if field.name in constants.MANDATORY_MECHANIC_FIELDS and not getattr(obj, field.name):        
+                form_status = False        
+        if form_status and not obj.sent_sms:        
+            LoyaltyService.send_welcome_sms(obj)
             obj.sent_sms=True
         obj.phone_number=utils.mobile_format(obj.phone_number)
         super(MechanicAdmin, self).save_model(request, obj, form, change)
