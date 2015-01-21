@@ -7,7 +7,7 @@ from gladminds.core.model_fetcher import models
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from django.core.cache import cache
 from tastypie.constants import ALL
-from gladminds.core.constants import FEED_TYPES, FeedStatus
+from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES
 
 
 def get_vins():
@@ -103,13 +103,13 @@ class OverallStatusResource(CustomBaseResource):
                                                   dealers]),
                                      create_dict(["8", "# of Active Dealers",
                                                   dealers_active]),
-                                     create_dict(["7", "# of ASCs",
+                                     create_dict(["9", "# of ASCs",
                                                   ascs]),
-                                     create_dict(["8", "# of Active ASCs",
+                                     create_dict(["10", "# of Active ASCs",
                                                   ascs_active]),
-                                     create_dict(["9", "# of SAs",
+                                     create_dict(["11", "# of SAs",
                                                   sas]),
-                                     create_dict(["10", "# of Active SAs",
+                                     create_dict(["12", "# of Active SAs",
                                                   sas_active])
                                      ]
                    )
@@ -150,13 +150,20 @@ class FeedStatusResource(CustomBaseResource):
             filters['created_date__lte'] = dtend
 
         data = []
-        for status in [FeedStatus.SENT, FeedStatus.RECEIVED]:
-            filters['action'] = status
-            for feed_type in FEED_TYPES:
-                filters['feed_type'] = feed_type
-                success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
-                data.append(create_feed_dict([status,
-                                              feed_type,
-                                              success_count,
-                                              failure_count]))
+        filters['action'] = FeedStatus.RECEIVED
+        for feed_type in FEED_TYPES:
+            filters['feed_type'] = feed_type
+            success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
+            data.append(create_feed_dict([FeedStatus.RECEIVED,
+                                          feed_type,
+                                          success_count,
+                                          failure_count]))
+        filters['action'] = FeedStatus.SENT
+        for feed_type in FEED_SENT_TYPES:
+            filters['feed_type'] = feed_type
+            success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
+            data.append(create_feed_dict([FeedStatus.SENT,
+                                          feed_type,
+                                          success_count,
+                                          failure_count]))
         return map(CustomApiObject, data)
