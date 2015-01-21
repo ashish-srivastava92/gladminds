@@ -338,14 +338,26 @@ class AccumulationRequest(base_models.AccumulationRequest):
         app_label = _APP_NAME
 
 class RedemptionPartner(base_models.RedemptionPartner):
-    '''details of retailer'''
+    '''details of redemption partner'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+
+    class Meta:
+        app_label = _APP_NAME
+        
+class LogisticPartner(base_models.LogisticPartner):
+    '''details of logistic partner'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
 
+
 class ProductCatalog(base_models.ProductCatalog):
     '''details of retailer'''
     partner = models.ForeignKey(RedemptionPartner, null=True, blank=True)
+    image_url = models.FileField(upload_to='{0}/bajaj/redeem_products'.format(settings.ENV),
+                                  max_length=255, null=True, blank=True,
+                                  validators=[validate_image])
 
     class Meta:
         app_label = _APP_NAME

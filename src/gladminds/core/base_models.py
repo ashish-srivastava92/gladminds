@@ -712,7 +712,7 @@ class Distributor(BaseModel):
         unique_together = ("distributor_id", "city")
 
     def __unicode__(self):
-        return self.name
+        return self.distributor_id + ' ' +self.name
     
 class Retailer(BaseModel):
     '''details of Distributor'''
@@ -851,14 +851,23 @@ class AccumulationRequest(BaseModel):
 
 class RedemptionPartner(BaseModel):
     partner_id = models.CharField(max_length=50, unique=True)
-    name = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
         verbose_name_plural = "Redemption partner"
-        
+
     def __unicode__(self):
         return str(self.partner_id)
+
+class LogisticPartner(BaseModel):
+    logistic_partner_id = models.CharField(max_length=50, unique=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Logistic partner"
+
+    def __unicode__(self):
+        return str(self.logistic_partner_id)
 
 
 class ProductCatalog(BaseModel):
@@ -869,12 +878,14 @@ class ProductCatalog(BaseModel):
     variation = models.CharField(max_length=50, null=True, blank=True)
     brand = models.CharField(max_length=50, null=True, blank=True)
     model = models.CharField(max_length=50, null=True, blank=True)
-    image_url = models.CharField(
-                   max_length=200, blank=True, null=True)
     category = models.CharField(max_length=50, null=True, blank=True)
     sub_category = models.CharField(max_length=50, null=True, blank=True)
     is_active = models.BooleanField(default=True)
-
+    
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+    image_tag.short_description = 'Product Image'
+    image_tag.allow_tags = True
 
     class Meta:
         abstract = True

@@ -151,6 +151,10 @@ GP_REDEMPTION_STATUS = (
         ('Approved', 'Approved'),
         ('Accepted', 'Accepted'),
         ('Packed', 'Packed'),
+        ('Shipped', 'Shipped')
+    )
+
+LP_REDEMPTION_STATUS = (
         ('Shipped', 'Shipped'),
         ('Delivered', 'Delivered')
     )
