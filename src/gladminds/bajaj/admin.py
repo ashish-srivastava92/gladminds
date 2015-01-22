@@ -467,6 +467,18 @@ class MechanicAdmin(GmModelAdmin):
         css_class = class_map.get(str(obj.form_status))
         if css_class:
             return {'class': css_class}
+        
+    def queryset(self, request):
+        """
+        Returns a QuerySet of all model instances that can be edited by the
+        admin site. This is used by changelist_view.
+        """
+        query_set = self.model._default_manager.get_query_set()
+        if request.user.groups.filter(name=Roles.ASMS).exists():
+            asm=models.AreaSalesManager.objects.get(user__user=request.user)
+            query_set=query_set.filter(state=asm.state.upper())
+
+        return query_set
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points')
