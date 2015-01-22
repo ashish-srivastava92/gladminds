@@ -12,7 +12,7 @@ from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
 from gladminds.core import constants
 from gladminds.core.model_helpers import PhoneField
 from gladminds.core import constants
-from gladminds.core.core_utils.utils import generate_mech_id
+from gladminds.core.core_utils.utils import generate_mech_id, generate_partner_id
 try:
     from django.utils.timezone import now as datetime_now
 except ImportError:
@@ -850,26 +850,18 @@ class AccumulationRequest(BaseModel):
     def __unicode__(self):
         return str(self.transaction_id)
 
-class RedemptionPartner(BaseModel):
-    partner_id = models.CharField(max_length=50, unique=True)
+class Partner(BaseModel):
+    
+    partner_id = models.CharField(max_length=50, unique=True, default=generate_partner_id)
+    address = models.CharField(max_length=100, null=True, blank=True)
+    partner_type = models.CharField(max_length=12, choices=constants.PARTNER_TYPE, null=False, blank=False)
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Redemption partner"
+        verbose_name_plural = "Partner"
 
     def __unicode__(self):
         return str(self.partner_id)
-
-class LogisticPartner(BaseModel):
-    logistic_partner_id = models.CharField(max_length=50, unique=True)
-
-    class Meta:
-        abstract = True
-        verbose_name_plural = "Logistic partner"
-
-    def __unicode__(self):
-        return str(self.logistic_partner_id)
-
 
 class ProductCatalog(BaseModel):
     product_id = models.CharField(max_length=50, unique=True)
@@ -901,6 +893,7 @@ class RedemptionRequest(BaseModel):
     transaction_id = models.AutoField(primary_key=True)
     expected_delivery_date =  models.DateTimeField(null=True, blank= True)
     status = models.CharField(max_length=12, choices=constants.REDEMPTION_STATUS, default='Open')
+    packed_by = models.CharField(max_length=50, null=True, blank=True)
     is_approved = models.BooleanField(default=False)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):

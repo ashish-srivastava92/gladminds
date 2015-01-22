@@ -26,6 +26,9 @@ def generate_mech_id():
     mechanic_id=generate_temp_id('TME')
     return mechanic_id
 
+def generate_partner_id():
+    partner_id=generate_temp_id('PRT')
+    return partner_id
 
 def debug(fn):
     '''

@@ -151,12 +151,21 @@ GP_REDEMPTION_STATUS = (
         ('Approved', 'Approved'),
         ('Accepted', 'Accepted'),
         ('Packed', 'Packed'),
-        ('Shipped', 'Shipped')
+        ('Shipped', 'Shipped'),
+        ('Shipped', 'Shipped'),
+        ('Delivered', 'Delivered')
     )
 
 LP_REDEMPTION_STATUS = (
         ('Shipped', 'Shipped'),
         ('Delivered', 'Delivered')
+    )
+
+PARTNER_TYPE = (
+        ('Merchant', 'Merchant'),
+        ('Redemption', 'Redemption'),
+        ('Logistics', 'Logistics'),
+        ('Marketing', 'Marketing')
     )
 
 class FeedStatus():
@@ -169,5 +178,3 @@ class FeedSentType():
     CUSTOMER_REGISTRATION = 'Customer Registration Feed'
 
 FEED_SENT_TYPES = [getattr(FeedSentType, x) for x in dir(FeedSentType) if (not x.startswith("__"))]
-
-

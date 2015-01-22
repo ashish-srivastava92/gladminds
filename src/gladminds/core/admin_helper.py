@@ -38,7 +38,9 @@ class GmModelAdmin(ModelAdmin):
                                                      extra_context=extra_context)
 
     def get_user(self, obj):
-        return obj.user.user.first_name
+        if obj.user:
+            return obj.user.user.first_name
+        return None
     
     def get_profile_number(self, obj):
         return obj.user.phone_number
