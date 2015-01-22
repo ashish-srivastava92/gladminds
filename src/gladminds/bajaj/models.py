@@ -302,7 +302,6 @@ class Mechanic(base_models.Mechanic):
     class Meta:
         app_label = _APP_NAME
 
-
 class SparePartMasterData(base_models.SparePartMasterData):
     '''details of Spare Part'''
     product_type = models.ForeignKey(ProductType, null=True, blank=True)
@@ -317,7 +316,6 @@ class SparePartUPC(base_models.SparePartUPC):
 
     class Meta:
         app_label = _APP_NAME
-
 
 class SparePartPoint(base_models.SparePartPoint):
     '''details of Spare Part'''
@@ -337,23 +335,28 @@ class AccumulationRequest(base_models.AccumulationRequest):
     class Meta:
         app_label = _APP_NAME
 
-class RedemptionPartner(base_models.RedemptionPartner):
-    '''details of retailer'''
+class Partner(base_models.Partner):
+    '''details of partner'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
 
 class ProductCatalog(base_models.ProductCatalog):
     '''details of retailer'''
-    partner = models.ForeignKey(RedemptionPartner, null=True, blank=True)
+    partner = models.ForeignKey(Partner, null=True, blank=True)
+    image_url = models.FileField(upload_to='{0}/bajaj/redeem_products'.format(settings.ENV),
+                                  max_length=255, null=True, blank=True,
+                                  validators=[validate_image])
 
     class Meta:
         app_label = _APP_NAME
-        
+
 class RedemptionRequest(base_models.RedemptionRequest):
     '''details of retailer'''
     product = models.ForeignKey(ProductCatalog)
     member = models.ForeignKey(Mechanic)
+    owner = models.ForeignKey(Partner, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME

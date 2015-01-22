@@ -36,3 +36,35 @@ class GmModelAdmin(ModelAdmin):
         return super(GmModelAdmin, self).change_view(request, object_id,
                                                      form_url=form_url,
                                                      extra_context=extra_context)
+
+    def get_user(self, obj):
+        if obj.user:
+            return obj.user.user.first_name
+        return None
+    
+    def get_profile_number(self, obj):
+        return obj.user.phone_number
+    
+    def get_profile_address(self, obj):
+        return obj.user.address
+
+    get_profile_number.short_description = 'Phone number'
+    get_profile_address.short_description = 'Address'
+    get_user.short_description = 'Name'
+    
+    def get_mechanic_name(self, obj):
+        return obj.member.first_name
+
+    def get_mechanic_pincode(self, obj):
+        return obj.member.pincode
+
+    def get_mechanic_district(self, obj):
+        return obj.member.district
+
+    def get_mechanic_state(self, obj):
+        return obj.member.state
+    
+    get_mechanic_name.short_description = 'Name'
+    get_mechanic_pincode.short_description = 'Pincode'
+    get_mechanic_district.short_description = 'City'
+    get_mechanic_state.short_description = 'State'
