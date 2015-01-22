@@ -43,6 +43,9 @@ OAUTH_DELETE_EXPIRED = True
 JOBCARD_DIR = '{0}/jobcards/prod/'
 JOBCARD_BUCKET = 'gladminds'
 
+SDFILE_DIR = '{0}/bajaj/sdfiles/'
+SDFILE_BUCKET = 'gladminds'
+
 FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/qa/'
 FEED_FAILURE_BUCKET = 'gladminds'
 

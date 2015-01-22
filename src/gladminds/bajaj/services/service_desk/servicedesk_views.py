@@ -83,6 +83,10 @@ def save_help_desk_data(request):
     sms_dict = {}
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)
+    if request.FILES:
+        sms_dict['file_location'] =  request.FILES['sdFile']
+    else:
+        sms_dict['file_location'] = None
     service_advisor_obj = models.ServiceAdvisor.objects.get(user__phone_number=sms_dict['advisorMobile'])
     if request.user.groups.filter(name=Roles.DEALERS).exists():
         dealer_asc_obj = models.Dealer.objects.get(dealer_id=request.user)

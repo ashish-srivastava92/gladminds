@@ -608,6 +608,7 @@ class Feedback(BaseModel):
     reminder_date = models.DateTimeField(null=True, blank=True)
     reminder_flag = models.BooleanField(default=False)
     resolution_flag = models.BooleanField(default=False)
+    file_location = models.CharField(max_length=215, null=True, blank=True)
     objects = service_desk_manager.FeedbackManager()
 
     class Meta:

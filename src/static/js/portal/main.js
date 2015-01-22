@@ -312,6 +312,25 @@ function vinSyncFeed(data){
         });
         return false;
     });
+    
+    $('.sdFile').on('change', function() {
+        var fileInput = $(this),
+            ext = fileInput.val().split('.').pop().toLowerCase();
+        if($.inArray(ext, ['pdf','tiff','jpg','png','ppt','doc','xls']) === -1) {
+            alert('Invalid file type!');
+            fileInput.replaceWith(fileInput=fileInput.clone(true));
+        }
+    });
+    
+   $('.sd-file').on('click', function() {
+	   var time = 5;
+	   setTimeout(function(){
+		   $('.sd-file').prop('disabled',false);
+	    }, time*1000);
+	   $('.sd-file').prop('disabled',true);
+    });
+
+    
 
     $('.comment-form').on('submit', function(e) {
         var data = Utils.getFormData('.servicedesk'),

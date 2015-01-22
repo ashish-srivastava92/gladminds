@@ -25,6 +25,7 @@ from gladminds.core.core_utils.date_utils import convert_utc_to_local_time, \
     get_time_in_seconds
 from gladminds.core.managers import mail
 from django.db.transaction import atomic
+import uuid
 
 LOG = logging.getLogger('gladminds')
 
@@ -153,6 +154,18 @@ def get_complain_data(sms_dict, phone_number, email, name, dealer_email, with_de
                                                             role=role
                                                             )
         gladminds_feedback_object.save()
+        if sms_dict['file_location']:
+            file_obj = sms_dict['file_location']
+            filename_prefix = gladminds_feedback_object.id
+            filename_suffix = str(uuid.uuid4())
+            ext = file_obj.name.split('.')[-1]
+            file_obj.name = 'GM'+str(filename_prefix)+'_'+'_'+filename_suffix+'.'+ext
+            destination = settings.SDFILE_DIR.format(settings.ENV)
+            bucket = settings.SDFILE_BUCKET
+            path = utils.upload_file(destination, bucket, file_obj, logger_msg="SDFile")
+            feedback_object = models.Feedback.objects.get(id=gladminds_feedback_object.id)
+            feedback_object.file_location = path
+            feedback_object.save()
         message = templates.get_template('SEND_RCV_FEEDBACK').format(type=gladminds_feedback_object.type)
     except Exception as ex:
         LOG.error(ex)
