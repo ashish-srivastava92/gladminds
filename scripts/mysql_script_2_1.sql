@@ -121,3 +121,4 @@ alter table bajaj_feedfailurelog add column email_flag boolean default false;
 
 update bajaj.auth_user new_user inner join gladminds.auth_user p on p.username=new_user.username set new_user.first_name=p.first_name where p.first_name!='';
 
+alter table bajaj_vinsyncfeedlog add ucn_count int(5) null;

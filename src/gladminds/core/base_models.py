@@ -547,6 +547,7 @@ class VinSyncFeedLog(BaseModel):
     dealer_asc_id = models.CharField(max_length=15, null=True, blank=True)
     status_code = models.CharField(max_length=15, null=True, blank=True)
     email_flag = models.BooleanField(default=False)
+    ucn_count = models.IntegerField(max_length=5, null=True, blank=True)
     
     class Meta:
         abstract =True

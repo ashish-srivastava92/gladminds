@@ -7,6 +7,7 @@ from django.conf import settings
 import logging
 from gladminds.core import utils
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
+from gladminds.bajaj.services.coupons.feed_models import save_to_db
 from gladminds.bajaj.services.coupons.import_feed import SAPFeed
 import json
 logger = logging.getLogger("gladminds")
@@ -203,51 +204,58 @@ class ExportUnsyncProductFeed(BaseExportFeed):
     def export(self, data=None):
         data_source = []
         message="some error occurred, please try again later."
-#         logger.info(
-#             "Export {1}: Items:{0}"\
-#             .format(data, self.feed_type))
+        logger.info(
+            "Export {1}: Items:{0}"\
+            .format(data, self.feed_type))
         client = self.get_client()
 
-#         logger.info("Trying to send product details the ID: {0}"\
-#                     .format(data['vin']))
-        item={"UCN_NO": "",
-                    "CHASSIS":"",
-                    "SERV_TY":"",
-                    "VEH_DISP_DT":"2014-12-12",
-                    "KUNNR":"",
-                    "PRD_TY":"",  
-                    "KMS_FRM":"",
-                    "KMS_TO":"",
-                    "DYS_LMT_FRM":"",
-                    "DYS_LMT_TO":""}
+        logger.info("Trying to send product details the ID: {0}"\
+                    .format(data['vin']))
+#         item={"UCN_NO": "",
+#                     "CHASSIS":"",
+#                     "SERV_TY":"",
+#                     "VEH_DISP_DT":"2014-12-12",
+#                     "KUNNR":"",
+#                     "PRD_TY":"",  
+#                     "KMS_FRM":"",
+#                     "KMS_TO":"",
+#                     "DYS_LMT_FRM":"",
+#                     "DYS_LMT_TO":""}
+#                     DT_DISPATCH={"item":item}
         result = client.service.SI_GCPONL_Sync(
-                DT_ONL=[{"CHASSIS": data['vin'],"DEALER": data['current_user'].username}], DT_DISPATCH={"item":item})
-
+                DT_ONL=[{"CHASSIS": data['vin'],"DEALER": data['current_user'].username}])
+        
         try:
-            
-            #logger.info("Response from SAP: {0}".format(result))
+            logger.info("Response from SAP: {0}".format(result))
             return_code = result[1][0]['RETURN_CODE']
             
             if return_code:
-                vin_sync_feed = models.VinSyncFeedLog(product_id = data['vin'], dealer_asc_id=data['current_user'].username, status_code=result[1][0]['RETURN_CODE'])
+                vin_sync_feed = models.VinSyncFeedLog(product_id = data['vin'], dealer_asc_id=data['current_user'].username,
+                                                      status_code=result[1][0]['RETURN_CODE'], ucn_count=len(result[0]))
                 vin_sync_feed.save()
                 if result[1][0]['RETURN_CODE'].upper() == 'S':
                     message='The Chassis was found in the main database. Please try after sometime.'
-                    for results in result[0]:
-                        data_source.append(utils.create_dispatch_feed_data(results))
                     feed_remark = FeedLogWithRemark(len(data_source),
                                             feed_type='VIN sync Feed',
                                             action='Sent', status=True)
-                    sap_obj = SAPFeed()
-                    feed_response = sap_obj.import_to_db(feed_type='dispatch', data_source=data_source,
-                                                     feed_remark=feed_remark)
-                    if feed_response.failed_feeds > 0:
-                        remarks = feed_response.remarks.elements()
+                    for results in result[0]:
+                        try:
+                            data_source.append(utils.create_dispatch_feed_data(results))
+                        except Exception as ex:
+                            ex = "ProductDispatchService: {0}  Error on Validating {1}".format(result, ex)
+                            feed_remark.fail_remarks(ex)
+                            logger.error(ex)
+                    feed_remark = save_to_db(feed_type='dispatch', data_source=data_source,
+                                        feed_remark=feed_remark)
+                    feed_remark.save_to_feed_log()
+                    if feed_remark.failed_feeds > 0:
+                        remarks = feed_remark.remarks.elements()
                         for remark in remarks:
-                            feed_failure_log(feed_type='VIN Sync Feed', reason=remark)
-                            logger.info('[vin sync]:: ' + json.dumps(feed_response.remarks))
-                            raise ValueError('dispatch feed failed!')
+                            feed_failure_log(feed_type='VIN sync Feed', reason=remark)
+                            logger.info('[vin sync]:: ' + json.dumps(feed_remark.remarks))
+                        raise ValueError('dispatch feed failed!')
                         logger.info('[vin sync ]:: dispatch feed completed')
+                        
                 elif result[1][0]['RETURN_CODE'].upper() == 'E':
                     message='This Chassis is not available in Main database, please type the correct chassis number'
         except Exception as ex:
