@@ -40,6 +40,11 @@ def service_desk(request):
     page_details['from'] = feedbacks.start_index()
     page_details['to'] = feedbacks.end_index()
     groups = utils.stringify_groups(request.user)
+    training_material = models.Service.objects.filter(service_type__name="Service Desk")
+    if len(training_material)>0:
+        training_material = training_material[0].training_material_url
+    else:
+        training_material = None
     if request.method == 'GET':
         template = 'portal/feedback_details.html'
         data = None
@@ -56,6 +61,7 @@ def service_desk(request):
                                           "record_showing_counts": RECORDS_PER_PAGE,
                                           "types": utils.get_list_from_set(FEEDBACK_TYPE),
                                           "priorities": utils.get_list_from_set(PRIORITY),
+                                          "training_material" : training_material,
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
                                                             'count': str(count), 'search': search}}
                                         )
@@ -119,6 +125,11 @@ def get_servicedesk_tickets(request):
     page_details['total_objects'] = paginator.count
     page_details['from'] = feedbacks.start_index()
     page_details['to'] = feedbacks.end_index()
+    training_material = models.Service.objects.filter(service_type__name="Service Desk")
+    if len(training_material)>0:
+        training_material = training_material[0].training_material_url
+    else:
+        training_material = None
 
     return render(request, 'service-desk/tickets.html', {"feedbacks" : feedbacks,
                                           "status": utils.get_list_from_set(FEEDBACK_STATUS),
@@ -127,6 +138,7 @@ def get_servicedesk_tickets(request):
                                           "pagination_links": PAGINATION_LINKS,
                                           "page_details": page_details,
                                           "record_showing_counts": RECORDS_PER_PAGE,
+                                          "training_material" : training_material,
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
                                                             'count': str(count), 'search': search}}
                                         )

@@ -88,3 +88,16 @@ def validate_image(fieldfile_obj):
         megabyte_limit = settings.MAX_UPLOAD_IMAGE_SIZE
         if filesize > megabyte_limit*1024*1024:
             raise ValidationError("Image size cannot exceed %sMB" % str(megabyte_limit))
+
+def validate_file(fieldfile_obj):
+        if not hasattr(fieldfile_obj.file, 'content_type'):
+            return
+        filesize = fieldfile_obj.file.size
+        content = fieldfile_obj.file.content_type
+        content_type = content.split('/')[1]
+        if content_type not in settings.ALLOWED_FILE_TYPES:
+            raise ValidationError("Only these file types are allowed %s" % ','.join(settings.ALLOWED_FILE_TYPES))
+
+        megabyte_limit = settings.MAX_UPLOAD_FILE_SIZE
+        if filesize > megabyte_limit*1024*1024:
+            raise ValidationError("File size cannot exceed %sMB" % str(megabyte_limit))

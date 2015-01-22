@@ -8,15 +8,22 @@
 <div class="well">
 	<div class="container">
 		<div class="row">
-			<div class="col-md-offset-5 col-md-5">
-				<h3 class="">Feedback Status</h3>
+			<div class="col-md-3">
+				{% if training_material%}
+					<a href={{training_material}} download>
+						<button type="button" class="btn btn-primary pull-left add-feedback-btn sd-file">SOP</button>
+					</a>
+				{% endif %}
+		 	</div>
+			<div class="col-md-5">
+				<h3 align="center">Feedback Status</h3>
 			</div>
-			<div class="col-md-2">
+			<div class="col-md-4">
 				<button class="btn btn-primary pull-right add-feedback-btn" data-toggle="modal" data-target="#myModal">
 			 		Add Ticket
 			 	</button>
 		 	</div>
-		</div>
+		 </div>
 	
 		<div class="row feedback-filters">
 			<div class="col-md-4 hide ">

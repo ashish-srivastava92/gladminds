@@ -665,7 +665,36 @@ class SLA(models.Model):
     class Meta:
         abstract = True
         verbose_name_plural = "SLA info"
+
+
+class ServiceType(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+
+    class Meta:
+        abstract =True
+        verbose_name_plural = "Service Types"
         
+    def __unicode__(self):
+        return self.name
+
+
+class Service(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+    
+    def file_tag(self):
+        return u'<h1> "{0}/{1}"</h1>'.format(settings.S3_BASE_URL, self.file_url)
+    file_tag.short_description = 'Training Material'
+    file_tag.allow_tags = True
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Services"
+        
+    def __unicode__(self):
+        return self.name
+
 #######################LOYALTY TABLES#################################
 
 class NationalSalesManager(BaseModel):

@@ -355,6 +355,11 @@ class SlaAdmin(GmModelAdmin):
     
     list_display = ('priority', response_time, reminder_time, resolution_time)
     
+
+class ServiceAdmin(GmModelAdmin):
+    list_display = ('service_type', 'name', 'description')
+    readonly_fields = ('file_tag',)
+
 class ServiceDeskUserAdmin(GmModelAdmin):
     list_display = ('user_profile', 'name', 'phone_number', 'email')
 
@@ -595,3 +600,5 @@ brand_admin.register(models.EmailTemplate, EmailTemplateAdmin)
 brand_admin.register(models.MessageTemplate, MessageTemplateAdmin)
 brand_admin.register(models.SLA, SlaAdmin)
 brand_admin.register(models.ServiceDeskUser, ServiceDeskUserAdmin)
+brand_admin.register(models.Service, ServiceAdmin)
+brand_admin.register(models.ServiceType)

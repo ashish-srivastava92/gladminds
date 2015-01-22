@@ -6,8 +6,19 @@
 
 {% block body %}
 <div class="well">
-	<h3 class="text-center">GladDesk Ticket Information</h3>
 	<div class="container">
+		<div class="row">
+			<div class="col-md-3">
+				{% if training_material%}
+					<a href={{training_material}} download>
+						<button type="button" class="btn btn-primary pull-left add-feedback-btn">SOP</button>
+					</a>
+				{% endif %}
+		 	</div>
+			<div class="col-md-5">
+				<h3 align="center">GladDesk Ticket Information</h3>
+			</div>
+		</div>
 		<div class="row feedback-filters">
 			<div class="col-md-4">
 				<div class="row">
