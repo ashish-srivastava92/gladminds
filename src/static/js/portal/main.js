@@ -316,7 +316,7 @@ function vinSyncFeed(data){
     $('.sd_file').on('change', function() {
         var fileInput = $(this),
             ext = fileInput.val().split('.').pop().toLowerCase();
-        if($.inArray(ext, ['pdf','tiff','jpg','png','ppt','doc','xls']) === -1) {
+        if($.inArray(ext, ['pdf','jpg','jpeg','png','ppt','pptx','doc','docx','xls','xlsx']) === -1) {
             alert('Invalid file type!');
             fileInput.replaceWith(fileInput=fileInput.clone(true));
         }
