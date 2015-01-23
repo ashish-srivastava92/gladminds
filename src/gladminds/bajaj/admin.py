@@ -514,7 +514,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
         """
         query_set = self.model._default_manager.get_query_set()
         if request.user.groups.filter(name=Roles.RPS).exists():
-            query_set=query_set.filter(is_approved=True, owner__user=request.user)
+            query_set=query_set.filter(is_approved=True, packed_by=request.user.username)
         elif request.user.groups.filter(name=Roles.LPS).exists():
             query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, owner__user=request.user)
 
@@ -529,7 +529,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
         elif request.user.groups.filter(name=Roles.LPS).exists():
             form.base_fields['status'].choices = constants.LP_REDEMPTION_STATUS
         else:
-            form.base_fields['status'].choices = constants.ASM_REDEMPTION_STATUS
+            form.base_fields['status'].choices = constants.REDEMPTION_STATUS
         return form
 
     def save_model(self, request, obj, form, change):

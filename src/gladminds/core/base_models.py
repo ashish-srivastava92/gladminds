@@ -861,7 +861,7 @@ class Partner(BaseModel):
         verbose_name_plural = "Partner"
 
     def __unicode__(self):
-        return str(self.partner_id)
+        return str(self.partner_id) + '(' + self.partner_type + ')'
 
 class ProductCatalog(BaseModel):
     product_id = models.CharField(max_length=50, unique=True)
@@ -895,12 +895,22 @@ class RedemptionRequest(BaseModel):
     status = models.CharField(max_length=12, choices=constants.REDEMPTION_STATUS, default='Open')
     packed_by = models.CharField(max_length=50, null=True, blank=True)
     is_approved = models.BooleanField(default=False)
+    
+    def clean(self, *args, **kwargs):
+        
+        if self.status=='Packed' and (not self.owner or self.owner.partner_type not in ['Redemption','Logistics']):
+            raise ValidationError("Please assign an owner")
+        elif self.status=='Approved' and (not self.owner or self.owner.partner_type!='Redemption'):
+            raise ValidationError("Please assign a redemption partner")
+        else:
+            super(RedemptionRequest, self).clean(*args, **kwargs)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         for field in self._meta.fields:
             if field.name=='status':
                 if getattr(self, field.name)=='Approved':
                     self.is_approved=True
+                    self.packed_by=self.owner.user.user.username
                 elif getattr(self, field.name) in ['Rejected', 'Open'] :
                     self.is_approved=False
 
