@@ -374,3 +374,19 @@ class RedemptionRequest(base_models.RedemptionRequest):
 
     class Meta:
         app_label = _APP_NAME
+
+
+class DateDimension(base_models.DateDimension):
+    '''
+    Date dimension table
+    '''
+    class Meta:
+        app_label = _APP_NAME
+
+
+class CouponFact(base_models.CouponFact):
+    '''Coupon Fact Table for reporting'''
+    date = models.ForeignKey(DateDimension)
+
+    class Meta:
+        app_label = _APP_NAME
