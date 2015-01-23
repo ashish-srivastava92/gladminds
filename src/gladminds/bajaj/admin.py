@@ -27,15 +27,15 @@ class UserProfileAdmin(GmModelAdmin):
     
 class DealerAdmin(GmModelAdmin):
     search_fields = ('dealer_id',)
-    list_display = ('dealer_id', 'user')
+    list_display = ('dealer_id', 'get_user', 'get_profile_number', 'get_profile_address')
 
 class AuthorizedServiceCenterAdmin(GmModelAdmin):
     search_fields = ('asc_id', 'dealer__dealer_id')
-    list_display = ('asc_id', 'user', 'dealer')
+    list_display = ('asc_id', 'get_user', 'get_profile_number', 'get_profile_address', 'dealer')
 
 class ServiceAdvisorAdmin(GmModelAdmin):
     search_fields = ('service_advisor_id', 'dealer__dealer_id', 'asc__asc_id')
-    list_display = ('service_advisor_id', 'user', 'dealer', 'asc', 'status')
+    list_display = ('service_advisor_id', 'get_user', 'get_profile_number', 'get_profile_address', 'dealer', 'asc', 'status')
 
 class BrandProductCategoryAdmin(GmModelAdmin):
     search_fields = ('name',)
@@ -354,7 +354,6 @@ class SlaAdmin(GmModelAdmin):
         return str(self.resolution_time) + ' ' + self.resolution_unit
     
     list_display = ('priority', response_time, reminder_time, resolution_time)
-    
 
 class ServiceAdmin(GmModelAdmin):
     list_display = ('service_type', 'name', 'description')
@@ -363,24 +362,97 @@ class ServiceAdmin(GmModelAdmin):
 class ServiceDeskUserAdmin(GmModelAdmin):
     list_display = ('user_profile', 'name', 'phone_number', 'email')
 
+'''Admin View for loyalty'''
 class NSMAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
+    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
     search_fields = ('nsm_id', 'name', 'phone_number', 'territory')
     list_display = ('nsm_id', 'name', 'email', 'phone_number','territory')
 
 class ASMAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
+    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
     search_fields = ('asm_id', 'nsm__name',
                      'phone_number', 'state')
     list_display = ('asm_id', 'name', 'email',
                      'phone_number', 'state', 'nsm')
 
 class DistributorAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
+    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
     search_fields = ('distributor_id', 'asm__asm_id',
                      'phone_number', 'city')
     list_display = ('distributor_id', 'name', 'email',
                     'phone_number', 'city', 'asm')
+
+class SparePartMasterAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    search_fields = ('part_number', 'category',
+                     'segment_type', 'supplier',
+                     'product_type__product_type')
+    list_display = ('part_number', 'description',
+                    'product_type', 'category',
+                    'segment_type',  'part_model', 'supplier')
+
+class SparePartUPCAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    search_fields = ('part_number__part_number', 'unique_part_code')
+    list_display = ('unique_part_code', 'part_number')
+
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('is_used',)
+        form = super(SparePartUPCAdmin, self).get_form(request, obj, **kwargs)
+        return form
+
+class SparePartPointAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    search_fields = ('part_number__part_number', 'points', 'territory')
+    list_display = ('part_number', 'points', 'valid_from',
+                    'valid_till', 'territory', 'price', 'MRP')
+
+class SparePartline(TabularInline):
+    model = models.AccumulationRequest.upcs.through
+
+class ProductCatalogAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    list_filter = ('is_active',)
+    search_fields = ('partner__partner_id', 'product_id',
+                    'brand', 'model', 'category',
+                    'sub_category')
+
+    list_display = ('partner', 'product_id', 'points', 'price',
+                    'description', 'variation',
+                    'brand', 'model', 'category',
+                    'sub_category')
+    readonly_fields = ('image_tag',)
+
+class PartnerAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    list_filter = ('partner_type',)
+    search_fields = ('partner_id', 'user__user__first_name', 'partner_type')
+
+    list_display = ('partner_id', 'address','partner_type',  'get_user')
+
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('partner_id',)
+        form = super(PartnerAdmin, self).get_form(request, obj, **kwargs)
+        return form
+
+class AccumulationRequestAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYADMINS, Roles.LOYALTYSUPERADMINS]
+    list_filter = (
+        ('created_date', DateFieldListFilter),
+    )
+    search_fields = ('member__phone_number', 'points')
+    list_display = ( 'member',  'get_mechanic_name', 'get_mechanic_district',
+                     'asm', 'get_upcs', 'points',
+                     'total_points', 'created_date')
+    
+    def get_upcs(self, obj):
+        upcs = obj.upcs.all()
+        if upcs:
+            return ' | '.join([str(upc.unique_part_code) for upc in upcs])
+        else:
+            return None
+
+    get_upcs.short_description = 'UPC'
 
 class MechanicAdmin(GmModelAdmin):
     list_filter = ('form_status',)
@@ -399,6 +471,18 @@ class MechanicAdmin(GmModelAdmin):
         css_class = class_map.get(str(obj.form_status))
         if css_class:
             return {'class': css_class}
+        
+    def queryset(self, request):
+        """
+        Returns a QuerySet of all model instances that can be edited by the
+        admin site. This is used by changelist_view.
+        """
+        query_set = self.model._default_manager.get_query_set()
+        if request.user.groups.filter(name=Roles.ASMS).exists():
+            asm=models.AreaSalesManager.objects.get(user__user=request.user)
+            query_set=query_set.filter(state=asm.state.upper())
+
+        return query_set
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points')
@@ -416,89 +500,16 @@ class MechanicAdmin(GmModelAdmin):
         obj.phone_number=utils.mobile_format(obj.phone_number)
         super(MechanicAdmin, self).save_model(request, obj, form, change)
 
-class SparePartMasterAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
-    search_fields = ('part_number', 'category',
-                     'segment_type', 'supplier',
-                     'product_type__product_type')
-    list_display = ('part_number', 'description',
-                    'product_type', 'category',
-                    'segment_type',  'part_model', 'supplier')
-
-class SparePartUPCAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
-    search_fields = ('part_number__part_number', 'unique_part_code')
-    list_display = ('unique_part_code', 'part_number')
-
-    def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('is_used',)
-        form = super(SparePartUPCAdmin, self).get_form(request, obj, **kwargs)
-        return form
-
-class SparePartPointAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
-    search_fields = ('part_number__part_number', 'points', 'territory')
-    list_display = ('part_number', 'points', 'valid_from',
-                    'valid_till', 'territory', 'price', 'MRP')
-
-class SparePartline(TabularInline):
-    model = models.AccumulationRequest.upcs.through
-
-class AccumulationRequestAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
-    list_filter = (
-        ('created_date', DateFieldListFilter),
-    )
-    search_fields = ('member__phone_number', 'points')
-    list_display = ( 'member',  'get_mechanic_name', 'get_mechanic_city',
-                     'asm', 'get_upcs', 'points',
-                     'total_points', 'created_date')
-
-    def get_mechanic_name(self, obj):
-        return obj.member.first_name
-    
-    def get_mechanic_city(self, obj):
-        return obj.member.district
-    
-    def get_upcs(self, obj):
-        upcs = obj.upcs.all()
-        if upcs:
-            return ' | '.join([str(upc.unique_part_code) for upc in upcs])
-        else:
-            return None
-    
-    get_mechanic_name.short_description = 'Name'
-    get_mechanic_city.short_description = 'City'
-    get_upcs.short_description = 'UPC'
-
-class ProductCatalogAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
-    list_filter = ('is_active',)
-    search_fields = ('partner__partner_id', 'product_id',
-                    'brand', 'model', 'category',
-                    'sub_category')
-
-    list_display = ('partner', 'product_id', 'points', 'price',
-                    'description', 'variation',
-                    'brand', 'model', 'category',
-                    'sub_category')
-
-class RedemptionPartnerAdmin(GmModelAdmin):
-    search_fields = ('partner_id', 'name')
-
-    list_display = ('partner_id','name')
-
 class RedemptionRequestAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.NSMS, Roles.LOYALTYSUPERADMINS]
     list_filter = (
         ('created_date', DateFieldListFilter),
     )
-    search_fields = ('member__phone_number', 'product__product_id')
-    list_display = ( 'member',  'get_mechanic_name',
+    search_fields = ('member__phone_number', 'product__product_id', 'owner__partner_id')
+    list_display = ('member',  'get_mechanic_name',
                      'delivery_address', 'get_mechanic_pincode',
                      'get_mechanic_district', 'get_mechanic_state',
                      'product', 'created_date', 'transaction_id',
-                     'expected_delivery_date', 'status')
+                     'expected_delivery_date', 'status', 'owner')
 
     def queryset(self, request):
         """
@@ -506,8 +517,10 @@ class RedemptionRequestAdmin(GmModelAdmin):
         admin site. This is used by changelist_view.
         """
         query_set = self.model._default_manager.get_query_set()
-        if not request.user.groups.filter(name=Roles.ASMS).exists():
-            query_set=query_set.filter(is_approved=True)
+        if request.user.groups.filter(name=Roles.RPS).exists():
+            query_set=query_set.filter(is_approved=True, owner__user=request.user)
+        elif request.user.groups.filter(name=Roles.LPS).exists():
+            query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, owner__user=request.user)
 
         return query_set
 
@@ -515,11 +528,12 @@ class RedemptionRequestAdmin(GmModelAdmin):
         self.exclude = ('is_approved',)
         form = super(RedemptionRequestAdmin, self).get_form(request, obj, **kwargs)
         form = copy.deepcopy(form)
-
-        if request.user.groups.filter(name=Roles.ASMS).exists():
-            form.base_fields['status'].choices = constants.ASM_REDEMPTION_STATUS
+        if request.user.groups.filter(name=Roles.RPS).exists():
+            form.base_fields['status'].choices = constants.GP_REDEMPTION_STATUS
+        elif request.user.groups.filter(name=Roles.LPS).exists():
+            form.base_fields['status'].choices = constants.LP_REDEMPTION_STATUS
         else:
-            form.base_fields['status'].choices = constants.GP_REDEMPTION_STATUS    
+            form.base_fields['status'].choices = constants.ASM_REDEMPTION_STATUS
         return form
 
     def save_model(self, request, obj, form, change):
@@ -538,23 +552,6 @@ class RedemptionRequestAdmin(GmModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
-
-    def get_mechanic_name(self, obj):
-        return obj.member.first_name
-
-    def get_mechanic_pincode(self, obj):
-        return obj.member.pincode
-
-    def get_mechanic_district(self, obj):
-        return obj.member.district
-
-    def get_mechanic_state(self, obj):
-        return obj.member.state
-    
-    get_mechanic_name.short_description = 'Name'
-    get_mechanic_pincode.short_description = 'Pincode'
-    get_mechanic_district.short_description = 'City'
-    get_mechanic_state.short_description = 'State'
 
 brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
 
@@ -588,7 +585,7 @@ if settings.ENV not in ['prod']:
     brand_admin.register(models.SparePartPoint, SparePartPointAdmin)
     brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
 
-    brand_admin.register(models.RedemptionPartner, RedemptionPartnerAdmin)
+    brand_admin.register(models.Partner, PartnerAdmin)
     brand_admin.register(models.ProductCatalog, ProductCatalogAdmin)
     brand_admin.register(models.RedemptionRequest, RedemptionRequestAdmin)
 

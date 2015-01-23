@@ -115,6 +115,8 @@ SUIT_CONFIG = {
                      'label': 'Spare Part Point'},
                    {'model': 'accumulationrequest',
                      'label': 'Accumulation Request'},
+                   {'model': 'partner',
+                     'label': 'Partner'},
                    {'model': 'productcatalog',
                      'label': 'Product Catalog'},
                    {'model': 'redemptionrequest',
