@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from gladminds.core import base_models
 from gladminds.core.auth_helper import GmApps
 from django.conf import settings
-from gladminds.core.model_helpers import validate_image
+from gladminds.core.model_helpers import validate_image, validate_file
 
 _APP_NAME = GmApps.BAJAJ
 
@@ -252,6 +252,20 @@ class AuditLog(base_models.AuditLog):
 
 
 class SLA(base_models.SLA):
+
+    class Meta:
+        app_label = _APP_NAME
+
+class ServiceType(base_models.ServiceType):
+    class Meta:
+        app_label = _APP_NAME
+    
+
+class Service(base_models.Service):
+    service_type = models.ForeignKey(ServiceType)
+    training_material_url = models.FileField(upload_to='{0}/bajaj/training_material'.format(settings.ENV),
+                                  max_length=255, null=True, blank=True,
+                                  validators=[validate_file])
 
     class Meta:
         app_label = _APP_NAME
