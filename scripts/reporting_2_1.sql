@@ -43,3 +43,16 @@ UPDATE bajaj_datedimension SET
       month=       DATE_FORMAT( date, "%M"),
       year =       DATE_FORMAT( date, "%Y" ),
       month_day =  DATE_FORMAT( date, "%d" );
+
+#########################################################################################
+
+CREATE TABLE `bajaj_couponfact` (
+    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    `closed` bigint NOT NULL,
+    `inprogress` bigint NOT NULL,
+    `expired` bigint NOT NULL,
+    `unused` bigint NOT NULL,
+    `exceeds` bigint NOT NULL,
+    `date_id` bigint NOT NULL
+);
+ALTER TABLE `bajaj_couponfact` ADD CONSTRAINT `date_id_refs_date_id_016dde9e` FOREIGN KEY (`date_id`) REFERENCES `bajaj_datedimension` (`date_id`);
