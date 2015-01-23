@@ -940,3 +940,30 @@ class RedemptionRequest(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "Accumulation Request"
+
+
+class DateDimension(models.Model):
+    date_id = models.BigIntegerField(primary_key=True)
+    date = models.DateField(unique=True)
+    timestamp = models.DateTimeField()
+    weekend = models.CharField(max_length=10)
+    day_of_week = models.CharField(max_length=10)
+    month = models.CharField(max_length=10)
+    month_day = models.IntegerField()
+    year = models.IntegerField()
+    week_starting_monday = models.CharField(max_length=2)
+
+    class Meta:
+        abstract = True
+
+
+class CouponFact(models.Model):
+    closed = models.BigIntegerField()
+    inprogress = models.BigIntegerField()
+    expired = models.BigIntegerField()
+    unused = models.BigIntegerField()
+    exceeds = models.BigIntegerField()
+
+    class Meta:
+        abstract = True
+

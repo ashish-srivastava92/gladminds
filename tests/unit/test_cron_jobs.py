@@ -1,7 +1,7 @@
 from gladminds.sqs_tasks import expire_service_coupon
 from datetime import datetime, timedelta
 from unit.base_unit import GladmindsUnitTestCase
-from gladminds.core.constants import COUPON_STATUS
+from gladminds.core.constants import COUPON_STATUS, FeedStatus
 from gladminds.core.cron_jobs.taskmanager import get_data_feed_log_detail
 
 
@@ -54,7 +54,7 @@ class TestCronjobs(GladmindsUnitTestCase):
 
     def test_get_data_feed_log_detail(self):
         obj = self.get_datafeed_log(feed_type="Dispatch Feed",total_data_count=4,failed_data_count=0\
-                                    ,success_data_count=4,timestamp=datetime.now(),action='Recieved', status='success')
+                                    ,success_data_count=4,timestamp=datetime.now(),action=FeedStatus.RECEIVED, status='success')
         feeds = get_data_feed_log_detail(start_date=datetime.now()-timedelta(days=1), end_date=datetime.now()+timedelta(days=1))
         self.assertEqual(len(feeds), 1)
 
