@@ -313,7 +313,7 @@ function vinSyncFeed(data){
         return false;
     });
     
-    $('.sdFile').on('change', function() {
+    $('.sd_file').on('change', function() {
         var fileInput = $(this),
             ext = fileInput.val().split('.').pop().toLowerCase();
         if($.inArray(ext, ['pdf','tiff','jpg','png','ppt','doc','xls']) === -1) {

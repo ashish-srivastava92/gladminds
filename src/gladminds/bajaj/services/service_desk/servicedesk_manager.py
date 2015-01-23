@@ -163,9 +163,8 @@ def get_complain_data(sms_dict, phone_number, email, name, dealer_email, with_de
             destination = settings.SDFILE_DIR.format(settings.ENV)
             bucket = settings.SDFILE_BUCKET
             path = utils.upload_file(destination, bucket, file_obj, logger_msg="SDFile")
-            feedback_object = models.Feedback.objects.get(id=gladminds_feedback_object.id)
-            feedback_object.file_location = path
-            feedback_object.save()
+            gladminds_feedback_object.file_location = path
+            gladminds_feedback_object.save()
         message = templates.get_template('SEND_RCV_FEEDBACK').format(type=gladminds_feedback_object.type)
     except Exception as ex:
         LOG.error(ex)
