@@ -10,7 +10,7 @@
 		<div class="row">
 			<div class="col-md-3">
 				{% if training_material%}
-					<a href={{training_material}} download>
+					<a href={{S3_URL}}/{{training_material}} download>
 						<button type="button" class="btn btn-primary pull-left add-feedback-btn">SOP</button>
 					</a>
 				{% endif %}
@@ -116,6 +116,7 @@
 					<th>Created</th>
 					<th>Modified</th>
 					<th>Due</th>
+					<th><span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span></th>
 				</tr>
 			</thead>
         <tbody>
@@ -151,6 +152,13 @@
 					<td>{{feedback.created_date|default_if_none:""}}</td>
 					<td>{{feedback.modified_date|default_if_none:""}}</td>
 					<td>{{feedback.due_date|default_if_none:""}}</td>
+					<td>{% if feedback.file_location %}
+						Y
+						{% else %}
+						-
+						{% endif %}
+					</td>
+
 			</tr>
 				{% endfor %}
 			</tbody>
