@@ -15,7 +15,5 @@ def gm_constants(request):
             'SD_OWNER' : Roles.SDOWNERS, 
             'DEALER' : Roles.DEALERS,
             'ASC': Roles.ASCS}
-    base_url = {'BASE_URL' : {}}
-    base_url['BASE_URL'] = {'S3_URL' : S3_BASE_URL}
-    return { 'CONSTANTS' :constants, 'URLS' : base_url }
+    return { 'CONSTANTS' :constants, 'S3_URL' : S3_BASE_URL }
 
