@@ -540,6 +540,8 @@ class RedemptionRequestAdmin(GmModelAdmin):
         super(RedemptionRequestAdmin, self).save_model(request, obj, form, change)
         if 'status' in form.changed_data and obj.status in constants.STATUS_TO_NOTIFY:
             LoyaltyService.send_request_status_sms(obj)
+        if 'owner' in form.changed_data:
+            LoyaltyService.send_mail_to_owner(obj)
 
     def suit_row_attributes(self, obj):
         class_map = {
