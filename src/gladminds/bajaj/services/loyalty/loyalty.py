@@ -2,6 +2,7 @@
 
 import logging
 import json
+from datetime import datetime
 
 from django.conf import settings
 from django.http.response import HttpResponse
@@ -11,7 +12,8 @@ from gladminds.sqs_tasks import send_point, send_loyalty_sms
 from gladminds.core import utils, constants
 from gladminds.core.services.loyalty.loyalty import CoreLoyaltyService
 from gladminds.core.services.message_template import get_template
-from datetime import datetime
+from gladminds.core.managers.mail import get_email_template, \
+                       send_email_to_redemption_request_owner
 
 LOG = logging.getLogger('gladminds')
 
@@ -20,6 +22,19 @@ AUDIT_ACTION = 'SEND TO QUEUE'
 
 class LoyaltyService(CoreLoyaltyService):
     '''Class for loyalty service'''
+
+    def send_mail_to_owner(self, redemption_obj):
+        '''Send mail to GP and LP when redemption
+           request is assigned to them'''
+        data = get_email_template('ASSIGNEE_REDEMPTION_MAIL_DETAIL')
+        data['newsubject'] = data['subject'].format(id = redemption_obj.transaction_id)
+        data['content'] = data['body'].format(id=redemption_obj.transaction_id,
+                              created_date = redemption_obj.created_date,
+                              member_id = redemption_obj.member.mechanic_id,
+                              product_id =  redemption_obj.product.product_id,
+                        delivery_address = redemption_obj.delivery_address)
+        owner_email_id=redemption_obj.owner.user.user.email
+        send_email_to_redemption_request_owner(data, owner_email_id)
 
     def send_request_status_sms(self, redemption_request):
         '''Send redemption request sms to mechanics'''

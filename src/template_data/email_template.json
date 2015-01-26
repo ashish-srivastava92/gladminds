@@ -250,5 +250,17 @@
             "body": "The feed failures since ", 
             "description": "Customer phone number update mail"
         }
+    },
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 22,
+        "fields": {
+            "template_key": "ASSIGNEE_REDEMPTION_MAIL_DETAIL",
+            "sender": "feed-report@gladminds.co",
+            "receiver": "naureen.razi@hashedin.com",
+            "subject": "Redemption request with reference-no-{id} is assigned to you",
+            "body": "Redemption request id: {id} created on {created_date} has been assigned to you. Member ID : {member_id} , Product ID: {product_id}, Delivery Address: {delivery_address}",  
+            "description": "Redemption requestDetail mail to assignee"
+        }
     }
 ]
