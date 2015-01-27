@@ -158,6 +158,7 @@ def modify_servicedesk_tickets(request, feedback_id):
     root_cause = get_list_from_set(ROOT_CAUSE)
     feedback_obj = get_feedback(feedback_id, request.user)
     servicedesk_users = get_servicedesk_users(designation=Roles.SDOWNERS)
+    servicedesk_manager = get_servicedesk_users(designation=Roles.SDMANAGERS)
     comments = get_comments(feedback_id)
     
     if request.method == 'POST':
@@ -171,6 +172,7 @@ def modify_servicedesk_tickets(request, feedback_id):
                     "ROOT_CAUSE" : root_cause,\
                    "group": group_name[0].name,\
                    'servicedeskuser': servicedesk_users,\
+                   'servicedeskmanager':servicedesk_manager[0],\
                    'comments': comments,\
                    'user':request.user
                    })

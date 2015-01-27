@@ -81,33 +81,6 @@
 			{% endif %}
 		</h4>
 		{% elif feedbacks.length != 0 %}
-		<div class="row">
-			<div class="col-md-6">
-				<div class="row">
-	            	<div class="col-md-2 showing-rocord-text">
-	                	<span>Showing: </span>
-	                </div>
-	                <div class="col-md-2">
-	                	<select class="form-control feedback-filters-options rocord-count" name="status" required>
-	                      	{% for record_showing_count in record_showing_counts %}
-	                     		 <option {% if filter_params.count == record_showing_count  %} selected {% endif%} value="{{record_showing_count}}">{{record_showing_count}}</option>
-	                      	{% endfor %}
-	                    </select>
-	                 </div>
-	                 <div class="col-md-2 entry-text showing-rocord-text">
-	                	<span>entries </span>
-	                </div>
-	            </div>
-			</div>
-			<div class="col-md-offset-3 col-md-3">
-				<div class="input-group">
-				  	<input type="text" value="{{filter_params.search|default:''}}" class="form-control feedback-search-text" placeholder="Type word">
-				  	<span class="btn input-group-addon">
-				  		<i class="glyphicon glyphicon-search feedback-free-text-search"></i>
-				  	</span>
-				</div>
-			</div>
-		</div>
 		<table class="table table-striped table-bordered table-responsive	" >
         <thead>
 				<tr>
@@ -181,6 +154,35 @@
 				</div>
 			</div>
 		{% endif %}
+		<div class="row {% if feedbacks.length != 0 %} hide {% endif %}">
+			<div class="col-md-6">
+				<div class="row">
+	            	<div class="col-md-2 showing-rocord-text">
+	                	<span>Showing: </span>
+	                </div>
+	                <div class="col-md-2">
+	                	<select class="form-control feedback-filters-options rocord-count" name="status" required>
+	                      	{% for record_showing_count in record_showing_counts %}
+	                     		 <option {% if filter_params.count == record_showing_count  %} selected {% endif%} value="{{record_showing_count}}">{{record_showing_count}}</option>
+	                      	{% endfor %}
+	                    </select>
+	                 </div>
+	                 <div class="col-md-2 entry-text showing-rocord-text">
+	                	<span>entries </span>
+	                </div>
+	            </div>
+			</div>
+			<div class="col-md-offset-3 col-md-3">
+				<div class="input-group">
+				  	<input type="text" value="{{filter_params.search|default:''}}" class="form-control feedback-search-text" placeholder="Type word">
+				  	<span class="btn input-group-addon">
+				  		<i class="glyphicon glyphicon-search feedback-free-text-search"></i>
+				  	</span>
+				</div>
+			</div>
+		</div>
+		
+		
 	</div>
 </div>
 
