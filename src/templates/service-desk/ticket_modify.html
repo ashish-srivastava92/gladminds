@@ -86,7 +86,6 @@
                         			<select id="assignee" class="form-control assignee" name="assign_to"   {% if group == CONSTANTS.SD_CONSTANTS.SD_OWNER or group == CONSTANTS.SD_CONSTANTS.DEALER or group == CONSTANTS.SD_CONSTANTS.ASC %} onfocus="disable_func()" readonly {% endif %} onchange="dueDateRequire(this.options[this.selectedIndex].value)" >
                             			<option value=""></option>
                             			<option value={{feedback.previous_assignee.user_profile.phone_number}}>Previous assignee</option>
-                            			<option value={{servicedeskmanager.user_profile.phone_number}}>{{servicedeskmanager.user_profile.user.username}}({{servicedeskmanager.user_profile.phone_number}})</option>
                                			{% for type in servicedeskuser %}
                       	          			<option {% if type == feedback.assignee %} selected {% endif %} value="{{type.user_profile.phone_number}}">{{type.user_profile.user.username}}({{type.user_profile.phone_number}})</option>
                                 		{% endfor %}
