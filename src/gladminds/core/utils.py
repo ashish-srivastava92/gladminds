@@ -165,21 +165,10 @@ def get_coupon_info(data):
         logger.error('[UCN_RECOVERY_ERROR]:: {0}'.format(ex))
     return coupon_data
 
-def upload_file(data, unique_service_coupon):
-    user_obj = models.UserProfile.objects.get(user=data['current_user'])
-    file_obj = data['job_card']
-    customer_id = data['customerId']
-    reason = data['reason']
-    file_obj.name = get_file_name(data, file_obj)
-    #TODO: Include Facility to get brand name here
-    destination = settings.JOBCARD_DIR.format('bajaj')
+def upload_file(destination, bucket, file_obj,logger_msg):
     path = uploadFileToS3(destination=destination, file_obj=file_obj, 
-                          bucket=settings.JOBCARD_BUCKET, logger_msg="JobCard")
-    ucn_recovery_obj = models.UCNRecovery(reason=reason, user=user_obj,
-                                        customer_id=customer_id, file_location=path,
-                                        unique_service_coupon=unique_service_coupon)
-    ucn_recovery_obj.save()
-    return ucn_recovery_obj
+                          bucket=bucket, logger_msg=logger_msg)
+    return path
 
 def get_file_name(data, file_obj):
     requester = data['current_user']

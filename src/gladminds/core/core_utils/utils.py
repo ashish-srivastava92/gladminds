@@ -8,6 +8,15 @@ import logging
 LOG = logging.getLogger('gladminds')
 
 
+def dictfetchall(cursor):
+    "Returns all rows from a cursor as a dict"
+    desc = cursor.description
+    return [
+        dict(zip([col[0] for col in desc], row))
+        for row in cursor.fetchall()
+    ]
+
+
 def get_list_from_set(set_data):
     created_list = []
     for set_object in set_data:
@@ -26,6 +35,9 @@ def generate_mech_id():
     mechanic_id=generate_temp_id('TME')
     return mechanic_id
 
+def generate_partner_id():
+    partner_id=generate_temp_id('PRT')
+    return partner_id
 
 def debug(fn):
     '''

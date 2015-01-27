@@ -12,7 +12,7 @@ from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
 from gladminds.core import constants
 from gladminds.core.model_helpers import PhoneField
 from gladminds.core import constants
-from gladminds.core.core_utils.utils import generate_mech_id
+from gladminds.core.core_utils.utils import generate_mech_id, generate_partner_id
 try:
     from django.utils.timezone import now as datetime_now
 except ImportError:
@@ -547,6 +547,7 @@ class VinSyncFeedLog(BaseModel):
     dealer_asc_id = models.CharField(max_length=15, null=True, blank=True)
     status_code = models.CharField(max_length=15, null=True, blank=True)
     email_flag = models.BooleanField(default=False)
+    ucn_count = models.IntegerField(max_length=5, null=True, blank=True)
     
     class Meta:
         abstract =True
@@ -607,6 +608,7 @@ class Feedback(BaseModel):
     reminder_date = models.DateTimeField(null=True, blank=True)
     reminder_flag = models.BooleanField(default=False)
     resolution_flag = models.BooleanField(default=False)
+    file_location = models.CharField(max_length=215, null=True, blank=True)
     objects = service_desk_manager.FeedbackManager()
 
     class Meta:
@@ -751,7 +753,7 @@ class Distributor(BaseModel):
         unique_together = ("distributor_id", "city")
 
     def __unicode__(self):
-        return self.name
+        return self.distributor_id + ' ' +self.name
     
 class Retailer(BaseModel):
     '''details of Distributor'''
@@ -888,17 +890,18 @@ class AccumulationRequest(BaseModel):
     def __unicode__(self):
         return str(self.transaction_id)
 
-class RedemptionPartner(BaseModel):
-    partner_id = models.CharField(max_length=50, unique=True)
-    name = models.CharField(max_length=50, null=True, blank=True)
+class Partner(BaseModel):
+    
+    partner_id = models.CharField(max_length=50, unique=True, default=generate_partner_id)
+    address = models.CharField(max_length=100, null=True, blank=True)
+    partner_type = models.CharField(max_length=12, choices=constants.PARTNER_TYPE, null=False, blank=False)
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Redemption partner"
-        
-    def __unicode__(self):
-        return str(self.partner_id)
+        verbose_name_plural = "Partner"
 
+    def __unicode__(self):
+        return str(self.partner_id) + '(' + self.partner_type + ')'
 
 class ProductCatalog(BaseModel):
     product_id = models.CharField(max_length=50, unique=True)
@@ -908,12 +911,14 @@ class ProductCatalog(BaseModel):
     variation = models.CharField(max_length=50, null=True, blank=True)
     brand = models.CharField(max_length=50, null=True, blank=True)
     model = models.CharField(max_length=50, null=True, blank=True)
-    image_url = models.CharField(
-                   max_length=200, blank=True, null=True)
     category = models.CharField(max_length=50, null=True, blank=True)
     sub_category = models.CharField(max_length=50, null=True, blank=True)
     is_active = models.BooleanField(default=True)
-
+    
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+    image_tag.short_description = 'Product Image'
+    image_tag.allow_tags = True
 
     class Meta:
         abstract = True
@@ -928,13 +933,24 @@ class RedemptionRequest(BaseModel):
     transaction_id = models.AutoField(primary_key=True)
     expected_delivery_date =  models.DateTimeField(null=True, blank= True)
     status = models.CharField(max_length=12, choices=constants.REDEMPTION_STATUS, default='Open')
+    packed_by = models.CharField(max_length=50, null=True, blank=True)
     is_approved = models.BooleanField(default=False)
+    
+    def clean(self, *args, **kwargs):
+        
+        if self.status=='Packed' and (not self.owner or self.owner.partner_type not in ['Redemption','Logistics']):
+            raise ValidationError("Please assign an owner")
+        elif self.status=='Approved' and (not self.owner or self.owner.partner_type!='Redemption'):
+            raise ValidationError("Please assign a redemption partner")
+        else:
+            super(RedemptionRequest, self).clean(*args, **kwargs)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         for field in self._meta.fields:
             if field.name=='status':
                 if getattr(self, field.name)=='Approved':
                     self.is_approved=True
+                    self.packed_by=self.owner.user.user.username
                 elif getattr(self, field.name) in ['Rejected', 'Open'] :
                     self.is_approved=False
 
@@ -944,3 +960,30 @@ class RedemptionRequest(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "Accumulation Request"
+
+
+class DateDimension(models.Model):
+    date_id = models.BigIntegerField(primary_key=True)
+    date = models.DateField(unique=True)
+    timestamp = models.DateTimeField()
+    weekend = models.CharField(max_length=10)
+    day_of_week = models.CharField(max_length=10)
+    month = models.CharField(max_length=10)
+    month_day = models.IntegerField()
+    year = models.IntegerField()
+    week_starting_monday = models.CharField(max_length=2)
+
+    class Meta:
+        abstract = True
+
+
+class CouponFact(models.Model):
+    closed = models.BigIntegerField()
+    inprogress = models.BigIntegerField()
+    expired = models.BigIntegerField()
+    unused = models.BigIntegerField()
+    exceeds = models.BigIntegerField()
+
+    class Meta:
+        abstract = True
+

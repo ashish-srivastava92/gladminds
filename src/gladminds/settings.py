@@ -43,6 +43,9 @@ OAUTH_DELETE_EXPIRED = True
 JOBCARD_DIR = '{0}/jobcards/prod/'
 JOBCARD_BUCKET = 'gladminds'
 
+SDFILE_DIR = '{0}/bajaj/sdfiles/'
+SDFILE_BUCKET = 'gladminds'
+
 FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/qa/'
 FEED_FAILURE_BUCKET = 'gladminds'
 
@@ -112,6 +115,8 @@ SUIT_CONFIG = {
                      'label': 'Spare Part Point'},
                    {'model': 'accumulationrequest',
                      'label': 'Accumulation Request'},
+                   {'model': 'partner',
+                     'label': 'Partner'},
                    {'model': 'productcatalog',
                      'label': 'Product Catalog'},
                    {'model': 'redemptionrequest',
@@ -526,7 +531,9 @@ AWS_STORAGE_BUCKET_MAP = {'afterbuy': 'afterbuy'}
 AWS_STORAGE_BUCKET_NAME = 'gladminds-brands'
 S3_BASE_URL = 'https://%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif']
+ALLOWED_FILE_TYPES = ['pdf']
 MAX_UPLOAD_IMAGE_SIZE = 4.0
+MAX_UPLOAD_FILE_SIZE = 4.0
 
 
 DEFAULT_COUPON_STATUS = 1

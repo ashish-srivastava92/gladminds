@@ -105,10 +105,6 @@ remarks, unique_service_coupon_id) select c.id, c.created_on, c.received_date, c
 c.cdms_doc_number, c.remarks, c.unique_service_coupon_id from gladminds.gladminds_cdmsdata c;
 
 ##############################################################
-alter table bajaj_sparepart add column is_used bool default 0;
-ALTER TABLE bajaj_mechanic ADD sent_sms boolean default false;
-
-
 
 update gladminds_coupondata c inner join (select d2.id as old_id , d.id as new_id from aftersell_registereddealer as d, aftersell_registereddealer as d2 where d2.dealer_id like concat('00000',d.dealer_id)) a on c.servicing_dealer_id = a.old_id set c.servicing_dealer_id=a.new_id;
 
@@ -120,4 +116,21 @@ alter table bajaj_customertempregistration add old_number VARCHAR(15) not null;
 alter table bajaj_feedfailurelog add column email_flag boolean default false;
 
 update bajaj.auth_user new_user inner join gladminds.auth_user p on p.username=new_user.username set new_user.first_name=p.first_name where p.first_name!='';
+	
+alter table bajaj_vinsyncfeedlog add ucn_count int(5) null;
+alter table bajaj_feedback add file_location varchar (215) null;
+###################################################################################
+alter table bajaj_sparepart add column is_used bool default 0;
+ALTER TABLE bajaj_mechanic ADD sent_sms boolean default false;
 
+alter table bajaj_productcatalog add column image_url varchar(255) null;
+
+alter table bajaj_productcatalog add column partner_id integer;
+alter table bajaj_productcatalog  add foreign key (partner_id) references bajaj_partner(id);
+
+alter table bajaj_redemptionrequest add column owner_id integer;
+alter table bajaj_redemptionrequest add foreign key (owner_id) references bajaj_partner(id);
+
+alter table bajaj_redemptionrequest add column packed_by varchar(50) null;
+
+update bajaj_smslog set action='RECEIVED' where action='RECIEVED';

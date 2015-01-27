@@ -28,7 +28,8 @@ from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS
-from gladminds.core.utils import get_email_template, format_product_object
+from gladminds.core.utils import get_email_template, format_product_object,\
+    get_file_name
 from gladminds.core.auth_helper import Roles
 from gladminds.core.auth.service_handler import check_service_active, Services
 from gladminds.core.core_utils.utils import log_time
@@ -171,7 +172,7 @@ def register(request, menu):
         return HttpResponseBadRequest()
     if request.method == 'GET':
         user_id = request.user
-        return render(request, TEMPLATE_MAPPING.get(menu), {'active_menu' : ACTIVE_MENU.get(menu)\
+        return render(request, TEMPLATE_MAPPING.get(menu, 'portal/404.html'), {'active_menu' : ACTIVE_MENU.get(menu)\
                                                                     , 'groups': groups, 'user_id' : user_id})
     elif request.method == 'POST':
         save_user = {
@@ -346,7 +347,18 @@ def recover_coupon_info(data):
     logger.info('UCN for customer {0} requested by User {1}'.format(customer_id, data['current_user']))
     coupon_data = utils.get_coupon_info(data)
     if coupon_data:
-        ucn_recovery_obj = utils.upload_file(data, coupon_data.unique_service_coupon)
+        user_obj = models.UserProfile.objects.get(user=data['current_user'])
+        file_obj = data['job_card']
+        customer_id = data['customerId']
+        reason = data['reason']
+        file_obj.name = get_file_name(data, file_obj)
+        destination = settings.JOBCARD_DIR.format('bajaj')
+        bucket = settings.JOBCARD_BUCKET
+        path = utils.upload_file(destination, bucket, file_obj, logger_msg="JobCard")
+        ucn_recovery_obj = models.UCNRecovery(reason=reason, user=user_obj,
+                                        customer_id=customer_id, file_location=path,
+                                        unique_service_coupon=coupon_data.unique_service_coupon)
+        ucn_recovery_obj.save()
         send_recovery_email_to_admin(ucn_recovery_obj, coupon_data)
         message = 'UCN for customer {0} is {1}.'.format(customer_id,
                                                     coupon_data.unique_service_coupon)

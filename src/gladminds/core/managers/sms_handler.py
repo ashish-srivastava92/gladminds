@@ -58,7 +58,7 @@ class SMSResources(Resource):
                 LOGGER.info('Message to send: ' + message)
         phone_number = utils.get_phone_number_format(phone_number)
         message = utils.format_message(message)
-        sms_log(action='RECIEVED', sender=phone_number,
+        sms_log(action='RECEIVED', sender=phone_number,
                 receiver='+1 469-513-9856', message=message)
         LOGGER.info('Received Message from phone number: {0} and message: {1}'.format(phone_number, message))
         try:

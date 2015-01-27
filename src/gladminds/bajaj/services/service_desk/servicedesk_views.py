@@ -1,25 +1,28 @@
-import logging
+import datetime
 import json
-from django.http.response import HttpResponse, HttpResponseBadRequest,\
-    HttpResponseRedirect, HttpResponseNotFound
+import logging
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.sites.models import get_current_site
 from django.core.paginator import Paginator
+from django.http.response import HttpResponse, HttpResponseBadRequest, \
+    HttpResponseRedirect, HttpResponseNotFound
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
-from django.contrib.sites.models import get_current_site
-from gladminds.core.constants import BY_DEFAULT_RECORDS_PER_PAGE,\
-    FEEDBACK_STATUS, PAGINATION_LINKS, RECORDS_PER_PAGE, FEEDBACK_TYPE, PRIORITY,\
-    ROOT_CAUSE
-from gladminds.core.auth.service_handler import check_service_active, Services
-from gladminds.core import utils
-from gladminds.core.auth_helper import Roles
+
 from gladminds.bajaj import models
-from gladminds.core.utils import get_list_from_set
-import datetime
-from gladminds.bajaj.services.service_desk.servicedesk_manager import get_feedbacks,\
-    get_complain_data, get_feedback, get_servicedesk_users, get_comments,\
+from gladminds.bajaj.services.service_desk.servicedesk_manager import get_feedbacks, \
+    get_complain_data, get_feedback, get_servicedesk_users, get_comments, \
     save_update_feedback, update_feedback_activities, SDActions
+from gladminds.core import utils
+from gladminds.core.auth.service_handler import check_service_active, Services
+from gladminds.core.auth_helper import Roles
+from gladminds.core.constants import BY_DEFAULT_RECORDS_PER_PAGE, \
+    FEEDBACK_STATUS, PAGINATION_LINKS, RECORDS_PER_PAGE, FEEDBACK_TYPE, PRIORITY, \
+    ROOT_CAUSE
+from gladminds.core.utils import get_list_from_set
+
 
 LOG = logging.getLogger('gladminds')
 
@@ -40,6 +43,11 @@ def service_desk(request):
     page_details['from'] = feedbacks.start_index()
     page_details['to'] = feedbacks.end_index()
     groups = utils.stringify_groups(request.user)
+    training_material = models.Service.objects.filter(service_type__name=Services.SERVICE_DESK)
+    if len(training_material)>0:
+        training_material = training_material[0].training_material_url
+    else:
+        training_material = None
     if request.method == 'GET':
         template = 'portal/feedback_details.html'
         data = None
@@ -56,6 +64,7 @@ def service_desk(request):
                                           "record_showing_counts": RECORDS_PER_PAGE,
                                           "types": utils.get_list_from_set(FEEDBACK_TYPE),
                                           "priorities": utils.get_list_from_set(PRIORITY),
+                                          "training_material" : training_material,
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
                                                             'count': str(count), 'search': search}}
                                         )
@@ -83,6 +92,10 @@ def save_help_desk_data(request):
     sms_dict = {}
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)
+    if request.FILES:
+        sms_dict['file_location'] =  request.FILES['sd_file']
+    else:
+        sms_dict['file_location'] = None
     service_advisor_obj = models.ServiceAdvisor.objects.get(user__phone_number=sms_dict['advisorMobile'])
     if request.user.groups.filter(name=Roles.DEALERS).exists():
         dealer_asc_obj = models.Dealer.objects.get(dealer_id=request.user)
@@ -115,6 +128,11 @@ def get_servicedesk_tickets(request):
     page_details['total_objects'] = paginator.count
     page_details['from'] = feedbacks.start_index()
     page_details['to'] = feedbacks.end_index()
+    training_material = models.Service.objects.filter(service_type__name=Services.SERVICE_DESK)
+    if len(training_material)>0:
+        training_material = training_material[0].training_material_url
+    else:
+        training_material = None
 
     return render(request, 'service-desk/tickets.html', {"feedbacks" : feedbacks,
                                           "status": utils.get_list_from_set(FEEDBACK_STATUS),
@@ -123,6 +141,7 @@ def get_servicedesk_tickets(request):
                                           "pagination_links": PAGINATION_LINKS,
                                           "page_details": page_details,
                                           "record_showing_counts": RECORDS_PER_PAGE,
+                                          "training_material" : training_material,
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
                                                             'count': str(count), 'search': search}}
                                         )

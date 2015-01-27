@@ -17,13 +17,13 @@ Gladminds middleware to identify the IP from where the message request came
 and reply through the same platform
 """
 
-class GladmindsMessageMiddleware(object):    
-    #If the request is come on message APIs, then based on the IP we set sms client
-    
+class GladmindsMessageMiddleware(object):
+    '''If the request is come on message APIs,
+    then based on the IP we set sms client'''
+
     def process_request(self, request, **kwargs):
         source_client = request.GET.get('__gm_source', None)
-        logger.info('[Middleware]: Source of client is {0}'.format(source_client))
-        
+
         if settings.ENV in ['local', 'test']:
             SMS_CLIENT.value = None
             return
@@ -33,15 +33,16 @@ class GladmindsMessageMiddleware(object):
         else :
             SMS_CLIENT.value = "AIRTEL"
 
-        logger.info('[Middleware]: Client is {0}'.format(SMS_CLIENT.value))
-    
 """
 Gladminds middleware to identify the user type (i.e Customer, Service Advisor and Admin).
 And set the it into request object
 """
 class GladmindsMiddleware(object):
-    # If the request is come on message APIs, then it coming from SA or
-    # Customer. Verify the customer and Dealer as per phone number and message text
+    ''' If the request is come on message APIs,
+        then it coming from SA or
+        Customer. Verify the customer and
+        Dealer as per phone number and message text'''
+
     def process_view(self, request, view_func, view_args, view_kwargs):
         # If user is authenticated then it's an admin user
         if request.user.is_authenticated():

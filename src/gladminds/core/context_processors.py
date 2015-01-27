@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
 from gladminds.core.auth_helper import Roles
+from gladminds.settings import S3_BASE_URL
 
 def current_site(request):
     return (settings.SITE_ID) and {'site': Site.objects.get_current()} or {}
@@ -14,5 +15,5 @@ def gm_constants(request):
             'SD_OWNER' : Roles.SDOWNERS, 
             'DEALER' : Roles.DEALERS,
             'ASC': Roles.ASCS}
-    return { 'CONSTANTS' :constants }
+    return { 'CONSTANTS' :constants, 'S3_URL' : S3_BASE_URL }
 

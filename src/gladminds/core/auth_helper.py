@@ -22,22 +22,29 @@ class Roles():
     ADMINS = 'Admins'
     USERS = 'Users'
     CXOADMINS = 'CxoAdmins'
+
+    SDESCALATION = 'EscalationAuthority'
+    BRANDMANAGERS = 'BrandManagers'
+    READONLY = 'ReadOnly'
+
     FSCSUPERADMINS = 'FscSuperAdmins'
-    SDSUPERADMINS = 'SdSuperAdmins'
-    LOYALTYSUPERADMINS = 'LoyaltySuperAdmins'
-    NSMS = 'NationalSalesManagers'
-    ASMS = 'AreaSalesManagers'
     FSCADMINS = 'FscAdmins'
-    SDADMINS = 'SdAdmins'
-    SDMANAGERS = 'SdManagers'
-    SDOWNERS = 'SdOwners'
     DEALERS = 'Dealers'
     ASCS = 'AuthorisedServiceCenters'
     DASCS = 'DependentAuthorisedServiceCenters'
     SERVICEADVISOR = 'ServiceAdvisors'
-    SDESCALATION = 'EscalationAuthority'
-    BRANDMANAGERS = 'BrandManagers'
-    READONLY = 'ReadOnly'
+
+    SDSUPERADMINS = 'SdSuperAdmins'
+    SDADMINS = 'SdAdmins'
+    SDMANAGERS = 'SdManagers'
+    SDOWNERS = 'SdOwners'
+
+    LOYALTYSUPERADMINS = 'LoyaltySuperAdmins'
+    LOYALTYADMINS = 'LoyaltyAdmins'
+    NSMS = 'NationalSalesManagers'
+    ASMS = 'AreaSalesManagers'
+    RPS = 'RedemptionPartners'
+    LPS = 'LogisticPartners'
 
 
 AFTERBUY_ADMIN_GROUPS = [Roles.SUPERADMINS, Roles.ADMINS]

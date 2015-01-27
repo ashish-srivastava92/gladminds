@@ -124,7 +124,7 @@ STATUS_CHOICES = ((1, 'Unused'), (2, 'Closed'), (
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 
 MAX_UCP_ALLOWED=10
-MANDATORY_MECHANIC_FIELDS = ['first_name', 'date_of_birth', 'phone_number', 'shop_name', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url']
+MANDATORY_MECHANIC_FIELDS = ['first_name', 'date_of_birth', 'phone_number','shop_address', 'shop_name', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url']
 
 FORM_STATUS_CHOICES = (
                        ('Complete', 'Complete'),
@@ -145,12 +145,6 @@ REDEMPTION_STATUS = (
         ('Delivered', 'Delivered')
     )
 
-ASM_REDEMPTION_STATUS = (
-        ('Open', 'Open'),
-        ('Approved', 'Approved'),
-        ('Rejected', 'Rejected'),
-    )
-
 GP_REDEMPTION_STATUS = (
         ('Approved', 'Approved'),
         ('Accepted', 'Accepted'),
@@ -159,7 +153,25 @@ GP_REDEMPTION_STATUS = (
         ('Delivered', 'Delivered')
     )
 
+LP_REDEMPTION_STATUS = (
+        ('Shipped', 'Shipped'),
+        ('Delivered', 'Delivered')
+    )
+
+PARTNER_TYPE = (
+        ('Merchant', 'Merchant'),
+        ('Redemption', 'Redemption'),
+        ('Logistics', 'Logistics'),
+        ('Marketing', 'Marketing')
+    )
+
 class FeedStatus():
     RECEIVED = 'Received'
     SENT = 'Sent'
-    
+
+
+class FeedSentType():
+    COUPON_REDEEM = 'Coupon Redeem Feed'
+    CUSTOMER_REGISTRATION = 'Customer Registration Feed'
+
+FEED_SENT_TYPES = [getattr(FeedSentType, x) for x in dir(FeedSentType) if (not x.startswith("__"))]

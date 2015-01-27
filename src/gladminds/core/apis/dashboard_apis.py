@@ -6,8 +6,12 @@ from tastypie import fields
 from gladminds.core.model_fetcher import models
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from django.core.cache import cache
-from tastypie.constants import ALL
-from gladminds.core.constants import FEED_TYPES, FeedStatus
+from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES
+from django.db import connections
+from django.conf import settings
+from gladminds.core.core_utils.utils import dictfetchall
+from django.http.response import HttpResponse
+from tastypie.utils.mime import build_content_type
 
 
 def get_vins():
@@ -34,7 +38,12 @@ def get_set_cache(key, data_func, timeout=15):
     '''
     result = cache.get(key)
     if result is None:
-        result = data_func()
+        if data_func is None:
+            raise
+        if not hasattr(data_func, '__call__'):
+            result = data_func
+        else:
+            result = data_func()
         cache.set(key, result, timeout*60)
     return result
 
@@ -150,13 +159,154 @@ class FeedStatusResource(CustomBaseResource):
             filters['created_date__lte'] = dtend
 
         data = []
-        for status in [FeedStatus.RECEIVED]:
-            filters['action'] = status
-            for feed_type in FEED_TYPES:
-                filters['feed_type'] = feed_type
-                success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
-                data.append(create_feed_dict([status,
-                                              feed_type,
-                                              success_count,
-                                              failure_count]))
+        filters['action'] = FeedStatus.RECEIVED
+        for feed_type in FEED_TYPES:
+            filters['feed_type'] = feed_type
+            success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
+            data.append(create_feed_dict([FeedStatus.RECEIVED,
+                                          feed_type,
+                                          success_count,
+                                          failure_count]))
+        filters['action'] = FeedStatus.SENT
+        for feed_type in FEED_SENT_TYPES:
+            filters['feed_type'] = feed_type
+            success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
+            data.append(create_feed_dict([FeedStatus.SENT,
+                                          feed_type,
+                                          success_count,
+                                          failure_count]))
         return map(CustomApiObject, data)
+
+
+class SMSReportResource(CustomBaseResource):
+    """
+    It is a preferences resource
+    """
+    date = fields.DateField(attribute="date")
+    sent = fields.DecimalField(attribute="sent", default=0)
+    received = fields.DecimalField(attribute="received", default=0)
+
+    class Meta:
+        resource_name = 'sms-report'
+        authentication = AccessTokenAuthentication()
+        object_class = CustomApiObject
+
+    def create_response(self, request, data, response_class=HttpResponse, **response_kwargs):
+        """
+        Extracts the common "which-format/serialize/return-response" cycle.
+
+        Mostly a useful shortcut/hook.
+        """
+        desired_format = self.determine_format(request)
+        data['overall'] = {'sent': self.get_sms_count(FeedStatus.SENT.upper()),
+                           'received': self.get_sms_count(FeedStatus.RECEIVED.upper())}
+
+        serialized = self.serialize(request, data, desired_format)
+        return response_class(content=serialized, content_type=build_content_type(desired_format), **response_kwargs)
+
+    def get_sms_count(self, action):
+        data = self.get_sql_data("select count(*) as count from bajaj_smslog where action=%(action)s",
+                                 filters={'action': action})
+        return data[0]['count']
+
+    def get_sql_data(self, query, filters={}):
+        conn = connections[settings.BRAND]
+        cursor = conn.cursor()
+        cursor.execute(query, filters)
+        data = dictfetchall(cursor)
+        conn.close()
+        return data
+
+    def obj_get_list(self, bundle, **kwargs):
+        self.is_authenticated(bundle.request)
+        filters = {}
+        params = {}
+        if hasattr(bundle.request, 'GET'):
+            params = bundle.request.GET.copy()
+        dtstart = params.get('created_date__gte')
+        dtend = params.get('created_date__lte')
+        where_and = " AND "
+        query = "select DATE(created_date) as date, action, count(*) as count from bajaj_smslog where action!='SEND TO QUEUE' "
+
+        if dtstart:
+            query = query + where_and + "DATE(created_date) >= %(dtstart)s "
+            filters['dtstart'] = dtstart
+        if dtend:
+            query = query + where_and + "DATE(created_date) <= %(dtend)s "
+            filters['dtend'] = dtend
+
+        query = query + " group by DATE(created_date), action;"
+
+        objs = {}
+        all_data = self.get_sql_data(query, filters)
+        for data in all_data:
+            obj = objs.get(data['date'], {'date': data['date']})
+            objs[data['date']] = obj
+            objs[data['date']][data['action'].lower()] = data['count']
+        return map(CustomApiObject, objs.values())
+
+
+class CouponReportResource(CustomBaseResource):
+    """
+    It is a preferences resource
+    """
+    date = fields.DateField(attribute="date")
+    closed = fields.DecimalField(attribute="closed", default=0)
+    inprogress = fields.DecimalField(attribute="inprogress", default=0)
+
+    class Meta:
+        resource_name = 'coupons-report'
+        authentication = AccessTokenAuthentication()
+        object_class = CustomApiObject
+
+    def create_response(self, request, data, response_class=HttpResponse, **response_kwargs):
+        """
+        Extracts the common "which-format/serialize/return-response" cycle.
+
+        Mostly a useful shortcut/hook.
+        """
+        desired_format = self.determine_format(request)
+        data['overall'] = {'closed': self.get_coupon_count("2"),
+                           'inprogress': self.get_coupon_count("4")}
+
+        serialized = self.serialize(request, data, desired_format)
+        return response_class(content=serialized, content_type=build_content_type(desired_format), **response_kwargs)
+
+    def get_coupon_count(self, status):
+        try:
+            return get_set_cache('gm_coupon_counter' + status, None)
+        except:
+            data = self.get_sql_data("select count(*) as count from bajaj_coupondata where status=%(status)s",
+                                 filters={'status': status})
+            return get_set_cache('gm_coupon_counter' + status, data[0]['count'])
+
+    def get_sql_data(self, query, filters={}):
+        conn = connections[settings.BRAND]
+        cursor = conn.cursor()
+        cursor.execute(query, filters)
+        data = dictfetchall(cursor)
+        conn.close()
+        return data
+
+    def obj_get_list(self, bundle, **kwargs):
+        self.is_authenticated(bundle.request)
+        filters = {}
+        params = {}
+        if hasattr(bundle.request, 'GET'):
+            params = bundle.request.GET.copy()
+        dtstart = params.get('created_date__gte')
+        dtend = params.get('created_date__lte')
+        where_and = " AND "
+        query = "select DATE(created_date) as date, action, count(*) as count from bajaj_smslog where action!='SEND TO QUEUE' "
+
+        if dtstart:
+            query = query + where_and + "DATE(created_date) >= %(dtstart)s "
+            filters['dtstart'] = dtstart
+        if dtend:
+            query = query + where_and + "DATE(created_date) <= %(dtend)s "
+            filters['dtend'] = dtend
+
+        query = query + " group by DATE(created_date), action;"
+
+        objs = {}
+        return map(CustomApiObject, objs.values())
