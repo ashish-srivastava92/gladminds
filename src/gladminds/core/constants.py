@@ -141,17 +141,10 @@ REDEMPTION_STATUS = (
         ('Delivered', 'Delivered')
     )
 
-ASM_REDEMPTION_STATUS = (
-        ('Open', 'Open'),
-        ('Approved', 'Approved'),
-        ('Rejected', 'Rejected'),
-    )
-
 GP_REDEMPTION_STATUS = (
         ('Approved', 'Approved'),
         ('Accepted', 'Accepted'),
         ('Packed', 'Packed'),
-        ('Shipped', 'Shipped'),
         ('Shipped', 'Shipped'),
         ('Delivered', 'Delivered')
     )
