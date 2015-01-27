@@ -955,7 +955,9 @@ class DateDimension(models.Model):
 
     class Meta:
         abstract = True
-
+    
+    def __str__(self):
+        return str(self.date)
 
 class CouponFact(models.Model):
     closed = models.BigIntegerField()
@@ -963,6 +965,7 @@ class CouponFact(models.Model):
     expired = models.BigIntegerField()
     unused = models.BigIntegerField()
     exceeds = models.BigIntegerField()
+    data_type = models.CharField(max_length=20, default='DAILY')
 
     class Meta:
         abstract = True

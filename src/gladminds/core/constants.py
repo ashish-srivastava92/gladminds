@@ -178,3 +178,12 @@ class FeedSentType():
     CUSTOMER_REGISTRATION = 'Customer Registration Feed'
 
 FEED_SENT_TYPES = [getattr(FeedSentType, x) for x in dir(FeedSentType) if (not x.startswith("__"))]
+
+
+class CouponStatus():
+    UNUSED = 1
+    CLOSED = 2
+    EXPIRED = 3
+    IN_PROGRESS = 4
+    EXCEEDS_LIMIT = 5
+    CLOSED_OLD_FSC = 6
