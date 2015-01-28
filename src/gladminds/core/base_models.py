@@ -665,37 +665,33 @@ class SLA(models.Model):
         abstract = True
         verbose_name_plural = "SLA info"
 
-class LoyaltySLA(models.Model):
-    status = models.CharField(max_length=12, choices=constants.STATUS, unique=True)
-    action = models.CharField(max_length=12, choices=constants.ACTION)
-    reminder = Duration()
-    resolution = Duration()
-    member_resolution = Duration()
-    
-    def get_time_in_seconds(self, time , unit):
-        if unit == 'days':
-            total_time = time * 86400
-        elif unit == 'hrs':
-            total_time = time * 3600
-        else:
-            total_time = time * 60
-        return total_time
-    
-    def clean(self, *args, **kwargs):
-        resolution_time = self.get_time_in_seconds(self.resolution_time, self.resolution_unit)        
-        reminder_time = self.get_time_in_seconds(self.reminder_time, self.reminder_unit)
-        if (resolution_time > reminder_time):
-#             if():    
-#                 raise ValidationError("ALREADY exist")
-#             else:        
-            super(LoyaltySLA, self).clean(*args, **kwargs)
-        else:
-            raise ValidationError("Ensure that Reminder time is greater than Response time and Resolution time is greater than Reminder time")           
+class ServiceType(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
 
     class Meta:
+        abstract =True
+        verbose_name_plural = "Service Types"
+        
+    def __unicode__(self):
+        return self.name
+
+
+class Service(models.Model):
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+    
+    def file_tag(self):
+        return u'<h1> "{0}/{1}"</h1>'.format(settings.S3_BASE_URL, self.file_url)
+    file_tag.short_description = 'Training Material'
+    file_tag.allow_tags = True
+    
+    class Meta:
         abstract = True
-        verbose_name_plural = "Loyalty SLA info"
-#         unique_together = ("status", "action")
+        verbose_name_plural = "Services"
+        
+    def __unicode__(self):
+        return self.name
    
 #######################LOYALTY TABLES#################################
 
@@ -952,6 +948,38 @@ class RedemptionRequest(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "Accumulation Request"
+
+class LoyaltySLA(models.Model):
+    status = models.CharField(max_length=12, choices=constants.STATUS, unique=True)
+    action = models.CharField(max_length=12, choices=constants.ACTION)
+    reminder = Duration()
+    resolution = Duration()
+    member_resolution = Duration()
+    
+    def get_time_in_seconds(self, time , unit):
+        if unit == 'days':
+            total_time = time * 86400
+        elif unit == 'hrs':
+            total_time = time * 3600
+        else:
+            total_time = time * 60
+        return total_time
+    
+    def clean(self, *args, **kwargs):
+        resolution_time = self.get_time_in_seconds(self.resolution_time, self.resolution_unit)        
+        reminder_time = self.get_time_in_seconds(self.reminder_time, self.reminder_unit)
+        if (resolution_time > reminder_time):
+#             if():    
+#                 raise ValidationError("ALREADY exist")
+#             else:        
+            super(LoyaltySLA, self).clean(*args, **kwargs)
+        else:
+            raise ValidationError("Ensure that Reminder time is greater than Response time and Resolution time is greater than Reminder time")           
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Loyalty SLA info"
+#         unique_together = ("status", "action")
 
 
 class DateDimension(models.Model):

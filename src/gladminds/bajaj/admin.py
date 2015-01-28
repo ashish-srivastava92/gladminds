@@ -355,26 +355,9 @@ class SlaAdmin(GmModelAdmin):
     
     list_display = ('priority', response_time, reminder_time, resolution_time)
 
-class LoyaltySlaAdmin(GmModelAdmin):
-    fieldsets = (
-        (None, {
-            'fields': (
-        'status','action',
-        ('reminder_time', 'reminder_unit'),
-        ('resolution_time', 'resolution_unit'), 
-        ('member_resolution_time','member_resolution_unit'))
-        }),
-        )    
-    def reminder_time(self):
-        return str(self.reminder_time) + ' ' + self.reminder_unit
-    
-    def resolution_time(self):
-        return str(self.resolution_time) + ' ' + self.resolution_unit
-    
-    def member_resolution_time(self):
-        return str(self.member_resolution_time) + ' ' + self.member_resolution_unit
-
-    list_display = ('status','action', reminder_time, resolution_time, member_resolution_time)
+class ServiceAdmin(GmModelAdmin):
+    list_display = ('service_type', 'name', 'description')
+    readonly_fields = ('file_tag',)
 
 class ServiceDeskUserAdmin(GmModelAdmin):
     list_display = ('user_profile', 'name', 'phone_number', 'email')
@@ -571,6 +554,27 @@ class RedemptionRequestAdmin(GmModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
+
+class LoyaltySlaAdmin(GmModelAdmin):
+    fieldsets = (
+        (None, {
+            'fields': (
+        'status','action',
+        ('reminder_time', 'reminder_unit'),
+        ('resolution_time', 'resolution_unit'), 
+        ('member_resolution_time','member_resolution_unit'))
+        }),
+        )    
+    def reminder_time(self):
+        return str(self.reminder_time) + ' ' + self.reminder_unit
+    
+    def resolution_time(self):
+        return str(self.resolution_time) + ' ' + self.resolution_unit
+    
+    def member_resolution_time(self):
+        return str(self.member_resolution_time) + ' ' + self.member_resolution_unit
+
+    list_display = ('status','action', reminder_time, resolution_time, member_resolution_time)
 
 brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
 

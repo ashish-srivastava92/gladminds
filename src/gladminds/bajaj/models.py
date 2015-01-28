@@ -255,7 +255,16 @@ class SLA(base_models.SLA):
     class Meta:
         app_label = _APP_NAME
 
-class LoyaltySLA(base_models.LoyaltySLA):
+class ServiceType(base_models.ServiceType):
+    class Meta:
+        app_label = _APP_NAME
+    
+
+class Service(base_models.Service):
+    service_type = models.ForeignKey(ServiceType)
+    training_material_url = models.FileField(upload_to='{0}/bajaj/training_material'.format(settings.ENV),
+                                  max_length=255, null=True, blank=True,
+                                  validators=[validate_file])
 
     class Meta:
         app_label = _APP_NAME
@@ -355,6 +364,11 @@ class RedemptionRequest(base_models.RedemptionRequest):
     '''details of retailer'''
     product = models.ForeignKey(ProductCatalog)
     member = models.ForeignKey(Mechanic)
+
+    class Meta:
+        app_label = _APP_NAME
+
+class LoyaltySLA(base_models.LoyaltySLA):
 
     class Meta:
         app_label = _APP_NAME
