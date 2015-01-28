@@ -955,7 +955,7 @@ class RedemptionRequest(BaseModel):
         verbose_name_plural = "Accumulation Request"
 
 class LoyaltySLA(models.Model):
-    status = models.CharField(max_length=12, choices=constants.STATUS, unique=True)
+    status = models.CharField(max_length=12, choices=constants.STATUS)
     action = models.CharField(max_length=12, choices=constants.ACTION)
     reminder = Duration()
     resolution = Duration()
@@ -974,9 +974,6 @@ class LoyaltySLA(models.Model):
         resolution_time = self.get_time_in_seconds(self.resolution_time, self.resolution_unit)        
         reminder_time = self.get_time_in_seconds(self.reminder_time, self.reminder_unit)
         if (resolution_time > reminder_time):
-#             if():    
-#                 raise ValidationError("ALREADY exist")
-#             else:        
             super(LoyaltySLA, self).clean(*args, **kwargs)
         else:
             raise ValidationError("Ensure that Reminder time is greater than Response time and Resolution time is greater than Reminder time")           
@@ -984,8 +981,6 @@ class LoyaltySLA(models.Model):
     class Meta:
         abstract = True
         verbose_name_plural = "Loyalty SLA info"
-#         unique_together = ("status", "action")
-
 
 class DateDimension(models.Model):
     date_id = models.BigIntegerField(primary_key=True)

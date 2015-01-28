@@ -397,4 +397,4 @@ class LoyaltySLA(base_models.LoyaltySLA):
 
     class Meta:
         app_label = _APP_NAME
-        unique_together = ("date", "data_type")
+        unique_together = ("status", "action")
