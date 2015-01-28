@@ -926,6 +926,11 @@ class RedemptionRequest(BaseModel):
     packed_by = models.CharField(max_length=50, null=True, blank=True)
     is_approved = models.BooleanField(default=False)
     
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+    image_tag.short_description = 'Proof of Delivery'
+    image_tag.allow_tags = True
+    
     def clean(self, *args, **kwargs):
         
         if self.status=='Packed' and (not self.owner or self.owner.partner_type not in ['Redemption','Logistics']):

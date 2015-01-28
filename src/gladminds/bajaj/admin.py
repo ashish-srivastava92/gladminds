@@ -510,6 +510,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
                      'get_mechanic_district', 'get_mechanic_state',
                      'product', 'created_date', 'transaction_id',
                      'expected_delivery_date', 'status', 'owner')
+    readonly_fields = ('image_tag',)
 
     def queryset(self, request):
         """

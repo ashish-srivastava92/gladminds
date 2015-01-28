@@ -258,8 +258,8 @@
             "template_key": "ASSIGNEE_REDEMPTION_MAIL_DETAIL",
             "sender": "feed-report@gladminds.co",
             "receiver": "naureen.razi@hashedin.com",
-            "subject": "Redemption request with reference-no-{id} is assigned to you",
-            "body": "Redemption request id: {id} created on {created_date} has been assigned to you. Member ID : {member_id} , Product ID: {product_id}, Delivery Address: {delivery_address}",  
+            "subject": "Loyalty Redemption request {id}",
+            "body": "Member {member_name} with ID  {member_id} has submitted a redemption request for product {product_name}, {product_id}.Member Address is as below: {delivery_address}, {member_city}, {member_state}. You can access the  request at :{url_link}",  
             "description": "Redemption requestDetail mail to assignee"
         }
     }
