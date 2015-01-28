@@ -535,9 +535,7 @@ ALLOWED_FILE_TYPES = { 'pdf' :'pdf',
                        'ppt' : 'vnd.ms-powerpoint',
                        'pptx' :'vnd.openxmlformats-officedocument.presentationml.presentation',
                        'pps' : 'vnd.ms-powerpoint',
-                       'ppsx' : 'vnd.openxmlformats-officedocument.presentationml.slideshow',
-                       'pptm' : 'vnd.ms-powerpoint.presentation.macroEnabled.12',
-                       'ppsm' : 'vnd.ms-powerpoint.slideshow.macroEnabled.12'
+                       'ppsx' : 'vnd.openxmlformats-officedocument.presentationml.slideshow'
                       }
 MAX_UPLOAD_IMAGE_SIZE = 4.0
 MAX_UPLOAD_FILE_SIZE = 4.0

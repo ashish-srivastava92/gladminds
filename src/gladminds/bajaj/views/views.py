@@ -368,26 +368,26 @@ def recover_coupon_info(data):
         return {'status': False, 'message': message}
 
 
-# def get_customer_info(data):
-#     try:
-#         product_obj = models.ProductData.objects.get(product_id=data['vin'])
-#     except Exception as ex:
-#         logger.info(ex)
-#         message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
-#         if data['groups'][0] == Roles.DEALERS:
-#             data['groups'][0] = "Dealer"
-#         else:
-#             data['groups'][0] = "ASC"
-#         template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
-#         send_mail_when_vin_does_not_exist(data=template)
-#         return {'message': message, 'status': 'fail'}
-#     if product_obj.purchase_date:
-#         product_data = format_product_object(product_obj)
-#         product_data['group'] = data['groups'][0] 
-#         return product_data
-#     else:
-#         message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
-#         return {'message': message}
+def get_customer_info_old(data):
+    try:
+        product_obj = models.ProductData.objects.get(product_id=data['vin'])
+    except Exception as ex:
+        logger.info(ex)
+        message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
+        if data['groups'][0] == Roles.DEALERS:
+            data['groups'][0] = "Dealer"
+        else:
+            data['groups'][0] = "ASC"
+        template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
+        send_mail_when_vin_does_not_exist(data=template)
+        return {'message': message, 'status': 'fail'}
+    if product_obj.purchase_date:
+        product_data = format_product_object(product_obj)
+        product_data['group'] = data['groups'][0] 
+        return product_data
+    else:
+        message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
+        return {'message': message}
 
 def vin_sync_feed(request):
     message=''
@@ -434,15 +434,6 @@ def exceptions(request, exception=None):
         return render(request, template, {'active_menu': exception,
                                            "data": data, 'groups': groups})
     elif request.method == 'POST':
-#         if exception == 'customer' and (settings.ENV in ['local', 'qa']):
-#             function_mapping = {
-#                 'customer': get_customer_info_test,
-#                 'recover': recover_coupon_info,
-#                 'search': utils.search_details,
-#                 'status': utils.services_search_details,
-#                 'serviceadvisor': utils.service_advisor_search
-#                 }
-#         else:
         function_mapping = {
             'customer': get_customer_info,
             'recover': recover_coupon_info,
