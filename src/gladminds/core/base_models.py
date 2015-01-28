@@ -891,6 +891,7 @@ class AccumulationRequest(BaseModel):
 class Partner(BaseModel):
     
     partner_id = models.CharField(max_length=50, unique=True, default=generate_partner_id)
+    name = models.CharField(max_length=100, null=True, blank=True)
     address = models.CharField(max_length=100, null=True, blank=True)
     partner_type = models.CharField(max_length=12, choices=constants.PARTNER_TYPE, null=False, blank=False)
 
@@ -899,7 +900,7 @@ class Partner(BaseModel):
         verbose_name_plural = "Partner"
 
     def __unicode__(self):
-        return str(self.partner_id) + '(' + self.partner_type + ')'
+        return str(self.name) + ' ' + str(self.partner_id) + '(' + str(self.partner_type) + ')'
 
 class ProductCatalog(BaseModel):
     product_id = models.CharField(max_length=50, unique=True)
@@ -932,6 +933,7 @@ class RedemptionRequest(BaseModel):
     expected_delivery_date =  models.DateTimeField(null=True, blank= True)
     status = models.CharField(max_length=12, choices=constants.REDEMPTION_STATUS, default='Open')
     packed_by = models.CharField(max_length=50, null=True, blank=True)
+    tracking_id = models.CharField(max_length=50, null=True, blank=True)
     is_approved = models.BooleanField(default=False)
     
     def image_tag(self):
@@ -941,9 +943,9 @@ class RedemptionRequest(BaseModel):
     
     def clean(self, *args, **kwargs):
         
-        if self.status=='Packed' and (not self.owner or self.owner.partner_type not in ['Redemption','Logistics']):
-            raise ValidationError("Please assign an owner")
-        elif self.status=='Approved' and (not self.owner or self.owner.partner_type!='Redemption'):
+        if self.status=='Packed' and (not self.partner or self.partner.partner_type not in ['Redemption','Logistics']):
+            raise ValidationError("Please assign a partner")
+        elif self.status=='Approved' and (not self.partner or self.partner.partner_type!='Redemption'):
             raise ValidationError("Please assign a redemption partner")
         else:
             super(RedemptionRequest, self).clean(*args, **kwargs)
@@ -953,7 +955,7 @@ class RedemptionRequest(BaseModel):
             if field.name=='status':
                 if getattr(self, field.name)=='Approved':
                     self.is_approved=True
-                    self.packed_by=self.owner.user.user.username
+                    self.packed_by=self.partner.user.user.username
                 elif getattr(self, field.name) in ['Rejected', 'Open'] :
                     self.is_approved=False
 

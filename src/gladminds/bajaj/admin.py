@@ -426,9 +426,9 @@ class ProductCatalogAdmin(GmModelAdmin):
 class PartnerAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
     list_filter = ('partner_type',)
-    search_fields = ('partner_id', 'user__user__first_name', 'partner_type')
+    search_fields = ('partner_id', 'name', 'partner_type')
 
-    list_display = ('partner_id', 'address','partner_type',  'get_user')
+    list_display = ('partner_id', 'name' , 'address','partner_type')
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('partner_id',)
@@ -480,7 +480,7 @@ class MechanicAdmin(GmModelAdmin):
         query_set = self.model._default_manager.get_query_set()
         if request.user.groups.filter(name=Roles.ASMS).exists():
             asm=models.AreaSalesManager.objects.get(user__user=request.user)
-            query_set=query_set.filter(state=asm.state.upper())
+            query_set=query_set.filter(state=asm.state)
 
         return query_set
 
@@ -504,13 +504,13 @@ class RedemptionRequestAdmin(GmModelAdmin):
     list_filter = (
         ('created_date', DateFieldListFilter),
     )
-    search_fields = ('member__phone_number', 'product__product_id', 'owner__partner_id')
+    search_fields = ('member__phone_number', 'product__product_id', 'partner__partner_id', 'transaction_id')
     list_display = ('member',  'get_mechanic_name',
                      'delivery_address', 'get_mechanic_pincode',
                      'get_mechanic_district', 'get_mechanic_state',
-                     'product', 'created_date', 'transaction_id',
-                     'expected_delivery_date', 'status', 'owner')
-    readonly_fields = ('image_tag',)
+                     'product', 'created_date',
+                     'expected_delivery_date', 'status', 'partner')
+    readonly_fields = ('image_tag', 'transaction_id')
 
     def queryset(self, request):
         """
@@ -521,7 +521,10 @@ class RedemptionRequestAdmin(GmModelAdmin):
         if request.user.groups.filter(name=Roles.RPS).exists():
             query_set=query_set.filter(is_approved=True, packed_by=request.user.username)
         elif request.user.groups.filter(name=Roles.LPS).exists():
-            query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, owner__user=request.user)
+            query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=request.user)
+        elif request.user.groups.filter(name=Roles.ASMS).exists():
+            asm=models.AreaSalesManager.objects.get(user__user=request.user)
+            query_set=query_set.filter(member__state=asm.state)
 
         return query_set
 
@@ -541,8 +544,8 @@ class RedemptionRequestAdmin(GmModelAdmin):
         super(RedemptionRequestAdmin, self).save_model(request, obj, form, change)
         if 'status' in form.changed_data and obj.status in constants.STATUS_TO_NOTIFY:
             LoyaltyService.send_request_status_sms(obj)
-        if 'owner' in form.changed_data and obj.owner:
-            LoyaltyService.send_mail_to_owner(obj)
+        if 'partner' in form.changed_data and obj.partner:
+            LoyaltyService.send_mail_to_partner(obj)
 
     def suit_row_attributes(self, obj):
         class_map = {
