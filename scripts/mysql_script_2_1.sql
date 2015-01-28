@@ -135,3 +135,8 @@ alter table bajaj_redemptionrequest add column packed_by varchar(50) null;
 
 update bajaj_smslog set action='RECEIVED' where action='RECIEVED';
 alter table bajaj_redemptionrequest add column image_url varchar(255) null
+
+#####################################################################################################
+
+alter table bajaj_customertempregistration add mobile_number_update_count int(5) null;
+

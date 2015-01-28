@@ -95,8 +95,8 @@ def validate_file(fieldfile_obj):
         filesize = fieldfile_obj.file.size
         content = fieldfile_obj.file.content_type
         content_type = content.split('/')[1]
-        if content_type not in settings.ALLOWED_FILE_TYPES:
-            raise ValidationError("Only these file types are allowed %s" % ','.join(settings.ALLOWED_FILE_TYPES))
+        if content_type not in settings.ALLOWED_FILE_TYPES.values():
+            raise ValidationError("Only these file types are allowed %s" % ','.join(settings.ALLOWED_FILE_TYPES.keys()))
 
         megabyte_limit = settings.MAX_UPLOAD_FILE_SIZE
         if filesize > megabyte_limit*1024*1024:

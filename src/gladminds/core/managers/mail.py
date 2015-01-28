@@ -133,9 +133,9 @@ def send_vin_sync_feed_report(feed_data=None):
         receivers = get_mail_receiver('VIN_SYNC_FEED', mail_detail)
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(["CHASSIS", "DEALER_ASC_ID", "STATUS_CODE"])
+        csvwriter.writerow(["CHASSIS", "DEALER/ASC ID", "STATUS CODE", "UCN COUNT"])
         for feed in feed_data:
-            csvwriter.writerow([feed['vin'], feed['dealer_asc_id'], feed['status_code']])
+            csvwriter.writerow([feed['vin'], feed['dealer_asc_id'], feed['status_code'], feed['ucn_count']])
 
         logger.info("Sending out feed_failure emails")
         send_email_with_file_attachment(mail_detail['sender'], receivers, mail_detail['subject'],

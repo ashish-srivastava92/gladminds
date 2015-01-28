@@ -368,7 +368,7 @@ def recover_coupon_info(data):
         return {'status': False, 'message': message}
 
 
-def get_customer_info(data):
+def get_customer_info_old(data):
     try:
         product_obj = models.ProductData.objects.get(product_id=data['vin'])
     except Exception as ex:
@@ -403,7 +403,7 @@ def vin_sync_feed(request):
 
     return HttpResponse(content=json.dumps({'message':message}),  content_type='application/json')
     
-def get_customer_info_test(data):
+def get_customer_info(data):
     try:
         product_obj = models.ProductData.objects.get(product_id=data['vin'])
     except Exception as ex:
@@ -434,22 +434,13 @@ def exceptions(request, exception=None):
         return render(request, template, {'active_menu': exception,
                                            "data": data, 'groups': groups})
     elif request.method == 'POST':
-        if exception == 'customer' and (settings.ENV in ['local', 'qa']):
-            function_mapping = {
-                'customer': get_customer_info_test,
-                'recover': recover_coupon_info,
-                'search': utils.search_details,
-                'status': utils.services_search_details,
-                'serviceadvisor': utils.service_advisor_search
-                }
-        else:
-            function_mapping = {
-                'customer': get_customer_info,
-                'recover': recover_coupon_info,
-                'search': utils.search_details,
-                'status': utils.services_search_details,
-                'serviceadvisor': utils.service_advisor_search
-            }
+        function_mapping = {
+            'customer': get_customer_info,
+            'recover': recover_coupon_info,
+            'search': utils.search_details,
+            'status': utils.services_search_details,
+            'serviceadvisor': utils.service_advisor_search
+        }
         try:
             post_data = request.POST.copy()
             post_data['current_user'] = request.user

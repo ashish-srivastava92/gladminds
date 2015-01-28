@@ -130,6 +130,7 @@ def get_vin_sync_feeds_detail():
         data['vin'] = feed.product_id
         data['dealer_asc_id'] = feed.dealer_asc_id
         data['status_code'] = feed.status_code
+        data['ucn_count'] = feed.ucn_count
         feed_data.append(data)
     feed_logs.update(email_flag=True)
     return feed_data

@@ -211,29 +211,24 @@ class ExportUnsyncProductFeed(BaseExportFeed):
 
         logger.info("Trying to send product details the ID: {0}"\
                     .format(data['vin']))
-#         item={"UCN_NO": "",
-#                     "CHASSIS":"",
-#                     "SERV_TY":"",
-#                     "VEH_DISP_DT":"2014-12-12",
-#                     "KUNNR":"",
-#                     "PRD_TY":"",  
-#                     "KMS_FRM":"",
-#                     "KMS_TO":"",
-#                     "DYS_LMT_FRM":"",
-#                     "DYS_LMT_TO":""}
-#                     DT_DISPATCH={"item":item}
+
         result = client.service.SI_GCPONL_Sync(
                 DT_ONL=[{"CHASSIS": data['vin'],"DEALER": data['current_user'].username}])
-        
         try:
             logger.info("Response from SAP: {0}".format(result))
-            return_code = result[1][0]['RETURN_CODE']
+            
+            if len(result)>1:
+                return_code = result[1][0]['RETURN_CODE']
+                ucn_count = len(result[0])
+            else:
+                return_code = result[0][0]['RETURN_CODE']
+                ucn_count=0
             
             if return_code:
                 vin_sync_feed = models.VinSyncFeedLog(product_id = data['vin'], dealer_asc_id=data['current_user'].username,
-                                                      status_code=result[1][0]['RETURN_CODE'], ucn_count=len(result[0]))
+                                                      status_code=return_code, ucn_count=ucn_count)
                 vin_sync_feed.save()
-                if result[1][0]['RETURN_CODE'].upper() == 'S':
+                if return_code.upper() == 'S':
                     message='The Chassis was found in the main database. Please try after sometime.'
                     feed_remark = FeedLogWithRemark(len(data_source),
                                             feed_type='VIN sync Feed',
@@ -256,7 +251,7 @@ class ExportUnsyncProductFeed(BaseExportFeed):
                         raise ValueError('dispatch feed failed!')
                         logger.info('[vin sync ]:: dispatch feed completed')
                         
-                elif result[1][0]['RETURN_CODE'].upper() == 'E':
+                else:
                     message='This Chassis is not available in Main database, please type the correct chassis number'
         except Exception as ex:
             logger.error("Failed to send the details to sap")

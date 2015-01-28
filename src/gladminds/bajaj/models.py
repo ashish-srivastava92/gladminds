@@ -271,6 +271,12 @@ class Service(base_models.Service):
         app_label = _APP_NAME
 
 
+class Constants(base_models.Constants):
+    ''' contains all the constants'''
+    class Meta:
+        app_label = _APP_NAME
+        
+        
 class NationalSalesManager(base_models.NationalSalesManager):
     '''details of National Sales Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
