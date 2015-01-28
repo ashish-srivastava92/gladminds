@@ -20,6 +20,7 @@ from gladminds.core.constants import DATE_FORMAT, FEED_TYPES
 from gladminds.core.cron_jobs.queue_utils import get_task_queue,\
     send_job_to_queue
 from gladminds.core.core_utils.date_utils import convert_utc_to_local_time
+from gladminds.core.cron_jobs.update_fact_tables import update_coupon_history_table
 
 
 logger = logging.getLogger("gladminds")
@@ -517,6 +518,12 @@ def export_customer_reg_to_sap(*args, **kwargs):
     else:
         logger.info("tasks.py: No Customer registered since last feed")
 
+@shared_task
+def update_coupon_history_data(*args, **kwargs):
+    try:
+        update_coupon_history_table()
+    except Exception as ex:
+        logger.info("update_coupon_history_data: {0}".format(ex))
 
 def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
     created_date = convert_utc_to_local_time(feedback_obj.created_date, True)
@@ -636,6 +643,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "send_customer_phone_number_update_message" : send_customer_phone_number_update_message,
               
-              "send_vin_sync_feed_details" : send_vin_sync_feed_details
+              "send_vin_sync_feed_details" : send_vin_sync_feed_details,
+
+              "update_coupon_history": update_coupon_history_data, 
 
               }
