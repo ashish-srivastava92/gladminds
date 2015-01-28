@@ -3,6 +3,7 @@
 import logging
 import json
 from datetime import datetime
+from constance import config
 
 from django.conf import settings
 from django.http.response import HttpResponse
@@ -28,13 +29,21 @@ class LoyaltyService(CoreLoyaltyService):
            request is assigned to them'''
         data = get_email_template('ASSIGNEE_REDEMPTION_MAIL_DETAIL')
         data['newsubject'] = data['subject'].format(id = redemption_obj.transaction_id)
+        url_link='<a href="http://bajaj.gladminds.co">http://bajaj.gladminds.co</a>'
         data['content'] = data['body'].format(id=redemption_obj.transaction_id,
                               created_date = redemption_obj.created_date,
                               member_id = redemption_obj.member.mechanic_id,
+                              member_name = redemption_obj.member.first_name,
+                              member_city = redemption_obj.member.district,
+                              member_state = redemption_obj.member.state,
                               product_id =  redemption_obj.product.product_id,
-                        delivery_address = redemption_obj.delivery_address)
+                              product_name =  redemption_obj.product.description,
+                        delivery_address = redemption_obj.delivery_address,
+                        url_link=url_link)
         owner_email_id=redemption_obj.owner.user.user.email
         send_email_to_redemption_request_owner(data, owner_email_id)
+        LOG.error('[send_mail_to_owner]:{0}:: Redemption request email sent'.format(
+                                    owner_email_id))
 
     def send_request_status_sms(self, redemption_request):
         '''Send redemption request sms to mechanics'''
@@ -47,6 +56,8 @@ class LoyaltyService(CoreLoyaltyService):
         sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
         self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
+        LOG.error('[send_request_status_sms]:{0}:: {1}'.format(
+                                    phone_number, message))
 
     def send_welcome_sms(self, mech):
         '''Send welcome sms to mechanics when registered'''
@@ -56,6 +67,8 @@ class LoyaltyService(CoreLoyaltyService):
         sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
         self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
+        LOG.error('[send_welcome_sms]:{0}:: {1}'.format(
+                                    phone_number, message))
 
     def send_welcome_message(self, request):
         '''Send welcome sms to mechanics uploaded: one time use'''
