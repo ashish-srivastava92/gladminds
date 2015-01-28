@@ -609,7 +609,7 @@ if settings.ENV not in ['prod']:
     brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
     brand_admin.register(models.LoyaltySLA, LoyaltySlaAdmin)
 
-    brand_admin.register(models.RedemptionPartner, PartnerAdmin)
+    brand_admin.register(models.Partner, PartnerAdmin)
     brand_admin.register(models.ProductCatalog, ProductCatalogAdmin)
     brand_admin.register(models.RedemptionRequest, RedemptionRequestAdmin)
 
