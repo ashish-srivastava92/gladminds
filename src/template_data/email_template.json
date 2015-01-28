@@ -259,7 +259,7 @@
             "sender": "feed-report@gladminds.co",
             "receiver": "naureen.razi@hashedin.com",
             "subject": "Loyalty Redemption request {id}",
-            "body": "Member {member_name} with ID  {member_id} has submitted a redemption request for product {product_name}, {product_id}.Member Address is as below: {delivery_address}, {member_city}, {member_state}. You can access the  request at :{url_link}",  
+            "body": "Member {member_name} with ID  {member_id} has submitted a redemption request for product '{product_name}', ID-{product_id}. Member Address is: {delivery_address}, {member_city}, {member_state}. You can access the  request at :{url_link}",  
             "description": "Redemption requestDetail mail to assignee"
         }
     }

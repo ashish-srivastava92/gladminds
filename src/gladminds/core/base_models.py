@@ -774,7 +774,7 @@ class Mechanic(BaseModel):
     first_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
-    date_of_birth = models.DateTimeField(null=True, blank= True)
+    date_of_birth = models.DateField(null=True, blank= True)
 
     form_number = models.IntegerField(max_length=50, null=True, blank=True)
     registered_date = models.DateTimeField(null=True, blank= True)
