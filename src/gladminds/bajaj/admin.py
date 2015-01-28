@@ -526,7 +526,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
         return query_set
 
     def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('is_approved',)
+        self.exclude = ('is_approved', 'packed_by')
         form = super(RedemptionRequestAdmin, self).get_form(request, obj, **kwargs)
         form = copy.deepcopy(form)
         if request.user.groups.filter(name=Roles.RPS).exists():
@@ -541,7 +541,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
         super(RedemptionRequestAdmin, self).save_model(request, obj, form, change)
         if 'status' in form.changed_data and obj.status in constants.STATUS_TO_NOTIFY:
             LoyaltyService.send_request_status_sms(obj)
-        if 'owner' in form.changed_data:
+        if 'owner' in form.changed_data and obj.owner:
             LoyaltyService.send_mail_to_owner(obj)
 
     def suit_row_attributes(self, obj):
