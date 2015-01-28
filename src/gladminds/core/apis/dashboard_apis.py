@@ -302,7 +302,7 @@ class CouponReportResource(CustomBaseResource):
         dtend = params.get('created_date__lte')
         where_and = " AND "
         query = "select c.*, d.date from bajaj_couponfact c inner join \
-        bajaj_datedimension d on c.date_id=d.date_id where c.data_type='DAILY' ";
+        bajaj_datedimension d on c.date_id=d.date_id where c.data_type='TOTAL' ";
         if dtstart:
             query = query + where_and + "DATE(d.date) >= %(dtstart)s "
             filters['dtstart'] = dtstart

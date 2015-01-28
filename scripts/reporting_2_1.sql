@@ -62,4 +62,4 @@ CREATE TABLE `bajaj_couponfact` (
 ALTER TABLE `bajaj_couponfact` ADD CONSTRAINT `date_id_refs_date_id_016dde9e` FOREIGN KEY (`date_id`) REFERENCES `bajaj_datedimension` (`date_id`);
 
 #######################################FILL IN FACT WITH MOCK################
-insert into bajaj_couponfact(closed, inprogress, expired, unused, exceeds, data_type, date_id) select 0, 0, 0, 0, 0, 'DAILY',date_id from bajaj_datedimension;
+insert into bajaj_couponfact(closed, inprogress, expired, unused, exceeds, data_type, date_id) select 0, 0, 0, 0, 0, 'TOTAL',date_id from bajaj_datedimension;
