@@ -390,3 +390,4 @@ class CouponFact(base_models.CouponFact):
 
     class Meta:
         app_label = _APP_NAME
+        unique_together = ("date", "data_type")

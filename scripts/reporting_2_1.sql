@@ -13,7 +13,8 @@ SELECT thousands.number * 1000 + hundreds.number * 100 + tens.number * 10 + ones
 LIMIT 1000000;
 
 ###### date table
- DROP TABLE IF EXISTS bajaj_datedimension;
+DROP TABLE IF EXISTS bajaj_couponfact;
+DROP TABLE IF EXISTS bajaj_datedimension;
 CREATE TABLE bajaj_datedimension (
       date_id          BIGINT PRIMARY KEY, 
       date             DATE NOT NULL,
@@ -30,9 +31,9 @@ CREATE TABLE bajaj_datedimension (
 
 ###### populate it with days
 INSERT INTO bajaj_datedimension (date_id, date)
-SELECT number, DATE_ADD( '2000-01-01', INTERVAL number DAY )
+SELECT number, DATE_ADD( '2014-01-01', INTERVAL number DAY )
  FROM numbers
-WHERE DATE_ADD( '2000-01-01', INTERVAL number DAY ) BETWEEN '2000-01-01' AND '2010-01-01'
+WHERE DATE_ADD( '2014-01-01', INTERVAL number DAY ) BETWEEN '2014-01-01' AND '2020-01-01'
 ORDER BY number;
 
 ###### fill in other rows
@@ -53,6 +54,12 @@ CREATE TABLE `bajaj_couponfact` (
     `expired` bigint NOT NULL,
     `unused` bigint NOT NULL,
     `exceeds` bigint NOT NULL,
-    `date_id` bigint NOT NULL
-);
+    `data_type` varchar(20) NOT NULL,
+    `date_id` bigint NOT NULL,
+    UNIQUE (`date_id`, `data_type`)
+)
+;
 ALTER TABLE `bajaj_couponfact` ADD CONSTRAINT `date_id_refs_date_id_016dde9e` FOREIGN KEY (`date_id`) REFERENCES `bajaj_datedimension` (`date_id`);
+
+#######################################FILL IN FACT WITH MOCK################
+insert into bajaj_couponfact(closed, inprogress, expired, unused, exceeds, data_type, date_id) select 0, 0, 0, 0, 0, 'TOTAL',date_id from bajaj_datedimension;

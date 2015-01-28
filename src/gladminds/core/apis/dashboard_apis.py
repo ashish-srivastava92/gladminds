@@ -6,7 +6,8 @@ from tastypie import fields
 from gladminds.core.model_fetcher import models
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from django.core.cache import cache
-from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES
+from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES,\
+    CouponStatus
 from django.db import connections
 from django.conf import settings
 from gladminds.core.core_utils.utils import dictfetchall
@@ -253,6 +254,8 @@ class CouponReportResource(CustomBaseResource):
     date = fields.DateField(attribute="date")
     closed = fields.DecimalField(attribute="closed", default=0)
     inprogress = fields.DecimalField(attribute="inprogress", default=0)
+    unused = fields.DecimalField(attribute="unused", default=0)
+    exceeds_limit = fields.DecimalField(attribute="exceeds", default=0)
 
     class Meta:
         resource_name = 'coupons-report'
@@ -266,13 +269,14 @@ class CouponReportResource(CustomBaseResource):
         Mostly a useful shortcut/hook.
         """
         desired_format = self.determine_format(request)
-        data['overall'] = {'closed': self.get_coupon_count("2"),
-                           'inprogress': self.get_coupon_count("4")}
+        data['overall'] = {'closed': self.get_coupon_count(CouponStatus.CLOSED),
+                           'inprogress': self.get_coupon_count(CouponStatus.IN_PROGRESS)}
 
         serialized = self.serialize(request, data, desired_format)
         return response_class(content=serialized, content_type=build_content_type(desired_format), **response_kwargs)
 
     def get_coupon_count(self, status):
+        status = str(status)
         try:
             return get_set_cache('gm_coupon_counter' + status, None)
         except:
@@ -297,16 +301,14 @@ class CouponReportResource(CustomBaseResource):
         dtstart = params.get('created_date__gte')
         dtend = params.get('created_date__lte')
         where_and = " AND "
-        query = "select DATE(created_date) as date, action, count(*) as count from bajaj_smslog where action!='SEND TO QUEUE' "
-
+        query = "select c.*, d.date from bajaj_couponfact c inner join \
+        bajaj_datedimension d on c.date_id=d.date_id where c.data_type='TOTAL' ";
         if dtstart:
-            query = query + where_and + "DATE(created_date) >= %(dtstart)s "
+            query = query + where_and + "DATE(d.date) >= %(dtstart)s "
             filters['dtstart'] = dtstart
         if dtend:
-            query = query + where_and + "DATE(created_date) <= %(dtend)s "
+            query = query + where_and + "DATE(d.date) <= %(dtend)s "
             filters['dtend'] = dtend
 
-        query = query + " group by DATE(created_date), action;"
-
-        objs = {}
-        return map(CustomApiObject, objs.values())
+        all_data = self.get_sql_data(query, filters)
+        return map(CustomApiObject, all_data)
