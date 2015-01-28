@@ -29,7 +29,7 @@ class LoyaltyService(CoreLoyaltyService):
            request is assigned to them'''
         data = get_email_template('ASSIGNEE_REDEMPTION_MAIL_DETAIL')
         data['newsubject'] = data['subject'].format(id = redemption_obj.transaction_id)
-        url_link='<a href="http://bajaj.gladminds.co">http://bajaj.gladminds.co</a>'
+        url_link='http://bajaj.gladminds.co'
         data['content'] = data['body'].format(id=redemption_obj.transaction_id,
                               created_date = redemption_obj.created_date,
                               member_id = redemption_obj.member.mechanic_id,

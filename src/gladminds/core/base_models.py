@@ -708,7 +708,6 @@ class NationalSalesManager(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "National Sales Managers"
-        unique_together = ("nsm_id", "territory")
 
     def __unicode__(self):
         return self.name
@@ -724,7 +723,6 @@ class AreaSalesManager(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "Area Sales Managers"
-        unique_together = ("asm_id", "state")
 
     def __unicode__(self):
         return self.name
@@ -740,7 +738,6 @@ class Distributor(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "Distributors"
-        unique_together = ("distributor_id", "city")
 
     def __unicode__(self):
         return self.distributor_id + ' ' +self.name
