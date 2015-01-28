@@ -65,6 +65,6 @@ class GmModelAdmin(ModelAdmin):
         return obj.member.state
     
     get_mechanic_name.short_description = 'Name'
-    get_mechanic_pincode.short_description = 'Pincode'
+    get_mechanic_pincode.short_description = 'PIN code'
     get_mechanic_district.short_description = 'City'
     get_mechanic_state.short_description = 'State'

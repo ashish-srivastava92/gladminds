@@ -14,7 +14,7 @@ from gladminds.core import utils, constants
 from gladminds.core.services.loyalty.loyalty import CoreLoyaltyService
 from gladminds.core.services.message_template import get_template
 from gladminds.core.managers.mail import get_email_template, \
-                       send_email_to_redemption_request_owner
+                       send_email_to_redemption_request_partner
 
 LOG = logging.getLogger('gladminds')
 
@@ -24,7 +24,7 @@ AUDIT_ACTION = 'SEND TO QUEUE'
 class LoyaltyService(CoreLoyaltyService):
     '''Class for loyalty service'''
 
-    def send_mail_to_owner(self, redemption_obj):
+    def send_mail_to_partner(self, redemption_obj):
         '''Send mail to GP and LP when redemption
            request is assigned to them'''
         data = get_email_template('ASSIGNEE_REDEMPTION_MAIL_DETAIL')
@@ -40,10 +40,10 @@ class LoyaltyService(CoreLoyaltyService):
                               product_name =  redemption_obj.product.description,
                         delivery_address = redemption_obj.delivery_address,
                         url_link=url_link)
-        owner_email_id=redemption_obj.owner.user.user.email
-        send_email_to_redemption_request_owner(data, owner_email_id)
-        LOG.error('[send_mail_to_owner]:{0}:: Redemption request email sent'.format(
-                                    owner_email_id))
+        partner_email_id=redemption_obj.partner.user.user.email
+        send_email_to_redemption_request_partner(data, partner_email_id)
+        LOG.error('[send_mail_to_partner]:{0}:: Redemption request email sent'.format(
+                                    partner_email_id))
 
     def send_request_status_sms(self, redemption_request):
         '''Send redemption request sms to mechanics'''

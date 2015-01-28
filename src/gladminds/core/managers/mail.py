@@ -404,13 +404,13 @@ def send_email_to_manager_after_issue_resolved(data, manager_obj):
     except Exception as ex:
         logger.info("[Exception fail to send mail to manager]  {0}".format(ex))
         
-def send_email_to_redemption_request_owner(data, owner_email):
+def send_email_to_redemption_request_partner(data, partner_email):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                             data, receiver = owner_email, message=data['content'])
+                             data, receiver = partner_email, message=data['content'])
     except Exception as ex:
-        logger.info("[Exception fail to send mail to owner of redemption]  {0}".format(ex))        
+        logger.info("[Exception fail to send mail to partner of redemption]  {0}".format(ex))        
            
 def send_template_email(template_name, context, mail_detail,receiver=None, message=None): 
     '''generic function use for send mail for any html template'''
