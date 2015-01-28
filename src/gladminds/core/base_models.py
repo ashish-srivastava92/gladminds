@@ -951,7 +951,10 @@ class RedemptionRequest(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Accumulation Request"
+        verbose_name_plural = "Redemption Request"
+        
+    def __unicode__(self):
+        return str(self.transaction_id)
 
 
 class DateDimension(models.Model):
