@@ -71,10 +71,15 @@ SLA_PRIORITY = (('Low', 'Low'),
                 ('Medium', 'Medium'),
                 ('High', 'High'),
                 ('Urgent', 'Urgent'),)
+STATUS = (('open','open'),
+          ('accepted','accepted'),
+          ('approved','approved'),
+          ('packed','packed'),
+          ('shipped','shipped'),
+          ('delivered','delivered'))
 
-ADMIN_ROLE = (('Loyalty', 'Loyalty'),
-              ('GiftingPartner', 'GiftingPartner'),
-              ('LogisticPartner', 'LogisticPartner'),)
+ACTION = (('welcome kit','welcome kit'),
+          ('redemption','redemption'))
 
 TIME_UNIT = (('mins', 'mins'),
              ('hrs', 'hrs'),

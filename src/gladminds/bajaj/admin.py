@@ -1,4 +1,4 @@
-import copy        
+import copy
 from django import forms
 from django.contrib.admin import AdminSite, TabularInline
 from django.contrib.auth.models import User, Group
@@ -355,37 +355,28 @@ class SlaAdmin(GmModelAdmin):
     
     list_display = ('priority', response_time, reminder_time, resolution_time)
 
-class LoyaltySlaAdmin(ModelAdmin):
+class LoyaltySlaAdmin(GmModelAdmin):
     fieldsets = (
         (None, {
             'fields': (
-        'priority', 'admin_role',
-        ('response_time', 'response_unit'),        
+        'status','action',
         ('reminder_time', 'reminder_unit'),
-        ('resolution_time', 'resolution_unit'),
-		('external_reminder_time', 'external_reminder_unit'),
-        ('external_resolution_time','external_resolution_unit'),)
+        ('resolution_time', 'resolution_unit'), 
+        ('member_resolution_time','member_resolution_unit'))
         }),
-        )
-    def response_time(self):
-        return str(self.response_time) + ' ' + self.response_unit
-    
+        )    
     def reminder_time(self):
         return str(self.reminder_time) + ' ' + self.reminder_unit
     
     def resolution_time(self):
         return str(self.resolution_time) + ' ' + self.resolution_unit
     
-    def external_reminder_time(self):
-        return str(self.external_reminder_time) + ' ' + self.external_reminder_unit      
+    def member_resolution_time(self):
+        return str(self.member_resolution_time) + ' ' + self.member_resolution_unit
 
-    def external_resolution_time(self):
-        return str(self.external_resolution_time) + ' ' + self.external_resolution_unit
-    
-    list_display = ('priority', 'admin_role', response_time, external_reminder_time, 
-                    reminder_time, external_resolution_time, resolution_time)    
+    list_display = ('status','action', reminder_time, resolution_time, member_resolution_time)
 
-class ServiceDeskUserAdmin(ModelAdmin):
+class ServiceDeskUserAdmin(GmModelAdmin):
     list_display = ('user_profile', 'name', 'phone_number', 'email')
 
 '''Admin View for loyalty'''
@@ -408,9 +399,6 @@ class DistributorAdmin(GmModelAdmin):
     list_display = ('distributor_id', 'name', 'email',
                     'phone_number', 'city', 'asm')
 
-            if field.name in constants.MANDATORY_MECHANIC_FIELDS and not getattr(obj, field.name):
-                form_status = False
-        if form_status and not obj.sent_sms:
 class SparePartMasterAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
     search_fields = ('part_number', 'category',
@@ -617,7 +605,7 @@ if settings.ENV not in ['prod']:
     brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
     brand_admin.register(models.LoyaltySLA, LoyaltySlaAdmin)
 
-    brand_admin.register(models.Partner, PartnerAdmin)
+    brand_admin.register(models.RedemptionPartner, PartnerAdmin)
     brand_admin.register(models.ProductCatalog, ProductCatalogAdmin)
     brand_admin.register(models.RedemptionRequest, RedemptionRequestAdmin)
 

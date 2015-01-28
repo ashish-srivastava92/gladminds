@@ -9,7 +9,6 @@ from constance import config
 from gladminds.core.managers import user_manager, coupon_manager,\
     service_desk_manager
 from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
-from gladminds.core import constants
 from gladminds.core.model_helpers import PhoneField
 from gladminds.core import constants
 from gladminds.core.core_utils.utils import generate_mech_id, generate_partner_id
@@ -667,17 +666,12 @@ class SLA(models.Model):
         verbose_name_plural = "SLA info"
 
 class LoyaltySLA(models.Model):
-    priority = models.CharField(max_length=12, choices=SLA_PRIORITY)
-    admin_role = models.CharField(max_length=12, choices=ADMIN_ROLE)
-    response = Duration()
+    status = models.CharField(max_length=12, choices=constants.STATUS, unique=True)
+    action = models.CharField(max_length=12, choices=constants.ACTION)
     reminder = Duration()
     resolution = Duration()
-    external_resolution = Duration()
-    external_reminder = Duration()
+    member_resolution = Duration()
     
-    class meta:
-        unique_together= ("priority", "admin_role")
-        
     def get_time_in_seconds(self, time , unit):
         if unit == 'days':
             total_time = time * 86400
@@ -688,23 +682,21 @@ class LoyaltySLA(models.Model):
         return total_time
     
     def clean(self, *args, **kwargs):
-        response_time = self.get_time_in_seconds(self.response_time, self.response_unit)
         resolution_time = self.get_time_in_seconds(self.resolution_time, self.resolution_unit)        
         reminder_time = self.get_time_in_seconds(self.reminder_time, self.reminder_unit)
-        external_resolution_time = self.get_time_in_seconds(self.external_resolution_time, self.external_resolution_unit)
-        external_reminder_time = self.get_time_in_seconds(self.external_reminder_time, self.external_reminder_unit)
-        
-        if (resolution_time > reminder_time > response_time \
-        and external_resolution_time > external_reminder_time > response_time):
-         
+        if (resolution_time > reminder_time):
+#             if():    
+#                 raise ValidationError("ALREADY exist")
+#             else:        
             super(LoyaltySLA, self).clean(*args, **kwargs)
         else:
             raise ValidationError("Ensure that Reminder time is greater than Response time and Resolution time is greater than Reminder time")           
-    
+
     class Meta:
         abstract = True
         verbose_name_plural = "Loyalty SLA info"
-        
+#         unique_together = ("status", "action")
+   
 #######################LOYALTY TABLES#################################
 
 class NationalSalesManager(BaseModel):
