@@ -281,8 +281,14 @@ def register_customer(request, group=None):
             customer_obj = models.CustomerTempRegistration.objects.filter(temp_customer_id = temp_customer_id)
             if customer_obj:
                 customer_obj = customer_obj[0]
+                print "cbwhcbehcbehj"
                 if customer_obj.new_number != data_source[0]['customer_phone_number']:
+                    print "new",customer_obj.new_number
+                    print "in",data_source[0]['customer_phone_number']
                     if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']) or models.ProductData.objects.filter(customer_phone_number=data_source[0]['customer_phone_number']):
+                        print "----------------------------------------"
+                        print models.ProductData.objects.filter(customer_phone_number=data_source[0]['customer_phone_number'])
+                        print models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number'])
                         message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
                         return json.dumps({'message': message})
                     customer_obj.old_number = customer_obj.new_number

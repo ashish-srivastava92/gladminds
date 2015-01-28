@@ -111,6 +111,9 @@ COUPON_WSDL = 'prod_coupon_redeem.wsdl'
 CUSTOMER_REGISTRATION_WSDL_URL = "http://bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL = 'prod_customer_registration.wsdl'
 
+VIN_SYNC_WSDL_URL="http://prod.bajaj.gladminds.co/api/v1/vin-sync-feed/?wsdl&v0"
+VIN_SYNC_WSDL='prod_vin_sync.wsdl'
+
 ENABLE_AMAZON_SQS = True
 
 AFTER_BUY_CONSTANTS = {

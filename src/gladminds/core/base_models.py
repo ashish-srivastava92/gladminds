@@ -375,7 +375,7 @@ class CustomerTempRegistration(BaseModel):
     remarks = models.CharField(max_length=500, null=True, blank=True)
     tagged_sap_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
-
+    mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True) 
     objects = user_manager.CustomerTempRegistrationManager()
 
     class Meta:
@@ -694,6 +694,17 @@ class Service(models.Model):
         
     def __unicode__(self):
         return self.name
+
+
+class Constants(models.Model):
+    ''' Contains all the constants '''
+    constant_name = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    constant_value = models.CharField(max_length=10, null=True, blank=True)
+        
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Constants"
+        
 
 #######################LOYALTY TABLES#################################
 
