@@ -531,7 +531,7 @@ AWS_STORAGE_BUCKET_MAP = {'afterbuy': 'afterbuy'}
 AWS_STORAGE_BUCKET_NAME = 'gladminds-brands'
 S3_BASE_URL = 'https://%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif']
-ALLOWED_FILE_TYPES = ['pdf']
+ALLOWED_FILE_TYPES = ['pdf','ppt','pptx','pps','ppsx']
 MAX_UPLOAD_IMAGE_SIZE = 4.0
 MAX_UPLOAD_FILE_SIZE = 4.0
 

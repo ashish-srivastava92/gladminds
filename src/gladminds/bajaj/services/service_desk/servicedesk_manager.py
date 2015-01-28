@@ -194,7 +194,7 @@ def get_feedback(feedback_id, user):
         return models.Feedback.objects.get(id=feedback_id)
 
 def get_servicedesk_users(designation):
-    users = User.objects.filter(groups__name=designation)
+    users = User.objects.filter(groups__name__in=designation)
     if len(users) > 0:
         user_list = models.UserProfile.objects.filter(user__in=users)
         return models.ServiceDeskUser.objects.filter(user_profile__in=user_list)
