@@ -3,7 +3,7 @@ from gladminds.core.core_utils.utils import dictfetchall
 from gladminds.core.constants import CouponStatus
 
 
-def update_coupon_table():
+def update_coupon_history_table():
 #     query_coupon = "select status,count(*) as count from bajaj_coupondata c where \
 #     DATE(c.created_date)=DATE_SUB(CURDATE(), INTERVAL 1 DAY) group by status;"
     query_coupon = "select status,count(*) as count from bajaj_coupondata c group by status;"
@@ -44,5 +44,3 @@ def update_coupon_table():
         cursor.execute(delete_query, params)
         cursor.execute(insert_query, params)
     conn.close()
-    
-update_coupon_table()
