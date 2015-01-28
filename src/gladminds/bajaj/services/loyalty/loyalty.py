@@ -52,6 +52,7 @@ class LoyaltyService(CoreLoyaltyService):
         message=get_template('REDEMPTION_PRODUCT_STATUS').format(
                         mechanic_name=member.first_name,
                         transaction_id=redemption_request.transaction_id,
+                        product_name=redemption_request.product.description,
                         status=redemption_request.status.lower())
         sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
         self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
