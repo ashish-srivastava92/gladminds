@@ -633,6 +633,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "send_point": send_point,
               
+              "send_loyalty_sms": send_loyalty_sms,
+              
               "send_reminders_for_servicedesk": send_reminders_for_servicedesk,
               
               "send_mail_for_feed_failure" : send_mail_for_feed_failure,
