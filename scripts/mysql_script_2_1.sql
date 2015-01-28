@@ -134,3 +134,4 @@ alter table bajaj_redemptionrequest add foreign key (owner_id) references bajaj_
 alter table bajaj_redemptionrequest add column packed_by varchar(50) null;
 
 update bajaj_smslog set action='RECEIVED' where action='RECIEVED';
+alter table bajaj_redemptionrequest add column image_url varchar(255) null

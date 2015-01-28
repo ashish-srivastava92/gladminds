@@ -371,6 +371,9 @@ class RedemptionRequest(base_models.RedemptionRequest):
     product = models.ForeignKey(ProductCatalog)
     member = models.ForeignKey(Mechanic)
     owner = models.ForeignKey(Partner, null=True, blank=True)
+    image_url = models.FileField(upload_to='{0}/bajaj/proof_delivery'.format(settings.ENV),
+                              max_length=255, null=True, blank=True,
+                              validators=[validate_image])
 
     class Meta:
         app_label = _APP_NAME
