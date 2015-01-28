@@ -504,7 +504,7 @@
     "pk": 56,
     "fields": {
       "template_key": "SEND_INSUFFICIENT_POINT_SINGLE",
-      "template": "Dear {mechanic_name}, Sorry, you need {shortage_points} more points for this product. Please check catalog for {total_points} points.",
+      "template": "Dear {mechanic_name}, Sorry, you need {shortage_points} more points for this product. You have {total_points} accumulated points.",
       "description": "Send this message when user does not have enough points to redeem a single product"
     }
   },
@@ -522,7 +522,7 @@
     "pk": 58,
     "fields": {
       "template_key":"INVALID_MEMBER_ID",
-      "template":"Dear {mechanic_name}, Invalid MembershipID. Please refer Membership card for your ID.",
+      "template":"Dear {mechanic_name}, Invalid Membership ID. Please refer Membership card for your ID.",
       "description":"Send this message when member-ID does not match our records"
     }
   },
@@ -531,7 +531,7 @@
     "pk": 59,
     "fields": {
       "template_key":"REDEMPTION_PRODUCT_STATUS",
-      "template":"Dear {mechanic_name}, Ref Req ID - {transaction_id}, your request is {status}.",
+      "template":"Dear {mechanic_name}, Ref Req ID - {transaction_id}. Your gift {product_name} has been {status}.",
       "description":"Send this message when member-ID does not match our records"
     }
   }
