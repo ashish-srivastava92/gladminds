@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-
 from gladminds.core import base_models
 from gladminds.core.auth_helper import GmApps
 from django.conf import settings
@@ -400,3 +399,9 @@ class CouponFact(base_models.CouponFact):
     class Meta:
         app_label = _APP_NAME
         unique_together = ("date", "data_type")
+        
+class LoyaltySLA(base_models.LoyaltySLA):
+
+    class Meta:
+        app_label = _APP_NAME
+        unique_together = ("status", "action")

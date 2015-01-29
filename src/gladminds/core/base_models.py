@@ -9,7 +9,6 @@ from constance import config
 from gladminds.core.managers import user_manager, coupon_manager,\
     service_desk_manager
 from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
-from gladminds.core import constants
 from gladminds.core.model_helpers import PhoneField
 from gladminds.core import constants
 from gladminds.core.core_utils.utils import generate_mech_id, generate_partner_id
@@ -666,7 +665,6 @@ class SLA(models.Model):
         abstract = True
         verbose_name_plural = "SLA info"
 
-
 class ServiceType(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
@@ -704,8 +702,8 @@ class Constants(models.Model):
     class Meta:
         abstract = True
         verbose_name_plural = "Constants"
-        
 
+        
 #######################LOYALTY TABLES#################################
 
 class NationalSalesManager(BaseModel):
@@ -969,6 +967,33 @@ class RedemptionRequest(BaseModel):
     def __unicode__(self):
         return str(self.transaction_id)
 
+class LoyaltySLA(models.Model):
+    status = models.CharField(max_length=12, choices=constants.STATUS)
+    action = models.CharField(max_length=12, choices=constants.ACTION)
+    reminder = Duration()
+    resolution = Duration()
+    member_resolution = Duration()
+    
+    def get_time_in_seconds(self, time , unit):
+        if unit == 'days':
+            total_time = time * 86400
+        elif unit == 'hrs':
+            total_time = time * 3600
+        else:
+            total_time = time * 60
+        return total_time
+    
+    def clean(self, *args, **kwargs):
+        resolution_time = self.get_time_in_seconds(self.resolution_time, self.resolution_unit)        
+        reminder_time = self.get_time_in_seconds(self.reminder_time, self.reminder_unit)
+        if (resolution_time > reminder_time):
+            super(LoyaltySLA, self).clean(*args, **kwargs)
+        else:
+            raise ValidationError("Ensure that Reminder time is greater than Response time and Resolution time is greater than Reminder time")           
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Loyalty SLA info"
 
 class DateDimension(models.Model):
     date_id = models.BigIntegerField(primary_key=True)
