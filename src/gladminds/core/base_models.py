@@ -989,7 +989,7 @@ class LoyaltySLA(models.Model):
         if (resolution_time > reminder_time):
             super(LoyaltySLA, self).clean(*args, **kwargs)
         else:
-            raise ValidationError("Ensure that Reminder time is greater than Response time and Resolution time is greater than Reminder time")           
+            raise ValidationError("Resolution time is greater than Reminder time")           
 
     class Meta:
         abstract = True
