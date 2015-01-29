@@ -235,7 +235,7 @@
             "sender": "feed-report@gladminds.co",
             "receiver": "priyanka.n@hashedin.com",
             "subject": "Gladminds Customer phone number update",
-            "body": "The customer phone number updates on  ", 
+            "body": "The customer phone number updates on {date} ", 
             "description": "Customer phone number update mail"
         }
     },
@@ -246,9 +246,9 @@
             "template_key": "FEED_FAILURE",
             "sender": "feed-report@gladminds.co",
             "receiver": "priyanka.n@hashedin.com",
-            "subject": "The feed failures since",
-            "body": "The feed failures since ", 
-            "description": "Customer phone number update mail"
+            "subject": "{feed_type} Failure mail",
+            "body": "Please find enclosed, the failure details of {feed_type} on {date} ", 
+            "description": "Feed failure mail "
         }
     },
     {

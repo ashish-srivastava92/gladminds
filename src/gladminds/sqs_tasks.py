@@ -435,7 +435,8 @@ def send_mail_for_feed_failure(*args, **kwargs):
     for feed_type in FEED_TYPES:
         feed_data = taskmanager.get_feed_failure_log_detail(type=feed_type)
         if feed_data:
-            mail.feed_failure(feed_data=feed_data)
+            mail.feed_failure(feed_data=feed_data['feed_data'])
+            feed_data['feed_logs'].update(email_flag=True)
 
 ''' Cron job to send vin sync feeds'''
 
@@ -443,8 +444,8 @@ def send_mail_for_feed_failure(*args, **kwargs):
 def send_vin_sync_feed_details(*args, **kwargs):
     feed_data = taskmanager.get_vin_sync_feeds_detail()
     if feed_data:
-        mail.send_vin_sync_feed_report(feed_data=feed_data)
-
+        mail.send_vin_sync_feed_report(feed_data=feed_data['feed_data'])
+        feed_data['feed_logs'].update(email_flag=True)
 '''
 Cron Job to send customer phone number update email
 '''
