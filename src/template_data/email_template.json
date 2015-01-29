@@ -235,7 +235,7 @@
             "sender": "feed-report@gladminds.co",
             "receiver": "priyanka.n@hashedin.com",
             "subject": "Gladminds Customer phone number update",
-            "body": "Please fine the enclosed, customer phone number updates on {date} ", 
+            "body": "Please find the enclosed, customer phone number updates on {date} ", 
             "description": "Customer phone number update mail"
         }
     },
