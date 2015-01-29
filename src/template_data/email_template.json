@@ -222,7 +222,7 @@
             "template_key": "VIN_SYNC_FEED",
             "sender": "feed-report@gladminds.co",
             "receiver": "priyanka.n@hashedin.com",
-            "subject": "Gladminds Vin Sync Feed Report",
+            "subject": "Consolidated Report : Gladminds Vin Sync Feed Report",
             "body": "Please find enclosed, the details of VINs updated in GCP database through online verification requested by various Dealers / ASCs for - ", 
             "description": "Vin sycn feed mail"
         }
@@ -235,7 +235,7 @@
             "sender": "feed-report@gladminds.co",
             "receiver": "priyanka.n@hashedin.com",
             "subject": "Gladminds Customer phone number update",
-            "body": "The customer phone number updates on  ", 
+            "body": "Please find the enclosed, customer phone number updates on {date} ", 
             "description": "Customer phone number update mail"
         }
     },
@@ -246,9 +246,9 @@
             "template_key": "FEED_FAILURE",
             "sender": "feed-report@gladminds.co",
             "receiver": "priyanka.n@hashedin.com",
-            "subject": "The feed failures since",
-            "body": "The feed failures since ", 
-            "description": "Customer phone number update mail"
+            "subject": "Consolidated Report: GladMinds Feed Failure - {feed_type} ",
+            "body": "Please find enclosed, the failure details of {feed_type} on {date} ", 
+            "description": "Feed failure mail "
         }
     },
     {
