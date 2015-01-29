@@ -246,7 +246,7 @@
             "template_key": "FEED_FAILURE",
             "sender": "feed-report@gladminds.co",
             "receiver": "priyanka.n@hashedin.com",
-            "subject": "{feed_type} Failure mail",
+            "subject": "Consolidated Report: GladMinds Feed Failure - {feed_type} ",
             "body": "Please find enclosed, the failure details of {feed_type} on {date} ", 
             "description": "Feed failure mail "
         }
