@@ -559,6 +559,27 @@ class RedemptionRequestAdmin(GmModelAdmin):
         if css_class:
             return {'class': css_class}
 
+class LoyaltySlaAdmin(GmModelAdmin):
+    fieldsets = (
+        (None, {
+            'fields': (
+        'status','action',
+        ('reminder_time', 'reminder_unit'),
+        ('resolution_time', 'resolution_unit'), 
+        ('member_resolution_time','member_resolution_unit'))
+        }),
+        )    
+    def reminder_time(self):
+        return str(self.reminder_time) + ' ' + self.reminder_unit
+    
+    def resolution_time(self):
+        return str(self.resolution_time) + ' ' + self.resolution_unit
+    
+    def member_resolution_time(self):
+        return str(self.member_resolution_time) + ' ' + self.member_resolution_unit
+
+    list_display = ('status','action', reminder_time, resolution_time, member_resolution_time)
+
 brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
 
 brand_admin.register(User, UserAdmin)
@@ -590,6 +611,7 @@ if settings.ENV not in ['prod']:
     brand_admin.register(models.SparePartUPC, SparePartUPCAdmin)
     brand_admin.register(models.SparePartPoint, SparePartPointAdmin)
     brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
+    brand_admin.register(models.LoyaltySLA, LoyaltySlaAdmin)
 
     brand_admin.register(models.Partner, PartnerAdmin)
     brand_admin.register(models.ProductCatalog, ProductCatalogAdmin)
