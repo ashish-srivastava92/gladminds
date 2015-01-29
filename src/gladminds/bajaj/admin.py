@@ -496,6 +496,7 @@ class MechanicAdmin(GmModelAdmin):
                 form_status = False
         if form_status and not obj.sent_sms:
             LoyaltyService.send_welcome_sms(obj)
+            LoyaltyService.initiate_welcome_kit(obj)
             obj.sent_sms=True
         obj.phone_number=utils.mobile_format(obj.phone_number)
         super(MechanicAdmin, self).save_model(request, obj, form, change)
@@ -558,6 +559,37 @@ class RedemptionRequestAdmin(GmModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
+        
+class WelcomeKitAdmin(GmModelAdmin):
+    list_filter = ('status',)
+    search_fields = ('member__phone_number', 'partner__partner_id', 'transaction_id')
+    list_display = ('member',  'get_mechanic_name',
+                     'delivery_address', 'get_mechanic_pincode',
+                     'get_mechanic_district', 'get_mechanic_state',
+                     'created_date', 'expected_delivery_date', 'status', 'partner')
+    readonly_fields = ('image_tag', 'transaction_id')
+    
+    def save_model(self, request, obj, form, change):
+        super(WelcomeKitAdmin, self).save_model(request, obj, form, change)
+        if 'status' in form.changed_data and obj.status=="Shipped":
+            LoyaltyService.send_welcome_kit_delivery(obj)
+        if 'partner' in form.changed_data and obj.partner:
+            LoyaltyService.send_welcome_kit_mail_to_partner(obj)
+
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('packed_by',)
+        form = super(WelcomeKitAdmin, self).get_form(request, obj, **kwargs)
+        return form
+
+    def suit_row_attributes(self, obj):
+        class_map = {
+            'Accepted': 'success',
+            'Packed': 'info',
+            'Shipped': 'warning',
+        }
+        css_class = class_map.get(str(obj.status))
+        if css_class:
+            return {'class': css_class}
 
 class LoyaltySlaAdmin(GmModelAdmin):
     fieldsets = (
@@ -616,6 +648,7 @@ if settings.ENV not in ['prod']:
     brand_admin.register(models.Partner, PartnerAdmin)
     brand_admin.register(models.ProductCatalog, ProductCatalogAdmin)
     brand_admin.register(models.RedemptionRequest, RedemptionRequestAdmin)
+    brand_admin.register(models.WelcomeKit, WelcomeKitAdmin)
 
 brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)
 brand_admin.register(models.SATempRegistration, SATempRegistrationAdmin)

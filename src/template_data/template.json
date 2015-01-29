@@ -440,8 +440,8 @@
     "model": "gladminds.messagetemplate",   
     "pk": 49,
     "fields": {
-      "template_key": "WELCOME_MESSAGE",
-      "template": "Dear {mechanic_name}, Congratulations! Welcome to the Bajaj loyalty program. To Accumulate, Send SMS with Code AC UPC to 9561112809",
+      "template_key": "COMPLETE_FORM",
+      "template": "Dear {mechanic_name}, We have received registration for Bajaj USTAAD program. After verification, you will receive the welcome kit in days",
       "description": "welcome message to mechanic"
       }
     },
@@ -532,7 +532,16 @@
     "fields": {
       "template_key":"REDEMPTION_PRODUCT_STATUS",
       "template":"Dear {mechanic_name}, Ref Req ID - {transaction_id}. Your gift {product_name} has been {status}.",
-      "description":"Send this message when member-ID does not match our records"
+      "description":"Send this message when member-ID redemption request changes"
     }
-  }
+  },
+  {
+    "model": "gladminds.messagetemplate",   
+    "pk": 60,
+    "fields": {
+      "template_key": "WELCOME_KIT_DELIVERY",
+      "template": "Dear {mechanic_name}, Congratulations! Welcome to the Bajaj loyalty program. To Accumulate, Send SMS with Code AC UPC to 9561112809",
+      "description": "welcome message to mechanic"
+      }
+    }
 ]
