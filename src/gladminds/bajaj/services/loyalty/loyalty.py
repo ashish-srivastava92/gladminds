@@ -24,6 +24,73 @@ AUDIT_ACTION = 'SEND TO QUEUE'
 class LoyaltyService(CoreLoyaltyService):
     '''Class for loyalty service'''
 
+    def send_welcome_sms(self, mech):
+        '''Send welcome sms to mechanics when registered'''
+        phone_number=utils.get_phone_number_format(mech.phone_number)
+        message=get_template('COMPLETE_FORM').format(
+                        mechanic_name=mech.first_name)
+        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
+                    'message': message, "sms_client": settings.SMS_CLIENT})
+        LOG.error('[send_welcome_sms]:{0}:: {1}'.format(
+                                    phone_number, message))
+
+    def send_welcome_message(self, request):
+        '''Send welcome sms to mechanics uploaded: one time use'''
+        if settings.ENV in settings.IGNORE_ENV:
+            return HttpResponse(json.dumps({'msg': 'SMS not allowed in ENV'}),
+                                content_type='application/json')
+        phone_list=[]
+        mechanics = models.Mechanic.objects.filter(sent_sms=False)
+        for mech in mechanics:
+            self.send_welcome_sms(mech)
+            phone_list.append(mech.phone_number)
+        mechanics.update(sent_sms=True)
+        response = 'Message sent to {0} mechanics. phone numbers: {1}'.format(
+                                len(phone_list), (', '.join(phone_list)))
+        return HttpResponse(json.dumps({'msg': response}),
+                            content_type='application/json')
+
+    def send_welcome_kit_mail_to_partner(self, welcome_kit_obj):
+        '''Send mail to GP and LP when welcome Kit is assigned to them'''
+        data = get_email_template('ASSIGNEE_WELCOME_KIT_MAIL')
+        data['newsubject'] = data['subject'].format(id = welcome_kit_obj.transaction_id)
+        url_link='http://bajaj.gladminds.co'
+        data['content'] = data['body'].format(id=welcome_kit_obj.transaction_id,
+                              created_date = welcome_kit_obj.created_date,
+                              member_id = welcome_kit_obj.member.mechanic_id,
+                              member_name = welcome_kit_obj.member.first_name,
+                              member_city = welcome_kit_obj.member.district,
+                              member_state = welcome_kit_obj.member.state,
+                        delivery_address = welcome_kit_obj.delivery_address,
+                        url_link=url_link)
+        partner_email_id=welcome_kit_obj.partner.user.user.email
+        send_email_to_redemption_request_partner(data, partner_email_id)
+        LOG.error('[send_welcome_kit_mail_to_partner]:{0}:: welcome kit request email sent'.format(
+                                    partner_email_id))
+        
+    def send_welcome_kit_delivery(self, redemption_request):
+        '''Send redemption request sms to mechanics'''
+        member = redemption_request.member
+        phone_number=utils.get_phone_number_format(member.phone_number)
+        message=get_template('WELCOME_KIT_DELIVERY').format(
+                        mechanic_name=member.first_name)
+        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
+                    'message': message, "sms_client": settings.SMS_CLIENT})
+        LOG.error('[send_request_status_sms]:{0}:: {1}'.format(
+                                    phone_number, message))
+        
+    def initiate_welcome_kit(self, mechanic_obj):
+        '''Saves the welcome kit request for processing'''
+        delivery_address = ', '.join(filter(None, (mechanic_obj.shop_number,
+                                                   mechanic_obj.shop_name,
+                                                   mechanic_obj.shop_address)))
+        welcome_kit=models.WelcomeKit(member=mechanic_obj,
+                                    delivery_address=delivery_address)
+        welcome_kit.save()
+        return welcome_kit
+
     def send_mail_to_partner(self, redemption_obj):
         '''Send mail to GP and LP when redemption
            request is assigned to them'''
@@ -60,32 +127,6 @@ class LoyaltyService(CoreLoyaltyService):
         LOG.error('[send_request_status_sms]:{0}:: {1}'.format(
                                     phone_number, message))
 
-    def send_welcome_sms(self, mech):
-        '''Send welcome sms to mechanics when registered'''
-        phone_number=utils.get_phone_number_format(mech.phone_number)
-        message=get_template('WELCOME_MESSAGE').format(
-                        mechanic_name=mech.first_name)
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
-        self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
-                    'message': message, "sms_client": settings.SMS_CLIENT})
-        LOG.error('[send_welcome_sms]:{0}:: {1}'.format(
-                                    phone_number, message))
-
-    def send_welcome_message(self, request):
-        '''Send welcome sms to mechanics uploaded: one time use'''
-        if settings.ENV in settings.IGNORE_ENV:
-            return HttpResponse(json.dumps({'msg': 'SMS not allowed in ENV'}),
-                                content_type='application/json')
-        phone_list=[]
-        mechanics = models.Mechanic.objects.filter(sent_sms=False)
-        for mech in mechanics:
-            self.send_welcome_sms(mech)
-            phone_list.append(mech.phone_number)
-        mechanics.update(sent_sms=True)
-        response = 'Message sent to {0} mechanics. phone numbers: {1}'.format(
-                                len(phone_list), (', '.join(phone_list)))
-        return HttpResponse(json.dumps({'msg': response}),
-                            content_type='application/json')
 
     def register_redemption_request(self, mechanic, products):
         '''Saves the redemption request for processing'''
