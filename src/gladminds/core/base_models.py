@@ -374,7 +374,7 @@ class CustomerTempRegistration(BaseModel):
     remarks = models.CharField(max_length=500, null=True, blank=True)
     tagged_sap_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
-    mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True) 
+    mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True, default=0) 
     objects = user_manager.CustomerTempRegistrationManager()
 
     class Meta:
@@ -694,7 +694,7 @@ class Service(models.Model):
         return self.name
 
 
-class Constants(models.Model):
+class Constant(BaseModel):
     ''' Contains all the constants '''
     constant_name = models.CharField(max_length=50, null=True, blank=True, unique=True)
     constant_value = models.CharField(max_length=10, null=True, blank=True)

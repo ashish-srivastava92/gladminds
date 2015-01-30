@@ -282,7 +282,12 @@ def register_customer(request, group=None):
             if customer_obj:
                 customer_obj = customer_obj[0]
                 if customer_obj.new_number != data_source[0]['customer_phone_number']:
-                    if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']) or models.ProductData.objects.filter(customer_phone_number=data_source[0]['customer_phone_number']):
+                    update_count = models.Constant.objects.get(constant_name='mobile_number_update_count').constant_value
+                    if customer_obj.mobile_number_update_count == int(update_count):
+                        message = get_template('PHONE_NUMBER_UPDATE_COUNT_EXCEEDED')
+                        return json.dumps({'message' : message})
+
+                    if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']):
                         message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
                         return json.dumps({'message': message})
                     customer_obj.old_number = customer_obj.new_number
@@ -290,7 +295,7 @@ def register_customer(request, group=None):
                     customer_obj.product_data = product_obj[0]
                     customer_obj.sent_to_sap = False
                     customer_obj.dealer_asc_id = str(request.user)
-
+                    customer_obj.mobile_number_update_count+=1
                     message = get_template('CUSTOMER_MOBILE_NUMBER_UPDATE').format(customer_name=customer_obj.new_customer_name, new_number=customer_obj.new_number)
                     for phone_number in [customer_obj.new_number, customer_obj.old_number]:
                         phone_number = utils.get_phone_number_format(phone_number)
@@ -313,7 +318,7 @@ def register_customer(request, group=None):
                             send_job_to_queue(send_customer_phone_number_update_message, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
 
             else:
-                if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']) or models.ProductData.objects.filter(customer_phone_number=data_source[0]['customer_phone_number']):
+                if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']):
                     message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
                     return json.dumps({'message': message})
                 customer_obj = models.CustomerTempRegistration(product_data=product_obj[0], 

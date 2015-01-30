@@ -1,0 +1,10 @@
+[
+  {
+    "model": "gladminds.constant",
+    "pk": 1,
+    "fields": {
+      "constant_name":"mobile_number_update_count",
+      "constant_value":"3"
+    }
+  }
+]

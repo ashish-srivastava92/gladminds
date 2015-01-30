@@ -140,4 +140,8 @@ alter table bajaj_redemptionrequest add column image_url varchar(255) null
 
 alter table bajaj_customertempregistration add mobile_number_update_count int(5) null;
 alter table bajaj_partner add column name varchar(100) null;
+update bajaj_customertempregistration set mobile_number_update_count =0;
+
+alter table bajaj_customertempregistration drop column mobile_number_update_count ;
+alter table bajaj_customertempregistration add mobile_number_update_count int(5) default 0 ;
 
