@@ -534,5 +534,14 @@
       "template":"Dear {mechanic_name}, Ref Req ID - {transaction_id}. Your gift {product_name} has been {status}.",
       "description":"Send this message when member-ID does not match our records"
     }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 60,
+    "fields": {
+      "template_key": "PHONE_NUMBER_UPDATE_COUNT_EXCEEDED",
+      "template": "Mobile number update not allowed. Please contact customer support: +91-9741775128.",
+      "description": "Send this message when customer phone number cannot be updated"
+    }
   }
 ]
