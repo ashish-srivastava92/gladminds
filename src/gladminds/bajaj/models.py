@@ -372,7 +372,7 @@ class ProductCatalog(base_models.ProductCatalog):
         app_label = _APP_NAME
 
 class RedemptionRequest(base_models.RedemptionRequest):
-    '''details of retailer'''
+    '''details of redemption request'''
     product = models.ForeignKey(ProductCatalog)
     member = models.ForeignKey(Mechanic)
     partner = models.ForeignKey(Partner, null=True, blank=True)
@@ -383,6 +383,16 @@ class RedemptionRequest(base_models.RedemptionRequest):
     class Meta:
         app_label = _APP_NAME
 
+class WelcomeKit(base_models.WelcomeKit):
+    '''details of welcome kit'''
+    member = models.ForeignKey(Mechanic)
+    partner = models.ForeignKey(Partner, null=True, blank=True)
+    image_url = models.FileField(upload_to='{0}/bajaj/proof_delivery'.format(settings.ENV),
+                              max_length=255, null=True, blank=True,
+                              validators=[validate_image])
+
+    class Meta:
+        app_label = _APP_NAME
 
 class DateDimension(base_models.DateDimension):
     '''
