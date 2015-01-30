@@ -694,7 +694,7 @@ class Service(models.Model):
         return self.name
 
 
-class Constant(models.Model):
+class Constant(BaseModel):
     ''' Contains all the constants '''
     constant_name = models.CharField(max_length=50, null=True, blank=True, unique=True)
     constant_value = models.CharField(max_length=10, null=True, blank=True)

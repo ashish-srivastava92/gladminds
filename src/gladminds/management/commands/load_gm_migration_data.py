@@ -1,5 +1,6 @@
 import os
 import json
+import datetime
 
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group
@@ -16,8 +17,10 @@ BASIC_FEED = import_feed.BaseFeed()
 class Command(BaseCommand):
     
     def handle(self, *args, **options):
+        self.today = datetime.datetime.now()
         self.add_sms_template()
         self.add_email_template()
+        self.add_constants()
         #self.add_group()
 
     def add_group(self):
@@ -42,7 +45,7 @@ class Command(BaseCommand):
             mt.objects.all().delete()
             for message_temp in message_templates:
                 fields = message_temp['fields']
-                temp_obj = mt(template_key=fields['template_key']\
+                temp_obj = mt(id=message_temp['pk'], created_date=self.today, template_key=fields['template_key']\
                            , template=fields['template'], description=fields['description'])
                 temp_obj.save()
             print "Loaded sms template..."
@@ -56,7 +59,7 @@ class Command(BaseCommand):
             et.objects.all().delete()
             for email_temp in email_templates:
                 fields = email_temp['fields']
-                temp_obj = et(template_key=fields['template_key']\
+                temp_obj = et(id=email_temp['pk'], created_date=self.today, template_key=fields['template_key']\
                            , sender=fields['sender'], receiver=fields['receiver'],\
                             subject=fields['subject'], body=fields['body'],\
                             description=fields['description'])
@@ -78,3 +81,15 @@ class Command(BaseCommand):
             gladminds_user.user = user
             gladminds_user.save()
         print "Loading users for existing dealer...."
+        
+    def add_constants(self):
+        print "Loading constants.."
+        file_path = os.path.join(settings.PROJECT_DIR, 'template_data/constant.json')
+        constants = json.loads(open(file_path).read())
+        cons = get_model('Constant', 'bajaj')
+        cons.objects.all().delete()
+        for constant in constants:
+            fields = constant['fields']
+            temp_obj = cons(id=constant['pk'], created_date=self.today, constant_name=fields['constant_name'],constant_value=fields['constant_value'])
+            temp_obj.save()
+        print "Loaded constants..."
