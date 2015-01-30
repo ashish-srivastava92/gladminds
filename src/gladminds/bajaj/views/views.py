@@ -283,7 +283,7 @@ def register_customer(request, group=None):
                 customer_obj = customer_obj[0]
                 if customer_obj.new_number != data_source[0]['customer_phone_number']:
                     update_count = models.Constant.objects.get(constant_name='mobile_number_update_count').constant_value
-                    if customer_obj.mobile_number_update_count > int(update_count)-1:
+                    if customer_obj.mobile_number_update_count == int(update_count):
                         message = get_template('PHONE_NUMBER_UPDATE_COUNT_EXCEEDED')
                         return json.dumps({'message' : message})
 
