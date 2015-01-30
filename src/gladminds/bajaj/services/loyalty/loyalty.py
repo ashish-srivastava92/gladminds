@@ -136,7 +136,7 @@ class LoyaltyService(CoreLoyaltyService):
                                                    member.shop_name,
                                                    member.shop_address)))
         for product in products:
-            date = self.set_date('Redemption', self.status)
+            date = self.set_date('Redemption', 'Open')
             redemption_request=models.RedemptionRequest(member=member,
                                         product=product,
                                         delivery_address=delivery_address,
