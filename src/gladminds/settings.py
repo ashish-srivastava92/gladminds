@@ -120,7 +120,9 @@ SUIT_CONFIG = {
                    {'model': 'productcatalog',
                      'label': 'Product Catalog'},
                    {'model': 'redemptionrequest',
-                     'label': 'Redemption Request'},)},
+                     'label': 'Redemption Request'},
+                   {'model': 'welcomekit',
+                     'label': 'Welcome Kit'},)},
         {'app': 'bajaj', 'label': 'User Registrations', 'icon': ' icon-folder-open',
          'models':(
                     {'model': 'asctempregistration',

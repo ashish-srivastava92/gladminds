@@ -103,8 +103,7 @@ def get_feed_failure_log_detail(type=None):
         data['reason'] = feed.reason
         data['created_date'] = feed.created_date
         feed_data.append(data)
-    feed_logs.update(email_flag=True)
-    return feed_data
+    return { 'feed_data':feed_data , 'feed_logs':feed_logs}
 
 def get_customer_details(start_date=None, end_date=None, type=None):
     start_date = start_date
@@ -132,8 +131,5 @@ def get_vin_sync_feeds_detail():
         data['status_code'] = feed.status_code
         data['ucn_count'] = feed.ucn_count
         feed_data.append(data)
-    feed_logs.update(email_flag=True)
-    return feed_data
+    return {'feed_data':feed_data, 'feed_logs':feed_logs}
 
-    
-    

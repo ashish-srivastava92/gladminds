@@ -170,6 +170,13 @@ PARTNER_TYPE = (
         ('Marketing', 'Marketing')
     )
 
+WELCOME_KIT_STATUS = (
+        ('Open', 'Open'),
+        ('Accepted', 'Accepted'),
+        ('Packed', 'Packed'),
+        ('Shipped', 'Shipped')
+    )
+
 class FeedStatus():
     RECEIVED = 'Received'
     SENT = 'Sent'

@@ -967,6 +967,31 @@ class RedemptionRequest(BaseModel):
         
     def __unicode__(self):
         return str(self.transaction_id)
+    
+class WelcomeKit(BaseModel):
+    '''details of Spare Part'''
+    delivery_address = models.CharField(max_length=50, null=True, blank=True)
+    transaction_id = models.AutoField(primary_key=True)
+    expected_delivery_date =  models.DateTimeField(null=True, blank= True)
+    due_date =  models.DateTimeField(null=True, blank= True)
+    status = models.CharField(max_length=12, choices=constants.WELCOME_KIT_STATUS, default='Open')
+    packed_by = models.CharField(max_length=50, null=True, blank=True)
+    tracking_id = models.CharField(max_length=50, null=True, blank=True)
+
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+    image_tag.short_description = 'Proof of Delivery'
+    image_tag.allow_tags = True
+
+    def clean(self, *args, **kwargs):
+        if self.status!='Open' and not self.partner:
+            raise ValidationError("Please assign a partner")
+        else:
+            super(WelcomeKit, self).clean(*args, **kwargs)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Welcome Kit Request"
 
 class LoyaltySLA(models.Model):
     status = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_STATUS)
