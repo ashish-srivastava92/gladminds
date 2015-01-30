@@ -71,15 +71,15 @@ SLA_PRIORITY = (('Low', 'Low'),
                 ('Medium', 'Medium'),
                 ('High', 'High'),
                 ('Urgent', 'Urgent'),)
-STATUS = (('open','open'),
-          ('accepted','accepted'),
-          ('approved','approved'),
-          ('packed','packed'),
-          ('shipped','shipped'),
-          ('delivered','delivered'))
+LOYALTY_SLA_STATUS = (('open','open'),
+                      ('accepted','accepted'),
+                      ('approved','approved'),
+                      ('packed','packed'),
+                      ('shipped','shipped'),
+                      ('delivered','delivered'))
 
-ACTION = (('welcome kit','welcome kit'),
-          ('redemption','redemption'))
+LOYALTY_SLA_ACTION = (('welcome kit','welcome kit'),
+                      ('redemption','redemption'))
 
 TIME_UNIT = (('mins', 'mins'),
              ('hrs', 'hrs'),
