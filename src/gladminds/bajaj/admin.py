@@ -545,7 +545,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
         date = LoyaltyService.set_date("Redemption", obj.status)
         obj.due_date = date['due_date']
         obj.expected_delivery_date = date['expected_delivery_date']
-        obj.resolution_flag = True
+        obj.resolution_flag = False
         if 'status' in form.changed_data:
             if obj.status=='Approved' and obj.refunded_points:
                 LoyaltyService.update_points(obj.member, redeem=obj.product.points)
@@ -584,7 +584,7 @@ class WelcomeKitAdmin(GmModelAdmin):
         date = LoyaltyService.set_date("Welcome Kit", obj.status)
         obj.due_date = date['due_date']
         obj.expected_delivery_date = date['expected_delivery_date']
-        obj.resolution_flag = True
+        obj.resolution_flag = False
         super(WelcomeKitAdmin, self).save_model(request, obj, form, change)
         if 'status' in form.changed_data and obj.status=="Shipped":
             LoyaltyService.send_welcome_kit_delivery(obj)
@@ -675,3 +675,4 @@ brand_admin.register(models.SLA, SlaAdmin)
 brand_admin.register(models.ServiceDeskUser, ServiceDeskUserAdmin)
 brand_admin.register(models.Service, ServiceAdmin)
 brand_admin.register(models.ServiceType)
+brand_admin.register(models.Constant)
