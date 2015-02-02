@@ -522,6 +522,7 @@ def export_customer_reg_to_sap(*args, **kwargs):
 @shared_task
 def update_coupon_history_data(*args, **kwargs):
     try:
+        logger.info("updating_coupon_history_data")
         update_coupon_history_table()
     except Exception as ex:
         logger.info("update_coupon_history_data: {0}".format(ex))
