@@ -21,6 +21,9 @@ from gladminds.core.cron_jobs.queue_utils import get_task_queue,\
     send_job_to_queue
 from gladminds.core.core_utils.date_utils import convert_utc_to_local_time
 from gladminds.core.cron_jobs.update_fact_tables import update_coupon_history_table
+from gladminds.core.managers.mail import get_email_template,send_email_to_redeem_escaltion_group,\
+    send_email_to_welcomekit_escaltion_group
+from gladminds.core.auth_helper import Roles
 
 
 logger = logging.getLogger("gladminds")
@@ -206,6 +209,23 @@ def send_coupon_close_message(*args, **kwargs):
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
 
+
+"""
+This job sends escalation message related to loyalty
+"""
+@shared_task
+def send_loyalty_escalation_message(*args, **kwargs):
+    status = "success"
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        set_gateway(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        send_reminder_message.retry(
+            exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        sms_log(status=status, receiver=phone_number, message=message)
 
 """
 Send OTP
@@ -577,7 +597,7 @@ def send_reminders_for_servicedesk(*args, **kwargs):
  
         if not feedback.resolution_flag:
             context = utils.create_context('DUE_DATE_EXCEEDED_MAIL_TO_MANAGER', feedback)
-            escalation_list = models.UserProfile.objects.filter(user__groups__name=settings.SD_ESCALATION_GROUP)
+            escalation_list = models.UserProfile.objects.filter(user__groups__name=Roles.SDESCALATION)
             escalation_list_detail = utils.get_escalation_mailing_list(escalation_list)
             send_due_date_exceeded(context, escalation_list_detail['mail'])
             for phone_number in escalation_list_detail['sms']: 
@@ -586,6 +606,60 @@ def send_reminders_for_servicedesk(*args, **kwargs):
         feedback.save()
  
 
+def welcome_kit_due_date_escalation(*args, **kwargs):
+    time = datetime.now()
+    '''
+    send mail when due date is less than current date
+    '''
+    welcome_kit_obj = models.WelcomeKit.objects.filter(due_date__lte=time, resolution_flag=True)
+    for welcome_kit in welcome_kit_obj:
+        
+        if not welcome_kit.status == 'Delivered':
+            data = get_email_template('WELCOME_KIT_DUE_DATE_EXCEED_MAIL_TO_MANAGER')
+            data['newsubject'] = data['subject'].format(id = welcome_kit.transaction_id)
+            data['content'] = data['body'].format(transaction_id=welcome_kit.transaction_id, 
+                                          due_date=welcome_kit.due_date, status=welcome_kit.status )
+            escalation_list = models.UserProfile.objects.filter(user__groups__name=Roles.WELCOMEKITESCALATION)
+            escalation_list_detail = utils.get_escalation_mailing_list(escalation_list)
+            send_email_to_welcomekit_escaltion_group(data, escalation_list_detail)
+
+            message = templates.get_template('LOYALTY_DUE_DATE_EXCEED_ESCALATION').format(transaction_id=welcome_kit.transaction_id,
+                                                                                          status=welcome_kit.status)    
+            for phone_number in escalation_list_detail['sms']: 
+                phone_number = utils.get_phone_number_format(phone_number)
+                sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+                send_job_to_queue(send_loyalty_escalation_message,
+                                   {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
+            welcome_kit.resolution_flag = False
+        welcome_kit.save()
+
+def redemption_request_due_date_escalation(*args, **kwargs):
+    time = datetime.now()
+    '''
+    send mail when due date is less than current date
+    '''
+    redemption_request_obj = models.RedemptionRequest.objects.filter(due_date__lte=time, resolution_flag=True)
+    for redemption_request in redemption_request_obj:
+        
+        if not redemption_request.status == 'Delivered':
+            data = get_email_template('REDEMPTION_REQUEST_DUE_DATE_EXCEED_MAIL_TO_MANAGER')
+            data['newsubject'] = data['subject'].format(id = redemption_request.transaction_id)
+            data['content'] = data['body'].format(transaction_id=redemption_request.transaction_id,
+                                                                      status=redemption_request.status)
+            escalation_list = models.UserProfile.objects.filter(user__groups__name=Roles.REDEEMESCALATION)
+            escalation_list_detail = utils.get_escalation_mailing_list(escalation_list)
+            send_email_to_redeem_escaltion_group(data, escalation_list_detail)
+            
+            message = templates.get_template('LOYALTY_DUE_DATE_EXCEED_ESCALATION').format(transaction_id=redemption_request.transaction_id,
+                                                                                          status=redemption_request.status)    
+            for phone_number in escalation_list_detail['sms']: 
+                phone_number = utils.get_phone_number_format(phone_number)
+                sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+                send_job_to_queue(send_loyalty_escalation_message,
+                                   {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
+            redemption_request.resolution_flag = False
+        redemption_request.save()
+ 
 _tasks_map = {"send_registration_detail": send_registration_detail,
 
               "send_service_detail": send_service_detail,
@@ -647,5 +721,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               "send_vin_sync_feed_details" : send_vin_sync_feed_details,
 
               "update_coupon_history": update_coupon_history_data, 
+              
+              "redemption_request_due_date_escalation":redemption_request_due_date_escalation,
 
+              "welcome_kit_due_date_escalation":welcome_kit_due_date_escalation,
               }

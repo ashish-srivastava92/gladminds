@@ -542,6 +542,10 @@ class RedemptionRequestAdmin(GmModelAdmin):
         return form
 
     def save_model(self, request, obj, form, change):
+        date = LoyaltyService.set_date("Redemption", obj.status)
+        obj.due_date = date['due_date']
+        obj.expected_delivery_date = date['expected_delivery_date']
+        obj.resolution_flag = True
         super(RedemptionRequestAdmin, self).save_model(request, obj, form, change)
         if 'status' in form.changed_data and obj.status in constants.STATUS_TO_NOTIFY:
             LoyaltyService.send_request_status_sms(obj)
@@ -566,10 +570,14 @@ class WelcomeKitAdmin(GmModelAdmin):
     list_display = ('member',  'get_mechanic_name',
                      'delivery_address', 'get_mechanic_pincode',
                      'get_mechanic_district', 'get_mechanic_state',
-                     'created_date', 'expected_delivery_date', 'status', 'partner')
+                     'created_date','due_date', 'expected_delivery_date', 'status', 'partner')
     readonly_fields = ('image_tag', 'transaction_id')
     
     def save_model(self, request, obj, form, change):
+        date = LoyaltyService.set_date("Welcome Kit", obj.status)
+        obj.due_date = date['due_date']
+        obj.expected_delivery_date = date['expected_delivery_date']
+        obj.resolution_flag = True
         super(WelcomeKitAdmin, self).save_model(request, obj, form, change)
         if 'status' in form.changed_data and obj.status=="Shipped":
             LoyaltyService.send_welcome_kit_delivery(obj)

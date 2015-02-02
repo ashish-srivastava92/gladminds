@@ -274,5 +274,29 @@
             "body": "Member {member_name} with ID  {member_id} has successfully registered. Welcome kit with ref ID {id} is to be delivered at: {delivery_address}, {member_city}, {member_state}.",  
             "description": "Welcome kit Detail mail to assignee"
         }
+    },
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 24,
+        "fields": {
+            "template_key": "WELCOME_KIT_DUE_DATE_EXCEED_MAIL_TO_MANAGER",
+            "sender": "feed-report@gladminds.co",
+            "receiver": "",
+            "subject": "Exceeded due date for welcome kit",
+            "body": "The due date for the ticket with transaction ID:{transaction_id} and status:{status} has been exceeded . Please address the issue",
+            "description":"Mail to escalation group if due date exceeds"
+        }
+    },
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 25,
+        "fields": {
+            "template_key": "REDEMPTION_REQUEST_DUE_DATE_EXCEED_MAIL_TO_MANAGER",
+            "sender": "feed-report@gladminds.co",
+            "receiver": "",
+            "subject": "Exceeded due date for welcome kit",
+            "body": "The due date for the ticket with transaction ID:{transaction_id} and status:{status} has been exceeded . Please address the issue",
+            "description":"Mail to escalation group if due date exceeds"
+        }
     }
 ]
