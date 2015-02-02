@@ -78,7 +78,7 @@
                     <label class="control-label">Product purchase Date:</label>
                 </div>
                 <div class="col-md-5 form-group">
-                    <input type="text" name='purchase-date' class="form-control purchase-date"
+                    <input type="text" name='purchase-date' class="form-control purchase-date purchase-date-picker"
                             pattern="^(\d{1,2})\/(\d{1,2})\/(\d{4})$" required
                             placeholder="dd/mm/yyyy" />
                 </div>
@@ -103,4 +103,14 @@
 {% block dependency %}
 <script src="/static/js/portal/utils.js"></script>
 <script src="/static/js/portal/main.js"></script>
+
+<script type="text/javascript">
+$('.purchase-date-picker').datetimepicker({
+	timepicker:false, 
+	format:'d/m/Y',
+	formatDate:'d/m/y',
+	
+});
+
+</script>
 {% endblock dependency %}
