@@ -403,7 +403,7 @@ class DateDimension(base_models.DateDimension):
 
 
 class CouponFact(base_models.CouponFact):
-    '''Coupon Fact Table for reporting purpose'''
+    '''Coupon Fact Table for reporting'''
     date = models.ForeignKey(DateDimension)
 
     class Meta:
