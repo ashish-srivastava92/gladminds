@@ -270,7 +270,7 @@ class Service(base_models.Service):
         app_label = _APP_NAME
 
 
-class Constants(base_models.Constants):
+class Constant(base_models.Constant):
     ''' contains all the constants'''
     class Meta:
         app_label = _APP_NAME

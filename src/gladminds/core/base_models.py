@@ -374,7 +374,7 @@ class CustomerTempRegistration(BaseModel):
     remarks = models.CharField(max_length=500, null=True, blank=True)
     tagged_sap_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
-    mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True) 
+    mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True, default=0) 
     objects = user_manager.CustomerTempRegistrationManager()
 
     class Meta:
@@ -694,7 +694,7 @@ class Service(models.Model):
         return self.name
 
 
-class Constants(models.Model):
+class Constant(BaseModel):
     ''' Contains all the constants '''
     constant_name = models.CharField(max_length=50, null=True, blank=True, unique=True)
     constant_value = models.CharField(max_length=10, null=True, blank=True)
@@ -933,7 +933,7 @@ class RedemptionRequest(BaseModel):
     packed_by = models.CharField(max_length=50, null=True, blank=True)
     tracking_id = models.CharField(max_length=50, null=True, blank=True)
     is_approved = models.BooleanField(default=False)
-    due_date =  models.DateTimeField(null=True, blank= True)
+    refunded_points = models.BooleanField(default=False)
     
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
@@ -941,13 +941,15 @@ class RedemptionRequest(BaseModel):
     image_tag.allow_tags = True
     
     def clean(self, *args, **kwargs):
-        
+        if self.status=='Approved' and self.refunded_points:
+            if self.member.total_points<self.product.points:
+                raise ValidationError("Member now does not not have sufficient points to approve the request")
         if self.status=='Packed' and (not self.partner or self.partner.partner_type not in ['Redemption','Logistics']):
             raise ValidationError("Please assign a partner")
         elif self.status=='Approved' and (not self.partner or self.partner.partner_type!='Redemption'):
             raise ValidationError("Please assign a redemption partner")
-        else:
-            super(RedemptionRequest, self).clean(*args, **kwargs)
+        
+        super(RedemptionRequest, self).clean(*args, **kwargs)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         for field in self._meta.fields:
@@ -994,8 +996,8 @@ class WelcomeKit(BaseModel):
         verbose_name_plural = "Welcome Kit Request"
 
 class LoyaltySLA(models.Model):
-    status = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_STATUS)
-    action = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_ACTION)
+    status = models.CharField(max_length=12, choices=constants.STATUS)
+    action = models.CharField(max_length=12, choices=constants.ACTION)
     reminder = Duration()
     resolution = Duration()
     member_resolution = Duration()
