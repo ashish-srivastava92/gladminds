@@ -933,6 +933,7 @@ class RedemptionRequest(BaseModel):
     packed_by = models.CharField(max_length=50, null=True, blank=True)
     tracking_id = models.CharField(max_length=50, null=True, blank=True)
     is_approved = models.BooleanField(default=False)
+    refunded_points = models.BooleanField(default=False)
     
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
@@ -940,13 +941,15 @@ class RedemptionRequest(BaseModel):
     image_tag.allow_tags = True
     
     def clean(self, *args, **kwargs):
-        
+        if self.status=='Approved' and self.refunded_points:
+            if self.member.total_points<self.product.points:
+                raise ValidationError("Member now does not not have sufficient points to approve the request")
         if self.status=='Packed' and (not self.partner or self.partner.partner_type not in ['Redemption','Logistics']):
             raise ValidationError("Please assign a partner")
         elif self.status=='Approved' and (not self.partner or self.partner.partner_type!='Redemption'):
             raise ValidationError("Please assign a redemption partner")
-        else:
-            super(RedemptionRequest, self).clean(*args, **kwargs)
+        
+        super(RedemptionRequest, self).clean(*args, **kwargs)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         for field in self._meta.fields:

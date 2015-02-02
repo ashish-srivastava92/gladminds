@@ -530,7 +530,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
         return query_set
 
     def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('is_approved', 'packed_by')
+        self.exclude = ('is_approved', 'packed_by', 'refunded_points')
         form = super(RedemptionRequestAdmin, self).get_form(request, obj, **kwargs)
         form = copy.deepcopy(form)
         if request.user.groups.filter(name=Roles.RPS).exists():
@@ -542,6 +542,13 @@ class RedemptionRequestAdmin(GmModelAdmin):
         return form
 
     def save_model(self, request, obj, form, change):
+        if 'status' in form.changed_data:
+            if obj.status=='Approved' and obj.refunded_points:
+                LoyaltyService.update_points(obj.member, redeem=obj.product.points)
+                obj.refunded_points = False
+            elif obj.status=='Rejected' and not obj.refunded_points:
+                LoyaltyService.update_points(obj.member, accumulate=obj.product.points)
+                obj.refunded_points = True
         super(RedemptionRequestAdmin, self).save_model(request, obj, form, change)
         if 'status' in form.changed_data and obj.status in constants.STATUS_TO_NOTIFY:
             LoyaltyService.send_request_status_sms(obj)
