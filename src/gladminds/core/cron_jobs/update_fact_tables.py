@@ -39,8 +39,8 @@ def update_coupon_history_table():
     insert_query = 'insert into bajaj_couponfact(date_id, inprogress, closed, expired, unused, exceeds, data_type) \
     values(%(date_id)s, %(inprogress)s,%(closed)s,%(expired)s,%(unused)s,%(exceeds)s, %(data_type)s)'
     delete_query = 'delete from bajaj_couponfact where date_id = %(date_id)s and data_type=%(data_type)s'
-    update_query = 'UPDATE `bajaj_couponfact SET inprogress`=%(inprogress),closed`=%(closed) \
-    expired`=%(expired), unused`=%(unused) WHERE date_id =%(date_id)s'
+    update_query = 'UPDATE bajaj_couponfact SET inprogress=%(inprogress)s, closed=%(closed)s, \
+    expired=%(expired)s, unused=%(unused)s, exceeds=%(exceeds)s WHERE date_id=%(date_id)s'
     try:
         cursor.execute(insert_query, params)
     except:
