@@ -149,3 +149,8 @@ alter table bajaj_customertempregistration add mobile_number_update_count int(5)
 alter table bajaj_redemptionrequest add column refunded_points bool default 0;
 
 
+#####################################################################################################
+alter table bajaj_redemptionrequest add column due_date datetime;
+alter table bajaj_redemptionrequest add column resolution_flag boolean;
+
+alter table bajaj_welcomekit add column resolution_flag boolean;

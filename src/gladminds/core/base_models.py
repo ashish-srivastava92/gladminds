@@ -934,7 +934,8 @@ class RedemptionRequest(BaseModel):
     tracking_id = models.CharField(max_length=50, null=True, blank=True)
     is_approved = models.BooleanField(default=False)
     refunded_points = models.BooleanField(default=False)
-    
+    due_date =  models.DateTimeField(null=True, blank= True)
+    resolution_flag = models.BooleanField(default=False)
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
     image_tag.short_description = 'Proof of Delivery'
@@ -979,6 +980,7 @@ class WelcomeKit(BaseModel):
     status = models.CharField(max_length=12, choices=constants.WELCOME_KIT_STATUS, default='Open')
     packed_by = models.CharField(max_length=50, null=True, blank=True)
     tracking_id = models.CharField(max_length=50, null=True, blank=True)
+    resolution_flag = models.BooleanField(default=False)
 
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
@@ -996,8 +998,8 @@ class WelcomeKit(BaseModel):
         verbose_name_plural = "Welcome Kit Request"
 
 class LoyaltySLA(models.Model):
-    status = models.CharField(max_length=12, choices=constants.STATUS)
-    action = models.CharField(max_length=12, choices=constants.ACTION)
+    status = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_STATUS)
+    action = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_ACTION)
     reminder = Duration()
     resolution = Duration()
     member_resolution = Duration()

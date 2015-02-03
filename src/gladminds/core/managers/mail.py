@@ -412,7 +412,23 @@ def send_email_to_redemption_request_partner(data, partner_email):
                              data, receiver = partner_email, message=data['content'])
     except Exception as ex:
         logger.info("[Exception fail to send mail to partner of redemption]  {0}".format(ex))        
-           
+
+def send_email_to_redeem_escaltion_group(data, redeem_escaltion_email):
+    try:
+        context = Context({"content": data['content']})
+        send_template_email("base_email_template.html", context,
+                             data, receiver = redeem_escaltion_email, message=data['content'])
+    except Exception as ex:
+        logger.info("[Exception fail to send mail to redemption escalation group]  {0}".format(ex))        
+
+def send_email_to_welcomekit_escaltion_group(data, welcomekit_escaltion_email):
+    try:
+        context = Context({"content": data['content']})
+        send_template_email("base_email_template.html", context,
+                             data, receiver = welcomekit_escaltion_email, message=data['content'])
+    except Exception as ex:
+        logger.info("[Exception fail to send mail to welcome kit escalation group ]  {0}".format(ex))        
+
 def send_template_email(template_name, context, mail_detail,receiver=None, message=None): 
     '''generic function use for send mail for any html template'''
     
