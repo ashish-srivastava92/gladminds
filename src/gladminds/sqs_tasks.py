@@ -1,6 +1,7 @@
 from celery import shared_task
 from django.conf import settings
 from datetime import datetime, timedelta
+import operator
 
 from gladminds.bajaj import models as models
 from gladminds.core import utils, export_file
@@ -612,7 +613,8 @@ def welcome_kit_due_date_escalation(*args, **kwargs):
     '''
     send mail when due date is less than current date
     '''
-    welcome_kit_obj = models.WelcomeKit.objects.filter(due_date__lte=time, resolution_flag=False,~Q(status='Shipped'))
+    args=[Q(due_date__lte=time), Q(resolution_flag=False),~Q(status='Shipped')]
+    welcome_kit_obj = models.WelcomeKit.objects.filter(reduce(operator.and_, args))
     for welcome_kit in welcome_kit_obj:
         data = get_email_template('WELCOME_KIT_DUE_DATE_EXCEED_MAIL_TO_MANAGER')
         data['newsubject'] = data['subject'].format(id = welcome_kit.transaction_id)
@@ -637,7 +639,8 @@ def redemption_request_due_date_escalation(*args, **kwargs):
     '''
     send mail when due date is less than current date
     '''
-    redemption_request_obj = models.RedemptionRequest.objects.filter(due_date__lte=time, resolution_flag=False,~Q(status='Delivered'))
+    args=[Q(due_date__lte=time), Q(resolution_flag=False),~Q(status='Delivered')]
+    redemption_request_obj = models.RedemptionRequest.objects.filter(reduce(operator.and_, args))
     for redemption_request in redemption_request_obj:
         data = get_email_template('REDEMPTION_REQUEST_DUE_DATE_EXCEED_MAIL_TO_MANAGER')
         data['newsubject'] = data['subject'].format(id = redemption_request.transaction_id)
