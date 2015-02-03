@@ -14,7 +14,7 @@ class DealerManager(models.Manager):
 
 class AuthorizedServiceCenterManager(models.Manager):
     def active_count(self):
-        return super(AuthorizedServiceCenterManager, self).get_query_set().filter(user__user__is_active=0).count()
+        return super(AuthorizedServiceCenterManager, self).get_query_set().filter(user__user__is_active=1).count()
 
     def count(self):
         return super(AuthorizedServiceCenterManager, self).get_query_set().all().count()
