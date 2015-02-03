@@ -44,7 +44,6 @@ def update_coupon_history_table():
     try:
         cursor.execute(insert_query, params)
     except:
-        cursor.execute(delete_query, params)
-        cursor.execute(insert_query, params)
+        cursor.execute(update_query, params)
     conn.close()
 
