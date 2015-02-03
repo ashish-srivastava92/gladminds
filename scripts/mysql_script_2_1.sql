@@ -148,9 +148,20 @@ alter table bajaj_customertempregistration add mobile_number_update_count int(5)
 #################################################################################################
 alter table bajaj_redemptionrequest add column refunded_points bool default 0;
 
-
 #####################################################################################################
 alter table bajaj_redemptionrequest add column due_date datetime;
 alter table bajaj_redemptionrequest add column resolution_flag boolean;
 
 alter table bajaj_welcomekit add column resolution_flag boolean;
+
+alter table bajaj_couponfact add column data_type varchar(20) null;
+
+###############################################################################
+alter table bajaj_mechanic add column sent_to_sap bool default 0;
+alter table bajaj_mechanic add column middle_name varchar(50) null;
+alter table bajaj_mechanic add column adress_line_1 varchar(40) null;
+alter table bajaj_mechanic add column adress_line_2 varchar(40) null;
+alter table bajaj_mechanic add column adress_line_3 varchar(40) null;
+alter table bajaj_mechanic add column adress_line_4 varchar(40) null;
+alter table bajaj_mechanic add column adress_line_5 varchar(40) null;
+alter table bajaj_mechanic add column adress_line_6 varchar(40) null;

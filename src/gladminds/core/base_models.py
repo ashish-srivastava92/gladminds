@@ -770,9 +770,17 @@ class Mechanic(BaseModel):
     total_points = models.IntegerField(max_length=50, null=True, blank=True, default=0)
 
     first_name = models.CharField(max_length=50, null=True, blank=True)
+    middle_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank= True)
+
+    adress_line_1 = models.CharField(max_length=40, null=True, blank=True)
+    adress_line_2 = models.CharField(max_length=40, null=True, blank=True)
+    adress_line_3 = models.CharField(max_length=40, null=True, blank=True)
+    adress_line_4 = models.CharField(max_length=40, null=True, blank=True)
+    adress_line_5 = models.CharField(max_length=40, null=True, blank=True)
+    adress_line_6 = models.CharField(max_length=40, null=True, blank=True)
 
     form_number = models.IntegerField(max_length=50, null=True, blank=True)
     registered_date = models.DateTimeField(null=True, blank= True)
@@ -792,6 +800,7 @@ class Mechanic(BaseModel):
     serviced_diesel = models.IntegerField(max_length=50, null=True, blank=True)
     spare_per_month = models.IntegerField(max_length=50, null=True, blank=True)
     genuine_parts_used = models.IntegerField(max_length=50, null=True, blank=True)
+    sent_to_sap = models.BooleanField(default=False)
 
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
@@ -1012,7 +1021,7 @@ class LoyaltySLA(models.Model):
         else:
             total_time = time * 60
         return total_time
-    
+
     def clean(self, *args, **kwargs):
         resolution_time = self.get_time_in_seconds(self.resolution_time, self.resolution_unit)        
         reminder_time = self.get_time_in_seconds(self.reminder_time, self.reminder_unit)
