@@ -88,7 +88,7 @@ class OverallStatusResource(CustomBaseResource):
         dealers = get_set_cache('gm_dealers',
                                models.Dealer.objects.count)
         dealers_active = get_set_cache('gm_dealers_active',
-                               models.AuthorizedServiceCenter.objects.active_count)
+                               models.Dealer.objects.active_count)
         ascs = get_set_cache('gm_ascs',
                                models.AuthorizedServiceCenter.objects.count)
         ascs_active = get_set_cache('gm_ascs_active',
