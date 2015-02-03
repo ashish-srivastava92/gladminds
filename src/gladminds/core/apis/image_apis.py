@@ -10,6 +10,7 @@ from uuid import uuid4
 from django.views.decorators.http import require_http_methods
 import mimetypes
 import logging
+from gladminds.core.auth_helper import GmApps
 logger = logging.getLogger('gladminds')
 
 serializerObj = Serializer()
@@ -27,9 +28,13 @@ def upload_files(request):
     try:
         conn = boto.connect_s3()
         bucket_name = settings.AWS_STORAGE_BUCKET_MAP.get(settings.BRAND,
-                                                          settings.BRAND)
+                                                          settings.AWS_STORAGE_BUCKET_NAME)
         bucket = conn.get_bucket(bucket_name, validate=False)
-        full_key = os.path.join(settings.ENV, keys[0], str(uuid4())+request.FILES[keys[0]]._name)
+        if settings.BRAND in [GmApps.AFTERBUY]:
+            full_key = os.path.join(settings.ENV, keys[0], str(uuid4())+request.FILES[keys[0]]._name)
+        else:
+            full_key = os.path.join(settings.ENV, settings.BRAND, keys[0],
+                                    str(uuid4())+request.FILES[keys[0]]._name)
         k = Key(bucket)
         data = request.FILES[keys[0]].read()
         k.key = full_key
