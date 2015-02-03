@@ -6,6 +6,7 @@ from tastypie.api import Api
 from gladminds.core.apis import user_apis, preferences_apis, coupon_apis, product_apis,\
     audit_apis, dashboard_apis, service_desk_apis
 from gladminds.core.managers.sms_handler import SMSResources
+from gladminds.core.apis.image_apis import upload_files
 
 api_v1 = Api(api_name="v1")
 api_v1.register(coupon_apis.CouponDataResource())
@@ -48,7 +49,8 @@ urlpatterns = patterns('',
     url(r'^aftersell/users/otp/validate', 'gladminds.core.views.validate_otp', name='validate_otp'),
     url(r'^aftersell/users/otp/update_pass', 'gladminds.core.views.update_pass', name='update_pass'),
     url(r'^aftersell/provider/change-password$', 'gladminds.core.views.change_password', name='change_password'),
-
+    
+    url(r'^v1/upload', upload_files),
     # Tasks URL
     url(r'^tasks-view/', 'gladminds.core.views.sqs_tasks_view'),
     url(r'^trigger-tasks', 'gladminds.core.views.trigger_sqs_tasks'),
