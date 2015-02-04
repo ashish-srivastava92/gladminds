@@ -39,6 +39,14 @@ def generate_partner_id():
     partner_id=generate_temp_id('PRT')
     return partner_id
 
+def generate_nsm_id():
+    nsm_id=generate_temp_id('NSM')
+    return nsm_id
+
+def generate_asm_id():
+    asm_id=generate_temp_id('ASM')
+    return asm_id
+
 def debug(fn):
     '''
     Use as print utility

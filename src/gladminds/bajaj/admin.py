@@ -368,12 +368,30 @@ class NSMAdmin(GmModelAdmin):
     search_fields = ('nsm_id', 'name', 'phone_number', 'territory')
     list_display = ('nsm_id', 'name', 'email', 'phone_number','territory')
 
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('nsm_id',)
+        form = super(NSMAdmin, self).get_form(request, obj, **kwargs)
+        return form
+
+    def save_model(self, request, obj, form, change):
+        obj.phone_number = utils.mobile_format(obj.phone_number)
+        super(NSMAdmin, self).save_model(request, obj, form, change)
+
 class ASMAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
     search_fields = ('asm_id', 'nsm__name',
                      'phone_number', 'state')
     list_display = ('asm_id', 'name', 'email',
                      'phone_number', 'state', 'nsm')
+    
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('asm_id',)
+        form = super(ASMAdmin, self).get_form(request, obj, **kwargs)
+        return form
+
+    def save_model(self, request, obj, form, change):
+        obj.phone_number = utils.mobile_format(obj.phone_number)
+        super(ASMAdmin, self).save_model(request, obj, form, change)
 
 class DistributorAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]

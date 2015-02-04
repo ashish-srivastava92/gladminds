@@ -11,7 +11,8 @@ from gladminds.core.managers import user_manager, coupon_manager,\
 from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
 from gladminds.core.model_helpers import PhoneField
 from gladminds.core import constants
-from gladminds.core.core_utils.utils import generate_mech_id, generate_partner_id
+from gladminds.core.core_utils.utils import generate_mech_id, generate_partner_id,\
+    generate_nsm_id,generate_asm_id
 try:
     from django.utils.timezone import now as datetime_now
 except ImportError:
@@ -708,7 +709,7 @@ class Constant(BaseModel):
 
 class NationalSalesManager(BaseModel):
     '''details of National Sales Manager'''
-    nsm_id = models.CharField(max_length=50)
+    nsm_id = models.CharField(max_length=50, unique=True, default=generate_nsm_id)
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
@@ -723,7 +724,7 @@ class NationalSalesManager(BaseModel):
 
 class AreaSalesManager(BaseModel):
     '''details of Area Service Manager'''
-    asm_id = models.CharField(max_length=50)
+    asm_id = models.CharField(max_length=50, unique=True, default=generate_asm_id)
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
