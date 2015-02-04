@@ -5,7 +5,8 @@
 
 {% block extrastyle %}
   {{ block.super }}
-  {#  <link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}" />#}
+  {# <link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}" />#}
+  <link rel="stylesheet" type="text/css" href="/static/libs/datepicker/css/jquery-ui.css" /> 
   {% if cl.formset %}
     {#    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />#}
   {% endif %}
@@ -65,6 +66,46 @@
               </div>
             {% endif %}
           {% endblock %}
+          {% if feed_search %}
+          <p>
+        	From <input type="text" class="feed_start_date" style="height: 15px" value="{{ feed_start_date|default:'' }}" placeholder="yyyy-mm-dd">
+			To <input type="text" class="feed_end_date" style="height: 15px" value="{{ feed_start_date|default:'' }}" placeholder="yyyy-mm-dd"> 
+			<a href="#" onclick="javascript:applyDateFilters();"><button style="height: 25px" class="btn btn-info">Search</button></a> 	
+		</p>
+	<script src="/static/libs/datepicker/js/jquery-ui.js"></script>
+	<script src="/static/libs/jquery.datetimepicker.js"></script>
+	<script type="text/javascript">
+    $('.feed_start_date').datepicker({dateFormat: 'yy-mm-dd'{% if feed_start_date %}, defaultDate: '{{ feed_start_date }}'{% endif %} }); 
+    $('.feed_end_date').datepicker({ dateFormat: 'yy-mm-dd'{% if feed_end_date %}, defaultDate: '{{ feed_end_date }}'{% endif %} });
+    
+    function applyDateFilters(){
+    	current_location = location.search;
+
+        if (current_location.charAt(0) == '?') current_location = current_location.substring(1);
+
+        var components = current_location.split(/[&;]/g);
+        new_location = [];
+        for (var index = 0; index < components.length; index ++){
+
+            var keyValuePair = components[index].split('=');
+            var key          = keyValuePair[0];
+            var value        = keyValuePair[1];
+            if(key == 'created_date__gte' || key == 'created_date__lte' || key == '') {
+                continue;
+            } else {
+            	new_location[index] = key + '=' + value;
+            }
+        }
+        if($('.feed_start_date' ).val() != '') {
+        	new_location[new_location.length] = 'created_date__gte=' + $( '.feed_start_date' ).val();
+        }
+        if($('.feed_end_date').val() != '') {
+        	new_location[new_location.length] = 'created_date__lte=' + $( '.feed_end_date' ).val();
+        }
+        window.location = '?' + new_location.join("&");
+    }
+	</script>
+          {% endif %}
 		  {% if custom_search %}
 		  	  <div class="search-container form-inline">
 	          	<input type="text" size="40" id="cust-searchbar" placeholder="Keyword" value = "{% if cl.query %}{{cl.query|get_coupon_status}}{% else %}{% endif %}" />&nbsp;
