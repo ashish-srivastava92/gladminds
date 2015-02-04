@@ -416,8 +416,8 @@ class SparePartMasterAdmin(GmModelAdmin):
 
 class SparePartUPCAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
-    search_fields = ('part_number__part_number', 'unique_part_code')
-    list_display = ('unique_part_code', 'part_number')
+    search_fields = ('part_number__part_number', 'unique_part_code', 'part_number__description')
+    list_display = ('unique_part_code', 'part_number', 'get_part_description')
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('is_used',)
@@ -508,7 +508,7 @@ class MechanicAdmin(GmModelAdmin):
         return query_set
 
     def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points')
+        self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points', 'sent_to_sap')
         form = super(MechanicAdmin, self).get_form(request, obj, **kwargs)
         return form
 

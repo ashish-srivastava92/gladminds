@@ -115,6 +115,9 @@ CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
 VIN_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/vin-sync-feed/?wsdl&v0"
 VIN_SYNC_WSDL='qa_vin_sync.wsdl'
 
+MEMBER_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/member-sync-feed/?wsdl&v0"
+MEMBER_SYNC_WSDL='qa_member_sync_feed.wsdl'
+
 WSDL_TNS="http://qa.bajaj.gladminds.co/api/v1/feed/"
 
 ENABLE_AMAZON_SQS = True

@@ -624,3 +624,6 @@ SAP_CRM_DETAIL = {
 FILE_CACHE_DURATION = 0
 VIN_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/vin-sync-feed/?wsdl&v0"
 VIN_SYNC_WSDL='qa_vin_sync.wsdl'
+
+MEMBER_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/member-sync-feed/?wsdl&v0"
+MEMBER_SYNC_WSDL='qa_member_sync_feed.wsdl'

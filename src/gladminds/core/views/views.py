@@ -455,7 +455,8 @@ def trigger_sqs_tasks(request):
         'expire-service-coupon': 'expire_service_coupon',
         'send-reminder': 'send_reminder',
         'export-customer-registered': 'export_customer_reg_to_sap',
-        'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk'
+        'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk',
+        'export_member_temp_id_to_sap': 'export_member_temp_id_to_sap',
     }
 
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)
