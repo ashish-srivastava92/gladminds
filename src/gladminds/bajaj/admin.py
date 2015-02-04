@@ -286,6 +286,11 @@ class FeedLogAdmin(GmModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
+        
+    def changelist_view(self, request, extra_context=None):
+        extra_context = {'feed_search': True
+                        }
+        return super(FeedLogAdmin, self).changelist_view(request, extra_context=extra_context)
 
 class ASCTempRegistrationAdmin(GmModelAdmin):
     search_fields = (
