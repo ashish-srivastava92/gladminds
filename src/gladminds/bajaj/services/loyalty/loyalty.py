@@ -2,7 +2,7 @@
 
 import logging
 import json
-from datetime import datetime
+from datetime import datetime,timedelta
 from constance import config
 
 from django.conf import settings
@@ -15,7 +15,7 @@ from gladminds.core.services.loyalty.loyalty import CoreLoyaltyService
 from gladminds.core.services.message_template import get_template
 from gladminds.core.managers.mail import get_email_template, \
                        send_email_to_redemption_request_partner
-
+from  gladminds.core.core_utils.date_utils import get_time_in_seconds
 LOG = logging.getLogger('gladminds')
 
 AUDIT_ACTION = 'SEND TO QUEUE'
@@ -136,9 +136,13 @@ class LoyaltyService(CoreLoyaltyService):
                                                    member.shop_name,
                                                    member.shop_address)))
         for product in products:
+            date = self.set_date('Redemption', 'Open')
             redemption_request=models.RedemptionRequest(member=member,
                                         product=product,
-                                        delivery_address=delivery_address)
+                                        delivery_address=delivery_address,
+                                        expected_delivery_date=date['expected_delivery_date'],
+                                        due_date=date['due_date'])
+            
             redemption_request.save()
             transaction_ids.append(str(redemption_request.transaction_id))
         transactions = (', '.join(transaction_ids))
@@ -289,4 +293,12 @@ class LoyaltyService(CoreLoyaltyService):
                   'message': message, "sms_client": settings.SMS_CLIENT})
         return {'status': True, 'message': message}
 
+    def set_date(self,action,status):
+        loyalty_sla_obj = models.LoyaltySLA.objects.get(action=action, status=status)
+        total_seconds = get_time_in_seconds(loyalty_sla_obj.resolution_time, loyalty_sla_obj.resolution_unit)
+        due_date = datetime.now() + timedelta(seconds=total_seconds)
+        total_seconds = get_time_in_seconds(loyalty_sla_obj.member_resolution_time, loyalty_sla_obj.member_resolution_unit)
+        expected_delivery_date = datetime.now() + timedelta(seconds=total_seconds)
+        return {'due_date':due_date, 'expected_delivery_date':expected_delivery_date}
+    
 LoyaltyService = LoyaltyService()

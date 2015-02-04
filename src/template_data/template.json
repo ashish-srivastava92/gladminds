@@ -546,7 +546,16 @@
     },
   {
     "model": "gladminds.messagetemplate",
-    "pk": 60,
+    "pk": 61,
+    "fields": {
+      "template_key":"LOYALTY_DUE_DATE_EXCEED_ESCALATION",
+      "template":"The due date for the ticket with transaction ID:{transaction_id} and status:{status} has been exceeded and the issue is not yet resolved.",
+      "description":"Send this message to escalation group if due date exceeds"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 62,
     "fields": {
       "template_key": "PHONE_NUMBER_UPDATE_COUNT_EXCEEDED",
       "template": "Mobile number update not allowed. Please contact customer support: +91-9741775128.",
