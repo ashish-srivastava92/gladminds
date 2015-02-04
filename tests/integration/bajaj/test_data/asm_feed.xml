@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://local.bajaj.gladminds.co:8000/api/v1/feed/">
+  <SOAP-ENV:Body>
+    <ns1:postASM>
+      <ns1:ObjectList>
+        <ns1:ASMData>
+          <ns1:ASMModel>        
+ 	      	<ns1:PHONE_NUMBER>123467890</ns1:PHONE_NUMBER>          
+			<ns1:NAME>PREM NATH</ns1:NAME>         
+   			<ns1:STATE>Karnataka</ns1:STATE>		
+            <ns1:TERRITORY>North</ns1:TERRITORY>
+  			<ns1:EMAIL>spremnath@bajajauto.co.in</ns1:EMAIL>
+            </ns1:ASMModel>
+        </ns1:ASMData>
+      </ns1:ObjectList>
+      <ns1:Credential>
+        <ns1:UserName>bajaj</ns1:UserName>
+        <ns1:Password>bajaj</ns1:Password>
+      </ns1:Credential>
+    </ns1:postASM>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

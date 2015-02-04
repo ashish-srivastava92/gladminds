@@ -9,7 +9,7 @@ from django.conf import settings
 from gladminds.bajaj.models import MessageTemplate, EmailTemplate
 from gladminds.bajaj import models as common
 from gladminds.bajaj.services.coupons import import_feed
-from gladminds.core.auth_helper import ALL_APPS
+from gladminds.core.auth_helper import ALL_APPS, Roles
 from gladminds.core.loaders.module_loader import get_model
 
 BASIC_FEED = import_feed.BaseFeed()
@@ -70,7 +70,7 @@ class Command(BaseCommand):
         print "Loading users for existing dealer...."
         all_dealers = common.Dealer.objects.all()
         for dealer in all_dealers:
-            BASIC_FEED.register_user('dealer', username=dealer.dealer_id)
+            BASIC_FEED.register_user(Roles.DEALERS, username=dealer.dealer_id)
         print "Loaded users for existing dealer...."
         
     def add_user_in_gladminds_table(self):
