@@ -16,6 +16,7 @@ from gladminds.bajaj import models
 from gladminds.core.managers.audit_manager import feed_log, sms_log
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.auth_helper import Roles
+from gladminds.bajaj.services.feed_resources import BaseFeed
 logger = logging.getLogger("gladminds")
 
 USER_GROUP = {'dealer': Roles.DEALERS,
@@ -107,70 +108,6 @@ class SAPFeed(object):
         return feed_obj.import_data()
 
 
-class BaseFeed(object):
-
-    def __init__(self, data_source=None, feed_remark=None):
-        self.data_source = data_source
-        self.feed_remark = feed_remark
-
-    def import_data(self):
-        pass
-
-    def register_user(self, user, group=None, username=None, phone_number=None,
-                      first_name='', last_name='', email='', address='',
-                      state='', pincode=''):
-        logger.info('New {0} Registration with id - {1}'.format(user, username))
-        if not group:
-            group = USER_GROUP[user]
-        try:
-            user_group = Group.objects.get(name=group)
-        except ObjectDoesNotExist as ex:
-            logger.info(
-                "[Exception: new_ registration]: {0}"
-                .format(ex))
-            user_group = Group.objects.create(name=group)
-            user_group.save()
-        if username:
-            try:
-                user_details = models.UserProfile.objects.select_related('user').get(user__username=username)
-            except ObjectDoesNotExist as ex:
-                logger.info(
-                    "[Exception: new_ registration]: {0}"
-                    .format(ex))    
-                new_user = User(
-                    username=username, first_name=first_name, last_name=last_name, email=email)
-                if user=='customer':
-                    password = settings.PASSWORD_POSTFIX
-                else:
-                    password = username + settings.PASSWORD_POSTFIX
-                new_user.set_password(password)
-                new_user.save()
-                new_user.groups.add(user_group)
-                new_user.save()
-                logger.info(user + ' {0} registered successfully'.format(username))
-                user_details = models.UserProfile(user=new_user,
-                                        phone_number=phone_number, address=address,
-                                        state=state, pincode=pincode)
-                user_details.save()
-            return user_details
-        else:
-            logger.info('{0} id is not provided.'.format(user))
-            raise Exception('{0} id is not provided.'.format(user))   
-
-    def check_or_create_dealer(self, dealer_id, address=None):
-        try:
-            dealer_data = models.Dealer.objects.select_related('user__user').get(
-                dealer_id=dealer_id)
-        except ObjectDoesNotExist as odne:
-            logger.debug(
-                "[Exception: new_dealer_data]: {0}"
-                .format(odne))
-            user = self.register_user('dealer', username=dealer_id)
-            dealer_data = models.Dealer(user=user,
-                dealer_id=dealer_id)
-            dealer_data.save()            
-        return dealer_data
-
 
 class BrandProductTypeFeed(BaseFeed):
 
@@ -208,7 +145,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                     logger.info(
                     "[Exception:  DealerAndServiceAdvisorFeed_sa]: {0}"
                     .format(odne))
-                    sa_user = self.register_user('SA', username=dealer['service_advisor_id'],
+                    sa_user = self.register_user(Roles.SERVICEADVISOR, username=dealer['service_advisor_id'],
                                                  first_name=dealer['name'],
                                                  phone_number=dealer['phone_number'])
                     service_advisor = models.ServiceAdvisor(
@@ -487,7 +424,7 @@ class ASCFeed(BaseFeed):
                 if asc['dealer_id']:
                     dealer_data = self.check_or_create_dealer(dealer_id=asc['dealer_id'])
                 try:
-                    asc_obj = self.register_user('ASC', username=asc['asc_id'],
+                    asc_obj = self.register_user(Roles.ASCS, username=asc['asc_id'],
                                                 address=asc['address'])
                     asc_data = models.AuthorizedServiceCenter(user=asc_obj,asc_id=asc['asc_id'],
                                     dealer=dealer_data)
@@ -509,7 +446,7 @@ class ASCAndServiceAdvisorFeed(BaseFeed):
             try:
                 asc_data = models.AuthorizedServiceCenter.objects.get(asc_id=asc['id'])
             except ObjectDoesNotExist as ex:
-                asc_obj = self.register_user('ASC', username=asc['id'])
+                asc_obj = self.register_user(Roles.ASCS, username=asc['id'])
                 asc_data = models.AuthorizedServiceCenter(user=asc_obj,asc_id=asc['id'])
             try:
                 mobile_number_active = self.check_mobile_active(asc, asc_data)
@@ -527,7 +464,7 @@ class ASCAndServiceAdvisorFeed(BaseFeed):
                     logger.info(
                     "[Exception:  DealerAndServiceAdvisorFeed_sa]: {0}"
                     .format(odne))
-                    sa_user = self.register_user('SA', username=asc['service_advisor_id'],
+                    sa_user = self.register_user(Roles.SERVICEADVISOR, username=asc['service_advisor_id'],
                                                  first_name=asc['name'],
                                                  phone_number=asc['phone_number'])
                     service_advisor = models.ServiceAdvisor(

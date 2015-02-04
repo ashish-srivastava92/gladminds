@@ -106,6 +106,29 @@ class MechanicModelList(ComplexModel):
     __namespace__ = tns
     MechanicData = Array(MechanicModel)
 
+class NSMModel(ComplexModel):
+    __namespace__ = tns
+    NAME = Unicode
+    EMAIL = Unicode
+    PHONE_NUMBER = Unicode
+    TERRITORY = Unicode
+
+class NSMModelList(ComplexModel):
+    __namespace__ = tns
+    NSMData = Array(NSMModel)
+
+class ASMModel(ComplexModel):
+    __namespace__ = tns
+    NAME = Unicode
+    EMAIL = Unicode
+    PHONE_NUMBER = Unicode
+    STATE = Unicode
+    TERRITORY = Unicode
+
+class ASMModelList(ComplexModel):
+    __namespace__ = tns
+    ASMData = Array(ASMModel)
+
 class PartMasterService(ServiceBase):
     __namespace__ = tns
 
@@ -253,6 +276,63 @@ class MechanicService(ServiceBase):
 
         feed_remark.save_to_feed_log()
         return get_response(feed_remark)
+
+class NSMService(ServiceBase):
+    __namespace__ = tns
+
+    @srpc(NSMModelList, AuthenticationModel, _returns=Unicode)
+    def postNSM(ObjectList, Credential):
+        nsm_list = []
+        feed_remark = FeedLogWithRemark(len(ObjectList.NSMData),
+                                        feed_type='NSM Feed',
+                                        action='Received', status=True)
+        for nsm in ObjectList.NSMData:
+            try:
+                nsm_list.append({
+                    'name':nsm.NAME, 
+                    'email':nsm.EMAIL,
+                    'phone_number': utils.mobile_format(nsm.PHONE_NUMBER),
+                    'territory':nsm.TERRITORY
+                })
+            except Exception as ex:
+                ex = "NSMService: {0}  Error on Validating {1}".format(nsm, ex)
+                feed_remark.fail_remarks(ex)
+                logger.error(ex)
+        feed_remark = save_to_db(feed_type='nsm', data_source=nsm_list,
+                              feed_remark=feed_remark)
+
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
+
+
+class ASMService(ServiceBase):
+    __namespace__ = tns
+
+    @srpc(ASMModelList, AuthenticationModel, _returns=Unicode)
+    def postASM(ObjectList, Credential):
+        asm_list = []
+        feed_remark = FeedLogWithRemark(len(ObjectList.ASMData),
+                                        feed_type='ASM Feed',
+                                        action='Received', status=True)
+        for asm in ObjectList.ASMData:
+            try:
+                asm_list.append({
+                    'name':asm.NAME, 
+                    'email':asm.EMAIL,
+                    'phone_number': utils.mobile_format(asm.PHONE_NUMBER),
+                    'state':asm.STATE,
+                    'territory':asm.TERRITORY
+                })
+            except Exception as ex:
+                ex = "ASMService: {0}  Error on Validating {1}".format(asm, ex)
+                feed_remark.fail_remarks(ex)
+                logger.error(ex)
+        feed_remark = save_to_db(feed_type='asm', data_source=asm_list,
+                              feed_remark=feed_remark)
+
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
+
 
 def get_response(feed_remark):
     if feed_remark.failed_feeds > 0:
