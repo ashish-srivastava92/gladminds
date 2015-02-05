@@ -289,7 +289,7 @@ class FeedLogAdmin(GmModelAdmin):
             return {'class': css_class}
         
     def changelist_view(self, request, extra_context=None):
-        extra_context = {'feed_search': True
+        extra_context = {'created_date_search': True
                         }
         return super(FeedLogAdmin, self).changelist_view(request, extra_context=extra_context)
 
@@ -461,10 +461,7 @@ class PartnerAdmin(GmModelAdmin):
 
 class AccumulationRequestAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYADMINS, Roles.LOYALTYSUPERADMINS]
-    list_filter = (
-        ('created_date', DateFieldListFilter),
-    )
-    search_fields = ('member__phone_number', 'points')
+    search_fields = ('member__mechanic_id', 'upcs__unique_part_code')
     list_display = ( 'member',  'get_mechanic_name', 'get_mechanic_district',
                      'asm', 'get_upcs', 'points',
                      'total_points', 'created_date')
@@ -478,6 +475,11 @@ class AccumulationRequestAdmin(GmModelAdmin):
 
     get_upcs.short_description = 'UPC'
 
+    def changelist_view(self, request, extra_context=None):
+        extra_context = {'created_date_search': True
+                        }
+        return super(AccumulationRequestAdmin, self).changelist_view(request, extra_context=extra_context)
+
 class MechanicForm(forms.ModelForm):
     class Meta:
         model = models.Mechanic
@@ -485,7 +487,7 @@ class MechanicForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(MechanicForm, self).__init__(*args, **kwargs)
         for field in constants.MANDATORY_MECHANIC_FIELDS:
-            self.fields[field].label = self.fields[field].label + '* '
+            self.fields[field].label = self.fields[field].label + ' * '
 
 class MechanicAdmin(GmModelAdmin):
     list_filter = ('form_status',)
