@@ -67,7 +67,7 @@
     "pk": 8,
     "fields": {
       "template_key":"SEND_CUSTOMER_VALID_COUPON",
-      "template":"Congratulations for availing Free Service {service_type}. Your Unique Coupon Number is {coupon}. Please provide this number at the time of delivery only.Happy Riding",
+      "template":"Congratulations for availing Free Service {service_type}. Your Unique Coupon Number is {coupon}. Please provide this number at the time of delivery only. Happy Riding",
       "description":"Send coupon validation sms to customer also"
     }
   },
@@ -172,7 +172,7 @@
     "fields": {
       "template_key":"RCV_CUSTOMER_BRAND_DATA",
       "template":"{brand_id}",
-      "description":"Receive this message from Customer for all brand procduct detail"
+      "description":"Receive this message from Customer for all brand product detail"
     }
   }, 
   {
@@ -343,7 +343,7 @@
     "fields": {
       "template_key": "INVALID_RECOVERY_MESSAGE",
       "template": "Incorrect {0} or no matching details.",
-      "description": "Send on if customer id or VIN does not exits."
+      "description": "Send on if customer id or VIN does not exists."
     }
   },
    {
@@ -431,9 +431,9 @@
     "model": "gladminds.messagetemplate",   
     "pk": 48,
     "fields": {
-      "template_key": "MAX_ALLOWED_UCP",
+      "template_key": "MAX_ALLOWED_UPC",
       "template": "Maximum allowed part code is {max_limit}",
-      "description": "maximim allowed ucps"
+      "description": "maximum allowed UPCs"
       }
     },
   {

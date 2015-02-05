@@ -5,6 +5,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.admin import ModelAdmin
 from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib.admin import DateFieldListFilter
+from django import forms
 
 from gladminds.bajaj import models
 from gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
@@ -477,8 +478,18 @@ class AccumulationRequestAdmin(GmModelAdmin):
 
     get_upcs.short_description = 'UPC'
 
+class MechanicForm(forms.ModelForm):
+    class Meta:
+        model = models.Mechanic
+    
+    def __init__(self, *args, **kwargs):
+        super(MechanicForm, self).__init__(*args, **kwargs)
+        for field in constants.MANDATORY_MECHANIC_FIELDS:
+            self.fields[field].label = self.fields[field].label + '* '
+
 class MechanicAdmin(GmModelAdmin):
     list_filter = ('form_status',)
+    form = MechanicForm
     search_fields = ('mechanic_id',
                      'phone_number', 'first_name',
                      'state', 'district')
