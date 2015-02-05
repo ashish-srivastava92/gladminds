@@ -191,7 +191,7 @@ class LoyaltyService(CoreLoyaltyService):
         invalid_upcs_message=''
         try:
             if len(unique_product_codes)>constants.MAX_UCP_ALLOWED:
-                message=get_template('MAX_ALLOWED_UCP').format(
+                message=get_template('MAX_ALLOWED_UPC').format(
                                         max_limit=constants.MAX_UCP_ALLOWED)
                 raise ValueError('Maximum allowed ucp exceeded')
             mechanic = models.Mechanic.objects.filter(phone_number=utils.mobile_format(phone_number))
