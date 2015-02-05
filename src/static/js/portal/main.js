@@ -54,6 +54,9 @@
     });
     
     $('.cutomer-reg-form').on('submit', function() {
+        $('.customer-phone').val('').attr('disabled', true);
+        $('.customer-name').val('').attr('disabled', true);
+        $('.purchase-date').val('').attr('disabled', true);
         var vin = $('#srch-vin').val(),
           user = $('#user').text().trim(),
           messageModal = $('.modal.message-modal'),
@@ -78,7 +81,7 @@
             		 	}
             	
             else if (data['phone']) {
-                  $('.customer-phone').val(data['phone']).attr('readOnly', true);
+                  $('.customer-phone').val(data['phone']).attr('disabled', false).attr('readOnly', true);
             	  if (data['group']=='AuthorisedServiceCenters' || data['group']=='Dealers'){
             		  $('.customer-phone').val(data['phone']).attr('readOnly', false);
             	}
@@ -88,9 +91,9 @@
                   $('.customer-submit').attr('disabled', false);
               }	
               else if (data['message']) {
-                  $('.customer-phone').val('').attr('readOnly', false);
-            	  $('.customer-name').val('').attr('readOnly', false);
-                  $('.purchase-date').val('').attr('readOnly', false);
+                  $('.customer-phone').val('').attr('readOnly', false).attr('disabled', false);
+            	  $('.customer-name').val('').attr('readOnly', false).attr('disabled', false);
+                  $('.purchase-date').val('').attr('readOnly', false).attr('disabled', false);
                   $('.customer-id').val('').attr('readOnly', false);
                   $('.customer-submit').attr('disabled', true);
                   messageBlock.text(data.message);
