@@ -141,7 +141,7 @@ def create_servicedesk_user(name, phone_number, email):
     
     return servicedesk_user
 
-def save_feedback_ticket(sms_dict, phone_number, email, name, dealer_email, with_detail=False):
+def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_detail=False):
     ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
     manager_obj = User.objects.get(groups__name=Roles.SDMANAGERS)
     try:
@@ -265,7 +265,7 @@ def get_dealer_asc_email(feedback_obj):
 
      
 @atomic   
-def save_update_feedback(feedback_obj, data, user, host):
+def modify_feedback(feedback_obj, data, user, host):
     status = get_list_from_set(FEEDBACK_STATUS)
     comment_object = None
     assign_status = False
@@ -273,6 +273,7 @@ def save_update_feedback(feedback_obj, data, user, host):
     reporter_email_id = get_reporter_details(feedback_obj.reporter, "email")
     reporter_phone_number = get_reporter_details(feedback_obj.reporter)
     previous_status = feedback_obj.status
+    dealer_asc_obj = get_dealer_asc_email(feedback_obj)
     
     # check if status is pending
     if feedback_obj.status == status[4]:
@@ -296,8 +297,6 @@ def save_update_feedback(feedback_obj, data, user, host):
             else:
                 LOG.info("Reporter emailId not found.")
                 
-                dealer_asc_obj = get_dealer_asc_email(feedback_obj)
-
                 if dealer_asc_obj.user.email:
                     send_mail_to_dealer(feedback_obj, dealer_asc_obj.user.email, 'DUE_DATE_MAIL_TO_DEALER')
                 else:
@@ -323,7 +322,6 @@ def save_update_feedback(feedback_obj, data, user, host):
                     send_mail_to_reporter(reporter_email_id, feedback_obj, 'DUE_DATE_MAIL_TO_INITIATOR')
             else:
                 LOG.info("Reporter emailId not found.")
-                dealer_asc_obj = get_dealer_asc_email(feedback_obj)
                 if dealer_asc_obj.user.email:
                     send_mail_to_dealer(feedback_obj, dealer_asc_obj.user.email, 'DUE_DATE_MAIL_TO_DEALER')
                 else:
@@ -381,7 +379,6 @@ def save_update_feedback(feedback_obj, data, user, host):
                                                          reporter_email_id)
         else:
             LOG.info("Reporter emailId not found.")
-            dealer_asc_obj = get_dealer_asc_email(feedback_obj)
             if dealer_asc_obj.user.email:
                 context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL_TO_DEALER',
                                  feedback_obj)
@@ -418,7 +415,6 @@ def save_update_feedback(feedback_obj, data, user, host):
                                                           feedback_obj, host, reporter_email_id)
         else:
             LOG.info("Reporter emailId not found.")
-            dealer_asc_obj = get_dealer_asc_email(feedback_obj)
             if dealer_asc_obj.user.email:
                 context = create_context('FEEDBACK_RESOLVED_MAIL_TO_DEALER',
                                  feedback_obj)
@@ -453,4 +449,3 @@ def save_update_feedback(feedback_obj, data, user, host):
                      feedback_obj.assignee.user_profile.phone_number,
                      feedback_obj, comment_object)
 
-            

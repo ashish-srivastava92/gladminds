@@ -13,8 +13,8 @@ from django.views.decorators.http import require_http_methods
 
 from gladminds.bajaj import models
 from gladminds.bajaj.services.service_desk.servicedesk_manager import get_feedbacks, \
-    save_feedback_ticket, get_feedback, get_servicedesk_users, get_comments, \
-    save_update_feedback, update_feedback_activities, SDActions
+    create_feedback, get_feedback, get_servicedesk_users, get_comments, \
+    modify_feedback, update_feedback_activities, SDActions
 from gladminds.core import utils
 from gladminds.core.auth.service_handler import check_service_active, Services
 from gladminds.core.auth_helper import Roles
@@ -90,7 +90,7 @@ def enable_servicedesk(request):
 def save_feedback(request):
     data = save_help_desk_data(request)
     return HttpResponse(content=json.dumps(data),
-                        content_type='applicatiom/json')
+                        content_type='application/json')
     
 
 def save_help_desk_data(request):
@@ -113,7 +113,7 @@ def save_help_desk_data(request):
         dealer_asc_email = dealer_asc_obj.user.user.email
     else:
         dealer_asc_email = None
-    return save_feedback_ticket(sms_dict, user_profile.phone_number,
+    return create_feedback(sms_dict, user_profile.phone_number,
                                                 user_profile.user.email,
                                                 user_profile.user.username, dealer_asc_email,
                                                 with_detail=True)    
@@ -169,7 +169,7 @@ def modify_servicedesk_tickets(request, feedback_id):
     
     if request.method == 'POST':
         host = request.get_host()
-        save_update_feedback(feedback_obj, request.POST, request.user, host)
+        modify_feedback(feedback_obj, request.POST, request.user, host)
     if feedback_obj:
         return render(request, 'service-desk/ticket_modify.html',\
                   {"feedback": feedback_obj, "FEEDBACK_STATUS": status,\
