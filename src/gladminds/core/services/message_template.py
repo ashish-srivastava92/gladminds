@@ -55,7 +55,7 @@ def get_message_template_mapper():
                         'receive': get_template('RCV_USER_COMPLAINT'),
                         'send':get_template('SEND_RCV_FEEDBACK'),
                         'invalid':get_template('SEND_INVALID_MESSAGE'),
-                        'handler':'service_desk.servicedesk_manager.get_complain_data',
+                        'handler':'service_desk.servicedesk_manager.save_feedback_ticket',
                         'auth_rule': ['open']
                         },
             settings.ALLOWED_KEYWORDS['accumulate_point']:{
