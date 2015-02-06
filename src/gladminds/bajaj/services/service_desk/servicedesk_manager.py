@@ -68,6 +68,7 @@ def get_feedbacks(user, status, priority, type, search=None):
             sa_id_list = []
             for sa in sa_list:
                 sa_id_list.append(sa.service_advisor_id)
+            sa_id_list.append(user)
             feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
                                                        priority__in=priority_filter, type__in=type_filter
                                                     ).order_by('-created_date')
@@ -77,6 +78,7 @@ def get_feedbacks(user, status, priority, type, search=None):
             sa_id_list = []
             for sa in sa_list:
                 sa_id_list.append(sa.service_advisor_id)
+            sa_id_list.append(user)
             feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
                                                        priority__in=priority_filter, type__in=type_filter
                                                     ).order_by('-created_date')
@@ -124,22 +126,28 @@ def check_role_of_initiator(phone_number):
         else:
             return "other"
 
-def get_complain_data(sms_dict, phone_number, email, name, dealer_email, with_detail=False):
+def create_servicedesk_user(name, phone_number, email):
+    user_profile = models.UserProfile.objects.filter(phone_number=phone_number)
+    if len(user_profile) > 0:
+        servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
+        if servicedesk_user:
+            servicedesk_user = servicedesk_user[0]
+        else:
+            servicedesk_user = models.ServiceDeskUser(user_profile=user_profile[0], name=name)
+            servicedesk_user.save()
+    else:
+        servicedesk_user = models.ServiceDeskUser(name=name, phone_number=phone_number, email=email)
+        servicedesk_user.save()
+    
+    return servicedesk_user
+
+def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_detail=False):
     ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
     manager_obj = User.objects.get(groups__name=Roles.SDMANAGERS)
     try:
         role = check_role_of_initiator(phone_number)
-        user_profile = models.UserProfile.objects.filter(phone_number=phone_number)
-        if len(user_profile) > 0:
-            servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
-            if servicedesk_user:
-                servicedesk_user = servicedesk_user[0]
-            else:
-                servicedesk_user = models.ServiceDeskUser(user_profile=user_profile[0], name=name)
-                servicedesk_user.save()
-        else:
-            servicedesk_user = models.ServiceDeskUser(name=name, phone_number=phone_number, email=email)
-            servicedesk_user.save()
+        servicedesk_user = create_servicedesk_user(name, phone_number, email)
+
         if with_detail:
             gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
                                                             type=sms_dict['type'],
@@ -245,9 +253,19 @@ def update_feedback_activities(feedback, action, original_value, new_value):
     feedback_activity = models.Activity(feedback=feedback, action=action, original_value=original_value,
                                         new_value=new_value)
     feedback_activity.save()
- 
+
+def get_dealer_asc_email(feedback_obj):
+    user = feedback_obj.reporter.user_profile.user
+    if user.groups.filter(name=Roles.SERVICEADVISOR).exists():
+        dealer_asc_obj = models.ServiceAdvisor.objects.get_dealer_asc_obj(feedback_obj.reporter)
+    else:
+        dealer_asc_obj = models.UserProfile.objects.get(user=feedback_obj.reporter.user_profile.user)
+
+    return dealer_asc_obj 
+
+     
 @atomic   
-def save_update_feedback(feedback_obj, data, user, host):
+def modify_feedback(feedback_obj, data, user, host):
     status = get_list_from_set(FEEDBACK_STATUS)
     comment_object = None
     assign_status = False
@@ -255,6 +273,7 @@ def save_update_feedback(feedback_obj, data, user, host):
     reporter_email_id = get_reporter_details(feedback_obj.reporter, "email")
     reporter_phone_number = get_reporter_details(feedback_obj.reporter)
     previous_status = feedback_obj.status
+    dealer_asc_obj = get_dealer_asc_email(feedback_obj)
     
     # check if status is pending
     if feedback_obj.status == status[4]:
@@ -277,9 +296,9 @@ def save_update_feedback(feedback_obj, data, user, host):
                 send_mail_to_reporter(reporter_email_id, feedback_obj, 'DUE_DATE_MAIL_TO_INITIATOR')
             else:
                 LOG.info("Reporter emailId not found.")
-                dealer_asc_obj = models.ServiceAdvisor.objects.get_dealer_asc_obj(feedback_obj.reporter)
-                if dealer_asc_obj.user.user.email:
-                    send_mail_to_dealer(feedback_obj, dealer_asc_obj.user.user.email, 'DUE_DATE_MAIL_TO_DEALER')
+                
+                if dealer_asc_obj.user.email:
+                    send_mail_to_dealer(feedback_obj, dealer_asc_obj.user.email, 'DUE_DATE_MAIL_TO_DEALER')
                 else:
                     LOG.info("Dealer / Asc emailId not found.")
 
@@ -303,9 +322,8 @@ def save_update_feedback(feedback_obj, data, user, host):
                     send_mail_to_reporter(reporter_email_id, feedback_obj, 'DUE_DATE_MAIL_TO_INITIATOR')
             else:
                 LOG.info("Reporter emailId not found.")
-                dealer_asc_obj = models.ServiceAdvisor.objects.get_dealer_asc_obj(feedback_obj.reporter)
-                if dealer_asc_obj.user.user.email:
-                    send_mail_to_dealer(feedback_obj, dealer_asc_obj.user.user.email, 'DUE_DATE_MAIL_TO_DEALER')
+                if dealer_asc_obj.user.email:
+                    send_mail_to_dealer(feedback_obj, dealer_asc_obj.user.email, 'DUE_DATE_MAIL_TO_DEALER')
                 else:
                     LOG.info("Dealer / Asc emailId not found.")
             send_sms('INITIATOR_FEEDBACK_DUE_DATE_CHANGE', reporter_phone_number,
@@ -361,12 +379,11 @@ def save_update_feedback(feedback_obj, data, user, host):
                                                          reporter_email_id)
         else:
             LOG.info("Reporter emailId not found.")
-            dealer_asc_obj = models.ServiceAdvisor.objects.get_dealer_asc_obj(feedback_obj.reporter)
-            if dealer_asc_obj.user.user.email:
+            if dealer_asc_obj.user.email:
                 context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL_TO_DEALER',
                                  feedback_obj)
                 mail.send_email_to_dealer_after_issue_assigned(context,
-                                                         dealer_asc_obj.user.user.email)
+                                                         dealer_asc_obj.user.email)
             else:
                 LOG.info("Dealer / Asc emailId not found.")
 
@@ -398,12 +415,11 @@ def save_update_feedback(feedback_obj, data, user, host):
                                                           feedback_obj, host, reporter_email_id)
         else:
             LOG.info("Reporter emailId not found.")
-            dealer_asc_obj = models.ServiceAdvisor.objects.get_dealer_asc_obj(feedback_obj.reporter)
-            if dealer_asc_obj.user.user.email:
+            if dealer_asc_obj.user.email:
                 context = create_context('FEEDBACK_RESOLVED_MAIL_TO_DEALER',
                                  feedback_obj)
                 mail.send_email_to_dealer_after_issue_assigned(context,
-                                                         dealer_asc_obj.user.user.email)
+                                                         dealer_asc_obj.user.email)
             else:
                 LOG.info("Dealer / Asc emailId not found.")
                     
@@ -433,4 +449,3 @@ def save_update_feedback(feedback_obj, data, user, host):
                      feedback_obj.assignee.user_profile.phone_number,
                      feedback_obj, comment_object)
 
-            

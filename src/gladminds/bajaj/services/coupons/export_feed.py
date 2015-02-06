@@ -211,7 +211,7 @@ class ExportUnsyncProductFeed(BaseExportFeed):
 
         logger.info("Trying to send product details the ID: {0}"\
                     .format(data['vin']))
-
+        
         result = client.service.SI_GCPONL_Sync(
                 DT_ONL=[{"CHASSIS": data['vin'],"DEALER": data['current_user'].username}])
         try:
@@ -230,12 +230,12 @@ class ExportUnsyncProductFeed(BaseExportFeed):
                 vin_sync_feed.save()
                 if return_code.upper() == 'S':
                     message='The Chassis was found in the main database. Please try after sometime.'
-                    feed_remark = FeedLogWithRemark(len(data_source),
-                                            feed_type='VIN sync Feed',
-                                            action='Sent', status=True)
                     for results in result[0]:
                         try:
                             data_source.append(utils.create_dispatch_feed_data(results))
+                            feed_remark = FeedLogWithRemark(len(data_source),
+                                            feed_type='VIN sync Feed',
+                                            action='Sent', status=True)
                         except Exception as ex:
                             ex = "ProductDispatchService: {0}  Error on Validating {1}".format(result, ex)
                             feed_remark.fail_remarks(ex)

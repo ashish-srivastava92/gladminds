@@ -303,7 +303,6 @@ function vinSyncFeed(data){
                 setTimeout(function() {
                     parent.window.location='/aftersell/servicedesk/helpdesk';
                 }, 2000);
-                
             },
             error: function() {
                 messageBlock.text('Invalid Data');
@@ -316,6 +315,47 @@ function vinSyncFeed(data){
         return false;
     });
     
+    $('.service-desk-form').on('submit', function() {
+        var formData = new FormData($(this).get(0)),
+            messageModal = $('.modal.message-modal'),
+            messageBlock = $('.modal-body', messageModal),
+            messageHeader = $('.modal-title', messageModal),
+            waitingModal = $('.modal.waiting-dialog'),
+      jqXHR = $.ajax({
+            type: 'POST',
+            url: '/aftersell/servicedesk/save-feedback/',
+            data: formData,
+            cache: false,
+            processData: false,
+            contentType: false,
+            beforeSend: function(){
+                $(this).find('input[type="text"]').val('');
+                waitingModal.modal('show');
+            },
+            success: function(data){
+                messageBlock.text(data.message);
+                messageHeader.text('Thanks');
+                waitingModal.modal('hide');
+                messageModal.modal('show');
+                $('.summary').val('');
+                $('.type').val('');
+                $('.description').val('');
+                $('.advisorMobile').val('');
+                setTimeout(function() {
+                    parent.window.location='/aftersell/servicedesk/';
+                }, 2000);
+                
+            },
+            error: function() {
+                messageBlock.text('Invalid Data');
+                messageHeader.text('Invalid');
+                waitingModal.modal('hide');
+                messageModal.modal('show');
+                
+            }
+        });
+        return false;
+    });
     $('.sd_file').on('change', function() {
         var fileInput = $(this),
             ext = fileInput.val().split('.').pop().toLowerCase();

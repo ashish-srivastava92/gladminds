@@ -18,6 +18,11 @@
 			<div class="col-md-5">
 				<h3 align="center">GladDesk Ticket Information</h3>
 			</div>
+			<div class="col-md-4">
+				<button class="btn btn-primary pull-right add-feedback-btn" data-toggle="modal" data-target="#myModal">
+			 		Add Ticket
+			 	</button>
+		 	</div>
 		</div>
 		<div class="row feedback-filters">
 			<div class="col-md-4">
@@ -192,10 +197,83 @@
 		
 	</div>
 </div>
-
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Submit a Service Desk Ticket</h4>
+      </div>
+      <div class="modal-body">
+		<form class="service-desk-form" role="search">
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">Reporter*:</label>
+                  </div>
+                  <div class="col-md-9 form-group">
+                 	<input type="text" class="form-control advisorMobile" name="advisorMobile" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">Type*:</label>
+                  </div>
+                  <div class="col-md-9 form-group">
+                    <select class="form-control type" name="type" required>
+                      <option value="">Select Type</option>
+                      {% for type in types %}
+                      <option value="{{type}}">{{type}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">Subject*:</label>
+                  </div>
+                  <div class="col-md-9 form-group">
+                    <input type="text" class="form-control summary" name="summary" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">Description*:</label>
+                  </div>
+                  <div class="col-md-9 form-group">
+                    <textarea rows="8" cols="100" class="form-control description" name="description" required></textarea>
+                  </div>
+                </div> 
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">Upload File*:</label>
+                    <label class="control-label"><small><i>allowed format png,jpg,pdf,ppt,doc,xls</i></small></label>
+                  </div>
+                  <div class="col-md-9 form-group">
+                    <input type="file" class='form-control sd_file' name="sd_file" >
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12 form-group">
+                    <button type="submit" value="Submit" class="btn btn-primary pull-right">
+                    Submit
+                    </button>
+                  </div>
+                </div>               
+                
+         </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% include "portal/modal.html" %}
+{% include "portal/waiting_modal.html" %}
 {% endblock %} 
 {% block dependency%}
+<script src="/static/js/portal/utils.js"></script>
 <script src="/static/js/portal/main.js"></script>
 <script src="/static/js/table_data.js"></script>
 <script src="/static/js/table_data_bootstrap.js"></script>
+
 {% endblock dependency %}

@@ -39,9 +39,9 @@ class ServiceAdvisorManager(models.Manager):
     def get_dealer_asc_obj(self, reporter):
         service_advisor_obj = super(ServiceAdvisorManager, self).select_related('dealer, asc').get(user=reporter.user_profile)
         if service_advisor_obj.dealer:
-            return service_advisor_obj.dealer
+            return service_advisor_obj.dealer.user
         else:
-            return service_advisor_obj.asc
+            return service_advisor_obj.asc.user
 
 
 class CustomerTempRegistrationManager(models.Manager):

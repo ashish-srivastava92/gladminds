@@ -13,8 +13,8 @@ from django.views.decorators.http import require_http_methods
 
 from gladminds.bajaj import models
 from gladminds.bajaj.services.service_desk.servicedesk_manager import get_feedbacks, \
-    get_complain_data, get_feedback, get_servicedesk_users, get_comments, \
-    save_update_feedback, update_feedback_activities, SDActions
+    create_feedback, get_feedback, get_servicedesk_users, get_comments, \
+    modify_feedback, update_feedback_activities, SDActions
 from gladminds.core import utils
 from gladminds.core.auth.service_handler import check_service_active, Services
 from gladminds.core.auth_helper import Roles
@@ -87,6 +87,12 @@ def enable_servicedesk(request):
     else:
         return HttpResponseRedirect('http://support.gladminds.co/')
 
+def save_feedback(request):
+    data = save_help_desk_data(request)
+    return HttpResponse(content=json.dumps(data),
+                        content_type='application/json')
+    
+
 def save_help_desk_data(request):
     fields = ['description', 'advisorMobile', 'type', 'summary']
     sms_dict = {}
@@ -96,20 +102,21 @@ def save_help_desk_data(request):
         sms_dict['file_location'] =  request.FILES['sd_file']
     else:
         sms_dict['file_location'] = None
-    service_advisor_obj = models.ServiceAdvisor.objects.get(user__phone_number=sms_dict['advisorMobile'])
+    user_profile = models.UserProfile.objects.get(user__username=str(sms_dict['advisorMobile']))
     if request.user.groups.filter(name=Roles.DEALERS).exists():
         dealer_asc_obj = models.Dealer.objects.get(dealer_id=request.user)
-    else:
+    elif request.user.groups.filter(name=Roles.ASCS).exists():
         dealer_asc_obj = models.AuthorizedServiceCenter.objects.get(asc_id=request.user)
-        
-    if dealer_asc_obj.user.user.email:
+    else:
+        dealer_asc_obj = None
+    if dealer_asc_obj:
         dealer_asc_email = dealer_asc_obj.user.user.email
     else:
         dealer_asc_email = None
-    return get_complain_data(sms_dict, service_advisor_obj.user.phone_number,
-                                                service_advisor_obj.user.user.email,
-                                                service_advisor_obj.user.user.username, dealer_asc_email,
-                                                with_detail=True)
+    return create_feedback(sms_dict, user_profile.phone_number,
+                                                user_profile.user.email,
+                                                user_profile.user.username, dealer_asc_email,
+                                                with_detail=True)    
 
 @check_service_active(Services.SERVICE_DESK)
 @login_required()
@@ -162,7 +169,7 @@ def modify_servicedesk_tickets(request, feedback_id):
     
     if request.method == 'POST':
         host = request.get_host()
-        save_update_feedback(feedback_obj, request.POST, request.user, host)
+        modify_feedback(feedback_obj, request.POST, request.user, host)
     if feedback_obj:
         return render(request, 'service-desk/ticket_modify.html',\
                   {"feedback": feedback_obj, "FEEDBACK_STATUS": status,\
