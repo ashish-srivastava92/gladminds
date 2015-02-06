@@ -25,7 +25,10 @@ class FeedLogWithRemark():
         self.failed_feeds = self.failed_feeds + 1
 
     def save_to_feed_log(self):
+        print "total", self.total_feeds
+        print "fail", self.failed_feeds
         success_data_count = self.total_feeds - self.failed_feeds
+        print "succes", success_data_count
         remarks = json.dumps(self.remarks)
 
         path = ""
