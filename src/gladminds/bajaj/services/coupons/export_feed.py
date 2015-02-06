@@ -236,13 +236,10 @@ class ExportUnsyncProductFeed(BaseExportFeed):
                             feed_remark = FeedLogWithRemark(len(data_source),
                                             feed_type='VIN sync Feed',
                                             action='Sent', status=True)
-                            a=10
                         except Exception as ex:
                             ex = "ProductDispatchService: {0}  Error on Validating {1}".format(result, ex)
                             feed_remark.fail_remarks(ex)
                             logger.error(ex)
-                    print "ssssssssss"
-                    print a
                     feed_remark = save_to_db(feed_type='dispatch', data_source=data_source,
                                         feed_remark=feed_remark)
                     feed_remark.save_to_feed_log()
