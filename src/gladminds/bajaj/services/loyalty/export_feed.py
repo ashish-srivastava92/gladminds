@@ -38,19 +38,25 @@ class BaseExportFeed(object):
 class ExportMemberTempFeed(BaseExportFeed):
     
     def export_data(self, start_date=None, end_date=None):
-        results = models.Mechanic.objects.filter(sent_to_sap=0)
+        results = models.Mechanic.objects.filter(sent_to_sap=0, form_status='Complete')
         items = []
         total_failed = 0
         item_batch = {
             'TIMESTAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
         for mechanic in results:
             try:
+                distributor_id=None
+                date_of_birth=None
+                if mechanic.registered_by_distributor:
+                    distributor_id=mechanic.registered_by_distributor.distributor_id
+                if mechanic.date_of_birth:
+                    date_of_birth=mechanic.date_of_birth.date().strftime("%Y-%m-%d")
                 item = {
                         "TEMP_ID": mechanic.mechanic_id,
                         "FIRST_NAME": mechanic.first_name,
                         "MIDDLE_NAME": mechanic.middle_name,
                         "LAST_NAME": mechanic.first_name,
-                        "BIRTH_DT": mechanic.date_of_birth.date().strftime("%Y-%m-%d"),
+                        "BIRTH_DT": date_of_birth,
                         "ADDR1": mechanic.adress_line_1,
                         "ADDR2": mechanic.adress_line_2,
                         "ADDR3": mechanic.adress_line_3,
@@ -59,7 +65,7 @@ class ExportMemberTempFeed(BaseExportFeed):
                         "ADDR6": mechanic.adress_line_6,
                         "STATE": mechanic.state,
                         "PIN_CODE": mechanic.pincode,
-                        "DSB_CODE": mechanic.registered_by_distributor.distributor_id,
+                        "DSB_CODE": distributor_id,
                         "MOBILE_NO":str(mechanic.phone_number),
                     }                        
                 items.append(item)
