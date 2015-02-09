@@ -113,11 +113,11 @@ def customer_phone_number_update(customer_details=None):
         receivers = get_mail_receiver(settings.CUSTOMER_PHONE_NUMBER_UPDATE, mail_detail)
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(["DEALER/ASC ID", "CUSTOMER ID", "CUSTOMER NAME", "OLD NUMBER", "NEW NUMBER"])
+        csvwriter.writerow(["DEALER/ASC ID", "CUSTOMER ID", "CUSTOMER NAME", "OLD NUMBER", "NEW NUMBER", "MODIFIED DATE"])
 
         for customer in customer_details:
             csvwriter.writerow([customer['dealer_asc_id'], customer['customer_id'], customer['customer_name'],
-                                customer['old_number'], customer['new_number']])
+                                customer['old_number'], customer['new_number'], customer['modified_date']])
         
         send_email_with_file_attachment(mail_detail['sender'], receivers, mail_detail['subject'],
                                           mail_detail['body'].format(date=yesterday.strftime("%b %d %Y")), 'customer_phone_number_update_',
