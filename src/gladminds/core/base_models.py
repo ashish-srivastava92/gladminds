@@ -11,7 +11,8 @@ from gladminds.core.managers import user_manager, coupon_manager,\
 from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
 from gladminds.core.model_helpers import PhoneField
 from gladminds.core import constants
-from gladminds.core.core_utils.utils import generate_mech_id, generate_partner_id
+from gladminds.core.core_utils.utils import generate_mech_id, generate_partner_id,\
+    generate_nsm_id,generate_asm_id
 try:
     from django.utils.timezone import now as datetime_now
 except ImportError:
@@ -374,7 +375,8 @@ class CustomerTempRegistration(BaseModel):
     remarks = models.CharField(max_length=500, null=True, blank=True)
     tagged_sap_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
-    mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True, default=0) 
+    mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True, default=0)
+    email_flag = models.BooleanField(default=False) 
     objects = user_manager.CustomerTempRegistrationManager()
 
     class Meta:
@@ -708,7 +710,7 @@ class Constant(BaseModel):
 
 class NationalSalesManager(BaseModel):
     '''details of National Sales Manager'''
-    nsm_id = models.CharField(max_length=50)
+    nsm_id = models.CharField(max_length=50, unique=True, default=generate_nsm_id)
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
@@ -723,7 +725,7 @@ class NationalSalesManager(BaseModel):
 
 class AreaSalesManager(BaseModel):
     '''details of Area Service Manager'''
-    asm_id = models.CharField(max_length=50)
+    asm_id = models.CharField(max_length=50, unique=True, default=generate_asm_id)
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
@@ -770,9 +772,17 @@ class Mechanic(BaseModel):
     total_points = models.IntegerField(max_length=50, null=True, blank=True, default=0)
 
     first_name = models.CharField(max_length=50, null=True, blank=True)
+    middle_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank= True)
+
+    adress_line_1 = models.CharField(max_length=40, null=True, blank=True)
+    adress_line_2 = models.CharField(max_length=40, null=True, blank=True)
+    adress_line_3 = models.CharField(max_length=40, null=True, blank=True)
+    adress_line_4 = models.CharField(max_length=40, null=True, blank=True)
+    adress_line_5 = models.CharField(max_length=40, null=True, blank=True)
+    adress_line_6 = models.CharField(max_length=40, null=True, blank=True)
 
     form_number = models.IntegerField(max_length=50, null=True, blank=True)
     registered_date = models.DateTimeField(null=True, blank= True)
@@ -792,6 +802,7 @@ class Mechanic(BaseModel):
     serviced_diesel = models.IntegerField(max_length=50, null=True, blank=True)
     spare_per_month = models.IntegerField(max_length=50, null=True, blank=True)
     genuine_parts_used = models.IntegerField(max_length=50, null=True, blank=True)
+    sent_to_sap = models.BooleanField(default=False)
 
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
@@ -1012,7 +1023,7 @@ class LoyaltySLA(models.Model):
         else:
             total_time = time * 60
         return total_time
-    
+
     def clean(self, *args, **kwargs):
         resolution_time = self.get_time_in_seconds(self.resolution_time, self.resolution_unit)        
         reminder_time = self.get_time_in_seconds(self.reminder_time, self.reminder_unit)

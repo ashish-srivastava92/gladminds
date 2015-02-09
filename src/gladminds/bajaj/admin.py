@@ -5,6 +5,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.admin import ModelAdmin
 from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib.admin import DateFieldListFilter
+from django import forms
 
 from gladminds.bajaj import models
 from gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
@@ -177,7 +178,7 @@ class CouponAdmin(GmModelAdmin):
         custom_search_mapping = {'Unique Service Coupon' : '^unique_service_coupon',
                                  'Product Id': '^product__product_id',
                                  'Status': 'status'}
-        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping
+        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping, 'created_date_search': True
                         }
         return super(CouponAdmin, self).changelist_view(request, extra_context=extra_context)
 
@@ -286,6 +287,11 @@ class FeedLogAdmin(GmModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
+        
+    def changelist_view(self, request, extra_context=None):
+        extra_context = {'created_date_search': True
+                        }
+        return super(FeedLogAdmin, self).changelist_view(request, extra_context=extra_context)
 
 class ASCTempRegistrationAdmin(GmModelAdmin):
     search_fields = (
@@ -368,12 +374,30 @@ class NSMAdmin(GmModelAdmin):
     search_fields = ('nsm_id', 'name', 'phone_number', 'territory')
     list_display = ('nsm_id', 'name', 'email', 'phone_number','territory')
 
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('nsm_id',)
+        form = super(NSMAdmin, self).get_form(request, obj, **kwargs)
+        return form
+
+    def save_model(self, request, obj, form, change):
+        obj.phone_number = utils.mobile_format(obj.phone_number)
+        super(NSMAdmin, self).save_model(request, obj, form, change)
+
 class ASMAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
     search_fields = ('asm_id', 'nsm__name',
                      'phone_number', 'state')
     list_display = ('asm_id', 'name', 'email',
                      'phone_number', 'state', 'nsm')
+    
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('asm_id',)
+        form = super(ASMAdmin, self).get_form(request, obj, **kwargs)
+        return form
+
+    def save_model(self, request, obj, form, change):
+        obj.phone_number = utils.mobile_format(obj.phone_number)
+        super(ASMAdmin, self).save_model(request, obj, form, change)
 
 class DistributorAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
@@ -393,8 +417,8 @@ class SparePartMasterAdmin(GmModelAdmin):
 
 class SparePartUPCAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
-    search_fields = ('part_number__part_number', 'unique_part_code')
-    list_display = ('unique_part_code', 'part_number')
+    search_fields = ('part_number__part_number', 'unique_part_code', 'part_number__description')
+    list_display = ('unique_part_code', 'part_number', 'get_part_description')
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('is_used',)
@@ -437,10 +461,7 @@ class PartnerAdmin(GmModelAdmin):
 
 class AccumulationRequestAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYADMINS, Roles.LOYALTYSUPERADMINS]
-    list_filter = (
-        ('created_date', DateFieldListFilter),
-    )
-    search_fields = ('member__phone_number', 'points')
+    search_fields = ('member__mechanic_id', 'upcs__unique_part_code')
     list_display = ( 'member',  'get_mechanic_name', 'get_mechanic_district',
                      'asm', 'get_upcs', 'points',
                      'total_points', 'created_date')
@@ -454,8 +475,23 @@ class AccumulationRequestAdmin(GmModelAdmin):
 
     get_upcs.short_description = 'UPC'
 
+    def changelist_view(self, request, extra_context=None):
+        extra_context = {'created_date_search': True
+                        }
+        return super(AccumulationRequestAdmin, self).changelist_view(request, extra_context=extra_context)
+
+class MechanicForm(forms.ModelForm):
+    class Meta:
+        model = models.Mechanic
+    
+    def __init__(self, *args, **kwargs):
+        super(MechanicForm, self).__init__(*args, **kwargs)
+        for field in constants.MANDATORY_MECHANIC_FIELDS:
+            self.fields[field].label = self.fields[field].label + ' * '
+
 class MechanicAdmin(GmModelAdmin):
     list_filter = ('form_status',)
+    form = MechanicForm
     search_fields = ('mechanic_id',
                      'phone_number', 'first_name',
                      'state', 'district')
@@ -485,7 +521,7 @@ class MechanicAdmin(GmModelAdmin):
         return query_set
 
     def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points')
+        self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points', 'sent_to_sap')
         form = super(MechanicAdmin, self).get_form(request, obj, **kwargs)
         return form
 

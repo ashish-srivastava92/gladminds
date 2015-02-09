@@ -10,6 +10,7 @@ from gladminds.core.managers.sms_client_manager import load_gateway, MessageSent
 from gladminds.core.managers import mail
 from gladminds.core.cron_jobs import taskmanager
 from gladminds.bajaj.services.coupons import import_feed, export_feed
+from gladminds.bajaj.services.loyalty import export_feed as loyalty_export
 from gladminds.core.services import  message_template as templates
 
 import pytz
@@ -473,13 +474,10 @@ Cron Job to send customer phone number update email
 '''
 @shared_task
 def send_mail_for_customer_phone_number_update(*args, **kwargs):
-    day = kwargs['day_duration']
-    today = datetime.now().date()
-    start_date = today - timedelta(days=day)
-    end_date = today + timedelta(days=1)
-    customer_details = taskmanager.get_customer_details(
-        start_date=start_date, end_date=end_date)
-    mail.customer_phone_number_update(customer_details=customer_details)
+    customer_details = taskmanager.get_customer_details()
+    if customer_details['customer_data']:
+        mail.customer_phone_number_update(customer_details=customer_details['customer_data'])
+        customer_details['customer_details'].update(email_flag=True)
 
 '''
 Cron Job to send ASC Registeration to BAJAJ
@@ -609,6 +607,22 @@ def send_reminders_for_servicedesk(*args, **kwargs):
             feedback.resolution_flag = False
         feedback.save()
  
+ 
+'''
+Cron Job to send info of registered Mechanic
+'''
+@shared_task
+def export_member_temp_id_to_sap(*args, **kwargs):
+    member_registered = loyalty_export.ExportMemberTempFeed(username=settings.SAP_CRM_DETAIL[
+                   'username'], password=settings.SAP_CRM_DETAIL['password'],
+                  wsdl_url=settings.MEMBER_SYNC_WSDL_URL, feed_type='Mechanic Registration Feed')
+    feed_export_data = member_registered.export_data()
+    return
+    if len(feed_export_data[0]) > 0:
+        member_registered.export(items=feed_export_data[0], item_batch=feed_export_data[
+                             1], total_failed_on_feed=feed_export_data[2])
+    else:
+        logger.info("tasks.py: No member registered since last feed")
 
 def welcome_kit_due_date_escalation(*args, **kwargs):
     time = datetime.now()
@@ -725,6 +739,10 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               "update_coupon_history": update_coupon_history_data, 
               
               "redemption_request_due_date_escalation":redemption_request_due_date_escalation,
+              
+              "export_member_temp_id_to_sap": export_member_temp_id_to_sap,
 
               "welcome_kit_due_date_escalation":welcome_kit_due_date_escalation,
+              
+              "send_mail_for_customer_phone_number_update" : send_mail_for_customer_phone_number_update
               }

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://local.bajaj.gladminds.co:8000/api/v1/feed/">
+  <SOAP-ENV:Body>
+    <ns1:postNSM>
+      <ns1:ObjectList>
+        <ns1:NSMData>
+          <ns1:NSMModel>
+          	<ns1:PHONE_NUMBER>123456789</ns1:PHONE_NUMBER>
+          	<ns1:USER_ID>123</ns1:USER_ID>
+          	<ns1:NAME>PAVAN</ns1:NAME>
+            <ns1:TERRITORY>Karnataka</ns1:TERRITORY>
+            <ns1:EMAIL>PAVANKUMAR.S@HASEDIN.COM</ns1:EMAIL>
+           	</ns1:NSMModel>
+        </ns1:NSMData>
+      </ns1:ObjectList>
+      <ns1:Credential>
+        <ns1:UserName>bajaj</ns1:UserName>
+        <ns1:Password>bajaj</ns1:Password>
+      </ns1:Credential>
+    </ns1:postNSM>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

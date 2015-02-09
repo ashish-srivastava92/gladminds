@@ -68,3 +68,8 @@ class GmModelAdmin(ModelAdmin):
     get_mechanic_pincode.short_description = 'PIN code'
     get_mechanic_district.short_description = 'City'
     get_mechanic_state.short_description = 'State'
+    
+    def get_part_description(self, obj):
+        return obj.part_number.description
+    
+    get_part_description.short_description = 'Description'

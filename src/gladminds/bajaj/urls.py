@@ -7,7 +7,7 @@ from gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
 loyalty = LoyaltyService
 
 urlpatterns = patterns('',
-    url(r'^sms/','gladminds.bajaj.services.coupons.feed_views.send_sms', name='send_sms'),
+    url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
     url(r'', include(brand_admin.urls)),
     url(r'', include(api_v1.urls)),
     url(r'^site-info-hackish/$', 'gladminds.bajaj.views.site_info', name='site_info'),
@@ -16,13 +16,17 @@ urlpatterns = patterns('',
     url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.modify_servicedesk_tickets', name='modify_servicedesk_tickets'),
     url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/comments/(?P<comment_id>\d+)/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.modify_feedback_comments', name='modify_feedback_comments'),
     url(r'^aftersell/feedbackresponse/(?P<feedback_id>\d+)/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.get_feedback_response', name='get_feedback_response'),
-
+    url(r'^aftersell/servicedesk/save-feedback/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.save_feedback', name='save_feedback'),
+    
     url(r'^api/v1/feed/\?wsdl$', 'gladminds.bajaj.webservice.all_service'),
     url(r'^api/v1/feed/$', 'gladminds.bajaj.webservice.all_service'),
 
-    url(r'^api/v1/redeem-feed/$', 'gladminds.bajaj.services.coupons.feed_views.views_coupon_redeem_wsdl'),
-    url(r'^api/v1/customer-feed/$', 'gladminds.bajaj.services.coupons.feed_views.views_customer_registration_wsdl'),
-    url(r'^api/v1/vin-sync-feed/$', 'gladminds.bajaj.services.coupons.feed_views.views_vin_sync_wsdl'),
+    url(r'^api/v1/redeem-feed/$', 'gladminds.bajaj.services.feed_views.views_coupon_redeem_wsdl'),
+    url(r'^api/v1/customer-feed/$', 'gladminds.bajaj.services.feed_views.views_customer_registration_wsdl'),
+    url(r'^api/v1/vin-sync-feed/$', 'gladminds.bajaj.services.feed_views.views_vin_sync_wsdl'),
+    url(r'^api/v1/member-sync-feed/$', 'gladminds.bajaj.services.feed_views.views_member_sync_wsdl'),
+
+    url(r'^sync-member/$', 'gladminds.sqs_tasks.export_member_temp_id_to_sap'),
 
     url(r'^aftersell/users/(?P<users>[a-zA-Z0-9]+)$', 'gladminds.bajaj.views.views.users'),
     url(r'^aftersell/sa/(?P<id>[a-zA-Z0-9]+)/$', 'gladminds.bajaj.views.views.get_sa_under_asc'),

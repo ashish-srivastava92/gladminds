@@ -15,6 +15,8 @@ from gladminds.core import utils
 from gladminds.bajaj import models
 from gladminds.core.managers.audit_manager import feed_log, sms_log
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
+from gladminds.bajaj.services.feed_resources import BaseFeed
+from gladminds.core.auth_helper import Roles
 
 logger = logging.getLogger("gladminds")
 USER_GROUP = {'dealer': 'dealers', 'ASC': 'ascs', 'SA':'sas', 'customer':"customer"}
@@ -27,18 +29,13 @@ class LoyaltyFeed(object):
             'part_upc': PartUPCFeed,
             'part_point': PartPointFeed,
             'distributor': DistributorFeed,
-            'mechanic': MechanicFeed
+            'mechanic': MechanicFeed,
+            'nsm':NSMFeed,
+            'asm':ASMFeed
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
         return feed_obj.import_data()
-
-class BaseFeed(object):
-
-    def __init__(self, data_source=None, feed_remark=None):
-        self.data_source = data_source
-        self.feed_remark = feed_remark
-
 
 class PartMasterFeed(BaseFeed):
 
@@ -196,3 +193,85 @@ class MechanicFeed(BaseFeed):
                 continue
 
         return self.feed_remark
+    
+class NSMFeed(BaseFeed):
+    
+    def import_data(self):
+        total_failed = 0
+        for nsm in self.data_source:
+            try:
+                nsm_object = models.NationalSalesManager.objects.filter(territory=nsm['territory'])
+                try:
+                    user_object = models.UserProfile.objects.get(user__username=nsm['email'])
+                except ObjectDoesNotExist as ex:
+                    logger.error("[import_nsm_data] {0} : {1}".format(nsm['phone_number'], ex))
+                    user_object = self.register_user(Roles.NSMS,username=nsm['email'],phone_number=nsm['phone_number'],
+                                                     first_name=nsm['name'], email=nsm['email'])
+                if not nsm_object:
+                    nsm_temp_id = utils.generate_temp_id('TNSM')
+                    nsm_object = models.NationalSalesManager(nsm_id=nsm_temp_id,
+                                                             name=nsm['name'],
+                                                             email=nsm['email'],
+                                                             phone_number=nsm['phone_number'],
+                                                             territory=nsm['territory'],
+                                                             user=user_object)
+                    nsm_object.save()
+                else:
+                    nsm_object = nsm_object[0]
+                    nsm_object.name = nsm['name']
+                    nsm_object.email= nsm['email']
+                    nsm_object.phone_number = nsm['phone_number']
+                    nsm_object.user = user_object
+                    nsm_object.save()  
+            except Exception as ex:
+                print "4"
+                total_failed += 1
+                ex = "[NSMFeed]: id-{0} :: {1}".format(nsm['phone_number'], ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+                continue
+        return self.feed_remark              
+    
+class ASMFeed(BaseFeed):
+    
+    def import_data(self):
+        total_failed = 0
+        for asm in self.data_source:
+            try:
+                try:
+                    user_object = models.UserProfile.objects.get(user__username=asm['email'])
+                except ObjectDoesNotExist as ex:
+                    logger.error("[import_asm_data] {0} : {1}".format(asm['phone_number'], ex))
+                    user_object = self.register_user(Roles.ASMS,username=asm['email'],phone_number=asm['phone_number'],
+                                                     first_name=asm['name'], state=asm['state'], email=asm['email'])                    
+                try:
+                    nsm_obj = models.NationalSalesManager.objects.get(territory=asm['territory'])
+                    try:
+                        asm_object = models.AreaSalesManager.objects.get(state=asm['state'])   
+                        asm_object.name = asm['name']
+                        asm_object.email= asm['email']
+                        asm_object.phone_number = asm['phone_number']
+                        asm_object.user = user_object
+                        asm_object.nsm = nsm_obj
+                        asm_object.save()
+                    except:
+                        asm_temp_id = utils.generate_temp_id('TASM')
+                        asm_object = models.AreaSalesManager(asm_id=asm_temp_id,
+                                                                 nsm=nsm_obj,
+                                                                 name=asm['name'],
+                                                                 email=asm['email'],
+                                                                 phone_number=asm['phone_number'],
+                                                                 state=asm['state'],
+                                                                 user=user_object)                                                        
+                        asm_object.save()
+                
+                except ObjectDoesNotExist as ex:
+                    logger.error("[import_asm_data] {0} : {1}".format(asm['phone_number'], ex))
+                    logger.error(ex)
+            except Exception as ex:
+                total_failed += 1
+                ex = "[ASMFeed]: id-{0} :: {1}".format(asm['phone_number'], ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+                continue
+        return self.feed_remark              

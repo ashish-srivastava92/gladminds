@@ -295,6 +295,7 @@ def register_customer(request, group=None):
                     customer_obj.product_data = product_obj[0]
                     customer_obj.sent_to_sap = False
                     customer_obj.dealer_asc_id = str(request.user)
+                    customer_obj.email_flag = False
                     customer_obj.mobile_number_update_count+=1
                     message = get_template('CUSTOMER_MOBILE_NUMBER_UPDATE').format(customer_name=customer_obj.new_customer_name, new_number=customer_obj.new_number)
                     for phone_number in [customer_obj.new_number, customer_obj.old_number]:
@@ -326,7 +327,7 @@ def register_customer(request, group=None):
                                                                new_number = data_source[0]['customer_phone_number'],
                                                                old_number = data_source[0]['customer_phone_number'],
                                                                product_purchase_date = data_source[0]['product_purchase_date'],
-                                                               temp_customer_id = temp_customer_id)
+                                                               temp_customer_id = temp_customer_id, email_flag=True)
             customer_obj.save()
             logger.info('[Temporary_cust_registration]:: Initiating purchase feed')
             feed_remark = FeedLogWithRemark(len(data_source),
@@ -511,7 +512,7 @@ def trigger_sqs_tasks(request):
         'expire-service-coupon': 'expire_service_coupon',
         'send-reminder': 'send_reminder',
         'export-customer-registered': 'export_customer_reg_to_sap',
-        'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk'
+        'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk',
     }
 
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)
