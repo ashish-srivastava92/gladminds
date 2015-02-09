@@ -135,22 +135,27 @@ def get_vin_sync_feeds_detail():
 
 ''' returns coupon details with policy descripencies'''
 
-def get_discrepant_coupon_details(start_date=None, end_date=None, type=None):
-    start_date = start_date
-    end_date = end_date
+def get_discrepant_coupon_details():
     coupon_data = []
+    service_type_obj = models.Constant.objects.filter(constant_name__contains ='service')
     
-    service_1_valid_days = models.Constant.objects.get(constant_name='service_1_valid_days').constant_value
-    service_2_valid_days = models.Constant.objects.get(constant_name='service_2_valid_days').constant_value
-    service_3_valid_days = models.Constant.objects.get(constant_name='service_3_valid_days').constant_value
-    service_1_valid_kms = models.Constant.objects.get(constant_name='service_1_valid_kms').constant_value
-    service_2_valid_kms = models.Constant.objects.get(constant_name='service_2_valid_kms').constant_value
-    service_3_valid_kms = models.Constant.objects.get(constant_name='service_3_valid_kms').constant_value    
-    
+    for service_type in service_type_obj:
+        if service_type.constant_name == 'service_1_valid_days':
+            service_1_valid_days = service_type.constant_value
+        elif service_type.constant_name == 'service_1_valid_kms':
+            service_1_valid_kms = service_type.constant_value    
+        if service_type.constant_name == 'service_2_valid_days':
+            service_2_valid_days = service_type.constant_value
+        elif service_type.constant_name == 'service_2_valid_kms':
+            service_2_valid_kms = service_type.constant_value    
+        if service_type.constant_name == 'service_3_valid_days':
+            service_3_valid_days = service_type.constant_value
+        else:
+            service_3_valid_kms = service_type.constant_value    
+
     coupons_details= models.CouponData.objects.filter((Q(service_type=1) and (~Q(valid_days=service_1_valid_days) or ~Q(valid_kms=service_1_valid_kms))) or
                                                         (Q(service_type=2) and (~Q(valid_days=service_2_valid_days) or ~Q(valid_kms=service_2_valid_kms))) or
-                                                        (Q(service_type=3) and (~Q(valid_days=service_3_valid_days) or ~Q(valid_kms=service_3_valid_kms))),
-                                                        created_date__range=(start_date, end_date)).select_related('product')
+                                                        (Q(service_type=3) and (~Q(valid_days=service_3_valid_days) or ~Q(valid_kms=service_3_valid_kms)))).select_related('product')
    
     for coupon in coupons_details:
         data = {}
@@ -171,10 +176,3 @@ def get_discrepant_coupon_details(start_date=None, end_date=None, type=None):
         coupon.save()    
         coupon_data.append(data)  
     return coupon_data
-
-#     args = [Q(service_type=1),~Q(valid_days=service_1_valid_days) , ~Q(valid_kms=service_1_valid_kms),
-#             Q(service_type=2),~Q(valid_days=service_2_valid_days) , ~Q(valid_kms=service_2_valid_kms),
-#             Q(service_type=3),~Q(valid_days=service_3_valid_days) , ~Q(valid_kms=service_3_valid_kms)]         
-#     querry_func = lambda a,b,c,d,e,f,g,h,i: (a and (b or c)) or (d and (e or f)) or (g and (h or i))
-#     coupons_details = models.CouponData.objects.filter(reduce(querry_func, args),created_date__range=(start_date, end_date))
-
