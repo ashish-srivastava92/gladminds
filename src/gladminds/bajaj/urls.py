@@ -21,6 +21,7 @@ urlpatterns = patterns('',
     url(r'^api/v1/feed/\?wsdl$', 'gladminds.bajaj.webservice.all_service'),
     url(r'^api/v1/feed/$', 'gladminds.bajaj.webservice.all_service'),
 
+    url(r'^test-qwe/','gladminds.sqs_tasks.send_mail_for_policy_discrepency'),
     url(r'^api/v1/redeem-feed/$', 'gladminds.bajaj.services.feed_views.views_coupon_redeem_wsdl'),
     url(r'^api/v1/customer-feed/$', 'gladminds.bajaj.services.feed_views.views_customer_registration_wsdl'),
     url(r'^api/v1/vin-sync-feed/$', 'gladminds.bajaj.services.feed_views.views_vin_sync_wsdl'),

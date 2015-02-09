@@ -482,6 +482,19 @@ def send_mail_for_customer_phone_number_update(*args, **kwargs):
         start_date=start_date, end_date=end_date)
     mail.customer_phone_number_update(customer_details=customer_details)
 
+
+''' Cron job to send for policy_discrepency'''
+
+@shared_task
+def send_mail_for_policy_discrepency(*args, **kwargs):
+#     day = kwargs['day_duration']
+    day = 1
+    today = datetime.now().date()
+    start_date = today - timedelta(days=day)
+    end_date = today + timedelta(days=1)
+    discrepant_coupons = taskmanager.get_discrepant_coupon_details(start_date=start_date, end_date=end_date)
+    mail.discrepant_coupon_update(discrepant_coupons=discrepant_coupons)
+
 '''
 Cron Job to send ASC Registeration to BAJAJ
 '''
