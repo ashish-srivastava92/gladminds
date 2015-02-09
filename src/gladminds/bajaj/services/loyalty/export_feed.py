@@ -80,10 +80,10 @@ class ExportMemberTempFeed(BaseExportFeed):
                 result = client.service.SI_Mech_Sync(
                     DT_Mac={'item':[item]}, DT_STAMP={'item':item_batch})
                 logger.info("Response from SAP: {0}".format(result))
-                if result[1][0]['STATUS'] == 'SUCCESS':
+                if result[0]['item'][0]['STATUS'] == 'SUCCESS':
                     try:
                         export_status = True
-                        member_detail = models.Mechanic.objects.get(unique_service_coupon=item['TEMP_ID'])
+                        member_detail = models.Mechanic.objects.get(mechanic_id=item['TEMP_ID'])
                         member_detail.sent_to_sap = True
                         member_detail.save()
                         logger.info("Sent the details of member {0} to sap".format(item['TEMP_ID']))
