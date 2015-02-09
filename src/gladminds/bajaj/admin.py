@@ -178,7 +178,7 @@ class CouponAdmin(GmModelAdmin):
         custom_search_mapping = {'Unique Service Coupon' : '^unique_service_coupon',
                                  'Product Id': '^product__product_id',
                                  'Status': 'status'}
-        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping
+        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping, 'created_date_search': True
                         }
         return super(CouponAdmin, self).changelist_view(request, extra_context=extra_context)
 

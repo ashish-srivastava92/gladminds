@@ -38,7 +38,7 @@ class BaseExportFeed(object):
 class ExportMemberTempFeed(BaseExportFeed):
     
     def export_data(self, start_date=None, end_date=None):
-        results = models.Mechanic.objects.filter(sent_to_sap=0)
+        results = models.Mechanic.objects.filter(sent_to_sap=0, form_status='Complete')
         items = []
         total_failed = 0
         item_batch = {
