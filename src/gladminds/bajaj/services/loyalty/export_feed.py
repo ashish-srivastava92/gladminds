@@ -77,7 +77,7 @@ class ExportMemberTempFeed(BaseExportFeed):
             logger.info("Trying to send SAP the member: {0}"\
                         .format(item))
             try:            
-                result = client.service.OP_SI_Mech_Sync(
+                result = client.service.SI_Mech_Sync(
                     DT_Mac={'item':[item]}, DT_STAMP={'item':item_batch})
                 logger.info("Response from SAP: {0}".format(result))
                 if result[1][0]['STATUS'] == 'SUCCESS':
