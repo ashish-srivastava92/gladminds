@@ -617,7 +617,6 @@ def export_member_temp_id_to_sap(*args, **kwargs):
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.MEMBER_SYNC_WSDL_URL, feed_type='Mechanic Registration Feed')
     feed_export_data = member_registered.export_data()
-    return
     if len(feed_export_data[0]) > 0:
         member_registered.export(items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
