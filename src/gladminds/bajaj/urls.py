@@ -52,5 +52,6 @@ urlpatterns = patterns('',
     url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/comments/(?P<comment_id>\d+)/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.modify_feedback_comments', name='modify_feedback_comments'),
     url(r'^aftersell/feedbackresponse/(?P<feedback_id>\d+)/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.get_feedback_response', name='get_feedback_response'),
     url(r'^welcome', loyalty.send_welcome_message, name='send_welcome_message'),
+    url(r'^kit/download', loyalty.download_welcome_kit, name='download_welcome_kit'),
     url(r'', include(core_urls)),
 )

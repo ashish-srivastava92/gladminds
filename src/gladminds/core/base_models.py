@@ -753,7 +753,7 @@ class Distributor(BaseModel):
         return self.distributor_id + ' ' +self.name
     
 class Retailer(BaseModel):
-    '''details of Distributor'''
+    '''details of Retailer'''
     retailer_name = models.CharField(max_length=50)
     retailer_town = models.CharField(max_length=50, null=True, blank=True)
     
@@ -811,6 +811,7 @@ class Mechanic(BaseModel):
     form_status = models.CharField(max_length=15, choices=constants.FORM_STATUS_CHOICES,
                               default='Incomplete')
     sent_sms = models.BooleanField(default=False)
+    download_detail = models.BooleanField(default=False)
 
     objects = user_manager.MechanicManager()
 
@@ -852,7 +853,7 @@ class SparePartMasterData(BaseModel):
         return self.part_number
     
 class SparePartUPC(BaseModel):
-    '''details of Spare Part'''
+    '''details of Spare Part UPC'''
     unique_part_code = models.CharField(max_length=50, unique=True)
     is_used = models.BooleanField(default=False)
     
@@ -866,7 +867,7 @@ class SparePartUPC(BaseModel):
         return self.unique_part_code
 
 class SparePartPoint(BaseModel):
-    '''details of Spare Part'''
+    '''details of Spare Part points'''
     points = models.IntegerField(max_length=50, null=True, blank=True)
     price = models.FloatField(max_length=50, null=True, blank=True)
     MRP = models.FloatField(max_length=50, null=True, blank=True)
@@ -884,7 +885,7 @@ class SparePartPoint(BaseModel):
         return self.territory + ":" + str(self.points)
 
 class AccumulationRequest(BaseModel):
-    '''details of Spare Part'''
+    '''details of Accumulation request'''
     transaction_id = models.AutoField(primary_key=True)
     points = models.IntegerField(max_length=50)
     total_points = models.IntegerField(max_length=50)
@@ -897,7 +898,7 @@ class AccumulationRequest(BaseModel):
         return str(self.transaction_id)
 
 class Partner(BaseModel):
-    
+    '''details of RPs and LPs'''
     partner_id = models.CharField(max_length=50, unique=True, default=generate_partner_id)
     name = models.CharField(max_length=100, null=True, blank=True)
     address = models.CharField(max_length=100, null=True, blank=True)
@@ -911,6 +912,7 @@ class Partner(BaseModel):
         return str(self.name) + ' ' + str(self.partner_id) + '(' + str(self.partner_type) + ')'
 
 class ProductCatalog(BaseModel):
+    '''details of Product Catalog'''
     product_id = models.CharField(max_length=50, unique=True)
     points = models.IntegerField(max_length=50, null=True, blank=True)
     price = models.IntegerField(max_length=50, null=True, blank=True)
@@ -935,7 +937,7 @@ class ProductCatalog(BaseModel):
         return str(self.product_id)
 
 class RedemptionRequest(BaseModel):
-    '''details of Spare Part'''
+    '''details of Redemption Request'''
     delivery_address = models.CharField(max_length=50, null=True, blank=True)
     transaction_id = models.AutoField(primary_key=True)
     expected_delivery_date =  models.DateTimeField(null=True, blank= True)
@@ -982,7 +984,7 @@ class RedemptionRequest(BaseModel):
         return str(self.transaction_id)
     
 class WelcomeKit(BaseModel):
-    '''details of Spare Part'''
+    '''details of welcome kit'''
     delivery_address = models.CharField(max_length=50, null=True, blank=True)
     transaction_id = models.AutoField(primary_key=True)
     expected_delivery_date =  models.DateTimeField(null=True, blank= True)

@@ -23,6 +23,20 @@ AUDIT_ACTION = 'SEND TO QUEUE'
 
 class LoyaltyService(CoreLoyaltyService):
     '''Class for loyalty service'''
+    
+    def download_welcome_kit(self, request):
+        '''Download list of new or all registered member'''
+        phone_list=[]
+        print "34444444444", request.POST.get('choice')
+#         mechanics = models.Mechanic.objects.filter(sent_sms=False)
+#         for mech in mechanics:
+#             self.send_welcome_sms(mech)
+#             phone_list.append(mech.phone_number)
+#         mechanics.update(sent_sms=True)
+#         response = 'Message sent to {0} mechanics. phone numbers: {1}'.format(
+#                                 len(phone_list), (', '.join(phone_list)))
+#         return HttpResponse(json.dumps({'msg': response}),
+#                             content_type='application/json')
 
     def send_welcome_sms(self, mech):
         '''Send welcome sms to mechanics when registered'''

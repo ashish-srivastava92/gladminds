@@ -165,3 +165,5 @@ alter table bajaj_mechanic add column adress_line_3 varchar(40) null;
 alter table bajaj_mechanic add column adress_line_4 varchar(40) null;
 alter table bajaj_mechanic add column adress_line_5 varchar(40) null;
 alter table bajaj_mechanic add column adress_line_6 varchar(40) null;
+
+alter table bajaj_mechanic add column download_detail bool default 0;
