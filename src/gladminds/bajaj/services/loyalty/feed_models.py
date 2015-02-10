@@ -93,10 +93,11 @@ class DistributorModelList(ComplexModel):
 class MechanicModel(ComplexModel):
     __namespace__ = tns
     MECH_ID = Unicode
+    TEMP_MECH_ID = Unicode
     FIRST_NAME = Unicode
     LAST_NAME = Unicode(default=None)
     PHONE_NUMBER = Unicode
-    DOB = Date
+    DOB = Unicode(default=None)
     SHOP_NAME = Unicode
     DISTRICT = Unicode
     STATE = Unicode
@@ -267,7 +268,8 @@ class MechanicService(ServiceBase):
                     'district': mechanic.DISTRICT.upper(),
                     'state': mechanic.STATE.upper(),
                     'pincode': mechanic.PINCODE,
-                    'dist_id': mechanic.DIST_ID
+                    'dist_id': mechanic.DIST_ID,
+                    'temp_id': mechanic.TEMP_MECH_ID
                 })
             except Exception as ex:
                 ex = "MechanicService: {0}  Error on Validating {1}".format(mechanic, ex)

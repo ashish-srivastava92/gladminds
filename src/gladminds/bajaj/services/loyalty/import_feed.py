@@ -167,34 +167,9 @@ class MechanicFeed(BaseFeed):
         total_failed = 0
         for mechanic in self.data_source:
             try:
-                mech_object = models.Mechanic.objects.filter(phone_number=mechanic['mobile'])
-                if mechanic['dist_id']:
-                    dist_object = models.Distributor.objects.get(distributor_id=mechanic['dist_id'])
-                if not mech_object:
-                    mech = models.Mechanic(registered_by_distributor=dist_object,
-                                    mechanic_id=mechanic['mechanic_id'],
-                                    first_name = mechanic['first_name'],
-                                    last_name = mechanic['last_name'],
-                                    date_of_birth=mechanic['dob'],
-                                    phone_number=mechanic['mobile'],
-                                    shop_name =  mechanic['shop_name'],
-                                    state =  mechanic['state'],
-                                    pincode =  mechanic['pincode'],
-                                    permanent_id=mechanic['mechanic_id'],
-                                    )
-                    mech.save()
-                else:
-                    mech=mech_object[0]
-                    mech.registered_by_distributor=dist_object
-                    mech.first_name = mechanic['first_name']
-                    mech.last_name = mechanic['last_name']
-                    mech.date_of_birth=mechanic['dob']
-                    mech.phone_number=mechanic['mobile']
-                    mech.shop_name = mechanic['shop_name']
-                    mech.state = mechanic['state']
-                    mech.pincode = mechanic['pincode']
-                    mech.permanent_id=mechanic['mechanic_id']
-                    mech.save()
+                mech_object = models.Mechanic.objects.get(mechanic_id=mechanic['temp_id'])
+                mech_object.permanent_id=mechanic['mechanic_id']
+                mech_object.save()
             except Exception as ex:
                 total_failed += 1
                 ex = "[MechanicFeed]: id-{0} :: {1}".format(mechanic['mobile'], ex)
