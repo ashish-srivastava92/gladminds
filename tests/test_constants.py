@@ -324,3 +324,14 @@ AFTERBUY_REGISTATION = {
                         "relation_name" :"owner",
                         "model":"aaa",
                         }
+
+NSM = {
+       "created_date": "2015-02-04T17:11:18",
+        "email": "rkrishnan@bajajauto.co.in",
+        "modified_date": "2015-02-04T17:11:18",
+        "name": "Raghunath",
+        "nsm_id": "NSM002",
+        "phone_number": 1234567890,
+        "territory": "south",
+        "user": "",
+        }
