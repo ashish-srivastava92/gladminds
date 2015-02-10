@@ -118,8 +118,11 @@ def customer_phone_number_update(customer_details=None):
         for customer in customer_details:
             csvwriter.writerow([customer['dealer_asc_id'], customer['customer_id'], customer['customer_name'],
                                 customer['old_number'], customer['new_number'], customer['modified_date']])
-        
-        send_email_with_file_attachment(mail_detail['sender'], receivers, mail_detail['subject'],
+        if (settings.ENV not in settings.IGNORE_ENV):
+            subject = mail_detail['subject'].format(env="")
+        else:
+            subject = mail_detail['subject'].format(env=settings.ENV.upper())
+        send_email_with_file_attachment(mail_detail['sender'], receivers, subject,
                                           mail_detail['body'].format(date=yesterday.strftime("%b %d %Y")), 'customer_phone_number_update_',
                                           csvfile)
         logger.info("Sending out customer phone number update emails")
