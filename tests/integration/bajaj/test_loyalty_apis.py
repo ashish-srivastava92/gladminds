@@ -15,7 +15,7 @@ class LoyaltyApiTests(ResourceTestCase):
         return resp
     
     def test_create_nsm(self):
-        uri = '/loyalty/v1/nsmnames/'
+        uri = '/loyalty/v1/nsms/'
         resp = self.post(uri,data=NSM)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -23,7 +23,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_nsm(self):
         resp = self.test_create_nsm()
         self.assertEquals(resp.status_code,201)
-        resp = client.get('/loyalty/v1/nsmnames/1/',content_type='application/json')
+        resp = client.get('/loyalty/v1/nsms/1/',content_type='application/json')
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['phone_number'], "1234567890")
         return resp
@@ -32,9 +32,9 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_nsm() 
         self.assertEquals(resp.status_code,200)
         a={"phone_number":"1234512345"}
-        resp = client.put('/loyalty/v1/nsmnames/1/', data=json.dumps(a), content_type='application/json')
+        resp = client.put('/loyalty/v1/nsms/1/', data=json.dumps(a), content_type='application/json')
         self.assertEquals(resp.status_code, 200)
-        resp = client.get('/loyalty/v1/nsmnames/1/',content_type='application/json')
+        resp = client.get('/loyalty/v1/nsms/1/',content_type='application/json')
         self.assertEqual(self.deserialize(resp)['phone_number'], "1234512345")
         
         
