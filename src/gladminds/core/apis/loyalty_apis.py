@@ -6,7 +6,7 @@ from tastypie.authorization import Authorization
 class NationalSalesResource(CustomBaseModelResource):
     class Meta:
         queryset = models.NationalSalesManager.objects.all()
-        resource_name = "nsmnames"
+        resource_name = "nsms"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -15,7 +15,7 @@ class NationalSalesResource(CustomBaseModelResource):
 class AreaSalesResource(CustomBaseModelResource):
     class Meta:
         queryset = models.AreaSalesManager.objects.all()
-        resource_name = "asmnames"
+        resource_name = "asms"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
