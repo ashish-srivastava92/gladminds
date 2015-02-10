@@ -4,6 +4,10 @@ import logging
 import json
 from datetime import datetime,timedelta
 from constance import config
+import StringIO
+import csv
+from django.http import HttpResponse
+from django.core.servers.basehttp import FileWrapper
 
 from django.conf import settings
 from django.http.response import HttpResponse
@@ -26,17 +30,25 @@ class LoyaltyService(CoreLoyaltyService):
     
     def download_welcome_kit(self, request):
         '''Download list of new or all registered member'''
-        phone_list=[]
-        print "34444444444", request.POST.get('choice')
-#         mechanics = models.Mechanic.objects.filter(sent_sms=False)
-#         for mech in mechanics:
-#             self.send_welcome_sms(mech)
-#             phone_list.append(mech.phone_number)
-#         mechanics.update(sent_sms=True)
-#         response = 'Message sent to {0} mechanics. phone numbers: {1}'.format(
-#                                 len(phone_list), (', '.join(phone_list)))
-#         return HttpResponse(json.dumps({'msg': response}),
-#                             content_type='application/json')
+        kwargs = {}
+        headers=[]
+        choice=request.POST.get('choice')
+        if choice=='new-register':
+            kwargs['download_detail'] = False
+        kwargs['form_status'] = 'Complete'
+        mechanics = models.Mechanic.objects.filter(**kwargs)
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        for field in models.Mechanic._meta.fields:
+            headers.append(field.name)
+        csvwriter.writerow(headers)
+        for mechanic in mechanics:
+            csvwriter.writerow([getattr(mechanic, f) for f in headers])
+#         print csvfile.getvalue()
+#         response = HttpResponse(FileWrapper(csvfile.read()), mimetype='application/x-download')
+#         response['Content-Disposition'] = 'attachment;filename=table.csv'
+#         return response
+
 
     def send_welcome_sms(self, mech):
         '''Send welcome sms to mechanics when registered'''
