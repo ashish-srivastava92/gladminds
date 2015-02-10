@@ -8,6 +8,7 @@
             <ns1:PHONE_NUMBER>1234567890</ns1:PHONE_NUMBER>
             <ns1:LAST_NAME>lastMECH</ns1:LAST_NAME>
             <ns1:DISTRICT>Bangalore</ns1:DISTRICT>
+            <ns1:MECH_ID>123456</ns1:MECH_ID>
             <ns1:DOB>2012-12-27</ns1:DOB>
             <ns1:FIRST_NAME>firstMECH</ns1:FIRST_NAME>
             <ns1:SHOP_NAME>XYZ</ns1:SHOP_NAME>
