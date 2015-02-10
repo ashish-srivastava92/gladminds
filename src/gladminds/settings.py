@@ -460,7 +460,7 @@ CUSTOMER_PHONE_NUMBER_UPDATE = {
 
     "sender": "feed-report@gladminds.co",
     "receiver": ["gladminds@hashedin.com"],
-    "subject": "Gladminds customer phone number update",
+    "subject": "Customer phone number update summary",
     "body": """""",
 }
 
