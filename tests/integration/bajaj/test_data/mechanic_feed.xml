@@ -5,15 +5,17 @@
       <ns1:ObjectList>
         <ns1:MechanicData>
           <ns1:MechanicModel>
-            <ns1:PHONE_NUMBER>1234567890</ns1:PHONE_NUMBER>
-            <ns1:LAST_NAME>lastMECH</ns1:LAST_NAME>
-            <ns1:DISTRICT>Bangalore</ns1:DISTRICT>
-            <ns1:DOB>2012-12-27</ns1:DOB>
-            <ns1:FIRST_NAME>firstMECH</ns1:FIRST_NAME>
-            <ns1:SHOP_NAME>XYZ</ns1:SHOP_NAME>
-            <ns1:STATE>Karnataka</ns1:STATE>
-            <ns1:PINCODE>800001</ns1:PINCODE>
-            <ns1:DIST_ID>dist001</ns1:DIST_ID>
+            <ns1:PHONE_NUMBER></ns1:PHONE_NUMBER>
+            <ns1:LAST_NAME></ns1:LAST_NAME>
+            <ns1:MECH_ID>123444555</ns1:MECH_ID>
+            <ns1:TEMP_MECH_ID>TMEKVII0E</ns1:TEMP_MECH_ID>
+            <ns1:DOB></ns1:DOB>
+            <ns1:FIRST_NAME></ns1:FIRST_NAME>
+            <ns1:SHOP_NAME></ns1:SHOP_NAME>
+            <ns1:DISTRICT></ns1:DISTRICT>
+            <ns1:STATE></ns1:STATE>
+            <ns1:PINCODE></ns1:PINCODE>
+            <ns1:DIST_ID></ns1:DIST_ID>
           </ns1:MechanicModel>
         </ns1:MechanicData>
       </ns1:ObjectList>

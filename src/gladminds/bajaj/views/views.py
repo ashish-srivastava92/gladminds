@@ -429,6 +429,9 @@ def exceptions(request, exception=None):
     groups = utils.stringify_groups(request.user)
     if not (Roles.ASCS in groups or Roles.DEALERS in groups):
         return HttpResponseBadRequest()
+    is_dealer = False
+    if Roles.DEALERS in groups:
+        is_dealer = True
     if request.method == 'GET':
         template = 'portal/exception.html'
         data = None
@@ -438,7 +441,7 @@ def exceptions(request, exception=None):
             else:
                 data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
         return render(request, template, {'active_menu': exception,
-                                           "data": data, 'groups': groups})
+                                           "data": data, 'groups': groups, 'is_dealer':is_dealer})
     elif request.method == 'POST':
         function_mapping = {
             'customer': get_customer_info,
