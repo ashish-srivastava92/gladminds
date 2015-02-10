@@ -1,7 +1,7 @@
 #from django.test import TestCase
 import json
 from django.test.client import Client
-from tastypie.test import ResourceTestCase, TestApiClient
+from tastypie.test import ResourceTestCase
 from test_constants import NSM
 client=Client(SERVER_NAME='bajaj')
 
@@ -9,7 +9,6 @@ class TestNationalSalesManager(ResourceTestCase):
     multi_db=True
     def setUp(self):
         super(TestNationalSalesManager, self).setUp()
-#         self.client =Client(SERVER_NAME='bajaj')
  
     def post(self,uri,data):
         resp = client.post(uri, data=json.dumps(data), content_type='application/json')
@@ -22,8 +21,6 @@ class TestNationalSalesManager(ResourceTestCase):
         return resp
     
     def test_get_nsm(self):
-        #uri = '/loyalty/v1/nsmnames/'
-        #resp = self.post(uri,data=NSM)
         resp = self.test_create_nsm()
         self.assertEquals(resp.status_code,201)
         resp = client.get('/loyalty/v1/nsmnames/1/',content_type='application/json')
