@@ -3,8 +3,14 @@ from gladminds.bajaj.admin import brand_admin
 from gladminds.core import urls as core_urls
 from gladminds.core.urls import api_v1
 from gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
+from tastypie.api import Api
+from gladminds.core.apis import loyalty_apis
 
 loyalty = LoyaltyService
+
+api_v1 = Api(api_name="loyalty/v1")
+api_v1.register(loyalty_apis.NationalSalesResource())
+api_v1.register(loyalty_apis.AreaSalesResource())
 
 urlpatterns = patterns('',
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
