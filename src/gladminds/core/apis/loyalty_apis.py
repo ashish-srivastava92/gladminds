@@ -3,7 +3,7 @@ from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.model_fetcher import models
 from tastypie.authorization import Authorization
 
-class NationalSalesResource(CustomBaseModelResource):
+class NsmResource(CustomBaseModelResource):
     class Meta:
         queryset = models.NationalSalesManager.objects.all()
         resource_name = "nsms"
@@ -12,7 +12,7 @@ class NationalSalesResource(CustomBaseModelResource):
         always_return_data = True
         
         
-class AreaSalesResource(CustomBaseModelResource):
+class AsmResource(CustomBaseModelResource):
     class Meta:
         queryset = models.AreaSalesManager.objects.all()
         resource_name = "asms"

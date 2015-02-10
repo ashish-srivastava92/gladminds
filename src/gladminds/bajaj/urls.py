@@ -9,8 +9,8 @@ from gladminds.core.apis import loyalty_apis
 loyalty = LoyaltyService
 
 api_v1 = Api(api_name="loyalty/v1")
-api_v1.register(loyalty_apis.NationalSalesResource())
-api_v1.register(loyalty_apis.AreaSalesResource())
+api_v1.register(loyalty_apis.NsmResource())
+api_v1.register(loyalty_apis.AsmResource())
 
 urlpatterns = patterns('',
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
