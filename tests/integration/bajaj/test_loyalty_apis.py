@@ -5,10 +5,10 @@ from tastypie.test import ResourceTestCase
 from test_constants import NSM
 client=Client(SERVER_NAME='bajaj')
 
-class TestNationalSalesManager(ResourceTestCase):
+class LoyaltyApiTests(ResourceTestCase):
     multi_db=True
     def setUp(self):
-        super(TestNationalSalesManager, self).setUp()
+        super(LoyaltyApiTests, self).setUp()
  
     def post(self,uri,data):
         resp = client.post(uri, data=json.dumps(data), content_type='application/json')
