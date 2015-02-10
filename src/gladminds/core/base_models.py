@@ -769,6 +769,7 @@ class Retailer(BaseModel):
 class Mechanic(BaseModel):
     '''details of Mechanic'''
     mechanic_id = models.CharField(max_length=50, unique=True, default=generate_mech_id)
+    permanent_id = models.CharField(max_length=50, unique=True)
     total_points = models.IntegerField(max_length=50, null=True, blank=True, default=0)
 
     first_name = models.CharField(max_length=50, null=True, blank=True)
@@ -835,6 +836,8 @@ class Mechanic(BaseModel):
         verbose_name_plural = "Mechanics"
 
     def __unicode__(self):
+        if self.permanent_id:
+            return self.permanent_id
         return self.mechanic_id
 
 class SparePartMasterData(BaseModel):
