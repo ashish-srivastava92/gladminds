@@ -132,7 +132,8 @@ class AuthorizedServiceCenter(BaseModel):
     asc_id = models.CharField(
         max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
-
+    asc_owner = models.CharField(max_length=100, null=True, blank=True)
+    asc_owner_email = models.CharField(max_length=100, null=True, blank=True)
     objects = user_manager.AuthorizedServiceCenterManager()
 
     class Meta:
@@ -705,7 +706,27 @@ class Constant(BaseModel):
         abstract = True
         verbose_name_plural = "Constants"
 
-        
+class AreaServiceManager(BaseModel):
+    '''details of Area Service Manager'''
+    asm_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Area Service Managers "
+    
+    def __unicode__(self):
+        return self.asm_id
+    
+class ZonalServiceManager(BaseModel):
+    '''details of Zonal Service Manager'''
+    zsm_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Zonal Service Managers "
+    
+    def __unicode__(self):
+        return self.zsm_id
 #######################LOYALTY TABLES#################################
 
 class NationalSalesManager(BaseModel):

@@ -169,3 +169,9 @@ alter table bajaj_mechanic add column adress_line_6 varchar(40) null;
 #####################################################################################################
 alter table bajaj_customertempregistration add column email_flag boolean default False;
 
+##############################################################################################
+
+alter table bajaj_authorizedservicecenter add foreign key (asm_id) references bajaj_areaservicemanager(id);
+alter table bajaj_authorizedservicecenter add column asc_owner varchar(100) null;
+alter table bajaj_authorizedservicecenter add column asc_owner_email varchar(100) null;
+
