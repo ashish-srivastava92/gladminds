@@ -234,7 +234,7 @@
             "template_key": "CUSTOMER_PHONE_NUMBER_UPDATE",
             "sender": "feed-report@gladminds.co",
             "receiver": "priyanka.n@hashedin.com",
-            "subject": "Gladminds Customer phone number update",
+            "subject": "Customer phone number update summary",
             "body": "Please find the enclosed, customer phone number updates on {date} ", 
             "description": "Customer phone number update mail"
         }
