@@ -48,17 +48,17 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEquals(resp.status_code,201)
         resp = client.get('/loyalty/v1/asms/1/',content_type='application/json')
         self.assertEquals(resp.status_code,200)
-        self.assertEqual(self.deserialize(resp)['phone_number'], "9176339712")
+        self.assertEqual(self.deserialize(resp)['phone_number'], "9999999999")
         return resp
     
     def test_update_asm(self):
         resp = self.test_get_asm() 
         self.assertEquals(resp.status_code,200)
-        a={"phone_number":"9176339715"}
+        a={"phone_number":"9999999998"}
         resp = client.put('/loyalty/v1/asms/1/', data=json.dumps(a), content_type='application/json')
         self.assertEquals(resp.status_code, 200)
         resp = client.get('/loyalty/v1/asms/1/',content_type='application/json')
-        self.assertEqual(self.deserialize(resp)['phone_number'], "9176339715")
+        self.assertEqual(self.deserialize(resp)['phone_number'], "9999999998")
         
         
     
