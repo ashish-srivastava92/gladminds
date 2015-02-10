@@ -335,3 +335,15 @@ NSM = {
         "territory": "south",
         "user": "",
         }
+
+DISTRIBUTOR = {
+               "created_date": "2015-02-04T17:10:26",
+               "modified_date": "2015-02-04T17:10:26",
+               "user": "",
+               "asm":"",
+               "distributor_id": 15689, 
+               "name": "Mrugen",
+               "email": "mrugen@gladminds.co",
+               "phone_number": 8951234509,
+               "city": "bhuj",
+               }
