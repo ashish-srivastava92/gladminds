@@ -167,7 +167,7 @@ class MechanicFeed(BaseFeed):
         total_failed = 0
         for mechanic in self.data_source:
             try:
-                mech_object = models.Mechanic.objects.get(phone_number=mechanic['temp_id'])
+                mech_object = models.Mechanic.objects.get(mechanic_id=mechanic['temp_id'])
                 mech_object.permanent_id=mechanic['mechanic_id']
                 mech_object.save()
             except Exception as ex:

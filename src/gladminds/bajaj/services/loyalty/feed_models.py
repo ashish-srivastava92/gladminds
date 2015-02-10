@@ -97,7 +97,7 @@ class MechanicModel(ComplexModel):
     FIRST_NAME = Unicode
     LAST_NAME = Unicode(default=None)
     PHONE_NUMBER = Unicode
-    DOB = Date
+    DOB = Unicode(default=None)
     SHOP_NAME = Unicode
     DISTRICT = Unicode
     STATE = Unicode
