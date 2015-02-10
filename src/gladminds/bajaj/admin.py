@@ -495,7 +495,7 @@ class MechanicAdmin(GmModelAdmin):
     search_fields = ('mechanic_id',
                      'phone_number', 'first_name',
                      'state', 'district')
-    list_display = ('mechanic_id','first_name', 'date_of_birth',
+    list_display = ('get_mechanic_id','first_name', 'date_of_birth',
                     'phone_number', 'shop_name', 'district',
                     'state', 'pincode', 'registered_by_distributor')
     readonly_fields = ('image_tag',)
@@ -521,7 +521,7 @@ class MechanicAdmin(GmModelAdmin):
         return query_set
 
     def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points', 'sent_to_sap')
+        self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points', 'sent_to_sap', 'permanent_id')
         form = super(MechanicAdmin, self).get_form(request, obj, **kwargs)
         return form
 

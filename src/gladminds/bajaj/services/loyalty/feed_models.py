@@ -92,6 +92,7 @@ class DistributorModelList(ComplexModel):
 
 class MechanicModel(ComplexModel):
     __namespace__ = tns
+    MECH_ID = Unicode
     FIRST_NAME = Unicode
     LAST_NAME = Unicode(default=None)
     PHONE_NUMBER = Unicode
@@ -257,6 +258,7 @@ class MechanicService(ServiceBase):
         for mechanic in ObjectList.MechanicData:
             try:
                 mechanic_list.append({
+                    'mechanic_id': mechanic.MECH_ID.upper(),
                     'first_name': mechanic.FIRST_NAME.upper(),
                     'last_name': mechanic.LAST_NAME.upper(),
                     'mobile': utils.mobile_format(mechanic.PHONE_NUMBER),
