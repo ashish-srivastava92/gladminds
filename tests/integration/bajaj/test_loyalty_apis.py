@@ -2,8 +2,7 @@
 import json
 from django.test.client import Client
 from tastypie.test import ResourceTestCase
-from test_constants import NSM
-from test_constants import DISTRIBUTOR
+from test_constants import NSM, ASM,DISTRIBUTOR
 client=Client(SERVER_NAME='bajaj')
 
 class LoyaltyApiTests(ResourceTestCase):
@@ -79,6 +78,29 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['phone_number'], "8951234409")
         
+        
+    def test_create_asm(self):
+        uri = '/loyalty/v1/asms/'
+        resp = self.post(uri,data=ASM)
+        self.assertEquals(resp.status_code,201)
+        return resp
+    
+    def test_get_asm(self):
+        resp = self.test_create_asm()
+        self.assertEquals(resp.status_code,201)
+        resp = client.get('/loyalty/v1/asms/1/',content_type='application/json')
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['phone_number'], "9999999999")
+        return resp
+    
+    def test_update_asm(self):
+        resp = self.test_get_asm() 
+        self.assertEquals(resp.status_code,200)
+        a={"phone_number":"9999999998"}
+        resp = client.put('/loyalty/v1/asms/1/', data=json.dumps(a), content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        resp = client.get('/loyalty/v1/asms/1/',content_type='application/json')
+        self.assertEqual(self.deserialize(resp)['phone_number'], "9999999998")
         
         
     

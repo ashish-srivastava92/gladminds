@@ -47,6 +47,11 @@ class GmModelAdmin(ModelAdmin):
     
     def get_profile_address(self, obj):
         return obj.user.address
+    
+    def get_mechanic_id(self, obj):
+        if obj.permanent_id:
+            return obj.permanent_id
+        return obj.mechanic_id
 
     get_profile_number.short_description = 'Phone number'
     get_profile_address.short_description = 'Address'
@@ -64,6 +69,7 @@ class GmModelAdmin(ModelAdmin):
     def get_mechanic_state(self, obj):
         return obj.member.state
     
+    get_mechanic_id.short_description = 'Mechanic ID'
     get_mechanic_name.short_description = 'Name'
     get_mechanic_pincode.short_description = 'PIN code'
     get_mechanic_district.short_description = 'City'
