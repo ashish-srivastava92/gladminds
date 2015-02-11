@@ -44,7 +44,7 @@
     	var data = Utils.getFormData('.customer-form'),
     	    purchaseDate={'name':'purchase-date', 'value':$('#purchase-date').val()};
     	data.push(purchaseDate);
-        Utils.submitForm(e, postData, '/aftersell/register/customer');
+        Utils.submitForm(e, data, '/aftersell/register/customer');
         $('.customer-phone').val('').attr('readOnly', false);
         $('.customer-name').val('').attr('readOnly', false);
         $('.purchase-date').val('').attr('readOnly', false).attr('disabled',false);
@@ -56,7 +56,7 @@
     $('.cutomer-reg-form').on('submit', function() {
         $('.customer-phone').val('').attr('readOnly', true);
         $('.customer-name').val('').attr('readOnly', true);
-        $('.purchase-date').val('').attr('readOnly', true);
+        $('.purchase-date').val('').attr('readOnly', false);
         var vin = $('#srch-vin').val(),
           user = $('#user').text().trim(),
           purchaseDate = $('#purchase-date').val(),	
