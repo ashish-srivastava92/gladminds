@@ -2,7 +2,7 @@
 import json
 from django.test.client import Client
 from tastypie.test import ResourceTestCase
-from test_constants import NSM, ASM,DISTRIBUTOR
+from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER
 client=Client(SERVER_NAME='bajaj')
 
 class LoyaltyApiTests(ResourceTestCase):
@@ -60,23 +60,47 @@ class LoyaltyApiTests(ResourceTestCase):
         uri = '/loyalty/v1/distributors/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
-        self.assertEqual(self.deserialize(resp)['phone_number'], "8951234509")
-        self.assertEqual(self.deserialize(resp)['distributor_id'], "15689")
-        self.assertEqual(self.deserialize(resp)['name'], "Mrugen")
-        self.assertEqual(self.deserialize(resp)['email'], "mrugen@gladminds.co")
-        self.assertEqual(self.deserialize(resp)['city'], "bhuj")
+        self.assertEqual(self.deserialize(resp)['phone_number'], "1111111111")
+        self.assertEqual(self.deserialize(resp)['email'], "test@gladminds.co")
         return resp
     
     def test_update_distributor(self):
         resp = self.test_get_distributor()
         self.assertEquals(resp.status_code,200)
-        data={"phone_number":"8951234409"}
+        data={"phone_number":"2222222222"}
         uri = '/loyalty/v1/distributors/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
         uri = '/loyalty/v1/distributors/1/'
         resp = self.get(uri)
-        self.assertEqual(self.deserialize(resp)['phone_number'], "8951234409")
+        self.assertEqual(self.deserialize(resp)['phone_number'], "2222222222")
+    
+    def test_create_retailer(self):
+        uri = '/loyalty/v1/retailers/'
+        resp = self.post(uri,data = RETAILER)
+        self.assertEquals(resp.status_code,201)
+        return resp
+    
+    def test_get_retailer(self):
+        resp = self.test_create_retailer()
+        self.assertEquals(resp.status_code,201)
+        uri = '/loyalty/v1/retailers/1/'
+        resp = self.get(uri)
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['retailer_name'], "Ayush")
+        self.assertEqual(self.deserialize(resp)['retailer_town'], "devghar")
+        return resp
+    
+    def test_update_retailer(self):
+        resp = self.test_get_retailer()
+        self.assertEquals(resp.status_code,200)
+        data={"retailer_town":"alalpur"}
+        uri = '/loyalty/v1/retailers/1/'
+        resp = self.put(uri,data)
+        self.assertEquals(resp.status_code, 200)
+        uri = '/loyalty/v1/retailers/1/'
+        resp = self.get(uri)
+        self.assertEqual(self.deserialize(resp)['retailer_town'], "alalpur")
         
         
     def test_create_asm(self):

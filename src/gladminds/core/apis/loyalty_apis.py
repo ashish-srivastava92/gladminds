@@ -28,6 +28,11 @@ class DistributorResource(CustomBaseModelResource):
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
-    
 
-        
+class RetailerResource(CustomBaseModelResource):
+    class Meta:
+        queryset = models.Retailer.objects.all()
+        resource_name = "retailers"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
