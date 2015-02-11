@@ -83,7 +83,6 @@ class LoyaltyApiTests(ResourceTestCase):
         uri = '/loyalty/v1/distributors/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
-        print "---------------------",self.deserialize(resp)
         self.assertEqual(self.deserialize(resp)['phone_number'], "1111111111")
         self.assertEqual(self.deserialize(resp)["asm"]['asm_id'],"ASM005")
         self.assertEqual(self.deserialize(resp)["user"]["user"]['username'],"15586")
