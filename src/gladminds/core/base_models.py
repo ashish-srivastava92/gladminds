@@ -705,6 +705,9 @@ class Constant(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "Constants"
+        
+    def __unicode__(self):
+        return constant_name
 
         
 #######################LOYALTY TABLES#################################

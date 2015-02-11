@@ -662,6 +662,10 @@ class LoyaltySlaAdmin(GmModelAdmin):
         return str(self.member_resolution_time) + ' ' + self.member_resolution_unit
 
     list_display = ('status','action', reminder_time, resolution_time, member_resolution_time)
+    
+class ConstantAdmin(GmModelAdmin):
+    search_fields = ('constant_name',  'constant_value')
+    list_display = ('constant_name',  'constant_value',)
 
 brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
 
@@ -711,4 +715,4 @@ brand_admin.register(models.SLA, SlaAdmin)
 brand_admin.register(models.ServiceDeskUser, ServiceDeskUserAdmin)
 brand_admin.register(models.Service, ServiceAdmin)
 brand_admin.register(models.ServiceType)
-brand_admin.register(models.Constant)
+brand_admin.register(models.Constant, ConstantAdmin)
