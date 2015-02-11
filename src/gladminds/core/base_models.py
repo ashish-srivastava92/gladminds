@@ -279,6 +279,7 @@ class OldFscData(BaseModel):
     special_case = models.BooleanField(default=False)
     missing_field = models.CharField(max_length=50, null=True, blank=True)
     missing_value = models.CharField(max_length=50, null=True, blank=True)
+    servicing_dealer = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
