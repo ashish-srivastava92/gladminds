@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, url, include
 from gladminds.bajaj.admin import brand_admin
 from gladminds.core import urls as core_urls
+from gladminds.core.apis import user_apis 
 from gladminds.core.urls import api_v1
 from gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
 from tastypie.api import Api
@@ -9,6 +10,8 @@ from gladminds.core.apis import loyalty_apis
 loyalty = LoyaltyService
 
 api_v1 = Api(api_name="loyalty/v1")
+api_v1.register(user_apis.UserResource())
+api_v1.register(user_apis.UserProfileResource())
 api_v1.register(loyalty_apis.NsmResource())
 api_v1.register(loyalty_apis.AsmResource())
 api_v1.register(loyalty_apis.DistributorResource())
