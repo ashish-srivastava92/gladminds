@@ -180,3 +180,14 @@ alter table bajaj_mechanic add column date_of_birth date;
 update bajaj_mechanic set date_of_birth=dob;
 alter table bajaj_mechanic drop column dob;
 
+#####################################################################################3
+
+select a.asc_id, a.user_id, d.dealer_id, d.user_id from bajaj_authorizedservicecenter a inner join bajaj_dealer d on d.dealer_id=a.asc_id;
+alter table bajaj_oldfscdata add column servicing_dealer varchar(50) null;
+show create table bajaj_oldfscdata;
+update bajaj_oldfscdata o set o.servicing_dealer=(select dealer_id from bajaj_dealer where d.user_id=o.dealer_id);
+alter table bajaj_oldfscdata drop foreign key `dealer_id_refs_user_id_9e0dec6c`;
+alter table bajaj_oldfscdata drop key `bajaj_oldfscdata_f65f7b5d`;
+alter table bajaj_oldfscdata drop column dealer_id;
+delete from bajaj_dealer where dealer_id in (select asc_id from bajaj_authorizedservicecenter);
+

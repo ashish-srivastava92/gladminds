@@ -331,16 +331,15 @@ class OldFscFeed(BaseFeed):
     
     def import_data(self):
         for fsc in self.data_source:
-            dealer_data = self.check_or_create_dealer(dealer_id=fsc['dealer'])
             product_data = models.ProductData.objects.filter(product_id=fsc['vin'])
             
             if len(product_data)==0:
-                self.save_to_old_fsc_table(dealer_data, fsc['service'], 'product_id', fsc['vin'])
+                self.save_to_old_fsc_table(fsc['dealer'], fsc['service'], 'product_id', fsc['vin'])
             else:
                 coupon_data = models.CouponData.objects.filter(product__product_id=fsc['vin'],
                                         service_type=int(fsc['service']))
                 if len(coupon_data) == 0:
-                    self.save_to_old_fsc_table(dealer_data, fsc['service'], 'service_type', fsc['service'], vin = product_data[0] )
+                    self.save_to_old_fsc_table(fsc['dealer'], fsc['service'], 'service_type', fsc['service'], vin = product_data[0] )
                 else:
                     cupon_details = coupon_data[0]
                     cupon_details.status = 6
@@ -356,7 +355,7 @@ class OldFscFeed(BaseFeed):
         except Exception as ex:
             old_coupon_data = models.OldFscData(product=vin, service_type = int(st),
                                              status=6, closed_date=datetime.now(), sent_to_sap = True,
-                                             dealer = dealer_detail, missing_field=missing_field, 
+                                             servicing_dealer = dealer_detail, missing_field=missing_field, 
                                              missing_value=missing_value)
             old_coupon_data.save()
 
