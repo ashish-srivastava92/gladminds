@@ -167,24 +167,9 @@ class MechanicFeed(BaseFeed):
         total_failed = 0
         for mechanic in self.data_source:
             try:
-                mech_object = models.Mechanic.objects.filter(phone_number=mechanic['mobile'])
-                if not mech_object:
-                    mech_id = utils.generate_temp_id('TME')
-                    if mechanic['dist_id']:
-                        dist_object = models.Distributor.objects.get(distributor_id=mechanic['dist_id'])
-                    mech_object = models.Mechanic(registered_by_distributor=dist_object,
-                                    mechanic_id=mech_id,
-                                    first_name = mechanic['first_name'],
-                                    last_name = mechanic['last_name'],
-                                    date_of_birth=mechanic['dob'],
-                                    phone_number=mechanic['mobile'],
-                                    shop_name =  mechanic['shop_name'],
-                                    state =  mechanic['state'],
-                                    pincode =  mechanic['pincode'],
-                                    )
-                    mech_object.save()
-                else:
-                    raise ValueError('Mechanic number already exists')
+                mech_object = models.Mechanic.objects.get(mechanic_id=mechanic['temp_id'])
+                mech_object.permanent_id=mechanic['mechanic_id']
+                mech_object.save()
             except Exception as ex:
                 total_failed += 1
                 ex = "[MechanicFeed]: id-{0} :: {1}".format(mechanic['mobile'], ex)

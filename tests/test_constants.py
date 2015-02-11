@@ -331,7 +331,38 @@ NSM = {
         "modified_date": "2015-02-04T17:11:18",
         "name": "Raghunath",
         "nsm_id": "NSM002",
-        "phone_number": 1234567890,
+        "phone_number": "1234567890",
         "territory": "south",
         "user": "",
         }
+
+DISTRIBUTOR = {
+               "created_date": "2015-02-04T17:10:26",
+               "modified_date": "2015-02-04T17:10:26",
+               "user": "",
+               "asm":"",
+               "distributor_id": 15689, 
+               "name": "Mrugen",
+               "email": "test@gladminds.co",
+               "phone_number": 1111111111,
+               "city": "bhuj",
+               }
+
+ASM = {
+        "asm_id": "ASM005",
+        "created_date": "2015-02-04T17:11:18",
+        "email": "spremnath@bajajauto.co.in",
+        "modified_date": "2015-02-09T13:05:04",
+        "name": "PREM NATH",
+        "phone_number": "9999999999",
+        "state": "Tamil Nadu",
+        "user":"",
+        "nsm":"",
+       }
+
+RETAILER = {
+            "retailer_name": "Ayush",
+            "retailer_town": "devghar",
+            "created_date":  "2015-02-04T17:10:26",
+            "modified_date": "2015-02-04T17:10:26",
+            }

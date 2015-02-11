@@ -166,6 +166,17 @@ alter table bajaj_mechanic add column adress_line_4 varchar(40) null;
 alter table bajaj_mechanic add column adress_line_5 varchar(40) null;
 alter table bajaj_mechanic add column adress_line_6 varchar(40) null;
 
+alter table bajaj_mechanic add column download_detail bool default 0;
 #####################################################################################################
 alter table bajaj_customertempregistration add column email_flag boolean default False;
+
+alter table bajaj_mechanic add permanent_id char(50) default null;
+alter table bajaj_mechanic add constraint unique_id unique(permanent_id);
+
+alter table bajaj_mechanic add column dob date;
+update bajaj_mechanic set dob=date_of_birth;
+alter table bajaj_mechanic drop column date_of_birth;
+alter table bajaj_mechanic add column date_of_birth date;
+update bajaj_mechanic set date_of_birth=dob;
+alter table bajaj_mechanic drop column dob;
 
