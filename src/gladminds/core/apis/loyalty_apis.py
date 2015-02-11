@@ -126,7 +126,7 @@ class RedemptionResource(CustomBaseModelResource):
                 redemption_dict['date_of_birth'] = redemptionrequest.member.date_of_birth.strftime('%Y-%m-%dT%H:%M:%S')
                 redemption_dict['image_url'] = str(redemptionrequest.member.image_url)
                 requests.append(redemption_dict)
-            return HttpResponse(json.dumps(redemption_dict), content_type="application/json")
+            return HttpResponse(json.dumps(requests), content_type="application/json")
         else: 
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
         
