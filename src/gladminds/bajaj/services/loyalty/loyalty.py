@@ -4,6 +4,10 @@ import logging
 import json
 from datetime import datetime,timedelta
 from constance import config
+import StringIO
+import csv
+from django.http import HttpResponse
+from django.core.servers.basehttp import FileWrapper
 
 from django.conf import settings
 from django.http.response import HttpResponse
@@ -23,6 +27,35 @@ AUDIT_ACTION = 'SEND TO QUEUE'
 
 class LoyaltyService(CoreLoyaltyService):
     '''Class for loyalty service'''
+    
+    def download_welcome_kit(self, request, choice):
+        '''Download list of new or all registered member'''
+        kwargs = {}
+        file_name=choice+'_member_details_' + datetime.now().strftime('%d_%m_%y')
+        headers=constants.WELCOME_KIT_MECHANIC_FIELDS
+        if choice=='new':
+            kwargs['download_detail'] = False
+        kwargs['form_status'] = 'Complete'
+        mechanics = models.Mechanic.objects.filter(**kwargs)
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(headers)
+        for mechanic in mechanics:
+            data=[]
+            for field in headers:
+                if field=='image_url':
+                    image_url="{0}/{1}".format(settings.S3_BASE_URL, mechanic.image_url)
+                    data.append(image_url)
+                elif field=='Mechanic ID':
+                    data.append(getattr(mechanic, 'permanent_id'))
+                else:
+                    data.append(getattr(mechanic, field))
+            csvwriter.writerow(data)
+        mechanics.update(download_detail=True)
+        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        return response
+
 
     def send_welcome_sms(self, mech):
         '''Send welcome sms to mechanics when registered'''

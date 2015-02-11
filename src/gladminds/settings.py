@@ -459,8 +459,15 @@ VIN_SYNC_FEED = {
 CUSTOMER_PHONE_NUMBER_UPDATE = {
 
     "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds@hashedin.com"],
-    "subject": "Customer phone number update summary",
+    "receiver": ["priyanka.n@hashedin.com"],
+    "subject": "Gladminds customer phone number update",
+    "body": """""",
+}
+
+POLICY_DISCREPANCY_MAIL_TO_MANAGER = {
+    "sender": "feed-report@gladminds.co",
+    "receiver": ["pavankumar.s@hashedin.com"],
+    "subject": "Gladminds customer phone number update",
     "body": """""",
 }
 

@@ -291,7 +291,7 @@ def validate_coupon(sms_dict, phone_number):
 
 @log_time
 def close_coupon(sms_dict, phone_number):
-    service_advisor = validate_service_advisor(phone_number)
+    service_advisor = validate_service_advisor(phone_number,close_action=True)
     unique_service_coupon = sms_dict['usc']
     sap_customer_id = sms_dict.get('sap_customer_id', None)
     message = None
@@ -327,10 +327,13 @@ def close_coupon(sms_dict, phone_number):
     return {'status': True, 'message': message}
 
 
-def validate_service_advisor(phone_number):
+def validate_service_advisor(phone_number, close_action=False):
     all_sa_dealer_obj = models.ServiceAdvisor.objects.active(phone_number)
-    if len(all_sa_dealer_obj) == 0:
-        message=templates.get_template('UNAUTHORISED_SA')
+    if len(all_sa_dealer_obj) == 0 or (close_action and all_sa_dealer_obj[0].asc == None):
+        if len(all_sa_dealer_obj) == 0:
+            message=templates.get_template('UNAUTHORISED_SA')
+        else:
+            message=templates.get_template('DEALER_UNAUTHORISED')
         sa_phone = utils.get_phone_number_format(phone_number)
         sms_log(receiver=sa_phone, action=AUDIT_ACTION, message=message)
         send_job_to_queue(send_service_detail, {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})

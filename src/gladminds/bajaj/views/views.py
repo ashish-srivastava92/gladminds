@@ -429,6 +429,9 @@ def exceptions(request, exception=None):
     groups = utils.stringify_groups(request.user)
     if not (Roles.ASCS in groups or Roles.DEALERS in groups):
         return HttpResponseBadRequest()
+    is_dealer = False
+    if Roles.DEALERS in groups:
+        is_dealer = True
     if request.method == 'GET':
         template = 'portal/exception.html'
         data = None
@@ -438,7 +441,7 @@ def exceptions(request, exception=None):
             else:
                 data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
         return render(request, template, {'active_menu': exception,
-                                           "data": data, 'groups': groups})
+                                           "data": data, 'groups': groups, 'is_dealer':is_dealer})
     elif request.method == 'POST':
         function_mapping = {
             'customer': get_customer_info,
@@ -712,9 +715,12 @@ def get_active_asc_report(request, role=None):
         month = now.month
     data_list = []
     asc_details = utils.get_asc_data(data, role)
+    print "43333333333", asc_details
     active_asc_list = asc_details.filter(~Q(date_joined=F('last_login')))
     active_ascs = active_asc_list.values_list('username', flat=True)
+    print "233333333333333333", active_ascs
     active_user_profile = models.UserProfile.objects.filter(user__username__in=active_ascs)
+    print "34444444", active_user_profile
     for asc_data in active_user_profile:
         active_ascs = OrderedDict();
         active_ascs['id'] = asc_data.user.username

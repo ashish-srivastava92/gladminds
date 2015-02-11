@@ -14,6 +14,18 @@ GM_USER = {
                     }
            }
 
+USER = {
+        "date_joined":"2015-02-04T17:10:24",
+         "email":"test@gladminds.co",
+         "first_name":"TEST USER",
+         "id":6,
+         "is_active":True,
+         "is_staff":False,
+         "last_login":"2015-02-04T17:10:24",
+         "last_name":"",
+         "username":"15586"
+        }
+
 GM_PRODUCTS = {
                 "customer_product_number": None,
                 "engine": None,
@@ -265,7 +277,7 @@ AFTERBUY_PRODUCTSUPPORT = {
                            "contact":"1234567890",
                            "website":"bajaj.com",
                            "email_id":"afterbuy@gmail.com",
-                           "address":"",
+                           "address":""
                            }
 
 AFTERBUY_SELLINFORMATION = {
@@ -322,5 +334,111 @@ AFTERBUY_REGISTATION = {
                         "engine_number" :"",
                         "owner_name" :"asdf",
                         "relation_name" :"owner",
-                        "model":"aaa",
+                        "model":"aaa"
                         }
+
+USER_PROFILE = {
+                "address":"CHENNAI",
+                "country":"",
+                "created_date":"2015-02-04T17:10:24",
+                "date_of_birth":"1992-12-29T00:00:00",
+                "gender":"",
+                "image_url":"",
+                "modified_date":"2015-02-04T17:10:24",
+                "phone_number":"",
+                "pincode":"",
+                "resource_uri":"",
+                "state":"",
+                "status":"",
+                "user": USER
+                }
+
+NSM = {
+       "created_date": "2015-02-04T17:11:18",
+        "email": "rkrishnan@bajajauto.co.in",
+        "modified_date": "2015-02-04T17:11:18",
+        "name": "Raghunath",
+        "nsm_id": "NSM002",
+        "phone_number": "1234567890",
+        "territory": "south",
+        "user": ""
+        }
+
+ASM = {
+        "asm_id": "ASM005",
+        "created_date": "2015-02-04T17:11:18",
+        "email": "spremnath@bajajauto.co.in",
+        "modified_date": "2015-02-09T13:05:04",
+        "name": "PREM NATH",
+        "phone_number": "9999999999",
+        "state": "Tamil Nadu",
+        "user":"",
+        "nsm":""
+       }
+
+
+PARTNER = {
+            "address": "F-89,Kamla nagar,kanpur",
+            "created_date": "2015-02-11T13:56:26",
+            "modified_date": "2015-02-11T13:56:26",
+            "name": "Anchit",
+            "partner_id": "PRT5Y76YB",
+            "partner_type": "Merchant",
+            "user":"",
+        }
+
+DISTRIBUTOR = {
+               "created_date": "2015-02-04T17:10:26",
+               "modified_date": "2015-02-04T17:10:26",
+               "user": USER_PROFILE,
+               "asm":ASM,
+               "distributor_id": 15689, 
+               "name": "Mrugen",
+               "email": "test@gladminds.co",
+               "phone_number": 1111111111,
+               "city": "bhuj"
+               }
+
+RETAILER = {
+            "retailer_name": "Ayush",
+            "retailer_town": "devghar",
+            "created_date":  "2015-02-04T17:10:26",
+            "modified_date": "2015-02-04T17:10:26",
+            }
+
+
+PRODUCT_TYPE = {
+                "brand_product_category":"",
+                "created_date": "2015-02-04T17:10:39",
+                "id": 1,
+                "image_url": "http://test",
+                "is_active": True,
+                "modified_date": "2015-02-04T17:10:39",
+                "product_type": ""
+                }
+
+SPARE_MASTER = {
+                "category": "cat1",
+                "created_date": "2015-02-04T17:10:39",
+                "description": "TEST DESCRIPTION",
+                "id": 1,
+                "modified_date": "2015-02-04T17:10:39",
+                "part_model": "2S",
+                "part_number": "11111111",
+                "product_type": PRODUCT_TYPE,
+                "segment_type": "",
+                "supplier": ""
+                }
+
+SPARE_POINT = {
+               "MRP": 30,
+               "created_date":"2015-02-04T17:10:24",
+               "id":1,
+               "modified_date":"2015-02-11T17:01:38",
+               "part_number": SPARE_MASTER,
+               "points":18,
+               "price":None,
+               "territory":"South",
+               "valid_from":"2014-12-22T00:00:00",
+               "valid_till":"2015-12-22T00:00:00"
+               }
