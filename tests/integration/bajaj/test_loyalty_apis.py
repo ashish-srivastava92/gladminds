@@ -2,7 +2,7 @@
 import json
 from django.test.client import Client
 from tastypie.test import ResourceTestCase
-from test_constants import NSM, ASM
+from test_constants import NSM, ASM, PARTNER
 client=Client(SERVER_NAME='bajaj')
 
 class LoyaltyApiTests(ResourceTestCase):
@@ -59,6 +59,31 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEquals(resp.status_code, 200)
         resp = client.get('/loyalty/v1/asms/1/',content_type='application/json')
         self.assertEqual(self.deserialize(resp)['phone_number'], "9999999998")
+        
+    def test_create_partner(self):
+        uri = '/loyalty/v1/partner/'
+        resp = self.post(uri,data=PARTNER)
+        self.assertEquals(resp.status_code,201)
+        return resp
+    
+    def test_get_partner(self):
+        resp = self.test_create_partner()
+        self.assertEquals(resp.status_code,201)
+        resp = client.get('/loyalty/v1/partner/1/',content_type='application/json')
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['name'], "Anchit")
+        return resp
+    
+    def test_update_partner(self):
+        resp = self.test_get_partner() 
+        self.assertEquals(resp.status_code,200)
+        a={"name":"Abhinav"}
+        resp = client.put('/loyalty/v1/partner/1/', data=json.dumps(a), content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        resp = client.get('/loyalty/v1/partner/1/',content_type='application/json')
+        self.assertEqual(self.deserialize(resp)['name'], "Abhinav")
+        
+    
         
         
     
