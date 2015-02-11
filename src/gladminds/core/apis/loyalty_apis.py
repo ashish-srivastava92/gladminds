@@ -13,6 +13,7 @@ from django.db.models.query_utils import Q
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.utils.urls import trailing_slash
 from tastypie import fields
+from gladminds.core.utils import get_dict_from_object
 
 class NsmResource(CustomBaseModelResource):
     class Meta:
@@ -84,7 +85,7 @@ class MemberResource(CustomBaseModelResource):
     
     class Meta:
         queryset = models.Mechanic.objects.all()
-        resource_name = "member"
+        resource_name = "members"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -98,7 +99,7 @@ class RedemptionResource(CustomBaseModelResource):
     
     class Meta:
         queryset = models.RedemptionRequest.objects.all()
-        resource_name = "redemption-request"
+        resource_name = "redemption-requests"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -106,22 +107,26 @@ class RedemptionResource(CustomBaseModelResource):
                      "member": ALL_WITH_RELATIONS,
                      "resolution_flag":ALL,
                      }
-
-#     def prepend_urls(self):
-#         return [
-#             url(r"^(?P<resource_name>%s)/member-pending-request%s" % (self._meta.resource_name,trailing_slash()),
-#                                                         self.wrap_view('pending_redemption_request'), name="pending_redemption_request")
-#                 ]
-#   
-#     def pending_redemption_request(self,request, **kwargs):
-#         redemptionrequests = models.RedemptionRequest.objects.filter(~Q(status='Delivered')).select_related('member')
-#         requests  = []
-#         for redemptionrequest in redemptionrequests: 
-#             redemption_dict = model_to_dict(redemptionrequest.member,exclude=['expected_delivery_date','due_date','image_url'])
-#             redemption_dict['created_date'] = str(redemptionrequest.member.created_date)
-#             redemption_dict['due_date'] = str(redemptionrequest.member.modified_date)
-#             redemption_dict['image_url'] = str(redemptionrequest.member.image_url)
-#             redemption_dict['registered_date'] = str(redemptionrequest.member.registered_date)
-#             redemption_dict['date_of_birth'] = str(redemptionrequest.member.date_of_birth)
-#             requests.append(redemption_dict)
-#         return HttpResponse(json.dumps(request), content_type="application/json")
+ 
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/members-details/(?P<status>[a-zA-Z.-]+)%s" % (self._meta.resource_name,trailing_slash()),
+                                                        self.wrap_view('pending_redemption_request'), name="pending_redemption_request")
+                ]
+   
+    def pending_redemption_request(self,request, **kwargs):
+        status = kwargs['status']
+        redemptionrequests = models.RedemptionRequest.objects.filter(~Q(status=status)).select_related('member')
+        requests  = []
+        if request.method == 'GET':
+            for redemptionrequest in redemptionrequests: 
+                redemption_dict = model_to_dict(redemptionrequest.member,exclude=['expected_delivery_date','due_date','image_url'])
+                redemption_dict['due_date'] = redemptionrequest.member.modified_date.strftime('%Y-%m-%dT%H:%M:%S')
+                redemption_dict['registered_date'] = redemptionrequest.member.registered_date.strftime('%Y-%m-%dT%H:%M:%S')
+                redemption_dict['date_of_birth'] = redemptionrequest.member.date_of_birth.strftime('%Y-%m-%dT%H:%M:%S')
+                redemption_dict['image_url'] = str(redemptionrequest.member.image_url)
+                requests.append(redemption_dict)
+            return HttpResponse(json.dumps(redemption_dict), content_type="application/json")
+        else: 
+            return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+        

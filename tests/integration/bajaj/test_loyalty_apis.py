@@ -205,7 +205,7 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEqual(self.deserialize(resp)['image_url'], "/media/qwer/alalpur")
 
     def test_create_redemptiomrequest(self):
-        uri = '/loyalty/v1/redemption-request/'
+        uri = '/loyalty/v1/redemption-requests/'
         create_mock_data = REDEMPTION_REQUEST
         resp = self.post(uri,data=create_mock_data)
         self.assertEquals(resp.status_code,201)
@@ -214,7 +214,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_redemptiomrequest(self):
         resp = self.test_create_redemptiomrequest()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/redemption-request/1/'
+        uri = '/loyalty/v1/redemption-requests/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['image_url'], None)
@@ -224,29 +224,36 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_redemptiomrequest()
         self.assertEquals(resp.status_code,200)
         data={"resolution_flag":False}
-        uri = '/loyalty/v1/redemption-request/1/'
+        uri = '/loyalty/v1/redemption-requests/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/redemption-request/1/'
+        uri = '/loyalty/v1/redemption-requests/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['is_approved'], False)
     
     ''' within sla and overdue test case '''
  
     def test_get_redemptiomrequest_by_overdue(self):
-		resp = self.test_create_redemptiomrequest()
-		self.assertEquals(resp.status_code,201)
-		uri = '/loyalty/v1/redemption-request/1/?resolution_flag=True'
-		resp = self.get(uri)
-		self.assertEquals(resp.status_code,200)
-		self.test_update_redemptiomrequest()
-		uri = '/loyalty/v1/redemption-request/1/?resolution_flag=False'
-		resp = self.get(uri)
-		self.assertEquals(resp.status_code,200)
-		
+        resp = self.test_create_redemptiomrequest()
+        self.assertEquals(resp.status_code,201)
+        uri = '/loyalty/v1/redemption-requests/?resolution_flag=True'
+        resp = self.get(uri)
+        self.assertEquals(resp.status_code,200)
+        self.test_update_redemptiomrequest()
+        uri = '/loyalty/v1/redemption-requests/?resolution_flag=False'
+        resp = self.get(uri)
+        self.assertEquals(resp.status_code,200)
+
     def test_get_redemptiomrequest_by_state(self):
-    	resp = self.test_create_redemptiomrequest()
-    	self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/redemption-request/1/?member__state=karnataka'
+        resp = self.test_create_redemptiomrequest()
+        self.assertEquals(resp.status_code,201)
+        uri = '/loyalty/v1/redemption-requests/?member__state=karnataka'
+        resp = self.get(uri)
+        self.assertEquals(resp.status_code,200)
+
+    def test_get_mechanic_list(self):
+        resp = self.test_create_redemptiomrequest()
+        self.assertEquals(resp.status_code,201)
+        uri = '/loyalty/v1/redemption-requests/members-details/open/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
