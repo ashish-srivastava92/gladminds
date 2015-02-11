@@ -128,6 +128,26 @@ def customer_phone_number_update(customer_details=None):
         logger.info("[Exception customer phone number update]: {0}".format(ex))
 
 
+def discrepant_coupon_update(discrepant_coupons=None):
+    try:
+        yesterday = datetime.now().date() - timedelta(days=1)
+        mail_detail = get_email_template('POLICY_DISCREPANCY_MAIL_TO_MANAGER')
+        receivers = get_mail_receiver(settings.POLICY_DISCREPANCY_MAIL_TO_MANAGER, mail_detail)
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(["VIN", "SERVICE TYPE", "VALID DAYS", "VALID KMS"])
+
+        for coupon in discrepant_coupons:
+            csvwriter.writerow([coupon['vin'], coupon['service_type'], coupon['valid_days'],
+                                coupon['valid_kms']])
+                    
+        send_email_with_file_attachment(mail_detail['sender'], receivers, mail_detail['subject'],
+                                          mail_detail['body'].format(date=yesterday.strftime("%b %d %Y")), 'customer_phone_number_update_',
+                                          csvfile)
+        logger.info("Sending out discrepant coupon update emails")
+    except Exception as ex:
+        logger.info("[Exception discrepant coupon update ]: {0}".format(ex))
+
 def send_vin_sync_feed_report(feed_data=None):
     try:
         yesterday = datetime.now().date() - timedelta(days=1)
