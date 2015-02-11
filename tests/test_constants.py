@@ -429,3 +429,9 @@ SPARE_MASTER = {
                 "segment_type": "",
                 "supplier": ""
                 }
+
+SPARE_PART_UPC = {  
+                "is_used":False,
+                "unique_part_code":"UPCC50",
+                "part_number": SPARE_MASTER
+                }

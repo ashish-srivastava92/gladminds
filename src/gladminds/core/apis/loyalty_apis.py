@@ -59,3 +59,12 @@ class SpareMasterResource(CustomBaseModelResource):
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
+        
+class SparePartUPCResource(CustomBaseModelResource):
+    part_number = fields.ForeignKey(SpareMasterResource, 'part_number', full=True)
+    class Meta:
+        queryset = models.SparePartUPC.objects.all()
+        resource_name = "spare-upcs"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
