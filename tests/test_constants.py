@@ -376,6 +376,17 @@ ASM = {
         "nsm":""
        }
 
+
+PARTNER = {
+            "address": "F-89,Kamla nagar,kanpur",
+            "created_date": "2015-02-11T13:56:26",
+            "modified_date": "2015-02-11T13:56:26",
+            "name": "Anchit",
+            "partner_id": "PRT5Y76YB",
+            "partner_type": "Merchant",
+            "user":"",
+        }
+
 DISTRIBUTOR = {
                "created_date": "2015-02-04T17:10:26",
                "modified_date": "2015-02-04T17:10:26",
@@ -394,6 +405,7 @@ RETAILER = {
             "created_date":  "2015-02-04T17:10:26",
             "modified_date": "2015-02-04T17:10:26",
             }
+
 
 PRODUCT_TYPE = {
                 "brand_product_category":"",

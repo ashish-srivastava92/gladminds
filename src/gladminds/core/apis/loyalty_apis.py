@@ -22,6 +22,14 @@ class AsmResource(CustomBaseModelResource):
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
+        
+class PartnerResource(CustomBaseModelResource):
+    class Meta:
+        queryset = models.Partner.objects.all()
+        resource_name = "partner"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
 
 
 class DistributorResource(CustomBaseModelResource):
@@ -33,6 +41,7 @@ class DistributorResource(CustomBaseModelResource):
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
+
 
 class RetailerResource(CustomBaseModelResource):
     class Meta:
