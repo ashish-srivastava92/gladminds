@@ -41,24 +41,25 @@
     
 
     $('.customer-form').on('submit', function(e) {
-        var data = Utils.getFormData('.customer-form'),
-            vin = $('#srch-vin').val();
-        data['vin'] = vin;
+    	var data = Utils.getFormData('.customer-form'),
+    	    purchaseDate={'name':'purchase-date', 'value':$('#purchase-date').val()};
+    	data.push(purchaseDate);
         Utils.submitForm(e, data, '/aftersell/register/customer');
         $('.customer-phone').val('').attr('readOnly', false);
         $('.customer-name').val('').attr('readOnly', false);
-        $('.purchase-date').val('').attr('readOnly', false);
+        $('.purchase-date').val('').attr('readOnly', false).attr('disabled',false);
         $('.customer-id').val('').attr('readOnly', false);
         $('.customer-submit').attr('disabled', true);
         return false;
     });
     
     $('.cutomer-reg-form').on('submit', function() {
-        $('.customer-phone').val('').attr('disabled', true);
-        $('.customer-name').val('').attr('disabled', true);
-        $('.purchase-date').val('').attr('disabled', true);
+        $('.customer-phone').val('').attr('readOnly', true);
+        $('.customer-name').val('').attr('readOnly', true);
+        $('.purchase-date').val('').attr('readOnly', false);
         var vin = $('#srch-vin').val(),
           user = $('#user').text().trim(),
+          purchaseDate = $('#purchase-date').val(),	
           messageModal = $('.modal.message-modal'),
           messageBlock = $('.modal-body', messageModal);
         if(vin.trim().length!==17){
@@ -81,19 +82,19 @@
             		 	}
             	
             else if (data['phone']) {
-                  $('.customer-phone').val(data['phone']).attr('disabled', false).attr('readOnly', true);
+                  $('.customer-phone').val(data['phone']).attr('readOnly', true);
             	  if (data['group']=='AuthorisedServiceCenters' || data['group']=='Dealers'){
             		  $('.customer-phone').val(data['phone']).attr('readOnly', false);
             	}
                   $('.customer-name').val(data['name']).attr('readOnly', true);
-                  $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
+                  $('.purchase-date').val(data['purchase_date']).attr('disabled', true);
                   $('.customer-id').val(data['id']).attr('readOnly', true);
                   $('.customer-submit').attr('disabled', false);
               }	
               else if (data['message']) {
-                  $('.customer-phone').val('').attr('readOnly', false).attr('disabled', false);
-            	  $('.customer-name').val('').attr('readOnly', false).attr('disabled', false);
-                  $('.purchase-date').val('').attr('readOnly', false).attr('disabled', false);
+                  $('.customer-phone').val('').attr('readOnly', false);
+            	  $('.customer-name').val('').attr('readOnly', false);
+            	  $('.purchase-date').val('').attr('disabled', false);
                   $('.customer-id').val('').attr('readOnly', false);
                   $('.customer-submit').attr('disabled', true);
                   messageBlock.text(data.message);
