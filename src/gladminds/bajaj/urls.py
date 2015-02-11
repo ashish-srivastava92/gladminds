@@ -5,7 +5,7 @@ from gladminds.core.apis import user_apis
 from gladminds.core.urls import api_v1
 from gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
 from tastypie.api import Api
-from gladminds.core.apis import loyalty_apis
+from gladminds.core.apis import loyalty_apis, product_apis
 
 loyalty = LoyaltyService
 
@@ -17,6 +17,8 @@ api_v1.register(loyalty_apis.AsmResource())
 api_v1.register(loyalty_apis.PartnerResource())
 api_v1.register(loyalty_apis.DistributorResource())
 api_v1.register(loyalty_apis.RetailerResource())
+api_v1.register(product_apis.ProductTypeResource())
+api_v1.register(loyalty_apis.SpareMasterResource())
 
 urlpatterns = patterns('',
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
