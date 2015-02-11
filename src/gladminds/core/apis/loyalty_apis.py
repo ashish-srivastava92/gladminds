@@ -26,7 +26,7 @@ class AsmResource(CustomBaseModelResource):
 class PartnerResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Partner.objects.all()
-        resource_name = "partner"
+        resource_name = "partners"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -55,7 +55,16 @@ class SpareMasterResource(CustomBaseModelResource):
     product_type = fields.ForeignKey(ProductTypeResource, 'product_type', full=True)
     class Meta:
         queryset = models.SparePartMasterData.objects.all()
-        resource_name = "spare-master"
+        resource_name = "spare-masters"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+class SparePartPointResource(CustomBaseModelResource):
+    part_number = fields.ForeignKey(SpareMasterResource, 'part_number', full=True)
+    class Meta:
+        queryset = models.SparePartPoint.objects.all()
+        resource_name = "spare-points"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True

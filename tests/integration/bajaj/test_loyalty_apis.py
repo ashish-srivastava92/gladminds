@@ -2,7 +2,7 @@
 import json
 from django.test.client import Client
 from tastypie.test import ResourceTestCase
-from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER,SPARE_MASTER,PARTNER,SPARE_PART_UPC
+from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER,SPARE_MASTER,PARTNER,SPARE_PART_UPC, SPARE_POINT
 
 client=Client(SERVER_NAME='bajaj')
 
@@ -73,7 +73,7 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEqual(self.deserialize(resp)['phone_number'], "9999999998")
         
     def test_create_partner(self):
-        uri = '/loyalty/v1/partner/'
+        uri = '/loyalty/v1/partners/'
         resp = self.post(uri,data=PARTNER)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -81,7 +81,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_partner(self):
         resp = self.test_create_partner()
         self.assertEquals(resp.status_code,201)
-        resp = client.get('/loyalty/v1/partner/1/',content_type='application/json')
+        resp = client.get('/loyalty/v1/partners/1/',content_type='application/json')
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['name'], "Anchit")
         return resp
@@ -90,9 +90,9 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_partner() 
         self.assertEquals(resp.status_code,200)
         a={"name":"Abhinav"}
-        resp = client.put('/loyalty/v1/partner/1/', data=json.dumps(a), content_type='application/json')
+        resp = client.put('/loyalty/v1/partners/1/', data=json.dumps(a), content_type='application/json')
         self.assertEquals(resp.status_code, 200)
-        resp = client.get('/loyalty/v1/partner/1/',content_type='application/json')
+        resp = client.get('/loyalty/v1/partners/1/',content_type='application/json')
         self.assertEqual(self.deserialize(resp)['name'], "Abhinav")
         
     def test_create_distributor(self):     
@@ -151,7 +151,7 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEqual(self.deserialize(resp)['retailer_town'], "alalpur")
     
     def test_create_spare_master(self):
-        uri = '/loyalty/v1/spare-master/'
+        uri = '/loyalty/v1/spare-masters/'
         resp = self.post(uri,data = SPARE_MASTER)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -159,7 +159,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_spare_master(self):
         resp = self.test_create_spare_master()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/spare-master/1/'
+        uri = '/loyalty/v1/spare-masters/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['part_number'], "11111111")
@@ -170,10 +170,10 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_spare_master()
         self.assertEquals(resp.status_code,200)
         data={"part_model":"3S"}
-        uri = '/loyalty/v1/spare-master/1/'
+        uri = '/loyalty/v1/spare-masters/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/spare-master/1/'
+        uri = '/loyalty/v1/spare-masters/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['part_model'], "3S")
         
@@ -204,3 +204,29 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEqual(self.deserialize(resp)['unique_part_code'], "UPCC51")
 
     
+    def test_create_spare_part_point(self):
+        uri = '/loyalty/v1/spare-points/'
+        resp = self.post(uri,data = SPARE_POINT)
+        self.assertEquals(resp.status_code,201)
+        return resp
+    
+    def test_get_spare_part_point(self):
+        resp = self.test_create_spare_part_point()
+        self.assertEquals(resp.status_code,201)
+        uri = '/loyalty/v1/spare-points/1/'
+        resp = self.get(uri)
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['MRP'], 30)
+        self.assertEqual(self.deserialize(resp)["part_number"]['part_number'], "11111111")
+        return resp
+    
+    def test_update_spare_part_point(self):
+        resp = self.test_get_spare_part_point()
+        self.assertEquals(resp.status_code,200)
+        data={"MRP": 31}
+        uri = '/loyalty/v1/spare-points/1/'
+        resp = self.put(uri,data)
+        self.assertEquals(resp.status_code, 200)
+        uri = '/loyalty/v1/spare-points/1/'
+        resp = self.get(uri)
+        self.assertEqual(self.deserialize(resp)['MRP'], 31)
