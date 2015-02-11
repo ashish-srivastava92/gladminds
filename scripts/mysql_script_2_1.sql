@@ -169,3 +169,6 @@ alter table bajaj_mechanic add column adress_line_6 varchar(40) null;
 #####################################################################################################
 alter table bajaj_customertempregistration add column email_flag boolean default False;
 
+alter table bajaj_mechanic add permanent_id char(50) default null;
+alter table bajaj_mechanic add constraint unique_id unique(permanent_id);
+
