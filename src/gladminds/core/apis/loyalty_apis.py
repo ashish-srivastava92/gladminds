@@ -2,6 +2,8 @@
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.model_fetcher import models
 from tastypie.authorization import Authorization
+from tastypie import fields
+from gladminds.core.apis.user_apis import UserProfileResource
 
 class NsmResource(CustomBaseModelResource):
     class Meta:
@@ -24,6 +26,26 @@ class PartnerResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Partner.objects.all()
         resource_name = "partner"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+
+class DistributorResource(CustomBaseModelResource):
+    user = fields.ForeignKey(UserProfileResource, 'user', full=True)
+    asm = fields.ForeignKey(AsmResource, 'asm', full=True)
+    class Meta:
+        queryset = models.Distributor.objects.all()
+        resource_name = "distributors"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+
+class RetailerResource(CustomBaseModelResource):
+    class Meta:
+        queryset = models.Retailer.objects.all()
+        resource_name = "retailers"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
