@@ -376,6 +376,17 @@ ASM = {
         "nsm":""
        }
 
+
+PARTNER = {
+            "address": "F-89,Kamla nagar,kanpur",
+            "created_date": "2015-02-11T13:56:26",
+            "modified_date": "2015-02-11T13:56:26",
+            "name": "Anchit",
+            "partner_id": "PRT5Y76YB",
+            "partner_type": "Merchant",
+            "user":"",
+        }
+
 DISTRIBUTOR = {
                "created_date": "2015-02-04T17:10:26",
                "modified_date": "2015-02-04T17:10:26",
@@ -394,3 +405,27 @@ RETAILER = {
             "created_date":  "2015-02-04T17:10:26",
             "modified_date": "2015-02-04T17:10:26",
             }
+
+
+PRODUCT_TYPE = {
+                "brand_product_category":"",
+                "created_date": "2015-02-04T17:10:39",
+                "id": 1,
+                "image_url": "http://test",
+                "is_active": True,
+                "modified_date": "2015-02-04T17:10:39",
+                "product_type": ""
+                }
+
+SPARE_MASTER = {
+                "category": "cat1",
+                "created_date": "2015-02-04T17:10:39",
+                "description": "TEST DESCRIPTION",
+                "id": 1,
+                "modified_date": "2015-02-04T17:10:39",
+                "part_model": "2S",
+                "part_number": "11111111",
+                "product_type": PRODUCT_TYPE,
+                "segment_type": "",
+                "supplier": ""
+                }

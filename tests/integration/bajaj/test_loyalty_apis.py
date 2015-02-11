@@ -2,7 +2,8 @@
 import json
 from django.test.client import Client
 from tastypie.test import ResourceTestCase
-from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER
+from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER,SPARE_MASTER
+
 client=Client(SERVER_NAME='bajaj')
 
 class LoyaltyApiTests(ResourceTestCase):
@@ -71,6 +72,29 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = client.get('/loyalty/v1/asms/1/',content_type='application/json')
         self.assertEqual(self.deserialize(resp)['phone_number'], "9999999998")
         
+    def test_create_partner(self):
+        uri = '/loyalty/v1/partner/'
+        resp = self.post(uri,data=PARTNER)
+        self.assertEquals(resp.status_code,201)
+        return resp
+    
+    def test_get_partner(self):
+        resp = self.test_create_partner()
+        self.assertEquals(resp.status_code,201)
+        resp = client.get('/loyalty/v1/partner/1/',content_type='application/json')
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['name'], "Anchit")
+        return resp
+    
+    def test_update_partner(self):
+        resp = self.test_get_partner() 
+        self.assertEquals(resp.status_code,200)
+        a={"name":"Abhinav"}
+        resp = client.put('/loyalty/v1/partner/1/', data=json.dumps(a), content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        resp = client.get('/loyalty/v1/partner/1/',content_type='application/json')
+        self.assertEqual(self.deserialize(resp)['name'], "Abhinav")
+        
     def test_create_distributor(self):     
         uri = '/loyalty/v1/distributors/'
         resp = self.post(uri,data = DISTRIBUTOR)
@@ -86,7 +110,6 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEqual(self.deserialize(resp)['phone_number'], "1111111111")
         self.assertEqual(self.deserialize(resp)["asm"]['asm_id'],"ASM005")
         self.assertEqual(self.deserialize(resp)["user"]["user"]['username'],"15586")
-        
         return resp
     
     def test_update_distributor(self):
@@ -126,9 +149,32 @@ class LoyaltyApiTests(ResourceTestCase):
         uri = '/loyalty/v1/retailers/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['retailer_town'], "alalpur")
-        
-        
-        
     
-        
+    def test_create_spare_master(self):
+        uri = '/loyalty/v1/spare-master/'
+        resp = self.post(uri,data = SPARE_MASTER)
+        self.assertEquals(resp.status_code,201)
+        return resp
+    
+    def test_get_spare_master(self):
+        resp = self.test_create_spare_master()
+        self.assertEquals(resp.status_code,201)
+        uri = '/loyalty/v1/spare-master/1/'
+        resp = self.get(uri)
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['part_number'], "11111111")
+        self.assertEqual(self.deserialize(resp)["product_type"]['image_url'], "http://test")
+        return resp
+    
+    def test_update_spare_master(self):
+        resp = self.test_get_spare_master()
+        self.assertEquals(resp.status_code,200)
+        data={"part_model":"3S"}
+        uri = '/loyalty/v1/spare-master/1/'
+        resp = self.put(uri,data)
+        self.assertEquals(resp.status_code, 200)
+        uri = '/loyalty/v1/spare-master/1/'
+        resp = self.get(uri)
+        self.assertEqual(self.deserialize(resp)['part_model'], "3S")
+
     
