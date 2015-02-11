@@ -41,7 +41,6 @@
     
 
     $('.customer-form').on('submit', function(e) {
-    	var postData=[];
     	var data = Utils.getFormData('.customer-form'),
     	    purchaseDate={'name':'purchase-date', 'value':$('#purchase-date').val()};
     	data.push(purchaseDate);
