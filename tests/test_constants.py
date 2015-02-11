@@ -336,6 +336,18 @@ NSM = {
         "user": "",
         }
 
+DISTRIBUTOR = {
+               "created_date": "2015-02-04T17:10:26",
+               "modified_date": "2015-02-04T17:10:26",
+               "user": "",
+               "asm":"",
+               "distributor_id": 15689, 
+               "name": "Mrugen",
+               "email": "test@gladminds.co",
+               "phone_number": 1111111111,
+               "city": "bhuj",
+               }
+
 ASM = {
         "asm_id": "ASM005",
         "created_date": "2015-02-04T17:11:18",
@@ -347,3 +359,10 @@ ASM = {
         "user":"",
         "nsm":"",
        }
+
+RETAILER = {
+            "retailer_name": "Ayush",
+            "retailer_town": "devghar",
+            "created_date":  "2015-02-04T17:10:26",
+            "modified_date": "2015-02-04T17:10:26",
+            }
