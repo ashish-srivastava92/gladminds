@@ -11,6 +11,7 @@ from django.http.response import HttpResponse
 from tastypie.http import HttpBadRequest
 from django.contrib.auth import authenticate, login
 from django.conf import settings
+from tastypie.authorization import Authorization
 
 from gladminds.core.model_fetcher import models
 from gladminds.core.auth.access_token_handler import create_access_token,\
@@ -27,9 +28,10 @@ class UserResource(CustomBaseModelResource):
         queryset = User.objects.all()
         resource_name = 'users'
         excludes = ['password', 'is_superuser']
-        authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get']
+        authorization = Authorization()
+#         authentication = AccessTokenAuthentication()
+#         authorization = MultiAuthorization(DjangoAuthorization())
+        detail_allowed_methods = ['get', 'post', 'put']
         filtering = {
                      "is_active": ALL
                      }
@@ -42,9 +44,10 @@ class UserProfileResource(CustomBaseModelResource):
     class Meta:
         queryset = models.UserProfile.objects.all()
         resource_name = 'gm-users'
-        authorization = MultiAuthorization(DjangoAuthorization())
-        authentication = AccessTokenAuthentication()
-        detail_allowed_methods = ['get']
+        authorization = Authorization()
+#         authorization = MultiAuthorization(DjangoAuthorization())
+#         authentication = AccessTokenAuthentication()
+        detail_allowed_methods = ['get', 'post', 'put']
         filtering = {
                      "user":  ALL_WITH_RELATIONS,
                      "phone_number": ALL

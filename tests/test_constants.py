@@ -14,6 +14,18 @@ GM_USER = {
                     }
            }
 
+USER = {
+        "date_joined":"2015-02-04T17:10:24",
+         "email":"test@gladminds.co",
+         "first_name":"TEST USER",
+         "id":6,
+         "is_active":True,
+         "is_staff":False,
+         "last_login":"2015-02-04T17:10:24",
+         "last_name":"",
+         "username":"15586"
+        }
+
 GM_PRODUCTS = {
                 "customer_product_number": None,
                 "engine": None,
@@ -265,7 +277,7 @@ AFTERBUY_PRODUCTSUPPORT = {
                            "contact":"1234567890",
                            "website":"bajaj.com",
                            "email_id":"afterbuy@gmail.com",
-                           "address":"",
+                           "address":""
                            }
 
 AFTERBUY_SELLINFORMATION = {
@@ -322,8 +334,24 @@ AFTERBUY_REGISTATION = {
                         "engine_number" :"",
                         "owner_name" :"asdf",
                         "relation_name" :"owner",
-                        "model":"aaa",
+                        "model":"aaa"
                         }
+
+USER_PROFILE = {
+                "address":"CHENNAI",
+                "country":"",
+                "created_date":"2015-02-04T17:10:24",
+                "date_of_birth":"1992-12-29T00:00:00",
+                "gender":"",
+                "image_url":"",
+                "modified_date":"2015-02-04T17:10:24",
+                "phone_number":"",
+                "pincode":"",
+                "resource_uri":"",
+                "state":"",
+                "status":"",
+                "user": USER
+                }
 
 NSM = {
        "created_date": "2015-02-04T17:11:18",
@@ -333,20 +361,8 @@ NSM = {
         "nsm_id": "NSM002",
         "phone_number": "1234567890",
         "territory": "south",
-        "user": "",
+        "user": ""
         }
-
-DISTRIBUTOR = {
-               "created_date": "2015-02-04T17:10:26",
-               "modified_date": "2015-02-04T17:10:26",
-               "user": "",
-               "asm":"",
-               "distributor_id": 15689, 
-               "name": "Mrugen",
-               "email": "test@gladminds.co",
-               "phone_number": 1111111111,
-               "city": "bhuj",
-               }
 
 ASM = {
         "asm_id": "ASM005",
@@ -357,8 +373,20 @@ ASM = {
         "phone_number": "9999999999",
         "state": "Tamil Nadu",
         "user":"",
-        "nsm":"",
+        "nsm":""
        }
+
+DISTRIBUTOR = {
+               "created_date": "2015-02-04T17:10:26",
+               "modified_date": "2015-02-04T17:10:26",
+               "user": USER_PROFILE,
+               "asm":ASM,
+               "distributor_id": 15689, 
+               "name": "Mrugen",
+               "email": "test@gladminds.co",
+               "phone_number": 1111111111,
+               "city": "bhuj"
+               }
 
 RETAILER = {
             "retailer_name": "Ayush",

@@ -47,8 +47,31 @@ class LoyaltyApiTests(ResourceTestCase):
         uri = '/loyalty/v1/nsms/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['phone_number'], "1234512345")
+        
+    def test_create_asm(self):
+        uri = '/loyalty/v1/asms/'
+        resp = self.post(uri,data=ASM)
+        self.assertEquals(resp.status_code,201)
+        return resp
     
-    def test_create_distributor(self):
+    def test_get_asm(self):
+        resp = self.test_create_asm()
+        self.assertEquals(resp.status_code,201)
+        resp = client.get('/loyalty/v1/asms/1/',content_type='application/json')
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['phone_number'], "9999999999")
+        return resp
+    
+    def test_update_asm(self):
+        resp = self.test_get_asm() 
+        self.assertEquals(resp.status_code,200)
+        a={"phone_number":"9999999998"}
+        resp = client.put('/loyalty/v1/asms/1/', data=json.dumps(a), content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        resp = client.get('/loyalty/v1/asms/1/',content_type='application/json')
+        self.assertEqual(self.deserialize(resp)['phone_number'], "9999999998")
+        
+    def test_create_distributor(self):     
         uri = '/loyalty/v1/distributors/'
         resp = self.post(uri,data = DISTRIBUTOR)
         self.assertEquals(resp.status_code,201)
@@ -61,7 +84,9 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['phone_number'], "1111111111")
-        self.assertEqual(self.deserialize(resp)['email'], "test@gladminds.co")
+        self.assertEqual(self.deserialize(resp)["asm"]['asm_id'],"ASM005")
+        self.assertEqual(self.deserialize(resp)["user"]["user"]['username'],"15586")
+        
         return resp
     
     def test_update_distributor(self):
@@ -102,29 +127,6 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['retailer_town'], "alalpur")
         
-        
-    def test_create_asm(self):
-        uri = '/loyalty/v1/asms/'
-        resp = self.post(uri,data=ASM)
-        self.assertEquals(resp.status_code,201)
-        return resp
-    
-    def test_get_asm(self):
-        resp = self.test_create_asm()
-        self.assertEquals(resp.status_code,201)
-        resp = client.get('/loyalty/v1/asms/1/',content_type='application/json')
-        self.assertEquals(resp.status_code,200)
-        self.assertEqual(self.deserialize(resp)['phone_number'], "9999999999")
-        return resp
-    
-    def test_update_asm(self):
-        resp = self.test_get_asm() 
-        self.assertEquals(resp.status_code,200)
-        a={"phone_number":"9999999998"}
-        resp = client.put('/loyalty/v1/asms/1/', data=json.dumps(a), content_type='application/json')
-        self.assertEquals(resp.status_code, 200)
-        resp = client.get('/loyalty/v1/asms/1/',content_type='application/json')
-        self.assertEqual(self.deserialize(resp)['phone_number'], "9999999998")
         
         
     
