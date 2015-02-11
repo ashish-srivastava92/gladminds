@@ -44,8 +44,7 @@
     	var postData=[];
     	var data = Utils.getFormData('.customer-form'),
     	    purchaseDate={'name':'purchase-date', 'value':$('#purchase-date').val()};
-    	postData=data
-    	postData.push(purchaseDate);
+    	data.push(purchaseDate);
         Utils.submitForm(e, postData, '/aftersell/register/customer');
         $('.customer-phone').val('').attr('readOnly', false);
         $('.customer-name').val('').attr('readOnly', false);
