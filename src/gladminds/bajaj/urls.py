@@ -19,6 +19,9 @@ api_v1.register(loyalty_apis.DistributorResource())
 api_v1.register(loyalty_apis.RetailerResource())
 api_v1.register(product_apis.ProductTypeResource())
 api_v1.register(loyalty_apis.SpareMasterResource())
+api_v1.register(loyalty_apis.RedemptionResource())
+api_v1.register(loyalty_apis.ProductResource())
+api_v1.register(loyalty_apis.SparePartUPCResource())
 api_v1.register(loyalty_apis.SparePartPointResource())
 
 urlpatterns = patterns('',

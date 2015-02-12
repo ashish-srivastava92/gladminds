@@ -430,6 +430,101 @@ SPARE_MASTER = {
                 "supplier": ""
                 }
 
+PRODUCT = {
+           "partner": PARTNER,
+           "brand": "",
+            "category": "",
+            "created_date": "2015-01-28T16:55:53",
+            "description": "",
+            "image_url": "",
+            "is_active": True,
+            "model": "",
+            "modified_date": "2015-01-28T16:55:53",
+            "points": 123,
+            "price": 12,
+            "product_id": "123",
+            "resource_uri": "/loyalty/v1/productcatalog/1/",
+            "sub_category": "",
+            "variation": ""
+        }
+
+REDEMPTION_REQUEST =  {
+                        "delivery_address": "yhghj",
+                        "due_date": "2015-02-09T17:49:45",
+                        "expected_delivery_date": "2015-02-10T16:49:45",
+                        "image_url": "",
+                        "is_approved": False,
+                        "member": {
+                            "adress_line_1": "",
+                            "adress_line_2": "",
+                            "adress_line_3": "",
+                            "adress_line_4": "",
+                            "adress_line_5": "",
+                            "adress_line_6": "",
+                            "created_date": "2014-12-29T20:21:09",
+                            "date_of_birth": "1971-10-20T05:30:00",
+                            "district": "MADURAI",
+                            "first_name": "Ramu",
+                            "form_number": 9156,
+                            "form_status": "Incomplete",
+                            "genuine_parts_used": 85,
+                            "id": 3,
+                            "image_url": "",
+                            "last_name": "M",
+                            "locality": "",
+                            "mechanic_id": "ME00003",
+                            "middle_name": "",
+                            "modified_date": "2015-02-10T12:47:34",
+                            "phone_number": "+919842461800",
+                            "pincode": "625002",
+                            "registered_date": "2014-09-06T00:00:00",
+                            "resource_uri": "",
+                            "sent_sms": False,
+                            "sent_to_sap": False,
+                            "serviced_2S": 180,
+                            "serviced_4S": 20,
+                            "serviced_CNG_LPG":0,
+                            "serviced_diesel": 0,
+                            "shop_address": "SELLUR",
+                            "shop_name": "SRI MEENAKSHI AMMAN AUTO WORKS",
+                            "shop_number": "34",
+                            "shop_wall_length": 0,
+                            "shop_wall_width": 0,
+                            "spare_per_month": 50000,
+                            "state": "Karnataka",
+                            "tehsil": "",
+                            "total_points": 0
+                        },
+                        "modified_date": "2015-02-09T16:49:45",
+                        "packed_by": "",
+                        "refunded_points": False,
+                        "resolution_flag": True,
+                        "status": "Open",
+                        "tracking_id": "",
+                        "product":{
+                                    "brand": "",
+                                    "category": "",
+                                    "created_date": "2015-01-28T16:55:53",
+                                    "description": "",
+                                    "image_url": "",
+                                    "is_active": True,
+                                    "model": "",
+                                    "modified_date": "2015-01-28T16:55:53",
+                                    "points": 123,
+                                    "price": 12,
+                                    "product_id": "123",
+                                    "resource_uri": "/loyalty/v1/productcatalog/1/",
+                                    "sub_category": "",
+                                    "variation": ""
+                                }
+                    }
+    
+SPARE_PART_UPC = {  
+                "is_used":False,
+                "unique_part_code":"UPCC50",
+                "part_number": SPARE_MASTER
+                }
+
 SPARE_POINT = {
                "MRP": 30,
                "created_date":"2015-02-04T17:10:24",
