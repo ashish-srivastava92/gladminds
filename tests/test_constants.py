@@ -430,6 +430,12 @@ SPARE_MASTER = {
                 "supplier": ""
                 }
 
+SPARE_PART_UPC = {  
+                "is_used":False,
+                "unique_part_code":"UPCC50",
+                "part_number": SPARE_MASTER
+                }
+
 SPARE_POINT = {
                "MRP": 30,
                "created_date":"2015-02-04T17:10:24",
