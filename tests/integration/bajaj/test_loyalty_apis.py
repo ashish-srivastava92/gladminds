@@ -3,7 +3,7 @@ import json
 from django.test.client import Client
 from tastypie.test import ResourceTestCase
 from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER,SPARE_MASTER, SPARE_POINT,SPARE_PART_UPC,\
-    REDEMPTION_REQUEST,PARTNER,PRODUCT
+    REDEMPTION_REQUEST,PARTNER,PRODUCT,ACCUMULATION, SPARE_PART_UPC1
 client=Client(SERVER_NAME='bajaj')
 
 class LoyaltyApiTests(ResourceTestCase):
@@ -311,3 +311,25 @@ class LoyaltyApiTests(ResourceTestCase):
         uri = '/loyalty/v1/spare-points/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['MRP'], 31)
+        
+    def test_create_accumulation(self):
+        uri = '/loyalty/v1/asms/'
+        resp = self.post(uri,data=ASM)
+        self.assertEquals(resp.status_code,201)
+        uri = '/loyalty/v1/spare-upcs/'
+        resp = self.post(uri,data = SPARE_PART_UPC)
+        resp = self.post(uri,data = SPARE_PART_UPC1)  
+        self.assertEquals(resp.status_code,201)
+        uri = '/loyalty/v1/accumulations/'
+        resp = self.post(uri,data = ACCUMULATION)
+        self.assertEquals(resp.status_code,201)
+        return resp
+    
+    def test_get_accumulation(self):
+        resp = self.test_create_accumulation()
+        self.assertEquals(resp.status_code,201)
+        uri = '/loyalty/v1/accumulations/1/'
+        resp = self.get(uri)
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['transaction_id'], 1)
+        return resp
