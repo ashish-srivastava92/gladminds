@@ -3,7 +3,7 @@ import json
 from django.test.client import Client
 from tastypie.test import ResourceTestCase
 from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER,SPARE_MASTER, SPARE_POINT,SPARE_PART_UPC,\
-    REDEMPTION_REQUEST,PARTNER,PRODUCT,ACCUMULATION, SPARE_PART_UPC1
+    REDEMPTION_REQUEST,PARTNER,PRODUCT,ACCUMULATION, SPARE_PART_UPC_1
 client=Client(SERVER_NAME='bajaj')
 
 class LoyaltyApiTests(ResourceTestCase):
@@ -318,7 +318,7 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEquals(resp.status_code,201)
         uri = '/loyalty/v1/spare-upcs/'
         resp = self.post(uri,data = SPARE_PART_UPC)
-        resp = self.post(uri,data = SPARE_PART_UPC1)  
+        resp = self.post(uri,data = SPARE_PART_UPC_1)  
         self.assertEquals(resp.status_code,201)
         uri = '/loyalty/v1/accumulations/'
         resp = self.post(uri,data = ACCUMULATION)

@@ -513,7 +513,7 @@ SPARE_PART_UPC = {
                 }
 
     
-SPARE_PART_UPC1 = {  
+SPARE_PART_UPC_1 = {  
                 "is_used":False,
                 "unique_part_code":"UPCC51",
                 "part_number": SPARE_MASTER
