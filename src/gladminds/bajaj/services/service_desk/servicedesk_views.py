@@ -29,6 +29,7 @@ LOG = logging.getLogger('gladminds')
 @check_service_active(Services.SERVICE_DESK)
 @login_required()
 def service_desk(request):
+    print "here-================================"
     status = request.GET.get('status')
     priority = request.GET.get('priority')
     type = request.GET.get('type')
