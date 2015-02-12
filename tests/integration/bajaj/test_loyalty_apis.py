@@ -2,8 +2,8 @@
 import json
 from django.test.client import Client
 from tastypie.test import ResourceTestCase
-# from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER,SPARE_MASTER
-from test_constants import *
+from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER,SPARE_MASTER, SPARE_POINT,\
+    REDEMPTION_REQUEST,PARTNER,PRODUCT
 client=Client(SERVER_NAME='bajaj')
 
 class LoyaltyApiTests(ResourceTestCase):
@@ -257,3 +257,30 @@ class LoyaltyApiTests(ResourceTestCase):
         uri = '/loyalty/v1/redemption-requests/members-details/open/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
+
+    def test_create_spare_part_point(self):
+        uri = '/loyalty/v1/spare-point/'
+        resp = self.post(uri,data = SPARE_POINT)
+        self.assertEquals(resp.status_code,201)
+        return resp
+    
+    def test_get_spare_part_point(self):
+        resp = self.test_create_spare_part_point()
+        self.assertEquals(resp.status_code,201)
+        uri = '/loyalty/v1/spare-point/1/'
+        resp = self.get(uri)
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['MRP'], 30)
+        self.assertEqual(self.deserialize(resp)["part_number"]['part_number'], "11111111")
+        return resp
+    
+    def test_update_spare_part_point(self):
+        resp = self.test_get_spare_part_point()
+        self.assertEquals(resp.status_code,200)
+        data={"MRP": 31}
+        uri = '/loyalty/v1/spare-point/1/'
+        resp = self.put(uri,data)
+        self.assertEquals(resp.status_code, 200)
+        uri = '/loyalty/v1/spare-point/1/'
+        resp = self.get(uri)
+        self.assertEqual(self.deserialize(resp)['MRP'], 31)

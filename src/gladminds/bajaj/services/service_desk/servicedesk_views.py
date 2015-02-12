@@ -55,6 +55,7 @@ def service_desk(request):
             data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
         else:
             data = models.ServiceAdvisor.objects.active_under_asc(request.user)
+        dealer_asc_details = models.UserProfile.objects.get(user__username=request.user)
         return render(request, template, {"feedbacks" : feedbacks,
                                           'active_menu': 'support',
                                           "data": data, 'groups': groups,
@@ -65,6 +66,7 @@ def service_desk(request):
                                           "types": utils.get_list_from_set(FEEDBACK_TYPE),
                                           "priorities": utils.get_list_from_set(PRIORITY),
                                           "training_material" : training_material,
+                                          "dealer_asc" : dealer_asc_details,
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
                                                             'count': str(count), 'search': search}}
                                         )
@@ -113,8 +115,10 @@ def save_help_desk_data(request):
         dealer_asc_email = dealer_asc_obj.user.user.email
     else:
         dealer_asc_email = None
-    return create_feedback(sms_dict, user_profile.phone_number,
-                                                user_profile.user.email,
+    
+    phone_number = getattr(user_profile, 'phone_number') or None
+    email = getattr(user_profile.user, 'email') or None
+    return create_feedback(sms_dict, phone_number, email,
                                                 user_profile.user.username, dealer_asc_email,
                                                 with_detail=True)    
 

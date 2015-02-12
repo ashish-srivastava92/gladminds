@@ -566,7 +566,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
         return query_set
 
     def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('is_approved', 'packed_by', 'refunded_points')
+        self.exclude = ('is_approved', 'packed_by', 'refunded_points', 'resolution_flag')
         form = super(RedemptionRequestAdmin, self).get_form(request, obj, **kwargs)
         form = copy.deepcopy(form)
         if request.user.groups.filter(name=Roles.RPS).exists():
@@ -578,10 +578,11 @@ class RedemptionRequestAdmin(GmModelAdmin):
         return form
 
     def save_model(self, request, obj, form, change):
-        date = LoyaltyService.set_date("Redemption", obj.status)
-        obj.due_date = date['due_date']
-        obj.expected_delivery_date = date['expected_delivery_date']
-        obj.resolution_flag = False
+        if 'status' in form.changed_data and obj.status!='Rejected':
+            date = LoyaltyService.set_date("Redemption", obj.status)
+            obj.due_date = date['due_date']
+            obj.expected_delivery_date = date['expected_delivery_date']
+            obj.resolution_flag = False
         if 'status' in form.changed_data:
             if obj.status=='Approved' and obj.refunded_points:
                 LoyaltyService.update_points(obj.member, redeem=obj.product.points)
@@ -628,7 +629,7 @@ class WelcomeKitAdmin(GmModelAdmin):
             LoyaltyService.send_welcome_kit_mail_to_partner(obj)
 
     def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('packed_by',)
+        self.exclude = ('packed_by','resolution_flag')
         form = super(WelcomeKitAdmin, self).get_form(request, obj, **kwargs)
         return form
 
@@ -662,6 +663,10 @@ class LoyaltySlaAdmin(GmModelAdmin):
         return str(self.member_resolution_time) + ' ' + self.member_resolution_unit
 
     list_display = ('status','action', reminder_time, resolution_time, member_resolution_time)
+    
+class ConstantAdmin(GmModelAdmin):
+    search_fields = ('constant_name',  'constant_value')
+    list_display = ('constant_name',  'constant_value',)
 
 brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
 
@@ -711,4 +716,4 @@ brand_admin.register(models.SLA, SlaAdmin)
 brand_admin.register(models.ServiceDeskUser, ServiceDeskUserAdmin)
 brand_admin.register(models.Service, ServiceAdmin)
 brand_admin.register(models.ServiceType)
-brand_admin.register(models.Constant)
+brand_admin.register(models.Constant, ConstantAdmin)

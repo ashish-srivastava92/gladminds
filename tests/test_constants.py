@@ -519,3 +519,15 @@ REDEMPTION_REQUEST =  {
                                 }
                     }
     
+SPARE_POINT = {
+               "MRP": 30,
+               "created_date":"2015-02-04T17:10:24",
+               "id":1,
+               "modified_date":"2015-02-11T17:01:38",
+               "part_number": SPARE_MASTER,
+               "points":18,
+               "price":None,
+               "territory":"South",
+               "valid_from":"2014-12-22T00:00:00",
+               "valid_till":"2015-12-22T00:00:00"
+               }
