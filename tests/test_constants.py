@@ -532,7 +532,6 @@ SPARE_POINT = {
                "valid_till":"2015-12-22T00:00:00"
                }
 
-<<<<<<< HEAD
 SLA = {  
        "status":"open",
        "action":"Welcome Kit",
@@ -543,7 +542,7 @@ SLA = {
        "member_resolution_time": 8,
        "member_resolution_unit":"hrs"
        }
-=======
+
 ACCUMULATION = {  
                 "asm":ASM,
                 "created_date":"2015-02-12T14:51:05",
@@ -628,4 +627,3 @@ ACCUMULATION = {
                 "transaction_id":1,
                 "upcs":[{"unique_part_code":"UPCC50"},{"unique_part_code":"UPCC51"},]
                 }
->>>>>>> d65c620f2550b9a27d564c13921c0cdb1fa144c0
