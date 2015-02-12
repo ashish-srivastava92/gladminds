@@ -720,8 +720,8 @@ class AreaServiceManager(BaseModel):
         verbose_name_plural = "Area Service Managers "
     
     def __unicode__(self):
-        return self.asm_id
-    
+        return self.user.user.username
+     
 class ZonalServiceManager(BaseModel):
     '''details of Zonal Service Manager'''
     zsm_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
