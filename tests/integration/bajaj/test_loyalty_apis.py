@@ -2,7 +2,7 @@
 import json
 from django.test.client import Client
 from tastypie.test import ResourceTestCase
-from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER,SPARE_MASTER, SPARE_POINT,\
+from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER,SPARE_MASTER, SPARE_POINT,SPARE_PART_UPC,\
     REDEMPTION_REQUEST,PARTNER,PRODUCT
 client=Client(SERVER_NAME='bajaj')
 
@@ -151,7 +151,7 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEqual(self.deserialize(resp)['retailer_town'], "alalpur")
 
     def test_create_spare_master(self):
-        uri = '/loyalty/v1/spare-master/'
+        uri = '/loyalty/v1/spare-masters/'
         resp = self.post(uri,data = SPARE_MASTER)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -159,7 +159,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_spare_master(self):
         resp = self.test_create_spare_master()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/spare-master/1/'
+        uri = '/loyalty/v1/spare-masters/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['part_number'], "11111111")
@@ -170,10 +170,10 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_spare_master()
         self.assertEquals(resp.status_code,200)
         data={"part_model":"3S"}
-        uri = '/loyalty/v1/spare-master/1/'
+        uri = '/loyalty/v1/spare-masters/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/spare-master/1/'
+        uri = '/loyalty/v1/spare-masters/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['part_model'], "3S")
 
@@ -230,6 +230,33 @@ class LoyaltyApiTests(ResourceTestCase):
         uri = '/loyalty/v1/redemption-requests/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['is_approved'], False)
+       
+    def test_create_spare_part_upc(self):
+        uri = '/loyalty/v1/spare-upcs/'
+        resp = self.post(uri,data = SPARE_PART_UPC)
+        self.assertEquals(resp.status_code,201)
+        return resp
+    
+    def test_get_spare_part_upc(self):
+        resp = self.test_create_spare_part_upc()
+        self.assertEquals(resp.status_code,201)
+        uri = '/loyalty/v1/spare-upcs/1/'
+        resp = self.get(uri)
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['unique_part_code'], "UPCC50")
+        return resp
+    
+    def test_update_spare_part_upc(self):
+        resp = self.test_get_spare_part_upc()
+        self.assertEquals(resp.status_code,200)
+        data={"unique_part_code":"UPCC51"}
+        uri = '/loyalty/v1/spare-upcs/1/'
+        resp = self.put(uri,data)
+        self.assertEquals(resp.status_code, 200)
+        uri = '/loyalty/v1/spare-upcs/1/'
+        resp = self.get(uri)
+        self.assertEqual(self.deserialize(resp)['unique_part_code'], "UPCC51")
+
     
     ''' within sla and overdue test case '''
  
@@ -259,7 +286,7 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEquals(resp.status_code,200)
 
     def test_create_spare_part_point(self):
-        uri = '/loyalty/v1/spare-point/'
+        uri = '/loyalty/v1/spare-points/'
         resp = self.post(uri,data = SPARE_POINT)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -267,7 +294,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_spare_part_point(self):
         resp = self.test_create_spare_part_point()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/spare-point/1/'
+        uri = '/loyalty/v1/spare-points/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['MRP'], 30)
@@ -278,9 +305,9 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_spare_part_point()
         self.assertEquals(resp.status_code,200)
         data={"MRP": 31}
-        uri = '/loyalty/v1/spare-point/1/'
+        uri = '/loyalty/v1/spare-points/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/spare-point/1/'
+        uri = '/loyalty/v1/spare-points/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['MRP'], 31)

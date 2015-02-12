@@ -139,3 +139,12 @@ class RedemptionResource(CustomBaseModelResource):
         else: 
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
         
+        
+class SparePartUPCResource(CustomBaseModelResource):
+    part_number = fields.ForeignKey(SpareMasterResource, 'part_number', full=True)
+    class Meta:
+        queryset = models.SparePartUPC.objects.all()
+        resource_name = "spare-upcs"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
