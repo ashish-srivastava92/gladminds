@@ -773,7 +773,7 @@ class Retailer(BaseModel):
 class Mechanic(BaseModel):
     '''details of Mechanic'''
     mechanic_id = models.CharField(max_length=50, unique=True, default=generate_mech_id)
-    permanent_id = models.CharField(max_length=50, unique=True)
+    permanent_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
     total_points = models.IntegerField(max_length=50, null=True, blank=True, default=0)
 
     first_name = models.CharField(max_length=50, null=True, blank=True)
