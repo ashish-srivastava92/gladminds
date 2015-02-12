@@ -13,11 +13,11 @@ from gladminds.core.auth_helper import ALL_APPS, Roles
 from gladminds.core.loaders.module_loader import get_model
 
 BASIC_FEED = import_feed.BaseFeed()
+TODAY = datetime.datetime.now()
 
 class Command(BaseCommand):
     
     def handle(self, *args, **options):
-        self.today = datetime.datetime.now()
         self.add_sms_template()
         self.add_email_template()
         self.add_constants()
@@ -45,7 +45,7 @@ class Command(BaseCommand):
             mt.objects.all().delete()
             for message_temp in message_templates:
                 fields = message_temp['fields']
-                temp_obj = mt(id=message_temp['pk'], created_date=self.today, template_key=fields['template_key']\
+                temp_obj = mt(id=message_temp['pk'], created_date=TODAY, template_key=fields['template_key']\
                            , template=fields['template'], description=fields['description'])
                 temp_obj.save()
             print "Loaded sms template..."
@@ -59,7 +59,7 @@ class Command(BaseCommand):
             et.objects.all().delete()
             for email_temp in email_templates:
                 fields = email_temp['fields']
-                temp_obj = et(id=email_temp['pk'], created_date=self.today, template_key=fields['template_key']\
+                temp_obj = et(id=email_temp['pk'], created_date=TODAY, template_key=fields['template_key']\
                            , sender=fields['sender'], receiver=fields['receiver'],\
                             subject=fields['subject'], body=fields['body'],\
                             description=fields['description'])
@@ -90,6 +90,6 @@ class Command(BaseCommand):
         cons.objects.all().delete()
         for constant in constants:
             fields = constant['fields']
-            temp_obj = cons(id=constant['pk'], created_date=self.today, constant_name=fields['constant_name'],constant_value=fields['constant_value'])
+            temp_obj = cons(id=constant['pk'], created_date=TODAY, constant_name=fields['constant_name'],constant_value=fields['constant_value'])
             temp_obj.save()
         print "Loaded constants..."

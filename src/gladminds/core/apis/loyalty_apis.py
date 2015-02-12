@@ -78,6 +78,14 @@ class SparePartPointResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
+class LoyaltySLAResource(CustomBaseModelResource):
+    class Meta:
+        queryset = models.LoyaltySLA.objects.all()
+        resource_name = "slas"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
 class ProductResource(CustomBaseModelResource):
     partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)
     
@@ -140,7 +148,7 @@ class RedemptionResource(CustomBaseModelResource):
             return HttpResponse(json.dumps(requests), content_type="application/json")
         else: 
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
-        
+    
         
 class SparePartUPCResource(CustomBaseModelResource):
     part_number = fields.ForeignKey(SpareMasterResource, 'part_number', full=True)

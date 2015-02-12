@@ -3,7 +3,8 @@ import json
 from django.test.client import Client
 from tastypie.test import ResourceTestCase
 from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER,SPARE_MASTER, SPARE_POINT,SPARE_PART_UPC,\
-    REDEMPTION_REQUEST,PARTNER,PRODUCT,ACCUMULATION, SPARE_PART_UPC_1
+    REDEMPTION_REQUEST,PARTNER,PRODUCT,ACCUMULATION, SPARE_PART_UPC_1,SLA
+    
 client=Client(SERVER_NAME='bajaj')
 
 class LoyaltyApiTests(ResourceTestCase):
@@ -311,6 +312,34 @@ class LoyaltyApiTests(ResourceTestCase):
         uri = '/loyalty/v1/spare-points/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['MRP'], 31)
+    
+    def test_create_sla(self):
+        uri = '/loyalty/v1/slas/'
+        resp = self.post(uri,data = SLA)
+        self.assertEquals(resp.status_code,201)
+        return resp
+    
+    def test_get_sla(self):
+        resp = self.test_create_sla()
+        self.assertEquals(resp.status_code,201)
+        uri = '/loyalty/v1/slas/1/'
+        resp = self.get(uri)
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['action'], "Welcome Kit")
+        self.assertEqual(self.deserialize(resp)['resolution_time'], 6)
+        self.assertEqual(self.deserialize(resp)['resolution_unit'], "hrs")
+        return resp
+    
+    def test_update_sla(self):
+        resp = self.test_get_sla()
+        self.assertEquals(resp.status_code,200)
+        data={"member_resolution_time": 10}
+        uri = '/loyalty/v1/slas/1/'
+        resp = self.put(uri,data)
+        self.assertEquals(resp.status_code, 200)
+        uri = '/loyalty/v1/slas/1/'
+        resp = self.get(uri)
+        self.assertEqual(self.deserialize(resp)['member_resolution_time'], 10)
         
     def test_create_accumulation(self):
         uri = '/loyalty/v1/asms/'
