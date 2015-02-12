@@ -442,3 +442,14 @@ SPARE_POINT = {
                "valid_from":"2014-12-22T00:00:00",
                "valid_till":"2015-12-22T00:00:00"
                }
+
+SLA = {  
+       "status":"open",
+       "action":"Welcome Kit",
+       "reminder_time":4,
+       "reminder_unit":"hrs",
+       "resolution_time": 6,
+       "resolution_unit":"hrs",
+       "member_resolution_time": 8,
+       "member_resolution_unit":"hrs"
+       }

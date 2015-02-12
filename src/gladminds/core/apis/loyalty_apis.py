@@ -5,6 +5,7 @@ from tastypie.authorization import Authorization
 from tastypie import fields
 from gladminds.core.apis.user_apis import UserProfileResource
 from gladminds.core.apis.product_apis import ProductTypeResource
+from gladminds.core.base_models import Duration
 
 class NsmResource(CustomBaseModelResource):
     class Meta:
@@ -65,6 +66,14 @@ class SparePartPointResource(CustomBaseModelResource):
     class Meta:
         queryset = models.SparePartPoint.objects.all()
         resource_name = "spare-points"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+class LoyaltySLAResource(CustomBaseModelResource):
+    class Meta:
+        queryset = models.LoyaltySLA.objects.all()
+        resource_name = "slas"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
