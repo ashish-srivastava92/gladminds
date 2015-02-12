@@ -108,6 +108,8 @@ class MemberResource(CustomBaseModelResource):
         always_return_data = True
         filtering = {
                      "state": ALL,
+                     "locality":ALL,
+                     "district":ALL,
                      }
         
 class RedemptionResource(CustomBaseModelResource):
@@ -156,3 +158,18 @@ class SparePartUPCResource(CustomBaseModelResource):
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
+        
+class AccumulationResource(CustomBaseModelResource):
+    member = fields.ForeignKey(MemberResource, 'member', full=True) 
+    asm = fields.ForeignKey(AsmResource, 'asm', null=True, blank=True, full=True)
+    upcs = fields.ManyToManyField(SparePartUPCResource, 'upcs', full=True)
+    
+    class Meta:
+        queryset = models.AccumulationRequest.objects.all()
+        resource_name = "accumulations"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post']
+        always_return_data = True
+        filtering = {
+                     "member":ALL_WITH_RELATIONS,
+                     }
