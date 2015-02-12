@@ -530,12 +530,11 @@ class MechanicAdmin(GmModelAdmin):
         for field in obj._meta.fields:
             if field.name in constants.MANDATORY_MECHANIC_FIELDS and not getattr(obj, field.name):
                 form_status = False
+        obj.phone_number=utils.mobile_format(obj.phone_number)
+        super(MechanicAdmin, self).save_model(request, obj, form, change)
         if form_status and not obj.sent_sms:
             LoyaltyService.send_welcome_sms(obj)
             LoyaltyService.initiate_welcome_kit(obj)
-            obj.sent_sms=True
-        obj.phone_number=utils.mobile_format(obj.phone_number)
-        super(MechanicAdmin, self).save_model(request, obj, form, change)
 
 class RedemptionRequestAdmin(GmModelAdmin):
     list_filter = (

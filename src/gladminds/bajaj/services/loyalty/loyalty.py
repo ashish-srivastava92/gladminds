@@ -122,6 +122,8 @@ class LoyaltyService(CoreLoyaltyService):
         welcome_kit=models.WelcomeKit(member=mechanic_obj,
                                     delivery_address=delivery_address)
         welcome_kit.save()
+        mechanic_obj.sent_sms=True
+        mechanic_obj.save()
         return welcome_kit
 
     def send_mail_to_partner(self, redemption_obj):
