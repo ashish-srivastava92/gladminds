@@ -133,6 +133,7 @@ class AuthorizedServiceCenter(BaseModel):
         max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
     asc_owner = models.CharField(max_length=100, null=True, blank=True)
+    asc_owner_phone = models.CharField(max_length=50, null=True, blank=True)
     asc_owner_email = models.CharField(max_length=100, null=True, blank=True)
     objects = user_manager.AuthorizedServiceCenterManager()
 
