@@ -83,7 +83,7 @@ class ProductResource(CustomBaseModelResource):
     
     class Meta:
         queryset = models.ProductCatalog.objects.all()
-        resource_name = "product-catalog"
+        resource_name = "product-catalogs"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True

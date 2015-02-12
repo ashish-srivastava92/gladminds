@@ -178,7 +178,7 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEqual(self.deserialize(resp)['part_model'], "3S")
 
     def test_create_product(self):
-        uri = '/loyalty/v1/product-catalog/'
+        uri = '/loyalty/v1/product-catalogs/'
         create_mock_data = PRODUCT
         resp = self.post(uri,data=create_mock_data)
         self.assertEquals(resp.status_code,201)
@@ -187,7 +187,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_product(self):
         resp = self.test_create_product()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/product-catalog/1/'
+        uri = '/loyalty/v1/product-catalogs/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['image_url'], None)
@@ -197,10 +197,10 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_product()
         self.assertEquals(resp.status_code,200)
         data={"image_url":"qwer/alalpur"}
-        uri = '/loyalty/v1/product-catalog/1/'
+        uri = '/loyalty/v1/product-catalogs/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/product-catalog/1/'
+        uri = '/loyalty/v1/product-catalogs/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['image_url'], "/media/qwer/alalpur")
 
