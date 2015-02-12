@@ -127,7 +127,7 @@ def check_role_of_initiator(phone_number):
             return "other"
 
 def create_servicedesk_user(name, phone_number, email):
-    user_profile = models.UserProfile.objects.filter(phone_number=phone_number)
+    user_profile = models.UserProfile.objects.filter(user__username=str(name))
     if len(user_profile) > 0:
         servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile=user_profile[0])
         if servicedesk_user:
@@ -145,21 +145,18 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
     ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
     manager_obj = User.objects.get(groups__name=Roles.SDMANAGERS)
     try:
-        role = check_role_of_initiator(phone_number)
         servicedesk_user = create_servicedesk_user(name, phone_number, email)
 
         if with_detail:
             gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
                                                             type=sms_dict['type'],
                                                             summary=sms_dict['summary'], description=sms_dict['description'],
-                                                            status="Open", created_date=datetime.datetime.now(),
-                                                            role=role
+                                                            status="Open", created_date=datetime.datetime.now()
                                                             )
         else:
             gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
                                                             message=sms_dict['message'], status="Open",
-                                                            created_date=datetime.datetime.now(),
-                                                            role=role
+                                                            created_date=datetime.datetime.now()                                                            
                                                             )
         gladminds_feedback_object.save()
         if sms_dict['file_location']:
@@ -179,10 +176,10 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
         message = templates.get_template('SEND_INVALID_MESSAGE')
     finally:
         LOG.info("Send complain message received successfully with %s" % message)
-        phone_number = utils.get_phone_number_format(phone_number)
-        phone_number = utils.get_phone_number_format(phone_number)
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
-        send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
+        if phone_number:
+            phone_number = utils.get_phone_number_format(phone_number)
+            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+            send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         if dealer_email:
             context = utils.create_context('FEEDBACK_DETAIL_TO_DEALER', gladminds_feedback_object)
             send_dealer_feedback(context, dealer_email)
@@ -344,7 +341,7 @@ def modify_feedback(feedback_obj, data, user, host):
             
         else:
             if data['assign_to'] :
-                servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile__phone_number=data['assign_to'])
+                servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile__user__username=str(data['assign_to']))
                 feedback_obj.assignee = servicedesk_user[0]
                 feedback_obj.assign_to_reporter = False
         feedback_obj.status = data['status']

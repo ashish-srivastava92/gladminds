@@ -20,7 +20,7 @@
     "pk": 3,
     "fields": {
       "constant_name":"service_1_valid_kms",
-      "constant_value":"3000"
+      "constant_value":"2000"
     }
   },
     {
@@ -28,7 +28,7 @@
     "pk": 4,
     "fields": {
       "constant_name":"service_2_valid_days",
-      "constant_value":"365"
+      "constant_value":"730"
     }
   },
     {
@@ -36,7 +36,7 @@
     "pk": 5,
     "fields": {
       "constant_name":"service_2_valid_kms",
-      "constant_value":"7000"
+      "constant_value":"8000"
     }
   },
     {
@@ -44,7 +44,7 @@
     "pk": 6,
     "fields": {
       "constant_name":"service_3_valid_days",
-      "constant_value":"365"
+      "constant_value":"730"
     }
   },
     {
@@ -52,7 +52,7 @@
     "pk": 7,
     "fields": {
       "constant_name":"service_3_valid_kms",
-      "constant_value":"3000"
+      "constant_value":"15000"
     }
   }  
 ]

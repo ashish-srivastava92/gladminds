@@ -280,6 +280,7 @@ class OldFscData(BaseModel):
     special_case = models.BooleanField(default=False)
     missing_field = models.CharField(max_length=50, null=True, blank=True)
     missing_value = models.CharField(max_length=50, null=True, blank=True)
+    servicing_dealer = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -705,6 +706,9 @@ class Constant(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "Constants"
+        
+    def __unicode__(self):
+        return constant_name
 
 class AreaServiceManager(BaseModel):
     '''details of Area Service Manager'''
@@ -973,6 +977,11 @@ class RedemptionRequest(BaseModel):
     refunded_points = models.BooleanField(default=False)
     due_date =  models.DateTimeField(null=True, blank= True)
     resolution_flag = models.BooleanField(default=False)
+    approved_date =  models.DateTimeField(null=True, blank= True)
+    shipped_date =  models.DateTimeField(null=True, blank= True)
+    delivery_date =  models.DateTimeField(null=True, blank= True)
+    pod_number = models.CharField(max_length=50, null=True, blank=True)
+    
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
     image_tag.short_description = 'Proof of Delivery'
@@ -995,8 +1004,13 @@ class RedemptionRequest(BaseModel):
                 if getattr(self, field.name)=='Approved':
                     self.is_approved=True
                     self.packed_by=self.partner.user.user.username
+                    self.approved_date=datetime_now()
                 elif getattr(self, field.name) in ['Rejected', 'Open'] :
                     self.is_approved=False
+                elif getattr(self, field.name)=='Shipped':
+                    self.shipped_date=datetime_now()
+                elif getattr(self, field.name)=='Delivered':
+                    self.delivery_date=datetime_now()
 
         return super(RedemptionRequest, self).save(force_insert=force_insert, force_update=force_update,
                               using=using, update_fields=update_fields)
@@ -1018,6 +1032,9 @@ class WelcomeKit(BaseModel):
     packed_by = models.CharField(max_length=50, null=True, blank=True)
     tracking_id = models.CharField(max_length=50, null=True, blank=True)
     resolution_flag = models.BooleanField(default=False)
+    shipped_date =  models.DateTimeField(null=True, blank= True)
+    delivery_date =  models.DateTimeField(null=True, blank= True)
+    pod_number = models.CharField(max_length=50, null=True, blank=True)
 
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
@@ -1029,10 +1046,24 @@ class WelcomeKit(BaseModel):
             raise ValidationError("Please assign a partner")
         else:
             super(WelcomeKit, self).clean(*args, **kwargs)
+            
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        for field in self._meta.fields:
+            if field.name=='status':
+                if getattr(self, field.name)=='Shipped':
+                    self.shipped_date=datetime_now()
+                elif getattr(self, field.name)=='Delivered':
+                    self.delivery_date=datetime_now()
+
+        return super(WelcomeKit, self).save(force_insert=force_insert, force_update=force_update,
+                              using=using, update_fields=update_fields)
 
     class Meta:
         abstract = True
         verbose_name_plural = "Welcome Kit Request"
+    
+    def __unicode__(self):
+        return str(self.transaction_id)
 
 class LoyaltySLA(models.Model):
     status = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_STATUS)
@@ -1061,6 +1092,9 @@ class LoyaltySLA(models.Model):
     class Meta:
         abstract = True
         verbose_name_plural = "Loyalty SLA info"
+        
+    def __unicode__(self):
+        return str(self.status)
 
 class DateDimension(models.Model):
     date_id = models.BigIntegerField(primary_key=True)

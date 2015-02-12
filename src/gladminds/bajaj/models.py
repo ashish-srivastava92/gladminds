@@ -160,7 +160,6 @@ class UCNRecovery(base_models.UCNRecovery):
 
 class OldFscData(base_models.OldFscData):
     product = models.ForeignKey(ProductData, null=True, blank=True)
-    dealer = models.ForeignKey(Dealer, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME

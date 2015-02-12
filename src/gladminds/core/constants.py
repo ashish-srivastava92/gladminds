@@ -174,7 +174,8 @@ WELCOME_KIT_STATUS = (
         ('Open', 'Open'),
         ('Accepted', 'Accepted'),
         ('Packed', 'Packed'),
-        ('Shipped', 'Shipped')
+        ('Shipped', 'Shipped'),
+        ('Delivered', 'Delivered')
     )
 
 class FeedStatus():
