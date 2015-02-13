@@ -8,6 +8,7 @@ from django.test import TestCase
 import datetime
 from time import sleep
 from django.contrib.auth.models import User
+from gladminds.core.auth_helper import Roles
 
 client = Client(SERVER_NAME='bajaj')
 
@@ -23,27 +24,23 @@ class TestServiceDeskFlow(BaseTestCase):
         brand = self.brand
         system = self.system
         self.create_user(username='gladminds', email='gladminds@gladminds.co', password='gladminds')
-        self.create_user(username='test', email='test@gladminds.co', password='test')
         brand.send_service_advisor_feed()
         system.create_sdo(username='sdo', email='gm@gm.com', password='123', phone_number="+91000000000")
         system.create_sdm(username='sdm', email='gm@gm.com', password='123', phone_number="+911234567890")
         system.create_sla(priority="Low")
         system.create_sla(priority="High")
-        self.create_user(username='dealer', email='dealer@xyz.com', password='123', group_name='dealers', phone_number="+919900880099")
-
+        system.create_dealer(username='dealer', email='dealer@xyz.com', password='123', phone_number="+919999999999")
+                
     def test_send_servicedesk_feedback(self):
         initiator = self.system
         SMSLog.objects.all().delete()
         EmailLog.objects.all().delete()
         initiator.post_feedback()
         sms_log_len_after = SMSLog.objects.all()
-        email_log_len_after = EmailLog.objects.all()
         feedback_obj = Feedback.objects.all()
         initiator.verify_result(input=feedback_obj[0].priority, output="Low")
-        initiator.verify_result(input=len(sms_log_len_after), output=1)
+        initiator.verify_result(input=len(sms_log_len_after), output=2)
         initiator.verify_result(input=sms_log_len_after[0].receiver, output="9999999999")
-        initiator.verify_result(input=len(email_log_len_after), output=1)
-        initiator.verify_result(input=email_log_len_after[0].receiver, output="gm@gm.com")
     
     def test_get_feedback_sdo(self):
         initiator = self.system

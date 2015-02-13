@@ -5,6 +5,7 @@ from integration.bajaj.base import BaseTestCase
 import datetime
 from django.test.client import Client
 from gladminds.bajaj.models import AuditLog, Feedback, SMSLog
+from gladminds.core.auth_helper import Roles
 
 client = Client(SERVER_NAME='bajaj')
 
@@ -43,13 +44,20 @@ class System(BaseTestCase):
         return spare_data
 
     def create_sdo(self, **kwargs):
-        user_servicedesk_owner_profile = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name='SDO', phone_number=kwargs['phone_number'])
+        user_servicedesk_owner_profile = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name=Roles.SDOWNERS, phone_number=kwargs['phone_number'])
         user_servicedesk_owner = models.ServiceDeskUser(user_profile=user_servicedesk_owner_profile)
         user_servicedesk_owner.save()
         return user_servicedesk_owner
+    
+    def create_dealer(self,**kwargs):
+        user_dealer_profile = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name=Roles.DEALERS, phone_number=kwargs['phone_number'])
+        user_dealer = models.Dealer(dealer_id='dealer', user=user_dealer_profile)
+        user_dealer.save()
+        user_dealer = models.Dealer.objects.get(user=user_dealer_profile)
+        return user_dealer
 
     def create_sdm(self, **kwargs):
-        user_servicedesk_manager_profile = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name='SDM', phone_number=kwargs['phone_number'])
+        user_servicedesk_manager_profile = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name=Roles.SDMANAGERS, phone_number=kwargs['phone_number'])
         user_servicedesk_manager = models.ServiceDeskUser(user_profile=user_servicedesk_manager_profile)
         user_servicedesk_manager.save()
         return user_servicedesk_manager
@@ -63,7 +71,7 @@ class System(BaseTestCase):
         return temp_customer_obj
 
     def dealer_login(self):
-        self.create_user(username='DEALER01', email='dealer@xyz.com', password='DEALER01@123', group_name='dealers', phone_number="+91776084042")
+        self.create_user(username='DEALER01', email='dealer@xyz.com', password='DEALER01@123', group_name=Roles.DEALERS, phone_number="+91776084042")
         data = {'username': 'DEALER01', 'password': 'DEALER01@123'}
         self.tester.client.login(username='DEALER01', password='DEALER01@123')
 
@@ -71,7 +79,7 @@ class System(BaseTestCase):
         data = {'username': 'dealer', 'password': '123'}
         response = client.post("/aftersell/dealer/login/", data=data)
         self.tester.assertEqual(response.status_code, 302)
-        data = {"description":"test","advisorMobile":"+919999999999",
+        data = {"description":"test","advisorMobile":"dealer",
                 "type":"Problem", "summary":"hello" }
         response = client.post("/aftersell/servicedesk/helpdesk", data=data)
         self.tester.assertEqual(response.status_code, 200)
