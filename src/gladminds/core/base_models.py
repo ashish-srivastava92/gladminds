@@ -376,6 +376,7 @@ class CustomerTempRegistration(BaseModel):
                                 null=False, blank=False, unique=True)
     sent_to_sap = models.BooleanField(default=False)
     remarks = models.CharField(max_length=500, null=True, blank=True)
+    update_history = models.CharField(max_length=500, null=True, blank=True)
     tagged_sap_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
     mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True, default=0)

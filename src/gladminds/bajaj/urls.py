@@ -9,28 +9,29 @@ from gladminds.core.apis import loyalty_apis, product_apis
 
 loyalty = LoyaltyService
 
-api_v1 = Api(api_name="loyalty/v1")
-api_v1.register(user_apis.UserResource())
-api_v1.register(user_apis.UserProfileResource())
-api_v1.register(loyalty_apis.NsmResource())
-api_v1.register(loyalty_apis.AsmResource())
-api_v1.register(loyalty_apis.PartnerResource())
-api_v1.register(loyalty_apis.DistributorResource())
-api_v1.register(loyalty_apis.RetailerResource())
-api_v1.register(product_apis.ProductTypeResource())
-api_v1.register(loyalty_apis.SpareMasterResource())
-api_v1.register(loyalty_apis.RedemptionResource())
-api_v1.register(loyalty_apis.ProductResource())
-api_v1.register(loyalty_apis.SparePartUPCResource())
-api_v1.register(loyalty_apis.SparePartPointResource())
-api_v1.register(loyalty_apis.LoyaltySLAResource())
-api_v1.register(loyalty_apis.MemberResource())
-api_v1.register(loyalty_apis.AccumulationResource())
+loyalty_v1 = Api(api_name="loyalty/v1")
+loyalty_v1.register(user_apis.UserResource())
+loyalty_v1.register(user_apis.UserProfileResource())
+loyalty_v1.register(loyalty_apis.NsmResource())
+loyalty_v1.register(loyalty_apis.AsmResource())
+loyalty_v1.register(loyalty_apis.PartnerResource())
+loyalty_v1.register(loyalty_apis.DistributorResource())
+loyalty_v1.register(loyalty_apis.RetailerResource())
+loyalty_v1.register(product_apis.ProductTypeResource())
+loyalty_v1.register(loyalty_apis.SpareMasterResource())
+loyalty_v1.register(loyalty_apis.RedemptionResource())
+loyalty_v1.register(loyalty_apis.ProductResource())
+loyalty_v1.register(loyalty_apis.SparePartUPCResource())
+loyalty_v1.register(loyalty_apis.SparePartPointResource())
+loyalty_v1.register(loyalty_apis.LoyaltySLAResource())
+loyalty_v1.register(loyalty_apis.MemberResource())
+loyalty_v1.register(loyalty_apis.AccumulationResource())
 
 urlpatterns = patterns('',
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
     url(r'', include(brand_admin.urls)),
     url(r'', include(api_v1.urls)),
+    url(r'', include(loyalty_v1.urls)),
     url(r'^site-info-hackish/$', 'gladminds.bajaj.views.site_info', name='site_info'),
     url(r'^aftersell/servicedesk/helpdesk$', 'gladminds.bajaj.services.service_desk.servicedesk_views.service_desk', name='enable_servicedesk'),
     url(r'^aftersell/servicedesk/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.get_servicedesk_tickets', name='get_servicedesk_tickets'),
