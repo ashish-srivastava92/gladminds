@@ -101,24 +101,25 @@ class Command(BaseCommand):
             asm_object.save()
                  
         for dealer in asm_list:
-            dealer_obj = DEALER.objects.filter(dealer_id=dealer['dealer_id'])
-            if not dealer_obj:
-                if len(dealer['dealer_name'])>30:
-                    full_name = dealer['dealer_name'].split(' ')
-                    first_name = ' '.join(full_name[0:3])
-                    last_name = ' '.join(full_name[3:])
-                else:
-                    first_name = dealer['dealer_name']
-                    last_name = ' '
-                dealer_user_pro = self.register_user(Roles.DEALERS,
-                                                     username=dealer['dealer_id'],
-                                                     first_name=first_name,
-                                                     last_name=last_name,
-                                                     email=dealer['dealer_email'],
-                                                     address=dealer['dealer_city'],
-                                                     state=dealer['dealer_state'])
-                dealer_object = DEALER(dealer_id=dealer['dealer_id'], user=dealer_user_pro)
-                dealer_object.save()
+            if dealer['dealer_id']:
+                dealer_obj = DEALER.objects.filter(dealer_id=dealer['dealer_id'])
+                if not dealer_obj:
+                    if len(dealer['dealer_name'])>30:
+                        full_name = dealer['dealer_name'].split(' ')
+                        first_name = ' '.join(full_name[0:3])
+                        last_name = ' '.join(full_name[3:])
+                    else:
+                        first_name = dealer['dealer_name']
+                        last_name = ' '
+                    dealer_user_pro = self.register_user(Roles.DEALERS,
+                                                         username=dealer['dealer_id'],
+                                                         first_name=first_name,
+                                                         last_name=last_name,
+                                                         email=dealer['dealer_email'],
+                                                         address=dealer['dealer_city'],
+                                                         state=dealer['dealer_state'])
+                    dealer_object = DEALER(dealer_id=dealer['dealer_id'], user=dealer_user_pro)
+                    dealer_object.save()
 
         for asc in asm_list:
             try:

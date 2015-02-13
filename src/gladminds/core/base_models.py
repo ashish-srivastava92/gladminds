@@ -731,7 +731,8 @@ class ZonalServiceManager(BaseModel):
         verbose_name_plural = "Zonal Service Managers "
     
     def __unicode__(self):
-        return self.zsm_id
+        return self.user.user.username
+    
 #######################LOYALTY TABLES#################################
 
 class NationalSalesManager(BaseModel):
