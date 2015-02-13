@@ -54,7 +54,7 @@ class DispatchedProduct(models.ProductData):
         proxy = True
 
 class ListDispatchedProduct(GmModelAdmin):
-    search_fields = ('^product_id', '^dealer_id__dealer_id')
+    search_fields = ('product_id', 'dealer_id__dealer_id')
     list_display = (
         'product_id', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
     list_per_page = 50
@@ -82,8 +82,8 @@ class ListDispatchedProduct(GmModelAdmin):
         return form
 
     def changelist_view(self, request, extra_context=None):
-        custom_search_mapping = {'Product Id' : '^product_id',
-                                 'Dealer Id': '^dealer_id__dealer_id',}
+        custom_search_mapping = {'Product Id' : 'product_id',
+                                 'Dealer Id': 'dealer_id__dealer_id',}
         extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping
                         }
         return super(ListDispatchedProduct, self).changelist_view(request, extra_context=extra_context)
@@ -98,8 +98,8 @@ class Couponline(TabularInline):
 
 
 class ProductDataAdmin(GmModelAdmin):
-    search_fields = ('^product_id', '^customer_id', '^customer_phone_number',
-                     '^customer_name')
+    search_fields = ('product_id', 'customer_id', 'customer_phone_number',
+                     'customer_name')
     list_display = ('product_id', 'customer_id', "UCN", 'customer_name',
                     'customer_phone_number', 'purchase_date')
     inlines = (Couponline,)
@@ -136,10 +136,10 @@ class ProductDataAdmin(GmModelAdmin):
         return coupon_service_type
     
     def changelist_view(self, request, extra_context=None):
-        custom_search_mapping = {'Product Id' : '^product_id',
-                                 'Customer ID':'^customer_id',
-                                 'Customer Name': '^customer_name',
-                                 'Customer Phone Number': '^customer_phone_number'}
+        custom_search_mapping = {'Product Id' : 'product_id',
+                                 'Customer ID':'customer_id',
+                                 'Customer Name': 'customer_name',
+                                 'Customer Phone Number': 'customer_phone_number'}
         extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping
                         }
         return super(ProductDataAdmin, self).changelist_view(request, extra_context=extra_context)
@@ -147,7 +147,7 @@ class ProductDataAdmin(GmModelAdmin):
 
 class CouponAdmin(GmModelAdmin):
     search_fields = (
-        '^unique_service_coupon', '^product__product_id', 'status')
+        'unique_service_coupon', 'product__product_id', 'status')
     list_display = ('product', 'unique_service_coupon', 'actual_service_date',
                     'actual_kms', 'status', 'service_type','service_advisor', 'associated_with')
     exclude = ('order',)
@@ -176,8 +176,8 @@ class CouponAdmin(GmModelAdmin):
                 return None
 
     def changelist_view(self, request, extra_context=None):
-        custom_search_mapping = {'Unique Service Coupon' : '^unique_service_coupon',
-                                 'Product Id': '^product__product_id',
+        custom_search_mapping = {'Unique Service Coupon' : 'unique_service_coupon',
+                                 'Product Id': 'product__product_id',
                                  'Status': 'status'}
         extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping, 'created_date_search': True
                         }
