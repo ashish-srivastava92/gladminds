@@ -28,6 +28,19 @@ AUDIT_ACTION = 'SEND TO QUEUE'
 class LoyaltyService(CoreLoyaltyService):
     '''Class for loyalty service'''
     
+    def save_comment(self, type, message, transaction_id, user):
+        redemption=welcome_kit=None
+        if type=='redemption':
+            redemption = transaction_id
+        elif type=='welcome_kit':
+            welcome_kit = transaction_id
+        comment_thread = models.CommentThread(user=user,
+                                              message=message,
+                                              welcome_kit=welcome_kit, 
+                                              redemption=redemption)
+        comment_thread.save()
+        return comment_thread
+        
     def download_welcome_kit(self, request, choice):
         '''Download list of new or all registered member'''
         kwargs = {}

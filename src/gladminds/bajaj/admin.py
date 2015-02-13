@@ -536,7 +536,31 @@ class MechanicAdmin(GmModelAdmin):
             LoyaltyService.send_welcome_sms(obj)
             LoyaltyService.initiate_welcome_kit(obj)
 
+class CommentThreadInline(TabularInline):
+    model = models.CommentThread
+    fields = ('created_date', 'user', 'message')
+    extra = 0
+    max_num = 0
+    readonly_fields = ('created_date', 'user', 'message')
+
+
+class RedemptionCommentForm(forms.ModelForm):
+    extra_field = forms.CharField(label='comment', required=False, widget=forms.Textarea(attrs={'style':'resize: none;'}))
+
+    def save(self, commit=True):
+        extra_field = self.cleaned_data.get('extra_field', None)
+        transaction_id = self.instance
+        LoyaltyService.save_comment('redemption', extra_field, transaction_id, self.current_user)
+        return super(RedemptionCommentForm, self).save(commit=commit)
+    
+    class Meta:
+        model = models.RedemptionRequest
+
+    
 class RedemptionRequestAdmin(GmModelAdmin):
+    readonly_fields = ('image_tag', 'transaction_id',)
+    form = RedemptionCommentForm
+    inlines = (CommentThreadInline,)
     list_filter = (
         ('created_date', DateFieldListFilter),
     )
@@ -546,7 +570,18 @@ class RedemptionRequestAdmin(GmModelAdmin):
                      'get_mechanic_district', 'get_mechanic_state',
                      'product', 'created_date','due_date',
                      'expected_delivery_date', 'status', 'partner')
-    readonly_fields = ('image_tag', 'transaction_id')
+    
+    fieldsets = (
+        (None, {
+            'fields': (
+            'transaction_id', 'delivery_address', 'expected_delivery_date', 'status',
+            'tracking_id', 'due_date', 'approved_date', 'shipped_date',
+            'delivery_date', 'pod_number', 'product', 'member',
+            'partner', 'image_url', 'image_tag',
+            'extra_field')
+        }),
+        )   
+    
 
     def queryset(self, request):
         """
@@ -574,6 +609,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
             form.base_fields['status'].choices = constants.LP_REDEMPTION_STATUS
         else:
             form.base_fields['status'].choices = constants.REDEMPTION_STATUS
+        form.current_user=request.user
         return form
 
     def save_model(self, request, obj, form, change):
@@ -606,15 +642,40 @@ class RedemptionRequestAdmin(GmModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
-        
+
+class WelcomeKitCommentForm(forms.ModelForm):
+    extra_field = forms.CharField(label='comment', required=False, widget=forms.Textarea(attrs={'style':'resize: none;'}))
+
+    def save(self, commit=True):
+        extra_field = self.cleaned_data.get('extra_field', None)
+        transaction_id = self.instance
+        LoyaltyService.save_comment('welcome_kit', extra_field, transaction_id, self.current_user)
+        return super(WelcomeKitCommentForm, self).save(commit=commit)
+    
+    class Meta:
+        model = models.WelcomeKit
+       
 class WelcomeKitAdmin(GmModelAdmin):
     list_filter = ('status',)
+    form = WelcomeKitCommentForm
+    inlines = (CommentThreadInline,)
     search_fields = ('member__phone_number', 'partner__partner_id', 'transaction_id')
     list_display = ('member',  'get_mechanic_name',
                      'delivery_address', 'get_mechanic_pincode',
                      'get_mechanic_district', 'get_mechanic_state',
                      'created_date','due_date', 'expected_delivery_date', 'status', 'partner')
     readonly_fields = ('image_tag', 'transaction_id')
+    fieldsets = (
+    (None, {
+        'fields': (
+        'transaction_id', 'delivery_address',
+        'expected_delivery_date', 'status',
+        'tracking_id', 'due_date', 'shipped_date',
+        'delivery_date', 'pod_number', 'member',
+        'partner', 'image_url', 'image_tag',
+        'extra_field')
+    }),
+    ) 
     
     def save_model(self, request, obj, form, change):
         date = LoyaltyService.set_date("Welcome Kit", obj.status)
@@ -630,6 +691,7 @@ class WelcomeKitAdmin(GmModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('packed_by','resolution_flag')
         form = super(WelcomeKitAdmin, self).get_form(request, obj, **kwargs)
+        form.current_user=request.user
         return form
 
     def suit_row_attributes(self, obj):

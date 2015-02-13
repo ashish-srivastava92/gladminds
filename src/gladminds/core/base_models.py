@@ -1043,6 +1043,19 @@ class WelcomeKit(BaseModel):
     
     def __unicode__(self):
         return str(self.transaction_id)
+    
+class CommentThread(BaseModel):
+    '''details of activities done by service-desk user'''
+    id = models.AutoField(primary_key=True)
+    message = models.TextField(null=True, blank=True)
+    is_edited = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Comment Thread"
+    
+    def __unicode__(self):
+        return str(self.id)
 
 class LoyaltySLA(models.Model):
     status = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_STATUS)

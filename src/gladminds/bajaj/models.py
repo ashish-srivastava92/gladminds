@@ -392,6 +392,15 @@ class WelcomeKit(base_models.WelcomeKit):
     class Meta:
         app_label = _APP_NAME
 
+class CommentThread(base_models.CommentThread):
+    '''details of activities done by service-desk user'''
+    welcome_kit = models.ForeignKey(WelcomeKit, null=True, blank=True)
+    redemption = models.ForeignKey(RedemptionRequest, null=True, blank=True)
+    user = models.ForeignKey(User, null=True, blank=True)
+
+    class Meta:
+        app_label = _APP_NAME
+
 class DateDimension(base_models.DateDimension):
     '''
     Date dimension table
