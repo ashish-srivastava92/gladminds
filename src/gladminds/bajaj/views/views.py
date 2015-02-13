@@ -297,10 +297,7 @@ def register_customer(request, group=None):
                     customer_obj.dealer_asc_id = str(request.user)
                     customer_obj.email_flag = False
                     customer_obj.mobile_number_update_count+=1
-                    if customer_obj.update_history:
-                        customer_obj.update_history = str(customer_obj.update_history) +" "+ str(customer_obj.old_number)
-                    else:
-                        customer_obj.update_history = str(customer_obj.old_number)
+                    customer_obj.update_history = str(customer_obj.old_number) + (", "+ customer_obj.update_history if customer_obj.update_history else "")
                     message = get_template('CUSTOMER_MOBILE_NUMBER_UPDATE').format(customer_name=customer_obj.new_customer_name, new_number=customer_obj.new_number)
                     for phone_number in [customer_obj.new_number, customer_obj.old_number]:
                         phone_number = utils.get_phone_number_format(phone_number)

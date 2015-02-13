@@ -16,7 +16,6 @@ from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.conf import settings
 from gladminds.core.auth_helper import Roles
 from gladminds.core import constants
-from gladminds.core.constants import COUPON_STATUS
 
 class BajajAdminSite(AdminSite):
     pass
@@ -192,7 +191,7 @@ class CouponAdmin(GmModelAdmin):
         if utils.get_search_query_params(request, self) and self.search_fields[0] == 'status':
             try:
                 request.GET = request.GET.copy()
-                search_value = str(COUPON_STATUS[request.GET["q"].title()])
+                search_value = str(constants.COUPON_STATUS[request.GET["q"].title()])
                 request.GET["q"] = search_value
                 request.META['QUERY_STRING'] = search_value
             except Exception:
