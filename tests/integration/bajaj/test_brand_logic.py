@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from django.db import transaction
 import os
 from django.conf import settings
-from gladminds.bajaj.feeds import feed
+from gladminds.bajaj.services.coupons import import_feed
 from datetime import datetime, timedelta
 
 from django.test.client import Client

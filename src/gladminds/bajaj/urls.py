@@ -14,10 +14,18 @@ api_v1.register(user_apis.UserResource())
 api_v1.register(user_apis.UserProfileResource())
 api_v1.register(loyalty_apis.NsmResource())
 api_v1.register(loyalty_apis.AsmResource())
+api_v1.register(loyalty_apis.PartnerResource())
 api_v1.register(loyalty_apis.DistributorResource())
 api_v1.register(loyalty_apis.RetailerResource())
 api_v1.register(product_apis.ProductTypeResource())
 api_v1.register(loyalty_apis.SpareMasterResource())
+api_v1.register(loyalty_apis.RedemptionResource())
+api_v1.register(loyalty_apis.ProductResource())
+api_v1.register(loyalty_apis.SparePartUPCResource())
+api_v1.register(loyalty_apis.SparePartPointResource())
+api_v1.register(loyalty_apis.LoyaltySLAResource())
+api_v1.register(loyalty_apis.MemberResource())
+api_v1.register(loyalty_apis.AccumulationResource())
 
 urlpatterns = patterns('',
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),

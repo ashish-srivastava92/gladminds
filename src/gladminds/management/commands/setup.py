@@ -10,6 +10,8 @@ from django.contrib.contenttypes.models import ContentType
 from gladminds.core.loaders.module_loader import get_model
 from gladminds.management.commands.load_mech_data import Command as mech_cmd
 from gladminds.management.commands.load_part_data import Command as part_cmd
+from gladminds.management.commands.load_area_service_manager_data import Command as asm_cmd
+from gladminds.bajaj.models import ZonalServiceManager
 
 _DEMO = GmApps.DEMO
 _BAJAJ = GmApps.BAJAJ
@@ -32,6 +34,8 @@ _BAJAJ_LOYALTY_SUPERADMINS = [('gladminds', '', 'gladminds!123'),
                                'kumarashish!123')]
 _BAJAJ_LOYALTY_NSM = [('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123', 'NSM002', 'south', 'Raghunath')]
 _BAJAJ_LOYALTY_ASM = [('spremnath@bajajauto.co.in', 'spremnath@bajajauto.co.in', 'spremnath!123', 'ASM004', 'PREM NATH', '+919176339712', 'Tamil Nadu')]
+_BAJAJ_ZSM = [('mspendharkar@bajajauto.co.in', 'mspendharkar@bajajauto.co.in', 'milindpendharkar@123', 'Milind Pendharkar')]
+
 
 class Command(BaseCommand):
 
@@ -47,8 +51,10 @@ class Command(BaseCommand):
         self.create_afterbuy_admins()
         self.create_bajaj_admins()
         self.set_afterbuy_permissions()
+        self.create_zonal_managers()
         if settings.ENV not in ['prod']:
             self.upload_loyalty_user()
+            self.upload_asm_user()
             self.upload_part_data()
         for brand in ALL_BRANDS:
             self.set_brand_permissions(brand)
@@ -86,7 +92,7 @@ class Command(BaseCommand):
             admin.is_staff = True
             admin.save(using=app)
             add_user_to_group(app, admin.id, Roles.SUPERADMINS)
-
+    
     def create_afterbuy_admins(self):
         for details in _AFTERBUY_ADMINS:
             self.create_consumer(details, Roles.ADMINS)
@@ -121,6 +127,20 @@ class Command(BaseCommand):
         except Exception as ex:
             print "[create_bajaj_admins]: ", ex
 
+    def create_zonal_managers(self):
+        from gladminds.bajaj.models import ZonalServiceManager
+        try:
+            for details in _BAJAJ_ZSM:
+                print "create zonal managers", details
+                profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.ZSM)
+                try:
+                    zsm_obj =  ZonalServiceManager.objects.get(user=profile_obj)
+                except:
+                    zsm_obj = ZonalServiceManager(user=profile_obj)
+                    zsm_obj.save()
+        except Exception as ex:
+            print "[create zsm ]" , ex
+            
     def create_user_profile(self, details, app, group=None):
         users = User.objects.filter(username=details[0]).using(app)
         if len(users) > 0:
@@ -187,7 +207,16 @@ class Command(BaseCommand):
             mech_data.handle()
         except Exception as ex:
             print "[upload_loyalty_user]: ", ex
-        
+    
+    def upload_asm_user(self):
+        '''
+        Uploads distributor and mechanic data
+        '''
+        try:
+            asm_data = asm_cmd()
+            asm_data.handle()
+        except Exception as ex:
+            print "[upload_asm_user]: ", ex
 
     def upload_part_data(self):
         '''
@@ -198,7 +227,7 @@ class Command(BaseCommand):
             part_data.handle()
         except Exception as ex:
             print "[upload_part_data]: ", ex
-
+    
     def set_brand_permissions(self, brand):
         try:
             for group in [Roles.ASMS, Roles.NSMS]:

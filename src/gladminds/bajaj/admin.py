@@ -30,9 +30,10 @@ class DealerAdmin(GmModelAdmin):
     search_fields = ('dealer_id',)
     list_display = ('dealer_id', 'get_user', 'get_profile_number', 'get_profile_address')
 
+
 class AuthorizedServiceCenterAdmin(GmModelAdmin):
     search_fields = ('asc_id', 'dealer__dealer_id')
-    list_display = ('asc_id', 'get_user', 'get_profile_number', 'get_profile_address', 'dealer')
+    list_display = ('asc_id', 'get_user', 'get_profile_number', 'get_profile_address', 'dealer', 'asm')
 
 class ServiceAdvisorAdmin(GmModelAdmin):
     search_fields = ('service_advisor_id', 'dealer__dealer_id', 'asc__asc_id')
