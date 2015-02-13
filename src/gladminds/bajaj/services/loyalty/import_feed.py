@@ -172,7 +172,7 @@ class MechanicFeed(BaseFeed):
                 mech_object.save()
             except Exception as ex:
                 total_failed += 1
-                ex = "[MechanicFeed]: id-{0} :: {1}".format(mechanic['mobile'], ex)
+                ex = "[MechanicFeed]: id-{0} :: {1}".format(mechanic['temp_id'], ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
                 continue
