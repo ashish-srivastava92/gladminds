@@ -26,6 +26,8 @@ api_v1.register(loyalty_apis.SparePartPointResource())
 api_v1.register(loyalty_apis.LoyaltySLAResource())
 api_v1.register(loyalty_apis.MemberResource())
 api_v1.register(loyalty_apis.AccumulationResource())
+api_v1.register(loyalty_apis.CommentThreadResource())
+api_v1.register(loyalty_apis.WelcomeKitResource())
 
 urlpatterns = patterns('',
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),

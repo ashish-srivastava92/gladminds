@@ -3,7 +3,7 @@ from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.model_fetcher import models
 from tastypie.authorization import Authorization
 from tastypie import fields
-from gladminds.core.apis.user_apis import UserProfileResource
+from gladminds.core.apis.user_apis import UserProfileResource, UserResource
 from gladminds.core.apis.product_apis import ProductTypeResource
 from django.conf.urls import url
 from django.http.response import HttpResponse
@@ -173,3 +173,26 @@ class AccumulationResource(CustomBaseModelResource):
         filtering = {
                      "member":ALL_WITH_RELATIONS,
                      }
+
+class WelcomeKitResource(CustomBaseModelResource):
+    member = fields.ForeignKey(MemberResource, 'member')
+    partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)
+    
+    class Meta:
+        queryset = models.WelcomeKit.objects.all()
+        resource_name = "welcomekits"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+class CommentThreadResource(CustomBaseModelResource):
+    redemption = fields.ForeignKey(RedemptionResource, 'redemption', null=True, blank=True, full=True)
+    welcome_kit = fields.ForeignKey(WelcomeKitResource, 'welcome_kit', null=True, blank=True, full=True)
+    user = fields.ForeignKey(UserResource, 'user', null=True, blank=True, full=True)
+    
+    class Meta:
+        queryset = models.CommentThread.objects.all()
+        resource_name = "comment-threads"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
