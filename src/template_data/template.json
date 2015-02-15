@@ -31,7 +31,7 @@
     "pk": 4,
     "fields": {
       "template_key":"SEND_SA_VALID_COUPON",
-      "template":"Please proceed for free service {service_type} for Customer ID {customer_id} Customer Name {customer_name}",
+      "template":"Please proceed for free service {service_type} for Customer ID {customer_id} Customer phone number {customer_phone}",
       "description":"Send on valid coupon id"
     }
   },

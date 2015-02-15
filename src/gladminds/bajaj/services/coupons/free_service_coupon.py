@@ -259,7 +259,7 @@ def validate_coupon(sms_dict, phone_number):
             update_coupon(valid_coupon, actual_kms, service_advisor, 4, datetime.now())
             dealer_message = templates.get_template('SEND_SA_VALID_COUPON').format(
                                             service_type=valid_coupon.service_type,
-                                            customer_id=sap_customer_id, customer_name=product.customer_name)
+                                            customer_id=sap_customer_id, customer_phone=product.customer_phone_number)
 
             customer_message = templates.get_template('SEND_CUSTOMER_VALID_COUPON').format(
                                         coupon=valid_coupon.unique_service_coupon,
