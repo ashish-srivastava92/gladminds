@@ -1001,23 +1001,6 @@ class RedemptionRequest(BaseModel):
         
         super(RedemptionRequest, self).clean(*args, **kwargs)
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        for field in self._meta.fields:
-            if field.name=='status':
-                if getattr(self, field.name)=='Approved':
-                    self.is_approved=True
-                    self.packed_by=self.partner.user.user.username
-                    self.approved_date=datetime_now()
-                elif getattr(self, field.name) in ['Rejected', 'Open'] :
-                    self.is_approved=False
-                elif getattr(self, field.name)=='Shipped':
-                    self.shipped_date=datetime_now()
-                elif getattr(self, field.name)=='Delivered':
-                    self.delivery_date=datetime_now()
-
-        return super(RedemptionRequest, self).save(force_insert=force_insert, force_update=force_update,
-                              using=using, update_fields=update_fields)
-
     class Meta:
         abstract = True
         verbose_name_plural = "Redemption Request"
@@ -1049,17 +1032,6 @@ class WelcomeKit(BaseModel):
             raise ValidationError("Please assign a partner")
         else:
             super(WelcomeKit, self).clean(*args, **kwargs)
-            
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        for field in self._meta.fields:
-            if field.name=='status':
-                if getattr(self, field.name)=='Shipped':
-                    self.shipped_date=datetime_now()
-                elif getattr(self, field.name)=='Delivered':
-                    self.delivery_date=datetime_now()
-
-        return super(WelcomeKit, self).save(force_insert=force_insert, force_update=force_update,
-                              using=using, update_fields=update_fields)
 
     class Meta:
         abstract = True
