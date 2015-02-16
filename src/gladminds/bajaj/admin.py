@@ -178,7 +178,7 @@ class CouponAdmin(GmModelAdmin):
         custom_search_mapping = {'Unique Service Coupon' : '^unique_service_coupon',
                                  'Product Id': '^product__product_id',
                                  'Status': 'status'}
-        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping
+        extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping, 'created_date_search': True
                         }
         return super(CouponAdmin, self).changelist_view(request, extra_context=extra_context)
 
@@ -495,7 +495,7 @@ class MechanicAdmin(GmModelAdmin):
     search_fields = ('mechanic_id',
                      'phone_number', 'first_name',
                      'state', 'district')
-    list_display = ('mechanic_id','first_name', 'date_of_birth',
+    list_display = ('get_mechanic_id','first_name', 'date_of_birth',
                     'phone_number', 'shop_name', 'district',
                     'state', 'pincode', 'registered_by_distributor')
     readonly_fields = ('image_tag',)
@@ -521,7 +521,7 @@ class MechanicAdmin(GmModelAdmin):
         return query_set
 
     def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points', 'sent_to_sap')
+        self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points', 'sent_to_sap', 'permanent_id')
         form = super(MechanicAdmin, self).get_form(request, obj, **kwargs)
         return form
 
@@ -530,12 +530,11 @@ class MechanicAdmin(GmModelAdmin):
         for field in obj._meta.fields:
             if field.name in constants.MANDATORY_MECHANIC_FIELDS and not getattr(obj, field.name):
                 form_status = False
+        obj.phone_number=utils.mobile_format(obj.phone_number)
+        super(MechanicAdmin, self).save_model(request, obj, form, change)
         if form_status and not obj.sent_sms:
             LoyaltyService.send_welcome_sms(obj)
             LoyaltyService.initiate_welcome_kit(obj)
-            obj.sent_sms=True
-        obj.phone_number=utils.mobile_format(obj.phone_number)
-        super(MechanicAdmin, self).save_model(request, obj, form, change)
 
 class RedemptionRequestAdmin(GmModelAdmin):
     list_filter = (
@@ -662,6 +661,10 @@ class LoyaltySlaAdmin(GmModelAdmin):
         return str(self.member_resolution_time) + ' ' + self.member_resolution_unit
 
     list_display = ('status','action', reminder_time, resolution_time, member_resolution_time)
+    
+class ConstantAdmin(GmModelAdmin):
+    search_fields = ('constant_name',  'constant_value')
+    list_display = ('constant_name',  'constant_value',)
 
 brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
 
@@ -711,4 +714,4 @@ brand_admin.register(models.SLA, SlaAdmin)
 brand_admin.register(models.ServiceDeskUser, ServiceDeskUserAdmin)
 brand_admin.register(models.Service, ServiceAdmin)
 brand_admin.register(models.ServiceType)
-brand_admin.register(models.Constant)
+brand_admin.register(models.Constant, ConstantAdmin)

@@ -295,6 +295,7 @@ def register_customer(request, group=None):
                     customer_obj.product_data = product_obj[0]
                     customer_obj.sent_to_sap = False
                     customer_obj.dealer_asc_id = str(request.user)
+                    customer_obj.email_flag = False
                     customer_obj.mobile_number_update_count+=1
                     message = get_template('CUSTOMER_MOBILE_NUMBER_UPDATE').format(customer_name=customer_obj.new_customer_name, new_number=customer_obj.new_number)
                     for phone_number in [customer_obj.new_number, customer_obj.old_number]:
@@ -326,7 +327,7 @@ def register_customer(request, group=None):
                                                                new_number = data_source[0]['customer_phone_number'],
                                                                old_number = data_source[0]['customer_phone_number'],
                                                                product_purchase_date = data_source[0]['product_purchase_date'],
-                                                               temp_customer_id = temp_customer_id)
+                                                               temp_customer_id = temp_customer_id, email_flag=True)
             customer_obj.save()
             logger.info('[Temporary_cust_registration]:: Initiating purchase feed')
             feed_remark = FeedLogWithRemark(len(data_source),
@@ -428,6 +429,9 @@ def exceptions(request, exception=None):
     groups = utils.stringify_groups(request.user)
     if not (Roles.ASCS in groups or Roles.DEALERS in groups):
         return HttpResponseBadRequest()
+    is_dealer = False
+    if Roles.DEALERS in groups:
+        is_dealer = True
     if request.method == 'GET':
         template = 'portal/exception.html'
         data = None
@@ -437,7 +441,7 @@ def exceptions(request, exception=None):
             else:
                 data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
         return render(request, template, {'active_menu': exception,
-                                           "data": data, 'groups': groups})
+                                           "data": data, 'groups': groups, 'is_dealer':is_dealer})
     elif request.method == 'POST':
         function_mapping = {
             'customer': get_customer_info,

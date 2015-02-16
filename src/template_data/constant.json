@@ -6,5 +6,53 @@
       "constant_name":"mobile_number_update_count",
       "constant_value":"3"
     }
-  }
+  },
+    {
+    "model": "gladminds.constant",
+    "pk": 2,
+    "fields": {
+      "constant_name":"service_1_valid_days",
+      "constant_value":"365"
+    }
+  },
+    {
+    "model": "gladminds.constant",
+    "pk": 3,
+    "fields": {
+      "constant_name":"service_1_valid_kms",
+      "constant_value":"2000"
+    }
+  },
+    {
+    "model": "gladminds.constant",
+    "pk": 4,
+    "fields": {
+      "constant_name":"service_2_valid_days",
+      "constant_value":"730"
+    }
+  },
+    {
+    "model": "gladminds.constant",
+    "pk": 5,
+    "fields": {
+      "constant_name":"service_2_valid_kms",
+      "constant_value":"8000"
+    }
+  },
+    {
+    "model": "gladminds.constant",
+    "pk": 6,
+    "fields": {
+      "constant_name":"service_3_valid_days",
+      "constant_value":"730"
+    }
+  },
+    {
+    "model": "gladminds.constant",
+    "pk": 7,
+    "fields": {
+      "constant_name":"service_3_valid_kms",
+      "constant_value":"15000"
+    }
+  }  
 ]

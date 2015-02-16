@@ -92,10 +92,12 @@ class DistributorModelList(ComplexModel):
 
 class MechanicModel(ComplexModel):
     __namespace__ = tns
+    MECH_ID = Unicode
+    TEMP_MECH_ID = Unicode
     FIRST_NAME = Unicode
     LAST_NAME = Unicode(default=None)
     PHONE_NUMBER = Unicode
-    DOB = Date
+    DOB = Unicode(default=None)
     SHOP_NAME = Unicode
     DISTRICT = Unicode
     STATE = Unicode
@@ -257,15 +259,17 @@ class MechanicService(ServiceBase):
         for mechanic in ObjectList.MechanicData:
             try:
                 mechanic_list.append({
-                    'first_name': mechanic.FIRST_NAME.upper(),
-                    'last_name': mechanic.LAST_NAME.upper(),
-                    'mobile': utils.mobile_format(mechanic.PHONE_NUMBER),
-                    'shop_name': mechanic.SHOP_NAME.upper(),
-                    'dob': mechanic.DOB,
-                    'district': mechanic.DISTRICT.upper(),
-                    'state': mechanic.STATE.upper(),
-                    'pincode': mechanic.PINCODE,
-                    'dist_id': mechanic.DIST_ID
+                    'mechanic_id': mechanic.MECH_ID,
+#                     'first_name': mechanic.FIRST_NAME,
+#                     'last_name': mechanic.LAST_NAME,
+#                     'mobile': utils.mobile_format(mechanic.PHONE_NUMBER),
+#                     'shop_name': mechanic.SHOP_NAME,
+#                     'dob': mechanic.DOB,
+#                     'district': mechanic.DISTRICT,
+#                     'state': mechanic.STATE,
+#                     'pincode': mechanic.PINCODE,
+#                     'dist_id': mechanic.DIST_ID,
+                    'temp_id': mechanic.TEMP_MECH_ID
                 })
             except Exception as ex:
                 ex = "MechanicService: {0}  Error on Validating {1}".format(mechanic, ex)

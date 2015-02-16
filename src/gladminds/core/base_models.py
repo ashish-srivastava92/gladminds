@@ -279,6 +279,7 @@ class OldFscData(BaseModel):
     special_case = models.BooleanField(default=False)
     missing_field = models.CharField(max_length=50, null=True, blank=True)
     missing_value = models.CharField(max_length=50, null=True, blank=True)
+    servicing_dealer = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -375,7 +376,8 @@ class CustomerTempRegistration(BaseModel):
     remarks = models.CharField(max_length=500, null=True, blank=True)
     tagged_sap_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
-    mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True, default=0) 
+    mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True, default=0)
+    email_flag = models.BooleanField(default=False) 
     objects = user_manager.CustomerTempRegistrationManager()
 
     class Meta:
@@ -703,6 +705,9 @@ class Constant(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "Constants"
+        
+    def __unicode__(self):
+        return constant_name
 
         
 #######################LOYALTY TABLES#################################
@@ -768,6 +773,7 @@ class Retailer(BaseModel):
 class Mechanic(BaseModel):
     '''details of Mechanic'''
     mechanic_id = models.CharField(max_length=50, unique=True, default=generate_mech_id)
+    permanent_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
     total_points = models.IntegerField(max_length=50, null=True, blank=True, default=0)
 
     first_name = models.CharField(max_length=50, null=True, blank=True)
@@ -833,6 +839,8 @@ class Mechanic(BaseModel):
         verbose_name_plural = "Mechanics"
 
     def __unicode__(self):
+        if self.permanent_id:
+            return self.permanent_id
         return self.mechanic_id
 
 class SparePartMasterData(BaseModel):

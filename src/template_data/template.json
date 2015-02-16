@@ -540,7 +540,7 @@
     "pk": 60,
     "fields": {
       "template_key": "WELCOME_KIT_DELIVERY",
-      "template": "Dear {mechanic_name}, Congratulations! Welcome to the Bajaj loyalty program. To Accumulate, Send SMS with Code AC UPC to 9561112809",
+      "template": "Dear {mechanic_name}, Welcome to the Bajaj USTAAD loyalty program. To ACCUMULATE POINTS, send SMS AC Unique_Code1 Unique_Code2 to 9561112809",
       "description": "welcome message to mechanic"
       }
     },
@@ -560,6 +560,15 @@
       "template_key": "PHONE_NUMBER_UPDATE_COUNT_EXCEEDED",
       "template": "Mobile number update not allowed. Please contact customer support: +91-9741775128.",
       "description": "Send this message when customer phone number cannot be updated"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 63,
+    "fields": {
+      "template_key":"DEALER_UNAUTHORISED",
+      "template":  "FSC cannot be closed with this option. Please use CDMS system to close FSC",
+      "description": "Send message when dealer not authorized to close coupon"
     }
   }
 ]

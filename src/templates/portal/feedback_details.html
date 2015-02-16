@@ -193,7 +193,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="myModalLabel">Submit a Service Desk Ticket</h4>
+   		<h4 class="modal-title" id="myModalLabel">Submit a Service Desk Ticket</h4>
       </div>
       <div class="modal-body">
 		<form class="help-desk-form" role="search">
@@ -204,8 +204,9 @@
                   <div class="col-md-9 form-group">
                     <select class="form-control advisorMobile" name="advisorMobile" required>
                       <option value="">Select mobile number</option>
+                      <option value="{{dealer_asc.user.username}}">{{dealer_asc.user.username}}</option>
                       {% for phone in data %}
-                      <option value="{{phone.user.phone_number}}">{{phone.service_advisor_id}} ({{phone.user.phone_number}})</option>
+                      <option value="{{phone.user.user.username}}">{{phone.service_advisor_id}} ({{phone.user.phone_number}})</option>
                       {% endfor %}
                     </select>
                   </div>

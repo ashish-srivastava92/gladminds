@@ -105,21 +105,20 @@ def get_feed_failure_log_detail(type=None):
         feed_data.append(data)
     return { 'feed_data':feed_data , 'feed_logs':feed_logs}
 
-def get_customer_details(start_date=None, end_date=None, type=None):
-    start_date = start_date
-    end_date = end_date
-    customer_details = models.CustomerTempRegistration.objects.filter(modified_date__range=(start_date, end_date),
-                                                                      dealer_asc_id__isnull=False)
+def get_customer_details():
+    customer_details = models.CustomerTempRegistration.objects.filter(email_flag=False, dealer_asc_id__isnull=False)
     customer_data = []
     for customer in customer_details:
-        data = {}
-        data['dealer_asc_id'] = customer.dealer_asc_id
-        data['customer_id'] = customer.temp_customer_id
-        data['customer_name'] = customer.new_customer_name
-        data['new_number'] = customer.new_number
-        data['old_number'] = customer.old_number
-        customer_data.append(data)
-    return customer_data
+        if customer.new_number != customer.old_number:
+            data = {}
+            data['dealer_asc_id'] = customer.dealer_asc_id
+            data['customer_id'] = customer.temp_customer_id
+            data['customer_name'] = customer.new_customer_name
+            data['new_number'] = customer.new_number
+            data['old_number'] = customer.old_number
+            data['modified_date'] = customer.modified_date
+            customer_data.append(data)
+    return {'customer_data' : customer_data, 'customer_details':customer_details}
 
 def get_vin_sync_feeds_detail():
     feed_logs = models.VinSyncFeedLog.objects.filter(email_flag=False)

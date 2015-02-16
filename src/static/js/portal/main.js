@@ -41,24 +41,25 @@
     
 
     $('.customer-form').on('submit', function(e) {
-        var data = Utils.getFormData('.customer-form'),
-            vin = $('#srch-vin').val();
-        data['vin'] = vin;
+    	var data = Utils.getFormData('.customer-form'),
+    	    purchaseDate={'name':'purchase-date', 'value':$('#purchase-date').val()};
+    	data.push(purchaseDate);
         Utils.submitForm(e, data, '/aftersell/register/customer');
         $('.customer-phone').val('').attr('readOnly', false);
         $('.customer-name').val('').attr('readOnly', false);
-        $('.purchase-date').val('').attr('readOnly', false);
+        $('.purchase-date').val('').attr('readOnly', false).attr('disabled',false);
         $('.customer-id').val('').attr('readOnly', false);
         $('.customer-submit').attr('disabled', true);
         return false;
     });
     
     $('.cutomer-reg-form').on('submit', function() {
-        $('.customer-phone').val('').attr('disabled', true);
-        $('.customer-name').val('').attr('disabled', true);
-        $('.purchase-date').val('').attr('disabled', true);
+        $('.customer-phone').val('').attr('readOnly', true);
+        $('.customer-name').val('').attr('readOnly', true);
+        $('.purchase-date').val('').attr('readOnly', false);
         var vin = $('#srch-vin').val(),
           user = $('#user').text().trim(),
+          purchaseDate = $('#purchase-date').val(),	
           messageModal = $('.modal.message-modal'),
           messageBlock = $('.modal-body', messageModal);
         if(vin.trim().length!==17){
@@ -81,19 +82,19 @@
             		 	}
             	
             else if (data['phone']) {
-                  $('.customer-phone').val(data['phone']).attr('disabled', false).attr('readOnly', true);
+                  $('.customer-phone').val(data['phone']).attr('readOnly', true);
             	  if (data['group']=='AuthorisedServiceCenters' || data['group']=='Dealers'){
             		  $('.customer-phone').val(data['phone']).attr('readOnly', false);
             	}
                   $('.customer-name').val(data['name']).attr('readOnly', true);
-                  $('.purchase-date').val(data['purchase_date']).attr('readOnly', true);
+                  $('.purchase-date').val(data['purchase_date']).attr('disabled', true);
                   $('.customer-id').val(data['id']).attr('readOnly', true);
                   $('.customer-submit').attr('disabled', false);
               }	
               else if (data['message']) {
-                  $('.customer-phone').val('').attr('readOnly', false).attr('disabled', false);
-            	  $('.customer-name').val('').attr('readOnly', false).attr('disabled', false);
-                  $('.purchase-date').val('').attr('readOnly', false).attr('disabled', false);
+                  $('.customer-phone').val('').attr('readOnly', false);
+            	  $('.customer-name').val('').attr('readOnly', false);
+            	  $('.purchase-date').val('').attr('disabled', false);
                   $('.customer-id').val('').attr('readOnly', false);
                   $('.customer-submit').attr('disabled', true);
                   messageBlock.text(data.message);
@@ -303,7 +304,6 @@ function vinSyncFeed(data){
                 setTimeout(function() {
                     parent.window.location='/aftersell/servicedesk/helpdesk';
                 }, 2000);
-                
             },
             error: function() {
                 messageBlock.text('Invalid Data');
@@ -316,6 +316,47 @@ function vinSyncFeed(data){
         return false;
     });
     
+    $('.service-desk-form').on('submit', function() {
+        var formData = new FormData($(this).get(0)),
+            messageModal = $('.modal.message-modal'),
+            messageBlock = $('.modal-body', messageModal),
+            messageHeader = $('.modal-title', messageModal),
+            waitingModal = $('.modal.waiting-dialog'),
+      jqXHR = $.ajax({
+            type: 'POST',
+            url: '/aftersell/servicedesk/save-feedback/',
+            data: formData,
+            cache: false,
+            processData: false,
+            contentType: false,
+            beforeSend: function(){
+                $(this).find('input[type="text"]').val('');
+                waitingModal.modal('show');
+            },
+            success: function(data){
+                messageBlock.text(data.message);
+                messageHeader.text('Thanks');
+                waitingModal.modal('hide');
+                messageModal.modal('show');
+                $('.summary').val('');
+                $('.type').val('');
+                $('.description').val('');
+                $('.advisorMobile').val('');
+                setTimeout(function() {
+                    parent.window.location='/aftersell/servicedesk/';
+                }, 2000);
+                
+            },
+            error: function() {
+                messageBlock.text('Invalid Data');
+                messageHeader.text('Invalid');
+                waitingModal.modal('hide');
+                messageModal.modal('show');
+                
+            }
+        });
+        return false;
+    });
     $('.sd_file').on('change', function() {
         var fileInput = $(this),
             ext = fileInput.val().split('.').pop().toLowerCase();
