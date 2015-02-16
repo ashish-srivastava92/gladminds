@@ -259,16 +259,16 @@ class MechanicService(ServiceBase):
         for mechanic in ObjectList.MechanicData:
             try:
                 mechanic_list.append({
-                    'mechanic_id': mechanic.MECH_ID.upper(),
-                    'first_name': mechanic.FIRST_NAME.upper(),
-                    'last_name': mechanic.LAST_NAME.upper(),
-                    'mobile': utils.mobile_format(mechanic.PHONE_NUMBER),
-                    'shop_name': mechanic.SHOP_NAME.upper(),
-                    'dob': mechanic.DOB,
-                    'district': mechanic.DISTRICT.upper(),
-                    'state': mechanic.STATE.upper(),
-                    'pincode': mechanic.PINCODE,
-                    'dist_id': mechanic.DIST_ID,
+                    'mechanic_id': mechanic.MECH_ID,
+#                     'first_name': mechanic.FIRST_NAME,
+#                     'last_name': mechanic.LAST_NAME,
+#                     'mobile': utils.mobile_format(mechanic.PHONE_NUMBER),
+#                     'shop_name': mechanic.SHOP_NAME,
+#                     'dob': mechanic.DOB,
+#                     'district': mechanic.DISTRICT,
+#                     'state': mechanic.STATE,
+#                     'pincode': mechanic.PINCODE,
+#                     'dist_id': mechanic.DIST_ID,
                     'temp_id': mechanic.TEMP_MECH_ID
                 })
             except Exception as ex:

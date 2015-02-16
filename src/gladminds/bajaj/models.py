@@ -31,11 +31,29 @@ class Dealer(base_models.Dealer):
         app_label = _APP_NAME
         verbose_name_plural = "Dealer Data"
 
+class ZonalServiceManager(base_models.ZonalServiceManager):
+    '''details of Zonal Service Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME 
+
+
+class AreaServiceManager(base_models.AreaServiceManager):
+    '''details of Area Service Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    zsm = models.ForeignKey(ZonalServiceManager, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME 
+
 
 class AuthorizedServiceCenter(base_models.AuthorizedServiceCenter):
     user = models.OneToOneField(UserProfile, primary_key=True,
                                 related_name='bajaj_registered_asc')
     dealer = models.ForeignKey(Dealer, null=True, blank=True)
+    asm = models.ForeignKey(AreaServiceManager, null=True, blank=True)
+    
 
     class Meta:
         app_label = _APP_NAME
@@ -388,6 +406,15 @@ class WelcomeKit(base_models.WelcomeKit):
     image_url = models.FileField(upload_to='{0}/bajaj/proof_delivery'.format(settings.ENV),
                               max_length=255, null=True, blank=True,
                               validators=[validate_image])
+
+    class Meta:
+        app_label = _APP_NAME
+
+class CommentThread(base_models.CommentThread):
+    '''details of activities done by service-desk user'''
+    welcome_kit = models.ForeignKey(WelcomeKit, null=True, blank=True)
+    redemption = models.ForeignKey(RedemptionRequest, null=True, blank=True)
+    user = models.ForeignKey(User, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME

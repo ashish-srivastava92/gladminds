@@ -132,7 +132,9 @@ class AuthorizedServiceCenter(BaseModel):
     asc_id = models.CharField(
         max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
-
+    asc_owner = models.CharField(max_length=100, null=True, blank=True)
+    asc_owner_phone = models.CharField(max_length=50, null=True, blank=True)
+    asc_owner_email = models.CharField(max_length=100, null=True, blank=True)
     objects = user_manager.AuthorizedServiceCenterManager()
 
     class Meta:
@@ -374,6 +376,7 @@ class CustomerTempRegistration(BaseModel):
                                 null=False, blank=False, unique=True)
     sent_to_sap = models.BooleanField(default=False)
     remarks = models.CharField(max_length=500, null=True, blank=True)
+    update_history = models.CharField(max_length=500, null=True, blank=True)
     tagged_sap_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
     mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True, default=0)
@@ -709,7 +712,28 @@ class Constant(BaseModel):
     def __unicode__(self):
         return constant_name
 
-        
+class AreaServiceManager(BaseModel):
+    '''details of Area Service Manager'''
+    asm_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Area Service Managers "
+    
+    def __unicode__(self):
+        return self.user.user.username
+     
+class ZonalServiceManager(BaseModel):
+    '''details of Zonal Service Manager'''
+    zsm_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Zonal Service Managers "
+    
+    def __unicode__(self):
+        return self.user.user.username
+    
 #######################LOYALTY TABLES#################################
 
 class NationalSalesManager(BaseModel):
@@ -977,23 +1001,6 @@ class RedemptionRequest(BaseModel):
         
         super(RedemptionRequest, self).clean(*args, **kwargs)
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        for field in self._meta.fields:
-            if field.name=='status':
-                if getattr(self, field.name)=='Approved':
-                    self.is_approved=True
-                    self.packed_by=self.partner.user.user.username
-                    self.approved_date=datetime_now()
-                elif getattr(self, field.name) in ['Rejected', 'Open'] :
-                    self.is_approved=False
-                elif getattr(self, field.name)=='Shipped':
-                    self.shipped_date=datetime_now()
-                elif getattr(self, field.name)=='Delivered':
-                    self.delivery_date=datetime_now()
-
-        return super(RedemptionRequest, self).save(force_insert=force_insert, force_update=force_update,
-                              using=using, update_fields=update_fields)
-
     class Meta:
         abstract = True
         verbose_name_plural = "Redemption Request"
@@ -1025,17 +1032,6 @@ class WelcomeKit(BaseModel):
             raise ValidationError("Please assign a partner")
         else:
             super(WelcomeKit, self).clean(*args, **kwargs)
-            
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        for field in self._meta.fields:
-            if field.name=='status':
-                if getattr(self, field.name)=='Shipped':
-                    self.shipped_date=datetime_now()
-                elif getattr(self, field.name)=='Delivered':
-                    self.delivery_date=datetime_now()
-
-        return super(WelcomeKit, self).save(force_insert=force_insert, force_update=force_update,
-                              using=using, update_fields=update_fields)
 
     class Meta:
         abstract = True
@@ -1043,6 +1039,19 @@ class WelcomeKit(BaseModel):
     
     def __unicode__(self):
         return str(self.transaction_id)
+    
+class CommentThread(BaseModel):
+    '''details of activities done by service-desk user'''
+    id = models.AutoField(primary_key=True)
+    message = models.TextField(null=True, blank=True)
+    is_edited = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Comment Thread"
+    
+    def __unicode__(self):
+        return str(self.id)
 
 class LoyaltySLA(models.Model):
     status = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_STATUS)
