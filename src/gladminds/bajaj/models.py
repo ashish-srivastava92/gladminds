@@ -414,7 +414,7 @@ class CommentThread(base_models.CommentThread):
     '''details of activities done by service-desk user'''
     welcome_kit = models.ForeignKey(WelcomeKit, null=True, blank=True)
     redemption = models.ForeignKey(RedemptionRequest, null=True, blank=True)
-    user = models.ForeignKey(User, null=True, blank=True)
+    user = models.ForeignKey(User)
 
     class Meta:
         app_label = _APP_NAME

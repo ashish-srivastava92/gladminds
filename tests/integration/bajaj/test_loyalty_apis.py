@@ -394,7 +394,7 @@ class LoyaltyApiTests(ResourceTestCase):
         self.test_create_sla()
         self.test_create_member()
         self.test_create_partner()
-        uri = '/loyalty/v1/welcomekits/'
+        uri = '/loyalty/v1/welcome-kits/'
         resp = self.post(uri,data = WELCOMEKIT)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -402,7 +402,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_welcomekit(self):
         resp = self.test_create_welcomekit()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/welcomekits/1/'
+        uri = '/loyalty/v1/welcome-kits/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['status'],"Open")
@@ -412,10 +412,10 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_create_welcomekit()
         self.assertEquals(resp.status_code,201)
         data={"delivery_address":"delhi"}
-        uri = '/loyalty/v1/welcomekits/1/'
+        uri = '/loyalty/v1/welcome-kits/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/welcomekits/1/'
+        uri = '/loyalty/v1/welcome-kits/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['delivery_address'],"delhi")
         

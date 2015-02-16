@@ -541,6 +541,6 @@ WELCOMEKIT = {
 COMMENT_THREAD =  {
                     "is_edited": False,
                     "message": "Gladminds",
-                    "welcome_kit": "/loyalty/v1/welcomekits/1/",
-                    "user":None,
+                    "welcome_kit": "/loyalty/v1/welcome-kits/1/",
+                    "user":USER,
                 }
