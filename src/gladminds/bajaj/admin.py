@@ -702,15 +702,15 @@ class WelcomeKitAdmin(GmModelAdmin):
         'tracking_id', 'due_date', 'shipped_date',
         'delivery_date', 'pod_number', 'member',
         'partner', 'image_url', 'image_tag',
-        'extra_field')
+        'extra_field','packed_by')
     }),
     ) 
     
     def save_model(self, request, obj, form, change):
-        if 'status' in form.changed_data:
-            if obj.status in ['Accepted', 'Open'] and obj.partner:
+        if 'partner' in form.changed_data and obj.partner and obj.status in ['Accepted', 'Open']:
                 obj.packed_by=obj.partner.user.user.username
-            elif obj.status=='Shipped':
+        if 'status' in form.changed_data:
+            if obj.status=='Shipped':
                 obj.shipped_date=datetime.datetime.now()
             elif obj.status=='Delivered':
                 obj.delivery_date=datetime.datetime.now()
@@ -725,7 +725,7 @@ class WelcomeKitAdmin(GmModelAdmin):
             LoyaltyService.send_welcome_kit_mail_to_partner(obj)
 
     def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('resolution_flag','packed_by')
+#         self.exclude = ('resolution_flag','packed_by')
         form = super(WelcomeKitAdmin, self).get_form(request, obj, **kwargs)
         form.current_user=request.user
         return form
