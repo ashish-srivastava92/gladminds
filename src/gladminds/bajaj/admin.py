@@ -702,7 +702,7 @@ class WelcomeKitAdmin(GmModelAdmin):
         'tracking_id', 'due_date', 'shipped_date',
         'delivery_date', 'pod_number', 'member',
         'partner', 'image_url', 'image_tag',
-        'extra_field','packed_by')
+        'extra_field')
     }),
     ) 
     
@@ -725,7 +725,7 @@ class WelcomeKitAdmin(GmModelAdmin):
             LoyaltyService.send_welcome_kit_mail_to_partner(obj)
 
     def get_form(self, request, obj=None, **kwargs):
-#         self.exclude = ('resolution_flag','packed_by')
+        self.exclude = ('resolution_flag','packed_by')
         form = super(WelcomeKitAdmin, self).get_form(request, obj, **kwargs)
         form.current_user=request.user
         return form
