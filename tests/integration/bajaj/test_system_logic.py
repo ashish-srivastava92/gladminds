@@ -94,14 +94,14 @@ class System(BaseTestCase):
         self.tester.assertEqual(response.status_code, 200)
 
     def update_feedback(self, **kwargs):
-        data = {"assign_to":"+91000000000",
+        data = {"assign_to":"sdo",
                 "status":"Open","Priority":"High",
                 "comments":"testing", "rootcause":"testing",
                 "resolution":"testing", "reporter_status": "false", "due_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         if kwargs.get('status'):
             data['status'] = kwargs['status']
-        if kwargs.get('assign_To'):
-            data['assign_To'] = kwargs['assign_To']
+        if kwargs.get('assign_to'):
+            data['assign_to'] = kwargs['assign_to']
         if kwargs.get('due_date'):
             data['due_date'] = kwargs['due_date']
         if kwargs.get('reporter_status'):
