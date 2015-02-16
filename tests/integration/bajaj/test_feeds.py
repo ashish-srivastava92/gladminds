@@ -60,7 +60,7 @@ class FeedsResourceTest(BaseTestCase):
     def test_product_purchase(self):
         brand = self.brand
         brand.send_purchase_feed()
-  
+    
     def test_coupon_redamption_feed(self):
         brand = self.brand
         brand.send_service_advisor_feed()
