@@ -627,3 +627,8 @@ VIN_SYNC_WSDL='qa_vin_sync.wsdl'
 
 MEMBER_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/member-sync-feed/?wsdl&v0"
 MEMBER_SYNC_WSDL='qa_member_sync_feed.wsdl'
+
+BRAND_META = {
+               "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd"},
+               "demo": {"title": "Daimler", "logo": "daimler/img/logo.gif", "tagline": "2015 Daimler AG", "basecss": "/daimler/css/base.css"}
+               }
