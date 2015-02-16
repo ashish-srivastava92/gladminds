@@ -710,7 +710,7 @@ class Constant(BaseModel):
         verbose_name_plural = "Constants"
         
     def __unicode__(self):
-        return constant_name
+        return self.constant_name
 
 class AreaServiceManager(BaseModel):
     '''details of Area Service Manager'''
