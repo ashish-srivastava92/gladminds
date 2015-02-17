@@ -122,7 +122,9 @@ SUIT_CONFIG = {
                    {'model': 'redemptionrequest',
                      'label': 'Redemption Request'},
                    {'model': 'welcomekit',
-                     'label': 'Welcome Kit'},)},
+                     'label': 'Welcome Kit'},
+                   {'model': 'loyaltysla',
+                     'label': 'Loyalty Sla'},)},
         {'app': 'bajaj', 'label': 'User Registrations', 'icon': ' icon-folder-open',
          'models':(
                     {'model': 'asctempregistration',
@@ -459,7 +461,14 @@ VIN_SYNC_FEED = {
 CUSTOMER_PHONE_NUMBER_UPDATE = {
 
     "sender": "feed-report@gladminds.co",
-    "receiver": ["gladminds@hashedin.com"],
+    "receiver": ["priyanka.n@hashedin.com"],
+    "subject": "Gladminds customer phone number update",
+    "body": """""",
+}
+
+POLICY_DISCREPANCY_MAIL_TO_MANAGER = {
+    "sender": "feed-report@gladminds.co",
+    "receiver": ["pavankumar.s@hashedin.com"],
     "subject": "Gladminds customer phone number update",
     "body": """""",
 }

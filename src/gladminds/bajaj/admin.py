@@ -1,4 +1,5 @@
 import copy
+import datetime
 from django import forms
 from django.contrib.admin import AdminSite, TabularInline
 from django.contrib.auth.models import User, Group
@@ -30,9 +31,10 @@ class DealerAdmin(GmModelAdmin):
     search_fields = ('dealer_id',)
     list_display = ('dealer_id', 'get_user', 'get_profile_number', 'get_profile_address')
 
+
 class AuthorizedServiceCenterAdmin(GmModelAdmin):
     search_fields = ('asc_id', 'dealer__dealer_id')
-    list_display = ('asc_id', 'get_user', 'get_profile_number', 'get_profile_address', 'dealer')
+    list_display = ('asc_id', 'get_user', 'get_profile_number', 'get_profile_address', 'dealer', 'asm')
 
 class ServiceAdvisorAdmin(GmModelAdmin):
     search_fields = ('service_advisor_id', 'dealer__dealer_id', 'asc__asc_id')
@@ -53,7 +55,7 @@ class DispatchedProduct(models.ProductData):
         proxy = True
 
 class ListDispatchedProduct(GmModelAdmin):
-    search_fields = ('^product_id', '^dealer_id__dealer_id')
+    search_fields = ('product_id', 'dealer_id__dealer_id')
     list_display = (
         'product_id', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
     list_per_page = 50
@@ -81,8 +83,8 @@ class ListDispatchedProduct(GmModelAdmin):
         return form
 
     def changelist_view(self, request, extra_context=None):
-        custom_search_mapping = {'Product Id' : '^product_id',
-                                 'Dealer Id': '^dealer_id__dealer_id',}
+        custom_search_mapping = {'Product Id' : 'product_id',
+                                 'Dealer Id': 'dealer_id__dealer_id',}
         extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping
                         }
         return super(ListDispatchedProduct, self).changelist_view(request, extra_context=extra_context)
@@ -97,8 +99,8 @@ class Couponline(TabularInline):
 
 
 class ProductDataAdmin(GmModelAdmin):
-    search_fields = ('^product_id', '^customer_id', '^customer_phone_number',
-                     '^customer_name')
+    search_fields = ('product_id', 'customer_id', 'customer_phone_number',
+                     'customer_name')
     list_display = ('product_id', 'customer_id', "UCN", 'customer_name',
                     'customer_phone_number', 'purchase_date')
     inlines = (Couponline,)
@@ -135,10 +137,10 @@ class ProductDataAdmin(GmModelAdmin):
         return coupon_service_type
     
     def changelist_view(self, request, extra_context=None):
-        custom_search_mapping = {'Product Id' : '^product_id',
-                                 'Customer ID':'^customer_id',
-                                 'Customer Name': '^customer_name',
-                                 'Customer Phone Number': '^customer_phone_number'}
+        custom_search_mapping = {'Product Id' : 'product_id',
+                                 'Customer ID':'customer_id',
+                                 'Customer Name': 'customer_name',
+                                 'Customer Phone Number': 'customer_phone_number'}
         extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping
                         }
         return super(ProductDataAdmin, self).changelist_view(request, extra_context=extra_context)
@@ -146,7 +148,7 @@ class ProductDataAdmin(GmModelAdmin):
 
 class CouponAdmin(GmModelAdmin):
     search_fields = (
-        '^unique_service_coupon', '^product__product_id', 'status')
+        'unique_service_coupon', 'product__product_id', 'status')
     list_display = ('product', 'unique_service_coupon', 'actual_service_date',
                     'actual_kms', 'status', 'service_type','service_advisor', 'associated_with')
     exclude = ('order',)
@@ -175,8 +177,8 @@ class CouponAdmin(GmModelAdmin):
                 return None
 
     def changelist_view(self, request, extra_context=None):
-        custom_search_mapping = {'Unique Service Coupon' : '^unique_service_coupon',
-                                 'Product Id': '^product__product_id',
+        custom_search_mapping = {'Unique Service Coupon' : 'unique_service_coupon',
+                                 'Product Id': 'product__product_id',
                                  'Status': 'status'}
         extra_context = {'custom_search': True, 'custom_search_fields': custom_search_mapping, 'created_date_search': True
                         }
@@ -190,7 +192,7 @@ class CouponAdmin(GmModelAdmin):
         if utils.get_search_query_params(request, self) and self.search_fields[0] == 'status':
             try:
                 request.GET = request.GET.copy()
-                search_value = str(utils.COUPON_STATUS[request.GET["q"]])
+                search_value = str(constants.COUPON_STATUS[request.GET["q"].title()])
                 request.GET["q"] = search_value
                 request.META['QUERY_STRING'] = search_value
             except Exception:
@@ -428,8 +430,21 @@ class SparePartUPCAdmin(GmModelAdmin):
 class SparePartPointAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
     search_fields = ('part_number__part_number', 'points', 'territory')
-    list_display = ('part_number', 'points', 'valid_from',
+
+    def changelist_view(self, request, extra_context={}):
+        if request.user.is_superuser or request.user.groups.filter(name=Roles.LOYALTYSUPERADMINS).exists():
+            self.list_display=('part_number', 'points', 'valid_from',
                     'valid_till', 'territory', 'price', 'MRP')
+        else:
+            self.list_display=('part_number', 'points', 'valid_from',
+                    'valid_till', 'territory')
+        return super(SparePartPointAdmin, self).changelist_view(request, extra_context=extra_context)
+    
+    def get_form(self, request, obj=None, **kwargs):
+        if not request.user.is_superuser and not request.user.groups.filter(name=Roles.LOYALTYSUPERADMINS).exists():
+            self.exclude = ('price', 'MRP')
+        form = super(SparePartPointAdmin, self).get_form(request, obj, **kwargs)
+        return form
 
 class SparePartline(TabularInline):
     model = models.AccumulationRequest.upcs.through
@@ -521,7 +536,7 @@ class MechanicAdmin(GmModelAdmin):
         return query_set
 
     def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points', 'sent_to_sap', 'permanent_id')
+        self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points', 'sent_to_sap', 'permanent_id', 'download_detail')
         form = super(MechanicAdmin, self).get_form(request, obj, **kwargs)
         return form
 
@@ -536,7 +551,32 @@ class MechanicAdmin(GmModelAdmin):
             LoyaltyService.send_welcome_sms(obj)
             LoyaltyService.initiate_welcome_kit(obj)
 
+class CommentThreadInline(TabularInline):
+    model = models.CommentThread
+    fields = ('created_date', 'user', 'message')
+    extra = 0
+    max_num = 0
+    readonly_fields = ('created_date', 'user', 'message')
+
+
+class RedemptionCommentForm(forms.ModelForm):
+    extra_field = forms.CharField(label='comment', required=False, widget=forms.Textarea(attrs={'style':'resize: none;'}))
+
+    def save(self, commit=True):
+        extra_field = self.cleaned_data.get('extra_field', None)
+        transaction_id = self.instance
+        if extra_field:
+            LoyaltyService.save_comment('redemption', extra_field, transaction_id, self.current_user)
+        return super(RedemptionCommentForm, self).save(commit=commit)
+    
+    class Meta:
+        model = models.RedemptionRequest
+
+    
 class RedemptionRequestAdmin(GmModelAdmin):
+    readonly_fields = ('image_tag', 'transaction_id',)
+    form = RedemptionCommentForm
+    inlines = (CommentThreadInline,)
     list_filter = (
         ('created_date', DateFieldListFilter),
     )
@@ -546,7 +586,18 @@ class RedemptionRequestAdmin(GmModelAdmin):
                      'get_mechanic_district', 'get_mechanic_state',
                      'product', 'created_date','due_date',
                      'expected_delivery_date', 'status', 'partner')
-    readonly_fields = ('image_tag', 'transaction_id')
+    
+    fieldsets = (
+        (None, {
+            'fields': (
+            'transaction_id', 'delivery_address', 'expected_delivery_date', 'status',
+            'tracking_id', 'due_date', 'approved_date', 'shipped_date',
+            'delivery_date', 'pod_number', 'product', 'member',
+            'partner', 'image_url', 'image_tag',
+            'extra_field')
+        }),
+        )   
+    
 
     def queryset(self, request):
         """
@@ -565,7 +616,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
         return query_set
 
     def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('is_approved', 'packed_by', 'refunded_points')
+        self.exclude = ('is_approved', 'packed_by', 'refunded_points', 'resolution_flag')
         form = super(RedemptionRequestAdmin, self).get_form(request, obj, **kwargs)
         form = copy.deepcopy(form)
         if request.user.groups.filter(name=Roles.RPS).exists():
@@ -574,13 +625,27 @@ class RedemptionRequestAdmin(GmModelAdmin):
             form.base_fields['status'].choices = constants.LP_REDEMPTION_STATUS
         else:
             form.base_fields['status'].choices = constants.REDEMPTION_STATUS
+        form.current_user=request.user
         return form
 
     def save_model(self, request, obj, form, change):
-        date = LoyaltyService.set_date("Redemption", obj.status)
-        obj.due_date = date['due_date']
-        obj.expected_delivery_date = date['expected_delivery_date']
-        obj.resolution_flag = False
+        if 'status' in form.changed_data and obj.status!='Rejected':
+            date = LoyaltyService.set_date("Redemption", obj.status)
+            obj.due_date = date['due_date']
+            obj.expected_delivery_date = date['expected_delivery_date']
+            obj.resolution_flag = False
+        if 'status' in form.changed_data:
+            if obj.status=='Approved':
+                obj.is_approved=True
+                obj.packed_by=obj.partner.user.user.username
+                obj.approved_date=datetime.datetime.now()
+            elif obj.status in ['Rejected', 'Open'] :
+                obj.is_approved=False
+                obj.packed_by=None
+            elif obj.status=='Shipped':
+                obj.shipped_date=datetime.datetime.now()
+            elif obj.status=='Delivered':
+                obj.delivery_date=datetime.datetime.now()
         if 'status' in form.changed_data:
             if obj.status=='Approved' and obj.refunded_points:
                 LoyaltyService.update_points(obj.member, redeem=obj.product.points)
@@ -605,17 +670,50 @@ class RedemptionRequestAdmin(GmModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
-        
+
+class WelcomeKitCommentForm(forms.ModelForm):
+    extra_field = forms.CharField(label='comment', required=False, widget=forms.Textarea(attrs={'style':'resize: none;'}))
+
+    def save(self, commit=True):
+        extra_field = self.cleaned_data.get('extra_field', None)
+        transaction_id = self.instance
+        if extra_field:
+            LoyaltyService.save_comment('welcome_kit', extra_field, transaction_id, self.current_user)
+        return super(WelcomeKitCommentForm, self).save(commit=commit)
+    
+    class Meta:
+        model = models.WelcomeKit
+       
 class WelcomeKitAdmin(GmModelAdmin):
     list_filter = ('status',)
+    form = WelcomeKitCommentForm
+    inlines = (CommentThreadInline,)
     search_fields = ('member__phone_number', 'partner__partner_id', 'transaction_id')
     list_display = ('member',  'get_mechanic_name',
                      'delivery_address', 'get_mechanic_pincode',
                      'get_mechanic_district', 'get_mechanic_state',
                      'created_date','due_date', 'expected_delivery_date', 'status', 'partner')
     readonly_fields = ('image_tag', 'transaction_id')
+    fieldsets = (
+    (None, {
+        'fields': (
+        'transaction_id', 'delivery_address',
+        'expected_delivery_date', 'status',
+        'tracking_id', 'due_date', 'shipped_date',
+        'delivery_date', 'pod_number', 'member',
+        'partner', 'image_url', 'image_tag',
+        'extra_field')
+    }),
+    ) 
     
     def save_model(self, request, obj, form, change):
+        if 'partner' in form.changed_data and obj.partner and obj.status in ['Accepted', 'Open']:
+                obj.packed_by=obj.partner.user.user.username
+        if 'status' in form.changed_data:
+            if obj.status=='Shipped':
+                obj.shipped_date=datetime.datetime.now()
+            elif obj.status=='Delivered':
+                obj.delivery_date=datetime.datetime.now()
         date = LoyaltyService.set_date("Welcome Kit", obj.status)
         obj.due_date = date['due_date']
         obj.expected_delivery_date = date['expected_delivery_date']
@@ -627,19 +725,37 @@ class WelcomeKitAdmin(GmModelAdmin):
             LoyaltyService.send_welcome_kit_mail_to_partner(obj)
 
     def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('packed_by',)
+        self.exclude = ('resolution_flag','packed_by')
         form = super(WelcomeKitAdmin, self).get_form(request, obj, **kwargs)
+        form.current_user=request.user
         return form
 
     def suit_row_attributes(self, obj):
         class_map = {
             'Accepted': 'success',
             'Packed': 'info',
-            'Shipped': 'warning',
+            'Shipped': 'info',
+            'Delivered': 'warning'
         }
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
+        
+    def queryset(self, request):
+        """
+        Returns a QuerySet of all model instances that can be edited by the
+        admin site. This is used by changelist_view.
+        """
+        query_set = self.model._default_manager.get_query_set()
+        if request.user.groups.filter(name=Roles.RPS).exists():
+            query_set=query_set.filter(packed_by=request.user.username)
+        elif request.user.groups.filter(name=Roles.LPS).exists():
+            query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=request.user)
+        elif request.user.groups.filter(name=Roles.ASMS).exists():
+            asm=models.AreaSalesManager.objects.get(user__user=request.user)
+            query_set=query_set.filter(member__state=asm.state)
+
+        return query_set
 
 class LoyaltySlaAdmin(GmModelAdmin):
     fieldsets = (

@@ -174,7 +174,8 @@ WELCOME_KIT_STATUS = (
         ('Open', 'Open'),
         ('Accepted', 'Accepted'),
         ('Packed', 'Packed'),
-        ('Shipped', 'Shipped')
+        ('Shipped', 'Shipped'),
+        ('Delivered', 'Delivered')
     )
 
 class FeedStatus():
@@ -196,3 +197,5 @@ class CouponStatus():
     IN_PROGRESS = 4
     EXCEEDS_LIMIT = 5
     CLOSED_OLD_FSC = 6
+
+WELCOME_KIT_MECHANIC_FIELDS = ['Mechanic ID', 'first_name', 'middle_name', 'last_name', 'phone_number', 'date_of_birth', 'adress_line_1', 'adress_line_2', 'adress_line_3', 'adress_line_4', 'adress_line_5', 'adress_line_6','shop_name', 'shop_address', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url',]
