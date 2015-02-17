@@ -14,6 +14,8 @@ from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.utils.urls import trailing_slash
 from tastypie import fields
 from gladminds.core.utils import get_dict_from_object
+from  gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
+
 
 class NSMResource(CustomBaseModelResource):
     class Meta:
@@ -196,3 +198,37 @@ class CommentThreadResource(CustomBaseModelResource):
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
+
+class DiscrepantAccumulationResource(CustomBaseModelResource):
+    upc = fields.ForeignKey(SparePartUPCResource,'upc', null=True, blank=True, full=True)
+    new_member = fields.ForeignKey(MemberResource,'new_member')
+    accumulation_request = fields.ForeignKey(AccumulationResource, 'accumulation_request')
+     
+    class Meta:
+        queryset = models.DiscrepantAccumulation.objects.all()
+        resource_name = "accumulation-discrepancies"
+        authorization = Authorization()
+        detail_allowed_methods = ['get']
+        always_return_data = True
+
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/upc=(?P<upc>[a-zA-Z0-9.-]+)&from=(?P<from>[a-zA-Z0-9.-]+)&to=(?P<to>[a-zA-Z0-9.-]+)%s" % (self._meta.resource_name,trailing_slash()),
+                                                     self.wrap_view('transfer_points'), name="transfer_points")
+                ]
+   
+    def transfer_points(self,request, **kwargs):
+        upc = kwargs['upc']
+        upc_obj = models.SparePartUPC.objects.get(unique_part_code=upc)
+        points = models.SparePartPoint.objects.get(part_number=upc_obj.part_number).points
+        from_mechanic = models.Mechanic.objects.get(mechanic_id= kwargs['from'])
+        to_mechanic = models.Mechanic.objects.get(mechanic_id= kwargs['to'])
+
+        LoyaltyService.update_points(from_mechanic, redeem=points)
+        LoyaltyService.update_points(to_mechanic, accumulate=points)
+         
+        accumulation_log = models.AccumulationRequest(member=to_mechanic,points=points,
+                                                      total_points=to_mechanic.total_points,is_transferred=True)            
+        accumulation_log.save()
+        accumulation_log.upcs.add(upc_obj)
+            

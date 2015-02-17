@@ -921,6 +921,7 @@ class AccumulationRequest(BaseModel):
     transaction_id = models.AutoField(primary_key=True)
     points = models.IntegerField(max_length=50)
     total_points = models.IntegerField(max_length=50)
+    is_transferred = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -1052,6 +1053,13 @@ class CommentThread(BaseModel):
     
     def __unicode__(self):
         return str(self.id)
+
+class DiscrepantAccumulation(BaseModel):
+    ''' details of accumulation request with discrepancy'''
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Discrepant Request"
 
 class LoyaltySLA(models.Model):
     status = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_STATUS)

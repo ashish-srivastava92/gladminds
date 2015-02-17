@@ -233,7 +233,9 @@ class LoyaltyService(CoreLoyaltyService):
 
     def accumulate_point(self, sms_dict, phone_number):
         '''accumulate points with given upc'''
-        unique_product_codes = set((sms_dict['ucp'].upper()).split())
+        unique_product_codes = set((sms_dict['upc'].upper()).split())
+#         if not isinstance(unique_product_codes['upc'], list):
+#             unique_product_codes = unique_product_codes['upc'].upper().split()
         valid_ucp=[]
         valid_product_number=[]
         invalid_upcs_message=''
@@ -273,6 +275,14 @@ class LoyaltyService(CoreLoyaltyService):
             if invalid_upcs:
                 invalid_upcs_message=' Invalid Entry... {0} does not exist in our records.'.format(
                                               (', '.join(invalid_upcs)))
+                used_upcs = models.SparePartUPC.objects.get_spare_parts(unique_product_codes, is_used=True) 
+                if used_upcs:
+                    for used_upc in used_upcs:
+                        accumulation_request = models.AccumulationRequest.objects.filter(upcs=used_upc)
+                        discrepant_accumulation_log = models.DiscrepantAccumulation(new_member=mechanic[0], upc = used_upc,
+                                                                         accumulation_request=accumulation_request[0])
+                        discrepant_accumulation_log.save()
+
             if len(unique_product_codes)==1 and invalid_upcs:
                 message=get_template('SEND_INVALID_UCP')
             else:

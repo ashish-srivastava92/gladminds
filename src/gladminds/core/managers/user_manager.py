@@ -59,8 +59,8 @@ class MechanicManager(models.Manager):
 
 
 class SparePartUPCManager(models.Manager):
-    def get_spare_parts(self, spare_product_codes):
-        return super(SparePartUPCManager, self).get_query_set().filter(unique_part_code__in=spare_product_codes,is_used=False)
+    def get_spare_parts(self, spare_product_codes,is_used=False):
+        return super(SparePartUPCManager, self).get_query_set().filter(unique_part_code__in=spare_product_codes,is_used=is_used)
 
 
 class SparePartPointManager(models.Manager):
