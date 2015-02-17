@@ -39,8 +39,9 @@ class BaseTestCase(ResourceTestCase):
         self.client = Client(SERVER_NAME='bajaj')
         self.access_token = 'testaccesstoken'
         load_email_obj = load_gm_migration_data.Command()
+        load_email_obj.add_constants()
         load_email_obj.add_email_template()
-        load_email_obj.add_sms_template()
+        load_email_obj.add_sms_template()        
         load_groups = setup.Command()
         load_groups.define_groups()
         load_services = service_setup.Command()

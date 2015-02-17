@@ -172,13 +172,11 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
 
 def compare_purchase_date(date_of_purchase):
     valid_msg_days = models.Constant.objects.get(constant_name = "welcome_msg_active_days").constant_value
-    valid_date = datetime.now().date()-timedelta(days=valid_msg_days)
+    valid_date = datetime.now().date()-timedelta(days=int(valid_msg_days))
     days = date_of_purchase
     if days >= valid_date:
-        print "@@@@@@@@TRUE@@@@@@"
         return True
     else:
-        print "@@@@@@@@@FALSE@@@@@@"
         return False
 
 class ProductDispatchFeed(BaseFeed):
@@ -250,7 +248,6 @@ class ProductDispatchFeed(BaseFeed):
 class ProductPurchaseFeed(BaseFeed):
 
     def import_data(self):
-
         for product in self.data_source:
             try:
                 product_data = models.ProductData.objects.get(product_id=product['vin'])
@@ -328,14 +325,11 @@ def update_coupon_data(sender, **kwargs):
                     customer_name=customer_name, sap_customer_id=customer_id)
             else:
                 if compare_purchase_date(product_purchase_date):
-                    print "@@@@@@WELCOME MESSAGE@@@@@@",product_purchase_date
                     message = templates.get_template('SEND_CUSTOMER_ON_PRODUCT_PURCHASE').format(
                     customer_name=customer_name, sap_customer_id=customer_id)
                 else:
-                    print "@@@@@@@@@@@@ONLY CUSTOMER ID@@@@@@@@@"
                     message = templates.get_template('SEND_REPLACED_CUSTOMER_ID').format(
                     customer_name=customer_name, sap_customer_id=customer_id)
-                    print response
             
             sms_log(
                 receiver=customer_phone_number, action='SEND TO QUEUE', message=message)
