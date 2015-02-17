@@ -63,7 +63,7 @@ class System(BaseTestCase):
         return temp_customer_obj
 
     def dealer_login(self):
-        self.create_user(username='DEALER01', email='dealer@xyz.com', password='DEALER01@123', group_name='dealers', phone_number="+91776084042")
+        self.create_user(username='DEALER01', email='dealer@xyz.com', password='DEALER01@123', group_name='Dealers', phone_number="+91776084042")
         data = {'username': 'DEALER01', 'password': 'DEALER01@123'}
         self.tester.client.login(username='DEALER01', password='DEALER01@123')
 
