@@ -13,11 +13,16 @@ from gladminds.core.model_helpers import PhoneField
 from gladminds.core import constants
 from gladminds.core.core_utils.utils import generate_mech_id, generate_partner_id,\
     generate_nsm_id,generate_asm_id
+from gladminds.core.model_helpers import validate_image
+
 try:
     from django.utils.timezone import now as datetime_now
 except ImportError:
     datetime_now = datetime.datetime.now
 STATUS_CHOICES=constants.STATUS_CHOICES
+
+def set_brand(instance, filename):
+    return '{0}/{1}/user'.format(settings.ENV,settings.BRAND)
 
 class BaseModel(models.Model):
     '''Base model containing created date and modified date'''
@@ -32,14 +37,31 @@ class UserProfile(BaseModel):
     '''User profile model to extend user'''
     phone_number = models.CharField(
                    max_length=15, blank=True, null=True)
-    image_url = models.CharField(
-                   max_length=200, blank=True, null=True)
+    #image_url = models.CharField(
+    #              max_length=200, blank=True, null=True)
     status = models.CharField(max_length=10, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     state = models.CharField(max_length=255, null=True, blank=True)
     country = models.CharField(max_length=255, null=True, blank=True)
     pincode = models.CharField(max_length=15, null=True, blank=True)
     date_of_birth = models.DateTimeField(null=True, blank=True)
+  
+    image_url = models.FileField(upload_to=set_brand,
+                                  max_length=200, null=True, blank=True,
+                                  validators=[validate_image])
+    
+#     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+#         self.image_url.upload_to='{0}/{1}/user'.format(settings.ENV,settings.GM_BRAND)
+#         return super(Mechanic, self).save(force_insert=force_insert, force_update=force_update,
+#                               using=using, update_fields=update_fields)
+            
+        
+        
+    
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+    image_tag.short_description = 'User Image'
+    image_tag.allow_tags = True
 
     GENDER_CHOICES = (
         ('M', 'Male'),

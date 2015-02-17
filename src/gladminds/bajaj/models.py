@@ -17,6 +17,11 @@ class BrandProductCategory(base_models.BrandProductCategory):
 class UserProfile(base_models.UserProfile):
     user = models.OneToOneField(User, primary_key=True,
                                         related_name='bajaj_users')
+    #UserProfile._init_(_APP_NAME)
+#     y=base_models.UserProfile(_APP_NAME)
+#     y.set_brand(_APP_NAME)
+    
+    
 
     class Meta:
         app_label = _APP_NAME
