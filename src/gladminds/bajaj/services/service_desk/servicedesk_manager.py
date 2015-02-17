@@ -81,7 +81,7 @@ def get_feedbacks(user, status, priority, type, search=None):
             sa_id_list.append(user)
             feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
                                                        priority__in=priority_filter, type__in=type_filter
-                                                    ).order_by('-created_date')
+                                                     ).order_by('-created_date')
     if user.groups.filter(name=Roles.SDMANAGERS).exists():
         feedbacks = models.Feedback.objects.filter(status__in=status_filter, priority__in=priority_filter,
                                                    type__in=type_filter).order_by('-created_date')

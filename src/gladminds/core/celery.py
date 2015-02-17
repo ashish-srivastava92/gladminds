@@ -66,6 +66,12 @@ app.conf.CELERYBEAT_SCHEDULE = {
         'kwargs': {'day_duration':1}
     },
 
+    #Job to send daily mail about discrepant coupons
+    'cronjob-send-report-mail-on-data-feed': {
+        'task': 'gladminds.sqs_tasks.send_mail_for_policy_discrepency',
+        'schedule': crontab(minute=0, hour=0),
+    },
+
     #Job to delete all the unused OTPs
     'cronjob-delete-unused-otp': {
         'task': 'gladminds.sqs_tasks.delete_unused_otp',

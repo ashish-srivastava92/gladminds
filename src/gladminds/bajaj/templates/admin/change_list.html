@@ -6,7 +6,8 @@
 {% block extrastyle %}
   {{ block.super }}
   {# <link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}" />#}
-  <link rel="stylesheet" type="text/css" href="/static/libs/datepicker/css/jquery-ui.css" /> 
+  <link rel="stylesheet" type="text/css" href="/static/libs/datepicker/css/jquery-ui.css" />
+  <link rel="stylesheet" type="text/css" href="/static/css/wait-modal.css" /> 
   {% if cl.formset %}
     {#    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />#}
   {% endif %}
@@ -66,6 +67,12 @@
               </div>
             {% endif %}
           {% endblock %}
+          {% ifequal cl.opts.verbose_name "mechanic" %}
+          {%include "admin/download_option.html" %}
+          <div class="object-tools">
+            <a href="" class="btn btn-info" data-toggle="modal" data-target="#downloadModal">Download welcome kit details</a>
+          </div>
+          {% endifequal %}
 		  {% if custom_search %}
 		  	  <div class="search-container form-inline">
 	          	<input type="text" size="40" id="cust-searchbar" placeholder="Keyword" value = "{% if cl.query %}{{cl.query|get_coupon_status}}{% else %}{% endif %}" />&nbsp;
@@ -142,8 +149,8 @@
 	</script>
     {% endif %}
           
-          {% if searchable_fields or cl.search_fields%}
-          <p><i>Note: searchable fields are {% if searchable_fields %}{{searchable_fields}}{% else %}{{cl.search_fields}}{% endif %}</i></p>
+          {% if searchable_fields %}
+          <p><i>Note: searchable fields are {% if searchable_fields %}{{searchable_fields}}{% endif %}</i></p>
           {% endif %}
         </div>
         {% block date_hierarchy %}

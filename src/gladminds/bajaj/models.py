@@ -31,11 +31,29 @@ class Dealer(base_models.Dealer):
         app_label = _APP_NAME
         verbose_name_plural = "Dealer Data"
 
+class ZonalServiceManager(base_models.ZonalServiceManager):
+    '''details of Zonal Service Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME 
+
+
+class AreaServiceManager(base_models.AreaServiceManager):
+    '''details of Area Service Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    zsm = models.ForeignKey(ZonalServiceManager, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME 
+
 
 class AuthorizedServiceCenter(base_models.AuthorizedServiceCenter):
     user = models.OneToOneField(UserProfile, primary_key=True,
                                 related_name='bajaj_registered_asc')
     dealer = models.ForeignKey(Dealer, null=True, blank=True)
+    asm = models.ForeignKey(AreaServiceManager, null=True, blank=True)
+    
 
     class Meta:
         app_label = _APP_NAME
@@ -274,7 +292,8 @@ class Constant(base_models.Constant):
     class Meta:
         app_label = _APP_NAME
         
-        
+
+#######################LOYALTY TABLES#################################
 class NationalSalesManager(base_models.NationalSalesManager):
     '''details of National Sales Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
@@ -285,7 +304,6 @@ class NationalSalesManager(base_models.NationalSalesManager):
 
 class AreaSalesManager(base_models.AreaSalesManager):
     '''details of Area Service Manager'''
-    '''details of National Sales Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
     nsm = models.ForeignKey(NationalSalesManager, null=True, blank=True)
 
@@ -329,14 +347,14 @@ class SparePartMasterData(base_models.SparePartMasterData):
 
 
 class SparePartUPC(base_models.SparePartUPC):
-    '''details of Spare Part'''
+    '''details of Spare Part UPC'''
     part_number = models.ForeignKey(SparePartMasterData)
 
     class Meta:
         app_label = _APP_NAME
 
 class SparePartPoint(base_models.SparePartPoint):
-    '''details of Spare Part'''
+    '''details of Spare Part points'''
     part_number = models.ForeignKey(SparePartMasterData)
 
     class Meta:
@@ -344,8 +362,7 @@ class SparePartPoint(base_models.SparePartPoint):
 
 
 class AccumulationRequest(base_models.AccumulationRequest):
-    '''details of Spare Part'''
-
+    '''details of Accumulation request'''
     member = models.ForeignKey(Mechanic)
     upcs = models.ManyToManyField(SparePartUPC)
     asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
@@ -354,14 +371,14 @@ class AccumulationRequest(base_models.AccumulationRequest):
         app_label = _APP_NAME
 
 class Partner(base_models.Partner):
-    '''details of partner'''
+    '''details of RPs and LPs'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
 
 class ProductCatalog(base_models.ProductCatalog):
-    '''details of retailer'''
+    '''details of Product Catalog'''
     partner = models.ForeignKey(Partner, null=True, blank=True)
     image_url = models.FileField(upload_to='{0}/bajaj/redeem_products'.format(settings.ENV),
                                   max_length=255, null=True, blank=True,
@@ -371,7 +388,7 @@ class ProductCatalog(base_models.ProductCatalog):
         app_label = _APP_NAME
 
 class RedemptionRequest(base_models.RedemptionRequest):
-    '''details of redemption request'''
+    '''details of Redemption Request'''
     product = models.ForeignKey(ProductCatalog)
     member = models.ForeignKey(Mechanic)
     partner = models.ForeignKey(Partner, null=True, blank=True)
@@ -389,6 +406,15 @@ class WelcomeKit(base_models.WelcomeKit):
     image_url = models.FileField(upload_to='{0}/bajaj/proof_delivery'.format(settings.ENV),
                               max_length=255, null=True, blank=True,
                               validators=[validate_image])
+
+    class Meta:
+        app_label = _APP_NAME
+
+class CommentThread(base_models.CommentThread):
+    '''details of activities done by service-desk user'''
+    welcome_kit = models.ForeignKey(WelcomeKit, null=True, blank=True)
+    redemption = models.ForeignKey(RedemptionRequest, null=True, blank=True)
+    user = models.ForeignKey(User, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME

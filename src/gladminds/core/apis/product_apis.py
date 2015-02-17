@@ -1,5 +1,5 @@
 from tastypie.constants import ALL
-from tastypie.authorization import DjangoAuthorization
+from tastypie.authorization import DjangoAuthorization, Authorization
 from tastypie import fields 
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.model_fetcher import models
@@ -12,8 +12,9 @@ class ProductTypeResource(CustomBaseModelResource):
     class Meta:
         queryset = models.ProductType.objects.all()
         resource_name = "product-types"
-        authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization())
+#         authentication = AccessTokenAuthentication()
+#         authorization = MultiAuthorization(DjangoAuthorization())
+        authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
         always_return_data = True
 

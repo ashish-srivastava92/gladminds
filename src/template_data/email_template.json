@@ -234,7 +234,7 @@
             "template_key": "CUSTOMER_PHONE_NUMBER_UPDATE",
             "sender": "feed-report@gladminds.co",
             "receiver": "priyanka.n@hashedin.com",
-            "subject": "Gladminds Customer phone number update",
+            "subject": "Customer phone number update summary",
             "body": "Please find the enclosed, customer phone number updates on {date} ", 
             "description": "Customer phone number update mail"
         }
@@ -297,6 +297,18 @@
             "subject": "Exceeded due date for welcome kit",
             "body": "The due date for the ticket with transaction ID:{transaction_id} and status:{status} has been exceeded . Please address the issue",
             "description":"Mail to escalation group if due date exceeds"
+        }
+    },
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 26,
+        "fields": {
+            "template_key": "POLICY_DISCREPANCY_MAIL_TO_MANAGER",
+            "sender": "feed-report@gladminds.co",
+            "receiver": "",
+            "subject": "Vehicles with policy_discrepancy",
+            "body": "There are some discrepancy in the coupon data for following vehicle",
+            "description":"Mail to manager group if there discrepancy in the coupon data "
         }
     }
 ]
