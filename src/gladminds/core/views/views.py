@@ -46,23 +46,29 @@ AUDIT_ACTION = 'SEND TO QUEUE'
 
 
 def redirect_url(request):
-    next_url = request.GET.get('next')
+    next_url = None
+    if request.POST:
+        url_params = str(request.META.get('HTTP_REFERER')).split('next=')
+        if len(url_params) > 1:
+            next_url = url_params[1]
+    else:
+        next_url = request.GET.get('next')
     if next_url:
-        return HttpResponseRedirect(next_url.strip())
-    return HttpResponseRedirect('/')
+        return next_url.strip()
+    return '/'
 
 
 def auth_login(request):
     user = getattr(request, 'user', None)
     if hasattr(user, 'is_authenticated') and user.is_authenticated():
-        return redirect_url(request)
+        return HttpResponseRedirect(redirect_url(request))
 
     c = {}
     c.update(csrf(request))
     if request.POST:
         username = request.POST.get('username')
         mobile = request.POST.get('mobile')
-        password = request.POST.get['password']
+        password = request.POST['password']
         if username:
             user = authenticate(username=username, password=password)
         if mobile:
@@ -72,11 +78,8 @@ def auth_login(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                return redirect_url(user)
-            else:
-                return render_to_response('login.html', c)
-        c["error"] = "username/mobile or password is incorrect"
-        return render_to_response('login.html', c)
+                return HttpResponseRedirect(redirect_url(request))
+        return HttpResponseRedirect(str(request.META.get('HTTP_REFERER')))
     else:
         return render_to_response('login.html', c)
 
@@ -88,6 +91,7 @@ def redirect_user(request):
         if group in user_groups:
             return HttpResponseRedirect(REDIRECT_USER.get(group))
     return HttpResponseBadRequest()
+
 
 def user_logout(request):
     if request.method == 'GET':
