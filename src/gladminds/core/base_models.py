@@ -132,7 +132,9 @@ class AuthorizedServiceCenter(BaseModel):
     asc_id = models.CharField(
         max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
-
+    asc_owner = models.CharField(max_length=100, null=True, blank=True)
+    asc_owner_phone = models.CharField(max_length=50, null=True, blank=True)
+    asc_owner_email = models.CharField(max_length=100, null=True, blank=True)
     objects = user_manager.AuthorizedServiceCenterManager()
 
     class Meta:
@@ -374,6 +376,7 @@ class CustomerTempRegistration(BaseModel):
                                 null=False, blank=False, unique=True)
     sent_to_sap = models.BooleanField(default=False)
     remarks = models.CharField(max_length=500, null=True, blank=True)
+    update_history = models.CharField(max_length=500, null=True, blank=True)
     tagged_sap_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
     mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True, default=0)
@@ -707,9 +710,30 @@ class Constant(BaseModel):
         verbose_name_plural = "Constants"
         
     def __unicode__(self):
-        return constant_name
+        return self.constant_name
 
-        
+class AreaServiceManager(BaseModel):
+    '''details of Area Service Manager'''
+    asm_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Area Service Managers "
+    
+    def __unicode__(self):
+        return self.user.user.username
+     
+class ZonalServiceManager(BaseModel):
+    '''details of Zonal Service Manager'''
+    zsm_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Zonal Service Managers "
+    
+    def __unicode__(self):
+        return self.user.user.username
+    
 #######################LOYALTY TABLES#################################
 
 class NationalSalesManager(BaseModel):
@@ -758,7 +782,7 @@ class Distributor(BaseModel):
         return self.distributor_id + ' ' +self.name
     
 class Retailer(BaseModel):
-    '''details of Distributor'''
+    '''details of Retailer'''
     retailer_name = models.CharField(max_length=50)
     retailer_town = models.CharField(max_length=50, null=True, blank=True)
     
@@ -817,6 +841,7 @@ class Mechanic(BaseModel):
     form_status = models.CharField(max_length=15, choices=constants.FORM_STATUS_CHOICES,
                               default='Incomplete')
     sent_sms = models.BooleanField(default=False)
+    download_detail = models.BooleanField(default=False)
 
     objects = user_manager.MechanicManager()
 
@@ -860,7 +885,7 @@ class SparePartMasterData(BaseModel):
         return self.part_number
     
 class SparePartUPC(BaseModel):
-    '''details of Spare Part'''
+    '''details of Spare Part UPC'''
     unique_part_code = models.CharField(max_length=50, unique=True)
     is_used = models.BooleanField(default=False)
     
@@ -874,7 +899,7 @@ class SparePartUPC(BaseModel):
         return self.unique_part_code
 
 class SparePartPoint(BaseModel):
-    '''details of Spare Part'''
+    '''details of Spare Part points'''
     points = models.IntegerField(max_length=50, null=True, blank=True)
     price = models.FloatField(max_length=50, null=True, blank=True)
     MRP = models.FloatField(max_length=50, null=True, blank=True)
@@ -892,7 +917,7 @@ class SparePartPoint(BaseModel):
         return self.territory + ":" + str(self.points)
 
 class AccumulationRequest(BaseModel):
-    '''details of Spare Part'''
+    '''details of Accumulation request'''
     transaction_id = models.AutoField(primary_key=True)
     points = models.IntegerField(max_length=50)
     total_points = models.IntegerField(max_length=50)
@@ -905,7 +930,7 @@ class AccumulationRequest(BaseModel):
         return str(self.transaction_id)
 
 class Partner(BaseModel):
-    
+    '''details of RPs and LPs'''
     partner_id = models.CharField(max_length=50, unique=True, default=generate_partner_id)
     name = models.CharField(max_length=100, null=True, blank=True)
     address = models.CharField(max_length=100, null=True, blank=True)
@@ -919,6 +944,7 @@ class Partner(BaseModel):
         return str(self.name) + ' ' + str(self.partner_id) + '(' + str(self.partner_type) + ')'
 
 class ProductCatalog(BaseModel):
+    '''details of Product Catalog'''
     product_id = models.CharField(max_length=50, unique=True)
     points = models.IntegerField(max_length=50, null=True, blank=True)
     price = models.IntegerField(max_length=50, null=True, blank=True)
@@ -943,7 +969,7 @@ class ProductCatalog(BaseModel):
         return str(self.product_id)
 
 class RedemptionRequest(BaseModel):
-    '''details of Spare Part'''
+    '''details of Redemption Request'''
     delivery_address = models.CharField(max_length=50, null=True, blank=True)
     transaction_id = models.AutoField(primary_key=True)
     expected_delivery_date =  models.DateTimeField(null=True, blank= True)
@@ -954,6 +980,11 @@ class RedemptionRequest(BaseModel):
     refunded_points = models.BooleanField(default=False)
     due_date =  models.DateTimeField(null=True, blank= True)
     resolution_flag = models.BooleanField(default=False)
+    approved_date =  models.DateTimeField(null=True, blank= True)
+    shipped_date =  models.DateTimeField(null=True, blank= True)
+    delivery_date =  models.DateTimeField(null=True, blank= True)
+    pod_number = models.CharField(max_length=50, null=True, blank=True)
+    
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
     image_tag.short_description = 'Proof of Delivery'
@@ -970,18 +1001,6 @@ class RedemptionRequest(BaseModel):
         
         super(RedemptionRequest, self).clean(*args, **kwargs)
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        for field in self._meta.fields:
-            if field.name=='status':
-                if getattr(self, field.name)=='Approved':
-                    self.is_approved=True
-                    self.packed_by=self.partner.user.user.username
-                elif getattr(self, field.name) in ['Rejected', 'Open'] :
-                    self.is_approved=False
-
-        return super(RedemptionRequest, self).save(force_insert=force_insert, force_update=force_update,
-                              using=using, update_fields=update_fields)
-
     class Meta:
         abstract = True
         verbose_name_plural = "Redemption Request"
@@ -990,7 +1009,7 @@ class RedemptionRequest(BaseModel):
         return str(self.transaction_id)
     
 class WelcomeKit(BaseModel):
-    '''details of Spare Part'''
+    '''details of welcome kit'''
     delivery_address = models.CharField(max_length=50, null=True, blank=True)
     transaction_id = models.AutoField(primary_key=True)
     expected_delivery_date =  models.DateTimeField(null=True, blank= True)
@@ -999,6 +1018,9 @@ class WelcomeKit(BaseModel):
     packed_by = models.CharField(max_length=50, null=True, blank=True)
     tracking_id = models.CharField(max_length=50, null=True, blank=True)
     resolution_flag = models.BooleanField(default=False)
+    shipped_date =  models.DateTimeField(null=True, blank= True)
+    delivery_date =  models.DateTimeField(null=True, blank= True)
+    pod_number = models.CharField(max_length=50, null=True, blank=True)
 
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
@@ -1014,6 +1036,22 @@ class WelcomeKit(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "Welcome Kit Request"
+    
+    def __unicode__(self):
+        return str(self.transaction_id)
+    
+class CommentThread(BaseModel):
+    '''details of activities done by service-desk user'''
+    id = models.AutoField(primary_key=True)
+    message = models.TextField(null=True, blank=True)
+    is_edited = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Comment Thread"
+    
+    def __unicode__(self):
+        return str(self.id)
 
 class LoyaltySLA(models.Model):
     status = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_STATUS)
@@ -1042,6 +1080,9 @@ class LoyaltySLA(models.Model):
     class Meta:
         abstract = True
         verbose_name_plural = "Loyalty SLA info"
+        
+    def __unicode__(self):
+        return str(self.status)
 
 class DateDimension(models.Model):
     date_id = models.BigIntegerField(primary_key=True)

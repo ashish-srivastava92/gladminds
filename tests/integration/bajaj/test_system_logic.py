@@ -68,7 +68,7 @@ class System(BaseTestCase):
         self.tester.client.login(username='DEALER01', password='DEALER01@123')
 
     def post_feedback(self):
-        data = {'username': 'GMDEALER001', 'password': 'GMDEALER001@123'}
+        data = {'username': 'dealer', 'password': '123'}
         response = client.post("/aftersell/dealer/login/", data=data)
         self.tester.assertEqual(response.status_code, 302)
         data = {"description":"test","advisorMobile":"+919999999999",

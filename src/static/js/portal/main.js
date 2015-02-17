@@ -61,7 +61,8 @@
           user = $('#user').text().trim(),
           purchaseDate = $('#purchase-date').val(),	
           messageModal = $('.modal.message-modal'),
-          messageBlock = $('.modal-body', messageModal);
+          messageBlock = $('.modal-body', messageModal),
+          waitingModal = $('.modal.waiting-dialog');
         if(vin.trim().length!==17){
             messageBlock.text('VIN should be 17 digits. Please retry');
             messageModal.modal('show');
@@ -100,13 +101,20 @@
                   messageBlock.text(data.message);
                   messageModal.modal('show');
                   if (!data['status']) {
+                	  $('.modal-header .close').css("display", "block");
                 	  $('.customer-id').val('').attr('readOnly', true);
                 	  $('.customer-submit').attr('disabled', false);
                   }
                   else {
+                      $('.modal-header .close').css("display", "none");
+                      setTimeout(function(){
+                      	messageModal.modal('hide');
+                      	waitingModal.modal('show');
+                      }, 3000);
                 	  vinSyncFeed(data);
                   }
               }
+            		
             },
             error: function() {
             	messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
@@ -118,15 +126,21 @@
 
 function vinSyncFeed(data){
     var messageModal = $('.modal.message-modal'),
-    	messageBlock = $('.modal-body', messageModal);
+    	messageBlock = $('.modal-body', messageModal),
+        waitingModal = $('.modal.waiting-dialog');
     var jqXHR = $.ajax({
         type: 'POST',
         url: '/aftersell/feeds/vin-sync/',
         data : data,
         success: function(data){
         if (data['message']) {
+            $('.modal-header .close').css("display", "none");
+            waitingModal.modal('hide');
             messageBlock.text(data.message);
             messageModal.modal('show');
+            setTimeout(function(){
+            	messageModal.modal('hide');
+            }, 5000);
             }
         },
         error: function() {

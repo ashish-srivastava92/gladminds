@@ -1,15 +1,37 @@
 from django.conf.urls import patterns, url, include
 from gladminds.bajaj.admin import brand_admin
 from gladminds.core import urls as core_urls
+from gladminds.core.apis import user_apis 
 from gladminds.core.urls import api_v1
 from gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
+from tastypie.api import Api
+from gladminds.core.apis import loyalty_apis, product_apis
 
 loyalty = LoyaltyService
+
+loyalty_v1 = Api(api_name="loyalty/v1")
+loyalty_v1.register(user_apis.UserResource())
+loyalty_v1.register(user_apis.UserProfileResource())
+loyalty_v1.register(loyalty_apis.NsmResource())
+loyalty_v1.register(loyalty_apis.AsmResource())
+loyalty_v1.register(loyalty_apis.PartnerResource())
+loyalty_v1.register(loyalty_apis.DistributorResource())
+loyalty_v1.register(loyalty_apis.RetailerResource())
+loyalty_v1.register(product_apis.ProductTypeResource())
+loyalty_v1.register(loyalty_apis.SpareMasterResource())
+loyalty_v1.register(loyalty_apis.RedemptionResource())
+loyalty_v1.register(loyalty_apis.ProductResource())
+loyalty_v1.register(loyalty_apis.SparePartUPCResource())
+loyalty_v1.register(loyalty_apis.SparePartPointResource())
+loyalty_v1.register(loyalty_apis.LoyaltySLAResource())
+loyalty_v1.register(loyalty_apis.MemberResource())
+loyalty_v1.register(loyalty_apis.AccumulationResource())
 
 urlpatterns = patterns('',
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
     url(r'', include(brand_admin.urls)),
     url(r'', include(api_v1.urls)),
+    url(r'', include(loyalty_v1.urls)),
     url(r'^site-info-hackish/$', 'gladminds.bajaj.views.site_info', name='site_info'),
     url(r'^aftersell/servicedesk/helpdesk$', 'gladminds.bajaj.services.service_desk.servicedesk_views.service_desk', name='enable_servicedesk'),
     url(r'^aftersell/servicedesk/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.get_servicedesk_tickets', name='get_servicedesk_tickets'),
@@ -25,8 +47,6 @@ urlpatterns = patterns('',
     url(r'^api/v1/customer-feed/$', 'gladminds.bajaj.services.feed_views.views_customer_registration_wsdl'),
     url(r'^api/v1/vin-sync-feed/$', 'gladminds.bajaj.services.feed_views.views_vin_sync_wsdl'),
     url(r'^api/v1/member-sync-feed/$', 'gladminds.bajaj.services.feed_views.views_member_sync_wsdl'),
-
-    url(r'^sync-member/$', 'gladminds.sqs_tasks.export_member_temp_id_to_sap'),
 
     url(r'^aftersell/users/(?P<users>[a-zA-Z0-9]+)$', 'gladminds.bajaj.views.views.users'),
     url(r'^aftersell/sa/(?P<id>[a-zA-Z0-9]+)/$', 'gladminds.bajaj.views.views.get_sa_under_asc'),
@@ -52,5 +72,6 @@ urlpatterns = patterns('',
     url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/comments/(?P<comment_id>\d+)/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.modify_feedback_comments', name='modify_feedback_comments'),
     url(r'^aftersell/feedbackresponse/(?P<feedback_id>\d+)/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.get_feedback_response', name='get_feedback_response'),
     url(r'^welcome', loyalty.send_welcome_message, name='send_welcome_message'),
+    url(r'^kit/download/(?P<choice>[a-zA-Z0-9]+)$', loyalty.download_welcome_kit, name='download_welcome_kit'),
     url(r'', include(core_urls)),
 )
