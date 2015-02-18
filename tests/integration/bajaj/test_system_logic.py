@@ -5,6 +5,7 @@ from integration.bajaj.base import BaseTestCase
 import datetime
 from django.test.client import Client
 from gladminds.bajaj.models import AuditLog, Feedback, SMSLog
+from gladminds.core.auth_helper import Roles
 
 client = Client(SERVER_NAME='bajaj')
 
@@ -63,7 +64,7 @@ class System(BaseTestCase):
         return temp_customer_obj
 
     def dealer_login(self):
-        self.create_user(username='DEALER01', email='dealer@xyz.com', password='DEALER01@123', group_name='Dealers', phone_number="+91776084042")
+        self.create_user(username='DEALER01', email='dealer@xyz.com', password='DEALER01@123', group_name=Roles.DEALERS, phone_number="+91776084042")
         data = {'username': 'DEALER01', 'password': 'DEALER01@123'}
         self.tester.client.login(username='DEALER01', password='DEALER01@123')
 
