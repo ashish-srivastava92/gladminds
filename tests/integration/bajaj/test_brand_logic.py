@@ -77,6 +77,7 @@ class Brand(object):
 
     def send_sms(self, **kwargs):
         response = client.post(kwargs['url'], kwargs['message'])
+        #print 'response hahahahahah:  ',response
         return response
 
     def check_coupon_status(self, **kwargs):
