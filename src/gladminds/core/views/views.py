@@ -17,7 +17,6 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import F
 
-from gladminds.bajaj import models
 from gladminds.core.services import message_template
 from gladminds.core import utils
 from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message
@@ -36,28 +35,56 @@ from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.services.message_template import get_template
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services.coupons import export_feed
+from django.core.context_processors import csrf
+from gladminds.core.model_fetcher import models
+from gladminds.core.model_helpers import format_phone_number
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
 AUDIT_ACTION = 'SEND TO QUEUE'
 
-@check_service_active(Services.FREE_SERVICE_COUPON)
-def auth_login(request, provider):
-    if request.method == 'GET':
-            if provider not in PROVIDERS:
-                return HttpResponseBadRequest()
-            return render(request, PROVIDER_MAPPING.get(provider, 'asc/login.html'))
 
-    if request.method == 'POST':
-        username = request.POST['username']
+def redirect_url(request):
+    next_url = None
+    if request.POST:
+        url_params = str(request.META.get('HTTP_REFERER')).split('next=')
+        if len(url_params) > 1:
+            next_url = url_params[1]
+    else:
+        next_url = request.GET.get('next')
+    if next_url:
+        return next_url.strip()
+    user_groups = utils.get_user_groups(request.user)
+    if Roles.DEALERS in user_groups:
+        return '/aftersell/servicedesk/'
+    return '/'
+
+
+def auth_login(request):
+    user = getattr(request, 'user', None)
+    if hasattr(user, 'is_authenticated') and user.is_authenticated():
+        return HttpResponseRedirect(redirect_url(request))
+
+    c = {}
+    c.update(csrf(request))
+    if request.POST:
+        username = request.POST.get('username')
+        mobile = request.POST.get('mobile')
         password = request.POST['password']
-        user = authenticate(username=username, password=password)
+        if username:
+            user = authenticate(username=username, password=password)
+        if mobile:
+            mobile = format_phone_number(mobile)
+            user_profile = models.UserProfile.objects.filter(phone_number=mobile)[0]
+            user = authenticate(username=user_profile.user.username, password=password)
         if user is not None:
             if user.is_active:
                 login(request, user)
-                return HttpResponseRedirect('/aftersell/provider/redirect')
-    return HttpResponseRedirect(request.path_info+'?auth_error=true')
+                return HttpResponseRedirect(redirect_url(request))
+        return HttpResponseRedirect(str(request.META.get('HTTP_REFERER')))
+    else:
+        return render_to_response('login.html', c)
 
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
@@ -67,6 +94,7 @@ def redirect_user(request):
         if group in user_groups:
             return HttpResponseRedirect(REDIRECT_USER.get(group))
     return HttpResponseBadRequest()
+
 
 def user_logout(request):
     if request.method == 'GET':
