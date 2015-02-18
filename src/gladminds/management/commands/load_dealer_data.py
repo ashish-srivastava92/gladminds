@@ -1,45 +1,130 @@
 import csv
 import time
+import random
 
 from datetime import datetime
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
+from gladminds.core import utils
 
-from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
-from gladminds.bajaj.services.coupons.import_feed import SAPFeed
+from gladminds.core.auth_helper import Roles
+from gladminds.core.loaders.module_loader import get_model
+APP='bajaj'
+user_profile = get_model('UserProfile', APP)
+TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
 
 class Command(BaseCommand):
     
     def handle(self, *args, **options):
-        self.upload_asc_data()
+        self.upload_dealer_data()
+        self.upload_service_advisor_data()
 
-    def upload_asc_data(self):
-        print "Started running function..."
-        file_list = ['DEALER_ASC_MATRIX.csv']
-        file = open("newfile.txt", "w")
+    def register_user(self, group, username):
+        user_group = Group.objects.using(APP).get(name=group)
+        new_user = User.objects.using(APP).create(username=username)
+        password = username + settings.PASSWORD_POSTFIX
+        new_user.set_password(password)
+        new_user.save(using=APP)
+        new_user.groups.add(user_group)
+        new_user.save(using=APP)
+        user_details = user_profile(user=new_user)
+        user_details.save()
+        return user_details
+
+    def upload_dealer_data(self):
+        print "Started running dealer function..."
+        file_list = ['DEALER_DATA.csv']
         dealer_list = []
-        
+        dealer_model = get_model('Dealer', APP)
+
         for i in range(0, 1):
             with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
                 for row_list in spamreader:
                     temp ={}
-                    temp['name'] = (row_list[1].strip())[0:29]
-                    temp['email'] = row_list[4].strip()
-                    temp['dealer_id'] = row_list[0].strip()                    
+                    temp['dealer_id'] = row_list[0].strip()  
+                    temp['name'] = row_list[1].strip()
+                    temp['city'] = row_list[2].strip()
+                    temp['state'] = row_list[4].strip()
                     dealer_list.append(temp)
         
         for dealer in dealer_list:
+            print "...D..", dealer
             try:
-                dealer_object = User.objects.get(username = dealer['dealer_id'])
+                dealer_object = dealer_model.objects.get(user__user__username = dealer['dealer_id'])
             except Exception as ex:
-                file.write("Failed dealer id is..." + dealer['dealer_id'])
-                
-            if dealer_object:
-                dealer_object.first_name = dealer['name']
-                dealer_object.email = dealer['email']
+                new_user=self.register_user(group=Roles.DEALERS, username=dealer['dealer_id'])
+                dealer_object = dealer_model(dealer_id=dealer['dealer_id'], user=new_user)
                 dealer_object.save()
-            
+            user_obj = dealer_object.user.user
+            user_pro_obj = dealer_object.user
+            first_name = dealer['name']
+            last_name = ''
+            if len(dealer['name'])>30:
+                full_name = dealer['name'].split(' ')
+                first_name = ' '.join(full_name[0:3])
+                last_name = ' '.join(full_name[3:])
+            user_obj.first_name = first_name
+            user_obj.last_name = last_name
+            user_obj.save(using=APP)
+            user_pro_obj.address = dealer['city']
+            user_pro_obj.state = dealer['state']
+            user_pro_obj.save()
+
+    def upload_service_advisor_data(self):
+        print "Started running SA function..."
+        file_list = ['SA_DATA.csv']
+        file = open("sa_details.txt", "w")
+        sa_list = []
+        dealer_model = get_model('Dealer', APP)
+        sa_model = get_model('ServiceAdvisor', APP)
+
+        for i in range(0, 1):
+            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
+                spamreader = csv.reader(csvfile, delimiter=',')
+                next(spamreader)
+                for row_list in spamreader:
+                    temp ={}
+                    temp['city'] = (row_list[2].strip())
+                    temp['dealer_id'] = row_list[3].strip() 
+                    temp['name'] = row_list[4].strip()
+                    temp['number'] = utils.mobile_format(row_list[5].strip())
+                                       
+                    sa_list.append(temp)
+        
+        for sa in sa_list:
+            print "...SA..", sa
+            dealer_object = dealer_model.objects.get(dealer_id = sa['dealer_id'])
+            try:
+                try:
+                    sa_object = sa_model.objects.get(user__phone_number = sa['number'], status='Y')
+                except Exception as ex:
+                    file.write("{0}: {1}".format(sa['number'], ex))
+                    service_advisor_id = TEMP_SA_ID_PREFIX + str(random.randint(10**5, 10**6))
+                    new_user=self.register_user(group=Roles.SERVICEADVISOR, username=service_advisor_id)
+                    sa_object = sa_model(service_advisor_id = service_advisor_id,
+                                         user=new_user,
+                                         status='Y',
+                                         dealer_id=dealer_object.user_id)
+                    sa_object.save()
+                if sa_object.dealer_id!=dealer_object.user_id:
+                    raise ValueError('ACTIVE UNDER {0}'.format(sa_object.dealer_id.dealer_id))
+                user_obj = sa_object.user.user
+                user_pro_obj = sa_object.user
+                first_name = sa['name']
+                last_name = ''
+                if len(sa['name'])>30:
+                    full_name = sa['name'].split(' ')
+                    first_name = ' '.join(full_name[0:3])
+                    last_name = ' '.join(full_name[3:])
+                user_obj.first_name = first_name
+                user_obj.last_name = last_name
+                user_obj.save(using=APP)
+                user_pro_obj.address = sa['city']
+                user_pro_obj.phone_number = sa['number']
+                user_pro_obj.save()
+            except Exception as ex:
+                file.write("{0}: {1}".format(sa['number'], ex))  
         file.close()
