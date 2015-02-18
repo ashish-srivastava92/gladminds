@@ -26,6 +26,7 @@ class UserProfileAdmin(GmModelAdmin):
     search_fields = ('user__username', 'phone_number')
     list_display = ('user', 'phone_number', 'status', 'address',
                     'state', 'country', 'pincode', 'date_of_birth', 'gender')
+    readonly_fields = ('image_tag',)
     
 class DealerAdmin(GmModelAdmin):
     search_fields = ('dealer_id',)
