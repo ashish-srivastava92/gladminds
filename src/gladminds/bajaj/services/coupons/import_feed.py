@@ -279,7 +279,7 @@ class ProductPurchaseFeed(BaseFeed):
                     result = client.service.SI_PurchFeed_Sync(
                              DT_Item=[{"CHASSIS": product['vin']}], DT_STAMP=[{"Item_Stamp":Item_Stamp}])
                     logger.info("[Info: ProductPurchaseSyncFeed_product_data]::Response from SAP: {0}".format(result))
-                    return_code=result[0]['STATUS']
+                    return_code=result['STATUS']
                     vin_sync_feed = models.VinSyncFeedLog(product_id = product['vin'],
                                                     status_code=return_code, ucn_count=-1)
                     vin_sync_feed.save()
