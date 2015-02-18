@@ -174,6 +174,7 @@ def register(request, menu):
     groups = utils.stringify_groups(request.user)
     if not (Roles.ASCS in groups or Roles.DEALERS in groups):
         return HttpResponseBadRequest()
+
     if request.method == 'GET':
         user_id = request.user
         return render(request, TEMPLATE_MAPPING.get(menu, 'portal/404.html'), {'active_menu' : ACTIVE_MENU.get(menu)\

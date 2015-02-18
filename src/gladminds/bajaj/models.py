@@ -17,7 +17,7 @@ class BrandProductCategory(base_models.BrandProductCategory):
 class UserProfile(base_models.UserProfile):
     user = models.OneToOneField(User, primary_key=True,
                                         related_name='bajaj_users')
-
+    
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Brand Users"
@@ -414,7 +414,7 @@ class CommentThread(base_models.CommentThread):
     '''details of activities done by service-desk user'''
     welcome_kit = models.ForeignKey(WelcomeKit, null=True, blank=True)
     redemption = models.ForeignKey(RedemptionRequest, null=True, blank=True)
-    user = models.ForeignKey(User, null=True, blank=True)
+    user = models.ForeignKey(User)
 
     class Meta:
         app_label = _APP_NAME

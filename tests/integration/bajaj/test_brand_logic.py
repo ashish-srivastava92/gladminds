@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from django.db import transaction
 import os
 from django.conf import settings
-from gladminds.bajaj.services.coupons import import_feed
+from gladminds.bajaj.services.coupons import import_feed, export_feed
 from datetime import datetime, timedelta
 
 from django.test.client import Client
@@ -77,6 +77,7 @@ class Brand(object):
 
     def send_sms(self, **kwargs):
         response = client.post(kwargs['url'], kwargs['message'])
+        #print 'response hahahahahah:  ',response
         return response
 
     def check_coupon_status(self, **kwargs):
@@ -147,7 +148,7 @@ class Brand(object):
         today = datetime.now()
         start_date = today - timedelta(days=1)
         end_date = today
-        redeem_obj = feed.CouponRedeemFeedToSAP()
+        redeem_obj = export_feed.ExportCouponRedeemFeed()
         feed_export_data = redeem_obj.export_data(start_date=start_date, end_date=end_date)
  
         self.tester.assertEqual(len(feed_export_data[0]), 1, "Not accurate length of feeds log")
