@@ -118,6 +118,9 @@ VIN_SYNC_WSDL='qa_vin_sync.wsdl'
 MEMBER_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/member-sync-feed/?wsdl&v0"
 MEMBER_SYNC_WSDL='qa_member_sync_feed.wsdl'
 
+PURCHASE_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/purchase-sync-feed/?wsdl&v0"
+PURCHASE_SYNC_WSDL='qa_purchase_sync_feed.wsdl'
+
 WSDL_TNS="http://qa.bajaj.gladminds.co/api/v1/feed/"
 
 ENABLE_AMAZON_SQS = True
