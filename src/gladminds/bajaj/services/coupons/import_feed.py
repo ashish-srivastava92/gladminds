@@ -273,19 +273,31 @@ class ProductPurchaseFeed(BaseFeed):
                 ex='[Info: ProductPurchaseFeed_product_data]: {0}'.format(done)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
-                purchase_sync_feed = BaseExportFeed(username=settings.SAP_CRM_DETAIL[
-                       'username'], password=settings.SAP_CRM_DETAIL['password'],
-                      wsdl_url=settings.PURCHASE_SYNC_WSDL_URL, feed_type='Purchase Sync Feed')
-                client = purchase_sync_feed.get_client()
-                Item_Stamp = {'I_STAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
-                result = client.service.SI_PurchFeed_Sync(
-                         DT_Item=[{"CHASSIS": product['vin']}], DT_STAMP=[{"Item_Stamp":Item_Stamp}])
-                logger.info("[Info: ProductPurchaseFeed_product_data]::Response from SAP: {0}".format(result))
-                logger.info('Result', result[0])
-                return_code=result[0]['STATUS']
-                vin_sync_feed = models.VinSyncFeedLog(product_id = product['vin'],
-                                                status_code=return_code, ucn_count=-1)
-                vin_sync_feed.save()
+                try:
+                    total_data_count=1
+                    total_failed=0
+                    export_status=True
+                    feed_type='Purchase Sync Feed'
+                    purchase_sync_feed = BaseExportFeed(username=settings.SAP_CRM_DETAIL[
+                           'username'], password=settings.SAP_CRM_DETAIL['password'],
+                          wsdl_url=settings.PURCHASE_SYNC_WSDL_URL, feed_type=feed_type)
+                    client = purchase_sync_feed.get_client()
+                    Item_Stamp = {'I_STAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
+                    result = client.service.SI_PurchFeed_Sync(
+                             DT_Item=[{"CHASSIS": product['vin']}], DT_STAMP=[{"Item_Stamp":Item_Stamp}])
+                    logger.info("[Info: ProductPurchaseSyncFeed_product_data]::Response from SAP: {0}".format(result))
+                    return_code=result[0]['STATUS']
+                    vin_sync_feed = models.VinSyncFeedLog(product_id = product['vin'],
+                                                    status_code=return_code, ucn_count=-1)
+                    vin_sync_feed.save()
+                except Exception as ex:
+                    ex='[Info: ProductPurchaseSyncFeed_product_data]: {0}'.format(ex)
+                    logger.error(ex)
+                    total_failed=1
+                    export_status=False
+                feed_log(feed_type=feed_type, total_data_count=total_data_count,
+                failed_data_count=total_failed, success_data_count=total_data_count- total_failed,
+                action='Sent', status=export_status)
                 continue
             except Exception as ex:
                 ex = '''[Exception: ProductPurchaseFeed_product_data]:{0} VIN - {1}'''.format(ex, product['vin'])
