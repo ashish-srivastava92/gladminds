@@ -12,8 +12,8 @@ loyalty = LoyaltyService
 loyalty_v1 = Api(api_name="loyalty/v1")
 loyalty_v1.register(user_apis.UserResource())
 loyalty_v1.register(user_apis.UserProfileResource())
-loyalty_v1.register(loyalty_apis.NsmResource())
-loyalty_v1.register(loyalty_apis.AsmResource())
+loyalty_v1.register(loyalty_apis.NSMResource())
+loyalty_v1.register(loyalty_apis.ASMResource())
 loyalty_v1.register(loyalty_apis.PartnerResource())
 loyalty_v1.register(loyalty_apis.DistributorResource())
 loyalty_v1.register(loyalty_apis.RetailerResource())
@@ -26,6 +26,9 @@ loyalty_v1.register(loyalty_apis.SparePartPointResource())
 loyalty_v1.register(loyalty_apis.LoyaltySLAResource())
 loyalty_v1.register(loyalty_apis.MemberResource())
 loyalty_v1.register(loyalty_apis.AccumulationResource())
+loyalty_v1.register(loyalty_apis.CommentThreadResource())
+loyalty_v1.register(loyalty_apis.WelcomeKitResource())
+
 
 urlpatterns = patterns('',
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
