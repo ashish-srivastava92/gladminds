@@ -97,5 +97,3 @@ ENV = "local"
 
 WSDL_TNS="http://local.bajaj.gladminds.co:8000/api/v1/feed/"
 
-DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-
