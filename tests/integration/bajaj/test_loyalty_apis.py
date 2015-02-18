@@ -3,7 +3,8 @@ import json
 from django.test.client import Client
 from tastypie.test import ResourceTestCase
 from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER,SPARE_MASTER, SPARE_POINT,SPARE_PART_UPC,\
-    REDEMPTION_REQUEST,PARTNER,PRODUCT,ACCUMULATION, SPARE_PART_UPC_1,SLA
+    REDEMPTION_REQUEST,PARTNER,PRODUCT,ACCUMULATION, SPARE_PART_UPC_1,SLA,\
+    MEMBER
     
 client=Client(SERVER_NAME='bajaj')
 
@@ -362,3 +363,30 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['transaction_id'], 1)
         return resp
+    
+    def test_create_member(self):
+        uri = '/loyalty/v1/members/'
+        resp = self.post(uri,data = MEMBER)
+        self.assertEquals(resp.status_code,201)
+        return resp
+    
+    def test_get_member(self):
+        resp = self.test_create_member()
+        self.assertEquals(resp.status_code,201)
+        uri = '/loyalty/v1/members/1/'
+        resp = self.get(uri)
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['phone_number'],"+919842461800")
+        return resp
+    
+    def test_update_member(self):
+        resp = self.test_create_member()
+        self.assertEquals(resp.status_code,201)
+        data={"phone_number":"+919842461801"}
+        uri = '/loyalty/v1/members/1/'
+        resp = self.put(uri,data)
+        self.assertEquals(resp.status_code, 200)
+        uri = '/loyalty/v1/members/1/'
+        resp = self.get(uri)
+        self.assertEqual(self.deserialize(resp)['phone_number'],"+919842461801")
+        
