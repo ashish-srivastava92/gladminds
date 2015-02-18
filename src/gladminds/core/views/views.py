@@ -55,6 +55,9 @@ def redirect_url(request):
         next_url = request.GET.get('next')
     if next_url:
         return next_url.strip()
+    user_groups = utils.get_user_groups(request.user)
+    if Roles.DEALERS in user_groups:
+        return '/aftersell/servicedesk/'
     return '/'
 
 
