@@ -646,7 +646,7 @@ def export_purchase_feed_sync_to_sap(*args, **kwargs):
         purchase_feed_sync.export(items=feed_export_data[0], item_batch=feed_export_data[
                          1], total_failed_on_feed=feed_export_data[2])
     else:
-        logger.info("[export_purchase_feed_sync_to_sap]: No Purchase failed since last feed")
+        logger.info("[export_purchase_feed_sync_to_sap]: No Purchase Feed failed since last feed")
 
 def welcome_kit_due_date_escalation(*args, **kwargs):
     time = datetime.now()
