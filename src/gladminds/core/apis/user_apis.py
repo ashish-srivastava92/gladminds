@@ -50,7 +50,10 @@ class UserProfileResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'put']
         filtering = {
                      "user":  ALL_WITH_RELATIONS,
-                     "phone_number": ALL
+                     "phone_number": ALL,
+                     "state": ALL,
+                     "country": ALL,
+                     "pincode": ALL
                      }
         always_return_data = True
 
@@ -123,7 +126,8 @@ class DealerResource(CustomBaseModelResource):
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
         filtering = {
-                     "user": ALL_WITH_RELATIONS
+                     "user": ALL_WITH_RELATIONS,
+                     "dealer_id": ALL,
                      }
         always_return_data = True
 
