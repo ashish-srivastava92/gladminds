@@ -348,6 +348,7 @@ class LoyaltyApiTests(ResourceTestCase):
         uri = '/loyalty/v1/asms/'
         resp = self.post(uri,data=ASM)
         self.assertEquals(resp.status_code,201)
+        self.test_create_spare_master()
         uri = '/loyalty/v1/spare-upcs/'
         resp = self.post(uri,data = SPARE_PART_UPC)
         resp = self.post(uri,data = SPARE_PART_UPC_1)  
@@ -450,13 +451,19 @@ class LoyaltyApiTests(ResourceTestCase):
 
     def test_transferpoints(self):
         self.test_create_spare_master()
-        self.test_create_spare_part_point()
-        self.test_create_spare_part_upc()
+        
+        uri = '/loyalty/v1/spare-points/'
+        resp = self.post(uri,data = SPARE_POINT)
+        self.assertEquals(resp.status_code,201)
+        
+        uri = '/loyalty/v1/spare-upcs/'
+        resp = self.post(uri,data = SPARE_PART_UPC)
+        self.assertEquals(resp.status_code,201)
+        
         self.test_create_member()
         self.test_create_member(data=MEMBER1)        
         uri = '/loyalty/v1/accumulation-discrepancies/transfer-points/'
-        type(TRANSFERPOINTS)
-        resp = client.post(uri, data =TRANSFERPOINTS, content_type='multipart/form-data')
+        resp = client.post(uri, data =TRANSFERPOINTS)
         self.assertEquals(resp.status_code,200)
       
         uri = '/loyalty/v1/members/1/'
