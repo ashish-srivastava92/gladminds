@@ -41,38 +41,39 @@ class ExportCouponRedeemFeed(BaseExportFeed):
                     }                        
                 items.append(item)
             except Exception as ex:
-                logger.error("error on data coupon data from db %s" % str(ex))
+                logger.error("[ExportCouponRedeemFeed]: error fetching from db {0}".format(ex))
                 total_failed = total_failed + 1
         return items, item_batch, total_failed
 
     def export(self, items=None, item_batch=None, total_failed_on_feed=0):
         logger.info(
-            "Export {0}".format(self.feed_type))
+            "[ExportCouponRedeemFeed]: Export {0}".format(self.feed_type))
         client = self.get_client()
         total_failed = total_failed_on_feed
         for item in items:
-            logger.info("Trying to send SAP the coupon: {0}"\
+            export_status = False
+            logger.info("[ExportCouponRedeemFeed]: Sending coupon - {0}"\
                         .format(item))
             try:            
                 result = client.service.MI_GCP_UCN_Sync(
                     ITEM=[item], ITEM_BATCH=item_batch)
-                logger.info("Response from SAP: {0}".format(result))
+                logger.info("[ExportCouponRedeemFeed]: Response from SAP: {0}".format(result))
                 if result[1]['I_STATUS'] == 'SUCCESS':
                     try:
-                        export_status = True
                         coupon = models.CouponData.objects.get(unique_service_coupon=item['GCP_UCN_NO'])
                         coupon.sent_to_sap = True
                         coupon.save()
-                        logger.info("Sent the details of coupon {0} to sap".format(item['GCP_UCN_NO']))
+                        export_status = True
+                        logger.info("[ExportCouponRedeemFeed]: Sent coupon - {0}".format(item['GCP_UCN_NO']))
                     except Exception as ex:
-                        logger.error("Coupon with id {0} does not exist".format(item['GCP_UCN_NO']))
+                        total_failed = total_failed + 1
+                        logger.error("[ExportCouponRedeemFeed]: Error:: {0} - {1}".format(item['GCP_UCN_NO'], ex))
                 else:
                     total_failed = total_failed + 1
-                    export_status = False
-                    logger.error("Failed to send the details of coupon {0} to sap".format(item['GCP_UCN_NO']))
+                    logger.error("[ExportCouponRedeemFeed]: {0}:: Success not received from SAP".format(item['GCP_UCN_NO']))
             except Exception as ex:
-                logger.error("Failed to send the details to sap")
-                logger.error(ex)
+                total_failed = total_failed + 1
+                logger.error("[ExportCouponRedeemFeed]: Error:: {0} - {1}".format(item['GCP_UCN_NO'], ex))
         feed_log(feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
@@ -131,24 +132,23 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
                 }
                 items.append(item)
             except Exception as ex:
-                logger.error("error on customer info from db %s" % str(ex))
+                logger.error("[ExportCustomerRegistrationFeed]: error fetching from db {0}".format(ex))
                 total_failed = total_failed + 1
         return items, item_batch, total_failed
 
     def export(self, items=None, item_batch=None, total_failed_on_feed=0):
-        export_status = False
         logger.info(
-            "Export {2}: Items:{0} and Item_batch: {1}"\
-            .format(items, item_batch, self.feed_type))
+            "[ExportCustomerRegistrationFeed]: Export {0}".format(self.feed_type))
         client = self.get_client()
         total_failed = total_failed_on_feed
         for item in items:
-            logger.info("Trying to send SAP the ID: {0}"\
+            export_status = False
+            logger.info("[ExportCustomerRegistrationFeed]: Sending customer - {0}"\
                         .format(item['CUSTOMER_ID']))
             try:
                 result = client.service.SI_GCPCstID_sync(
                     item_custveh=[{"item": item}], item=item_batch)
-                logger.info("Response from SAP: {0}".format(result))
+                logger.info("[ExportCustomerRegistrationFeed]: Response from SAP: {0}".format(result))
                 if result[0]['item'][0]['STATUS'] == 'SUCCESS':
                     try:
                         temp_customer_object = models.CustomerTempRegistration.objects.get(temp_customer_id=item['CUSTOMER_ID'])
@@ -159,16 +159,16 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
                             temp_customer_object.tagged_sap_id = result[1]['item'][0]['PARTNER']
                         temp_customer_object.save()
                         export_status = True
-                        logger.info("Sent the details of customer ID {0} to sap".format(item['CUSTOMER_ID']))
+                        logger.info("[ExportCustomerRegistrationFeed]: Sent customer ID - {0}".format(item['CUSTOMER_ID']))
                     except Exception as ex:
-                        logger.error("Customer with id {0} does not exist".format(item['CUSTOMER_ID']))
+                        total_failed = total_failed + 1
+                        logger.error("[ExportCustomerRegistrationFeed]: Error:: {0} - {1}".format(item['CUSTOMER_ID'], ex))
                 else:
                     total_failed = total_failed + 1
-                    export_status = False
-                    logger.error("Failed to send the details of customer ID {0} to sap".format(item['CUSTOMER_ID']))
+                    logger.error("[ExportCustomerRegistrationFeed]: Success not received from SAP".format(item['CUSTOMER_ID']))
             except Exception as ex:
-                logger.error("Failed to send the details to sap")
-                logger.error(ex)
+                total_failed = total_failed + 1
+                logger.error("[ExportCustomerRegistrationFeed]:  Error:: {0} - {1}".format(item['CUSTOMER_ID'], ex))
         feed_log(feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
@@ -180,17 +180,17 @@ class ExportUnsyncProductFeed(BaseExportFeed):
         data_source = []
         message="some error occurred, please try again later."
         logger.info(
-            "Export {1}: Items:{0}"\
+            "[ExportUnsyncProductFeed]: Export {1}: Items:{0}"\
             .format(data, self.feed_type))
         client = self.get_client()
 
-        logger.info("Trying to send product details the ID: {0}"\
+        logger.info("[ExportUnsyncProductFeed]: sending product details: {0}"\
                     .format(data['vin']))
         
         result = client.service.SI_GCPONL_Sync(
                 DT_ONL=[{"CHASSIS": data['vin'],"DEALER": data['current_user'].username}])
         try:
-            logger.info("Response from SAP: {0}".format(result))
+            logger.info("[ExportUnsyncProductFeed]: Response from SAP: {0}".format(result))
             
             if len(result)>1:
                 return_code = result[1][0]['RETURN_CODE']
@@ -212,7 +212,7 @@ class ExportUnsyncProductFeed(BaseExportFeed):
                                             feed_type='VIN sync Feed',
                                             action='Sent', status=True)
                         except Exception as ex:
-                            ex = "ProductDispatchService: {0}  Error on Validating {1}".format(result, ex)
+                            ex = "[ExportUnsyncProductFeed]: ProductDispatchService: {0}  Error on Validating {1}".format(result, ex)
                             feed_remark.fail_remarks(ex)
                             logger.error(ex)
                     feed_remark = save_to_db(feed_type='dispatch', data_source=data_source,
@@ -222,13 +222,68 @@ class ExportUnsyncProductFeed(BaseExportFeed):
                         remarks = feed_remark.remarks.elements()
                         for remark in remarks:
                             feed_failure_log(feed_type='VIN sync Feed', reason=remark)
-                            logger.info('[vin sync]:: ' + json.dumps(feed_remark.remarks))
+                            logger.info('[ExportUnsyncProductFeed]: ' + json.dumps(feed_remark.remarks))
                         raise ValueError('dispatch feed failed!')
-                        logger.info('[vin sync ]:: dispatch feed completed')
+                        logger.info('[ExportUnsyncProductFeed]: dispatch feed completed')
                         
                 else:
                     message='This Chassis is not available in Main database, please type the correct chassis number'
         except Exception as ex:
-            logger.error("Failed to send the details to sap")
+            logger.error("[ExportUnsyncProductFeed]: Failed to send the details to sap")
             logger.error(ex)
         return message
+    
+class ExportPurchaseSynFeed(BaseExportFeed):
+    
+    def export_data(self, start_date=None, end_date=None):
+        results = models.VinSyncFeedLog.objects.filter(sent_to_sap=False, ucn_count=-1)
+        items = []
+        total_failed = 0
+        item_batch = {'I_STAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
+        for sync_feed in results:
+            try:
+                item = {
+                    "CHASSIS": sync_feed.product_id,
+                }
+                items.append(item)
+            except Exception as ex:
+                logger.error("[ExportPurchaseSynFeed]: error fetching from db {0}".format(ex))
+                total_failed = total_failed + 1
+        return items, item_batch, total_failed
+
+    def export(self, items=None, item_batch=None, total_failed_on_feed=0):
+        logger.info(
+            "Export {2}: Items:{0} and Item_batch: {1}"\
+            .format(items, item_batch, self.feed_type))
+        client = self.get_client()
+        total_failed = total_failed_on_feed
+        for item in items:
+            export_status = False
+            logger.info("[ExportPurchaseSynFeed]: Sending chassis - {0}"\
+                        .format(item['CHASSIS']))
+            try:
+                result = client.service.SI_PurchFeed_Sync(
+                                DT_Item=[item],
+                                DT_STAMP=[{"Item_Stamp":item_batch}])
+                logger.info("[ExportPurchaseSynFeed]: Response from SAP: {0}".format(result))
+                if result['STATUS'] == 'SUCCESS':
+                    try:
+                        vin_sync_feed = models.VinSyncFeedLog.objects.get(product_id = item['CHASSIS'])
+                        vin_sync_feed.status_code = result['STATUS']
+                        vin_sync_feed.sent_to_sap = True
+                        vin_sync_feed.save()
+                        export_status = True
+                        logger.info("[ExportPurchaseSynFeed]: Sent the VIN {0} to sap".format(item['CHASSIS']))
+                    except Exception as ex:
+                        total_failed = total_failed + 1
+                        logger.error("[ExportPurchaseSynFeed]: Error:: {0} - {1}".format(item['CHASSIS'], ex))
+                else:
+                    total_failed = total_failed + 1
+                    logger.error("[ExportPurchaseSynFeed]:Success not received from SAP {0}".format(item['CHASSIS']))
+            except Exception as ex:
+                total_failed = total_failed + 1
+                logger.error("[ExportPurchaseSynFeed]: Error:: {0} - {1}".format(item['CHASSIS'], ex))
+        feed_log(feed_type=self.feed_type, total_data_count=len(items)\
+                 + total_failed_on_feed, failed_data_count=total_failed,\
+                 success_data_count=len(items) + total_failed_on_feed - total_failed,\
+                 action='Sent', status=export_status)

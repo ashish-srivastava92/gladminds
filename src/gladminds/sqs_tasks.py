@@ -433,7 +433,7 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
         coupon_redeem.export(items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:
-        logger.info("tasks.py: No Coupon closed during last day")
+        logger.info("[export_coupon_redeem_to_sap]: No Coupon closed during last day")
 
 '''
 Cron Job to send report email for data feed
@@ -545,7 +545,7 @@ def export_customer_reg_to_sap(*args, **kwargs):
         customer_registered.export(items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:
-        logger.info("tasks.py: No Customer registered since last feed")
+        logger.info("[export_customer_reg_to_sap]: No Customer registered since last feed")
 
 @shared_task
 def update_coupon_history_data(*args, **kwargs):
@@ -629,7 +629,24 @@ def export_member_temp_id_to_sap(*args, **kwargs):
         member_registered.export(items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:
-        logger.info("tasks.py: No member registered since last feed")
+        logger.info("[export_member_temp_id_to_sap]: No member registered since last feed")
+        
+'''
+Cron Job to send info of registered customer
+'''
+
+@shared_task
+def export_purchase_feed_sync_to_sap(*args, **kwargs):
+    purchase_feed_sync = export_feed.ExportPurchaseSynFeed(username=settings.SAP_CRM_DETAIL[
+                           'username'], password=settings.SAP_CRM_DETAIL['password'],
+                          wsdl_url=settings.PURCHASE_SYNC_WSDL_URL, feed_type='Purchase Sync Feed')
+    feed_export_data = purchase_feed_sync.export_data()
+    print "3", len(feed_export_data[0])
+    if len(feed_export_data[0]) > 0:
+        purchase_feed_sync.export(items=feed_export_data[0], item_batch=feed_export_data[
+                         1], total_failed_on_feed=feed_export_data[2])
+    else:
+        logger.info("[export_purchase_feed_sync_to_sap]: No Purchase failed since last feed")
 
 def welcome_kit_due_date_escalation(*args, **kwargs):
     time = datetime.now()
@@ -748,6 +765,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               "redemption_request_due_date_escalation":redemption_request_due_date_escalation,
               
               "export_member_temp_id_to_sap": export_member_temp_id_to_sap,
+              
+              "export_purchase_feed_sync_to_sap": export_purchase_feed_sync_to_sap,
 
               "welcome_kit_due_date_escalation":welcome_kit_due_date_escalation,
               
