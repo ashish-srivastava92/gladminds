@@ -145,7 +145,7 @@ def create_new_staging_version(version):
     upload_to_s3(BUCKET_NAME, version, FILE_NAME)
     create_version(APPLICATION_NAME, version)
 
-    ENVIRONMENT_NAME = 'gladminds-work-dev-'
+    ENVIRONMENT_NAME = 'gladminds-work-dev'
     update_environment(ENVIRONMENT_NAME, version)
      
     ENVIRONMENT_NAME = 'gladminds-web-dev'
