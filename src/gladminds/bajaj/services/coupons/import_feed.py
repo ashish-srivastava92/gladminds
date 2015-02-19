@@ -373,9 +373,7 @@ class CreditNoteFeed(BaseFeed):
     def import_data(self):
         for credit_note in self.data_source:
             try:
-                message=coupon_data=dealer_data=None
-                if credit_note['dealer']:
-                    dealer_data = self.check_or_create_dealer(dealer_id=credit_note['dealer'])
+                message=coupon_data=None
                 product_data = models.ProductData.objects.filter(product_id=credit_note['vin'])
                 if not product_data:
                     message='VIN: {0} does not exits'.format(credit_note['vin'])
