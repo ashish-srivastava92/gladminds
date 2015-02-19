@@ -7,9 +7,11 @@
     </div>
     <div id="wrapper">
         <div class="row">
-            <div class="col-md-3 .col-md-offset-1">
-                {% include "portal/base_portal.html" %}
-            </div>
+            {% if group != CONSTANTS.SD_CONSTANTS.SD_MANAGER  or group == None %}
+                <div class="col-md-3 .col-md-offset-1">
+                    {% include "portal/base_portal.html" %}
+                </div>
+            {% endif %}
             <div class="col-md-8">
                           <div class="row portal-form-heading">
                   <div class="col-md-10">
@@ -29,7 +31,7 @@
                     </div>
                   </div>
                 </div>
-                </div>
+               </div>
               </form>
               <div class="row portal-form-heading">
                 <div class="col-md-10">

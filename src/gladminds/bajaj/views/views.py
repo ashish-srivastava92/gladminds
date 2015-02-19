@@ -168,7 +168,7 @@ def update_pass(request):
 @login_required()
 def register(request, menu):
     groups = utils.stringify_groups(request.user)
-    if not (Roles.ASCS in groups or Roles.DEALERS in groups):
+    if not (Roles.ASCS in groups or Roles.DEALERS in groups or Roles.SDMANAGERS):
         return HttpResponseBadRequest()
     if request.method == 'GET':
         user_id = request.user
@@ -283,7 +283,8 @@ def register_customer(request, group=None):
                 customer_obj = customer_obj[0]
                 if customer_obj.new_number != data_source[0]['customer_phone_number']:
                     update_count = models.Constant.objects.get(constant_name='mobile_number_update_count').constant_value
-                    if customer_obj.mobile_number_update_count == int(update_count):
+                    if customer_obj.mobile_number_update_count >= int(update_count) and group[0] != Roles.SDMANAGERS:
+                        print "dealer=",request.user,"customer =",data_source[0]['customer_name'],"new number =",data_source[0]['customer_phone_number'],"old number =",customer_obj.new_number
                         message = get_template('PHONE_NUMBER_UPDATE_COUNT_EXCEEDED')
                         return json.dumps({'message' : message})
 
@@ -428,7 +429,7 @@ def get_customer_info(data):
 @login_required()
 def exceptions(request, exception=None):
     groups = utils.stringify_groups(request.user)
-    if not (Roles.ASCS in groups or Roles.DEALERS in groups):
+    if not (Roles.ASCS in groups or Roles.DEALERS in groups or Roles.SDMANAGERS):
         return HttpResponseBadRequest()
     is_dealer = False
     if Roles.DEALERS in groups:

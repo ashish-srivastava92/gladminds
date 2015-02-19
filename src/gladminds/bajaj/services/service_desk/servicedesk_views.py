@@ -217,3 +217,11 @@ def get_feedback_response(request, feedback_id):
         return render(request, 'service-desk/feedback_received.html')
     else:
         return HttpResponse()
+
+def update_customer_number(request):
+    groups = utils.stringify_groups(request.user)
+    if request.method == 'GET':       
+        return render(request, 'portal/customer_registration.html',{"group": groups[0]})
+    else:
+        return HttpResponseBadRequest()
+        
