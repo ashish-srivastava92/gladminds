@@ -154,14 +154,22 @@ class FeedStatusResource(CustomBaseResource):
             params = bundle.request.GET.copy()
         dtstart = params.get('created_date__gte')
         dtend = params.get('created_date__lte')
+        hash_key = "gm-feeds-status1-"
         if dtstart:
             filters['created_date__gte'] = dtstart
+            hash_key = hash_key + dtstart
         if dtend:
             filters['created_date__lte'] = dtend
+            hash_key = hash_key + dtend
 
         data_map = {}
         result = []
         filters['feed_type__in'] = FEED_SENT_TYPES + FEED_TYPES
+
+        output = cache.get(hash_key)
+        if output:
+            return map(CustomApiObject, output)
+
         objects = models.DataFeedLog.objects.filter(**filters)
 
         for feed_type in FEED_SENT_TYPES + FEED_TYPES:
@@ -180,7 +188,7 @@ class FeedStatusResource(CustomBaseResource):
                                           key,
                                           value[1],
                                           value[0]]))
-
+        cache.set(hash_key, result, 15*60)
         return map(CustomApiObject, result)
 #         data = []   
 #         filters['action'] = FeedStatus.RECEIVED
