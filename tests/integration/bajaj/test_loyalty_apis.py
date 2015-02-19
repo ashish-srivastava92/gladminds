@@ -234,6 +234,7 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEqual(self.deserialize(resp)['is_approved'], False)
        
     def test_create_spare_part_upc(self):
+        self.test_create_spare_master()
         uri = '/loyalty/v1/spare-upcs/'
         resp = self.post(uri,data = SPARE_PART_UPC)
         self.assertEquals(resp.status_code,201)
@@ -288,6 +289,7 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEquals(resp.status_code,200)
 
     def test_create_spare_part_point(self):
+        self.test_create_spare_master()
         uri = '/loyalty/v1/spare-points/'
         resp = self.post(uri,data = SPARE_POINT)
         self.assertEquals(resp.status_code,201)

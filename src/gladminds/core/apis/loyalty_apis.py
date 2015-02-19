@@ -222,7 +222,6 @@ class DiscrepantAccumulationResource(CustomBaseModelResource):
 
     
     def transfer_points(self,request, **kwargs):
-        print request
         try:
             with transaction.atomic():
                 upc = request.POST['upc']
