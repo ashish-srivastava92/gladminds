@@ -161,6 +161,7 @@ class FeedStatusResource(CustomBaseResource):
 
         data_map = {}
         result = []
+        filters['feed_type__in'] = FEED_SENT_TYPES + FEED_TYPES
         objects = models.DataFeedLog.objects.filter(**filters)
 
         for feed_type in FEED_SENT_TYPES + FEED_TYPES:
