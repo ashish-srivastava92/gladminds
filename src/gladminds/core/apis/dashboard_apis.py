@@ -159,24 +159,46 @@ class FeedStatusResource(CustomBaseResource):
         if dtend:
             filters['created_date__lte'] = dtend
 
-        data = []
-        filters['action'] = FeedStatus.RECEIVED
-        for feed_type in FEED_TYPES:
-            filters['feed_type'] = feed_type
-            success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
-            data.append(create_feed_dict([FeedStatus.RECEIVED,
-                                          feed_type,
-                                          success_count,
-                                          failure_count]))
-        filters['action'] = FeedStatus.SENT
-        for feed_type in FEED_SENT_TYPES:
-            filters['feed_type'] = feed_type
-            success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
-            data.append(create_feed_dict([FeedStatus.SENT,
-                                          feed_type,
-                                          success_count,
-                                          failure_count]))
-        return map(CustomApiObject, data)
+        data_map = {}
+        result = []
+        objects = models.DataFeedLog.objects.filter(**filters)
+
+        for feed_type in FEED_SENT_TYPES + FEED_TYPES:
+            data_map[feed_type] = [0, 0]
+        for obj in objects:
+            feed_counts = data_map[obj.feed_type] 
+            feed_counts[0] = feed_counts[0] + int(obj.failed_data_count)
+            feed_counts[1] = feed_counts[1] + int(obj.success_data_count)
+            data_map[obj.feed_type] = feed_counts
+
+        for key, value in data_map.items():
+            action = FeedStatus.RECEIVED
+            if key in FEED_SENT_TYPES:
+                action = FeedStatus.SENT
+            result.append(create_feed_dict([action,
+                                          key,
+                                          value[1],
+                                          value[0]]))
+
+        return map(CustomApiObject, result)
+#         data = []   
+#         filters['action'] = FeedStatus.RECEIVED
+#         for feed_type in FEED_TYPES:
+#             filters['feed_type'] = feed_type
+#             success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
+#             data.append(create_feed_dict([FeedStatus.RECEIVED,
+#                                           feed_type,
+#                                           success_count,
+#                                           failure_count]))
+#         filters['action'] = FeedStatus.SENT
+#         for feed_type in FEED_SENT_TYPES:
+#             filters['feed_type'] = feed_type
+#             success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
+#             data.append(create_feed_dict([FeedStatus.SENT,
+#                                           feed_type,
+#                                           success_count,
+#                                           failure_count]))
+#         return map(CustomApiObject, data)
 
 
 class SMSReportResource(CustomBaseResource):
