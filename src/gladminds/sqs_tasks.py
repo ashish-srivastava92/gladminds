@@ -629,7 +629,7 @@ def export_member_temp_id_to_sap(*args, **kwargs):
         member_registered.export(items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:
-       logger.info("[export_member_temp_id_to_sap]: No member registered since last feed")
+        logger.info("[export_member_temp_id_to_sap]: No member registered since last feed")
 
 '''
 Cron Job to send info of registered customer
