@@ -47,5 +47,9 @@ class FeedbackResource(CustomBaseModelResource):
         detail_allowed_methods = ['get']
         always_return_data = True
         filtering = {
-                        "status": ALL
+                        "status": ALL,
+                        "summary": ALL,
+                        "created_date": ['gte', 'lte'],
+                        "closed_date": ['gte', 'lte'],
+                        "resolved_date": ['gte', 'lte']
                      }
