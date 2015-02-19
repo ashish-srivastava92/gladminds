@@ -12,9 +12,9 @@ from django.forms.models import model_to_dict
 from django.db.models.query_utils import Q
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.utils.urls import trailing_slash
-from tastypie import fields
-from gladminds.core.utils import get_dict_from_object
-from  gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
+from gladminds.core.apis.authorization import MultiAuthorization,\
+    LoyaltyCustomAuthorization
+from django.db.transaction import atomic
 import logging
 from django.db import transaction
 
@@ -216,20 +216,20 @@ class DiscrepantAccumulationResource(CustomBaseModelResource):
 
     def prepend_urls(self):
         return [
-            url(r"^(?P<resource_name>%s)/upc=(?P<upc>[a-zA-Z0-9.-]+)&from=(?P<from>[a-zA-Z0-9.-]+)&to=(?P<to>[a-zA-Z0-9.-]+)%s" % (self._meta.resource_name,trailing_slash()),
+              url(r"^(?P<resource_name>%s)/transfer-points%s" % (self._meta.resource_name,trailing_slash()),
                                                      self.wrap_view('transfer_points'), name="transfer_points")
                 ]
 
     
     def transfer_points(self,request, **kwargs):
+        print request
         try:
             with transaction.atomic():
-                upc = kwargs['upc']
+                upc = request.POST['upc']
                 upc_obj = models.SparePartUPC.objects.get(unique_part_code=upc)
                 points = models.SparePartPoint.objects.get(part_number=upc_obj.part_number).points
-                from_mechanic = models.Mechanic.objects.get(mechanic_id= kwargs['from'])
-                to_mechanic = models.Mechanic.objects.get(mechanic_id= kwargs['to'])
-        
+                from_mechanic = models.Mechanic.objects.get(mechanic_id= request.POST['from'])
+                to_mechanic = models.Mechanic.objects.get(mechanic_id= request.POST['to'])
                 self.update_points(from_mechanic, redeem=points)
                 self.update_points(to_mechanic, accumulate=points)
                  
@@ -237,13 +237,14 @@ class DiscrepantAccumulationResource(CustomBaseModelResource):
                                                               total_points=to_mechanic.total_points,is_transferred=True)            
                 accumulation_log.save()
                 accumulation_log.upcs.add(upc_obj)
-        except:
+                data = {'status':1, 'message': 'Successfully transfered'}
+        except Exception as ex:
             logger.error('Invalid details')
-            
+            data = {'status': 0, 'message': 'could not transfer points'}
+        return HttpResponse(json.dumps(data), content_type="application/json")   
+    
     def update_points(self, mechanic, accumulate=0, redeem=0):
         '''Update the loyalty points of the user'''
         total_points = mechanic.total_points + accumulate -redeem
         mechanic.total_points = total_points
         mechanic.save()
-
-            

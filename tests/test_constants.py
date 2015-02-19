@@ -463,7 +463,46 @@ MEMBER = {
             "spare_per_month": 50000,
             "state": "Karnataka",
             "tehsil": "",
-            "total_points": 0
+            "total_points": 1000
+                        }
+
+MEMBER1 = {
+            "adress_line_1": "",
+            "adress_line_2": "",
+            "adress_line_3": "",
+            "adress_line_4": "",
+            "adress_line_5": "",
+            "adress_line_6": "",
+            "date_of_birth": "1971-10-20T05:30:00",
+            "district": "MADURAI",
+            "first_name": "Ramu",
+            "form_number": 9156,
+            "form_status": "Incomplete",
+            "genuine_parts_used": 85,
+            "image_url": "",
+            "last_name": "M",
+            "locality": "",
+            "mechanic_id": "ME00004",
+            "middle_name": "",
+            "phone_number": "+919842461801",
+            "pincode": "625002",
+            "registered_date": "2014-09-06T00:00:00",
+            "resource_uri": "",
+            "sent_sms": False,
+            "sent_to_sap": False,
+            "serviced_2S": 180,
+            "serviced_4S": 20,
+            "serviced_CNG_LPG":0,
+            "serviced_diesel": 0,
+            "shop_address": "SELLUR",
+            "shop_name": "SRI MEENAKSHI AMMAN AUTO WORKS",
+            "shop_number": "34",
+            "shop_wall_length": 0,
+            "shop_wall_width": 0,
+            "spare_per_month": 50000,
+            "state": "Karnataka",
+            "tehsil": "",
+            "total_points":100
                         }
 
 REDEMPTION_REQUEST =  {
@@ -484,7 +523,7 @@ REDEMPTION_REQUEST =  {
 SPARE_PART_UPC = {  
                 "is_used":False,
                 "unique_part_code":"UPCC50",
-                "part_number": SPARE_MASTER
+                "part_number":'/loyalty/v1/spare-masters/1/', 
                 }
 
     
@@ -496,7 +535,7 @@ SPARE_PART_UPC_1 = {
 
 SPARE_POINT = {
                "MRP": 30,
-               "part_number": SPARE_MASTER,
+               "part_number":  '/loyalty/v1/spare-masters/1/',
                "points":18,
                "price":None,
                "territory":"South",
@@ -543,4 +582,10 @@ COMMENT_THREAD =  {
                     "message": "Gladminds",
                     "welcome_kit": "/loyalty/v1/welcome-kits/1/",
                     "user":USER,
+                }
+
+TRANSFERPOINTS = {
+                "upc": "UPCC50",
+                "from": "ME00003",
+                "to": "ME00004",
                 }
