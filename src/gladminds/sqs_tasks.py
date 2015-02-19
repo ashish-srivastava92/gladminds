@@ -630,7 +630,7 @@ def export_member_temp_id_to_sap(*args, **kwargs):
                              1], total_failed_on_feed=feed_export_data[2])
     else:
         logger.info("[export_member_temp_id_to_sap]: No member registered since last feed")
-        
+
 '''
 Cron Job to send info of registered customer
 '''
@@ -641,7 +641,6 @@ def export_purchase_feed_sync_to_sap(*args, **kwargs):
                            'username'], password=settings.SAP_CRM_DETAIL['password'],
                           wsdl_url=settings.PURCHASE_SYNC_WSDL_URL, feed_type='Purchase Sync Feed')
     feed_export_data = purchase_feed_sync.export_data()
-    print "3", len(feed_export_data[0])
     if len(feed_export_data[0]) > 0:
         purchase_feed_sync.export(items=feed_export_data[0], item_batch=feed_export_data[
                          1], total_failed_on_feed=feed_export_data[2])
@@ -765,10 +764,13 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               "redemption_request_due_date_escalation":redemption_request_due_date_escalation,
               
               "export_member_temp_id_to_sap": export_member_temp_id_to_sap,
-              
+
               "export_purchase_feed_sync_to_sap": export_purchase_feed_sync_to_sap,
 
               "welcome_kit_due_date_escalation":welcome_kit_due_date_escalation,
               
-              "send_mail_for_customer_phone_number_update" : send_mail_for_customer_phone_number_update
+              "send_mail_for_customer_phone_number_update" : send_mail_for_customer_phone_number_update,
+              
+              "send_mail_for_policy_discrepency": send_mail_for_policy_discrepency
+              
               }
