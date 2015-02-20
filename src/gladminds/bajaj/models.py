@@ -214,6 +214,14 @@ class CustomerTempRegistration(base_models.CustomerTempRegistration):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Customer temporary info"
+        
+class CustomerUpdateHistory(base_models.CustomerUpdateHistory):
+    '''Stores the updated values of registered customer'''
+    temp_customer = models.ForeignKey(CustomerTempRegistration)
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Customer temporary Update History"
 
 
 class UserPreference(base_models.UserPreference):
