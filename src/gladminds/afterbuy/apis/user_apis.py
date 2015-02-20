@@ -54,7 +54,7 @@ def check_password(password):
         lambda s:bool(re.search(r'[^a-zA-Z0-9]',s))
         ]
     if not all(rule(s) for rule in rules):
-        return 'false'
+        return True
 
 class ConsumerResource(CustomBaseModelResource):
 
@@ -129,8 +129,8 @@ class ConsumerResource(CustomBaseModelResource):
         first_name = load.get('first_name')
         last_name = load.get('last_name','')
         password = load.get('password')
-        valid_password = check_password(password)
-        if (valid_password == 'false'):
+        invalid_password = check_password(password)
+        if (invalid_password):
             return HttpBadRequest("password is not meant according to the rules")
         if not phone_number or not password:
             return HttpBadRequest("phone_number, password required.")
@@ -245,6 +245,9 @@ class ConsumerResource(CustomBaseModelResource):
         otp_token = load.get('otp_token')
         password = load.get('password1')
         repassword = load.get('password2')
+        invalid_password = check_password(repassword)
+        if (invalid_password):
+            return HttpBadRequest("password is not meant according to the rules")
         auth_key = load.get('auth_key')
         user_details = {}
         if not type:
@@ -254,6 +257,7 @@ class ConsumerResource(CustomBaseModelResource):
         try:
             if type=='phone':
                 try:
+                    print "phone"
                     if not (settings.ENV in settings.IGNORE_ENV and otp_token in settings.HARCODED_OTPS):
                         consumer = afterbuy_model.OTPToken.objects.get(token=otp_token).user
                         otp_handler.validate_otp(otp_token, user=consumer)
