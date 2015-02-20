@@ -52,7 +52,7 @@ class Command(BaseCommand):
         self.create_bajaj_admins()
         self.set_afterbuy_permissions()
         self.create_zonal_managers()
-        if settings.ENV not in ['qa', 'prod']:
+        if settings.ENV not in ['qa', 'prod', 'staging']:
             self.upload_loyalty_user()
             self.upload_asm_user()
             self.upload_part_data()

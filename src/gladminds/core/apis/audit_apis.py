@@ -44,5 +44,7 @@ class DataFeedLogResource(CustomBaseModelResource):
         always_return_data = True
         filtering = {
                         "feed_type": ALL,
-                        "action": ALL
+                        "action": ALL,
+                        "created_date": ['gte', 'lte']
                      }
+        ordering = ['created_date']
