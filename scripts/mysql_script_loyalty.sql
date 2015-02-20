@@ -45,6 +45,7 @@ alter table bajaj_redemptionrequest add column pod_number varchar(50) null;
 alter table bajaj_welcomekit add column shipped_date datetime;
 alter table bajaj_welcomekit add column delivery_date datetime;
 alter table bajaj_welcomekit add column pod_number varchar(50) null;
+alter table bajaj_accumulationrequest add column is_transferred boolean default false;
 
 alter table bajaj_mechanic drop column adress_line_1;
 alter table bajaj_mechanic drop column adress_line_2;
