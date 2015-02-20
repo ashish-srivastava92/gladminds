@@ -5,12 +5,13 @@ from random import randint
 from django.utils import timezone
 from gladminds.core.exceptions import OtpFailedException
 from gladminds.core.loaders.module_loader import get_model
+from django.template.base import kwarg_re
 
 
 def save_otp(token, **kwargs):
     OTPToken = get_model('OTPToken')
     if 'user' in kwargs.keys():
-        user = get_model('Consumer').objects.get(user = kwargs.get('user'))
+        user = get_model('UserProfile').objects.get(user = kwargs.get('user'))
         OTPToken.objects.filter(user=user).delete()
         token_obj = OTPToken(user=user, token=str(token), request_date=datetime.now(), email=user.user.email)
     else:
@@ -44,7 +45,7 @@ def validate_otp(otp, **kwargs):
 
 def get_otp(**kwargs):
     if 'user' in kwargs.keys():
-        phone_number = get_model('Consumer').objects.get(user = kwargs.get('user')).phone_number
+        phone_number = get_model('UserProfile').objects.get(user = kwargs.get('user')).phone_number
     else:
         phone_number = kwargs.get('phone_number')
     otp = generate_otp(phone_number)
