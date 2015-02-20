@@ -131,6 +131,7 @@ def generate_otp(request):
             return HttpResponseRedirect('/aftersell/users/otp/validate?username='+username)
         
         except Exception as ex:
+            logger.error('Invalid details, mobile {0}'.format(phone_number))
             return HttpResponseRedirect('/aftersell/users/otp/generate?details=invalid')    
     
     elif request.method == 'GET':
@@ -151,7 +152,7 @@ def validate_otp(request):
             logger.info('OTP validated for name {0}'.format(username))
             return render(request, 'portal/reset_pass.html', {'otp': otp})
         except Exception as ex:
-            logger.error('OTP validation failed for name {0}'.format(username))
+            logger.error('OTP validation failed for name {0} : {1}'.format(username, ex))
             return HttpResponseRedirect('/aftersell/users/otp/generate?token=invalid')
 
 
