@@ -143,7 +143,9 @@ class AuthorizedServiceCenterResource(CustomBaseModelResource):
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
         filtering = {
-                     "user": ALL_WITH_RELATIONS
+                     "user": ALL_WITH_RELATIONS,
+                     "asc_id": ALL,
+                     "dealer": ALL_WITH_RELATIONS
                      }
         always_return_data = True
 
@@ -160,6 +162,10 @@ class ServiceAdvisorResource(CustomBaseModelResource):
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
         filtering = {
-                     "user": ALL_WITH_RELATIONS
+                     "user": ALL_WITH_RELATIONS,
+                     "dealer": ALL_WITH_RELATIONS,
+                     "asc": ALL_WITH_RELATIONS,
+                     "service_advisor_id": ALL,
+                     "status": ALL
                      }
         always_return_data = True
