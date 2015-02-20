@@ -26,6 +26,7 @@ class UserProfileAdmin(GmModelAdmin):
     search_fields = ('user__username', 'phone_number')
     list_display = ('user', 'phone_number', 'status', 'address',
                     'state', 'country', 'pincode', 'date_of_birth', 'gender')
+    readonly_fields = ('image_tag',)
     
 class DealerAdmin(GmModelAdmin):
     search_fields = ('dealer_id',)
@@ -536,7 +537,7 @@ class MechanicAdmin(GmModelAdmin):
         return query_set
 
     def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points', 'sent_to_sap', 'permanent_id')
+        self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points', 'sent_to_sap', 'permanent_id', 'download_detail')
         form = super(MechanicAdmin, self).get_form(request, obj, **kwargs)
         return form
 
@@ -707,10 +708,10 @@ class WelcomeKitAdmin(GmModelAdmin):
     ) 
     
     def save_model(self, request, obj, form, change):
-        if 'status' in form.changed_data:
-            if obj.status=='Accepted':
+        if 'partner' in form.changed_data and obj.partner and obj.status in ['Accepted', 'Open']:
                 obj.packed_by=obj.partner.user.user.username
-            elif obj.status=='Shipped':
+        if 'status' in form.changed_data:
+            if obj.status=='Shipped':
                 obj.shipped_date=datetime.datetime.now()
             elif obj.status=='Delivered':
                 obj.delivery_date=datetime.datetime.now()
@@ -725,7 +726,7 @@ class WelcomeKitAdmin(GmModelAdmin):
             LoyaltyService.send_welcome_kit_mail_to_partner(obj)
 
     def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('packed_by','resolution_flag')
+        self.exclude = ('resolution_flag','packed_by')
         form = super(WelcomeKitAdmin, self).get_form(request, obj, **kwargs)
         form.current_user=request.user
         return form

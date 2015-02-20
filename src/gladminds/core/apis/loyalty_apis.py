@@ -3,7 +3,7 @@ from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.model_fetcher import models
 from tastypie.authorization import Authorization
 from tastypie import fields
-from gladminds.core.apis.user_apis import UserProfileResource
+from gladminds.core.apis.user_apis import UserProfileResource, UserResource
 from gladminds.core.apis.product_apis import ProductTypeResource
 from django.conf.urls import url
 from django.http.response import HttpResponse
@@ -15,7 +15,7 @@ from tastypie.utils.urls import trailing_slash
 from tastypie import fields
 from gladminds.core.utils import get_dict_from_object
 
-class NsmResource(CustomBaseModelResource):
+class NSMResource(CustomBaseModelResource):
     class Meta:
         queryset = models.NationalSalesManager.objects.all()
         resource_name = "nsms"
@@ -24,7 +24,7 @@ class NsmResource(CustomBaseModelResource):
         always_return_data = True
         
         
-class AsmResource(CustomBaseModelResource):
+class ASMResource(CustomBaseModelResource):
     class Meta:
         queryset = models.AreaSalesManager.objects.all()
         resource_name = "asms"
@@ -43,7 +43,7 @@ class PartnerResource(CustomBaseModelResource):
 
 class DistributorResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
-    asm = fields.ForeignKey(AsmResource, 'asm', full=True)
+    asm = fields.ForeignKey(ASMResource, 'asm', full=True)
     class Meta:
         queryset = models.Distributor.objects.all()
         resource_name = "distributors"
@@ -161,7 +161,7 @@ class SparePartUPCResource(CustomBaseModelResource):
         
 class AccumulationResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member', full=True) 
-    asm = fields.ForeignKey(AsmResource, 'asm', null=True, blank=True, full=True)
+    asm = fields.ForeignKey(ASMResource, 'asm', null=True, blank=True, full=True)
     upcs = fields.ManyToManyField(SparePartUPCResource, 'upcs', full=True)
     
     class Meta:
@@ -173,3 +173,26 @@ class AccumulationResource(CustomBaseModelResource):
         filtering = {
                      "member":ALL_WITH_RELATIONS,
                      }
+
+class WelcomeKitResource(CustomBaseModelResource):
+    member = fields.ForeignKey(MemberResource, 'member')
+    partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)
+    
+    class Meta:
+        queryset = models.WelcomeKit.objects.all()
+        resource_name = "welcome-kits"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+class CommentThreadResource(CustomBaseModelResource):
+    redemption = fields.ForeignKey(RedemptionResource, 'redemption', null=True, blank=True, full=True)
+    welcome_kit = fields.ForeignKey(WelcomeKitResource, 'welcome_kit', null=True, blank=True, full=True)
+    user = fields.ForeignKey(UserResource, 'user')
+    
+    class Meta:
+        queryset = models.CommentThread.objects.all()
+        resource_name = "comment-threads"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True

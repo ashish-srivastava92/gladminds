@@ -1,10 +1,33 @@
 import logging
+from suds.client import Client
+from suds.transport.http import HttpAuthenticated
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User, Group
 from gladminds.bajaj import models
 from gladminds.core.auth_helper import Roles
 logger = logging.getLogger("gladminds")
+
+class BaseExportFeed(object):
+
+    def __init__(self, username=None, password=None, wsdl_url=None,\
+                                                        feed_type=None):
+        self.username = username
+        self.password = password
+        self.wsdl_url = wsdl_url
+        self.feed_type = feed_type
+
+    def get_http_authenticated(self):
+        return HttpAuthenticated(username=self.username,\
+                                 password=self.password)
+
+    def get_client(self):
+        transport = HttpAuthenticated(\
+            username=self.username, password=self.password)
+        client = Client(url=self.wsdl_url, transport=transport)
+        cache = client.options.cache
+        cache.setduration(seconds=settings.FILE_CACHE_DURATION)
+        return client
 
 class BaseFeed(object):
 

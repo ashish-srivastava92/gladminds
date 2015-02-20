@@ -4,7 +4,7 @@ from django.test.client import Client
 from tastypie.test import ResourceTestCase
 from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER,SPARE_MASTER, SPARE_POINT,SPARE_PART_UPC,\
     REDEMPTION_REQUEST,PARTNER,PRODUCT,ACCUMULATION, SPARE_PART_UPC_1,SLA,\
-    MEMBER
+    MEMBER, WELCOMEKIT, COMMENT_THREAD
     
 client=Client(SERVER_NAME='bajaj')
 
@@ -389,4 +389,60 @@ class LoyaltyApiTests(ResourceTestCase):
         uri = '/loyalty/v1/members/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['phone_number'],"+919842461801")
+        
+    def test_create_welcomekit(self):
+        self.test_create_sla()
+        self.test_create_member()
+        self.test_create_partner()
+        uri = '/loyalty/v1/welcome-kits/'
+        resp = self.post(uri,data = WELCOMEKIT)
+        self.assertEquals(resp.status_code,201)
+        return resp
+    
+    def test_get_welcomekit(self):
+        resp = self.test_create_welcomekit()
+        self.assertEquals(resp.status_code,201)
+        uri = '/loyalty/v1/welcome-kits/1/'
+        resp = self.get(uri)
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['status'],"Open")
+        return resp
+    
+    def test_update_welcomekit(self):
+        resp = self.test_create_welcomekit()
+        self.assertEquals(resp.status_code,201)
+        data={"delivery_address":"delhi"}
+        uri = '/loyalty/v1/welcome-kits/1/'
+        resp = self.put(uri,data)
+        self.assertEquals(resp.status_code, 200)
+        uri = '/loyalty/v1/welcome-kits/1/'
+        resp = self.get(uri)
+        self.assertEqual(self.deserialize(resp)['delivery_address'],"delhi")
+        
+    def test_create_commentthread(self):
+        self.test_create_welcomekit()
+        uri = '/loyalty/v1/comment-threads/'
+        resp = self.post(uri,data = COMMENT_THREAD)
+        self.assertEquals(resp.status_code,201)
+        return resp
+    
+    def test_get_commentthread(self):
+        resp = self.test_create_commentthread()
+        self.assertEquals(resp.status_code,201)
+        uri = '/loyalty/v1/comment-threads/1/'
+        resp = self.get(uri)
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['message'],"Gladminds")
+        return resp
+    
+    def test_update_commentthread(self):
+        resp = self.test_create_commentthread()
+        self.assertEquals(resp.status_code,201)
+        data={"message":"hi"}
+        uri = '/loyalty/v1/comment-threads/1/'
+        resp = self.put(uri,data)
+        self.assertEquals(resp.status_code, 200)
+        uri = '/loyalty/v1/comment-threads/1/'
+        resp = self.get(uri)
+        self.assertEqual(self.deserialize(resp)['message'],"hi")
         

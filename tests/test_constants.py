@@ -18,7 +18,6 @@ USER = {
         "date_joined":"2015-02-04T17:10:24",
          "email":"test@gladminds.co",
          "first_name":"TEST USER",
-         "id":6,
          "is_active":True,
          "is_staff":False,
          "last_login":"2015-02-04T17:10:24",
@@ -340,11 +339,9 @@ AFTERBUY_REGISTATION = {
 USER_PROFILE = {
                 "address":"CHENNAI",
                 "country":"",
-                "created_date":"2015-02-04T17:10:24",
                 "date_of_birth":"1992-12-29T00:00:00",
                 "gender":"",
                 "image_url":"",
-                "modified_date":"2015-02-04T17:10:24",
                 "phone_number":"",
                 "pincode":"",
                 "resource_uri":"",
@@ -354,9 +351,7 @@ USER_PROFILE = {
                 }
 
 NSM = {
-       "created_date": "2015-02-04T17:11:18",
         "email": "rkrishnan@bajajauto.co.in",
-        "modified_date": "2015-02-04T17:11:18",
         "name": "Raghunath",
         "nsm_id": "NSM002",
         "phone_number": "1234567890",
@@ -366,9 +361,7 @@ NSM = {
 
 ASM = {
         "asm_id": "ASM005",
-        "created_date": "2015-02-04T17:11:18",
         "email": "spremnath@bajajauto.co.in",
-        "modified_date": "2015-02-09T13:05:04",
         "name": "PREM NATH",
         "phone_number": "9999999999",
         "state": "Tamil Nadu",
@@ -379,8 +372,6 @@ ASM = {
 
 PARTNER = {
             "address": "F-89,Kamla nagar,kanpur",
-            "created_date": "2015-02-11T13:56:26",
-            "modified_date": "2015-02-11T13:56:26",
             "name": "Anchit",
             "partner_id": "PRT5Y76YB",
             "partner_type": "Merchant",
@@ -388,8 +379,6 @@ PARTNER = {
         }
 
 DISTRIBUTOR = {
-               "created_date": "2015-02-04T17:10:26",
-               "modified_date": "2015-02-04T17:10:26",
                "user": USER_PROFILE,
                "asm":ASM,
                "distributor_id": 15689, 
@@ -402,27 +391,19 @@ DISTRIBUTOR = {
 RETAILER = {
             "retailer_name": "Ayush",
             "retailer_town": "devghar",
-            "created_date":  "2015-02-04T17:10:26",
-            "modified_date": "2015-02-04T17:10:26",
             }
 
 
 PRODUCT_TYPE = {
                 "brand_product_category":"",
-                "created_date": "2015-02-04T17:10:39",
-                "id": 1,
                 "image_url": "http://test",
                 "is_active": True,
-                "modified_date": "2015-02-04T17:10:39",
                 "product_type": ""
                 }
 
 SPARE_MASTER = {
                 "category": "cat1",
-                "created_date": "2015-02-04T17:10:39",
                 "description": "TEST DESCRIPTION",
-                "id": 1,
-                "modified_date": "2015-02-04T17:10:39",
                 "part_model": "2S",
                 "part_number": "11111111",
                 "product_type": PRODUCT_TYPE,
@@ -434,12 +415,10 @@ PRODUCT = {
            "partner": PARTNER,
            "brand": "",
             "category": "",
-            "created_date": "2015-01-28T16:55:53",
             "description": "",
             "image_url": "",
             "is_active": True,
             "model": "",
-            "modified_date": "2015-01-28T16:55:53",
             "points": 123,
             "price": 12,
             "product_id": "123",
@@ -455,7 +434,6 @@ MEMBER = {
             "adress_line_4": "",
             "adress_line_5": "",
             "adress_line_6": "",
-            "created_date": "2014-12-29T20:21:09",
             "date_of_birth": "1971-10-20T05:30:00",
             "district": "MADURAI",
             "first_name": "Ramu",
@@ -467,7 +445,6 @@ MEMBER = {
             "locality": "",
             "mechanic_id": "ME00003",
             "middle_name": "",
-            "modified_date": "2015-02-10T12:47:34",
             "phone_number": "+919842461800",
             "pincode": "625002",
             "registered_date": "2014-09-06T00:00:00",
@@ -496,7 +473,6 @@ REDEMPTION_REQUEST =  {
                         "image_url": "",
                         "is_approved": False,
                         "member": MEMBER,
-                        "modified_date": "2015-02-09T16:49:45",
                         "packed_by": "",
                         "refunded_points": False,
                         "resolution_flag": True,
@@ -520,9 +496,6 @@ SPARE_PART_UPC_1 = {
 
 SPARE_POINT = {
                "MRP": 30,
-               "created_date":"2015-02-04T17:10:24",
-               "id":1,
-               "modified_date":"2015-02-11T17:01:38",
                "part_number": SPARE_MASTER,
                "points":18,
                "price":None,
@@ -544,85 +517,30 @@ SLA = {
 
 ACCUMULATION = {  
                 "asm":ASM,
-                "created_date":"2015-02-12T14:51:05",
-                "member":{  
-                          "adress_line_1":"",
-                          "adress_line_2":"",
-                          "adress_line_3":"",
-                          "adress_line_4":"",
-                          "adress_line_5":"",
-                          "adress_line_6":"",
-                          "created_date":"2015-02-04T17:11:42",
-                          "date_of_birth":"1960-01-03",
-                          "distributor":{  
-                                         "asm":{"asm_id":1},
-                                         "city":"MADURAI",
-                                         "created_date":"2015-02-04T17:11:41",
-                                         "distributor_id":"15665",
-                                         "email":"naveen.shankar@gladminds.co",
-                                         "modified_date":"2015-02-04T17:11:41",
-                                         "name":"SUSEE AUTO SPARES (P) LTD.",
-                                         "phone_number":"",
-                                         "user":{  
-                                                 "address":"MADURAI",
-                                                 "country":None,
-                                                 "created_date":"2015-02-04T17:11:41",
-                                                 "date_of_birth":None,
-                                                 "gender":None,
-                                                 "image_url":None,
-                                                 "modified_date":"2015-02-12T15:14:15",
-                                                 "phone_number":"",
-                                                 "pincode":None,
-                                                 "state":None,
-                                                 "status":None,
-                                                 "user":{  
-                                                         "date_joined":"2015-02-04T17:11:41",
-                                                         "email":"naveen.shankar@gladminds.co",
-                                                         "first_name":"SUSEE AUTO SPARES (P) LTD.",
-                                                         "is_active":True,
-                                                         "is_staff":False,
-                                                         "last_login":"2015-02-04T17:11:41",
-                                                         "last_name":"",
-                                                         "username":"15665"
-                                                         }
-                                                 }
-                                         },
-                          "district":"dell",
-                          "download_detail":False,
-                          "first_name":"Sekar",
-                          "form_number":9135,
-                          "form_status":"Incomplete",
-                          "genuine_parts_used":70,
-                          "image_url":None,
-                          "last_name":"M",
-                          "locality":"Mapalayam",
-                          "mechanic_id":"ME00001",
-                          "middle_name":"",
-                          "modified_date":"2015-02-12T14:53:20",
-                          "permanent_id":None,
-                          "phone_number":"+919843886938",
-                          "pincode":"625016",
-                          "preferred_retailer":RETAILER,
-                          "registered_date":"2014-09-06T00:00:00",
-                          "sent_sms":False,
-                          "sent_to_sap":False,
-                          "serviced_2S":None,
-                          "serviced_4S":None,
-                          "serviced_CNG_LPG":None,
-                          "serviced_diesel":None,
-                          "shop_address":"TP Main Road",
-                          "shop_name":"Saravana Auto Works",
-                          "shop_number":"10",
-                          "shop_wall_length":None,
-                          "shop_wall_width":None,
-                          "spare_per_month":85000,
-                          "state":"delhi",
-                          "tehsil":"",
-                          "total_points":0
-                          },
-                "modified_date":"2015-02-12T14:51:05",
+                "member":MEMBER,
                 "points":100,
                 "total_points":500,
                 "transaction_id":1,
                 "upcs":[{"unique_part_code":"UPCC50"},{"unique_part_code":"UPCC51"},]
+                }
+
+WELCOMEKIT = {
+                "delivery_address": "HSR LAYOUT ",
+                "delivery_date": None,
+                "image_url": None,
+                "member": {"mechanic_id":1},
+                "packed_by": None,
+                "partner":{"partner_id":1},
+                "resolution_flag": False,
+                "shipped_date": None,
+                "status": "Open",
+                "tracking_id":"",
+                "transaction_id": 1
+            }
+
+COMMENT_THREAD =  {
+                    "is_edited": False,
+                    "message": "Gladminds",
+                    "welcome_kit": "/loyalty/v1/welcome-kits/1/",
+                    "user":USER,
                 }
