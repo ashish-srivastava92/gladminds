@@ -1,5 +1,3 @@
-from suds.client import Client
-from suds.transport.http import HttpAuthenticated
 from datetime import datetime
 from gladminds.core.managers.audit_manager import feed_log, feed_failure_log
 from gladminds.bajaj import models
@@ -8,32 +6,9 @@ import logging
 from gladminds.core import utils
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.bajaj.services.coupons.feed_models import save_to_db
-from gladminds.bajaj.services.coupons.import_feed import SAPFeed
+from gladminds.bajaj.services.feed_resources import BaseExportFeed
 import json
 logger = logging.getLogger("gladminds")
-
-
-class BaseExportFeed(object):
-
-    def __init__(self, username=None, password=None, wsdl_url=None,\
-                                                        feed_type=None):
-        self.username = username
-        self.password = password
-        self.wsdl_url = wsdl_url
-        self.feed_type = feed_type
-
-    def get_http_authenticated(self):
-        return HttpAuthenticated(username=self.username,\
-                                 password=self.password)
-
-    def get_client(self):
-        transport = HttpAuthenticated(\
-            username=self.username, password=self.password)
-        client = Client(url=self.wsdl_url, transport=transport)
-        cache = client.options.cache
-        cache.setduration(seconds=settings.FILE_CACHE_DURATION)
-        return client
-
 
 class ExportCouponRedeemFeed(BaseExportFeed):
     

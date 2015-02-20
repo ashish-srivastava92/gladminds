@@ -3,7 +3,7 @@ from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.model_fetcher import models
 from tastypie.authorization import Authorization
 from tastypie import fields
-from gladminds.core.apis.user_apis import UserProfileResource
+from gladminds.core.apis.user_apis import UserProfileResource, UserResource
 from gladminds.core.apis.product_apis import ProductTypeResource
 from django.conf.urls import url
 from django.http.response import HttpResponse
@@ -12,10 +12,15 @@ from django.forms.models import model_to_dict
 from django.db.models.query_utils import Q
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.utils.urls import trailing_slash
-from tastypie import fields
-from gladminds.core.utils import get_dict_from_object
+from gladminds.core.apis.authorization import MultiAuthorization,\
+    LoyaltyCustomAuthorization
+from django.db.transaction import atomic
+import logging
+from django.db import transaction
 
-class NsmResource(CustomBaseModelResource):
+logger = logging.getLogger("gladminds")
+
+class NSMResource(CustomBaseModelResource):
     class Meta:
         queryset = models.NationalSalesManager.objects.all()
         resource_name = "nsms"
@@ -24,7 +29,7 @@ class NsmResource(CustomBaseModelResource):
         always_return_data = True
         
         
-class AsmResource(CustomBaseModelResource):
+class ASMResource(CustomBaseModelResource):
     class Meta:
         queryset = models.AreaSalesManager.objects.all()
         resource_name = "asms"
@@ -43,7 +48,7 @@ class PartnerResource(CustomBaseModelResource):
 
 class DistributorResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
-    asm = fields.ForeignKey(AsmResource, 'asm', full=True)
+    asm = fields.ForeignKey(ASMResource, 'asm', full=True)
     class Meta:
         queryset = models.Distributor.objects.all()
         resource_name = "distributors"
@@ -161,7 +166,7 @@ class SparePartUPCResource(CustomBaseModelResource):
         
 class AccumulationResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member', full=True) 
-    asm = fields.ForeignKey(AsmResource, 'asm', null=True, blank=True, full=True)
+    asm = fields.ForeignKey(ASMResource, 'asm', null=True, blank=True, full=True)
     upcs = fields.ManyToManyField(SparePartUPCResource, 'upcs', full=True)
     
     class Meta:
@@ -173,3 +178,72 @@ class AccumulationResource(CustomBaseModelResource):
         filtering = {
                      "member":ALL_WITH_RELATIONS,
                      }
+
+class WelcomeKitResource(CustomBaseModelResource):
+    member = fields.ForeignKey(MemberResource, 'member')
+    partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)
+    
+    class Meta:
+        queryset = models.WelcomeKit.objects.all()
+        resource_name = "welcome-kits"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+class CommentThreadResource(CustomBaseModelResource):
+    redemption = fields.ForeignKey(RedemptionResource, 'redemption', null=True, blank=True, full=True)
+    welcome_kit = fields.ForeignKey(WelcomeKitResource, 'welcome_kit', null=True, blank=True, full=True)
+    user = fields.ForeignKey(UserResource, 'user')
+    
+    class Meta:
+        queryset = models.CommentThread.objects.all()
+        resource_name = "comment-threads"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+class DiscrepantAccumulationResource(CustomBaseModelResource):
+    upc = fields.ForeignKey(SparePartUPCResource,'upc', null=True, blank=True, full=True)
+    new_member = fields.ForeignKey(MemberResource,'new_member')
+    accumulation_request = fields.ForeignKey(AccumulationResource, 'accumulation_request')
+     
+    class Meta:
+        queryset = models.DiscrepantAccumulation.objects.all()
+        resource_name = "accumulation-discrepancies"
+        authorization = Authorization()
+        detail_allowed_methods = ['get']
+        always_return_data = True
+
+    def prepend_urls(self):
+        return [
+              url(r"^(?P<resource_name>%s)/transfer-points%s" % (self._meta.resource_name,trailing_slash()),
+                                                     self.wrap_view('transfer_points'), name="transfer_points")
+                ]
+
+    
+    def transfer_points(self,request, **kwargs):
+        try:
+            with transaction.atomic():
+                upc = request.POST['upc']
+                upc_obj = models.SparePartUPC.objects.get(unique_part_code=upc)
+                points = models.SparePartPoint.objects.get(part_number=upc_obj.part_number).points
+                from_mechanic = models.Mechanic.objects.get(mechanic_id= request.POST['from'])
+                to_mechanic = models.Mechanic.objects.get(mechanic_id= request.POST['to'])
+                self.update_points(from_mechanic, redeem=points)
+                self.update_points(to_mechanic, accumulate=points)
+                 
+                accumulation_log = models.AccumulationRequest(member=to_mechanic,points=points,
+                                                              total_points=to_mechanic.total_points,is_transferred=True)            
+                accumulation_log.save()
+                accumulation_log.upcs.add(upc_obj)
+                data = {'status':1, 'message': 'Successfully transfered'}
+        except Exception as ex:
+            logger.error('[transfer_point]:{0}:: {1}'.format(upc, ex))
+            data = {'status': 0, 'message': 'could not transfer points'}
+        return HttpResponse(json.dumps(data), content_type="application/json")   
+    
+    def update_points(self, mechanic, accumulate=0, redeem=0):
+        '''Update the loyalty points of the user'''
+        total_points = mechanic.total_points + accumulate -redeem
+        mechanic.total_points = total_points
+        mechanic.save()

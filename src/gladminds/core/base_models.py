@@ -23,6 +23,9 @@ except ImportError:
     datetime_now = datetime.datetime.now
 STATUS_CHOICES=constants.STATUS_CHOICES
 
+def set_user_pic_path(instance, filename):
+    return '{0}/{1}/user'.format(settings.ENV,settings.BRAND)
+
 class BaseModel(models.Model):
     '''Base model containing created date and modified date'''
     created_date = models.DateTimeField(auto_now_add=True)
@@ -36,14 +39,21 @@ class UserProfile(BaseModel):
     '''User profile model to extend user'''
     phone_number = models.CharField(
                    max_length=15, blank=True, null=True)
-    image_url = models.CharField(
-                   max_length=200, blank=True, null=True)
     status = models.CharField(max_length=10, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     state = models.CharField(max_length=255, null=True, blank=True)
     country = models.CharField(max_length=255, null=True, blank=True)
     pincode = models.CharField(max_length=15, null=True, blank=True)
     date_of_birth = models.DateTimeField(null=True, blank=True)
+  
+    image_url = models.FileField(upload_to=set_user_pic_path,
+                                  max_length=200, null=True, blank=True,
+                                  validators=[validate_image])
+        
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+    image_tag.short_description = 'User Image'
+    image_tag.allow_tags = True
 
     GENDER_CHOICES = (
         ('M', 'Male'),
@@ -112,7 +122,7 @@ class OTPToken(BaseModel):
         verbose_name_plural = "OTPs"
 
     def __unicode__(self):
-        return self.phone_number + " " + self.token
+        return str(self.phone_number or '') + ' ' +self.token
 
 
 class Dealer(BaseModel):
@@ -373,14 +383,12 @@ class CustomerTempRegistration(BaseModel):
     '''Details of customer registration'''
     new_customer_name = models.CharField(max_length=50, null=True, blank=True)
     new_number = models.CharField(max_length=15, null=True, blank=True)
-    old_number = models.CharField(max_length=15)
     dealer_asc_id = models.CharField(max_length=15, null=True, blank=True)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
     temp_customer_id = models.CharField(max_length=50,
                                 null=False, blank=False, unique=True)
     sent_to_sap = models.BooleanField(default=False)
     remarks = models.CharField(max_length=500, null=True, blank=True)
-    update_history = models.CharField(max_length=500, null=True, blank=True)
     tagged_sap_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
     mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True, default=0)
@@ -393,6 +401,19 @@ class CustomerTempRegistration(BaseModel):
 
     def __unicode__(self):
         return self.new_customer_name
+
+class CustomerUpdateHistory(BaseModel):
+    '''Stores the updated values of registered customer'''
+    updated_field = models.CharField(max_length=100)
+    old_value = models.CharField(max_length=100)
+    new_value = models.CharField(max_length=100)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Customer temporary Update History"
+
+    def __unicode__(self):
+        return self.update_field
 
 class EmailToken(models.Model):
     ACTIVATED = u"ALREADY_ACTIVATED"
@@ -716,7 +737,7 @@ class Constant(BaseModel):
         verbose_name_plural = "Constants"
         
     def __unicode__(self):
-        return constant_name
+        return self.constant_name
 
 class AreaServiceManager(BaseModel):
     '''details of Area Service Manager'''
@@ -931,6 +952,7 @@ class AccumulationRequest(BaseModel):
     transaction_id = models.AutoField(primary_key=True)
     points = models.IntegerField(max_length=50)
     total_points = models.IntegerField(max_length=50)
+    is_transferred = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -1071,6 +1093,13 @@ class CommentThread(BaseModel):
     
     def __unicode__(self):
         return str(self.id)
+
+class DiscrepantAccumulation(BaseModel):
+    ''' details of accumulation request with discrepancy'''
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Discrepant Request"
 
 class LoyaltySLA(models.Model):
     status = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_STATUS)

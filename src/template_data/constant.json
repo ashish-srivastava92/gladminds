@@ -54,5 +54,13 @@
       "constant_name":"service_3_valid_kms",
       "constant_value":"15000"
     }
-  }  
+  },
+  {
+    "model": "gladminds.constant",
+    "pk": 8,
+    "fields": {
+      "constant_name":"welcome_msg_active_days",
+      "constant_value":"10"
+    }
+  }
 ]

@@ -36,6 +36,7 @@ from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.services.message_template import get_template
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services.coupons import export_feed
+from gladminds.core.auth import otp_handler
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
@@ -103,33 +104,34 @@ def change_password(request):
         else:
             return HttpResponseBadRequest('Not Allowed')
 
-
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def generate_otp(request):
     if request.method == 'POST':
         try:
             username = request.POST['username']
             user = User.objects.get(username=username)
-            phone_number = ''            
-            user_profile_obj = models.UserProfile.objects.filter(user=user) 
+            phone_number = ''
+            user_profile_obj = models.UserProfile.objects.filter(user=user)
             if user_profile_obj:
-                phone_number = (user_profile_obj[0]).phone_number
+                phone_number = user_profile_obj[0].phone_number
             logger.info('OTP request received . username: {0}'.format(username))
-            token = utils.get_token(user, phone_number, email=user.email)
+            token = otp_handler.get_otp(user=user)
             message = message_template.get_template('SEND_OTP').format(token)
             send_job_to_queue(send_otp, {'phone_number': phone_number, 'message': message,
                                          'sms_client': settings.SMS_CLIENT})
             logger.info('OTP sent to mobile {0}'.format(phone_number))
-            #Send email if email address exist
+#             #Send email if email address exist
             if user.email:
                 sent_otp_email(data=token, receiver=user.email, subject='Forgot Password')
+        
             return HttpResponseRedirect('/aftersell/users/otp/validate?username='+username)
+        
         except Exception as ex:
             logger.error('Invalid details, mobile {0}'.format(phone_number))
-            return HttpResponseRedirect('/aftersell/users/otp/generate?details=invalid')
+            return HttpResponseRedirect('/aftersell/users/otp/generate?details=invalid')    
+    
     elif request.method == 'GET':
         return render(request, 'portal/get_otp.html')
-
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def validate_otp(request):
@@ -140,13 +142,14 @@ def validate_otp(request):
             otp = request.POST['otp']
             username = request.POST['username']
             logger.info('OTP {0} recieved for validation. username {1}'.format(otp, username))
-            utils.validate_otp(otp, username)
+            user = User.objects.get(username=username)
+            user_profile = models.UserProfile.objects.get(user=user)
+            otp_handler.validate_otp(otp, user=user_profile)
             logger.info('OTP validated for name {0}'.format(username))
             return render(request, 'portal/reset_pass.html', {'otp': otp})
-        except:
-            logger.error('OTP validation failed for name {0}'.format(username))
+        except Exception as ex:
+            logger.error('OTP validation failed for name {0}: {1}'.format(username, ex))
             return HttpResponseRedirect('/aftersell/users/otp/generate?token=invalid')
-
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def update_pass(request):
