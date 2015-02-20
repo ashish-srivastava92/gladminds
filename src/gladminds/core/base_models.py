@@ -602,6 +602,21 @@ class Activity(BaseModel):
         abstract = True
         verbose_name_plural = "Activity info"
 
+class BrandDepartment(BaseModel):
+    name = models.CharField(max_length=100, null=True, blank=True)
+    description = models.CharField(max_length=100, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Department Info"
+    
+class DepartmentSubCategories(BaseModel):
+    name = models.CharField(max_length=100, null=True, blank=True)
+    description = models.CharField(max_length=100, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Sub-Department Info"
 
 class Feedback(BaseModel):
     '''details of feedback received'''
