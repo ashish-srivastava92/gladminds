@@ -238,7 +238,7 @@ class DiscrepantAccumulationResource(CustomBaseModelResource):
                 accumulation_log.upcs.add(upc_obj)
                 data = {'status':1, 'message': 'Successfully transfered'}
         except Exception as ex:
-            logger.error('Invalid details')
+            logger.error('[transfer_point]:{0}:: {1}'.format(upc, ex))
             data = {'status': 0, 'message': 'could not transfer points'}
         return HttpResponse(json.dumps(data), content_type="application/json")   
     
