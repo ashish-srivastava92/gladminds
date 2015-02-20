@@ -126,6 +126,7 @@ def save_help_desk_data(request):
 @login_required()
 @require_http_methods(["GET"])
 def get_servicedesk_tickets(request):
+    groups = utils.stringify_groups(request.user)
     status = request.GET.get('status')
     priority = request.GET.get('priority')
     type = request.GET.get('type')
@@ -153,6 +154,7 @@ def get_servicedesk_tickets(request):
                                           "page_details": page_details,
                                           "record_showing_counts": RECORDS_PER_PAGE,
                                           "training_material" : training_material,
+                                          "groups":groups[0],
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
                                                             'count': str(count), 'search': search}}
                                         )
