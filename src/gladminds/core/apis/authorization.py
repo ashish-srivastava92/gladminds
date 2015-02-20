@@ -4,7 +4,9 @@ from provider.oauth2.models import AccessToken
 from django.conf import settings
 
 from gladminds.afterbuy import models as afterbuy
-
+from gladminds.core.auth_helper import Roles
+from gladminds.core import constants
+from gladminds.core.model_fetcher import models
 
 class CustomAuthorization(Authorization):
 
@@ -81,7 +83,7 @@ class CustomAuthorization(Authorization):
         except:
             raise Unauthorized("You are not allowed to access that data.")
         user_id = int(authorization.user.id)
-
+        klass = bundle.obj.__class__
         if klass._meta.module_name == 'consumer':
             if user_id == data['user_id']:
                 update_obj = klass.objects.get(user__id=user_id)
@@ -165,3 +167,43 @@ class MultiAuthorization(Authorization):
                 raise Unauthorized("You are not allowed to access that resource.")
         return True
 
+
+class LoyaltyCustomAuthorization():
+
+    def __init__(self, *args, **kwargs):
+        self.display_field = kwargs
+
+    def read_list(self, object_list, bundle):
+        klass = bundle.obj.__class__
+        
+        if klass._meta.module_name == 'redemptionrequest':
+            user = bundle.request.user
+            if user.groups.filter(name=Roles.RPS).exists():
+                object_list=object_list.filter(is_approved=True, packed_by=user.username)
+            elif user.groups.filter(name=Roles.LPS).exists():
+                object_list=object_list.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=user)
+            elif user.groups.filter(name=Roles.ASMS).exists():
+                asm = models.AreaSalesManager.objects.get(user__user= user)
+                object_list=object_list.filter(member__state=asm.state)
+            elif user.groups.filter(name=Roles.DEALERS).exists():
+                object_list=object_list.filter(registered_by_distributor__user=user)
+                
+        if bundle.request.user.groups.exists():
+            user = bundle.request.user.groups.values()[0]['name']
+            for obj in object_list:       
+                for x in self.display_field[user]:
+                    delattr(obj, x)
+        return object_list
+
+    def read_detail(self, object_list, bundle):
+        if self.read_list(object_list, bundle):
+            return True
+    
+    def create_detail(self, object_list, bundle):
+        return True
+
+    def update_detail(self, object_list, bundle):
+        return True
+
+    def delete_detail(self, object_list, bundle):
+        return True

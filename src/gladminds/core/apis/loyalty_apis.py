@@ -124,9 +124,15 @@ class RedemptionResource(CustomBaseModelResource):
     class Meta:
         queryset = models.RedemptionRequest.objects.all()
         resource_name = "redemption-requests"
-        authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
+        display_field = {
+                         'NationalSalesManagers':['due_date'],
+                         'AreaSalesManagers':[],
+                         'RedemptionPartners':[],
+                         'LogisticPartners':[]
+                       }
+        authorization = MultiAuthorization(Authorization(), LoyaltyCustomAuthorization(**display_field))
         filtering = {
                      "member": ALL_WITH_RELATIONS,
                      "resolution_flag":ALL,
