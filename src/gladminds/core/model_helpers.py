@@ -111,14 +111,14 @@ def create_upload_path(folder, instance):
 def set_service_training_material_path(instance,filename):
     return create_upload_path('training_material', instance)
 
-def set_mechanic_pic_path(instance,filename):
+def set_mechanic_image_path(instance,filename):
     return create_upload_path('mechanics', instance)
 
-def set_product_catalog_pic_path(instance,filename):
+def set_product_catalog_image_path(instance,filename):
     return create_upload_path('product', instance)
 
-def set_redemption_request_pic_path(instance,filename):
+def set_redemption_pod_path(instance,filename):
     return create_upload_path('redemption', instance)
 
-def set_welcome_kit_pic_path(instance,filename):
+def set_welcome_kit_pod_path(instance,filename):
     return create_upload_path('welcome', instance)

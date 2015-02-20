@@ -15,8 +15,8 @@ from gladminds.core.core_utils.utils import generate_mech_id, generate_partner_i
     generate_nsm_id,generate_asm_id
 from gladminds.core.model_helpers import validate_image, validate_file
 from gladminds.core.model_helpers import set_service_training_material_path,\
-    set_mechanic_pic_path,set_product_catalog_pic_path,set_redemption_request_pic_path,\
-    set_welcome_kit_pic_path
+    set_mechanic_image_path,set_product_catalog_image_path,set_redemption_pod_path,\
+    set_welcome_kit_pod_path
 try:
     from django.utils.timezone import now as datetime_now
 except ImportError:
@@ -839,7 +839,7 @@ class Mechanic(BaseModel):
     genuine_parts_used = models.IntegerField(max_length=50, null=True, blank=True)
     sent_to_sap = models.BooleanField(default=False)
     
-    image_url = models.FileField(upload_to=set_mechanic_pic_path,
+    image_url = models.FileField(upload_to=set_mechanic_image_path,
                                   max_length=255, null=True, blank=True,
                                   validators=[validate_image])
 
@@ -965,7 +965,7 @@ class ProductCatalog(BaseModel):
     category = models.CharField(max_length=50, null=True, blank=True)
     sub_category = models.CharField(max_length=50, null=True, blank=True)
     is_active = models.BooleanField(default=True)
-    image_url = models.FileField(upload_to=set_product_catalog_pic_path,
+    image_url = models.FileField(upload_to=set_product_catalog_image_path,
                                   max_length=255, null=True, blank=True,
                                   validators=[validate_image])
     
@@ -997,7 +997,7 @@ class RedemptionRequest(BaseModel):
     shipped_date =  models.DateTimeField(null=True, blank= True)
     delivery_date =  models.DateTimeField(null=True, blank= True)
     pod_number = models.CharField(max_length=50, null=True, blank=True)
-    image_url = models.FileField(upload_to=set_redemption_request_pic_path,
+    image_url = models.FileField(upload_to=set_redemption_pod_path,
                               max_length=255, null=True, blank=True,
                               validators=[validate_image])
     
@@ -1037,7 +1037,7 @@ class WelcomeKit(BaseModel):
     shipped_date =  models.DateTimeField(null=True, blank= True)
     delivery_date =  models.DateTimeField(null=True, blank= True)
     pod_number = models.CharField(max_length=50, null=True, blank=True)
-    image_url = models.FileField(upload_to=set_welcome_kit_pic_path,
+    image_url = models.FileField(upload_to=set_welcome_kit_pod_path,
                               max_length=255, null=True, blank=True,
                               validators=[validate_image])
 

@@ -1,6 +1,7 @@
 from uuid import uuid4
 import json
 import logging
+import re
 from django.http.response import HttpResponse
 from django.conf.urls import url
 from tastypie.http import HttpBadRequest
@@ -42,7 +43,18 @@ class DjangoUserResources(ModelResource):
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         excludes = ['password', 'is_superuser']
         always_return_data = True
-
+        
+def check_password(password):
+    s = password
+    print 'passworddddd: ',password
+    rules = [lambda s:any(x.isupper() for x in s),
+        lambda s:any(x.islower() for x in s),
+        lambda s:any(x.isdigit() for x in s),
+        lambda s:len(s) >= 6,
+        lambda s:bool(re.search(r'[^a-zA-Z0-9]',s))
+        ]
+    if not all(rule(s) for rule in rules):
+        return 'false'
 
 class ConsumerResource(CustomBaseModelResource):
 
@@ -94,7 +106,7 @@ class ConsumerResource(CustomBaseModelResource):
             logger.error('Invalid details, mobile {0} and exception {1}'.format(request.POST.get('phone_number', ''),ex))
             data = {'status': 0, 'message': ex}
         return HttpResponse(json.dumps(data), content_type="application/json")
-
+            
     @atomic(using=GmApps.AFTERBUY)
     def user_registration(self, request, **kwargs):
         if request.method != 'POST':
@@ -117,6 +129,9 @@ class ConsumerResource(CustomBaseModelResource):
         first_name = load.get('first_name')
         last_name = load.get('last_name','')
         password = load.get('password')
+        valid_password = check_password(password)
+        if (valid_password == 'false'):
+            return HttpBadRequest("password is not meant according to the rules")
         if not phone_number or not password:
             return HttpBadRequest("phone_number, password required.")
         try:
