@@ -381,14 +381,12 @@ class CustomerTempRegistration(BaseModel):
     '''Details of customer registration'''
     new_customer_name = models.CharField(max_length=50, null=True, blank=True)
     new_number = models.CharField(max_length=15, null=True, blank=True)
-    old_number = models.CharField(max_length=15)
     dealer_asc_id = models.CharField(max_length=15, null=True, blank=True)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
     temp_customer_id = models.CharField(max_length=50,
                                 null=False, blank=False, unique=True)
     sent_to_sap = models.BooleanField(default=False)
     remarks = models.CharField(max_length=500, null=True, blank=True)
-    update_history = models.CharField(max_length=500, null=True, blank=True)
     tagged_sap_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
     mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True, default=0)
@@ -401,6 +399,19 @@ class CustomerTempRegistration(BaseModel):
 
     def __unicode__(self):
         return self.new_customer_name
+
+class CustomerUpdateHistory(BaseModel):
+    '''Stores the updated values of registered customer'''
+    updated_field = models.CharField(max_length=100)
+    old_value = models.CharField(max_length=100)
+    new_value = models.CharField(max_length=100)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Customer temporary Update History"
+
+    def __unicode__(self):
+        return self.update_field
 
 class EmailToken(models.Model):
     ACTIVATED = u"ALREADY_ACTIVATED"
