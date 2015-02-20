@@ -448,3 +448,11 @@ class LoyaltySLA(base_models.LoyaltySLA):
     class Meta:
         app_label = _APP_NAME
         unique_together = ("status", "action")
+
+class DiscrepantAccumulation(base_models.DiscrepantAccumulation):
+    upc = models.ForeignKey(SparePartUPC)
+    new_member = models.ForeignKey(Mechanic)
+    accumulation_request = models.ForeignKey(AccumulationRequest)
+     
+    class Meta:
+        app_label = _APP_NAME

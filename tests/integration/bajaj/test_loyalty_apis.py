@@ -4,7 +4,7 @@ from django.test.client import Client
 from tastypie.test import ResourceTestCase
 from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER,SPARE_MASTER, SPARE_POINT,SPARE_PART_UPC,\
     REDEMPTION_REQUEST,PARTNER,PRODUCT,ACCUMULATION, SPARE_PART_UPC_1,SLA,\
-    MEMBER, WELCOMEKIT, COMMENT_THREAD
+    MEMBER, WELCOMEKIT, COMMENT_THREAD, MEMBER1, TRANSFERPOINTS
     
 client=Client(SERVER_NAME='bajaj')
 
@@ -234,6 +234,7 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEqual(self.deserialize(resp)['is_approved'], False)
        
     def test_create_spare_part_upc(self):
+        self.test_create_spare_master()
         uri = '/loyalty/v1/spare-upcs/'
         resp = self.post(uri,data = SPARE_PART_UPC)
         self.assertEquals(resp.status_code,201)
@@ -288,6 +289,7 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEquals(resp.status_code,200)
 
     def test_create_spare_part_point(self):
+        self.test_create_spare_master()
         uri = '/loyalty/v1/spare-points/'
         resp = self.post(uri,data = SPARE_POINT)
         self.assertEquals(resp.status_code,201)
@@ -346,6 +348,7 @@ class LoyaltyApiTests(ResourceTestCase):
         uri = '/loyalty/v1/asms/'
         resp = self.post(uri,data=ASM)
         self.assertEquals(resp.status_code,201)
+        self.test_create_spare_master()
         uri = '/loyalty/v1/spare-upcs/'
         resp = self.post(uri,data = SPARE_PART_UPC)
         resp = self.post(uri,data = SPARE_PART_UPC_1)  
@@ -364,9 +367,9 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEqual(self.deserialize(resp)['transaction_id'], 1)
         return resp
     
-    def test_create_member(self):
+    def test_create_member(self,data = MEMBER):
         uri = '/loyalty/v1/members/'
-        resp = self.post(uri,data = MEMBER)
+        resp = self.post(uri,data = data)
         self.assertEquals(resp.status_code,201)
         return resp
     
@@ -445,4 +448,28 @@ class LoyaltyApiTests(ResourceTestCase):
         uri = '/loyalty/v1/comment-threads/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['message'],"hi")
+
+    def test_transferpoints(self):
+        self.test_create_spare_master()
         
+        uri = '/loyalty/v1/spare-points/'
+        resp = self.post(uri,data = SPARE_POINT)
+        self.assertEquals(resp.status_code,201)
+        
+        uri = '/loyalty/v1/spare-upcs/'
+        resp = self.post(uri,data = SPARE_PART_UPC)
+        self.assertEquals(resp.status_code,201)
+        
+        self.test_create_member()
+        self.test_create_member(data=MEMBER1)        
+        uri = '/loyalty/v1/accumulation-discrepancies/transfer-points/'
+        resp = client.post(uri, data =TRANSFERPOINTS)
+        self.assertEquals(resp.status_code,200)
+      
+        uri = '/loyalty/v1/members/1/'
+        resp = self.get(uri)
+        self.assertEqual(self.deserialize(resp)['total_points'],982)
+       
+        uri = '/loyalty/v1/members/2/'
+        resp = self.get(uri)
+        self.assertEqual(self.deserialize(resp)['total_points'],118)
