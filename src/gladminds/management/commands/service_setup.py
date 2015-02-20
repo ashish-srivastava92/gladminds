@@ -4,9 +4,10 @@ from gladminds.core.auth.service_handler import Services
 from gladminds.default import models
 
 
-_SERVICES = [Services.AFTERBUY, Services.FREE_SERVICE_COUPON, Services.LOYALTY, Services.SERVICE_DESK]
+_BAJAJ_SERVICES = [Services.AFTERBUY, Services.FREE_SERVICE_COUPON, Services.LOYALTY, Services.SERVICE_DESK]
+_DEMO_SERVICES = [Services.SERVICE_DESK]
 _INDUSTRIES = ['automobiles']
-_BRANDS = {'bajaj': [_INDUSTRIES[0]]}
+_BRANDS = {'bajaj': [_INDUSTRIES[0]], 'demo': [_INDUSTRIES[0]]}
 
 class Command(BaseCommand): 
     
@@ -18,7 +19,7 @@ class Command(BaseCommand):
         self.create_brands_services()
         
     def create_service_types(self):
-        for service in _SERVICES:
+        for service in _BAJAJ_SERVICES:
             try:
                 service_obj = models.ServiceType.objects.get(name=service)
                 print "service type {0} already exists.".format(service)
@@ -28,7 +29,7 @@ class Command(BaseCommand):
                 service_obj.save()
     
     def create_services(self):
-        for service in _SERVICES:
+        for service in _BAJAJ_SERVICES:
             service_type_obj = models.ServiceType.objects.filter(name=service)
             if len(service_type_obj) > 0:
                 try:
@@ -71,7 +72,11 @@ class Command(BaseCommand):
             for industry in _BRANDS[brand]:
                 brand_obj = models.Brand.objects.filter(name=brand, industry__name=industry)
                 if len(brand_obj)>0:
-                    for service in _SERVICES:                        
+                    if brand == 'bajaj':
+                        SERVICES = _BAJAJ_SERVICES
+                    elif brand == 'demo':
+                        SERVICES = _DEMO_SERVICES
+                    for service in SERVICES:                        
                         try:
                             brand_service_obj = models.BrandService.objects.get(brand=brand_obj[0],
                                                                                 service__name=service)

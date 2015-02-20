@@ -27,6 +27,13 @@ from gladminds.core.model_fetcher import models
 LOG = logging.getLogger('gladminds')
 
 
+def get_helpdesk(request):
+    if request.user.groups.filter(name__in=[Roles.DEALERS, Roles.ASCS]):
+        return HttpResponseRedirect('/aftersell/servicedesk/helpdesk')
+    
+    elif request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.SDOWNERS]):
+        return HttpResponseRedirect('/aftersell/servicedesk/')
+            
 @check_service_active(Services.SERVICE_DESK)
 @login_required()
 def service_desk(request):

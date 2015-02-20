@@ -645,3 +645,17 @@ BRAND_META = {
                "demo": {"title": "Daimler", "logo": "daimler/img/logo.gif", "tagline": "2015 Daimler AG",
                         "basecss": "/daimler/css/base.css"}
                }
+
+HOME_URLS = {
+             "bajaj": { "AuthorisedServiceCenters" :[{"DFSC":"/aftersell/register/asc"}, {"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "Dealers" :[{"DFSC":"/aftersell/register/asc"}, {"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "SdManagers" :{"SERVICE DESK":["/aftersell/helpdesk"]},
+                       "SdOwners" :{"SERVICE DESK":["/aftersell/helpdesk"]},
+                       },
+             "demo" : {"SdManagers":[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "Dealers" :[{"DFSC":"/aftersell/register/asc"}, {"SERVICE DESK":"/aftersell/helpdesk"}]  
+                       }
+             }
+
+LOGIN_URL='login/'
