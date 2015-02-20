@@ -46,7 +46,6 @@ class DjangoUserResources(ModelResource):
         
 def check_password(password):
     s = password
-    print 'passworddddd: ',password
     rules = [lambda s:any(x.isupper() for x in s),
         lambda s:any(x.islower() for x in s),
         lambda s:any(x.isdigit() for x in s),
