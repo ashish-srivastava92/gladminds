@@ -5,43 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Dashboard - SB Admin</title>
+    <title>{{METAINFO.tagline}}</title>
     <link href="/static/css/bootstrap.css" rel="stylesheet">
     <!-- Add custom CSS here -->
     <link href="/static/css/sb-admin.css" rel="stylesheet">
-    <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
-    <!-- <link rel="stylesheet" href="/static/css/morris-0.4.3.min.css"> -->
-	
-	<!--[if gt IE 7]>
-		<link href="/static/css/bootstrap-ie7.css" rel="stylesheet">
-	    <link href="/static/css/style-ie7.css" rel="stylesheet">
-	    <script src="/static/libs/html5.js"></script>
-    <![endif]-->    
-    
+    <link rel="stylesheet" href="/static/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/{{METAINFO.basecss}}">
     {% block style %}
     {% endblock %}
   </head>
-  <body class="well">
-  	<div id="wrapper">
-  		
+  <body>
+	{% block header %}
+	<header class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <div class="navbar-inner">
+             <a class="brand" href="#"><img src="/static/{{METAINFO.logo}}" class='brand-logo' height=50px width=209px></a>
+          </div>
+        </div>
+      </div>
+    </header>
+    {% endblock %}
+  	<div id="wrapper">	
     {% block body %}
     {% endblock %}
    </div>
-	<!--[if IE]>
+          <!--[if IE]>
        	<script src="/static/js/jquery-1.7.1.min.js"></script> 
+       	<script src="/static/js/afterbuy/jquery-ui.js"></script>
        	<script src="/static/js/form-validation.js"></script> 
    	<![endif]-->
 
 	<!--[if !IE]><!-->
 		<script src="/static/js/jquery-2.1.1.js"></script> 
+		<script src="/static/libs/datepicker/js/jquery-ui.js"></script>
 	<!--<![endif]-->
-
+       
+    
     <script src="/static/js/bootstrap.js"></script>
     <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
-    <script src="http://cdn.oesmith.co.uk/morris-0.4.3.min.js"></script> 
-    <script src="/static/js/morris/chart-data-morris.js"></script>
+    <script src="http://cdn.oesmith.co.uk/morris-0.4.3.min.js"></script>
+    <script src="/static/js/morris/chart-data-morris.js"></script> -->
+    <script src="/static/libs/jquery.datetimepicker.js"></script>
     <script src="/static/js/tablesorter/jquery.tablesorter.js"></script>
-    <script src="/static/js/tablesorter/tables.js"></script> -->
+    <script src="/static/js/tablesorter/tables.js"></script>
+  
     {% block dependency %}
     {% endblock dependency %}
   </body>

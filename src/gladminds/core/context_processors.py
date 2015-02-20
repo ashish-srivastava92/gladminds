@@ -15,5 +15,7 @@ def gm_constants(request):
             'SD_OWNER' : Roles.SDOWNERS, 
             'DEALER' : Roles.DEALERS,
             'ASC': Roles.ASCS}
-    return { 'CONSTANTS' :constants, 'S3_URL' : S3_BASE_URL }
+    brand_meta = settings.BRAND_META.get(settings.BRAND, {})
+    return { 'CONSTANTS' :constants, 'S3_URL' : S3_BASE_URL,
+            'METAINFO': brand_meta}
 

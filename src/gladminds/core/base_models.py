@@ -576,6 +576,7 @@ class VinSyncFeedLog(BaseModel):
     status_code = models.CharField(max_length=15, null=True, blank=True)
     email_flag = models.BooleanField(default=False)
     ucn_count = models.IntegerField(max_length=5, null=True, blank=True)
+    sent_to_sap = models.BooleanField(default=False)
     
     class Meta:
         abstract =True

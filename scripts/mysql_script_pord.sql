@@ -29,5 +29,8 @@ alter table bajaj_customertempregistration add column update_history varchar(500
 alter table bajaj_authorizedservicecenter add column asc_owner_phone varchar(50) null;
 alter table bajaj_authorizedservicecenter add column asc_owner_email varchar(100) null;
 
+
 alter table bajaj_customertempregistration drop column old_number;
 alter table bajaj_customertempregistration drop column update_history;
+alter table bajaj_vinsyncfeedlog add column sent_to_sap boolean default False;
+
