@@ -127,7 +127,7 @@ class RedemptionResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         display_field = {
-                         'NationalSalesManagers':['due_date'],
+                         'NationalSalesManagers':[],
                          'AreaSalesManagers':[],
                          'RedemptionPartners':[],
                          'LogisticPartners':[]

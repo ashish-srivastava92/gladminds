@@ -22,7 +22,17 @@ USER = {
          "is_staff":False,
          "last_login":"2015-02-04T17:10:24",
          "last_name":"",
-         "username":"15586"
+         "username":"user"
+        }
+
+USER1 = {
+        "date_joined":"2015-02-04T17:10:24",
+         "email":"asc@xyz.com",
+         "first_name":"TEST USER",
+         "is_active":True,
+         "is_staff":True,
+         "last_name":"",
+         "username":"user"
         }
 
 GM_PRODUCTS = {
@@ -345,7 +355,7 @@ USER_PROFILE = {
                 "phone_number":"",
                 "pincode":"",
                 "resource_uri":"",
-                "state":"",
+                "state":"karnataka",
                 "status":"",
                 "user": USER
                 }
@@ -356,7 +366,7 @@ NSM = {
         "nsm_id": "NSM002",
         "phone_number": "1234567890",
         "territory": "south",
-        "user": ""
+        "user": " "
         }
 
 ASM = {
@@ -364,8 +374,8 @@ ASM = {
         "email": "spremnath@bajajauto.co.in",
         "name": "PREM NATH",
         "phone_number": "9999999999",
-        "state": "Tamil Nadu",
-        "user":"",
+        "state": "Karnataka",
+        "user":USER,
         "nsm":""
        }
 
@@ -500,7 +510,7 @@ MEMBER1 = {
             "shop_wall_length": 0,
             "shop_wall_width": 0,
             "spare_per_month": 50000,
-            "state": "Karnataka",
+            "state": "TAMIL",
             "tehsil": "",
             "total_points":100
                         }
@@ -512,12 +522,13 @@ REDEMPTION_REQUEST =  {
                         "image_url": "",
                         "is_approved": False,
                         "member": MEMBER,
-                        "packed_by": "",
+                        "packed_by": "user",
                         "refunded_points": False,
                         "resolution_flag": True,
                         "status": "Open",
                         "tracking_id": "",
                         "product":PRODUCT,
+                        "partner":"/loyalty/v1/partners/1/",
                     }
     
 SPARE_PART_UPC = {  

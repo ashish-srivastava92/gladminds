@@ -6,7 +6,7 @@ from django.conf import settings
 from gladminds.afterbuy import models as afterbuy
 from gladminds.core.auth_helper import Roles
 from gladminds.core import constants
-from gladminds.core.model_fetcher import models
+from gladminds.bajaj import models
 
 class CustomAuthorization(Authorization):
 
@@ -181,13 +181,13 @@ class LoyaltyCustomAuthorization():
             if user.groups.filter(name=Roles.RPS).exists():
                 object_list=object_list.filter(is_approved=True, packed_by=user.username)
             elif user.groups.filter(name=Roles.LPS).exists():
-                object_list=object_list.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=user)
+                object_list=object_list.filter(status__in=['Shipped','Delivered'], partner__user=user)
             elif user.groups.filter(name=Roles.ASMS).exists():
                 asm = models.AreaSalesManager.objects.get(user__user= user)
                 object_list=object_list.filter(member__state=asm.state)
             elif user.groups.filter(name=Roles.DEALERS).exists():
                 object_list=object_list.filter(registered_by_distributor__user=user)
-                
+
         if bundle.request.user.groups.exists():
             user = bundle.request.user.groups.values()[0]['name']
             for obj in object_list:       
