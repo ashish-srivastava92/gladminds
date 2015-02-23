@@ -351,7 +351,7 @@
     "pk": 39,
     "fields": {
       "template_key":"RCV_ACCUMULATE_POINT",
-      "template":"{ucp}",
+      "template":"{upc}",
       "description":"Receive this message when mechanic send spare to accumulate points"
     }
   },

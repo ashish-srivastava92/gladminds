@@ -120,7 +120,7 @@ class OTPToken(BaseModel):
         verbose_name_plural = "OTPs"
 
     def __unicode__(self):
-        return self.phone_number + " " + self.token
+        return str(self.phone_number or '') + ' ' +self.token
 
 
 class Dealer(BaseModel):
@@ -593,6 +593,7 @@ class VinSyncFeedLog(BaseModel):
     status_code = models.CharField(max_length=15, null=True, blank=True)
     email_flag = models.BooleanField(default=False)
     ucn_count = models.IntegerField(max_length=5, null=True, blank=True)
+    sent_to_sap = models.BooleanField(default=False)
     
     class Meta:
         abstract =True
@@ -846,12 +847,12 @@ class Mechanic(BaseModel):
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank= True)
 
-    adress_line_1 = models.CharField(max_length=40, null=True, blank=True)
-    adress_line_2 = models.CharField(max_length=40, null=True, blank=True)
-    adress_line_3 = models.CharField(max_length=40, null=True, blank=True)
-    adress_line_4 = models.CharField(max_length=40, null=True, blank=True)
-    adress_line_5 = models.CharField(max_length=40, null=True, blank=True)
-    adress_line_6 = models.CharField(max_length=40, null=True, blank=True)
+    address_line_1 = models.CharField(max_length=40, null=True, blank=True)
+    address_line_2 = models.CharField(max_length=40, null=True, blank=True)
+    address_line_3 = models.CharField(max_length=40, null=True, blank=True)
+    address_line_4 = models.CharField(max_length=40, null=True, blank=True)
+    address_line_5 = models.CharField(max_length=40, null=True, blank=True)
+    address_line_6 = models.CharField(max_length=40, null=True, blank=True)
 
     form_number = models.IntegerField(max_length=50, null=True, blank=True)
     registered_date = models.DateTimeField(null=True, blank= True)
@@ -961,6 +962,7 @@ class AccumulationRequest(BaseModel):
     transaction_id = models.AutoField(primary_key=True)
     points = models.IntegerField(max_length=50)
     total_points = models.IntegerField(max_length=50)
+    is_transferred = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -1092,6 +1094,13 @@ class CommentThread(BaseModel):
     
     def __unicode__(self):
         return str(self.id)
+
+class DiscrepantAccumulation(BaseModel):
+    ''' details of accumulation request with discrepancy'''
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Discrepant Request"
 
 class LoyaltySLA(models.Model):
     status = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_STATUS)
