@@ -263,7 +263,7 @@ class ProductPurchaseFeed(BaseFeed):
                 post_save.connect(
                     update_coupon_data, sender=models.ProductData)
             except ObjectDoesNotExist as done:
-                ex='[Info: ProductPurchaseFeed_product_data]: {0}'.format(done)
+                ex='[Info: ProductPurchaseFeed_product_data]: VIN- {0} :: {1}'''.format(product['vin'], done)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
                 vin_sync_feed = models.VinSyncFeedLog.objects.filter(product_id = product['vin'],ucn_count=-1)
@@ -274,7 +274,7 @@ class ProductPurchaseFeed(BaseFeed):
                     vin_sync_feed=models.VinSyncFeedLog(product_id = product['vin'],ucn_count=-1) 
                 vin_sync_feed.save()
             except Exception as ex:
-                ex = '''[Exception: ProductPurchaseFeed_product_data]:{0} VIN - {1}'''.format(ex, product['vin'])
+                ex = '''[Exception: ProductPurchaseFeed_product_data]: VIN- {0} :: {1}'''.format(product['vin'], ex)
                 self.feed_remark.fail_remarks(ex)
                 logger.error(ex)
                 continue
