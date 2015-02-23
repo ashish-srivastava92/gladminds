@@ -649,8 +649,8 @@ BRAND_META = {
 HOME_URLS = {
              "bajaj": { "AuthorisedServiceCenters" :[{"DFSC":"/aftersell/register/asc"}, {"SERVICE DESK":"/aftersell/helpdesk"}],
                        "Dealers" :[{"DFSC":"/aftersell/register/asc"}, {"SERVICE DESK":"/aftersell/helpdesk"}],
-                       "SdManagers" :{"SERVICE DESK":["/aftersell/helpdesk"]},
-                       "SdOwners" :{"SERVICE DESK":["/aftersell/helpdesk"]},
+                       "SdManagers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        },
              "demo" : {"SdManagers":[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],

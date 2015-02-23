@@ -30,3 +30,11 @@ alter table bajaj_authorizedservicecenter add column asc_owner_phone varchar(50)
 alter table bajaj_authorizedservicecenter add column asc_owner_email varchar(100) null;
 
 alter table bajaj_vinsyncfeedlog add column sent_to_sap boolean default False;
+
+alter table demo_feedback add department_id integer;
+alter table demo_feedback add foreign key (department_id) references demo_branddepartment(id);
+
+alter table bajaj_feedback add department_id integer;
+alter table bajaj_feedback add foreign key (department_id) references bajaj_branddepartment(id);
+
+

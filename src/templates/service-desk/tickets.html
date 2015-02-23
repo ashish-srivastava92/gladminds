@@ -229,6 +229,19 @@
                   </div>
                 </div>
                 
+                <div class="row {% if METAINFO.title == 'Bajaj' %} hide {% endif %}">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">Priority:</label>
+                  </div>
+                  <div class="col-md-9 form-group">
+                    <select class="form-control priority" name="priority" required>
+                      {% for priority in priorities %}
+                      <option value="{{priority}}">{{priority}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                
                 <div class="row">
                   <div class="col-md-3 form-group">
                     <label class="control-label">Subject*:</label>
@@ -247,7 +260,7 @@
                 </div> 
                 <div class="row">
                   <div class="col-md-3 form-group">
-                    <label class="control-label">Upload File*:</label>
+                    <label class="control-label">Upload File:</label>
                     <label class="control-label"><small><i>allowed format png,jpg,pdf,ppt,doc,xls</i></small></label>
                   </div>
                   <div class="col-md-9 form-group">

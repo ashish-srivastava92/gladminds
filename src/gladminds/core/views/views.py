@@ -28,7 +28,7 @@ from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
     USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS,\
-    SERVICE_MAPPING, DAIMLER_GROUP_MAPPING
+    SERVICE_MAPPING
 from gladminds.core.utils import get_email_template, format_product_object
 from gladminds.core.auth_helper import Roles
 from gladminds.core.auth.service_handler import check_service_active, Services
@@ -70,21 +70,7 @@ def redirect_url(request):
 @login_required()
 def get_services(request):
     if request.method == 'GET':
-        user_group = utils.get_user_groups(request.user)
-        print "user", user_group
-        allowed_users = settings.HOME_URLS.get(settings.BRAND, {})
-        if set(user_group).intersection(allowed_users.keys()):
-            a=set(user_group).intersection(allowed_users.keys())
-            
-        brand_service = BrandService.objects.filter(brand__name='demo')
-        all_services = []
-        for service in brand_service:
-            services = {}
-            services['name'] = service.service.name.title()
-            services['url'] = SERVICE_MAPPING.get(service.service.name)
-            all_services.append(services)
-           
-        return render(request, 'portal/services.html', {'services': all_services})
+        return render(request, 'portal/services.html')
 
 def auth_login(request):
     user = getattr(request, 'user', None)
@@ -128,7 +114,7 @@ def user_logout(request):
         for group in USER_GROUPS:
             if group in user_groups:
                 logout(request)
-                return HttpResponseRedirect(DAIMLER_GROUP_MAPPING.get(group))
+                return HttpResponseRedirect('/login/')
 
         return HttpResponseBadRequest()
     return HttpResponseBadRequest('Not Allowed')
