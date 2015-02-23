@@ -17,8 +17,42 @@ from gladminds.core.apis.authorization import MultiAuthorization,\
 from django.db.transaction import atomic
 import logging
 from django.db import transaction
+from gladminds.core.auth_helper import Roles
 
 logger = logging.getLogger("gladminds")
+
+class TerritoryResource(CustomBaseModelResource):
+    
+    class Meta:
+        queryset = models.Territory.objects.all()
+        resource_name = "territories"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'put', 'delete']
+        always_return_data = True
+
+class StateResource(CustomBaseModelResource):
+    territory = fields.ForeignKey(TerritoryResource, 'territory')
+    
+    class Meta:
+        queryset = models.State.objects.all()
+        resource_name = "states"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        always_return_data = True
+        filtering = {
+                     "state_name":ALL, 
+                     }
+        
+class CityResource(CustomBaseModelResource):    
+    state = fields.ForeignKey(StateResource, 'state')
+    
+    class Meta:
+        queryset = models.City.objects.all()
+        resource_name = "cities"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        always_return_data = True
+
 
 class NSMResource(CustomBaseModelResource):
     class Meta:
@@ -104,6 +138,7 @@ class ProductResource(CustomBaseModelResource):
 class MemberResource(CustomBaseModelResource):
     distributor = fields.ForeignKey(DistributorResource, 'registered_by_distributor', null=True, blank=True, full=True) 
     preferred_retailer = fields.ForeignKey(RetailerResource, 'preferred_retailer', null=True, blank=True, full=True)
+    state = fields.ForeignKey(StateResource, 'state')
     
     class Meta:
         queryset = models.Mechanic.objects.all()
@@ -112,7 +147,7 @@ class MemberResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
-                     "state": ALL,
+                     "state":ALL_WITH_RELATIONS,
                      "locality":ALL,
                      "district":ALL,
                      }
@@ -126,13 +161,31 @@ class RedemptionResource(CustomBaseModelResource):
         resource_name = "redemption-requests"
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
-        display_field = {
-                         'NationalSalesManagers':[],
-                         'AreaSalesManagers':[],
-                         'RedemptionPartners':[],
-                         'LogisticPartners':[]
-                       }
-        authorization = MultiAuthorization(Authorization(), LoyaltyCustomAuthorization(**display_field))
+        args = {
+                'display_field' : {
+                                    Roles.ASMS:[],
+                                    Roles.NSMS:[],
+                                    Roles.RPS:[],
+                                    Roles.LPS:[]
+                                   },
+                'query_field' : {
+                                  Roles.RPS:{
+                                             'query':[Q(is_approved=True)],
+                                             'user_name':'packed_by' 
+                                             },
+                                  Roles.LPS : {
+                                                'query':[Q(status__in=['Shipped','Delivered'])],
+                                                'user':'partner__user'
+                                                      },
+                                  Roles.DEALERS:{
+                                                 'query':[],
+                                                 'user':'registered_by_distributor__user' 
+                                                 }
+                           }
+                }
+        
+        authorization = MultiAuthorization(Authorization(), LoyaltyCustomAuthorization
+                                           (display_field=args['display_field'], query_field=args['query_field']))
         filtering = {
                      "member": ALL_WITH_RELATIONS,
                      "resolution_flag":ALL,
@@ -253,33 +306,3 @@ class DiscrepantAccumulationResource(CustomBaseModelResource):
         total_points = mechanic.total_points + accumulate -redeem
         mechanic.total_points = total_points
         mechanic.save()
-
-class TerritoryResource(CustomBaseModelResource):
-    
-    class Meta:
-        queryset = models.Territory.objects.all()
-        resource_name = "territories"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'put', 'delete']
-        always_return_data = True
-
-class StateResource(CustomBaseModelResource):
-    territory = fields.ForeignKey(TerritoryResource, 'territory')
-    
-    class Meta:
-        queryset = models.State.objects.all()
-        resource_name = "states"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put', 'delete']
-        always_return_data = True
-
-class CityResource(CustomBaseModelResource):    
-    state = fields.ForeignKey(StateResource, 'state')
-    
-    class Meta:
-        queryset = models.City.objects.all()
-        resource_name = "cities"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put', 'delete']
-        always_return_data = True
-

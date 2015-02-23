@@ -7,6 +7,8 @@ from gladminds.afterbuy import models as afterbuy
 from gladminds.core.auth_helper import Roles
 from gladminds.core import constants
 from gladminds.bajaj import models
+import operator
+from django.db.models.query_utils import Q
 
 class CustomAuthorization(Authorization):
 
@@ -170,31 +172,40 @@ class MultiAuthorization(Authorization):
 
 class LoyaltyCustomAuthorization():
 
-    def __init__(self, *args, **kwargs):
-        self.display_field = kwargs
-
-    def read_list(self, object_list, bundle):
-        klass = bundle.obj.__class__
+    def __init__(self, display_field=None, query_field=None):
+        self.display_field = display_field
+        self.query_field = query_field
         
-        if klass._meta.module_name == 'redemptionrequest':
-            user = bundle.request.user
-            if user.groups.filter(name=Roles.RPS).exists():
-                object_list=object_list.filter(is_approved=True, packed_by=user.username)
-            elif user.groups.filter(name=Roles.LPS).exists():
-                object_list=object_list.filter(status__in=['Shipped','Delivered'], partner__user=user)
-            elif user.groups.filter(name=Roles.ASMS).exists():
+    def read_list(self, object_list, bundle):  
+        user = bundle.request.user
+        user_name = user.groups.values()[0]['name']    
+        klass_name = bundle.obj.__class__._meta.module_name
+        
+        try:
+            ''' filter the object list based on query defined for specific Role'''
+            if self.query_field:
+                query = self.query_field[user_name]
+                q_object = Q()
+                if query['user_name']:
+                    q_object.add(query['user_name'], user.username)
+                    query['query'].append(q_object)
+                if query['user']:
+                    q_object.add(query['user'], user)
+                    query['query'].append(q_object)
+                object_list = object_list.filter(reduce(operator.and_, query['query']))
+            elif klass_name == 'redemptionrequest' and user.groups.filter(name=Roles.ASMS).exists():
                 asm = models.AreaSalesManager.objects.get(user__user= user)
-                object_list=object_list.filter(member__state=asm.state)
-            elif user.groups.filter(name=Roles.DEALERS).exists():
-                object_list=object_list.filter(registered_by_distributor__user=user)
-
-        if bundle.request.user.groups.exists():
-            user = bundle.request.user.groups.values()[0]['name']
-            for obj in object_list:       
-                for x in self.display_field[user]:
-                    delattr(obj, x)
-        return object_list
-
+                object_list=object_list.filter(member__state=asm.state)            
+    
+            ''' hides the fields in object_list '''            
+            if self.display_field:
+                for obj in object_list:
+                    for x in self.display_field[user_name]:
+                        delattr(obj, x)
+            return object_list
+        except:
+            return object_list
+        
     def read_detail(self, object_list, bundle):
         if self.read_list(object_list, bundle):
             return True
