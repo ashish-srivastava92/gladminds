@@ -142,47 +142,67 @@ SUIT_CONFIG = {
 MANAGERS = ADMINS
 
 DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
+DB_USER = os.environ.get('DB_USER', 'root')
+DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
+DB_PORT = os.environ.get('DB_PORT', '3306')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'admin')
+
+class GmApps():
+    AFTERBUY = 'afterbuy'
+    BAJAJ = 'bajaj'
+    BAJAJCV = 'bajajcv'
+    DEMO = 'demo'
+    GM = 'default'
 
 # Mapping is first app name then db name
 DATABASE_APPS_MAPPING = {
-                         'default': 'default',
-                         'bajaj':'bajaj',
-                         'demo': 'demo',
-                         'afterbuy':'afterbuy'
+                         GmApps.GM: 'default',
+                         GmApps.BAJAJ:'bajaj',
+                         GmApps.DEMO: 'demo',
+                         GmApps.AFTERBUY:'afterbuy',
+                         GmApps.BAJAJCV:'bajajcv'
                     }
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+    GmApps.GM: {
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gm',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     },
-    'bajaj': {
-        'ENGINE': 'django.db.backends.sqlite3',
+    GmApps.BAJAJ: {
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'bajaj',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     },
-    'demo': {
-        'ENGINE': 'django.db.backends.sqlite3',
+    GmApps.DEMO: {
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'demo',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     },
-    'afterbuy': {
-        'ENGINE': 'django.db.backends.sqlite3',
+    GmApps.AFTERBUY: {
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'afterbuy',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
+    },
+    GmApps.BAJAJCV: {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'bajajcv',
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     }
 }
 
@@ -590,8 +610,8 @@ SMS_HEALTH_CHECK_INTERVAL = 6
 FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
 BRAND = None
-GM_BRAND = 'default'
-BRANDS = ['bajaj', 'demo', 'afterbuy']
+GM_BRAND = GmApps.GM
+BRANDS = [GmApps.BAJAJ, GmApps.DEMO, GmApps.AFTERBUY,GmApps.BAJAJCV]
 ###############################################
 AIRTEL_IP = '54.84.243.77'
 SMS_CLIENT = "MOCK"
@@ -608,10 +628,11 @@ SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                   'MOCK': {}
                   }
 
-ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},
-          'demo': {'user': 'demo', 'password': 'demo'},
-          'afterbuy': {'user': 'afterbuy', 'password': 'afterbuy'},
-          'default': {'user': 'gladminds', 'password': 'gladminds'}
+ADMIN_DETAILS = {GmApps.BAJAJ: {'user': 'bajaj', 'password': 'bajaj'},
+          GmApps.DEMO: {'user': 'demo', 'password': 'demo'},
+          GmApps.AFTERBUY: {'user': 'afterbuy', 'password': 'afterbuy'},
+          GmApps.GM: {'user': 'gladminds', 'password': 'gladminds'},
+          GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'bajajcv'}
           }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True

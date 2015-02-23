@@ -10,6 +10,7 @@ ALL_APPS = settings.BRANDS + [settings.GM_BRAND]
 class GmApps():
     AFTERBUY = 'afterbuy'
     BAJAJ = 'bajaj'
+    BAJAJCV = 'bajajcv'
     DEMO = 'demo'
     GM = 'default'
 
