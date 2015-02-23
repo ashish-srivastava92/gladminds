@@ -12,8 +12,8 @@ from django.forms.models import model_to_dict
 from django.db.models.query_utils import Q
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.utils.urls import trailing_slash
-from gladminds.core.apis.authorization import MultiAuthorization,\
-    LoyaltyCustomAuthorization
+from gladminds.core.apis.authorization import MultiAuthorization
+#     LoyaltyCustomAuthorization
 from django.db.transaction import atomic
 import logging
 from django.db import transaction

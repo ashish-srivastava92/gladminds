@@ -446,7 +446,7 @@ def get_customer_info(data):
 @login_required()
 def exceptions(request, exception=None):
     groups = utils.stringify_groups(request.user)
-    if not (Roles.ASCS in groups or Roles.DEALERS in groups or Roles.SDMANAGERS):
+    if len(set([Roles.ASCS, Roles.DEALERS, Roles.SDMANAGERS]).intersection(set(groups))) == 0:
         return HttpResponseBadRequest()
     is_dealer = False
     if Roles.DEALERS in groups:
