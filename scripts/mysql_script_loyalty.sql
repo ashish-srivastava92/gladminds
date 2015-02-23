@@ -59,5 +59,3 @@ alter table bajaj_mechanic add column address_line_3 varchar(40) null;
 alter table bajaj_mechanic add column address_line_4 varchar(40) null;
 alter table bajaj_mechanic add column address_line_5 varchar(40) null;
 alter table bajaj_mechanic add column address_line_6 varchar(40) null;
-
-alter table bajaj_mechanic add constraint unique(phone_number);
