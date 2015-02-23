@@ -27,7 +27,7 @@ GROUP_MAPPING = {
                 Roles.SDMANAGERS : '/aftersell/helpdesk/login'
                 }
 
-USER_GROUPS = [ Roles.DEALERS, Roles.ASCS, Roles.DASCS, Roles.SDOWNERS, Roles.SDMANAGERS]
+USER_GROUPS = [ Roles.DEALERS, Roles.ASCS, Roles.DASCS, Roles.SDOWNERS, Roles.SDMANAGERS ]
 
 REDIRECT_USER ={
                  Roles.DEALERS : '/aftersell/register/asc',

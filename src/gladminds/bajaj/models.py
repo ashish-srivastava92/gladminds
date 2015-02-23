@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from gladminds.core import base_models
+from gladminds.core import base_models, constants
 from gladminds.core.auth_helper import GmApps
 from django.conf import settings
 from gladminds.core.model_helpers import validate_image, validate_file
@@ -334,11 +334,31 @@ class Retailer(base_models.Retailer):
     class Meta:
         app_label = _APP_NAME
 
+class Territory(base_models.Territory):
+    '''List of territories'''
+    
+    class Meta:
+        app_label = _APP_NAME
+
+class State(base_models.State):
+    ''' List of states mapped to territory'''
+    territory = models.ForeignKey(Territory)
+ 
+    class Meta:
+        app_label = _APP_NAME
+
+class City(base_models.City):
+    ''' List of cities mapped to states'''
+    state = models.ForeignKey(State)    
+   
+    class Meta:
+        app_label = _APP_NAME
 
 class Mechanic(base_models.Mechanic):
     '''details of Mechanic'''
     registered_by_distributor = models.ForeignKey(Distributor, null=True, blank=True)
     preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
+    state = models.ForeignKey(State)
     image_url = models.FileField(upload_to='{0}/bajaj/mechanics'.format(settings.ENV),
                                   max_length=255, null=True, blank=True,
                                   validators=[validate_image])
