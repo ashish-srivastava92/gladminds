@@ -466,6 +466,14 @@ CUSTOMER_PHONE_NUMBER_UPDATE = {
     "body": """""",
 }
 
+PHONE_NUMBER_UPDATE_COUNT_EXCEEDED_MAIL_TO_ASM = {
+
+    "sender": "feed-report@gladminds.co",
+    "receiver": ["karishma.c@hashedin.com"],
+    "subject": "Limit for updating Gladminds customer phone number exceeded",
+    "body": """""",
+}
+
 POLICY_DISCREPANCY_MAIL_TO_MANAGER = {
     "sender": "feed-report@gladminds.co",
     "receiver": ["pavankumar.s@hashedin.com"],

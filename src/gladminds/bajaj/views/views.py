@@ -20,7 +20,7 @@ from django.db.models import F
 from gladminds.bajaj import models
 from gladminds.core import utils
 from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message,\
-    send_mail_for_feed_failure
+    send_mail_for_feed_failure,send_mail_customer_phone_number_update_exceeds
 from gladminds.core.managers.mail import sent_otp_email,\
     send_recovery_email_to_admin, send_mail_when_vin_does_not_exist
 from gladminds.bajaj.services.coupons.import_feed import SAPFeed
@@ -168,7 +168,7 @@ def update_pass(request):
 @login_required()
 def register(request, menu):
     groups = utils.stringify_groups(request.user)
-    if not (Roles.ASCS in groups or Roles.DEALERS in groups or Roles.SDMANAGERS):
+    if not (Roles.ASCS in groups or Roles.DEALERS in groups or Roles.SDMANAGERS in groups):
         return HttpResponseBadRequest()
 
     if request.method == 'GET':
@@ -285,7 +285,13 @@ def register_customer(request, group=None):
                 if customer_obj.new_number != data_source[0]['customer_phone_number']:
                     update_count = models.Constant.objects.get(constant_name='mobile_number_update_count').constant_value
                     if customer_obj.mobile_number_update_count >= int(update_count) and group[0] != Roles.SDMANAGERS:
-                        print "dealer=",request.user,"customer =",data_source[0]['customer_name'],"new number =",data_source[0]['customer_phone_number'],"old number =",customer_obj.new_number
+                        customer_update = models.CustomerUpdateFailure(product_id = product_obj[0],
+                                                                       customer_name = data_source[0]['customer_name'],
+                                                                       customer_id = customer_obj.temp_customer_id,
+                                                                       updated_by = "dealer-"+ str(request.user),
+                                                                       old_number = customer_obj.new_number,
+                                                                       new_number = data_source[0]['customer_phone_number'])
+                        customer_update.save()
                         message = get_template('PHONE_NUMBER_UPDATE_COUNT_EXCEEDED')
                         return json.dumps({'message' : message})
 
@@ -314,8 +320,10 @@ def register_customer(request, group=None):
                         groups = utils.stringify_groups(request.user)
                         if Roles.ASCS in groups:
                             dealer_asc_id = "asc : " + customer_obj.dealer_asc_id
-                        else:
+                        elif Roles.DEALERS in groups:
                             dealer_asc_id = "dealer : " + customer_obj.dealer_asc_id
+                        else :
+                            dealer_asc_id = "manager : " + customer_obj.dealer_asc_id
                         
                         message = get_template('CUSTOMER_PHONE_NUMBER_UPDATE').format(customer_id=customer_obj.temp_customer_id, old_number=old_number, 
                                                                                   new_number=customer_obj.new_number, dealer_asc_id=dealer_asc_id)
@@ -345,7 +353,7 @@ def register_customer(request, group=None):
                 logger.info('[Temporary_cust_registration]:: ' + json.dumps(feed_response.remarks))
                 raise ValueError('purchase feed failed!')
             logger.info('[Temporary_cust_registration]:: purchase feed completed')
-    except Exception as ex:
+    except Exception as ex: 
         logger.info(ex)
         return HttpResponseBadRequest()
     if existing_customer:

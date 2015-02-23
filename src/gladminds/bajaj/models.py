@@ -214,6 +214,14 @@ class CustomerTempRegistration(base_models.CustomerTempRegistration):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Customer temporary info"
+
+class CustomerUpdateFailure(base_models.CustomerUpdateFailure):
+    '''stores data when phone number update exceeds the limit'''
+    product_id = models.ForeignKey(ProductData, null=False, blank=False)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Update Failures"
         
 class CustomerUpdateHistory(base_models.CustomerUpdateHistory):
     '''Stores the updated values of registered customer'''
