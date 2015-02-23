@@ -604,7 +604,7 @@ class Activity(BaseModel):
         verbose_name_plural = "Activity info"
 
 class BrandDepartment(BaseModel):
-    name = models.CharField(max_length=100, null=True, blank=True)
+    name = models.CharField(max_length=100)
     description = models.CharField(max_length=100, null=True, blank=True)
     
     class Meta:
@@ -612,7 +612,7 @@ class BrandDepartment(BaseModel):
         verbose_name_plural = "Department Info"
     
 class DepartmentSubCategories(BaseModel):
-    name = models.CharField(max_length=100, null=True, blank=True)
+    name = models.CharField(max_length=100)
     description = models.CharField(max_length=100, null=True, blank=True)
     
     class Meta:
