@@ -12,13 +12,11 @@ BY_DEFAULT_RECORDS_PER_PAGE = RECORDS_PER_PAGE[0]
 
 ALL = 'all'
 
-PROVIDERS = ['asc', 'dasc', 'dealer', 'helpdesk', 'nsm', 'asm']
+PROVIDERS = ['asc', 'dasc', 'dealer', 'helpdesk']
 
 PROVIDER_MAPPING = {
                     'dealer' : 'dealer/login.html',
-                    'helpdesk' : 'service-desk/login.html',
-                    'nsm':'dealer/login.html',
-                    'asm':'dealer/login.html'
+                    'helpdesk' : 'service-desk/login.html'
                  }
 
 GROUP_MAPPING = {
@@ -29,15 +27,13 @@ GROUP_MAPPING = {
                 Roles.SDMANAGERS : '/aftersell/helpdesk/login'
                 }
 
-USER_GROUPS = [ Roles.DEALERS, Roles.ASCS, Roles.DASCS, Roles.SDOWNERS, Roles.SDMANAGERS, Roles.NSMS, Roles.ASMS]
+USER_GROUPS = [ Roles.DEALERS, Roles.ASCS, Roles.DASCS, Roles.SDOWNERS, Roles.SDMANAGERS ]
 
 REDIRECT_USER ={
                  Roles.DEALERS : '/aftersell/register/asc',
                  Roles.ASCS : '/aftersell/register/sa',
                  Roles.SDOWNERS : '/aftersell/servicedesk/',
-                 Roles.SDMANAGERS : '/aftersell/servicedesk/',
-                 Roles.NSMS : "/aftersell/servicedesk/",
-                 Roles.ASMS : "/aftersell/servicedesk/"
+                 Roles.SDMANAGERS : '/aftersell/servicedesk/'
                 }
 
 TEMPLATE_MAPPING = {
