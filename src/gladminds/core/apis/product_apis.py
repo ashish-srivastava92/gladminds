@@ -37,7 +37,7 @@ class ProductResource(CustomBaseModelResource):
                      "customer_phone_number": ALL,
                      "customer_name": ALL,
                      "customer_address": ALL,
-                     "purchase_date": ['gte', 'lte'],
+                     "purchase_date": ['gte', 'lte', 'isnull'],
                      "invoice_date": ['gte', 'lte']
                      }
 

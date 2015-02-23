@@ -19,6 +19,10 @@ def get_vins():
     return models.ProductData.objects.all().count()
 
 
+def get_customers_count():
+    return models.ProductData.objects.filter(purchase_date__isnull=True).count()
+
+
 def get_success_and_failure_counts(objects):
     fail = 0
     success = 0
@@ -26,6 +30,7 @@ def get_success_and_failure_counts(objects):
         fail = fail + int(data.failed_data_count)
         success = success + int(data.success_data_count)
     return success, fail
+
 
 def get_set_cache(key, data_func, timeout=15):
     '''
@@ -71,7 +76,8 @@ class OverallStatusResource(CustomBaseResource):
 
     def obj_get_list(self, bundle, **kwargs):
         self.is_authenticated(bundle.request)
-        vins = get_set_cache('gm_vins', get_vins)
+        vins = get_set_cache('gm_vins', get_vins, timeout=30)
+        customers = get_set_cache('gm_customers', get_customers_count, timeout=35)
         coupons_closed = get_set_cache('gm_coupons_closed',
                                        models.CouponData.objects.closed_count,
                                        timeout=13)
@@ -120,7 +126,9 @@ class OverallStatusResource(CustomBaseResource):
                                      create_dict(["11", "# of SAs",
                                                   sas]),
                                      create_dict(["12", "# of Active SAs",
-                                                  sas_active])
+                                                  sas_active]),
+                                     create_dict(["13", "# of Customers",
+                                                  customers])
                                      ]
                    )
 
