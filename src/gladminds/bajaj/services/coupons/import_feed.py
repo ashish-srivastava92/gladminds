@@ -16,7 +16,7 @@ from gladminds.bajaj import models
 from gladminds.core.managers.audit_manager import feed_log, sms_log
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.auth_helper import Roles
-from gladminds.bajaj.services.feed_resources import BaseFeed
+from gladminds.bajaj.services.feed_resources import BaseFeed, BaseExportFeed
 logger = logging.getLogger("gladminds")
 
 USER_GROUP = {'dealer': Roles.DEALERS,
@@ -107,8 +107,6 @@ class SAPFeed(object):
                                              feed_remark=feed_remark)
         return feed_obj.import_data()
 
-
-
 class BrandProductTypeFeed(BaseFeed):
 
     def import_data(self):
@@ -170,6 +168,14 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
             return True
         return False
 
+def compare_purchase_date(date_of_purchase):
+    valid_msg_days = models.Constant.objects.get(constant_name = "welcome_msg_active_days").constant_value
+    valid_date = datetime.now().date()-timedelta(days=int(valid_msg_days))
+    days = date_of_purchase
+    if days >= valid_date:
+        return True
+    else:
+        return False
 
 class ProductDispatchFeed(BaseFeed):
 
@@ -240,7 +246,6 @@ class ProductDispatchFeed(BaseFeed):
 class ProductPurchaseFeed(BaseFeed):
 
     def import_data(self):
-
         for product in self.data_source:
             try:
                 product_data = models.ProductData.objects.get(product_id=product['vin'])
@@ -264,8 +269,19 @@ class ProductPurchaseFeed(BaseFeed):
                 
                 post_save.connect(
                     update_coupon_data, sender=models.ProductData)
+            except ObjectDoesNotExist as done:
+                ex='[Info: ProductPurchaseFeed_product_data]: VIN- {0} :: {1}'''.format(product['vin'], done)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+                vin_sync_feed = models.VinSyncFeedLog.objects.filter(product_id = product['vin'],ucn_count=-1)
+                if vin_sync_feed:
+                   vin_sync_feed=vin_sync_feed[0]
+                   vin_sync_feed.sent_to_sap=False
+                else:
+                    vin_sync_feed=models.VinSyncFeedLog(product_id = product['vin'],ucn_count=-1) 
+                vin_sync_feed.save()
             except Exception as ex:
-                ex = '''[Exception: ProductPurchaseFeed_product_data]:{0} VIN - {1}'''.format(ex, product['vin'])
+                ex = '''[Exception: ProductPurchaseFeed_product_data]: VIN- {0} :: {1}'''.format(product['vin'], ex)
                 self.feed_remark.fail_remarks(ex)
                 logger.error(ex)
                 continue
@@ -317,8 +333,13 @@ def update_coupon_data(sender, **kwargs):
                 message = templates.get_template('SEND_TEMPORARY_CUSTOMER_ID').format(
                     customer_name=customer_name, sap_customer_id=customer_id)
             else:
-                message = templates.get_template('SEND_CUSTOMER_ON_PRODUCT_PURCHASE').format(
+                if compare_purchase_date(product_purchase_date):
+                    message = templates.get_template('SEND_CUSTOMER_ON_PRODUCT_PURCHASE').format(
                     customer_name=customer_name, sap_customer_id=customer_id)
+                else:
+                    message = templates.get_template('SEND_REPLACED_CUSTOMER_ID').format(
+                    customer_name=customer_name, sap_customer_id=customer_id)
+            
             sms_log(
                 receiver=customer_phone_number, action='SEND TO QUEUE', message=message)
             send_job_to_queue(send_on_product_purchase, {"phone_number":customer_phone_number, "message":message, "sms_client":settings.SMS_CLIENT}) 
@@ -364,9 +385,7 @@ class CreditNoteFeed(BaseFeed):
     def import_data(self):
         for credit_note in self.data_source:
             try:
-                message=coupon_data=dealer_data=None
-                if credit_note['dealer']:
-                    dealer_data = self.check_or_create_dealer(dealer_id=credit_note['dealer'])
+                message=coupon_data=None
                 product_data = models.ProductData.objects.filter(product_id=credit_note['vin'])
                 if not product_data:
                     message='VIN: {0} does not exits'.format(credit_note['vin'])

@@ -37,6 +37,7 @@ from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.services.message_template import get_template
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services.coupons import export_feed
+from gladminds.core.auth import otp_handler
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
@@ -110,29 +111,31 @@ def change_password(request):
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def generate_otp(request):
     if request.method == 'POST':
-        phone_number = '' 
         try:
             username = request.POST['username']
             user = User.objects.get(username=username)
-            user_profile_obj = models.UserProfile.objects.filter(user=user) 
+            phone_number = ''
+            user_profile_obj = models.UserProfile.objects.filter(user=user)
             if user_profile_obj:
-                phone_number = (user_profile_obj[0]).phone_number
+                phone_number = user_profile_obj[0].phone_number
             logger.info('OTP request received . username: {0}'.format(username))
-            token = utils.get_token(user, phone_number, email=user.email)
+            token = otp_handler.get_otp(user=user)
             message = get_template('SEND_OTP').format(token)
             send_job_to_queue(send_otp, {'phone_number': phone_number, 'message': message,
                                          'sms_client': settings.SMS_CLIENT})
             logger.info('OTP sent to mobile {0}'.format(phone_number))
-            #Send email if email address exist
+#             #Send email if email address exist
             if user.email:
                 sent_otp_email(data=token, receiver=user.email, subject='Forgot Password')
+        
             return HttpResponseRedirect('/aftersell/users/otp/validate?username='+username)
+        
         except Exception as ex:
             logger.error('Invalid details, mobile {0}'.format(phone_number))
-            return HttpResponseRedirect('/aftersell/users/otp/generate?details=invalid')
+            return HttpResponseRedirect('/aftersell/users/otp/generate?details=invalid')    
+    
     elif request.method == 'GET':
         return render(request, 'portal/get_otp.html')
-
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def validate_otp(request):
@@ -143,11 +146,13 @@ def validate_otp(request):
             otp = request.POST['otp']
             username = request.POST['username']
             logger.info('OTP {0} recieved for validation. username {1}'.format(otp, username))
-            utils.validate_otp(otp, username)
+            user = User.objects.get(username=username)
+            user_profile = models.UserProfile.objects.get(user=user)
+            otp_handler.validate_otp(otp, user=user_profile)
             logger.info('OTP validated for name {0}'.format(username))
             return render(request, 'portal/reset_pass.html', {'otp': otp})
-        except:
-            logger.error('OTP validation failed for name {0}'.format(username))
+        except Exception as ex:
+            logger.error('OTP validation failed for name {0} : {1}'.format(username, ex))
             return HttpResponseRedirect('/aftersell/users/otp/generate?token=invalid')
 
 
@@ -170,6 +175,7 @@ def register(request, menu):
     groups = utils.stringify_groups(request.user)
     if not (Roles.ASCS in groups or Roles.DEALERS in groups):
         return HttpResponseBadRequest()
+
     if request.method == 'GET':
         user_id = request.user
         return render(request, TEMPLATE_MAPPING.get(menu, 'portal/404.html'), {'active_menu' : ACTIVE_MENU.get(menu)\
@@ -290,16 +296,20 @@ def register_customer(request, group=None):
                     if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']):
                         message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
                         return json.dumps({'message': message})
-                    customer_obj.old_number = customer_obj.new_number
+                    old_number = customer_obj.new_number
                     customer_obj.new_number = data_source[0]['customer_phone_number']
                     customer_obj.product_data = product_obj[0]
                     customer_obj.sent_to_sap = False
                     customer_obj.dealer_asc_id = str(request.user)
                     customer_obj.email_flag = False
                     customer_obj.mobile_number_update_count+=1
-                    customer_obj.update_history = str(customer_obj.old_number) + (", "+ customer_obj.update_history if customer_obj.update_history else "")
+                    update_history = models.CustomerUpdateHistory(temp_customer=customer_obj,
+                                                                  updated_field='Phone Number',
+                                                                  old_value=old_number,
+                                                                  new_value=customer_obj.new_number)
+                    update_history.save()
                     message = get_template('CUSTOMER_MOBILE_NUMBER_UPDATE').format(customer_name=customer_obj.new_customer_name, new_number=customer_obj.new_number)
-                    for phone_number in [customer_obj.new_number, customer_obj.old_number]:
+                    for phone_number in [customer_obj.new_number, old_number]:
                         phone_number = utils.get_phone_number_format(phone_number)
                         sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
                         send_job_to_queue(send_customer_phone_number_update_message, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
@@ -311,7 +321,7 @@ def register_customer(request, group=None):
                         else:
                             dealer_asc_id = "dealer : " + customer_obj.dealer_asc_id
                         
-                        message = get_template('CUSTOMER_PHONE_NUMBER_UPDATE').format(customer_id=customer_obj.temp_customer_id, old_number=customer_obj.old_number, 
+                        message = get_template('CUSTOMER_PHONE_NUMBER_UPDATE').format(customer_id=customer_obj.temp_customer_id, old_number=old_number, 
                                                                                   new_number=customer_obj.new_number, dealer_asc_id=dealer_asc_id)
                         managers = models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS)
                         for manager in managers:
@@ -326,7 +336,6 @@ def register_customer(request, group=None):
                 customer_obj = models.CustomerTempRegistration(product_data=product_obj[0], 
                                                                new_customer_name = data_source[0]['customer_name'],
                                                                new_number = data_source[0]['customer_phone_number'],
-                                                               old_number = data_source[0]['customer_phone_number'],
                                                                product_purchase_date = data_source[0]['product_purchase_date'],
                                                                temp_customer_id = temp_customer_id, email_flag=True)
             customer_obj.save()

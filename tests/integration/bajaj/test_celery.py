@@ -43,7 +43,7 @@ class CeleryTestCaseBase(base_integration.BrandResourceTestCase):
         phone_number = "9999999"
         sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'SAP001'}
         self.validate_coupon(sms_dict, phone_number)
-
+        
         customer_message_task_info = self.applied_tasks[1]
         self.assertEqual(customer_message_task_info['options']["countdown"], settings.DELAY_IN_CUSTOMER_UCN_MESSAGE, 'Set delay in celery job')
         self.assertEqual(customer_message_task_info['kwargs']["phone_number"], "232323232", 'Customer phone number should be correct')

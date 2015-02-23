@@ -7,11 +7,9 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 from gladminds.core import utils
-from gladminds.bajaj import models as models
 from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, ALL
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.core.services import message_template as templates
-from gladminds.bajaj.services.coupons import free_service_coupon as fsc
 from gladminds.sqs_tasks import send_coupon, send_sms,\
     send_servicedesk_feedback_detail
 from gladminds.core.managers.mail import send_feedback_received, \
@@ -26,6 +24,7 @@ from gladminds.core.core_utils.date_utils import convert_utc_to_local_time, \
 from gladminds.core.managers import mail
 from django.db.transaction import atomic
 import uuid
+from gladminds.core.model_fetcher import models
 
 LOG = logging.getLogger('gladminds')
 
@@ -42,18 +41,19 @@ class SDActions():
     COMMENT_UPDATE = "updated comment"
     DUE_DATE = "changed due_date"
 
+
 def get_feedbacks(user, status, priority, type, search=None):
     feedbacks = []
     if type == ALL or type is None:
         type_filter = get_list_from_set(FEEDBACK_TYPE)
     else:
         type_filter = [type]
-    
+
     if priority == ALL or priority is None:
         priority_filter = get_list_from_set(PRIORITY)
     else:
         priority_filter = [priority]
-            
+
     if status is None or status == 'active':
         status_filter = ['Open', 'Pending', 'In Progress']
     else:
@@ -81,7 +81,7 @@ def get_feedbacks(user, status, priority, type, search=None):
             sa_id_list.append(user)
             feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
                                                        priority__in=priority_filter, type__in=type_filter
-                                                     ).order_by('-created_date')
+                                                    ).order_by('-created_date')
     if user.groups.filter(name=Roles.SDMANAGERS).exists():
         feedbacks = models.Feedback.objects.filter(status__in=status_filter, priority__in=priority_filter,
                                                    type__in=type_filter).order_by('-created_date')
@@ -92,6 +92,7 @@ def get_feedbacks(user, status, priority, type, search=None):
                                                    priority__in=priority_filter, type__in=type_filter).order_by('-created_date')
 
     return feedbacks
+
 
 def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=None):
     created_date = convert_utc_to_local_time(feedback_obj.created_date)
@@ -114,17 +115,6 @@ def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=Non
         send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     return {'status': True, 'message': message}
 
-def check_role_of_initiator(phone_number):
-    active_sa = fsc.validate_service_advisor(phone_number)
-    if  active_sa:
-        return "SA"
-    else:
-        check_customer_obj = models.ProductData.objects.filter(
-                                        customer_phone_number=phone_number)
-        if check_customer_obj:
-            return "Customer"
-        else:
-            return "other"
 
 def create_servicedesk_user(name, phone_number, email):
     user_profile = models.UserProfile.objects.filter(user__username=str(name))
@@ -138,8 +128,9 @@ def create_servicedesk_user(name, phone_number, email):
     else:
         servicedesk_user = models.ServiceDeskUser(name=name, phone_number=phone_number, email=email)
         servicedesk_user.save()
-    
+
     return servicedesk_user
+
 
 def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_detail=False):
     ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
@@ -157,7 +148,7 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
             gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
                                                             message=sms_dict['message'], status="Open",
                                                             created_date=datetime.datetime.now()                                                            
-                                                        ) 
+                                                            )
         gladminds_feedback_object.save()
         if sms_dict['file_location']:
             file_obj = sms_dict['file_location']
@@ -198,6 +189,7 @@ def get_feedback(feedback_id, user):
     else:
         return models.Feedback.objects.get(id=feedback_id)
 
+
 def get_servicedesk_users(designation):
     users = User.objects.filter(groups__name__in=designation)
     if len(users) > 0:
@@ -207,9 +199,11 @@ def get_servicedesk_users(designation):
         LOG.info("No user with designation SDO exists")
         return None
 
+
 def get_comments(feedback_id):
     comments = models.Comment.objects.filter(feedback_object_id=feedback_id)
     return comments
+
 
 def set_due_date(priority, feedback_obj):
     '''
@@ -225,6 +219,7 @@ def set_due_date(priority, feedback_obj):
     reminder_date = due_date - datetime.timedelta(seconds=total_seconds)
     return {'due_date':due_date, 'reminder_date':reminder_date}
 
+
 def get_reporter_details(reporter, value="phone_number"):
     if value == "email":
         if reporter.email:
@@ -236,20 +231,23 @@ def get_reporter_details(reporter, value="phone_number"):
             return reporter.phone_number
         else:
             return reporter.user_profile.phone_number
-    
+
 
 def send_mail_to_reporter(reporter_email_id, feedback_obj, template):
     context = create_context(template, feedback_obj)
     mail.send_email_to_initiator_when_due_date_is_changed(context, reporter_email_id)
 
+
 def send_mail_to_dealer(feedback_obj, email_id, template):
     context = create_context(template, feedback_obj)
     mail.send_email_to_dealer_after_issue_assigned(context, email_id)
+
 
 def update_feedback_activities(feedback, action, original_value, new_value):
     feedback_activity = models.Activity(feedback=feedback, action=action, original_value=original_value,
                                         new_value=new_value)
     feedback_activity.save()
+
 
 def get_dealer_asc_email(feedback_obj):
     user = feedback_obj.reporter.user_profile.user
@@ -260,8 +258,8 @@ def get_dealer_asc_email(feedback_obj):
 
     return dealer_asc_obj 
 
-     
-@atomic   
+
+@atomic
 def modify_feedback(feedback_obj, data, user, host):
     status = get_list_from_set(FEEDBACK_STATUS)
     comment_object = None
@@ -419,7 +417,7 @@ def modify_feedback(feedback_obj, data, user, host):
                                                          dealer_asc_obj.user.email)
             else:
                 LOG.info("Dealer / Asc emailId not found.")
-                    
+
         context = create_context('TICKET_RESOLVED_DETAIL_TO_BAJAJ',
                                  feedback_obj)
         mail.send_email_to_bajaj_after_issue_resolved(context)

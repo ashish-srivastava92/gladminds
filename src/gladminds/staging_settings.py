@@ -21,7 +21,7 @@ DATABASES = {
         'NAME': 'gm',
         'USER': 'gladminds',
         'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'HOST': 'gladminds-dev.chnnvvffqwop.us-east-1.rds.amazonaws.com',
         'PORT': '3306',
     },
     'bajaj': {
@@ -29,7 +29,7 @@ DATABASES = {
         'NAME': 'bajaj',
         'USER': 'gladminds',
         'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'HOST': 'gladminds-dev.chnnvvffqwop.us-east-1.rds.amazonaws.com',
         'PORT': '3306',
     },
     'demo': {
@@ -37,7 +37,7 @@ DATABASES = {
         'NAME': 'demo',
         'USER': 'gladminds',
         'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'HOST': 'gladminds-dev.chnnvvffqwop.us-east-1.rds.amazonaws.com',
         'PORT': '3306',
     },
     'afterbuy': {
@@ -45,7 +45,7 @@ DATABASES = {
         'NAME': 'afterbuy',
         'USER': 'gladminds',
         'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'HOST': 'gladminds-dev.chnnvvffqwop.us-east-1.rds.amazonaws.com',
         'PORT': '3306',
     }
 }
@@ -104,24 +104,24 @@ SAP_CRM_DETAIL = {
                   'password':'welcome123'
                   }
 
-ASC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
+ASC_WSDL_URL = "http://staging.bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
 
-COUPON_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/redeem-feed/?wsdl&v0"
+COUPON_WSDL_URL = "http://staging.bajaj.gladminds.co/api/v1/redeem-feed/?wsdl&v0"
 COUPON_WSDL = 'qa_coupon_redeem.wsdl'
 
-CUSTOMER_REGISTRATION_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
+CUSTOMER_REGISTRATION_WSDL_URL = "http://staging.bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
 
-VIN_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/vin-sync-feed/?wsdl&v0"
+VIN_SYNC_WSDL_URL="http://staging.bajaj.gladminds.co/api/v1/vin-sync-feed/?wsdl&v0"
 VIN_SYNC_WSDL='qa_vin_sync.wsdl'
 
-MEMBER_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/member-sync-feed/?wsdl&v0"
+MEMBER_SYNC_WSDL_URL="http://staging.bajaj.gladminds.co/api/v1/member-sync-feed/?wsdl&v0"
 MEMBER_SYNC_WSDL='qa_member_sync_feed.wsdl'
 
-PURCHASE_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/purchase-sync-feed/?wsdl&v0"
+PURCHASE_SYNC_WSDL_URL="http://staging.bajaj.gladminds.co/api/v1/purchase-sync-feed/?wsdl&v0"
 PURCHASE_SYNC_WSDL='qa_purchase_sync_feed.wsdl'
 
-WSDL_TNS="http://qa.bajaj.gladminds.co/api/v1/feed/"
+WSDL_TNS="http://staging.bajaj.gladminds.co/api/v1/feed/"
 
 ENABLE_AMAZON_SQS = True
 
@@ -151,4 +151,4 @@ VIN_SYNC_FEED["receiver"] = ["gmdev@hashedin.com"]
 MAIL_DETAIL["subject"] = "GladMinds Feed Report QA"
 MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 #######################################################################
-ENV = "qa"
+ENV = "staging"

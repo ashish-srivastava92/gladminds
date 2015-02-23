@@ -45,6 +45,7 @@ class CustomerRegistrationTest(BrandResourceTestCase, BaseTestCase):
         brand = self.brand
         system = self.system
         response = brand.send_sms(url=self.MESSAGE_URL, message=self.CUST_REG)
+        #print 'response: ',response
         system.verify_result(input=response.status_code, output=200)
  
     def test_invalid_message(self):

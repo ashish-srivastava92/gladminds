@@ -8,32 +8,9 @@ import logging
 from gladminds.core import utils
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.bajaj.services.coupons.feed_models import save_to_db
-from gladminds.bajaj.services.coupons.import_feed import SAPFeed
+from gladminds.bajaj.services.feed_resources import BaseExportFeed
 import json
 logger = logging.getLogger("gladminds")
-
-
-class BaseExportFeed(object):
-
-    def __init__(self, username=None, password=None, wsdl_url=None,\
-                                                        feed_type=None):
-        self.username = username
-        self.password = password
-        self.wsdl_url = wsdl_url
-        self.feed_type = feed_type
-
-    def get_http_authenticated(self):
-        return HttpAuthenticated(username=self.username,\
-                                 password=self.password)
-
-    def get_client(self):
-        transport = HttpAuthenticated(\
-            username=self.username, password=self.password)
-        client = Client(url=self.wsdl_url, transport=transport)
-        cache = client.options.cache
-        cache.setduration(seconds=settings.FILE_CACHE_DURATION)
-        return client
-
 
 class ExportMemberTempFeed(BaseExportFeed):
     
@@ -51,12 +28,12 @@ class ExportMemberTempFeed(BaseExportFeed):
                         "MIDDLE_NAME": mechanic.middle_name,
                         "LAST_NAME": mechanic.first_name,
                         "BIRTH_DT": mechanic.date_of_birth.date().strftime("%Y-%m-%d"),
-                        "ADDR1": mechanic.adress_line_1,
-                        "ADDR2": mechanic.adress_line_2,
-                        "ADDR3": mechanic.adress_line_3,
-                        "ADDR4": mechanic.adress_line_4,
-                        "ADDR5": mechanic.adress_line_5,
-                        "ADDR6": mechanic.adress_line_6,
+                        "ADDR1": mechanic.address_line_1,
+                        "ADDR2": mechanic.address_line_2,
+                        "ADDR3": mechanic.address_line_3,
+                        "ADDR4": mechanic.address_line_4,
+                        "ADDR5": mechanic.address_line_5,
+                        "ADDR6": mechanic.address_line_6,
                         "STATE": mechanic.state,
                         "PIN_CODE": mechanic.pincode,
                         "DSB_CODE": mechanic.registered_by_distributor.distributor_id,

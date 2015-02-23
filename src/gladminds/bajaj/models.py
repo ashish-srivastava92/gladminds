@@ -17,7 +17,7 @@ class BrandProductCategory(base_models.BrandProductCategory):
 class UserProfile(base_models.UserProfile):
     user = models.OneToOneField(User, primary_key=True,
                                         related_name='bajaj_users')
-
+    
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Brand Users"
@@ -214,6 +214,14 @@ class CustomerTempRegistration(base_models.CustomerTempRegistration):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Customer temporary info"
+        
+class CustomerUpdateHistory(base_models.CustomerUpdateHistory):
+    '''Stores the updated values of registered customer'''
+    temp_customer = models.ForeignKey(CustomerTempRegistration)
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Customer temporary Update History"
 
 
 class UserPreference(base_models.UserPreference):
