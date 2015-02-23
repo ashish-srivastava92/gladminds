@@ -253,3 +253,33 @@ class DiscrepantAccumulationResource(CustomBaseModelResource):
         total_points = mechanic.total_points + accumulate -redeem
         mechanic.total_points = total_points
         mechanic.save()
+
+class TerritoryResource(CustomBaseModelResource):
+    
+    class Meta:
+        queryset = models.Territory.objects.all()
+        resource_name = "territories"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'put', 'delete']
+        always_return_data = True
+
+class StateResource(CustomBaseModelResource):
+    territory = fields.ForeignKey(TerritoryResource, 'territory')
+    
+    class Meta:
+        queryset = models.State.objects.all()
+        resource_name = "states"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        always_return_data = True
+
+class CityResource(CustomBaseModelResource):    
+    state = fields.ForeignKey(StateResource, 'state')
+    
+    class Meta:
+        queryset = models.City.objects.all()
+        resource_name = "cities"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        always_return_data = True
+

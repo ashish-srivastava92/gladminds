@@ -600,3 +600,18 @@ TRANSFERPOINTS = {
                 "from": "ME00003",
                 "to": "ME00004",
                 }
+
+TERRITORY = {
+             'territory':'NORTH' 
+             }
+
+STATE = {
+         'state_name':'Karnataka',
+         'state_code':'KAR',
+         'territory': "/loyalty/v1/territories/1/",
+         }
+
+CITY = {
+        'city':'Bangalore',     
+        'state':"/loyalty/v1/states/1/",      
+        }

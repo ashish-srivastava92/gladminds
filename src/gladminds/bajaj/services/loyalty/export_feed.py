@@ -15,7 +15,7 @@ logger = logging.getLogger("gladminds")
 class ExportMemberTempFeed(BaseExportFeed):
     
     def export_data(self, start_date=None, end_date=None):
-        results = models.Mechanic.objects.filter(sent_to_sap=0, form_status='Complete')
+        results = models.Mechanic.objects.filter(sent_to_sap=0, form_status='Complete').select_related('state')
         items = []
         total_failed = 0
         item_batch = {
@@ -34,7 +34,7 @@ class ExportMemberTempFeed(BaseExportFeed):
                         "ADDR4": mechanic.address_line_4,
                         "ADDR5": mechanic.address_line_5,
                         "ADDR6": mechanic.address_line_6,
-                        "STATE": mechanic.state,
+                        "STATE": mechanic.state.state_code,
                         "PIN_CODE": mechanic.pincode,
                         "DSB_CODE": mechanic.registered_by_distributor.distributor_id,
                         "MOBILE_NO":str(mechanic.phone_number),

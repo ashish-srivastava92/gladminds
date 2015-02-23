@@ -29,6 +29,9 @@ loyalty_v1.register(loyalty_apis.AccumulationResource())
 loyalty_v1.register(loyalty_apis.CommentThreadResource())
 loyalty_v1.register(loyalty_apis.WelcomeKitResource())
 loyalty_v1.register(loyalty_apis.DiscrepantAccumulationResource())
+loyalty_v1.register(loyalty_apis.TerritoryResource())
+loyalty_v1.register(loyalty_apis.StateResource())
+loyalty_v1.register(loyalty_apis.CityResource())
 
 
 urlpatterns = patterns('',

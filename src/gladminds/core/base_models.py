@@ -827,7 +827,7 @@ class Mechanic(BaseModel):
     first_name = models.CharField(max_length=50, null=True, blank=True)
     middle_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True, blank=True)
-    phone_number = PhoneField(skip_check=True, null=True, blank=True)
+    phone_number = PhoneField(unique=True)
     date_of_birth = models.DateField(null=True, blank= True)
 
     address_line_1 = models.CharField(max_length=40, null=True, blank=True)
@@ -845,7 +845,6 @@ class Mechanic(BaseModel):
     locality = models.CharField(max_length=50, null=True, blank=True)
     tehsil = models.CharField(max_length=50, null=True, blank=True)
     district = models.CharField(max_length=50, null=True, blank=True)
-    state = models.CharField(max_length=50, null=True, blank=True)
     pincode = models.CharField(max_length=50, null=True, blank=True)
     shop_wall_length = models.IntegerField(max_length=50, null=True, blank=True)
     shop_wall_width = models.IntegerField(max_length=50, null=True, blank=True)
@@ -1115,6 +1114,38 @@ class LoyaltySLA(models.Model):
         
     def __unicode__(self):
         return str(self.status)
+
+class Territory(BaseModel):
+    territory = models.CharField(max_length=20, unique = True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Territory info"
+
+    def __unicode__(self):
+        return self.territory
+
+
+class State(BaseModel):
+    state_name = models.CharField(max_length=30, unique = True)
+    state_code = models.CharField(max_length=10, unique = True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "State info"
+
+    def __unicode__(self):
+        return self.state_name
+    
+class City(BaseModel):
+    city = models.CharField(max_length=50, unique = True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "City info"
+
+    def __unicode__(self):
+        return self.city
 
 class DateDimension(models.Model):
     date_id = models.BigIntegerField(primary_key=True)
