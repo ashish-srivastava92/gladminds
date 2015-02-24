@@ -560,16 +560,10 @@ class MechanicAdmin(GmModelAdmin):
         return form
 
     def save_model(self, request, obj, form, change):
-        form_status = True
-        for field in obj._meta.fields:
-            if field.name in constants.MANDATORY_MECHANIC_FIELDS and not getattr(obj, field.name):
-                form_status = False
-        obj.phone_number=utils.mobile_format(obj.phone_number)
+        if not (obj.phone_number == '' or (len(obj.phone_number) < 10)):
+            obj.phone_number=utils.mobile_format(obj.phone_number)
         super(MechanicAdmin, self).save_model(request, obj, form, change)
-        if form_status and not obj.sent_sms:
-            LoyaltyService.send_welcome_sms(obj)
-            LoyaltyService.initiate_welcome_kit(obj)
-
+        
 class CommentThreadInline(TabularInline):
     model = models.CommentThread
     fields = ('created_date', 'user', 'message')
