@@ -375,7 +375,14 @@ class ServiceDeskUserAdmin(GmModelAdmin):
 class NSMAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
     search_fields = ('nsm_id', 'name', 'phone_number', 'territory')
-    list_display = ('nsm_id', 'name', 'email', 'phone_number','territory')
+    list_display = ('nsm_id', 'name', 'email', 'phone_number','get_territory')
+
+    def get_territory(self, obj):
+        territories = obj.territory.all()
+        if territories:
+            return ' | '.join([str(territory.territory) for territory in territories])
+        else:
+            return None
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('nsm_id',)
@@ -391,8 +398,16 @@ class ASMAdmin(GmModelAdmin):
     search_fields = ('asm_id', 'nsm__name',
                      'phone_number', 'state')
     list_display = ('asm_id', 'name', 'email',
-                     'phone_number', 'state', 'nsm')
+                     'phone_number', 'get_state', 'nsm')
     
+
+    def get_state(self, obj):
+        states = obj.state.all()
+        if states:
+            return ' | '.join([str(state.state_name) for state in states])
+        else:
+            return None
+
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('asm_id',)
         form = super(ASMAdmin, self).get_form(request, obj, **kwargs)
