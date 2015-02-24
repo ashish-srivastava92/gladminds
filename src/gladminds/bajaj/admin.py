@@ -384,6 +384,8 @@ class NSMAdmin(GmModelAdmin):
         else:
             return None
 
+    get_territory.short_description = 'Territory'
+
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('nsm_id',)
         form = super(NSMAdmin, self).get_form(request, obj, **kwargs)
@@ -407,6 +409,7 @@ class ASMAdmin(GmModelAdmin):
             return ' | '.join([str(state.state_name) for state in states])
         else:
             return None
+    get_state.short_description = 'State'
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('asm_id',)

@@ -178,7 +178,6 @@ class RedemptionResource(CustomBaseModelResource):
                                                 'user':'partner__user'
                                                       },
                                   Roles.DEALERS:{
-                                                 'query':[],
                                                  'user':'registered_by_distributor__user' 
                                                  }
                            }
