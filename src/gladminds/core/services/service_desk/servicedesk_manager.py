@@ -137,17 +137,19 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
     manager_obj = User.objects.get(groups__name=Roles.SDMANAGERS)
     try:
         servicedesk_user = create_servicedesk_user(name, phone_number, email)
-
+        sub_category = models.DepartmentSubCategories.objects.get(id=sms_dict['sub-department'])
         if with_detail:
             gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
                                                             type=sms_dict['type'],
                                                             summary=sms_dict['summary'], description=sms_dict['description'],
-                                                            status="Open", created_date=datetime.datetime.now(), priority=sms_dict['priority']
+                                                            status="Open", created_date=datetime.datetime.now(), priority=sms_dict['priority'],
+                                                            sub_department = sub_category
                                                             )
         else:
             gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
                                                             message=sms_dict['message'], status="Open",
-                                                            created_date=datetime.datetime.now(), priority=sms_dict['priority']                                                            
+                                                            created_date=datetime.datetime.now(), priority=sms_dict['priority'],
+                                                            sub_department = sub_category                                                            
                                                             )
         gladminds_feedback_object.save()
         if sms_dict['file_location']:

@@ -50,6 +50,7 @@ AUDIT_ACTION = 'SEND TO QUEUE'
 @login_required()
 def redirect_url(request):
     brand_url = settings.HOME_URLS.get(settings.BRAND, {})
+    brand_meta = settings.BRAND_META.get(settings.BRAND, {})
     next_url = None
     if request.POST:
         url_params = str(request.META.get('HTTP_REFERER')).split('next=')
@@ -65,7 +66,7 @@ def redirect_url(request):
         if user_group in brand_url.keys():
             return "/"
 
-    return '/admin/'
+    return brand_meta['admin_url']
 
 @login_required()
 def get_services(request):

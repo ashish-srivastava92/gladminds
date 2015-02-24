@@ -96,7 +96,7 @@ def save_feedback(request):
     
 
 def save_help_desk_data(request):
-    fields = ['description', 'advisorMobile', 'type', 'summary', 'priority']
+    fields = ['description', 'advisorMobile', 'type', 'summary']
     sms_dict = {}
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)

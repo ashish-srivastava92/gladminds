@@ -315,7 +315,6 @@ function vinSyncFeed(data){
                 $('.type').val('');
                 $('.description').val('');
                 $('.advisorMobile').val('');
-                $('.priority').val('')
                 setTimeout(function() {
                     parent.window.location='/aftersell/servicedesk/helpdesk';
                 }, 2000);
@@ -357,7 +356,6 @@ function vinSyncFeed(data){
                 $('.type').val('');
                 $('.description').val('');
                 $('.advisorMobile').val('');
-                $('.priority').val('');
                 setTimeout(function() {
                     parent.window.location='/aftersell/servicedesk/';
                 }, 2000);

@@ -95,7 +95,7 @@ class Feedback(base_models.Feedback):
     reporter = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_feedback_reporter')
     assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_feedback_assignee')
     previous_assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_previous_assignee')
-    department = models.ForeignKey(BrandDepartment,null=True, blank=True) 
+    sub_department = models.ForeignKey(DepartmentSubCategories,null=True, blank=True) 
     
     class Meta:
         app_label = _APP_NAME

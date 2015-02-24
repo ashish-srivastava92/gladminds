@@ -104,7 +104,7 @@ def save_feedback(request):
     
 
 def save_help_desk_data(request):
-    fields = ['description', 'advisorMobile', 'type', 'summary', 'priority']
+    fields = ['description', 'advisorMobile', 'type', 'summary', 'priority', 'department', 'sub-department']
     sms_dict = {}
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)
@@ -147,6 +147,10 @@ def get_servicedesk_tickets(request):
     page_details['total_objects'] = paginator.count
     page_details['from'] = feedbacks.start_index()
     page_details['to'] = feedbacks.end_index()
+    departments = models.BrandDepartment.objects.all()
+    brand_departments = []
+    for department in departments:
+        brand_departments.append(department)
     training_material = models.Service.objects.filter(service_type__name=Services.SERVICE_DESK)
     if len(training_material)>0:
         training_material = training_material[0].training_material_url
@@ -159,11 +163,22 @@ def get_servicedesk_tickets(request):
                                           "priorities": utils.get_list_from_set(PRIORITY),
                                           "pagination_links": PAGINATION_LINKS,
                                           "page_details": page_details,
+                                          "departments": brand_departments, 
                                           "record_showing_counts": RECORDS_PER_PAGE,
                                           "training_material" : training_material,
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
                                                             'count': str(count), 'search': search}}
                                         )
+
+def get_subcategories(request):
+    sub_departments = models.DepartmentSubCategories.objects.filter(department__id=request.POST.get('department'))
+    brand_sub_departments = []
+    for sub_department in sub_departments:
+        brand_sub_department = {}
+        brand_sub_department['name'] = sub_department.name
+        brand_sub_department['id'] = sub_department.id
+        brand_sub_departments.append(brand_sub_department)
+    return HttpResponse(content=json.dumps(brand_sub_departments), content_type='application/json')
 
 @check_service_active(Services.SERVICE_DESK)
 @login_required()
