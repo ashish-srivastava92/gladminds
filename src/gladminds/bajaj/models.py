@@ -302,38 +302,6 @@ class Constant(base_models.Constant):
         
 
 #######################LOYALTY TABLES#################################
-class NationalSalesManager(base_models.NationalSalesManager):
-    '''details of National Sales Manager'''
-    user = models.ForeignKey(UserProfile, null=True, blank=True)
-
-    class Meta:
-        app_label = _APP_NAME
-
-
-class AreaSalesManager(base_models.AreaSalesManager):
-    '''details of Area Service Manager'''
-    user = models.ForeignKey(UserProfile, null=True, blank=True)
-    nsm = models.ForeignKey(NationalSalesManager, null=True, blank=True)
-
-    class Meta:
-        app_label = _APP_NAME
-
-
-class Distributor(base_models.Distributor):
-    '''details of Distributor'''
-    user = models.ForeignKey(UserProfile, null=True, blank=True)
-    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
-
-    class Meta:
-        app_label = _APP_NAME
-
-
-class Retailer(base_models.Retailer):
-    '''details of retailer'''
-
-    class Meta:
-        app_label = _APP_NAME
-
 class Territory(base_models.Territory):
     '''List of territories'''
     
@@ -351,6 +319,40 @@ class City(base_models.City):
     ''' List of cities mapped to states'''
     state = models.ForeignKey(State)    
    
+    class Meta:
+        app_label = _APP_NAME
+
+class NationalSalesManager(base_models.NationalSalesManager):
+    '''details of National Sales Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    territory = models.ManyToManyField(Territory, blank=False)
+
+    class Meta:
+        app_label = _APP_NAME
+
+
+class AreaSalesManager(base_models.AreaSalesManager):
+    '''details of Area Service Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    nsm = models.ForeignKey(NationalSalesManager, null=True, blank=True)
+    state = models.ManyToManyField(State, blank=False)
+
+    class Meta:
+        app_label = _APP_NAME
+
+
+class Distributor(base_models.Distributor):
+    '''details of Distributor'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
+
+    class Meta:
+        app_label = _APP_NAME
+
+
+class Retailer(base_models.Retailer):
+    '''details of retailer'''
+
     class Meta:
         app_label = _APP_NAME
 

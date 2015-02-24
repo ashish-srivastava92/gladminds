@@ -766,7 +766,6 @@ class NationalSalesManager(BaseModel):
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
-    territory = models.CharField(max_length=50, null=True, blank=True, unique=True)
 
     class Meta:
         abstract = True
@@ -781,7 +780,6 @@ class AreaSalesManager(BaseModel):
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
-    state = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True

@@ -532,7 +532,7 @@ class MechanicAdmin(GmModelAdmin):
         query_set = self.model._default_manager.get_query_set()
         if request.user.groups.filter(name=Roles.ASMS).exists():
             asm=models.AreaSalesManager.objects.get(user__user=request.user)
-            query_set=query_set.filter(state=asm.state)
+            query_set=query_set.filter(state__in=asm.state)
 
         return query_set
 
@@ -612,7 +612,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
             query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=request.user)
         elif request.user.groups.filter(name=Roles.ASMS).exists():
             asm=models.AreaSalesManager.objects.get(user__user=request.user)
-            query_set=query_set.filter(member__state=asm.state)
+            query_set=query_set.filter(member__state__in=asm.state)
 
         return query_set
 
@@ -754,7 +754,7 @@ class WelcomeKitAdmin(GmModelAdmin):
             query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=request.user)
         elif request.user.groups.filter(name=Roles.ASMS).exists():
             asm=models.AreaSalesManager.objects.get(user__user=request.user)
-            query_set=query_set.filter(member__state=asm.state)
+            query_set=query_set.filter(member__state__in=asm.state)
 
         return query_set
 

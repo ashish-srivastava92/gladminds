@@ -107,7 +107,7 @@ class LoyaltyService(CoreLoyaltyService):
                               member_id = welcome_kit_obj.member.mechanic_id,
                               member_name = welcome_kit_obj.member.first_name,
                               member_city = welcome_kit_obj.member.district,
-                              member_state = welcome_kit_obj.member.state,
+                              member_state = welcome_kit_obj.member.state.state_name,
                         delivery_address = welcome_kit_obj.delivery_address,
                         url_link=url_link)
         partner_email_id=welcome_kit_obj.partner.user.user.email
@@ -150,7 +150,7 @@ class LoyaltyService(CoreLoyaltyService):
                               member_id = redemption_obj.member.mechanic_id,
                               member_name = redemption_obj.member.first_name,
                               member_city = redemption_obj.member.district,
-                              member_state = redemption_obj.member.state,
+                              member_state = redemption_obj.member.state.state_name,
                               product_id =  redemption_obj.product.product_id,
                               product_name =  redemption_obj.product.description,
                         delivery_address = redemption_obj.delivery_address,

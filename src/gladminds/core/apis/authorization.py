@@ -195,7 +195,7 @@ class LoyaltyCustomAuthorization():
                 object_list = object_list.filter(reduce(operator.and_, query['query']))
             elif klass_name == 'redemptionrequest' and user.groups.filter(name=Roles.ASMS).exists():
                 asm = models.AreaSalesManager.objects.get(user__user= user)
-                object_list=object_list.filter(member__state=asm.state)            
+                object_list=object_list.filter(member__state__in=asm.state)            
     
             ''' hides the fields in object_list '''            
             if self.display_field:
