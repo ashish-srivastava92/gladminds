@@ -101,7 +101,7 @@ class Command(BaseCommand):
     
     @atomic
     def create_bajaj_admins(self):
-        from gladminds.bajaj.models import AreaSalesManager, NationalSalesManager
+        from gladminds.bajaj.models import AreaSparesManager, NationalSparesManager
         try:
             for details in _BAJAJ_LOYALTY_SUPERADMINS:
                 print "create loyalty superadmin", details
@@ -110,17 +110,17 @@ class Command(BaseCommand):
                 print "create loyalty nsm", details
                 profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.NSMS)
                 try: 
-                    nsm_obj = NationalSalesManager.objects.get(user=profile_obj, nsm_id=details[3])
+                    nsm_obj = NationalSparesManager.objects.get(user=profile_obj, nsm_id=details[3])
                 except:
-                    nsm_obj = NationalSalesManager(user=profile_obj, nsm_id=details[3],
+                    nsm_obj = NationalSparesManager(user=profile_obj, nsm_id=details[3],
                                                    name=details[5], email=details[0],
                                                                territory=details[4])
                     nsm_obj.save()
             for details in _BAJAJ_LOYALTY_ASM:
                 print "create loyalty asm", details
                 profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.ASMS)
-                if not AreaSalesManager.objects.filter(user=profile_obj, asm_id=details[3]).exists():
-                    asm_obj = AreaSalesManager(nsm=nsm_obj, user=profile_obj, asm_id=details[3],
+                if not AreaSparesManager.objects.filter(user=profile_obj, asm_id=details[3]).exists():
+                    asm_obj = AreaSparesManager(nsm=nsm_obj, user=profile_obj, asm_id=details[3],
                                                  name=details[4], email=details[0],
                                                  phone_number=details[5], state=details[6])
                     asm_obj.save()

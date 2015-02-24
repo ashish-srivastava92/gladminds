@@ -531,7 +531,7 @@ class MechanicAdmin(GmModelAdmin):
         """
         query_set = self.model._default_manager.get_query_set()
         if request.user.groups.filter(name=Roles.ASMS).exists():
-            asm=models.AreaSalesManager.objects.get(user__user=request.user)
+            asm=models.AreaSparesManager.objects.get(user__user=request.user)
             query_set=query_set.filter(state=asm.state)
 
         return query_set
@@ -611,7 +611,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
         elif request.user.groups.filter(name=Roles.LPS).exists():
             query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=request.user)
         elif request.user.groups.filter(name=Roles.ASMS).exists():
-            asm=models.AreaSalesManager.objects.get(user__user=request.user)
+            asm=models.AreaSparesManager.objects.get(user__user=request.user)
             query_set=query_set.filter(member__state=asm.state)
 
         return query_set
@@ -753,7 +753,7 @@ class WelcomeKitAdmin(GmModelAdmin):
         elif request.user.groups.filter(name=Roles.LPS).exists():
             query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=request.user)
         elif request.user.groups.filter(name=Roles.ASMS).exists():
-            asm=models.AreaSalesManager.objects.get(user__user=request.user)
+            asm=models.AreaSparesManager.objects.get(user__user=request.user)
             query_set=query_set.filter(member__state=asm.state)
 
         return query_set
@@ -805,8 +805,8 @@ brand_admin.register(models.DataFeedLog, FeedLogAdmin)
 brand_admin.register(models.FeedFailureLog)
 
 if settings.ENV not in ['prod']:
-    brand_admin.register(models.NationalSalesManager, NSMAdmin)
-    brand_admin.register(models.AreaSalesManager, ASMAdmin)
+    brand_admin.register(models.NationalSparesManager, NSMAdmin)
+    brand_admin.register(models.AreaSparesManager, ASMAdmin)
     brand_admin.register(models.Distributor, DistributorAdmin)
     brand_admin.register(models.Mechanic, MechanicAdmin)
 

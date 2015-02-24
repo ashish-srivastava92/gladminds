@@ -310,18 +310,18 @@ class Constant(base_models.Constant):
         
 
 #######################LOYALTY TABLES#################################
-class NationalSalesManager(base_models.NationalSalesManager):
-    '''details of National Sales Manager'''
+class NationalSparesManager(base_models.NationalSparesManager):
+    '''details of National Spares Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
 
 
-class AreaSalesManager(base_models.AreaSalesManager):
-    '''details of Area Service Manager'''
+class AreaSparesManager(base_models.AreaSparesManager):
+    '''details of Area Spares Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
-    nsm = models.ForeignKey(NationalSalesManager, null=True, blank=True)
+    nsm = models.ForeignKey(NationalSparesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -330,7 +330,7 @@ class AreaSalesManager(base_models.AreaSalesManager):
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
-    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
+    asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -381,7 +381,7 @@ class AccumulationRequest(base_models.AccumulationRequest):
     '''details of Accumulation request'''
     member = models.ForeignKey(Mechanic)
     upcs = models.ManyToManyField(SparePartUPC)
-    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
+    asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME

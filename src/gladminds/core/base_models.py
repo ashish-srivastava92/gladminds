@@ -777,8 +777,8 @@ class ZonalServiceManager(BaseModel):
     
 #######################LOYALTY TABLES#################################
 
-class NationalSalesManager(BaseModel):
-    '''details of National Sales Manager'''
+class NationalSparesManager(BaseModel):
+    '''details of National Spares Manager'''
     nsm_id = models.CharField(max_length=50, unique=True, default=generate_nsm_id)
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
@@ -787,13 +787,13 @@ class NationalSalesManager(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "National Sales Managers"
+        verbose_name_plural = "National Spares Managers"
 
     def __unicode__(self):
         return self.name
 
-class AreaSalesManager(BaseModel):
-    '''details of Area Service Manager'''
+class AreaSparesManager(BaseModel):
+    '''details of Area Spares Manager'''
     asm_id = models.CharField(max_length=50, unique=True, default=generate_asm_id)
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
@@ -802,7 +802,7 @@ class AreaSalesManager(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Area Sales Managers"
+        verbose_name_plural = "Area Spares Managers"
 
     def __unicode__(self):
         return self.name

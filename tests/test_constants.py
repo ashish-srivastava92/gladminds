@@ -428,12 +428,12 @@ PRODUCT = {
         }
 
 MEMBER = {
-            "adress_line_1": "",
-            "adress_line_2": "",
-            "adress_line_3": "",
-            "adress_line_4": "",
-            "adress_line_5": "",
-            "adress_line_6": "",
+            "address_line_1": "",
+            "address_line_2": "",
+            "address_line_3": "",
+            "address_line_4": "",
+            "address_line_5": "",
+            "address_line_6": "",
             "date_of_birth": "1971-10-20T05:30:00",
             "district": "MADURAI",
             "first_name": "Ramu",
