@@ -325,7 +325,7 @@ class City(base_models.City):
 class NationalSalesManager(base_models.NationalSalesManager):
     '''details of National Sales Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
-    territory = models.ManyToManyField(Territory, blank=False)
+    territory = models.ManyToManyField(Territory)
 
     class Meta:
         app_label = _APP_NAME
@@ -335,7 +335,7 @@ class AreaSalesManager(base_models.AreaSalesManager):
     '''details of Area Service Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
     nsm = models.ForeignKey(NationalSalesManager, null=True, blank=True)
-    state = models.ManyToManyField(State, blank=False)
+    state = models.ManyToManyField(State)
 
     class Meta:
         app_label = _APP_NAME
