@@ -51,6 +51,10 @@ def service_desk(request):
     page_details['from'] = feedbacks.start_index()
     page_details['to'] = feedbacks.end_index()
     groups = utils.stringify_groups(request.user)
+    departments = models.BrandDepartment.objects.all()
+    brand_departments = []
+    for department in departments:
+        brand_departments.append(department)
     training_material = models.Service.objects.filter(service_type__name=Services.SERVICE_DESK)
     if len(training_material)>0:
         training_material = training_material[0].training_material_url
@@ -70,6 +74,7 @@ def service_desk(request):
                                           "status": utils.get_list_from_set(FEEDBACK_STATUS),
                                           "pagination_links": PAGINATION_LINKS,
                                           "page_details": page_details,
+                                          "departments": brand_departments,
                                           "record_showing_counts": RECORDS_PER_PAGE,
                                           "types": utils.get_list_from_set(FEEDBACK_TYPE),
                                           "priorities": utils.get_list_from_set(PRIORITY),
