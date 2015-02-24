@@ -17,7 +17,7 @@ _DEMO = GmApps.DEMO
 _BAJAJ = GmApps.BAJAJ
 _AFTERBUY = GmApps.AFTERBUY
 _GM = GmApps.GM
-
+_BAJAJCV = GmApps.BAJAJCV
 
 _ALL_APPS = ALL_APPS
 
@@ -43,11 +43,13 @@ class Command(BaseCommand):
         call_command('syncdb', database=_DEMO, interactive=False)
         call_command('syncdb', database=_BAJAJ, interactive=False)
         call_command('syncdb', database=_AFTERBUY, interactive=False)
+        call_command('syncdb', database=_BAJAJCV, interactive=False)
         call_command('syncdb', interactive=False)
         self.define_groups()
         self.create_admin(_DEMO)
         self.create_admin(_BAJAJ)
         self.create_admin(_GM)
+        self.create_admin(_BAJAJCV)
         self.create_afterbuy_admins()
         self.create_bajaj_admins()
         self.set_afterbuy_permissions()
