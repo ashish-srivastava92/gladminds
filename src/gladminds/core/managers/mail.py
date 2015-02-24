@@ -509,7 +509,6 @@ def send_phone_number_update_count_exceeded(update_details=None):
         yesterday = datetime.now().date() - timedelta(days=1)
         mail_detail = get_email_template('PHONE_NUMBER_UPDATE_COUNT_EXCEEDED')
         receivers = get_mail_receiver(settings.PHONE_NUMBER_UPDATE_COUNT_EXCEEDED_MAIL_TO_ASM, mail_detail)
-        print "re", receivers
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(["UPDATED BY", "CUSTOMER ID", "CUSTOMER NAME", "OLD NUMBER", "NEW NUMBER", "MODIFIED DATE","PRODUCT ID"])

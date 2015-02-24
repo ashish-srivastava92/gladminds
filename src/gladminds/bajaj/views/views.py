@@ -360,6 +360,7 @@ def register_customer(request, group=None):
             logger.info('[Temporary_cust_registration]:: purchase feed completed')
     except Exception as ex: 
         logger.info(ex)
+
         return HttpResponseBadRequest()
     if existing_customer:
         return json.dumps({'message': CUST_UPDATE_SUCCESS})

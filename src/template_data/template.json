@@ -234,7 +234,7 @@
     "pk": 26,
     "fields": {
       "template_key": "SEND_REPLACED_CUSTOMER_ID",
-      "template": "Dear {customer_name}, Your Permanent customer ID is {sap_customer_id} for your Bajaj Bike. Please refer this ID during servicing of your Bike",
+      "template": "Dear {customer_name}, Your permanent customer ID is {sap_customer_id} for your Bajaj bike. Please refer this ID during servicing of your bike",
       "description": "Send new sap ID to Customer"
     }
   },
