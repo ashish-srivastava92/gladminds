@@ -88,52 +88,47 @@
     });
     
     $('.department').on('change', function(){
-    	var department = $('.department'),
+    	var department = $('.department').val(),
     		jqXHR = $.ajax({
-            type: 'POST',
-            url : '/aftersell/servicedesk/get-subcategories/',
-            data: department,
+            type: 'GET',
+            url : '/v1/service-desk-users/?sub_department__department='+department,
+            success : function(data){
+            	$('.sub-department-assignee').empty()
+            	$('.sub-department-assignee').append($('<option>', {
+            			value: false,
+            			text : " "
+            		}));
+            	var result = data.objects;
+            	for (var i=0;i< data.objects.length;i++){
+            		$('.sub-department-assignee')
+            		.append($('<option>', {
+            			value: result[i].id,
+            			text : result[i].user.user.username
+            		}));
+            	}
+            }
+        }),
+        jqXH =$.ajax({
+            type: 'GET',
+            url : '/v1/department-sub-categories/?department='+department,
             success : function(data){
             	$('.sub-department').empty()
             	$('.sub-department').append($('<option>', {
             			value: false,
             			text : " "
             		}));
-
-            	for (var i=0;i< data.length;i++){
+            	var result = data.objects;
+            	for (var i=0;i< data.objects.length;i++){
             		$('.sub-department')
             		.append($('<option>', {
-            			value: data[i].id,
-            			text : data[i].name
+            			value: result[i].id,
+            			text : result[i].name
             		}));
             	}
             }
         });
     });
     
-    $('.sub-department').on('change', function(){
-    	var department = $('.department'),
-    		jqXHR = $.ajax({
-            type: 'POST',
-            url : '/aftersell/servicedesk/get-brand-users/',
-            data: department,
-            success : function(data){
-            	$('.sub-department-assignee').empty()
-            	for (var i=0;i< data.length;i++){
-            		$('.sub-department-assignee')
-            		.append($('<option>', {
-            			value: data[i].id,
-            			text : data[i].name
-            		}));
-            	}
-            	$('.sub-department-assignee').append($('<option>', {
-            		value : false,
-            		text : " "
-            	}));
-            }
-        });
-    });
-
     $('.sd_file').on('change', function() {
         var fileInput = $(this),
             ext = fileInput.val().split('.').pop().toLowerCase();
