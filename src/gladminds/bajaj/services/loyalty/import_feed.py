@@ -190,7 +190,7 @@ class NSMFeed(BaseFeed):
                     user_object = models.UserProfile.objects.get(user__username=nsm['email'])
                 except ObjectDoesNotExist as ex:
                     logger.error("[import_nsm_data] {0} : {1}".format(nsm['phone_number'], ex))
-                    user_object = self.register_user(Roles.NSMS,username=nsm['email'],phone_number=nsm['phone_number'],
+                    user_object = self.register_user(Roles.NATIONALSPARESMANAGERS,username=nsm['email'],phone_number=nsm['phone_number'],
                                                      first_name=nsm['name'], email=nsm['email'])
                 if not nsm_object:
                     nsm_temp_id = utils.generate_temp_id('TNSM')
@@ -227,7 +227,7 @@ class ASMFeed(BaseFeed):
                     user_object = models.UserProfile.objects.get(user__username=asm['email'])
                 except ObjectDoesNotExist as ex:
                     logger.error("[import_asm_data] {0} : {1}".format(asm['phone_number'], ex))
-                    user_object = self.register_user(Roles.ASMS,username=asm['email'],phone_number=asm['phone_number'],
+                    user_object = self.register_user(Roles.AREASPARESMANAGERS,username=asm['email'],phone_number=asm['phone_number'],
                                                      first_name=asm['name'], state=asm['state'], email=asm['email'])                    
                 try:
                     nsm_obj = models.NationalSparesManager.objects.get(territory=asm['territory'])

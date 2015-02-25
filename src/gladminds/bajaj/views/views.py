@@ -173,7 +173,7 @@ def update_pass(request):
 @login_required()
 def register(request, menu):
     groups = utils.stringify_groups(request.user)
-    if not (Roles.ASCS in groups or Roles.DEALERS in groups or Roles.SDMANAGERS in groups):
+    if len(set([Roles.ASCS, Roles.DEALERS, Roles.SDMANAGERS]).intersection(set(groups))) == 0:
         return HttpResponseBadRequest()
 
     if request.method == 'GET':

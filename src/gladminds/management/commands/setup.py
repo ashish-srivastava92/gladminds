@@ -108,7 +108,7 @@ class Command(BaseCommand):
                 self.create_user_profile(details, GmApps.BAJAJ, Roles.LOYALTYSUPERADMINS)
             for details in _BAJAJ_LOYALTY_NSM:
                 print "create loyalty nsm", details
-                profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.NSMS)
+                profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.NATIONALSPARESMANAGERS)
                 try: 
                     nsm_obj = NationalSparesManager.objects.get(user=profile_obj, nsm_id=details[3])
                 except:
@@ -118,7 +118,7 @@ class Command(BaseCommand):
                     nsm_obj.save()
             for details in _BAJAJ_LOYALTY_ASM:
                 print "create loyalty asm", details
-                profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.ASMS)
+                profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.AREASPARESMANAGERS)
                 if not AreaSparesManager.objects.filter(user=profile_obj, asm_id=details[3]).exists():
                     asm_obj = AreaSparesManager(nsm=nsm_obj, user=profile_obj, asm_id=details[3],
                                                  name=details[4], email=details[0],
@@ -230,7 +230,7 @@ class Command(BaseCommand):
     
     def set_brand_permissions(self, brand):
         try:
-            for group in [Roles.ASMS, Roles.NSMS]:
+            for group in [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]:
                 model_ids = []
                 for model in ['Distributor', 'Retailer', 'Mechanic']:
                     model_ids.append(ContentType.objects.get(app_label__in=[brand, 'auth'], model=model).id)

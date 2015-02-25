@@ -2,7 +2,7 @@
 import json
 from django.test.client import Client
 from tastypie.test import ResourceTestCase
-from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER,SPARE_MASTER, SPARE_POINT,SPARE_PART_UPC,\
+from test_constants import NATIONAL_SPARES_MANAGER, AREA_SPARES_MANAGER,DISTRIBUTOR,RETAILER,SPARE_MASTER, SPARE_POINT,SPARE_PART_UPC,\
     REDEMPTION_REQUEST,PARTNER,PRODUCT,ACCUMULATION, SPARE_PART_UPC_1,SLA,\
     MEMBER, WELCOMEKIT, COMMENT_THREAD, MEMBER1, TRANSFERPOINTS, TERRITORY,\
     STATE, CITY
@@ -37,7 +37,7 @@ class LoyaltyApiTests(ResourceTestCase):
 
     def test_create_nsm(self):
         uri = '/loyalty/v1/nsms/'
-        resp = self.post(uri,data=NSM)
+        resp = self.post(uri,data=NATIONAL_SPARES_MANAGER)
         self.assertEquals(resp.status_code,201)
         return resp
  
@@ -61,7 +61,7 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['phone_number'], "1234512345")
  
-    def test_create_asm(self, data=ASM):
+    def test_create_asm(self, data=AREA_SPARES_MANAGER):
         uri = '/loyalty/v1/asms/'
         resp = self.post(uri,data=data)
         self.assertEquals(resp.status_code,201)
@@ -355,7 +355,7 @@ class LoyaltyApiTests(ResourceTestCase):
  
     def test_create_accumulation(self):
         uri = '/loyalty/v1/asms/'
-        resp = self.post(uri,data=ASM)
+        resp = self.post(uri,data=AREA_SPARES_MANAGER)
         self.assertEquals(resp.status_code,201)
         self.test_create_spare_master()
         uri = '/loyalty/v1/spare-upcs/'
@@ -489,11 +489,11 @@ class LoyaltyApiTests(ResourceTestCase):
         self.test_create_redemptiomrequest()
         self.test_create_redemptiomrequest(data=data)
         self.test_create_asm()
-        userprofile = self.create_new_user(username='user', group_name=Roles.ASMS, email='asc@xyz.com')
+        userprofile = self.create_new_user(username='user', group_name=Roles.AREASPARESMANAGERS, email='asc@xyz.com')
         userprofile.state ='karnataka'
         userprofile.save()
  
-        up = models.AreaSalesManager.objects.get(email="spremnath@bajajauto.co.in")
+        up = models.AreaSparesManager.objects.get(email="spremnath@bajajauto.co.in")
         up.user =  userprofile
         up.save()
  

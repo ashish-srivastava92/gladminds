@@ -360,7 +360,7 @@ USER_PROFILE = {
                 "user": USER
                 }
 
-NSM = {
+NATIONAL_SPARES_MANAGER = {
         "email": "rkrishnan@bajajauto.co.in",
         "name": "Raghunath",
         "nsm_id": "NSM002",
@@ -369,7 +369,7 @@ NSM = {
         "user": " "
         }
 
-ASM = {
+AREA_SPARES_MANAGER = {
         "asm_id": "ASM005",
         "email": "spremnath@bajajauto.co.in",
         "name": "PREM NATH",
@@ -390,7 +390,7 @@ PARTNER = {
 
 DISTRIBUTOR = {
                "user": USER_PROFILE,
-               "asm":ASM,
+               "asm":AREA_SPARES_MANAGER,
                "distributor_id": 15689, 
                "name": "Mrugen",
                "email": "test@gladminds.co",
@@ -566,7 +566,7 @@ SLA = {
        }
 
 ACCUMULATION = {  
-                "asm":ASM,
+                "asm":AREA_SPARES_MANAGER,
                 "member":MEMBER,
                 "points":100,
                 "total_points":500,

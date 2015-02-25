@@ -44,8 +44,8 @@ class Roles():
     
     LOYALTYSUPERADMINS = 'LoyaltySuperAdmins'
     LOYALTYADMINS = 'LoyaltyAdmins'
-    NSMS = 'NationalSparesManagers'
-    ASMS = 'AreaSparesManagers'
+    NATIONALSPARESMANAGERS = 'NationalSparesManagers'
+    AREASPARESMANAGERS = 'AreaSparesManagers'
     RPS = 'RedemptionPartners'
     LPS = 'LogisticPartners'
     WELCOMEKITESCALATION = 'WelcomeKitEscalation'

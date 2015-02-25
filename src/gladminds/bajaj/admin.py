@@ -373,7 +373,7 @@ class ServiceDeskUserAdmin(GmModelAdmin):
 
 '''Admin View for loyalty'''
 class NSMAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('nsm_id', 'name', 'phone_number', 'territory')
     list_display = ('nsm_id', 'name', 'email', 'phone_number','territory')
 
@@ -387,7 +387,7 @@ class NSMAdmin(GmModelAdmin):
         super(NSMAdmin, self).save_model(request, obj, form, change)
 
 class ASMAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('asm_id', 'nsm__name',
                      'phone_number', 'state')
     list_display = ('asm_id', 'name', 'email',
@@ -403,14 +403,14 @@ class ASMAdmin(GmModelAdmin):
         super(ASMAdmin, self).save_model(request, obj, form, change)
 
 class DistributorAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('distributor_id', 'asm__asm_id',
                      'phone_number', 'city')
     list_display = ('distributor_id', 'name', 'email',
                     'phone_number', 'city', 'asm')
 
 class SparePartMasterAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('part_number', 'category',
                      'segment_type', 'supplier',
                      'product_type__product_type')
@@ -419,7 +419,7 @@ class SparePartMasterAdmin(GmModelAdmin):
                     'segment_type',  'part_model', 'supplier')
 
 class SparePartUPCAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('part_number__part_number', 'unique_part_code', 'part_number__description')
     list_display = ('unique_part_code', 'part_number', 'get_part_description')
 
@@ -429,7 +429,7 @@ class SparePartUPCAdmin(GmModelAdmin):
         return form
 
 class SparePartPointAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('part_number__part_number', 'points', 'territory')
 
     def changelist_view(self, request, extra_context={}):
@@ -451,7 +451,7 @@ class SparePartline(TabularInline):
     model = models.AccumulationRequest.upcs.through
 
 class ProductCatalogAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     list_filter = ('is_active',)
     search_fields = ('partner__partner_id', 'product_id',
                     'brand', 'model', 'category',
@@ -464,7 +464,7 @@ class ProductCatalogAdmin(GmModelAdmin):
     readonly_fields = ('image_tag',)
 
 class PartnerAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     list_filter = ('partner_type',)
     search_fields = ('partner_id', 'name', 'partner_type')
 
@@ -476,7 +476,7 @@ class PartnerAdmin(GmModelAdmin):
         return form
 
 class AccumulationRequestAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYADMINS, Roles.LOYALTYSUPERADMINS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.LOYALTYADMINS, Roles.LOYALTYSUPERADMINS]
     search_fields = ('member__mechanic_id', 'upcs__unique_part_code')
     list_display = ( 'member',  'get_mechanic_name', 'get_mechanic_district',
                      'asm', 'get_upcs', 'points',
@@ -530,7 +530,7 @@ class MechanicAdmin(GmModelAdmin):
         admin site. This is used by changelist_view.
         """
         query_set = self.model._default_manager.get_query_set()
-        if request.user.groups.filter(name=Roles.ASMS).exists():
+        if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm=models.AreaSparesManager.objects.get(user__user=request.user)
             query_set=query_set.filter(state=asm.state)
 
@@ -610,7 +610,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
             query_set=query_set.filter(is_approved=True, packed_by=request.user.username)
         elif request.user.groups.filter(name=Roles.LPS).exists():
             query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=request.user)
-        elif request.user.groups.filter(name=Roles.ASMS).exists():
+        elif request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm=models.AreaSparesManager.objects.get(user__user=request.user)
             query_set=query_set.filter(member__state=asm.state)
 
@@ -752,7 +752,7 @@ class WelcomeKitAdmin(GmModelAdmin):
             query_set=query_set.filter(packed_by=request.user.username)
         elif request.user.groups.filter(name=Roles.LPS).exists():
             query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=request.user)
-        elif request.user.groups.filter(name=Roles.ASMS).exists():
+        elif request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm=models.AreaSparesManager.objects.get(user__user=request.user)
             query_set=query_set.filter(member__state=asm.state)
 
