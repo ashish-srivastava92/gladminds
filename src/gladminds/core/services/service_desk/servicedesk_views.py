@@ -201,7 +201,7 @@ def get_subcategories(request):
     return HttpResponse(content=json.dumps(brand_sub_departments), content_type='application/json')
 
 def get_brand_users(request):
-    sub_department_users = models.ServiceDeskUser.objects.filter(sub_department__id=request.POST.get('sub-department'))
+    sub_department_users = models.ServiceDeskUser.objects.filter(sub_department__department__id=request.POST.get('department'))
     brand_sub_department_users = []
     for sub_department in sub_department_users:
         brand_sub_department = {}
@@ -221,7 +221,7 @@ def modify_servicedesk_tickets(request, feedback_id):
     feedback_types = get_list_from_set(FEEDBACK_TYPE)
     root_cause = get_list_from_set(ROOT_CAUSE)
     feedback_obj = get_feedback(feedback_id, request.user)
-    servicedesk_users = get_servicedesk_users(designation=[Roles.SDOWNERS,Roles.SDMANAGERS] )
+    servicedesk_users = get_servicedesk_users(designation=[Roles.SDOWNERS,Roles.SDMANAGERS], feedback_obj=feedback_obj )
     comments = get_comments(feedback_id)
     
     if request.method == 'POST':

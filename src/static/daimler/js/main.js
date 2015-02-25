@@ -112,7 +112,7 @@
     });
     
     $('.sub-department').on('change', function(){
-    	var department = $('.sub-department'),
+    	var department = $('.department'),
     		jqXHR = $.ajax({
             type: 'POST',
             url : '/aftersell/servicedesk/get-brand-users/',
