@@ -34,6 +34,25 @@ def get_helpdesk(request):
     elif request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.SDOWNERS]):
         return HttpResponseRedirect('/aftersell/servicedesk/')
             
+def get_brand_departments():
+    departments = models.BrandDepartment.objects.all()
+    brand_departments = []
+    for department in departments:
+        brand_departments.append(department)
+    
+    return brand_departments
+
+def get_brand_sub_departments():
+    sub_departments = models.DepartmentSubCategories.objects.all()
+    brand_sub_departments = []
+    for sub_department in sub_departments:
+        brand_sub_department = {}
+        brand_sub_department['department'] = sub_department.department.id
+        brand_sub_department['sub_department_name'] = sub_department.name
+        brand_sub_department['sub_department_id'] = sub_department.id
+        brand_sub_departments.append(brand_sub_department)
+    return brand_sub_departments
+
 @check_service_active(Services.SERVICE_DESK)
 @login_required()
 def service_desk(request):
@@ -51,10 +70,8 @@ def service_desk(request):
     page_details['from'] = feedbacks.start_index()
     page_details['to'] = feedbacks.end_index()
     groups = utils.stringify_groups(request.user)
-    departments = models.BrandDepartment.objects.all()
-    brand_departments = []
-    for department in departments:
-        brand_departments.append(department)
+    brand_departments = get_brand_departments()
+    brand_sub_departments = get_brand_sub_departments()
     training_material = models.Service.objects.filter(service_type__name=Services.SERVICE_DESK)
     if len(training_material)>0:
         training_material = training_material[0].training_material_url
@@ -80,6 +97,7 @@ def service_desk(request):
                                           "priorities": utils.get_list_from_set(PRIORITY),
                                           "training_material" : training_material,
                                           "dealer_asc" : dealer_asc_details,
+                                          "brand_sub_departments" : brand_sub_departments,
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
                                                             'count': str(count), 'search': search}}
                                         )
@@ -109,7 +127,7 @@ def save_feedback(request):
     
 
 def save_help_desk_data(request):
-    fields = ['description', 'advisorMobile', 'type', 'summary', 'priority', 'department', 'sub-department']
+    fields = ['description', 'advisorMobile', 'type', 'summary', 'priority', 'department', 'sub-department', 'sub-department-assignee']
     sms_dict = {}
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)
@@ -152,10 +170,7 @@ def get_servicedesk_tickets(request):
     page_details['total_objects'] = paginator.count
     page_details['from'] = feedbacks.start_index()
     page_details['to'] = feedbacks.end_index()
-    departments = models.BrandDepartment.objects.all()
-    brand_departments = []
-    for department in departments:
-        brand_departments.append(department)
+    brand_departments = get_brand_departments()
     training_material = models.Service.objects.filter(service_type__name=Services.SERVICE_DESK)
     if len(training_material)>0:
         training_material = training_material[0].training_material_url
@@ -184,6 +199,16 @@ def get_subcategories(request):
         brand_sub_department['id'] = sub_department.id
         brand_sub_departments.append(brand_sub_department)
     return HttpResponse(content=json.dumps(brand_sub_departments), content_type='application/json')
+
+def get_brand_users(request):
+    sub_department_users = models.ServiceDeskUser.objects.filter(sub_department__id=request.POST.get('sub-department'))
+    brand_sub_department_users = []
+    for sub_department in sub_department_users:
+        brand_sub_department = {}
+        brand_sub_department['name'] = sub_department.user_profile.user.username
+        brand_sub_department['id'] = sub_department.id
+        brand_sub_department_users.append(brand_sub_department)
+    return HttpResponse(content=json.dumps(brand_sub_department_users), content_type='application/json')
 
 @check_service_active(Services.SERVICE_DESK)
 @login_required()

@@ -94,12 +94,13 @@
             url : '/aftersell/servicedesk/get-subcategories/',
             data: department,
             success : function(data){
-            	console.log(data);
-            	console.log(data.length);
             	$('.sub-department').empty()
+            	$('.sub-department').append($('<option>', {
+            			value: false,
+            			text : " "
+            		}));
+
             	for (var i=0;i< data.length;i++){
-            		console.log(data[i]);
-            		console.log(data[i]);
             		$('.sub-department')
             		.append($('<option>', {
             			value: data[i].id,
@@ -109,6 +110,30 @@
             }
         });
     });
+    
+    $('.sub-department').on('change', function(){
+    	var department = $('.sub-department'),
+    		jqXHR = $.ajax({
+            type: 'POST',
+            url : '/aftersell/servicedesk/get-brand-users/',
+            data: department,
+            success : function(data){
+            	$('.sub-department-assignee').empty()
+            	for (var i=0;i< data.length;i++){
+            		$('.sub-department-assignee')
+            		.append($('<option>', {
+            			value: data[i].id,
+            			text : data[i].name
+            		}));
+            	}
+            	$('.sub-department-assignee').append($('<option>', {
+            		value : false,
+            		text : " "
+            	}));
+            }
+        });
+    });
+
     $('.sd_file').on('change', function() {
         var fileInput = $(this),
             ext = fileInput.val().split('.').pop().toLowerCase();

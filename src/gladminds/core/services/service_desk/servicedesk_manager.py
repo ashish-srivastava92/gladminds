@@ -138,17 +138,25 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
     try:
         servicedesk_user = create_servicedesk_user(name, phone_number, email)
         sub_category = models.DepartmentSubCategories.objects.get(id=sms_dict['sub-department'])
-        if with_detail:
+        
+        if json.loads(sms_dict['sub-department-assignee']):
+            sub_department_assignee = models.ServiceDeskUser.objects.filter(id=sms_dict['sub-department-assignee']) 
+        
+        else:
+            sub_department_assignee = ''
+             
+        if len(sub_department_assignee)>0:
             gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
                                                             type=sms_dict['type'],
                                                             summary=sms_dict['summary'], description=sms_dict['description'],
                                                             status="Open", created_date=datetime.datetime.now(), priority=sms_dict['priority'],
-                                                            sub_department = sub_category
+                                                            sub_department = sub_category, assignee=sub_department_assignee[0]
                                                             )
         else:
             gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
-                                                            message=sms_dict['message'], status="Open",
-                                                            created_date=datetime.datetime.now(), priority=sms_dict['priority'],
+                                                            type=sms_dict['type'],
+                                                            summary=sms_dict['summary'], description=sms_dict['description'],
+                                                            status="Open", created_date=datetime.datetime.now(), priority=sms_dict['priority'],
                                                             sub_department = sub_category                                                            
                                                             )
         gladminds_feedback_object.save()

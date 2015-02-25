@@ -5,7 +5,7 @@ from django.contrib import admin
 
 urlpatterns = patterns('',
     url(r'^site-info/$', 'gladminds.demo.views.site_info', name='site_info'),
+    url(r'^admin/', include(brand_admin.urls)),
     url(r'', include(core_urls)),
-    url(r'^', include(brand_admin.urls)),
-    (r'^admin/', include(admin.site.urls) )
+    
 )

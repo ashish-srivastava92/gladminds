@@ -49,6 +49,7 @@ urlpatterns = patterns('',
     url(r'^aftersell/servicedesk/save-feedback/$', 'gladminds.core.services.service_desk.servicedesk_views.save_feedback', name='save_feedback'),
     
     url(r'^aftersell/servicedesk/get-subcategories/$', 'gladminds.core.services.service_desk.servicedesk_views.get_subcategories', name='get_subcategories'),
+    url(r'^aftersell/servicedesk/get-brand-users/$', 'gladminds.core.services.service_desk.servicedesk_views.get_brand_users', name='get_brand_users'),
 
     url(r'^aftersell/register/(?P<menu>[a-zA-Z0-9]+)$', 'gladminds.core.views.register'),
     url(r'^aftersell/exceptions/(?P<exception>[a-zA-Z0-9]+)$', 'gladminds.core.views.exceptions'),
