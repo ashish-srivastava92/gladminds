@@ -30,3 +30,5 @@ alter table bajaj_authorizedservicecenter add column asc_owner_phone varchar(50)
 alter table bajaj_authorizedservicecenter add column asc_owner_email varchar(100) null;
 
 alter table bajaj_vinsyncfeedlog add column sent_to_sap boolean default False;
+alter table bajaj_dealer add column use_cdms boolean default True;
+
