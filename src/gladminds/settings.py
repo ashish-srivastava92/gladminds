@@ -348,6 +348,7 @@ ALL_APPS = (
     'gladminds.core',
     'gladminds.bajaj',
     'gladminds.demo',
+    'gladminds.bajajcv',
     'gladminds.afterbuy',
     'djcelery',
     'corsheaders',
@@ -632,7 +633,7 @@ ADMIN_DETAILS = {GmApps.BAJAJ: {'user': 'bajaj', 'password': 'bajaj'},
           GmApps.DEMO: {'user': 'demo', 'password': 'demo'},
           GmApps.AFTERBUY: {'user': 'afterbuy', 'password': 'afterbuy'},
           GmApps.GM: {'user': 'gladminds', 'password': 'gladminds'},
-          GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'bajajcv'}
+          GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'x`'}
           }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True

@@ -6,7 +6,7 @@ from test_constants import NSM, ASM,DISTRIBUTOR,RETAILER,SPARE_MASTER, SPARE_POI
     REDEMPTION_REQUEST,PARTNER,PRODUCT,ACCUMULATION, SPARE_PART_UPC_1,SLA,\
     MEMBER, WELCOMEKIT, COMMENT_THREAD, MEMBER1, TRANSFERPOINTS
     
-client=Client(SERVER_NAME='bajaj')
+client=Client(SERVER_NAME='bajajcv')
 
 class LoyaltyApiTests(ResourceTestCase):
     multi_db=True

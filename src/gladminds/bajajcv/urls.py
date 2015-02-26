@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, url, include
+from gladminds.bajajcv.admin import brand_admin
 from gladminds.core import urls as core_urls
 from gladminds.core.apis import user_apis 
 from gladminds.core.urls import api_v1
@@ -30,6 +31,9 @@ loyalty_v1.register(loyalty_apis.WelcomeKitResource())
 loyalty_v1.register(loyalty_apis.DiscrepantAccumulationResource())
 
 urlpatterns = patterns('',
+    url(r'', include(brand_admin.urls)),
+    url(r'', include(loyalty_v1.urls)),
+    url(r'',include(core_urls)),
     url(r'^welcome', loyalty.send_welcome_message, name='send_welcome_message'),
     url(r'^kit/download/(?P<choice>[a-zA-Z0-9]+)$', loyalty.download_welcome_kit, name='download_welcome_kit'),
 )
