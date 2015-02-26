@@ -42,4 +42,5 @@ alter table demo_servicedeskuser add foreign key (sub_department_id) references 
 alter table demo_userprofile add column department varchar(100) null;
 
 alter table bajaj_dealer add column use_cdms boolean default True;
+alter table demo_dealer add column use_cdms boolean default True;
 
