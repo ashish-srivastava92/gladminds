@@ -129,6 +129,7 @@ class Dealer(BaseModel):
     dealer_id = models.CharField(
         max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
+    use_cdms = models.BooleanField(default=True)
 
     objects = user_manager.DealerManager()
 

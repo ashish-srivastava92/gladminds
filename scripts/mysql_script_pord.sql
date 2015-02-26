@@ -41,4 +41,5 @@ alter table demo_servicedeskuser add sub_department_id integer;
 alter table demo_servicedeskuser add foreign key (sub_department_id) references demo_departmentsubcategories(id);
 alter table demo_userprofile add column department varchar(100) null;
 
+alter table bajaj_dealer add column use_cdms boolean default True;
 
