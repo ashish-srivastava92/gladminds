@@ -43,7 +43,8 @@ class UserProfile(BaseModel):
     country = models.CharField(max_length=255, null=True, blank=True)
     pincode = models.CharField(max_length=15, null=True, blank=True)
     date_of_birth = models.DateTimeField(null=True, blank=True)
-  
+    department = models.CharField(max_length=100, null=True, blank=True)
+    
     image_url = models.FileField(upload_to=set_user_pic_path,
                                   max_length=200, null=True, blank=True,
                                   validators=[validate_image])
@@ -604,7 +605,25 @@ class Activity(BaseModel):
         abstract = True
         verbose_name_plural = "Activity info"
 
+class BrandDepartment(BaseModel):
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=100, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Department Info"
+    
+class DepartmentSubCategories(BaseModel):
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=100, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Sub-Department Info"
 
+    def __unicode__(self):
+        return self.name
+    
 class Feedback(BaseModel):
     '''details of feedback received'''
     summary = models.CharField(max_length=512, null=True, blank=True)
