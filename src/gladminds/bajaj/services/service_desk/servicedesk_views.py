@@ -12,6 +12,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
 from gladminds.bajaj import models
+from gladminds.bajaj.views import views
 from gladminds.bajaj.services.service_desk.servicedesk_manager import get_feedbacks, \
     create_feedback, get_feedback, get_servicedesk_users, get_comments, \
     modify_feedback, update_feedback_activities, SDActions
@@ -126,6 +127,7 @@ def save_help_desk_data(request):
 @login_required()
 @require_http_methods(["GET"])
 def get_servicedesk_tickets(request):
+    groups = utils.stringify_groups(request.user)
     status = request.GET.get('status')
     priority = request.GET.get('priority')
     type = request.GET.get('type')
@@ -153,6 +155,7 @@ def get_servicedesk_tickets(request):
                                           "page_details": page_details,
                                           "record_showing_counts": RECORDS_PER_PAGE,
                                           "training_material" : training_material,
+                                          "groups":groups[0],
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
                                                             'count': str(count), 'search': search}}
                                         )
@@ -217,3 +220,11 @@ def get_feedback_response(request, feedback_id):
         return render(request, 'service-desk/feedback_received.html')
     else:
         return HttpResponse()
+
+def update_customer_number(request):
+    groups = utils.get_user_groups(request.user)
+    if request.method == 'GET':       
+        return render(request, 'portal/customer_registration.html',{"group": groups[0]})
+    else:
+        return HttpResponseBadRequest()
+        

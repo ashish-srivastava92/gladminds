@@ -193,8 +193,8 @@ class LoyaltyCustomAuthorization():
                     q_object.add(query['user'], user)
                     query['query'].append(q_object)
                 object_list = object_list.filter(reduce(operator.and_, query['query']))
-            elif klass_name == 'redemptionrequest' and user.groups.filter(name=Roles.ASMS).exists():
-                asm = models.AreaSalesManager.objects.get(user__user= user)
+            elif klass_name == 'redemptionrequest' and user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+                asm = models.AreaSparesManager.objects.get(user__user= user)
                 object_list=object_list.filter(member__state=asm.state)            
     
             ''' hides the fields in object_list '''            
