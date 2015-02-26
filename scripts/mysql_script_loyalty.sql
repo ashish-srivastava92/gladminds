@@ -61,3 +61,5 @@ alter table bajaj_mechanic add column address_line_5 varchar(40) null;
 alter table bajaj_mechanic add column address_line_6 varchar(40) null;
 rename table bajaj_areasalesmanager to bajaj_areasparesmanager;
 rename table bajaj_nationalsalesmanager to bajaj_nationalsparesmanager;
+update auth_group set name="AreaSparesManagers" where name="AreaSalesManagers";
+update auth_group set name="NationalSparesManagers" where name="NationalSalesManagers";
