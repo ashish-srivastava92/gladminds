@@ -160,6 +160,12 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
                                                             sub_department = sub_category                                                            
                                                             )
         gladminds_feedback_object.save()
+        if gladminds_feedback_object.assignee:
+            date = set_due_date(sms_dict['priority'], gladminds_feedback_object)
+            gladminds_feedback_object.due_date = date['due_date']
+            gladminds_feedback_object.reminder_date = date['reminder_date'] 
+            gladminds_feedback_object.save()
+
         if sms_dict['file_location']:
             file_obj = sms_dict['file_location']
             filename_prefix = gladminds_feedback_object.id
