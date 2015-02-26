@@ -229,55 +229,6 @@
                   </div>
                 </div>
                 
-                
-                <div class="row">
-                  <div class="col-md-3 form-group">
-                    <label class="control-label">Priority:</label>
-                  </div>
-                  <div class="col-md-9 form-group">
-                    <select class="form-control priority" name="priority" required>
-                      {% for priority in priorities %}
-                      <option value="{{priority}}">{{priority}}</option>
-                      {% endfor %}
-                    </select>
-                  </div>
-                </div>
-					
-				<div class="row">
-					<div class="col-md-3 form-group">
-					<label class="control-label">Departments*:</label>
-					</div>
-					<div class="col-md-9 form-group">
-						<select class="form-control department" name="department" id="department" required>
-							<option value=""></option> {% for department in departments %}
-							<option value="{{department.id}}">{{department.name}}</option>
-							{% endfor %}
-						</select>
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="col-md-3 form-group">
-						<label class="control-label">Sub-Departments*:</label>
-					</div>
-					<div class="col-md-9 form-group">
-						<select class="form-control sub-department"	name="sub-department" id="sub-department" required>
-							<option value="">-- choose a department first--</option>
-						</select>
-					</div>
-				</div>
-                
-                <div class="row">
-					<div class="col-md-3 form-group">
-						<label class="control-label">Assign To*:</label>
-					</div>
-					<div class="col-md-9 form-group">
-						<select class="form-control sub-department-assignee" name="sub-department-assignee" id="sub-department-assignee" >
-							<option value="None"> </option>
-						</select>
-					</div>
-				</div>
-				
                 <div class="row">
                   <div class="col-md-3 form-group">
                     <label class="control-label">Subject*:</label>
@@ -296,7 +247,7 @@
                 </div> 
                 <div class="row">
                   <div class="col-md-3 form-group">
-                    <label class="control-label">Upload File*:</label>
+                    <label class="control-label">Upload File:</label>
                     <label class="control-label"><small><i>allowed format png,jpg,pdf,ppt,doc,xls</i></small></label>
                   </div>
                   <div class="col-md-9 form-group">
@@ -321,7 +272,7 @@
 {% endblock %} 
 {% block dependency%}
 <script src="/static/js/portal/utils.js"></script>
-<script src="/static/daimler/js/main.js"></script>
+<script src="/static/js/portal/main.js"></script>
 <script src="/static/js/table_data.js"></script>
 <script src="/static/js/table_data_bootstrap.js"></script>
 
