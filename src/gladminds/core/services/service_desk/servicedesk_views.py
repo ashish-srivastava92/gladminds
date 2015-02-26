@@ -39,20 +39,9 @@ def get_brand_departments():
     brand_departments = []
     for department in departments:
         brand_departments.append(department)
-    
+     
     return brand_departments
-
-def get_brand_sub_departments():
-    sub_departments = models.DepartmentSubCategories.objects.all()
-    brand_sub_departments = []
-    for sub_department in sub_departments:
-        brand_sub_department = {}
-        brand_sub_department['department'] = sub_department.department.id
-        brand_sub_department['sub_department_name'] = sub_department.name
-        brand_sub_department['sub_department_id'] = sub_department.id
-        brand_sub_departments.append(brand_sub_department)
-    return brand_sub_departments
-
+ 
 @check_service_active(Services.SERVICE_DESK)
 @login_required()
 def service_desk(request):
@@ -71,7 +60,6 @@ def service_desk(request):
     page_details['to'] = feedbacks.end_index()
     groups = utils.stringify_groups(request.user)
     brand_departments = get_brand_departments()
-    brand_sub_departments = get_brand_sub_departments()
     training_material = models.Service.objects.filter(service_type__name=Services.SERVICE_DESK)
     if len(training_material)>0:
         training_material = training_material[0].training_material_url
@@ -97,7 +85,6 @@ def service_desk(request):
                                           "priorities": utils.get_list_from_set(PRIORITY),
                                           "training_material" : training_material,
                                           "dealer_asc" : dealer_asc_details,
-                                          "brand_sub_departments" : brand_sub_departments,
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
                                                             'count': str(count), 'search': search}}
                                         )

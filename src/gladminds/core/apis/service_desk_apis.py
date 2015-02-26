@@ -7,18 +7,20 @@ from gladminds.core.apis.authorization import MultiAuthorization
 from tastypie.authentication import MultiAuthentication, Authentication
 from gladminds.core.model_fetcher import models
 from gladminds.core.apis.user_apis import UserProfileResource
+from django.forms.models import model_to_dict
 
 class BrandDepartmentResource(CustomBaseModelResource):
+    department_sub_categories = fields.ToManyField('gladminds.core.apis.service_desk_apis.DepartmentSubCategoriesResource', 'department_sub_categories', full=True)
     class Meta:
         queryset = models.BrandDepartment.objects.all()
         resource_name = "brand-departments"
         authorization = Authorization()
         detail_allowed_methods = ['get']
         always_return_data = True
-        
+    
 class DepartmentSubCategoriesResource(CustomBaseModelResource):
-    department = fields.ForeignKey(BrandDepartmentResource, 'department', null=True,
-                                       blank=True, full=True)
+    sub_department_user = fields.ToManyField('gladminds.core.apis.service_desk_apis.ServiceDeskUserResource', 'sub_department_user', full=True)
+
     class Meta:
         queryset = models.DepartmentSubCategories.objects.all()
         resource_name = "department-sub-categories"
@@ -29,15 +31,12 @@ class DepartmentSubCategoriesResource(CustomBaseModelResource):
                      "department": ALL_WITH_RELATIONS
                      } 
     
-
 class ServiceDeskUserResource(CustomBaseModelResource):
     '''
     Service Desk User Resource
     '''
     user = fields.ForeignKey(UserProfileResource, 'user_profile',
                                         full=True, null=True, blank=True)
-    sub_department = fields.ForeignKey(DepartmentSubCategoriesResource, 'sub_department', null=True,
-                                       blank=True, full=True)
     
     class Meta:
         queryset = models.ServiceDeskUser.objects.all()
@@ -45,7 +44,6 @@ class ServiceDeskUserResource(CustomBaseModelResource):
 #         authorization = MultiAuthorization(DjangoAuthorization())
 #         authentication = MultiAuthentication(AccessTokenAuthentication())
         authorization = Authorization()
-#         authentication = Authentication()
         detail_allowed_methods = ['get']
         always_return_data = True
         filtering = {

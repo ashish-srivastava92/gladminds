@@ -61,7 +61,7 @@ class BrandDepartment(base_models.BrandDepartment):
 
 
 class DepartmentSubCategories(base_models.DepartmentSubCategories):
-    department = models.ForeignKey(BrandDepartment, null=True, blank=True)
+    department = models.ForeignKey(BrandDepartment, related_name="department_sub_categories", null=True, blank=True)
     
     class Meta:
         app_label = _APP_NAME
@@ -70,7 +70,7 @@ class DepartmentSubCategories(base_models.DepartmentSubCategories):
 
 class ServiceDeskUser(base_models.ServiceDeskUser):
     user_profile = models.ForeignKey(UserProfile, null=True, blank=True)
-    sub_department = models.ForeignKey(DepartmentSubCategories,null=True, blank=True)
+    sub_department = models.ForeignKey(DepartmentSubCategories, related_name="sub_department_user", null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME

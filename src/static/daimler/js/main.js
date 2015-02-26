@@ -91,39 +91,30 @@
     	var department = $('.department').val(),
     		jqXHR = $.ajax({
             type: 'GET',
-            url : '/v1/service-desk-users/?sub_department__department='+department,
+            url : '/v1/brand-departments/'+department,
             success : function(data){
             	$('.sub-department-assignee').empty()
             	$('.sub-department-assignee').append($('<option>', {
             			value: false,
             			text : " "
             		}));
-            	var result = data.objects;
-            	for (var i=0;i< data.objects.length;i++){
-            		$('.sub-department-assignee')
-            		.append($('<option>', {
-            			value: result[i].id,
-            			text : result[i].user.user.username
-            		}));
-            	}
-            }
-        }),
-        jqXH =$.ajax({
-            type: 'GET',
-            url : '/v1/department-sub-categories/?department='+department,
-            success : function(data){
             	$('.sub-department').empty()
-            	$('.sub-department').append($('<option>', {
-            			value: false,
-            			text : " "
-            		}));
-            	var result = data.objects;
-            	for (var i=0;i< data.objects.length;i++){
+            	var subCategories = data.department_sub_categories;
+
+            	for (var i=0;i< subCategories.length;i++){
             		$('.sub-department')
             		.append($('<option>', {
-            			value: result[i].id,
-            			text : result[i].name
+            			value: subCategories[i].id,
+            			text : subCategories[i].name
             		}));
+
+            		for (var j=0; j<subCategories[i].sub_department_user.length;j++){
+                		$('.sub-department-assignee')
+                		.append($('<option>', {
+                			value: subCategories[i].sub_department_user[j].id,
+                			text : subCategories[i].sub_department_user[j].user.user.username
+                		}));
+            		}
             	}
             }
         });

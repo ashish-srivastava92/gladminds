@@ -8,6 +8,7 @@ from gladminds.core.apis import service_desk_apis
 api_v1 = Api(api_name="v1")
 api_v1.register(service_desk_apis.ServiceDeskUserResource())
 api_v1.register(service_desk_apis.DepartmentSubCategoriesResource())
+api_v1.register(service_desk_apis.BrandDepartmentResource())
 
 urlpatterns = patterns('',
     url(r'^site-info/$', 'gladminds.demo.views.site_info', name='site_info'),
