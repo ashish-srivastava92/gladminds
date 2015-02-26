@@ -613,6 +613,9 @@ class BrandDepartment(BaseModel):
         abstract = True
         verbose_name_plural = "Department Info"
     
+    def __unicode__(self):
+        return self.name
+    
 class DepartmentSubCategories(BaseModel):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=100, null=True, blank=True)
