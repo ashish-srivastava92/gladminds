@@ -62,9 +62,9 @@ def get_feedbacks(user, status, priority, type, search=None):
             status_filter = get_list_from_set(FEEDBACK_STATUS)
         else:
             status_filter = [status]
-
+    
+    sa_id_list = []
     if user.groups.filter(name=Roles.DEALERS).exists():
-        sa_id_list = []
         sa_list = models.ServiceAdvisor.objects.active_under_dealer(user)
         if sa_list:
             for sa in sa_list:
@@ -73,6 +73,16 @@ def get_feedbacks(user, status, priority, type, search=None):
         feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
                                                        priority__in=priority_filter, type__in=type_filter
                                                     ).order_by('-created_date')
+                                                    
+    if user.groups.filter(name=Roles.DEALERADMIN).exists():
+        dealers = models.Dealer.objects.all()
+        for dealer in dealers:
+            sa_id_list.append(dealer.dealer_id)
+        sa_id_list.append(user)
+    feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
+                                                       priority__in=priority_filter, type__in=type_filter
+                                                    ).order_by('-created_date')    
+        
     if user.groups.filter(name=Roles.ASCS).exists():
         sa_list = models.ServiceAdvisor.objects.active_under_asc(user)
         sa_id_list = []
