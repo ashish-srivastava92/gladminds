@@ -189,7 +189,8 @@ class LoyaltyService(CoreLoyaltyService):
                                         product=product,
                                         delivery_address=delivery_address,
                                         expected_delivery_date=date['expected_delivery_date'],
-                                        due_date=date['due_date'])
+                                        due_date=date['due_date'],
+                                        points=products.points)
             
             redemption_request.save()
             transaction_ids.append(str(redemption_request.transaction_id))
