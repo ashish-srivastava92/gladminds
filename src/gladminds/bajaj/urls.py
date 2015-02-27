@@ -9,7 +9,7 @@ from gladminds.core.apis import loyalty_apis, product_apis
 
 loyalty = LoyaltyService
 
-loyalty_v1 = Api(api_name="loyalty/v1")
+loyalty_v1 = Api(api_name="v1")
 loyalty_v1.register(user_apis.UserResource())
 loyalty_v1.register(user_apis.UserProfileResource())
 loyalty_v1.register(loyalty_apis.NSMResource())
