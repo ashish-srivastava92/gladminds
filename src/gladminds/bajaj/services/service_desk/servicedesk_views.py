@@ -50,7 +50,7 @@ def service_desk(request):
     else:
         training_material = None
     if request.method == 'GET':
-        template = 'portal/feedback_details.html'
+        template = 'service-desk/feedback_details.html'
         data = None
         if request.user.groups.filter(name=Roles.DEALERS).exists():
             data = models.ServiceAdvisor.objects.active_under_dealer(request.user)

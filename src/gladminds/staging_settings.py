@@ -21,7 +21,7 @@ DATABASES = {
         'NAME': 'gm',
         'USER': 'gladminds',
         'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-dev.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'HOST': 'gladminds-staging.chnnvvffqwop.us-east-1.rds.amazonaws.com',
         'PORT': '3306',
     },
     'bajaj': {
@@ -29,7 +29,7 @@ DATABASES = {
         'NAME': 'bajaj',
         'USER': 'gladminds',
         'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-dev.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'HOST': 'gladminds-staging.chnnvvffqwop.us-east-1.rds.amazonaws.com',
         'PORT': '3306',
     },
     'demo': {
@@ -37,7 +37,7 @@ DATABASES = {
         'NAME': 'demo',
         'USER': 'gladminds',
         'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-dev.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'HOST': 'gladminds-staging.chnnvvffqwop.us-east-1.rds.amazonaws.com',
         'PORT': '3306',
     },
     'afterbuy': {
@@ -45,7 +45,7 @@ DATABASES = {
         'NAME': 'afterbuy',
         'USER': 'gladminds',
         'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-dev.chnnvvffqwop.us-east-1.rds.amazonaws.com',
+        'HOST': 'gladminds-staging.chnnvvffqwop.us-east-1.rds.amazonaws.com',
         'PORT': '3306',
     }
 }

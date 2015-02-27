@@ -22,8 +22,8 @@
     "pk": 3,
     "fields": {
       "template_key":"SEND_CUSTOMER_INVALID_CUSTOMER",
-      "template":"No service register for Customer Id: {sap_customer_id}",
-      "description":"Send on if customer id is not valid"
+      "template":"No service register for Customer ID: {sap_customer_id}",
+      "description":"Send on if customer ID is not valid"
     }
   },
   {
@@ -68,7 +68,7 @@
     "fields": {
       "template_key":"SEND_CUSTOMER_VALID_COUPON",
       "template":"Congratulations for availing Free Service {service_type}. Your Unique Coupon Number is {coupon}. Please provide this number at the time of delivery only. Happy Riding",
-      "description":"Send coupon validation sms to customer also"
+      "description":"Send coupon validation SMS to customer also"
     }
   },
       {
@@ -77,7 +77,7 @@
     "fields": {
       "template_key":"SEND_CUSTOMER_EXPIRED_COUPON",
       "template":"Information provided by you is invalid for Free Service {service_type}",
-      "description":"Send coupon invalid sms to customer also"
+      "description":"Send coupon invalid SMS to customer also"
     }
   },
       {
@@ -95,7 +95,7 @@
     "fields": {
       "template_key":"SEND_CUSTOMER_COUPON_REMINDER",
       "template":"Reminder: Your Coupon {usc} for product {vin} will expire on {expired_date} having valid kms {valid_kms}" ,
-      "description":"Send reminder sms on coupon expiry"
+      "description":"Send reminder SMS on coupon expiry"
     }
   },
       {
@@ -104,7 +104,7 @@
     "fields": {
       "template_key":"SEND_SA_CLOSE_COUPON",
       "template":"Service Completion for Customer ID {customer_id} and FSC {usc} tagged into the system. Thank You",
-      "description":"Send sms on coupon completion"
+      "description":"Send SMS on coupon completion"
     }
   },
       {
@@ -113,7 +113,7 @@
     "fields": {
       "template_key":"SEND_INVALID_MESSAGE",
       "template":"Invalid message For any assistance please contact our customer care at ++91-9741775128",
-      "description":"Send sms when received message is invalid"
+      "description":"Send SMS when received message is invalid"
     }
   },
   
@@ -253,7 +253,7 @@
     "fields": {
       "template_key": "COUPON_ALREADY_CLOSED",
       "template": "The FSC is already tagged in the system",
-      "description": "Send coupon is closed message to an initiator if it has been closed by some other sa"
+      "description": "Send coupon is closed message to an initiator if it has been closed by some other SA"
     }
   },
   {
@@ -288,7 +288,7 @@
     "pk": 32,
     "fields": {
       "template_key": "INITIATOR_FEEDBACK_DETAILS",
-      "template": "Your {type} has been assigned to one of our technician.Severity:{priority}.",
+      "template": "Your {type} has been assigned to one of our technician. Severity:{priority}.",
       "description": "Your feedback has been assigned to one of our technician  is looking into it."
       }
    },
@@ -334,7 +334,7 @@
     "fields": {
       "template_key": "SEND_CUSTOMER_DETAILS",
       "template": "Your {0} is {1}.",
-      "description": "Send id or vin to customer depending upon message he sent"
+      "description": "Send ID or VIN to customer depending upon message he sent"
     }
   },
   {
@@ -343,7 +343,7 @@
     "fields": {
       "template_key": "INVALID_RECOVERY_MESSAGE",
       "template": "Incorrect {0} or no matching details.",
-      "description": "Send on if customer id or VIN does not exists."
+      "description": "Send on if customer ID or VIN does not exists."
     }
   },
    {
@@ -370,7 +370,7 @@
     "fields": {
       "template_key":"SEND_INVALID_UCP",
       "template":"Invalid Entry... UPC does not exist in our records. Please contact our Customer Care at: +91-9741775128",
-      "description":"Send this message when single ucp does not exists in our records"
+      "description":"Send this message when single UPC does not exists in our records"
     }
   },
   {
