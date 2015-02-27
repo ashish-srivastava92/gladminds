@@ -38,6 +38,7 @@ class Roles():
     SDADMINS = 'SdAdmins'
     SDMANAGERS = 'SdManagers'
     SDOWNERS = 'SdOwners'
+    DEALERADMIN = 'DealerAdmins' 
     
     AREASERVICEMANAGER = 'AreaServiceManagers'
     ZSM = 'ZonalServiceManagers' 

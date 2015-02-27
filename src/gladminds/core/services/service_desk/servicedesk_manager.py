@@ -7,7 +7,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 from gladminds.core import utils
-from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, ALL
+from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, ALL,\
+    DEMO_PRIORITY
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.core.services import message_template as templates
 from gladminds.sqs_tasks import send_coupon, send_sms,\
@@ -50,7 +51,7 @@ def get_feedbacks(user, status, priority, type, search=None):
         type_filter = [type]
 
     if priority == ALL or priority is None:
-        priority_filter = get_list_from_set(PRIORITY)
+        priority_filter = get_list_from_set(DEMO_PRIORITY)
     else:
         priority_filter = [priority]
 
@@ -63,8 +64,8 @@ def get_feedbacks(user, status, priority, type, search=None):
             status_filter = [status]
 
     if user.groups.filter(name=Roles.DEALERS).exists():
-        sa_list = models.ServiceAdvisor.objects.active_under_dealer(user)
         sa_id_list = []
+        sa_list = models.ServiceAdvisor.objects.active_under_dealer(user)
         if sa_list:
             for sa in sa_list:
                 sa_id_list.append(sa.service_advisor_id)

@@ -632,7 +632,6 @@ class Feedback(BaseModel):
     summary = models.CharField(max_length=512, null=True, blank=True)
     description = models.CharField(max_length=512, null=True, blank=False)
     status = models.CharField(max_length=12, choices=constants.FEEDBACK_STATUS)
-    priority = models.CharField(max_length=12, choices=constants.PRIORITY, default='Low')
     type = models.CharField(max_length=20, choices=constants.FEEDBACK_TYPE)
     closed_date = models.DateTimeField(null=True, blank=True)
     resolved_date = models.DateTimeField(null=True, blank=True)
@@ -655,7 +654,9 @@ class Feedback(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "Feedback info"
-
+    
+    def __unicode__(self):
+        return self.summary
 
 class Comment(BaseModel):
     '''details of comments given for a feedback'''
@@ -678,7 +679,6 @@ class Duration(CompositeField):
     unit = models.CharField(max_length=12, choices=constants.TIME_UNIT, verbose_name = 'unit')
 
 class SLA(models.Model):
-    priority = models.CharField(max_length=12, choices=constants.SLA_PRIORITY, unique=True)
     response = Duration()
     reminder = Duration()
     resolution = Duration()
