@@ -38,7 +38,8 @@ class Roles():
     SDADMINS = 'SdAdmins'
     SDMANAGERS = 'SdManagers'
     SDOWNERS = 'SdOwners'
-    
+    SDREADONLY = 'SdReadOnly'
+
     AREASERVICEMANAGER = 'AreaServiceManagers'
     ZSM = 'ZonalServiceManagers' 
     

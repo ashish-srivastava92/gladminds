@@ -28,16 +28,18 @@ GROUP_MAPPING = {
                 Roles.ASCS : '/aftersell/asc/login',
                 Roles.DASCS :'/aftersell/asc/login',
                 Roles.SDOWNERS :'/aftersell/helpdesk/login',
-                Roles.SDMANAGERS : '/aftersell/helpdesk/login'
+                Roles.SDMANAGERS : '/aftersell/helpdesk/login',
+                Roles.SDREADONLY : '/aftersell/helpdesk/login'
                 }
 
-USER_GROUPS = [ Roles.DEALERS, Roles.ASCS, Roles.DASCS, Roles.SDOWNERS, Roles.SDMANAGERS]
+USER_GROUPS = [ Roles.DEALERS, Roles.ASCS, Roles.DASCS, Roles.SDOWNERS, Roles.SDMANAGERS, Roles.SDREADONLY]
 
 REDIRECT_USER ={
                  Roles.DEALERS : '/aftersell/register/asc',
                  Roles.ASCS : '/aftersell/register/sa',
                  Roles.SDOWNERS : '/aftersell/helpdesk',
-                 Roles.SDMANAGERS : '/aftersell/helpdesk'
+                 Roles.SDMANAGERS : '/aftersell/helpdesk',
+                 Roles.SDREADONLY : '/aftersell/helpdesk'
                 }
 
 TEMPLATE_MAPPING = {
