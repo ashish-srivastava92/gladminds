@@ -61,4 +61,4 @@ alter table bajaj_mechanic add column address_line_5 varchar(40) null;
 alter table bajaj_mechanic add column address_line_6 varchar(40) null;
 
 ###################################################################################################
-alter table bajaj_redemptionrequest add column points integer;
+alter table bajaj_redemptionrequest add column points integer(50);
