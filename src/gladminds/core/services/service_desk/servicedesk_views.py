@@ -31,7 +31,7 @@ def get_helpdesk(request):
     if request.user.groups.filter(name__in=[Roles.DEALERS, Roles.ASCS]):
         return HttpResponseRedirect('/aftersell/servicedesk/helpdesk')
     
-    elif request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.SDOWNERS]):
+    elif request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.SDOWNERS, Roles.SDREADONLY]):
         return HttpResponseRedirect('/aftersell/servicedesk/')
             
 def get_brand_departments():
