@@ -203,7 +203,7 @@ class CouponAdmin(GmModelAdmin):
         '''
             This if condition only for landing page
         '''
-        if not request.GET and not request.POST and request.path == "/gladminds/coupondata/":
+        if not request.GET.has_key('q'):
             qs = qs.filter(status=4)
         return qs
 

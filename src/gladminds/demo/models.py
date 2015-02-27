@@ -53,19 +53,34 @@ class ServiceAdvisor(base_models.ServiceAdvisor):
         app_label = _APP_NAME
         verbose_name_plural = "Service Advisor Data"
 
+class BrandDepartment(base_models.BrandDepartment):
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Brand Department"
+
+
+class DepartmentSubCategories(base_models.DepartmentSubCategories):
+    department = models.ForeignKey(BrandDepartment, related_name="department_sub_categories", null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Department Sub-categories"
+
 
 class ServiceDeskUser(base_models.ServiceDeskUser):
     user_profile = models.ForeignKey(UserProfile, null=True, blank=True)
+    sub_department = models.ForeignKey(DepartmentSubCategories, related_name="sub_department_user", null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Service Desk Users"
 
-
 class Feedback(base_models.Feedback):
     reporter = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='demo_feedback_reporter')
     assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='demo_feedback_assignee')
     previous_assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='demo_previous_assignee')
+    sub_department = models.ForeignKey(DepartmentSubCategories,null=True, blank=True) 
     
     class Meta:
         app_label = _APP_NAME

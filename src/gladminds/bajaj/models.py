@@ -78,11 +78,24 @@ class ServiceDeskUser(base_models.ServiceDeskUser):
         app_label = _APP_NAME
         verbose_name_plural = "Service Desk Users"
 
+class BrandDepartment(base_models.BrandDepartment):
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Brand Department"
 
+class DepartmentSubCategories(base_models.DepartmentSubCategories):
+    department = models.ForeignKey(BrandDepartment, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Department Sub-categories"
+        
 class Feedback(base_models.Feedback):
     reporter = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_feedback_reporter')
     assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_feedback_assignee')
     previous_assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_previous_assignee')
+    sub_department = models.ForeignKey(DepartmentSubCategories,null=True, blank=True) 
     
     class Meta:
         app_label = _APP_NAME
