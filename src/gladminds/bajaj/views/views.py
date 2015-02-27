@@ -5,6 +5,7 @@ import datetime
 import operator
 import re
 
+from gladminds.core.utils import check_password
 from tastypie.http import HttpBadRequest
 from collections import OrderedDict
 from django.shortcuts import render_to_response, render
@@ -86,18 +87,6 @@ def user_logout(request):
         return HttpResponseBadRequest()
     return HttpResponseBadRequest('Not Allowed')
 
-def check_change_password(password):
-    s = password
-    rules = [lambda s:any(x.isupper() for x in s),
-        lambda s:any(x.islower() for x in s),
-        lambda s:any(x.isdigit() for x in s),
-        lambda s:len(s) >= 6,
-        lambda s:bool(re.search(r'[^a-zA-Z0-9]',s))
-        ]
-    if not all(rule(s) for rule in rules):
-        return True
-    return False
-
 @check_service_active(Services.FREE_SERVICE_COUPON)
 @login_required()
 def change_password(request):
@@ -111,8 +100,7 @@ def change_password(request):
             new_password = request.POST.get('newPassword')
             check_pass = user.check_password(str(old_password))
             if check_pass:
-                invalid_password = check_change_password(new_password)
-                print invalid_password
+                invalid_password = check_password(new_password)
                 if (invalid_password):
                     data = {'message':"password does not match the rules",'status':False}
                 else:    

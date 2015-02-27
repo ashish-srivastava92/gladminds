@@ -2,6 +2,7 @@ from uuid import uuid4
 import json
 import logging
 import re
+from gladminds.core.utils import check_password
 from django.http.response import HttpResponse
 from django.conf.urls import url
 from tastypie.http import HttpBadRequest
@@ -44,17 +45,6 @@ class DjangoUserResources(ModelResource):
         excludes = ['password', 'is_superuser']
         always_return_data = True
         
-def check_password(password):
-    s = password
-    rules = [lambda s:any(x.isupper() for x in s),
-        lambda s:any(x.islower() for x in s),
-        lambda s:any(x.isdigit() for x in s),
-        lambda s:len(s) >= 6,
-        lambda s:bool(re.search(r'[^a-zA-Z0-9]',s))
-        ]
-    if not all(rule(s) for rule in rules):
-        return True
-
 class ConsumerResource(CustomBaseModelResource):
 
     user = fields.ForeignKey(DjangoUserResources, 'user', null=True, blank=True, full=True)
@@ -129,7 +119,7 @@ class ConsumerResource(CustomBaseModelResource):
         last_name = load.get('last_name','')
         password = load.get('password')
         invalid_password = check_password(password)
-        if (invalid_password):
+        if invalid_password:
             return HttpBadRequest("password is not meant according to the rules")
         if not phone_number or not password:
             return HttpBadRequest("phone_number, password required.")
@@ -256,7 +246,6 @@ class ConsumerResource(CustomBaseModelResource):
         try:
             if type=='phone':
                 try:
-                    print "phone"
                     if not (settings.ENV in settings.IGNORE_ENV and otp_token in settings.HARCODED_OTPS):
                         consumer = afterbuy_model.OTPToken.objects.get(token=otp_token).user
                         otp_handler.validate_otp(otp_token, user=consumer)
