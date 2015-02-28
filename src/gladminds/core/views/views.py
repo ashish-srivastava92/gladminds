@@ -513,6 +513,7 @@ def trigger_sqs_tasks(request):
         'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk',
         'export_member_temp_id_to_sap': 'export_member_temp_id_to_sap',
         'export_purchase_feed_sync_to_sap': 'export_purchase_feed_sync_to_sap',
+        'send_mail_for_policy_discrepency': 'send_mail_for_policy_discrepency'
     }
 
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)

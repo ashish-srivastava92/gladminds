@@ -203,7 +203,7 @@ class CouponAdmin(GmModelAdmin):
         '''
             This if condition only for landing page
         '''
-        if not request.GET.has_key('q'):
+        if not request.GET.has_key('q') and not request.GET.has_key('_changelist_filters'):
             qs = qs.filter(status=4)
         return qs
 
