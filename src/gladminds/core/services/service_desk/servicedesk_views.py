@@ -18,8 +18,8 @@ from gladminds.core import utils
 from gladminds.core.auth.service_handler import check_service_active, Services
 from gladminds.core.auth_helper import Roles
 from gladminds.core.constants import BY_DEFAULT_RECORDS_PER_PAGE, \
-    FEEDBACK_STATUS, PAGINATION_LINKS, RECORDS_PER_PAGE, FEEDBACK_TYPE, PRIORITY, \
-    ROOT_CAUSE
+    FEEDBACK_STATUS, PAGINATION_LINKS, RECORDS_PER_PAGE, FEEDBACK_TYPE,\
+    ROOT_CAUSE, DEMO_PRIORITY
 from gladminds.core.utils import get_list_from_set
 from gladminds.core.model_fetcher import models
 
@@ -28,7 +28,7 @@ LOG = logging.getLogger('gladminds')
 
 
 def get_helpdesk(request):
-    if request.user.groups.filter(name__in=[Roles.DEALERS, Roles.ASCS]):
+    if request.user.groups.filter(name__in=[Roles.DEALERS, Roles.ASCS, Roles.DEALERADMIN]):
         return HttpResponseRedirect('/aftersell/servicedesk/helpdesk')
     
     elif request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.SDOWNERS, Roles.SDREADONLY]):
@@ -82,7 +82,7 @@ def service_desk(request):
                                           "departments": brand_departments,
                                           "record_showing_counts": RECORDS_PER_PAGE,
                                           "types": utils.get_list_from_set(FEEDBACK_TYPE),
-                                          "priorities": utils.get_list_from_set(PRIORITY),
+                                          "priorities": utils.get_list_from_set(DEMO_PRIORITY),
                                           "training_material" : training_material,
                                           "dealer_asc" : dealer_asc_details,
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
@@ -167,7 +167,7 @@ def get_servicedesk_tickets(request):
     return render(request, 'service-desk/tickets.html', {"feedbacks" : feedbacks,
                                           "status": utils.get_list_from_set(FEEDBACK_STATUS),
                                           "types": utils.get_list_from_set(FEEDBACK_TYPE),
-                                          "priorities": utils.get_list_from_set(PRIORITY),
+                                          "priorities": utils.get_list_from_set(DEMO_PRIORITY),
                                           "pagination_links": PAGINATION_LINKS,
                                           "page_details": page_details,
                                           "departments": brand_departments, 
@@ -204,7 +204,7 @@ def modify_servicedesk_tickets(request, feedback_id):
     host = get_current_site(request)
     group_name = request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.SDOWNERS, Roles.DEALERS, Roles.ASCS])
     status = get_list_from_set(FEEDBACK_STATUS)
-    priority_types = get_list_from_set(PRIORITY)
+    priority_types = get_list_from_set(DEMO_PRIORITY)
     feedback_types = get_list_from_set(FEEDBACK_TYPE)
     root_cause = get_list_from_set(ROOT_CAUSE)
     feedback_obj = get_feedback(feedback_id, request.user)

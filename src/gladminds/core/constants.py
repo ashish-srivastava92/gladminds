@@ -32,7 +32,7 @@ GROUP_MAPPING = {
                 Roles.SDREADONLY : '/aftersell/helpdesk/login'
                 }
 
-USER_GROUPS = [ Roles.DEALERS, Roles.ASCS, Roles.DASCS, Roles.SDOWNERS, Roles.SDMANAGERS, Roles.SDREADONLY]
+USER_GROUPS = [ Roles.DEALERS, Roles.ASCS, Roles.DASCS, Roles.SDOWNERS, Roles.SDMANAGERS, Roles.DEALERADMIN, Roles.SDREADONLY]
 
 REDIRECT_USER ={
                  Roles.DEALERS : '/aftersell/register/asc',
@@ -68,6 +68,12 @@ PRIORITY = (
         ('Urgent', 'Urgent'),
     )
 
+DEMO_PRIORITY = (
+        ('P3', 'P3'),
+        ('P2', 'P2'),
+        ('P1', 'P1'),
+    )
+
 FEEDBACK_TYPE = (('Problem', 'Problem'),
                  ('Question', 'Question'),
                  ('Feature Request', 'Feature Request'),
@@ -77,6 +83,7 @@ SLA_PRIORITY = (('Low', 'Low'),
                 ('Medium', 'Medium'),
                 ('High', 'High'),
                 ('Urgent', 'Urgent'),)
+
 LOYALTY_SLA_STATUS = (('Open','Open'),
                       ('Accepted','Accepted'),
                       ('Approved','Approved'),

@@ -71,7 +71,22 @@ def redirect_url(request):
 @login_required()
 def get_services(request):
     if request.method == 'GET':
-        return render(request, 'portal/services.html')
+        user_groups = utils.get_user_groups(request.user)
+        brand_url = settings.HOME_URLS.get(settings.BRAND, {})
+        brand_services = []
+    
+        for user_group in user_groups:
+            if user_group in brand_url.keys():
+                values = brand_url[user_group]
+                for value in values:
+                    services = {} 
+                    services['url'] = value.values()[0]
+                    services['name'] = value.keys()[0]
+                    brand_services.append(services)
+        if len(brand_services)==1:
+            return HttpResponseRedirect(brand_services[0]['url'])
+        else:
+            return render(request, 'portal/services.html')
 
 def auth_login(request):
     user = getattr(request, 'user', None)

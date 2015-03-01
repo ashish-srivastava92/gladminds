@@ -654,7 +654,8 @@ HOME_URLS = {
                        },
              "demo" : {"SdManagers":[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
-                       "Dealers" :[{"SERVICE DESK":"/aftersell/helpdesk"}]  
+                       "Dealers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "DealerAdmins":[{"SERVICE DESK":"/aftersell/helpdesk"}]
                        }
              }
 
