@@ -18,6 +18,7 @@ class CouponDataResource(CustomBaseModelResource):
     class Meta:
         queryset = models.CouponData.objects.all()
         resource_name = "coupons"
+        model_name = 'CouponData'
         authorization = MultiAuthorization(DjangoAuthorization())
         authentication = MultiAuthentication(AccessTokenAuthentication())
         detail_allowed_methods = ['get']
