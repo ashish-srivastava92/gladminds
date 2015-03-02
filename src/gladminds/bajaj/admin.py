@@ -374,7 +374,7 @@ class ServiceDeskUserAdmin(GmModelAdmin):
 '''Admin View for loyalty'''
 class NSMAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    search_fields = ('nsm_id', 'name', 'phone_number', 'territory')
+    search_fields = ('nsm_id', 'name', 'phone_number')
     list_display = ('nsm_id', 'name', 'email', 'phone_number','get_territory')
 
     def get_territory(self, obj):

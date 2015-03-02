@@ -31,7 +31,7 @@ api_v1.register(service_desk_apis.FeedbackResource())
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import admin
-admin.autodiscover()
+# admin.autodiscover()
 admin.site.login = login_required(settings.LOGIN_URL)
 
 api_v1.register(SMSResources())

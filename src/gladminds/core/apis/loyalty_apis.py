@@ -57,7 +57,7 @@ class CityResource(CustomBaseModelResource):
 
 class NSMResource(CustomBaseModelResource):
     class Meta:
-        queryset = models.NationalSalesManager.objects.all()
+        queryset = models.NationalSparesManager.objects.all()
         resource_name = "nsms"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
@@ -66,7 +66,7 @@ class NSMResource(CustomBaseModelResource):
         
 class ASMResource(CustomBaseModelResource):
     class Meta:
-        queryset = models.AreaSalesManager.objects.all()
+        queryset = models.AreaSparesManager.objects.all()
         resource_name = "asms"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']

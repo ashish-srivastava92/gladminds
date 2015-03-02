@@ -365,7 +365,7 @@ NATIONAL_SPARES_MANAGER = {
         "name": "Raghunath",
         "nsm_id": "NSM002",
         "phone_number": "1234567890",
-        "territory": "south",
+        "territory": "/v1/territories/1/",
         "user": " "
         }
 
@@ -374,7 +374,7 @@ AREA_SPARES_MANAGER = {
         "email": "spremnath@bajajauto.co.in",
         "name": "PREM NATH",
         "phone_number": "9999999999",
-        "state": "Karnataka",
+        "state": "/v1/states/1/",
         "user":USER,
         "nsm":""
        }
@@ -471,7 +471,7 @@ MEMBER = {
             "shop_wall_length": 0,
             "shop_wall_width": 0,
             "spare_per_month": 50000,
-            "state": "Karnataka",
+            "state": "/v1/states/1/",
             "tehsil": "",
             "total_points": 1000
                         }
@@ -510,7 +510,7 @@ MEMBER1 = {
             "shop_wall_length": 0,
             "shop_wall_width": 0,
             "spare_per_month": 50000,
-            "state": "TAMIL",
+            "state": "/v1/states/1/",
             "tehsil": "",
             "total_points":100
                         }
