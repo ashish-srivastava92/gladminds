@@ -1,4 +1,4 @@
-from tastypie.constants import ALL
+from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.authorization import DjangoAuthorization, Authorization
 from tastypie import fields 
 from gladminds.core.apis.base_apis import CustomBaseModelResource
@@ -40,7 +40,8 @@ class ProductResource(CustomBaseModelResource):
                      "customer_name": ALL,
                      "customer_address": ALL,
                      "purchase_date": ['gte', 'lte', 'isnull'],
-                     "invoice_date": ['gte', 'lte']
+                     "invoice_date": ['gte', 'lte'],
+                     "dealer_id": ALL_WITH_RELATIONS
                      }
 
 
