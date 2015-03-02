@@ -147,6 +147,7 @@ def get_discrepant_coupon_details():
     
     for coupon in coupons_details:
         data = {}
+        data['date'] = coupon.created_date.strftime("%d/%m/%y")
         data['vin'] = coupon.product.product_id
         data['service_type'] = coupon.service_type
         data['valid_days'] = coupon.valid_days
