@@ -37,7 +37,7 @@ class LoyaltyApiTests(ResourceTestCase):
 
     def test_create_nsm(self):
         uri = '/v1/nsms/'
-        resp = self.post(uri,data=NSM)
+        resp = self.post(uri,data=NATIONAL_SPARES_MANAGER)
         self.assertEquals(resp.status_code,201)
         return resp
  
@@ -61,7 +61,7 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['phone_number'], "1234512345")
  
-    def test_create_asm(self, data=ASM):
+    def test_create_asm(self, data=AREA_SPARES_MANAGER):
         uri = '/v1/asms/'
         resp = self.post(uri,data=data)
         self.assertEquals(resp.status_code,201)
