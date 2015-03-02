@@ -270,7 +270,7 @@ function change_url_by_filter(){
 	var url = window.location.pathname + '?',
 		serch_text = $(".feedback-search-text").val(),
     	selectedOptions = $('.feedback-filters-options'),
-    	filters = ['priority', 'type', 'status', 'count'];
+    	filters = ['priority', 'status', 'count'];
     	$.each(filters, function(index, val){
     		url = url + val + '=' + selectedOptions[index].options[selectedOptions[index].selectedIndex].value + '&'
     	});

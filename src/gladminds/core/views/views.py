@@ -72,7 +72,22 @@ def redirect_url(request):
 @login_required()
 def get_services(request):
     if request.method == 'GET':
-        return render(request, 'portal/services.html')
+        user_groups = utils.get_user_groups(request.user)
+        brand_url = settings.HOME_URLS.get(settings.BRAND, {})
+        brand_services = []
+    
+        for user_group in user_groups:
+            if user_group in brand_url.keys():
+                values = brand_url[user_group]
+                for value in values:
+                    services = {} 
+                    services['url'] = value.values()[0]
+                    services['name'] = value.keys()[0]
+                    brand_services.append(services)
+        if len(brand_services)==1:
+            return HttpResponseRedirect(brand_services[0]['url'])
+        else:
+            return render(request, 'portal/services.html')
 
 def auth_login(request):
     user = getattr(request, 'user', None)
@@ -97,7 +112,7 @@ def auth_login(request):
                 return HttpResponseRedirect(redirect_url(request))
         return HttpResponseRedirect(str(request.META.get('HTTP_REFERER')))
     else:
-        return render_to_response('login.html', c)
+        return render(request, 'login.html')
 
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
@@ -501,6 +516,7 @@ def trigger_sqs_tasks(request):
         'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk',
         'export_member_temp_id_to_sap': 'export_member_temp_id_to_sap',
         'export_purchase_feed_sync_to_sap': 'export_purchase_feed_sync_to_sap',
+        'send_mail_for_policy_discrepency': 'send_mail_for_policy_discrepency'
     }
 
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)

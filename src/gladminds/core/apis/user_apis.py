@@ -169,3 +169,108 @@ class ServiceAdvisorResource(CustomBaseModelResource):
                      "status": ALL
                      }
         always_return_data = True
+    
+class NationalSparesManagerResource(CustomBaseModelResource):
+    class Meta:
+        queryset = models.NationalSalesManager.objects.all()
+        resource_name = "national-spares-managers"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+        
+        
+class AreaSparesManagerResource(CustomBaseModelResource):
+    class Meta:
+        queryset = models.AreaSalesManager.objects.all()
+        resource_name = "area-spares-managers"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+        
+class PartnerResource(CustomBaseModelResource):
+    class Meta:
+        queryset = models.Partner.objects.all()
+        resource_name = "partners"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+
+class DistributorResource(CustomBaseModelResource):
+    user = fields.ForeignKey(UserProfileResource, 'user', full=True)
+    asm = fields.ForeignKey(AreaSparesManagerResource, 'asm', full=True)
+    class Meta:
+        queryset = models.Distributor.objects.all()
+        resource_name = "distributors"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+
+class RetailerResource(CustomBaseModelResource):
+    class Meta:
+        queryset = models.Retailer.objects.all()
+        resource_name = "retailers"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+class MemberResource(CustomBaseModelResource):
+    distributor = fields.ForeignKey(DistributorResource, 'registered_by_distributor', null=True, blank=True, full=True) 
+    preferred_retailer = fields.ForeignKey(RetailerResource, 'preferred_retailer', null=True, blank=True, full=True)
+    
+    class Meta:
+        queryset = models.Mechanic.objects.all()
+        resource_name = "members"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+        filtering = {
+                     "state": ALL,
+                     "locality":ALL,
+                     "district":ALL,
+                     }
+        
+
+class ServiceDeskUserResource(CustomBaseModelResource):
+    '''
+    Service Desk User Resource
+    '''
+    user = fields.ForeignKey(UserProfileResource, 'user_profile',
+                                        full=True, null=True, blank=True)
+    
+    class Meta:
+        queryset = models.ServiceDeskUser.objects.all()
+        resource_name = "service-desk-users"
+#         authorization = MultiAuthorization(DjangoAuthorization())
+#         authentication = MultiAuthentication(AccessTokenAuthentication())
+        authorization = Authorization()
+        detail_allowed_methods = ['get']
+        always_return_data = True
+        filtering = {
+                        "user": ALL_WITH_RELATIONS,
+                        "sub_department": ALL_WITH_RELATIONS,
+                        "sub_department__department": ALL_WITH_RELATIONS
+                     }
+
+class DepartmentSubCategoriesResource(CustomBaseModelResource):
+    sub_department_user = fields.ToManyField(ServiceDeskUserResource, 'sub_department_user', full=True)
+
+    class Meta:
+        queryset = models.DepartmentSubCategories.objects.all()
+        resource_name = "department-sub-categories"
+        authorization = Authorization()
+        detail_allowed_methods = ['get']
+        always_return_data = True
+        filtering = { 
+                     "department": ALL_WITH_RELATIONS
+                     } 
+
+class BrandDepartmentResource(CustomBaseModelResource):
+    department_sub_categories = fields.ToManyField(DepartmentSubCategoriesResource, 'department_sub_categories', full=True)
+    class Meta:
+        queryset = models.BrandDepartment.objects.all()
+        resource_name = "brand-departments"
+        authorization = Authorization()
+        detail_allowed_methods = ['get']
+        always_return_data = True

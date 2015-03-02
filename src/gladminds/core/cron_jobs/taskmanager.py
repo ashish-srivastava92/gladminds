@@ -156,11 +156,11 @@ def get_discrepant_coupon_details():
     service_dict = {}
     for service_type in service_type_obj:
         service_dict.update({service_type.constant_name:service_type.constant_value})
-   
-    coupons_details= models.CouponData.objects.filter((Q(service_type=1) and (~Q(valid_days=service_dict['service_1_valid_days']) or ~Q(valid_kms=service_dict['service_1_valid_kms']))) or
-                                                        (Q(service_type=2) and (~Q(valid_days=service_dict['service_2_valid_days']) or ~Q(valid_kms=service_dict['service_2_valid_kms']))) or
-                                                        (Q(service_type=3) and (~Q(valid_days=service_dict['service_3_valid_days']) or ~Q(valid_kms=service_dict['service_3_valid_kms'])))).select_related('product')
-   
+        
+    coupons_details= models.CouponData.objects.filter((Q(service_type=1) & (~Q(valid_days=service_dict['service_1_valid_days']) | ~Q(valid_kms=service_dict['service_1_valid_kms'])))
+                                                    | (Q(service_type=2) & (~Q(valid_days=service_dict['service_2_valid_days']) | ~Q(valid_kms=service_dict['service_2_valid_kms'])))
+                                                    | (Q(service_type=3) & (~Q(valid_days=service_dict['service_3_valid_days']) | ~Q(valid_kms=service_dict['service_3_valid_kms']))))
+    
     for coupon in coupons_details:
         data = {}
         data['vin'] = coupon.product.product_id
