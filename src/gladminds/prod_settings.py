@@ -105,17 +105,19 @@ SAP_CRM_DETAIL = {
                   'username':'pisuper',
                   'password':'welcome123'
                   }
-ASC_WSDL_URL = "http://bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
-COUPON_WSDL_URL = "http://bajaj.gladminds.co/api/v1/redeem-feed/?wsdl&v0"
+
 COUPON_WSDL = 'prod_coupon_redeem.wsdl'
-CUSTOMER_REGISTRATION_WSDL_URL = "http://bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL = 'prod_customer_registration.wsdl'
-
-VIN_SYNC_WSDL_URL="http://bajaj.gladminds.co/api/v1/vin-sync-feed/?wsdl&v0"
 VIN_SYNC_WSDL='prod_vin_sync.wsdl'
+PURCHASE_SYNC_WSDL='prod_purchase_sync_feed.wsdl'
 
-MEMBER_SYNC_WSDL_URL = "http://bajaj.gladminds.co/api/v1/member-sync-feed/?wsdl&v0"
-MEMBER_SYNC_WSDL = 'prod_member_sync_feed.wsdl'
+
+ASC_WSDL_URL = "http://bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
+COUPON_WSDL_URL = "http://bajaj.gladminds.co/api/v1/coupon-redeem/?wsdl&v0"
+CUSTOMER_REGISTRATION_WSDL_URL = "http://bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
+VIN_SYNC_WSDL_URL="http://bajaj.gladminds.co/api/v1/vin-sync/?wsdl&v0"
+PURCHASE_SYNC_WSDL_URL="http://bajaj.gladminds.co/api/v1/purchase-sync/?wsdl&v0"
+
 
 ENABLE_AMAZON_SQS = True
 

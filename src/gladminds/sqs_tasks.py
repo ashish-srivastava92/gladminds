@@ -698,6 +698,21 @@ def redemption_request_due_date_escalation(*args, **kwargs):
                                {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         redemption_request.resolution_flag = True
         redemption_request.save()
+        
+'''
+Cron Job to send info of registered Mechanic
+'''
+@shared_task
+def export_member_accumulation_to_sap(*args, **kwargs):
+    accumulation_requests = loyalty_export.ExportAccumulationFeed(username=settings.SAP_CRM_DETAIL[
+                   'username'], password=settings.SAP_CRM_DETAIL['password'],
+                  wsdl_url=settings.ACCUMULATION_SYNC_WSDL_URL, feed_type='Accumulation Request Feed')
+    feed_export_data = accumulation_requests.export_data()
+    if len(feed_export_data[0]) > 0:
+        accumulation_requests.export(items=feed_export_data[0], item_batch=feed_export_data[
+                             1], total_failed_on_feed=feed_export_data[2])
+    else:
+        logger.info("[export_member_accumulation_to_sap]: No member registered since last feed")
  
 _tasks_map = {"send_registration_detail": send_registration_detail,
 
