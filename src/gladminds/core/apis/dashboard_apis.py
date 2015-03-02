@@ -3,7 +3,7 @@ This contains the dasboards apis
 '''
 from gladminds.core.apis.base_apis import CustomBaseResource, CustomApiObject
 from tastypie import fields
-from gladminds.core.model_fetcher import models
+from gladminds.bajaj import models
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from django.core.cache import cache
 from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES,\

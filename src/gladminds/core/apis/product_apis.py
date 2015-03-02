@@ -12,6 +12,7 @@ class ProductTypeResource(CustomBaseModelResource):
     class Meta:
         queryset = models.ProductType.objects.all()
         resource_name = "product-types"
+        model_name = 'ProductType'
 #         authentication = AccessTokenAuthentication()
 #         authorization = MultiAuthorization(DjangoAuthorization())
         authorization = Authorization()
@@ -28,6 +29,7 @@ class ProductResource(CustomBaseModelResource):
     class Meta:
         queryset = models.ProductData.objects.all()
         resource_name = "products"
+        model_name = 'ProductData'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(Authorization())
         detail_allowed_methods = ['get']
@@ -48,6 +50,7 @@ class CustomerTempRegistrationResource(CustomBaseModelResource):
     class Meta:
         queryset = models.CustomerTempRegistration.objects.all()
         resource_name = "customer-changes"
+        model_name = 'CustomerTempRegistration'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
@@ -59,6 +62,7 @@ class ProductCatalogResource(CustomBaseModelResource):
     class Meta:
         queryset = models.ProductCatalog.objects.all()
         resource_name = "product-catalogs"
+        model_name = 'ProductCatalog'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -68,6 +72,7 @@ class SpareMasterResource(CustomBaseModelResource):
     class Meta:
         queryset = models.SparePartMasterData.objects.all()
         resource_name = "spare-masters"
+        model_name = 'SparePartMasterData'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -77,6 +82,7 @@ class SparePartPointResource(CustomBaseModelResource):
     class Meta:
         queryset = models.SparePartPoint.objects.all()
         resource_name = "spare-points"
+        model_name = 'SparePartPoint'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -86,6 +92,7 @@ class SparePartUPCResource(CustomBaseModelResource):
     class Meta:
         queryset = models.SparePartUPC.objects.all()
         resource_name = "spare-upcs"
+        model_name = 'SparePartUPC'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True

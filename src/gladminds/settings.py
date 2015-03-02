@@ -591,7 +591,9 @@ FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
 BRAND = None
 GM_BRAND = 'default'
-BRANDS = ['bajaj', 'demo', 'afterbuy']
+OUTSIDE_BRANDS = ['bajaj', 'demo']
+
+BRANDS = OUTSIDE_BRANDS + ['afterbuy']
 ###############################################
 AIRTEL_IP = '54.84.243.77'
 SMS_CLIENT = "MOCK"

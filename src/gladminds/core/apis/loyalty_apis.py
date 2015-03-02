@@ -18,18 +18,20 @@ class LoyaltySLAResource(CustomBaseModelResource):
     class Meta:
         queryset = models.LoyaltySLA.objects.all()
         resource_name = "slas"
+        model_name = 'LoyaltySLA'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
-    
+
 class RedemptionResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
     product_catalog = fields.ForeignKey(ProductCatalogResource, 'product')
-    
+
     class Meta:
         queryset = models.RedemptionRequest.objects.all()
         resource_name = "redemption-requests"
+        model_name = 'RedemptionRequest'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -69,6 +71,7 @@ class AccumulationResource(CustomBaseModelResource):
     class Meta:
         queryset = models.AccumulationRequest.objects.all()
         resource_name = "accumulations"
+        model_name = "AccumulationRequest"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post']
         always_return_data = True
