@@ -5,29 +5,54 @@ from gladminds.sqs_tasks import _tasks_map
 from tastypie.api import Api
 from django.conf import settings
 from gladminds.core.apis import user_apis, preferences_apis, coupon_apis, product_apis,\
-    audit_apis, dashboard_apis, service_desk_apis
+    audit_apis, dashboard_apis, service_desk_apis, loyalty_apis
 from gladminds.core.managers.sms_handler import SMSResources
 from gladminds.core.apis.image_apis import upload_files
 
 api_v1 = Api(api_name="v1")
-api_v1.register(coupon_apis.CouponDataResource())
-api_v1.register(product_apis.ProductTypeResource())
-api_v1.register(product_apis.ProductResource())
-api_v1.register(product_apis.CustomerTempRegistrationResource())
+
 api_v1.register(user_apis.UserProfileResource())
 api_v1.register(user_apis.DealerResource())
 api_v1.register(user_apis.AuthorizedServiceCenterResource())
 api_v1.register(user_apis.ServiceAdvisorResource())
+api_v1.register(user_apis.NationalSparesManagerResource())
+api_v1.register(user_apis.AreaSparesManagerResource())
+api_v1.register(user_apis.PartnerResource())
+api_v1.register(user_apis.DistributorResource())
+api_v1.register(user_apis.RetailerResource())
+api_v1.register(user_apis.MemberResource())
+api_v1.register(user_apis.ServiceDeskUserResource())
+api_v1.register(user_apis.DepartmentSubCategoriesResource())
+api_v1.register(user_apis.BrandDepartmentResource())
+
+api_v1.register(product_apis.ProductTypeResource())
+api_v1.register(product_apis.ProductResource())
+api_v1.register(product_apis.CustomerTempRegistrationResource())
+api_v1.register(product_apis.ProductTypeResource())
+api_v1.register(product_apis.SpareMasterResource())
+api_v1.register(product_apis.ProductCatalogResource())
+api_v1.register(product_apis.SparePartUPCResource())
+api_v1.register(product_apis.SparePartPointResource())
+
+api_v1.register(coupon_apis.CouponDataResource())
+
+api_v1.register(loyalty_apis.RedemptionResource())
+api_v1.register(loyalty_apis.LoyaltySLAResource())
+api_v1.register(loyalty_apis.AccumulationResource())
+
+api_v1.register(service_desk_apis.FeedbackResource())
+
+
 api_v1.register(preferences_apis.UserPreferenceResource())
 api_v1.register(preferences_apis.BrandPreferenceResource())
+
 api_v1.register(audit_apis.SMSLogResource())
 api_v1.register(audit_apis.DataFeedLogResource())
+
 api_v1.register(dashboard_apis.OverallStatusResource())
 api_v1.register(dashboard_apis.FeedStatusResource())
 api_v1.register(dashboard_apis.SMSReportResource())
 api_v1.register(dashboard_apis.CouponReportResource())
-api_v1.register(service_desk_apis.ServiceDeskUserResource())
-api_v1.register(service_desk_apis.FeedbackResource())
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import admin
@@ -40,7 +65,6 @@ urlpatterns = patterns('',
     url(r'api/doc/', include('gladminds.core.api_docs.swagger_urls', namespace='tastypie_swagger')),
     url(r'login/$', 'gladminds.core.views.auth_login'),
     url(r'^$', 'gladminds.core.views.get_services'),
-#     (r'^admin/', include(admin.site.urls) ),
     url(r'^aftersell/users/(?P<users>[a-zA-Z0-9]+)$', 'gladminds.core.views.users'),
     url(r'^aftersell/sa/(?P<id>[a-zA-Z0-9]+)/$', 'gladminds.core.views.get_sa_under_asc'),
     url(r'^report/(?P<role>[a-zA-Z0-9.-]+)/$', 'gladminds.core.views.brand_details'),
