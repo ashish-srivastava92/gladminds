@@ -12,11 +12,11 @@ BY_DEFAULT_RECORDS_PER_PAGE = RECORDS_PER_PAGE[0]
 
 ALL = 'all'
 
-PROVIDERS = ['asc', 'dasc', 'dealer', 'helpdesk']
+PROVIDERS = ['asc', 'dasc', 'dealer', 'helpdesk', 'asm', 'rps']
 
 PROVIDER_MAPPING = {
                     'dealer' : 'dealer/login.html',
-                    'helpdesk' : 'service-desk/login.html'
+                    'helpdesk' : 'service-desk/login.html',
                  }
 
 SERVICE_MAPPING = {

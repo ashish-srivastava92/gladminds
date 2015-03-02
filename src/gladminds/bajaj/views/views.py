@@ -519,6 +519,7 @@ def trigger_sqs_tasks(request):
         'send-reminder': 'send_reminder',
         'export-customer-registered': 'export_customer_reg_to_sap',
         'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk',
+        'send_mail_for_policy_discrepency':'send_mail_for_policy_discrepency',
     }
 
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)
