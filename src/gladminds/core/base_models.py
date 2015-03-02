@@ -43,7 +43,8 @@ class UserProfile(BaseModel):
     country = models.CharField(max_length=255, null=True, blank=True)
     pincode = models.CharField(max_length=15, null=True, blank=True)
     date_of_birth = models.DateTimeField(null=True, blank=True)
-  
+    department = models.CharField(max_length=100, null=True, blank=True)
+    
     image_url = models.FileField(upload_to=set_user_pic_path,
                                   max_length=200, null=True, blank=True,
                                   validators=[validate_image])
@@ -128,6 +129,7 @@ class Dealer(BaseModel):
     dealer_id = models.CharField(
         max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
+    use_cdms = models.BooleanField(default=True)
 
     objects = user_manager.DealerManager()
 
@@ -389,8 +391,7 @@ class CustomerTempRegistration(BaseModel):
     remarks = models.CharField(max_length=500, null=True, blank=True)
     tagged_sap_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
-    mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True, default=0)
-    email_flag = models.BooleanField(default=False) 
+    mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True, default=0) 
     objects = user_manager.CustomerTempRegistrationManager()
 
     class Meta:
@@ -405,13 +406,31 @@ class CustomerUpdateHistory(BaseModel):
     updated_field = models.CharField(max_length=100)
     old_value = models.CharField(max_length=100)
     new_value = models.CharField(max_length=100)
+    email_flag = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
         verbose_name_plural = "Customer temporary Update History"
 
     def __unicode__(self):
-        return self.update_field
+        return self.updated_field
+
+class CustomerUpdateFailure(BaseModel):
+    '''Stores data when phone number update exceeds the limit'''
+    customer_name = models.CharField(max_length=50, null=False, blank=False)
+    customer_id = models.CharField(max_length=50,
+                                null=False, blank=False, unique=False)
+    updated_by = models.CharField(max_length=50, null=False, blank=False)
+    old_number = models.CharField(max_length=15, null=False, blank=False)
+    new_number = models.CharField(max_length=15, null=False, blank=False)
+    email_flag = models.BooleanField(default=False)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = 'Update Failures'
+    
+    def __unicode__(self):
+        return self.customer_id
 
 class EmailToken(models.Model):
     ACTIVATED = u"ALREADY_ACTIVATED"
@@ -614,7 +633,28 @@ class Activity(BaseModel):
         abstract = True
         verbose_name_plural = "Activity info"
 
+class BrandDepartment(BaseModel):
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=100, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Department Info"
+    
+    def __unicode__(self):
+        return self.name
+    
+class DepartmentSubCategories(BaseModel):
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=100, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Sub-Department Info"
 
+    def __unicode__(self):
+        return self.name
+    
 class Feedback(BaseModel):
     '''details of feedback received'''
     summary = models.CharField(max_length=512, null=True, blank=True)
@@ -760,8 +800,8 @@ class ZonalServiceManager(BaseModel):
     
 #######################LOYALTY TABLES#################################
 
-class NationalSalesManager(BaseModel):
-    '''details of National Sales Manager'''
+class NationalSparesManager(BaseModel):
+    '''details of National Spares Manager'''
     nsm_id = models.CharField(max_length=50, unique=True, default=generate_nsm_id)
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
@@ -769,13 +809,13 @@ class NationalSalesManager(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "National Sales Managers"
+        verbose_name_plural = "National Spares Managers"
 
     def __unicode__(self):
         return self.name
 
-class AreaSalesManager(BaseModel):
-    '''details of Area Service Manager'''
+class AreaSparesManager(BaseModel):
+    '''details of Area Spares Manager'''
     asm_id = models.CharField(max_length=50, unique=True, default=generate_asm_id)
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
@@ -783,7 +823,7 @@ class AreaSalesManager(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Area Sales Managers"
+        verbose_name_plural = "Area Spares Managers"
 
     def __unicode__(self):
         return self.name

@@ -29,8 +29,8 @@ class ProductResource(CustomBaseModelResource):
         queryset = models.ProductData.objects.all()
         resource_name = "products"
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        authorization = MultiAuthorization(Authorization())
+        detail_allowed_methods = ['get']
         filtering = {
                      "product_id":  ALL,
                      "customer_id": ALL,

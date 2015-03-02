@@ -78,11 +78,24 @@ class ServiceDeskUser(base_models.ServiceDeskUser):
         app_label = _APP_NAME
         verbose_name_plural = "Service Desk Users"
 
+class BrandDepartment(base_models.BrandDepartment):
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Brand Department"
 
+class DepartmentSubCategories(base_models.DepartmentSubCategories):
+    department = models.ForeignKey(BrandDepartment, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Department Sub-categories"
+        
 class Feedback(base_models.Feedback):
     reporter = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_feedback_reporter')
     assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_feedback_assignee')
     previous_assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_previous_assignee')
+    sub_department = models.ForeignKey(DepartmentSubCategories,null=True, blank=True) 
     
     class Meta:
         app_label = _APP_NAME
@@ -214,6 +227,14 @@ class CustomerTempRegistration(base_models.CustomerTempRegistration):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Customer temporary info"
+
+class CustomerUpdateFailure(base_models.CustomerUpdateFailure):
+    '''stores data when phone number update exceeds the limit'''
+    product_id = models.ForeignKey(ProductData, null=False, blank=False)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Update Failures"
         
 class CustomerUpdateHistory(base_models.CustomerUpdateHistory):
     '''Stores the updated values of registered customer'''
@@ -322,8 +343,8 @@ class City(base_models.City):
     class Meta:
         app_label = _APP_NAME
 
-class NationalSalesManager(base_models.NationalSalesManager):
-    '''details of National Sales Manager'''
+class NationalSparesManager(base_models.NationalSparesManager):
+    '''details of National Spares Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
     territory = models.ManyToManyField(Territory)
 
@@ -331,11 +352,11 @@ class NationalSalesManager(base_models.NationalSalesManager):
         app_label = _APP_NAME
 
 
-class AreaSalesManager(base_models.AreaSalesManager):
-    '''details of Area Service Manager'''
+class AreaSparesManager(base_models.AreaSparesManager):
+    '''details of Area Spares Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
-    nsm = models.ForeignKey(NationalSalesManager, null=True, blank=True)
     state = models.ManyToManyField(State)
+    nsm = models.ForeignKey(NationalSparesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -344,7 +365,7 @@ class AreaSalesManager(base_models.AreaSalesManager):
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
-    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
+    asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -395,7 +416,7 @@ class AccumulationRequest(base_models.AccumulationRequest):
     '''details of Accumulation request'''
     member = models.ForeignKey(Mechanic)
     upcs = models.ManyToManyField(SparePartUPC)
-    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
+    asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME

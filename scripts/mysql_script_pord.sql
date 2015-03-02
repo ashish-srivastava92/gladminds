@@ -32,5 +32,21 @@ alter table bajaj_authorizedservicecenter add column asc_owner_email varchar(100
 
 alter table bajaj_customertempregistration drop column old_number;
 alter table bajaj_customertempregistration drop column update_history;
+alter table bajaj_customerupdatehistory add email_flag boolean default False not null;
+alter table bajaj_customertempregistration drop column email_flag;
 alter table bajaj_vinsyncfeedlog add column sent_to_sap boolean default False;
+
+alter table demo_feedback add sub_department_id integer;
+alter table demo_feedback add foreign key (sub_department_id) references demo_departmentsubcategories(id);
+
+alter table bajaj_feedback add sub_department_id integer;
+alter table bajaj_feedback add foreign key (sub_department_id) references bajaj_departmentsubcategories(id);
+
+alter table demo_servicedeskuser add sub_department_id integer;
+alter table demo_servicedeskuser add foreign key (sub_department_id) references demo_departmentsubcategories(id);
+alter table demo_userprofile add column department varchar(100) null;
+alter table bajaj_userprofile add column department varchar(100) null;
+
+alter table bajaj_dealer add column use_cdms boolean default True;
+alter table demo_dealer add column use_cdms boolean default True;
 

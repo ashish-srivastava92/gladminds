@@ -63,3 +63,14 @@ ALTER TABLE `bajaj_couponfact` ADD CONSTRAINT `date_id_refs_date_id_016dde9e` FO
 
 #######################################FILL IN FACT WITH MOCK################
 insert into bajaj_couponfact(closed, inprogress, expired, unused, exceeds, data_type, date_id) select 0, 0, 0, 0, 0, 'TOTAL',date_id from bajaj_datedimension;
+
+
+###################COUPON FACT TABLE UPDATE############################
+
+UPDATE bajaj_couponfact b , (select stat.date, stat.count from (select d.date_id as date, count(*) as count from bajaj_coupondata b inner join bajaj_datedimension d on DATE(b.closed_date)=d.date group by DATE(closed_date)) as stat ) as stats set b.closed=stats.count where b.date_id=stats.date;
+
+UPDATE bajaj_couponfact b , (select stat.date, stat.count from (select d.date_id as date, count(*) as count from bajaj_coupondata b inner join bajaj_datedimension d on DATE(b.actual_service_date)=d.date group by DATE(actual_service_date)) as stat ) as stats set b.inprogress=stats.count where b.date_id=stats.date;
+
+set @csum := 0;
+UPDATE bajaj_couponfact b , (select d.date_id as date, mid_stats.sum as sum from (select stat.date, (@csum := @csum + stat.count) as sum from (select DATE(created_date) as date,count(*) as count from bajaj_coupondata where DATE(created_date)=DATE(modified_date) and status=1 group by DATE(created_date)) as stat) as mid_stats inner join bajaj_datedimension d on d.date=mid_stats.date) as stats  set b.unused=stats.sum where b.date_id=stats.date
+

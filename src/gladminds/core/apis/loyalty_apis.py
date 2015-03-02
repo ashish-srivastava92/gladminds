@@ -14,10 +14,11 @@ from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.utils.urls import trailing_slash
 from gladminds.core.apis.authorization import MultiAuthorization,\
     LoyaltyCustomAuthorization
-from django.db.transaction import atomic
 import logging
 from django.db import transaction
 from gladminds.core.auth_helper import Roles
+from django.db.models.aggregates import Count, Sum
+import itertools
 
 logger = logging.getLogger("gladminds")
 
@@ -81,8 +82,8 @@ class PartnerResource(CustomBaseModelResource):
 
 
 class DistributorResource(CustomBaseModelResource):
-    user = fields.ForeignKey(UserProfileResource, 'user', full=True)
-    asm = fields.ForeignKey(ASMResource, 'asm', full=True)
+    user = fields.ForeignKey(UserProfileResource, 'user', null=True, blank=True, full=True)
+    asm = fields.ForeignKey(ASMResource, 'asm', null=True, blank=True, full=True)
     class Meta:
         queryset = models.Distributor.objects.all()
         resource_name = "distributors"
@@ -138,7 +139,7 @@ class ProductResource(CustomBaseModelResource):
 class MemberResource(CustomBaseModelResource):
     distributor = fields.ForeignKey(DistributorResource, 'registered_by_distributor', null=True, blank=True, full=True) 
     preferred_retailer = fields.ForeignKey(RetailerResource, 'preferred_retailer', null=True, blank=True, full=True)
-    state = fields.ForeignKey(StateResource, 'state')
+    state = fields.ForeignKey(StateResource, 'state',)
     
     class Meta:
         queryset = models.Mechanic.objects.all()
@@ -155,6 +156,7 @@ class MemberResource(CustomBaseModelResource):
 class RedemptionResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
     product = fields.ForeignKey(ProductResource, 'product')
+    partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)
     
     class Meta:
         queryset = models.RedemptionRequest.objects.all()
@@ -163,8 +165,8 @@ class RedemptionResource(CustomBaseModelResource):
         always_return_data = True
         args = {
                 'display_field' : {
-                                    Roles.ASMS:[],
-                                    Roles.NSMS:[],
+                                    Roles.AREASPARESMANAGERS:[],
+                                    Roles.NATIONALSPARESMANAGERS:[],
                                     Roles.RPS:[],
                                     Roles.LPS:[]
                                    },
@@ -176,11 +178,16 @@ class RedemptionResource(CustomBaseModelResource):
                                   Roles.LPS : {
                                                 'query':[Q(status__in=['Shipped','Delivered'])],
                                                 'user':'partner__user'
-                                                      },
+                                              },
                                   Roles.DEALERS:{
-                                                 'user':'registered_by_distributor__user' 
-                                                 }
-                           }
+                                                 'user':'registered_by_distributor__user', 
+                                                 'area':'member__registered_by_distributor__city'
+                                                 }, 
+                                  Roles.AREASPARESMANAGERS : {
+                                                'user':'member__registered_by_distributor__asm__user__user',
+                                                'area':'member__state__state_name'
+                                               },
+                                }
                 }
         
         authorization = MultiAuthorization(Authorization(), LoyaltyCustomAuthorization
@@ -192,10 +199,67 @@ class RedemptionResource(CustomBaseModelResource):
  
     def prepend_urls(self):
         return [
-            url(r"^(?P<resource_name>%s)/members-details/(?P<status>[a-zA-Z.-]+)%s" % (self._meta.resource_name,trailing_slash()),
-                                                        self.wrap_view('pending_redemption_request'), name="pending_redemption_request")
+                url(r"^(?P<resource_name>%s)/members-details/(?P<status>[a-zA-Z.-]+)%s" % (self._meta.resource_name,trailing_slash()),
+                                                        self.wrap_view('pending_redemption_request'), name="pending_redemption_request"),
+                url(r"^(?P<resource_name>%s)/count%s" % (self._meta.resource_name,trailing_slash()),
+                                                        self.wrap_view('count_redemption_request'), name="count_redemption_request"),
+                url(r"^(?P<resource_name>%s)/points%s" % (self._meta.resource_name,trailing_slash()),
+                                                        self.wrap_view('points_redemption_request'), name="points_redemption_request"),
                 ]
-   
+
+
+    ''' returns a dict having Count of redemption request within sla, above sla and total count'''
+    def count_redemption_request (self, request, **kwargs):
+        data = {}
+        query = {}
+        try:
+            user_group = request.user.groups.values()[0]['name']
+            if not request.user.groups.filter(name=Roles.RPS).exists():
+                q_user = self._meta.args['query_field'][user_group]['user']
+                query[q_user] = request.user
+            else:
+                q_user = self._meta.args['query_field'][user_group]['user_name']
+                query[q_user] = request.user.username
+                query['is_approved']= True
+               
+            total = models.RedemptionRequest.objects.values('status').annotate(total_count= Count('status')).filter(**query)   
+            query['resolution_flag'] = False
+            within_sla_count = models.RedemptionRequest.objects.values('status').annotate(within_sla_count= Count('status')).filter(**query)
+            query['resolution_flag'] = True        
+            overdue_count = models.RedemptionRequest.objects.values('resolution_flag').annotate(above_sla_count= Count('status')).filter(**query)        
+        
+            for a,b,c in itertools.izip_longest(total, within_sla_count, overdue_count):    
+                if not type(b):
+                    a['within_sla_count']= b['within_sla_count']            
+                if not type(c):
+                    a['above_sla_count']= c['above_sla_count']   
+                a.setdefault('total_count', 0)
+                a.setdefault('within_sla_count', 0)
+                a.setdefault('above_sla_count', 0)                                     
+                data[a['status']]= a
+        except Exception as ex:
+            logger.error('redemption request count requested by {0}:: {1}'.format(request.user, ex))
+            data = {'status': 0, 'message': 'could not retrieve the count of redemption request'}
+        return HttpResponse(json.dumps(data), content_type="application/json")
+
+
+    def points_redemption_request (self, request, **kwargs):
+        data = {}
+        query = {}
+        try:
+            user_group = request.user.groups.values()[0]['name']
+            q_user = self._meta.args['query_field'][user_group]['user']
+            area = self._meta.args['query_field'][user_group]['area']
+            query[q_user] = request.user
+            total_points_list = models.RedemptionRequest.objects.filter(**query).values(area).annotate(Sum('points'))   
+            data = total_points_list
+        except Exception as ex:
+            logger.error('redemption request points requested by {0}:: {1}'.format(request.user, ex))
+            data = {'status': 0, 'message': 'could not retrieve the points of redemption request'}
+        return HttpResponse(json.dumps(data), content_type="application/json")
+
+
+    ''' List of mechanics with pending redemption request'''
     def pending_redemption_request(self,request, **kwargs):
         status = kwargs['status']
         redemptionrequests = models.RedemptionRequest.objects.filter(~Q(status=status)).select_related('member')

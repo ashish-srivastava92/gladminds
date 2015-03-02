@@ -19,6 +19,10 @@ PROVIDER_MAPPING = {
                     'helpdesk' : 'service-desk/login.html'
                  }
 
+SERVICE_MAPPING = {
+                    'service_desk' : '/aftersell/helpdesk',
+                 }
+
 GROUP_MAPPING = {
                 Roles.DEALERS : '/aftersell/dealer/login',
                 Roles.ASCS : '/aftersell/asc/login',
@@ -32,8 +36,8 @@ USER_GROUPS = [ Roles.DEALERS, Roles.ASCS, Roles.DASCS, Roles.SDOWNERS, Roles.SD
 REDIRECT_USER ={
                  Roles.DEALERS : '/aftersell/register/asc',
                  Roles.ASCS : '/aftersell/register/sa',
-                 Roles.SDOWNERS : '/aftersell/servicedesk/',
-                 Roles.SDMANAGERS : '/aftersell/servicedesk/'
+                 Roles.SDOWNERS : '/aftersell/helpdesk',
+                 Roles.SDMANAGERS : '/aftersell/helpdesk'
                 }
 
 TEMPLATE_MAPPING = {

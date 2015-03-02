@@ -99,10 +99,10 @@ SUIT_CONFIG = {
                      'label': 'Feed Failure Log'})},
         {'app': 'bajaj', 'label': 'Loyalty', 'icon': ' icon-folder-open',
          'models':(
-                    {'model': 'nationalsalesmanager',
-                     'label': 'National Sales Manager'},
-                   {'model': 'areasalesmanager',
-                     'label': 'Area Sales Manager'},
+                    {'model': 'nationalsparesmanager',
+                     'label': 'National Spares Manager'},
+                   {'model': 'areasparesmanager',
+                     'label': 'Area Spares Manager'},
                     {'model': 'distributor',
                      'label': 'Distributor'},
                    {'model': 'mechanic',
@@ -466,6 +466,14 @@ CUSTOMER_PHONE_NUMBER_UPDATE = {
     "body": """""",
 }
 
+PHONE_NUMBER_UPDATE_COUNT_EXCEEDED_MAIL_TO_ASM = {
+
+    "sender": "feed-report@gladminds.co",
+    "receiver": ["karishma.c@hashedin.com"],
+    "subject": "Limit for updating Gladminds customer phone number exceeded",
+    "body": """""",
+}
+
 POLICY_DISCREPANCY_MAIL_TO_MANAGER = {
     "sender": "feed-report@gladminds.co",
     "receiver": ["pavankumar.s@hashedin.com"],
@@ -641,7 +649,21 @@ PURCHASE_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/purchase-syn
 PURCHASE_SYNC_WSDL='qa_purchase_sync_feed.wsdl'
 
 BRAND_META = {
-               "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd"},
+               "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/"},
                "demo": {"title": "Daimler", "logo": "daimler/img/logo.gif", "tagline": "2015 Daimler AG",
-                        "basecss": "/daimler/css/base.css"}
+                        "basecss": "/daimler/css/base.css","admin_url" :"/admin/"}
                }
+
+HOME_URLS = {
+             "bajaj": { "AuthorisedServiceCenters" :[{"DFSC":"/aftersell/register/asc"}, {"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "Dealers" :[{"DFSC":"/aftersell/register/asc"}, {"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "SdManagers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       },
+             "demo" : {"SdManagers":[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "Dealers" :[{"SERVICE DESK":"/aftersell/helpdesk"}]  
+                       }
+             }
+
+LOGIN_URL='login/'

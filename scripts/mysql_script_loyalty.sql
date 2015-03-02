@@ -59,6 +59,13 @@ alter table bajaj_mechanic add column address_line_3 varchar(40) null;
 alter table bajaj_mechanic add column address_line_4 varchar(40) null;
 alter table bajaj_mechanic add column address_line_5 varchar(40) null;
 alter table bajaj_mechanic add column address_line_6 varchar(40) null;
+<<<<<<< HEAD
 
 ###################################################################################################
 alter table bajaj_redemptionrequest add column points integer(50);
+=======
+rename table bajaj_areasalesmanager to bajaj_areasparesmanager;
+rename table bajaj_nationalsalesmanager to bajaj_nationalsparesmanager;
+update auth_group set name="AreaSparesManagers" where name="AreaSalesManagers";
+update auth_group set name="NationalSparesManagers" where name="NationalSalesManagers";
+>>>>>>> upstream/gm_loyalty_phase_2

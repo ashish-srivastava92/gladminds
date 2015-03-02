@@ -197,11 +197,10 @@ class LoyaltyCustomAuthorization():
                     query['query'].append(q_object)
                 object_list = object_list.filter(reduce(operator.and_, query['query']))
         except:
-            if klass_name == 'redemptionrequest' and user.groups.filter(name=Roles.ASMS).exists():
-                asm_state_list= models.AreaSalesManager.objects.get(user__user= user).state.all()
+            if klass_name == 'redemptionrequest' and user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+                asm_state_list= models.AreaSparesManager.objects.get(user__user= user).state.all()
                 object_list=object_list.filter(member__state__in=asm_state_list)            
 
-        try:
             ''' hides the fields in object_list '''            
             if self.display_field:
                 for obj in object_list:

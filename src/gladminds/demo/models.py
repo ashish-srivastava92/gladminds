@@ -53,19 +53,34 @@ class ServiceAdvisor(base_models.ServiceAdvisor):
         app_label = _APP_NAME
         verbose_name_plural = "Service Advisor Data"
 
+class BrandDepartment(base_models.BrandDepartment):
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Brand Department"
+
+
+class DepartmentSubCategories(base_models.DepartmentSubCategories):
+    department = models.ForeignKey(BrandDepartment, related_name="department_sub_categories", null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Department Sub-categories"
+
 
 class ServiceDeskUser(base_models.ServiceDeskUser):
     user_profile = models.ForeignKey(UserProfile, null=True, blank=True)
+    sub_department = models.ForeignKey(DepartmentSubCategories, related_name="sub_department_user", null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Service Desk Users"
 
-
 class Feedback(base_models.Feedback):
     reporter = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='demo_feedback_reporter')
     assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='demo_feedback_assignee')
     previous_assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='demo_previous_assignee')
+    sub_department = models.ForeignKey(DepartmentSubCategories,null=True, blank=True) 
     
     class Meta:
         app_label = _APP_NAME
@@ -275,7 +290,7 @@ class Constant(base_models.Constant):
         app_label = _APP_NAME
         
         
-class NationalSalesManager(base_models.NationalSalesManager):
+class NationalSparesManager(base_models.NationalSparesManager):
     '''details of National Sales Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
 
@@ -283,11 +298,11 @@ class NationalSalesManager(base_models.NationalSalesManager):
         app_label = _APP_NAME
 
 
-class AreaSalesManager(base_models.AreaSalesManager):
+class AreaSparesManager(base_models.AreaSparesManager):
     '''details of Area Service Manager'''
     '''details of National Sales Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
-    nsm = models.ForeignKey(NationalSalesManager, null=True, blank=True)
+    nsm = models.ForeignKey(NationalSparesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -296,7 +311,7 @@ class AreaSalesManager(base_models.AreaSalesManager):
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
-    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
+    asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -348,7 +363,7 @@ class AccumulationRequest(base_models.AccumulationRequest):
 
     member = models.ForeignKey(Mechanic)
     upcs = models.ManyToManyField(SparePartUPC)
-    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
+    asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
