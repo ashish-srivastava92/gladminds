@@ -25,13 +25,9 @@
 						
 						<div class="col-sm-6">
 							<div class="form-group">
-                    			<label class="col-sm-4 control-label" for="type">Type</label>
+                    			<label class="col-sm-4 control-label" for="department">Department</label>
                         		<div class="col-sm-8">
-                            		<select id="type" class="form-control" name="type"  {% if group == CONSTANTS.SD_CONSTANTS.SD_OWNER or group == CONSTANTS.SD_CONSTANTS.DEALER or group == CONSTANTS.SD_CONSTANTS.ASC %} onfocus="disable_func('Other')"  readonly {% else %} onfocus="disable_func('Manager')" {% endif %}  >
-                                		{% for type in FEEDBACK_TYPE %}
-                     	            		<option {% if type == feedback.type %} selected {% endif %} value="{{type}}">{{type}}</option>
-                                    	{% endfor %}
-                                 	</select>
+                        			<input type="text" class="form-control" name = "Department"  value='{{feedback.sub_department.department|default_if_none:""}}' readonly >
                             	</div>
                    			</div>
 						</div>
