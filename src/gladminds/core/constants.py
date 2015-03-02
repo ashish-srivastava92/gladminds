@@ -32,11 +32,7 @@ GROUP_MAPPING = {
                 Roles.SDREADONLY : '/aftersell/helpdesk/login'
                 }
 
-<<<<<<< HEAD
-USER_GROUPS = [ Roles.DEALERS, Roles.ASCS, Roles.DASCS, Roles.SDOWNERS, Roles.SDMANAGERS ]
-=======
 USER_GROUPS = [ Roles.DEALERS, Roles.ASCS, Roles.DASCS, Roles.SDOWNERS, Roles.SDMANAGERS, Roles.DEALERADMIN, Roles.SDREADONLY]
->>>>>>> upstream/master
 
 REDIRECT_USER ={
                  Roles.DEALERS : '/aftersell/register/asc',
