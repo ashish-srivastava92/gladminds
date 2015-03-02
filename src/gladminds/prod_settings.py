@@ -138,24 +138,24 @@ AFTER_BUY_CONSTANTS = {
 SQS_QUEUE_NAME = "gladminds-prod2"
 ########################################################################
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail"
-UCN_RECOVERY_MAIL_DETAIL["receiver"] = ["gladminds@hashedin.com", "nvhasabnis@bajajauto.co.in", "ssozarde@bajajauto.co.in","jojibabu.vege@gladminds.co","support@gladminds.co"]
-VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["jojibabu.vege@gladminds.co","ssozarde@bajajauto.co.in", "gladminds+alerts@hashedin.com", "Dhazarika@bajajauto.co.in", "Rkjena@bajajauto.co.in", "skolluri@bajajauto.co.in", "sudhir.patil@gladminds.co"]
+UCN_RECOVERY_MAIL_DETAIL["receiver"] = ["suresh@hashedin.com", "gladminds@hashedin.com", "nvhasabnis@bajajauto.co.in", "ssozarde@bajajauto.co.in","jojibabu.vege@gladminds.co","support@gladminds.co"]
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["suresh@hashedin.com", "jojibabu.vege@gladminds.co","ssozarde@bajajauto.co.in", "gladminds@hashedin.com", "Dhazarika@bajajauto.co.in", "Rkjena@bajajauto.co.in", "skolluri@bajajauto.co.in", "sudhir.patil@gladminds.co"]
 FEED_FAILURE["subject"] = "Consolidated Report: GladMinds Feed Failure - "
-FEED_FAILURE["receiver"] = ["jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in", "skolluri@bajajauto.co.in",
+FEED_FAILURE["receiver"] = ["suresh@hashedin.com", "jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in", "skolluri@bajajauto.co.in",
                             "sudhir.patil@gladminds.co", "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
-                            "gladminds+alerts@hashedin.com", "naveen.shankar@gladminds.co"]
-CUSTOMER_PHONE_NUMBER_UPDATE["receiver"] = ["jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in",
+                            "gladminds@hashedin.com", "naveen.shankar@gladminds.co"]
+CUSTOMER_PHONE_NUMBER_UPDATE["receiver"] = ["suresh@hashedin.com", "jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in",
                                             "skolluri@bajajauto.co.in", "sudhir.patil@gladminds.co",
                                             "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
-                                            "gladminds+alerts@hashedin.com"]
-VIN_SYNC_FEED["receiver"] = ["rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in", "ssozarde@bajajauto.co.in", "gladminds+alerts@hashedin.com"]
+                                            "gladminds@hashedin.com"]
+VIN_SYNC_FEED["receiver"] = ["suresh@hashedin.com", "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in", "ssozarde@bajajauto.co.in", "gladminds@hashedin.com"]
 
 ########################################################################
 ###################Change Mail Subject on Prod##########################
 MAIL_DETAIL["subject"] = "Report: GladMinds Feed Summary"
 MAIL_DETAIL["receiver"] = ["jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in", "skolluri@bajajauto.co.in",
                             "sudhir.patil@gladminds.co", "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
-                            "gladminds+alerts@hashedin.com", "naveen.shankar@gladminds.co", "sudhir.patil@gladminds.co"]
+                            "gladminds@hashedin.com", "suresh@hashedin.com", "naveen.shankar@gladminds.co", "sudhir.patil@gladminds.co"]
 
 #######################Feed Fail Failure Info###########################
 FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/dev/'

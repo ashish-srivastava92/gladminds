@@ -1,58 +1,13 @@
-from tastypie.constants import ALL_WITH_RELATIONS, ALL
-from tastypie.authorization import DjangoAuthorization, Authorization
+from tastypie.constants import ALL
+from tastypie.authorization import DjangoAuthorization
 from tastypie import fields
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import MultiAuthorization
-from tastypie.authentication import MultiAuthentication, Authentication
+from tastypie.authentication import MultiAuthentication
 from gladminds.core.model_fetcher import models
-from gladminds.core.apis.user_apis import UserProfileResource
-from django.forms.models import model_to_dict
-
-class BrandDepartmentResource(CustomBaseModelResource):
-    department_sub_categories = fields.ToManyField('gladminds.core.apis.service_desk_apis.DepartmentSubCategoriesResource', 'department_sub_categories', full=True)
-    class Meta:
-        queryset = models.BrandDepartment.objects.all()
-        resource_name = "brand-departments"
-        authorization = Authorization()
-        detail_allowed_methods = ['get']
-        always_return_data = True
+from gladminds.core.apis.user_apis import ServiceDeskUserResource
     
-class DepartmentSubCategoriesResource(CustomBaseModelResource):
-    sub_department_user = fields.ToManyField('gladminds.core.apis.service_desk_apis.ServiceDeskUserResource', 'sub_department_user', full=True)
-
-    class Meta:
-        queryset = models.DepartmentSubCategories.objects.all()
-        resource_name = "department-sub-categories"
-        authorization = Authorization()
-        detail_allowed_methods = ['get']
-        always_return_data = True
-        filtering = { 
-                     "department": ALL_WITH_RELATIONS
-                     } 
-    
-class ServiceDeskUserResource(CustomBaseModelResource):
-    '''
-    Service Desk User Resource
-    '''
-    user = fields.ForeignKey(UserProfileResource, 'user_profile',
-                                        full=True, null=True, blank=True)
-    
-    class Meta:
-        queryset = models.ServiceDeskUser.objects.all()
-        resource_name = "service-desk-users"
-#         authorization = MultiAuthorization(DjangoAuthorization())
-#         authentication = MultiAuthentication(AccessTokenAuthentication())
-        authorization = Authorization()
-        detail_allowed_methods = ['get']
-        always_return_data = True
-        filtering = {
-                        "user": ALL_WITH_RELATIONS,
-                        "sub_department": ALL_WITH_RELATIONS,
-                        "sub_department__department": ALL_WITH_RELATIONS
-                     }
-
-
 class FeedbackResource(CustomBaseModelResource):
     '''
     Service Desk Feedback Resource

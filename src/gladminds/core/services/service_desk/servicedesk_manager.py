@@ -7,7 +7,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 from gladminds.core import utils
-from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, ALL
+from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, ALL,\
+    DEMO_PRIORITY
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.core.services import message_template as templates
 from gladminds.sqs_tasks import send_coupon, send_sms,\
@@ -50,7 +51,7 @@ def get_feedbacks(user, status, priority, type, search=None):
         type_filter = [type]
 
     if priority == ALL or priority is None:
-        priority_filter = get_list_from_set(PRIORITY)
+        priority_filter = get_list_from_set(DEMO_PRIORITY)
     else:
         priority_filter = [priority]
 
@@ -61,10 +62,10 @@ def get_feedbacks(user, status, priority, type, search=None):
             status_filter = get_list_from_set(FEEDBACK_STATUS)
         else:
             status_filter = [status]
-
+    
+    sa_id_list = []
     if user.groups.filter(name=Roles.DEALERS).exists():
         sa_list = models.ServiceAdvisor.objects.active_under_dealer(user)
-        sa_id_list = []
         if sa_list:
             for sa in sa_list:
                 sa_id_list.append(sa.service_advisor_id)
@@ -72,6 +73,16 @@ def get_feedbacks(user, status, priority, type, search=None):
         feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
                                                        priority__in=priority_filter, type__in=type_filter
                                                     ).order_by('-created_date')
+                                                    
+    if user.groups.filter(name=Roles.DEALERADMIN).exists():
+        dealers = models.Dealer.objects.all()
+        for dealer in dealers:
+            sa_id_list.append(dealer.dealer_id)
+        sa_id_list.append(user)
+    feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
+                                                       priority__in=priority_filter, type__in=type_filter
+                                                    ).order_by('-created_date')    
+        
     if user.groups.filter(name=Roles.ASCS).exists():
         sa_list = models.ServiceAdvisor.objects.active_under_asc(user)
         sa_id_list = []
