@@ -468,7 +468,7 @@ CUSTOMER_PHONE_NUMBER_UPDATE = {
 
 POLICY_DISCREPANCY_MAIL_TO_MANAGER = {
     "sender": "feed-report@gladminds.co",
-    "receiver": ["pavankumar.s@hashedin.com"],
+    "receiver": ["pavankumar.s@hashedin.com", "suresh@hashedin.com"],
     "subject": "Gladminds customer phone number update",
     "body": """""",
 }
