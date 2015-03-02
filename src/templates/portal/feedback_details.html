@@ -188,7 +188,6 @@
                   </div>
                   <div class="col-md-9 form-group">
                     <select class="form-control advisorMobile" name="advisorMobile" required>
-                      <option value="">Select mobile number</option>
                       <option value="{{dealer_asc.user.username}}">{{dealer_asc.user.username}}</option>
                       {% for phone in data %}
                       <option value="{{phone.user.user.username}}">{{phone.service_advisor_id}} ({{phone.user.phone_number}})</option>
@@ -248,7 +247,7 @@
 				
 				<div class="row">
 					<div class="col-md-3 form-group">
-						<label class="control-label">Assign To*:</label>
+						<label class="control-label">Assign To:</label>
 					</div>
 					<div class="col-md-9 form-group">
 						<select class="form-control sub-department-assignee" name="sub-department-assignee" id="sub-department-assignee" >

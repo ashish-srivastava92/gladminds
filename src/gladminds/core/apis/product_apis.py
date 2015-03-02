@@ -5,7 +5,7 @@ from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.model_fetcher import models
 from gladminds.core.apis.authorization import MultiAuthorization
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from gladminds.core.apis.user_apis import DealerResource
+from gladminds.core.apis.user_apis import DealerResource, PartnerResource
 
 
 class ProductTypeResource(CustomBaseModelResource):
@@ -51,4 +51,41 @@ class CustomerTempRegistrationResource(CustomBaseModelResource):
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
+        always_return_data = True
+
+class ProductCatalogResource(CustomBaseModelResource):
+    partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)
+    
+    class Meta:
+        queryset = models.ProductCatalog.objects.all()
+        resource_name = "product-catalogs"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+class SpareMasterResource(CustomBaseModelResource):
+    product_type = fields.ForeignKey(ProductTypeResource, 'product_type', full=True)
+    class Meta:
+        queryset = models.SparePartMasterData.objects.all()
+        resource_name = "spare-masters"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+class SparePartPointResource(CustomBaseModelResource):
+    part_number = fields.ForeignKey(SpareMasterResource, 'part_number', full=True)
+    class Meta:
+        queryset = models.SparePartPoint.objects.all()
+        resource_name = "spare-points"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+class SparePartUPCResource(CustomBaseModelResource):
+    part_number = fields.ForeignKey(SpareMasterResource, 'part_number', full=True)
+    class Meta:
+        queryset = models.SparePartUPC.objects.all()
+        resource_name = "spare-upcs"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
