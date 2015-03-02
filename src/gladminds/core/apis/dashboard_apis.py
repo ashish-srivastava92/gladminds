@@ -20,7 +20,7 @@ def get_vins():
 
 
 def get_customers_count():
-    return models.ProductData.objects.filter(purchase_date__isnull=True).count()
+    return models.ProductData.objects.filter(purchase_date__isnull=False).count()
 
 
 def get_success_and_failure_counts(objects):
