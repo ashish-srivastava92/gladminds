@@ -85,7 +85,7 @@ alter table bajaj_areasparesmanager drop column state ;
 update table bajaj_mechanic 
 inner join bajaj_state on bajaj_state.state_name = bajaj_mechanic.state 
 set bajaj_mechanic.state_id = bajaj_state.id 
-where bajaj_state.state_name = 'karnataka';
+where bajaj_state.state_name = 'Karnataka';
 
 
 update table bajaj_mechanic 
@@ -96,7 +96,7 @@ where bajaj_state.state_name = 'Tamil Nadu';
 update table bajaj_mechanic 
 inner join bajaj_state on bajaj_state.state_name = bajaj_mechanic.state 
 set bajaj_mechanic.state_id = bajaj_state.id 
-where bajaj_state.state_name = 'kerala';
+where bajaj_state.state_name = 'Kerala';
 
 alter table bajaj_mechanic drop column state;
 
