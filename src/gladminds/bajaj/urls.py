@@ -35,6 +35,8 @@ urlpatterns = patterns('',
     url(r'^aftersell/feeds/vin-sync/$', 'gladminds.bajaj.views.views.vin_sync_feed'),
     url(r'^aftersell/asc/self-register/$', 'gladminds.bajaj.views.views.save_asc_registration'),
     
+    url(r'^update-customer-number$', 'gladminds.bajaj.services.service_desk.servicedesk_views.update_customer_number'),
+    
     url(r'^aftersell/(?P<provider>[a-zA-Z]+)/login/$', 'gladminds.bajaj.views.views.auth_login', name='user_login'),
     url(r'^aftersell/provider/logout$', 'gladminds.bajaj.views.views.user_logout', name='user_logout'),
     url(r'^aftersell/provider/redirect$', 'gladminds.bajaj.views.views.redirect_user'),

@@ -17,7 +17,7 @@ class Command(BaseCommand):
         print "Started uploading distributor..."
         file_list = ['DIST_DATA.csv']
         dealer_list = []
-        asm = get_model('AreaSalesManager', APP)
+        asm = get_model('AreaSparesManager', APP)
         dist = get_model('Distributor', APP)
         user_profile = get_model('UserProfile', APP)
 

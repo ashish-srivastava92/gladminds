@@ -6,7 +6,7 @@
             "template_key": "MOCK_KEY",
             "sender": "feed-report@gladminds.co",
             "receiver": "naureen.razi@hashedin.com,naveen.shankar@gladminds.co",
-            "subject": "Gladminds ASC Registration Passed",
+            "subject": "GladMinds ASC Registration Passed",
             "body": "Mock Key for testing out the email templates",
             "description": "Mock Key for testing out the email templates"
         }
@@ -222,7 +222,7 @@
             "template_key": "VIN_SYNC_FEED",
             "sender": "feed-report@gladminds.co",
             "receiver": "priyanka.n@hashedin.com",
-            "subject": "Consolidated Report : Gladminds Vin Sync Feed Report",
+            "subject": "Consolidated Report : GladMinds Vin Sync Feed Report",
             "body": "Please find enclosed, the details of VINs updated in GCP database through online verification requested by various Dealers / ASCs for - ", 
             "description": "Vin sycn feed mail"
         }
@@ -233,7 +233,7 @@
         "fields": {
             "template_key": "CUSTOMER_PHONE_NUMBER_UPDATE",
             "sender": "feed-report@gladminds.co",
-            "receiver": "priyanka.n@hashedin.com",
+            "receiver": "karishma.c@hashedin.com",
             "subject": "Customer phone number update summary",
             "body": "Please find the enclosed, customer phone number updates on {date} ", 
             "description": "Customer phone number update mail"
@@ -309,6 +309,18 @@
             "subject": "Vehicles with policy discrepancy",
             "body": "There are some discrepancy in the coupon data for following vehicle",
             "description":"Mail to manager group if there discrepancy in the coupon data "
+        }
+    },
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 27,
+        "fields": {
+            "template_key": "PHONE_NUMBER_UPDATE_COUNT_EXCEEDED",
+            "sender": "feed-report@gladminds.co",
+            "receiver": "karishma.c@hashedin.com",
+            "subject": "limit for updating phone number exceeded",
+            "body": "The count of updates to phone number of the customers with following details exceeded the limit.Please address the issue",
+            "description":"Mail to ASM if count of updates to phone number of a customer exceeds"
         }
     }
 ]

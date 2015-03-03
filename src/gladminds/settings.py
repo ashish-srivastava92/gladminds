@@ -99,10 +99,10 @@ SUIT_CONFIG = {
                      'label': 'Feed Failure Log'})},
         {'app': 'bajaj', 'label': 'Loyalty', 'icon': ' icon-folder-open',
          'models':(
-                    {'model': 'nationalsalesmanager',
-                     'label': 'National Sales Manager'},
-                   {'model': 'areasalesmanager',
-                     'label': 'Area Sales Manager'},
+                    {'model': 'nationalsparesmanager',
+                     'label': 'National Spares Manager'},
+                   {'model': 'areasparesmanager',
+                     'label': 'Area Spares Manager'},
                     {'model': 'distributor',
                      'label': 'Distributor'},
                    {'model': 'mechanic',
@@ -463,6 +463,14 @@ CUSTOMER_PHONE_NUMBER_UPDATE = {
     "sender": "feed-report@gladminds.co",
     "receiver": ["priyanka.n@hashedin.com"],
     "subject": "Gladminds customer phone number update",
+    "body": """""",
+}
+
+PHONE_NUMBER_UPDATE_COUNT_EXCEEDED_MAIL_TO_ASM = {
+
+    "sender": "feed-report@gladminds.co",
+    "receiver": ["karishma.c@hashedin.com"],
+    "subject": "Limit for updating Gladminds customer phone number exceeded",
     "body": """""",
 }
 

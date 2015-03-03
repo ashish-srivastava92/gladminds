@@ -4,7 +4,10 @@ from provider.oauth2.models import AccessToken
 from django.conf import settings
 
 from gladminds.afterbuy import models as afterbuy
-
+from gladminds.core.auth_helper import Roles
+from gladminds.bajaj import models
+import operator
+from django.db.models.query_utils import Q
 
 class CustomAuthorization(Authorization):
 
@@ -81,7 +84,7 @@ class CustomAuthorization(Authorization):
         except:
             raise Unauthorized("You are not allowed to access that data.")
         user_id = int(authorization.user.id)
-
+        klass = bundle.obj.__class__
         if klass._meta.module_name == 'consumer':
             if user_id == data['user_id']:
                 update_obj = klass.objects.get(user__id=user_id)
@@ -165,3 +168,58 @@ class MultiAuthorization(Authorization):
                 raise Unauthorized("You are not allowed to access that resource.")
         return True
 
+
+class LoyaltyCustomAuthorization():
+
+    def __init__(self, display_field=None, query_field=None):
+        self.display_field = display_field
+        self.query_field = query_field
+        
+    def read_list(self, object_list, bundle):  
+        user = bundle.request.user
+        user_name = user.groups.values()[0]['name']    
+        klass_name = bundle.obj.__class__._meta.module_name
+        
+        try:
+            ''' filter the object list based on query defined for specific Role'''
+            query = self.query_field[user_name]
+            query.setdefault('query', [])
+            query.setdefault('user_name', None)
+            query.setdefault('user', None)
+            
+            if query:
+                q_object = Q()
+                if query['user_name']:
+                    q_object.add(query['user_name'], user.username)
+                    query['query'].append(q_object)
+                if query['user']:
+                    q_object.add(query['user'], user)
+                    query['query'].append(q_object)
+                object_list = object_list.filter(reduce(operator.and_, query['query']))
+        except:
+            if klass_name == 'redemptionrequest' and user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+                asm_state_list= models.AreaSparesManager.objects.get(user__user= user).state.all()
+                object_list=object_list.filter(member__state__in=asm_state_list)            
+
+        try:
+            ''' hides the fields in object_list '''            
+            if self.display_field:
+                for obj in object_list:
+                    for x in self.display_field[user_name]:
+                        delattr(obj, x)
+            return object_list
+        except:
+            return object_list
+        
+    def read_detail(self, object_list, bundle):
+        if self.read_list(object_list, bundle):
+            return True
+    
+    def create_detail(self, object_list, bundle):
+        return True
+
+    def update_detail(self, object_list, bundle):
+        return True
+
+    def delete_detail(self, object_list, bundle):
+        return True

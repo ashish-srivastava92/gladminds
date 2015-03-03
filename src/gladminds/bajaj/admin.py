@@ -373,9 +373,18 @@ class ServiceDeskUserAdmin(GmModelAdmin):
 
 '''Admin View for loyalty'''
 class NSMAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
-    search_fields = ('nsm_id', 'name', 'phone_number', 'territory')
-    list_display = ('nsm_id', 'name', 'email', 'phone_number','territory')
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('nsm_id', 'name', 'phone_number')
+    list_display = ('nsm_id', 'name', 'email', 'phone_number','get_territory')
+
+    def get_territory(self, obj):
+        territories = obj.territory.all()
+        if territories:
+            return ' | '.join([str(territory.territory) for territory in territories])
+        else:
+            return None
+
+    get_territory.short_description = 'Territory'
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('nsm_id',)
@@ -387,12 +396,21 @@ class NSMAdmin(GmModelAdmin):
         super(NSMAdmin, self).save_model(request, obj, form, change)
 
 class ASMAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('asm_id', 'nsm__name',
                      'phone_number', 'state')
     list_display = ('asm_id', 'name', 'email',
-                     'phone_number', 'state', 'nsm')
+                     'phone_number', 'get_state', 'nsm')
     
+
+    def get_state(self, obj):
+        states = obj.state.all()
+        if states:
+            return ' | '.join([str(state.state_name) for state in states])
+        else:
+            return None
+    get_state.short_description = 'State'
+
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('asm_id',)
         form = super(ASMAdmin, self).get_form(request, obj, **kwargs)
@@ -403,14 +421,14 @@ class ASMAdmin(GmModelAdmin):
         super(ASMAdmin, self).save_model(request, obj, form, change)
 
 class DistributorAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('distributor_id', 'asm__asm_id',
                      'phone_number', 'city')
     list_display = ('distributor_id', 'name', 'email',
                     'phone_number', 'city', 'asm')
 
 class SparePartMasterAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('part_number', 'category',
                      'segment_type', 'supplier',
                      'product_type__product_type')
@@ -419,7 +437,7 @@ class SparePartMasterAdmin(GmModelAdmin):
                     'segment_type',  'part_model', 'supplier')
 
 class SparePartUPCAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('part_number__part_number', 'unique_part_code', 'part_number__description')
     list_display = ('unique_part_code', 'part_number', 'get_part_description')
 
@@ -429,7 +447,7 @@ class SparePartUPCAdmin(GmModelAdmin):
         return form
 
 class SparePartPointAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('part_number__part_number', 'points', 'territory')
 
     def changelist_view(self, request, extra_context={}):
@@ -451,7 +469,7 @@ class SparePartline(TabularInline):
     model = models.AccumulationRequest.upcs.through
 
 class ProductCatalogAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     list_filter = ('is_active',)
     search_fields = ('partner__partner_id', 'product_id',
                     'brand', 'model', 'category',
@@ -464,7 +482,7 @@ class ProductCatalogAdmin(GmModelAdmin):
     readonly_fields = ('image_tag',)
 
 class PartnerAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     list_filter = ('partner_type',)
     search_fields = ('partner_id', 'name', 'partner_type')
 
@@ -476,7 +494,7 @@ class PartnerAdmin(GmModelAdmin):
         return form
 
 class AccumulationRequestAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYADMINS, Roles.LOYALTYSUPERADMINS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.LOYALTYADMINS, Roles.LOYALTYSUPERADMINS]
     search_fields = ('member__mechanic_id', 'upcs__unique_part_code')
     list_display = ( 'member',  'get_mechanic_name', 'get_mechanic_district',
                      'asm', 'get_upcs', 'points',
@@ -530,9 +548,9 @@ class MechanicAdmin(GmModelAdmin):
         admin site. This is used by changelist_view.
         """
         query_set = self.model._default_manager.get_query_set()
-        if request.user.groups.filter(name=Roles.ASMS).exists():
-            asm=models.AreaSalesManager.objects.get(user__user=request.user)
-            query_set=query_set.filter(state=asm.state)
+        if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            query_set=query_set.filter(state=asm_state_list)
 
         return query_set
 
@@ -542,16 +560,10 @@ class MechanicAdmin(GmModelAdmin):
         return form
 
     def save_model(self, request, obj, form, change):
-        form_status = True
-        for field in obj._meta.fields:
-            if field.name in constants.MANDATORY_MECHANIC_FIELDS and not getattr(obj, field.name):
-                form_status = False
-        obj.phone_number=utils.mobile_format(obj.phone_number)
+        if not (obj.phone_number == '' or (len(obj.phone_number) < 10)):
+            obj.phone_number=utils.mobile_format(obj.phone_number)
         super(MechanicAdmin, self).save_model(request, obj, form, change)
-        if form_status and not obj.sent_sms:
-            LoyaltyService.send_welcome_sms(obj)
-            LoyaltyService.initiate_welcome_kit(obj)
-
+        
 class CommentThreadInline(TabularInline):
     model = models.CommentThread
     fields = ('created_date', 'user', 'message')
@@ -610,9 +622,9 @@ class RedemptionRequestAdmin(GmModelAdmin):
             query_set=query_set.filter(is_approved=True, packed_by=request.user.username)
         elif request.user.groups.filter(name=Roles.LPS).exists():
             query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=request.user)
-        elif request.user.groups.filter(name=Roles.ASMS).exists():
-            asm=models.AreaSalesManager.objects.get(user__user=request.user)
-            query_set=query_set.filter(member__state=asm.state)
+        elif request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            query_set=query_set.filter(member__state=asm_state_list)
 
         return query_set
 
@@ -752,9 +764,9 @@ class WelcomeKitAdmin(GmModelAdmin):
             query_set=query_set.filter(packed_by=request.user.username)
         elif request.user.groups.filter(name=Roles.LPS).exists():
             query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=request.user)
-        elif request.user.groups.filter(name=Roles.ASMS).exists():
-            asm=models.AreaSalesManager.objects.get(user__user=request.user)
-            query_set=query_set.filter(member__state=asm.state)
+        elif request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            query_set=query_set.filter(member__state=asm_state_list)
 
         return query_set
 
@@ -805,8 +817,8 @@ brand_admin.register(models.DataFeedLog, FeedLogAdmin)
 brand_admin.register(models.FeedFailureLog)
 
 if settings.ENV not in ['prod']:
-    brand_admin.register(models.NationalSalesManager, NSMAdmin)
-    brand_admin.register(models.AreaSalesManager, ASMAdmin)
+    brand_admin.register(models.NationalSparesManager, NSMAdmin)
+    brand_admin.register(models.AreaSparesManager, ASMAdmin)
     brand_admin.register(models.Distributor, DistributorAdmin)
     brand_admin.register(models.Mechanic, MechanicAdmin)
 
