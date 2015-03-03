@@ -3,7 +3,7 @@ This contains the dasboards apis
 '''
 from gladminds.core.apis.base_apis import CustomBaseResource, CustomApiObject
 from tastypie import fields
-from gladminds.core.model_fetcher import models
+from gladminds.bajaj import models
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from django.core.cache import cache
 from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES,\
@@ -20,7 +20,7 @@ def get_vins():
 
 
 def get_customers_count():
-    return models.ProductData.objects.filter(purchase_date__isnull=True).count()
+    return models.ProductData.objects.filter(purchase_date__isnull=False).count()
 
 
 def get_success_and_failure_counts(objects):

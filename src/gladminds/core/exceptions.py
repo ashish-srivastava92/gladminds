@@ -23,6 +23,11 @@ class ServiceNotActiveException(Exception):
         self.msg = message
 
 
+class ModelBrandNotMatchingException(Exception):
+    def __init__(self, message="Models and brand in settings not matching."):
+        self.msg = message
+
+
 class AuthError(RuntimeError):
     '''
     General exception class.

@@ -9,6 +9,8 @@ from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.fields import ApiField
 from django.http.response import HttpResponse
 from tastypie import http
+from django.conf import settings
+from gladminds.core.loaders.module_loader import get_model
 
 
 class BaseCorsResource(Resource):
@@ -55,7 +57,12 @@ class CustomBaseModelResource(BaseCorsResource, ModelResource):
         if fmt == 'text/html' and 'format' not in request:
             fmt = 'application/json'
         return fmt
- 
+
+    def get_object_list(self, request):
+        if settings.BRAND in settings.OUTSIDE_BRANDS:
+            return get_model(self._meta.model_name, brand=settings.BRAND).objects.all()
+        return self._meta.queryset._clone()
+
  
 class CustomApiObject(dict):
     """

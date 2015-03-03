@@ -5,7 +5,6 @@ from django.conf import settings
 
 from gladminds.afterbuy import models as afterbuy
 from gladminds.core.auth_helper import Roles
-from gladminds.core import constants
 from gladminds.bajaj import models
 import operator
 from django.db.models.query_utils import Q
@@ -183,8 +182,12 @@ class LoyaltyCustomAuthorization():
         
         try:
             ''' filter the object list based on query defined for specific Role'''
-            if self.query_field:
-                query = self.query_field[user_name]
+            query = self.query_field[user_name]
+            query.setdefault('query', [])
+            query.setdefault('user_name', None)
+            query.setdefault('user', None)
+            
+            if query:
                 q_object = Q()
                 if query['user_name']:
                     q_object.add(query['user_name'], user.username)
@@ -193,10 +196,12 @@ class LoyaltyCustomAuthorization():
                     q_object.add(query['user'], user)
                     query['query'].append(q_object)
                 object_list = object_list.filter(reduce(operator.and_, query['query']))
-            elif klass_name == 'redemptionrequest' and user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-                asm = models.AreaSparesManager.objects.get(user__user= user)
-                object_list=object_list.filter(member__state=asm.state)            
-    
+        except:
+            if klass_name == 'redemptionrequest' and user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+                asm_state_list= models.AreaSparesManager.objects.get(user__user= user).state.all()
+                object_list=object_list.filter(member__state__in=asm_state_list)            
+
+        try:
             ''' hides the fields in object_list '''            
             if self.display_field:
                 for obj in object_list:

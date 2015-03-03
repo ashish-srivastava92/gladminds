@@ -476,7 +476,7 @@ PHONE_NUMBER_UPDATE_COUNT_EXCEEDED_MAIL_TO_ASM = {
 
 POLICY_DISCREPANCY_MAIL_TO_MANAGER = {
     "sender": "feed-report@gladminds.co",
-    "receiver": ["pavankumar.s@hashedin.com"],
+    "receiver": ["pavankumar.s@hashedin.com", "suresh@hashedin.com"],
     "subject": "Gladminds customer phone number update",
     "body": """""",
 }
@@ -599,7 +599,9 @@ FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
 BRAND = None
 GM_BRAND = 'default'
-BRANDS = ['bajaj', 'demo', 'afterbuy']
+OUTSIDE_BRANDS = ['bajaj', 'demo']
+
+BRANDS = OUTSIDE_BRANDS + ['afterbuy']
 ###############################################
 AIRTEL_IP = '54.84.243.77'
 SMS_CLIENT = "MOCK"
