@@ -306,7 +306,7 @@
             "template_key": "POLICY_DISCREPANCY_MAIL_TO_MANAGER",
             "sender": "feed-report@gladminds.co",
             "receiver": "",
-            "subject": "Vehicles with policy_discrepancy",
+            "subject": "Vehicles with policy discrepancy",
             "body": "There are some discrepancy in the coupon data for following vehicle",
             "description":"Mail to manager group if there discrepancy in the coupon data "
         }
