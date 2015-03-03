@@ -36,7 +36,8 @@ class LoyaltyApiTests(ResourceTestCase):
         client.login(username='user', password='123')
 
     def test_create_nsm(self):
-        uri = '/loyalty/v1/nsms/'
+        self.test_create_territory();
+        uri = '/v1/nsms/'
         resp = self.post(uri,data=NATIONAL_SPARES_MANAGER)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -44,7 +45,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_nsm(self):
         resp = self.test_create_nsm()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/nsms/1/'
+        uri = '/v1/nsms/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['phone_number'], "1234567890")
@@ -54,15 +55,16 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_nsm()
         self.assertEquals(resp.status_code,200)
         a={"phone_number":"1234512345"}
-        uri = '/loyalty/v1/nsms/1/'
+        uri = '/v1/nsms/1/'
         resp = self.put(uri,a)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/nsms/1/'
+        uri = '/v1/nsms/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['phone_number'], "1234512345")
  
     def test_create_asm(self, data=AREA_SPARES_MANAGER):
-        uri = '/loyalty/v1/asms/'
+        self.test_create_state(data=STATE)
+        uri = '/v1/asms/'
         resp = self.post(uri,data=data)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -70,7 +72,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_asm(self):
         resp = self.test_create_asm()
         self.assertEquals(resp.status_code,201)
-        resp = client.get('/loyalty/v1/asms/1/',content_type='application/json')
+        resp = client.get('/v1/asms/1/',content_type='application/json')
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['phone_number'], "9999999999")
         return resp
@@ -79,13 +81,13 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_asm()
         self.assertEquals(resp.status_code,200)
         a={"phone_number":"9999999998"}
-        resp = client.put('/loyalty/v1/asms/1/', data=json.dumps(a), content_type='application/json')
+        resp = client.put('/v1/asms/1/', data=json.dumps(a), content_type='application/json')
         self.assertEquals(resp.status_code, 200)
-        resp = client.get('/loyalty/v1/asms/1/',content_type='application/json')
+        resp = client.get('/v1/asms/1/',content_type='application/json')
         self.assertEqual(self.deserialize(resp)['phone_number'], "9999999998")
  
     def test_create_partner(self):
-        uri = '/loyalty/v1/partners/'
+        uri = '/v1/partners/'
         resp = self.post(uri,data=PARTNER)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -93,7 +95,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_partner(self):
         resp = self.test_create_partner()
         self.assertEquals(resp.status_code,201)
-        resp = client.get('/loyalty/v1/partners/1/',content_type='application/json')
+        resp = client.get('/v1/partners/1/',content_type='application/json')
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['name'], "Anchit")
         return resp
@@ -102,13 +104,13 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_partner()
         self.assertEquals(resp.status_code,200)
         a={"name":"Abhinav"}
-        resp = client.put('/loyalty/v1/partners/1/', data=json.dumps(a), content_type='application/json')
+        resp = client.put('/v1/partners/1/', data=json.dumps(a), content_type='application/json')
         self.assertEquals(resp.status_code, 200)
-        resp = client.get('/loyalty/v1/partners/1/',content_type='application/json')
+        resp = client.get('/v1/partners/1/',content_type='application/json')
         self.assertEqual(self.deserialize(resp)['name'], "Abhinav")
  
     def test_create_distributor(self):
-        uri = '/loyalty/v1/distributors/'
+        uri = '/v1/distributors/'
         resp = self.post(uri,data = DISTRIBUTOR)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -116,7 +118,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_distributor(self):
         resp = self.test_create_distributor()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/distributors/1/'
+        uri = '/v1/distributors/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['phone_number'], "1111111111")
@@ -128,15 +130,15 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_distributor()
         self.assertEquals(resp.status_code,200)
         data={"phone_number":"2222222222"}
-        uri = '/loyalty/v1/distributors/1/'
+        uri = '/v1/distributors/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/distributors/1/'
+        uri = '/v1/distributors/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['phone_number'], "2222222222")
  
     def test_create_retailer(self):
-        uri = '/loyalty/v1/retailers/'
+        uri = '/v1/retailers/'
         resp = self.post(uri,data = RETAILER)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -144,7 +146,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_retailer(self):
         resp = self.test_create_retailer()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/retailers/1/'
+        uri = '/v1/retailers/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['retailer_name'], "Ayush")
@@ -155,15 +157,15 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_retailer()
         self.assertEquals(resp.status_code,200)
         data={"retailer_town":"alalpur"}
-        uri = '/loyalty/v1/retailers/1/'
+        uri = '/v1/retailers/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/retailers/1/'
+        uri = '/v1/retailers/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['retailer_town'], "alalpur")
  
     def test_create_spare_master(self):
-        uri = '/loyalty/v1/spare-masters/'
+        uri = '/v1/spare-masters/'
         resp = self.post(uri,data = SPARE_MASTER)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -171,7 +173,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_spare_master(self):
         resp = self.test_create_spare_master()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/spare-masters/1/'
+        uri = '/v1/spare-masters/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['part_number'], "11111111")
@@ -182,15 +184,15 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_spare_master()
         self.assertEquals(resp.status_code,200)
         data={"part_model":"3S"}
-        uri = '/loyalty/v1/spare-masters/1/'
+        uri = '/v1/spare-masters/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/spare-masters/1/'
+        uri = '/v1/spare-masters/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['part_model'], "3S")
  
     def test_create_product(self):
-        uri = '/loyalty/v1/product-catalogs/'
+        uri = '/v1/product-catalogs/'
         create_mock_data = PRODUCT
         resp = self.post(uri,data=create_mock_data)
         self.assertEquals(resp.status_code,201)
@@ -199,7 +201,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_product(self):
         resp = self.test_create_product()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/product-catalogs/1/'
+        uri = '/v1/product-catalogs/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['image_url'], None)
@@ -209,15 +211,15 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_product()
         self.assertEquals(resp.status_code,200)
         data={"image_url":"qwer/alalpur"}
-        uri = '/loyalty/v1/product-catalogs/1/'
+        uri = '/v1/product-catalogs/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/product-catalogs/1/'
+        uri = '/v1/product-catalogs/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['image_url'], "/media/qwer/alalpur")
  
     def test_create_redemptiomrequest(self,data = REDEMPTION_REQUEST):
-        uri = '/loyalty/v1/redemption-requests/'
+        uri = '/v1/redemption-requests/'
         resp = self.post(uri,data=data)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -225,7 +227,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_redemptiomrequest(self):
         resp = self.test_create_redemptiomrequest()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/redemption-requests/1/'
+        uri = '/v1/redemption-requests/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['image_url'], None)
@@ -235,16 +237,16 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_redemptiomrequest()
         self.assertEquals(resp.status_code,200)
         data={"resolution_flag":False}
-        uri = '/loyalty/v1/redemption-requests/1/'
+        uri = '/v1/redemption-requests/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/redemption-requests/1/'
+        uri = '/v1/redemption-requests/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['is_approved'], False)
  
     def test_create_spare_part_upc(self):
         self.test_create_spare_master()
-        uri = '/loyalty/v1/spare-upcs/'
+        uri = '/v1/spare-upcs/'
         resp = self.post(uri,data = SPARE_PART_UPC)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -252,7 +254,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_spare_part_upc(self):
         resp = self.test_create_spare_part_upc()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/spare-upcs/1/'
+        uri = '/v1/spare-upcs/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['unique_part_code'], "UPCC50")
@@ -262,10 +264,10 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_spare_part_upc()
         self.assertEquals(resp.status_code,200)
         data={"unique_part_code":"UPCC51"}
-        uri = '/loyalty/v1/spare-upcs/1/'
+        uri = '/v1/spare-upcs/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/spare-upcs/1/'
+        uri = '/v1/spare-upcs/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['unique_part_code'], "UPCC51")
  
@@ -275,31 +277,31 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_redemptiomrequest_by_overdue(self):
         resp = self.test_create_redemptiomrequest()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/redemption-requests/?resolution_flag=True'
+        uri = '/v1/redemption-requests/?resolution_flag=True'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.test_update_redemptiomrequest()
-        uri = '/loyalty/v1/redemption-requests/?resolution_flag=False'
+        uri = '/v1/redemption-requests/?resolution_flag=False'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
  
     def test_get_redemptiomrequest_by_state(self):
         resp = self.test_create_redemptiomrequest()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/redemption-requests/?member__state=karnataka'
+        uri = '/v1/redemption-requests/?member__state=karnataka'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
  
     def test_get_mechanic_list(self):
         resp = self.test_create_redemptiomrequest()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/redemption-requests/members-details/open/'
+        uri = '/v1/redemption-requests/members-details/open/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
  
     def test_create_spare_part_point(self):
         self.test_create_spare_master()
-        uri = '/loyalty/v1/spare-points/'
+        uri = '/v1/spare-points/'
         resp = self.post(uri,data = SPARE_POINT)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -307,7 +309,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_spare_part_point(self):
         resp = self.test_create_spare_part_point()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/spare-points/1/'
+        uri = '/v1/spare-points/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['MRP'], 30)
@@ -318,15 +320,15 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_spare_part_point()
         self.assertEquals(resp.status_code,200)
         data={"MRP": 31}
-        uri = '/loyalty/v1/spare-points/1/'
+        uri = '/v1/spare-points/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/spare-points/1/'
+        uri = '/v1/spare-points/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['MRP'], 31)
  
     def test_create_sla(self):
-        uri = '/loyalty/v1/slas/'
+        uri = '/v1/slas/'
         resp = self.post(uri,data = SLA)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -334,7 +336,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_sla(self):
         resp = self.test_create_sla()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/slas/1/'
+        uri = '/v1/slas/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['action'], "Welcome Kit")
@@ -346,23 +348,23 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_sla()
         self.assertEquals(resp.status_code,200)
         data={"member_resolution_time": 10}
-        uri = '/loyalty/v1/slas/1/'
+        uri = '/v1/slas/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/slas/1/'
+        uri = '/v1/slas/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['member_resolution_time'], 10)
  
     def test_create_accumulation(self):
-        uri = '/loyalty/v1/asms/'
+        uri = '/v1/asms/'
         resp = self.post(uri,data=AREA_SPARES_MANAGER)
         self.assertEquals(resp.status_code,201)
         self.test_create_spare_master()
-        uri = '/loyalty/v1/spare-upcs/'
+        uri = '/v1/spare-upcs/'
         resp = self.post(uri,data = SPARE_PART_UPC)
         resp = self.post(uri,data = SPARE_PART_UPC_1)
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/accumulations/'
+        uri = '/v1/accumulations/'
         resp = self.post(uri,data = ACCUMULATION)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -370,14 +372,15 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_accumulation(self):
         resp = self.test_create_accumulation()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/accumulations/1/'
+        uri = '/v1/accumulations/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['transaction_id'], 1)
         return resp
  
     def test_create_member(self,data = MEMBER):
-        uri = '/loyalty/v1/members/'
+        self.test_create_state(data=STATE)
+        uri = '/v1/members/'
         resp = self.post(uri,data = data)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -385,7 +388,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_member(self):
         resp = self.test_create_member()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/members/1/'
+        uri = '/v1/members/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['phone_number'],"+919842461800")
@@ -395,10 +398,10 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_create_member()
         self.assertEquals(resp.status_code,201)
         data={"phone_number":"+919842461801"}
-        uri = '/loyalty/v1/members/1/'
+        uri = '/v1/members/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/members/1/'
+        uri = '/v1/members/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['phone_number'],"+919842461801")
  
@@ -406,7 +409,7 @@ class LoyaltyApiTests(ResourceTestCase):
         self.test_create_sla()
         self.test_create_member()
         self.test_create_partner()
-        uri = '/loyalty/v1/welcome-kits/'
+        uri = '/v1/welcome-kits/'
         resp = self.post(uri,data = WELCOMEKIT)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -414,7 +417,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_welcomekit(self):
         resp = self.test_create_welcomekit()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/welcome-kits/1/'
+        uri = '/v1/welcome-kits/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['status'],"Open")
@@ -424,16 +427,16 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_create_welcomekit()
         self.assertEquals(resp.status_code,201)
         data={"delivery_address":"delhi"}
-        uri = '/loyalty/v1/welcome-kits/1/'
+        uri = '/v1/welcome-kits/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/welcome-kits/1/'
+        uri = '/v1/welcome-kits/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['delivery_address'],"delhi")
  
     def test_create_commentthread(self):
         self.test_create_welcomekit()
-        uri = '/loyalty/v1/comment-threads/'
+        uri = '/v1/comment-threads/'
         resp = self.post(uri,data = COMMENT_THREAD)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -441,7 +444,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_commentthread(self):
         resp = self.test_create_commentthread()
         self.assertEquals(resp.status_code,201)
-        uri = '/loyalty/v1/comment-threads/1/'
+        uri = '/v1/comment-threads/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['message'],"Gladminds")
@@ -451,35 +454,35 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_create_commentthread()
         self.assertEquals(resp.status_code,201)
         data={"message":"hi"}
-        uri = '/loyalty/v1/comment-threads/1/'
+        uri = '/v1/comment-threads/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/loyalty/v1/comment-threads/1/'
+        uri = '/v1/comment-threads/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['message'],"hi")
  
     def test_transferpoints(self):
         self.test_create_spare_master()
  
-        uri = '/loyalty/v1/spare-points/'
+        uri = '/v1/spare-points/'
         resp = self.post(uri,data = SPARE_POINT)
         self.assertEquals(resp.status_code,201)
  
-        uri = '/loyalty/v1/spare-upcs/'
+        uri = '/v1/spare-upcs/'
         resp = self.post(uri,data = SPARE_PART_UPC)
         self.assertEquals(resp.status_code,201)
  
         self.test_create_member()
         self.test_create_member(data=MEMBER1)
-        uri = '/loyalty/v1/accumulation-discrepancies/transfer-points/'
+        uri = '/v1/accumulation-discrepancies/transfer-points/'
         resp = client.post(uri, data =TRANSFERPOINTS)
         self.assertEquals(resp.status_code,200)
  
-        uri = '/loyalty/v1/members/1/'
+        uri = '/v1/members/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['total_points'],982)
  
-        uri = '/loyalty/v1/members/2/'
+        uri = '/v1/members/2/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['total_points'],118)
  
@@ -499,7 +502,7 @@ class LoyaltyApiTests(ResourceTestCase):
  
         self.login()
  
-        uri = '/loyalty/v1/redemption-requests/'
+        uri = '/v1/redemption-requests/'
         self.get(uri)
  
     def test_rps_redemptionrequest(self):
@@ -517,14 +520,14 @@ class LoyaltyApiTests(ResourceTestCase):
         partner.save()
  
         self.login()
-        uri = '/loyalty/v1/redemption-requests/'
+        uri = '/v1/redemption-requests/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['objects'][0]['packed_by'],'user')
  
  
     def test_lps_redemption(self):
  
-        uri = '/loyalty/v1/partners/'
+        uri = '/v1/partners/'
         self.post(uri,data=PARTNER)
         userprofile = self.create_new_user(username='user', group_name=Roles.LPS, email='lp@xyz.com')
         partner = models.Partner.objects.get(name="Anchit")
@@ -540,48 +543,48 @@ class LoyaltyApiTests(ResourceTestCase):
         redemptionrequest.save()
  
         self.login()
-        uri = '/loyalty/v1/redemption-requests/'
+        uri = '/v1/redemption-requests/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['objects'][0]['status'],'Shipped')
  
  
     def test_create_territory(self,data = TERRITORY):
-        uri = '/loyalty/v1/territories/'
+        uri = '/v1/territories/'
         resp = self.post(uri,data=data)
         self.assertEquals(resp.status_code,201)
         return resp
 
     def test_get_territory(self):
         self.test_create_territory()
-        uri = '/loyalty/v1/territories/1/'
+        uri = '/v1/territories/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['territory'],'NORTH')
 
     def test_create_state(self, data=STATE):
         self.test_create_territory()
-        uri = '/loyalty/v1/states/'
+        uri = '/v1/states/'
         resp = self.post(uri,data=data)
         self.assertEquals(resp.status_code,201)
         return resp
 
     def test_get_state(self):
         self.test_create_state()
-        uri = '/loyalty/v1/states/1/'
+        uri = '/v1/states/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['state_name'],'Karnataka')
 
     def test_create_city(self, data=CITY):
         self.test_create_state()
-        uri = '/loyalty/v1/cities/'
+        uri = '/v1/cities/'
         resp = self.post(uri,data=data)
         self.assertEquals(resp.status_code,201)
         return resp
 
     def test_get_city(self):
         self.test_create_city()
-        uri = '/loyalty/v1/cities/1/'
+        uri = '/v1/cities/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['city'],'Bangalore')
