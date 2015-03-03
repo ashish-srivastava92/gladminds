@@ -19,7 +19,7 @@ class Command(BaseCommand):
     
     def register_user(self, group, username=None, phone_number=None,
                       first_name='', last_name='', email='', address='',
-                      state='', pincode=''):
+                      state='', pincode='', APP=APP):
         user_profile = get_model('UserProfile', APP)
         logger.info('New {0} Registration with id - {1}'.format(group, username))
         try:

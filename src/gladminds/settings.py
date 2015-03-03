@@ -644,7 +644,7 @@ PURCHASE_SYNC_WSDL='qa_purchase_sync_feed.wsdl'
 
 BRAND_META = {
                "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/"},
-               "demo": {"title": "Daimler", "logo": "daimler/img/logo.gif", "tagline": "2015 Daimler AG",
+               "demo": {"title": "Daimler", "logo": "daimler/img/daimler_logo.gif", "tagline": "2015 Daimler AG",
                         "basecss": "/daimler/css/base.css","admin_url" :"/admin/"}
                }
 
@@ -657,7 +657,8 @@ HOME_URLS = {
              "demo" : {"SdManagers":[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        "Dealers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
-                       "DealerAdmins":[{"SERVICE DESK":"/aftersell/helpdesk"}]
+                       "DealerAdmins":[{"SERVICE DESK":"/aftersell/helpdesk"},
+                                       {"ADD SERVICE DESK USER":"/add/servicedesk-user"}]
                        }
              }
 
