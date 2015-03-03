@@ -430,3 +430,40 @@ class LoyaltySLA(base_models.LoyaltySLA):
     class Meta:
         app_label = _APP_NAME
         unique_together = ("status", "action")
+
+class Territory(base_models.Territory):
+    '''List of territories'''
+    
+    class Meta:
+        app_label = _APP_NAME
+
+class State(base_models.State):
+    ''' List of states mapped to territory'''
+    territory = models.ForeignKey(Territory)
+ 
+    class Meta:
+        app_label = _APP_NAME
+
+class City(base_models.City):
+    ''' List of cities mapped to states'''
+    state = models.ForeignKey(State)    
+   
+    class Meta:
+        app_label = _APP_NAME
+
+class CommentThread(base_models.CommentThread):
+    '''details of activities done by service-desk user'''
+    welcome_kit = models.ForeignKey(WelcomeKit, null=True, blank=True)
+    redemption = models.ForeignKey(RedemptionRequest, null=True, blank=True)
+    user = models.ForeignKey(User, related_name="demo_comments_user")
+
+    class Meta:
+        app_label = _APP_NAME
+
+class DiscrepantAccumulation(base_models.DiscrepantAccumulation):
+    upc = models.ForeignKey(SparePartUPC)
+    new_member = models.ForeignKey(Mechanic)
+    accumulation_request = models.ForeignKey(AccumulationRequest)
+     
+    class Meta:
+        app_label = _APP_NAME
