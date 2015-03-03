@@ -374,8 +374,17 @@ class ServiceDeskUserAdmin(GmModelAdmin):
 '''Admin View for loyalty'''
 class NSMAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    search_fields = ('nsm_id', 'name', 'phone_number', 'territory')
-    list_display = ('nsm_id', 'name', 'email', 'phone_number','territory')
+    search_fields = ('nsm_id', 'name', 'phone_number')
+    list_display = ('nsm_id', 'name', 'email', 'phone_number','get_territory')
+
+    def get_territory(self, obj):
+        territories = obj.territory.all()
+        if territories:
+            return ' | '.join([str(territory.territory) for territory in territories])
+        else:
+            return None
+
+    get_territory.short_description = 'Territory'
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('nsm_id',)
@@ -391,8 +400,17 @@ class ASMAdmin(GmModelAdmin):
     search_fields = ('asm_id', 'nsm__name',
                      'phone_number', 'state')
     list_display = ('asm_id', 'name', 'email',
-                     'phone_number', 'state', 'nsm')
+                     'phone_number', 'get_state', 'nsm')
     
+
+    def get_state(self, obj):
+        states = obj.state.all()
+        if states:
+            return ' | '.join([str(state.state_name) for state in states])
+        else:
+            return None
+    get_state.short_description = 'State'
+
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('asm_id',)
         form = super(ASMAdmin, self).get_form(request, obj, **kwargs)
@@ -531,8 +549,8 @@ class MechanicAdmin(GmModelAdmin):
         """
         query_set = self.model._default_manager.get_query_set()
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm=models.AreaSparesManager.objects.get(user__user=request.user)
-            query_set=query_set.filter(state=asm.state)
+            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            query_set=query_set.filter(state=asm_state_list)
 
         return query_set
 
@@ -542,16 +560,10 @@ class MechanicAdmin(GmModelAdmin):
         return form
 
     def save_model(self, request, obj, form, change):
-        form_status = True
-        for field in obj._meta.fields:
-            if field.name in constants.MANDATORY_MECHANIC_FIELDS and not getattr(obj, field.name):
-                form_status = False
-        obj.phone_number=utils.mobile_format(obj.phone_number)
+        if not (obj.phone_number == '' or (len(obj.phone_number) < 10)):
+            obj.phone_number=utils.mobile_format(obj.phone_number)
         super(MechanicAdmin, self).save_model(request, obj, form, change)
-        if form_status and not obj.sent_sms:
-            LoyaltyService.send_welcome_sms(obj)
-            LoyaltyService.initiate_welcome_kit(obj)
-
+        
 class CommentThreadInline(TabularInline):
     model = models.CommentThread
     fields = ('created_date', 'user', 'message')
@@ -611,8 +623,8 @@ class RedemptionRequestAdmin(GmModelAdmin):
         elif request.user.groups.filter(name=Roles.LPS).exists():
             query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=request.user)
         elif request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm=models.AreaSparesManager.objects.get(user__user=request.user)
-            query_set=query_set.filter(member__state=asm.state)
+            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            query_set=query_set.filter(member__state=asm_state_list)
 
         return query_set
 
@@ -753,8 +765,8 @@ class WelcomeKitAdmin(GmModelAdmin):
         elif request.user.groups.filter(name=Roles.LPS).exists():
             query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=request.user)
         elif request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm=models.AreaSparesManager.objects.get(user__user=request.user)
-            query_set=query_set.filter(member__state=asm.state)
+            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            query_set=query_set.filter(member__state=asm_state_list)
 
         return query_set
 

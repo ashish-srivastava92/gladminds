@@ -17,6 +17,7 @@ from gladminds.core.managers.audit_manager import feed_log, sms_log
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.bajaj.services.feed_resources import BaseFeed
 from gladminds.core.auth_helper import Roles
+from gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
 
 logger = logging.getLogger("gladminds")
 USER_GROUP = {'dealer': 'dealers', 'ASC': 'ascs', 'SA':'sas', 'customer':"customer"}
@@ -170,6 +171,11 @@ class MechanicFeed(BaseFeed):
                 mech_object = models.Mechanic.objects.get(mechanic_id=mechanic['temp_id'])
                 mech_object.permanent_id=mechanic['mechanic_id']
                 mech_object.save()
+                if not mech_object.sent_sms:
+                    LoyaltyService.send_welcome_sms(mech_object)
+                    mech_object.sent_sms = True
+                    mech_object.save()
+                    LoyaltyService.initiate_welcome_kit(mech_object)
             except Exception as ex:
                 total_failed += 1
                 ex = "[MechanicFeed]: id-{0} :: {1}".format(mechanic['temp_id'], ex)

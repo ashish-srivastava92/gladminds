@@ -324,9 +324,30 @@ class Constant(base_models.Constant):
         
 
 #######################LOYALTY TABLES#################################
+class Territory(base_models.Territory):
+    '''List of territories'''
+    
+    class Meta:
+        app_label = _APP_NAME
+
+class State(base_models.State):
+    ''' List of states mapped to territory'''
+    territory = models.ForeignKey(Territory)
+ 
+    class Meta:
+        app_label = _APP_NAME
+
+class City(base_models.City):
+    ''' List of cities mapped to states'''
+    state = models.ForeignKey(State)    
+   
+    class Meta:
+        app_label = _APP_NAME
+
 class NationalSparesManager(base_models.NationalSparesManager):
     '''details of National Spares Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
+    territory = models.ManyToManyField(Territory)
 
     class Meta:
         app_label = _APP_NAME
@@ -335,6 +356,7 @@ class NationalSparesManager(base_models.NationalSparesManager):
 class AreaSparesManager(base_models.AreaSparesManager):
     '''details of Area Spares Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
+    state = models.ManyToManyField(State)
     nsm = models.ForeignKey(NationalSparesManager, null=True, blank=True)
 
     class Meta:
@@ -353,26 +375,6 @@ class Distributor(base_models.Distributor):
 class Retailer(base_models.Retailer):
     '''details of retailer'''
 
-    class Meta:
-        app_label = _APP_NAME
-
-class Territory(base_models.Territory):
-    '''List of territories'''
-    
-    class Meta:
-        app_label = _APP_NAME
-
-class State(base_models.State):
-    ''' List of states mapped to territory'''
-    territory = models.ForeignKey(Territory)
- 
-    class Meta:
-        app_label = _APP_NAME
-
-class City(base_models.City):
-    ''' List of cities mapped to states'''
-    state = models.ForeignKey(State)    
-   
     class Meta:
         app_label = _APP_NAME
 
