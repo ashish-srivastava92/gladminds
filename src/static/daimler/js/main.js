@@ -87,6 +87,43 @@
         return false;
     });
     
+    $('.sd-user-form').on('submit', function() {
+        var formData = new FormData($(this).get(0)),
+            messageModal = $('.modal.message-modal'),
+            messageBlock = $('.modal-body', messageModal),
+            messageHeader = $('.modal-title', messageModal),
+            waitingModal = $('.modal.waiting-dialog'),
+      jqXHR = $.ajax({
+            type: 'POST',
+            url: '/add/servicedesk-user/',
+            data: formData,
+            cache: false,
+            processData: false,
+            contentType: false,
+            beforeSend: function(){
+                $(this).find('input[type="text"]').val('');
+                waitingModal.modal('show');
+            },
+            success: function(data){
+                messageBlock.text(data.message);
+                messageHeader.text('Thanks');
+                waitingModal.modal('hide');
+                messageModal.modal('show');
+                $('.username').val('');
+                $('.email').val('');
+                $('.phone-number').val('');
+            },
+            error: function() {
+                messageBlock.text('Invalid Data');
+                messageHeader.text('Invalid');
+                waitingModal.modal('hide');
+                messageModal.modal('show');
+                
+            }
+        });
+        return false;
+    });
+    
     $('.department').on('change', function(){
     	var department = $('.department').val(),
     		jqXHR = $.ajax({
