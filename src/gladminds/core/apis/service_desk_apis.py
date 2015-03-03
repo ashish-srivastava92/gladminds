@@ -22,6 +22,7 @@ class FeedbackResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Feedback.objects.all()
         resource_name = "feedbacks"
+        model_name = "Feedback"
         authorization = MultiAuthorization(DjangoAuthorization())
         authentication = MultiAuthentication(AccessTokenAuthentication())
         detail_allowed_methods = ['get']

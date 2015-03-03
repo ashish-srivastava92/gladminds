@@ -449,12 +449,12 @@ PRODUCT = {
         }
 
 MEMBER = {
-            "adress_line_1": "",
-            "adress_line_2": "",
-            "adress_line_3": "",
-            "adress_line_4": "",
-            "adress_line_5": "",
-            "adress_line_6": "",
+            "address_line_1": "",
+            "address_line_2": "",
+            "address_line_3": "",
+            "address_line_4": "",
+            "address_line_5": "",
+            "address_line_6": "",
             "created_date": "2014-12-29T20:21:09",
             "date_of_birth": "1971-10-20T05:30:00",
             "district": "MADURAI",
@@ -546,12 +546,12 @@ ACCUMULATION = {
                 "asm":ASM,
                 "created_date":"2015-02-12T14:51:05",
                 "member":{  
-                          "adress_line_1":"",
-                          "adress_line_2":"",
-                          "adress_line_3":"",
-                          "adress_line_4":"",
-                          "adress_line_5":"",
-                          "adress_line_6":"",
+                          "address_line_1":"",
+                          "address_line_2":"",
+                          "address_line_3":"",
+                          "address_line_4":"",
+                          "address_line_5":"",
+                          "address_line_6":"",
                           "created_date":"2015-02-04T17:11:42",
                           "date_of_birth":"1960-01-03",
                           "distributor":{  
