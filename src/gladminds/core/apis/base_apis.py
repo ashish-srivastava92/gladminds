@@ -58,10 +58,10 @@ class CustomBaseModelResource(BaseCorsResource, ModelResource):
             fmt = 'application/json'
         return fmt
 
-#     def get_object_list(self, request):
-#         if settings.BRAND in settings.OUTSIDE_BRANDS:
-#             return get_model(self._meta.model_name, brand=settings.BRAND).objects.all()
-#         return self._meta.queryset._clone()
+    def get_object_list(self, request):
+        if settings.BRAND in settings.OUTSIDE_BRANDS:
+            return get_model(self._meta.model_name, brand=settings.BRAND).objects.all()
+        return self._meta.queryset._clone()
 
  
 class CustomApiObject(dict):
