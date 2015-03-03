@@ -27,6 +27,7 @@ class UserResource(CustomBaseModelResource):
     class Meta:
         queryset = User.objects.all()
         resource_name = 'users'
+        model_name = 'User'
         excludes = ['password', 'is_superuser']
         authorization = Authorization()
 #         authentication = AccessTokenAuthentication()
@@ -44,6 +45,7 @@ class UserProfileResource(CustomBaseModelResource):
     class Meta:
         queryset = models.UserProfile.objects.all()
         resource_name = 'gm-users'
+        model_name = 'UserProfile'
         authorization = Authorization()
 #         authorization = MultiAuthorization(DjangoAuthorization())
 #         authentication = AccessTokenAuthentication()
@@ -55,7 +57,7 @@ class UserProfileResource(CustomBaseModelResource):
                      "country": ALL,
                      "pincode": ALL
                      }
-        always_return_data = True
+        always_return_data = True 
 
     def prepend_urls(self):
         return [
@@ -122,6 +124,7 @@ class DealerResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Dealer.objects.all()
         resource_name = "dealers"
+        model_name = 'Dealer'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
@@ -139,6 +142,7 @@ class AuthorizedServiceCenterResource(CustomBaseModelResource):
     class Meta:
         queryset = models.AuthorizedServiceCenter.objects.all()
         resource_name = "authorized-service-centers"
+        model_name = 'AuthorizedServiceCenter'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
@@ -158,6 +162,7 @@ class ServiceAdvisorResource(CustomBaseModelResource):
     class Meta:
         queryset = models.ServiceAdvisor.objects.all()
         resource_name = "service-advisors"
+        model_name = 'ServiceAdvisor'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
@@ -174,6 +179,7 @@ class NationalSparesManagerResource(CustomBaseModelResource):
     class Meta:
         queryset = models.NationalSalesManager.objects.all()
         resource_name = "national-spares-managers"
+        model_name = 'NationalSalesManager'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -191,6 +197,7 @@ class PartnerResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Partner.objects.all()
         resource_name = "partners"
+        model_name = 'Partner'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -202,6 +209,7 @@ class DistributorResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Distributor.objects.all()
         resource_name = "distributors"
+        model_name = 'Distributor'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -211,6 +219,7 @@ class RetailerResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Retailer.objects.all()
         resource_name = "retailers"
+        model_name = 'Retailer'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -222,6 +231,7 @@ class MemberResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Mechanic.objects.all()
         resource_name = "members"
+        model_name = 'Mechanic'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -230,7 +240,7 @@ class MemberResource(CustomBaseModelResource):
                      "locality":ALL,
                      "district":ALL,
                      }
-        
+
 
 class ServiceDeskUserResource(CustomBaseModelResource):
     '''
@@ -242,6 +252,7 @@ class ServiceDeskUserResource(CustomBaseModelResource):
     class Meta:
         queryset = models.ServiceDeskUser.objects.all()
         resource_name = "service-desk-users"
+        model_name = 'ServiceDeskUser'
 #         authorization = MultiAuthorization(DjangoAuthorization())
 #         authentication = MultiAuthentication(AccessTokenAuthentication())
         authorization = Authorization()
@@ -249,9 +260,8 @@ class ServiceDeskUserResource(CustomBaseModelResource):
         always_return_data = True
         filtering = {
                         "user": ALL_WITH_RELATIONS,
-                        "sub_department": ALL_WITH_RELATIONS,
-                        "sub_department__department": ALL_WITH_RELATIONS
                      }
+
 
 class DepartmentSubCategoriesResource(CustomBaseModelResource):
     sub_department_user = fields.ToManyField(ServiceDeskUserResource, 'sub_department_user', full=True)
@@ -259,6 +269,7 @@ class DepartmentSubCategoriesResource(CustomBaseModelResource):
     class Meta:
         queryset = models.DepartmentSubCategories.objects.all()
         resource_name = "department-sub-categories"
+        model_name = 'DepartmentSubCategories'
         authorization = Authorization()
         detail_allowed_methods = ['get']
         always_return_data = True
@@ -266,11 +277,13 @@ class DepartmentSubCategoriesResource(CustomBaseModelResource):
                      "department": ALL_WITH_RELATIONS
                      } 
 
+
 class BrandDepartmentResource(CustomBaseModelResource):
     department_sub_categories = fields.ToManyField(DepartmentSubCategoriesResource, 'department_sub_categories', full=True)
     class Meta:
         queryset = models.BrandDepartment.objects.all()
         resource_name = "brand-departments"
+        model_name = 'BrandDepartment'
         authorization = Authorization()
         detail_allowed_methods = ['get']
         always_return_data = True
