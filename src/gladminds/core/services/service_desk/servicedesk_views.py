@@ -22,10 +22,10 @@ from gladminds.core.constants import BY_DEFAULT_RECORDS_PER_PAGE, \
     ROOT_CAUSE, DEMO_PRIORITY
 from gladminds.core.utils import get_list_from_set
 from gladminds.core.model_fetcher import models
+from gladminds.management.commands import load_area_service_manager_data
 
 
 LOG = logging.getLogger('gladminds')
-
 
 def get_helpdesk(request):
     if request.user.groups.filter(name__in=[Roles.DEALERS, Roles.ASCS, Roles.DEALERADMIN]):
@@ -257,3 +257,16 @@ def get_feedback_response(request, feedback_id):
         return render(request, 'service-desk/feedback_received.html')
     else:
         return HttpResponse()
+
+def add_servicedesk_user(request):
+    register_user = load_area_service_manager_data.Command()
+    if request.method == 'GET':
+        return render(request, 'service-desk/servicedesk_user_registration.html')
+    elif request.method == 'POST':
+        dealer_user_obj = register_user.register_user(Roles.DEALERS,username=request.POST.get('name'),
+                                                 phone_number=request.POST.get('phone-number'),
+                                                 email = request.POST.get('email'), APP=settings.BRAND)
+        dealer_obj = models.Dealer(dealer_id=request.POST.get('name'), user=dealer_user_obj)
+        dealer_obj.save()
+        return HttpResponse(json.dumps({'message': "Registered Successfully"}),
+                            content_type='application/json')

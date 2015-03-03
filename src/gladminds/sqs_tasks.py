@@ -479,6 +479,16 @@ def send_mail_for_customer_phone_number_update(*args, **kwargs):
         mail.customer_phone_number_update(customer_details=customer_details['customer_data'])
         customer_details['customer_details'].update(email_flag=True)
 
+'''
+Cron Job to send email to asm when customer number update exceeds
+'''
+@shared_task
+def send_mail_customer_phone_number_update_exceeds(*args, **kwargs):
+    update_details = taskmanager.get_update_number_exceeds()
+    if update_details['update_data']:
+        mail.send_phone_number_update_count_exceeded(update_details=update_details['update_data'])
+        update_details['update_details'].update(email_flag=True) 
+
 
 ''' Cron job to send for policy_discrepency'''
 
@@ -771,6 +781,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               "send_servicedesk_feedback_detail" : send_servicedesk_feedback_detail,
               
               "send_customer_phone_number_update_message" : send_customer_phone_number_update_message,
+              
+              "send_mail_customer_phone_number_update_exceeds" : send_mail_customer_phone_number_update_exceeds,
               
               "send_vin_sync_feed_details" : send_vin_sync_feed_details,
 

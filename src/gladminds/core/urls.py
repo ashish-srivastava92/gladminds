@@ -56,7 +56,7 @@ api_v1.register(dashboard_apis.CouponReportResource())
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import admin
-admin.autodiscover()
+# admin.autodiscover()
 admin.site.login = login_required(settings.LOGIN_URL)
 
 api_v1.register(SMSResources())
@@ -65,6 +65,7 @@ urlpatterns = patterns('',
     url(r'api/doc/', include('gladminds.core.api_docs.swagger_urls', namespace='tastypie_swagger')),
     url(r'login/$', 'gladminds.core.views.auth_login'),
     url(r'^$', 'gladminds.core.views.get_services'),
+    url(r'^add/servicedesk-user/$', 'gladminds.core.services.service_desk.servicedesk_views.add_servicedesk_user', name='add_servicedesk_user'),
     url(r'^aftersell/users/(?P<users>[a-zA-Z0-9]+)$', 'gladminds.core.views.users'),
     url(r'^aftersell/sa/(?P<id>[a-zA-Z0-9]+)/$', 'gladminds.core.views.get_sa_under_asc'),
     url(r'^report/(?P<role>[a-zA-Z0-9.-]+)/$', 'gladminds.core.views.brand_details'),

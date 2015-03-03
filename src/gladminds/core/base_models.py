@@ -121,7 +121,7 @@ class OTPToken(BaseModel):
         verbose_name_plural = "OTPs"
 
     def __unicode__(self):
-        return self.phone_number + " " + self.token
+        return str(self.phone_number or '') + ' ' +self.token
 
 
 class Dealer(BaseModel):
@@ -383,18 +383,15 @@ class CustomerTempRegistration(BaseModel):
     '''Details of customer registration'''
     new_customer_name = models.CharField(max_length=50, null=True, blank=True)
     new_number = models.CharField(max_length=15, null=True, blank=True)
-    old_number = models.CharField(max_length=15)
     dealer_asc_id = models.CharField(max_length=15, null=True, blank=True)
     product_purchase_date = models.DateTimeField(null=True, blank=True)
     temp_customer_id = models.CharField(max_length=50,
                                 null=False, blank=False, unique=True)
     sent_to_sap = models.BooleanField(default=False)
     remarks = models.CharField(max_length=500, null=True, blank=True)
-    update_history = models.CharField(max_length=500, null=True, blank=True)
     tagged_sap_id = models.CharField(
         max_length=215, null=True, blank=True, unique=True)
-    mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True, default=0)
-    email_flag = models.BooleanField(default=False) 
+    mobile_number_update_count = models.IntegerField(max_length=5, null=True, blank=True, default=0) 
     objects = user_manager.CustomerTempRegistrationManager()
 
     class Meta:
@@ -403,6 +400,37 @@ class CustomerTempRegistration(BaseModel):
 
     def __unicode__(self):
         return self.new_customer_name
+
+class CustomerUpdateHistory(BaseModel):
+    '''Stores the updated values of registered customer'''
+    updated_field = models.CharField(max_length=100)
+    old_value = models.CharField(max_length=100)
+    new_value = models.CharField(max_length=100)
+    email_flag = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Customer temporary Update History"
+
+    def __unicode__(self):
+        return self.updated_field
+
+class CustomerUpdateFailure(BaseModel):
+    '''Stores data when phone number update exceeds the limit'''
+    customer_name = models.CharField(max_length=50, null=False, blank=False)
+    customer_id = models.CharField(max_length=50,
+                                null=False, blank=False, unique=False)
+    updated_by = models.CharField(max_length=50, null=False, blank=False)
+    old_number = models.CharField(max_length=15, null=False, blank=False)
+    new_number = models.CharField(max_length=15, null=False, blank=False)
+    email_flag = models.BooleanField(default=False)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = 'Update Failures'
+    
+    def __unicode__(self):
+        return self.customer_id
 
 class EmailToken(models.Model):
     ACTIVATED = u"ALREADY_ACTIVATED"
@@ -772,32 +800,30 @@ class ZonalServiceManager(BaseModel):
     
 #######################LOYALTY TABLES#################################
 
-class NationalSalesManager(BaseModel):
-    '''details of National Sales Manager'''
+class NationalSparesManager(BaseModel):
+    '''details of National Spares Manager'''
     nsm_id = models.CharField(max_length=50, unique=True, default=generate_nsm_id)
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
-    territory = models.CharField(max_length=50, null=True, blank=True, unique=True)
 
     class Meta:
         abstract = True
-        verbose_name_plural = "National Sales Managers"
+        verbose_name_plural = "National Spares Managers"
 
     def __unicode__(self):
         return self.name
 
-class AreaSalesManager(BaseModel):
-    '''details of Area Service Manager'''
+class AreaSparesManager(BaseModel):
+    '''details of Area Spares Manager'''
     asm_id = models.CharField(max_length=50, unique=True, default=generate_asm_id)
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
-    state = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Area Sales Managers"
+        verbose_name_plural = "Area Spares Managers"
 
     def __unicode__(self):
         return self.name
@@ -857,7 +883,6 @@ class Mechanic(BaseModel):
     locality = models.CharField(max_length=50, null=True, blank=True)
     tehsil = models.CharField(max_length=50, null=True, blank=True)
     district = models.CharField(max_length=50, null=True, blank=True)
-    state = models.CharField(max_length=50, null=True, blank=True)
     pincode = models.CharField(max_length=50, null=True, blank=True)
     shop_wall_length = models.IntegerField(max_length=50, null=True, blank=True)
     shop_wall_width = models.IntegerField(max_length=50, null=True, blank=True)
@@ -958,6 +983,7 @@ class AccumulationRequest(BaseModel):
     points = models.IntegerField(max_length=50)
     total_points = models.IntegerField(max_length=50)
     sent_to_sap = models.BooleanField(default=False)
+    is_transferred = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -1022,6 +1048,7 @@ class RedemptionRequest(BaseModel):
     delivery_date =  models.DateTimeField(null=True, blank= True)
     pod_number = models.CharField(max_length=50, null=True, blank=True)
     sent_to_sap = models.BooleanField(default=False)
+    points = models.IntegerField(max_length=50)
     
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
@@ -1091,6 +1118,13 @@ class CommentThread(BaseModel):
     def __unicode__(self):
         return str(self.id)
 
+class DiscrepantAccumulation(BaseModel):
+    ''' details of accumulation request with discrepancy'''
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Discrepant Request"
+
 class LoyaltySLA(models.Model):
     status = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_STATUS)
     action = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_ACTION)
@@ -1121,6 +1155,38 @@ class LoyaltySLA(models.Model):
         
     def __unicode__(self):
         return str(self.status)
+
+class Territory(BaseModel):
+    territory = models.CharField(max_length=20, unique = True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Territory info"
+
+    def __unicode__(self):
+        return self.territory
+
+
+class State(BaseModel):
+    state_name = models.CharField(max_length=30, unique = True)
+    state_code = models.CharField(max_length=10, unique = True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "State info"
+
+    def __unicode__(self):
+        return self.state_name
+    
+class City(BaseModel):
+    city = models.CharField(max_length=50, unique = True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "City info"
+
+    def __unicode__(self):
+        return self.city
 
 class DateDimension(models.Model):
     date_id = models.BigIntegerField(primary_key=True)

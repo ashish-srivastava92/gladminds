@@ -34,7 +34,7 @@ class ExportMemberTempFeed(BaseExportFeed):
                         "ADDR4": mechanic.address_line_4,
                         "ADDR5": mechanic.address_line_5,
                         "ADDR6": mechanic.address_line_6,
-                        "STATE": mechanic.state,
+                        "STATE": mechanic.state.state_code,
                         "PIN_CODE": mechanic.pincode,
                         "DSB_CODE": mechanic.registered_by_distributor.distributor_id,
                         "MOBILE_NO":str(mechanic.phone_number),

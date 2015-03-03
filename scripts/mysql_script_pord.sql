@@ -44,7 +44,3 @@
 --alter table demo_userprofile add column department varchar(100) null;
 --alter table bajaj_dealer add column use_cdms boolean default True;
 --alter table demo_dealer add column use_cdms boolean default True;
-
-alter table bajaj_accumulationrequest add column sent_to_sap boolean default False;
-alter table bajaj_redemptionrequest add column sent_to_sap boolean default False;
-
