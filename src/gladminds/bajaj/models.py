@@ -229,6 +229,22 @@ class CustomerTempRegistration(base_models.CustomerTempRegistration):
         app_label = _APP_NAME
         verbose_name_plural = "Customer temporary info"
 
+class CustomerUpdateFailure(base_models.CustomerUpdateFailure):
+    '''stores data when phone number update exceeds the limit'''
+    product_id = models.ForeignKey(ProductData, null=False, blank=False)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Update Failures"
+        
+class CustomerUpdateHistory(base_models.CustomerUpdateHistory):
+    '''Stores the updated values of registered customer'''
+    temp_customer = models.ForeignKey(CustomerTempRegistration)
+
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Customer temporary Update History"
+
 
 class UserPreference(base_models.UserPreference):
     user = models.ForeignKey(UserProfile)
@@ -308,18 +324,40 @@ class Constant(base_models.Constant):
         
 
 #######################LOYALTY TABLES#################################
-class NationalSalesManager(base_models.NationalSalesManager):
-    '''details of National Sales Manager'''
+class Territory(base_models.Territory):
+    '''List of territories'''
+    
+    class Meta:
+        app_label = _APP_NAME
+
+class State(base_models.State):
+    ''' List of states mapped to territory'''
+    territory = models.ForeignKey(Territory)
+ 
+    class Meta:
+        app_label = _APP_NAME
+
+class City(base_models.City):
+    ''' List of cities mapped to states'''
+    state = models.ForeignKey(State)    
+   
+    class Meta:
+        app_label = _APP_NAME
+
+class NationalSparesManager(base_models.NationalSparesManager):
+    '''details of National Spares Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
+    territory = models.ManyToManyField(Territory)
 
     class Meta:
         app_label = _APP_NAME
 
 
-class AreaSalesManager(base_models.AreaSalesManager):
-    '''details of Area Service Manager'''
+class AreaSparesManager(base_models.AreaSparesManager):
+    '''details of Area Spares Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
-    nsm = models.ForeignKey(NationalSalesManager, null=True, blank=True)
+    state = models.ManyToManyField(State)
+    nsm = models.ForeignKey(NationalSparesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -328,7 +366,7 @@ class AreaSalesManager(base_models.AreaSalesManager):
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
-    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
+    asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -340,11 +378,11 @@ class Retailer(base_models.Retailer):
     class Meta:
         app_label = _APP_NAME
 
-
 class Mechanic(base_models.Mechanic):
     '''details of Mechanic'''
     registered_by_distributor = models.ForeignKey(Distributor, null=True, blank=True)
     preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
+    state = models.ForeignKey(State)
     image_url = models.FileField(upload_to='{0}/bajaj/mechanics'.format(settings.ENV),
                                   max_length=255, null=True, blank=True,
                                   validators=[validate_image])
@@ -379,7 +417,7 @@ class AccumulationRequest(base_models.AccumulationRequest):
     '''details of Accumulation request'''
     member = models.ForeignKey(Mechanic)
     upcs = models.ManyToManyField(SparePartUPC)
-    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
+    asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -428,7 +466,7 @@ class CommentThread(base_models.CommentThread):
     '''details of activities done by service-desk user'''
     welcome_kit = models.ForeignKey(WelcomeKit, null=True, blank=True)
     redemption = models.ForeignKey(RedemptionRequest, null=True, blank=True)
-    user = models.ForeignKey(User, null=True, blank=True)
+    user = models.ForeignKey(User)
 
     class Meta:
         app_label = _APP_NAME
@@ -454,3 +492,11 @@ class LoyaltySLA(base_models.LoyaltySLA):
     class Meta:
         app_label = _APP_NAME
         unique_together = ("status", "action")
+
+class DiscrepantAccumulation(base_models.DiscrepantAccumulation):
+    upc = models.ForeignKey(SparePartUPC)
+    new_member = models.ForeignKey(Mechanic)
+    accumulation_request = models.ForeignKey(AccumulationRequest)
+     
+    class Meta:
+        app_label = _APP_NAME

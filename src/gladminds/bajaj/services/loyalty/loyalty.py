@@ -107,7 +107,7 @@ class LoyaltyService(CoreLoyaltyService):
                               member_id = welcome_kit_obj.member.mechanic_id,
                               member_name = welcome_kit_obj.member.first_name,
                               member_city = welcome_kit_obj.member.district,
-                              member_state = welcome_kit_obj.member.state,
+                              member_state = welcome_kit_obj.member.state.state_name,
                         delivery_address = welcome_kit_obj.delivery_address,
                         url_link=url_link)
         partner_email_id=welcome_kit_obj.partner.user.user.email
@@ -150,7 +150,7 @@ class LoyaltyService(CoreLoyaltyService):
                               member_id = redemption_obj.member.mechanic_id,
                               member_name = redemption_obj.member.first_name,
                               member_city = redemption_obj.member.district,
-                              member_state = redemption_obj.member.state,
+                              member_state = redemption_obj.member.state.state_name,
                               product_id =  redemption_obj.product.product_id,
                               product_name =  redemption_obj.product.description,
                         delivery_address = redemption_obj.delivery_address,
@@ -189,7 +189,8 @@ class LoyaltyService(CoreLoyaltyService):
                                         product=product,
                                         delivery_address=delivery_address,
                                         expected_delivery_date=date['expected_delivery_date'],
-                                        due_date=date['due_date'])
+                                        due_date=date['due_date'],
+                                        points=products.points)
             
             redemption_request.save()
             transaction_ids.append(str(redemption_request.transaction_id))
@@ -273,6 +274,20 @@ class LoyaltyService(CoreLoyaltyService):
             if invalid_upcs:
                 invalid_upcs_message=' Invalid Entry... {0} does not exist in our records.'.format(
                                               (', '.join(invalid_upcs)))
+                used_upcs = models.SparePartUPC.objects.get_spare_parts(invalid_upcs, is_used=True) 
+                if used_upcs:
+                    accumulation_requests = models.AccumulationRequest.objects.filter(upcs__in=used_upcs).prefetch_related('upcs').select_related('upcs')
+                    accumulation_dict = {}
+                    try:
+                        for accumulation_request in accumulation_requests:
+                            for upcs in  accumulation_request.upcs.values():
+                                accumulation_dict[upcs['unique_part_code']] = accumulation_request    
+                        for used_upc in used_upcs:
+                            discrepant_accumulation_log = models.DiscrepantAccumulation(new_member=mechanic[0], upc = used_upc,
+                                                                         accumulation_request=accumulation_dict[used_upc])
+                            discrepant_accumulation_log.save()
+                    except Exception as ex:
+                        LOG.error('[accumulate_point]:{0}:: {1}'.format(phone_number, ex))
             if len(unique_product_codes)==1 and invalid_upcs:
                 message=get_template('SEND_INVALID_UCP')
             else:

@@ -44,13 +44,20 @@ class System(BaseTestCase):
         return spare_data
 
     def create_sdo(self, **kwargs):
-        user_servicedesk_owner_profile = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name='SDO', phone_number=kwargs['phone_number'])
+        user_servicedesk_owner_profile = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name=Roles.SDOWNERS, phone_number=kwargs['phone_number'])
         user_servicedesk_owner = models.ServiceDeskUser(user_profile=user_servicedesk_owner_profile)
         user_servicedesk_owner.save()
         return user_servicedesk_owner
+    
+    def create_dealer(self,**kwargs):
+        user_dealer_profile = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name=Roles.DEALERS, phone_number=kwargs['phone_number'])
+        user_dealer = models.Dealer(dealer_id='dealer', user=user_dealer_profile)
+        user_dealer.save()
+        user_dealer = models.Dealer.objects.get(user=user_dealer_profile)
+        return user_dealer
 
     def create_sdm(self, **kwargs):
-        user_servicedesk_manager_profile = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name='SDM', phone_number=kwargs['phone_number'])
+        user_servicedesk_manager_profile = self.create_user(username=kwargs['username'], email=kwargs['email'], password=kwargs['password'], group_name=Roles.SDMANAGERS, phone_number=kwargs['phone_number'])
         user_servicedesk_manager = models.ServiceDeskUser(user_profile=user_servicedesk_manager_profile)
         user_servicedesk_manager.save()
         return user_servicedesk_manager
@@ -72,7 +79,7 @@ class System(BaseTestCase):
         data = {'username': 'dealer', 'password': '123'}
         response = client.post("/aftersell/dealer/login/", data=data)
         self.tester.assertEqual(response.status_code, 302)
-        data = {"description":"test","advisorMobile":"+919999999999",
+        data = {"description":"test","advisorMobile":"dealer",
                 "type":"Problem", "summary":"hello" }
         response = client.post("/aftersell/servicedesk/helpdesk", data=data)
         self.tester.assertEqual(response.status_code, 200)
@@ -87,14 +94,14 @@ class System(BaseTestCase):
         self.tester.assertEqual(response.status_code, 200)
 
     def update_feedback(self, **kwargs):
-        data = {"assign_to":"+91000000000",
+        data = {"assign_to":"sdo",
                 "status":"Open","Priority":"High",
                 "comments":"testing", "rootcause":"testing",
                 "resolution":"testing", "reporter_status": "false", "due_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         if kwargs.get('status'):
             data['status'] = kwargs['status']
-        if kwargs.get('assign_To'):
-            data['assign_To'] = kwargs['assign_To']
+        if kwargs.get('assign_to'):
+            data['assign_to'] = kwargs['assign_to']
         if kwargs.get('due_date'):
             data['due_date'] = kwargs['due_date']
         if kwargs.get('reporter_status'):
