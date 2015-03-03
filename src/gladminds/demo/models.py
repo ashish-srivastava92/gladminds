@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-from gladminds.core import base_models
+from gladminds.core import base_models, constants
 from gladminds.core.auth_helper import GmApps
 from django.conf import settings
 from gladminds.core.model_helpers import validate_image, validate_file
@@ -77,6 +77,7 @@ class ServiceDeskUser(base_models.ServiceDeskUser):
         verbose_name_plural = "Service Desk Users"
 
 class Feedback(base_models.Feedback):
+    priority = models.CharField(max_length=12, choices=constants.DEMO_PRIORITY, default='Low')
     reporter = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='demo_feedback_reporter')
     assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='demo_feedback_assignee')
     previous_assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='demo_previous_assignee')
@@ -266,7 +267,7 @@ class AuditLog(base_models.AuditLog):
 
 
 class SLA(base_models.SLA):
-
+    priority = models.CharField(max_length=12, choices=constants.DEMO_PRIORITY, unique=True)
     class Meta:
         app_label = _APP_NAME
 

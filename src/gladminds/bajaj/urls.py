@@ -1,36 +1,8 @@
 from django.conf.urls import patterns, url, include
 from gladminds.bajaj.admin import brand_admin
 from gladminds.core import urls as core_urls
-from gladminds.core.apis import user_apis 
 from gladminds.core.urls import api_v1
-from gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
-from gladminds.core.apis import loyalty_apis, product_apis
-
-loyalty = LoyaltyService
-
-api_v1.register(user_apis.UserResource())
-api_v1.register(user_apis.UserProfileResource())
-api_v1.register(loyalty_apis.NSMResource())
-api_v1.register(loyalty_apis.ASMResource())
-api_v1.register(loyalty_apis.PartnerResource())
-api_v1.register(loyalty_apis.DistributorResource())
-api_v1.register(loyalty_apis.RetailerResource())
-api_v1.register(product_apis.ProductTypeResource())
-api_v1.register(loyalty_apis.SpareMasterResource())
-api_v1.register(loyalty_apis.RedemptionResource())
-api_v1.register(loyalty_apis.ProductResource())
-api_v1.register(loyalty_apis.SparePartUPCResource())
-api_v1.register(loyalty_apis.SparePartPointResource())
-api_v1.register(loyalty_apis.LoyaltySLAResource())
-api_v1.register(loyalty_apis.MemberResource())
-api_v1.register(loyalty_apis.AccumulationResource())
-api_v1.register(loyalty_apis.CommentThreadResource())
-api_v1.register(loyalty_apis.WelcomeKitResource())
-api_v1.register(loyalty_apis.DiscrepantAccumulationResource())
-api_v1.register(loyalty_apis.TerritoryResource())
-api_v1.register(loyalty_apis.StateResource())
-api_v1.register(loyalty_apis.CityResource())
-
+from gladminds.bajaj.services.loyalty.loyalty import loyalty
 
 urlpatterns = patterns('',
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),

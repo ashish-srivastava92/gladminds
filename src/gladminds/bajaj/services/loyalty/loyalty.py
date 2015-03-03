@@ -364,4 +364,4 @@ class LoyaltyService(CoreLoyaltyService):
         expected_delivery_date = datetime.now() + timedelta(seconds=total_seconds)
         return {'due_date':due_date, 'expected_delivery_date':expected_delivery_date}
     
-LoyaltyService = LoyaltyService()
+loyalty = LoyaltyService()

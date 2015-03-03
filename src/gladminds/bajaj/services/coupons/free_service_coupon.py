@@ -271,7 +271,7 @@ def validate_coupon(sms_dict, phone_number):
                                         req_service_type=service_type,
                                         req_status=requested_coupon_status,
                                         customer_id=sap_customer_id)
-
+            customer_message=dealer_message
         sms_log(receiver=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
         send_job_to_queue(send_coupon_detail_customer, {"phone_number":utils.get_phone_number_format(customer_phone_number), "message":customer_message, "sms_client":settings.SMS_CLIENT},
                           delay_seconds=customer_message_countdown)

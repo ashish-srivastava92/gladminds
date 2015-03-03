@@ -3,8 +3,6 @@ from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.model_fetcher import models
 from tastypie.authorization import Authorization
 from tastypie import fields
-from gladminds.core.apis.user_apis import UserProfileResource, UserResource
-from gladminds.core.apis.product_apis import ProductTypeResource
 from django.conf.urls import url
 from django.http.response import HttpResponse
 import json
@@ -19,6 +17,9 @@ from django.db import transaction
 from gladminds.core.auth_helper import Roles
 from django.db.models.aggregates import Count, Sum
 import itertools
+from gladminds.core.apis.user_apis import MemberResource, AreaSparesManagerResource, PartnerResource,UserResource
+from gladminds.core.apis.product_apis import ProductCatalogResource,\
+    SparePartUPCResource
 
 logger = logging.getLogger("gladminds")
 
@@ -54,70 +55,6 @@ class CityResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'put', 'delete']
         always_return_data = True
 
-
-class NSMResource(CustomBaseModelResource):
-    class Meta:
-        queryset = models.NationalSparesManager.objects.all()
-        resource_name = "nsms"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
-        always_return_data = True
-        
-        
-class ASMResource(CustomBaseModelResource):
-    class Meta:
-        queryset = models.AreaSparesManager.objects.all()
-        resource_name = "asms"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
-        always_return_data = True
-        
-class PartnerResource(CustomBaseModelResource):
-    class Meta:
-        queryset = models.Partner.objects.all()
-        resource_name = "partners"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
-        always_return_data = True
-
-
-class DistributorResource(CustomBaseModelResource):
-    user = fields.ForeignKey(UserProfileResource, 'user', null=True, blank=True, full=True)
-    asm = fields.ForeignKey(ASMResource, 'asm', null=True, blank=True, full=True)
-    class Meta:
-        queryset = models.Distributor.objects.all()
-        resource_name = "distributors"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
-        always_return_data = True
-
-
-class RetailerResource(CustomBaseModelResource):
-    class Meta:
-        queryset = models.Retailer.objects.all()
-        resource_name = "retailers"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
-        always_return_data = True
-
-class SpareMasterResource(CustomBaseModelResource):
-    product_type = fields.ForeignKey(ProductTypeResource, 'product_type', full=True)
-    class Meta:
-        queryset = models.SparePartMasterData.objects.all()
-        resource_name = "spare-masters"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
-        always_return_data = True
-
-class SparePartPointResource(CustomBaseModelResource):
-    part_number = fields.ForeignKey(SpareMasterResource, 'part_number', full=True)
-    class Meta:
-        queryset = models.SparePartPoint.objects.all()
-        resource_name = "spare-points"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
-        always_return_data = True
-
 class LoyaltySLAResource(CustomBaseModelResource):
     class Meta:
         queryset = models.LoyaltySLA.objects.all()
@@ -126,38 +63,12 @@ class LoyaltySLAResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
-class ProductResource(CustomBaseModelResource):
-    partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)
-    
-    class Meta:
-        queryset = models.ProductCatalog.objects.all()
-        resource_name = "product-catalogs"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
-        always_return_data = True
-    
-class MemberResource(CustomBaseModelResource):
-    distributor = fields.ForeignKey(DistributorResource, 'registered_by_distributor', null=True, blank=True, full=True) 
-    preferred_retailer = fields.ForeignKey(RetailerResource, 'preferred_retailer', null=True, blank=True, full=True)
-    state = fields.ForeignKey(StateResource, 'state',)
-    
-    class Meta:
-        queryset = models.Mechanic.objects.all()
-        resource_name = "members"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
-        always_return_data = True
-        filtering = {
-                     "state":ALL_WITH_RELATIONS,
-                     "locality":ALL,
-                     "district":ALL,
-                     }
         
 class RedemptionResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
-    product = fields.ForeignKey(ProductResource, 'product')
-    partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)
-    
+    product_catalog = fields.ForeignKey(ProductCatalogResource, 'product')
+    partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)    
+
     class Meta:
         queryset = models.RedemptionRequest.objects.all()
         resource_name = "redemption-requests"
@@ -256,7 +167,7 @@ class RedemptionResource(CustomBaseModelResource):
         except Exception as ex:
             logger.error('redemption request points requested by {0}:: {1}'.format(request.user, ex))
             data = {'status': 0, 'message': 'could not retrieve the points of redemption request'}
-        return HttpResponse(json.dumps(data), content_type="application/json")
+        return HttpResponse(data, content_type="application/json")
 
 
     ''' List of mechanics with pending redemption request'''
@@ -277,18 +188,9 @@ class RedemptionResource(CustomBaseModelResource):
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
     
         
-class SparePartUPCResource(CustomBaseModelResource):
-    part_number = fields.ForeignKey(SpareMasterResource, 'part_number', full=True)
-    class Meta:
-        queryset = models.SparePartUPC.objects.all()
-        resource_name = "spare-upcs"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
-        always_return_data = True
-        
 class AccumulationResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member', full=True) 
-    asm = fields.ForeignKey(ASMResource, 'asm', null=True, blank=True, full=True)
+    asm = fields.ForeignKey(AreaSparesManagerResource, 'asm', null=True, blank=True, full=True)
     upcs = fields.ManyToManyField(SparePartUPCResource, 'upcs', full=True)
     
     class Meta:
