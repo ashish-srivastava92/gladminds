@@ -476,7 +476,7 @@ PHONE_NUMBER_UPDATE_COUNT_EXCEEDED_MAIL_TO_ASM = {
 
 POLICY_DISCREPANCY_MAIL_TO_MANAGER = {
     "sender": "feed-report@gladminds.co",
-    "receiver": ["pavankumar.s@hashedin.com"],
+    "receiver": ["pavankumar.s@hashedin.com", "suresh@hashedin.com"],
     "subject": "Gladminds customer phone number update",
     "body": """""",
 }
@@ -599,7 +599,9 @@ FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
 BRAND = None
 GM_BRAND = 'default'
-BRANDS = ['bajaj', 'demo', 'afterbuy']
+OUTSIDE_BRANDS = ['bajaj', 'demo']
+
+BRANDS = OUTSIDE_BRANDS + ['afterbuy']
 ###############################################
 AIRTEL_IP = '54.84.243.77'
 SMS_CLIENT = "MOCK"
@@ -650,7 +652,7 @@ PURCHASE_SYNC_WSDL='qa_purchase_sync_feed.wsdl'
 
 BRAND_META = {
                "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/"},
-               "demo": {"title": "Daimler", "logo": "daimler/img/logo.gif", "tagline": "2015 Daimler AG",
+               "demo": {"title": "Daimler", "logo": "daimler/img/daimler_logo.gif", "tagline": "2015 Daimler AG",
                         "basecss": "/daimler/css/base.css","admin_url" :"/admin/"}
                }
 
@@ -663,7 +665,8 @@ HOME_URLS = {
              "demo" : {"SdManagers":[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        "Dealers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
-                       "DealerAdmins":[{"SERVICE DESK":"/aftersell/helpdesk"}]
+                       "DealerAdmins":[{"SERVICE DESK":"/aftersell/helpdesk"},
+                                       {"ADD SERVICE DESK USER":"/add/servicedesk-user"}]
                        }
              }
 

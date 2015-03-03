@@ -188,7 +188,7 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
             path = utils.upload_file(destination, bucket, file_obj, logger_msg="SDFile")
             gladminds_feedback_object.file_location = path
             gladminds_feedback_object.save()
-        message = templates.get_template('SEND_RCV_FEEDBACK').format(type=gladminds_feedback_object.type)
+        message = templates.get_template('SEND_RCV_FEEDBACK').format(type="feedback")
     except Exception as ex:
         LOG.error(ex)
         message = templates.get_template('SEND_INVALID_MESSAGE')

@@ -81,7 +81,7 @@
         <thead>
 				<tr>
 				    <th>Ticket</th>
-					<th>Customer</th>
+					<th>Reported By</th>
 					<th>Assignee</th>
 					<th>Description</th>
 					<th>Priority</th>
@@ -204,7 +204,7 @@
 		<form class="service-desk-form" role="search">
                 <div class="row">
                   <div class="col-md-3 form-group">
-                    <label class="control-label">Reporter*:</label>
+                    <label class="control-label">Reported_By*:</label>
                   </div>
                   <div class="col-md-9 form-group">
                  	<input type="text" class="form-control advisorMobile" name="advisorMobile" required>
@@ -283,13 +283,13 @@
                     <label class="control-label">Description*:</label>
                   </div>
                   <div class="col-md-9 form-group">
-                    <textarea rows="8" cols="100" class="form-control description" name="description" required></textarea>
+                    <textarea rows="4" cols="100" class="form-control description" name="description" required></textarea>
                   </div>
                 </div> 
                 <div class="row">
                   <div class="col-md-3 form-group">
                     <label class="control-label">Upload File*:</label>
-                    <label class="control-label"><small><i>allowed format png,jpg,pdf,ppt,doc,xls</i></small></label>
+                    <label class="control-label"><small><i>png,jpg,pdf,ppt,doc,xls</i></small></label>
                   </div>
                   <div class="col-md-9 form-group">
                     <input type="file" class='form-control sd_file' name="sd_file" >
