@@ -172,7 +172,7 @@ class ServiceAdvisorResource(CustomBaseModelResource):
     
 class NationalSparesManagerResource(CustomBaseModelResource):
     class Meta:
-        queryset = models.NationalSalesManager.objects.all()
+        queryset = models.NationalSparesManager.objects.all()
         resource_name = "national-spares-managers"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
@@ -181,7 +181,7 @@ class NationalSparesManagerResource(CustomBaseModelResource):
         
 class AreaSparesManagerResource(CustomBaseModelResource):
     class Meta:
-        queryset = models.AreaSalesManager.objects.all()
+        queryset = models.AreaSparesManager.objects.all()
         resource_name = "area-spares-managers"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
