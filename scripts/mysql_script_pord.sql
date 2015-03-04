@@ -44,3 +44,6 @@
 --alter table demo_userprofile add column department varchar(100) null;
 --alter table bajaj_dealer add column use_cdms boolean default True;
 --alter table demo_dealer add column use_cdms boolean default True;
+
+alter table bajaj_productdata add constraint unique(engine);
+alter table bajaj_productdata add column sku_code varchar(25) null;
