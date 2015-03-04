@@ -982,6 +982,7 @@ class AccumulationRequest(BaseModel):
     transaction_id = models.AutoField(primary_key=True)
     points = models.IntegerField(max_length=50)
     total_points = models.IntegerField(max_length=50)
+    sent_to_sap = models.BooleanField(default=False)
     is_transferred = models.BooleanField(default=False)
 
     class Meta:
@@ -1046,6 +1047,7 @@ class RedemptionRequest(BaseModel):
     shipped_date =  models.DateTimeField(null=True, blank= True)
     delivery_date =  models.DateTimeField(null=True, blank= True)
     pod_number = models.CharField(max_length=50, null=True, blank=True)
+    sent_to_sap = models.BooleanField(default=False)
     points = models.IntegerField(max_length=50)
     
     def image_tag(self):

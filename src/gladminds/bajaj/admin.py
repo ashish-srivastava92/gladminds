@@ -526,9 +526,9 @@ class MechanicForm(forms.ModelForm):
 class MechanicAdmin(GmModelAdmin):
     list_filter = ('form_status',)
     form = MechanicForm
-    search_fields = ('mechanic_id',
+    search_fields = ('mechanic_id', 'permanent_id',
                      'phone_number', 'first_name',
-                     'state', 'district')
+                     'state__state_name', 'district')
     list_display = ('get_mechanic_id','first_name', 'date_of_birth',
                     'phone_number', 'shop_name', 'district',
                     'state', 'pincode', 'registered_by_distributor')
