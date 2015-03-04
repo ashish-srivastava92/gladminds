@@ -92,6 +92,10 @@ def get_feedbacks(user, status, priority, type, search=None):
         feedbacks = models.Feedback.objects.filter(assignee=servicedesk_user[0], status__in=status_filter,
                                                    priority__in=priority_filter, type__in=type_filter).order_by('-created_date')
 
+    if user.groups.filter(name=Roles.FSCADMINS).exists():
+        feedbacks = models.Feedback.objects.filter(reporter__user_profile__user=user, status__in=status_filter,
+                                                   priority__in=priority_filter, type__in=type_filter).order_by('-created_date')
+
     return feedbacks
 
 def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=None):
@@ -147,7 +151,7 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
     manager_obj = User.objects.get(groups__name=Roles.SDMANAGERS)
     try:
         servicedesk_user = create_servicedesk_user(name, phone_number, email)
-
+        print servicedesk_user, "wwwwwww"
         if with_detail:
             gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
                                                             type=sms_dict['type'],

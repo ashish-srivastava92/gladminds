@@ -46,6 +46,14 @@
 	     </ul>
      </li>
      {% endif %}
+     {% endfor %}     
+     {% for app in app_list %}
+       {% if 'Products' in app.label and  app.models  %}
+       <li {{ model.is_active|yesno:' class=active,' }}>
+        <a href="/aftersell/servicedesk/helpdesk" target="_blank"><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>Contact Support
+	    </a>
+       </li> 
+     {% endif %}
      {% endfor %}
     {% endif %}
   </ul>
