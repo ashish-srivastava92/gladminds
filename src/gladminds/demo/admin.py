@@ -359,15 +359,15 @@ class ServiceDeskUserAdmin(ModelAdmin):
 
 class NSMAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.LOYALTYSUPERADMINS]
-    search_fields = ('nsm_id', 'name', 'phone_number', 'territory')
-    list_display = ('nsm_id', 'name', 'email', 'phone_number','territory')
+    search_fields = ('nsm_id', 'name', 'phone_number')
+    list_display = ('nsm_id', 'name', 'email', 'phone_number')
 
 class ASMAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.LOYALTYSUPERADMINS]
     search_fields = ('asm_id', 'nsm__name',
-                     'phone_number', 'state')
+                     'phone_number')
     list_display = ('asm_id', 'name', 'email',
-                     'phone_number', 'state', 'nsm')
+                     'phone_number', 'nsm')
 
 class DistributorAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.LOYALTYSUPERADMINS]
@@ -379,11 +379,10 @@ class DistributorAdmin(GmModelAdmin):
 class MechanicAdmin(GmModelAdmin):
     list_filter = ('form_status',)
     search_fields = ('mechanic_id',
-                     'phone_number', 'first_name',
-                     'state', 'district')
+                     'phone_number', 'first_name','district')
     list_display = ('mechanic_id','first_name', 'date_of_birth',
                     'phone_number', 'shop_name', 'district',
-                    'state', 'pincode', 'registered_by_distributor')
+                    'pincode', 'registered_by_distributor')
     readonly_fields = ('image_tag',)
 
     def suit_row_attributes(self, obj):
