@@ -97,7 +97,7 @@ class ExportAccumulationFeed(BaseExportFeed):
                     }
                 upcs = accumulation.upcs.all()
                 for upc in upcs:
-                    item['UPCED'] = upc.unique_part_code
+                    item['UPCED'] = str(upc.unique_part_code)
                     items.append(item)
             except Exception as ex:
                 logger.error("[ExportAccumulationFeed]: error fetching from db {0}".format(ex))
@@ -117,7 +117,7 @@ class ExportAccumulationFeed(BaseExportFeed):
                 result = client.service.SI_Acc_Sync(
                     DT_Accum={'Item':[item]}, DT_STAMP={'Item_Stamp':item_batch})
                 logger.info("[ExportAccumulationFeed]: Response from SAP: {0}".format(result))
-                if result[0]['DT_Item'][0]['STATUS'] == 'SUCCESS':
+                if result[0]['STATUS'] == 'SUCCESS':
                     try:
                         accumulation_detail = models.AccumulationRequest.objects.get(transaction_id=item['TANSSID'])
                         accumulation_detail.sent_to_sap = True
@@ -180,7 +180,7 @@ class ExportRedemptionFeed(BaseExportFeed):
                 result = client.service.SI_Redum_Sync(
                     DT_Redum={'Item':[item]}, DT_STAMP={'Item':item_batch})
                 logger.info("[ExportRedemptionFeed]: Response from SAP: {0}".format(result))
-                if result[0]['Item'][0]['STATUS'] == 'SUCCESS':
+                if result[0]['STATUS'] == 'SUCCESS':
                     try:
                         redemption_detail = models.RedemptionRequest.objects.get(transaction_id=item['TANSSID'])
                         redemption_detail.sent_to_sap = True
@@ -219,7 +219,7 @@ class ExportDistributorFeed(BaseExportFeed):
                         "DISTID": distributor.distributor_id,
                         "NAME": distributor.name,
                         "EMAIL": distributor.email,
-                        "MOBNO": str(distributor.phone_number),
+                        "MOBNO": str(distributor.phone_number) if distributor.phone_number else None,
                         "CITY": distributor.city,
                         "ASMID": asm,
                     }
@@ -242,7 +242,7 @@ class ExportDistributorFeed(BaseExportFeed):
                 result = client.service.SI_Dist_Sync(
                     DT_DIST={'Item':[item]}, DT_STAMP={'Item_Stamp':item_batch})
                 logger.info("[ExportDistributorFeed]: Response from SAP: {0}".format(result))
-                if result[0]['Item'][0]['STATUS'] == 'SUCCESS':
+                if result[0]['STATUS'] == 'SUCCESS':
                     try:
                         distributor_detail = models.Distributor.objects.get(distributor_id=item['DISTID'])
                         distributor_detail.sent_to_sap = True
