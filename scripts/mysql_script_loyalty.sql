@@ -66,36 +66,23 @@ update auth_group set name="AreaSparesManagers" where name="AreaSalesManagers";
 update auth_group set name="NationalSparesManagers" where name="NationalSalesManagers";
 
 alter table bajaj_redemptionrequest add column points integer(50) null;
-alter table bajaj_nationalsparesmanager add foreign key (territory_id) references bajaj_territory(id);
-alter table bajaj_areasparesmanager add foreign key (state_id) references bajaj_state(id);
+
+alter table bajaj_mechanic add column state_id integer;
 alter table bajaj_mechanic add foreign key (state_id) references bajaj_state(id);
 
-insert into bajaj_areasparesmanager (areasparesmanager_id, statae_id) 
-select bajaj_areasparesmanager.id, bajaj_state.id from bajaj_areasparesmanager
-inner join bajaj_state on bajaj_state.state_name = bajaj_areasparesmaanager.state;
+insert into bajaj_areasparesmanager_state (areasparesmanager_id, statae_id) select bajaj_areasparesmanager.id, bajaj_state.id from bajaj_areasparesmanager inner join bajaj_state on bajaj_state.state_name = bajaj_areasparesmaanager.state;
 
-insert into bajaj_nationalsparesmanager (nationalsparesmanager_id, territory_id) 
-select bajaj_nationalsparesmanager.id, bajaj_territory.id from bajaj_nationalsparesmanager 
-inner join bajaj_territory on bajaj_territory.territory = bajaj_nationalsparesmanager.territory;
+insert into bajaj_nationalsparesmanager_territory (nationalsparesmanager_id, territory_id) select bajaj_nationalsparesmanager.id, bajaj_territory.id from bajaj_nationalsparesmanager inner join bajaj_territory on bajaj_territory.territory = bajaj_nationalsparesmanager.territory;
 
 alter table bajaj_nationalsparesmanager drop column territory;
 alter table bajaj_areasparesmanager drop column state ;
 
-update table bajaj_mechanic 
-inner join bajaj_state on bajaj_state.state_name = bajaj_mechanic.state 
-set bajaj_mechanic.state_id = bajaj_state.id 
-where bajaj_state.state_name = 'Karnataka';
+update bajaj_mechanic inner join bajaj_state on bajaj_state.state_name = bajaj_mechanic.state set bajaj_mechanic.state_id = bajaj_state.id  where bajaj_state.state_name = 'Karnataka';
 
 
-update table bajaj_mechanic 
-inner join bajaj_state on bajaj_state.state_name = bajaj_mechanic.state 
-set bajaj_mechanic.state_id = bajaj_state.id 
-where bajaj_state.state_name = 'Tamil Nadu';
+update bajaj_mechanic inner join bajaj_state on bajaj_state.state_name = bajaj_mechanic.state set bajaj_mechanic.state_id = bajaj_state.id where bajaj_state.state_name = 'Tamil Nadu';
 
-update table bajaj_mechanic 
-inner join bajaj_state on bajaj_state.state_name = bajaj_mechanic.state 
-set bajaj_mechanic.state_id = bajaj_state.id 
-where bajaj_state.state_name = 'Kerala';
+update bajaj_mechanic inner join bajaj_state on bajaj_state.state_name = bajaj_mechanic.state set bajaj_mechanic.state_id = bajaj_state.id where bajaj_state.state_name = 'Kerala';
 
 alter table bajaj_mechanic drop column state;
 

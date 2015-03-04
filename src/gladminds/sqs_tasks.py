@@ -33,10 +33,6 @@ logger = logging.getLogger("gladminds")
 __all__ = ['GladmindsTaskManager']
 AUDIT_ACTION = 'SEND TO QUEUE'
 
-"""
-This task send sms to customer on customer registration
-"""
-
 def set_gateway(**kwargs):
     sms_client = kwargs.get('sms_client', None)
     logger.info('sms_client is {0}'.format(sms_client))
@@ -45,6 +41,9 @@ def set_gateway(**kwargs):
 
 @shared_task
 def send_registration_detail(*args, **kwargs):
+    """
+    send sms to customer on customer registration
+    """
     status = "success"
     logger.info("message addded")
     try:
@@ -58,13 +57,10 @@ def send_registration_detail(*args, **kwargs):
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
 
-
-"""
-This task send customer details recovery by sms 
-"""
-
-
 def customer_detail_recovery(*args, **kwargs):
+    """
+    send customer details recovery by sms 
+    """
     status = "success"
     try:
         phone_number = kwargs.get('phone_number', None)
@@ -77,14 +73,11 @@ def customer_detail_recovery(*args, **kwargs):
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
 
-
-"""
-This task send customer valid service detail
-"""
-
-
 @shared_task
 def send_service_detail(*args, **kwargs):
+    """
+    send customer valid service detail
+    """
     status = "success"
     try:
         phone_number = kwargs.get('phone_number', None)
@@ -97,13 +90,11 @@ def send_service_detail(*args, **kwargs):
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
 
-"""
-This job send sms to service advisor, whether the coupon is valid or not 
-"""
-
-
 @shared_task
 def send_coupon_validity_detail(*args, **kwargs):
+    """
+    send sms to service advisor, whether the coupon is valid or not 
+    """
     status = "success"
     try:
         phone_number = kwargs.get('phone_number', None)
@@ -116,14 +107,12 @@ def send_coupon_validity_detail(*args, **kwargs):
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
 
-"""
-This job send sms to customer when SA send 
- query, whether the coupon is valid or not 
-"""
-
-
 @shared_task
 def send_coupon_detail_customer(*args, **kwargs):
+    """
+    send sms to customer when SA send 
+     query, whether the coupon is valid or not 
+    """
     status = "success"
     try:
         phone_number = kwargs.get('phone_number', None)
@@ -136,12 +125,11 @@ def send_coupon_detail_customer(*args, **kwargs):
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
 
-
-"""
-This job send sms in service desk 
-"""
 @shared_task
 def send_servicedesk_feedback_detail(*args, **kwargs):
+    """
+    send sms in service desk 
+    """
     status = "success"
     try:
         phone_number = kwargs.get('phone_number', None)
@@ -154,13 +142,11 @@ def send_servicedesk_feedback_detail(*args, **kwargs):
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
 
-"""
-This job send reminder sms to customer
-"""
-
-
 @shared_task
 def send_reminder_message(*args, **kwargs):
+    """
+    send reminder sms to customer
+    """
     status = "success"
     try:
         phone_number = kwargs.get('phone_number', None)
@@ -172,14 +158,12 @@ def send_reminder_message(*args, **kwargs):
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
-
-
-"""
-This job send reminder sms to customer
-"""
 
 @shared_task
 def send_customer_phone_number_update_message(*args, **kwargs):
+    """
+    send customer phone number update sms
+    """
     status = "success"
     try:
         phone_number = kwargs.get('phone_number', None)
@@ -192,14 +176,11 @@ def send_customer_phone_number_update_message(*args, **kwargs):
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
 
-
-"""
-This job send coupon close message
-"""
-
-
 @shared_task
 def send_coupon_close_message(*args, **kwargs):
+    """
+    send coupon close message
+    """
     status = "success"
     try:
         phone_number = kwargs.get('phone_number', None)
@@ -212,12 +193,11 @@ def send_coupon_close_message(*args, **kwargs):
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
 
-
-"""
-This job sends escalation message related to loyalty
-"""
 @shared_task
 def send_loyalty_escalation_message(*args, **kwargs):
+    """
+    sends escalation message related to loyalty
+    """
     status = "success"
     try:
         phone_number = kwargs.get('phone_number', None)
@@ -230,11 +210,9 @@ def send_loyalty_escalation_message(*args, **kwargs):
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
 
-"""
-Send OTP
-"""
 @shared_task
 def send_otp(*args, **kwargs):
+    """ Send OTP """
     status = "success"
     try:
         phone_number = kwargs.get('phone_number', None)
@@ -261,13 +239,11 @@ def send_coupon(*args, **kwargs):
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
 
-"""
-This job send coupon close message to customer
-"""
-
-
 @shared_task
 def send_close_sms_customer(*args, **kwargs):
+    """
+    send coupon close message to customer
+    """
     status = "success"
     try:
         phone_number = kwargs.get('phone_number', None)
@@ -295,13 +271,11 @@ def send_brand_sms_customer(*args, **kwargs):
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
 
-"""
-This task send Invalid Keyword message
-"""
-
-
 @shared_task
 def send_invalid_keyword_message(*args, **kwargs):
+    """
+    send Invalid Keyword message
+    """
     status = "success"
     try:
         phone_number = kwargs.get('phone_number', None)
@@ -314,14 +288,11 @@ def send_invalid_keyword_message(*args, **kwargs):
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
 
-
-"""
-This job send on customer product purchase
-"""
-
-
 @shared_task
 def send_on_product_purchase(*args, **kwargs):
+    """
+    send on customer product purchase
+    """
     status = "success"
     try:
         phone_number = kwargs.get('phone_number', None)
@@ -337,6 +308,9 @@ def send_on_product_purchase(*args, **kwargs):
 
 @shared_task
 def send_point(*args, **kwargs):
+    """
+    send on loyalty points to member
+    """    
     status = "success"
     try:
         phone_number = kwargs.get('phone_number', None)
@@ -350,11 +324,11 @@ def send_point(*args, **kwargs):
     finally:
         sms_log(status=status, receiver=phone_number, message=message)
 
-"""
-Send loyalty sms
-"""
 @shared_task
 def send_loyalty_sms(*args, **kwargs):
+    """
+    Send loyalty sms
+    """
     status = "success"
     try:
         phone_number = kwargs.get('phone_number', None)
@@ -367,64 +341,54 @@ def send_loyalty_sms(*args, **kwargs):
     finally:
         sms_log(status=status, receiver=phone_number, message=message, brand=brand)
 
-"""
-Crontab to send reminder sms to customer 
-"""
-
-
 @shared_task
 def send_reminder(*args, **kwargs):
+    """
+    send reminder sms to customer 
+    """
     taskmanager.get_customers_to_send_reminder(*args, **kwargs)
-
-"""
-Crontab to send scheduler reminder sms setup by admin
-"""
-
 
 @shared_task
 def send_schedule_reminder(*args, **kwargs):
+    """
+    send scheduler reminder sms setup by admin
+    """
     taskmanager.get_customers_to_send_reminder_by_admin(*args, **kwargs)
-
-
-"""
-Crontab to set the is_expire=True for all those coupon which expire till current date time
-"""
-
 
 @shared_task
 def expire_service_coupon(*args, **kwargs):
+    """
+    set the is_expire=True for all those coupon which expire till current date time
+    """
     taskmanager.expire_service_coupon(*args, **kwargs)
-
-"""
-Crontab to import data from SAP to Gladminds Database
-"""
 
 @shared_task
 def mark_feeback_to_closed(*args, **kwargs):
+    """
+    mark feedbacks resolved 2 days back as closed 
+    """
     taskmanager.mark_feeback_to_closed(*args, **kwargs)
-
-"""
-Crontab to import data from SAP to Gladminds Database
-"""
-
 
 @shared_task
 def import_data(*args, **kwargs):
+    """
+    import data from SAP to Gladminds Database
+    """
     import_feed.load_feed()
-
-
-'''
-Cronjob to export close coupon data into csv file
-'''
-
 
 @shared_task
 def export_close_coupon_data(*args, **kwargs):
+    '''
+    export close coupon data into csv file
+    '''
     export_file.export_data_csv()
 
 
 @shared_task
 def export_coupon_redeem_to_sap(*args, **kwargs):
+    '''
+    send coupon redeemed in a day
+    '''
     coupon_redeem = export_feed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.COUPON_WSDL_URL, feed_type='Coupon Redeem Feed')
@@ -435,13 +399,11 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
     else:
         logger.info("[export_coupon_redeem_to_sap]: No Coupon closed during last day")
 
-'''
-Cron Job to send report email for data feed
-'''
-
-
 @shared_task
 def send_report_mail_for_feed(*args, **kwargs):
+    '''
+    send report email for data feed
+    '''
     day = kwargs['day_duration']
     today = datetime.now().date()
     start_date = today - timedelta(days=day)
@@ -449,61 +411,57 @@ def send_report_mail_for_feed(*args, **kwargs):
         start_date=start_date, end_date=today)
     mail.feed_report(feed_data=feed_data)
 
-'''
-Cron Job to send feed failure email
-'''
-
 @shared_task
 def send_mail_for_feed_failure(*args, **kwargs):
+    '''
+    send feed failure email
+    '''
     for feed_type in FEED_TYPES:
         feed_data = taskmanager.get_feed_failure_log_detail(type=feed_type)
         if feed_data['feed_data']:
             mail.feed_failure(feed_data=feed_data['feed_data'])
             feed_data['feed_logs'].update(email_flag=True)
 
-''' Cron job to send vin sync feeds'''
-
 @shared_task
 def send_vin_sync_feed_details(*args, **kwargs):
+    ''' send vin sync feeds'''
     feed_data = taskmanager.get_vin_sync_feeds_detail()
     if feed_data['feed_data']:
         mail.send_vin_sync_feed_report(feed_data=feed_data['feed_data'])
         feed_data['feed_logs'].update(email_flag=True)
-'''
-Cron Job to send customer phone number update email
-'''
+
 @shared_task
 def send_mail_for_customer_phone_number_update(*args, **kwargs):
+    '''
+    send customer phone number update email
+    '''
     customer_details = taskmanager.get_customer_details()
     if customer_details['customer_data']:
         mail.customer_phone_number_update(customer_details=customer_details['customer_data'])
         customer_details['customer_details'].update(email_flag=True)
 
-'''
-Cron Job to send email to asm when customer number update exceeds
-'''
 @shared_task
 def send_mail_customer_phone_number_update_exceeds(*args, **kwargs):
+    '''
+    send email to asm when customer number update exceeds
+    '''
     update_details = taskmanager.get_update_number_exceeds()
     if update_details['update_data']:
         mail.send_phone_number_update_count_exceeded(update_details=update_details['update_data'])
         update_details['update_details'].update(email_flag=True) 
 
-
-''' Cron job to send for policy_discrepency'''
-
 @shared_task
 def send_mail_for_policy_discrepency(*args, **kwargs):
+    ''' send mail for policy_discrepency'''
     discrepant_coupons = taskmanager.get_discrepant_coupon_details()
     mail.discrepant_coupon_update(discrepant_coupons=discrepant_coupons)
-
-'''
-Cron Job to send ASC Registeration to BAJAJ
-'''
 
 
 @shared_task
 def export_asc_registeration_to_sap(*args, **kwargs):
+    '''
+    send ASC Registration to BAJAJ
+    '''
     phone_number = kwargs['phone_number']
     brand = kwargs['brand']
     feed_type = "ASC Registration Feed"
@@ -534,19 +492,18 @@ def export_asc_registeration_to_sap(*args, **kwargs):
          failed_data_count=total_failed, success_data_count=1 - total_failed,
                  action='Sent', status=export_status)
 
-'''
-Delete the all the generated otp by end of day.
-'''
 @shared_task
 def delete_unused_otp(*args, **kwargs):
+    '''
+    Delete the all the generated otp by end of day.
+    '''
     models.OTPToken.objects.all().delete()
-
-'''
-Cron Job to send info of registered customer
-'''
 
 @shared_task
 def export_customer_reg_to_sap(*args, **kwargs):
+    '''
+    send info of registered customer
+    '''
     customer_registered = export_feed.ExportCustomerRegistrationFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.CUSTOMER_REGISTRATION_WSDL_URL, feed_type='Customer Registration Feed')
@@ -624,13 +581,12 @@ def send_reminders_for_servicedesk(*args, **kwargs):
                 send_sms('DUE_DATE_EXCEEDED_ESCALATION', phone_number, feedback)
             feedback.resolution_flag = False
         feedback.save()
- 
- 
-'''
-Cron Job to send info of registered Mechanic
-'''
+
 @shared_task
 def export_member_temp_id_to_sap(*args, **kwargs):
+    '''
+    send info of registered Mechanic
+    '''
     member_registered = loyalty_export.ExportMemberTempFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.MEMBER_SYNC_WSDL_URL, feed_type='Mechanic Registration Feed')
@@ -641,12 +597,11 @@ def export_member_temp_id_to_sap(*args, **kwargs):
     else:
         logger.info("[export_member_temp_id_to_sap]: No member registered since last feed")
 
-'''
-Cron Job to send info of registered customer
-'''
-
 @shared_task
 def export_purchase_feed_sync_to_sap(*args, **kwargs):
+    '''
+    send info of purchase feed failed due to no matching VIN in GM
+    '''
     purchase_feed_sync = export_feed.ExportPurchaseSynFeed(username=settings.SAP_CRM_DETAIL[
                            'username'], password=settings.SAP_CRM_DETAIL['password'],
                           wsdl_url=settings.PURCHASE_SYNC_WSDL_URL, feed_type='Purchase Sync Feed')
@@ -660,7 +615,7 @@ def export_purchase_feed_sync_to_sap(*args, **kwargs):
 def welcome_kit_due_date_escalation(*args, **kwargs):
     time = datetime.now()
     '''
-    send mail when due date is less than current date
+    send mail when due date is less than current date for welcome kit request
     '''
     args=[Q(due_date__lte=time), Q(resolution_flag=False),~Q(status='Shipped')]
     welcome_kit_obj = models.WelcomeKit.objects.filter(reduce(operator.and_, args))
@@ -686,7 +641,7 @@ def welcome_kit_due_date_escalation(*args, **kwargs):
 def redemption_request_due_date_escalation(*args, **kwargs):
     time = datetime.now()
     '''
-    send mail when due date is less than current date
+    send mail when due date is less than current date for redemption request
     '''
     args=[Q(due_date__lte=time), Q(resolution_flag=False),~Q(status='Delivered')]
     redemption_request_obj = models.RedemptionRequest.objects.filter(reduce(operator.and_, args))
@@ -708,12 +663,12 @@ def redemption_request_due_date_escalation(*args, **kwargs):
                                {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         redemption_request.resolution_flag = True
         redemption_request.save()
-        
-'''
-Cron Job to send info of registered Mechanic
-'''
+
 @shared_task
 def export_member_accumulation_to_sap(*args, **kwargs):
+    '''
+    send info of accumulation requests
+    '''
     accumulation_requests = loyalty_export.ExportAccumulationFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.ACCUMULATION_SYNC_WSDL_URL, feed_type='Accumulation Request Feed')
@@ -722,7 +677,22 @@ def export_member_accumulation_to_sap(*args, **kwargs):
         accumulation_requests.export(items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:
-        logger.info("[export_member_accumulation_to_sap]: No member registered since last feed")
+        logger.info("[export_member_accumulation_to_sap]: No accumulation request since last feed")
+        
+@shared_task
+def export_member_redemption_to_sap(*args, **kwargs):
+    '''
+    send info of redemption requests
+    '''
+    redemption_requests = loyalty_export.ExportRedemptionFeed(username=settings.SAP_CRM_DETAIL[
+                   'username'], password=settings.SAP_CRM_DETAIL['password'],
+                  wsdl_url=settings.ACCUMULATION_SYNC_WSDL_URL, feed_type='Redemption Request Feed')
+    feed_export_data = redemption_requests.export_data()
+    if len(feed_export_data[0]) > 0:
+        redemption_requests.export(items=feed_export_data[0], item_batch=feed_export_data[
+                             1], total_failed_on_feed=feed_export_data[2])
+    else:
+        logger.info("[export_member_redemption_to_sap]: No redemption request since last feed")
  
 _tasks_map = {"send_registration_detail": send_registration_detail,
 
@@ -798,6 +768,10 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "send_mail_for_customer_phone_number_update" : send_mail_for_customer_phone_number_update,
               
-              "send_mail_for_policy_discrepency": send_mail_for_policy_discrepency
+              "send_mail_for_policy_discrepency": send_mail_for_policy_discrepency,
+              
+              "export_member_accumulation_to_sap": export_member_accumulation_to_sap,
+              
+              "export_member_redemption_to_sap": export_member_redemption_to_sap
               
               }

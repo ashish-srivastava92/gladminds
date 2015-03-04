@@ -61,6 +61,9 @@ class LoyaltyService(CoreLoyaltyService):
                     data.append(image_url)
                 elif field=='Mechanic ID':
                     data.append(getattr(mechanic, 'permanent_id'))
+                elif field=='state':
+                    state = mechanic.state.state_name
+                    data.append(state)
                 else:
                     data.append(getattr(mechanic, field))
             csvwriter.writerow(data)
