@@ -518,7 +518,8 @@ def trigger_sqs_tasks(request):
         'export_purchase_feed_sync_to_sap': 'export_purchase_feed_sync_to_sap',
         'send_mail_for_policy_discrepency': 'send_mail_for_policy_discrepency',
         'export_member_accumulation_to_sap': 'export_member_accumulation_to_sap',
-        'export_member_redemption_to_sap':'export_member_redemption_to_sap'
+        'export_member_redemption_to_sap':'export_member_redemption_to_sap',
+        'export_distributor_to_sap': 'export_distributor_to_sap'
     }
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)
     taskqueue.add(sqs_tasks[request.POST['task']], settings.BRAND)
