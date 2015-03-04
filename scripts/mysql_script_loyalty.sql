@@ -92,3 +92,5 @@ alter table bajaj_accumulationrequest add column is_transferred boolean default 
 
 alter table bajaj_mechanic add constraint unique(phone_number);
 
+alter table bajaj_distributor add column sent_to_sap boolean default False;
+

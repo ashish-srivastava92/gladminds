@@ -836,6 +836,7 @@ class Distributor(BaseModel):
     email = models.EmailField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
     city = models.CharField(max_length=50, null=True, blank=True)
+    sent_to_sap = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
