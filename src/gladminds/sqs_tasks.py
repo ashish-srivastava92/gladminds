@@ -693,6 +693,21 @@ def export_member_redemption_to_sap(*args, **kwargs):
                              1], total_failed_on_feed=feed_export_data[2])
     else:
         logger.info("[export_member_redemption_to_sap]: No redemption request since last feed")
+        
+@shared_task
+def export_distributor_to_sap(*args, **kwargs):
+    '''
+    send info of redemption requests
+    '''
+    distributors = loyalty_export.ExportDistributorFeed(username=settings.SAP_CRM_DETAIL[
+                   'username'], password=settings.SAP_CRM_DETAIL['password'],
+                  wsdl_url=settings.DISTRIBUTOR_SYNC_WSDL_URL, feed_type='Distributor Registration Feed')
+    feed_export_data = distributors.export_data()
+    if len(feed_export_data[0]) > 0:
+        distributors.export(items=feed_export_data[0], item_batch=feed_export_data[
+                             1], total_failed_on_feed=feed_export_data[2])
+    else:
+        logger.info("[export_distributor_to_sap]: No distributor registered since last feed")
  
 _tasks_map = {"send_registration_detail": send_registration_detail,
 
@@ -772,6 +787,8 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "export_member_accumulation_to_sap": export_member_accumulation_to_sap,
               
-              "export_member_redemption_to_sap": export_member_redemption_to_sap
+              "export_member_redemption_to_sap": export_member_redemption_to_sap,
+              
+              "export_distributor_to_sap": export_distributor_to_sap
               
               }

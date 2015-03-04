@@ -162,7 +162,6 @@ class ExportRedemptionFeed(BaseExportFeed):
                         "TANSSID": redemption.transaction_id,
                     }
                 items.append(item)
-                print "item:", item
             except Exception as ex:
                 logger.error("[ExportRedemptionFeed]: error fetching from db {0}".format(ex))
                 total_failed = total_failed + 1
@@ -195,6 +194,68 @@ class ExportRedemptionFeed(BaseExportFeed):
                     logger.error("[ExportRedemptionFeed]: {0}:: Not received success from sap".format(item['TANSSID']))
             except Exception as ex:
                 logger.error("[ExportRedemptionFeed]: Error in sending accumulation :{0}::{1}".format(item['TANSSID'], ex))
+        feed_log(feed_type=self.feed_type, total_data_count=len(items)\
+                 + total_failed_on_feed, failed_data_count=total_failed,\
+                 success_data_count=len(items) + total_failed_on_feed - total_failed,\
+                 action='Sent', status=export_status)
+        
+
+class ExportDistributorFeed(BaseExportFeed):
+
+    def export_data(self):
+        args = {}
+        results = models.Distributor.objects.filter(sent_to_sap=0)
+        items = []
+        total_failed = 0
+        item_batch = {
+            'I_STAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
+        for distributor in results:
+            try:
+                asm=None
+                if distributor.asm:
+                    asm = distributor.asm.asm_id
+                
+                item = {
+                        "DISTID": distributor.distributor_id,
+                        "NAME": distributor.name,
+                        "EMAIL": distributor.email,
+                        "MOBNO": str(distributor.phone_number),
+                        "CITY": distributor.city,
+                        "ASMID": asm,
+                    }
+                items.append(item)
+            except Exception as ex:
+                logger.error("[ExportDistributorFeed]: error fetching from db {0}".format(ex))
+                total_failed = total_failed + 1
+        return items, item_batch, total_failed
+    
+    def export(self, items=None, item_batch=None, total_failed_on_feed=0):
+        logger.info(
+            "[ExportDistributorFeed]: Export {0}".format(self.feed_type))
+        export_status = False
+        client = self.get_client()
+        total_failed = total_failed_on_feed
+        for item in items:
+            logger.info("[ExportDistributorFeed]: Trying to send SAP the member: {0}"\
+                        .format(item))
+            try:
+                result = client.service.SI_Dist_Sync(
+                    DT_DIST={'item':[item]}, DT_STAMP={'Item_Stamp':item_batch})
+                logger.info("[ExportDistributorFeed]: Response from SAP: {0}".format(result))
+                if result[0]['Item'][0]['STATUS'] == 'SUCCESS':
+                    try:
+                        distributor_detail = models.Distributor.objects.get(distributor_id=item['DISTID'])
+                        distributor_detail.sent_to_sap = True
+                        distributor_detail.save()
+                        logger.info("[ExportDistributorFeed]: Sent the details of member {0} to sap".format(item['DISTID']))
+                        export_status = True
+                    except Exception as ex:
+                        logger.error("[ExportDistributorFeed]: Error in sending accumulation:{0}::{1}".format(item['DISTID'], ex))
+                else:
+                    total_failed = total_failed + 1
+                    logger.error("[ExportDistributorFeed]: {0}:: Not received success from sap".format(item['DISTID']))
+            except Exception as ex:
+                logger.error("[ExportDistributorFeed]: Error in sending accumulation :{0}::{1}".format(item['DISTID'], ex))
         feed_log(feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
