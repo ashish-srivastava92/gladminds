@@ -113,7 +113,7 @@ PURCHASE_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/purchase-sync/?wsdl&
 
 MEMBER_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/member-sync/?wsdl&v0"
 ACCUMULATION_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/accumulation-request/?wsdl&v0"
-REDEMPTION_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/redepmtion-request/?wsdl&v0"
+REDEMPTION_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/redemption-request/?wsdl&v0"
 DISTRIBUTOR_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/distributor-sync/?wsdl&v0"
 
 WSDL_TNS="http://qa.bajaj.gladminds.co/api/v1/feed/"

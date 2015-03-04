@@ -657,7 +657,7 @@ VIN_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/vin-sync/?wsdl&v0
 MEMBER_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/member-sync/?wsdl&v0"
 PURCHASE_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/purchase-sync/?wsdl&v0"
 ACCUMULATION_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/accumulation-request/?wsdl&v0"
-REDEMPTION_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/redepmtion-request/?wsdl&v0"
+REDEMPTION_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/redemption-request/?wsdl&v0"
 DISTRIBUTOR_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/distributor-sync/?wsdl&v0"
 
 BRAND_META = {
