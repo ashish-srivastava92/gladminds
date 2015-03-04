@@ -19,11 +19,7 @@ urlpatterns = patterns('',
     url(r'^api/v1/feed/\?wsdl$', 'gladminds.bajaj.webservice.all_service'),
     url(r'^api/v1/feed/$', 'gladminds.bajaj.webservice.all_service'),
 
-    url(r'^api/v1/redeem-feed/$', 'gladminds.bajaj.services.feed_views.views_coupon_redeem_wsdl'),
-    url(r'^api/v1/customer-feed/$', 'gladminds.bajaj.services.feed_views.views_customer_registration_wsdl'),
-    url(r'^api/v1/vin-sync-feed/$', 'gladminds.bajaj.services.feed_views.views_vin_sync_wsdl'),
-    url(r'^api/v1/member-sync-feed/$', 'gladminds.bajaj.services.feed_views.views_member_sync_wsdl'),
-    url(r'^api/v1/purchase-sync-feed/$', 'gladminds.bajaj.services.feed_views.views_purchase_sync_wsdl'),
+    url(r'^api/v1/(?P<feed_type>[a-zA-Z0-9-]+)/$', 'gladminds.bajaj.services.feed_views.view_wsdl'),
 
     url(r'^aftersell/users/(?P<users>[a-zA-Z0-9]+)$', 'gladminds.bajaj.views.views.users'),
     url(r'^aftersell/sa/(?P<id>[a-zA-Z0-9]+)/$', 'gladminds.bajaj.views.views.get_sa_under_asc'),
