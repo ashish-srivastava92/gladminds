@@ -181,7 +181,12 @@ class ProductDispatchFeed(BaseFeed):
 
     def import_data(self):
         for product in self.data_source:
-            if product['engine']:   
+            if not product['engine']:                 
+                ex = '''[Error: ProductDispatchFeed_product_data_save]: VIN - {0} Missing Engine Number'''.format(product['vin'])
+                self.feed_remark.fail_remarks(ex)
+                logger.error(ex)
+                continue
+            else:
                 try:
                     product_data = models.ProductData.objects.get(product_id=product['vin'])
                 except ObjectDoesNotExist as done:
@@ -232,11 +237,6 @@ class ProductDispatchFeed(BaseFeed):
                     self.feed_remark.fail_remarks(ex)
                     logger.error(ex)
                     continue
-            else:                
-                ex = '''[Error: ProductDispatchFeed_product_data_save]: VIN - {0} Missing Engine Number'''.format(product['vin'])
-                self.feed_remark.fail_remarks(ex)
-                logger.error(ex)
-                continue
 
         return self.feed_remark
 
