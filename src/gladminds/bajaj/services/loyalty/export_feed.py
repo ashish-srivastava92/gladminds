@@ -115,7 +115,7 @@ class ExportAccumulationFeed(BaseExportFeed):
                         .format(item))
             try:            
                 result = client.service.SI_Acc_Sync(
-                    DT_Accum={'item':[item]}, DT_STAMP={'Item_Stamp':item_batch})
+                    DT_Accum={'Item':[item]}, DT_STAMP={'Item_Stamp':item_batch})
                 logger.info("[ExportAccumulationFeed]: Response from SAP: {0}".format(result))
                 if result[0]['DT_Item'][0]['STATUS'] == 'SUCCESS':
                     try:
@@ -178,7 +178,7 @@ class ExportRedemptionFeed(BaseExportFeed):
                         .format(item))
             try:            
                 result = client.service.SI_Redum_Sync(
-                    DT_Redum={'item':[item]}, DT_STAMP={'Item':item_batch})
+                    DT_Redum={'Item':[item]}, DT_STAMP={'Item':item_batch})
                 logger.info("[ExportRedemptionFeed]: Response from SAP: {0}".format(result))
                 if result[0]['Item'][0]['STATUS'] == 'SUCCESS':
                     try:
@@ -240,7 +240,7 @@ class ExportDistributorFeed(BaseExportFeed):
                         .format(item))
             try:
                 result = client.service.SI_Dist_Sync(
-                    DT_DIST={'item':[item]}, DT_STAMP={'Item_Stamp':item_batch})
+                    DT_DIST={'Item':[item]}, DT_STAMP={'Item_Stamp':item_batch})
                 logger.info("[ExportDistributorFeed]: Response from SAP: {0}".format(result))
                 if result[0]['Item'][0]['STATUS'] == 'SUCCESS':
                     try:
