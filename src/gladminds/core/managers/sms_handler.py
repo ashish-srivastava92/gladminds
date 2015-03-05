@@ -34,6 +34,7 @@ class SMSResources(Resource):
         sms_dict = {}
         error_template = None
         phone_number = ""
+        message = ""
         if request.POST.get('text'):
             message = request.POST.get('text')
             phone_number = request.POST.get('phoneNumber')
