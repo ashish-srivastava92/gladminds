@@ -1,6 +1,7 @@
 ---------------------------- BAJAJ DATABASE ------------------------------------------
 
 rename table bajaj_accumulationrequest to gm_accumulationrequest;
+rename table bajaj_accumulationrequest_upcs to gm_accumulationrequest_upcs;
 rename table bajaj_activity to gm_activity;
 rename table bajaj_areasalesmanager  to gm_areasalesmanager ;
 rename table bajaj_areaservicemanager to gm_areaservicemanager;
@@ -70,6 +71,7 @@ rename table bajaj_productdata to gm_productdata;
 -------------------------------------------------- DEMO DATABASE----------------------------------------------------------
 
 rename table demo_accumulationrequest to gm_accumulationrequest;
+rename table demo_accumulationrequest_upcs to gm_accumulationrequest_upcs;
 rename table demo_activity to gm_activity;
 rename table demo_areasalesmanager  to gm_areasalesmanager ;
 rename table demo_areaservicemanager to gm_areaservicemanager;
