@@ -866,7 +866,7 @@ class Mechanic(BaseModel):
     first_name = models.CharField(max_length=50, null=True, blank=True)
     middle_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True, blank=True)
-    phone_number = PhoneField(skip_check=True, null=True, blank=True)
+    phone_number = PhoneField(null=True, blank=True, unique=True)
     date_of_birth = models.DateField(null=True, blank= True)
 
     address_line_1 = models.CharField(max_length=40, null=True, blank=True)
