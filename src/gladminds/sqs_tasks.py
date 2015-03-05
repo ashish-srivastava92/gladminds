@@ -16,7 +16,7 @@ from gladminds.core.services import  message_template as templates
 import pytz
 import logging
 from gladminds.core.managers.mail import send_due_date_exceeded,\
-    send_due_date_reminder
+    send_due_date_reminder, send_email_to_asc_customer_support
 from django.contrib.auth.models import User
 from gladminds.core.constants import DATE_FORMAT, FEED_TYPES
 from gladminds.core.cron_jobs.queue_utils import get_task_queue,\
@@ -27,6 +27,7 @@ from gladminds.core.managers.mail import get_email_template,send_email_to_redeem
     send_email_to_welcomekit_escaltion_group
 from gladminds.core.auth_helper import Roles
 from django.db.models import Q
+import textwrap
 
 
 logger = logging.getLogger("gladminds")
@@ -197,6 +198,23 @@ def send_coupon_close_message(*args, **kwargs):
 def send_loyalty_escalation_message(*args, **kwargs):
     """
     sends escalation message related to loyalty
+    """
+    status = "success"
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        set_gateway(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        send_reminder_message.retry(
+            exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        sms_log(status=status, receiver=phone_number, message=message)
+
+@shared_task
+def send_dfsc_customer_support(*args, **kwargs):
+    """
+    sends customer support phone number 
     """
     status = "success"
     try:
@@ -664,6 +682,32 @@ def redemption_request_due_date_escalation(*args, **kwargs):
         redemption_request.resolution_flag = True
         redemption_request.save()
 
+def dfsc_customer_support(*args, **kwargs):    
+    asc_obj =models.AuthorizedServiceCenter.objects.filter(user__state='MAH')    
+    data = get_email_template('CUSTOMER_SUPPORT_FOR_DFSC')
+    data['newsubject'] = data['subject']
+    str = "Dear Dealer/ASC,                                                             \
+           Happy to help ! Please reach out to us for support regarding DFSC module.    \
+           Pls note change in support phone number.                                     \
+                                                                                        \
+           Online Support. Initiate ticket from DFSC Contact us                         \
+           Phone Support. Call us on 7847011011                                         \
+           Email Support. Mail us on hello@gladminds.co                                 \
+                                                                                        \
+           Thank you !                                                                  \
+           Bajaj DFSC Support.                                                          \
+           Rgs,                                                                         \
+           Asha"
+    
+    data['content'] = textwrap.fill(str,78)
+    message = templates.get_template('CUSTOMER_SUPPORT_FOR_DFSC')
+    for asc in asc_obj:
+        asc_phone = asc.asc_owner_phone
+        send_email_to_asc_customer_support(data, asc.asc_owner_email)
+        sms_log(receiver=asc_phone, action=AUDIT_ACTION, message=message)
+        send_job_to_queue(send_dfsc_customer_support,
+                               {"phone_number":asc_phone, "message":message, "sms_client":settings.SMS_CLIENT})
+
 @shared_task
 def export_member_accumulation_to_sap(*args, **kwargs):
     '''
@@ -789,6 +833,7 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "export_member_redemption_to_sap": export_member_redemption_to_sap,
               
-              "export_distributor_to_sap": export_distributor_to_sap
+              "export_distributor_to_sap": export_distributor_to_sap,
               
+              "dfsc_customer_support": dfsc_customer_support
               }

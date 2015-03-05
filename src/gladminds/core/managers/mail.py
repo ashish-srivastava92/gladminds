@@ -442,6 +442,14 @@ def send_email_to_redeem_escaltion_group(data, redeem_escaltion_email):
     except Exception as ex:
         logger.info("[Exception fail to send mail to redemption escalation group]  {0}".format(ex))        
 
+def send_email_to_asc_customer_support(data, asc_email_id):
+    try:
+        context = Context({"content": data['content']})
+        send_template_email("base_email_template.html", context,
+                             data, receiver = asc_email_id, message=data['content'])
+    except Exception as ex:
+        logger.info("[Exception fail to send mail to ASCs on Customer Support]  {0}".format(ex))
+    
 def send_email_to_welcomekit_escaltion_group(data, welcomekit_escaltion_email):
     try:
         context = Context({"content": data['content']})
