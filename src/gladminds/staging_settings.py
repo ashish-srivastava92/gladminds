@@ -141,7 +141,7 @@ AFTER_BUY_CONSTANTS = {
                        }
 
 ########################SQS Queue Name
-SQS_QUEUE_NAME = "gladminds-qa2"
+SQS_QUEUE_NAME = "gladminds-staging"
 ######################################
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail QA"
 VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]
