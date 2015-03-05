@@ -25,15 +25,14 @@ class Cache():
     def set(key, result, timeout=15, brand=None):
         if brand is None:
             brand = settings.BRAND
-        key = settings.ENV + brand + key
-        return cache.set(key, result, timeout*60)
+        return cache.set('{0}-{1}-{2}'.format(settings.ENV, brand, key), result, timeout*60)
     
 def get_vins():
-    return get_model('ProductData', settings.BRAND).objects.all().count()
+    return get_model('ProductData').objects.all().count()
 
 
 def get_customers_count():
-    return get_model('ProductData', settings.BRAND).objects.filter(purchase_date__isnull=False).count()
+    return get_model('ProductData').objects.filter(purchase_date__isnull=False).count()
 
 
 def get_success_and_failure_counts(objects):
