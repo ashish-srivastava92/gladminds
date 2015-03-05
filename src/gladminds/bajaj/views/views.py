@@ -173,13 +173,18 @@ def update_pass(request):
 @login_required()
 def register(request, menu):
     groups = utils.stringify_groups(request.user)
+    use_cdms = True
     if len(set([Roles.ASCS, Roles.DEALERS, Roles.SDMANAGERS]).intersection(set(groups))) == 0:
         return HttpResponseBadRequest()
 
     if request.method == 'GET':
         user_id = request.user
+        if Roles.DEALERS in groups:
+            use_cdms=models.Dealer.objects.get(user__user=user_id).use_cdms
         return render(request, TEMPLATE_MAPPING.get(menu, 'portal/404.html'), {'active_menu' : ACTIVE_MENU.get(menu)\
-                                                                    , 'groups': groups, 'user_id' : user_id})
+                                                                    , 'groups': groups,
+                                                                    'user_id' : user_id,
+                                                                    'use_cdms' : use_cdms})
     elif request.method == 'POST':
         save_user = {
             'asc': save_asc_registration,
@@ -533,6 +538,7 @@ def trigger_sqs_tasks(request):
         'send-reminder': 'send_reminder',
         'export-customer-registered': 'export_customer_reg_to_sap',
         'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk',
+        'send_mail_for_policy_discrepency':'send_mail_for_policy_discrepency',
     }
 
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)

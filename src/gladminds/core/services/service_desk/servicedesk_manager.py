@@ -7,7 +7,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 from gladminds.core import utils
-from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, ALL
+from gladminds.core.constants import FEEDBACK_STATUS, PRIORITY, FEEDBACK_TYPE, ALL,\
+    DEMO_PRIORITY
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.core.services import message_template as templates
 from gladminds.sqs_tasks import send_coupon, send_sms,\
@@ -50,7 +51,7 @@ def get_feedbacks(user, status, priority, type, search=None):
         type_filter = [type]
 
     if priority == ALL or priority is None:
-        priority_filter = get_list_from_set(PRIORITY)
+        priority_filter = get_list_from_set(DEMO_PRIORITY)
     else:
         priority_filter = [priority]
 
@@ -61,25 +62,35 @@ def get_feedbacks(user, status, priority, type, search=None):
             status_filter = get_list_from_set(FEEDBACK_STATUS)
         else:
             status_filter = [status]
-
+    
+    sa_id_list = []
     if user.groups.filter(name=Roles.DEALERS).exists():
         sa_list = models.ServiceAdvisor.objects.active_under_dealer(user)
         if sa_list:
-            sa_id_list = []
             for sa in sa_list:
                 sa_id_list.append(sa.service_advisor_id)
-            sa_id_list.append(user)
-            feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
+        sa_id_list.append(user)
+        feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
                                                        priority__in=priority_filter, type__in=type_filter
                                                     ).order_by('-created_date')
+                                                    
+    if user.groups.filter(name=Roles.DEALERADMIN).exists():
+        dealers = models.Dealer.objects.all()
+        for dealer in dealers:
+            sa_id_list.append(dealer.dealer_id)
+        sa_id_list.append(user)
+    feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
+                                                       priority__in=priority_filter, type__in=type_filter
+                                                    ).order_by('-created_date')    
+        
     if user.groups.filter(name=Roles.ASCS).exists():
         sa_list = models.ServiceAdvisor.objects.active_under_asc(user)
+        sa_id_list = []
         if sa_list:
-            sa_id_list = []
             for sa in sa_list:
                 sa_id_list.append(sa.service_advisor_id)
-            sa_id_list.append(user)
-            feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
+        sa_id_list.append(user)
+        feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
                                                        priority__in=priority_filter, type__in=type_filter
                                                     ).order_by('-created_date')
     if user.groups.filter(name=Roles.SDMANAGERS).exists():
@@ -137,19 +148,35 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
     manager_obj = User.objects.get(groups__name=Roles.SDMANAGERS)
     try:
         servicedesk_user = create_servicedesk_user(name, phone_number, email)
-
-        if with_detail:
+        sub_category = models.DepartmentSubCategories.objects.get(id=sms_dict['sub-department'])
+        
+        if json.loads(sms_dict['sub-department-assignee']):
+            sub_department_assignee = models.ServiceDeskUser.objects.filter(id=sms_dict['sub-department-assignee']) 
+        
+        else:
+            sub_department_assignee = ''
+             
+        if len(sub_department_assignee)>0:
             gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
                                                             type=sms_dict['type'],
                                                             summary=sms_dict['summary'], description=sms_dict['description'],
-                                                            status="Open", created_date=datetime.datetime.now()
+                                                            status="Open", created_date=datetime.datetime.now(), priority=sms_dict['priority'],
+                                                            sub_department = sub_category, assignee=sub_department_assignee[0]
                                                             )
         else:
             gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
-                                                            message=sms_dict['message'], status="Open",
-                                                            created_date=datetime.datetime.now()                                                            
+                                                            type=sms_dict['type'],
+                                                            summary=sms_dict['summary'], description=sms_dict['description'],
+                                                            status="Open", created_date=datetime.datetime.now(), priority=sms_dict['priority'],
+                                                            sub_department = sub_category                                                            
                                                             )
         gladminds_feedback_object.save()
+        if gladminds_feedback_object.assignee:
+            date = set_due_date(sms_dict['priority'], gladminds_feedback_object)
+            gladminds_feedback_object.due_date = date['due_date']
+            gladminds_feedback_object.reminder_date = date['reminder_date'] 
+            gladminds_feedback_object.save()
+
         if sms_dict['file_location']:
             file_obj = sms_dict['file_location']
             filename_prefix = gladminds_feedback_object.id
@@ -161,7 +188,7 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
             path = utils.upload_file(destination, bucket, file_obj, logger_msg="SDFile")
             gladminds_feedback_object.file_location = path
             gladminds_feedback_object.save()
-        message = templates.get_template('SEND_RCV_FEEDBACK').format(type=gladminds_feedback_object.type)
+        message = templates.get_template('SEND_RCV_FEEDBACK').format(type="feedback")
     except Exception as ex:
         LOG.error(ex)
         message = templates.get_template('SEND_INVALID_MESSAGE')
@@ -190,11 +217,11 @@ def get_feedback(feedback_id, user):
         return models.Feedback.objects.get(id=feedback_id)
 
 
-def get_servicedesk_users(designation):
+def get_servicedesk_users(designation,feedback_obj):
     users = User.objects.filter(groups__name__in=designation)
     if len(users) > 0:
         user_list = models.UserProfile.objects.filter(user__in=users)
-        return models.ServiceDeskUser.objects.filter(user_profile__in=user_list)
+        return models.ServiceDeskUser.objects.filter(user_profile__in=user_list, sub_department__department=feedback_obj.sub_department.department)
     else:
         LOG.info("No user with designation SDO exists")
         return None

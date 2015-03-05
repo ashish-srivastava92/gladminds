@@ -271,7 +271,7 @@ def validate_coupon(sms_dict, phone_number):
                                         req_service_type=service_type,
                                         req_status=requested_coupon_status,
                                         customer_id=sap_customer_id)
-
+            customer_message=dealer_message
         sms_log(receiver=customer_phone_number, action=AUDIT_ACTION, message=customer_message)
         send_job_to_queue(send_coupon_detail_customer, {"phone_number":utils.get_phone_number_format(customer_phone_number), "message":customer_message, "sms_client":settings.SMS_CLIENT},
                           delay_seconds=customer_message_countdown)
@@ -328,12 +328,13 @@ def close_coupon(sms_dict, phone_number):
 
 
 def validate_service_advisor(phone_number, close_action=False):
+    message=None
     all_sa_dealer_obj = models.ServiceAdvisor.objects.active(phone_number)
-    if len(all_sa_dealer_obj) == 0 or (close_action and all_sa_dealer_obj[0].asc == None):
-        if len(all_sa_dealer_obj) == 0:
-            message=templates.get_template('UNAUTHORISED_SA')
-        else:
-            message=templates.get_template('DEALER_UNAUTHORISED')
+    if not len(all_sa_dealer_obj):
+        message=templates.get_template('UNAUTHORISED_SA')
+    elif close_action and all_sa_dealer_obj[0].dealer and all_sa_dealer_obj[0].dealer.use_cdms:
+        message=templates.get_template('DEALER_UNAUTHORISED')
+    if message:
         sa_phone = utils.get_phone_number_format(phone_number)
         sms_log(receiver=sa_phone, action=AUDIT_ACTION, message=message)
         send_job_to_queue(send_service_detail, {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})

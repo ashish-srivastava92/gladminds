@@ -43,7 +43,8 @@ class UserProfile(BaseModel):
     country = models.CharField(max_length=255, null=True, blank=True)
     pincode = models.CharField(max_length=15, null=True, blank=True)
     date_of_birth = models.DateTimeField(null=True, blank=True)
-  
+    department = models.CharField(max_length=100, null=True, blank=True)
+    
     image_url = models.FileField(upload_to=set_user_pic_path,
                                   max_length=200, null=True, blank=True,
                                   validators=[validate_image])
@@ -128,6 +129,7 @@ class Dealer(BaseModel):
     dealer_id = models.CharField(
         max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
+    use_cdms = models.BooleanField(default=True)
 
     objects = user_manager.DealerManager()
 
@@ -210,9 +212,10 @@ class ProductData(BaseModel):
         max_length=15, null=True, blank=True)
     purchase_date = models.DateTimeField(null=True, blank=True)
     invoice_date = models.DateTimeField(null=True, blank=True)
-    engine = models.CharField(max_length=255, null=True, blank=True)
+    engine = models.CharField(max_length=255, null=True, blank=True, unique=True)
     veh_reg_no = models.CharField(max_length=15, null=True, blank=True)
     is_active = models.BooleanField(default=True)
+    sku_code = models.CharField(max_length=25, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -631,13 +634,33 @@ class Activity(BaseModel):
         abstract = True
         verbose_name_plural = "Activity info"
 
+class BrandDepartment(BaseModel):
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=100, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Department Info"
+    
+    def __unicode__(self):
+        return self.name
+    
+class DepartmentSubCategories(BaseModel):
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=100, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Sub-Department Info"
 
+    def __unicode__(self):
+        return self.name
+    
 class Feedback(BaseModel):
     '''details of feedback received'''
     summary = models.CharField(max_length=512, null=True, blank=True)
     description = models.CharField(max_length=512, null=True, blank=False)
     status = models.CharField(max_length=12, choices=constants.FEEDBACK_STATUS)
-    priority = models.CharField(max_length=12, choices=constants.PRIORITY, default='Low')
     type = models.CharField(max_length=20, choices=constants.FEEDBACK_TYPE)
     closed_date = models.DateTimeField(null=True, blank=True)
     resolved_date = models.DateTimeField(null=True, blank=True)
@@ -660,7 +683,9 @@ class Feedback(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "Feedback info"
-
+    
+    def __unicode__(self):
+        return self.summary
 
 class Comment(BaseModel):
     '''details of comments given for a feedback'''
@@ -683,7 +708,6 @@ class Duration(CompositeField):
     unit = models.CharField(max_length=12, choices=constants.TIME_UNIT, verbose_name = 'unit')
 
 class SLA(models.Model):
-    priority = models.CharField(max_length=12, choices=constants.SLA_PRIORITY, unique=True)
     response = Duration()
     reminder = Duration()
     resolution = Duration()
@@ -783,7 +807,6 @@ class NationalSparesManager(BaseModel):
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
-    territory = models.CharField(max_length=50, null=True, blank=True, unique=True)
 
     class Meta:
         abstract = True
@@ -798,7 +821,6 @@ class AreaSparesManager(BaseModel):
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
-    state = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -814,6 +836,7 @@ class Distributor(BaseModel):
     email = models.EmailField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
     city = models.CharField(max_length=50, null=True, blank=True)
+    sent_to_sap = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -844,7 +867,7 @@ class Mechanic(BaseModel):
     first_name = models.CharField(max_length=50, null=True, blank=True)
     middle_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True, blank=True)
-    phone_number = PhoneField(skip_check=True, null=True, blank=True)
+    phone_number = PhoneField(skip_check=True, null=True, blank=True, unique=True)
     date_of_birth = models.DateField(null=True, blank= True)
 
     address_line_1 = models.CharField(max_length=40, null=True, blank=True)
@@ -961,6 +984,7 @@ class AccumulationRequest(BaseModel):
     transaction_id = models.AutoField(primary_key=True)
     points = models.IntegerField(max_length=50)
     total_points = models.IntegerField(max_length=50)
+    sent_to_sap = models.BooleanField(default=False)
     is_transferred = models.BooleanField(default=False)
 
     class Meta:
@@ -1025,6 +1049,8 @@ class RedemptionRequest(BaseModel):
     shipped_date =  models.DateTimeField(null=True, blank= True)
     delivery_date =  models.DateTimeField(null=True, blank= True)
     pod_number = models.CharField(max_length=50, null=True, blank=True)
+    sent_to_sap = models.BooleanField(default=False)
+    points = models.IntegerField(max_length=50)
     
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)

@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-from gladminds.core import base_models
+from gladminds.core import base_models, constants
 from gladminds.core.auth_helper import GmApps
 from django.conf import settings
 from gladminds.core.model_helpers import validate_image, validate_file
@@ -53,19 +53,35 @@ class ServiceAdvisor(base_models.ServiceAdvisor):
         app_label = _APP_NAME
         verbose_name_plural = "Service Advisor Data"
 
+class BrandDepartment(base_models.BrandDepartment):
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Brand Department"
+
+
+class DepartmentSubCategories(base_models.DepartmentSubCategories):
+    department = models.ForeignKey(BrandDepartment, related_name="department_sub_categories", null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Department Sub-categories"
+
 
 class ServiceDeskUser(base_models.ServiceDeskUser):
     user_profile = models.ForeignKey(UserProfile, null=True, blank=True)
+    sub_department = models.ForeignKey(DepartmentSubCategories, related_name="sub_department_user", null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Service Desk Users"
 
-
 class Feedback(base_models.Feedback):
+    priority = models.CharField(max_length=12, choices=constants.DEMO_PRIORITY, default='Low')
     reporter = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='demo_feedback_reporter')
     assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='demo_feedback_assignee')
     previous_assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='demo_previous_assignee')
+    sub_department = models.ForeignKey(DepartmentSubCategories,null=True, blank=True) 
     
     class Meta:
         app_label = _APP_NAME
@@ -251,7 +267,7 @@ class AuditLog(base_models.AuditLog):
 
 
 class SLA(base_models.SLA):
-
+    priority = models.CharField(max_length=12, choices=constants.DEMO_PRIORITY, unique=True)
     class Meta:
         app_label = _APP_NAME
 
@@ -414,3 +430,40 @@ class LoyaltySLA(base_models.LoyaltySLA):
     class Meta:
         app_label = _APP_NAME
         unique_together = ("status", "action")
+
+class Territory(base_models.Territory):
+    '''List of territories'''
+    
+    class Meta:
+        app_label = _APP_NAME
+
+class State(base_models.State):
+    ''' List of states mapped to territory'''
+    territory = models.ForeignKey(Territory)
+ 
+    class Meta:
+        app_label = _APP_NAME
+
+class City(base_models.City):
+    ''' List of cities mapped to states'''
+    state = models.ForeignKey(State)    
+   
+    class Meta:
+        app_label = _APP_NAME
+
+class CommentThread(base_models.CommentThread):
+    '''details of activities done by service-desk user'''
+    welcome_kit = models.ForeignKey(WelcomeKit, null=True, blank=True)
+    redemption = models.ForeignKey(RedemptionRequest, null=True, blank=True)
+    user = models.ForeignKey(User, related_name="demo_comments_user")
+
+    class Meta:
+        app_label = _APP_NAME
+
+class DiscrepantAccumulation(base_models.DiscrepantAccumulation):
+    upc = models.ForeignKey(SparePartUPC)
+    new_member = models.ForeignKey(Mechanic)
+    accumulation_request = models.ForeignKey(AccumulationRequest)
+     
+    class Meta:
+        app_label = _APP_NAME

@@ -18,15 +18,30 @@ from gladminds.core import utils
 from gladminds.core.auth.service_handler import check_service_active, Services
 from gladminds.core.auth_helper import Roles
 from gladminds.core.constants import BY_DEFAULT_RECORDS_PER_PAGE, \
-    FEEDBACK_STATUS, PAGINATION_LINKS, RECORDS_PER_PAGE, FEEDBACK_TYPE, PRIORITY, \
-    ROOT_CAUSE
+    FEEDBACK_STATUS, PAGINATION_LINKS, RECORDS_PER_PAGE, FEEDBACK_TYPE,\
+    ROOT_CAUSE, DEMO_PRIORITY
 from gladminds.core.utils import get_list_from_set
 from gladminds.core.model_fetcher import models
+from gladminds.management.commands import load_area_service_manager_data
 
 
 LOG = logging.getLogger('gladminds')
 
-
+def get_helpdesk(request):
+    if request.user.groups.filter(name__in=[Roles.DEALERS, Roles.ASCS, Roles.DEALERADMIN]):
+        return HttpResponseRedirect('/aftersell/servicedesk/helpdesk')
+    
+    elif request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.SDOWNERS, Roles.SDREADONLY]):
+        return HttpResponseRedirect('/aftersell/servicedesk/')
+            
+def get_brand_departments():
+    departments = models.BrandDepartment.objects.all()
+    brand_departments = []
+    for department in departments:
+        brand_departments.append(department)
+     
+    return brand_departments
+ 
 @check_service_active(Services.SERVICE_DESK)
 @login_required()
 def service_desk(request):
@@ -44,6 +59,7 @@ def service_desk(request):
     page_details['from'] = feedbacks.start_index()
     page_details['to'] = feedbacks.end_index()
     groups = utils.stringify_groups(request.user)
+    brand_departments = get_brand_departments()
     training_material = models.Service.objects.filter(service_type__name=Services.SERVICE_DESK)
     if len(training_material)>0:
         training_material = training_material[0].training_material_url
@@ -63,9 +79,10 @@ def service_desk(request):
                                           "status": utils.get_list_from_set(FEEDBACK_STATUS),
                                           "pagination_links": PAGINATION_LINKS,
                                           "page_details": page_details,
+                                          "departments": brand_departments,
                                           "record_showing_counts": RECORDS_PER_PAGE,
                                           "types": utils.get_list_from_set(FEEDBACK_TYPE),
-                                          "priorities": utils.get_list_from_set(PRIORITY),
+                                          "priorities": utils.get_list_from_set(DEMO_PRIORITY),
                                           "training_material" : training_material,
                                           "dealer_asc" : dealer_asc_details,
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
@@ -97,7 +114,7 @@ def save_feedback(request):
     
 
 def save_help_desk_data(request):
-    fields = ['description', 'advisorMobile', 'type', 'summary']
+    fields = ['description', 'advisorMobile', 'type', 'summary', 'priority', 'department', 'sub-department', 'sub-department-assignee']
     sms_dict = {}
     for field in fields:
         sms_dict[field] = request.POST.get(field, None)
@@ -140,6 +157,7 @@ def get_servicedesk_tickets(request):
     page_details['total_objects'] = paginator.count
     page_details['from'] = feedbacks.start_index()
     page_details['to'] = feedbacks.end_index()
+    brand_departments = get_brand_departments()
     training_material = models.Service.objects.filter(service_type__name=Services.SERVICE_DESK)
     if len(training_material)>0:
         training_material = training_material[0].training_material_url
@@ -149,14 +167,35 @@ def get_servicedesk_tickets(request):
     return render(request, 'service-desk/tickets.html', {"feedbacks" : feedbacks,
                                           "status": utils.get_list_from_set(FEEDBACK_STATUS),
                                           "types": utils.get_list_from_set(FEEDBACK_TYPE),
-                                          "priorities": utils.get_list_from_set(PRIORITY),
+                                          "priorities": utils.get_list_from_set(DEMO_PRIORITY),
                                           "pagination_links": PAGINATION_LINKS,
                                           "page_details": page_details,
+                                          "departments": brand_departments, 
                                           "record_showing_counts": RECORDS_PER_PAGE,
                                           "training_material" : training_material,
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
                                                             'count': str(count), 'search': search}}
                                         )
+
+def get_subcategories(request):
+    sub_departments = models.DepartmentSubCategories.objects.filter(department__id=request.POST.get('department'))
+    brand_sub_departments = []
+    for sub_department in sub_departments:
+        brand_sub_department = {}
+        brand_sub_department['name'] = sub_department.name
+        brand_sub_department['id'] = sub_department.id
+        brand_sub_departments.append(brand_sub_department)
+    return HttpResponse(content=json.dumps(brand_sub_departments), content_type='application/json')
+
+def get_brand_users(request):
+    sub_department_users = models.ServiceDeskUser.objects.filter(sub_department__department__id=request.POST.get('department'))
+    brand_sub_department_users = []
+    for sub_department in sub_department_users:
+        brand_sub_department = {}
+        brand_sub_department['name'] = sub_department.user_profile.user.username
+        brand_sub_department['id'] = sub_department.id
+        brand_sub_department_users.append(brand_sub_department)
+    return HttpResponse(content=json.dumps(brand_sub_department_users), content_type='application/json')
 
 @check_service_active(Services.SERVICE_DESK)
 @login_required()
@@ -165,11 +204,11 @@ def modify_servicedesk_tickets(request, feedback_id):
     host = get_current_site(request)
     group_name = request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.SDOWNERS, Roles.DEALERS, Roles.ASCS])
     status = get_list_from_set(FEEDBACK_STATUS)
-    priority_types = get_list_from_set(PRIORITY)
+    priority_types = get_list_from_set(DEMO_PRIORITY)
     feedback_types = get_list_from_set(FEEDBACK_TYPE)
     root_cause = get_list_from_set(ROOT_CAUSE)
     feedback_obj = get_feedback(feedback_id, request.user)
-    servicedesk_users = get_servicedesk_users(designation=[Roles.SDOWNERS,Roles.SDMANAGERS] )
+    servicedesk_users = get_servicedesk_users(designation=[Roles.SDOWNERS,Roles.SDMANAGERS], feedback_obj=feedback_obj )
     comments = get_comments(feedback_id)
     
     if request.method == 'POST':
@@ -218,3 +257,16 @@ def get_feedback_response(request, feedback_id):
         return render(request, 'service-desk/feedback_received.html')
     else:
         return HttpResponse()
+
+def add_servicedesk_user(request):
+    register_user = load_area_service_manager_data.Command()
+    if request.method == 'GET':
+        return render(request, 'service-desk/servicedesk_user_registration.html')
+    elif request.method == 'POST':
+        dealer_user_obj = register_user.register_user(Roles.DEALERS,username=request.POST.get('name'),
+                                                 phone_number=request.POST.get('phone-number'),
+                                                 email = request.POST.get('email'), APP=settings.BRAND)
+        dealer_obj = models.Dealer(dealer_id=request.POST.get('name'), user=dealer_user_obj)
+        dealer_obj.save()
+        return HttpResponse(json.dumps({'message': "Registered Successfully"}),
+                            content_type='application/json')

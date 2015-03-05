@@ -365,7 +365,7 @@ NATIONAL_SPARES_MANAGER = {
         "name": "Raghunath",
         "nsm_id": "NSM002",
         "phone_number": "1234567890",
-        "territory": "south",
+        "territory": "/v1/territories/1/",
         "user": " "
         }
 
@@ -374,7 +374,7 @@ AREA_SPARES_MANAGER = {
         "email": "spremnath@bajajauto.co.in",
         "name": "PREM NATH",
         "phone_number": "9999999999",
-        "state": "Karnataka",
+        "state": "/v1/states/1/",
         "user":USER,
         "nsm":""
        }
@@ -432,7 +432,7 @@ PRODUCT = {
             "points": 123,
             "price": 12,
             "product_id": "123",
-            "resource_uri": "/loyalty/v1/productcatalog/1/",
+            "resource_uri": "/v1/productcatalog/1/",
             "sub_category": "",
             "variation": ""
         }
@@ -471,7 +471,7 @@ MEMBER = {
             "shop_wall_length": 0,
             "shop_wall_width": 0,
             "spare_per_month": 50000,
-            "state": "Karnataka",
+            "state": "/v1/states/1/",
             "tehsil": "",
             "total_points": 1000
                         }
@@ -510,7 +510,7 @@ MEMBER1 = {
             "shop_wall_length": 0,
             "shop_wall_width": 0,
             "spare_per_month": 50000,
-            "state": "TAMIL",
+            "state": "/v1/states/1/",
             "tehsil": "",
             "total_points":100
                         }
@@ -528,25 +528,25 @@ REDEMPTION_REQUEST =  {
                         "status": "Open",
                         "tracking_id": "",
                         "product":PRODUCT,
-                        "partner":"/loyalty/v1/partners/1/",
+                        "partner":"/v1/partners/1/",
                     }
     
 SPARE_PART_UPC = {  
                 "is_used":False,
                 "unique_part_code":"UPCC50",
-                "part_number":'/loyalty/v1/spare-masters/1/', 
+                "part_number":'/v1/spare-masters/1/', 
                 }
 
     
 SPARE_PART_UPC_1 = {  
                 "is_used":False,
                 "unique_part_code":"UPCC51",
-                "part_number": '/loyalty/v1/spare-masters/1/', 
+                "part_number": '/v1/spare-masters/1/', 
                 }
 
 SPARE_POINT = {
                "MRP": 30,
-               "part_number":  '/loyalty/v1/spare-masters/1/',
+               "part_number":  '/v1/spare-masters/1/',
                "points":18,
                "price":None,
                "territory":"South",
@@ -591,7 +591,7 @@ WELCOMEKIT = {
 COMMENT_THREAD =  {
                     "is_edited": False,
                     "message": "Gladminds",
-                    "welcome_kit": "/loyalty/v1/welcome-kits/1/",
+                    "welcome_kit": "/v1/welcome-kits/1/",
                     "user":USER,
                 }
 
@@ -608,10 +608,10 @@ TERRITORY = {
 STATE = {
          'state_name':'Karnataka',
          'state_code':'KAR',
-         'territory': "/loyalty/v1/territories/1/",
+         'territory': "/v1/territories/1/",
          }
 
 CITY = {
         'city':'Bangalore',     
-        'state':"/loyalty/v1/states/1/",      
+        'state':"/v1/states/1/",      
         }

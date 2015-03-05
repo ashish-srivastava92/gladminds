@@ -78,11 +78,25 @@ class ServiceDeskUser(base_models.ServiceDeskUser):
         app_label = _APP_NAME
         verbose_name_plural = "Service Desk Users"
 
+class BrandDepartment(base_models.BrandDepartment):
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Brand Department"
 
+class DepartmentSubCategories(base_models.DepartmentSubCategories):
+    department = models.ForeignKey(BrandDepartment, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Department Sub-categories"
+        
 class Feedback(base_models.Feedback):
+    priority = models.CharField(max_length=12, choices=constants.PRIORITY, default='Low')
     reporter = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_feedback_reporter')
     assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_feedback_assignee')
     previous_assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_previous_assignee')
+    sub_department = models.ForeignKey(DepartmentSubCategories,null=True, blank=True) 
     
     class Meta:
         app_label = _APP_NAME
@@ -284,7 +298,7 @@ class AuditLog(base_models.AuditLog):
 
 
 class SLA(base_models.SLA):
-
+    priority = models.CharField(max_length=12, choices=constants.SLA_PRIORITY, unique=True)
     class Meta:
         app_label = _APP_NAME
 
@@ -310,9 +324,30 @@ class Constant(base_models.Constant):
         
 
 #######################LOYALTY TABLES#################################
+class Territory(base_models.Territory):
+    '''List of territories'''
+    
+    class Meta:
+        app_label = _APP_NAME
+
+class State(base_models.State):
+    ''' List of states mapped to territory'''
+    territory = models.ForeignKey(Territory)
+ 
+    class Meta:
+        app_label = _APP_NAME
+
+class City(base_models.City):
+    ''' List of cities mapped to states'''
+    state = models.ForeignKey(State)    
+   
+    class Meta:
+        app_label = _APP_NAME
+
 class NationalSparesManager(base_models.NationalSparesManager):
     '''details of National Spares Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
+    territory = models.ManyToManyField(Territory)
 
     class Meta:
         app_label = _APP_NAME
@@ -321,6 +356,7 @@ class NationalSparesManager(base_models.NationalSparesManager):
 class AreaSparesManager(base_models.AreaSparesManager):
     '''details of Area Spares Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
+    state = models.ManyToManyField(State)
     nsm = models.ForeignKey(NationalSparesManager, null=True, blank=True)
 
     class Meta:
@@ -339,26 +375,6 @@ class Distributor(base_models.Distributor):
 class Retailer(base_models.Retailer):
     '''details of retailer'''
 
-    class Meta:
-        app_label = _APP_NAME
-
-class Territory(base_models.Territory):
-    '''List of territories'''
-    
-    class Meta:
-        app_label = _APP_NAME
-
-class State(base_models.State):
-    ''' List of states mapped to territory'''
-    territory = models.ForeignKey(Territory)
- 
-    class Meta:
-        app_label = _APP_NAME
-
-class City(base_models.City):
-    ''' List of cities mapped to states'''
-    state = models.ForeignKey(State)    
-   
     class Meta:
         app_label = _APP_NAME
 
@@ -450,7 +466,7 @@ class CommentThread(base_models.CommentThread):
     '''details of activities done by service-desk user'''
     welcome_kit = models.ForeignKey(WelcomeKit, null=True, blank=True)
     redemption = models.ForeignKey(RedemptionRequest, null=True, blank=True)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, related_name="bajaj_comments_user")
 
     class Meta:
         app_label = _APP_NAME

@@ -17,6 +17,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import F
 
+from gladminds.default.models import BrandService
 from gladminds.core.services import message_template
 from gladminds.core import utils
 from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message
@@ -26,7 +27,8 @@ from gladminds.bajaj.services.coupons.import_feed import SAPFeed
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
-    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS
+    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS,\
+    SERVICE_MAPPING
 from gladminds.core.utils import get_email_template, format_product_object
 from gladminds.core.auth_helper import Roles
 from gladminds.core.auth.service_handler import check_service_active, Services
@@ -39,14 +41,17 @@ from gladminds.core.auth import otp_handler
 from django.core.context_processors import csrf
 from gladminds.core.model_fetcher import models
 from gladminds.core.model_helpers import format_phone_number
+from tastypie.http import HttpBadRequest
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
 AUDIT_ACTION = 'SEND TO QUEUE'
 
-
+@login_required()
 def redirect_url(request):
+    brand_url = settings.HOME_URLS.get(settings.BRAND, {})
+    brand_meta = settings.BRAND_META.get(settings.BRAND, {})
     next_url = None
     if request.POST:
         url_params = str(request.META.get('HTTP_REFERER')).split('next=')
@@ -57,10 +62,32 @@ def redirect_url(request):
     if next_url:
         return next_url.strip()
     user_groups = utils.get_user_groups(request.user)
-    if Roles.DEALERS in user_groups:
-        return '/aftersell/servicedesk/'
-    return '/'
 
+    for user_group in user_groups:
+        if user_group in brand_url.keys():
+            return "/"
+
+    return brand_meta.get('admin_url', '/admin')
+
+@login_required()
+def get_services(request):
+    if request.method == 'GET':
+        user_groups = utils.get_user_groups(request.user)
+        brand_url = settings.HOME_URLS.get(settings.BRAND, {})
+        brand_services = []
+    
+        for user_group in user_groups:
+            if user_group in brand_url.keys():
+                values = brand_url[user_group]
+                for value in values:
+                    services = {} 
+                    services['url'] = value.values()[0]
+                    services['name'] = value.keys()[0]
+                    brand_services.append(services)
+        if len(brand_services)==1:
+            return HttpResponseRedirect(brand_services[0]['url'])
+        else:
+            return render(request, 'portal/services.html')
 
 def auth_login(request):
     user = getattr(request, 'user', None)
@@ -85,7 +112,7 @@ def auth_login(request):
                 return HttpResponseRedirect(redirect_url(request))
         return HttpResponseRedirect(str(request.META.get('HTTP_REFERER')))
     else:
-        return render_to_response('login.html', c)
+        return render(request, 'login.html')
 
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
@@ -104,7 +131,7 @@ def user_logout(request):
         for group in USER_GROUPS:
             if group in user_groups:
                 logout(request)
-                return HttpResponseRedirect(GROUP_MAPPING.get(group))
+                return HttpResponseRedirect('/login/')
 
         return HttpResponseBadRequest()
     return HttpResponseBadRequest('Not Allowed')
@@ -489,8 +516,11 @@ def trigger_sqs_tasks(request):
         'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk',
         'export_member_temp_id_to_sap': 'export_member_temp_id_to_sap',
         'export_purchase_feed_sync_to_sap': 'export_purchase_feed_sync_to_sap',
+        'send_mail_for_policy_discrepency': 'send_mail_for_policy_discrepency',
+        'export_member_accumulation_to_sap': 'export_member_accumulation_to_sap',
+        'export_member_redemption_to_sap':'export_member_redemption_to_sap',
+        'export_distributor_to_sap': 'export_distributor_to_sap'
     }
-
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)
     taskqueue.add(sqs_tasks[request.POST['task']], settings.BRAND)
     return HttpResponse()
