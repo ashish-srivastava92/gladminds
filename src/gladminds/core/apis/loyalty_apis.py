@@ -3,10 +3,12 @@ from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.model_fetcher import models
 from tastypie.authorization import Authorization
 from tastypie import fields
+from django.db.models import Count
+from gladminds.core import utils
 from gladminds.core.apis.user_apis import UserProfileResource, UserResource
 from gladminds.core.apis.product_apis import ProductTypeResource
 from django.conf.urls import url
-from django.http.response import HttpResponse
+from django.http.response import HttpResponse, HttpResponseBadRequest
 import json
 from django.forms.models import model_to_dict
 from django.db.models.query_utils import Q
@@ -150,6 +152,21 @@ class MemberResource(CustomBaseModelResource):
                      "locality":ALL,
                      "district":ALL,
                      }
+
+# class AccumulationRedemptionDetail(CustomBaseModelResource):
+#         
+#     class Meta: 
+#         resource_name = "accumulation-redemption-details"
+#         authorization = Authorization()
+#         detail_allowed_methods = ['get', 'post', 'put']
+#         always_return_data = True
+#         def prepend_urls(self):
+#             return [
+#                     url(r"^(?P<resource_name>%s)/members-details/(?P<status>[a-zA-Z.-]+)%s" % (self._meta.resource_name,trailing_slash()),
+#                                                         self.wrap_view('pending_redemption_request'), name="pending_redemption_request")
+#                     ]
+        
+    
         
 class RedemptionResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
@@ -236,6 +253,45 @@ class AccumulationResource(CustomBaseModelResource):
         filtering = {
                      "member":ALL_WITH_RELATIONS,
                      }
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/members-details%s" % (self._meta.resource_name,trailing_slash()),
+                                                        self.wrap_view('accumulation_report_details'), name="redemption_report_details")
+                ]
+    def accumulation_report_details(self,request, **kwargs):
+        print "HELLOOOOOOOO*************"
+        try:
+            members = models.AccumulationRequest.objects.filter(Q(territory=request.user__territory)).select_related('member')
+            requests  = []
+                
+            if request.method == 'GET':
+                details = {}
+                print "######",models.RedemptionRequest.objects.all().values('member').annotate(total=Count('member'))
+                for member in members: 
+                    if member.member.permanent_id in details:
+                        details[member.member.permanent_id]['accumulation_requests']= details[member.member.permanent_id]['accumulation_requests'] + 1
+                    else:
+                        member_dict = {}
+                        id = member.member.permanent_id
+                        member_dict['name'] = member.member.first_name + member.member.middle_name + member.member.last_name
+                        member_dict['registration_date'] = member.member.registered_date.strftime('%Y-%m-%dT%H:%M:%S')
+                        member_dict['location'] = member.member.address_line_1 + member.member.address_line_2 + member.member.address_line_3 + member.member.address_line_4 + member.member.address_line_5 + member.member.address_line_6
+                        member_dict['city'] = member.member.district
+                        member_dict['state'] = member.member.state.state_name
+                        member_dict['area'] = member.member.locality
+                        member_dict['region'] = member.member.state.territory.territory
+                        member_dict['accumulation_requests'] = 1
+                        member_dict['accumulated_points'] = member.member.points
+    #                             member_dict['redemption_requests'] = models.RedemptionRequest.objects.filter(member__permanent_id=id).count()
+    #                             member_dict['redeemed_points'] = member.member.total_points-member.member.points
+                        details[id]=member_dict
+                requests.append(details)
+        
+                return HttpResponse(json.dumps(requests), content_type="application/json")
+        except Exception as ex:
+            print "@@@@", ex
+            
+            
 
 class WelcomeKitResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
