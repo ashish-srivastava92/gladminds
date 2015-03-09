@@ -178,7 +178,10 @@ DATABASES = {}
 
 for brand in dir(GmApps):
     if not brand.startswith('__'):
-        db_common.update({'NAME': getattr(GmApps,brand)})
+        if getattr(GmApps,brand) in ['default']:
+            db_common.update({'NAME': 'gm'})
+        else:
+            db_common.update({'NAME': getattr(GmApps,brand)})
         DATABASES[getattr(GmApps,brand)] = deepcopy(db_common)
 # DATABASES = {
 #     GmApps.GM: {

@@ -8,6 +8,7 @@ from gladminds.core.apis import user_apis, preferences_apis, coupon_apis, produc
     audit_apis, dashboard_apis, service_desk_apis, loyalty_apis
 from gladminds.core.managers.sms_handler import SMSResources
 from gladminds.core.apis.image_apis import upload_files
+from gladminds.core.admin import brand_admin
 
 api_v1 = Api(api_name="v1")
 
@@ -55,15 +56,15 @@ api_v1.register(dashboard_apis.SMSReportResource())
 api_v1.register(dashboard_apis.CouponReportResource())
 
 from django.contrib.auth.decorators import login_required
-from django.contrib import admin
 # admin.autodiscover()
-admin.site.login = login_required(settings.LOGIN_URL)
 
 api_v1.register(SMSResources())
 
 urlpatterns = patterns('',
+    url(r'^admin/$', include(brand_admin.urls)),
     url(r'api/doc/', include('gladminds.core.api_docs.swagger_urls', namespace='tastypie_swagger')),
     url(r'login/$', 'gladminds.core.views.auth_login'),
+    url(r'logout/$', 'gladminds.core.views.user_logout'),
     url(r'^$', 'gladminds.core.views.get_services'),
     url(r'^add/servicedesk-user/$', 'gladminds.core.services.service_desk.servicedesk_views.add_servicedesk_user', name='add_servicedesk_user'),
     url(r'^aftersell/users/(?P<users>[a-zA-Z0-9]+)$', 'gladminds.core.views.users'),

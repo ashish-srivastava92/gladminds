@@ -42,6 +42,7 @@ from django.core.context_processors import csrf
 from gladminds.core.model_fetcher import models
 from gladminds.core.model_helpers import format_phone_number
 from tastypie.http import HttpBadRequest
+from django.views.decorators.http import require_http_methods
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
@@ -91,7 +92,6 @@ def get_services(request):
 
 def auth_login(request):
     user = getattr(request, 'user', None)
-    print user
     if hasattr(user, 'is_authenticated') and user.is_authenticated():
         return HttpResponseRedirect(redirect_url(request))
 
@@ -107,12 +107,9 @@ def auth_login(request):
             mobile = format_phone_number(mobile)
             user_profile = models.UserProfile.objects.filter(phone_number=mobile)[0]
             user = authenticate(username=user_profile.user.username, password=password)
-        print "000000000", user, user.is_active
         if user is not None:
             if user.is_active:
-                print "22222222222222222"
                 login(request, user)
-                print "111111111111111"
                 return HttpResponseRedirect(redirect_url(request))
         return HttpResponseRedirect(str(request.META.get('HTTP_REFERER')))
     else:
@@ -127,18 +124,18 @@ def redirect_user(request):
             return HttpResponseRedirect(REDIRECT_USER.get(group))
     return HttpResponseBadRequest()
 
-
+@require_http_methods(["GET"])
 def user_logout(request):
-    if request.method == 'GET':
-        #TODO: Implement brand restrictions.
-        user_groups = utils.get_user_groups(request.user)
-        for group in USER_GROUPS:
-            if group in user_groups:
-                logout(request)
-                return HttpResponseRedirect('/login/')
-
-        return HttpResponseBadRequest()
-    return HttpResponseBadRequest('Not Allowed')
+    user_groups = utils.get_user_groups(request.user)
+    for group in USER_GROUPS:
+        if group in user_groups:
+            logout(request)
+            return HttpResponseRedirect('/login/') 
+    
+    next_url = '/'
+    next_url = request.GET.get('next')
+    logout(request)
+    return HttpResponseRedirect('/login/?next='+next_url)   
 
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
