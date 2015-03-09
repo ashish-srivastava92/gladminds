@@ -151,7 +151,6 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
     manager_obj = User.objects.get(groups__name=Roles.SDMANAGERS)
     try:
         servicedesk_user = create_servicedesk_user(name, phone_number, email)
-        print servicedesk_user, "wwwwwww"
         if with_detail:
             gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
                                                             type=sms_dict['type'],

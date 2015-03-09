@@ -683,30 +683,39 @@ def redemption_request_due_date_escalation(*args, **kwargs):
         redemption_request.save()
 
 def dfsc_customer_support(*args, **kwargs):    
-    asc_obj =models.AuthorizedServiceCenter.objects.filter(user__state='MAH')    
+    asc_obj = models.AuthorizedServiceCenter.objects.filter(user__state='MAH')
+    dealer_obj = models.Dealer.objects.filter(user__state='MAH')
     data = get_email_template('CUSTOMER_SUPPORT_FOR_DFSC')
     data['newsubject'] = data['subject']
-    str = "Dear Dealer/ASC,                                                             \
-           Happy to help ! Please reach out to us for support regarding DFSC module.    \
-           Pls note change in support phone number.                                     \
-                                                                                        \
-           Online Support. Initiate ticket from DFSC Contact us                         \
-           Phone Support. Call us on 7847011011                                         \
-           Email Support. Mail us on hello@gladminds.co                                 \
-                                                                                        \
-           Thank you !                                                                  \
-           Bajaj DFSC Support.                                                          \
-           Rgs,                                                                         \
-           Asha"
     
-    data['content'] = textwrap.fill(str,78)
+    content = "Dear Dealer/ASC,                                                             \
+               Happy to help ! Please reach out to us for support regarding DFSC module.    \
+               Pls note change in support phone number.                                     \
+                                                                                            \
+               Online Support. Initiate ticket from DFSC Contact us                         \
+               Phone Support. Call us on 7847011011                                         \
+               Email Support. Mail us on hello@gladminds.co                                 \
+                                                                                            \
+               Thank you !                                                                  \
+               Bajaj DFSC Support.                                                          \
+               Rgs,                                                                         \
+               Asha"
+    data['content'] = textwrap.fill(content,78)
     message = templates.get_template('CUSTOMER_SUPPORT_FOR_DFSC')
-    for asc in asc_obj:
-        asc_phone = asc.asc_owner_phone
-        send_email_to_asc_customer_support(data, asc.asc_owner_email)
+    
+    for dealer in asc_obj:
+        asc_phone = dealer.user__phone_number
+        send_email_to_asc_customer_support(data, dealer.user__user__email)
         sms_log(receiver=asc_phone, action=AUDIT_ACTION, message=message)
         send_job_to_queue(send_dfsc_customer_support,
                                {"phone_number":asc_phone, "message":message, "sms_client":settings.SMS_CLIENT})
+
+    for dealer in dealer_obj:
+        dealer_phone = dealer.user__phone_number
+        send_email_to_asc_customer_support(data, dealer.user__user__email)
+        sms_log(receiver = dealer_phone, action=AUDIT_ACTION, message=message)
+        send_job_to_queue(send_dfsc_customer_support,
+                               {"phone_number":dealer_phone, "message":message, "sms_client":settings.SMS_CLIENT})
 
 @shared_task
 def export_member_accumulation_to_sap(*args, **kwargs):

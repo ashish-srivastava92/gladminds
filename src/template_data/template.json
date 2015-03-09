@@ -576,7 +576,7 @@
     "pk": 64,
     "fields": {
       "template_key":"CUSTOMER_SUPPORT_FOR_DFSC",
-      "template":  "Require for content from gladminds",
+      "template":  "",
       "description": "Send message for change in customer support"
     }
   }
