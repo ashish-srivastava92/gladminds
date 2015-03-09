@@ -12,11 +12,15 @@ BY_DEFAULT_RECORDS_PER_PAGE = RECORDS_PER_PAGE[0]
 
 ALL = 'all'
 
-PROVIDERS = ['asc', 'dasc', 'dealer', 'helpdesk']
+PROVIDERS = ['asc', 'dasc', 'dealer', 'helpdesk', 'asm', 'rps']
 
 PROVIDER_MAPPING = {
                     'dealer' : 'dealer/login.html',
-                    'helpdesk' : 'service-desk/login.html'
+                    'helpdesk' : 'service-desk/login.html',
+                 }
+
+SERVICE_MAPPING = {
+                    'service_desk' : '/aftersell/helpdesk',
                  }
 
 GROUP_MAPPING = {
@@ -24,16 +28,18 @@ GROUP_MAPPING = {
                 Roles.ASCS : '/aftersell/asc/login',
                 Roles.DASCS :'/aftersell/asc/login',
                 Roles.SDOWNERS :'/aftersell/helpdesk/login',
-                Roles.SDMANAGERS : '/aftersell/helpdesk/login'
+                Roles.SDMANAGERS : '/aftersell/helpdesk/login',
+                Roles.SDREADONLY : '/aftersell/helpdesk/login'
                 }
 
-USER_GROUPS = [ Roles.DEALERS, Roles.ASCS, Roles.DASCS, Roles.SDOWNERS, Roles.SDMANAGERS]
+USER_GROUPS = [ Roles.DEALERS, Roles.ASCS, Roles.DASCS, Roles.SDOWNERS, Roles.SDMANAGERS, Roles.DEALERADMIN, Roles.SDREADONLY]
 
 REDIRECT_USER ={
                  Roles.DEALERS : '/aftersell/register/asc',
                  Roles.ASCS : '/aftersell/register/sa',
-                 Roles.SDOWNERS : '/aftersell/servicedesk/',
-                 Roles.SDMANAGERS : '/aftersell/servicedesk/'
+                 Roles.SDOWNERS : '/aftersell/helpdesk',
+                 Roles.SDMANAGERS : '/aftersell/helpdesk',
+                 Roles.SDREADONLY : '/aftersell/helpdesk'
                 }
 
 TEMPLATE_MAPPING = {
@@ -62,6 +68,12 @@ PRIORITY = (
         ('Urgent', 'Urgent'),
     )
 
+DEMO_PRIORITY = (
+        ('P3', 'P3'),
+        ('P2', 'P2'),
+        ('P1', 'P1'),
+    )
+
 FEEDBACK_TYPE = (('Problem', 'Problem'),
                  ('Question', 'Question'),
                  ('Feature Request', 'Feature Request'),
@@ -71,6 +83,7 @@ SLA_PRIORITY = (('Low', 'Low'),
                 ('Medium', 'Medium'),
                 ('High', 'High'),
                 ('Urgent', 'Urgent'),)
+
 LOYALTY_SLA_STATUS = (('Open','Open'),
                       ('Accepted','Accepted'),
                       ('Approved','Approved'),
@@ -129,7 +142,7 @@ STATUS_CHOICES = ((1, 'Unused'), (2, 'Closed'), (
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 
 MAX_UCP_ALLOWED=10
-MANDATORY_MECHANIC_FIELDS = ['first_name', 'date_of_birth', 'phone_number','shop_address', 'shop_name', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url']
+MANDATORY_MECHANIC_FIELDS = ['first_name', 'phone_number','shop_address', 'shop_name', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url']
 
 FORM_STATUS_CHOICES = (
                        ('Complete', 'Complete'),
@@ -198,4 +211,4 @@ class CouponStatus():
     EXCEEDS_LIMIT = 5
     CLOSED_OLD_FSC = 6
 
-WELCOME_KIT_MECHANIC_FIELDS = ['Mechanic ID', 'first_name', 'middle_name', 'last_name', 'phone_number', 'date_of_birth', 'adress_line_1', 'adress_line_2', 'adress_line_3', 'adress_line_4', 'adress_line_5', 'adress_line_6','shop_name', 'shop_address', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url',]
+WELCOME_KIT_MECHANIC_FIELDS = ['Mechanic ID', 'first_name', 'middle_name', 'last_name', 'phone_number', 'date_of_birth', 'address_line_1', 'address_line_2', 'address_line_3', 'address_line_4', 'address_line_5', 'address_line_6','shop_name', 'shop_address', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url',]

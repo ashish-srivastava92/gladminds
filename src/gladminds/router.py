@@ -1,4 +1,5 @@
 from django.conf import settings
+from gladminds.core.exceptions import ModelBrandNotMatchingException
 
 _COMMON_APPS = ['auth', 'contenttypes', 'sessions', 'sites', 'admin', 'djcelery', 'provider',
                 'oauth2', 'django_otp', 'permission', 'group', 'messages', 'staticfiles',
@@ -8,31 +9,33 @@ class DatabaseAppsRouter(object):
     """
     A router to control all database operations on models for different
     databases.
-
     In case an app is not set in settings.DATABASE_APPS_MAPPING, the router
     will fallback to the `default` database.
-
     Settings example:
-
     DATABASE_APPS_MAPPING = {'app1': 'db1', 'app2': 'db2'}
     """
-    
-    def common(self,model, **hints):
-        if model._meta.app_label in _COMMON_APPS+['core']:
+    @staticmethod
+    def common_logic(model, hints={}):
+        if model._meta.app_label in _COMMON_APPS:
             if 'instance' in hints.keys():
                 db = hints['instance']._state.db or settings.BRAND
             else:
                 db = settings.BRAND
             return settings.DATABASE_APPS_MAPPING.get(db)
+
+        if settings.BRAND in settings.OUTSIDE_BRANDS and model._meta.app_label in settings.OUTSIDE_BRANDS and settings.BRAND != model._meta.app_label:
+            raise ModelBrandNotMatchingException('setings.BRAND:{0}; META:{1}'.
+                                                 format(settings.BRAND,
+                                                        model._meta.app_label))
         return settings.DATABASE_APPS_MAPPING.get(model._meta.app_label)
-    
+
     def db_for_read(self, model, **hints):
         """"Point all read operations to the specific database."""
-        return self.common(model,**hints);
+        return self.common_logic(model, hints=hints)
 
     def db_for_write(self, model, **hints):
         """Point all write operations to the specific database."""
-        return self.common(model,**hints);
+        return self.common_logic(model, hints=hints)
 
     def allow_relation(self, obj1, obj2, **hints):
         """Allow any relation between apps that use the same database."""
@@ -66,4 +69,3 @@ class DatabaseAppsRouter(object):
             return False
         
         return None
-    

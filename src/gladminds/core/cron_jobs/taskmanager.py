@@ -106,19 +106,35 @@ def get_feed_failure_log_detail(type=None):
     return { 'feed_data':feed_data , 'feed_logs':feed_logs}
 
 def get_customer_details():
-    customer_details = models.CustomerTempRegistration.objects.filter(email_flag=False, dealer_asc_id__isnull=False)
+    customer_details = models.CustomerUpdateHistory.objects.filter(email_flag=False, temp_customer__dealer_asc_id__isnull=False)
     customer_data = []
     for customer in customer_details:
-        if customer.new_number != customer.old_number:
+        if customer.new_value != customer.old_value:
             data = {}
-            data['dealer_asc_id'] = customer.dealer_asc_id
-            data['customer_id'] = customer.temp_customer_id
-            data['customer_name'] = customer.new_customer_name
-            data['new_number'] = customer.new_number
-            data['old_number'] = customer.old_number
+            data['dealer_asc_id'] = customer.temp_customer.dealer_asc_id
+            data['customer_id'] = customer.temp_customer.temp_customer_id
+            data['customer_name'] = customer.temp_customer.new_customer_name
+            data['new_number'] = customer.new_value
+            data['old_number'] = customer.old_value
             data['modified_date'] = customer.modified_date
             customer_data.append(data)
     return {'customer_data' : customer_data, 'customer_details':customer_details}
+
+def get_update_number_exceeds():
+    update_details = models.CustomerUpdateFailure.objects.filter(email_flag=False, updated_by__isnull=False)
+    update_data = []
+    for update in update_details:
+        if update.new_number != update.old_number:
+            data = {}
+            data['updated_by'] = update.updated_by
+            data['customer_id'] = update.customer_id
+            data['customer_name'] = update.customer_name
+            data['new_number'] = update.new_number
+            data['old_number'] = update.old_number
+            data['modified_date'] = update.modified_date
+            data['product_id'] = update.product_id.product_id
+            update_data.append(data)
+    return {'update_data' : update_data, 'update_details':update_details}
 
 def get_vin_sync_feeds_detail():
     feed_logs = models.VinSyncFeedLog.objects.filter(email_flag=False)
@@ -140,13 +156,14 @@ def get_discrepant_coupon_details():
     service_dict = {}
     for service_type in service_type_obj:
         service_dict.update({service_type.constant_name:service_type.constant_value})
-   
-    coupons_details= models.CouponData.objects.filter((Q(service_type=1) and (~Q(valid_days=service_dict['service_1_valid_days']) or ~Q(valid_kms=service_dict['service_1_valid_kms']))) or
-                                                        (Q(service_type=2) and (~Q(valid_days=service_dict['service_2_valid_days']) or ~Q(valid_kms=service_dict['service_2_valid_kms']))) or
-                                                        (Q(service_type=3) and (~Q(valid_days=service_dict['service_3_valid_days']) or ~Q(valid_kms=service_dict['service_3_valid_kms'])))).select_related('product')
-   
+        
+    coupons_details= models.CouponData.objects.filter((Q(service_type=1) & (~Q(valid_days=service_dict['service_1_valid_days']) | ~Q(valid_kms=service_dict['service_1_valid_kms'])))
+                                                    | (Q(service_type=2) & (~Q(valid_days=service_dict['service_2_valid_days']) | ~Q(valid_kms=service_dict['service_2_valid_kms'])))
+                                                    | (Q(service_type=3) & (~Q(valid_days=service_dict['service_3_valid_days']) | ~Q(valid_kms=service_dict['service_3_valid_kms']))))
+    
     for coupon in coupons_details:
         data = {}
+        data['date'] = coupon.created_date.strftime("%d/%m/%y")
         data['vin'] = coupon.product.product_id
         data['service_type'] = coupon.service_type
         data['valid_days'] = coupon.valid_days

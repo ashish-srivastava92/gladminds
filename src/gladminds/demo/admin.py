@@ -358,19 +358,19 @@ class ServiceDeskUserAdmin(ModelAdmin):
     list_display = ('user_profile', 'name', 'phone_number', 'email')
 
 class NSMAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
-    search_fields = ('nsm_id', 'name', 'phone_number', 'territory')
-    list_display = ('nsm_id', 'name', 'email', 'phone_number','territory')
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.LOYALTYSUPERADMINS]
+    search_fields = ('nsm_id', 'name', 'phone_number')
+    list_display = ('nsm_id', 'name', 'email', 'phone_number')
 
 class ASMAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.LOYALTYSUPERADMINS]
     search_fields = ('asm_id', 'nsm__name',
-                     'phone_number', 'state')
+                     'phone_number')
     list_display = ('asm_id', 'name', 'email',
-                     'phone_number', 'state', 'nsm')
+                     'phone_number', 'nsm')
 
 class DistributorAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.LOYALTYSUPERADMINS]
     search_fields = ('distributor_id', 'asm__asm_id',
                      'phone_number', 'city')
     list_display = ('distributor_id', 'name', 'email',
@@ -379,11 +379,10 @@ class DistributorAdmin(GmModelAdmin):
 class MechanicAdmin(GmModelAdmin):
     list_filter = ('form_status',)
     search_fields = ('mechanic_id',
-                     'phone_number', 'first_name',
-                     'state', 'district')
+                     'phone_number', 'first_name','district')
     list_display = ('mechanic_id','first_name', 'date_of_birth',
                     'phone_number', 'shop_name', 'district',
-                    'state', 'pincode', 'registered_by_distributor')
+                    'pincode', 'registered_by_distributor')
     readonly_fields = ('image_tag',)
 
     def suit_row_attributes(self, obj):
@@ -407,7 +406,7 @@ class MechanicAdmin(GmModelAdmin):
         super(MechanicAdmin, self).save_model(request, obj, form, change)    
 
 class SparePartMasterAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.LOYALTYSUPERADMINS]
     search_fields = ('part_number', 'category',
                      'segment_type', 'supplier',
                      'product_type__product_type')
@@ -416,7 +415,7 @@ class SparePartMasterAdmin(GmModelAdmin):
                     'segment_type',  'part_model', 'supplier')
 
 class SparePartUPCAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.LOYALTYSUPERADMINS]
     search_fields = ('part_number__part_number', 'unique_part_code')
     list_display = ('unique_part_code', 'part_number')
 
@@ -426,7 +425,7 @@ class SparePartUPCAdmin(GmModelAdmin):
         return form
 
 class SparePartPointAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.LOYALTYSUPERADMINS]
     search_fields = ('part_number__part_number', 'points', 'territory')
     list_display = ('part_number', 'points', 'valid_from',
                     'valid_till', 'territory', 'price', 'MRP')
@@ -435,7 +434,7 @@ class SparePartline(TabularInline):
     model = models.AccumulationRequest.upcs.through
 
 class AccumulationRequestAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.ASMS, Roles.NSMS, Roles.LOYALTYSUPERADMINS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.LOYALTYSUPERADMINS]
     list_filter = (
         ('created_date', DateFieldListFilter),
     )
@@ -481,8 +480,8 @@ brand_admin.register(models.SMSLog, SMSLogAdmin)
 brand_admin.register(models.EmailLog, EmailLogAdmin)
 brand_admin.register(models.DataFeedLog, FeedLogAdmin)
 
-brand_admin.register(models.NationalSalesManager, NSMAdmin)
-brand_admin.register(models.AreaSalesManager, ASMAdmin)
+brand_admin.register(models.NationalSparesManager, NSMAdmin)
+brand_admin.register(models.AreaSparesManager, ASMAdmin)
 brand_admin.register(models.Distributor, DistributorAdmin)
 brand_admin.register(models.Mechanic, MechanicAdmin)
 
@@ -499,3 +498,6 @@ brand_admin.register(models.EmailTemplate, EmailTemplateAdmin)
 brand_admin.register(models.MessageTemplate, MessageTemplateAdmin)
 brand_admin.register(models.SLA, SlaAdmin)
 brand_admin.register(models.ServiceDeskUser, ServiceDeskUserAdmin)
+brand_admin.register(models.BrandDepartment)
+brand_admin.register(models.DepartmentSubCategories)
+brand_admin.register(models.Feedback)

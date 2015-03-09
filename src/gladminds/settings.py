@@ -99,10 +99,10 @@ SUIT_CONFIG = {
                      'label': 'Feed Failure Log'})},
         {'app': 'bajaj', 'label': 'Loyalty', 'icon': ' icon-folder-open',
          'models':(
-                    {'model': 'nationalsalesmanager',
-                     'label': 'National Sales Manager'},
-                   {'model': 'areasalesmanager',
-                     'label': 'Area Sales Manager'},
+                    {'model': 'nationalsparesmanager',
+                     'label': 'National Spares Manager'},
+                   {'model': 'areasparesmanager',
+                     'label': 'Area Spares Manager'},
                     {'model': 'distributor',
                      'label': 'Distributor'},
                    {'model': 'mechanic',
@@ -487,9 +487,17 @@ CUSTOMER_PHONE_NUMBER_UPDATE = {
     "body": """""",
 }
 
+PHONE_NUMBER_UPDATE_COUNT_EXCEEDED_MAIL_TO_ASM = {
+
+    "sender": "feed-report@gladminds.co",
+    "receiver": ["karishma.c@hashedin.com"],
+    "subject": "Limit for updating Gladminds customer phone number exceeded",
+    "body": """""",
+}
+
 POLICY_DISCREPANCY_MAIL_TO_MANAGER = {
     "sender": "feed-report@gladminds.co",
-    "receiver": ["pavankumar.s@hashedin.com"],
+    "receiver": ["pavankumar.s@hashedin.com", "suresh@hashedin.com"],
     "subject": "Gladminds customer phone number update",
     "body": """""",
 }
@@ -611,8 +619,10 @@ SMS_HEALTH_CHECK_INTERVAL = 6
 FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
 BRAND = None
-GM_BRAND = GmApps.GM
-BRANDS = [GmApps.BAJAJ, GmApps.DEMO, GmApps.AFTERBUY,GmApps.BAJAJCV]
+GM_BRAND = 'default'
+OUTSIDE_BRANDS = ['bajaj', 'demo','bajajcv']
+
+BRANDS = OUTSIDE_BRANDS + ['afterbuy']
 ###############################################
 AIRTEL_IP = '54.84.243.77'
 SMS_CLIENT = "MOCK"
@@ -653,11 +663,43 @@ SAP_CRM_DETAIL = {
                   'password':'welcome123'
                   }
 FILE_CACHE_DURATION = 0
-VIN_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/vin-sync-feed/?wsdl&v0"
+
+COUPON_WSDL = 'qa_coupon_redeem.wsdl'
+CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
 VIN_SYNC_WSDL='qa_vin_sync.wsdl'
-
-MEMBER_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/member-sync-feed/?wsdl&v0"
 MEMBER_SYNC_WSDL='qa_member_sync_feed.wsdl'
-
-PURCHASE_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/purchase-sync-feed/?wsdl&v0"
 PURCHASE_SYNC_WSDL='qa_purchase_sync_feed.wsdl'
+ACCUMULATION_SYNC_WSDL = 'qa_accumulation_feed.wsdl'
+REDEMPTION_SYNC_WSDL = 'qa_redemption_feed.wsdl'
+DISTRIBUTOR_SYNC_WSDL = 'qa_distributor_sync_feed.wsdl'                
+
+COUPON_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/coupon-redeem/?wsdl&v0"
+CUSTOMER_REGISTRATION_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/customer-feed/?wsdl&v0"
+VIN_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/vin-sync/?wsdl&v0"
+MEMBER_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/member-sync/?wsdl&v0"
+PURCHASE_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/purchase-sync/?wsdl&v0"
+ACCUMULATION_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/accumulation-request/?wsdl&v0"
+REDEMPTION_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/redemption-request/?wsdl&v0"
+DISTRIBUTOR_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/distributor-sync/?wsdl&v0"
+
+BRAND_META = {
+               "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/"},
+               "demo": {"title": "Daimler", "logo": "daimler/img/daimler_logo.gif", "tagline": "2015 Daimler AG",
+                        "basecss": "/daimler/css/base.css","admin_url" :"/admin/"}
+               }
+
+HOME_URLS = {
+             "bajaj": { "AuthorisedServiceCenters" :[{"DFSC":"/aftersell/register/asc"}, {"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "Dealers" :[{"DFSC":"/aftersell/register/asc"}, {"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "SdManagers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       },
+             "demo" : {"SdManagers":[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "Dealers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "DealerAdmins":[{"SERVICE DESK":"/aftersell/helpdesk"},
+                                       {"ADD SERVICE DESK USER":"/add/servicedesk-user"}]
+                       }
+             }
+
+LOGIN_URL='login/'

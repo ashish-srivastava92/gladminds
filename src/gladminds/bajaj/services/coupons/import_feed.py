@@ -170,68 +170,73 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
 
 def compare_purchase_date(date_of_purchase):
     valid_msg_days = models.Constant.objects.get(constant_name = "welcome_msg_active_days").constant_value
-    valid_date = datetime.now().date()-timedelta(days=int(valid_msg_days))
-    days = date_of_purchase
-    if days >= valid_date:
+    days = datetime.now().date()-date_of_purchase
+    if days <= valid_msg_days:
         return True
     else:
         return False
+    
 
 class ProductDispatchFeed(BaseFeed):
 
     def import_data(self):
         for product in self.data_source:
-            try:
-                product_data = models.ProductData.objects.get(product_id=product['vin'])
-            except ObjectDoesNotExist as done:
-                logger.info(
-                    '[Info: ProductDispatchFeed_product_data]: {0}'.format(done))
-                try:
-                    dealer_data = self.check_or_create_dealer(dealer_id=product['dealer_id'])
-                    self.get_or_create_product_type(
-                        product_type=product['product_type'])
-                    producttype_data = models.ProductType.objects.get(
-                        product_type=product['product_type'])
-                    invoice_date = product['invoice_date']
-                    product_data = models.ProductData(
-                        product_id=product['vin'], product_type=producttype_data, invoice_date=invoice_date, dealer_id=dealer_data)
-                    product_data.save()
-                    logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN-{0} UCN-{1}'.format(product['vin'], product['unique_service_coupon']))
-                except Exception as ex:
-                    ex = '''[Exception: ProductDispatchFeed_product_data_save]:{0} VIN - {1}'''.format(ex, product['vin'])
-                    self.feed_remark.fail_remarks(ex)
-                    logger.error(ex)
-                    continue
-            try:
-                if not product['unique_service_coupon']:
-                    continue
-                valid_coupon = models.CouponData.objects.filter(unique_service_coupon=product['unique_service_coupon'])
-                service_type_exists = models.CouponData.objects.filter(product__product_id=product['vin'], service_type=str(product['service_type']))
-                if service_type_exists and not valid_coupon:
-                    service_type_error = 'VIN already has coupon of service type {0}'.format(product['service_type'])
-                    logger.error(service_type_error)
-                    raise ValueError(service_type_error)
-                elif not valid_coupon:
-                    coupon_data = models.CouponData(unique_service_coupon=product['unique_service_coupon'],
-                            product=product_data, valid_days=product['valid_days'],
-                            valid_kms=product['valid_kms'], service_type=product['service_type'],
-                            status=product['coupon_status'])
-                    coupon_data.save()
-                    logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN - {0} UCN - {1}'.format(product['vin'], product['unique_service_coupon']))
-                    
-                elif valid_coupon[0].product.product_id == product['vin'] and str(valid_coupon[0].service_type) == str(product['service_type']):
-                    logger.info('UCN is already saved in database. VIN - {0} UCN - {1}'.format(product['vin'], product['unique_service_coupon']))
-                    continue
-                else:
-                    coupon_exist_error = 'Coupon already registered for VIN {0}'.format(valid_coupon[0].product.product_id)
-                    logger.error(coupon_exist_error)
-                    raise ValueError(coupon_exist_error)
-            except Exception as ex:   
-                ex = '''[Error: ProductDispatchFeed_product_data_save]: VIN - {0} Coupon - {1} {2}'''.format(
-                                        product['vin'], product['unique_service_coupon'], ex)
+            if not product['engine']:                 
+                ex = '''[Error: ProductDispatchFeed_product_data_save]: VIN - {0} Missing Engine Number'''.format(product['vin'])
                 self.feed_remark.fail_remarks(ex)
                 logger.error(ex)
                 continue
+            else:
+                try:
+                    product_data = models.ProductData.objects.get(product_id=product['vin'])
+                except ObjectDoesNotExist as done:
+                    logger.info(
+                        '[Info: ProductDispatchFeed_product_data]: {0}'.format(done))
+                    try:
+                        dealer_data = self.check_or_create_dealer(dealer_id=product['dealer_id'])
+                        self.get_or_create_product_type(
+                            product_type=product['product_type'])
+                        producttype_data = models.ProductType.objects.get(product_type=product['product_type'])
+                        product_data = models.ProductData(
+                            product_id=product['vin'], product_type=producttype_data, invoice_date=product['invoice_date'], 
+                            dealer_id=dealer_data, sku_code=product['sku_code'], engine=product['engine'])
+                        product_data.save()
+                        logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN-{0} UCN-{1}'.format(product['vin'], product['unique_service_coupon']))
+                    except Exception as ex:
+                        ex = '''[Exception: ProductDispatchFeed_product_data_save]:{0} VIN - {1}'''.format(ex, product['vin'])
+                        self.feed_remark.fail_remarks(ex)
+                        logger.error(ex)
+                        continue
+                try:
+                    if not product['unique_service_coupon']:
+                        continue
+                    valid_coupon = models.CouponData.objects.filter(unique_service_coupon=product['unique_service_coupon'])
+                    service_type_exists = models.CouponData.objects.filter(product__product_id=product['vin'], service_type=str(product['service_type']))
+                    if service_type_exists and not valid_coupon:
+                        service_type_error = 'VIN already has coupon of service type {0}'.format(product['service_type'])
+                        logger.error(service_type_error)
+                        raise ValueError(service_type_error)
+                    elif not valid_coupon:
+                        coupon_data = models.CouponData(unique_service_coupon=product['unique_service_coupon'],
+                                product=product_data, valid_days=product['valid_days'],
+                                valid_kms=product['valid_kms'], service_type=product['service_type'],
+                                status=product['coupon_status'])
+                        coupon_data.save()
+                        logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN - {0} UCN - {1}'.format(product['vin'], product['unique_service_coupon']))
+                        
+                    elif valid_coupon[0].product.product_id == product['vin'] and str(valid_coupon[0].service_type) == str(product['service_type']):
+                        logger.info('UCN is already saved in database. VIN - {0} UCN - {1}'.format(product['vin'], product['unique_service_coupon']))
+                        continue
+                    else:
+                        coupon_exist_error = 'Coupon already registered for VIN {0}'.format(valid_coupon[0].product.product_id)
+                        logger.error(coupon_exist_error)
+                        raise ValueError(coupon_exist_error)
+                except Exception as ex:   
+                    ex = '''[Error: ProductDispatchFeed_product_data_save]: VIN - {0} Coupon - {1} {2}'''.format(
+                                            product['vin'], product['unique_service_coupon'], ex)
+                    self.feed_remark.fail_remarks(ex)
+                    logger.error(ex)
+                    continue
 
         return self.feed_remark
 
@@ -249,6 +254,10 @@ class ProductPurchaseFeed(BaseFeed):
         for product in self.data_source:
             try:
                 product_data = models.ProductData.objects.get(product_id=product['vin'])
+                
+                if product_data.engine != product['engine']:
+                    message = "The engine number {0} does not match with engine number in Database".format(product['engine'])                               
+                    raise ValueError(message)
                 if product_data.customer_phone_number and product_data.customer_id == product['sap_customer_id']:
                     post_save.disconnect(
                         update_coupon_data, sender=models.ProductData)
@@ -270,37 +279,18 @@ class ProductPurchaseFeed(BaseFeed):
                 post_save.connect(
                     update_coupon_data, sender=models.ProductData)
             except ObjectDoesNotExist as done:
-                ex='[Info: ProductPurchaseFeed_product_data]: {0}'.format(done)
+                ex='[Info: ProductPurchaseFeed_product_data]: VIN- {0} :: {1}'''.format(product['vin'], done)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
-                try:
-                    total_data_count=1
-                    total_failed=0
-                    export_status=True
-                    feed_type='Purchase Sync Feed'
-                    purchase_sync_feed = BaseExportFeed(username=settings.SAP_CRM_DETAIL[
-                           'username'], password=settings.SAP_CRM_DETAIL['password'],
-                          wsdl_url=settings.PURCHASE_SYNC_WSDL_URL, feed_type=feed_type)
-                    client = purchase_sync_feed.get_client()
-                    Item_Stamp = {'I_STAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
-                    result = client.service.SI_PurchFeed_Sync(
-                             DT_Item=[{"CHASSIS": product['vin']}], DT_STAMP=[{"Item_Stamp":Item_Stamp}])
-                    logger.info("[Info: ProductPurchaseSyncFeed_product_data]::Response from SAP: {0}".format(result))
-                    return_code=result[0]['STATUS']
-                    vin_sync_feed = models.VinSyncFeedLog(product_id = product['vin'],
-                                                    status_code=return_code, ucn_count=-1)
-                    vin_sync_feed.save()
-                except Exception as ex:
-                    ex='[Info: ProductPurchaseSyncFeed_product_data]: {0}'.format(ex)
-                    logger.error(ex)
-                    total_failed=1
-                    export_status=False
-                feed_log(feed_type=feed_type, total_data_count=total_data_count,
-                failed_data_count=total_failed, success_data_count=total_data_count- total_failed,
-                action='Sent', status=export_status)
-                continue
+                vin_sync_feed = models.VinSyncFeedLog.objects.filter(product_id = product['vin'],ucn_count=-1)
+                if vin_sync_feed:
+                    vin_sync_feed=vin_sync_feed[0]
+                    vin_sync_feed.sent_to_sap=False
+                else:
+                    vin_sync_feed=models.VinSyncFeedLog(product_id = product['vin'],ucn_count=-1) 
+                vin_sync_feed.save()
             except Exception as ex:
-                ex = '''[Exception: ProductPurchaseFeed_product_data]:{0} VIN - {1}'''.format(ex, product['vin'])
+                ex = '''[Exception: ProductPurchaseFeed_product_data]: VIN- {0} :: {1}'''.format(product['vin'], ex)
                 self.feed_remark.fail_remarks(ex)
                 logger.error(ex)
                 continue

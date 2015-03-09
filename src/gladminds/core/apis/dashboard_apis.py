@@ -3,7 +3,7 @@ This contains the dasboards apis
 '''
 from gladminds.core.apis.base_apis import CustomBaseResource, CustomApiObject
 from tastypie import fields
-from gladminds.core.model_fetcher import models
+from gladminds.bajaj import models
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from django.core.cache import cache
 from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES,\
@@ -19,6 +19,10 @@ def get_vins():
     return models.ProductData.objects.all().count()
 
 
+def get_customers_count():
+    return models.ProductData.objects.filter(purchase_date__isnull=False).count()
+
+
 def get_success_and_failure_counts(objects):
     fail = 0
     success = 0
@@ -26,6 +30,7 @@ def get_success_and_failure_counts(objects):
         fail = fail + int(data.failed_data_count)
         success = success + int(data.success_data_count)
     return success, fail
+
 
 def get_set_cache(key, data_func, timeout=15):
     '''
@@ -71,7 +76,8 @@ class OverallStatusResource(CustomBaseResource):
 
     def obj_get_list(self, bundle, **kwargs):
         self.is_authenticated(bundle.request)
-        vins = get_set_cache('gm_vins', get_vins)
+        vins = get_set_cache('gm_vins', get_vins, timeout=30)
+        customers = get_set_cache('gm_customers', get_customers_count, timeout=35)
         coupons_closed = get_set_cache('gm_coupons_closed',
                                        models.CouponData.objects.closed_count,
                                        timeout=13)
@@ -120,7 +126,9 @@ class OverallStatusResource(CustomBaseResource):
                                      create_dict(["11", "# of SAs",
                                                   sas]),
                                      create_dict(["12", "# of Active SAs",
-                                                  sas_active])
+                                                  sas_active]),
+                                     create_dict(["13", "# of Customers",
+                                                  customers])
                                      ]
                    )
 
@@ -154,29 +162,60 @@ class FeedStatusResource(CustomBaseResource):
             params = bundle.request.GET.copy()
         dtstart = params.get('created_date__gte')
         dtend = params.get('created_date__lte')
+        hash_key = "gm-feeds-status1-"
         if dtstart:
             filters['created_date__gte'] = dtstart
+            hash_key = hash_key + dtstart
         if dtend:
             filters['created_date__lte'] = dtend
+            hash_key = hash_key + dtend
 
-        data = []
-        filters['action'] = FeedStatus.RECEIVED
-        for feed_type in FEED_TYPES:
-            filters['feed_type'] = feed_type
-            success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
-            data.append(create_feed_dict([FeedStatus.RECEIVED,
-                                          feed_type,
-                                          success_count,
-                                          failure_count]))
-        filters['action'] = FeedStatus.SENT
-        for feed_type in FEED_SENT_TYPES:
-            filters['feed_type'] = feed_type
-            success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
-            data.append(create_feed_dict([FeedStatus.SENT,
-                                          feed_type,
-                                          success_count,
-                                          failure_count]))
-        return map(CustomApiObject, data)
+        data_map = {}
+        result = []
+        filters['feed_type__in'] = FEED_SENT_TYPES + FEED_TYPES
+
+        output = cache.get(hash_key)
+        if output:
+            return map(CustomApiObject, output)
+
+        objects = models.DataFeedLog.objects.filter(**filters)
+
+        for feed_type in FEED_SENT_TYPES + FEED_TYPES:
+            data_map[feed_type] = [0, 0]
+        for obj in objects:
+            feed_counts = data_map[obj.feed_type] 
+            feed_counts[0] = feed_counts[0] + int(obj.failed_data_count)
+            feed_counts[1] = feed_counts[1] + int(obj.success_data_count)
+            data_map[obj.feed_type] = feed_counts
+
+        for key, value in data_map.items():
+            action = FeedStatus.RECEIVED
+            if key in FEED_SENT_TYPES:
+                action = FeedStatus.SENT
+            result.append(create_feed_dict([action,
+                                          key,
+                                          value[1],
+                                          value[0]]))
+        cache.set(hash_key, result, 15*60)
+        return map(CustomApiObject, result)
+#         data = []   
+#         filters['action'] = FeedStatus.RECEIVED
+#         for feed_type in FEED_TYPES:
+#             filters['feed_type'] = feed_type
+#             success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
+#             data.append(create_feed_dict([FeedStatus.RECEIVED,
+#                                           feed_type,
+#                                           success_count,
+#                                           failure_count]))
+#         filters['action'] = FeedStatus.SENT
+#         for feed_type in FEED_SENT_TYPES:
+#             filters['feed_type'] = feed_type
+#             success_count, failure_count = get_success_and_failure_counts(models.DataFeedLog.objects.filter(**filters))
+#             data.append(create_feed_dict([FeedStatus.SENT,
+#                                           feed_type,
+#                                           success_count,
+#                                           failure_count]))
+#         return map(CustomApiObject, data)
 
 
 class SMSReportResource(CustomBaseResource):

@@ -22,7 +22,17 @@ USER = {
          "is_staff":False,
          "last_login":"2015-02-04T17:10:24",
          "last_name":"",
-         "username":"15586"
+         "username":"user"
+        }
+
+USER1 = {
+        "date_joined":"2015-02-04T17:10:24",
+         "email":"asc@xyz.com",
+         "first_name":"TEST USER",
+         "is_active":True,
+         "is_staff":True,
+         "last_name":"",
+         "username":"user"
         }
 
 GM_PRODUCTS = {
@@ -345,27 +355,27 @@ USER_PROFILE = {
                 "phone_number":"",
                 "pincode":"",
                 "resource_uri":"",
-                "state":"",
+                "state":"karnataka",
                 "status":"",
                 "user": USER
                 }
 
-NSM = {
+NATIONAL_SPARES_MANAGER = {
         "email": "rkrishnan@bajajauto.co.in",
         "name": "Raghunath",
         "nsm_id": "NSM002",
         "phone_number": "1234567890",
-        "territory": "south",
-        "user": ""
+        "territory": "/v1/territories/1/",
+        "user": " "
         }
 
-ASM = {
+AREA_SPARES_MANAGER = {
         "asm_id": "ASM005",
         "email": "spremnath@bajajauto.co.in",
         "name": "PREM NATH",
         "phone_number": "9999999999",
-        "state": "Tamil Nadu",
-        "user":"",
+        "state": "/v1/states/1/",
+        "user":USER,
         "nsm":""
        }
 
@@ -380,7 +390,7 @@ PARTNER = {
 
 DISTRIBUTOR = {
                "user": USER_PROFILE,
-               "asm":ASM,
+               "asm":AREA_SPARES_MANAGER,
                "distributor_id": 15689, 
                "name": "Mrugen",
                "email": "test@gladminds.co",
@@ -422,18 +432,18 @@ PRODUCT = {
             "points": 123,
             "price": 12,
             "product_id": "123",
-            "resource_uri": "/loyalty/v1/productcatalog/1/",
+            "resource_uri": "/v1/productcatalog/1/",
             "sub_category": "",
             "variation": ""
         }
 
 MEMBER = {
-            "adress_line_1": "",
-            "adress_line_2": "",
-            "adress_line_3": "",
-            "adress_line_4": "",
-            "adress_line_5": "",
-            "adress_line_6": "",
+            "address_line_1": "",
+            "address_line_2": "",
+            "address_line_3": "",
+            "address_line_4": "",
+            "address_line_5": "",
+            "address_line_6": "",
             "date_of_birth": "1971-10-20T05:30:00",
             "district": "MADURAI",
             "first_name": "Ramu",
@@ -461,18 +471,18 @@ MEMBER = {
             "shop_wall_length": 0,
             "shop_wall_width": 0,
             "spare_per_month": 50000,
-            "state": "Karnataka",
+            "state": "/v1/states/1/",
             "tehsil": "",
             "total_points": 1000
                         }
 
 MEMBER1 = {
-            "adress_line_1": "",
-            "adress_line_2": "",
-            "adress_line_3": "",
-            "adress_line_4": "",
-            "adress_line_5": "",
-            "adress_line_6": "",
+            "address_line_1": "",
+            "address_line_2": "",
+            "address_line_3": "",
+            "address_line_4": "",
+            "address_line_5": "",
+            "address_line_6": "",
             "date_of_birth": "1971-10-20T05:30:00",
             "district": "MADURAI",
             "first_name": "Ramu",
@@ -500,7 +510,7 @@ MEMBER1 = {
             "shop_wall_length": 0,
             "shop_wall_width": 0,
             "spare_per_month": 50000,
-            "state": "Karnataka",
+            "state": "/v1/states/1/",
             "tehsil": "",
             "total_points":100
                         }
@@ -512,30 +522,31 @@ REDEMPTION_REQUEST =  {
                         "image_url": "",
                         "is_approved": False,
                         "member": MEMBER,
-                        "packed_by": "",
+                        "packed_by": "user",
                         "refunded_points": False,
                         "resolution_flag": True,
                         "status": "Open",
                         "tracking_id": "",
                         "product":PRODUCT,
+                        "partner":"/v1/partners/1/",
                     }
     
 SPARE_PART_UPC = {  
                 "is_used":False,
                 "unique_part_code":"UPCC50",
-                "part_number":'/loyalty/v1/spare-masters/1/', 
+                "part_number":'/v1/spare-masters/1/', 
                 }
 
     
 SPARE_PART_UPC_1 = {  
                 "is_used":False,
                 "unique_part_code":"UPCC51",
-                "part_number": '/loyalty/v1/spare-masters/1/', 
+                "part_number": '/v1/spare-masters/1/', 
                 }
 
 SPARE_POINT = {
                "MRP": 30,
-               "part_number":  '/loyalty/v1/spare-masters/1/',
+               "part_number":  '/v1/spare-masters/1/',
                "points":18,
                "price":None,
                "territory":"South",
@@ -555,7 +566,7 @@ SLA = {
        }
 
 ACCUMULATION = {  
-                "asm":ASM,
+                "asm":AREA_SPARES_MANAGER,
                 "member":MEMBER,
                 "points":100,
                 "total_points":500,
@@ -580,7 +591,7 @@ WELCOMEKIT = {
 COMMENT_THREAD =  {
                     "is_edited": False,
                     "message": "Gladminds",
-                    "welcome_kit": "/loyalty/v1/welcome-kits/1/",
+                    "welcome_kit": "/v1/welcome-kits/1/",
                     "user":USER,
                 }
 
@@ -589,3 +600,18 @@ TRANSFERPOINTS = {
                 "from": "ME00003",
                 "to": "ME00004",
                 }
+
+TERRITORY = {
+             'territory':'NORTH' 
+             }
+
+STATE = {
+         'state_name':'Karnataka',
+         'state_code':'KAR',
+         'territory': "/v1/territories/1/",
+         }
+
+CITY = {
+        'city':'Bangalore',     
+        'state':"/v1/states/1/",      
+        }

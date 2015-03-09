@@ -12,6 +12,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
 from gladminds.bajaj import models
+from gladminds.bajaj.views import views
 from gladminds.bajaj.services.service_desk.servicedesk_manager import get_feedbacks, \
     create_feedback, get_feedback, get_servicedesk_users, get_comments, \
     modify_feedback, update_feedback_activities, SDActions
@@ -49,7 +50,7 @@ def service_desk(request):
     else:
         training_material = None
     if request.method == 'GET':
-        template = 'portal/feedback_details.html'
+        template = 'service-desk/feedback_details.html'
         data = None
         if request.user.groups.filter(name=Roles.DEALERS).exists():
             data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
@@ -126,6 +127,7 @@ def save_help_desk_data(request):
 @login_required()
 @require_http_methods(["GET"])
 def get_servicedesk_tickets(request):
+    groups = utils.stringify_groups(request.user)
     status = request.GET.get('status')
     priority = request.GET.get('priority')
     type = request.GET.get('type')
@@ -153,6 +155,7 @@ def get_servicedesk_tickets(request):
                                           "page_details": page_details,
                                           "record_showing_counts": RECORDS_PER_PAGE,
                                           "training_material" : training_material,
+                                          "groups":groups[0],
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
                                                             'count': str(count), 'search': search}}
                                         )
@@ -162,13 +165,13 @@ def get_servicedesk_tickets(request):
 @require_http_methods(["GET", "POST"])
 def modify_servicedesk_tickets(request, feedback_id):
     host = get_current_site(request)
-    group_name = request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.SDOWNERS, Roles.DEALERS, Roles.ASCS])
+    group_name = request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.SDOWNERS, Roles.DEALERS, Roles.ASCS, Roles.SDREADONLY])
     status = get_list_from_set(FEEDBACK_STATUS)
     priority_types = get_list_from_set(PRIORITY)
     feedback_types = get_list_from_set(FEEDBACK_TYPE)
     root_cause = get_list_from_set(ROOT_CAUSE)
     feedback_obj = get_feedback(feedback_id, request.user)
-    servicedesk_users = get_servicedesk_users(designation=[Roles.SDOWNERS,Roles.SDMANAGERS] )
+    servicedesk_users = get_servicedesk_users(designation=[Roles.SDOWNERS,Roles.SDMANAGERS, Roles.SDREADONLY] )
     comments = get_comments(feedback_id)
     
     if request.method == 'POST':
@@ -217,3 +220,11 @@ def get_feedback_response(request, feedback_id):
         return render(request, 'service-desk/feedback_received.html')
     else:
         return HttpResponse()
+
+def update_customer_number(request):
+    groups = utils.get_user_groups(request.user)
+    if request.method == 'GET':       
+        return render(request, 'portal/customer_registration.html',{"group": groups[0]})
+    else:
+        return HttpResponseBadRequest()
+        

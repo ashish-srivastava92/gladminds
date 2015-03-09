@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from gladminds.core import base_models
+from gladminds.core import base_models, constants
 from gladminds.core.auth_helper import GmApps
 from django.conf import settings
 from gladminds.core.model_helpers import validate_image, validate_file
@@ -78,11 +78,25 @@ class ServiceDeskUser(base_models.ServiceDeskUser):
         app_label = _APP_NAME
         verbose_name_plural = "Service Desk Users"
 
+class BrandDepartment(base_models.BrandDepartment):
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Brand Department"
 
+class DepartmentSubCategories(base_models.DepartmentSubCategories):
+    department = models.ForeignKey(BrandDepartment, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Department Sub-categories"
+        
 class Feedback(base_models.Feedback):
+    priority = models.CharField(max_length=12, choices=constants.PRIORITY, default='Low')
     reporter = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_feedback_reporter')
     assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_feedback_assignee')
     previous_assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_previous_assignee')
+    sub_department = models.ForeignKey(DepartmentSubCategories,null=True, blank=True) 
     
     class Meta:
         app_label = _APP_NAME
@@ -214,6 +228,14 @@ class CustomerTempRegistration(base_models.CustomerTempRegistration):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Customer temporary info"
+
+class CustomerUpdateFailure(base_models.CustomerUpdateFailure):
+    '''stores data when phone number update exceeds the limit'''
+    product_id = models.ForeignKey(ProductData, null=False, blank=False)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Update Failures"
         
 class CustomerUpdateHistory(base_models.CustomerUpdateHistory):
     '''Stores the updated values of registered customer'''
@@ -276,7 +298,7 @@ class AuditLog(base_models.AuditLog):
 
 
 class SLA(base_models.SLA):
-
+    priority = models.CharField(max_length=12, choices=constants.SLA_PRIORITY, unique=True)
     class Meta:
         app_label = _APP_NAME
 
@@ -299,18 +321,40 @@ class Constant(base_models.Constant):
         
 
 #######################LOYALTY TABLES#################################
-class NationalSalesManager(base_models.NationalSalesManager):
-    '''details of National Sales Manager'''
+class Territory(base_models.Territory):
+    '''List of territories'''
+    
+    class Meta:
+        app_label = _APP_NAME
+
+class State(base_models.State):
+    ''' List of states mapped to territory'''
+    territory = models.ForeignKey(Territory)
+ 
+    class Meta:
+        app_label = _APP_NAME
+
+class City(base_models.City):
+    ''' List of cities mapped to states'''
+    state = models.ForeignKey(State)    
+   
+    class Meta:
+        app_label = _APP_NAME
+
+class NationalSparesManager(base_models.NationalSparesManager):
+    '''details of National Spares Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
+    territory = models.ManyToManyField(Territory)
 
     class Meta:
         app_label = _APP_NAME
 
 
-class AreaSalesManager(base_models.AreaSalesManager):
-    '''details of Area Service Manager'''
+class AreaSparesManager(base_models.AreaSparesManager):
+    '''details of Area Spares Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
-    nsm = models.ForeignKey(NationalSalesManager, null=True, blank=True)
+    state = models.ManyToManyField(State)
+    nsm = models.ForeignKey(NationalSparesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -319,7 +363,7 @@ class AreaSalesManager(base_models.AreaSalesManager):
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
-    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
+    asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -331,12 +375,14 @@ class Retailer(base_models.Retailer):
     class Meta:
         app_label = _APP_NAME
 
-
 class Mechanic(base_models.Mechanic):
     '''details of Mechanic'''
     registered_by_distributor = models.ForeignKey(Distributor, null=True, blank=True)
     preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
-    
+
+    state = models.ForeignKey(State)
+
+
     class Meta:
         app_label = _APP_NAME
 
@@ -367,7 +413,7 @@ class AccumulationRequest(base_models.AccumulationRequest):
     '''details of Accumulation request'''
     member = models.ForeignKey(Mechanic)
     upcs = models.ManyToManyField(SparePartUPC)
-    asm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
+    asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
 
     class Meta:
         app_label = _APP_NAME
@@ -407,7 +453,7 @@ class CommentThread(base_models.CommentThread):
     '''details of activities done by service-desk user'''
     welcome_kit = models.ForeignKey(WelcomeKit, null=True, blank=True)
     redemption = models.ForeignKey(RedemptionRequest, null=True, blank=True)
-    user = models.ForeignKey(User, related_name="bajaj welcome-kit user")
+    user = models.ForeignKey(User, related_name="bajaj_comments_user")
 
     class Meta:
         app_label = _APP_NAME

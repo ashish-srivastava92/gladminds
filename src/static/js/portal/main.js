@@ -84,7 +84,7 @@
             	
             else if (data['phone']) {
                   $('.customer-phone').val(data['phone']).attr('readOnly', true);
-            	  if (data['group']=='AuthorisedServiceCenters' || data['group']=='Dealers'){
+            	  if (data['group']=='AuthorisedServiceCenters' || data['group']=='Dealers' || data['group']=='SdManagers'){
             		  $('.customer-phone').val(data['phone']).attr('readOnly', false);
             	}
                   $('.customer-name').val(data['name']).attr('readOnly', true);
@@ -123,7 +123,7 @@
         });
         return false;
     });
-
+    
 function vinSyncFeed(data){
     var messageModal = $('.modal.message-modal'),
     	messageBlock = $('.modal-body', messageModal),
