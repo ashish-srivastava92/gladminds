@@ -44,17 +44,16 @@ class DynamicSitesMiddleware(object):
         self.request = request
         self.domain, self.port = self.get_domain_and_port()
         BRAND.value = self.get_fields(self.domain)
-        if BRAND.value not in settings.BRANDS:
-            BRAND.value = settings.GM_BRAND
             
-        if BRAND.value == settings.GM_BRAND:
+        if BRAND.value == 'admin':
             request.urlconf = 'gladminds.urls'
+            return
         try:
             import_module('gladminds.{0}.urls'.format(BRAND.value))
             request.urlconf = 'gladminds.{0}.urls'.format(BRAND.value)
         except:
             request.urlconf = 'gladminds.core.urls'
-
+            
     def process_response(self, request, response):
         if getattr(request, "urlconf", None):
             patch_vary_headers(response, ('Host',))

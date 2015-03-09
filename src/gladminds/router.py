@@ -56,7 +56,7 @@ class DatabaseAppsRouter(object):
 
     def allow_syncdb(self, db, model):
         """Make sure that apps only appear in the related database."""
-        if model._meta.app_label in _COMMON_APPS:
+        if model._meta.app_label in _COMMON_APPS+['core']:
             return True
 
         if model._meta.app_label in ['south'] and db in ['default']:

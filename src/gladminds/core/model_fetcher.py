@@ -16,7 +16,6 @@ class ModelFetcher(object):
         try:
             return getattr(import_module('gladminds.{0}.models'.format(brand)), key)
         except Exception as e:
-            print e
             return getattr(import_module('gladminds.core.models'), key)
 
 models = ModelFetcher()

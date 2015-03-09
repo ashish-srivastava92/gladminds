@@ -91,6 +91,7 @@ def get_services(request):
 
 def auth_login(request):
     user = getattr(request, 'user', None)
+    print user
     if hasattr(user, 'is_authenticated') and user.is_authenticated():
         return HttpResponseRedirect(redirect_url(request))
 
@@ -106,9 +107,12 @@ def auth_login(request):
             mobile = format_phone_number(mobile)
             user_profile = models.UserProfile.objects.filter(phone_number=mobile)[0]
             user = authenticate(username=user_profile.user.username, password=password)
+        print "000000000", user, user.is_active
         if user is not None:
             if user.is_active:
+                print "22222222222222222"
                 login(request, user)
+                print "111111111111111"
                 return HttpResponseRedirect(redirect_url(request))
         return HttpResponseRedirect(str(request.META.get('HTTP_REFERER')))
     else:

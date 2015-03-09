@@ -2,6 +2,7 @@
 # Django settings for gladminds project.
 import os
 import djcelery
+from copy import deepcopy
 djcelery.setup_loader()
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -153,6 +154,7 @@ class GmApps():
     BAJAJCV = 'bajajcv'
     DEMO = 'demo'
     GM = 'default'
+    HONDA = 'honda'
 
 # Mapping is first app name then db name
 DATABASE_APPS_MAPPING = {
@@ -160,51 +162,74 @@ DATABASE_APPS_MAPPING = {
                          GmApps.BAJAJ:'bajaj',
                          GmApps.DEMO: 'demo',
                          GmApps.AFTERBUY:'afterbuy',
-                         GmApps.BAJAJCV:'bajajcv'
+                         GmApps.BAJAJCV:'bajajcv',
+                         GmApps.HONDA:'honda'
                     }
 
-DATABASES = {
-    GmApps.GM: {
+db_common = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gm',
         'USER': DB_USER,
         'PASSWORD': DB_PASSWORD,
         'HOST': DB_HOST,
         'PORT': DB_PORT,
-    },
-    GmApps.BAJAJ: {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bajaj',
-        'USER': DB_USER,
-        'PASSWORD': DB_PASSWORD,
-        'HOST': DB_HOST,
-        'PORT': DB_PORT,
-    },
-    GmApps.DEMO: {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'demo',
-        'USER': DB_USER,
-        'PASSWORD': DB_PASSWORD,
-        'HOST': DB_HOST,
-        'PORT': DB_PORT,
-    },
-    GmApps.AFTERBUY: {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'afterbuy',
-        'USER': DB_USER,
-        'PASSWORD': DB_PASSWORD,
-        'HOST': DB_HOST,
-        'PORT': DB_PORT,
-    },
-    GmApps.BAJAJCV: {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bajajcv',
-        'USER': DB_USER,
-        'PASSWORD': DB_PASSWORD,
-        'HOST': DB_HOST,
-        'PORT': DB_PORT,
     }
-}
+DATABASES = {}
+
+for brand in dir(GmApps):
+    if not brand.startswith('__'):
+        db_common.update({'NAME': getattr(GmApps,brand)})
+        DATABASES[getattr(GmApps,brand)] = deepcopy(db_common)
+# DATABASES = {
+#     GmApps.GM: {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'gm',
+#         'USER': DB_USER,
+#         'PASSWORD': DB_PASSWORD,
+#         'HOST': DB_HOST,
+#         'PORT': DB_PORT,
+#     },
+#     GmApps.BAJAJ: {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'bajaj',
+#         'USER': DB_USER,
+#         'PASSWORD': DB_PASSWORD,
+#         'HOST': DB_HOST,
+#         'PORT': DB_PORT,
+#     },
+#     GmApps.DEMO: {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'demo',
+#         'USER': DB_USER,
+#         'PASSWORD': DB_PASSWORD,
+#         'HOST': DB_HOST,
+#         'PORT': DB_PORT,
+#     },
+#     GmApps.AFTERBUY: {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'afterbuy',
+#         'USER': DB_USER,
+#         'PASSWORD': DB_PASSWORD,
+#         'HOST': DB_HOST,
+#         'PORT': DB_PORT,
+#     },
+#     GmApps.BAJAJCV: {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'bajajcv',
+#         'USER': DB_USER,
+#         'PASSWORD': DB_PASSWORD,
+#         'HOST': DB_HOST,
+#         'PORT': DB_PORT,
+#     },
+#      GmApps.HONDA: {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'honda',
+#         'USER': DB_USER,
+#         'PASSWORD': DB_PASSWORD,
+#         'HOST': DB_HOST,
+#         'PORT': DB_PORT,
+#     }
+# }
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -643,7 +668,8 @@ ADMIN_DETAILS = {GmApps.BAJAJ: {'user': 'bajaj', 'password': 'bajaj'},
           GmApps.DEMO: {'user': 'demo', 'password': 'demo'},
           GmApps.AFTERBUY: {'user': 'afterbuy', 'password': 'afterbuy'},
           GmApps.GM: {'user': 'gladminds', 'password': 'gladminds'},
-          GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'x`'}
+          GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'x`'},
+          GmApps.HONDA: {'user': 'honda', 'password': 'honda'}
           }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True

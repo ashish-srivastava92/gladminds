@@ -5,7 +5,7 @@ from gladminds.core.auth_helper import GmApps
 from django.conf import settings
 from gladminds.core.model_helpers import validate_image, validate_file
 
-_APP_NAME = "core"
+_APP_NAME ='core'
 
 
 class BrandProductCategory(base_models.BrandProductCategory):
