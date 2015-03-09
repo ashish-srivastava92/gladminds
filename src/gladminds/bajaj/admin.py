@@ -559,11 +559,11 @@ class MechanicAdmin(GmModelAdmin):
         form = super(MechanicAdmin, self).get_form(request, obj, **kwargs)
         return form
 
-    def save_model(self, request, obj, form, change):
-        if not (obj.phone_number == '' or (len(obj.phone_number) < 10)):
-            obj.phone_number=utils.mobile_format(obj.phone_number)
-        super(MechanicAdmin, self).save_model(request, obj, form, change)
-        
+#     def save_model(self, request, obj, form, change):
+#         if not (obj.phone_number == '' or (len(obj.phone_number) < 10)):
+#             obj.phone_number=utils.mobile_format(obj.phone_number)
+#         super(MechanicAdmin, self).save_model(request, obj, form, change)
+
 class CommentThreadInline(TabularInline):
     model = models.CommentThread
     fields = ('created_date', 'user', 'message')

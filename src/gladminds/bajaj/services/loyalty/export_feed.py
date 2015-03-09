@@ -97,7 +97,7 @@ class ExportAccumulationFeed(BaseExportFeed):
                     }
                 upcs = accumulation.upcs.all()
                 for upc in upcs:
-                    item['UPCED'] = upc.unique_part_code
+                    item['UPCED'] = str(upc.unique_part_code)
                     items.append(item)
             except Exception as ex:
                 logger.error("[ExportAccumulationFeed]: error fetching from db {0}".format(ex))
@@ -115,9 +115,9 @@ class ExportAccumulationFeed(BaseExportFeed):
                         .format(item))
             try:            
                 result = client.service.SI_Acc_Sync(
-                    DT_Accum={'item':[item]}, DT_STAMP={'Item_Stamp':item_batch})
+                    DT_Accum={'Item':[item]}, DT_STAMP={'Item_Stamp':item_batch})
                 logger.info("[ExportAccumulationFeed]: Response from SAP: {0}".format(result))
-                if result[0]['DT_Item'][0]['STATUS'] == 'SUCCESS':
+                if result[0]['STATUS'] == 'SUCCESS':
                     try:
                         accumulation_detail = models.AccumulationRequest.objects.get(transaction_id=item['TANSSID'])
                         accumulation_detail.sent_to_sap = True
@@ -159,7 +159,7 @@ class ExportRedemptionFeed(BaseExportFeed):
                         "DELVDAT": redemption.delivery_date.date().strftime("%Y-%m-%d"),
                         "PODNO": redemption.pod_number,
                         "PODDOC": redemption.image_url,
-                        "TANSSID": redemption.transaction_id,
+                        "TRANSID": redemption.transaction_id,
                     }
                 items.append(item)
             except Exception as ex:
@@ -178,22 +178,22 @@ class ExportRedemptionFeed(BaseExportFeed):
                         .format(item))
             try:            
                 result = client.service.SI_Redum_Sync(
-                    DT_Redum={'item':[item]}, DT_STAMP={'Item':item_batch})
+                    DT_Redum={'Item':[item]}, DT_STAMP={'Item':item_batch})
                 logger.info("[ExportRedemptionFeed]: Response from SAP: {0}".format(result))
-                if result[0]['Item'][0]['STATUS'] == 'SUCCESS':
+                if result[0]['STATUS'] == 'SUCCESS':
                     try:
-                        redemption_detail = models.RedemptionRequest.objects.get(transaction_id=item['TANSSID'])
+                        redemption_detail = models.RedemptionRequest.objects.get(transaction_id=item['TRANSID'])
                         redemption_detail.sent_to_sap = True
                         redemption_detail.save()
-                        logger.info("[ExportRedemptionFeed]: Sent the details of member {0} to sap".format(item['TANSSID']))
+                        logger.info("[ExportRedemptionFeed]: Sent the details of member {0} to sap".format(item['TRANSID']))
                         export_status = True
                     except Exception as ex:
-                        logger.error("[ExportRedemptionFeed]: Error in sending accumulation:{0}::{1}".format(item['TANSSID'], ex))
+                        logger.error("[ExportRedemptionFeed]: Error in sending accumulation:{0}::{1}".format(item['TRANSID'], ex))
                 else:
                     total_failed = total_failed + 1
-                    logger.error("[ExportRedemptionFeed]: {0}:: Not received success from sap".format(item['TANSSID']))
+                    logger.error("[ExportRedemptionFeed]: {0}:: Not received success from sap".format(item['TRANSID']))
             except Exception as ex:
-                logger.error("[ExportRedemptionFeed]: Error in sending accumulation :{0}::{1}".format(item['TANSSID'], ex))
+                logger.error("[ExportRedemptionFeed]: Error in sending accumulation :{0}::{1}".format(item['TRANSID'], ex))
         feed_log(feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
@@ -219,7 +219,7 @@ class ExportDistributorFeed(BaseExportFeed):
                         "DISTID": distributor.distributor_id,
                         "NAME": distributor.name,
                         "EMAIL": distributor.email,
-                        "MOBNO": str(distributor.phone_number),
+                        "MOBNO": str(distributor.phone_number) if distributor.phone_number else None,
                         "CITY": distributor.city,
                         "ASMID": asm,
                     }
@@ -240,9 +240,9 @@ class ExportDistributorFeed(BaseExportFeed):
                         .format(item))
             try:
                 result = client.service.SI_Dist_Sync(
-                    DT_DIST={'item':[item]}, DT_STAMP={'Item_Stamp':item_batch})
+                    DT_DIST={'Item':[item]}, DT_STAMP={'Item_Stamp':item_batch})
                 logger.info("[ExportDistributorFeed]: Response from SAP: {0}".format(result))
-                if result[0]['Item'][0]['STATUS'] == 'SUCCESS':
+                if result[0]['STATUS'] == 'SUCCESS':
                     try:
                         distributor_detail = models.Distributor.objects.get(distributor_id=item['DISTID'])
                         distributor_detail.sent_to_sap = True

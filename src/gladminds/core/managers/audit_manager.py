@@ -1,9 +1,15 @@
 from gladminds.core.loaders.module_loader import get_model
 import datetime
+from django.conf import settings
+from gladminds.core.auth_helper import GmApps
 
 
 def sms_log(action='SENT', sender='+1 469-513-9856', receiver=None,
-              message=None, status='success', brand='bajaj'):
+              message=None, status='success', brand=None):
+    brand = settings.BRAND
+    if brand is None:
+        brand = GmApps.BAJAJ
+
     if receiver == '9999999999':
         status = 'fail'
     sm_model = get_model('SMSLog', brand=brand)
@@ -14,7 +20,11 @@ def sms_log(action='SENT', sender='+1 469-513-9856', receiver=None,
 
 
 def feed_log(feed_type=None, total_data_count=None, failed_data_count=None,
-     success_data_count=None, status=None, action=None, remarks=None, file_location=None, brand='bajaj'):
+     success_data_count=None, status=None, action=None, remarks=None, file_location=None, brand=None):
+
+    brand = settings.BRAND
+    if brand is None:
+        brand = GmApps.BAJAJ
 
     feed_log_model = get_model('DataFeedLog', brand=brand)
     data_feed_log = feed_log_model(feed_type=feed_type,
@@ -25,12 +35,18 @@ def feed_log(feed_type=None, total_data_count=None, failed_data_count=None,
                                      remarks=remarks, file_location=file_location)
     data_feed_log.save()
 
-def email_log(subject, message, sender, receiver, brand='bajaj'):
+def email_log(subject, message, sender, receiver, brand=None):
+    brand = settings.BRAND
+    if brand is None:
+        brand = GmApps.BAJAJ
     email_model = get_model('EmailLog', brand=brand)
     email_log = email_model(subject=subject, message=message, sender=sender, receiver=receiver)
     email_log.save()
 
-def feed_failure_log(feed_type=None, reason=None, brand='bajaj'):
+def feed_failure_log(feed_type=None, reason=None, brand=None):
+    brand = settings.BRAND
+    if brand is None:
+        brand = GmApps.BAJAJ
 
     feed_failure_log_model = get_model('FeedFailureLog', brand=brand)
     feed_failure_log = feed_failure_log_model(feed_type=feed_type,
