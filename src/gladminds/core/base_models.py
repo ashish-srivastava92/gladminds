@@ -778,7 +778,7 @@ class ServiceType(models.Model):
     class Meta:
         abstract =True
         verbose_name_plural = "Service Types"
-        db_table = 'gm_sla'
+        db_table = 'gm_servicetype'
         
     def __unicode__(self):
         return self.name
@@ -796,7 +796,7 @@ class Service(models.Model):
     class Meta:
         abstract = True
         verbose_name_plural = "Services"
-        db_table = 'gm_servicetype'
+        db_table = 'gm_service'
         
     def __unicode__(self):
         return self.name
