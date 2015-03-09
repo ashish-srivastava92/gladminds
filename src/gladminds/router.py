@@ -16,7 +16,7 @@ class DatabaseAppsRouter(object):
     """
     @staticmethod
     def common_logic(model, hints={}):
-        if model._meta.app_label in _COMMON_APPS:
+        if model._meta.app_label in _COMMON_APPS+['core']:
             if 'instance' in hints.keys():
                 db = hints['instance']._state.db or settings.BRAND
             else:
