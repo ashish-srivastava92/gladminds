@@ -172,7 +172,7 @@ class ProductDispatchModel(ComplexModel):
     #UCN_Status = Unicode
     TIMESTAMP = Unicode(pattern=pattern)
     SKU_CODE = Unicode
-    ENGINE = Unicode
+#     ENGINE = Unicode
 
 class ProductDispatchModelList(ComplexModel):
     __namespace__ = tns
@@ -339,8 +339,8 @@ class ProductDispatchService(ServiceBase):
                     'valid_kms': product.KMS_TO,
                     'service_type': product.SERVICE_TYPE,
                     'coupon_status': settings.DEFAULT_COUPON_STATUS,
-                    'sku_code':product.SKU_CODE,
-                    'engine':product.ENGINE,
+                    'sku_code':product.SKU_CODE
+#                     'engine':product.ENGINE,
                 })
             except Exception as ex:
                 ex = "ProductDispatchService: {0}  Error on Validating {1}".format(product, ex)
