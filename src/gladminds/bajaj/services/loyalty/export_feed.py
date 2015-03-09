@@ -159,7 +159,7 @@ class ExportRedemptionFeed(BaseExportFeed):
                         "DELVDAT": redemption.delivery_date.date().strftime("%Y-%m-%d"),
                         "PODNO": redemption.pod_number,
                         "PODDOC": redemption.image_url,
-                        "TANSSID": redemption.transaction_id,
+                        "TRANSID": redemption.transaction_id,
                     }
                 items.append(item)
             except Exception as ex:
@@ -182,18 +182,18 @@ class ExportRedemptionFeed(BaseExportFeed):
                 logger.info("[ExportRedemptionFeed]: Response from SAP: {0}".format(result))
                 if result[0]['STATUS'] == 'SUCCESS':
                     try:
-                        redemption_detail = models.RedemptionRequest.objects.get(transaction_id=item['TANSSID'])
+                        redemption_detail = models.RedemptionRequest.objects.get(transaction_id=item['TRANSID'])
                         redemption_detail.sent_to_sap = True
                         redemption_detail.save()
-                        logger.info("[ExportRedemptionFeed]: Sent the details of member {0} to sap".format(item['TANSSID']))
+                        logger.info("[ExportRedemptionFeed]: Sent the details of member {0} to sap".format(item['TRANSID']))
                         export_status = True
                     except Exception as ex:
-                        logger.error("[ExportRedemptionFeed]: Error in sending accumulation:{0}::{1}".format(item['TANSSID'], ex))
+                        logger.error("[ExportRedemptionFeed]: Error in sending accumulation:{0}::{1}".format(item['TRANSID'], ex))
                 else:
                     total_failed = total_failed + 1
-                    logger.error("[ExportRedemptionFeed]: {0}:: Not received success from sap".format(item['TANSSID']))
+                    logger.error("[ExportRedemptionFeed]: {0}:: Not received success from sap".format(item['TRANSID']))
             except Exception as ex:
-                logger.error("[ExportRedemptionFeed]: Error in sending accumulation :{0}::{1}".format(item['TANSSID'], ex))
+                logger.error("[ExportRedemptionFeed]: Error in sending accumulation :{0}::{1}".format(item['TRANSID'], ex))
         feed_log(feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
