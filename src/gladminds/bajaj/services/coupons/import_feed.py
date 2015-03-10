@@ -255,12 +255,12 @@ class ProductPurchaseFeed(BaseFeed):
             try:
                 product_data = models.ProductData.objects.get(product_id=product['vin'])
                 
-                if product_data.engine and product_data.engine != product['engine']:
-                    message = "The engine number {0} does not match with engine number in Database".format(product['engine'])                               
-                    raise ValueError(message)
-                ''' Update engine number if it is null in DB'''
-                if product_data.engine is None:
-                    product_data.engine = product['engine']
+#                 if product_data.engine and product_data.engine != product['engine']:
+#                     message = "The engine number {0} does not match with engine number in Database".format(product['engine'])                               
+#                     raise ValueError(message)
+#                 ''' Update engine number if it is null in DB'''
+#                 if product_data.engine is None:
+#                     product_data.engine = product['engine']
 
                 if product_data.customer_phone_number and product_data.customer_id == product['sap_customer_id']:
                     post_save.disconnect(
