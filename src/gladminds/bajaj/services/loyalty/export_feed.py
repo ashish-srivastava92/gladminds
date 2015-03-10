@@ -102,35 +102,48 @@ class ExportAccumulationFeed(BaseExportFeed):
             except Exception as ex:
                 logger.error("[ExportAccumulationFeed]: error fetching from db {0}".format(ex))
                 total_failed = total_failed + 1
-        return items, item_batch, total_failed
+        return items, item_batch, total_failed, results
     
-    def export(self, items=None, item_batch=None, total_failed_on_feed=0):
+    def export(self, items=None, item_batch=None, total_failed_on_feed=0, query_set=None):
         logger.info(
             "[ExportAccumulationFeed]: Export {0}".format(self.feed_type))
         export_status = False
         client = self.get_client()
         total_failed = total_failed_on_feed
-        for item in items:
-            logger.info("[ExportAccumulationFeed]: Trying to send SAP the member: {0}"\
-                        .format(item))
-            try:            
-                result = client.service.SI_Acc_Sync(
-                    DT_Accum={'Item':[item]}, DT_STAMP={'Item_Stamp':item_batch})
-                logger.info("[ExportAccumulationFeed]: Response from SAP: {0}".format(result))
-                if result[0]['STATUS'] == 'SUCCESS':
-                    try:
-                        accumulation_detail = models.AccumulationRequest.objects.get(transaction_id=item['TANSSID'])
-                        accumulation_detail.sent_to_sap = True
-                        accumulation_detail.save()
-                        logger.info("[ExportAccumulationFeed]: Sent the details of member {0} to sap".format(item['TANSSID']))
-                        export_status = True
-                    except Exception as ex:
-                        logger.error("[ExportAccumulationFeed]: Error in sending accumulation:{0}::{1}".format(item['TANSSID'], ex))
-                else:
-                    total_failed = total_failed + 1
-                    logger.error("[ExportAccumulationFeed]: {0}:: Not received success from sap".format(item['TANSSID']))
-            except Exception as ex:
-                logger.error("[ExportAccumulationFeed]: Error in sending accumulation :{0}::{1}".format(item['TANSSID'], ex))
+        try:
+            result = client.service.SI_Acc_Sync(
+                    DT_Accum={'Item':items}, DT_STAMP={'Item_Stamp':item_batch})
+            logger.info("[ExportAccumulationFeed]: Response from SAP: {0}".format(result))
+            if result[0]['STATUS'] == 'SUCCESS':
+                query_set.update(sent_to_sap=True)
+                logger.error("[ExportAccumulationFeed]: Sent details o SAP")
+            else:
+                total_failed = total_failed + len(items)
+                logger.error("[ExportAccumulationFeed]: Not received success from sap")
+        except Exception as ex:
+            logger.error("[ExportAccumulationFeed]: Error in sending accumulation :{0}".format(ex))
+                
+#         for item in items:
+#             logger.info("[ExportAccumulationFeed]: Trying to send SAP the member: {0}"\
+#                         .format(item))
+#             try:            
+#                 result = client.service.SI_Acc_Sync(
+#                     DT_Accum={'Item':[item]}, DT_STAMP={'Item_Stamp':item_batch})
+#                 logger.info("[ExportAccumulationFeed]: Response from SAP: {0}".format(result))
+#                 if result[0]['STATUS'] == 'SUCCESS':
+#                     try:
+#                         accumulation_detail = models.AccumulationRequest.objects.get(transaction_id=item['TANSSID'])
+#                         accumulation_detail.sent_to_sap = True
+#                         accumulation_detail.save()
+#                         logger.info("[ExportAccumulationFeed]: Sent the details of member {0} to sap".format(item['TANSSID']))
+#                         export_status = True
+#                     except Exception as ex:
+#                         logger.error("[ExportAccumulationFeed]: Error in sending accumulation:{0}::{1}".format(item['TANSSID'], ex))
+#                 else:
+#                     total_failed = total_failed + 1
+#                     logger.error("[ExportAccumulationFeed]: {0}:: Not received success from sap".format(item['TANSSID']))
+#             except Exception as ex:
+#                 logger.error("[ExportAccumulationFeed]: Error in sending accumulation :{0}::{1}".format(item['TANSSID'], ex))
         feed_log(feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
@@ -165,35 +178,48 @@ class ExportRedemptionFeed(BaseExportFeed):
             except Exception as ex:
                 logger.error("[ExportRedemptionFeed]: error fetching from db {0}".format(ex))
                 total_failed = total_failed + 1
-        return items, item_batch, total_failed
+        return items, item_batch, total_failed, results
     
-    def export(self, items=None, item_batch=None, total_failed_on_feed=0):
+    def export(self, items=None, item_batch=None, total_failed_on_feed=0, query_set=None):
         logger.info(
             "[ExportRedemptionFeed]: Export {0}".format(self.feed_type))
         export_status = False
         client = self.get_client()
         total_failed = total_failed_on_feed
-        for item in items:
-            logger.info("[ExportRedemptionFeed]: Trying to send SAP the member: {0}"\
-                        .format(item))
-            try:            
-                result = client.service.SI_Redum_Sync(
-                    DT_Redum={'Item':[item]}, DT_STAMP={'Item':item_batch})
-                logger.info("[ExportRedemptionFeed]: Response from SAP: {0}".format(result))
-                if result[0]['STATUS'] == 'SUCCESS':
-                    try:
-                        redemption_detail = models.RedemptionRequest.objects.get(transaction_id=item['TRANSID'])
-                        redemption_detail.sent_to_sap = True
-                        redemption_detail.save()
-                        logger.info("[ExportRedemptionFeed]: Sent the details of member {0} to sap".format(item['TRANSID']))
-                        export_status = True
-                    except Exception as ex:
-                        logger.error("[ExportRedemptionFeed]: Error in sending accumulation:{0}::{1}".format(item['TRANSID'], ex))
-                else:
-                    total_failed = total_failed + 1
-                    logger.error("[ExportRedemptionFeed]: {0}:: Not received success from sap".format(item['TRANSID']))
-            except Exception as ex:
-                logger.error("[ExportRedemptionFeed]: Error in sending accumulation :{0}::{1}".format(item['TRANSID'], ex))
+        try: 
+            result = client.service.SI_Redum_Sync(
+                        DT_Redum={'Item':items}, DT_STAMP={'Item':item_batch})
+            logger.info("[ExportRedemptionFeed]: Response from SAP: {0}".format(result))
+            if result[0]['STATUS'] == 'SUCCESS':
+                query_set.update(sent_to_sap=True)
+                export_status = True
+                logger.error("[ExportRedemptionFeed]: Sent details o SAP")
+            else:
+                total_failed = total_failed + len(items)
+                logger.error("[ExportRedemptionFeed]: Not received success from sap")
+        except Exception as ex:
+                logger.error("[ExportRedemptionFeed]: Error in sending accumulation :{0}".format(ex))
+#         for item in items:
+#             logger.info("[ExportRedemptionFeed]: Trying to send SAP the member: {0}"\
+#                         .format(item))
+#             try:            
+#                 result = client.service.SI_Redum_Sync(
+#                     DT_Redum={'Item':[item]}, DT_STAMP={'Item':item_batch})
+#                 logger.info("[ExportRedemptionFeed]: Response from SAP: {0}".format(result))
+#                 if result[0]['STATUS'] == 'SUCCESS':
+#                     try:
+#                         redemption_detail = models.RedemptionRequest.objects.get(transaction_id=item['TRANSID'])
+#                         redemption_detail.sent_to_sap = True
+#                         redemption_detail.save()
+#                         logger.info("[ExportRedemptionFeed]: Sent the details of member {0} to sap".format(item['TRANSID']))
+#                         export_status = True
+#                     except Exception as ex:
+#                         logger.error("[ExportRedemptionFeed]: Error in sending accumulation:{0}::{1}".format(item['TRANSID'], ex))
+#                 else:
+#                     total_failed = total_failed + 1
+#                     logger.error("[ExportRedemptionFeed]: {0}:: Not received success from sap".format(item['TRANSID']))
+#             except Exception as ex:
+#                 logger.error("[ExportRedemptionFeed]: Error in sending accumulation :{0}::{1}".format(item['TRANSID'], ex))
         feed_log(feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
