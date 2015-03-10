@@ -171,7 +171,7 @@ class ProductDispatchModel(ComplexModel):
     SERVICE_TYPE = Unicode
     #UCN_Status = Unicode
     TIMESTAMP = Unicode(pattern=pattern)
-    SKU_CODE = Unicode
+#     SKU_CODE = Unicode
 #     ENGINE = Unicode
 
 class ProductDispatchModelList(ComplexModel):
@@ -339,7 +339,7 @@ class ProductDispatchService(ServiceBase):
                     'valid_kms': product.KMS_TO,
                     'service_type': product.SERVICE_TYPE,
                     'coupon_status': settings.DEFAULT_COUPON_STATUS,
-                    'sku_code':product.SKU_CODE
+#                     'sku_code':product.SKU_CODE
 #                     'engine':product.ENGINE,
                 })
             except Exception as ex:

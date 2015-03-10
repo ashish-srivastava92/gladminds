@@ -194,12 +194,12 @@ class ProductDispatchFeed(BaseFeed):
                     '[Info: ProductDispatchFeed_product_data]: {0}'.format(done))
                 try:
                     dealer_data = self.check_or_create_dealer(dealer_id=product['dealer_id'])
-                    self.get_or_create_product_type(
-                        product_type=product['product_type'])
-                    producttype_data = models.ProductType.objects.get(product_type=product['product_type'])
+#                     self.get_or_create_product_type(
+#                         product_type=product['product_type'])
+#                     producttype_data = models.ProductType.objects.get(product_type=product['product_type'])
                     product_data = models.ProductData(
-                        product_id=product['vin'], product_type=producttype_data, invoice_date=product['invoice_date'], 
-                        dealer_id=dealer_data, sku_code=product['sku_code'])
+                        product_id=product['vin'], invoice_date=product['invoice_date'], 
+                        dealer_id=dealer_data, sku_code=product['product_type'])
                     product_data.save()
                     logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN-{0} UCN-{1}'.format(product['vin'], product['unique_service_coupon']))
                 except Exception as ex:
