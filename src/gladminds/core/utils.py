@@ -41,7 +41,7 @@ def check_password(password):
         ]
     #if not all(rule(s) for rule in rules):
         #return False
-    return True
+    return False
 
 def generate_temp_id(prefix_value):
     for x in range(5):
