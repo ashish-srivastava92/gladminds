@@ -5,7 +5,7 @@ from tastypie.authorization import Authorization
 from tastypie import fields
 from django.db.models import Count
 from gladminds.core import utils
-from gladminds.core.apis.user_apis import UserProfileResource, UserResource
+from gladminds.core.apis.dashboard_apis import SMSReportResource 
 from gladminds.core.apis.product_apis import ProductTypeResource
 from django.conf.urls import url
 from django.http.response import HttpResponse, HttpResponseBadRequest
@@ -21,10 +21,13 @@ from django.db import transaction
 from gladminds.core.auth_helper import Roles
 from django.db.models.aggregates import Count, Sum
 import itertools
-from gladminds.core.apis.user_apis import MemberResource, AreaSparesManagerResource, PartnerResource,UserResource
+from gladminds.core.apis.user_apis import MemberResource, AreaSparesManagerResource, PartnerResource,UserResource,\
+UserProfileResource,DistributorResource,RetailerResource
 from gladminds.core.apis.product_apis import ProductCatalogResource,\
     SparePartUPCResource
-
+from django.conf import settings
+from gladminds.core.core_utils.utils import dictfetchall
+from django.db import connections
 logger = logging.getLogger("gladminds")
 
 class TerritoryResource(CustomBaseModelResource):
@@ -68,7 +71,6 @@ class LoyaltySLAResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
-<<<<<<< HEAD
 class ProductResource(CustomBaseModelResource):
     partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)
     
@@ -95,23 +97,6 @@ class MemberResource(CustomBaseModelResource):
                      "locality":ALL,
                      "district":ALL,
                      }
-
-# class AccumulationRedemptionDetail(CustomBaseModelResource):
-#         
-#     class Meta: 
-#         resource_name = "accumulation-redemption-details"
-#         authorization = Authorization()
-#         detail_allowed_methods = ['get', 'post', 'put']
-#         always_return_data = True
-#         def prepend_urls(self):
-#             return [
-#                     url(r"^(?P<resource_name>%s)/members-details/(?P<status>[a-zA-Z.-]+)%s" % (self._meta.resource_name,trailing_slash()),
-#                                                         self.wrap_view('pending_redemption_request'), name="pending_redemption_request")
-#                     ]
-        
-    
-=======
->>>>>>> 5d46f3f85255c7cf569bb6407c562cc690272405
         
 class RedemptionResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
@@ -237,8 +222,8 @@ class RedemptionResource(CustomBaseModelResource):
             return HttpResponse(json.dumps(requests), content_type="application/json")
         else: 
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
-    
-        
+
+       
 class AccumulationResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member', full=True) 
     asm = fields.ForeignKey(AreaSparesManagerResource, 'asm', null=True, blank=True, full=True)
@@ -260,38 +245,75 @@ class AccumulationResource(CustomBaseModelResource):
                                                         self.wrap_view('accumulation_report_details'), name="redemption_report_details")
                 ]
     def accumulation_report_details(self,request, **kwargs):
-        print "HELLOOOOOOOO*************"
+        nsm = models.NationalSparesManager.objects.filter(user__user=request.user)
+        territory = nsm[0].territory.all()
+        print "@@@ INSIDE REPORT @@",territory[0]
+        members = self.get_total_accumulated_redemption_requsets(str(territory[0]))
+        requests  = []   
+        if request.method == 'GET':
+            details = {}
+            for member in members: 
+                member_dict = {}
+                id = member['permanent_id']
+                member_dict['name'] = member['first_name'] + " " + member['middle_name'] + " " + member['last_name']
+                member_dict['registration_date'] = member['registered_date'].strftime('%d-%m-%Y')
+                member_dict['location'] = member['address_line_1'] + " " + member['address_line_2'] + " " + member['address_line_3'] + " " + member['address_line_4'] + " " + member['address_line_5'] + " " + member['address_line_6']
+                member_dict['city'] = member['district']
+                member_dict['state'] = member['state']
+                member_dict['area'] = member['locality']
+                member_dict['region'] = member['territory']
+                member_dict['accumulation_requests'] = member['accumulation_requests']
+                member_dict['accumulated_points'] = int(member['accumulated_points'])
+                member_dict['redemption_requests'] = member['redemption_requests']
+                member_dict['redeemed_points'] = int(member['redeemed_points'])
+                details[id]=member_dict
+            requests.append(details)        
+            return HttpResponse(json.dumps(requests), content_type="application/json")
+    
+    def get_total_accumulated_redemption_requsets(self,territory):
+        print "@@ INSIDE ACCUMUATION REQUEST @@",territory
         try:
-            members = models.AccumulationRequest.objects.filter(Q(territory=request.user__territory)).select_related('member')
-            requests  = []
-                
-            if request.method == 'GET':
-                details = {}
-                print "######",models.RedemptionRequest.objects.all().values('member').annotate(total=Count('member'))
-                for member in members: 
-                    if member.member.permanent_id in details:
-                        details[member.member.permanent_id]['accumulation_requests']= details[member.member.permanent_id]['accumulation_requests'] + 1
-                    else:
-                        member_dict = {}
-                        id = member.member.permanent_id
-                        member_dict['name'] = member.member.first_name + member.member.middle_name + member.member.last_name
-                        member_dict['registration_date'] = member.member.registered_date.strftime('%Y-%m-%dT%H:%M:%S')
-                        member_dict['location'] = member.member.address_line_1 + member.member.address_line_2 + member.member.address_line_3 + member.member.address_line_4 + member.member.address_line_5 + member.member.address_line_6
-                        member_dict['city'] = member.member.district
-                        member_dict['state'] = member.member.state.state_name
-                        member_dict['area'] = member.member.locality
-                        member_dict['region'] = member.member.state.territory.territory
-                        member_dict['accumulation_requests'] = 1
-                        member_dict['accumulated_points'] = member.member.points
-    #                             member_dict['redemption_requests'] = models.RedemptionRequest.objects.filter(member__permanent_id=id).count()
-    #                             member_dict['redeemed_points'] = member.member.total_points-member.member.points
-                        details[id]=member_dict
-                requests.append(details)
-        
-                return HttpResponse(json.dumps(requests), content_type="application/json")
-        except Exception as ex:
-            print "@@@@", ex
+            member_query =  "select * from \
+                             (select id,permanent_id,first_name,middle_name,last_name,address_line_1,address_line_2,address_line_3,address_line_4,address_line_5,address_line_6,registered_date,district,A.state,locality,A.territory\
+                             from \
+                             (select bajaj_territory.territory as territory, state_name as state \
+                             from bajaj_territory,bajaj_mechanic,bajaj_state \
+                             where bajaj_mechanic.state_id=bajaj_state.id \
+                             and \
+                             bajaj_state.territory_id=bajaj_territory.id "
+                             
+            condition_nsm =      "and bajaj_territory.territory=%(territory)s "
+           
+            accumlations_redemptions = ")A,bajaj_mechanic)C \
+                                       left join \
+                                       (select A.member_id,A.accumulation_requests,A.accumulated_points,B.redemption_requests,B.redeemed_points \
+                                       from \
+                                       (select bajaj_accumulationrequest.member_id,count(bajaj_accumulationrequest.member_id) as accumulation_requests,\
+                                       sum(bajaj_accumulationrequest.points) as accumulated_points \
+                                       from \
+                                       bajaj_accumulationrequest \
+                                       group by(bajaj_accumulationrequest.member_id))A \
+                                       left join \
+                                       (select bajaj_redemptionrequest.member_id,count(bajaj_redemptionrequest.member_id) as redemption_requests,\
+                                       sum(bajaj_redemptionrequest.points) as redeemed_points from bajaj_redemptionrequest \
+                                       group by(bajaj_redemptionrequest.member_id))B \
+                                       on A.member_id = B.member_id)D \
+                                       on C.id=D.member_id;"
             
+            member_objects = self.get_sql_data(member_query + condition_nsm + accumlations_redemptions,filters={'territory':territory})
+            return member_objects
+        except Exception as ex:
+            print ex
+     
+    def get_sql_data(self,query, filters={}):
+        print "@@ INSIDE SQL @@",filters
+        conn = connections[settings.BRAND]
+        cursor = conn.cursor()
+        cursor.execute(query, filters)
+        data = dictfetchall(cursor)
+        conn.close()
+        print "#@ DATA @#",data
+        return data
             
 
 class WelcomeKitResource(CustomBaseModelResource):
