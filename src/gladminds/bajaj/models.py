@@ -332,14 +332,14 @@ class Territory(base_models.Territory):
 
 class State(base_models.State):
     ''' List of states mapped to territory'''
-    territory = models.ForeignKey(Territory)
+    territory = models.ForeignKey(Territory, null=True, blank=True)
  
     class Meta:
         app_label = _APP_NAME
 
 class City(base_models.City):
     ''' List of cities mapped to states'''
-    state = models.ForeignKey(State)    
+    state = models.ForeignKey(State, null=True, blank=True)    
    
     class Meta:
         app_label = _APP_NAME
