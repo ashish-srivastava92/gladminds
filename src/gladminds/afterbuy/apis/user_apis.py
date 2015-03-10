@@ -119,7 +119,7 @@ class ConsumerResource(CustomBaseModelResource):
         last_name = load.get('last_name','')
         password = load.get('password')
         invalid_password = check_password(password)
-        if invalid_password:
+        if not invalid_password:
             return HttpBadRequest("password is not meant according to the rules")
         if not phone_number or not password:
             return HttpBadRequest("phone_number, password required.")

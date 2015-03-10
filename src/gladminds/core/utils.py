@@ -40,8 +40,8 @@ def check_password(password):
         lambda s:bool(re.search(r'[^a-zA-Z0-9]',s))
         ]
     #if not all(rule(s) for rule in rules):
-        #return False
-    return False
+        #return True
+    return True
 
 def generate_temp_id(prefix_value):
     for x in range(5):
