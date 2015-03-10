@@ -313,12 +313,12 @@ def register_customer(request, group=None):
                     customer_obj.product_data = product_obj[0]
                     customer_obj.sent_to_sap = False
                     customer_obj.dealer_asc_id = str(request.user)
-                    customer_obj.email_flag = False
                     customer_obj.mobile_number_update_count+=1
                     update_history = models.CustomerUpdateHistory(temp_customer=customer_obj,
                                                                   updated_field='Phone Number',
                                                                   old_value=old_number,
-                                                                  new_value=customer_obj.new_number)
+                                                                  new_value=customer_obj.new_number,
+                                                                  email_flag=False)
                     update_history.save()
                     message = get_template('CUSTOMER_MOBILE_NUMBER_UPDATE').format(customer_name=customer_obj.new_customer_name, new_number=customer_obj.new_number)
                     for phone_number in [customer_obj.new_number, old_number]:
@@ -351,7 +351,7 @@ def register_customer(request, group=None):
                                                                new_customer_name = data_source[0]['customer_name'],
                                                                new_number = data_source[0]['customer_phone_number'],
                                                                product_purchase_date = data_source[0]['product_purchase_date'],
-                                                               temp_customer_id = temp_customer_id, email_flag=True)
+                                                               temp_customer_id = temp_customer_id)
             customer_obj.save()
             logger.info('[Temporary_cust_registration]:: Initiating purchase feed')
             feed_remark = FeedLogWithRemark(len(data_source),
