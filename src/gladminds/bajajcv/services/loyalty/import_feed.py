@@ -141,7 +141,7 @@ class DistributorFeed(BaseFeed):
                                                 phone_number=distributor['mobile'],
                                                 address=distributor['city'])
                     dist_user_pro_object.save()
-                    asm_object = models.AreaSalesManager.objects.get(asm_id=distributor['asm_id'])
+                    asm_object = models.AreaSparesManager.objects.get(asm_id=distributor['asm_id'])
                     dist_object = models.Distributor(distributor_id=distributor['id'],
                                               asm=asm_object,
                                               user=dist_user_pro_object,
@@ -185,7 +185,7 @@ class NSMFeed(BaseFeed):
         total_failed = 0
         for nsm in self.data_source:
             try:
-                nsm_object = models.NationalSalesManager.objects.filter(territory=nsm['territory'])
+                nsm_object = models.NationalSparesManager.objects.filter(territory=nsm['territory'])
                 try:
                     user_object = models.UserProfile.objects.get(user__username=nsm['email'])
                 except ObjectDoesNotExist as ex:
@@ -194,7 +194,7 @@ class NSMFeed(BaseFeed):
                                                      first_name=nsm['name'], email=nsm['email'])
                 if not nsm_object:
                     nsm_temp_id = utils.generate_temp_id('TNSM')
-                    nsm_object = models.NationalSalesManager(nsm_id=nsm_temp_id,
+                    nsm_object = models.NationalSparesManager(nsm_id=nsm_temp_id,
                                                              name=nsm['name'],
                                                              email=nsm['email'],
                                                              phone_number=nsm['phone_number'],
@@ -209,7 +209,6 @@ class NSMFeed(BaseFeed):
                     nsm_object.user = user_object
                     nsm_object.save()  
             except Exception as ex:
-                print "4"
                 total_failed += 1
                 ex = "[NSMFeed]: id-{0} :: {1}".format(nsm['phone_number'], ex)
                 logger.error(ex)
@@ -230,9 +229,9 @@ class ASMFeed(BaseFeed):
                     user_object = self.register_user(Roles.ASMS,username=asm['email'],phone_number=asm['phone_number'],
                                                      first_name=asm['name'], state=asm['state'], email=asm['email'])                    
                 try:
-                    nsm_obj = models.NationalSalesManager.objects.get(territory=asm['territory'])
+                    nsm_obj = models.NationalSparesManager.objects.get(territory=asm['territory'])
                     try:
-                        asm_object = models.AreaSalesManager.objects.get(state=asm['state'])   
+                        asm_object = models.AreaSparesManager.objects.get(state=asm['state'])   
                         asm_object.name = asm['name']
                         asm_object.email= asm['email']
                         asm_object.phone_number = asm['phone_number']
@@ -241,7 +240,7 @@ class ASMFeed(BaseFeed):
                         asm_object.save()
                     except:
                         asm_temp_id = utils.generate_temp_id('TASM')
-                        asm_object = models.AreaSalesManager(asm_id=asm_temp_id,
+                        asm_object = models.AreaSparesManager(asm_id=asm_temp_id,
                                                                  nsm=nsm_obj,
                                                                  name=asm['name'],
                                                                  email=asm['email'],

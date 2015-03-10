@@ -126,7 +126,6 @@ def generate_otp(request):
                 phone_number = user_profile_obj[0].phone_number
             logger.info('OTP request received . username: {0}'.format(username))
             token = otp_handler.get_otp(user=user)
-            print token
             message = get_template('SEND_OTP').format(token)
             send_job_to_queue(send_otp, {'phone_number': phone_number, 'message': message,
                                          'sms_client': settings.SMS_CLIENT})
