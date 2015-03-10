@@ -13,6 +13,9 @@ class ModelFetcher(object):
     def __getattr__(self, key):
         if self.brand is None:
             brand = settings.BRAND
-        return getattr(import_module('gladminds.{0}.models'.format(brand)), key)
+        try:
+            return getattr(import_module('gladminds.{0}.models'.format(brand)), key)
+        except Exception as e:
+            return getattr(import_module('gladminds.core.models'), key)
 
 models = ModelFetcher()

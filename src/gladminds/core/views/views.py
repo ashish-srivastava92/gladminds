@@ -42,6 +42,7 @@ from django.core.context_processors import csrf
 from gladminds.core.model_fetcher import models
 from gladminds.core.model_helpers import format_phone_number
 from tastypie.http import HttpBadRequest
+from django.views.decorators.http import require_http_methods
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
@@ -123,18 +124,18 @@ def redirect_user(request):
             return HttpResponseRedirect(REDIRECT_USER.get(group))
     return HttpResponseBadRequest()
 
-
+@require_http_methods(["GET"])
 def user_logout(request):
-    if request.method == 'GET':
-        #TODO: Implement brand restrictions.
-        user_groups = utils.get_user_groups(request.user)
-        for group in USER_GROUPS:
-            if group in user_groups:
-                logout(request)
-                return HttpResponseRedirect('/login/')
-
-        return HttpResponseBadRequest()
-    return HttpResponseBadRequest('Not Allowed')
+    user_groups = utils.get_user_groups(request.user)
+    for group in USER_GROUPS:
+        if group in user_groups:
+            logout(request)
+            return HttpResponseRedirect('/login/') 
+    
+    next_url = '/'
+    next_url = request.GET.get('next')
+    logout(request)
+    return HttpResponseRedirect('/login/?next='+next_url)   
 
 
 @check_service_active(Services.FREE_SERVICE_COUPON)

@@ -9,17 +9,14 @@ class DatabaseAppsRouter(object):
     """
     A router to control all database operations on models for different
     databases.
-
     In case an app is not set in settings.DATABASE_APPS_MAPPING, the router
     will fallback to the `default` database.
-
     Settings example:
-
     DATABASE_APPS_MAPPING = {'app1': 'db1', 'app2': 'db2'}
     """
     @staticmethod
     def common_logic(model, hints={}):
-        if model._meta.app_label in _COMMON_APPS:
+        if model._meta.app_label in _COMMON_APPS+['core']:
             if 'instance' in hints.keys():
                 db = hints['instance']._state.db or settings.BRAND
             else:
@@ -59,7 +56,7 @@ class DatabaseAppsRouter(object):
 
     def allow_syncdb(self, db, model):
         """Make sure that apps only appear in the related database."""
-        if model._meta.app_label in _COMMON_APPS:
+        if model._meta.app_label in _COMMON_APPS+['core']:
             return True
 
         if model._meta.app_label in ['south'] and db in ['default']:
@@ -72,4 +69,3 @@ class DatabaseAppsRouter(object):
             return False
         
         return None
-    

@@ -279,9 +279,6 @@ class ServiceType(base_models.ServiceType):
 
 class Service(base_models.Service):
     service_type = models.ForeignKey(ServiceType)
-    training_material_url = models.FileField(upload_to='{0}/bajaj/training_material'.format(settings.ENV),
-                                  max_length=255, null=True, blank=True,
-                                  validators=[validate_file])
 
     class Meta(base_models.Service.Meta):
         app_label = _APP_NAME
@@ -353,10 +350,9 @@ class Mechanic(base_models.Mechanic):
     '''details of Mechanic'''
     registered_by_distributor = models.ForeignKey(Distributor, null=True, blank=True)
     preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
+
     state = models.ForeignKey(State)
-    image_url = models.FileField(upload_to='{0}/bajaj/mechanics'.format(settings.ENV),
-                                  max_length=255, null=True, blank=True,
-                                  validators=[validate_image])
+
 
     class Meta(base_models.Mechanic.Meta):
         app_label = _APP_NAME
@@ -403,9 +399,6 @@ class Partner(base_models.Partner):
 class ProductCatalog(base_models.ProductCatalog):
     '''details of Product Catalog'''
     partner = models.ForeignKey(Partner, null=True, blank=True)
-    image_url = models.FileField(upload_to='{0}/bajaj/redeem_products'.format(settings.ENV),
-                                  max_length=255, null=True, blank=True,
-                                  validators=[validate_image])
 
     class Meta(base_models.ProductCatalog.Meta):
         app_label = _APP_NAME
@@ -415,9 +408,6 @@ class RedemptionRequest(base_models.RedemptionRequest):
     product = models.ForeignKey(ProductCatalog)
     member = models.ForeignKey(Mechanic)
     partner = models.ForeignKey(Partner, null=True, blank=True)
-    image_url = models.FileField(upload_to='{0}/bajaj/proof_delivery'.format(settings.ENV),
-                              max_length=255, null=True, blank=True,
-                              validators=[validate_image])
 
     class Meta(base_models.RedemptionRequest.Meta):
         app_label = _APP_NAME
@@ -426,9 +416,6 @@ class WelcomeKit(base_models.WelcomeKit):
     '''details of welcome kit'''
     member = models.ForeignKey(Mechanic)
     partner = models.ForeignKey(Partner, null=True, blank=True)
-    image_url = models.FileField(upload_to='{0}/bajaj/proof_delivery'.format(settings.ENV),
-                              max_length=255, null=True, blank=True,
-                              validators=[validate_image])
 
     class Meta(base_models.WelcomeKit.Meta):
         app_label = _APP_NAME

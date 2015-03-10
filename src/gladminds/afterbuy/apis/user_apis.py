@@ -1,6 +1,8 @@
 from uuid import uuid4
 import json
 import logging
+import re
+from gladminds.core.utils import check_password
 from django.http.response import HttpResponse
 from django.conf.urls import url
 from tastypie.http import HttpBadRequest
@@ -42,8 +44,7 @@ class DjangoUserResources(ModelResource):
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         excludes = ['password', 'is_superuser']
         always_return_data = True
-
-
+        
 class ConsumerResource(CustomBaseModelResource):
 
     user = fields.ForeignKey(DjangoUserResources, 'user', null=True, blank=True, full=True)
@@ -94,7 +95,7 @@ class ConsumerResource(CustomBaseModelResource):
             logger.error('Invalid details, mobile {0} and exception {1}'.format(request.POST.get('phone_number', ''),ex))
             data = {'status': 0, 'message': ex}
         return HttpResponse(json.dumps(data), content_type="application/json")
-
+            
     @atomic(using=GmApps.AFTERBUY)
     def user_registration(self, request, **kwargs):
         if request.method != 'POST':
@@ -117,6 +118,9 @@ class ConsumerResource(CustomBaseModelResource):
         first_name = load.get('first_name')
         last_name = load.get('last_name','')
         password = load.get('password')
+        invalid_password = check_password(password)
+        if not invalid_password:
+            return HttpBadRequest("password is not meant according to the rules")
         if not phone_number or not password:
             return HttpBadRequest("phone_number, password required.")
         try:
@@ -230,6 +234,9 @@ class ConsumerResource(CustomBaseModelResource):
         otp_token = load.get('otp_token')
         password = load.get('password1')
         repassword = load.get('password2')
+        invalid_password = check_password(repassword)
+        if (invalid_password):
+            return HttpBadRequest("password is not meant according to the rules")
         auth_key = load.get('auth_key')
         user_details = {}
         if not type:
