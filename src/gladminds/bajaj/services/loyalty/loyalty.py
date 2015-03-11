@@ -78,7 +78,7 @@ class LoyaltyService(CoreLoyaltyService):
         phone_number=utils.get_phone_number_format(mech.phone_number)
         message=get_template('COMPLETE_FORM').format(
                         mechanic_name=mech.first_name)
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
         self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
         LOG.error('[send_welcome_sms]:{0}:: {1}'.format(
@@ -124,7 +124,7 @@ class LoyaltyService(CoreLoyaltyService):
         phone_number=utils.get_phone_number_format(member.phone_number)
         message=get_template('WELCOME_KIT_DELIVERY').format(
                         mechanic_name=member.first_name)
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
         self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
         LOG.error('[send_request_status_sms]:{0}:: {1}'.format(
@@ -172,7 +172,7 @@ class LoyaltyService(CoreLoyaltyService):
                         transaction_id=redemption_request.transaction_id,
                         product_name=redemption_request.product.description,
                         status=redemption_request.status.lower())
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
         self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
         LOG.error('[send_request_status_sms]:{0}:: {1}'.format(
@@ -230,7 +230,7 @@ class LoyaltyService(CoreLoyaltyService):
                                             phone_number, ex))
         finally:
             phone_number = utils.get_phone_number_format(phone_number)
-            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
             self.queue_service(send_point, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
         return {'status': True, 'message': message}
@@ -304,7 +304,7 @@ class LoyaltyService(CoreLoyaltyService):
             LOG.error('[accumulate_point]:{0}:: {1}'.format(phone_number, ex))
         finally:
             phone_number = utils.get_phone_number_format(phone_number)
-            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
             self.queue_service(send_point, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
         return {'status': True, 'message': message}
@@ -354,7 +354,7 @@ class LoyaltyService(CoreLoyaltyService):
             LOG.error('[redeem_point]:{0}:: {1}'.format(phone_number, ex))
         finally:
             phone_number = utils.get_phone_number_format(phone_number)
-            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
             self.queue_service(send_point, {'phone_number': phone_number,
                   'message': message, "sms_client": settings.SMS_CLIENT})
         return {'status': True, 'message': message}

@@ -188,13 +188,11 @@ class ProductDispatchFeed(BaseFeed):
                     '[Info: ProductDispatchFeed_product_data]: {0}'.format(done))
                 try:
                     dealer_data = self.check_or_create_dealer(dealer_id=product['dealer_id'])
-                    self.get_or_create_product_type(
-                        product_type=product['product_type'])
-                    producttype_data = models.ProductType.objects.get(
-                        product_type=product['product_type'])
-                    invoice_date = product['invoice_date']
+#                     self.get_or_create_product_type(
+#                         product_type=product['product_type'])
+#                     producttype_data = models.ProductType.objects.get( product_type=product['product_type'])
                     product_data = models.ProductData(
-                        product_id=product['vin'], product_type=producttype_data, invoice_date=invoice_date, dealer_id=dealer_data)
+                        product_id=product['vin'], sku_code=product['product_type'], invoice_date=product['invoice_date'], dealer_id=dealer_data)
                     product_data.save()
                     logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN-{0} UCN-{1}'.format(product['vin'], product['unique_service_coupon']))
                 except Exception as ex:
@@ -341,7 +339,7 @@ def update_coupon_data(sender, **kwargs):
                     customer_name=customer_name, sap_customer_id=customer_id)
             
             sms_log(
-                receiver=customer_phone_number, action='SEND TO QUEUE', message=message)
+                settings.BRAND, receiver=customer_phone_number, action='SEND TO QUEUE', message=message)
             send_job_to_queue(send_on_product_purchase, {"phone_number":customer_phone_number, "message":message, "sms_client":settings.SMS_CLIENT}) 
         except Exception as ex:
             logger.info("[Exception]: Signal-In Update Coupon Data %s" % ex)
