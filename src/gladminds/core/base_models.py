@@ -223,7 +223,8 @@ class ProductData(BaseModel):
     engine = models.CharField(max_length=255, null=True, blank=True)
     veh_reg_no = models.CharField(max_length=15, null=True, blank=True)
     is_active = models.BooleanField(default=True)
-
+    sku_code = models.CharField(max_length=20, null=True, blank=True)
+    
     class Meta:
         abstract = True
         verbose_name_plural = "Product Data"
