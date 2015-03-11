@@ -360,7 +360,7 @@
     "pk": 40,
     "fields": {
       "template_key":"SEND_ACCUMULATED_POINT",
-      "template":"Dear {mechanic_name}, {added_points} points updated. Total points: {total_points}.{invalid_upcs} To Redeem, Send SMS with Code RD<SPACE><PRODUCT CODE> to 9561112809",
+      "template":"Dear {mechanic_name}, {added_points} points updated. Total points: {total_points}.{invalid_upcs} To Redeem, Send SMS with Code RD<SPACE><MEMBER ID><SPACE><PRODUCT CODE> to 9561112809",
       "description":"Send this message when mechanic send product to accumulate points"
     }
   },
