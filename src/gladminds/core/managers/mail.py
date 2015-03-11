@@ -33,7 +33,7 @@ def send_email_with_file_attachment(sender, receiver, subject, body, filename, c
         message = EmailMessage(subject, body, sender, receiver)
         message.attach(filename + yesterday.strftime("%b %d %Y") +'.csv', content.getvalue(), 'text/csv')
         message.send()
-        audit_manager.email_log(brand=settings.BRAND, subject=subject, message=" ", sender=sender, receiver=receiver);
+        audit_manager.email_log(settings.BRAND, subject, " ", sender, receiver);
         return True
     except Exception as ex:
         logger.error('Exception while sending mail {0}'.format(ex))
@@ -53,7 +53,7 @@ def send_email(sender, receiver, subject, body, message=None,smtp_server=setting
         mail = smtplib.SMTP(smtp_server)
         mail.sendmail(from_addr=sender, to_addrs=receiver, msg=msg.as_string())
         mail.quit()
-        audit_manager.email_log(brand=settings.BRAND, subject=subject, message=message, sender=sender, receiver=receiver);
+        audit_manager.email_log(settings.BRAND, subject, message, sender, receiver);
         return True
     except Exception as ex:
         logger.error('Exception while sending mail: {0}'.format(ex))
