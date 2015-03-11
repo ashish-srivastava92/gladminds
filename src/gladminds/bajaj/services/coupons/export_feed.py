@@ -45,7 +45,7 @@ class ExportCouponRedeemFeed(BaseExportFeed):
                 total_failed = total_failed + 1
         return items, item_batch, total_failed
 
-    def export(self, items=None, item_batch=None, total_failed_on_feed=0):
+    def export(self, brand, items=None, item_batch=None, total_failed_on_feed=0):
         logger.info(
             "[ExportCouponRedeemFeed]: Export {0}".format(self.feed_type))
         client = self.get_client()
@@ -74,7 +74,7 @@ class ExportCouponRedeemFeed(BaseExportFeed):
             except Exception as ex:
                 total_failed = total_failed + 1
                 logger.error("[ExportCouponRedeemFeed]: Error:: {0} - {1}".format(item['GCP_UCN_NO'], ex))
-        feed_log(brand=settings.BRAND, feed_type=self.feed_type, total_data_count=len(items)\
+        feed_log(brand, feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
@@ -136,7 +136,7 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
                 total_failed = total_failed + 1
         return items, item_batch, total_failed
 
-    def export(self, items=None, item_batch=None, total_failed_on_feed=0):
+    def export(self, brand, items=None, item_batch=None, total_failed_on_feed=0):
         logger.info(
             "[ExportCustomerRegistrationFeed]: Export {0}".format(self.feed_type))
         client = self.get_client()
@@ -169,7 +169,7 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
             except Exception as ex:
                 total_failed = total_failed + 1
                 logger.error("[ExportCustomerRegistrationFeed]:  Error:: {0} - {1}".format(item['CUSTOMER_ID'], ex))
-        feed_log(brand=settings.BRAND, feed_type=self.feed_type, total_data_count=len(items)\
+        feed_log(brand, feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
@@ -251,7 +251,7 @@ class ExportPurchaseSynFeed(BaseExportFeed):
                 total_failed = total_failed + 1
         return items, item_batch, total_failed
 
-    def export(self, items=None, item_batch=None, total_failed_on_feed=0):
+    def export(self, brand, items=None, item_batch=None, total_failed_on_feed=0):
         logger.info(
             "Export {2}: Items:{0} and Item_batch: {1}"\
             .format(items, item_batch, self.feed_type))
@@ -283,7 +283,7 @@ class ExportPurchaseSynFeed(BaseExportFeed):
             except Exception as ex:
                 total_failed = total_failed + 1
                 logger.error("[ExportPurchaseSynFeed]: Error:: {0} - {1}".format(item['CHASSIS'], ex))
-        feed_log(brand=settings.BRAND, feed_type=self.feed_type, total_data_count=len(items)\
+        feed_log(brand, feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
