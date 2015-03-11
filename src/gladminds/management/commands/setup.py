@@ -33,7 +33,7 @@ _BAJAJ_LOYALTY_SUPERADMINS = [('gladminds', '', 'gladminds!123'),
                               ('kumarashish@bajajauto.co.in', 'kumarashish@bajajauto.co.in',
                                'kumarashish!123')]
 _BAJAJ_LOYALTY_NSM = [('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123', 'NSM002', 'south', 'Raghunath')]
-_BAJAJ_LOYALTY_ASM = [('spremnath@bajajauto.co.in', 'spremnath@bajajauto.co.in', 'spremnath!123', 'ASM004', 'PREM NATH', '+919176339712', 'Tamil Nadu')]
+_BAJAJ_LOYALTY_ASM = [('prajurkar@bajajauto.co.in', 'prajurkar@bajajauto.co.in', 'spremnath!123', 'ASM004', 'PREM NATH', '+919176339712', 'Tamil Nadu')]
 _BAJAJ_ZSM = [('mspendharkar@bajajauto.co.in', 'mspendharkar@bajajauto.co.in', 'milindpendharkar@123', 'Milind Pendharkar')]
 
 
