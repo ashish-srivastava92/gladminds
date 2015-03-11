@@ -342,7 +342,7 @@ def get_response(feed_remark):
     if feed_remark.failed_feeds > 0:
         remarks = feed_remark.remarks.elements()
         for remark in remarks:
-            feed_failure_log(feed_type=feed_remark.feed_type, reason=remark)
+            feed_failure_log(brand=settings.BRAND, feed_type=feed_remark.feed_type, reason=remark)
         return FAILED
     else:
         return SUCCESS

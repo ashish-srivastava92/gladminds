@@ -14,7 +14,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
-
+CONN_MAX_AGE = None
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
