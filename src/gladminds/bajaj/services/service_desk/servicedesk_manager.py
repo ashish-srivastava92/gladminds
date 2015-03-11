@@ -111,7 +111,7 @@ def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=Non
     finally:
         LOG.info("Send complain message received successfully with {0}".format(message))
         phone_number = utils.get_phone_number_format(phone_number)
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(brand=settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
         send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     return {'status': True, 'message': message}
 
@@ -179,7 +179,7 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
         LOG.info("Send complain message received successfully with %s" % message)
         if phone_number:
             phone_number = utils.get_phone_number_format(phone_number)
-            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(brand=settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
             send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         if dealer_email:
             context = utils.create_context('FEEDBACK_DETAIL_TO_DEALER', gladminds_feedback_object)

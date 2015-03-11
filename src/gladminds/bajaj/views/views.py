@@ -323,7 +323,7 @@ def register_customer(request, group=None):
                     message = get_template('CUSTOMER_MOBILE_NUMBER_UPDATE').format(customer_name=customer_obj.new_customer_name, new_number=customer_obj.new_number)
                     for phone_number in [customer_obj.new_number, old_number]:
                         phone_number = utils.get_phone_number_format(phone_number)
-                        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+                        sms_log(brand=settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
                         send_job_to_queue(send_customer_phone_number_update_message, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
                             
                     if models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS).exists():
@@ -340,7 +340,7 @@ def register_customer(request, group=None):
                         managers = models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS)
                         for manager in managers:
                             phone_number = utils.get_phone_number_format(manager.phone_number)
-                            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+                            sms_log(brand=settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
                             send_job_to_queue(send_customer_phone_number_update_message, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
 
             else:

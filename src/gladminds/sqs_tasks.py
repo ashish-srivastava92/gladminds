@@ -55,7 +55,7 @@ def send_registration_detail(*args, **kwargs):
         send_registration_detail.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message)
 
 def customer_detail_recovery(*args, **kwargs):
     """
@@ -71,7 +71,7 @@ def customer_detail_recovery(*args, **kwargs):
         customer_detail_recovery.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message)
 
 @shared_task
 def send_service_detail(*args, **kwargs):
@@ -88,7 +88,7 @@ def send_service_detail(*args, **kwargs):
         send_service_detail.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message)
 
 @shared_task
 def send_coupon_validity_detail(*args, **kwargs):
@@ -105,7 +105,7 @@ def send_coupon_validity_detail(*args, **kwargs):
         send_coupon_validity_detail.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message)
 
 @shared_task
 def send_coupon_detail_customer(*args, **kwargs):
@@ -125,7 +125,7 @@ def send_coupon_detail_customer(*args, **kwargs):
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         logger.info('[send_coupon_detail_customer]: SENT MESSAGE FINALLY')
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message)
 
 @shared_task
 def send_servicedesk_feedback_detail(*args, **kwargs):
@@ -142,7 +142,7 @@ def send_servicedesk_feedback_detail(*args, **kwargs):
         send_servicedesk_feedback_detail.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message)
 
 @shared_task
 def send_reminder_message(*args, **kwargs):
@@ -159,7 +159,7 @@ def send_reminder_message(*args, **kwargs):
         send_reminder_message.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message)
 
 @shared_task
 def send_customer_phone_number_update_message(*args, **kwargs):
@@ -176,7 +176,7 @@ def send_customer_phone_number_update_message(*args, **kwargs):
         send_reminder_message.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message)
 
 @shared_task
 def send_coupon_close_message(*args, **kwargs):
@@ -193,7 +193,7 @@ def send_coupon_close_message(*args, **kwargs):
         send_coupon_close_message.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message)
 
 @shared_task
 def send_loyalty_escalation_message(*args, **kwargs):
@@ -210,7 +210,7 @@ def send_loyalty_escalation_message(*args, **kwargs):
         send_reminder_message.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message)
 
 @shared_task
 def send_otp(*args, **kwargs):
@@ -225,7 +225,7 @@ def send_otp(*args, **kwargs):
         status = "failed"
         send_otp.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message, brand=brand)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message, brand=brand)
 
 
 @shared_task
@@ -239,7 +239,7 @@ def send_coupon(*args, **kwargs):
         status = "failed"
         send_coupon.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message)
 
 @shared_task
 def send_close_sms_customer(*args, **kwargs):
@@ -256,7 +256,7 @@ def send_close_sms_customer(*args, **kwargs):
         send_close_sms_customer.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message)
 
 
 @shared_task
@@ -271,7 +271,7 @@ def send_brand_sms_customer(*args, **kwargs):
         send_brand_sms_customer.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message)
 
 @shared_task
 def send_invalid_keyword_message(*args, **kwargs):
@@ -288,7 +288,7 @@ def send_invalid_keyword_message(*args, **kwargs):
         send_invalid_keyword_message.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message)
 
 @shared_task
 def send_on_product_purchase(*args, **kwargs):
@@ -305,7 +305,7 @@ def send_on_product_purchase(*args, **kwargs):
         send_on_product_purchase.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message)
         
 
 @shared_task
@@ -324,7 +324,7 @@ def send_point(*args, **kwargs):
         logger.error("[Eception:send_point]:{0}".format(ex))
         send_point.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message)
 
 @shared_task
 def send_loyalty_sms(*args, **kwargs):
@@ -341,7 +341,7 @@ def send_loyalty_sms(*args, **kwargs):
         status = "failed"
         send_loyalty_sms.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        sms_log(status=status, receiver=phone_number, message=message, brand=brand)
+        sms_log(brand=settings.BRAND,status=status, receiver=phone_number, message=message, brand=brand)
 
 @shared_task
 def send_reminder(*args, **kwargs):
@@ -490,7 +490,7 @@ def export_asc_registeration_to_sap(*args, **kwargs):
             feed_data = 'ASC Registration for this %s is failing' % phone_number
             mail.send_registration_failure(feed_data=feed_data,
                                feed_type="ASC Registration Feed", brand=brand)
-        feed_log(feed_type="ASC Registration Feed", total_data_count=1,
+        feed_log(brand=settings.BRAND, feed_type="ASC Registration Feed", total_data_count=1,
          failed_data_count=total_failed, success_data_count=1 - total_failed,
                  action='Sent', status=export_status)
 
@@ -554,7 +554,7 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
     finally:
         logger.info("Send complain message received successfully with %s" % message)
         phone_number = utils.get_phone_number_format(phone_number)
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(brand=settings.BRAND,receiver=phone_number, action=AUDIT_ACTION, message=message)
         send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     return {'status': True, 'message': message}
 
@@ -634,7 +634,7 @@ def welcome_kit_due_date_escalation(*args, **kwargs):
                                                                                       status=welcome_kit.status)    
         for phone_number in escalation_list_detail['sms']: 
             phone_number = utils.get_phone_number_format(phone_number)
-            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(brand=settings.BRAND,receiver=phone_number, action=AUDIT_ACTION, message=message)
             send_job_to_queue(send_loyalty_escalation_message,
                                {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         welcome_kit.resolution_flag = True
@@ -660,7 +660,7 @@ def redemption_request_due_date_escalation(*args, **kwargs):
                                                                                       status=redemption_request.status)    
         for phone_number in escalation_list_detail['sms']: 
             phone_number = utils.get_phone_number_format(phone_number)
-            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(brand=settings.BRAND,receiver=phone_number, action=AUDIT_ACTION, message=message)
             send_job_to_queue(send_loyalty_escalation_message,
                                {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         redemption_request.resolution_flag = True
