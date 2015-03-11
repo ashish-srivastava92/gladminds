@@ -2,7 +2,8 @@ from gladminds.core.loaders.module_loader import get_model
 import datetime
 from django.conf import settings
 from gladminds.core.auth_helper import GmApps
-
+import logging
+logger = logging.getLogger("gladminds")
 
 def sms_log(action='SENT', sender='+1 469-513-9856', receiver=None,
               message=None, status='success', brand=None):
@@ -13,6 +14,7 @@ def sms_log(action='SENT', sender='+1 469-513-9856', receiver=None,
     if receiver == '9999999999':
         status = 'fail'
     sm_model = get_model('SMSLog', brand=brand)
+    logger.info("[sms_log]: {1} :: {0}".format(action, sm_model))
     sms_log = sm_model(action=action, sender=sender,
                                receiver=receiver, status=status,
                                message=message)
