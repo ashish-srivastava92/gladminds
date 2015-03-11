@@ -5,6 +5,7 @@ from spyne.protocol.soap import Soap11
 from spyne.server.django import DjangoApplication
 from gladminds.bajaj.services.coupons import feed_models as fsc_feed
 from gladminds.bajaj.services.loyalty import feed_models as loyalty_feed
+from gladminds.bajajcv.services.loyalty import feed_models as loyalty_feed
 
 tns = settings.WSDL_TNS
 

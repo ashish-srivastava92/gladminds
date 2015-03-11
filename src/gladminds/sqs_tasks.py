@@ -727,7 +727,7 @@ def export_member_redemption_to_sap(*args, **kwargs):
     '''
     redemption_requests = loyalty_export.ExportRedemptionFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
-                  wsdl_url=settings.ACCUMULATION_SYNC_WSDL_URL, feed_type='Redemption Request Feed')
+                  wsdl_url=settings.REDEMPTION_SYNC_WSDL_URL, feed_type='Redemption Request Feed')
     feed_export_data = redemption_requests.export_data()
     if len(feed_export_data[0]) > 0:
         redemption_requests.export(items=feed_export_data[0], item_batch=feed_export_data[

@@ -8,8 +8,8 @@ from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib.admin import DateFieldListFilter
 from django import forms
 
-from gladminds.bajaj import models
-from gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
+from gladminds.bajajcv import models
+from gladminds.bajajcv.services.loyalty.loyalty import LoyaltyService
 from gladminds.core import utils
 from gladminds.core.auth_helper import GmApps, Roles
 from gladminds.core.admin_helper import GmModelAdmin
@@ -18,7 +18,7 @@ from django.conf import settings
 from gladminds.core.auth_helper import Roles
 from gladminds.core import constants
 
-class BajajAdminSite(AdminSite):
+class BajajcvAdminSite(AdminSite):
     pass
 
 
@@ -203,7 +203,7 @@ class CouponAdmin(GmModelAdmin):
         '''
             This if condition only for landing page
         '''
-        if not request.GET.has_key('q') and not request.GET.has_key('_changelist_filters'):
+        if not request.GET and not request.POST and request.path == "/gladminds/coupondata/":
             qs = qs.filter(status=4)
         return qs
 
@@ -374,17 +374,8 @@ class ServiceDeskUserAdmin(GmModelAdmin):
 '''Admin View for loyalty'''
 class NSMAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    search_fields = ('nsm_id', 'name', 'phone_number')
-    list_display = ('nsm_id', 'name', 'email', 'phone_number','get_territory')
-
-    def get_territory(self, obj):
-        territories = obj.territory.all()
-        if territories:
-            return ' | '.join([str(territory.territory) for territory in territories])
-        else:
-            return None
-
-    get_territory.short_description = 'Territory'
+    search_fields = ('nsm_id', 'name', 'phone_number', 'territory')
+    list_display = ('nsm_id', 'name', 'email', 'phone_number','territory')
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('nsm_id',)
@@ -400,17 +391,8 @@ class ASMAdmin(GmModelAdmin):
     search_fields = ('asm_id', 'nsm__name',
                      'phone_number', 'state')
     list_display = ('asm_id', 'name', 'email',
-                     'phone_number', 'get_state', 'nsm')
+                     'phone_number', 'state', 'nsm')
     
-
-    def get_state(self, obj):
-        states = obj.state.all()
-        if states:
-            return ' | '.join([str(state.state_name) for state in states])
-        else:
-            return None
-    get_state.short_description = 'State'
-
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('asm_id',)
         form = super(ASMAdmin, self).get_form(request, obj, **kwargs)
@@ -526,9 +508,9 @@ class MechanicForm(forms.ModelForm):
 class MechanicAdmin(GmModelAdmin):
     list_filter = ('form_status',)
     form = MechanicForm
-    search_fields = ('mechanic_id', 'permanent_id',
+    search_fields = ('mechanic_id',
                      'phone_number', 'first_name',
-                     'state__state_name', 'district')
+                     'state', 'district')
     list_display = ('get_mechanic_id','first_name', 'date_of_birth',
                     'phone_number', 'shop_name', 'district',
                     'state', 'pincode', 'registered_by_distributor')
@@ -549,8 +531,8 @@ class MechanicAdmin(GmModelAdmin):
         """
         query_set = self.model._default_manager.get_query_set()
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
-            query_set=query_set.filter(state=asm_state_list)
+            asm=models.AreaSparesManager.objects.get(user__user=request.user)
+            query_set=query_set.filter(state=asm.state)
 
         return query_set
 
@@ -559,10 +541,16 @@ class MechanicAdmin(GmModelAdmin):
         form = super(MechanicAdmin, self).get_form(request, obj, **kwargs)
         return form
 
-#     def save_model(self, request, obj, form, change):
-#         if not (obj.phone_number == '' or (len(obj.phone_number) < 10)):
-#             obj.phone_number=utils.mobile_format(obj.phone_number)
-#         super(MechanicAdmin, self).save_model(request, obj, form, change)
+    def save_model(self, request, obj, form, change):
+        form_status = True
+        for field in obj._meta.fields:
+            if field.name in constants.MANDATORY_MECHANIC_FIELDS and not getattr(obj, field.name):
+                form_status = False
+        obj.phone_number=utils.mobile_format(obj.phone_number)
+        super(MechanicAdmin, self).save_model(request, obj, form, change)
+        if form_status and not obj.sent_sms:
+            LoyaltyService.send_welcome_sms(obj)
+            LoyaltyService.initiate_welcome_kit(obj)
 
 class CommentThreadInline(TabularInline):
     model = models.CommentThread
@@ -623,8 +611,8 @@ class RedemptionRequestAdmin(GmModelAdmin):
         elif request.user.groups.filter(name=Roles.LPS).exists():
             query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=request.user)
         elif request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
-            query_set=query_set.filter(member__state=asm_state_list)
+            asm=models.AreaSparesManager.objects.get(user__user=request.user)
+            query_set=query_set.filter(member__state=asm.state)
 
         return query_set
 
@@ -765,8 +753,8 @@ class WelcomeKitAdmin(GmModelAdmin):
         elif request.user.groups.filter(name=Roles.LPS).exists():
             query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=request.user)
         elif request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
-            query_set=query_set.filter(member__state=asm_state_list)
+            asm=models.AreaSparesManager.objects.get(user__user=request.user)
+            query_set=query_set.filter(member__state=asm.state)
 
         return query_set
 
@@ -795,7 +783,7 @@ class ConstantAdmin(GmModelAdmin):
     search_fields = ('constant_name',  'constant_value')
     list_display = ('constant_name',  'constant_value',)
 
-brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
+brand_admin = BajajcvAdminSite(name=GmApps.BAJAJCV)
 
 brand_admin.register(User, UserAdmin)
 brand_admin.register(Group, GroupAdmin)
@@ -844,4 +832,3 @@ brand_admin.register(models.ServiceDeskUser, ServiceDeskUserAdmin)
 brand_admin.register(models.Service, ServiceAdmin)
 brand_admin.register(models.ServiceType)
 brand_admin.register(models.Constant, ConstantAdmin)
-brand_admin.register(models.Feedback)

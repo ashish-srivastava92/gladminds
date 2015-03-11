@@ -24,7 +24,7 @@ class GladmindsMessageMiddleware(object):
     def process_request(self, request, **kwargs):
         source_client = request.GET.get('__gm_source', None)
 
-        if settings.ENV in ['local', 'test']:
+        if settings.ENV in ['local', 'test', 'staging']:
             SMS_CLIENT.value = None
             return
 

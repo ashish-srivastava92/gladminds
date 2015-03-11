@@ -17,9 +17,12 @@ class TastypieApiMixin(object):
     """
     def __init__(self, *args, **kwargs):
         super(TastypieApiMixin, self).__init__(*args, **kwargs)
-        tastypie_api_module = getattr(settings, 'TASTYPIE_SWAGGER_API_MODULE', None)
-        if settings.BRAND in settings.BRANDS:
-            tastypie_api_module = 'gladminds.{0}.urls.api_v1'.format(settings.BRAND)
+        #tastypie_api_module = getattr(settings, 'TASTYPIE_SWAGGER_API_MODULE', None)
+        tastypie_api_module = 'gladminds.{0}.urls.api_v1'.format(settings.BRAND)
+        if settings.BRAND not in settings.BRANDS:
+            tastypie_api_module = 'gladminds.core.urls.api_v1'
+        if settings.BRAND == 'admin':
+            tastypie_api_module = 'gladminds.urls.api_v1'
         path, attr = tastypie_api_module.rsplit('.', 1)
         try:
             tastypie_api = getattr(sys.modules[path], attr, None)

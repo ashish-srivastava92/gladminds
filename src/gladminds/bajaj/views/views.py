@@ -3,7 +3,10 @@ import json
 import random
 import datetime
 import operator
+import re
 
+from gladminds.core.utils import check_password
+from tastypie.http import HttpBadRequest
 from collections import OrderedDict
 from django.shortcuts import render_to_response, render
 from django.http.response import HttpResponseRedirect, HttpResponse,\
@@ -84,10 +87,9 @@ def user_logout(request):
         return HttpResponseBadRequest()
     return HttpResponseBadRequest('Not Allowed')
 
-
 @check_service_active(Services.FREE_SERVICE_COUPON)
 @login_required()
-def change_password(request): 
+def change_password(request):
     if request.method == 'GET':
         return render(request, 'portal/change_password.html')
     if request.method == 'POST':
@@ -98,9 +100,13 @@ def change_password(request):
             new_password = request.POST.get('newPassword')
             check_pass = user.check_password(str(old_password))
             if check_pass:
-                user.set_password(str(new_password))
-                user.save()
-                data = {'message': 'Password Changed successfully', 'status': True}
+                invalid_password = check_password(new_password)
+                if (invalid_password):
+                    data = {'message':"password does not match the rules",'status':False}
+                else:    
+                    user.set_password(str(new_password))
+                    user.save()
+                    data = {'message': 'Password Changed successfully', 'status': True}
             else:
                 data = {'message': 'Old password wrong', 'status': False}
             return HttpResponse(json.dumps(data), content_type='application/json')
@@ -313,12 +319,12 @@ def register_customer(request, group=None):
                     customer_obj.product_data = product_obj[0]
                     customer_obj.sent_to_sap = False
                     customer_obj.dealer_asc_id = str(request.user)
-                    customer_obj.email_flag = False
                     customer_obj.mobile_number_update_count+=1
                     update_history = models.CustomerUpdateHistory(temp_customer=customer_obj,
                                                                   updated_field='Phone Number',
                                                                   old_value=old_number,
-                                                                  new_value=customer_obj.new_number)
+                                                                  new_value=customer_obj.new_number,
+                                                                  email_flag=False)
                     update_history.save()
                     message = get_template('CUSTOMER_MOBILE_NUMBER_UPDATE').format(customer_name=customer_obj.new_customer_name, new_number=customer_obj.new_number)
                     for phone_number in [customer_obj.new_number, old_number]:
@@ -351,7 +357,7 @@ def register_customer(request, group=None):
                                                                new_customer_name = data_source[0]['customer_name'],
                                                                new_number = data_source[0]['customer_phone_number'],
                                                                product_purchase_date = data_source[0]['product_purchase_date'],
-                                                               temp_customer_id = temp_customer_id, email_flag=True)
+                                                               temp_customer_id = temp_customer_id)
             customer_obj.save()
             logger.info('[Temporary_cust_registration]:: Initiating purchase feed')
             feed_remark = FeedLogWithRemark(len(data_source),
