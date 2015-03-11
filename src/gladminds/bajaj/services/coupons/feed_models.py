@@ -240,6 +240,86 @@ class CreditNoteModelList(ComplexModel):
     __namespace__ = tns
     CreditNoteData = Array(CreditNoteModel)
 
+class ItemFieldModel(ComplexModel):
+    __namespace__ = tns
+    BOM_NUMBER = Unicode
+    PART_NUMBER = Unicode
+    REVISION_NO = Unicode
+    QUANTITY = Unicode
+    UOM = Unicode
+    VALID_FROM = Date(default=None)
+    VALID_TO = Date(default=None)
+    PLATE_ID = Unicode
+    PLATE_TXT = Unicode
+    SERIAL_NUMBER = Unicode
+    CHANGE_NUMBER = Unicode
+    CHANGE_NUMBER_TO = Unicode
+    ITEM = Unicode
+    ITEM_ID = Unicode
+   
+class HeaderFieldModel(ComplexModel):
+    __namespace__ = tns
+    SKU_CODE = Unicode
+    PLANT = Unicode
+    BOM_TYPE = Unicode
+    BOM_NO = Unicode
+    CREATED_ON = Date(default=None)
+    VALID_FROM = Date(default=None)
+    VALID_TO = Date(default=None)
+   
+class TimeStampModel(ComplexModel):
+    __namespace__ = tns
+    TIMESTAMP = Unicode(pattern=pattern)
+
+class BOMModel(ComplexModel):
+    __namespace__ = tns
+    HEADERFIELD = HeaderFieldModel
+    ITEMFIELD =  ItemFieldModel
+    BOMTIMESTAMP = TimeStampModel
+    
+class BillOfMaterialList(ComplexModel):
+    __namespace__ = tns
+    BOMData = Array(BOMModel)
+
+class BillOfMaterialService(ServiceBase):
+    __namespace__ = tns
+
+    @srpc(BillOfMaterialList, AuthenticationModel,  _returns=Unicode)
+    def postBillOfMaterial(ObjectList, Credential):
+        try:
+            bom_list = []
+            for bom in ObjectList.BOMData:
+                bom_list.append({
+                                 'sku_code': bom.HEADERFIELD.SKU_CODE,
+                                 'plant': bom.HEADERFIELD.PLANT,
+                                 'bom_type': bom.HEADERFIELD.BOM_TYPE,
+                                 'bom_number_header': bom.HEADERFIELD.BOM_NO,
+                                 'created_on': bom.HEADERFIELD.CREATED_ON,
+                                 'valid_from_header': bom.HEADERFIELD.VALID_FROM,
+                                 'valid_to_header': bom.HEADERFIELD.VALID_TO,
+                                 
+                                 'bom_number' : bom.ITEMFIELD.BOM_NUMBER, 
+                                 'part_number' : bom.ITEMFIELD.PART_NUMBER,  
+                                 'revision_number' : bom.ITEMFIELD.REVISION_NO, 
+                                 'quantity' : bom.ITEMFIELD.QUANTITY,
+                                 'uom' :bom.ITEMFIELD.UOM,
+                                 'valid_from' : bom.ITEMFIELD.VALID_FROM,
+                                 'valid_to' : bom.ITEMFIELD.VALID_TO,
+                                 'plate_id' : bom.ITEMFIELD.PLATE_ID,
+                                 'plate_txt' : bom.ITEMFIELD.PLATE_TXT,
+                                 'serial_number' : bom.ITEMFIELD.SERIAL_NUMBER,
+                                 'change_number' : bom.ITEMFIELD.CHANGE_NUMBER,
+                                 'change_number_to' : bom.ITEMFIELD.CHANGE_NUMBER_TO,
+                                 'item' : bom.ITEMFIELD.ITEM,
+                                 'item_id' : bom.ITEMFIELD.ITEM_ID,
+                                    
+                                 'timestamp':bom.BOMTIMESTAMP.TIMESTAMP
+                                })
+            save_to_db(feed_type='BOM', data_source=bom_list)
+            return SUCCESS
+        except Exception as ex:
+            return FAILED
+  
 class BrandService(ServiceBase):
     __namespace__ = tns
 
