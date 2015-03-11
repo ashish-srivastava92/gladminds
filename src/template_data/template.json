@@ -368,7 +368,7 @@
     "model": "gladminds.messagetemplate",
     "pk": 41,
     "fields": {
-      "template_key":"SEND_INVALID_UCP",
+      "template_key":"SEND_INVALID_UPC",
       "template":"Invalid Entry... UPC does not exist in our records. Please contact our Customer Care at: +91-9741775128",
       "description":"Send this message when single UPC does not exists in our records"
     }

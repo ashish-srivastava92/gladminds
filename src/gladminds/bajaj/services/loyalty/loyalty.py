@@ -237,15 +237,15 @@ class LoyaltyService(CoreLoyaltyService):
 
     def accumulate_point(self, sms_dict, phone_number):
         '''accumulate points with given upc'''
-        unique_product_codes = set((sms_dict['ucp'].upper()).split())
-        valid_ucp=[]
+        unique_product_codes = set((sms_dict['upc'].upper()).split())
+        valid_upc=[]
         valid_product_number=[]
         invalid_upcs_message=''
         try:
-            if len(unique_product_codes)>constants.MAX_UCP_ALLOWED:
+            if len(unique_product_codes)>constants.MAX_UPC_ALLOWED:
                 message=get_template('MAX_ALLOWED_UPC').format(
-                                        max_limit=constants.MAX_UCP_ALLOWED)
-                raise ValueError('Maximum allowed ucp exceeded')
+                                        max_limit=constants.MAX_UPC_ALLOWED)
+                raise ValueError('Maximum allowed upc exceeded')
             mechanic = models.Mechanic.objects.filter(phone_number=utils.mobile_format(phone_number))
             if not mechanic:
                 message=get_template('UNREGISTERED_USER')
@@ -262,7 +262,7 @@ class LoyaltyService(CoreLoyaltyService):
                 accumulation_log.save()
                 for spare in spares:
                     valid_product_number.append(spare.part_number)
-                    valid_ucp.append(spare.unique_part_code)
+                    valid_upc.append(spare.unique_part_code)
                     accumulation_log.upcs.add(spare)
                 spare_points = models.SparePartPoint.objects.get_part_number(valid_product_number)
                 for spare_point in spare_points:
@@ -273,7 +273,7 @@ class LoyaltyService(CoreLoyaltyService):
                 spares.update(is_used=True)
                 accumulation_log.total_points=total_points
                 accumulation_log.save()
-            invalid_upcs = list(set(unique_product_codes).difference(valid_ucp))
+            invalid_upcs = list(set(unique_product_codes).difference(valid_upc))
             if invalid_upcs:
                 invalid_upcs_message=' Invalid Entry... {0} does not exist in our records.'.format(
                                               (', '.join(invalid_upcs)))
@@ -292,7 +292,7 @@ class LoyaltyService(CoreLoyaltyService):
                     except Exception as ex:
                         LOG.error('[accumulate_point]:{0}:: {1}'.format(phone_number, ex))
             if len(unique_product_codes)==1 and invalid_upcs:
-                message=get_template('SEND_INVALID_UCP')
+                message=get_template('SEND_INVALID_UPC')
             else:
                 message=get_template('SEND_ACCUMULATED_POINT').format(
                                 mechanic_name=mechanic[0].first_name,
