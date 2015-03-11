@@ -409,12 +409,13 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
     '''
     send coupon redeemed in a day
     '''
+    brand= kwargs.get('brand', None)
     coupon_redeem = export_feed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.COUPON_WSDL_URL, feed_type='Coupon Redeem Feed')
     feed_export_data = coupon_redeem.export_data()
     if len(feed_export_data[0]) > 0:
-        coupon_redeem.export(items=feed_export_data[0], item_batch=feed_export_data[
+        coupon_redeem.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:
         logger.info("[export_coupon_redeem_to_sap]: No Coupon closed during last day")
@@ -508,7 +509,7 @@ def export_asc_registeration_to_sap(*args, **kwargs):
             feed_data = 'ASC Registration for this %s is failing' % phone_number
             mail.send_registration_failure(feed_data=feed_data,
                                feed_type="ASC Registration Feed", brand=brand)
-        feed_log(brand=settings.BRAND, feed_type="ASC Registration Feed", total_data_count=1,
+        feed_log(brand, feed_type="ASC Registration Feed", total_data_count=1,
          failed_data_count=total_failed, success_data_count=1 - total_failed,
                  action='Sent', status=export_status)
 
@@ -524,12 +525,13 @@ def export_customer_reg_to_sap(*args, **kwargs):
     '''
     send info of registered customer
     '''
+    brand= kwargs.get('brand', None)    
     customer_registered = export_feed.ExportCustomerRegistrationFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.CUSTOMER_REGISTRATION_WSDL_URL, feed_type='Customer Registration Feed')
     feed_export_data = customer_registered.export_data()
     if len(feed_export_data[0]) > 0:
-        customer_registered.export(items=feed_export_data[0], item_batch=feed_export_data[
+        customer_registered.export( brand, items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:
         logger.info("[export_customer_reg_to_sap]: No Customer registered since last feed")
@@ -543,7 +545,7 @@ def update_coupon_history_data(*args, **kwargs):
 #     except Exception as ex:
 #         logger.info("update_coupon_history_data: {0}".format(ex))
 
-def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
+def send_sms(template_name, phone_number, feedback_obj, comment_obj=None, brand=None):
     created_date = convert_utc_to_local_time(feedback_obj.created_date, True)
     try:
         assignee = feedback_obj.assignee.user_profile.user.username
@@ -572,7 +574,7 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None):
     finally:
         logger.info("Send complain message received successfully with %s" % message)
         phone_number = utils.get_phone_number_format(phone_number)
-        sms_log(settings.BRAND,receiver=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(brand,receiver=phone_number, action=AUDIT_ACTION, message=message)
         send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     return {'status': True, 'message': message}
 
@@ -583,6 +585,7 @@ def send_reminders_for_servicedesk(*args, **kwargs):
     '''
     send mail when reminder_date is less than current date or when due date is less than current date
     '''
+    brand= kwargs.get('brand', None)
     feedback_obj = models.Feedback.objects.filter(reminder_date__lte=time, reminder_flag=False) or models.Feedback.objects.filter(due_date__lte=time,resolution_flag=False)
     for feedback in feedback_obj:
         if not feedback.reminder_flag:
@@ -598,7 +601,7 @@ def send_reminders_for_servicedesk(*args, **kwargs):
             escalation_list_detail = utils.get_escalation_mailing_list(escalation_list)
             send_due_date_exceeded(context, escalation_list_detail['mail'])
             for phone_number in escalation_list_detail['sms']: 
-                send_sms('DUE_DATE_EXCEEDED_ESCALATION', phone_number, feedback)
+                send_sms('DUE_DATE_EXCEEDED_ESCALATION', phone_number, feedback, brand)
             feedback.resolution_flag = False
         feedback.save()
 
@@ -607,12 +610,13 @@ def export_member_temp_id_to_sap(*args, **kwargs):
     '''
     send info of registered Mechanic
     '''
+    brand= kwargs.get('brand', None)
     member_registered = loyalty_export.ExportMemberTempFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.MEMBER_SYNC_WSDL_URL, feed_type='Mechanic Registration Feed')
     feed_export_data = member_registered.export_data()
     if len(feed_export_data[0]) > 0:
-        member_registered.export(items=feed_export_data[0], item_batch=feed_export_data[
+        member_registered.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:
         logger.info("[export_member_temp_id_to_sap]: No member registered since last feed")
@@ -622,12 +626,13 @@ def export_purchase_feed_sync_to_sap(*args, **kwargs):
     '''
     send info of purchase feed failed due to no matching VIN in GM
     '''
+    brand= kwargs.get('brand', None)
     purchase_feed_sync = export_feed.ExportPurchaseSynFeed(username=settings.SAP_CRM_DETAIL[
                            'username'], password=settings.SAP_CRM_DETAIL['password'],
                           wsdl_url=settings.PURCHASE_SYNC_WSDL_URL, feed_type='Purchase Sync Feed')
     feed_export_data = purchase_feed_sync.export_data()
     if len(feed_export_data[0]) > 0:
-        purchase_feed_sync.export(items=feed_export_data[0], item_batch=feed_export_data[
+        purchase_feed_sync.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
                          1], total_failed_on_feed=feed_export_data[2])
     else:
         logger.info("[export_purchase_feed_sync_to_sap]: No Purchase Feed failed since last feed")
@@ -637,6 +642,7 @@ def welcome_kit_due_date_escalation(*args, **kwargs):
     '''
     send mail when due date is less than current date for welcome kit request
     '''
+    brand= kwargs.get('brand', None)
     args=[Q(due_date__lte=time), Q(resolution_flag=False),~Q(status='Shipped')]
     welcome_kit_obj = models.WelcomeKit.objects.filter(reduce(operator.and_, args))
     for welcome_kit in welcome_kit_obj:
@@ -652,7 +658,7 @@ def welcome_kit_due_date_escalation(*args, **kwargs):
                                                                                       status=welcome_kit.status)    
         for phone_number in escalation_list_detail['sms']: 
             phone_number = utils.get_phone_number_format(phone_number)
-            sms_log(settings.BRAND,receiver=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(brand,receiver=phone_number, action=AUDIT_ACTION, message=message)
             send_job_to_queue(send_loyalty_escalation_message,
                                {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         welcome_kit.resolution_flag = True
@@ -663,6 +669,7 @@ def redemption_request_due_date_escalation(*args, **kwargs):
     '''
     send mail when due date is less than current date for redemption request
     '''
+    brand= kwargs.get('brand', None)
     args=[Q(due_date__lte=time), Q(resolution_flag=False),~Q(status='Delivered')]
     redemption_request_obj = models.RedemptionRequest.objects.filter(reduce(operator.and_, args))
     for redemption_request in redemption_request_obj:
@@ -678,7 +685,7 @@ def redemption_request_due_date_escalation(*args, **kwargs):
                                                                                       status=redemption_request.status)    
         for phone_number in escalation_list_detail['sms']: 
             phone_number = utils.get_phone_number_format(phone_number)
-            sms_log(brand=settings.BRAND,receiver=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(brand,receiver=phone_number, action=AUDIT_ACTION, message=message)
             send_job_to_queue(send_loyalty_escalation_message,
                                {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         redemption_request.resolution_flag = True
@@ -689,12 +696,13 @@ def export_member_accumulation_to_sap(*args, **kwargs):
     '''
     send info of accumulation requests
     '''
+    brand= kwargs.get('brand', None)
     accumulation_requests = loyalty_export.ExportAccumulationFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.ACCUMULATION_SYNC_WSDL_URL, feed_type='Accumulation Request Feed')
     feed_export_data = accumulation_requests.export_data()
     if len(feed_export_data[0]) > 0:
-        accumulation_requests.export(items=feed_export_data[0], item_batch=feed_export_data[
+        accumulation_requests.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2], query_set=feed_export_data[3])
     else:
         logger.info("[export_member_accumulation_to_sap]: No accumulation request since last feed")
@@ -704,12 +712,13 @@ def export_member_redemption_to_sap(*args, **kwargs):
     '''
     send info of redemption requests
     '''
+    brand= kwargs.get('brand', None)
     redemption_requests = loyalty_export.ExportRedemptionFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.REDEMPTION_SYNC_WSDL_URL, feed_type='Redemption Request Feed')
     feed_export_data = redemption_requests.export_data()
     if len(feed_export_data[0]) > 0:
-        redemption_requests.export(items=feed_export_data[0], item_batch=feed_export_data[
+        redemption_requests.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2], query_set=feed_export_data[3])
     else:
         logger.info("[export_member_redemption_to_sap]: No redemption request since last feed")
@@ -719,12 +728,13 @@ def export_distributor_to_sap(*args, **kwargs):
     '''
     send info of redemption requests
     '''
+    brand= kwargs.get('brand', None)
     distributors = loyalty_export.ExportDistributorFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.DISTRIBUTOR_SYNC_WSDL_URL, feed_type='Distributor Registration Feed')
     feed_export_data = distributors.export_data()
     if len(feed_export_data[0]) > 0:
-        distributors.export(items=feed_export_data[0], item_batch=feed_export_data[
+        distributors.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:
         logger.info("[export_distributor_to_sap]: No distributor registered since last feed")
