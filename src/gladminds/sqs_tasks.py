@@ -682,41 +682,29 @@ def redemption_request_due_date_escalation(*args, **kwargs):
         redemption_request.resolution_flag = True
         redemption_request.save()
 
+def customer_support_helper(obj_list, data, message):   
+    for obj in obj_list:
+        try:
+            phone = obj.user.phone_number
+            send_email_to_asc_customer_support(data, obj.user.user.email)
+            sms_log(receiver = phone, action=AUDIT_ACTION, message=message)
+            send_job_to_queue(send_dfsc_customer_support,
+                                   {"phone_number":phone, "message":message, "sms_client":settings.SMS_CLIENT})
+        except Exception as ex:
+            logger.info("[Exception fail to send SMS to ASCs/Dealers on Customer Support]  {0}".format(ex))
+            
 def dfsc_customer_support(*args, **kwargs):    
-    asc_obj = models.AuthorizedServiceCenter.objects.filter(user__state='MAH')
-    dealer_obj = models.Dealer.objects.filter(user__state='MAH')
+    asc_obj = models.AuthorizedServiceCenter.objects.filter(user__state='MAH').select_related('user, user__user')
+    dealer_obj = models.Dealer.objects.filter(user__state='MAH').select_related('user, user__user')
+    
     data = get_email_template('CUSTOMER_SUPPORT_FOR_DFSC')
     data['newsubject'] = data['subject']
-    
-    content = "Dear Dealer/ASC,                                                             \
-               Happy to help ! Please reach out to us for support regarding DFSC module.    \
-               Pls note change in support phone number.                                     \
-                                                                                            \
-               Online Support. Initiate ticket from DFSC Contact us                         \
-               Phone Support. Call us on 7847011011                                         \
-               Email Support. Mail us on hello@gladminds.co                                 \
-                                                                                            \
-               Thank you !                                                                  \
-               Bajaj DFSC Support.                                                          \
-               Rgs,                                                                         \
-               Asha"
-    data['content'] = textwrap.fill(content,78)
+    data['content'] = data['body']
     message = templates.get_template('CUSTOMER_SUPPORT_FOR_DFSC')
     
-    for dealer in asc_obj:
-        asc_phone = dealer.user__phone_number
-        send_email_to_asc_customer_support(data, dealer.user__user__email)
-        sms_log(receiver=asc_phone, action=AUDIT_ACTION, message=message)
-        send_job_to_queue(send_dfsc_customer_support,
-                               {"phone_number":asc_phone, "message":message, "sms_client":settings.SMS_CLIENT})
-
-    for dealer in dealer_obj:
-        dealer_phone = dealer.user__phone_number
-        send_email_to_asc_customer_support(data, dealer.user__user__email)
-        sms_log(receiver = dealer_phone, action=AUDIT_ACTION, message=message)
-        send_job_to_queue(send_dfsc_customer_support,
-                               {"phone_number":dealer_phone, "message":message, "sms_client":settings.SMS_CLIENT})
-
+    customer_support_helper(asc_obj, data, message)
+    customer_support_helper(dealer_obj, data, message)    
+    
 @shared_task
 def export_member_accumulation_to_sap(*args, **kwargs):
     '''

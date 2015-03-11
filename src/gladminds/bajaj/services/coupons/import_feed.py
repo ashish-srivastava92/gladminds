@@ -181,12 +181,6 @@ class ProductDispatchFeed(BaseFeed):
 
     def import_data(self):
         for product in self.data_source:
-#             if not product['engine']:                 
-#                 ex = '''[Error: ProductDispatchFeed_product_data_save]: VIN - {0} Missing Engine Number'''.format(product['vin'])
-#                 self.feed_remark.fail_remarks(ex)
-#                 logger.error(ex)
-#                 continue
-#             else:
             try:
                 product_data = models.ProductData.objects.get(product_id=product['vin'])
             except ObjectDoesNotExist as done:
@@ -194,9 +188,6 @@ class ProductDispatchFeed(BaseFeed):
                     '[Info: ProductDispatchFeed_product_data]: {0}'.format(done))
                 try:
                     dealer_data = self.check_or_create_dealer(dealer_id=product['dealer_id'])
-#                     self.get_or_create_product_type(
-#                         product_type=product['product_type'])
-#                     producttype_data = models.ProductType.objects.get(product_type=product['product_type'])
                     product_data = models.ProductData(
                         product_id=product['vin'], invoice_date=product['invoice_date'], 
                         dealer_id=dealer_data, sku_code=product['product_type'])
@@ -254,14 +245,6 @@ class ProductPurchaseFeed(BaseFeed):
         for product in self.data_source:
             try:
                 product_data = models.ProductData.objects.get(product_id=product['vin'])
-                
-#                 if product_data.engine and product_data.engine != product['engine']:
-#                     message = "The engine number {0} does not match with engine number in Database".format(product['engine'])                               
-#                     raise ValueError(message)
-#                 ''' Update engine number if it is null in DB'''
-#                 if product_data.engine is None:
-#                     product_data.engine = product['engine']
-
                 if product_data.customer_phone_number and product_data.customer_id == product['sap_customer_id']:
                     post_save.disconnect(
                         update_coupon_data, sender=models.ProductData)

@@ -444,9 +444,14 @@ def send_email_to_redeem_escaltion_group(data, redeem_escaltion_email):
 
 def send_email_to_asc_customer_support(data, asc_email_id):
     try:
+        file_stream = open(settings.EMAIL_DIR+'/customer_support.html')
+        feed_temp = file_stream.read()
+        template = Template(feed_temp)
         context = Context({"content": data['content']})
-        send_template_email("base_email_template.html", context,
-                             data, receiver = asc_email_id, message=data['content'])
+        body = template.render(context)
+        send_email(sender = data['sender'], receiver = asc_email_id, 
+                   subject = data['subject'], body = body, message=data['content'],
+                   smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception fail to send mail to ASCs on Customer Support]  {0}".format(ex))
     
