@@ -73,7 +73,7 @@ class ExportMemberTempFeed(BaseExportFeed):
                     logger.error("[ExportMemberTempFeed]: {0}:: Not received success from sap".format(item['TEMP_ID']))
             except Exception as ex:
                 logger.error("[ExportMemberTempFeed]:  Error in member update:{0}::{1}".format(item['TEMP_ID'], ex))
-        feed_log(feed_type=self.feed_type, total_data_count=len(items)\
+        feed_log(brand=settings.BRAND, feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
@@ -144,7 +144,7 @@ class ExportAccumulationFeed(BaseExportFeed):
 #                     logger.error("[ExportAccumulationFeed]: {0}:: Not received success from sap".format(item['TANSSID']))
 #             except Exception as ex:
 #                 logger.error("[ExportAccumulationFeed]: Error in sending accumulation :{0}::{1}".format(item['TANSSID'], ex))
-        feed_log(feed_type=self.feed_type, total_data_count=len(items)\
+        feed_log(brand=settings.BRAND, feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
@@ -220,7 +220,7 @@ class ExportRedemptionFeed(BaseExportFeed):
 #                     logger.error("[ExportRedemptionFeed]: {0}:: Not received success from sap".format(item['TRANSID']))
 #             except Exception as ex:
 #                 logger.error("[ExportRedemptionFeed]: Error in sending accumulation :{0}::{1}".format(item['TRANSID'], ex))
-        feed_log(feed_type=self.feed_type, total_data_count=len(items)\
+        feed_log(brand=settings.BRAND, feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
@@ -282,7 +282,7 @@ class ExportDistributorFeed(BaseExportFeed):
                     logger.error("[ExportDistributorFeed]: {0}:: Not received success from sap".format(item['DISTID']))
             except Exception as ex:
                 logger.error("[ExportDistributorFeed]: Error in sending accumulation :{0}::{1}".format(item['DISTID'], ex))
-        feed_log(feed_type=self.feed_type, total_data_count=len(items)\
+        feed_log(brand=settings.BRAND, feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)

@@ -74,7 +74,7 @@ class ExportCouponRedeemFeed(BaseExportFeed):
             except Exception as ex:
                 total_failed = total_failed + 1
                 logger.error("[ExportCouponRedeemFeed]: Error:: {0} - {1}".format(item['GCP_UCN_NO'], ex))
-        feed_log(feed_type=self.feed_type, total_data_count=len(items)\
+        feed_log(brand=settings.BRAND, feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
@@ -169,7 +169,7 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
             except Exception as ex:
                 total_failed = total_failed + 1
                 logger.error("[ExportCustomerRegistrationFeed]:  Error:: {0} - {1}".format(item['CUSTOMER_ID'], ex))
-        feed_log(feed_type=self.feed_type, total_data_count=len(items)\
+        feed_log(brand=settings.BRAND, feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
@@ -221,7 +221,7 @@ class ExportUnsyncProductFeed(BaseExportFeed):
                     if feed_remark.failed_feeds > 0:
                         remarks = feed_remark.remarks.elements()
                         for remark in remarks:
-                            feed_failure_log(feed_type='VIN sync Feed', reason=remark)
+                            feed_failure_log(brand=settings.BRAND, feed_type='VIN sync Feed', reason=remark)
                             logger.info('[ExportUnsyncProductFeed]: ' + json.dumps(feed_remark.remarks))
                         raise ValueError('dispatch feed failed!')
                         logger.info('[ExportUnsyncProductFeed]: dispatch feed completed')
@@ -283,7 +283,7 @@ class ExportPurchaseSynFeed(BaseExportFeed):
             except Exception as ex:
                 total_failed = total_failed + 1
                 logger.error("[ExportPurchaseSynFeed]: Error:: {0} - {1}".format(item['CHASSIS'], ex))
-        feed_log(feed_type=self.feed_type, total_data_count=len(items)\
+        feed_log(brand=settings.BRAND, feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
