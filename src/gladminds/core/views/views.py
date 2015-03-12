@@ -66,7 +66,7 @@ def redirect_url(request):
 
     for user_group in user_groups:
         if user_group in brand_url.keys():
-            return "/"
+            return "/services"
 
     return brand_meta.get('admin_url', '/admin')
 
