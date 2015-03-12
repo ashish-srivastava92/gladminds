@@ -340,7 +340,7 @@ def update_coupon_data(sender, **kwargs):
                     customer_name=customer_name, sap_customer_id=customer_id)
             
             sms_log(
-                receiver=customer_phone_number, action='SEND TO QUEUE', message=message)
+                settings.BRAND, receiver=customer_phone_number, action='SEND TO QUEUE', message=message)
             send_job_to_queue(send_on_product_purchase, {"phone_number":customer_phone_number, "message":message, "sms_client":settings.SMS_CLIENT}) 
         except Exception as ex:
             logger.info("[Exception]: Signal-In Update Coupon Data %s" % ex)
