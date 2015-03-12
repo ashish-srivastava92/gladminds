@@ -844,6 +844,44 @@ class ZonalServiceManager(BaseModel):
     def __unicode__(self):
         return self.user.user.username
     
+class BOMItem(BaseModel):
+    '''Detaills of  Service Billing of Material'''
+    timestamp = models.DateTimeField(default=datetime.now)
+    
+    bom_number = models.CharField(max_length=10, null=True, blank=True)
+    part_number = models.CharField(max_length=20, null=True, blank=True)
+    revision_number = models.CharField(max_length=10, null=True, blank=True)
+    quantity = models.CharField(max_length=20, null=True, blank=True)
+    uom = models.CharField(max_length=100, null=True, blank=True)
+    valid_from = models.DateField(null=True, blank= True)
+    valid_to = models.DateField(null=True, blank= True)
+    plate_id = models.CharField(max_length=40, null=True, blank=True)
+    plate_txt = models.CharField(max_length=40, null=True, blank=True)
+    serial_number = models.CharField(max_length=20, null=True, blank=True)
+    change_number = models.CharField(max_length=12, null=True, blank=True)
+    change_number_to = models.CharField(max_length=12, null=True, blank=True)
+    item = models.CharField(max_length=10, null=True, blank=True)    
+    item_id = models.CharField(max_length=10, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Bills of Material "
+
+
+class BOMHeader(BaseModel):
+    '''Detaills of  Header fields BOM'''
+    sku_code = models.CharField(max_length=20, null=True, blank=True)
+    plant = models.CharField(max_length=10, null=True, blank=True)
+    bom_type = models.CharField(max_length=10, null=True, blank=True)
+    bom_number = models.CharField(max_length=10, null=True, blank=True)
+    valid_from = models.DateField(null=True, blank= True)
+    valid_to = models.DateField(null=True, blank= True)
+    created_on = models.DateField(null=True, blank= True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Bills of Material "
+    
 #######################LOYALTY TABLES#################################
 
 class NationalSparesManager(BaseModel):

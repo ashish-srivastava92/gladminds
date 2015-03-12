@@ -16,7 +16,8 @@ def gm_constants(request):
             'SD_OWNER' : Roles.SDOWNERS, 
             'DEALER' : Roles.DEALERS,
             'ASC': Roles.ASCS,
-            'SD_READONLY': Roles.SDREADONLY}
+            'SD_READONLY': Roles.SDREADONLY,
+            'FSCADMIN':Roles.FSCADMINS}
     brand_meta = settings.BRAND_META.get(settings.BRAND, {})
     user_groups = utils.get_user_groups(request.user)
     brand_url = settings.HOME_URLS.get(settings.BRAND, {})
