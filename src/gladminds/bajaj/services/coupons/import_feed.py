@@ -102,6 +102,7 @@ class SAPFeed(object):
             'old_fsc': OldFscFeed,
             'credit_note': CreditNoteFeed,
             'asc_sa': ASCAndServiceAdvisorFeed,
+            'BOM': BillOfMaterialFeed,
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
@@ -504,3 +505,29 @@ class ASCAndServiceAdvisorFeed(BaseFeed):
         if list_active_mobile:
             return True
         return False
+    
+class BillOfMaterialFeed(BaseFeed):
+   
+    def import_data(self):       
+        for bom in self.data_source:
+            try:
+                bom_item_obj = models.BOMItem(bom_number=bom['bom_number'], part_number=bom['part_number'],
+                                            revision_number=bom['revision_number'], quantity=bom['quantity'], 
+                                            uom=bom['uom'], change_number_to=bom['change_number_to'],
+                                            valid_from=bom['valid_from'], valid_to=bom['valid_to'], 
+                                            plate_id=bom['plate_id'], plate_txt=bom['plate_txt'],
+                                            serial_number=bom['serial_number'], change_number=bom['change_number'],
+                                            item=bom['item'], item_id=bom['item_id'])                
+                bom_item_obj.save()
+                
+                bom_header_obj = models.BOMHeader(sku_code=bom['sku_code'], plant=bom['plant'],
+                                                  bom_type=bom['bom_type'], bom_number=bom['bom_number_header'],
+                                                  created_on=bom['created_on'], valid_from=bom['valid_from_header'],
+                                                  valid_to=bom['valid_to_header'])
+                bom_header_obj.save() 
+            except Exception as ex:
+                logger.info("[Exception: ]: BillOfMaterialFeed {0}".format(ex))
+                
+
+    
+    
