@@ -245,7 +245,7 @@ class ItemFieldModel(ComplexModel):
     BOM_NUMBER = Unicode
     PART_NUMBER = Unicode
     REVISION_NO = Unicode
-    QUANTITY = Unicode
+    QTY = Unicode
     UOM = Unicode
     VALID_FROM = Date(default=None)
     VALID_TO = Date(default=None)
@@ -301,7 +301,7 @@ class BillOfMaterialService(ServiceBase):
                                  'bom_number' : bom.ITEMFIELD.BOM_NUMBER, 
                                  'part_number' : bom.ITEMFIELD.PART_NUMBER,  
                                  'revision_number' : bom.ITEMFIELD.REVISION_NO, 
-                                 'quantity' : bom.ITEMFIELD.QUANTITY,
+                                 'quantity' : bom.ITEMFIELD.QTY,
                                  'uom' :bom.ITEMFIELD.UOM,
                                  'valid_from' : bom.ITEMFIELD.VALID_FROM,
                                  'valid_to' : bom.ITEMFIELD.VALID_TO,
@@ -319,7 +319,7 @@ class BillOfMaterialService(ServiceBase):
             return SUCCESS
         except Exception as ex:
             return FAILED
-  
+
 class BrandService(ServiceBase):
     __namespace__ = tns
 
@@ -544,7 +544,7 @@ def get_response(feed_remark):
     if feed_remark.failed_feeds > 0:
         remarks = feed_remark.remarks.elements()
         for remark in remarks:
-            feed_failure_log(feed_type=feed_remark.feed_type, reason=remark)
+            feed_failure_log(brand=settings.BRAND, feed_type=feed_remark.feed_type, reason=remark)
         return FAILED
     else:
         return SUCCESS

@@ -352,7 +352,7 @@ def register_customer(request, group=None):
                         managers = models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS)
                         for manager in managers:
                             phone_number = utils.get_phone_number_format(manager.phone_number)
-                            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+                            sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
                             send_job_to_queue(send_customer_phone_number_update_message, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
 
             else:

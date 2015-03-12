@@ -1,8 +1,8 @@
 from django.conf import settings
-from gladminds.core.model_fetcher import models
+from gladminds.core.loaders.module_loader import get_model
 
 def get_template(template_key):
-    object = models.MessageTemplate.objects.get(template_key=template_key)
+    object = get_model('MessageTemplate').objects.get(template_key=template_key)
     return object.template
 
 RCV_MESSAGE_FORMAT = "{key} {message}"
@@ -62,21 +62,21 @@ def get_message_template_mapper():
                         'receive': get_template('RCV_ACCUMULATE_POINT'),
                         'send':get_template('SEND_ACCUMULATED_POINT'),
                         'invalid':get_template('SEND_INVALID_MESSAGE'),
-                        'handler':'loyalty.loyalty.LoyaltyService.accumulate_point',
+                        'handler':'loyalty.loyalty.loyalty.accumulate_point',
                         'auth_rule': ['open']
                         },
             settings.ALLOWED_KEYWORDS['check_point_balance']:{
                         'receive': get_template('RCV_CHK_BAL_POINT'),
                         'send':get_template('SEND_BALANCE_POINT'),
                         'invalid':get_template('SEND_INVALID_MESSAGE'),
-                        'handler':'loyalty.loyalty.LoyaltyService.check_point_balance',
+                        'handler':'loyalty.loyalty.loyalty.check_point_balance',
                         'auth_rule': ['open']
                         },
             settings.ALLOWED_KEYWORDS['redeem_point']:{
                         'receive': get_template('RCV_REDEEM_POINT'),
                         'send':get_template('SEND_REDEEM_POINT'),
                         'invalid':get_template('SEND_INVALID_MESSAGE'),
-                        'handler':'loyalty.loyalty.LoyaltyService.redeem_point',
+                        'handler':'loyalty.loyalty.loyalty.redeem_point',
                         'auth_rule': ['open']
                         }
             }

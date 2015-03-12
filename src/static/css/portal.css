@@ -130,10 +130,12 @@ textarea {
 	height :75px ;
 	width:250px;
 }
+
 .footer-margin {
 	margin-left: 150px;
 }
+
 .footer-inner {
 	margin-right: 25px;
 	font-weight: bolder;
-}
+ }

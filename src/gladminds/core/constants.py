@@ -141,7 +141,7 @@ STATUS_CHOICES = ((1, 'Unused'), (2, 'Closed'), (
 
 COUPON_STATUS = dict((v, k) for k, v in dict(STATUS_CHOICES).items())
 
-MAX_UCP_ALLOWED=10
+MAX_UPC_ALLOWED=10
 MANDATORY_MECHANIC_FIELDS = ['first_name', 'phone_number','shop_address', 'shop_name', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url']
 
 FORM_STATUS_CHOICES = (
