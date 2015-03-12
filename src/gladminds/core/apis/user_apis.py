@@ -243,29 +243,18 @@ class MemberResource(CustomBaseModelResource):
                      }
 
 
-class ServiceDeskUserResource(CustomBaseModelResource):
-    '''
-    Service Desk User Resource
-    '''
-    user = fields.ForeignKey(UserProfileResource, 'user_profile',
-                                        full=True, null=True, blank=True)
-    
+class BrandDepartmentResource(CustomBaseModelResource):
     class Meta:
-        queryset = models.ServiceDeskUser.objects.all()
-        resource_name = "service-desk-users"
-        model_name = 'ServiceDeskUser'
-#         authorization = MultiAuthorization(DjangoAuthorization())
-#         authentication = MultiAuthentication(AccessTokenAuthentication())
+        queryset = models.BrandDepartment.objects.all()
+        resource_name = "brand-departments"
+        model_name = 'BrandDepartment'
         authorization = Authorization()
         detail_allowed_methods = ['get']
         always_return_data = True
-        filtering = {
-                        "user": ALL_WITH_RELATIONS,
-                     }
 
 
 class DepartmentSubCategoriesResource(CustomBaseModelResource):
-    sub_department_user = fields.ToManyField(ServiceDeskUserResource, 'sub_department_user', full=True)
+    department = fields.ForeignKey(BrandDepartmentResource, 'department', full=True, null=True, blank=True)
 
     class Meta:
         queryset = models.DepartmentSubCategories.objects.all()
@@ -279,12 +268,26 @@ class DepartmentSubCategoriesResource(CustomBaseModelResource):
                      } 
 
 
-class BrandDepartmentResource(CustomBaseModelResource):
-    department_sub_categories = fields.ToManyField(DepartmentSubCategoriesResource, 'department_sub_categories', full=True)
+class ServiceDeskUserResource(CustomBaseModelResource):
+    '''
+    Service Desk User Resource
+    '''
+    user = fields.ForeignKey(UserProfileResource, 'user_profile',
+                                        full=True, null=True, blank=True)
+    sub_department = fields.ForeignKey(DepartmentSubCategoriesResource, 'sub_department',
+                                       full=True, null=True, blank=True)
+
     class Meta:
-        queryset = models.BrandDepartment.objects.all()
-        resource_name = "brand-departments"
-        model_name = 'BrandDepartment'
+        queryset = models.ServiceDeskUser.objects.all()
+        resource_name = "service-desk-users"
+        model_name = 'ServiceDeskUser'
+#         authorization = MultiAuthorization(DjangoAuthorization())
+#         authentication = MultiAuthentication(AccessTokenAuthentication())
         authorization = Authorization()
         detail_allowed_methods = ['get']
         always_return_data = True
+        filtering = {
+                        "user": ALL_WITH_RELATIONS,
+                        "sub_department" : ALL_WITH_RELATIONS
+                     }
+
