@@ -142,7 +142,7 @@ class RedemptionResource(CustomBaseModelResource):
             query['resolution_flag'] = True        
             overdue_count = models.RedemptionRequest.objects.values('resolution_flag').annotate(above_sla_count= Count('status')).filter(**query)        
         
-            for a,b,c in itertools.izip_longest(total, within_sla_count, overdue_count):    
+            for a,b,c in itertools.izip_longest(total, within_sla_count, overdue_count):
                 if not type(b):
                     a['within_sla_count']= b['within_sla_count']            
                 if not type(c):
