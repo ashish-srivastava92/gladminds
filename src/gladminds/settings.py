@@ -355,7 +355,7 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-TEST_IGNORE_APPS = (# 'south',
+TEST_IGNORE_APPS = ( 'south',
                     )
 
 ALL_APPS = (
@@ -383,8 +383,7 @@ ALL_APPS = (
     'storages',
     'tastypie_swagger',
     'django_otp',
-    'django_otp.plugins.otp_totp',
-    'constance.backends.database'
+    'django_otp.plugins.otp_totp'
    # 'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
@@ -679,13 +678,10 @@ ENABLE_SERVICE_DESK = True
 
 DEFAULT_IMAGE_ID = 'guest.png'
 
-CONSTANCE_CONFIG = {
-    'DEFAULT_IMAGE': ('guest.png', 'Default image to be used by any app'),
-    'AFTERBUY_FORGOT_PASSWORD_URL': ('http://afterbuy.co/demo/staging_qw741qaz5/change-password.php', 'Afterbuy forgot password url'),
-    'AFTERBUY_RECYCLE_EMAIL_RECIPIENT' : ('demosupport@gladminds.co', 'Default Email for recycle')
-}
 
-CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+AFTERBUY_FORGOT_PASSWORD_URL = 'http://afterbuy.co/demo/staging_qw741qaz5/change-password.php'
+AFTERBUY_RECYCLE_EMAIL_RECIPIENT = 'demosupport@gladminds.co'
+
 
 SAP_CRM_DETAIL = {
                   'username':'pisuper',

@@ -3,7 +3,6 @@
 import logging
 import json
 from datetime import datetime,timedelta
-from constance import config
 import StringIO
 import csv
 from django.http import HttpResponse

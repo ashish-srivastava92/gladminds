@@ -3,7 +3,7 @@ from gladminds.core.exceptions import ModelBrandNotMatchingException
 
 _COMMON_APPS = ['auth', 'contenttypes', 'sessions', 'sites', 'admin', 'djcelery', 'provider',
                 'oauth2', 'django_otp', 'permission', 'group', 'messages', 'staticfiles',
-                'database']
+                'database']+['core']
 
 class DatabaseAppsRouter(object):
     """
@@ -16,7 +16,7 @@ class DatabaseAppsRouter(object):
     """
     @staticmethod
     def common_logic(model, hints={}):
-        if model._meta.app_label in _COMMON_APPS+['core']:
+        if model._meta.app_label in _COMMON_APPS:
             if 'instance' in hints.keys():
                 db = hints['instance']._state.db or settings.BRAND
             else:
@@ -56,7 +56,7 @@ class DatabaseAppsRouter(object):
 
     def allow_syncdb(self, db, model):
         """Make sure that apps only appear in the related database."""
-        if model._meta.app_label in _COMMON_APPS+['core']:
+        if model._meta.app_label in _COMMON_APPS:
             return True
 
         if model._meta.app_label in ['south'] and db in ['default']:
