@@ -20,9 +20,9 @@ class Command(BaseCommand):
         self.upload_dealer_data()
         self.upload_service_advisor_data()
 
-    def register_user(self, group, username):
+    def register_user(self, group, username, first_name=''):
         user_group = Group.objects.using(APP).get(name=group)
-        new_user = User.objects.using(APP).create(username=username)
+        new_user = User.objects.using(APP).create(username=username, first_name=first_name)
         password = username + settings.PASSWORD_POSTFIX
         new_user.set_password(password)
         new_user.save(using=APP)
@@ -34,7 +34,7 @@ class Command(BaseCommand):
 
     def upload_dealer_data(self):
         print "Started running dealer function..."
-        file_list = ['DEALER_DATA.csv']
+        file_list = ['dealer_data.csv']
         dealer_list = []
         dealer_model = get_model('Dealer', APP)
 
@@ -44,18 +44,19 @@ class Command(BaseCommand):
                 next(spamreader)
                 for row_list in spamreader:
                     temp ={}
-                    temp['dealer_id'] = row_list[0].strip()  
-                    temp['name'] = row_list[1].strip()
-                    temp['city'] = row_list[2].strip()
-                    temp['state'] = row_list[4].strip()
+                    temp['dealer_id'] = row_list[2].strip() 
+                    temp['name'] = row_list[3].strip()
+                    temp['city'] = row_list[4].strip()
+#                     temp['state'] = row_list[4].strip()
+
                     dealer_list.append(temp)
         
         for dealer in dealer_list:
-            print "...D..", dealer
+            print "...Loading Dealer..", dealer
             try:
                 dealer_object = dealer_model.objects.get(user__user__username = dealer['dealer_id'])
             except Exception as ex:
-                new_user=self.register_user(group=Roles.DEALERS, username=dealer['dealer_id'])
+                new_user=self.register_user(group=Roles.DEALERS, username=dealer['dealer_id'], first_name=dealer['name'])
                 dealer_object = dealer_model(dealer_id=dealer['dealer_id'], user=new_user)
                 dealer_object.save()
             user_obj = dealer_object.user.user
@@ -70,12 +71,11 @@ class Command(BaseCommand):
             user_obj.last_name = last_name
             user_obj.save(using=APP)
             user_pro_obj.address = dealer['city']
-            user_pro_obj.state = dealer['state']
             user_pro_obj.save()
 
     def upload_service_advisor_data(self):
         print "Started running SA function..."
-        file_list = ['SA_DATA.csv']
+        file_list = ['dealer_data.csv']
         file = open("sa_details.txt", "w")
         sa_list = []
         dealer_model = get_model('Dealer', APP)
@@ -86,16 +86,16 @@ class Command(BaseCommand):
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
                 for row_list in spamreader:
-                    temp ={}
-                    temp['city'] = (row_list[2].strip())
-                    temp['dealer_id'] = row_list[3].strip() 
-                    temp['name'] = row_list[4].strip()
-                    temp['number'] = utils.mobile_format(row_list[5].strip())
+                    temp={}
+                    temp['city'] = (row_list[4].strip())
+                    temp['dealer_id'] = row_list[2].strip()
+                    temp['name'] = row_list[5].strip()
+                    temp['number'] = utils.mobile_format(row_list[6].strip()  )
                                        
                     sa_list.append(temp)
         
         for sa in sa_list:
-            print "...SA..", sa
+            print "...Loading SA..", sa
             dealer_object = dealer_model.objects.get(dealer_id = sa['dealer_id'])
             try:
                 try:
