@@ -5,7 +5,7 @@ from spyne.model.complex import Array
 from spyne.model.complex import ComplexModel
 from spyne.model.complex import Iterable
 from spyne.model.primitive import Integer, Decimal, Date
-from spyne.model.primitive import Unicode, Mandatory
+from spyne.model.primitive import Unicode, Mandatory, Boolean
 from spyne.protocol.soap import Soap11
 from spyne.server.django import DjangoApplication
 from spyne.server.wsgi import WsgiApplication
@@ -136,7 +136,7 @@ class DealerModel(ComplexModel):
     SER_ADV_MOBILE = Unicode
     ACTIVE_FLAG = Unicode
     TIMESTAMP = Unicode(pattern=pattern)
-
+    CDMS_FLAG = Boolean
 
 class DealerModelList(ComplexModel):
     __namespace__ = tns
@@ -357,7 +357,8 @@ class DealerService(ServiceBase):
                     'service_advisor_id': dealer.SER_ADV_ID,
                     'name': dealer.SER_ADV_NAME,
                     'phone_number': utils.mobile_format(dealer.SER_ADV_MOBILE),
-                    'status': dealer.ACTIVE_FLAG
+                    'status': dealer.ACTIVE_FLAG,
+                    'cdms_flag':dealer.CDMS_FLAG
                 })
             except Exception as ex:
                 ex = "DealerService: {0}  Error on Validating {1}".format(dealer, ex)
