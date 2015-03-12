@@ -245,7 +245,7 @@ class ItemFieldModel(ComplexModel):
     BOM_NUMBER = Unicode
     PART_NUMBER = Unicode
     REVISION_NO = Unicode
-    QUANTITY = Unicode
+    QTY = Unicode
     UOM = Unicode
     VALID_FROM = Date(default=None)
     VALID_TO = Date(default=None)
@@ -301,7 +301,7 @@ class BillOfMaterialService(ServiceBase):
                                  'bom_number' : bom.ITEMFIELD.BOM_NUMBER, 
                                  'part_number' : bom.ITEMFIELD.PART_NUMBER,  
                                  'revision_number' : bom.ITEMFIELD.REVISION_NO, 
-                                 'quantity' : bom.ITEMFIELD.QUANTITY,
+                                 'quantity' : bom.ITEMFIELD.QTY,
                                  'uom' :bom.ITEMFIELD.UOM,
                                  'valid_from' : bom.ITEMFIELD.VALID_FROM,
                                  'valid_to' : bom.ITEMFIELD.VALID_TO,
@@ -319,7 +319,7 @@ class BillOfMaterialService(ServiceBase):
             return SUCCESS
         except Exception as ex:
             return FAILED
-  
+
 class BrandService(ServiceBase):
     __namespace__ = tns
 

@@ -193,7 +193,7 @@ class LoyaltyService(CoreLoyaltyService):
                                         delivery_address=delivery_address,
                                         expected_delivery_date=date['expected_delivery_date'],
                                         due_date=date['due_date'],
-                                        points=products.points)
+                                        points=product.points)
             
             redemption_request.save()
             transaction_ids.append(str(redemption_request.transaction_id))
@@ -320,7 +320,7 @@ class LoyaltyService(CoreLoyaltyService):
             elif mechanic and  mechanic[0].form_status=='Incomplete':
                 message=get_template('INCOMPLETE_FORM')
                 raise ValueError('Incomplete user details')
-            elif mechanic and mechanic[0].mechanic_id!=sms_dict['member_id']:
+            elif mechanic and (mechanic[0].mechanic_id!=sms_dict['member_id'] and mechanic[0].permanent_id!=sms_dict['member_id']):
                 message=get_template('INVALID_MEMBER_ID').format(mechanic_name=mechanic[0].first_name)
                 raise ValueError('Invalid user-ID')
             products=models.ProductCatalog.objects.filter(product_id__in=product_codes)

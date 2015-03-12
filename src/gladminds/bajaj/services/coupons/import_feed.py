@@ -525,4 +525,3 @@ class BillOfMaterialFeed(BaseFeed):
                 bom_header_obj.save() 
             except Exception as ex:
                 logger.info("[Exception: ]: BillOfMaterialFeed {0}".format(ex))
-                

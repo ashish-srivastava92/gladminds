@@ -107,6 +107,12 @@ mechanic_app = Application([loyalty_feed.MechanicService],
                            out_protocol=Soap11()
                            )
 
+bom_app = Application([fsc_feed.BillOfMaterialService],
+                           tns=tns,
+                           in_protocol=Soap11(validator='lxml'),
+                           out_protocol=Soap11()
+                           )
+
 all_service = csrf_exempt(DjangoApplication(all_app))
 brand_service = csrf_exempt(DjangoApplication(brand_app))
 dealer_service = csrf_exempt(DjangoApplication(dealer_app))
