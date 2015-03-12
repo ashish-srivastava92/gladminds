@@ -68,7 +68,7 @@ class GmModelAdmin(ModelAdmin):
         return obj.member.district
 
     def get_mechanic_state(self, obj):
-        return obj.member.state
+        return obj.member.state.state_name
     
     get_mechanic_id.short_description = 'Mechanic ID'
     get_mechanic_name.short_description = 'Name'

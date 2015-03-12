@@ -17,7 +17,8 @@ _DEMO = GmApps.DEMO
 _BAJAJ = GmApps.BAJAJ
 _AFTERBUY = GmApps.AFTERBUY
 _GM = GmApps.GM
-
+_BAJAJCV = GmApps.BAJAJCV
+_HONDA = GmApps.HONDA
 
 _ALL_APPS = ALL_APPS
 
@@ -33,7 +34,7 @@ _BAJAJ_LOYALTY_SUPERADMINS = [('gladminds', '', 'gladminds!123'),
                               ('kumarashish@bajajauto.co.in', 'kumarashish@bajajauto.co.in',
                                'kumarashish!123')]
 _BAJAJ_LOYALTY_NSM = [('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123', 'NSM002', 'south', 'Raghunath')]
-_BAJAJ_LOYALTY_ASM = [('spremnath@bajajauto.co.in', 'spremnath@bajajauto.co.in', 'spremnath!123', 'ASM004', 'PREM NATH', '+919176339712', 'Tamil Nadu')]
+_BAJAJ_LOYALTY_ASM = [('prajurkar@bajajauto.co.in', 'prajurkar@bajajauto.co.in', 'spremnath!123', 'ASM004', 'PREM NATH', '+919176339712', 'Tamil Nadu')]
 _BAJAJ_ZSM = [('mspendharkar@bajajauto.co.in', 'mspendharkar@bajajauto.co.in', 'milindpendharkar@123', 'Milind Pendharkar')]
 
 
@@ -43,11 +44,15 @@ class Command(BaseCommand):
         call_command('syncdb', database=_DEMO, interactive=False)
         call_command('syncdb', database=_BAJAJ, interactive=False)
         call_command('syncdb', database=_AFTERBUY, interactive=False)
+        call_command('syncdb', database=_BAJAJCV, interactive=False)
+        call_command('syncdb', database=_HONDA, interactive=False)
         call_command('syncdb', interactive=False)
         self.define_groups()
         self.create_admin(_DEMO)
         self.create_admin(_BAJAJ)
         self.create_admin(_GM)
+        self.create_admin(_BAJAJCV)
+        self.create_admin(_HONDA)
         self.create_afterbuy_admins()
         self.create_bajaj_admins()
         self.set_afterbuy_permissions()
@@ -63,7 +68,7 @@ class Command(BaseCommand):
         for group in AFTERBUY_GROUPS:
             self.add_group(GmApps.AFTERBUY, group)
 
-        for app in [GmApps.BAJAJ, GmApps.DEMO, GmApps.GM]:
+        for app in [GmApps.BAJAJ, GmApps.DEMO, GmApps.GM, GmApps.HONDA]:
             for group in OTHER_GROUPS:
                 self.add_group(app, group)
 

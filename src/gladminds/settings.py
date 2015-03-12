@@ -2,6 +2,7 @@
 # Django settings for gladminds project.
 import os
 import djcelery
+from copy import deepcopy
 djcelery.setup_loader()
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -142,49 +143,96 @@ SUIT_CONFIG = {
 MANAGERS = ADMINS
 
 DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
+DB_USER = os.environ.get('DB_USER', 'root')
+DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
+DB_PORT = os.environ.get('DB_PORT', '3306')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'admin')
+
+class GmApps():
+    AFTERBUY = 'afterbuy'
+    BAJAJ = 'bajaj'
+    BAJAJCV = 'bajajcv'
+    DEMO = 'demo'
+    GM = 'default'
+    HONDA = 'honda'
 
 # Mapping is first app name then db name
 DATABASE_APPS_MAPPING = {
-                         'default': 'default',
-                         'bajaj':'bajaj',
-                         'demo': 'demo',
-                         'afterbuy':'afterbuy'
+                         GmApps.GM: 'default',
+                         GmApps.BAJAJ:'bajaj',
+                         GmApps.DEMO: 'demo',
+                         GmApps.AFTERBUY:'afterbuy',
+                         GmApps.BAJAJCV:'bajajcv',
+                         GmApps.HONDA:'honda'
                     }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+db_common = {
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gm',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-    },
-    'bajaj': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'bajaj',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-    },
-    'demo': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'demo',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-    },
-    'afterbuy': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'afterbuy',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     }
-}
+DATABASES = {}
+
+for brand in dir(GmApps):
+    if not brand.startswith('__'):
+        if getattr(GmApps,brand) in ['default']:
+            db_common.update({'NAME': 'gm'})
+        else:
+            db_common.update({'NAME': getattr(GmApps,brand)})
+        DATABASES[getattr(GmApps,brand)] = deepcopy(db_common)
+# DATABASES = {
+#     GmApps.GM: {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'gm',
+#         'USER': DB_USER,
+#         'PASSWORD': DB_PASSWORD,
+#         'HOST': DB_HOST,
+#         'PORT': DB_PORT,
+#     },
+#     GmApps.BAJAJ: {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'bajaj',
+#         'USER': DB_USER,
+#         'PASSWORD': DB_PASSWORD,
+#         'HOST': DB_HOST,
+#         'PORT': DB_PORT,
+#     },
+#     GmApps.DEMO: {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'demo',
+#         'USER': DB_USER,
+#         'PASSWORD': DB_PASSWORD,
+#         'HOST': DB_HOST,
+#         'PORT': DB_PORT,
+#     },
+#     GmApps.AFTERBUY: {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'afterbuy',
+#         'USER': DB_USER,
+#         'PASSWORD': DB_PASSWORD,
+#         'HOST': DB_HOST,
+#         'PORT': DB_PORT,
+#     },
+#     GmApps.BAJAJCV: {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'bajajcv',
+#         'USER': DB_USER,
+#         'PASSWORD': DB_PASSWORD,
+#         'HOST': DB_HOST,
+#         'PORT': DB_PORT,
+#     },
+#      GmApps.HONDA: {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'honda',
+#         'USER': DB_USER,
+#         'PASSWORD': DB_PASSWORD,
+#         'HOST': DB_HOST,
+#         'PORT': DB_PORT,
+#     }
+# }
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -328,6 +376,7 @@ ALL_APPS = (
     'gladminds.core',
     'gladminds.bajaj',
     'gladminds.demo',
+    'gladminds.bajajcv',
     'gladminds.afterbuy',
     'djcelery',
     'corsheaders',
@@ -599,7 +648,7 @@ FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
 BRAND = None
 GM_BRAND = 'default'
-OUTSIDE_BRANDS = ['bajaj', 'demo']
+OUTSIDE_BRANDS = ['bajaj', 'demo','bajajcv']
 
 BRANDS = OUTSIDE_BRANDS + ['afterbuy']
 ###############################################
@@ -618,10 +667,12 @@ SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                   'MOCK': {}
                   }
 
-ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},
-          'demo': {'user': 'demo', 'password': 'demo'},
-          'afterbuy': {'user': 'afterbuy', 'password': 'afterbuy'},
-          'default': {'user': 'gladminds', 'password': 'gladminds'}
+ADMIN_DETAILS = {GmApps.BAJAJ: {'user': 'bajaj', 'password': 'bajaj'},
+          GmApps.DEMO: {'user': 'demo', 'password': 'demo'},
+          GmApps.AFTERBUY: {'user': 'afterbuy', 'password': 'afterbuy'},
+          GmApps.GM: {'user': 'gladminds', 'password': 'gladminds'},
+          GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'x`'},
+          GmApps.HONDA: {'user': 'honda', 'password': 'honda'}
           }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True

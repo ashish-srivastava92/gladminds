@@ -165,7 +165,7 @@ def get_servicedesk_tickets(request):
 @require_http_methods(["GET", "POST"])
 def modify_servicedesk_tickets(request, feedback_id):
     host = get_current_site(request)
-    group_name = request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.SDOWNERS, Roles.DEALERS, Roles.ASCS, Roles.SDREADONLY])
+    group_name = request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.SDOWNERS, Roles.DEALERS, Roles.ASCS, Roles.SDREADONLY, Roles.FSCADMINS])
     status = get_list_from_set(FEEDBACK_STATUS)
     priority_types = get_list_from_set(PRIORITY)
     feedback_types = get_list_from_set(FEEDBACK_TYPE)

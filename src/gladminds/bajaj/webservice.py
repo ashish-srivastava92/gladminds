@@ -5,6 +5,7 @@ from spyne.protocol.soap import Soap11
 from spyne.server.django import DjangoApplication
 from gladminds.bajaj.services.coupons import feed_models as fsc_feed
 from gladminds.bajaj.services.loyalty import feed_models as loyalty_feed
+from gladminds.bajajcv.services.loyalty import feed_models as loyalty_feed
 
 tns = settings.WSDL_TNS
 
@@ -15,6 +16,7 @@ all_app = Application([fsc_feed.BrandService,
                        fsc_feed.ASCService,
                        fsc_feed.OldFscService,
                        fsc_feed.CreditNoteService,
+                       fsc_feed.BillOfMaterialService,
                        loyalty_feed.PartMasterService,
                        loyalty_feed.PartUPCService,
                        loyalty_feed.PartPointService,
@@ -69,6 +71,12 @@ credit_note_app = Application([fsc_feed.CreditNoteService],
                            out_protocol=Soap11()
                            )
 
+bom_app = Application([fsc_feed.BillOfMaterialService],
+                           tns=tns,
+                           in_protocol=Soap11(validator='lxml'),
+                           out_protocol=Soap11()
+                           )
+
 part_master_app = Application([loyalty_feed.PartMasterService],
                            tns=tns,
                            in_protocol=Soap11(validator='lxml'),
@@ -99,6 +107,12 @@ mechanic_app = Application([loyalty_feed.MechanicService],
                            out_protocol=Soap11()
                            )
 
+bom_app = Application([fsc_feed.BillOfMaterialService],
+                           tns=tns,
+                           in_protocol=Soap11(validator='lxml'),
+                           out_protocol=Soap11()
+                           )
+
 all_service = csrf_exempt(DjangoApplication(all_app))
 brand_service = csrf_exempt(DjangoApplication(brand_app))
 dealer_service = csrf_exempt(DjangoApplication(dealer_app))
@@ -112,3 +126,4 @@ part_upc_service = csrf_exempt(DjangoApplication(part_upc_app))
 part_point_service = csrf_exempt(DjangoApplication(part_point_app))
 distributor_service = csrf_exempt(DjangoApplication(distributor_app))
 mechanic_service = csrf_exempt(DjangoApplication(mechanic_app))
+bom_service = csrf_exempt(DjangoApplication(bom_app))

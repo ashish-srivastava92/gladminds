@@ -5,12 +5,10 @@
       <ns1:ObjectList>
         <ns1:ProductDispatchData>
           <ns1:ProductDispatchModel>
-            <ns1:ENGINE>V8ENGINEK31</ns1:ENGINE>
-   			<ns1:PRODUCT_TYPE>Bike</ns1:PRODUCT_TYPE>
+            <ns1:PRODUCT_TYPE>Bike</ns1:PRODUCT_TYPE>
    			<ns1:KMS_TO>4000</ns1:KMS_TO>  	
     		<ns1:TIMESTAMP>2005-08-01000000</ns1:TIMESTAMP>                  
             <ns1:VEC_DIS_DT>2014-03-20</ns1:VEC_DIS_DT>            
-            <ns1:SKU_CODE>GMDEALER001</ns1:SKU_CODE>
             <ns1:DAYS_LIMIT_FROM>25</ns1:DAYS_LIMIT_FROM>
             <ns1:CHASSIS>XXXXXXXXXX</ns1:CHASSIS>
           	<ns1:DAYS_LIMIT_TO>30</ns1:DAYS_LIMIT_TO>      
@@ -20,12 +18,10 @@
             <ns1:KUNNR>GMDEALER001</ns1:KUNNR>
           </ns1:ProductDispatchModel>
           <ns1:ProductDispatchModel>
-            <ns1:ENGINE>V8ENGINEK32</ns1:ENGINE>
-   			<ns1:PRODUCT_TYPE>Bike</ns1:PRODUCT_TYPE>  	
+            <ns1:PRODUCT_TYPE>Bike</ns1:PRODUCT_TYPE>  	
    			<ns1:KMS_TO>4000</ns1:KMS_TO>
     		<ns1:TIMESTAMP>2005-08-01000000</ns1:TIMESTAMP>                  
             <ns1:VEC_DIS_DT>2014-03-20</ns1:VEC_DIS_DT>            
-            <ns1:SKU_CODE>GMDEALER001</ns1:SKU_CODE>
             <ns1:DAYS_LIMIT_FROM>25</ns1:DAYS_LIMIT_FROM>
             <ns1:CHASSIS>XXXXXXXXXY</ns1:CHASSIS>
           	<ns1:DAYS_LIMIT_TO>30</ns1:DAYS_LIMIT_TO>      

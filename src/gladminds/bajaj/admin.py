@@ -9,7 +9,7 @@ from django.contrib.admin import DateFieldListFilter
 from django import forms
 
 from gladminds.bajaj import models
-from gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
+from gladminds.bajaj.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
 from gladminds.core.auth_helper import GmApps, Roles
 from gladminds.core.admin_helper import GmModelAdmin
@@ -559,11 +559,11 @@ class MechanicAdmin(GmModelAdmin):
         form = super(MechanicAdmin, self).get_form(request, obj, **kwargs)
         return form
 
-    def save_model(self, request, obj, form, change):
-        if not (obj.phone_number == '' or (len(obj.phone_number) < 10)):
-            obj.phone_number=utils.mobile_format(obj.phone_number)
-        super(MechanicAdmin, self).save_model(request, obj, form, change)
-        
+#     def save_model(self, request, obj, form, change):
+#         if not (obj.phone_number == '' or (len(obj.phone_number) < 10)):
+#             obj.phone_number=utils.mobile_format(obj.phone_number)
+#         super(MechanicAdmin, self).save_model(request, obj, form, change)
+
 class CommentThreadInline(TabularInline):
     model = models.CommentThread
     fields = ('created_date', 'user', 'message')
@@ -579,7 +579,7 @@ class RedemptionCommentForm(forms.ModelForm):
         extra_field = self.cleaned_data.get('extra_field', None)
         transaction_id = self.instance
         if extra_field:
-            LoyaltyService.save_comment('redemption', extra_field, transaction_id, self.current_user)
+            loyalty.save_comment('redemption', extra_field, transaction_id, self.current_user)
         return super(RedemptionCommentForm, self).save(commit=commit)
     
     class Meta:
@@ -643,7 +643,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if 'status' in form.changed_data and obj.status!='Rejected':
-            date = LoyaltyService.set_date("Redemption", obj.status)
+            date = loyalty.set_date("Redemption", obj.status)
             obj.due_date = date['due_date']
             obj.expected_delivery_date = date['expected_delivery_date']
             obj.resolution_flag = False
@@ -661,16 +661,16 @@ class RedemptionRequestAdmin(GmModelAdmin):
                 obj.delivery_date=datetime.datetime.now()
         if 'status' in form.changed_data:
             if obj.status=='Approved' and obj.refunded_points:
-                LoyaltyService.update_points(obj.member, redeem=obj.product.points)
+                loyalty.update_points(obj.member, redeem=obj.product.points)
                 obj.refunded_points = False
             elif obj.status=='Rejected' and not obj.refunded_points:
-                LoyaltyService.update_points(obj.member, accumulate=obj.product.points)
+                loyalty.update_points(obj.member, accumulate=obj.product.points)
                 obj.refunded_points = True
         super(RedemptionRequestAdmin, self).save_model(request, obj, form, change)
         if 'status' in form.changed_data and obj.status in constants.STATUS_TO_NOTIFY:
-            LoyaltyService.send_request_status_sms(obj)
+            loyalty.send_request_status_sms(obj)
         if 'partner' in form.changed_data and obj.partner:
-            LoyaltyService.send_mail_to_partner(obj)
+            loyalty.send_mail_to_partner(obj)
 
     def suit_row_attributes(self, obj):
         class_map = {
@@ -691,7 +691,7 @@ class WelcomeKitCommentForm(forms.ModelForm):
         extra_field = self.cleaned_data.get('extra_field', None)
         transaction_id = self.instance
         if extra_field:
-            LoyaltyService.save_comment('welcome_kit', extra_field, transaction_id, self.current_user)
+            loyalty.save_comment('welcome_kit', extra_field, transaction_id, self.current_user)
         return super(WelcomeKitCommentForm, self).save(commit=commit)
     
     class Meta:
@@ -727,15 +727,15 @@ class WelcomeKitAdmin(GmModelAdmin):
                 obj.shipped_date=datetime.datetime.now()
             elif obj.status=='Delivered':
                 obj.delivery_date=datetime.datetime.now()
-        date = LoyaltyService.set_date("Welcome Kit", obj.status)
+        date = loyalty.set_date("Welcome Kit", obj.status)
         obj.due_date = date['due_date']
         obj.expected_delivery_date = date['expected_delivery_date']
         obj.resolution_flag = False
         super(WelcomeKitAdmin, self).save_model(request, obj, form, change)
         if 'status' in form.changed_data and obj.status=="Shipped":
-            LoyaltyService.send_welcome_kit_delivery(obj)
+            loyalty.send_welcome_kit_delivery(obj)
         if 'partner' in form.changed_data and obj.partner:
-            LoyaltyService.send_welcome_kit_mail_to_partner(obj)
+            loyalty.send_welcome_kit_mail_to_partner(obj)
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('resolution_flag','packed_by')

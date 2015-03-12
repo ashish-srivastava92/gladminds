@@ -14,7 +14,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
-
+CONN_MAX_AGE = None
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -80,7 +80,7 @@ TEMPLATE_DIRS = (
 #                 }
 FILE_CACHE_DURATION = 0
 
-SMS_CLIENT = "AIRTEL"
+SMS_CLIENT = "MOCK"
 FEED_TYPE = 'CSV'
 
 #AfterBuy File Upload location configuration
@@ -141,7 +141,7 @@ AFTER_BUY_CONSTANTS = {
                        }
 
 ########################SQS Queue Name
-SQS_QUEUE_NAME = "gladminds-qa2"
+SQS_QUEUE_NAME = "gladminds-staging"
 ######################################
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail QA"
 VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]

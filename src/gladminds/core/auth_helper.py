@@ -10,8 +10,10 @@ ALL_APPS = settings.BRANDS + [settings.GM_BRAND]
 class GmApps():
     AFTERBUY = 'afterbuy'
     BAJAJ = 'bajaj'
+    BAJAJCV = 'bajajcv'
     DEMO = 'demo'
     GM = 'default'
+    HONDA = 'honda'
 
 ALL_BRANDS = [getattr(GmApps, x) for x in dir(GmApps) if (not x.startswith("__") and getattr(GmApps, x)
                                                           not in [GmApps.AFTERBUY, GmApps.GM])]

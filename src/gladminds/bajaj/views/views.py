@@ -3,7 +3,10 @@ import json
 import random
 import datetime
 import operator
+import re
 
+from gladminds.core.utils import check_password
+from tastypie.http import HttpBadRequest
 from collections import OrderedDict
 from django.shortcuts import render_to_response, render
 from django.http.response import HttpResponseRedirect, HttpResponse,\
@@ -84,10 +87,9 @@ def user_logout(request):
         return HttpResponseBadRequest()
     return HttpResponseBadRequest('Not Allowed')
 
-
 @check_service_active(Services.FREE_SERVICE_COUPON)
 @login_required()
-def change_password(request): 
+def change_password(request):
     if request.method == 'GET':
         return render(request, 'portal/change_password.html')
     if request.method == 'POST':
@@ -98,9 +100,13 @@ def change_password(request):
             new_password = request.POST.get('newPassword')
             check_pass = user.check_password(str(old_password))
             if check_pass:
-                user.set_password(str(new_password))
-                user.save()
-                data = {'message': 'Password Changed successfully', 'status': True}
+                invalid_password = check_password(new_password)
+                if (invalid_password):
+                    data = {'message':"password does not match the rules",'status':False}
+                else:    
+                    user.set_password(str(new_password))
+                    user.save()
+                    data = {'message': 'Password Changed successfully', 'status': True}
             else:
                 data = {'message': 'Old password wrong', 'status': False}
             return HttpResponse(json.dumps(data), content_type='application/json')
@@ -323,7 +329,7 @@ def register_customer(request, group=None):
                     message = get_template('CUSTOMER_MOBILE_NUMBER_UPDATE').format(customer_name=customer_obj.new_customer_name, new_number=customer_obj.new_number)
                     for phone_number in [customer_obj.new_number, old_number]:
                         phone_number = utils.get_phone_number_format(phone_number)
-                        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+                        sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
                         send_job_to_queue(send_customer_phone_number_update_message, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
                             
                     if models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS).exists():
@@ -340,7 +346,7 @@ def register_customer(request, group=None):
                         managers = models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS)
                         for manager in managers:
                             phone_number = utils.get_phone_number_format(manager.phone_number)
-                            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+                            sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
                             send_job_to_queue(send_customer_phone_number_update_message, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
 
             else:
