@@ -127,7 +127,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
         total_failed = 0
         for dealer in self.data_source:
             dealer_data = self.check_or_create_dealer(dealer_id=dealer['id'],
-                                address=dealer['address'])
+                                address=dealer['address'], cdms_flag=dealer['cdms_flag'])
             try:
                 mobile_number_active = self.check_mobile_active(dealer, dealer_data)
                 if mobile_number_active and dealer['status']=='Y':

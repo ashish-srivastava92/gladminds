@@ -15,6 +15,7 @@ from gladminds.core.managers.audit_manager import sms_log
 from gladminds.sqs_tasks import send_invalid_keyword_message
 from gladminds.core import utils
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
+from time import time
 
 LOGGER = logging.getLogger('gladminds')
 ANGULAR_FORMAT = lambda x: x.replace('{', '<').replace('}', '>')
@@ -74,10 +75,14 @@ class SMSResources(Resource):
             error_template = ANGULAR_FORMAT('CORRECT FORMAT: ' + inf.template)
             error_message = inf.message
         if error_template:
-            sms_log(settings.BRAND,receiver=phone_number,
+            l1 = time()
+            sms_log(settings.BRAND, receiver=phone_number,
                     action=AUDIT_ACTION, message=error_template)
+            l2 = time()
+            LOGGER.info("The database took {0} secs yippee".format(l2-l1))
             send_job_to_queue(send_invalid_keyword_message, {"phone_number":phone_number, "message":error_template, "sms_client":settings.SMS_CLIENT})
-            
+            l3 = time()
+            LOGGER.info("The sqs took {0} secs yippee".format(l3-l2))
             raise ImmediateHttpResponse(HttpBadRequest(error_message))
         to_be_serialized = {}
         try:
