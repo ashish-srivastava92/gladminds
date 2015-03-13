@@ -260,7 +260,6 @@ class AccumulationResource(CustomBaseModelResource):
         querry_lp_rp=''
         before_accumulation="(select A.member_id,"
         groups = utils.get_user_groups(request.user)
-        print "@@ GROUP @@",groups
         if Roles.NATIONALSPARESMANAGERS in groups:
             nsm = models.NationalSparesManager.objects.filter(user__user=request.user)
             territories = nsm[0].territory.all()
@@ -288,8 +287,7 @@ class AccumulationResource(CustomBaseModelResource):
             before_accumulation="(select B.member_id,"
         else:
             return HttpResponseBadRequest()
-            
-        print "@@ HELLOOOO @@"    
+          
         members = self.get_total_accumulated_redemption_requsets(condition,querry,join,querry_lp_rp,querry_lp_rp1,before_accumulation)    
         requests  = []   
         if request.method == 'GET':
@@ -297,60 +295,55 @@ class AccumulationResource(CustomBaseModelResource):
             for member in members: 
                 member_dict = {}
                 id = member['permanent_id']
-                member_dict['name'] = member['first_name'] + " " + member['middle_name'] + " " + member['last_name']
-                member_dict['registration_date'] = member['registered_date'].strftime('%d-%m-%Y')
-                member_dict['location'] = member['address_line_1'] + " " + member['address_line_2'] + " " + member['address_line_3'] + " " + member['address_line_4'] + " " + member['address_line_5'] + " " + member['address_line_6']
-                member_dict['city'] = member['district']
-                member_dict['state'] = member['state']
-                member_dict['area'] = member['locality']
-                member_dict['region'] = member['territory']
-                if member['accumulation_requests']==None:
-                    member_dict['accumulation_requests'] = 0
-                else:
-                    member_dict['accumulation_requests'] = member['accumulation_requests']
-                if member['accumulated_points'] != None:
-                    member_dict['accumulated_points'] = int(member['accumulated_points'])
-                else:
-                    member_dict['accumulated_points'] = 0
-                if member['redemption_requests']==None:
-                    member_dict['redemption_requests'] = 0
-                else:
-                    member_dict['redemption_requests'] = member['redemption_requests']
-                if member['redeemed_points'] != None:
-                    member_dict['redeemed_points'] = int(member['redeemed_points'])
-                else:
-                    member_dict['redeemed_points'] = 0
-                details[id]=member_dict
-            requests.append(details)        
+                if id != None:
+                    member_dict['name'] = member['first_name'] + " " + member['middle_name'] + " " + member['last_name']
+                    member_dict['registration_date'] = member['registered_date'].strftime('%d-%m-%Y')
+                    member_dict['location'] = member['address_line_1'] + " " + member['address_line_2'] + " " + member['address_line_3'] + " " + member['address_line_4'] + " " + member['address_line_5'] + " " + member['address_line_6']
+                    member_dict['city'] = member['district']
+                    member_dict['state'] = member['state']
+                    member_dict['area'] = member['locality']
+                    member_dict['region'] = member['territory']
+                    if member['accumulation_requests']==None:
+                        member_dict['accumulation_requests'] = 0
+                    else:
+                        member_dict['accumulation_requests'] = member['accumulation_requests']
+                    if member['accumulated_points'] != None:
+                        member_dict['accumulated_points'] = int(member['accumulated_points'])
+                    else:
+                        member_dict['accumulated_points'] = 0
+                    if member['redemption_requests']==None:
+                        member_dict['redemption_requests'] = 0
+                    else:
+                        member_dict['redemption_requests'] = member['redemption_requests']
+                    if member['redeemed_points'] != None:
+                        member_dict['redeemed_points'] = int(member['redeemed_points'])
+                    else:
+                        member_dict['redeemed_points'] = 0
+                    details[id]=member_dict
+            requests.append(details)       
             return HttpResponse(json.dumps(requests), content_type="application/json")
     
     def get_total_accumulated_redemption_requsets(self,condition,querry,join,querry_lp_rp,querry_lp_rp1,before_accumulation):
-        try:
-            print "@@ CONDITION @@",condition
-            print "@@ FUNCTION @@"
-            member_query =  "select * from \
-                             (select gm_mechanic.id,permanent_id,first_name,middle_name,last_name,address_line_1,address_line_2,address_line_3,address_line_4,address_line_5,address_line_6,registered_date,district,locality,gm_territory.territory as territory, state_name as state \
-                             from gm_territory,gm_mechanic,gm_state \
-                             where gm_mechanic.state_id=gm_state.id \
-                             and \
-                             gm_state.territory_id=gm_territory.id "                             
-            middle_querry = ")C "
+        member_query =  "select * from \
+                         (select gm_mechanic.id,permanent_id,first_name,middle_name,last_name,address_line_1,address_line_2,address_line_3,address_line_4,address_line_5,address_line_6,registered_date,district,locality,gm_territory.territory as territory, state_name as state \
+                         from gm_territory,gm_mechanic,gm_state \
+                         where gm_mechanic.state_id=gm_state.id \
+                         and \
+                         gm_state.territory_id=gm_territory.id "                             
+        middle_querry = ")C "
             
-            accumlations="A.accumulation_requests,A.accumulated_points,B.redemption_requests,B.redeemed_points \
-                                       from \
-                                       (select gm_accumulationrequest.member_id,count(gm_accumulationrequest.member_id) as accumulation_requests,\
-                                       sum(gm_accumulationrequest.points) as accumulated_points \
-                                       from \
-                                       gm_accumulationrequest \
-                                       group by(gm_accumulationrequest.member_id))A "
-            redemptions="(select gm_redemptionrequest.member_id,count(gm_redemptionrequest.member_id) as redemption_requests,\
-                                       sum(gm_redemptionrequest.points) as redeemed_points from gm_redemptionrequest group by(gm_redemptionrequest.member_id))B "                                       
-            querry_end=" on A.member_id = B.member_id)D on C.id=D.member_id;"            
-            member_objects = self.get_sql_data(member_query + querry + middle_querry + join + before_accumulation + accumlations + join + querry_lp_rp1 + redemptions + querry_lp_rp + querry_end,filters={'condition':condition})
-            print "@@ RETURNING @@",member_objects
-            return member_objects
-        except Exception as ex:
-            print "@@@@ ",ex
+        accumlations="A.accumulation_requests,A.accumulated_points,B.redemption_requests,B.redeemed_points \
+                                   from \
+                                   (select gm_accumulationrequest.member_id,count(gm_accumulationrequest.member_id) as accumulation_requests,\
+                                   sum(gm_accumulationrequest.points) as accumulated_points \
+                                   from \
+                                   gm_accumulationrequest \
+                                   group by(gm_accumulationrequest.member_id))A "
+        redemptions="(select gm_redemptionrequest.member_id,count(gm_redemptionrequest.member_id) as redemption_requests,\
+                                   sum(gm_redemptionrequest.points) as redeemed_points from gm_redemptionrequest group by(gm_redemptionrequest.member_id))B "                                       
+        querry_end=" on A.member_id = B.member_id)D on C.id=D.member_id;"            
+        member_objects = self.get_sql_data(member_query + querry + middle_querry + join + before_accumulation + accumlations + join + querry_lp_rp1 + redemptions + querry_lp_rp + querry_end,filters={'condition':condition})
+        return member_objects
      
     def get_sql_data(self,query, filters={}):
         conn = connections[settings.BRAND]
