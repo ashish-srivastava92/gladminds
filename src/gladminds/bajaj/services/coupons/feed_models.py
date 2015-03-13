@@ -266,15 +266,19 @@ class HeaderFieldModel(ComplexModel):
     VALID_FROM = Date(default=None)
     VALID_TO = Date(default=None)
    
+class HeaderAndItemModel(ComplexModel):   
+    __namespace__ = tns
+    HEADERFIELD = HeaderFieldModel
+    ITEMFIELD  = ItemFieldModel
+     
 class TimeStampModel(ComplexModel):
     __namespace__ = tns
     TIMESTAMP = Unicode(pattern=pattern)
 
 class BOMModel(ComplexModel):
     __namespace__ = tns
-    HEADERFIELD = HeaderFieldModel
-    ITEMFIELD =  ItemFieldModel
     BOMTIMESTAMP = TimeStampModel
+    HEADERANDITEM = Array(HeaderAndItemModel)
     
 class BillOfMaterialList(ComplexModel):
     __namespace__ = tns
@@ -287,8 +291,9 @@ class BillOfMaterialService(ServiceBase):
     def postBillOfMaterial(ObjectList, Credential):
         try:
             bom_list = []
-            for bom in ObjectList.BOMData:
-                bom_list.append({
+            for bom_obj in ObjectList.BOMData:
+                for bom in bom_obj.HEADERANDITEM:
+	                bom_list.append({
                                  'sku_code': bom.HEADERFIELD.SKU_CODE,
                                  'plant': bom.HEADERFIELD.PLANT,
                                  'bom_type': bom.HEADERFIELD.BOM_TYPE,
@@ -311,8 +316,8 @@ class BillOfMaterialService(ServiceBase):
                                  'change_number_to' : bom.ITEMFIELD.CHANGE_NUMBER_TO,
                                  'item' : bom.ITEMFIELD.ITEM,
                                  'item_id' : bom.ITEMFIELD.ITEM_ID,
-                                    
-                                 'timestamp':bom.BOMTIMESTAMP.TIMESTAMP
+
+                                 'timestamp':bom_obj.BOMTIMESTAMP.TIMESTAMP
                                 })
             save_to_db(feed_type='BOM', data_source=bom_list)
             return SUCCESS
