@@ -20,6 +20,7 @@ from django.views.generic.base import View
 from django.http import HttpResponse, HttpResponseServerError,\
     HttpResponseBadRequest
 from boto.sqs.connection import SQSConnection
+from django.conf import settings
 class TaskQueue:
     def add(self, task_name, task_params=None, **kwargs):
         pass
@@ -61,11 +62,17 @@ class SqsHandler(View):
         handler = self.task_map[str(task_name)]
         handler(**params)
 
+queue_conn = None
+
+if settings.ENABLE_AMAZON_SQS:
+    queue_conn = SQSConnection().get_queue(settings.SQS_QUEUE_NAME)
+
 
 class SqsTaskQueue(TaskQueue):
     def __init__(self, sqs_name, brand):
         self._conn = SQSConnection()
-        self._q = self._conn.get_queue(sqs_name)
+        #self._q = self._conn.get_queue(sqs_name)
+        self._q = queue_conn
         self.brand = brand
 
     def add(self, task_name, task_params=None, delay_seconds=None, **kwargs):
