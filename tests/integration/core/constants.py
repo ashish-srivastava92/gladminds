@@ -1,3 +1,5 @@
+from django.conf import settings
+import os
 def add_slashes(data):
     if data.startswith('/'):
         data = data[1:]
@@ -18,4 +20,10 @@ class AfterbuyUrls():
         LOGIN = 'consumers/login/'
         BRAND = 'brands/'
         INDUSTRY = 'industries/'
+        
+class BajajUrls():
+        COUPONS = 'coupons/'
+        LOGIN = 'gm-users/login/'
+        
+COUPON_SCHEMA = open(os.path.join(settings.BASE_DIR, 'tests/smoke/bajaj/coupon_data.json')).read()
 
