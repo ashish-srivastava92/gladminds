@@ -319,10 +319,8 @@ class BillOfMaterialService(ServiceBase):
 
                                 'timestamp':bom_obj.BOMTIMESTAMP.TIMESTAMP
                                 })
-                bom_dict = {'header_field':bom_header_list,
-                            'item_field':bom_item_list,
-                            }
-            save_to_db(feed_type='BOM', data_source=bom_dict)
+            save_to_db(feed_type='BOMHEADER', data_source=bom_header_list)
+            save_to_db(feed_type='BOMITEM', data_source=bom_item_list)
             return SUCCESS
         except Exception as ex:
             return FAILED
