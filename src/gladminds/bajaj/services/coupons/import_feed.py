@@ -127,10 +127,9 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
     def import_data(self):
         total_failed = 0
         for dealer in self.data_source:
-            dealer.setdefault('cdms_flag', 0)
-            dealer_data = self.check_or_create_dealer(dealer_id=dealer['id'],
-                                address=dealer['address'], cdms_flag=dealer['cdms_flag'])
             try:
+                dealer_data = self.check_or_create_dealer(dealer_id=dealer['id'],
+                                address=dealer['address'], cdms_flag=dealer['cdms_flag'])
                 mobile_number_active = self.check_mobile_active(dealer, dealer_data)
                 if mobile_number_active and dealer['status']=='Y':
                     raise ValueError(dealer['phone_number'] + ' is active under another dealer')
