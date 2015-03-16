@@ -20,9 +20,9 @@ class Command(BaseCommand):
         self.upload_dealer_data()
         self.upload_service_advisor_data()
 
-    def register_user(self, group, username, first_name=''):
+    def register_user(self, group, username):
         user_group = Group.objects.using(APP).get(name=group)
-        new_user = User.objects.using(APP).create(username=username, first_name=first_name)
+        new_user = User.objects.using(APP).create(username=username)
         password = username + settings.PASSWORD_POSTFIX
         new_user.set_password(password)
         new_user.save(using=APP)
@@ -56,7 +56,7 @@ class Command(BaseCommand):
             try:
                 dealer_object = dealer_model.objects.get(user__user__username = dealer['dealer_id'])
             except Exception as ex:
-                new_user=self.register_user(group=Roles.DEALERS, username=dealer['dealer_id'], first_name=dealer['name'])
+                new_user=self.register_user(group=Roles.DEALERS, username=dealer['dealer_id'])
                 dealer_object = dealer_model(dealer_id=dealer['dealer_id'], user=new_user)
                 dealer_object.save()
             user_obj = dealer_object.user.user
@@ -95,36 +95,37 @@ class Command(BaseCommand):
                     sa_list.append(temp)
         
         for sa in sa_list:
-            print "...Loading SA..", sa
-            dealer_object = dealer_model.objects.get(dealer_id = sa['dealer_id'])
-            try:
+            if not sa['name']=='':
+                print "...Loading SA..", sa
+                dealer_object = dealer_model.objects.get(dealer_id = sa['dealer_id'])
                 try:
-                    sa_object = sa_model.objects.get(user__phone_number = sa['number'], status='Y')
+                    try:
+                        sa_object = sa_model.objects.get(user__phone_number = sa['number'], status='Y')
+                    except Exception as ex:
+                        file.write("{0}: {1}".format(sa['number'], ex))
+                        service_advisor_id = TEMP_SA_ID_PREFIX + str(random.randint(10**5, 10**6))
+                        new_user=self.register_user(group=Roles.SERVICEADVISOR, username=service_advisor_id)
+                        sa_object = sa_model(service_advisor_id = service_advisor_id,
+                                             user=new_user,
+                                             status='Y',
+                                             dealer_id=dealer_object.user_id)
+                        sa_object.save()
+                    if sa_object.dealer_id!=dealer_object.user_id:
+                        raise ValueError('ACTIVE UNDER {0}'.format(sa_object.dealer_id.dealer_id))
+                    user_obj = sa_object.user.user
+                    user_pro_obj = sa_object.user
+                    first_name = sa['name']
+                    last_name = ''
+                    if len(sa['name'])>30:
+                        full_name = sa['name'].split(' ')
+                        first_name = ' '.join(full_name[0:3])
+                        last_name = ' '.join(full_name[3:])
+                    user_obj.first_name = first_name
+                    user_obj.last_name = last_name
+                    user_obj.save(using=APP)
+                    user_pro_obj.address = sa['city']
+                    user_pro_obj.phone_number = sa['number']
+                    user_pro_obj.save()
                 except Exception as ex:
-                    file.write("{0}: {1}".format(sa['number'], ex))
-                    service_advisor_id = TEMP_SA_ID_PREFIX + str(random.randint(10**5, 10**6))
-                    new_user=self.register_user(group=Roles.SERVICEADVISOR, username=service_advisor_id)
-                    sa_object = sa_model(service_advisor_id = service_advisor_id,
-                                         user=new_user,
-                                         status='Y',
-                                         dealer_id=dealer_object.user_id)
-                    sa_object.save()
-                if sa_object.dealer_id!=dealer_object.user_id:
-                    raise ValueError('ACTIVE UNDER {0}'.format(sa_object.dealer_id.dealer_id))
-                user_obj = sa_object.user.user
-                user_pro_obj = sa_object.user
-                first_name = sa['name']
-                last_name = ''
-                if len(sa['name'])>30:
-                    full_name = sa['name'].split(' ')
-                    first_name = ' '.join(full_name[0:3])
-                    last_name = ' '.join(full_name[3:])
-                user_obj.first_name = first_name
-                user_obj.last_name = last_name
-                user_obj.save(using=APP)
-                user_pro_obj.address = sa['city']
-                user_pro_obj.phone_number = sa['number']
-                user_pro_obj.save()
-            except Exception as ex:
-                file.write("{0}: {1}".format(sa['number'], ex))  
+                    file.write("{0}: {1}".format(sa['number'], ex))  
         file.close()

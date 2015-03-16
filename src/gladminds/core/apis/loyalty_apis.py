@@ -87,18 +87,18 @@ class RedemptionResource(CustomBaseModelResource):
                 'query_field' : {
                                   Roles.RPS:{
                                              'query':[Q(is_approved=True)],
-                                             'user_name':'packed_by' 
+                                             'user':'packed_by' 
                                              },
                                   Roles.LPS : {
                                                 'query':[Q(status__in=['Shipped','Delivered'])],
-                                                'user':'partner__user'
+                                                'user':'partner__user__user__username'
                                               },
-                                  Roles.DEALERS:{
-                                                 'user':'registered_by_distributor__user', 
+                                  Roles.DISTRIBUTORS:{
+                                                 'user':'member__registered_by_distributor__user__user__username', 
                                                  'area':'member__registered_by_distributor__city'
                                                  }, 
                                   Roles.AREASPARESMANAGERS : {
-                                                'user':'member__registered_by_distributor__asm__user__user',
+                                                'user':'member__state__in',
                                                 'area':'member__state__state_name'
                                                },
                                 }
@@ -124,33 +124,33 @@ class RedemptionResource(CustomBaseModelResource):
 
     ''' returns a dict having Count of redemption request within sla, above sla and total count'''
     def count_redemption_request (self, request, **kwargs):
-        data = {}
+        data = []
         query = {}
         try:
-            user_group = request.user.groups.values()[0]['name']
-            if not request.user.groups.filter(name=Roles.RPS).exists():
+            if not request.user.is_superuser:
+                user_group = request.user.groups.values()[0]['name']
                 q_user = self._meta.args['query_field'][user_group]['user']
-                query[q_user] = request.user
-            else:
-                q_user = self._meta.args['query_field'][user_group]['user_name']
-                query[q_user] = request.user.username
-                query['is_approved']= True
+                if not request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+                    query[q_user] = request.user.username
+                else:
+                    asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+                    query[q_user] = asm_state_list
                
             total = models.RedemptionRequest.objects.values('status').annotate(total_count= Count('status')).filter(**query)   
             query['resolution_flag'] = False
             within_sla_count = models.RedemptionRequest.objects.values('status').annotate(within_sla_count= Count('status')).filter(**query)
             query['resolution_flag'] = True        
-            overdue_count = models.RedemptionRequest.objects.values('resolution_flag').annotate(above_sla_count= Count('status')).filter(**query)        
-        
-            for a,b,c in itertools.izip_longest(total, within_sla_count, overdue_count):    
-                if not type(b):
-                    a['within_sla_count']= b['within_sla_count']            
-                if not type(c):
-                    a['above_sla_count']= c['above_sla_count']   
-                a.setdefault('total_count', 0)
-                a.setdefault('within_sla_count', 0)
-                a.setdefault('above_sla_count', 0)                                     
-                data[a['status']]= a
+            overdue_count = models.RedemptionRequest.objects.values('status').annotate(above_sla_count= Count('status')).filter(**query)        
+            for redemption in total:
+                redemption['above_sla_count'] = 0
+                redemption['within_sla_count'] =0
+                redemption_within_sla = filter(lambda within_sla: within_sla['status'] == redemption['status'], within_sla_count)
+                redemption_overdue = filter(lambda overdue_sla: overdue_sla['status'] == redemption['status'], overdue_count)
+                if redemption_within_sla:
+                    redemption['within_sla_count']= redemption_within_sla[0]['within_sla_count']
+                if redemption_overdue:       
+                    redemption['above_sla_count']= redemption_overdue[0]['above_sla_count']                                     
+                data.append(redemption)
         except Exception as ex:
             logger.error('redemption request count requested by {0}:: {1}'.format(request.user, ex))
             data = {'status': 0, 'message': 'could not retrieve the count of redemption request'}
