@@ -508,8 +508,8 @@ class ASCAndServiceAdvisorFeed(BaseFeed):
     
 class BillOfMaterialFeed(BaseFeed):
    
-    def import_data(self):       
-        for bom in self.data_source:
+    def import_data(self):
+        for bom in self.data_source['item_field']:
             try:
                 bom_item_obj = models.BOMItem(bom_number=bom['bom_number'], part_number=bom['part_number'],
                                             revision_number=bom['revision_number'], quantity=bom['quantity'], 
@@ -519,7 +519,11 @@ class BillOfMaterialFeed(BaseFeed):
                                             serial_number=bom['serial_number'], change_number=bom['change_number'],
                                             item=bom['item'], item_id=bom['item_id'])                
                 bom_item_obj.save()
+            except Exception as ex:
+                logger.info("[Exception: ]: BillOfMaterialFeed {0}".format(ex))
                 
+        for bom in self.data_source['header_field']:
+            try:
                 bom_header_obj = models.BOMHeader(sku_code=bom['sku_code'], plant=bom['plant'],
                                                   bom_type=bom['bom_type'], bom_number=bom['bom_number_header'],
                                                   created_on=bom['created_on'], valid_from=bom['valid_from_header'],
