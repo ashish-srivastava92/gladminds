@@ -213,7 +213,7 @@ def modify_servicedesk_tickets(request, feedback_id):
     feedback_types = get_list_from_set(FEEDBACK_TYPE)
     root_cause = get_list_from_set(ROOT_CAUSE)
     feedback_obj = get_feedback(feedback_id, request.user)
-    servicedesk_users = get_servicedesk_users(designation=[Roles.SDOWNERS,Roles.SDMANAGERS], feedback_obj=feedback_obj )
+    servicedesk_users = get_servicedesk_users(designation=[Roles.SDOWNERS,Roles.SDMANAGERS, Roles.SDREADONLY] )
     comments = get_comments(feedback_id)
     
     if request.method == 'POST':

@@ -216,16 +216,14 @@ def get_feedback(feedback_id, user):
     else:
         return models.Feedback.objects.get(id=feedback_id)
 
-
-def get_servicedesk_users(designation,feedback_obj):
+def get_servicedesk_users(designation):
     users = User.objects.filter(groups__name__in=designation)
     if len(users) > 0:
         user_list = models.UserProfile.objects.filter(user__in=users)
-        return models.ServiceDeskUser.objects.filter(user_profile__in=user_list, sub_department__department=feedback_obj.sub_department.department)
+        return models.ServiceDeskUser.objects.filter(user_profile__in=user_list)
     else:
         LOG.info("No user with designation SDO exists")
         return None
-
 
 def get_comments(feedback_id):
     comments = models.Comment.objects.filter(feedback_object_id=feedback_id)
