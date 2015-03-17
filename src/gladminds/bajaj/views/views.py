@@ -247,7 +247,7 @@ def save_sa_registration(request, groups):
         existing_sa = True
     else:
         service_advisor_id = TEMP_SA_ID_PREFIX + str(random.randint(10**5, 10**6))
-    data_source.append(utils.create_sa_feed_data(data, request.user, service_advisor_id))
+    data_source.append(utils.create_sa_feed_data(data, request.user.username, service_advisor_id))
     logger.info('[Temporary_sa_registration]:: Initiating dealer-sa feed for ID' + service_advisor_id)
     if Roles.ASCS in groups:
         feed_type='asc_sa'

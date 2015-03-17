@@ -102,7 +102,8 @@ class SAPFeed(object):
             'old_fsc': OldFscFeed,
             'credit_note': CreditNoteFeed,
             'asc_sa': ASCAndServiceAdvisorFeed,
-            'BOM': BillOfMaterialFeed,
+            'BOMHEADER': BOMHeaderFeed,
+            'BOMITEM': BOMItemFeed,
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
@@ -126,9 +127,9 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
     def import_data(self):
         total_failed = 0
         for dealer in self.data_source:
-            dealer_data = self.check_or_create_dealer(dealer_id=dealer['id'],
-                                address=dealer['address'], cdms_flag=dealer['cdms_flag'])
             try:
+                dealer_data = self.check_or_create_dealer(dealer_id=dealer['id'],
+                                address=dealer['address'], cdms_flag=dealer['cdms_flag'])
                 mobile_number_active = self.check_mobile_active(dealer, dealer_data)
                 if mobile_number_active and dealer['status']=='Y':
                     raise ValueError(dealer['phone_number'] + ' is active under another dealer')
@@ -503,10 +504,10 @@ class ASCAndServiceAdvisorFeed(BaseFeed):
         if list_active_mobile:
             return True
         return False
-
-class BillOfMaterialFeed(BaseFeed):
-   
-    def import_data(self):       
+    
+class BOMItemFeed(BaseFeed):
+  
+    def import_data(self):
         for bom in self.data_source:
             try:
                 bom_item_obj = models.BOMItem(bom_number=bom['bom_number'], part_number=bom['part_number'],
@@ -517,11 +518,18 @@ class BillOfMaterialFeed(BaseFeed):
                                             serial_number=bom['serial_number'], change_number=bom['change_number'],
                                             item=bom['item'], item_id=bom['item_id'])                
                 bom_item_obj.save()
-                
+            except Exception as ex:
+                logger.info("[Exception: ]: BOMItemFeed {0}".format(ex))
+
+class BOMHeaderFeed(BaseFeed):    
+
+    def import_data(self):
+        for bom in self.data_source:
+            try:
                 bom_header_obj = models.BOMHeader(sku_code=bom['sku_code'], plant=bom['plant'],
                                                   bom_type=bom['bom_type'], bom_number=bom['bom_number_header'],
                                                   created_on=bom['created_on'], valid_from=bom['valid_from_header'],
                                                   valid_to=bom['valid_to_header'])
                 bom_header_obj.save() 
             except Exception as ex:
-                logger.info("[Exception: ]: BillOfMaterialFeed {0}".format(ex))
+                logger.info("[Exception: ]: BOMHeaderFeed {0}".format(ex))

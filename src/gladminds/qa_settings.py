@@ -65,6 +65,8 @@ SAP_CRM_DETAIL = {
                   'password':'welcome123'
                   }
 
+MEMBER_SYNC_WSDL='prod_member_sync_feed.wsdl'
+
 ASC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
 
 COUPON_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/coupon-redeem/?wsdl&v0"
