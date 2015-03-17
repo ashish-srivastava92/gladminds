@@ -265,6 +265,7 @@ def create_sa_feed_data(post_data, user_id, temp_sa_id):
     data['name'] = post_data['name'].upper()
     data['status'] = post_data['status']
     data['address'] = None
+    data['cdms_flag'] = False
     return data
 
 def create_context(email_template_name, feedback_obj, comment_obj=None):

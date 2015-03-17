@@ -483,11 +483,6 @@ LOGGING = {
     }
 }
 
-
-CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
-COUPON_WSDL = 'qa_coupon_redeem.wsdl'
-VIN_SYNC_WSDL='qa_vin_sync.wsdl'
-
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
     "sender": "feed-report@gladminds.co",

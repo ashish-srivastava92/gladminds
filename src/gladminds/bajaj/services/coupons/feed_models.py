@@ -267,15 +267,16 @@ class HeaderFieldModel(ComplexModel):
     VALID_FROM = Date(default=None)
     VALID_TO = Date(default=None)
    
+     
 class TimeStampModel(ComplexModel):
     __namespace__ = tns
     TIMESTAMP = Unicode(pattern=pattern)
 
 class BOMModel(ComplexModel):
     __namespace__ = tns
-    HEADERFIELD = HeaderFieldModel
-    ITEMFIELD =  ItemFieldModel
     BOMTIMESTAMP = TimeStampModel
+    HEADERFIELD = Array(HeaderFieldModel)
+    ITEMFIELD = Array(ItemFieldModel)
     
 class BillOfMaterialList(ComplexModel):
     __namespace__ = tns
@@ -287,35 +288,40 @@ class BillOfMaterialService(ServiceBase):
     @srpc(BillOfMaterialList, AuthenticationModel,  _returns=Unicode)
     def postBillOfMaterial(ObjectList, Credential):
         try:
-            bom_list = []
-            for bom in ObjectList.BOMData:
-                bom_list.append({
-                                 'sku_code': bom.HEADERFIELD.SKU_CODE,
-                                 'plant': bom.HEADERFIELD.PLANT,
-                                 'bom_type': bom.HEADERFIELD.BOM_TYPE,
-                                 'bom_number_header': bom.HEADERFIELD.BOM_NO,
-                                 'created_on': bom.HEADERFIELD.CREATED_ON,
-                                 'valid_from_header': bom.HEADERFIELD.VALID_FROM,
-                                 'valid_to_header': bom.HEADERFIELD.VALID_TO,
-                                 
-                                 'bom_number' : bom.ITEMFIELD.BOM_NUMBER, 
-                                 'part_number' : bom.ITEMFIELD.PART_NUMBER,  
-                                 'revision_number' : bom.ITEMFIELD.REVISION_NO, 
-                                 'quantity' : bom.ITEMFIELD.QTY,
-                                 'uom' :bom.ITEMFIELD.UOM,
-                                 'valid_from' : bom.ITEMFIELD.VALID_FROM,
-                                 'valid_to' : bom.ITEMFIELD.VALID_TO,
-                                 'plate_id' : bom.ITEMFIELD.PLATE_ID,
-                                 'plate_txt' : bom.ITEMFIELD.PLATE_TXT,
-                                 'serial_number' : bom.ITEMFIELD.SERIAL_NUMBER,
-                                 'change_number' : bom.ITEMFIELD.CHANGE_NUMBER,
-                                 'change_number_to' : bom.ITEMFIELD.CHANGE_NUMBER_TO,
-                                 'item' : bom.ITEMFIELD.ITEM,
-                                 'item_id' : bom.ITEMFIELD.ITEM_ID,
-                                    
-                                 'timestamp':bom.BOMTIMESTAMP.TIMESTAMP
+            bom_header_list = []
+            bom_item_list = []
+            for bom_obj in ObjectList.BOMData:
+                for bom in bom_obj.HEADERFIELD:
+	                bom_header_list.append({
+                                 'sku_code': bom.SKU_CODE,
+                                 'plant': bom.PLANT,
+                                 'bom_type': bom.BOM_TYPE,
+                                 'bom_number_header': bom.BOM_NO,
+                                 'created_on': bom.CREATED_ON,
+                                 'valid_from_header': bom.VALID_FROM,
+                                 'valid_to_header': bom.VALID_TO,
+                                 })
+                for bom in bom_obj.ITEMFIELD:
+                    bom_item_list.append({
+                                'bom_number' : bom.BOM_NUMBER, 
+                                'part_number' : bom.PART_NUMBER,  
+                                'revision_number' : bom.REVISION_NO, 
+                                'quantity' : bom.QTY,
+                                'uom' :bom.UOM,
+                                'valid_from' : bom.VALID_FROM,
+                                'valid_to' : bom.VALID_TO,
+                                'plate_id' : bom.PLATE_ID,
+                                'plate_txt' : bom.PLATE_TXT,
+                                'serial_number' : bom.SERIAL_NUMBER,
+                                'change_number' : bom.CHANGE_NUMBER,
+                                'change_number_to' : bom.CHANGE_NUMBER_TO,
+                                'item' : bom.ITEM,
+                                'item_id' : bom.ITEM_ID,
+
+                                'timestamp':bom_obj.BOMTIMESTAMP.TIMESTAMP
                                 })
-            save_to_db(feed_type='BOM', data_source=bom_list)
+            save_to_db(feed_type='BOMHEADER', data_source=bom_header_list)
+            save_to_db(feed_type='BOMITEM', data_source=bom_item_list)
             return SUCCESS
         except Exception as ex:
             return FAILED

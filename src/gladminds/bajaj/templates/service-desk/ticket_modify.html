@@ -56,12 +56,14 @@
 							<div class="form-group">
                     			<label class="col-sm-4 control-label" for="Status">Status</label>
                        			<div class="col-sm-8">
-	                    			<select id="status" class="form-control status" name="status" {% if group == CONSTANTS.SD_CONSTANTS.DEALER or group == CONSTANTS.SD_CONSTANTS.FSCADMIN and feedback.status != 'Pending' %} onfocus="disable_func()" readonly
+	                    			<select id="status" class="form-control status" name="status" {% if group == CONSTANTS.SD_CONSTANTS.DEALER and feedback.status != 'Pending' and feedback.status != 'Resolved' %} onfocus="disable_func()" readonly
                                 			{% endif %} onchange="rootCause(this.options[this.selectedIndex].value)" >
                             			{% for type in FEEDBACK_STATUS %}
                                 			<option {% if type == feedback.status %} selected {% endif %}
                                 			{% if feedback.status == 'Pending' %}
-                                				{% if type == 'Open' or type == 'Closed' or type == 'Resolved' %} disabled {% endif %}  {% endif %} value="{{type}}">{{type}}</option>
+                                				{% if type == 'Open' or type == 'Closed' or type == 'Resolved' %} disabled {% endif %}
+                                			{% elif feedback.status == 'Resolved' %}
+                                				{% if not type == 'Closed' %} disabled {% endif %}  {% endif %} value="{{type}}">{{type}}</option>
                                 		{% endfor %}
                              		</select>
 								</div>
