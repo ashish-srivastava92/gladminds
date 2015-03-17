@@ -102,6 +102,8 @@ class SAPFeed(object):
             'old_fsc': OldFscFeed,
             'credit_note': CreditNoteFeed,
             'asc_sa': ASCAndServiceAdvisorFeed,
+            'BOMHEADER': BOMHeaderFeed,
+            'BOMITEM': BOMItemFeed,
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
@@ -125,9 +127,9 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
     def import_data(self):
         total_failed = 0
         for dealer in self.data_source:
-            dealer_data = self.check_or_create_dealer(dealer_id=dealer['id'],
-                                address=dealer['address'])
             try:
+                dealer_data = self.check_or_create_dealer(dealer_id=dealer['id'],
+                                address=dealer['address'], cdms_flag=dealer['cdms_flag'])
                 mobile_number_active = self.check_mobile_active(dealer, dealer_data)
                 if mobile_number_active and dealer['status']=='Y':
                     raise ValueError(dealer['phone_number'] + ' is active under another dealer')
@@ -339,7 +341,7 @@ def update_coupon_data(sender, **kwargs):
                     customer_name=customer_name, sap_customer_id=customer_id)
             
             sms_log(
-                receiver=customer_phone_number, action='SEND TO QUEUE', message=message)
+                settings.BRAND, receiver=customer_phone_number, action='SEND TO QUEUE', message=message)
             send_job_to_queue(send_on_product_purchase, {"phone_number":customer_phone_number, "message":message, "sms_client":settings.SMS_CLIENT}) 
         except Exception as ex:
             logger.info("[Exception]: Signal-In Update Coupon Data %s" % ex)
@@ -504,3 +506,36 @@ class ASCAndServiceAdvisorFeed(BaseFeed):
         if list_active_mobile:
             return True
         return False
+    
+class BOMItemFeed(BaseFeed):
+  
+    def import_data(self):
+        for bom in self.data_source:
+            try:
+                bom_item_obj = models.BOMItem(bom_number=bom['bom_number'], part_number=bom['part_number'],
+                                            revision_number=bom['revision_number'], quantity=bom['quantity'], 
+                                            uom=bom['uom'], change_number_to=bom['change_number_to'],
+                                            valid_from=bom['valid_from'], valid_to=bom['valid_to'], 
+                                            plate_id=bom['plate_id'], plate_txt=bom['plate_txt'],
+                                            serial_number=bom['serial_number'], change_number=bom['change_number'],
+                                            item=bom['item'], item_id=bom['item_id'])                
+                bom_item_obj.save()
+            except Exception as ex:
+                logger.info("[Exception: ]: BOMItemFeed {0}".format(ex))
+
+class BOMHeaderFeed(BaseFeed):    
+
+    def import_data(self):
+        for bom in self.data_source:
+            try:
+                bom_header_obj = models.BOMHeader(sku_code=bom['sku_code'], plant=bom['plant'],
+                                                  bom_type=bom['bom_type'], bom_number=bom['bom_number_header'],
+                                                  created_on=bom['created_on'], valid_from=bom['valid_from_header'],
+                                                  valid_to=bom['valid_to_header'])
+                bom_header_obj.save() 
+            except Exception as ex:
+                logger.info("[Exception: ]: BOMHeaderFeed {0}".format(ex))
+                
+
+    
+    

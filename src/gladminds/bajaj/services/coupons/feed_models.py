@@ -5,7 +5,7 @@ from spyne.model.complex import Array
 from spyne.model.complex import ComplexModel
 from spyne.model.complex import Iterable
 from spyne.model.primitive import Integer, Decimal, Date
-from spyne.model.primitive import Unicode, Mandatory
+from spyne.model.primitive import Unicode, Mandatory, Boolean
 from spyne.protocol.soap import Soap11
 from spyne.server.django import DjangoApplication
 from spyne.server.wsgi import WsgiApplication
@@ -136,7 +136,7 @@ class DealerModel(ComplexModel):
     SER_ADV_MOBILE = Unicode
     ACTIVE_FLAG = Unicode
     TIMESTAMP = Unicode(pattern=pattern)
-
+    CDMS_FLAG = Boolean
 
 class DealerModelList(ComplexModel):
     __namespace__ = tns
@@ -239,6 +239,92 @@ class CreditNoteModelList(ComplexModel):
     __namespace__ = tns
     CreditNoteData = Array(CreditNoteModel)
 
+class ItemFieldModel(ComplexModel):
+    __namespace__ = tns
+    BOM_NUMBER = Unicode
+    PART_NUMBER = Unicode
+    REVISION_NO = Unicode
+    QTY = Unicode
+    UOM = Unicode
+    VALID_FROM = Date(default=None)
+    VALID_TO = Date(default=None)
+    PLATE_ID = Unicode
+    PLATE_TXT = Unicode
+    SERIAL_NUMBER = Unicode
+    CHANGE_NUMBER = Unicode
+    CHANGE_NUMBER_TO = Unicode
+    ITEM = Unicode
+    ITEM_ID = Unicode
+   
+class HeaderFieldModel(ComplexModel):
+    __namespace__ = tns
+    SKU_CODE = Unicode
+    PLANT = Unicode
+    BOM_TYPE = Unicode
+    BOM_NO = Unicode
+    CREATED_ON = Date(default=None)
+    VALID_FROM = Date(default=None)
+    VALID_TO = Date(default=None)
+   
+     
+class TimeStampModel(ComplexModel):
+    __namespace__ = tns
+    TIMESTAMP = Unicode(pattern=pattern)
+
+class BOMModel(ComplexModel):
+    __namespace__ = tns
+    BOMTIMESTAMP = TimeStampModel
+    HEADERFIELD = Array(HeaderFieldModel)
+    ITEMFIELD = Array(ItemFieldModel)
+    
+class BillOfMaterialList(ComplexModel):
+    __namespace__ = tns
+    BOMData = Array(BOMModel)
+
+class BillOfMaterialService(ServiceBase):
+    __namespace__ = tns
+
+    @srpc(BillOfMaterialList, AuthenticationModel,  _returns=Unicode)
+    def postBillOfMaterial(ObjectList, Credential):
+        try:
+            bom_header_list = []
+            bom_item_list = []
+            for bom_obj in ObjectList.BOMData:
+                for bom in bom_obj.HEADERFIELD:
+	                bom_header_list.append({
+                                 'sku_code': bom.SKU_CODE,
+                                 'plant': bom.PLANT,
+                                 'bom_type': bom.BOM_TYPE,
+                                 'bom_number_header': bom.BOM_NO,
+                                 'created_on': bom.CREATED_ON,
+                                 'valid_from_header': bom.VALID_FROM,
+                                 'valid_to_header': bom.VALID_TO,
+                                 })
+                for bom in bom_obj.ITEMFIELD:
+                    bom_item_list.append({
+                                'bom_number' : bom.BOM_NUMBER, 
+                                'part_number' : bom.PART_NUMBER,  
+                                'revision_number' : bom.REVISION_NO, 
+                                'quantity' : bom.QTY,
+                                'uom' :bom.UOM,
+                                'valid_from' : bom.VALID_FROM,
+                                'valid_to' : bom.VALID_TO,
+                                'plate_id' : bom.PLATE_ID,
+                                'plate_txt' : bom.PLATE_TXT,
+                                'serial_number' : bom.SERIAL_NUMBER,
+                                'change_number' : bom.CHANGE_NUMBER,
+                                'change_number_to' : bom.CHANGE_NUMBER_TO,
+                                'item' : bom.ITEM,
+                                'item_id' : bom.ITEM_ID,
+
+                                'timestamp':bom_obj.BOMTIMESTAMP.TIMESTAMP
+                                })
+            save_to_db(feed_type='BOMHEADER', data_source=bom_header_list)
+            save_to_db(feed_type='BOMITEM', data_source=bom_item_list)
+            return SUCCESS
+        except Exception as ex:
+            return FAILED
+
 class BrandService(ServiceBase):
     __namespace__ = tns
 
@@ -276,7 +362,8 @@ class DealerService(ServiceBase):
                     'service_advisor_id': dealer.SER_ADV_ID,
                     'name': dealer.SER_ADV_NAME,
                     'phone_number': utils.mobile_format(dealer.SER_ADV_MOBILE),
-                    'status': dealer.ACTIVE_FLAG
+                    'status': dealer.ACTIVE_FLAG,
+                    'cdms_flag':dealer.CDMS_FLAG
                 })
             except Exception as ex:
                 ex = "DealerService: {0}  Error on Validating {1}".format(dealer, ex)
@@ -461,7 +548,7 @@ def get_response(feed_remark):
     if feed_remark.failed_feeds > 0:
         remarks = feed_remark.remarks.elements()
         for remark in remarks:
-            feed_failure_log(feed_type=feed_remark.feed_type, reason=remark)
+            feed_failure_log(brand=settings.BRAND, feed_type=feed_remark.feed_type, reason=remark)
         return FAILED
     else:
         return SUCCESS
