@@ -334,7 +334,6 @@ ALL_APPS = (
     'storages',
     'tastypie_swagger',
     'django_otp',
-    'smoketest',
     'django_otp.plugins.otp_totp',
     'constance.backends.database'
    # 'debug_toolbar',

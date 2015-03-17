@@ -13,7 +13,7 @@ class BajajResourceTestCase(TestCase):
     def assertSuccess(self, first, msg=None):
         if int(first) < 200 or int(first) > 299:
             raise self.failureException(msg)
-
+        
     def login(self, dct=None):
         if dct is None:
             dct = {"username": os.environ['USERNAME'], "password": os.environ['PASSWORD']}
@@ -34,7 +34,6 @@ class BajajResourceTestCase(TestCase):
         params.update({'access_token': self.login()})
         resp = requests.get(self.base_version+uri, headers=headers, params=params)
         self.assertSuccess(resp.status_code)
-        json.loads(resp.content)
         return json.loads(resp.content)
 
     def delete(self, uri, content_type='application/json',
@@ -46,4 +45,10 @@ class BajajResourceTestCase(TestCase):
     def check_schema(self,data,stored_data):
         diff = set(data.keys()) - set(stored_data.keys())
         if diff:
-            raise Exception
+            raise self.failureException("Schema not matching")
+        for key,value in data.items():
+            if isinstance(value,dict):
+                self.check_schema(value,stored_data[key])
+                
+    def assertCheckSchema(self,data,stored_data):
+        self.check_schema(data,stored_data)

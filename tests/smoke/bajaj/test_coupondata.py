@@ -16,4 +16,4 @@ class TestBajajCouponDataApi(base_smoke.BajajResourceTestCase):
         data = data['objects'][0]
         unquoted = urllib.unquote(COUPON_SCHEMA)
         stored_data = json.loads(unquoted)
-        self.check_schema(data, stored_data)
+        self.assertCheckSchema(data, stored_data)
