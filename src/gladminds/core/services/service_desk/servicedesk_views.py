@@ -90,14 +90,6 @@ def service_desk(request):
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
                                                             'count': str(count), 'search': search}}
                                         )
-    elif request.method == 'POST':
-        try:
-            data = save_help_desk_data(request)
-            return HttpResponse(content=json.dumps(data),
-                                content_type='application/json')
-        except Exception as ex:
-            LOG.error('Exception while saving data : {0}'.format(ex))
-            return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
 

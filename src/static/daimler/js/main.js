@@ -8,7 +8,7 @@
 		waitingModal = $('.modal.waiting-dialog'),
 		jqXHR = $.ajax({
 			type: 'POST',
-			url: '/aftersell/servicedesk/helpdesk',
+			url: '/v1/feedbacks/add-ticket/',
 			data: formData,
 			cache: false,
 			processData: false,
@@ -50,7 +50,7 @@
 		waitingModal = $('.modal.waiting-dialog'),
 		jqXHR = $.ajax({
 			type: 'POST',
-			url: '/aftersell/servicedesk/save-feedback/',
+			url: '/v1/feedbacks/add-ticket/',
 			data: formData,
 			cache: false,
 			processData: false,

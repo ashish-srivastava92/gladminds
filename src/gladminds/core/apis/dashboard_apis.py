@@ -13,6 +13,7 @@ from gladminds.core.core_utils.utils import dictfetchall
 from django.http.response import HttpResponse
 from tastypie.utils.mime import build_content_type
 from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.auth_helper import Roles
 
 class Cache():
     @staticmethod
@@ -374,18 +375,25 @@ class TicketStatusResource(CustomBaseResource):
 
     class Meta:
         resource_name = 'ticket-status'
+        authentication = AccessTokenAuthentication()
         object_class = CustomApiObject
     
-    def get_ticket_count(self, status, department=None):
+    def get_ticket_count(self, request, status):
         status = str(status)
-        if department:
-            department = str(department)
-            data = self.get_sql_data("select count(*) as count from gm_feedback f inner join gm_departmentsubcategories s on \
-            f.sub_department_id = s.id where s.department_id=%(department)s and f.status=%(status)s",
-                                 filters={'status' : status, 'department':department})
-        else:
+        if request.user.groups.filter(name=Roles.SDOWNERS):
+            assignee_id = get_model('ServiceDeskUser').objects.get(user_profile__user_id=int(request.user.id)).id
+            data = self.get_sql_data("select count(*) as count from gm_feedback where status=%(status)s and assignee_id=%(assignee_id)s",
+                     filters={'status' : status, 'assignee_id' : assignee_id})
+        
+        elif request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.DEALERADMIN]):
             data = self.get_sql_data("select count(*) as count from gm_feedback where status=%(status)s",
-                                 filters={'status' : status, 'department':department})
+                                 filters={'status' : status})
+        
+        elif request.user.groups.filter(name=Roles.DEALERS):
+            reporter_id = get_model('ServiceDeskUser').objects.get(user_profile__user_id=int(request.user.id)).id
+            data = self.get_sql_data("select count(*) as count from gm_feedback where status=%(status)s and reporter_id=%(reporter_id)s",
+                     filters={'status' : status, 'reporter_id' : reporter_id})
+            
         return get_set_cache('gm_ticket_count' + status, data[0]['count'])
     
     def get_sql_data(self, query, filters={}):
@@ -397,13 +405,12 @@ class TicketStatusResource(CustomBaseResource):
         return data
         
     def obj_get_list(self, bundle, **kwargs):
-        department = bundle.request.GET.get('department')
         self.is_authenticated(bundle.request)
-        tickets_open = self.get_ticket_count(TicketStatus.OPEN, department)
-        tickets_progress = self.get_ticket_count(TicketStatus.IN_PROGRESS, department)
-        tickets_pending = self.get_ticket_count(TicketStatus.PENDING, department)
-        tickets_resolved = self.get_ticket_count(TicketStatus.RESOLVED, department)
-        tickets_closed = self.get_ticket_count(TicketStatus.CLOSED, department)
+        tickets_open = self.get_ticket_count(bundle.request, TicketStatus.OPEN)
+        tickets_progress = self.get_ticket_count(bundle.request, TicketStatus.IN_PROGRESS)
+        tickets_pending = self.get_ticket_count(bundle.request, TicketStatus.PENDING)
+        tickets_resolved = self.get_ticket_count(bundle.request, TicketStatus.RESOLVED)
+        tickets_closed = self.get_ticket_count(bundle.request, TicketStatus.CLOSED)
         tickets_raised = tickets_open + tickets_progress + tickets_pending + tickets_resolved + tickets_closed 
 
         return map(CustomApiObject, [
