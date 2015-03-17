@@ -92,3 +92,7 @@
 --
 --alter table bajaj_distributor add column sent_to_sap boolean default False;
 
+
+alter table gm_activity add user_id integer;
+alter table gm_activity add foreign key (user_id) references auth_user(id);
+																																		

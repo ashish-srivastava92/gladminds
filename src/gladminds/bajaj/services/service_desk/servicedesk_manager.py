@@ -250,9 +250,9 @@ def send_mail_to_dealer(feedback_obj, email_id, template):
     context = create_context(template, feedback_obj)
     mail.send_email_to_dealer_after_issue_assigned(context, email_id)
 
-def update_feedback_activities(feedback, action, original_value, new_value):
+def update_feedback_activities(feedback, action, original_value, new_value, user):
     feedback_activity = models.Activity(feedback=feedback, action=action, original_value=original_value,
-                                        new_value=new_value)
+                                        new_value=new_value, user=user)
     feedback_activity.save()
 
 def get_dealer_asc_email(feedback_obj):
@@ -292,7 +292,7 @@ def modify_feedback(feedback_obj, data, user, host):
         feedback_obj.due_date = datetime.datetime.strptime(data['due_date'], '%Y-%m-%d %H:%M:%S')
         feedback_obj.save()
         if due_date != feedback_obj.due_date:
-            update_feedback_activities(feedback_obj, SDActions.DUE_DATE, due_date, feedback_obj.due_date)
+            update_feedback_activities(feedback_obj, SDActions.DUE_DATE, due_date, feedback_obj.due_date, user)
             if reporter_email_id:
                 send_mail_to_reporter(reporter_email_id, feedback_obj, 'DUE_DATE_MAIL_TO_INITIATOR')
             else:
@@ -316,8 +316,8 @@ def modify_feedback(feedback_obj, data, user, host):
             feedback_obj.due_date = date['due_date']
             feedback_obj.reminder_date = date['reminder_date'] 
             feedback_obj.save()
-            update_feedback_activities(feedback_obj, SDActions.PRIORITY, priority, feedback_obj.priority)
-            update_feedback_activities(feedback_obj, SDActions.DUE_DATE, due_date, feedback_obj.due_date)
+            update_feedback_activities(feedback_obj, SDActions.PRIORITY, priority, feedback_obj.priority, user)
+            update_feedback_activities(feedback_obj, SDActions.DUE_DATE, due_date, feedback_obj.due_date, user)
             if due_date != convert_utc_to_local_time(feedback_obj.due_date):
                 if reporter_email_id:
                     send_mail_to_reporter(reporter_email_id, feedback_obj, 'DUE_DATE_MAIL_TO_INITIATOR')
@@ -372,7 +372,7 @@ def modify_feedback(feedback_obj, data, user, host):
         feedback_obj.due_date = date['due_date']
         feedback_obj.reminder_date = date['reminder_date'] 
         feedback_obj.save()
-        update_feedback_activities(feedback_obj, SDActions.STATUS, None, data['status'])
+        update_feedback_activities(feedback_obj, SDActions.STATUS, None, data['status'], user)
         context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL',
                                  feedback_obj)
         if reporter_email_id:
@@ -398,7 +398,7 @@ def modify_feedback(feedback_obj, data, user, host):
                                         modified_date=datetime.datetime.now(),
                                         feedback_object=feedback_obj)
         comment_object.save()
-        update_feedback_activities(feedback_obj, SDActions.COMMENT, None, data['comments'])
+        update_feedback_activities(feedback_obj, SDActions.COMMENT, None, data['comments'], user)
 
 # check if status is resolved
     if feedback_obj.status == status[2]:
@@ -434,7 +434,7 @@ def modify_feedback(feedback_obj, data, user, host):
                  feedback_obj)
     
     if previous_status != feedback_obj.status:
-        update_feedback_activities(feedback_obj, SDActions.STATUS, previous_status, feedback_obj.status)
+        update_feedback_activities(feedback_obj, SDActions.STATUS, previous_status, feedback_obj.status, user)
         
     if pending_status:
         set_wait_time(feedback_obj)
@@ -442,7 +442,7 @@ def modify_feedback(feedback_obj, data, user, host):
     if feedback_obj.assignee:
         if assign_number != feedback_obj.assignee.user_profile.phone_number:
             update_feedback_activities(feedback_obj, SDActions.ASSIGNEE, assign_number,
-                                       feedback_obj.assignee.user_profile.phone_number)
+                                       feedback_obj.assignee.user_profile.phone_number, user)
             context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL',
                                       feedback_obj)
             mail.send_email_to_assignee(context, feedback_obj.assignee.user_profile.user.email)

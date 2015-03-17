@@ -15,7 +15,7 @@ from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import MultiAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.apis.user_apis import ServiceDeskUserResource, \
-    DepartmentSubCategoriesResource
+    DepartmentSubCategoriesResource, UserResource
 from gladminds.core.model_fetcher import models
 
 
@@ -73,4 +73,28 @@ class FeedbackResource(CustomBaseModelResource):
         except Exception as ex:
             LOG.error('Exception while saving data : {0}'.format(ex))
             return HttpResponseBadRequest()
+    
+
+class ActivityResource(CustomBaseModelResource):
+    '''
+    Service Desk Activities Resource 
+    '''
+    feedback = fields.ForeignKey(FeedbackResource, 'feedback', full=True,
+                                 null=True, blank=True)
+    user = fields.ForeignKey(UserResource, 'user', full=True,
+                             null=True, blank=True)
+    
+    class Meta:
+        queryset = models.Activity.objects.all()
+        resource_name = 'feedback-activities'
+        model_name = "Activity"
+        detailed_allowed_methods = ['get']
+        always_return_data = True
+        filtering = {
+                      "user" : ALL_WITH_RELATIONS,
+                      "feedback" : ALL_WITH_RELATIONS
+                     }
+    
+    
+    
     
