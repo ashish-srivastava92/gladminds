@@ -290,6 +290,15 @@ class Constant(base_models.Constant):
     class Meta(base_models.Constant.Meta):
         app_label = _APP_NAME
         
+class BOMItem(base_models.BOMItem):
+    '''Detaills of  Service Billing of Material'''
+    class Meta:
+        app_label = _APP_NAME
+
+class BOMHeader(base_models.BOMHeader):
+    '''Detaills of Header BOM'''
+    class Meta:
+        app_label = _APP_NAME
 
 #######################LOYALTY TABLES#################################
 class Territory(base_models.Territory):
@@ -302,7 +311,7 @@ class State(base_models.State):
     ''' List of states mapped to territory'''
     territory = models.ForeignKey(Territory, null=True, blank=True)
  
-    class Meta(base_models.Territory.Meta):
+    class Meta(base_models.State.Meta):
         app_label = _APP_NAME
 
 class City(base_models.City):

@@ -92,6 +92,10 @@ def get_feedbacks(user, status, priority, type, search=None):
         feedbacks = models.Feedback.objects.filter(assignee=servicedesk_user[0], status__in=status_filter,
                                                    priority__in=priority_filter, type__in=type_filter).order_by('-created_date')
 
+    if user.groups.filter(name=Roles.FSCADMINS).exists():
+        feedbacks = models.Feedback.objects.filter(reporter__user_profile__user=user, status__in=status_filter,
+                                                   priority__in=priority_filter, type__in=type_filter).order_by('-created_date')
+
     return feedbacks
 
 def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=None):
@@ -111,7 +115,7 @@ def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=Non
     finally:
         LOG.info("Send complain message received successfully with {0}".format(message))
         phone_number = utils.get_phone_number_format(phone_number)
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
         send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     return {'status': True, 'message': message}
 
@@ -147,7 +151,6 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
     manager_obj = User.objects.get(groups__name=Roles.SDMANAGERS)
     try:
         servicedesk_user = create_servicedesk_user(name, phone_number, email)
-
         if with_detail:
             gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
                                                             type=sms_dict['type'],
@@ -179,7 +182,7 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
         LOG.info("Send complain message received successfully with %s" % message)
         if phone_number:
             phone_number = utils.get_phone_number_format(phone_number)
-            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
             send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         if dealer_email:
             context = utils.create_context('FEEDBACK_DETAIL_TO_DEALER', gladminds_feedback_object)

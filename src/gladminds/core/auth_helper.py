@@ -49,6 +49,7 @@ class Roles():
     LOYALTYADMINS = 'LoyaltyAdmins'
     NATIONALSPARESMANAGERS = 'NationalSparesManagers'
     AREASPARESMANAGERS = 'AreaSparesManagers'
+    DISTRIBUTORS = 'Distributors'
     RPS = 'RedemptionPartners'
     LPS = 'LogisticPartners'
     WELCOMEKITESCALATION = 'WelcomeKitEscalation'

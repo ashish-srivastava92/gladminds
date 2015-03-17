@@ -400,7 +400,7 @@ class State(base_models.State):
     ''' List of states mapped to territory'''
     territory = models.ForeignKey(Territory)
  
-    class Meta(base_models.Territory.Meta):
+    class Meta(base_models.State.Meta):
         app_label = _APP_NAME
 
 class City(base_models.City):
