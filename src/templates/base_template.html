@@ -48,6 +48,7 @@
     {% endblock %}
     {% block body %}
     {% endblock %}
+	{% if BRAND == 'bajaj' %}
     {% if 'AuthorisedServiceCenters' in groups or 'Dealers' in groups%}
 	  <div>
 	    <h5 class="footer-margin">
@@ -56,6 +57,7 @@
 	       Mail Support: Mail us at <span class="footer-inner">hello@gladminds.co</span> 
 	    </h5>
 	  </div>
+    {% endif %}
     {% endif %}
         <!--[if IE]>
         	<script src="/static/js/jquery-1.7.1.min.js"></script> 

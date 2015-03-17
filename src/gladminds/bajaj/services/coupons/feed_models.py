@@ -286,43 +286,59 @@ class BillOfMaterialService(ServiceBase):
 
     @srpc(BillOfMaterialList, AuthenticationModel,  _returns=Unicode)
     def postBillOfMaterial(ObjectList, Credential):
-        try:
-            bom_header_list = []
-            bom_item_list = []
-            for bom_obj in ObjectList.BOMData:
-                for bom in bom_obj.HEADERFIELD:
-	                bom_header_list.append({
-                                 'sku_code': bom.SKU_CODE,
-                                 'plant': bom.PLANT,
-                                 'bom_type': bom.BOM_TYPE,
-                                 'bom_number_header': bom.BOM_NO,
-                                 'created_on': bom.CREATED_ON,
-                                 'valid_from_header': bom.VALID_FROM,
-                                 'valid_to_header': bom.VALID_TO,
-                                 })
-                for bom in bom_obj.ITEMFIELD:
-                    bom_item_list.append({
-                                'bom_number' : bom.BOM_NUMBER, 
-                                'part_number' : bom.PART_NUMBER,  
-                                'revision_number' : bom.REVISION_NO, 
-                                'quantity' : bom.QTY,
-                                'uom' :bom.UOM,
-                                'valid_from' : bom.VALID_FROM,
-                                'valid_to' : bom.VALID_TO,
-                                'plate_id' : bom.PLATE_ID,
-                                'plate_txt' : bom.PLATE_TXT,
-                                'serial_number' : bom.SERIAL_NUMBER,
-                                'change_number' : bom.CHANGE_NUMBER,
-                                'change_number_to' : bom.CHANGE_NUMBER_TO,
-                                'item' : bom.ITEM,
-                                'item_id' : bom.ITEM_ID,
+        bom_header_list = []
+        bom_item_list = []
+        header_count = 0 
+        item_count = 0
+        
+        for bom_obj in ObjectList.BOMData:
+            header_count = header_count + len(bom_obj.HEADERFIELD)
+            item_count = item_count + len(bom_obj.ITEMFIELD)
+            
+            for bom in bom_obj.HEADERFIELD:
+                bom_header_list.append({
+                             'sku_code': bom.SKU_CODE,
+                             'plant': bom.PLANT,
+                             'bom_type': bom.BOM_TYPE,
+                             'bom_number_header': bom.BOM_NO,
+                             'created_on': bom.CREATED_ON,
+                             'valid_from_header': bom.VALID_FROM,
+                             'valid_to_header': bom.VALID_TO,
+                             })
+            
+            for bom in bom_obj.ITEMFIELD:
+                bom_item_list.append({
+                            'bom_number' : bom.BOM_NUMBER, 
+                            'part_number' : bom.PART_NUMBER,  
+                            'revision_number' : bom.REVISION_NO, 
+                            'quantity' : bom.QTY,
+                            'uom' :bom.UOM,
+                            'valid_from' : bom.VALID_FROM,
+                            'valid_to' : bom.VALID_TO,
+                            'plate_id' : bom.PLATE_ID,
+                            'plate_txt' : bom.PLATE_TXT,
+                            'serial_number' : bom.SERIAL_NUMBER,
+                            'change_number' : bom.CHANGE_NUMBER,
+                            'change_number_to' : bom.CHANGE_NUMBER_TO,
+                            'item' : bom.ITEM,
+                            'item_id' : bom.ITEM_ID,
 
-                                'timestamp':bom_obj.BOMTIMESTAMP.TIMESTAMP
-                                })
-            save_to_db(feed_type='BOMHEADER', data_source=bom_header_list)
-            save_to_db(feed_type='BOMITEM', data_source=bom_item_list)
+                            'timestamp':bom_obj.BOMTIMESTAMP.TIMESTAMP
+                            })
+
+        feed_remark_header = FeedLogWithRemark(header_count, feed_type='BOM Header Feed', action='Received', status=True)
+        feed_remark_header = save_to_db(feed_type='BOMHEADER', data_source=bom_header_list, feed_remark=feed_remark_header)
+        feed_remark_header.save_to_feed_log()
+        header_log = get_response(feed_remark_header)
+        
+        feed_remark_item = FeedLogWithRemark(item_count, feed_type='BOM Item Feed', action='Received', status=True)
+        feed_remark_item = save_to_db(feed_type='BOMITEM', data_source=bom_item_list, feed_remark=feed_remark_item)
+        feed_remark_item.save_to_feed_log()
+        item_log = get_response(feed_remark_item)
+        
+        if item_log == SUCCESS and  item_log == header_log:
             return SUCCESS
-        except Exception as ex:
+        else:
             return FAILED
 
 class BrandService(ServiceBase):

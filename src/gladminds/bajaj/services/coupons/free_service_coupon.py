@@ -146,13 +146,13 @@ def update_higher_range_coupon(kms, product):
     LOG.info("%s have higher KMS range" % updated_coupon)
 
 
-def update_exceed_limit_coupon(actual_kms, product):
+def update_exceed_limit_coupon(actual_kms, product, service_advisor):
     '''
         Exceed Limit those coupon whose kms limit is small then actual kms limit
     '''
     exceed_limit_coupon = models.CouponData.objects\
         .filter(Q(status=1) | Q(status=4), product=product, valid_kms__lt=actual_kms)\
-        .update(status=5, actual_kms=actual_kms)
+        .update(status=5, actual_kms=actual_kms, service_advisor=service_advisor, actual_service_date=datetime.now())
     LOG.info("%s are exceed limit coupon" % exceed_limit_coupon)
 
 
@@ -221,7 +221,7 @@ def validate_coupon(sms_dict, phone_number):
     try:
         product = get_product(sap_customer_id)
         LOG.info("Associated product %s" % product)
-        update_exceed_limit_coupon(actual_kms, product)
+        update_exceed_limit_coupon(actual_kms, product, service_advisor)
         valid_coupon = models.CouponData.objects.filter(Q(status=1) | Q(status=4) | Q(status=5), product=product,
                         valid_kms__gte=actual_kms, service_type=service_type) \
                        .select_related('vin', 'customer_phone_number__phone_number').order_by('service_type')

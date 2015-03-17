@@ -522,6 +522,10 @@ class BOMItemFeed(BaseFeed):
                 bom_item_obj.save()
             except Exception as ex:
                 logger.info("[Exception: ]: BOMItemFeed {0}".format(ex))
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+                
+        return self.feed_remark
 
 class BOMHeaderFeed(BaseFeed):    
 
@@ -535,7 +539,9 @@ class BOMHeaderFeed(BaseFeed):
                 bom_header_obj.save() 
             except Exception as ex:
                 logger.info("[Exception: ]: BOMHeaderFeed {0}".format(ex))
-                
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
 
+        return self.feed_remark
     
     
