@@ -281,6 +281,63 @@ class BillOfMaterialList(ComplexModel):
     __namespace__ = tns
     BOMData = Array(BOMModel)
 
+class EcoReleaseModel(ComplexModel):
+    __namespace__ = tns
+    ECO_NUMBER  = Unicode
+    ECO_REL_DATE = Date(default=None)
+    ECO_DESCRIP = Unicode
+    ACTION = Unicode
+    PARENT_PART = Unicode
+    ADD_PART = Unicode
+    ADD_PART_QTY = Unicode
+    ADD_PART_REV = Unicode
+    ADD_PART_LOC_CODE = Unicode
+    DEL_PART = Unicode
+    DEL_PART_QTY = Unicode
+    DEL_PART_REV = Unicode
+    DEL_PART_LOC_CODE = Unicode
+    MODELS_APPLICABLE = Unicode
+    SERVICEABILITY = Unicode
+    INTERCHAGEABILITY = Unicode
+    REASON_FOR_CHANGE = Unicode
+
+class EcoReleaseModelList(ComplexModel):
+    __namespace__ = tns
+    ECOReleaseData = Array(EcoReleaseModel)
+
+class ECOReleaseService(ServiceBase):
+    __namespace__ = tns
+
+    @srpc(EcoReleaseModelList, AuthenticationModel,  _returns=Unicode)
+    def postECORelease(ObjectList, Credential):
+        eco_list = []
+        feed_remark = FeedLogWithRemark(len(ObjectList.ECOReleaseData), feed_type='ECO_RELEASE', action='Received', status=True)
+
+        for eco_obj in ObjectList.ECOReleaseData:
+            eco_list.append({
+                            'eco_number' :  eco_obj.ECO_NUMBER,
+                            'eco_release_date' :  eco_obj.ECO_REL_DATE,
+                            'eco_description' :  eco_obj.ECO_DESCRIP,
+                            'action' :  eco_obj.ACTION,
+                            'parent_part' :  eco_obj.PARENT_PART,
+                            'add_part' :  eco_obj.ADD_PART,
+                            'add_part_qty' :  eco_obj.ADD_PART_QTY,
+                            'add_part_rev' :  eco_obj.ADD_PART_REV,
+                            'add_part_loc_code' :  eco_obj.ADD_PART_LOC_CODE,
+                            'del_part' :  eco_obj.DEL_PART,
+                            'del_part_qty' :  eco_obj.DEL_PART_QTY,
+                            'del_part_rev' :  eco_obj.DEL_PART_REV,
+                            'del_part_loc_code' :  eco_obj.DEL_PART_LOC_CODE,
+                            'models_applicable' :  eco_obj.MODELS_APPLICABLE,
+                            'serviceability' :  eco_obj.SERVICEABILITY,
+                            'interchangebility' :  eco_obj.INTERCHAGEABILITY,
+                            'reason_for_change' :  eco_obj.REASON_FOR_CHANGE,
+                            })
+
+        feed_remark = save_to_db(feed_type='ECO_RELEASE', data_source=eco_list, feed_remark=feed_remark)
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
+
 class BillOfMaterialService(ServiceBase):
     __namespace__ = tns
 
