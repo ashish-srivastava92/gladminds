@@ -39,7 +39,7 @@ class FeedbackResource(CustomBaseModelResource):
         resource_name = "feedbacks"
         model_name = "Feedback"
         authorization = MultiAuthorization(DjangoAuthorization())
-#         authentication = MultiAuthentication(AccessTokenAuthentication())
+        authentication = MultiAuthentication(AccessTokenAuthentication())
         detail_allowed_methods = ['get']
         always_return_data = True
         filtering = {
@@ -96,5 +96,24 @@ class ActivityResource(CustomBaseModelResource):
                      }
     
     
+class SLAResource(CustomBaseModelResource):
+    '''
+    Service Desk SLA Resource
+    '''    
     
-    
+    class Meta:
+        queryset = models.SLA.objects.all()
+        resource_name = 'slas'
+        model_name = 'SLA'
+        detailed_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+        authorization = MultiAuthorization(DjangoAuthorization())
+        filtering = {
+                     "priority" : ALL
+                     
+                     }
+        
+        
+        
+        
+        

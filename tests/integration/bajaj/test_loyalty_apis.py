@@ -328,7 +328,7 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEqual(self.deserialize(resp)['MRP'], 31)
  
     def test_create_sla(self):
-        uri = '/v1/slas/'
+        uri = '/v1/loyalty-slas/'
         resp = self.post(uri,data = SLA)
         self.assertEquals(resp.status_code,201)
         return resp
@@ -336,7 +336,7 @@ class LoyaltyApiTests(ResourceTestCase):
     def test_get_sla(self):
         resp = self.test_create_sla()
         self.assertEquals(resp.status_code,201)
-        uri = '/v1/slas/1/'
+        uri = '/v1/loyalty-slas/1/'
         resp = self.get(uri)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['action'], "Welcome Kit")
@@ -348,10 +348,10 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.test_get_sla()
         self.assertEquals(resp.status_code,200)
         data={"member_resolution_time": 10}
-        uri = '/v1/slas/1/'
+        uri = '/v1/loyalty-slas/1/'
         resp = self.put(uri,data)
         self.assertEquals(resp.status_code, 200)
-        uri = '/v1/slas/1/'
+        uri = '/v1/loyalty-slas/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['member_resolution_time'], 10)
  

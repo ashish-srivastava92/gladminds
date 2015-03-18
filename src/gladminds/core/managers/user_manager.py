@@ -1,5 +1,14 @@
+import logging
+
+from django.conf import settings
+from django.contrib.auth.models import Group, User
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
+from gladminds.core.loaders.module_loader import get_model
+
+
+logger = logging.getLogger("gladminds")
 
 class DealerManager(models.Manager):
     def active(self):
@@ -67,3 +76,43 @@ class SparePartPointManager(models.Manager):
     def get_part_number(self, valid_product_number):
         return super(SparePartPointManager, self).get_query_set().filter(part_number__in=valid_product_number)
 
+class RegisterUser():
+    def register_user(self, group, username=None, phone_number=None,
+                      first_name='', last_name='', email='', address='',
+                      state='', pincode='', APP=None):
+        user_profile = get_model('UserProfile', APP)
+        logger.info('New {0} Registration with id - {1}'.format(group, username))
+        try:
+            user_group = Group.objects.using(APP).get(name=group)
+        except ObjectDoesNotExist as ex:
+            logger.info(
+                "[Exception: new_ registration]: {0}"
+                .format(ex))
+            user_group = Group.objects.using(APP).create(name=group)
+            user_group.save(using=APP)
+        if username:
+            try:
+                user_details = user_profile.objects.select_related('user').get(user__username=username)
+            except ObjectDoesNotExist as ex:
+                logger.info(
+                    "[Exception: new_ registration]: {0}"
+                    .format(ex))    
+                new_user = User(
+                    username=username, first_name=first_name, last_name=last_name, email=email)
+                if group =='customer':
+                    password = settings.PASSWORD_POSTFIX
+                else:
+                    password = username + settings.PASSWORD_POSTFIX
+                new_user.set_password(password)
+                new_user.save(using=APP)
+                new_user.groups.add(user_group)
+                new_user.save(using=APP)
+                logger.info(group + ' {0} registered successfully'.format(username))
+                user_details = user_profile(user=new_user,
+                                        phone_number=phone_number, address=address,
+                                        state=state, pincode=pincode)
+                user_details.save()
+            return user_details
+        else:
+            logger.info('{0} id is not provided.'.format(str(group)))
+            raise Exception('{0} id is not provided.'.format(str(group)))   
