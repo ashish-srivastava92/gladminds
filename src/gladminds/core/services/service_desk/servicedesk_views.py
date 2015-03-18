@@ -90,14 +90,6 @@ def service_desk(request):
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
                                                             'count': str(count), 'search': search}}
                                         )
-    elif request.method == 'POST':
-        try:
-            data = save_help_desk_data(request)
-            return HttpResponse(content=json.dumps(data),
-                                content_type='application/json')
-        except Exception as ex:
-            LOG.error('Exception while saving data : {0}'.format(ex))
-            return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
 
@@ -221,7 +213,7 @@ def modify_servicedesk_tickets(request, feedback_id):
     feedback_types = get_list_from_set(FEEDBACK_TYPE)
     root_cause = get_list_from_set(ROOT_CAUSE)
     feedback_obj = get_feedback(feedback_id, request.user)
-    servicedesk_users = get_servicedesk_users(designation=[Roles.SDOWNERS,Roles.SDMANAGERS], feedback_obj=feedback_obj )
+    servicedesk_users = get_servicedesk_users(designation=[Roles.SDOWNERS,Roles.SDMANAGERS, Roles.SDREADONLY] )
     comments = get_comments(feedback_id)
     
     if request.method == 'POST':
@@ -253,7 +245,8 @@ def modify_feedback_comments(request, feedback_id, comment_id):
         comment.comment = data['commentDescription']
         comment.modified_date = datetime.datetime.now()
         comment.save()
-        update_feedback_activities(feedback_obj, SDActions.COMMENT_UPDATE, previous_comment, data['commentDescription'])
+        update_feedback_activities(feedback_obj, SDActions.COMMENT_UPDATE, previous_comment,
+                                   data['commentDescription'], request.user)
         return HttpResponse("Success")
 
     except Exception as ex:

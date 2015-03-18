@@ -203,7 +203,7 @@ def modify_feedback_comments(request, feedback_id, comment_id):
         comment.comment = data['commentDescription']
         comment.modified_date = datetime.datetime.now()
         comment.save()
-        update_feedback_activities(feedback_obj, SDActions.COMMENT_UPDATE, previous_comment, data['commentDescription'])
+        update_feedback_activities(feedback_obj, SDActions.COMMENT_UPDATE, previous_comment, data['commentDescription'], request.user)
         return HttpResponse("Success")
 
     except Exception as ex:
