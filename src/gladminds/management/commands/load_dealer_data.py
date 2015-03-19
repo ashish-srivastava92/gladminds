@@ -6,7 +6,7 @@ from datetime import datetime
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User, Group
-from gladminds.core import utils
+# from gladminds.core import utils
 
 from gladminds.core.auth_helper import Roles
 from gladminds.core.loaders.module_loader import get_model
@@ -15,6 +15,9 @@ user_profile = get_model('UserProfile', APP)
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
 
 class Command(BaseCommand):
+
+    def mobile_format(self, phone_number):
+        return '+91' + phone_number[-10:]
     
     def handle(self, *args, **options):
         self.upload_dealer_data()
@@ -94,7 +97,7 @@ class Command(BaseCommand):
                     temp['city'] = (row_list[3].strip())
                     temp['dealer_id'] = row_list[1].strip()
                     temp['name'] = row_list[4].strip()
-                    temp['number'] = utils.mobile_format(row_list[5].strip()  )
+                    temp['number'] = self.mobile_format(row_list[5].strip())
                                        
                     sa_list.append(temp)
         
