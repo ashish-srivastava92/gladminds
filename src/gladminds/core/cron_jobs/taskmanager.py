@@ -161,7 +161,8 @@ def get_discrepant_coupon_details():
             
         coupons_details= models.CouponData.objects.filter((Q(service_type=1) & (~Q(valid_days=service_dict['service_1_valid_days']) | ~Q(valid_kms=service_dict['service_1_valid_kms'])))
                                                         | (Q(service_type=2) & (~Q(valid_days=service_dict['service_2_valid_days']) | ~Q(valid_kms=service_dict['service_2_valid_kms'])))
-                                                        | (Q(service_type=3) & (~Q(valid_days=service_dict['service_3_valid_days']) | ~Q(valid_kms=service_dict['service_3_valid_kms']))))
+                                                        | (Q(service_type=3) & (~Q(valid_days=service_dict['service_3_valid_days']) | ~Q(valid_kms=service_dict['service_3_valid_kms'])))
+                                                        ).select_related('product')
         
         for coupon in coupons_details:
             data = {}
@@ -171,16 +172,23 @@ def get_discrepant_coupon_details():
             data['valid_days'] = coupon.valid_days
             data['valid_kms'] = coupon.valid_kms
             if coupon.service_type == 1:
-                coupon.valid_days = service_dict['service_1_valid_days']
-                coupon.valid_kms = service_dict['service_1_valid_kms']
+                valid_days = service_dict['service_1_valid_days']
+                valid_kms = service_dict['service_1_valid_kms']
             elif coupon.service_type == 2:
-                coupon.valid_days = service_dict['service_2_valid_days']
-                coupon.valid_kms = service_dict['service_2_valid_kms']
+                valid_days = service_dict['service_2_valid_days']
+                valid_kms = service_dict['service_2_valid_kms']
             else:
-                coupon.valid_days = service_dict['service_3_valid_days']
-                coupon.valid_kms = service_dict['service_3_valid_kms']
-             
-            coupon.save()    
+                valid_days = service_dict['service_3_valid_days']
+                valid_kms = service_dict['service_3_valid_kms']
+            
+            if coupon.product.purchase_date:
+                updated_date = coupon.product.purchase_date + timedelta(days = int(valid_days))
+                coupon.extended_date = updated_date 
+                coupon.mark_expired_on =  updated_date
+
+            coupon.valid_days = valid_days
+            coupon.valid_kms = valid_kms
+            coupon.save()
             coupon_data.append(data) 
         logger.info("[Policy discpancy]: got discrepant coupons list ")
         return coupon_data
