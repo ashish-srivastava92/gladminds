@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
 from gladminds.core.loaders.module_loader import get_model
-from gladminds.core.utils import generate_temp_id, mobile_format
+# from gladminds.core.utils import generate_temp_id, mobile_format
 from gladminds.core.auth_helper import Roles, GmApps
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist
@@ -154,4 +154,5 @@ class Command(BaseCommand):
             asc_object.asc_owner = asc['asc_owner_name']
             asc_object.asc_owner_phone = asc['asc_owner_phone']
             asc_object.save()
-            
+
+        

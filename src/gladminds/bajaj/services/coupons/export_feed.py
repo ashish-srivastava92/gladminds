@@ -19,6 +19,7 @@ class ExportCouponRedeemFeed(BaseExportFeed):
         total_failed = 0
         item_batch = {
             'TIMESTAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
+        self.feed_remark = FeedLogWithRemark(len(results), feed_type='Coupon Redemption Feed', action='Send', status=True)
         for redeem in results:
             try:
                 #added the condition only for the previous coupons with no servicing dealer details
@@ -43,6 +44,9 @@ class ExportCouponRedeemFeed(BaseExportFeed):
             except Exception as ex:
                 logger.error("[ExportCouponRedeemFeed]: error fetching from db {0}".format(ex))
                 total_failed = total_failed + 1
+                self.feed_remark.fail_remarks(ex)
+        
+        self.feed_remark.save_to_feed_log()
         return items, item_batch, total_failed
 
     def export(self, brand, items=None, item_batch=None, total_failed_on_feed=0):
@@ -50,6 +54,7 @@ class ExportCouponRedeemFeed(BaseExportFeed):
             "[ExportCouponRedeemFeed]: Export {0}".format(self.feed_type))
         client = self.get_client()
         total_failed = total_failed_on_feed
+        export_status = False
         for item in items:
             export_status = False
             logger.info("[ExportCouponRedeemFeed]: Sending coupon - {0}"\
@@ -68,17 +73,19 @@ class ExportCouponRedeemFeed(BaseExportFeed):
                     except Exception as ex:
                         total_failed = total_failed + 1
                         logger.error("[ExportCouponRedeemFeed]: Error:: {0} - {1}".format(item['GCP_UCN_NO'], ex))
+                        self.feed_remark.fail_remarks(ex)
                 else:
                     total_failed = total_failed + 1
                     logger.error("[ExportCouponRedeemFeed]: {0}:: Success not received from SAP".format(item['GCP_UCN_NO']))
             except Exception as ex:
                 total_failed = total_failed + 1
                 logger.error("[ExportCouponRedeemFeed]: Error:: {0} - {1}".format(item['GCP_UCN_NO'], ex))
+                self.feed_remark.fail_remarks(ex)
         feed_log(brand, feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
-
+        self.feed_remark.save_to_feed_log()
 
 class ExportASCRegistrationFeed(BaseExportFeed):
     def export_data(self, asc_phone_number=None):

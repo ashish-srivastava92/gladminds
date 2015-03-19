@@ -311,7 +311,7 @@ class ECOReleaseService(ServiceBase):
     @srpc(EcoReleaseModelList, AuthenticationModel,  _returns=Unicode)
     def postECORelease(ObjectList, Credential):
         eco_list = []
-        feed_remark = FeedLogWithRemark(len(ObjectList.ECOReleaseData), feed_type='ECO_RELEASE', action='Received', status=True)
+        feed_remark = FeedLogWithRemark(len(ObjectList.ECOReleaseData), feed_type='ECO Release Feed', action='Received', status=True)
 
         for eco_obj in ObjectList.ECOReleaseData:
             eco_list.append({
