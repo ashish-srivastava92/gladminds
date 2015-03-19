@@ -159,7 +159,7 @@ class DealerResource(CustomBaseModelResource):
             if phone_number:
                 user = models.Dealer.objects.get(user__phone_number=phone_number)
                 if user.dealer_id == username:
-                    data = {'status' : 0 , 'message' : "Already registered"}
+                    data = {'status' : 0 , 'message' : "Already registereds"}
                 else:
                     data = {'status' : 0 , 'message' : "Phone number already exists"}
         except Exception as ex:
