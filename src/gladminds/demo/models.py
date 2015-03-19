@@ -81,6 +81,7 @@ class Feedback(base_models.Feedback):
 
 class Activity(base_models.Activity):
     feedback = models.ForeignKey(Feedback, null=True, blank=True)
+    user = models.ForeignKey(User, null=True, blank=True, related_name="demo_activity_users")
     
     class Meta(base_models.Activity.Meta):
         app_label = _APP_NAME
