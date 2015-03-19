@@ -75,7 +75,7 @@ class Command(BaseCommand):
         retailer = get_model('Retailer', APP)
         dist = get_model('Distributor', APP)
         user_profile = get_model('UserProfile', APP)
-        mech = get_model('Mechanic', APP)
+        mech = get_model('Member', APP)
 
         for i in range(0, 1):
             with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:

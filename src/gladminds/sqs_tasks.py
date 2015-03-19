@@ -626,12 +626,12 @@ def send_reminders_for_servicedesk(*args, **kwargs):
 @shared_task
 def export_member_temp_id_to_sap(*args, **kwargs):
     '''
-    send info of registered Mechanic
+    send info of registered Member
     '''
     brand= kwargs.get('brand', None)
     member_registered = loyalty_export.ExportMemberTempFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
-                  wsdl_url=settings.MEMBER_SYNC_WSDL_URL, feed_type='Mechanic Registration Feed')
+                  wsdl_url=settings.MEMBER_SYNC_WSDL_URL, feed_type='Member Registration Feed')
     feed_export_data = member_registered.export_data()
     if len(feed_export_data[0]) > 0:
         member_registered.export(brand, items=feed_export_data[0], item_batch=feed_export_data[

@@ -983,8 +983,8 @@ class Retailer(BaseModel):
     def __unicode__(self):
         return self.retailer_name
 
-class Mechanic(BaseModel):
-    '''details of Mechanic'''
+class Member(BaseModel):
+    '''details of Member'''
     mechanic_id = models.CharField(max_length=50, unique=True, default=generate_mech_id)
     permanent_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
     total_points = models.IntegerField(max_length=50, null=True, blank=True, default=0)
@@ -1020,14 +1020,16 @@ class Mechanic(BaseModel):
     spare_per_month = models.IntegerField(max_length=50, null=True, blank=True)
     genuine_parts_used = models.IntegerField(max_length=50, null=True, blank=True)
     sent_to_sap = models.BooleanField(default=False)
-    
     image_url = models.FileField(upload_to=set_mechanic_image_path,
                                   max_length=255, null=True, blank=True,
                                   validators=[validate_image])
+    last_transaction_date = models.DateTimeField(null=True, blank=True)
+    total_accumulation_req = models.IntegerField(max_length=50, null=True, blank=True, default=0)
+    total_redemption_req = models.IntegerField(max_length=50, null=True, blank=True, default=0)
 
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
-    image_tag.short_description = 'Mechanic Image'
+    image_tag.short_description = 'Member Image'
     image_tag.allow_tags = True
 
     form_status = models.CharField(max_length=15, choices=constants.FORM_STATUS_CHOICES,
@@ -1035,7 +1037,7 @@ class Mechanic(BaseModel):
     sent_sms = models.BooleanField(default=False)
     download_detail = models.BooleanField(default=False)
 
-    objects = user_manager.MechanicManager()
+    objects = user_manager.MemberManager()
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         form_status=True
@@ -1048,13 +1050,13 @@ class Mechanic(BaseModel):
         else:
             self.form_status='Complete'
             
-        return super(Mechanic, self).save(force_insert=force_insert, force_update=force_update,
+        return super(Member, self).save(force_insert=force_insert, force_update=force_update,
                               using=using, update_fields=update_fields)
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Mechanics"
-        db_table = 'gm_mechanic'
+        verbose_name_plural = "Members"
+        db_table = 'gm_member'
 
     def __unicode__(self):
         if self.permanent_id:

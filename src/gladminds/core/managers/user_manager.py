@@ -53,9 +53,9 @@ class CustomerTempRegistrationManager(models.Manager):
         return customer_id
 
 
-class MechanicManager(models.Manager):
+class MemberManager(models.Manager):
     def get_mechanic(self, phone_number):
-        return super(MechanicManager, self).get_query_set().filter(user__phone_number=phone_number)
+        return super(MemberManager, self).get_query_set().filter(user__phone_number=phone_number)
 
 
 class SparePartUPCManager(models.Manager):

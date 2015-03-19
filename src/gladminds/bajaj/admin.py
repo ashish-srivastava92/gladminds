@@ -514,18 +514,18 @@ class AccumulationRequestAdmin(GmModelAdmin):
                         }
         return super(AccumulationRequestAdmin, self).changelist_view(request, extra_context=extra_context)
 
-class MechanicForm(forms.ModelForm):
+class MemberForm(forms.ModelForm):
     class Meta:
-        model = models.Mechanic
+        model = models.Member
     
     def __init__(self, *args, **kwargs):
-        super(MechanicForm, self).__init__(*args, **kwargs)
+        super(MemberForm, self).__init__(*args, **kwargs)
         for field in constants.MANDATORY_MECHANIC_FIELDS:
             self.fields[field].label = self.fields[field].label + ' * '
 
-class MechanicAdmin(GmModelAdmin):
+class MemberAdmin(GmModelAdmin):
     list_filter = ('form_status',)
-    form = MechanicForm
+    form = MemberForm
     search_fields = ('mechanic_id', 'permanent_id',
                      'phone_number', 'first_name',
                      'state__state_name', 'district')
@@ -556,13 +556,13 @@ class MechanicAdmin(GmModelAdmin):
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points', 'sent_to_sap', 'permanent_id', 'download_detail')
-        form = super(MechanicAdmin, self).get_form(request, obj, **kwargs)
+        form = super(MemberAdmin, self).get_form(request, obj, **kwargs)
         return form
 
 #     def save_model(self, request, obj, form, change):
 #         if not (obj.phone_number == '' or (len(obj.phone_number) < 10)):
 #             obj.phone_number=utils.mobile_format(obj.phone_number)
-#         super(MechanicAdmin, self).save_model(request, obj, form, change)
+#         super(MemberAdmin, self).save_model(request, obj, form, change)
 
 class CommentThreadInline(TabularInline):
     model = models.CommentThread
@@ -820,7 +820,7 @@ if settings.ENV not in ['prod']:
     brand_admin.register(models.NationalSparesManager, NSMAdmin)
     brand_admin.register(models.AreaSparesManager, ASMAdmin)
     brand_admin.register(models.Distributor, DistributorAdmin)
-    brand_admin.register(models.Mechanic, MechanicAdmin)
+    brand_admin.register(models.Member, MemberAdmin)
 
     brand_admin.register(models.SparePartMasterData, SparePartMasterAdmin)
     brand_admin.register(models.SparePartUPC, SparePartUPCAdmin)
