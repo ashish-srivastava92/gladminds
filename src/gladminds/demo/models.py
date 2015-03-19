@@ -427,3 +427,12 @@ class DiscrepantAccumulation(base_models.DiscrepantAccumulation):
      
     class Meta(base_models.DiscrepantAccumulation.Meta):
         app_label = _APP_NAME
+
+
+class FeedBackFact(base_models.FeedBackFact):
+    ''' Feedback Fact Table for reporting'''
+    date = models.ForeignKey(DateDimension)
+    
+    class Meta(base_models.FeedBackFact.Meta):
+        app_label =_APP_NAME
+        unique_together = ("date", "data_type")
