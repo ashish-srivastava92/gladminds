@@ -425,7 +425,17 @@ class DistributorAdmin(GmModelAdmin):
     search_fields = ('distributor_id', 'asm__asm_id',
                      'phone_number', 'city')
     list_display = ('distributor_id', 'name', 'email',
-                    'phone_number', 'city', 'asm')
+                    'phone_number', 'city', 'asm', 'state')
+
+    def queryset(self, request):
+        query_set = self.model._default_manager.get_query_set()
+        if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            query_set=query_set.filter(state=asm_state_list)
+        return query_set
+
+    def changelist_view(self, request, extra_context=None):
+        return super(DistributorAdmin, self).changelist_view(request)
 
 class SparePartMasterAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
