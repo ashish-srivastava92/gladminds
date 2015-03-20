@@ -381,7 +381,7 @@ class Distributor(base_models.Distributor):
     '''details of Distributor'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
     asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
-
+    state = models.ForeignKey(State, null=True, blank=True)
     class Meta:
         app_label = _APP_NAME
 
