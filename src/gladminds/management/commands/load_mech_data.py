@@ -11,7 +11,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.upload_dist_data()
-        self.upload_mech_data()
+#         self.upload_mech_data()
     
     def upload_dist_data(self):
         print "Started uploading distributor..."

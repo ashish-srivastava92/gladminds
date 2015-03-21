@@ -36,7 +36,7 @@ class ExportCouponRedeemFeed(BaseExportFeed):
                         "GCP_KMS": redeem.actual_kms,
                         "GCP_KUNNR": servicing_dealer,
                         "GCP_UCN_NO": redeem.unique_service_coupon,
-                        "PRODUCT_TYPE": redeem.sku_code,
+                        "PRODUCT_TYPE": redeem.product.sku_code,
                         "SERVICE_TYPE": str(redeem.service_type),
                         "SER_AVL_DT": redeem.actual_service_date.date().strftime("%Y-%m-%d"),
                     }                        
