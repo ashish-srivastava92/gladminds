@@ -9,7 +9,8 @@ class BajajResourceTestCase(TestCase):
 
     def setUp(self):
         self.base_version = 'http://{0}/v1/'.format(os.environ['SERVER_NAME'])
-
+        self.base_version_xml = 'http://{0}/api/v1/feed/'.format(os.environ['SERVER_NAME'])
+    
     def assertSuccess(self, first, msg=None):
         if int(first) < 200 or int(first) > 299:
             raise self.failureException(msg)
@@ -22,7 +23,7 @@ class BajajResourceTestCase(TestCase):
         self.assertSuccess(resp.status_code)
         return json.loads(resp.content)['access_token']
 
-    def post(self, uri, content_type='application/json', data=None,
+    def post(self, uri, content_type='applic ation/json', data=None,
              headers={'content_type': 'application/json'}, params={}):
         params.update({'access_token': self.login()})
         resp = requests.post(self.base_version+uri, data=json.dumps(data), headers=headers)
@@ -33,7 +34,7 @@ class BajajResourceTestCase(TestCase):
             headers={'content_type':'application/json'}, params={}):
         params.update({'access_token': self.login()})
         resp = requests.get(self.base_version+uri, headers=headers, params=params)
-        self.assertSuccess(resp.status_code)
+        self.assertSuccess(resp.status_code)       
         return json.loads(resp.content)
 
     def delete(self, uri, content_type='application/json',
@@ -52,3 +53,16 @@ class BajajResourceTestCase(TestCase):
                 
     def assertCheckSchema(self,data,stored_data):
         self.check_schema(data,stored_data)
+
+    def post_xml(self, content_type='application/xml', data=None,
+             headers={
+                      'content_type': 'text/xml; charset=UTF-8',
+                      }, params={}):
+        params.update({'access_token': self.login()})
+        data = data.encode('utf-8')
+        resp = requests.post(self.base_version_xml, data=data, headers=headers)
+        self.assertSuccess(resp.status_code)
+        
+    def check_result(self, result,parameter, value):
+        self.assertEqual(result[parameter],value)
+

@@ -22,8 +22,8 @@
         </ns1:ProductPurchaseData>
       </ns1:ObjectList>
       <ns1:Credential>
-        <ns1:UserName>gladminds</ns1:UserName>
-        <ns1:Password>gladminds</ns1:Password>
+        <ns1:UserName>bajaj</ns1:UserName>
+        <ns1:Password>bajaj</ns1:Password>
       </ns1:Credential>
     </ns1:postProductPurchase>
   </SOAP-ENV:Body>
