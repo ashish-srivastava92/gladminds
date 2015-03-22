@@ -258,4 +258,4 @@ class Command(BaseCommand):
                     group.permissions.add(permission)
                 group.save(using=brand)
         except Exception as ex:
-            print "[upload_part_data]: ", ex
+            print "[set_brand_permissions]: ", ex
