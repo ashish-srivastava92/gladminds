@@ -132,8 +132,7 @@ def user_logout(request):
             logout(request)
             return HttpResponseRedirect('/login/') 
     
-    next_url = '/'
-    next_url = request.GET.get('next')
+    next_url = request.GET.get('next', '/')
     logout(request)
     return HttpResponseRedirect('/login/?next='+next_url)   
 
@@ -503,6 +502,7 @@ def get_sa_under_asc(request, id=None):
     return render(request, template, {'active_menu':'sa',"data": data})
 
 
+@login_required()
 def sqs_tasks_view(request):
     return render_to_response('trigger-sqs-tasks.html')
 
