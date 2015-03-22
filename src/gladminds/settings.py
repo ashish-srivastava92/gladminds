@@ -328,7 +328,6 @@ ALL_APPS = (
     'gladminds.core',
     'gladminds.bajaj',
     'gladminds.demo',
-    'gladminds.bajajcv',
     'gladminds.afterbuy',
     'djcelery',
     'corsheaders',
