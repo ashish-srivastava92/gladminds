@@ -301,6 +301,11 @@ class BOMHeader(base_models.BOMHeader):
     class Meta:
         app_label = _APP_NAME
 
+class ECORelease(base_models.ECORelease):
+    '''Detaills of ECO Release'''
+    class Meta:
+        app_label = _APP_NAME
+
 #######################LOYALTY TABLES#################################
 class Territory(base_models.Territory):
     '''List of territories'''
@@ -345,7 +350,8 @@ class Distributor(base_models.Distributor):
     '''details of Distributor'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
     asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
-
+    state = models.ForeignKey(State, null=True, blank=True)
+    
     class Meta(base_models.Distributor.Meta):
         app_label = _APP_NAME
 

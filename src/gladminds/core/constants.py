@@ -235,14 +235,14 @@ LOYALTY_ACCESS = {
                                                 'user':'partner__user__user__username'
                                               },
                                   Roles.DISTRIBUTORS:{
-                                                 'user':'member__registered_by_distributor__user__user__username', 
+                                                 'user':'member__registered_by_distributor__city', 
                                                  'area':'district',
-                                                 'region': 'district'
+                                                 'group_region': 'district'
                                                  }, 
                                   Roles.AREASPARESMANAGERS : {
                                                 'user':'member__state__in',
                                                 'area':'state__in',
-                                                'region': 'state__state_name'
+                                                'group_region': 'state__state_name'
                                                },
                                 }
                 }

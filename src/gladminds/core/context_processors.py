@@ -33,5 +33,6 @@ def gm_constants(request):
                 brand_services.append(services)
     
     return { 'CONSTANTS' :constants, 'S3_URL' : S3_BASE_URL,
-            'METAINFO': brand_meta, 'METAURL': brand_services }
+            'METAINFO': brand_meta, 'METAURL': brand_services, 
+            'BRAND': settings.BRAND }
 

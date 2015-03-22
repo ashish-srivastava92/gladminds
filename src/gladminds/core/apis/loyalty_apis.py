@@ -82,23 +82,6 @@ class ProductResource(CustomBaseModelResource):
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
-    
-class MemberResource(CustomBaseModelResource):
-    distributor = fields.ForeignKey(DistributorResource, 'registered_by_distributor', null=True, blank=True, full=True) 
-    preferred_retailer = fields.ForeignKey(RetailerResource, 'preferred_retailer', null=True, blank=True, full=True)
-    state = fields.ForeignKey(StateResource, 'state')
-    
-    class Meta:
-        queryset = models.Mechanic.objects.all()
-        resource_name = "members"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
-        always_return_data = True
-        filtering = {
-                     "state":ALL_WITH_RELATIONS,
-                     "locality":ALL,
-                     "district":ALL,
-                     }
         
 class RedemptionResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
@@ -142,11 +125,14 @@ class RedemptionResource(CustomBaseModelResource):
             if not request.user.is_superuser:
                 user_group = request.user.groups.values()[0]['name']
                 q_user = self._meta.args['query_field'][user_group]['user']
-                if not request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-                    query[q_user] = request.user.username
-                else:
+                if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
                     asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
                     query[q_user] = asm_state_list
+                elif request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+                    distributor_city =  models.Distributor.objects.get(user__user=request.user).city
+                    query[q_user] = str(distributor_city)
+                else:
+                    query[q_user] = request.user.username
                
             redemption_requests = models.RedemptionRequest.objects.values('status', 'resolution_flag').annotate(count= Count('status')).filter(**query)   
             redemption_report = {}
@@ -216,120 +202,6 @@ class AccumulationResource(CustomBaseModelResource):
         filtering = {
                      "member":ALL_WITH_RELATIONS,
                      }
-    def prepend_urls(self):
-        return [
-            url(r"^(?P<resource_name>%s)/members-details%s" % (self._meta.resource_name,trailing_slash()),
-                                                        self.wrap_view('accumulation_report_details'), name="redemption_report_details")
-                ]
-    def get_condition(self,conditions):
-        all_conditions=[]
-        for condition in conditions:
-                all_conditions.append(str(condition))
-        return all_conditions
-        
-        
-    
-    def accumulation_report_details(self,request, **kwargs):
-        querry=''
-        join="left join "
-        condition=''
-        querry_lp_rp1=''
-        querry_lp_rp=''
-        before_accumulation="(select A.member_id,"
-        groups = utils.get_user_groups(request.user)
-        if Roles.NATIONALSPARESMANAGERS in groups:
-            nsm = models.NationalSparesManager.objects.filter(user__user=request.user)
-            territories = nsm[0].territory.all()
-            condition = self.get_condition(territories)
-            querry = "and gm_territory.territory in %(condition)s "
-            
-            
-            
-        elif Roles.AREASPARESMANAGERS in groups:
-            asm = models.AreaSparesManager.objects.filter(user__user=request.user)
-            states = asm[0].state.all()
-            condition = self.get_condition(states)
-            querry = "and gm_state.state_name in %(condition)s "
-            
-        elif Roles.LOYALTYADMINS in groups or Roles.LOYALTYSUPERADMINS in groups:
-            pass
-        
-        elif Roles.LPS in groups or Roles.RPS in groups :
-            lp_rp = models.Partner.objects.filter(user__user=request.user)
-            lp_rp_id = lp_rp[0].partner_id
-            condition = lp_rp_id
-            querry_lp_rp1 = "(select * from "
-            join = "right join "
-            querry_lp_rp = " where member_id in (select gm_redemptionrequest.member_id from gm_redemptionrequest where partner_id = (select gm_partner.id from gm_partner where gm_partner.partner_id= %(condition)s) group by (gm_redemptionrequest.member_id)))B"
-            before_accumulation="(select B.member_id,"
-        else:
-            return HttpResponseBadRequest()
-          
-        members = self.get_total_accumulated_redemption_requsets(condition,querry,join,querry_lp_rp,querry_lp_rp1,before_accumulation)    
-        requests  = []   
-        if request.method == 'GET':
-            details = {}
-            for member in members: 
-                member_dict = {}
-                id = member['permanent_id']
-                if id != None:
-                    member_dict['name'] = member['first_name'] + " " + member['middle_name'] + " " + member['last_name']
-                    member_dict['registration_date'] = member['registered_date'].strftime('%d-%m-%Y')
-                    member_dict['location'] = member['address_line_1'] + " " + member['address_line_2'] + " " + member['address_line_3'] + " " + member['address_line_4'] + " " + member['address_line_5'] + " " + member['address_line_6']
-                    member_dict['city'] = member['district']
-                    member_dict['state'] = member['state']
-                    member_dict['area'] = member['locality']
-                    member_dict['region'] = member['territory']
-                    if member['accumulation_requests']==None:
-                        member_dict['accumulation_requests'] = 0
-                    else:
-                        member_dict['accumulation_requests'] = member['accumulation_requests']
-                    if member['accumulated_points'] != None:
-                        member_dict['accumulated_points'] = int(member['accumulated_points'])
-                    else:
-                        member_dict['accumulated_points'] = 0
-                    if member['redemption_requests']==None:
-                        member_dict['redemption_requests'] = 0
-                    else:
-                        member_dict['redemption_requests'] = member['redemption_requests']
-                    if member['redeemed_points'] != None:
-                        member_dict['redeemed_points'] = int(member['redeemed_points'])
-                    else:
-                        member_dict['redeemed_points'] = 0
-                    details[id]=member_dict
-            requests.append(details)       
-            return HttpResponse(json.dumps(requests), content_type="application/json")
-    
-    def get_total_accumulated_redemption_requsets(self,condition,querry,join,querry_lp_rp,querry_lp_rp1,before_accumulation):
-        member_query =  "select * from \
-                         (select gm_mechanic.id,permanent_id,first_name,middle_name,last_name,address_line_1,address_line_2,address_line_3,address_line_4,address_line_5,address_line_6,registered_date,district,locality,gm_territory.territory as territory, state_name as state \
-                         from gm_territory,gm_mechanic,gm_state \
-                         where gm_mechanic.state_id=gm_state.id \
-                         and \
-                         gm_state.territory_id=gm_territory.id "                             
-        middle_querry = ")C "
-            
-        accumlations="A.accumulation_requests,A.accumulated_points,B.redemption_requests,B.redeemed_points \
-                                   from \
-                                   (select gm_accumulationrequest.member_id,count(gm_accumulationrequest.member_id) as accumulation_requests,\
-                                   sum(gm_accumulationrequest.points) as accumulated_points \
-                                   from \
-                                   gm_accumulationrequest \
-                                   group by(gm_accumulationrequest.member_id))A "
-        redemptions="(select gm_redemptionrequest.member_id,count(gm_redemptionrequest.member_id) as redemption_requests,\
-                                   sum(gm_redemptionrequest.points) as redeemed_points from gm_redemptionrequest group by(gm_redemptionrequest.member_id))B "                                       
-        querry_end=" on A.member_id = B.member_id)D on C.id=D.member_id;"            
-        member_objects = self.get_sql_data(member_query + querry + middle_querry + join + before_accumulation + accumlations + join + querry_lp_rp1 + redemptions + querry_lp_rp + querry_end,filters={'condition':condition})
-        return member_objects
-     
-    def get_sql_data(self,query, filters={}):
-        conn = connections[settings.BRAND]
-        cursor = conn.cursor()
-        cursor.execute(query, filters)
-        data = dictfetchall(cursor)
-        conn.close()
-        return data
-            
 
 class WelcomeKitResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')

@@ -881,7 +881,7 @@ class BOMHeader(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "Bills of Material "
-    
+
 class BOMItem(BaseModel):
     '''Detaills of  Service Billing of Material'''
     timestamp = models.DateTimeField(default=datetime.now)
@@ -919,7 +919,34 @@ class BOMHeader(BaseModel):
     class Meta:
         abstract = True
         verbose_name_plural = "Bills of Material "
+
+class ECORelease(BaseModel):
+    ''' details of ECO release'''
+    eco_number  = models.CharField(max_length=20, null=True, blank=True)
+    eco_release_date = models.DateField(max_length=20, null=True, blank=True)
+    eco_description = models.CharField(max_length=40, null=True, blank=True)
+    action = models.CharField(max_length=20, null=True, blank=True)
+    parent_part = models.CharField(max_length=20, null=True, blank=True)
+
+    add_part = models.CharField(max_length=20, null=True, blank=True)
+    add_part_qty = models.IntegerField(max_length=20, null=True, blank=True)
+    add_part_rev = models.CharField(max_length=20, null=True, blank=True)
+    add_part_loc_code = models.CharField(max_length=90, null=True, blank=True)
     
+    del_part = models.CharField(max_length=20, null=True, blank=True)
+    del_part_qty = models.IntegerField(max_length=20, null=True, blank=True)
+    del_part_rev = models.IntegerField(max_length=20, null=True, blank=True)
+    del_part_loc_code = models.CharField(max_length=90, null=True, blank=True)
+    
+    models_applicable = models.CharField(max_length=90, null=True, blank=True)
+    serviceability = models.CharField(max_length=20, null=True, blank=True)
+    interchangebility = models.CharField(max_length=20, null=True, blank=True)
+    reason_for_change = models.CharField(max_length=90, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "ECO Release"
+
 #######################LOYALTY TABLES#################################
 
 class NationalSparesManager(BaseModel):
