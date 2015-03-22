@@ -301,6 +301,11 @@ class BOMHeader(base_models.BOMHeader):
     class Meta:
         app_label = _APP_NAME
 
+class ECORelease(base_models.ECORelease):
+    '''Detaills of ECO Release'''
+    class Meta:
+        app_label = _APP_NAME
+
 #######################LOYALTY TABLES#################################
 class Territory(base_models.Territory):
     '''List of territories'''
@@ -345,7 +350,8 @@ class Distributor(base_models.Distributor):
     '''details of Distributor'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
     asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
-
+    state = models.ForeignKey(State, null=True, blank=True)
+    
     class Meta(base_models.Distributor.Meta):
         app_label = _APP_NAME
 
@@ -356,15 +362,15 @@ class Retailer(base_models.Retailer):
     class Meta(base_models.Retailer.Meta):
         app_label = _APP_NAME
 
-class Mechanic(base_models.Mechanic):
-    '''details of Mechanic'''
+class Member(base_models.Member):
+    '''details of Member'''
     registered_by_distributor = models.ForeignKey(Distributor, null=True, blank=True)
     preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
 
     state = models.ForeignKey(State)
 
 
-    class Meta(base_models.Mechanic.Meta):
+    class Meta(base_models.Member.Meta):
         app_label = _APP_NAME
 
 class SparePartMasterData(base_models.SparePartMasterData):
@@ -392,7 +398,7 @@ class SparePartPoint(base_models.SparePartPoint):
 
 class AccumulationRequest(base_models.AccumulationRequest):
     '''details of Accumulation request'''
-    member = models.ForeignKey(Mechanic)
+    member = models.ForeignKey(Member)
     upcs = models.ManyToManyField(SparePartUPC)
     asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
 
@@ -416,7 +422,7 @@ class ProductCatalog(base_models.ProductCatalog):
 class RedemptionRequest(base_models.RedemptionRequest):
     '''details of Redemption Request'''
     product = models.ForeignKey(ProductCatalog)
-    member = models.ForeignKey(Mechanic)
+    member = models.ForeignKey(Member)
     partner = models.ForeignKey(Partner, null=True, blank=True)
 
     class Meta(base_models.RedemptionRequest.Meta):
@@ -424,7 +430,7 @@ class RedemptionRequest(base_models.RedemptionRequest):
 
 class WelcomeKit(base_models.WelcomeKit):
     '''details of welcome kit'''
-    member = models.ForeignKey(Mechanic)
+    member = models.ForeignKey(Member)
     partner = models.ForeignKey(Partner, null=True, blank=True)
 
     class Meta(base_models.WelcomeKit.Meta):
@@ -463,7 +469,7 @@ class LoyaltySLA(base_models.LoyaltySLA):
 
 class DiscrepantAccumulation(base_models.DiscrepantAccumulation):
     upc = models.ForeignKey(SparePartUPC)
-    new_member = models.ForeignKey(Mechanic)
+    new_member = models.ForeignKey(Member)
     accumulation_request = models.ForeignKey(AccumulationRequest)
      
     class Meta(base_models.DiscrepantAccumulation.Meta):

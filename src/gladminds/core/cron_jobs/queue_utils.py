@@ -25,15 +25,19 @@ def check_celery_running():
     return False
 
 
-def send_job_to_queue(task, task_params, delay_seconds=None, brand=None):
+def queue_job(task, task_params, queue_name, delay_seconds=None, brand=None):
     '''
-    Sends a job to queue
-    :param task_name:
-    :type string:
+    queues jobs
+    :param task:
+    :type task:
     :param task_params:
-    :type dict:
+    :type task_params:
+    :param queue_name:
+    :type queue_name:
+    :param delay_seconds:
+    :type delay_seconds:
     :param brand:
-    :type string:
+    :type brand:
     '''
     if not hasattr(task, '__call__'):
         raise ParamToBeFunctionException
@@ -42,7 +46,6 @@ def send_job_to_queue(task, task_params, delay_seconds=None, brand=None):
     task_params.update({'brand': brand})
 
     if settings.ENABLE_AMAZON_SQS:
-        queue_name = settings.SQS_QUEUE_NAME
         task_name = task.__name__
         SqsTaskQueue(queue_name, brand).add(task_name, task_params,
                                             delay_seconds=delay_seconds)
@@ -54,3 +57,17 @@ def send_job_to_queue(task, task_params, delay_seconds=None, brand=None):
                 task.apply_async(kwargs=task_params, countdown=delay_seconds)
         else:
             task(**task_params)
+
+
+def send_job_to_sms_queue(task, task_params, delay_seconds=None, brand=None):
+    queue_name = getattr(settings, 'SQS_QUEUE_NAME_SMS', None)
+    queue_job(task, task_params, queue_name, delay_seconds=delay_seconds,
+              brand=brand)
+
+
+def send_job_to_queue(task, task_params, delay_seconds=None, brand=None):
+    queue_name = getattr(settings, 'SQS_QUEUE_NAME', None)
+    if 'phone_number' in task_params.keys():
+        queue_name = getattr(settings, 'SQS_QUEUE_NAME_SMS', queue_name)
+    queue_job(task, task_params, queue_name, delay_seconds=delay_seconds,
+              brand=brand)

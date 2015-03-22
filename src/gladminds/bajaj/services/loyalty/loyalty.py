@@ -49,7 +49,7 @@ class LoyaltyService(CoreLoyaltyService):
         if choice=='new':
             kwargs['download_detail'] = False
         kwargs['form_status'] = 'Complete'
-        mechanics = models.Mechanic.objects.filter(**kwargs)
+        mechanics = models.Member.objects.filter(**kwargs)
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(headers)
@@ -90,7 +90,7 @@ class LoyaltyService(CoreLoyaltyService):
             return HttpResponse(json.dumps({'msg': 'SMS not allowed in ENV'}),
                                 content_type='application/json')
         phone_list=[]
-        mechanics = models.Mechanic.objects.filter(sent_sms=False)
+        mechanics = models.Member.objects.filter(sent_sms=False)
         for mech in mechanics:
             self.send_welcome_sms(mech)
             phone_list.append(mech.phone_number)
@@ -204,13 +204,18 @@ class LoyaltyService(CoreLoyaltyService):
         '''Update the loyalty points of the user'''
         total_points = mechanic.total_points + accumulate -redeem
         mechanic.total_points = total_points
+        if accumulate>0:
+            mechanic.total_accumulation_req=mechanic.total_accumulation_req+1
+        elif redeem>0:
+            mechanic.redemption_req=mechanic.total_redemption_req+1
+        mechanic.last_transaction_date=datetime.now()
         mechanic.save()
         return total_points
 
     def check_point_balance(self, sms_dict, phone_number):
         '''send balance point of the user'''
         try:
-            mechanic = models.Mechanic.objects.filter(phone_number=utils.mobile_format(phone_number))
+            mechanic = models.Member.objects.filter(phone_number=utils.mobile_format(phone_number))
             if not mechanic:
                 message=get_template('UNREGISTERED_USER')
                 raise ValueError('Unregistered user')
@@ -246,7 +251,7 @@ class LoyaltyService(CoreLoyaltyService):
                 message=get_template('MAX_ALLOWED_UPC').format(
                                         max_limit=constants.MAX_UPC_ALLOWED)
                 raise ValueError('Maximum allowed upc exceeded')
-            mechanic = models.Mechanic.objects.filter(phone_number=utils.mobile_format(phone_number))
+            mechanic = models.Member.objects.filter(phone_number=utils.mobile_format(phone_number))
             if not mechanic:
                 message=get_template('UNREGISTERED_USER')
                 raise ValueError('Unregistered user')
@@ -313,7 +318,7 @@ class LoyaltyService(CoreLoyaltyService):
         '''redeem points with given upc'''
         product_codes = sms_dict['product_id'].upper().split()
         try:
-            mechanic = models.Mechanic.objects.filter(phone_number=utils.mobile_format(phone_number))
+            mechanic = models.Member.objects.filter(phone_number=utils.mobile_format(phone_number))
             if not mechanic:
                 message=get_template('UNREGISTERED_USER')
                 raise ValueError('Unregistered user')

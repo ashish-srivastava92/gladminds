@@ -496,18 +496,18 @@ class AccumulationRequestAdmin(GmModelAdmin):
                         }
         return super(AccumulationRequestAdmin, self).changelist_view(request, extra_context=extra_context)
 
-class MechanicForm(forms.ModelForm):
+class MemberForm(forms.ModelForm):
     class Meta:
-        model = models.Mechanic
+        model = models.Member
     
     def __init__(self, *args, **kwargs):
-        super(MechanicForm, self).__init__(*args, **kwargs)
+        super(MemberForm, self).__init__(*args, **kwargs)
         for field in constants.MANDATORY_MECHANIC_FIELDS:
             self.fields[field].label = self.fields[field].label + ' * '
 
-class MechanicAdmin(GmModelAdmin):
+class MemberAdmin(GmModelAdmin):
     list_filter = ('form_status',)
-    form = MechanicForm
+    form = MemberForm
     search_fields = ('mechanic_id',
                      'phone_number', 'first_name',
                      'state', 'district')
@@ -547,7 +547,7 @@ class MechanicAdmin(GmModelAdmin):
             if field.name in constants.MANDATORY_MECHANIC_FIELDS and not getattr(obj, field.name):
                 form_status = False
         obj.phone_number=utils.mobile_format(obj.phone_number)
-        super(MechanicAdmin, self).save_model(request, obj, form, change)
+        super(MemberAdmin, self).save_model(request, obj, form, change)
         if form_status and not obj.sent_sms:
             LoyaltyService.send_welcome_sms(obj)
             LoyaltyService.initiate_welcome_kit(obj)
@@ -808,7 +808,7 @@ if settings.ENV not in ['prod']:
     brand_admin.register(models.NationalSparesManager, NSMAdmin)
     brand_admin.register(models.AreaSparesManager, ASMAdmin)
     brand_admin.register(models.Distributor, DistributorAdmin)
-    brand_admin.register(models.Mechanic, MechanicAdmin)
+    brand_admin.register(models.Member, MemberAdmin)
 
     brand_admin.register(models.SparePartMasterData, SparePartMasterAdmin)
     brand_admin.register(models.SparePartUPC, SparePartUPCAdmin)

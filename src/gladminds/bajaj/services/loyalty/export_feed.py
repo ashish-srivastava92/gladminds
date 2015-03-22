@@ -16,7 +16,7 @@ logger = logging.getLogger("gladminds")
 class ExportMemberTempFeed(BaseExportFeed):
     
     def export_data(self):
-        results = models.Mechanic.objects.filter(sent_to_sap=0, form_status='Complete')
+        results = models.Member.objects.filter(sent_to_sap=0, form_status='Complete')
         items = []
         total_failed = 0
         item_batch = {
@@ -61,7 +61,7 @@ class ExportMemberTempFeed(BaseExportFeed):
                 logger.info("[ExportMemberTempFeed]: Response from SAP: {0}".format(result))
                 if result[0]['item'][0]['STATUS'] == 'SUCCESS':
                     try:
-                        member_detail = models.Mechanic.objects.get(mechanic_id=item['TEMP_ID'])
+                        member_detail = models.Member.objects.get(mechanic_id=item['TEMP_ID'])
                         member_detail.sent_to_sap = True
                         member_detail.save()
                         logger.info("[ExportMemberTempFeed]: Sent the details of member {0} to sap".format(item['TEMP_ID']))

@@ -92,7 +92,10 @@
 --
 --alter table bajaj_distributor add column sent_to_sap boolean default False;
 
+rename table gm_mechanic to gm_member;
+alter table gm_member add column last_transaction_date datetime;
+alter table gm_member add column total_accumulation_req integer(50) default 0;
+alter table gm_member add column total_redemption_req integer(50) default 0;
 
 alter table gm_activity add user_id integer;
 alter table gm_activity add foreign key (user_id) references auth_user(id);
-																																		

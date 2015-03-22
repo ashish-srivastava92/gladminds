@@ -29,7 +29,7 @@ class LoyaltyFeed(object):
             'part_upc': PartUPCFeed,
             'part_point': PartPointFeed,
             'distributor': DistributorFeed,
-            'mechanic': MechanicFeed,
+            'mechanic': MemberFeed,
             'nsm':NSMFeed,
             'asm':ASMFeed
         }
@@ -161,13 +161,13 @@ class DistributorFeed(BaseFeed):
 
         return self.feed_remark
 
-class MechanicFeed(BaseFeed):
+class MemberFeed(BaseFeed):
 
     def import_data(self):
         total_failed = 0
         for mechanic in self.data_source:
             try:
-                mech_object = models.Mechanic.objects.get(mechanic_id=mechanic['temp_id'])
+                mech_object = models.Member.objects.get(mechanic_id=mechanic['temp_id'])
                 mech_object.permanent_id=mechanic['mechanic_id']
                 mech_object.save()
             except Exception as ex:

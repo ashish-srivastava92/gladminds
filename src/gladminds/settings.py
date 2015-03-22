@@ -44,6 +44,8 @@ OAUTH_DELETE_EXPIRED = True
 JOBCARD_DIR = '{0}/jobcards/prod/'
 JOBCARD_BUCKET = 'gladminds'
 
+ENV = 'prod'
+
 SDFILE_DIR = '{0}/bajaj/sdfiles/'
 SDFILE_BUCKET = 'gladminds'
 
@@ -106,8 +108,8 @@ SUIT_CONFIG = {
                      'label': 'Area Spares Manager'},
                     {'model': 'distributor',
                      'label': 'Distributor'},
-                   {'model': 'mechanic',
-                     'label': 'Mechanic'},
+                   {'model': 'member',
+                     'label': 'Member'},
                    {'model': 'sparepartmasterdata',
                      'label': 'Spare Part Master Data'},
                    {'model': 'sparepartupc',

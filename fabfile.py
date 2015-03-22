@@ -123,10 +123,13 @@ def create_new_prod_version(version):
     upload_to_s3(BUCKET_NAME, version, FILE_NAME)
     create_version(APPLICATION_NAME, version)
     
-    ENVIRONMENT_NAME = 'gladminds-work-prod-2-1'
+    ENVIRONMENT_NAME = 'gladminds-work-prod'
     update_environment(ENVIRONMENT_NAME, version)
 
     ENVIRONMENT_NAME = 'gladminds-web-prod-2-1'
+    update_environment(ENVIRONMENT_NAME, version)
+
+    ENVIRONMENT_NAME = 'gladminds-work-prod-sms'
     update_environment(ENVIRONMENT_NAME, version)
 
 @task()
@@ -150,7 +153,9 @@ def create_new_staging_version(version):
 
     ENVIRONMENT_NAME = 'gladminds-work-dev'
     update_environment(ENVIRONMENT_NAME, version)  
-   
+
+    ENVIRONMENT_NAME = 'gladminds-work-dev-sms'
+    update_environment(ENVIRONMENT_NAME, version)
 
 def upload_to_s3(bucket_name, key, file_name):
     conn = boto.connect_s3(ACCESS_KEY, SECRET_KEY)

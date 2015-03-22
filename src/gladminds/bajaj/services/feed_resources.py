@@ -11,11 +11,12 @@ logger = logging.getLogger("gladminds")
 class BaseExportFeed(object):
 
     def __init__(self, username=None, password=None, wsdl_url=None,\
-                                                        feed_type=None):
+                                                        feed_type=None, feed_remark=None):
         self.username = username
         self.password = password
         self.wsdl_url = wsdl_url
         self.feed_type = feed_type
+        self.feed_remark = feed_remark
 
     def get_http_authenticated(self):
         return HttpAuthenticated(username=self.username,\
