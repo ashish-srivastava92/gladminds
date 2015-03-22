@@ -3,6 +3,7 @@ import requests
 from django.test.testcases import TestCase
 import os
 from integration.core.constants import BajajUrls
+import urllib
 
 
 class BajajResourceTestCase(TestCase):
@@ -50,5 +51,7 @@ class BajajResourceTestCase(TestCase):
             if isinstance(value,dict):
                 self.check_schema(value,stored_data[key])
                 
-    def assertCheckSchema(self,data,stored_data):
+    def assertCheckSchema(self,data,COUPON_SCHEMA):
+        unquoted = urllib.unquote(COUPON_SCHEMA)
+        stored_data = json.loads(unquoted)
         self.check_schema(data,stored_data)
