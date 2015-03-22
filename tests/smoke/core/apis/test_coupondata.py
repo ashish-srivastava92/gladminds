@@ -1,6 +1,6 @@
 ''' Smoke for testing out the Afterbuy Api
 '''
-from smoke.bajaj import base_smoke
+from smoke import base_smoke
 from integration.core.constants import BajajUrls, Constants, COUPON_SCHEMA
 import json
 import os
