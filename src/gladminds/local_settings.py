@@ -13,7 +13,7 @@ TEMPLATE_DEBUG = DEBUG
 
 BROKER_URL = 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
-
+SECRET_KEY = 'bbu7*-yvup0-*laxug+n5tf^lga_bwtrxu%y4ilb#$lv8%zw0m'
 
 JOBCARD_DIR = '{0}/jobcards/dev/'
 

@@ -1,4 +1,4 @@
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import get_model
 import datetime
 from django.conf import settings
 from gladminds.core.auth_helper import GmApps

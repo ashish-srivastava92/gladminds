@@ -4,7 +4,7 @@ from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from random import randint
 from django.utils import timezone
 from gladminds.core.exceptions import OtpFailedException
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import get_model
 from django.template.base import kwarg_re
 
 

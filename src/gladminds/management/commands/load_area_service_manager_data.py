@@ -4,7 +4,7 @@ import datetime
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import get_model
 # from gladminds.core.utils import generate_temp_id, mobile_format
 from gladminds.core.auth_helper import Roles, GmApps
 from django.contrib.auth.models import Group, User
