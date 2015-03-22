@@ -53,7 +53,7 @@ class DynamicSitesMiddleware(object):
             request.urlconf = 'gladminds.{0}.urls'.format(BRAND.value)
         except:
             request.urlconf = 'gladminds.core.urls'
-            
+
     def process_response(self, request, response):
         if getattr(request, "urlconf", None):
             patch_vary_headers(response, ('Host',))

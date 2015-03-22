@@ -10,7 +10,7 @@ from tastypie.fields import ApiField
 from django.http.response import HttpResponse
 from tastypie import http
 from django.conf import settings
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import get_model
 
 
 class BaseCorsResource(Resource):

@@ -12,7 +12,7 @@ from django.conf import settings
 from gladminds.core.core_utils.utils import dictfetchall
 from django.http.response import HttpResponse
 from tastypie.utils.mime import build_content_type
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import get_model
 from gladminds.core.auth_helper import Roles
 
 class Cache():

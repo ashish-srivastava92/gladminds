@@ -14,7 +14,6 @@ TEMPLATE_DEBUG = DEBUG
 BROKER_URL = 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
 
-
 JOBCARD_DIR = '{0}/jobcards/dev/'
 
 FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/dev/'

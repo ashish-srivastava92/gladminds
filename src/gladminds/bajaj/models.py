@@ -293,17 +293,17 @@ class Constant(base_models.Constant):
         
 class BOMItem(base_models.BOMItem):
     '''Detaills of  Service Billing of Material'''
-    class Meta:
+    class Meta(base_models.BOMItem.Meta):
         app_label = _APP_NAME
 
 class BOMHeader(base_models.BOMHeader):
     '''Detaills of Header BOM'''
-    class Meta:
+    class Meta(base_models.BOMHeader.Meta):
         app_label = _APP_NAME
 
 class ECORelease(base_models.ECORelease):
     '''Detaills of ECO Release'''
-    class Meta:
+    class Meta(base_models.ECORelease.Meta):
         app_label = _APP_NAME
 
 #######################LOYALTY TABLES#################################

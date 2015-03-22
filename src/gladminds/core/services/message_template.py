@@ -1,5 +1,5 @@
 from django.conf import settings
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import get_model
 
 def get_template(template_key):
     object = get_model('MessageTemplate').objects.get(template_key=template_key)

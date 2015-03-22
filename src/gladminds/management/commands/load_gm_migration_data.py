@@ -10,7 +10,7 @@ from gladminds.bajaj.models import MessageTemplate, EmailTemplate
 from gladminds.bajaj import models as common
 from gladminds.bajaj.services.coupons import import_feed
 from gladminds.core.auth_helper import ALL_APPS, Roles
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import get_model
 
 BASIC_FEED = import_feed.BaseFeed()
 TODAY = datetime.datetime.now()

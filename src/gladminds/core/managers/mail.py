@@ -9,7 +9,7 @@ from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 from gladminds.core.managers import audit_manager
 from gladminds.core.auth_helper import GmApps
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import get_model
 from gladminds.bajaj.models import EmailLog
 
 logger = logging.getLogger("gladminds")
