@@ -56,6 +56,10 @@ def generate_temp_id(prefix_value):
 def get_handler(handler, brand=None):
     if not brand:
         brand = settings.BRAND
+    try:
+        import_module('gladminds.{0}'.format(brand))
+    except Exception as ex:
+        brand='core'
     func_handler = '.'.join(handler.split('.')[-1:])
     service_handler = '.'.join(handler.split('.')[-2:-1])
     try:

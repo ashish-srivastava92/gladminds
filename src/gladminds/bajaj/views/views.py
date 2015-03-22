@@ -553,8 +553,6 @@ def trigger_sqs_tasks(request):
 
 
 def site_info(request):
-    if settings.ENV in ['qa']:
-        send_mail_for_feed_failure()
     if request.method != 'GET':
         raise Http404
     brand = settings.BRAND

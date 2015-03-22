@@ -594,7 +594,7 @@ FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
 BRAND = None
 GM_BRAND = 'default'
-OUTSIDE_BRANDS = ['bajaj', 'demo','bajajcv']
+OUTSIDE_BRANDS = ['bajaj', 'demo','bajajcv','daimler']
 
 BRANDS = OUTSIDE_BRANDS + ['afterbuy']
 ###############################################
@@ -617,7 +617,7 @@ ADMIN_DETAILS = {GmApps.BAJAJ: {'user': 'bajaj', 'password': 'bajaj'},
           GmApps.DEMO: {'user': 'demo', 'password': 'demo'},
           GmApps.AFTERBUY: {'user': 'afterbuy', 'password': 'afterbuy'},
           GmApps.GM: {'user': 'gladminds', 'password': 'gladminds'},
-          GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'x`'},
+          GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'bajajcv'},
           GmApps.DAIMLER: {'user': 'daimler', 'password': 'daimler'}
           }
 ##################################################################################################
@@ -677,4 +677,4 @@ HOME_URLS = {
                        }
              }
 
-LOGIN_URL='login/'
+LOGIN_URL='/login'

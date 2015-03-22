@@ -28,10 +28,10 @@ class Loader(BaseLoader):
                 if brand in settings.BRANDS and brand not in settings.GM_BRAND:
                     try:
                         mod = import_module('gladminds.{0}'.format(brand))
+                        brand_template_dir = os.path.join(os.path.dirname(mod.__file__), 'templates')
+                        yield safe_join(brand_template_dir, template_name)
                     except ImportError as e:
-                        raise ImproperlyConfigured('ImportError %s: %s' % (brand, e.args[0]))
-                    brand_template_dir = os.path.join(os.path.dirname(mod.__file__), 'templates')
-                    yield safe_join(brand_template_dir, template_name)
+                        yield safe_join(template_dir, template_name)
                 else:
                     yield safe_join(template_dir, template_name)
             except UnicodeDecodeError:
