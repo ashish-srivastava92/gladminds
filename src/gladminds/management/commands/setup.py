@@ -243,7 +243,6 @@ class Command(BaseCommand):
             for group in [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]:
                 model_ids = []
                 for model in ['Distributor', 'Retailer', 'Member']:
-                    print "22222222222", brand, model
                     model_ids.append(ContentType.objects.get(app_label__in=[brand, 'auth'], model=model).id)
                 permissions = Permission.objects.using(brand).filter(content_type__id__in=model_ids)
                 group = Group.objects.using(brand).get(name=group)

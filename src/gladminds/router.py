@@ -64,7 +64,6 @@ class DatabaseAppsRouter(object):
             return True
 
         if model._meta.app_label in ['core']:
-            print "111111!!", model._meta.app_label, db
             try:
                 import_module('gladminds.{0}.models'.format(db))
                 return False
