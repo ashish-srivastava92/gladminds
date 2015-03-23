@@ -159,28 +159,16 @@ class DealerResource(CustomBaseModelResource):
         phone_number = load.get('phone-number')
         email = load.get('email')
         try:
-            if phone_number:
-                user = models.Dealer.objects.get(user__phone_number=phone_number)
-                if user.dealer_id == username:
-                    print "user"
-                    data = {'status' : 0 , 'message' : "Already registered"}
-                else:
-                    data = {'status' : 0 , 'message' : "Phone number already exists"}
-            else:
-                user = models.Dealer.objects.get(dealer_id=username)
-                data = {'status': 0 , 'message' : 'Dealer already exists'}
-                
+            user = models.Dealer.objects.get(user__phone_number=phone_number, dealer_id=username)
+            data = {'status': 0 , 'message' : 'Dealer with this id or phone number already exists'}
+
         except Exception as ex:
             logger.info("Exception while registering dealer {0}".format(ex))
-            try:
-                user_data = register_user.register_user(Roles.DEALERS,username=username,
-                                                 phone_number=phone_number,
-                                                 email = email, APP=settings.BRAND)
-                dealer_data = models.Dealer(dealer_id=username, user=user_data)
-                dealer_data.save()
-            except Exception as ex:
-                logger.info("Exception while registering dealer {0}".format(ex))
-          
+            user_data = register_user.register_user(Roles.DEALERS,username=username,
+                                             phone_number=phone_number,
+                                             email = email, APP=settings.BRAND)
+            dealer_data = models.Dealer(dealer_id=username, user=user_data)
+            dealer_data.save()
             data = {"status": 1 , "message" : "Dealer registered successfully"}
 
         return HttpResponse(json.dumps(data), content_type="application/json")
