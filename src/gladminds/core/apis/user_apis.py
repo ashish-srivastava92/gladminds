@@ -1,30 +1,34 @@
-import logging
-import json
 from datetime import datetime, timedelta
-from tastypie.constants import ALL_WITH_RELATIONS, ALL
-from tastypie.authorization import DjangoAuthorization
-from django.contrib.auth.models import User
-from django.conf.urls import url
-from tastypie.utils.urls import trailing_slash
-from tastypie import fields
-from django.http.response import HttpResponse
-from tastypie.http import HttpBadRequest
-from django.contrib.auth import authenticate, login
-from django.conf import settings
-from django.db.models.aggregates import Count, Sum
-from tastypie.authorization import Authorization
+import json
+import logging
 
-from gladminds.core.model_fetcher import models
-from gladminds.core.auth.access_token_handler import create_access_token,\
-    delete_access_token
-from gladminds.core.apis.base_apis import CustomBaseModelResource
+from django.conf import settings
+from django.conf.urls import url
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
+from django.db.models.aggregates import Count, Sum
+from django.http.response import HttpResponse
+from tastypie import fields
+from tastypie.authorization import Authorization
+from tastypie.authorization import DjangoAuthorization
+from tastypie.constants import ALL_WITH_RELATIONS, ALL
+from tastypie.http import HttpBadRequest
+from tastypie.utils.urls import trailing_slash
+
+from gladminds.core import constants
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import MultiAuthorization
-from gladminds.core.auth_helper import Roles 
-from gladminds.core import constants
+from gladminds.core.apis.base_apis import CustomBaseModelResource
+from gladminds.core.auth.access_token_handler import create_access_token, \
+    delete_access_token
+from gladminds.core.auth_helper import Roles
+from gladminds.core.managers.user_manager import RegisterUser
+from gladminds.core.model_fetcher import models
+
 
 logger = logging.getLogger('gladminds')
 
+register_user = RegisterUser()
 
 class UserResource(CustomBaseModelResource):
     class Meta:
@@ -123,21 +127,53 @@ class UserProfileResource(CustomBaseModelResource):
 
 class DealerResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
-
+    
     class Meta:
         queryset = models.Dealer.objects.all()
         resource_name = "dealers"
         model_name = 'Dealer'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get']
+        detail_allowed_methods = ['get', 'post']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "dealer_id": ALL,
                      }
         always_return_data = True
 
+    def prepend_urls(self):
+        return [
+                 url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('register_dealer'), name="register_dealer")]
+    
+    
+    def register_dealer(self, request, **kwargs):
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=401)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        username = load.get('username')
+        phone_number = load.get('phone-number')
+        email = load.get('email')
+        try:
+            user = models.Dealer.objects.get(user__phone_number=phone_number, dealer_id=username)
+            data = {'status': 0 , 'message' : 'Dealer with this id or phone number already exists'}
 
+        except Exception as ex:
+            logger.info("Exception while registering dealer {0}".format(ex))
+            user_data = register_user.register_user(Roles.DEALERS,username=username,
+                                             phone_number=phone_number,
+                                             email = email, APP=settings.BRAND)
+            dealer_data = models.Dealer(dealer_id=username, user=user_data)
+            dealer_data.save()
+            data = {"status": 1 , "message" : "Dealer registered successfully"}
+
+        return HttpResponse(json.dumps(data), content_type="application/json")
+    
+              
 class AuthorizedServiceCenterResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
     dealer = fields.ForeignKey(DealerResource, 'dealer', null=True, blank=True, full=True)

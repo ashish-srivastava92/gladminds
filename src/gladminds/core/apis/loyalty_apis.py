@@ -67,7 +67,7 @@ class CityResource(CustomBaseModelResource):
 class LoyaltySLAResource(CustomBaseModelResource):
     class Meta:
         queryset = models.LoyaltySLA.objects.all()
-        resource_name = "slas"
+        resource_name = "loyalty-slas"
         model_name = 'LoyaltySLA'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']

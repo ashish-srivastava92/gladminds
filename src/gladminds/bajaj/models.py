@@ -474,3 +474,4 @@ class DiscrepantAccumulation(base_models.DiscrepantAccumulation):
      
     class Meta(base_models.DiscrepantAccumulation.Meta):
         app_label = _APP_NAME
+
