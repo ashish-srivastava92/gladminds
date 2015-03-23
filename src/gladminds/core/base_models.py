@@ -1376,15 +1376,3 @@ class CouponFact(models.Model):
         verbose_name_plural = "Coupon Facts"
         db_table = "gm_couponfact"
 
-class FeedBackFact(models.Model):
-    fcr = models.FloatField(max_length=20, null=True, blank=True, default='0.0')
-    tat = models.FloatField(max_length=20, null=True, blank=True, default='0.0')
-    response_time = models.FloatField(max_length=20, null=True, blank=True, default='0.0')
-    reopen = models.BigIntegerField(null=True, blank=True)
-    data_type = models.CharField(max_length=20, default='MONTHLY')
-    
-    class Meta:
-        abstract = True
-        verbose_name_plural = "Feedback Facts"
-        db_table = "gm_feedbackfact"
-        
