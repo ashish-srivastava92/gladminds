@@ -19,7 +19,7 @@ from django.db.models import F
 
 from gladminds.default.models import BrandService
 from gladminds.core.services import message_template
-from gladminds.core import utils
+from gladminds.core import utils, model_fetcher
 from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message
 from gladminds.core.managers.mail import sent_otp_email,\
     send_recovery_email_to_admin, send_mail_when_vin_does_not_exist
