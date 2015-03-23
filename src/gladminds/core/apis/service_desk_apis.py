@@ -39,7 +39,6 @@ class FeedbackResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Feedback.objects.all()
         resource_name = "feedbacks"
-        model_name = "Feedback"
         authorization = MultiAuthorization(DjangoAuthorization())
         authentication = MultiAuthentication(AccessTokenAuthentication())
         detail_allowed_methods = ['get']
@@ -110,7 +109,6 @@ class ActivityResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Activity.objects.all()
         resource_name = 'feedback-activities'
-        model_name = "Activity"
         detailed_allowed_methods = ['get']
         always_return_data = True
         filtering = {

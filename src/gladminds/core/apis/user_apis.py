@@ -34,7 +34,6 @@ class UserResource(CustomBaseModelResource):
     class Meta:
         queryset = User.objects.all()
         resource_name = 'users'
-        model_name = 'User'
         excludes = ['password', 'is_superuser']
         authorization = Authorization()
 #         authentication = AccessTokenAuthentication()
@@ -52,7 +51,6 @@ class UserProfileResource(CustomBaseModelResource):
     class Meta:
         queryset = models.UserProfile.objects.all()
         resource_name = 'gm-users'
-        model_name = 'UserProfile'
         authorization = Authorization()
 #         authorization = MultiAuthorization(DjangoAuthorization())
 #         authentication = AccessTokenAuthentication()
@@ -131,7 +129,6 @@ class DealerResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Dealer.objects.all()
         resource_name = "dealers"
-        model_name = 'Dealer'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get', 'post']
@@ -181,7 +178,6 @@ class AuthorizedServiceCenterResource(CustomBaseModelResource):
     class Meta:
         queryset = models.AuthorizedServiceCenter.objects.all()
         resource_name = "authorized-service-centers"
-        model_name = 'AuthorizedServiceCenter'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
@@ -201,7 +197,6 @@ class ServiceAdvisorResource(CustomBaseModelResource):
     class Meta:
         queryset = models.ServiceAdvisor.objects.all()
         resource_name = "service-advisors"
-        model_name = 'ServiceAdvisor'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
@@ -218,7 +213,6 @@ class NationalSparesManagerResource(CustomBaseModelResource):
     class Meta:
         queryset = models.NationalSparesManager.objects.all()
         resource_name = "national-spares-managers"
-        model_name = 'NationalSparesManager'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -228,7 +222,6 @@ class AreaSparesManagerResource(CustomBaseModelResource):
     class Meta:
         queryset = models.AreaSparesManager.objects.all()
         resource_name = "area-spares-managers"
-        model_name = 'AreaSparesManager'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -237,7 +230,6 @@ class PartnerResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Partner.objects.all()
         resource_name = "partners"
-        model_name = 'Partner'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -249,7 +241,6 @@ class DistributorResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Distributor.objects.all()
         resource_name = "distributors"
-        model_name = 'Distributor'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -259,7 +250,6 @@ class RetailerResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Retailer.objects.all()
         resource_name = "retailers"
-        model_name = 'Retailer'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -271,7 +261,6 @@ class MemberResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Member.objects.all()
         resource_name = "members"
-        model_name = 'Member'
         authorization = Authorization()
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'put']
@@ -293,8 +282,17 @@ class MemberResource(CustomBaseModelResource):
                 self.wrap_view('get_total_points'), name="get_total_points"),
         ]
    
+    def get_role_access_query(self, user, area, args):
+        if user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list=models.AreaSparesManager.objects.get(user__user=user).state.all()
+            args[area] = asm_state_list
+        elif user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+            distributor_city =  models.Distributor.objects.get(user__user=user).city
+            args[area] = str(distributor_city)
+        return args
+
     def get_active_member(self, request, **kwargs):
-        print self.is_authenticated(request)
+        self.is_authenticated(request)
         args={}
         try:
             load = request.GET
@@ -308,12 +306,7 @@ class MemberResource(CustomBaseModelResource):
                 user_group = request.user.groups.values()[0]['name']
                 area = self._meta.args['query_field'][user_group]['area']
                 region = self._meta.args['query_field'][user_group]['group_region']
-                if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-                    asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
-                    args[area] = asm_state_list
-                elif request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
-                    distributor_city =  models.Distributor.objects.get(user__user=request.user).city
-                    args[area] = str(distributor_city)
+                args = self.get_role_access_query(request.user, area, args)
             registered_member = models.Member.objects.filter(**args).values(region).annotate(count= Count('mechanic_id'))
             args['last_transaction_date__gte']=datetime.now()-timedelta(int(active_days))
             active_member = models.Member.objects.filter(**args).values(region).annotate(count= Count('mechanic_id'))
@@ -326,50 +319,42 @@ class MemberResource(CustomBaseModelResource):
                 if active:
                     member_report[member[region]]['active_count']= active[0]['count']
         except Exception as ex:
-            logger.error('redemption request count requested by {0}:: {1}'.format(request.user, ex))
-            data = {'status': 0, 'message': 'could not retrieve the count of redemption request'}
+            logger.error('Active member count requested by {0}:: {1}'.format(request.user, ex))
+            member_report = {'status': 0, 'message': 'could not retrieve the count of active members'}
         return HttpResponse(json.dumps(member_report), content_type="application/json")
 
     def get_total_points(self, request, **kwargs):
-        print self.is_authenticated(request)
+        self.is_authenticated(request)
         args={}
         try:
             load = request.GET
         except Exception as ex:
             return HttpResponse(content_type="application/json", status=404)
         try:
-            active_days = load.get('active_days', None)
-            if not active_days:
-                active_days=30
             if not request.user.is_superuser:
                 user_group = request.user.groups.values()[0]['name']
-                area = self._meta.args['query_field'][user_group]['area']
+                area = 'member__' + self._meta.args['query_field'][user_group]['area']
                 region = 'member__' + self._meta.args['query_field'][user_group]['group_region']
-                if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-                    asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
-                    args[area] = asm_state_list
-                elif request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
-                    distributor_city =  models.Distributor.objects.get(user__user=request.user).city
-                    args[area] = str(distributor_city)
+                args = self.get_role_access_query(request.user, area, args)
             total_redeem_points = models.RedemptionRequest.objects.filter(**args).values(region).annotate(sum=Sum('points'))
-            total_accumulate_list = models.AccumulationRequest.objects.filter(**args).values(region).annotate(sum=Sum('points'))
+            total_accumulate_points = models.AccumulationRequest.objects.filter(**args).values(region).annotate(sum=Sum('points'))
             member_report={}
-#             for region_point in total_redeem_points:
-#                 member_report[region_point[region]]={}
-#                 member_report[region_point[region]]['sum'] = region_point['sum']
-#                 active = filter(lambda active: active[region] == region_point[region], total_accumulate_list)
-#                 if active:
-#                     member_report[member[region]]['active_count']= active[0]['count']
+            for region_point in total_redeem_points:
+                member_report[region_point[region]]={}
+                member_report[region_point[region]]['total_redeem'] = region_point['sum']
+                member_report[region_point[region]]['total_accumulate'] = 0
+                active = filter(lambda active: active[region] == region_point[region], total_accumulate_points)
+                if active:
+                    member_report[region_point[region]]['total_accumulate']= active[0]['sum']
         except Exception as ex:
-            logger.error('redemption request count requested by {0}:: {1}'.format(request.user, ex))
-            data = {'status': 0, 'message': 'could not retrieve the count of redemption request'}
+            logger.error('redemption/accumulation request count requested by {0}:: {1}'.format(request.user, ex))
+            member_report = {'status': 0, 'message': 'could not retrieve the sum of points of requests'}
         return HttpResponse(json.dumps(member_report), content_type="application/json")
 
 class BrandDepartmentResource(CustomBaseModelResource):
     class Meta:
         queryset = models.BrandDepartment.objects.all()
         resource_name = "brand-departments"
-        model_name = 'BrandDepartment'
         authorization = Authorization()
         detail_allowed_methods = ['get']
         always_return_data = True
@@ -381,7 +366,6 @@ class DepartmentSubCategoriesResource(CustomBaseModelResource):
     class Meta:
         queryset = models.DepartmentSubCategories.objects.all()
         resource_name = "department-sub-categories"
-        model_name = 'DepartmentSubCategories'
         authorization = Authorization()
         detail_allowed_methods = ['get']
         always_return_data = True
@@ -402,7 +386,6 @@ class ServiceDeskUserResource(CustomBaseModelResource):
     class Meta:
         queryset = models.ServiceDeskUser.objects.all()
         resource_name = "service-desk-users"
-        model_name = 'ServiceDeskUser'
 #         authorization = MultiAuthorization(DjangoAuthorization())
 #         authentication = MultiAuthentication(AccessTokenAuthentication())
         authorization = Authorization()

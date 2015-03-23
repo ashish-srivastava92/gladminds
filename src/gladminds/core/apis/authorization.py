@@ -8,6 +8,7 @@ from gladminds.core.auth_helper import Roles
 from gladminds.bajaj import models
 import operator
 from django.db.models.query_utils import Q
+from gladminds.core.model_fetcher import get_model
 
 class CustomAuthorization(Authorization):
 
@@ -198,7 +199,7 @@ class LoyaltyCustomAuthorization():
                 object_list = object_list.filter(reduce(operator.and_, query['query']))
         except:
             if klass_name == 'redemptionrequest' and user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-                asm_state_list= models.AreaSparesManager.objects.get(user__user= user).state.all()
+                asm_state_list= get_model('AreaSparesManager').objects.get(user__user= user).state.all()
                 object_list=object_list.filter(member__state__in=asm_state_list)            
 
         try:

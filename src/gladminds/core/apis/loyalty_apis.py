@@ -1,6 +1,6 @@
 #from tastypie.constants import ALL
 from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.core.model_fetcher import models
+from gladminds.core.model_fetcher import models, get_model
 from gladminds.core import constants
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from tastypie.authorization import Authorization
@@ -67,8 +67,7 @@ class CityResource(CustomBaseModelResource):
 class LoyaltySLAResource(CustomBaseModelResource):
     class Meta:
         queryset = models.LoyaltySLA.objects.all()
-        resource_name = "loyalty-slas"
-        model_name = 'LoyaltySLA'
+        resource_name = "slas"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -89,15 +88,14 @@ class RedemptionResource(CustomBaseModelResource):
     partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)    
 
     class Meta:
-        queryset = models.RedemptionRequest.objects.all()
+        queryset = get_model('RedemptionRequest').objects.all()
         resource_name = "redemption-requests"
-        model_name = 'RedemptionRequest'
         authorization = Authorization()
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         args = constants.LOYALTY_ACCESS
-        
+         
         authorization = MultiAuthorization(Authorization(), LoyaltyCustomAuthorization
                                            (display_field=args['display_field'], query_field=args['query_field']))
         filtering = {
@@ -111,10 +109,21 @@ class RedemptionResource(CustomBaseModelResource):
                                                         self.wrap_view('pending_redemption_request'), name="pending_redemption_request"),
                 url(r"^(?P<resource_name>%s)/count%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('count_redemption_request'), name="count_redemption_request"),
-                url(r"^(?P<resource_name>%s)/points%s" % (self._meta.resource_name,trailing_slash()),
-                                                        self.wrap_view('points_redemption_request'), name="points_redemption_request"),
                 ]
 
+    def get_filter_query(self, user, query):
+        if not user.is_superuser:
+            user_group = user.groups.values()[0]['name']
+            q_user = self._meta.args['query_field'][user_group]['user']
+            if user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+                asm_state_list=models.AreaSparesManager.objects.get(user__user=user).state.all()
+                query[q_user] = asm_state_list
+            elif user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+                distributor_city =  models.Distributor.objects.get(user__user=user).city
+                query[q_user] = str(distributor_city)
+            else:
+                query[q_user] = user.username
+        return query
 
     ''' returns a dict having Count of redemption request within sla, above sla and total count'''
     def count_redemption_request (self, request, **kwargs):
@@ -122,18 +131,7 @@ class RedemptionResource(CustomBaseModelResource):
         query = {}
         try:
             self.is_authenticated(request)
-            if not request.user.is_superuser:
-                user_group = request.user.groups.values()[0]['name']
-                q_user = self._meta.args['query_field'][user_group]['user']
-                if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-                    asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
-                    query[q_user] = asm_state_list
-                elif request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
-                    distributor_city =  models.Distributor.objects.get(user__user=request.user).city
-                    query[q_user] = str(distributor_city)
-                else:
-                    query[q_user] = request.user.username
-               
+            query =self.get_filter_query(request.user, query)
             redemption_requests = models.RedemptionRequest.objects.values('status', 'resolution_flag').annotate(count= Count('status')).filter(**query)   
             redemption_report = {}
             for status in dict(constants.REDEMPTION_STATUS).keys():
@@ -151,23 +149,6 @@ class RedemptionResource(CustomBaseModelResource):
             logger.error('redemption request count requested by {0}:: {1}'.format(request.user, ex))
             data = {'status': 0, 'message': 'could not retrieve the count of redemption request'}
         return HttpResponse(json.dumps(redemption_report), content_type="application/json")
-
-
-    def points_redemption_request (self, request, **kwargs):
-        data = {}
-        query = {}
-        try:
-            user_group = request.user.groups.values()[0]['name']
-            q_user = self._meta.args['query_field'][user_group]['user']
-            area = self._meta.args['query_field'][user_group]['area']
-            query[q_user] = request.user
-            total_points_list = models.RedemptionRequest.objects.filter(**query).values(area).annotate(Sum('points'))   
-            data = total_points_list
-        except Exception as ex:
-            logger.error('redemption request points requested by {0}:: {1}'.format(request.user, ex))
-            data = {'status': 0, 'message': 'could not retrieve the points of redemption request'}
-        return HttpResponse(data, content_type="application/json")
-
 
     ''' List of Members with pending redemption request'''
     def pending_redemption_request(self,request, **kwargs):
@@ -195,7 +176,6 @@ class AccumulationResource(CustomBaseModelResource):
     class Meta:
         queryset = models.AccumulationRequest.objects.all()
         resource_name = "accumulations"
-        model_name = "AccumulationRequest"
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post']
         always_return_data = True
