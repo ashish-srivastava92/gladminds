@@ -298,7 +298,7 @@ class EcoReleaseModel(ComplexModel):
     DEL_PART_LOC_CODE = Unicode
     MODELS_APPLICABLE = Unicode
     SERVICEABILITY = Unicode
-    INTERCHAGEABILITY = Unicode
+    INTERCHANGEABILITY = Unicode
     REASON_FOR_CHANGE = Unicode
 
 class EcoReleaseModelList(ComplexModel):
@@ -330,7 +330,7 @@ class ECOReleaseService(ServiceBase):
                             'del_part_loc_code' :  eco_obj.DEL_PART_LOC_CODE,
                             'models_applicable' :  eco_obj.MODELS_APPLICABLE,
                             'serviceability' :  eco_obj.SERVICEABILITY,
-                            'interchangebility' :  eco_obj.INTERCHAGEABILITY,
+                            'interchangebility' :  eco_obj.INTERCHANGEABILITY,
                             'reason_for_change' :  eco_obj.REASON_FOR_CHANGE,
                             })
 
