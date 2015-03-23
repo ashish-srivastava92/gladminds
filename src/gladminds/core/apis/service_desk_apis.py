@@ -17,6 +17,8 @@ from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.apis.user_apis import ServiceDeskUserResource, \
     DepartmentSubCategoriesResource, UserResource
 from gladminds.core.model_fetcher import models
+from django.db import connections
+from gladminds.core.core_utils.utils import dictfetchall
 
 
 LOG = logging.getLogger('gladminds')
@@ -38,7 +40,7 @@ class FeedbackResource(CustomBaseModelResource):
         queryset = models.Feedback.objects.all()
         resource_name = "feedbacks"
         authorization = MultiAuthorization(DjangoAuthorization())
-#         authentication = MultiAuthentication(AccessTokenAuthentication())
+        authentication = MultiAuthentication(AccessTokenAuthentication())
         detail_allowed_methods = ['get']
         always_return_data = True
         filtering = {
@@ -57,7 +59,9 @@ class FeedbackResource(CustomBaseModelResource):
     def prepend_urls(self):
         return [
                  url(r"^(?P<resource_name>%s)/add-ticket%s" % (self._meta.resource_name,trailing_slash()),
-                                                        self.wrap_view('add_service_desk_ticket'), name="add_service_desk_ticket")]
+                                                        self.wrap_view('add_service_desk_ticket'), name="add_service_desk_ticket"),
+                url(r"^(?P<resource_name>%s)/tat-report%s" % (self._meta.resource_name,trailing_slash()),
+                                                        self.wrap_view('get_tat'), name="get_tat")]
          
     def add_service_desk_ticket(self, request, **kwargs):
         try:
@@ -72,6 +76,25 @@ class FeedbackResource(CustomBaseModelResource):
         except Exception as ex:
             LOG.error('Exception while saving data : {0}'.format(ex))
             return HttpResponseBadRequest()
+    
+    def get_tat(self, request, **kwargs):
+        conn = connections[settings.BRAND]
+        cursor = conn.cursor()
+        cursor.execute("select sum(f2.dt) as sums ,count(*) as c , avg(f2.dt) as tat, YEAR(f1.created_date) as year, \
+    MONTH(f1.created_date) as month from gm_feedback f1 inner join (select f2.id, TIMEDIFF(f2.resolved_date,f2.created_date)\
+    as dt , f2.created_date from gm_feedback f2 where status= 'resolved') f2 on f2.id=f1.id group by \
+    YEAR(f1.created_date), MONTH(f1.created_date)")
+        details = dictfetchall(cursor)
+        conn.close()
+        result = []
+        for data in details:
+            tat ={}
+            minutes, seconds = divmod(data['tat'], 60)
+            tat['tat'] = minutes
+            tat['month_of_year'] = str(data['year'])+"-"+ str(data['month'])
+            result.append(tat)
+        return HttpResponse(content=json.dumps(result),
+                                    content_type='application/json')
     
 
 class ActivityResource(CustomBaseModelResource):
@@ -92,7 +115,26 @@ class ActivityResource(CustomBaseModelResource):
                       "user" : ALL_WITH_RELATIONS,
                       "feedback" : ALL_WITH_RELATIONS
                      }
+        ordering = ['created_date']
     
+class SLAResource(CustomBaseModelResource):
+    '''
+    Service Desk SLA Resource
+    '''    
     
-    
-    
+    class Meta:
+        queryset = models.SLA.objects.all()
+        resource_name = 'slas'
+        model_name = 'SLA'
+        detailed_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+        authorization = MultiAuthorization(DjangoAuthorization())
+        filtering = {
+                     "priority" : ALL
+                     
+                     }
+        
+        
+        
+        
+        
