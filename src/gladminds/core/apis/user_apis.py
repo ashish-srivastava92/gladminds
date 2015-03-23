@@ -257,8 +257,17 @@ class MemberResource(CustomBaseModelResource):
                 self.wrap_view('get_total_points'), name="get_total_points"),
         ]
    
+    def get_role_acess_query(self, user, area, args):
+        if user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list=models.AreaSparesManager.objects.get(user__user=user).state.all()
+            args[area] = asm_state_list
+        elif user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+            distributor_city =  models.Distributor.objects.get(user__user=user).city
+            args[area] = str(distributor_city)
+        return args
+
     def get_active_member(self, request, **kwargs):
-        print self.is_authenticated(request)
+        self.is_authenticated(request)
         args={}
         try:
             load = request.GET
@@ -272,12 +281,7 @@ class MemberResource(CustomBaseModelResource):
                 user_group = request.user.groups.values()[0]['name']
                 area = self._meta.args['query_field'][user_group]['area']
                 region = self._meta.args['query_field'][user_group]['group_region']
-                if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-                    asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
-                    args[area] = asm_state_list
-                elif request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
-                    distributor_city =  models.Distributor.objects.get(user__user=request.user).city
-                    args[area] = str(distributor_city)
+                args = self.get_role_acess_query(request.user, area, args)
             registered_member = models.Member.objects.filter(**args).values(region).annotate(count= Count('mechanic_id'))
             args['last_transaction_date__gte']=datetime.now()-timedelta(int(active_days))
             active_member = models.Member.objects.filter(**args).values(region).annotate(count= Count('mechanic_id'))
@@ -290,43 +294,36 @@ class MemberResource(CustomBaseModelResource):
                 if active:
                     member_report[member[region]]['active_count']= active[0]['count']
         except Exception as ex:
-            logger.error('redemption request count requested by {0}:: {1}'.format(request.user, ex))
-            data = {'status': 0, 'message': 'could not retrieve the count of redemption request'}
+            logger.error('Active member count requested by {0}:: {1}'.format(request.user, ex))
+            member_report = {'status': 0, 'message': 'could not retrieve the count of active members'}
         return HttpResponse(json.dumps(member_report), content_type="application/json")
 
     def get_total_points(self, request, **kwargs):
-        print self.is_authenticated(request)
+        self.is_authenticated(request)
         args={}
         try:
             load = request.GET
         except Exception as ex:
             return HttpResponse(content_type="application/json", status=404)
         try:
-            active_days = load.get('active_days', None)
-            if not active_days:
-                active_days=30
             if not request.user.is_superuser:
                 user_group = request.user.groups.values()[0]['name']
-                area = self._meta.args['query_field'][user_group]['area']
+                area = 'member__' + self._meta.args['query_field'][user_group]['area']
                 region = 'member__' + self._meta.args['query_field'][user_group]['group_region']
-                if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-                    asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
-                    args[area] = asm_state_list
-                elif request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
-                    distributor_city =  models.Distributor.objects.get(user__user=request.user).city
-                    args[area] = str(distributor_city)
+                args = self.get_role_acess_query(request.user, area, args)
             total_redeem_points = models.RedemptionRequest.objects.filter(**args).values(region).annotate(sum=Sum('points'))
-            total_accumulate_list = models.AccumulationRequest.objects.filter(**args).values(region).annotate(sum=Sum('points'))
+            total_accumulate_points = models.AccumulationRequest.objects.filter(**args).values(region).annotate(sum=Sum('points'))
             member_report={}
-#             for region_point in total_redeem_points:
-#                 member_report[region_point[region]]={}
-#                 member_report[region_point[region]]['sum'] = region_point['sum']
-#                 active = filter(lambda active: active[region] == region_point[region], total_accumulate_list)
-#                 if active:
-#                     member_report[member[region]]['active_count']= active[0]['count']
+            for region_point in total_redeem_points:
+                member_report[region_point[region]]={}
+                member_report[region_point[region]]['total_redeem'] = region_point['sum']
+                member_report[region_point[region]]['total_accumulate'] = 0
+                active = filter(lambda active: active[region] == region_point[region], total_accumulate_points)
+                if active:
+                    member_report[region_point[region]]['total_accumulate']= active[0]['sum']
         except Exception as ex:
-            logger.error('redemption request count requested by {0}:: {1}'.format(request.user, ex))
-            data = {'status': 0, 'message': 'could not retrieve the count of redemption request'}
+            logger.error('redemption/accumulation request count requested by {0}:: {1}'.format(request.user, ex))
+            member_report = {'status': 0, 'message': 'could not retrieve the sum of points of requests'}
         return HttpResponse(json.dumps(member_report), content_type="application/json")
 
 class BrandDepartmentResource(CustomBaseModelResource):

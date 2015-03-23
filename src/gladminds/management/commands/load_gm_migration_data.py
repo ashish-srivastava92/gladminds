@@ -18,8 +18,8 @@ TODAY = datetime.datetime.now()
 class Command(BaseCommand):
     
     def handle(self, *args, **options):
-#         self.add_sms_template()
-#         self.add_email_template()
+        self.add_sms_template()
+        self.add_email_template()
         self.add_constants()
 
     def add_group(self):

@@ -61,8 +61,8 @@ from django.contrib.auth.decorators import login_required
 api_v1.register(SMSResources())
 
 urlpatterns = patterns('',
-    url(r'^$', include(brand_admin.urls)),
     url(r'', include(api_v1.urls)),
+    url(r'^$', include(brand_admin.urls)),
     url(r'api/doc/', include('gladminds.core.api_docs.swagger_urls', namespace='tastypie_swagger')),
     url(r'^login/$', 'gladminds.core.views.auth_login'),
     url(r'^logout/$', 'gladminds.core.views.user_logout'),
