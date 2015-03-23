@@ -155,9 +155,9 @@ MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 ENV = "staging"
 
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django_elasticache.memcached.ElastiCache',
-        'LOCATION': 'gladminds-memcache.t2nfas.cfg.use1.cache.amazonaws.com:11211'
-    }
-}
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_elasticache.memcached.ElastiCache',
+#         'LOCATION': 'gladminds-memcache.t2nfas.cfg.use1.cache.amazonaws.com:11211'
+#     }
+# }
