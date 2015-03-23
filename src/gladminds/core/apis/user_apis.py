@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import json
 import logging
 
@@ -5,6 +6,7 @@ from django.conf import settings
 from django.conf.urls import url
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
+from django.db.models.aggregates import Count, Sum
 from django.http.response import HttpResponse
 from tastypie import fields
 from tastypie.authorization import Authorization
@@ -13,6 +15,7 @@ from tastypie.constants import ALL_WITH_RELATIONS, ALL
 from tastypie.http import HttpBadRequest
 from tastypie.utils.urls import trailing_slash
 
+from gladminds.core import constants
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import MultiAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
@@ -159,9 +162,14 @@ class DealerResource(CustomBaseModelResource):
             if phone_number:
                 user = models.Dealer.objects.get(user__phone_number=phone_number)
                 if user.dealer_id == username:
+                    print "user"
                     data = {'status' : 0 , 'message' : "Already registered"}
                 else:
                     data = {'status' : 0 , 'message' : "Phone number already exists"}
+            else:
+                user = models.Dealer.objects.get(dealer_id=username)
+                data = {'status': 0 , 'message' : 'Dealer already exists'}
+                
         except Exception as ex:
             logger.info("Exception while registering dealer {0}".format(ex))
             try:
@@ -172,6 +180,7 @@ class DealerResource(CustomBaseModelResource):
                 dealer_data.save()
             except Exception as ex:
                 logger.info("Exception while registering dealer {0}".format(ex))
+          
             data = {"status": 1 , "message" : "Dealer registered successfully"}
 
         return HttpResponse(json.dumps(data), content_type="application/json")
@@ -272,18 +281,101 @@ class MemberResource(CustomBaseModelResource):
     preferred_retailer = fields.ForeignKey(RetailerResource, 'preferred_retailer', null=True, blank=True, full=True)
     
     class Meta:
-        queryset = models.Mechanic.objects.all()
+        queryset = models.Member.objects.all()
         resource_name = "members"
-        model_name = 'Mechanic'
+        model_name = 'Member'
         authorization = Authorization()
+        authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
+        args = constants.LOYALTY_ACCESS
         filtering = {
                      "state": ALL,
                      "locality":ALL,
                      "district":ALL,
                      }
+        
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/active%s" % (self._meta.resource_name,
+                                                     trailing_slash()),
+                self.wrap_view('get_active_member'), name="get_active_member"),
+            url(r"^(?P<resource_name>%s)/points%s" % (self._meta.resource_name,
+                                                     trailing_slash()),
+                self.wrap_view('get_total_points'), name="get_total_points"),
+        ]
+   
+    def get_active_member(self, request, **kwargs):
+        print self.is_authenticated(request)
+        args={}
+        try:
+            load = request.GET
+        except Exception as ex:
+            return HttpResponse(content_type="application/json", status=404)
+        try:
+            active_days = load.get('active_days', None)
+            if not active_days:
+                active_days=30
+            if not request.user.is_superuser:
+                user_group = request.user.groups.values()[0]['name']
+                area = self._meta.args['query_field'][user_group]['area']
+                region = self._meta.args['query_field'][user_group]['group_region']
+                if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+                    asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+                    args[area] = asm_state_list
+                elif request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+                    distributor_city =  models.Distributor.objects.get(user__user=request.user).city
+                    args[area] = str(distributor_city)
+            registered_member = models.Member.objects.filter(**args).values(region).annotate(count= Count('mechanic_id'))
+            args['last_transaction_date__gte']=datetime.now()-timedelta(int(active_days))
+            active_member = models.Member.objects.filter(**args).values(region).annotate(count= Count('mechanic_id'))
+            member_report={}
+            for member in registered_member:
+                member_report[member[region]]={}
+                member_report[member[region]]['registered_count'] = member['count']
+                member_report[member[region]]['active_count']= 0
+                active = filter(lambda active: active[region] == member[region], active_member)
+                if active:
+                    member_report[member[region]]['active_count']= active[0]['count']
+        except Exception as ex:
+            logger.error('redemption request count requested by {0}:: {1}'.format(request.user, ex))
+            data = {'status': 0, 'message': 'could not retrieve the count of redemption request'}
+        return HttpResponse(json.dumps(member_report), content_type="application/json")
 
+    def get_total_points(self, request, **kwargs):
+        print self.is_authenticated(request)
+        args={}
+        try:
+            load = request.GET
+        except Exception as ex:
+            return HttpResponse(content_type="application/json", status=404)
+        try:
+            active_days = load.get('active_days', None)
+            if not active_days:
+                active_days=30
+            if not request.user.is_superuser:
+                user_group = request.user.groups.values()[0]['name']
+                area = self._meta.args['query_field'][user_group]['area']
+                region = 'member__' + self._meta.args['query_field'][user_group]['group_region']
+                if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+                    asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+                    args[area] = asm_state_list
+                elif request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+                    distributor_city =  models.Distributor.objects.get(user__user=request.user).city
+                    args[area] = str(distributor_city)
+            total_redeem_points = models.RedemptionRequest.objects.filter(**args).values(region).annotate(sum=Sum('points'))
+            total_accumulate_list = models.AccumulationRequest.objects.filter(**args).values(region).annotate(sum=Sum('points'))
+            member_report={}
+#             for region_point in total_redeem_points:
+#                 member_report[region_point[region]]={}
+#                 member_report[region_point[region]]['sum'] = region_point['sum']
+#                 active = filter(lambda active: active[region] == region_point[region], total_accumulate_list)
+#                 if active:
+#                     member_report[member[region]]['active_count']= active[0]['count']
+        except Exception as ex:
+            logger.error('redemption request count requested by {0}:: {1}'.format(request.user, ex))
+            data = {'status': 0, 'message': 'could not retrieve the count of redemption request'}
+        return HttpResponse(json.dumps(member_report), content_type="application/json")
 
 class BrandDepartmentResource(CustomBaseModelResource):
     class Meta:

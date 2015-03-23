@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group, User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import get_model
 
 
 logger = logging.getLogger("gladminds")
@@ -62,9 +62,9 @@ class CustomerTempRegistrationManager(models.Manager):
         return customer_id
 
 
-class MechanicManager(models.Manager):
+class MemberManager(models.Manager):
     def get_mechanic(self, phone_number):
-        return super(MechanicManager, self).get_query_set().filter(user__phone_number=phone_number)
+        return super(MemberManager, self).get_query_set().filter(user__phone_number=phone_number)
 
 
 class SparePartUPCManager(models.Manager):

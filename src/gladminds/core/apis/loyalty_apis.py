@@ -1,10 +1,16 @@
 #from tastypie.constants import ALL
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.model_fetcher import models
+from gladminds.core import constants
+from gladminds.core.apis.authentication import AccessTokenAuthentication
 from tastypie.authorization import Authorization
 from tastypie import fields
+from django.db.models import Count
+from gladminds.core import utils
+from gladminds.core.apis.dashboard_apis import SMSReportResource 
+from gladminds.core.apis.product_apis import ProductTypeResource
 from django.conf.urls import url
-from django.http.response import HttpResponse
+from django.http.response import HttpResponse, HttpResponseBadRequest
 import json
 from django.forms.models import model_to_dict
 from django.db.models.query_utils import Q
@@ -17,10 +23,13 @@ from django.db import transaction
 from gladminds.core.auth_helper import Roles
 from django.db.models.aggregates import Count, Sum
 import itertools
-from gladminds.core.apis.user_apis import MemberResource, AreaSparesManagerResource, PartnerResource,UserResource
+from gladminds.core.apis.user_apis import MemberResource, AreaSparesManagerResource, PartnerResource,UserResource,\
+UserProfileResource,DistributorResource,RetailerResource
 from gladminds.core.apis.product_apis import ProductCatalogResource,\
     SparePartUPCResource
-
+from django.conf import settings
+from gladminds.core.core_utils.utils import dictfetchall
+from django.db import connections
 logger = logging.getLogger("gladminds")
 
 class TerritoryResource(CustomBaseModelResource):
@@ -64,6 +73,15 @@ class LoyaltySLAResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
+class ProductResource(CustomBaseModelResource):
+    partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)
+    
+    class Meta:
+        queryset = models.ProductCatalog.objects.all()
+        resource_name = "product-catalogs"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
         
 class RedemptionResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
@@ -75,34 +93,10 @@ class RedemptionResource(CustomBaseModelResource):
         resource_name = "redemption-requests"
         model_name = 'RedemptionRequest'
         authorization = Authorization()
+        authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
-        args = {
-                'display_field' : {
-                                    Roles.AREASPARESMANAGERS:[],
-                                    Roles.NATIONALSPARESMANAGERS:[],
-                                    Roles.RPS:[],
-                                    Roles.LPS:[]
-                                   },
-                'query_field' : {
-                                  Roles.RPS:{
-                                             'query':[Q(is_approved=True)],
-                                             'user':'packed_by' 
-                                             },
-                                  Roles.LPS : {
-                                                'query':[Q(status__in=['Shipped','Delivered'])],
-                                                'user':'partner__user__user__username'
-                                              },
-                                  Roles.DISTRIBUTORS:{
-                                                 'user':'member__registered_by_distributor__user__user__username', 
-                                                 'area':'member__registered_by_distributor__city'
-                                                 }, 
-                                  Roles.AREASPARESMANAGERS : {
-                                                'user':'member__state__in',
-                                                'area':'member__state__state_name'
-                                               },
-                                }
-                }
+        args = constants.LOYALTY_ACCESS
         
         authorization = MultiAuthorization(Authorization(), LoyaltyCustomAuthorization
                                            (display_field=args['display_field'], query_field=args['query_field']))
@@ -127,34 +121,36 @@ class RedemptionResource(CustomBaseModelResource):
         data = []
         query = {}
         try:
+            self.is_authenticated(request)
             if not request.user.is_superuser:
                 user_group = request.user.groups.values()[0]['name']
                 q_user = self._meta.args['query_field'][user_group]['user']
-                if not request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-                    query[q_user] = request.user.username
-                else:
+                if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
                     asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
                     query[q_user] = asm_state_list
+                elif request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+                    distributor_city =  models.Distributor.objects.get(user__user=request.user).city
+                    query[q_user] = str(distributor_city)
+                else:
+                    query[q_user] = request.user.username
                
-            total = models.RedemptionRequest.objects.values('status').annotate(total_count= Count('status')).filter(**query)   
-            query['resolution_flag'] = False
-            within_sla_count = models.RedemptionRequest.objects.values('status').annotate(within_sla_count= Count('status')).filter(**query)
-            query['resolution_flag'] = True        
-            overdue_count = models.RedemptionRequest.objects.values('status').annotate(above_sla_count= Count('status')).filter(**query)        
-            for redemption in total:
-                redemption['above_sla_count'] = 0
-                redemption['within_sla_count'] =0
-                redemption_within_sla = filter(lambda within_sla: within_sla['status'] == redemption['status'], within_sla_count)
-                redemption_overdue = filter(lambda overdue_sla: overdue_sla['status'] == redemption['status'], overdue_count)
-                if redemption_within_sla:
-                    redemption['within_sla_count']= redemption_within_sla[0]['within_sla_count']
-                if redemption_overdue:       
-                    redemption['above_sla_count']= redemption_overdue[0]['above_sla_count']                                     
-                data.append(redemption)
+            redemption_requests = models.RedemptionRequest.objects.values('status', 'resolution_flag').annotate(count= Count('status')).filter(**query)   
+            redemption_report = {}
+            for status in dict(constants.REDEMPTION_STATUS).keys():
+                redemption_report[status]={'total_count':0, 'above_sla_count':0, 'within_sla_count':0}
+            for redemption in redemption_requests:
+                redemption_status=redemption['status']
+                if redemption['resolution_flag']:
+                    count=redemption['count']
+                    redemption_report[redemption_status]['above_sla_count']=count
+                else:
+                    count=redemption['count']
+                    redemption_report[redemption_status]['within_sla_count']=count
+                redemption_report[redemption_status]['total_count']=redemption_report[redemption_status]['total_count']+count
         except Exception as ex:
             logger.error('redemption request count requested by {0}:: {1}'.format(request.user, ex))
             data = {'status': 0, 'message': 'could not retrieve the count of redemption request'}
-        return HttpResponse(json.dumps(data), content_type="application/json")
+        return HttpResponse(json.dumps(redemption_report), content_type="application/json")
 
 
     def points_redemption_request (self, request, **kwargs):
@@ -173,7 +169,7 @@ class RedemptionResource(CustomBaseModelResource):
         return HttpResponse(data, content_type="application/json")
 
 
-    ''' List of mechanics with pending redemption request'''
+    ''' List of Members with pending redemption request'''
     def pending_redemption_request(self,request, **kwargs):
         status = kwargs['status']
         redemptionrequests = models.RedemptionRequest.objects.filter(~Q(status=status)).select_related('member')
@@ -189,8 +185,8 @@ class RedemptionResource(CustomBaseModelResource):
             return HttpResponse(json.dumps(requests), content_type="application/json")
         else: 
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
-    
-        
+
+       
 class AccumulationResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member', full=True) 
     asm = fields.ForeignKey(AreaSparesManagerResource, 'asm', null=True, blank=True, full=True)
@@ -255,8 +251,8 @@ class DiscrepantAccumulationResource(CustomBaseModelResource):
                 upc = request.POST['upc']
                 upc_obj = models.SparePartUPC.objects.get(unique_part_code=upc)
                 points = models.SparePartPoint.objects.get(part_number=upc_obj.part_number).points
-                from_mechanic = models.Mechanic.objects.get(mechanic_id= request.POST['from'])
-                to_mechanic = models.Mechanic.objects.get(mechanic_id= request.POST['to'])
+                from_mechanic = models.Member.objects.get(mechanic_id= request.POST['from'])
+                to_mechanic = models.Member.objects.get(mechanic_id= request.POST['to'])
                 self.update_points(from_mechanic, redeem=points)
                 self.update_points(to_mechanic, accumulate=points)
                  

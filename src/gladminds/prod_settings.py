@@ -100,6 +100,7 @@ AFTER_BUY_CONSTANTS = {
 
 ########################SQS Queue Name##################################
 SQS_QUEUE_NAME = "gladminds-prod2"
+SQS_QUEUE_NAME_SMS = "gladminds-prod-sms"
 ########################################################################
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail"
 UCN_RECOVERY_MAIL_DETAIL["receiver"] = ["suresh@hashedin.com", "gladminds@hashedin.com", "nvhasabnis@bajajauto.co.in", "ssozarde@bajajauto.co.in","jojibabu.vege@gladminds.co","support@gladminds.co"]

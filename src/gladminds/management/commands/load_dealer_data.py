@@ -6,15 +6,18 @@ from datetime import datetime
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User, Group
-from gladminds.core import utils
+# from gladminds.core import utils
 
 from gladminds.core.auth_helper import Roles
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import get_model
 APP='bajaj'
 user_profile = get_model('UserProfile', APP)
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
 
 class Command(BaseCommand):
+
+    def mobile_format(self, phone_number):
+        return '+91' + phone_number[-10:]
     
     def handle(self, *args, **options):
         self.upload_dealer_data()
@@ -44,9 +47,13 @@ class Command(BaseCommand):
                 next(spamreader)
                 for row_list in spamreader:
                     temp ={}
-                    temp['dealer_id'] = row_list[2].strip() 
-                    temp['name'] = row_list[3].strip()
-                    temp['city'] = row_list[4].strip()
+                    temp['dealer_id'] = row_list[1].strip() 
+                    temp['name'] = row_list[2].strip()
+                    temp['city'] = row_list[3].strip()
+                    try:
+                        temp['use_cdms'] = row_list[6].strip()
+                    except:
+                        temp.setdefault('use_cdms', True)
 #                     temp['state'] = row_list[4].strip()
 
                     dealer_list.append(temp)
@@ -57,7 +64,7 @@ class Command(BaseCommand):
                 dealer_object = dealer_model.objects.get(user__user__username = dealer['dealer_id'])
             except Exception as ex:
                 new_user=self.register_user(group=Roles.DEALERS, username=dealer['dealer_id'])
-                dealer_object = dealer_model(dealer_id=dealer['dealer_id'], user=new_user)
+                dealer_object = dealer_model(dealer_id=dealer['dealer_id'], user=new_user, use_cdms=dealer['use_cdms'])
                 dealer_object.save()
             user_obj = dealer_object.user.user
             user_pro_obj = dealer_object.user
@@ -87,10 +94,10 @@ class Command(BaseCommand):
                 next(spamreader)
                 for row_list in spamreader:
                     temp={}
-                    temp['city'] = (row_list[4].strip())
-                    temp['dealer_id'] = row_list[2].strip()
-                    temp['name'] = row_list[5].strip()
-                    temp['number'] = utils.mobile_format(row_list[6].strip()  )
+                    temp['city'] = (row_list[3].strip())
+                    temp['dealer_id'] = row_list[1].strip()
+                    temp['name'] = row_list[4].strip()
+                    temp['number'] = self.mobile_format(row_list[5].strip())
                                        
                     sa_list.append(temp)
         

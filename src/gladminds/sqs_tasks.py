@@ -493,8 +493,10 @@ def send_mail_customer_phone_number_update_exceeds(*args, **kwargs):
 def send_mail_for_policy_discrepency(*args, **kwargs):
     ''' send mail for policy_discrepency'''
     discrepant_coupons = taskmanager.get_discrepant_coupon_details()
-    mail.discrepant_coupon_update(discrepant_coupons=discrepant_coupons)
-
+    if discrepant_coupons:
+        mail.discrepant_coupon_update(discrepant_coupons=discrepant_coupons)
+    else:
+        logger.info('[Policy Discrepency]: There were no policy discrepency in coupons')
 
 @shared_task
 def export_asc_registeration_to_sap(*args, **kwargs):
@@ -626,12 +628,12 @@ def send_reminders_for_servicedesk(*args, **kwargs):
 @shared_task
 def export_member_temp_id_to_sap(*args, **kwargs):
     '''
-    send info of registered Mechanic
+    send info of registered Member
     '''
     brand= kwargs.get('brand', None)
     member_registered = loyalty_export.ExportMemberTempFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
-                  wsdl_url=settings.MEMBER_SYNC_WSDL_URL, feed_type='Mechanic Registration Feed')
+                  wsdl_url=settings.MEMBER_SYNC_WSDL_URL, feed_type='Member Registration Feed')
     feed_export_data = member_registered.export_data()
     if len(feed_export_data[0]) > 0:
         member_registered.export(brand, items=feed_export_data[0], item_batch=feed_export_data[

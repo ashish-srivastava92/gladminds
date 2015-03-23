@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://local.bajaj.gladminds.co:8000/api/v1/feed/">
+  <SOAP-ENV:Body>
+    <ns1:postECORelease>
+      <ns1:ObjectList>
+        <ns1:ECOReleaseData>
+          <ns1:EcoReleaseModel>
+       		<ns1:SERVICEABILITY>YESS</ns1:SERVICEABILITY>
+           	<ns1:REASON_FOR_CHANGE>DONT KNOW </ns1:REASON_FOR_CHANGE>
+        	<ns1:DEL_PART_QTY>12</ns1:DEL_PART_QTY>
+        	<ns1:INTERCHAGEABILITY>NO</ns1:INTERCHAGEABILITY>
+			<ns1:DEL_PART_REV>1234</ns1:DEL_PART_REV>
+        	<ns1:ECO_DESCRIP>WHEEL SPOKE</ns1:ECO_DESCRIP>
+			<ns1:ADD_PART_LOC_CODE>QWE134</ns1:ADD_PART_LOC_CODE>
+			<ns1:ADD_PART>111</ns1:ADD_PART>
+			<ns1:DEL_PART>1123</ns1:DEL_PART>
+			<ns1:ECO_REL_DATE>2014-03-08</ns1:ECO_REL_DATE>
+			<ns1:ECO_NUMBER>2345</ns1:ECO_NUMBER>
+       		<ns1:ACTION>DUMP DATA</ns1:ACTION>
+			<ns1:ADD_PART_QTY>22</ns1:ADD_PART_QTY>
+			<ns1:DEL_PART_LOC_CODE>123</ns1:DEL_PART_LOC_CODE>
+			<ns1:ADD_PART_REV>222</ns1:ADD_PART_REV>
+			<ns1:MODELS_APPLICABLE>EVERY MODEL</ns1:MODELS_APPLICABLE>
+        	<ns1:PARENT_PART>1234</ns1:PARENT_PART>
+          </ns1:EcoReleaseModel>
+        </ns1:ECOReleaseData>
+      </ns1:ObjectList>
+      <ns1:Credential>
+        <ns1:UserName>bajaj</ns1:UserName>
+        <ns1:Password>bajaj</ns1:Password>
+      </ns1:Credential>
+    </ns1:postECORelease>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
