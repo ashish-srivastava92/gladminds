@@ -846,13 +846,13 @@ class ECORelease(BaseModel):
     parent_part = models.CharField(max_length=20, null=True, blank=True)
 
     add_part = models.CharField(max_length=20, null=True, blank=True)
-    add_part_qty = models.IntegerField(max_length=20, null=True, blank=True)
+    add_part_qty = models.FloatField(max_length=20, null=True, blank=True)
     add_part_rev = models.CharField(max_length=20, null=True, blank=True)
     add_part_loc_code = models.CharField(max_length=90, null=True, blank=True)
     
     del_part = models.CharField(max_length=20, null=True, blank=True)
-    del_part_qty = models.IntegerField(max_length=20, null=True, blank=True)
-    del_part_rev = models.IntegerField(max_length=20, null=True, blank=True)
+    del_part_qty = models.FloatField(max_length=20, null=True, blank=True)
+    del_part_rev = models.FloatField(max_length=20, null=True, blank=True)
     del_part_loc_code = models.CharField(max_length=90, null=True, blank=True)
     
     models_applicable = models.CharField(max_length=90, null=True, blank=True)

@@ -289,12 +289,12 @@ class EcoReleaseModel(ComplexModel):
     ACTION = Unicode
     PARENT_PART = Unicode
     ADD_PART = Unicode
-    ADD_PART_QTY = Unicode
+    ADD_PART_QTY = Decimal
     ADD_PART_REV = Unicode
     ADD_PART_LOC_CODE = Unicode
     DEL_PART = Unicode
-    DEL_PART_QTY = Unicode
-    DEL_PART_REV = Unicode
+    DEL_PART_QTY = Decimal
+    DEL_PART_REV = Decimal
     DEL_PART_LOC_CODE = Unicode
     MODELS_APPLICABLE = Unicode
     SERVICEABILITY = Unicode
