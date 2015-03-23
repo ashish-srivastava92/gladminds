@@ -49,6 +49,7 @@ TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
 AUDIT_ACTION = 'SEND TO QUEUE'
 
+
 @login_required()
 def redirect_url(request):
     brand_url = settings.HOME_URLS.get(settings.BRAND, {})
@@ -71,7 +72,7 @@ def redirect_url(request):
     return brand_meta.get('admin_url', '/admin')
 
 @login_required()
-def get_services(request):
+def home(request):
     if request.method == 'GET':
         user_groups = utils.get_user_groups(request.user)
         brand_url = settings.HOME_URLS.get(settings.BRAND, {})
@@ -87,6 +88,8 @@ def get_services(request):
                     brand_services.append(services)
         if len(brand_services)==1:
             return HttpResponseRedirect(brand_services[0]['url'])
+        elif len(brand_services)==0:
+            return HttpResponseRedirect('/admin')
         else:
             return render(request, 'portal/services.html')
 
