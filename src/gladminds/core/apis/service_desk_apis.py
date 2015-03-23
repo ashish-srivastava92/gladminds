@@ -12,7 +12,8 @@ from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.utils.urls import trailing_slash
 
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from gladminds.core.apis.authorization import MultiAuthorization
+from gladminds.core.apis.authorization import MultiAuthorization,\
+    ServiceDeskCustomAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.apis.user_apis import ServiceDeskUserResource, \
     DepartmentSubCategoriesResource, UserResource
@@ -40,7 +41,7 @@ class FeedbackResource(CustomBaseModelResource):
         queryset = models.Feedback.objects.all()
         resource_name = "feedbacks"
         model_name = "Feedback"
-        authorization = MultiAuthorization(DjangoAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization(), ServiceDeskCustomAuthorization())
         authentication = MultiAuthentication(AccessTokenAuthentication())
         detail_allowed_methods = ['get']
         always_return_data = True
@@ -53,10 +54,11 @@ class FeedbackResource(CustomBaseModelResource):
                         "resolved_date": ['gte', 'lte'],
                         "assignee" : ALL_WITH_RELATIONS,
                         "due_date" : ALL,
-                        "sub_department__department" : ALL_WITH_RELATIONS,
                         "sub_department" : ALL_WITH_RELATIONS
                      }
-    
+        
+        ordering = ['created_date']
+        
     def prepend_urls(self):
         return [
                  url(r"^(?P<resource_name>%s)/add-ticket%s" % (self._meta.resource_name,trailing_slash()),
@@ -94,9 +96,11 @@ class FeedbackResource(CustomBaseModelResource):
             tat['tat'] = minutes
             tat['month_of_year'] = str(data['year'])+"-"+ str(data['month'])
             result.append(tat)
-        return HttpResponse(content=json.dumps(result),
+        reports = {}
+        reports['TAT'] = result
+        return HttpResponse(content=json.dumps(reports),
                                     content_type='application/json')
-    
+
 
 class ActivityResource(CustomBaseModelResource):
     '''
