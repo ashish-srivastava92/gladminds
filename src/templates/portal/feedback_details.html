@@ -16,7 +16,7 @@
 				{% endif %}
 		 	</div>
 			<div class="col-md-5">
-				<h3 align="center">Feedback Status</h3>
+				<h3 align="center">Enquiry Status</h3>
 			</div>
 			<div class="col-md-4">
 				<button class="btn btn-primary pull-right add-feedback-btn" data-toggle="modal" data-target="#myModal">
@@ -36,21 +36,6 @@
 	                    	<option value="all">All</option>
 	                      	{% for priority in priorities %}
 	                     		 <option {% if filter_params.priority == priority %} selected {% endif%} value="{{priority}}">{{priority}}</option>
-	                      	{% endfor %}
-	                    </select>
-	                 </div>
-	            </div>
-			</div>
-			<div class="col-md-4 hide">
-				<div class="row">
-	            	<div class="col-md-3 form-group">
-	                <label class="control-label pull-right feedback-filters-label">Type: </label>
-	                </div>
-	                <div class="col-md-8 form-group">
-	                	<select class="form-control feedback-filters-options" name="type" required>
-	                    	<option value="all">All</option>
-	                      	{% for type in types %}
-	                     		 <option {% if filter_params.type == type %} selected {% endif%} value="{{type}}">{{type}}</option>
 	                      	{% endfor %}
 	                    </select>
 	                 </div>
@@ -85,7 +70,7 @@
         <thead>
 				<tr>
 				    <th>Ticket</th>
-					<th>Reporter</th>
+					<th>Reported By</th>
 					<th>Description</th>
 					<th>Status</th>
 					<th>Created</th>
@@ -199,11 +184,10 @@
 		<form class="help-desk-form" role="search">
                 <div class="row">
                   <div class="col-md-3 form-group">
-                    <label class="control-label">Reporter*:</label>
+                    <label class="control-label">Reported_By*:</label>
                   </div>
                   <div class="col-md-9 form-group">
                     <select class="form-control advisorMobile" name="advisorMobile" required>
-                      <option value="">Select mobile number</option>
                       <option value="{{dealer_asc.user.username}}">{{dealer_asc.user.username}}</option>
                       {% for phone in data %}
                       <option value="{{phone.user.user.username}}">{{phone.service_advisor_id}} ({{phone.user.phone_number}})</option>
@@ -212,20 +196,66 @@
                   </div>
                 </div>
                 
-                <div class="row">
+                <div class="row hide">
                   <div class="col-md-3 form-group">
                     <label class="control-label">Type*:</label>
                   </div>
                   <div class="col-md-9 form-group">
                     <select class="form-control type" name="type" required>
-                      <option value="">Select Type</option>
                       {% for type in types %}
                       <option value="{{type}}">{{type}}</option>
                       {% endfor %}
                     </select>
                   </div>
                 </div>
-                
+                <div class="row">
+                  <div class="col-md-3 form-group">
+                    <label class="control-label">Priority:</label>
+                  </div>
+                  <div class="col-md-9 form-group">
+                    <select class="form-control priority" name="priority" required>
+                      {% for priority in priorities %}
+                      <option value="{{priority}}">{{priority}}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+					
+				<div class="row">
+					<div class="col-md-3 form-group">
+					<label class="control-label">Departments*:</label>
+					</div>
+					<div class="col-md-9 form-group">
+						<select class="form-control department" name="department" id="department" required >
+							<option value=""></option> {% for department in departments %}
+							<option value="{{department.id}}">{{department.name}}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-3 form-group">
+						<label class="control-label">Activity Type*:</label>
+					</div>
+					<div class="col-md-9 form-group">
+						<select class="form-control sub-department"	name="sub-department" id="sub-department" required>
+							<option value="">-- choose a department first--</option>
+						</select>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-3 form-group">
+						<label class="control-label">Assign To:</label>
+					</div>
+					<div class="col-md-9 form-group">
+						<select class="form-control sub-department-assignee" name="sub-department-assignee" id="sub-department-assignee" >
+							<option value="None"> </option>
+						</select>
+					</div>
+				</div>
+									                
                 <div class="row">
                   <div class="col-md-3 form-group">
                     <label class="control-label">Subject*:</label>
@@ -239,13 +269,13 @@
                     <label class="control-label">Description*:</label>
                   </div>
                   <div class="col-md-9 form-group">
-                    <textarea rows="8" cols="100" class="form-control description" name="description" required></textarea>
+                    <textarea rows="4" cols="100" class="form-control description" name="description" required></textarea>
                   </div>
                 </div> 
                 <div class="row">
                   <div class="col-md-3 form-group">
-                    <label class="control-label">Upload File*:</label>
-                    <label class="control-label"><small><i>allowed format png,jpg,pdf,ppt,doc,xls</i></small></label>
+                    <label class="control-label">Upload File:</label>
+                    <label class="control-label"><small><i>png,jpg,pdf,ppt,doc,xls</i></small></label>
                   </div>
                   <div class="col-md-9 form-group">
                     <input type="file" class='form-control sd_file' name="sd_file" >
@@ -270,15 +300,9 @@
  
 {% block dependency%}
 
-{% if active_menu == 'recover' %}
-  <script>
-  var jobCardFileData = null;
-  </script>
-{% endif %}
-
 <script src="/static/js/table_data.js"></script>
 <script src="/static/js/table_data_bootstrap.js"></script>
 <script src="/static/js/portal/utils.js"></script>
-<script src="/static/js/portal/main.js"></script>
+<script src="/static/daimler/js/main.js"></script>
 
 {% endblock dependency %}

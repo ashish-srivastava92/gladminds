@@ -33,7 +33,7 @@ _BAJAJ_LOYALTY_SUPERADMINS = [('gladminds', '', 'gladminds!123'),
                               ('kumarashish@bajajauto.co.in', 'kumarashish@bajajauto.co.in',
                                'kumarashish!123')]
 _BAJAJ_LOYALTY_NSM = [('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123', 'NSM002', 'south', 'Raghunath')]
-_BAJAJ_LOYALTY_ASM = [('spremnath@bajajauto.co.in', 'spremnath@bajajauto.co.in', 'spremnath!123', 'ASM004', 'PREM NATH', '+919176339712', 'Tamil Nadu')]
+_BAJAJ_LOYALTY_ASM = [('prajurkar@bajajauto.co.in', 'prajurkar@bajajauto.co.in', 'spremnath!123', 'ASM004', 'PREM NATH', '+919176339712', 'Tamil Nadu')]
 _BAJAJ_ZSM = [('mspendharkar@bajajauto.co.in', 'mspendharkar@bajajauto.co.in', 'milindpendharkar@123', 'Milind Pendharkar')]
 
 
@@ -52,7 +52,7 @@ class Command(BaseCommand):
         self.create_bajaj_admins()
         self.set_afterbuy_permissions()
         self.create_zonal_managers()
-        if settings.ENV not in ['prod']:
+        if settings.ENV not in ['qa', 'prod', 'staging']:
             self.upload_loyalty_user()
             self.upload_asm_user()
             self.upload_part_data()
@@ -101,26 +101,26 @@ class Command(BaseCommand):
     
     @atomic
     def create_bajaj_admins(self):
-        from gladminds.bajaj.models import AreaSalesManager, NationalSalesManager
+        from gladminds.bajaj.models import AreaSparesManager, NationalSparesManager
         try:
             for details in _BAJAJ_LOYALTY_SUPERADMINS:
                 print "create loyalty superadmin", details
                 self.create_user_profile(details, GmApps.BAJAJ, Roles.LOYALTYSUPERADMINS)
             for details in _BAJAJ_LOYALTY_NSM:
                 print "create loyalty nsm", details
-                profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.NSMS)
+                profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.NATIONALSPARESMANAGERS)
                 try: 
-                    nsm_obj = NationalSalesManager.objects.get(user=profile_obj, nsm_id=details[3])
+                    nsm_obj = NationalSparesManager.objects.get(user=profile_obj, nsm_id=details[3])
                 except:
-                    nsm_obj = NationalSalesManager(user=profile_obj, nsm_id=details[3],
+                    nsm_obj = NationalSparesManager(user=profile_obj, nsm_id=details[3],
                                                    name=details[5], email=details[0],
                                                                territory=details[4])
                     nsm_obj.save()
             for details in _BAJAJ_LOYALTY_ASM:
                 print "create loyalty asm", details
-                profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.ASMS)
-                if not AreaSalesManager.objects.filter(user=profile_obj, asm_id=details[3]).exists():
-                    asm_obj = AreaSalesManager(nsm=nsm_obj, user=profile_obj, asm_id=details[3],
+                profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.AREASPARESMANAGERS)
+                if not AreaSparesManager.objects.filter(user=profile_obj, asm_id=details[3]).exists():
+                    asm_obj = AreaSparesManager(nsm=nsm_obj, user=profile_obj, asm_id=details[3],
                                                  name=details[4], email=details[0],
                                                  phone_number=details[5], state=details[6])
                     asm_obj.save()
@@ -230,7 +230,7 @@ class Command(BaseCommand):
     
     def set_brand_permissions(self, brand):
         try:
-            for group in [Roles.ASMS, Roles.NSMS]:
+            for group in [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]:
                 model_ids = []
                 for model in ['Distributor', 'Retailer', 'Mechanic']:
                     model_ids.append(ContentType.objects.get(app_label__in=[brand, 'auth'], model=model).id)

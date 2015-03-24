@@ -61,6 +61,9 @@ class LoyaltyService(CoreLoyaltyService):
                     data.append(image_url)
                 elif field=='Mechanic ID':
                     data.append(getattr(mechanic, 'permanent_id'))
+                elif field=='state':
+                    state = mechanic.state.state_name
+                    data.append(state)
                 else:
                     data.append(getattr(mechanic, field))
             csvwriter.writerow(data)
@@ -75,7 +78,7 @@ class LoyaltyService(CoreLoyaltyService):
         phone_number=utils.get_phone_number_format(mech.phone_number)
         message=get_template('COMPLETE_FORM').format(
                         mechanic_name=mech.first_name)
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
         self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
         LOG.error('[send_welcome_sms]:{0}:: {1}'.format(
@@ -107,7 +110,7 @@ class LoyaltyService(CoreLoyaltyService):
                               member_id = welcome_kit_obj.member.mechanic_id,
                               member_name = welcome_kit_obj.member.first_name,
                               member_city = welcome_kit_obj.member.district,
-                              member_state = welcome_kit_obj.member.state,
+                              member_state = welcome_kit_obj.member.state.state_name,
                         delivery_address = welcome_kit_obj.delivery_address,
                         url_link=url_link)
         partner_email_id=welcome_kit_obj.partner.user.user.email
@@ -121,7 +124,7 @@ class LoyaltyService(CoreLoyaltyService):
         phone_number=utils.get_phone_number_format(member.phone_number)
         message=get_template('WELCOME_KIT_DELIVERY').format(
                         mechanic_name=member.first_name)
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
         self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
         LOG.error('[send_request_status_sms]:{0}:: {1}'.format(
@@ -150,7 +153,7 @@ class LoyaltyService(CoreLoyaltyService):
                               member_id = redemption_obj.member.mechanic_id,
                               member_name = redemption_obj.member.first_name,
                               member_city = redemption_obj.member.district,
-                              member_state = redemption_obj.member.state,
+                              member_state = redemption_obj.member.state.state_name,
                               product_id =  redemption_obj.product.product_id,
                               product_name =  redemption_obj.product.description,
                         delivery_address = redemption_obj.delivery_address,
@@ -169,7 +172,7 @@ class LoyaltyService(CoreLoyaltyService):
                         transaction_id=redemption_request.transaction_id,
                         product_name=redemption_request.product.description,
                         status=redemption_request.status.lower())
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
         self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
         LOG.error('[send_request_status_sms]:{0}:: {1}'.format(
@@ -189,7 +192,8 @@ class LoyaltyService(CoreLoyaltyService):
                                         product=product,
                                         delivery_address=delivery_address,
                                         expected_delivery_date=date['expected_delivery_date'],
-                                        due_date=date['due_date'])
+                                        due_date=date['due_date'],
+                                        points=product.points)
             
             redemption_request.save()
             transaction_ids.append(str(redemption_request.transaction_id))
@@ -226,22 +230,22 @@ class LoyaltyService(CoreLoyaltyService):
                                             phone_number, ex))
         finally:
             phone_number = utils.get_phone_number_format(phone_number)
-            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
             self.queue_service(send_point, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
         return {'status': True, 'message': message}
 
     def accumulate_point(self, sms_dict, phone_number):
         '''accumulate points with given upc'''
-        unique_product_codes = set((sms_dict['ucp'].upper()).split())
-        valid_ucp=[]
+        unique_product_codes = set((sms_dict['upc'].upper()).split())
+        valid_upc=[]
         valid_product_number=[]
         invalid_upcs_message=''
         try:
-            if len(unique_product_codes)>constants.MAX_UCP_ALLOWED:
+            if len(unique_product_codes)>constants.MAX_UPC_ALLOWED:
                 message=get_template('MAX_ALLOWED_UPC').format(
-                                        max_limit=constants.MAX_UCP_ALLOWED)
-                raise ValueError('Maximum allowed ucp exceeded')
+                                        max_limit=constants.MAX_UPC_ALLOWED)
+                raise ValueError('Maximum allowed upc exceeded')
             mechanic = models.Mechanic.objects.filter(phone_number=utils.mobile_format(phone_number))
             if not mechanic:
                 message=get_template('UNREGISTERED_USER')
@@ -258,7 +262,7 @@ class LoyaltyService(CoreLoyaltyService):
                 accumulation_log.save()
                 for spare in spares:
                     valid_product_number.append(spare.part_number)
-                    valid_ucp.append(spare.unique_part_code)
+                    valid_upc.append(spare.unique_part_code)
                     accumulation_log.upcs.add(spare)
                 spare_points = models.SparePartPoint.objects.get_part_number(valid_product_number)
                 for spare_point in spare_points:
@@ -269,12 +273,26 @@ class LoyaltyService(CoreLoyaltyService):
                 spares.update(is_used=True)
                 accumulation_log.total_points=total_points
                 accumulation_log.save()
-            invalid_upcs = list(set(unique_product_codes).difference(valid_ucp))
+            invalid_upcs = list(set(unique_product_codes).difference(valid_upc))
             if invalid_upcs:
                 invalid_upcs_message=' Invalid Entry... {0} does not exist in our records.'.format(
                                               (', '.join(invalid_upcs)))
+                used_upcs = models.SparePartUPC.objects.get_spare_parts(invalid_upcs, is_used=True) 
+                if used_upcs:
+                    accumulation_requests = models.AccumulationRequest.objects.filter(upcs__in=used_upcs).prefetch_related('upcs').select_related('upcs')
+                    accumulation_dict = {}
+                    try:
+                        for accumulation_request in accumulation_requests:
+                            for upcs in  accumulation_request.upcs.values():
+                                accumulation_dict[upcs['unique_part_code']] = accumulation_request    
+                        for used_upc in used_upcs:
+                            discrepant_accumulation_log = models.DiscrepantAccumulation(new_member=mechanic[0], upc = used_upc,
+                                                                         accumulation_request=accumulation_dict[used_upc])
+                            discrepant_accumulation_log.save()
+                    except Exception as ex:
+                        LOG.error('[accumulate_point]:{0}:: {1}'.format(phone_number, ex))
             if len(unique_product_codes)==1 and invalid_upcs:
-                message=get_template('SEND_INVALID_UCP')
+                message=get_template('SEND_INVALID_UPC')
             else:
                 message=get_template('SEND_ACCUMULATED_POINT').format(
                                 mechanic_name=mechanic[0].first_name,
@@ -286,7 +304,7 @@ class LoyaltyService(CoreLoyaltyService):
             LOG.error('[accumulate_point]:{0}:: {1}'.format(phone_number, ex))
         finally:
             phone_number = utils.get_phone_number_format(phone_number)
-            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
             self.queue_service(send_point, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
         return {'status': True, 'message': message}
@@ -302,7 +320,7 @@ class LoyaltyService(CoreLoyaltyService):
             elif mechanic and  mechanic[0].form_status=='Incomplete':
                 message=get_template('INCOMPLETE_FORM')
                 raise ValueError('Incomplete user details')
-            elif mechanic and mechanic[0].mechanic_id!=sms_dict['member_id']:
+            elif mechanic and (mechanic[0].mechanic_id!=sms_dict['member_id'] and mechanic[0].permanent_id!=sms_dict['member_id']):
                 message=get_template('INVALID_MEMBER_ID').format(mechanic_name=mechanic[0].first_name)
                 raise ValueError('Invalid user-ID')
             products=models.ProductCatalog.objects.filter(product_id__in=product_codes)
@@ -336,7 +354,7 @@ class LoyaltyService(CoreLoyaltyService):
             LOG.error('[redeem_point]:{0}:: {1}'.format(phone_number, ex))
         finally:
             phone_number = utils.get_phone_number_format(phone_number)
-            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
             self.queue_service(send_point, {'phone_number': phone_number,
                   'message': message, "sms_client": settings.SMS_CLIENT})
         return {'status': True, 'message': message}
@@ -349,4 +367,4 @@ class LoyaltyService(CoreLoyaltyService):
         expected_delivery_date = datetime.now() + timedelta(seconds=total_seconds)
         return {'due_date':due_date, 'expected_delivery_date':expected_delivery_date}
     
-LoyaltyService = LoyaltyService()
+loyalty = LoyaltyService()

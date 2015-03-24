@@ -11,13 +11,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.upload_dist_data()
-        self.upload_mech_data()
+#         self.upload_mech_data()
     
     def upload_dist_data(self):
         print "Started uploading distributor..."
         file_list = ['DIST_DATA.csv']
         dealer_list = []
-        asm = get_model('AreaSalesManager', APP)
+        asm = get_model('AreaSparesManager', APP)
         dist = get_model('Distributor', APP)
         user_profile = get_model('UserProfile', APP)
 

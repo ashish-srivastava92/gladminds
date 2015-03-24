@@ -105,17 +105,19 @@ SAP_CRM_DETAIL = {
                   'username':'pisuper',
                   'password':'welcome123'
                   }
-ASC_WSDL_URL = "http://bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
-COUPON_WSDL_URL = "http://bajaj.gladminds.co/api/v1/redeem-feed/?wsdl&v0"
+
 COUPON_WSDL = 'prod_coupon_redeem.wsdl'
-CUSTOMER_REGISTRATION_WSDL_URL = "http://bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL = 'prod_customer_registration.wsdl'
-
-VIN_SYNC_WSDL_URL="http://bajaj.gladminds.co/api/v1/vin-sync-feed/?wsdl&v0"
 VIN_SYNC_WSDL='prod_vin_sync.wsdl'
+PURCHASE_SYNC_WSDL='prod_purchase_sync_feed.wsdl'
 
-MEMBER_SYNC_WSDL_URL = "http://bajaj.gladminds.co/api/v1/member-sync-feed/?wsdl&v0"
-MEMBER_SYNC_WSDL = 'prod_member_sync_feed.wsdl'
+
+ASC_WSDL_URL = "http://bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
+COUPON_WSDL_URL = "http://bajaj.gladminds.co/api/v1/coupon-redeem/?wsdl&v0"
+CUSTOMER_REGISTRATION_WSDL_URL = "http://bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
+VIN_SYNC_WSDL_URL="http://bajaj.gladminds.co/api/v1/vin-sync/?wsdl&v0"
+PURCHASE_SYNC_WSDL_URL="http://bajaj.gladminds.co/api/v1/purchase-sync/?wsdl&v0"
+
 
 ENABLE_AMAZON_SQS = True
 
@@ -136,26 +138,30 @@ AFTER_BUY_CONSTANTS = {
 
 ########################SQS Queue Name##################################
 SQS_QUEUE_NAME = "gladminds-prod2"
+SQS_QUEUE_NAME_SMS = "gladminds-prod-sms"
 ########################################################################
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail"
-UCN_RECOVERY_MAIL_DETAIL["receiver"] = ["gladminds@hashedin.com", "nvhasabnis@bajajauto.co.in", "ssozarde@bajajauto.co.in","jojibabu.vege@gladminds.co","support@gladminds.co"]
-VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["jojibabu.vege@gladminds.co","ssozarde@bajajauto.co.in", "gladminds+alerts@hashedin.com", "Dhazarika@bajajauto.co.in", "Rkjena@bajajauto.co.in", "skolluri@bajajauto.co.in", "sudhir.patil@gladminds.co"]
+UCN_RECOVERY_MAIL_DETAIL["receiver"] = ["suresh@hashedin.com", "gladminds@hashedin.com", "nvhasabnis@bajajauto.co.in", "ssozarde@bajajauto.co.in","jojibabu.vege@gladminds.co","support@gladminds.co"]
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["suresh@hashedin.com", "jojibabu.vege@gladminds.co","ssozarde@bajajauto.co.in", "gladminds@hashedin.com", "Dhazarika@bajajauto.co.in", "Rkjena@bajajauto.co.in", "skolluri@bajajauto.co.in", "sudhir.patil@gladminds.co"]
 FEED_FAILURE["subject"] = "Consolidated Report: GladMinds Feed Failure - "
-FEED_FAILURE["receiver"] = ["jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in", "skolluri@bajajauto.co.in",
+FEED_FAILURE["receiver"] = ["suresh@hashedin.com", "jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in", "skolluri@bajajauto.co.in",
                             "sudhir.patil@gladminds.co", "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
-                            "gladminds+alerts@hashedin.com", "naveen.shankar@gladminds.co"]
-CUSTOMER_PHONE_NUMBER_UPDATE["receiver"] = ["jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in",
+                            "gladminds@hashedin.com", "naveen.shankar@gladminds.co"]
+CUSTOMER_PHONE_NUMBER_UPDATE["receiver"] = ["suresh@hashedin.com", "jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in",
                                             "skolluri@bajajauto.co.in", "sudhir.patil@gladminds.co",
                                             "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
-                                            "gladminds+alerts@hashedin.com"]
-VIN_SYNC_FEED["receiver"] = ["rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in", "ssozarde@bajajauto.co.in", "gladminds+alerts@hashedin.com"]
+                                            "gladminds@hashedin.com"]
+VIN_SYNC_FEED["receiver"] = ["suresh@hashedin.com", "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in", "ssozarde@bajajauto.co.in", "gladminds@hashedin.com"]
 
+POLICY_DISCREPANCY_MAIL_TO_MANAGER ["receiver"] = ["suresh@hashedin.com", "jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in",
+                                                   "sudhir.patil@gladminds.co", "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
+                                                   "gladminds@hashedin.com", "naveen.shankar@gladminds.co"]
 ########################################################################
 ###################Change Mail Subject on Prod##########################
 MAIL_DETAIL["subject"] = "Report: GladMinds Feed Summary"
 MAIL_DETAIL["receiver"] = ["jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in", "skolluri@bajajauto.co.in",
                             "sudhir.patil@gladminds.co", "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
-                            "gladminds+alerts@hashedin.com", "naveen.shankar@gladminds.co", "sudhir.patil@gladminds.co"]
+                            "gladminds@hashedin.com", "suresh@hashedin.com", "naveen.shankar@gladminds.co", "sudhir.patil@gladminds.co"]
 
 #######################Feed Fail Failure Info###########################
 FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/dev/'
@@ -223,3 +229,11 @@ SUIT_CONFIG = {
          'models':(
                     'messagetemplate', 'emailtemplate',)},)
 }
+
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_elasticache.memcached.ElastiCache',
+#         'LOCATION': 'gladminds-memcache.t2nfas.cfg.use1.cache.amazonaws.com:11211'
+#     }
+# }

@@ -63,26 +63,27 @@ def get_feedbacks(user, status, priority, type, search=None):
             status_filter = [status]
 
     if user.groups.filter(name=Roles.DEALERS).exists():
+        sa_id_list = []
         sa_list = models.ServiceAdvisor.objects.active_under_dealer(user)
         if sa_list:
-            sa_id_list = []
             for sa in sa_list:
                 sa_id_list.append(sa.service_advisor_id)
-            sa_id_list.append(user)
-            feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
+        sa_id_list.append(user)
+        feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
                                                        priority__in=priority_filter, type__in=type_filter
                                                     ).order_by('-created_date')
+            
     if user.groups.filter(name=Roles.ASCS).exists():
         sa_list = models.ServiceAdvisor.objects.active_under_asc(user)
+        sa_id_list = []
         if sa_list:
-            sa_id_list = []
             for sa in sa_list:
                 sa_id_list.append(sa.service_advisor_id)
-            sa_id_list.append(user)
-            feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
+        sa_id_list.append(user)
+        feedbacks = models.Feedback.objects.filter(reporter__name__in=sa_id_list, status__in=status_filter,
                                                        priority__in=priority_filter, type__in=type_filter
                                                      ).order_by('-created_date')
-    if user.groups.filter(name=Roles.SDMANAGERS).exists():
+    if user.groups.filter(name=Roles.SDMANAGERS).exists() or user.groups.filter(name=Roles.SDREADONLY).exists():
         feedbacks = models.Feedback.objects.filter(status__in=status_filter, priority__in=priority_filter,
                                                    type__in=type_filter).order_by('-created_date')
     if user.groups.filter(name=Roles.SDOWNERS).exists():
@@ -110,7 +111,7 @@ def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=Non
     finally:
         LOG.info("Send complain message received successfully with {0}".format(message))
         phone_number = utils.get_phone_number_format(phone_number)
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
         send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     return {'status': True, 'message': message}
 
@@ -157,7 +158,7 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
             gladminds_feedback_object = models.Feedback(reporter=servicedesk_user,
                                                             message=sms_dict['message'], status="Open",
                                                             created_date=datetime.datetime.now()                                                            
-                                                            )
+                                                        ) 
         gladminds_feedback_object.save()
         if sms_dict['file_location']:
             file_obj = sms_dict['file_location']
@@ -178,7 +179,7 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
         LOG.info("Send complain message received successfully with %s" % message)
         if phone_number:
             phone_number = utils.get_phone_number_format(phone_number)
-            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+            sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
             send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         if dealer_email:
             context = utils.create_context('FEEDBACK_DETAIL_TO_DEALER', gladminds_feedback_object)

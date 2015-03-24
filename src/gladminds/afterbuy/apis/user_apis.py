@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import  login
 from django.conf import settings
 from gladminds.afterbuy import utils as afterbuy_utils
-from gladminds.core.auth import otp_handler
+from gladminds.afterbuy import otp_handler
 from gladminds.afterbuy import models as afterbuy_model
 from tastypie import fields, http
 from gladminds.core.apis.base_apis import CustomBaseModelResource

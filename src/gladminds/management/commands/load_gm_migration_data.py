@@ -21,7 +21,6 @@ class Command(BaseCommand):
         self.add_sms_template()
         self.add_email_template()
         self.add_constants()
-        #self.add_group()
 
     def add_group(self):
         print "Loading groups..."

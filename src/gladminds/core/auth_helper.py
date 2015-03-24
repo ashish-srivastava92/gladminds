@@ -38,14 +38,15 @@ class Roles():
     SDADMINS = 'SdAdmins'
     SDMANAGERS = 'SdManagers'
     SDOWNERS = 'SdOwners'
-    
+    DEALERADMIN = 'DealerAdmins' 
+    SDREADONLY = 'SdReadOnly'
     AREASERVICEMANAGER = 'AreaServiceManagers'
     ZSM = 'ZonalServiceManagers' 
     
     LOYALTYSUPERADMINS = 'LoyaltySuperAdmins'
     LOYALTYADMINS = 'LoyaltyAdmins'
-    NSMS = 'NationalSalesManagers'
-    ASMS = 'AreaSalesManagers'
+    NATIONALSPARESMANAGERS = 'NationalSparesManagers'
+    AREASPARESMANAGERS = 'AreaSparesManagers'
     RPS = 'RedemptionPartners'
     LPS = 'LogisticPartners'
     WELCOMEKITESCALATION = 'WelcomeKitEscalation'

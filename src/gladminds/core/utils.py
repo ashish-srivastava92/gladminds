@@ -253,6 +253,7 @@ def create_sa_feed_data(post_data, user_id, temp_sa_id):
     data['name'] = post_data['name'].upper()
     data['status'] = post_data['status']
     data['address'] = None
+    data['cdms_flag'] = False
     return data
 
 def create_context(email_template_name, feedback_obj, comment_obj=None):
@@ -270,9 +271,13 @@ def create_context(email_template_name, feedback_obj, comment_obj=None):
         due_date = feedback_obj.due_date.strftime(DATE_FORMAT)
     except:
         due_date = ""
+    if settings.BRAND == 'bajaj':
+        type = feedback_obj.type
+    else:
+        type = "feedback"
     data = get_email_template(email_template_name)
     data['newsubject'] = data['subject'].format(id = feedback_obj.id)
-    data['content'] = data['body'].format(id=feedback_obj.id, type = feedback_obj.type, reporter = feedback_obj.reporter.user_profile.user.username, 
+    data['content'] = data['body'].format(id=feedback_obj.id, type = type, reporter = feedback_obj.reporter.user_profile.user.username, 
                                           message = feedback_obj.description, created_date = created_date, 
                                           assign_to = assignee ,  priority =  feedback_obj.priority, comment = comment,
                                           root_cause = feedback_obj.root_cause, resolution = feedback_obj.resolution,

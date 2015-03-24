@@ -104,19 +104,19 @@ SAP_CRM_DETAIL = {
                   'password':'welcome123'
                   }
 
+MEMBER_SYNC_WSDL='prod_member_sync_feed.wsdl'
+
 ASC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
 
-COUPON_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/redeem-feed/?wsdl&v0"
-COUPON_WSDL = 'qa_coupon_redeem.wsdl'
-
+COUPON_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/coupon-redeem/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
-CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
+VIN_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/vin-sync/?wsdl&v0"
+PURCHASE_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/purchase-sync/?wsdl&v0"
 
-VIN_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/vin-sync-feed/?wsdl&v0"
-VIN_SYNC_WSDL='qa_vin_sync.wsdl'
-
-MEMBER_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/member-sync-feed/?wsdl&v0"
-MEMBER_SYNC_WSDL='qa_member_sync_feed.wsdl'
+MEMBER_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/member-sync/?wsdl&v0"
+ACCUMULATION_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/accumulation-request/?wsdl&v0"
+REDEMPTION_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/redemption-request/?wsdl&v0"
+DISTRIBUTOR_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/distributor-sync/?wsdl&v0"
 
 WSDL_TNS="http://qa.bajaj.gladminds.co/api/v1/feed/"
 
@@ -149,3 +149,11 @@ MAIL_DETAIL["subject"] = "GladMinds Feed Report QA"
 MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 #######################################################################
 ENV = "qa"
+
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_elasticache.memcached.ElastiCache',
+#         'LOCATION': 'gladminds-memcache.t2nfas.cfg.use1.cache.amazonaws.com:11211'
+#     }
+# }

@@ -33,7 +33,7 @@ def send_email_with_file_attachment(sender, receiver, subject, body, filename, c
         message = EmailMessage(subject, body, sender, receiver)
         message.attach(filename + yesterday.strftime("%b %d %Y") +'.csv', content.getvalue(), 'text/csv')
         message.send()
-        audit_manager.email_log(subject," ", sender, receiver, brand=brand);
+        audit_manager.email_log(settings.BRAND, subject, " ", sender, receiver);
         return True
     except Exception as ex:
         logger.error('Exception while sending mail {0}'.format(ex))
@@ -56,7 +56,7 @@ def send_email(sender, receiver, subject, body, message=None,smtp_server=setting
         mail.login("anchit082","anchit05")
         mail.sendmail(from_addr=sender, to_addrs=receiver, msg=msg.as_string())
         mail.quit()
-        audit_manager.email_log(subject, message, sender, receiver, brand=brand);
+        audit_manager.email_log(settings.BRAND, subject, message, sender, receiver);
         return True
         print body
     except Exception as ex:
@@ -136,7 +136,7 @@ def customer_phone_number_update(customer_details=None):
         receivers = get_mail_receiver(settings.CUSTOMER_PHONE_NUMBER_UPDATE, mail_detail)
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(["DEALER/ASC ID", "CUSTOMER ID", "CUSTOMER NAME", "OLD NUMBER", "NEW NUMBER", "MODIFIED DATE"])
+        csvwriter.writerow(["DEALER/ASC/MANAGER ID", "CUSTOMER ID", "CUSTOMER NAME", "OLD NUMBER", "NEW NUMBER", "MODIFIED DATE"])
 
         for customer in customer_details:
             csvwriter.writerow([customer['dealer_asc_id'], customer['customer_id'], customer['customer_name'],
@@ -158,11 +158,11 @@ def discrepant_coupon_update(discrepant_coupons=None):
         receivers = get_mail_receiver(settings.POLICY_DISCREPANCY_MAIL_TO_MANAGER, mail_detail)
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(["VIN", "SERVICE TYPE", "VALID DAYS", "VALID KMS"])
+        csvwriter.writerow(["DATE", "VIN", "SERVICE TYPE", "VALID DAYS", "VALID KMS"])
 
         for coupon in discrepant_coupons:
-            csvwriter.writerow([coupon['vin'], coupon['service_type'], coupon['valid_days'],
-                                coupon['valid_kms']])
+            csvwriter.writerow([coupon['date'], coupon['vin'], coupon['service_type'],
+                                coupon['valid_days'], coupon['valid_kms']])
                     
         send_email_with_file_attachment(mail_detail['sender'], receivers, mail_detail['subject'],
                                           mail_detail['body'].format(date=yesterday.strftime("%b %d %Y")), 'customer_phone_number_update_',
@@ -526,3 +526,24 @@ def send_recovery_email_to_admin(file_obj, coupon_data):
     data = get_email_template('UCN_REQUEST_ALERT')['body'].format(requester,coupon_data.service_type,
                 customer_id, coupon_data.actual_kms, reason, file_location)
     send_ucn_request_alert(data=data)
+
+def send_phone_number_update_count_exceeded(update_details=None):
+    try:
+        yesterday = datetime.now().date() - timedelta(days=1)
+        mail_detail = get_email_template('PHONE_NUMBER_UPDATE_COUNT_EXCEEDED')
+        receivers = get_mail_receiver(settings.PHONE_NUMBER_UPDATE_COUNT_EXCEEDED_MAIL_TO_ASM, mail_detail)
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(["UPDATED BY", "CUSTOMER ID", "CUSTOMER NAME", "OLD NUMBER", "NEW NUMBER", "MODIFIED DATE","PRODUCT ID"])
+
+        for update in update_details:
+            csvwriter.writerow([update['updated_by'], update['customer_id'], update['customer_name'],
+                                update['old_number'], update['new_number'], update['modified_date'], update['product_id']])
+        if settings.ENV in settings.IGNORE_ENV:
+            mail_detail['subject'] = mail_detail['subject'] + '- ' + settings.ENV
+        send_email_with_file_attachment(mail_detail['sender'], receivers, mail_detail['subject'],
+                                          mail_detail['body'].format(date=yesterday.strftime("%b %d %Y")), 'customer_phone_number_update_exceed_',
+                                          csvfile)
+        logger.info("Sending out customer phone number update exceeds emails")
+    except Exception as ex:
+        logger.info("[Exception customer phone number update]: {0}".format(ex))
