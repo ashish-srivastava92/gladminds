@@ -3,10 +3,20 @@ from django.contrib.auth.models import User
 from gladminds.core import base_models
 from gladminds.core.auth_helper import GmApps
 from django.conf import settings
+from django.utils.translation import gettext as _
+from constance import config
+from gladminds.core.managers.email_token_manager import EmailTokenManager
 from gladminds.core.model_helpers import validate_image, validate_file
+from gladminds.core.managers.mail import sent_password_reset_link,\
+    send_email_activation
+import datetime
 
 _APP_NAME = GmApps.BAJAJ
 
+try:
+    from django.utils.timezone import now as datetime_now
+except ImportError:
+    datetime_now = datetime.datetime.now
 
 class BrandProductCategory(base_models.BrandProductCategory):
     class Meta:
@@ -440,3 +450,8 @@ class LoyaltySLA(base_models.LoyaltySLA):
     class Meta:
         app_label = _APP_NAME
         unique_together = ("status", "action")
+        
+class EmailToken(base_models.EmailToken):
+    class Meta:
+        verbose_name_plural = 'email_tokens'
+        app_label = _APP_NAME

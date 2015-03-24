@@ -26,7 +26,9 @@ class BajajResourceTestCase(TestCase):
     def post(self, uri, content_type='application/json', data=None,
              headers={'content_type': 'application/json'}, params={}):
         params.update({'access_token': self.login()})
-        resp = requests.post(self.base_version+uri, data=json.dumps(data), headers=headers)
+        print "111", self.base_version+uri
+        resp = requests.post(self.base_version+uri, data=data)
+        #print "222222222222", resp.status_code
         self.assertSuccess(resp.status_code)
         return json.loads(resp.content)
 
@@ -55,3 +57,11 @@ class BajajResourceTestCase(TestCase):
         unquoted = urllib.unquote(COUPON_SCHEMA)
         stored_data = json.loads(unquoted)
         self.check_schema(data,stored_data)
+        
+    def check_coupon(self,phone_number,data):
+        #print "helooooooooooo"
+        data={'text': data, 'phoneNumber' : phone_number}
+        coupon_data = self.post(BajajUrls.MESSAGES,content_type=None, data=data)
+        print coupon_data['message']
+        #print "8888888888888",coupon_data['status']
+        self.assertTrue(coupon_data['status'])
