@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.utils import generate_temp_id, mobile_format
-APP='bajaj'
+APP='bajajcv'
 
 class Command(BaseCommand):
 
@@ -42,12 +42,12 @@ class Command(BaseCommand):
                     temp['supplier'] = row_list[6].strip()
                     spare_list.append(temp)
         for spare in spare_list:
-            spare_object = spare_master.objects.filter(part_number=spare['part_no'])
+            spare_object = spare_master.objects.filter(part_number=spare['part_no']).using(APP)
             if not spare_object:
-                spare_type_object = spare_type.objects.filter(product_type=spare['type'])
+                spare_type_object = spare_type.objects.filter(product_type=spare['type']).using(APP)
                 if not spare_type_object:
                     spare_type_object = spare_type(product_type=spare['type'])
-                    spare_type_object.save()
+                    spare_type_object.save(using=APP)
                 else:
                     spare_type_object = spare_type_object[0]
                 spare_object = spare_master(
@@ -59,7 +59,7 @@ class Command(BaseCommand):
                                             segment_type = spare['segment'],
                                             supplier = spare['supplier']
                                 )
-                spare_object.save()
+                spare_object.save(using=APP)
     
     def upload_part_upc_data(self):
         print "Started uploading part upc..."
@@ -77,14 +77,14 @@ class Command(BaseCommand):
                     temp['UPC'] = (row_list[1].strip()).upper()
                     spare_list.append(temp)
         for spare in spare_list:
-            spare_object = spare_upc.objects.filter(unique_part_code = spare['UPC'])
+            spare_object = spare_upc.objects.filter(unique_part_code = spare['UPC']).using(APP)
             if not spare_object:
-                spare_master_object = spare_master.objects.filter(part_number=spare['part_no'])
+                spare_master_object = spare_master.objects.filter(part_number=spare['part_no']).using(APP)
                 
                 spare_object = spare_upc(
                                             part_number=spare_master_object[0],
                                             unique_part_code = spare['UPC'])
-                spare_object.save()
+                spare_object.save(using=APP)
 
     def upload_part_point_data(self):
         print "Started uploading part points..."
@@ -107,9 +107,9 @@ class Command(BaseCommand):
                     temp['points'] = row_list[6].strip()
                     spare_list.append(temp)
         for spare in spare_list:
-            spare_master_object = spare_master.objects.filter(part_number=spare['part_no'])
+            spare_master_object = spare_master.objects.filter(part_number=spare['part_no']).using(APP)
             spare_object = spare_part.objects.filter(part_number=spare_master_object[0],
-                                                     territory=spare['territory'])
+                                                     territory=spare['territory']).using(APP)
             if not spare_object:
                 spare_object = spare_part(part_number = spare_master_object[0],
                                           points = spare['points'],
@@ -118,4 +118,4 @@ class Command(BaseCommand):
                                           valid_from = spare['valid_from'],
                                           valid_till = spare['valid_to'],
                                           territory = spare['territory'])
-                spare_object.save()
+                spare_object.save(using=APP)

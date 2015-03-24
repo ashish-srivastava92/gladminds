@@ -1,3 +1,4 @@
+from datetime import datetime 
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
 from django.db.transaction import atomic
@@ -106,34 +107,35 @@ class Command(BaseCommand):
     
     @atomic
     def create_bajaj_admins(self):
-        from gladminds.bajaj.models import AreaSparesManager, NationalSparesManager, Territory, State
+        from gladminds.core.models import AreaSparesManager, NationalSparesManager, Territory, State
         try:
             for details in _BAJAJ_LOYALTY_SUPERADMINS:
                 print "create loyalty superadmin", details
-                self.create_user_profile(details, GmApps.BAJAJ, Roles.LOYALTYSUPERADMINS)
+                self.create_user_profile(details, GmApps.BAJAJCV, Roles.LOYALTYSUPERADMINS)
             for details in _BAJAJ_LOYALTY_NSM:
                 print "create loyalty nsm", details
-                profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.NATIONALSPARESMANAGERS)
+                profile_obj = self.create_user_profile(details, GmApps.BAJAJCV, Roles.NATIONALSPARESMANAGERS)
                 try: 
-                    nsm_obj = NationalSparesManager.objects.get(user=profile_obj, nsm_id=details[3])
+                    nsm_obj = NationalSparesManager.objects.using(GmApps.BAJAJCV).get(user=profile_obj, nsm_id=details[3])
                 except:
-                    territory = Territory.objects.get(territory=details[4])
-                    nsm_obj = NationalSparesManager(user=profile_obj, nsm_id=details[3],
+                    territory = Territory.objects.using(GmApps.BAJAJCV).get(territory=details[4])
+                    nsm_obj = NationalSparesManager(created_date=datetime.now(),
+                                                    user=profile_obj, nsm_id=details[3],
                                                    name=details[5], email=details[0])
-                    nsm_obj.save()
+                    nsm_obj.save(using=GmApps.BAJAJCV)
                     nsm_obj.territory.add(territory)
-                    nsm_obj.save()
+                    nsm_obj.save(using=GmApps.BAJAJCV)
             for details in _BAJAJ_LOYALTY_ASM:
                 print "create loyalty asm", details
-                profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.AREASPARESMANAGERS)
-                if not AreaSparesManager.objects.filter(user=profile_obj, asm_id=details[3]).exists():
-                    state = State.objects.get(state_name=details[6])
+                profile_obj = self.create_user_profile(details, GmApps.BAJAJCV, Roles.AREASPARESMANAGERS)
+                if not AreaSparesManager.objects.using(GmApps.BAJAJCV).filter(user=profile_obj, asm_id=details[3]).exists():
+                    state = State.objects.using(GmApps.BAJAJCV).get(state_name=details[6])
                     asm_obj = AreaSparesManager(nsm=nsm_obj, user=profile_obj, asm_id=details[3],
                                                  name=details[4], email=details[0],
                                                  phone_number=details[5])
-                    asm_obj.save()
+                    asm_obj.save(using=GmApps.BAJAJCV)
                     asm_obj.state.add(state)
-                    asm_obj.save()
+                    asm_obj.save(using=GmApps.BAJAJCV)
         except Exception as ex:
             print "[create_bajaj_admins]: ", ex
 
@@ -167,7 +169,7 @@ class Command(BaseCommand):
         try:
             return user_profile_class.objects.get(user=admin.id)
         except:
-            profile_obj = user_profile_class(user=admin)
+            profile_obj = user_profile_class(created_date=datetime.now(), user=admin)
             profile_obj.save()
             return profile_obj
 

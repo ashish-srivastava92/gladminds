@@ -19,7 +19,7 @@ from django.db.models import F
 
 from gladminds.default.models import BrandService
 from gladminds.core.services import message_template
-from gladminds.core import utils
+from gladminds.core import utils, model_fetcher
 from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message
 from gladminds.core.managers.mail import sent_otp_email,\
     send_recovery_email_to_admin, send_mail_when_vin_does_not_exist
@@ -49,6 +49,7 @@ TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
 AUDIT_ACTION = 'SEND TO QUEUE'
 
+
 @login_required()
 def redirect_url(request):
     brand_url = settings.HOME_URLS.get(settings.BRAND, {})
@@ -71,7 +72,7 @@ def redirect_url(request):
     return brand_meta.get('admin_url', '/admin')
 
 @login_required()
-def get_services(request):
+def home(request):
     if request.method == 'GET':
         user_groups = utils.get_user_groups(request.user)
         brand_url = settings.HOME_URLS.get(settings.BRAND, {})
@@ -87,6 +88,8 @@ def get_services(request):
                     brand_services.append(services)
         if len(brand_services)==1:
             return HttpResponseRedirect(brand_services[0]['url'])
+        elif len(brand_services)==0:
+            return HttpResponseRedirect('/admin')
         else:
             return render(request, 'portal/services.html')
 

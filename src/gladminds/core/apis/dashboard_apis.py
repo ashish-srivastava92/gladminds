@@ -4,7 +4,7 @@ This contains the dasboards apis
 from gladminds.core.apis.base_apis import CustomBaseResource, CustomApiObject
 from tastypie import fields
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from django.core.cache import cache
+from gladminds.core.core_utils.cache_utils import Cache
 from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES,\
     CouponStatus, TicketStatus
 from django.db import connections
@@ -14,19 +14,6 @@ from django.http.response import HttpResponse
 from tastypie.utils.mime import build_content_type
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.auth_helper import Roles
-
-class Cache():
-    @staticmethod
-    def get(key, brand=None):
-        if brand is None:
-            brand = settings.BRAND
-        return cache.get('{0}-{1}-{2}'.format(settings.ENV, brand, key))
-    
-    @staticmethod
-    def set(key, result, timeout=15, brand=None):
-        if brand is None:
-            brand = settings.BRAND
-        return cache.set('{0}-{1}-{2}'.format(settings.ENV, brand, key), result, timeout*60)
     
 def get_vins():
     return get_model('ProductData').objects.all().count()
@@ -187,7 +174,7 @@ class FeedStatusResource(CustomBaseResource):
         result = []
         filters['feed_type__in'] = FEED_SENT_TYPES + FEED_TYPES
 
-        output = cache.get(hash_key)
+        output = Cache.get(hash_key)
         if output:
             return map(CustomApiObject, output)
 
@@ -209,7 +196,7 @@ class FeedStatusResource(CustomBaseResource):
                                           key,
                                           value[1],
                                           value[0]]))
-        cache.set(hash_key, result, 15*60)
+        Cache.set(hash_key, result, 15*60)
         return map(CustomApiObject, result)
 #         data = []   
 #         filters['action'] = FeedStatus.RECEIVED
