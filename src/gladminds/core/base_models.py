@@ -537,7 +537,7 @@ class EmailToken(models.Model):
                     'base_url':settings.DOMAIN_BASE_URL}
         if trigger_mail == 'forgot-password':
             ctx_dict = {'activation_key': self.activation_key,
-                    'link': config.AFTERBUY_FORGOT_PASSWORD_URL}
+                    'link': settings.AFTERBUY_FORGOT_PASSWORD_URL}
             sent_password_reset_link(reciever_email, ctx_dict)
         else:
             send_email_activation(reciever_email, ctx_dict)
