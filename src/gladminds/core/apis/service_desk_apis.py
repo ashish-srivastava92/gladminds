@@ -1,25 +1,29 @@
+import datetime
 from importlib import import_module
 import json
 import logging
 
 from django.conf import settings
 from django.conf.urls import url
-from django.http.response import HttpResponse, HttpResponseBadRequest
+from django.db import connections
+from django.http.response import HttpResponse, HttpResponseBadRequest, \
+    HttpResponseNotFound
 from tastypie import fields
 from tastypie.authentication import MultiAuthentication
-from tastypie.authorization import DjangoAuthorization
+from tastypie.authorization import DjangoAuthorization, Authorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.utils.urls import trailing_slash
 
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from gladminds.core.apis.authorization import MultiAuthorization,\
+from gladminds.core.apis.authorization import MultiAuthorization, \
     ServiceDeskCustomAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.apis.user_apis import ServiceDeskUserResource, \
     DepartmentSubCategoriesResource, UserResource
-from gladminds.core.model_fetcher import models
-from django.db import connections
 from gladminds.core.core_utils.utils import dictfetchall
+from gladminds.core.model_fetcher import models
+from gladminds.core.services.service_desk.servicedesk_manager import SDActions, \
+    update_feedback_activities
 
 
 LOG = logging.getLogger('gladminds')
@@ -146,9 +150,9 @@ class SLAResource(CustomBaseModelResource):
         queryset = models.SLA.objects.all()
         resource_name = 'slas'
         model_name = 'SLA'
+        authorization = MultiAuthorization(DjangoAuthorization())
         detailed_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
-        authorization = MultiAuthorization(DjangoAuthorization())
         filtering = {
                      "priority" : ALL
                      
@@ -164,14 +168,36 @@ class CommentsResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Comment.objects.all()
         resource_name = 'comments'
-        detailed_allowed_methods = ['get', 'post', 'put']
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
-        authorization = MultiAuthorization(DjangoAuthorization())
         filtering = {
                      "feedback" : ALL_WITH_RELATIONS,
                      "id" : ALL
                      }
         
+    def prepend_urls(self):
+        return [
+                url(r"^(?P<resource_name>%s)/modify-comments/(?P<comment_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                                                        self.wrap_view('modify_comment'), name="modify_comment")
+                ]
         
-        
-        
+    
+    def modify_comment(self, request, **kwargs):
+        data = request.POST
+        try:
+            comment = models.Comment.objects.get(id=data['commentId'])
+            previous_comment = comment.comment
+            comment.comment = data['commentDescription']
+            comment.modified_date = datetime.datetime.now()
+            comment.save()
+            update_feedback_activities(comment.feedback_object, SDActions.COMMENT_UPDATE, previous_comment,
+                                       data['commentDescription'], request.user)
+            return HttpResponse("Success")
+    
+        except Exception as ex:
+            LOG.info("[Exception while modifying comment]: {0}".format(ex))
+            return HttpResponseNotFound()
+
+    
+    
