@@ -21,6 +21,21 @@ class UserProfile(base_models.UserProfile):
     class Meta(base_models.UserProfile.Meta):
         app_label = _APP_NAME
 
+class ZonalServiceManager(base_models.ZonalServiceManager):
+    '''details of Zonal Service Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    
+    class Meta(base_models.ZonalServiceManager.Meta):
+        app_label = _APP_NAME 
+
+class AreaServiceManager(base_models.AreaServiceManager):
+    '''details of Area Service Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    zsm = models.ForeignKey(ZonalServiceManager, null=True, blank=True)
+    
+    class Meta(base_models.AreaServiceManager.Meta):
+        app_label = _APP_NAME 
+
 
 class Dealer(base_models.Dealer):
     user = models.OneToOneField(UserProfile, primary_key=True,
@@ -34,7 +49,8 @@ class AuthorizedServiceCenter(base_models.AuthorizedServiceCenter):
     user = models.OneToOneField(UserProfile, primary_key=True,
                                 related_name='demo_registered_asc')
     dealer = models.ForeignKey(Dealer, null=True, blank=True)
-
+    asm = models.ForeignKey(AreaServiceManager, null=True, blank=True)
+    
     class Meta(base_models.AuthorizedServiceCenter.Meta):
         app_label = _APP_NAME
 
@@ -64,9 +80,10 @@ class DepartmentSubCategories(base_models.DepartmentSubCategories):
 class ServiceDeskUser(base_models.ServiceDeskUser):
     user_profile = models.ForeignKey(UserProfile, null=True, blank=True)
     sub_department = models.ForeignKey(DepartmentSubCategories, related_name="sub_department_user", null=True, blank=True)
-
+    
     class Meta(base_models.ServiceDeskUser.Meta):
         app_label = _APP_NAME
+
 
 class Feedback(base_models.Feedback):
     priority = models.CharField(max_length=12, choices=constants.DEMO_PRIORITY, default='Low')
@@ -280,15 +297,27 @@ class AreaSparesManager(base_models.AreaSparesManager):
     class Meta(base_models.AreaSparesManager.Meta):
         app_label = _APP_NAME
 
+class Territory(base_models.Territory):
+    '''List of territories'''
+    
+    class Meta(base_models.Territory.Meta):
+        app_label = _APP_NAME
+
+class State(base_models.State):
+    ''' List of states mapped to territory'''
+    territory = models.ForeignKey(Territory, null=True, blank=True)
+ 
+    class Meta(base_models.State.Meta):
+        app_label = _APP_NAME
 
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
     asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
-
+    state = models.ForeignKey(State, null=True, blank=True)
+    
     class Meta(base_models.Distributor.Meta):
         app_label = _APP_NAME
-
 
 class Retailer(base_models.Retailer):
     '''details of retailer'''
@@ -301,6 +330,9 @@ class Member(base_models.Member):
     '''details of Member'''
     registered_by_distributor = models.ForeignKey(Distributor, null=True, blank=True)
     preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
+
+    state = models.ForeignKey(State)
+
 
     class Meta(base_models.Member.Meta):
         app_label = _APP_NAME

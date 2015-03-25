@@ -12,7 +12,8 @@ from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.utils.urls import trailing_slash
 
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from gladminds.core.apis.authorization import MultiAuthorization
+from gladminds.core.apis.authorization import MultiAuthorization,\
+    ServiceDeskCustomAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.apis.user_apis import ServiceDeskUserResource, \
     DepartmentSubCategoriesResource, UserResource
@@ -33,13 +34,15 @@ class FeedbackResource(CustomBaseModelResource):
                                  null=True, blank=True)
     previous_assignee = fields.ForeignKey(ServiceDeskUserResource, 'previous_assignee',
                                           full=True, null=True, blank=True)
-    sub_department = fields.ForeignKey(DepartmentSubCategoriesResource, 'sub_department', null=True, blank=True, full=True)
+    sub_department = fields.ForeignKey(DepartmentSubCategoriesResource, 'sub_department',
+                                       null=True, blank=True, full=True)
     
 
     class Meta:
         queryset = models.Feedback.objects.all()
         resource_name = "feedbacks"
-        authorization = MultiAuthorization(DjangoAuthorization())
+        model_name = "Feedback"
+        authorization = MultiAuthorization(DjangoAuthorization(), ServiceDeskCustomAuthorization())
         authentication = MultiAuthentication(AccessTokenAuthentication())
         detail_allowed_methods = ['get']
         always_return_data = True
@@ -52,16 +55,20 @@ class FeedbackResource(CustomBaseModelResource):
                         "resolved_date": ['gte', 'lte'],
                         "assignee" : ALL_WITH_RELATIONS,
                         "due_date" : ALL,
-                        "sub_department__department" : ALL_WITH_RELATIONS,
                         "sub_department" : ALL_WITH_RELATIONS
                      }
-    
+        
+        ordering = ['created_date']
+        
     def prepend_urls(self):
         return [
                  url(r"^(?P<resource_name>%s)/add-ticket%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('add_service_desk_ticket'), name="add_service_desk_ticket"),
                 url(r"^(?P<resource_name>%s)/tat-report%s" % (self._meta.resource_name,trailing_slash()),
-                                                        self.wrap_view('get_tat'), name="get_tat")]
+                                                        self.wrap_view('get_tat'), name="get_tat"),
+                url(r"^(?P<resource_name>%s)/modify-ticket/(?P<feedback_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                                                        self.wrap_view('modify_service_desk_ticket'), name="modify_service_desk_ticket")
+                ]
          
     def add_service_desk_ticket(self, request, **kwargs):
         try:
@@ -93,10 +100,23 @@ class FeedbackResource(CustomBaseModelResource):
             tat['tat'] = minutes
             tat['month_of_year'] = str(data['year'])+"-"+ str(data['month'])
             result.append(tat)
-        return HttpResponse(content=json.dumps(result),
+        reports = {}
+        reports['TAT'] = result
+        return HttpResponse(content=json.dumps(reports),
                                     content_type='application/json')
-    
 
+    def modify_service_desk_ticket(self, request, **kwargs):
+        try:
+            brand = settings.BRAND
+            try:
+                modify_ticket = getattr(import_module('gladminds.{0}.services.service_desk.servicedesk_views'.format(brand), 'modify_servicedesk_tickets'))
+            except Exception as ex:
+                modify_ticket = getattr(import_module('gladminds.core.services.service_desk.servicedesk_views'), 'modify_servicedesk_tickets')       
+            return modify_ticket(request, kwargs['feedback_id'])
+        except Exception as ex:
+            LOG.error('Exception while modifying data : {0}'.format(ex))
+            return HttpResponseBadRequest()
+    
 class ActivityResource(CustomBaseModelResource):
     '''
     Service Desk Activities Resource 
@@ -134,6 +154,23 @@ class SLAResource(CustomBaseModelResource):
                      
                      }
         
+class CommentsResource(CustomBaseModelResource):
+    '''
+    Service Desk Comments Resource
+    '''
+    feedback = fields.ForeignKey(FeedbackResource, 'feedback_object', null=True,
+                                 blank=True, full=True)
+    
+    class Meta:
+        queryset = models.Comment.objects.all()
+        resource_name = 'comments'
+        detailed_allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+        authorization = MultiAuthorization(DjangoAuthorization())
+        filtering = {
+                     "feedback" : ALL_WITH_RELATIONS,
+                     "id" : ALL
+                     }
         
         
         

@@ -192,7 +192,7 @@
 	$('.servicedesk').on('submit', function(e) {
 		var data = Utils.getFormData('.servicedesk'),
 		formData = new FormData($(this).get(0)),
-		url = '/aftersell/feedbackdetails/'+data.ticketId+'/',
+		url = '/v1/feedbacks/modify-ticket/'+data.ticketId+'/',
 		messageModal = $('.modal.message-modal'),
 		messageBlock = $('.modal-body', messageModal),
 		messageHeader = $('.modal-title', messageModal),

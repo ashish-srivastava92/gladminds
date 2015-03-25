@@ -4,7 +4,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.utils.translation import gettext as _
-from constance import config
 from gladminds.core import base_models
 from gladminds.core.constants import GENDER_CHOICES, SIZE_CHOICES, FUEL_CHOICES
 from gladminds.core.model_helpers import PhoneField
@@ -440,7 +439,7 @@ class EmailToken(models.Model):
                     'base_url': settings.DOMAIN_BASE_URL}
         if trigger_mail == 'forgot-password':
             ctx_dict = {'activation_key': self.activation_key,
-                    'link': config.AFTERBUY_FORGOT_PASSWORD_URL}
+                    'link': settings.AFTERBUY_FORGOT_PASSWORD_URL}
             sent_password_reset_link(receiver_email, data=ctx_dict,
                                      brand=GmApps.AFTERBUY)
         else:

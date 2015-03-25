@@ -307,7 +307,7 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-TEST_IGNORE_APPS = (# 'south',
+TEST_IGNORE_APPS = ( 'south',
                     )
 
 ALL_APPS = (
@@ -334,8 +334,7 @@ ALL_APPS = (
     'storages',
     'tastypie_swagger',
     'django_otp',
-    'django_otp.plugins.otp_totp',
-    'constance.backends.database'
+    'django_otp.plugins.otp_totp'
    # 'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
@@ -625,13 +624,10 @@ ENABLE_SERVICE_DESK = True
 
 DEFAULT_IMAGE_ID = 'guest.png'
 
-CONSTANCE_CONFIG = {
-    'DEFAULT_IMAGE': ('guest.png', 'Default image to be used by any app'),
-    'AFTERBUY_FORGOT_PASSWORD_URL': ('http://afterbuy.co/demo/staging_qw741qaz5/change-password.php', 'Afterbuy forgot password url'),
-    'AFTERBUY_RECYCLE_EMAIL_RECIPIENT' : ('demosupport@gladminds.co', 'Default Email for recycle')
-}
 
-CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+AFTERBUY_FORGOT_PASSWORD_URL = 'http://afterbuy.co/demo/staging_qw741qaz5/change-password.php'
+AFTERBUY_RECYCLE_EMAIL_RECIPIENT = 'demosupport@gladminds.co'
+
 
 SAP_CRM_DETAIL = {
                   'username':'pisuper',
@@ -660,7 +656,11 @@ DISTRIBUTOR_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/distrib
 BRAND_META = {
                "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/"},
                "demo": {"title": "Daimler", "logo": "daimler/img/daimler_logo.gif", "tagline": "2015 Daimler AG",
-                        "basecss": "/daimler/css/base.css","admin_url" :"/admin/"}
+                        "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
+              "daimler": {"title": "Daimler", "logo": "daimler/img/daimler_logo.gif", "tagline": "2015 Daimler AG",
+                        "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
+
+              
                }
 
 HOME_URLS = {
@@ -670,6 +670,12 @@ HOME_URLS = {
                        "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        },
              "demo" : {"SdManagers":[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "Dealers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "DealerAdmins":[{"SERVICE DESK":"/aftersell/helpdesk"},
+                                       {"ADD SERVICE DESK USER":"/add/servicedesk-user"}]
+                       },
+             "daimler" : {"SdManagers":[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        "Dealers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        "DealerAdmins":[{"SERVICE DESK":"/aftersell/helpdesk"},
