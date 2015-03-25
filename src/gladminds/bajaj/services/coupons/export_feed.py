@@ -13,13 +13,16 @@ logger = logging.getLogger("gladminds")
 class ExportCouponRedeemFeed(BaseExportFeed):
     
     def export_data(self, start_date=None, end_date=None):
+        logger.info("[ExportCouponRedeemFeed]: Entered ExportCouponRedeemFeed")
         results = models.CouponData.objects.filter(sent_to_sap=0,
-                            status=2).select_related('product_id', 'customer_phone_number')
+                            status=2).select_related('product_id')
+        logger.info("[ExportCouponRedeemFeed]: Fetched Result from DB")
         items = []
         total_failed = 0
         item_batch = {
             'TIMESTAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
         self.feed_remark = FeedLogWithRemark(len(results), feed_type='Coupon Redemption Feed', action='Send', status=True)
+        logger.info("[ExportCouponRedeemFeed]: processing Coupons")
         for redeem in results:
             try:
                 #added the condition only for the previous coupons with no servicing dealer details
@@ -45,7 +48,7 @@ class ExportCouponRedeemFeed(BaseExportFeed):
                 logger.error("[ExportCouponRedeemFeed]: error fetching from db {0}".format(ex))
                 total_failed = total_failed + 1
                 self.feed_remark.fail_remarks(ex)
-        
+        logger.info("[ExportCouponRedeemFeed]: processed coupon")
         self.feed_remark.save_to_feed_log()
         return items, item_batch, total_failed
 
