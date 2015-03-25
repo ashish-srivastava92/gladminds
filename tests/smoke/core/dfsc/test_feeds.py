@@ -2,26 +2,20 @@ import json
 import requests
 from django.test.testcases import TestCase
 import os
-from smoke.base_smoke import BajajResourceTestCase
-from integration.core.constants import DISPATCH_XML_DATA,PURCHASE_XML_DATA
+from smoke.utility import FeedsResourceTest
 
-class TestFeeds(BajajResourceTestCase):
+class TestFeeds(FeedsResourceTest):
         
     def test_product_dispatch(self):
-        xml_data = DISPATCH_XML_DATA
-        self.post_xml(data=xml_data, content_type='text/xml')
-        url="products/1/"
-        result = self.get(url)
-        self.check_result(result,"product_id","XXXXXXXXXX")
+        self.send_dispatch_feed()        
     
     def test_product_purchase(self):
-        self.test_product_dispatch()
-        xml_data = PURCHASE_XML_DATA
-        self.post_xml(data=xml_data, content_type='text/xml')
-        url="products/1/"
-        result = self.get(url)
-        self.check_result(result,"customer_name","TestCustomer")
+        self.send_dispatch_feed()
+        self.send_purchase_feed()
     
+    def test_service_advisor_feed(self):
+        self.send_service_advisor_feed()
+
     
     
     

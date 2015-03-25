@@ -63,6 +63,9 @@ class BajajResourceTestCase(TestCase):
         resp = requests.post(self.base_version_xml, data=data, headers=headers)
         self.assertSuccess(resp.status_code)
         
-    def check_result(self, result,parameter, value):
-        self.assertEqual(result[parameter],value)
+    def check_result(self, result,value,parameter=None,inner_parameter=None):
+        if inner_parameter!=None:
+            self.assertEqual(result[parameter][inner_parameter],value)
+        else:
+            self.assertEqual(result[parameter],value)
 
