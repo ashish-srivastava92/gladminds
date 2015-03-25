@@ -11,9 +11,10 @@ from gladminds.core.base_models import CouponData
 from gladminds.core.constants import COUPON_STATUS
 from django.db.models.aggregates import Sum
 from email import email
+import logging
 
 AUDIT_ACTION = "SENT TO QUEUE"
-
+logger = logging.getLogger("gladminds")
 
 @transaction.commit_manually()
 def get_customers_to_send_reminder(*args, **kwargs):
@@ -33,7 +34,7 @@ def get_customers_to_send_reminder(*args, **kwargs):
         valid_kms = reminder.valid_kms
         message = templates.get_template('SEND_CUSTOMER_COUPON_REMINDER').format(usc=usc, vin=vin, expired_date=expired_date, valid_kms=valid_kms)
         send_reminder_message.delay(phone_number=phone_number, message=message)
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
         reminder.last_reminder_date = datetime.now()
         reminder.save()
         user = models.UserProfile.objects.filter(phone_number=phone_number)
@@ -56,7 +57,7 @@ def get_customers_to_send_reminder_by_admin(*args, **kwargs):
         valid_kms = reminder.valid_kms
         message = templates.get_template('SEND_CUSTOMER_COUPON_REMINDER').format(usc=usc, vin=vin, expired_date=expired_date, valid_kms=valid_kms)
         send_reminder_message.delay(phone_number=phone_number, message=message)
-        sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+        sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
         reminder.last_reminder_date = datetime.now()
         reminder.schedule_reminder_date = None
         reminder.save()
@@ -152,32 +153,44 @@ def get_vin_sync_feeds_detail():
 
 def get_discrepant_coupon_details():
     coupon_data = []
-    service_type_obj = models.Constant.objects.filter(constant_name__contains ='service')
     service_dict = {}
-    for service_type in service_type_obj:
-        service_dict.update({service_type.constant_name:service_type.constant_value})
+    try:
+        service_type_obj = models.Constant.objects.filter(constant_name__contains ='service')
+        for service_type in service_type_obj:
+            service_dict.update({service_type.constant_name:service_type.constant_value})
+            
+        coupons_details= models.CouponData.objects.filter((Q(service_type=1) & (~Q(valid_days=service_dict['service_1_valid_days']) | ~Q(valid_kms=service_dict['service_1_valid_kms'])))
+                                                        | (Q(service_type=2) & (~Q(valid_days=service_dict['service_2_valid_days']) | ~Q(valid_kms=service_dict['service_2_valid_kms'])))
+                                                        | (Q(service_type=3) & (~Q(valid_days=service_dict['service_3_valid_days']) | ~Q(valid_kms=service_dict['service_3_valid_kms'])))
+                                                        ).select_related('product')
         
-    coupons_details= models.CouponData.objects.filter((Q(service_type=1) & (~Q(valid_days=service_dict['service_1_valid_days']) | ~Q(valid_kms=service_dict['service_1_valid_kms'])))
-                                                    | (Q(service_type=2) & (~Q(valid_days=service_dict['service_2_valid_days']) | ~Q(valid_kms=service_dict['service_2_valid_kms'])))
-                                                    | (Q(service_type=3) & (~Q(valid_days=service_dict['service_3_valid_days']) | ~Q(valid_kms=service_dict['service_3_valid_kms']))))
-    
-    for coupon in coupons_details:
-        data = {}
-        data['date'] = coupon.created_date.strftime("%d/%m/%y")
-        data['vin'] = coupon.product.product_id
-        data['service_type'] = coupon.service_type
-        data['valid_days'] = coupon.valid_days
-        data['valid_kms'] = coupon.valid_kms
-        if coupon.service_type == 1:
-            coupon.valid_days = service_dict['service_1_valid_days']
-            coupon.valid_kms = service_dict['service_1_valid_kms']
-        elif coupon.service_type == 2:
-            coupon.valid_days = service_dict['service_2_valid_days']
-            coupon.valid_kms = service_dict['service_2_valid_kms']
-        else:
-            coupon.valid_days = service_dict['service_3_valid_days']
-            coupon.valid_kms = service_dict['service_3_valid_kms']
-         
-        coupon.save()    
-        coupon_data.append(data)  
-    return coupon_data
+        for coupon in coupons_details:
+            data = {}
+            data['date'] = coupon.created_date.strftime("%d/%m/%y")
+            data['vin'] = coupon.product.product_id
+            data['service_type'] = coupon.service_type
+            data['valid_days'] = coupon.valid_days
+            data['valid_kms'] = coupon.valid_kms
+            if coupon.service_type == 1:
+                valid_days = service_dict['service_1_valid_days']
+                valid_kms = service_dict['service_1_valid_kms']
+            elif coupon.service_type == 2:
+                valid_days = service_dict['service_2_valid_days']
+                valid_kms = service_dict['service_2_valid_kms']
+            else:
+                valid_days = service_dict['service_3_valid_days']
+                valid_kms = service_dict['service_3_valid_kms']
+            
+            if coupon.product.purchase_date:
+                updated_date = coupon.product.purchase_date + timedelta(days = int(valid_days))
+                coupon.extended_date = updated_date 
+                coupon.mark_expired_on =  updated_date
+
+            coupon.valid_days = valid_days
+            coupon.valid_kms = valid_kms
+            coupon.save()
+            coupon_data.append(data) 
+        logger.info("[Policy discpancy]: got discrepant coupons list ")
+        return coupon_data
+    except Exception as ex:
+        logger.info("[Exception Policy discpancy ]: {0}".format(ex))

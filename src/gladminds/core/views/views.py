@@ -19,7 +19,7 @@ from django.db.models import F
 
 from gladminds.default.models import BrandService
 from gladminds.core.services import message_template
-from gladminds.core import utils
+from gladminds.core import utils, model_fetcher
 from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message
 from gladminds.core.managers.mail import sent_otp_email,\
     send_recovery_email_to_admin, send_mail_when_vin_does_not_exist
@@ -49,6 +49,7 @@ TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
 AUDIT_ACTION = 'SEND TO QUEUE'
 
+
 @login_required()
 def redirect_url(request):
     brand_url = settings.HOME_URLS.get(settings.BRAND, {})
@@ -66,12 +67,12 @@ def redirect_url(request):
 
     for user_group in user_groups:
         if user_group in brand_url.keys():
-            return "/"
+            return "/services"
 
     return brand_meta.get('admin_url', '/admin')
 
 @login_required()
-def get_services(request):
+def home(request):
     if request.method == 'GET':
         user_groups = utils.get_user_groups(request.user)
         brand_url = settings.HOME_URLS.get(settings.BRAND, {})
@@ -87,6 +88,8 @@ def get_services(request):
                     brand_services.append(services)
         if len(brand_services)==1:
             return HttpResponseRedirect(brand_services[0]['url'])
+        elif len(brand_services)==0:
+            return HttpResponseRedirect('/admin')
         else:
             return render(request, 'portal/services.html')
 
@@ -132,8 +135,7 @@ def user_logout(request):
             logout(request)
             return HttpResponseRedirect('/login/') 
     
-    next_url = '/'
-    next_url = request.GET.get('next')
+    next_url = request.GET.get('next', '/')
     logout(request)
     return HttpResponseRedirect('/login/?next='+next_url)   
 
@@ -352,7 +354,7 @@ def register_customer(request, group=None):
                         managers = models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS)
                         for manager in managers:
                             phone_number = utils.get_phone_number_format(manager.phone_number)
-                            sms_log(receiver=phone_number, action=AUDIT_ACTION, message=message)
+                            sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
                             send_job_to_queue(send_customer_phone_number_update_message, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
 
             else:
@@ -503,6 +505,7 @@ def get_sa_under_asc(request, id=None):
     return render(request, template, {'active_menu':'sa',"data": data})
 
 
+@login_required()
 def sqs_tasks_view(request):
     return render_to_response('trigger-sqs-tasks.html')
 

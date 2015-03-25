@@ -16,7 +16,8 @@ def gm_constants(request):
             'SD_OWNER' : Roles.SDOWNERS, 
             'DEALER' : Roles.DEALERS,
             'ASC': Roles.ASCS,
-            'SD_READONLY': Roles.SDREADONLY}
+            'SD_READONLY': Roles.SDREADONLY,
+            'FSCADMIN':Roles.FSCADMINS}
     brand_meta = settings.BRAND_META.get(settings.BRAND, {})
     user_groups = utils.get_user_groups(request.user)
     brand_url = settings.HOME_URLS.get(settings.BRAND, {})
@@ -32,5 +33,6 @@ def gm_constants(request):
                 brand_services.append(services)
     
     return { 'CONSTANTS' :constants, 'S3_URL' : S3_BASE_URL,
-            'METAINFO': brand_meta, 'METAURL': brand_services }
+            'METAINFO': brand_meta, 'METAURL': brand_services, 
+            'BRAND': settings.BRAND }
 

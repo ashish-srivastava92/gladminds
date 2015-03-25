@@ -7,7 +7,7 @@ from tastypie.exceptions import ImmediateHttpResponse
 
 from gladminds.core.apis.base_apis import CustomBaseResource, CustomApiObject
 from django.forms.models import model_to_dict
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import get_model
 
 
 class PreferencesBaseResource(CustomBaseResource):

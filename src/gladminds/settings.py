@@ -25,7 +25,7 @@ ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
                     'check_point_balance':'chkbal'}
 
 ADMINS = (
-    ('somit', 'somit@hashedin.com'),
+    ('pavan', 'pavankumar.s@hashedin.com'),
     ('naureen', 'naureen.razi@hashedin.com'),
     ('priyanka', 'priyanka.n@hashedin.com')
 )
@@ -43,6 +43,8 @@ DOMAIN_BASE_URL = '/afterbuy/v1/consumers/activate-email/'
 OAUTH_DELETE_EXPIRED = True
 JOBCARD_DIR = '{0}/jobcards/prod/'
 JOBCARD_BUCKET = 'gladminds'
+
+ENV = 'prod'
 
 SDFILE_DIR = '{0}/bajaj/sdfiles/'
 SDFILE_BUCKET = 'gladminds'
@@ -106,8 +108,8 @@ SUIT_CONFIG = {
                      'label': 'Area Spares Manager'},
                     {'model': 'distributor',
                      'label': 'Distributor'},
-                   {'model': 'mechanic',
-                     'label': 'Mechanic'},
+                   {'model': 'member',
+                     'label': 'Member'},
                    {'model': 'sparepartmasterdata',
                      'label': 'Spare Part Master Data'},
                    {'model': 'sparepartupc',
@@ -154,7 +156,7 @@ class GmApps():
     BAJAJCV = 'bajajcv'
     DEMO = 'demo'
     GM = 'default'
-    HONDA = 'honda'
+    DAIMLER = 'daimler'
 
 # Mapping is first app name then db name
 DATABASE_APPS_MAPPING = {
@@ -163,7 +165,7 @@ DATABASE_APPS_MAPPING = {
                          GmApps.DEMO: 'demo',
                          GmApps.AFTERBUY:'afterbuy',
                          GmApps.BAJAJCV:'bajajcv',
-                         GmApps.HONDA:'honda'
+                         GmApps.DAIMLER:'daimler',
                     }
 
 db_common = {
@@ -183,56 +185,6 @@ for brand in dir(GmApps):
         else:
             db_common.update({'NAME': getattr(GmApps,brand)})
         DATABASES[getattr(GmApps,brand)] = deepcopy(db_common)
-# DATABASES = {
-#     GmApps.GM: {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'gm',
-#         'USER': DB_USER,
-#         'PASSWORD': DB_PASSWORD,
-#         'HOST': DB_HOST,
-#         'PORT': DB_PORT,
-#     },
-#     GmApps.BAJAJ: {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'bajaj',
-#         'USER': DB_USER,
-#         'PASSWORD': DB_PASSWORD,
-#         'HOST': DB_HOST,
-#         'PORT': DB_PORT,
-#     },
-#     GmApps.DEMO: {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'demo',
-#         'USER': DB_USER,
-#         'PASSWORD': DB_PASSWORD,
-#         'HOST': DB_HOST,
-#         'PORT': DB_PORT,
-#     },
-#     GmApps.AFTERBUY: {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'afterbuy',
-#         'USER': DB_USER,
-#         'PASSWORD': DB_PASSWORD,
-#         'HOST': DB_HOST,
-#         'PORT': DB_PORT,
-#     },
-#     GmApps.BAJAJCV: {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'bajajcv',
-#         'USER': DB_USER,
-#         'PASSWORD': DB_PASSWORD,
-#         'HOST': DB_HOST,
-#         'PORT': DB_PORT,
-#     },
-#      GmApps.HONDA: {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'honda',
-#         'USER': DB_USER,
-#         'PASSWORD': DB_PASSWORD,
-#         'HOST': DB_HOST,
-#         'PORT': DB_PORT,
-#     }
-# }
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -376,7 +328,6 @@ ALL_APPS = (
     'gladminds.core',
     'gladminds.bajaj',
     'gladminds.demo',
-    'gladminds.bajajcv',
     'gladminds.afterbuy',
     'djcelery',
     'corsheaders',
@@ -481,11 +432,6 @@ LOGGING = {
         }
     }
 }
-
-
-CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
-COUPON_WSDL = 'qa_coupon_redeem.wsdl'
-VIN_SYNC_WSDL='qa_vin_sync.wsdl'
 
 MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
@@ -647,7 +593,7 @@ FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
 BRAND = None
 GM_BRAND = 'default'
-OUTSIDE_BRANDS = ['bajaj', 'demo','bajajcv']
+OUTSIDE_BRANDS = ['bajaj', 'demo','bajajcv','daimler']
 
 BRANDS = OUTSIDE_BRANDS + ['afterbuy']
 ###############################################
@@ -670,8 +616,8 @@ ADMIN_DETAILS = {GmApps.BAJAJ: {'user': 'bajaj', 'password': 'bajaj'},
           GmApps.DEMO: {'user': 'demo', 'password': 'demo'},
           GmApps.AFTERBUY: {'user': 'afterbuy', 'password': 'afterbuy'},
           GmApps.GM: {'user': 'gladminds', 'password': 'gladminds'},
-          GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'x`'},
-          GmApps.HONDA: {'user': 'honda', 'password': 'honda'}
+          GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'bajajcv'},
+          GmApps.DAIMLER: {'user': 'daimler', 'password': 'daimler'}
           }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True
@@ -727,4 +673,4 @@ HOME_URLS = {
                        }
              }
 
-LOGIN_URL='login/'
+LOGIN_URL='/login'

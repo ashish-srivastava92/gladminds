@@ -4,7 +4,7 @@ This contains the dasboards apis
 from gladminds.core.apis.base_apis import CustomBaseResource, CustomApiObject
 from tastypie import fields
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from django.core.cache import cache
+from gladminds.core.core_utils.cache_utils import Cache
 from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES,\
     CouponStatus, TicketStatus
 from django.db import connections
@@ -12,20 +12,8 @@ from django.conf import settings
 from gladminds.core.core_utils.utils import dictfetchall
 from django.http.response import HttpResponse
 from tastypie.utils.mime import build_content_type
-from gladminds.core.loaders.module_loader import get_model
-
-class Cache():
-    @staticmethod
-    def get(key, brand=None):
-        if brand is None:
-            brand = settings.BRAND
-        return cache.get('{0}-{1}-{2}'.format(settings.ENV, brand, key))
-    
-    @staticmethod
-    def set(key, result, timeout=15, brand=None):
-        if brand is None:
-            brand = settings.BRAND
-        return cache.set('{0}-{1}-{2}'.format(settings.ENV, brand, key), result, timeout*60)
+from gladminds.core.model_fetcher import get_model
+from gladminds.core.auth_helper import Roles
     
 def get_vins():
     return get_model('ProductData').objects.all().count()
@@ -186,7 +174,7 @@ class FeedStatusResource(CustomBaseResource):
         result = []
         filters['feed_type__in'] = FEED_SENT_TYPES + FEED_TYPES
 
-        output = cache.get(hash_key)
+        output = Cache.get(hash_key)
         if output:
             return map(CustomApiObject, output)
 
@@ -208,7 +196,7 @@ class FeedStatusResource(CustomBaseResource):
                                           key,
                                           value[1],
                                           value[0]]))
-        cache.set(hash_key, result, 15*60)
+        Cache.set(hash_key, result, 15*60)
         return map(CustomApiObject, result)
 #         data = []   
 #         filters['action'] = FeedStatus.RECEIVED
@@ -374,18 +362,25 @@ class TicketStatusResource(CustomBaseResource):
 
     class Meta:
         resource_name = 'ticket-status'
+        authentication = AccessTokenAuthentication()
         object_class = CustomApiObject
     
-    def get_ticket_count(self, status, department=None):
+    def get_ticket_count(self, request, status):
         status = str(status)
-        if department:
-            department = str(department)
-            data = self.get_sql_data("select count(*) as count from gm_feedback f inner join gm_departmentsubcategories s on \
-            f.sub_department_id = s.id where s.department_id=%(department)s and f.status=%(status)s",
-                                 filters={'status' : status, 'department':department})
-        else:
+        if request.user.groups.filter(name=Roles.SDOWNERS):
+            assignee_id = get_model('ServiceDeskUser').objects.get(user_profile__user_id=int(request.user.id)).id
+            data = self.get_sql_data("select count(*) as count from gm_feedback where status=%(status)s and assignee_id=%(assignee_id)s",
+                     filters={'status' : status, 'assignee_id' : assignee_id})
+        
+        elif request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.DEALERADMIN]):
             data = self.get_sql_data("select count(*) as count from gm_feedback where status=%(status)s",
-                                 filters={'status' : status, 'department':department})
+                                 filters={'status' : status})
+        
+        elif request.user.groups.filter(name=Roles.DEALERS):
+            reporter_id = get_model('ServiceDeskUser').objects.get(user_profile__user_id=int(request.user.id)).id
+            data = self.get_sql_data("select count(*) as count from gm_feedback where status=%(status)s and reporter_id=%(reporter_id)s",
+                     filters={'status' : status, 'reporter_id' : reporter_id})
+            
         return get_set_cache('gm_ticket_count' + status, data[0]['count'])
     
     def get_sql_data(self, query, filters={}):
@@ -397,13 +392,12 @@ class TicketStatusResource(CustomBaseResource):
         return data
         
     def obj_get_list(self, bundle, **kwargs):
-        department = bundle.request.GET.get('department')
         self.is_authenticated(bundle.request)
-        tickets_open = self.get_ticket_count(TicketStatus.OPEN, department)
-        tickets_progress = self.get_ticket_count(TicketStatus.IN_PROGRESS, department)
-        tickets_pending = self.get_ticket_count(TicketStatus.PENDING, department)
-        tickets_resolved = self.get_ticket_count(TicketStatus.RESOLVED, department)
-        tickets_closed = self.get_ticket_count(TicketStatus.CLOSED, department)
+        tickets_open = self.get_ticket_count(bundle.request, TicketStatus.OPEN)
+        tickets_progress = self.get_ticket_count(bundle.request, TicketStatus.IN_PROGRESS)
+        tickets_pending = self.get_ticket_count(bundle.request, TicketStatus.PENDING)
+        tickets_resolved = self.get_ticket_count(bundle.request, TicketStatus.RESOLVED)
+        tickets_closed = self.get_ticket_count(bundle.request, TicketStatus.CLOSED)
         tickets_raised = tickets_open + tickets_progress + tickets_pending + tickets_resolved + tickets_closed 
 
         return map(CustomApiObject, [

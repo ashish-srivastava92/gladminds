@@ -6,9 +6,9 @@ from gladminds.bajaj.services.loyalty.loyalty import loyalty
 
 urlpatterns = patterns('',
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
-    url(r'', include(brand_admin.urls)),
+    url(r'^admin/', include(brand_admin.urls)),
     url(r'', include(api_v1.urls)),
-    url(r'^site-info-hackish/$', 'gladminds.bajaj.views.site_info', name='site_info'),
+    url(r'^site-info/$', 'gladminds.bajaj.views.site_info', name='site_info'),
     url(r'^aftersell/servicedesk/helpdesk$', 'gladminds.bajaj.services.service_desk.servicedesk_views.service_desk', name='enable_servicedesk'),
     url(r'^aftersell/servicedesk/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.get_servicedesk_tickets', name='get_servicedesk_tickets'),
     url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.modify_servicedesk_tickets', name='modify_servicedesk_tickets'),

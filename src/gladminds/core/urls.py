@@ -26,10 +26,9 @@ api_v1.register(user_apis.ServiceDeskUserResource())
 api_v1.register(user_apis.DepartmentSubCategoriesResource())
 api_v1.register(user_apis.BrandDepartmentResource())
 
-#api_v1.register(product_apis.ProductTypeResource())
+api_v1.register(product_apis.ProductTypeResource())
 api_v1.register(product_apis.ProductResource())
 api_v1.register(product_apis.CustomerTempRegistrationResource())
-api_v1.register(product_apis.ProductTypeResource())
 api_v1.register(product_apis.SpareMasterResource())
 api_v1.register(product_apis.ProductCatalogResource())
 api_v1.register(product_apis.SparePartUPCResource())
@@ -42,7 +41,8 @@ api_v1.register(loyalty_apis.LoyaltySLAResource())
 api_v1.register(loyalty_apis.AccumulationResource())
 
 api_v1.register(service_desk_apis.FeedbackResource())
-
+api_v1.register(service_desk_apis.ActivityResource())
+api_v1.register(service_desk_apis.SLAResource())
 
 api_v1.register(preferences_apis.UserPreferenceResource())
 api_v1.register(preferences_apis.BrandPreferenceResource())
@@ -57,16 +57,19 @@ api_v1.register(dashboard_apis.CouponReportResource())
 api_v1.register(dashboard_apis.TicketStatusResource())
 
 from django.contrib.auth.decorators import login_required
-# admin.autodiscover()
+from django.contrib import admin
+admin.autodiscover()
 
 api_v1.register(SMSResources())
 
 urlpatterns = patterns('',
-    url(r'^admin/$', include(brand_admin.urls)),
+    url(r'', include(api_v1.urls)),
+    url(r'^$', 'gladminds.core.views.home'),
+    url(r'^admin/', include(brand_admin.urls)),
     url(r'api/doc/', include('gladminds.core.api_docs.swagger_urls', namespace='tastypie_swagger')),
-    url(r'login/$', 'gladminds.core.views.auth_login'),
-    url(r'logout/$', 'gladminds.core.views.user_logout'),
-    url(r'^$', 'gladminds.core.views.get_services'),
+    url(r'^login/$', 'gladminds.core.views.auth_login'),
+    url(r'^logout/$', 'gladminds.core.views.user_logout'),
+    url(r'^services/$', 'gladminds.core.views.home'),
     url(r'^add/servicedesk-user/$', 'gladminds.core.services.service_desk.servicedesk_views.add_servicedesk_user', name='add_servicedesk_user'),
     url(r'^aftersell/users/(?P<users>[a-zA-Z0-9]+)$', 'gladminds.core.views.users'),
     url(r'^aftersell/sa/(?P<id>[a-zA-Z0-9]+)/$', 'gladminds.core.views.get_sa_under_asc'),
@@ -100,8 +103,9 @@ urlpatterns = patterns('',
 
     url(r'^v1/upload', upload_files),
     # Tasks URL
-    url(r'^tasks-view/', 'gladminds.core.views.sqs_tasks_view'),
+    url(r'^tasks-view/$', 'gladminds.core.views.sqs_tasks_view'),
     url(r'^trigger-tasks', 'gladminds.core.views.trigger_sqs_tasks'),
     url(r'^tasks', SqsHandler.as_view(task_map=_tasks_map)),
+    url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
 
 )

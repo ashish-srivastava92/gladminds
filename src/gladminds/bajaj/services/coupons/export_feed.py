@@ -19,6 +19,7 @@ class ExportCouponRedeemFeed(BaseExportFeed):
         total_failed = 0
         item_batch = {
             'TIMESTAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
+        self.feed_remark = FeedLogWithRemark(len(results), feed_type='Coupon Redemption Feed', action='Send', status=True)
         for redeem in results:
             try:
                 #added the condition only for the previous coupons with no servicing dealer details
@@ -35,7 +36,7 @@ class ExportCouponRedeemFeed(BaseExportFeed):
                         "GCP_KMS": redeem.actual_kms,
                         "GCP_KUNNR": servicing_dealer,
                         "GCP_UCN_NO": redeem.unique_service_coupon,
-                        "PRODUCT_TYPE": redeem.product.product_type.product_type,
+                        "PRODUCT_TYPE": redeem.product.sku_code,
                         "SERVICE_TYPE": str(redeem.service_type),
                         "SER_AVL_DT": redeem.actual_service_date.date().strftime("%Y-%m-%d"),
                     }                        
@@ -43,13 +44,17 @@ class ExportCouponRedeemFeed(BaseExportFeed):
             except Exception as ex:
                 logger.error("[ExportCouponRedeemFeed]: error fetching from db {0}".format(ex))
                 total_failed = total_failed + 1
+                self.feed_remark.fail_remarks(ex)
+        
+        self.feed_remark.save_to_feed_log()
         return items, item_batch, total_failed
 
-    def export(self, items=None, item_batch=None, total_failed_on_feed=0):
+    def export(self, brand, items=None, item_batch=None, total_failed_on_feed=0):
         logger.info(
             "[ExportCouponRedeemFeed]: Export {0}".format(self.feed_type))
         client = self.get_client()
         total_failed = total_failed_on_feed
+        export_status = False
         for item in items:
             export_status = False
             logger.info("[ExportCouponRedeemFeed]: Sending coupon - {0}"\
@@ -68,17 +73,19 @@ class ExportCouponRedeemFeed(BaseExportFeed):
                     except Exception as ex:
                         total_failed = total_failed + 1
                         logger.error("[ExportCouponRedeemFeed]: Error:: {0} - {1}".format(item['GCP_UCN_NO'], ex))
+                        self.feed_remark.fail_remarks(ex)
                 else:
                     total_failed = total_failed + 1
                     logger.error("[ExportCouponRedeemFeed]: {0}:: Success not received from SAP".format(item['GCP_UCN_NO']))
             except Exception as ex:
                 total_failed = total_failed + 1
                 logger.error("[ExportCouponRedeemFeed]: Error:: {0} - {1}".format(item['GCP_UCN_NO'], ex))
-        feed_log(feed_type=self.feed_type, total_data_count=len(items)\
+                self.feed_remark.fail_remarks(ex)
+        feed_log(brand, feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
-
+        self.feed_remark.save_to_feed_log()
 
 class ExportASCRegistrationFeed(BaseExportFeed):
     def export_data(self, asc_phone_number=None):
@@ -136,7 +143,7 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
                 total_failed = total_failed + 1
         return items, item_batch, total_failed
 
-    def export(self, items=None, item_batch=None, total_failed_on_feed=0):
+    def export(self, brand, items=None, item_batch=None, total_failed_on_feed=0):
         logger.info(
             "[ExportCustomerRegistrationFeed]: Export {0}".format(self.feed_type))
         client = self.get_client()
@@ -169,7 +176,7 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
             except Exception as ex:
                 total_failed = total_failed + 1
                 logger.error("[ExportCustomerRegistrationFeed]:  Error:: {0} - {1}".format(item['CUSTOMER_ID'], ex))
-        feed_log(feed_type=self.feed_type, total_data_count=len(items)\
+        feed_log(brand, feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
@@ -221,7 +228,7 @@ class ExportUnsyncProductFeed(BaseExportFeed):
                     if feed_remark.failed_feeds > 0:
                         remarks = feed_remark.remarks.elements()
                         for remark in remarks:
-                            feed_failure_log(feed_type='VIN sync Feed', reason=remark)
+                            feed_failure_log(brand=settings.BRAND, feed_type='VIN sync Feed', reason=remark)
                             logger.info('[ExportUnsyncProductFeed]: ' + json.dumps(feed_remark.remarks))
                         raise ValueError('dispatch feed failed!')
                         logger.info('[ExportUnsyncProductFeed]: dispatch feed completed')
@@ -251,7 +258,7 @@ class ExportPurchaseSynFeed(BaseExportFeed):
                 total_failed = total_failed + 1
         return items, item_batch, total_failed
 
-    def export(self, items=None, item_batch=None, total_failed_on_feed=0):
+    def export(self, brand, items=None, item_batch=None, total_failed_on_feed=0):
         logger.info(
             "Export {2}: Items:{0} and Item_batch: {1}"\
             .format(items, item_batch, self.feed_type))
@@ -283,7 +290,7 @@ class ExportPurchaseSynFeed(BaseExportFeed):
             except Exception as ex:
                 total_failed = total_failed + 1
                 logger.error("[ExportPurchaseSynFeed]: Error:: {0} - {1}".format(item['CHASSIS'], ex))
-        feed_log(feed_type=self.feed_type, total_data_count=len(items)\
+        feed_log(brand, feed_type=self.feed_type, total_data_count=len(items)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)

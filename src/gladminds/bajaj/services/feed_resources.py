@@ -11,11 +11,12 @@ logger = logging.getLogger("gladminds")
 class BaseExportFeed(object):
 
     def __init__(self, username=None, password=None, wsdl_url=None,\
-                                                        feed_type=None):
+                                                        feed_type=None, feed_remark=None):
         self.username = username
         self.password = password
         self.wsdl_url = wsdl_url
         self.feed_type = feed_type
+        self.feed_remark = feed_remark
 
     def get_http_authenticated(self):
         return HttpAuthenticated(username=self.username,\
@@ -77,17 +78,19 @@ class BaseFeed(object):
             logger.info('{0} id is not provided.'.format(group))
             raise Exception('{0} id is not provided.'.format(group))   
 
-    def check_or_create_dealer(self, dealer_id, address=None):
+    def check_or_create_dealer(self, dealer_id, address=None, cdms_flag=0):
         try:
             dealer_data = models.Dealer.objects.select_related('user__user').get(
                 dealer_id=dealer_id)
+            dealer_data.use_cdms = cdms_flag
+            dealer_data.save()
         except ObjectDoesNotExist as odne:
             logger.debug(
                 "[Exception: new_dealer_data]: {0}"
                 .format(odne))
             user = self.register_user(Roles.DEALERS, username=dealer_id)
             dealer_data = models.Dealer(user=user,
-                dealer_id=dealer_id)
+                dealer_id=dealer_id, use_cdms=cdms_flag)
             dealer_data.save()            
         return dealer_data
 

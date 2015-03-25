@@ -317,10 +317,22 @@
         "fields": {
             "template_key": "PHONE_NUMBER_UPDATE_COUNT_EXCEEDED",
             "sender": "feed-report@gladminds.co",
-            "receiver": "karishma.c@hashedin.com",
+            "receiver": "",
             "subject": "limit for updating phone number exceeded",
             "body": "The count of updates to phone number of the customers with following details exceeded the limit.Please address the issue",
             "description":"Mail to ASM if count of updates to phone number of a customer exceeds"
         }
+    },
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 28,
+        "fields": {
+            "template_key": "CUSTOMER_SUPPORT_FOR_DFSC",
+            "sender": "feed-report@gladminds.co",
+            "receiver": "",
+            "subject": "Customer support for DFSC",
+            "body": "",
+            "description":"Mail to ASCs on customer support"
+            }
     }
 ]

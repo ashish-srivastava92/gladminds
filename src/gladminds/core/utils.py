@@ -56,6 +56,10 @@ def generate_temp_id(prefix_value):
 def get_handler(handler, brand=None):
     if not brand:
         brand = settings.BRAND
+    try:
+        import_module('gladminds.{0}'.format(brand))
+    except Exception as ex:
+        brand='core'
     func_handler = '.'.join(handler.split('.')[-1:])
     service_handler = '.'.join(handler.split('.')[-2:-1])
     try:
@@ -265,6 +269,7 @@ def create_sa_feed_data(post_data, user_id, temp_sa_id):
     data['name'] = post_data['name'].upper()
     data['status'] = post_data['status']
     data['address'] = None
+    data['cdms_flag'] = False
     return data
 
 def create_context(email_template_name, feedback_obj, comment_obj=None):

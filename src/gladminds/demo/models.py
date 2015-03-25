@@ -81,6 +81,7 @@ class Feedback(base_models.Feedback):
 
 class Activity(base_models.Activity):
     feedback = models.ForeignKey(Feedback, null=True, blank=True)
+    user = models.ForeignKey(User, null=True, blank=True, related_name="demo_activity_users")
     
     class Meta(base_models.Activity.Meta):
         app_label = _APP_NAME
@@ -296,12 +297,12 @@ class Retailer(base_models.Retailer):
         app_label = _APP_NAME
 
 
-class Mechanic(base_models.Mechanic):
-    '''details of Mechanic'''
+class Member(base_models.Member):
+    '''details of Member'''
     registered_by_distributor = models.ForeignKey(Distributor, null=True, blank=True)
     preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
 
-    class Meta(base_models.Mechanic.Meta):
+    class Meta(base_models.Member.Meta):
         app_label = _APP_NAME
 
 class SparePartMasterData(base_models.SparePartMasterData):
@@ -330,7 +331,7 @@ class SparePartPoint(base_models.SparePartPoint):
 class AccumulationRequest(base_models.AccumulationRequest):
     '''details of Spare Part'''
 
-    member = models.ForeignKey(Mechanic)
+    member = models.ForeignKey(Member)
     upcs = models.ManyToManyField(SparePartUPC)
     asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
 
@@ -354,7 +355,7 @@ class ProductCatalog(base_models.ProductCatalog):
 class RedemptionRequest(base_models.RedemptionRequest):
     '''details of redemption request'''
     product = models.ForeignKey(ProductCatalog)
-    member = models.ForeignKey(Mechanic)
+    member = models.ForeignKey(Member)
     partner = models.ForeignKey(Partner, null=True, blank=True)
 
     class Meta(base_models.RedemptionRequest.Meta):
@@ -362,7 +363,7 @@ class RedemptionRequest(base_models.RedemptionRequest):
 
 class WelcomeKit(base_models.WelcomeKit):
     '''details of welcome kit'''
-    member = models.ForeignKey(Mechanic)
+    member = models.ForeignKey(Member)
     partner = models.ForeignKey(Partner, null=True, blank=True)
 
     class Meta(base_models.WelcomeKit.Meta):
@@ -400,7 +401,7 @@ class State(base_models.State):
     ''' List of states mapped to territory'''
     territory = models.ForeignKey(Territory)
  
-    class Meta(base_models.Territory.Meta):
+    class Meta(base_models.State.Meta):
         app_label = _APP_NAME
 
 class City(base_models.City):
@@ -421,8 +422,9 @@ class CommentThread(base_models.CommentThread):
 
 class DiscrepantAccumulation(base_models.DiscrepantAccumulation):
     upc = models.ForeignKey(SparePartUPC)
-    new_member = models.ForeignKey(Mechanic)
+    new_member = models.ForeignKey(Member)
     accumulation_request = models.ForeignKey(AccumulationRequest)
      
     class Meta(base_models.DiscrepantAccumulation.Meta):
         app_label = _APP_NAME
+
