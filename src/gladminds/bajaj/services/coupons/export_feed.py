@@ -13,16 +13,13 @@ logger = logging.getLogger("gladminds")
 class ExportCouponRedeemFeed(BaseExportFeed):
     
     def export_data(self, start_date=None, end_date=None):
-        logger.info("[ExportCouponRedeemFeed]: Entered ExportCouponRedeemFeed")
         results = models.CouponData.objects.filter(sent_to_sap=0,
                             status=2).select_related('product_id')
-        logger.info("[ExportCouponRedeemFeed]: Fetched Result from DB")
         items = []
         total_failed = 0
         item_batch = {
             'TIMESTAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
         self.feed_remark = FeedLogWithRemark(len(results), feed_type='Coupon Redemption Feed', action='Send', status=True)
-        logger.info("[ExportCouponRedeemFeed]: processing Coupons")
         for redeem in results:
             try:
                 #added the condition only for the previous coupons with no servicing dealer details
@@ -49,7 +46,6 @@ class ExportCouponRedeemFeed(BaseExportFeed):
                 total_failed = total_failed + 1
                 self.feed_remark.fail_remarks(ex)
         logger.info("[ExportCouponRedeemFeed]: processed coupon")
-        self.feed_remark.save_to_feed_log()
         return items, item_batch, total_failed
 
     def export(self, brand, items=None, item_batch=None, total_failed_on_feed=0):
@@ -88,7 +84,6 @@ class ExportCouponRedeemFeed(BaseExportFeed):
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
-        self.feed_remark.save_to_feed_log()
 
 class ExportASCRegistrationFeed(BaseExportFeed):
     def export_data(self, asc_phone_number=None):

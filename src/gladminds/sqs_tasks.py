@@ -410,13 +410,13 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
     send coupon redeemed in a day
     '''
     brand= kwargs.get('brand', None)
-    logger.info("[export_coupon_redeem_to_sap]: Entered export_coupon_redeem_to_sap")
     coupon_redeem = export_feed.ExportCouponRedeemFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.COUPON_WSDL_URL, feed_type='Coupon Redeem Feed')
-    logger.info("[export_coupon_redeem_to_sap]: Created exportCouponRedeemFeed instance")
     feed_export_data = coupon_redeem.export_data()
+    logger.info("[export_coupon_redeem_to_sap]: Got coupon data")
     if len(feed_export_data[0]) > 0:
+        logger.info("[export_coupon_redeem_to_sap]: Entering Export {0}".format(brand))
         coupon_redeem.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:
