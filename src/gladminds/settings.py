@@ -674,6 +674,12 @@ HOME_URLS = {
                        "Dealers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        "DealerAdmins":[{"SERVICE DESK":"/aftersell/helpdesk"},
                                        {"ADD SERVICE DESK USER":"/add/servicedesk-user"}]
+                       },
+             "daimler" : {"SdManagers":[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "Dealers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "DealerAdmins":[{"SERVICE DESK":"/aftersell/helpdesk"},
+                                       {"ADD SERVICE DESK USER":"/add/servicedesk-user"}]
                        }
              }
 
