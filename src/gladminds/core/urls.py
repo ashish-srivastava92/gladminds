@@ -43,6 +43,7 @@ api_v1.register(loyalty_apis.AccumulationResource())
 api_v1.register(service_desk_apis.FeedbackResource())
 api_v1.register(service_desk_apis.ActivityResource())
 api_v1.register(service_desk_apis.SLAResource())
+api_v1.register(service_desk_apis.CommentsResource())
 
 api_v1.register(preferences_apis.UserPreferenceResource())
 api_v1.register(preferences_apis.BrandPreferenceResource())

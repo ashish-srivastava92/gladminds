@@ -224,3 +224,15 @@ class LoyaltyCustomAuthorization():
 
     def delete_detail(self, object_list, bundle):
         return True
+
+class ServiceDeskCustomAuthorization():
+    
+    def read_list(self, object_list, bundle):
+        if bundle.request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.DEALERADMIN]):
+            object_list = object_list.all()
+        elif bundle.request.user.groups.filter(name=Roles.SDOWNERS):
+            object_list = object_list.filter(assignee__user_profile__user_id=int(bundle.request.user.id))
+        elif bundle.request.user.groups.filter(name=Roles.DEALERS):
+            object_list = object_list.filter(reporter__user_profile__user_id=int(bundle.request.user.id))
+        return object_list
+    

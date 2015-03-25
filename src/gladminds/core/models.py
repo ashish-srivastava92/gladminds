@@ -66,25 +66,29 @@ class ServiceAdvisor(base_models.ServiceAdvisor):
         app_label = _APP_NAME
 
 
-class ServiceDeskUser(base_models.ServiceDeskUser):
-    user_profile = models.ForeignKey(UserProfile, null=True, blank=True)
-
-    class Meta(base_models.ServiceDeskUser.Meta):
-        app_label = _APP_NAME
-
 class BrandDepartment(base_models.BrandDepartment):
     
     class Meta(base_models.BrandDepartment.Meta):
         app_label = _APP_NAME
 
+
 class DepartmentSubCategories(base_models.DepartmentSubCategories):
-    department = models.ForeignKey(BrandDepartment, null=True, blank=True)
+    department = models.ForeignKey(BrandDepartment, related_name="department_sub_categories", null=True, blank=True)
     
     class Meta(base_models.DepartmentSubCategories.Meta):
         app_label = _APP_NAME
-        
+
+
+class ServiceDeskUser(base_models.ServiceDeskUser):
+    user_profile = models.ForeignKey(UserProfile, null=True, blank=True)
+    sub_department = models.ForeignKey(DepartmentSubCategories, related_name="sub_department_user", null=True, blank=True)
+    
+    class Meta(base_models.ServiceDeskUser.Meta):
+        app_label = _APP_NAME
+
+
 class Feedback(base_models.Feedback):
-    priority = models.CharField(max_length=12, choices=constants.PRIORITY, default='Low')
+    priority = models.CharField(max_length=12, choices=constants.DEMO_PRIORITY, default='P3')
     reporter = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='core_feedback_reporter')
     assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='core_feedback_assignee')
     previous_assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='core_previous_assignee')
@@ -267,7 +271,7 @@ class AuditLog(base_models.AuditLog):
 
 
 class SLA(base_models.SLA):
-    priority = models.CharField(max_length=12, choices=constants.SLA_PRIORITY, unique=True)
+    priority = models.CharField(max_length=12, choices=constants.DEMO_PRIORITY, unique=True)
     
     class Meta(base_models.SLA.Meta):
         app_label = _APP_NAME
