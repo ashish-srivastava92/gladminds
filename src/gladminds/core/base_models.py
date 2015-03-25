@@ -864,6 +864,23 @@ class ECORelease(BaseModel):
         abstract = True
         verbose_name_plural = "ECO Release"
 
+class ContainerTracker(BaseModel):
+    ''' details of Container Tracker'''
+
+    zib_indent_num = models.CharField(max_length=30, null=True, blank=True)
+    consignment_id = models.CharField(max_length=30, null=True, blank=True)
+    truck_no = models.CharField(max_length=30, null=True, blank=True)
+    lr_number = models.CharField(max_length=20, null=True, blank=True)
+    lr_date = models.DateField(max_length=10, null=True, blank=True)
+    do_num = models.CharField(max_length=30, null=True, blank=True)
+    gatein_date = models.DateField(max_length=10, null=True, blank=True)
+    gatein_time = models.TimeField(max_length=10, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Container Tracker"
+
+
 #######################LOYALTY TABLES#################################
 
 class NationalSparesManager(BaseModel):
