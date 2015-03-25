@@ -660,7 +660,11 @@ DISTRIBUTOR_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/distrib
 BRAND_META = {
                "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/"},
                "demo": {"title": "Daimler", "logo": "daimler/img/daimler_logo.gif", "tagline": "2015 Daimler AG",
-                        "basecss": "/daimler/css/base.css","admin_url" :"/admin/"}
+                        "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
+              "daimler": {"title": "Daimler", "logo": "daimler/img/daimler_logo.gif", "tagline": "2015 Daimler AG",
+                        "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
+
+              
                }
 
 HOME_URLS = {
