@@ -337,6 +337,11 @@ class ECORelease(base_models.ECORelease):
     class Meta:
         app_label = _APP_NAME
 
+class ContainerTracker(base_models.ContainerTracker):
+    ''' details of Container Tracker'''
+    class Meta:
+        app_label = _APP_NAME
+
 #######################LOYALTY TABLES#################################
 class Territory(base_models.Territory):
     '''List of territories'''
