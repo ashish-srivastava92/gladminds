@@ -890,6 +890,7 @@ class ContainerTracker(BaseModel):
     do_num = models.CharField(max_length=30, null=True, blank=True)
     gatein_date = models.DateField(max_length=10, null=True, blank=True)
     gatein_time = models.TimeField(max_length=10, null=True, blank=True)
+    status = models.CharField(max_length=12, choices=constants.CONSIGNMENT_STATUS, default='Open')
 
     class Meta:
         abstract = True
