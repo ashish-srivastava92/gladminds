@@ -131,46 +131,6 @@ class ASMModelList(ComplexModel):
     __namespace__ = tns
     ASMData = Array(ASMModel)
 
-class ContainerTrackerModel(ComplexModel):
-    __namespace__ = tns
-
-    ZIB_INDENT_NUM = Unicode
-    CONSIGNMENT_ID = Unicode
-    TRUCK_NO = Unicode
-    LR_NUMBER = Unicode
-    LR_DATE = Date(default=None)
-    DO_NUM = Unicode
-    GATEIN_DATE = Date(default=None)
-    GATEIN_TIME = Time(default=None)
-    
-class ContainerTrackerModelList(ComplexModel):
-    __namespace__ = tns
-    ContainerTrackerData = Array(ContainerTrackerModel)
-    
-class ContainerTrackerService(ServiceBase):
-    __namespace__ = tns
-    @srpc(ContainerTrackerModelList, AuthenticationModel,  _returns=Unicode)
-    def postContainerTracker(ObjectList, Credential):
-        tracker_list = []
-        feed_remark = FeedLogWithRemark(len(ObjectList.ContainerTrackerData), feed_type='ContainerTracker Feed', action='Received', status=True)
-
-        for tracker_obj in ObjectList.ContainerTrackerData:
-            tracker_list.append({
-                                'zib_indent_num' :  tracker_obj.ZIB_INDENT_NUM ,
-                                'consignment_id' :  tracker_obj.CONSIGNMENT_ID ,
-                                'truck_no' :  tracker_obj.TRUCK_NO ,
-                                'lr_number' :  tracker_obj.LR_NUMBER ,
-                                'lr_date' :  tracker_obj.LR_DATE ,
-                                'do_num' :  tracker_obj.DO_NUM ,
-                                'gatein_date' :  tracker_obj.GATEIN_DATE ,
-                                'gatein_time' :  tracker_obj.GATEIN_TIME ,
-                            })
-
-        feed_remark = save_to_db(feed_type='CONTAINER_TRACKER', data_source=tracker_list, feed_remark=feed_remark)
-        feed_remark.save_to_feed_log()
-        return get_response(feed_remark)
-
-
 class PartMasterService(ServiceBase):
     __namespace__ = tns
 

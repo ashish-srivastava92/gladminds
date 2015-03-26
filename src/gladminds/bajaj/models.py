@@ -337,8 +337,17 @@ class ECORelease(base_models.ECORelease):
     class Meta:
         app_label = _APP_NAME
 
+class Transporter(base_models.Transporter):
+    '''details of Area Service Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME 
+
 class ContainerTracker(base_models.ContainerTracker):
     ''' details of Container Tracker'''
+    transporter = models.ForeignKey(Transporter)
+
     class Meta:
         app_label = _APP_NAME
 

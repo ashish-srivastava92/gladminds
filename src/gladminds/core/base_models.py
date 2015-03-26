@@ -864,6 +864,15 @@ class ECORelease(BaseModel):
         abstract = True
         verbose_name_plural = "ECO Release"
 
+class Transporter(BaseModel):
+    ''' details of Container Transporter'''
+    transporter_id = models.CharField(
+        max_length=15, blank=False, unique=True, null=False)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "Transporter"
+    
 class ContainerTracker(BaseModel):
     ''' details of Container Tracker'''
 
