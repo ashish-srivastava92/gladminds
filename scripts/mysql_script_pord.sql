@@ -44,3 +44,7 @@
 --alter table demo_userprofile add column department varchar(100) null;
 --alter table bajaj_dealer add column use_cdms boolean default True;
 --alter table demo_dealer add column use_cdms boolean default True;
+
+alter table bajaj_userprofile add column is_email_verified boolean default False;
+alter table bajaj_userprofile add column is_phone_verified boolean default False;
+

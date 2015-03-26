@@ -57,7 +57,6 @@ def send_email(sender, receiver, subject, body, message=None,smtp_server=setting
         mail.quit()
         audit_manager.email_log(settings.BRAND, subject, message, sender, receiver);
         return True
-        print body
     except Exception as ex:
         logger.error('Exception while sending mail: {0}'.format(ex))
         return False

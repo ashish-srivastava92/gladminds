@@ -231,7 +231,6 @@ class ConsumerResource(CustomBaseModelResource):
         password = load.get('password1')
         repassword = load.get('password2')
         auth_key = load.get('auth_key')
-        print auth_key
         user_details = {}
         if not type:
             return HttpBadRequest("type not defined use email/phone")
