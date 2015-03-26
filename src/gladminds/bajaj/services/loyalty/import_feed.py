@@ -215,7 +215,6 @@ class NSMFeed(BaseFeed):
                     nsm_object.user = user_object
                     nsm_object.save()  
             except Exception as ex:
-                print "4"
                 total_failed += 1
                 ex = "[NSMFeed]: id-{0} :: {1}".format(nsm['phone_number'], ex)
                 logger.error(ex)

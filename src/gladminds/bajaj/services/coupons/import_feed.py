@@ -523,7 +523,7 @@ class BOMItemFeed(BaseFeed):
                                             item=bom['item'], item_id=bom['item_id'])                
                 bom_item_obj.save()
             except Exception as ex:
-                logger.info("[Exception: ]: BOMItemFeed {0}".format(ex))
+                ex="[Exception: ]: BOMItemFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
                 
@@ -540,7 +540,7 @@ class BOMHeaderFeed(BaseFeed):
                                                   valid_to=bom['valid_to_header'])
                 bom_header_obj.save() 
             except Exception as ex:
-                logger.info("[Exception: ]: BOMHeaderFeed {0}".format(ex))
+                ex="[Exception: ]: BOMHeaderFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
 
@@ -560,7 +560,7 @@ class ECOReleaseFeed(BaseFeed):
                                                     interchangebility=eco_obj['interchangebility'], reason_for_change=eco_obj['reason_for_change'])
                 eco_release_obj.save() 
             except Exception as ex:
-                logger.info("[Exception: ]: ECOReleaseFeed {0}".format(ex))
+                ex="[Exception: ]: ECOReleaseFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         return self.feed_remark
@@ -594,7 +594,7 @@ class ContainerTrackerFeed(BaseFeed):
                 container_tracker_obj.status=status
                 container_tracker_obj.save() 
             except Exception as ex:
-                logger.info("[Exception: ]: ContainerTrackerFeed {0}".format(ex))
+                ex="[Exception: ]: ContainerTrackerFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         
