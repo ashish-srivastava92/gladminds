@@ -149,7 +149,7 @@ FORM_STATUS_CHOICES = (
                        ('Incomplete', 'Incomplete'),
                        )
 
-FEED_TYPES = ['Dispatch Feed', 'Purchase Feed', 'Credit Note Feed', 'CDMS Feed']
+FEED_TYPES = ['Dispatch Feed', 'Purchase Feed', 'Credit Note Feed', 'CDMS Feed', 'Old Fsc Feed']
 
 STATUS_TO_NOTIFY = ['Approved', 'Rejected', 'Accepted', 'Shipped', 'Delivered']
 
@@ -199,6 +199,7 @@ class FeedStatus():
 class FeedSentType():
     COUPON_REDEEM = 'Coupon Redeem Feed'
     CUSTOMER_REGISTRATION = 'Customer Registration Feed'
+    PURCHASE_SYNC_FEED = 'Purchase Sync Feed'
 
 FEED_SENT_TYPES = [getattr(FeedSentType, x) for x in dir(FeedSentType) if (not x.startswith("__"))]
 
