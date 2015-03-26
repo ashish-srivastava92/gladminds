@@ -61,7 +61,7 @@ TEMPLATE_CONTEXT_PROCESSORS = TCP + (
     'django.core.context_processors.request',
 )
 
-SUIT_CONFIG = {
+SUIT_ = {
     'ADMIN_NAME': 'GladMinds',
     'CONFIRM_UNSAVED_CHANGES': True,
     'SEARCH_URL': '',
@@ -527,6 +527,13 @@ RECYCLE_MAIL = {
                 
                 }
 
+RESET_LINK = {
+              "sender":"anchit082@gmail.com",
+              "subject":"Reset your password",
+              "receiver":["anchit.gupta@hashedin.com"],
+              "body": """""",
+              }
+
 # AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
 AFTERBUY_USER_LOC = os.path.join(AFTERBUY_LOC, "users")
@@ -625,6 +632,7 @@ ENABLE_SERVICE_DESK = True
 
 DEFAULT_IMAGE_ID = 'guest.png'
 
+FORGOT_PASSWORD_LINK = {'bajaj':'x'}
 CONSTANCE_CONFIG = {
     'DEFAULT_IMAGE': ('guest.png', 'Default image to be used by any app'),
     'AFTERBUY_FORGOT_PASSWORD_URL': ('http://afterbuy.co/demo/staging_qw741qaz5/change-password.php', 'Afterbuy forgot password url'),

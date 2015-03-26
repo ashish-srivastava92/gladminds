@@ -23,9 +23,9 @@ class BajajAdminSite(AdminSite):
 
 
 class UserProfileAdmin(GmModelAdmin):
-    search_fields = ('user__username', 'phone_number')
+    search_fields = ('user__username', 'phone_number',)
     list_display = ('user', 'phone_number', 'status', 'address',
-                    'state', 'country', 'pincode', 'date_of_birth', 'gender')
+                    'state', 'country', 'pincode', 'date_of_birth', 'gender','is_email_verified')
     readonly_fields = ('image_tag',)
     
 class DealerAdmin(GmModelAdmin):

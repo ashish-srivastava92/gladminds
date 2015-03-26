@@ -14,6 +14,8 @@ from gladminds.core import constants
 from gladminds.core.core_utils.utils import generate_mech_id, generate_partner_id,\
     generate_nsm_id,generate_asm_id
 from gladminds.core.model_helpers import validate_image
+from gladminds.core.managers.mail import sent_password_reset_link,\
+    send_email_activation
 
 try:
     from django.utils.timezone import now as datetime_now
@@ -43,6 +45,10 @@ class UserProfile(BaseModel):
     country = models.CharField(max_length=255, null=True, blank=True)
     pincode = models.CharField(max_length=15, null=True, blank=True)
     date_of_birth = models.DateTimeField(null=True, blank=True)
+    
+    is_email_verified = models.BooleanField(default=False)
+    is_phone_verified = models.BooleanField(default=False)
+  
     department = models.CharField(max_length=100, null=True, blank=True)
     
     image_url = models.FileField(upload_to=set_user_pic_path,
@@ -513,7 +519,7 @@ class EmailToken(models.Model):
                     'base_url':settings.DOMAIN_BASE_URL}
         if trigger_mail == 'forgot-password':
             ctx_dict = {'activation_key': self.activation_key,
-                    'link': config.AFTERBUY_FORGOT_PASSWORD_URL}
+                    'link': settings.FORGOT_PASSWORD_LINK[settings.BRAND]}
             sent_password_reset_link(reciever_email, ctx_dict)
         else:
             send_email_activation(reciever_email, ctx_dict)
