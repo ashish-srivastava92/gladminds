@@ -355,20 +355,20 @@ class OldFscFeed(BaseFeed):
     def import_data(self):
         for fsc in self.data_source:
             product_data = models.ProductData.objects.filter(product_id=fsc['vin'])
-            
+            dealer_id = str(int(fsc['dealer']))
             if len(product_data)==0:
-                self.save_to_old_fsc_table(fsc['dealer'], fsc['service'], 'product_id', fsc['vin'])
+                self.save_to_old_fsc_table(dealer_id, fsc['service'], 'product_id', fsc['vin'])
             else:
                 coupon_data = models.CouponData.objects.filter(product__product_id=fsc['vin'],
                                         service_type=int(fsc['service']))
                 if len(coupon_data) == 0:
-                    self.save_to_old_fsc_table(fsc['dealer'], fsc['service'], 'service_type', fsc['service'], vin = product_data[0] )
+                    self.save_to_old_fsc_table(dealer_id, fsc['service'], 'service_type', fsc['service'], vin = product_data[0] )
                 else:
                     cupon_details = coupon_data[0]
                     cupon_details.status = 6
                     cupon_details.closed_date = datetime.now()
                     cupon_details.sent_to_sap = True
-                    cupon_details.servicing_dealer = str(int(fsc['dealer']))
+                    cupon_details.servicing_dealer = dealer_id
                     cupon_details.save()
         return self.feed_remark
 
