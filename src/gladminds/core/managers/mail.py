@@ -42,7 +42,6 @@ def send_email_with_file_attachment(sender, receiver, subject, body, filename, c
 
 def send_email(sender, receiver, subject, body, message=None,smtp_server=settings.MAIL_SERVER, title='GCP_Bajaj_FSC_Feeds'
                , brand='bajaj'):
-    print "11111111",body
     try:
         msg = MIMEText(body, 'html', _charset='utf-8')
         msg['Subject'] = subject
@@ -60,7 +59,6 @@ def send_email(sender, receiver, subject, body, message=None,smtp_server=setting
         return True
         print body
     except Exception as ex:
-        #print "==exception",ex
         logger.error('Exception while sending mail: {0}'.format(ex))
         return False
 
@@ -79,16 +77,11 @@ def send_email_activation(receiver_email, data=None, brand=None):
                brand=brand)
     
 def send_reset_link_email(email,data=None,brand=None):
-    print "99999999",data
     file_stream = open(settings.EMAIL_DIR+'/reset_link.html')
     feed_temp = file_stream.read()
-    #print data
     template = Template(feed_temp)
     context = Context(data)
-    #print "context", context
     body = template.render(context)
-    #print "body", body
-    #print "0000000000000000000000000000000000", data
     mail_detail = settings.RESET_LINK
     send_email(sender=mail_detail['sender'],
                receiver=email,

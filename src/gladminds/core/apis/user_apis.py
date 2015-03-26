@@ -213,23 +213,12 @@ class UserProfileResource(CustomBaseModelResource):
         email = load.get('email')
         try:
             user_obj = models.UserProfile.objects.get(user__email=email, is_email_verified=True)
-            print user_obj
         except Exception as ex:
             return HttpBadRequest("Either your email is not verified or its not exist")
-            #log_message = "new user :{0}".format(ex)
-            #logger.info(log_message)
-            #data = {'status': 0, 'message': "Either your email is not verified or its not exist"}
-            #print user_obj.user.__dict__
         site = RequestSite(request)
         token = get_model('EmailToken').objects.create_email_token(user_obj, email, site, trigger_mail='forgot-password')
-        #print type(token)
         activation_key = token.activation_key
-        print activation_key
-        #dict = {
-        #        "reset_link":"http://local.bajaj.gladminds.co:8000/reset_link/",
-        #        }
         data = {'status': 1, 'message': "Password reset link sent successfully"}
-        #send_reset_link_email(email,"http://local.bajaj.gladminds.co:8000/reset_link/"+activation_key,settings.BRAND)
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def change_user_password(self, request, **kwargs):
@@ -239,33 +228,14 @@ class UserProfileResource(CustomBaseModelResource):
             load = json.loads(request.body)
         except:
             return HttpResponse(content_type="application/json", status=404)
-        #type = kwargs['type']
-        #otp_token = load.get('otp_token')
         email = load.get('email')
         password = load.get('password1')
-        #print "pppp",password
         repassword = load.get('password2')
-        #auth_key = load.get('auth_key')
-        #print "aaaaaaaaa",auth_key
         user_details = {}
-        #if not type:
-        #    return HttpBadRequest("type not defined use email/phone")
         if password != repassword:
             return HttpBadRequest("password1 and password2 not matched")
-#         try:
-#             if type=='phone':
-#                 try:
-#                     if not (settings.ENV in settings.IGNORE_ENV and otp_token in settings.HARCODED_OTPS):
-#                         consumer = models.OTPToken.objects.get(token=otp_token).user
-#                         otp_handler.validate_otp(otp_token, user=consumer)
-#                 except Exception:
-#                     raise ImmediateHttpResponse(
-#                         response=http.HttpBadRequest('Wrong OTP!'))
-#                 user_details['id'] = consumer.user.id
-#             elif type=='email':
         try:
             user_obj = models.UserProfile.objects.get(user__email=email, is_email_verified=True)
-            print "fffffffffff",user_obj
         except Exception:
             raise ImmediateHttpResponse(
                 response=http.HttpBadRequest('invalid authentication key!'))
@@ -274,9 +244,6 @@ class UserProfileResource(CustomBaseModelResource):
         user.set_password(password)
         user.save()
         data = {'status': 1, 'message': "password updated successfully"}
-        #except Exception as ex:
-        #    logger.error('Invalid details, mobile {0} and exception {1}'.format(request.POST.get('phone_number', ''),ex))
-        #    data = {'status': 0, 'message': "password not updated"}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def login(self, request, **kwargs):
@@ -308,7 +275,6 @@ class UserProfileResource(CustomBaseModelResource):
 
         if user_auth is not None:
             access_token = create_access_token(user_auth, http_host)
-            #access_token = create_access_token(user_auth, user_obj.username, password, http_host)
             if user_auth.is_active:
                 login(request, user_auth)
                 data = {'status': 1, 'message': "login successfully",
