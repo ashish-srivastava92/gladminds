@@ -57,7 +57,11 @@ class BaseFeed(object):
             except ObjectDoesNotExist as ex:
                 logger.info(
                     "[Exception: new_ registration]: {0}"
-                    .format(ex))    
+                    .format(ex))
+                if len(first_name)>30:
+                    full_name = first_name.split(' ')
+                    first_name = ' '.join(full_name[0:3])
+                    last_name = ' '.join(full_name[3:])
                 new_user = User(
                     username=username, first_name=first_name, last_name=last_name, email=email)
                 if group =='customer':
@@ -93,4 +97,19 @@ class BaseFeed(object):
                 dealer_id=dealer_id, use_cdms=cdms_flag)
             dealer_data.save()            
         return dealer_data
+    
+    def check_or_create_transporter(self, transporter_id, name):
+        try:
+            transporter_data = models.Transporter.objects.select_related('user__user').get(
+                transporter_id=transporter_id)
+        except ObjectDoesNotExist as odne:
+            logger.debug(
+                "[Exception: new_dealer_data]: {0}"
+                .format(odne))
+            user = self.register_user(Roles.TRANSPORTER, username=transporter_id,
+                                      first_name=name)
+            transporter_data = models.Transporter(user=user,
+                transporter_id=transporter_id)
+            transporter_data.save()            
+        return transporter_data
 

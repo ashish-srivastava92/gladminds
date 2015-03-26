@@ -102,9 +102,10 @@ class SAPFeed(object):
             'old_fsc': OldFscFeed,
             'credit_note': CreditNoteFeed,
             'asc_sa': ASCAndServiceAdvisorFeed,
-            'BOMHEADER': BOMHeaderFeed,
-            'BOMITEM': BOMItemFeed,
-            'ECO_RELEASE': ECOReleaseFeed,
+            'bomheader': BOMHeaderFeed,
+            'bomitem': BOMItemFeed,
+            'eco_release': ECOReleaseFeed,
+            'container_tracker':ContainerTrackerFeed,
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
@@ -563,4 +564,30 @@ class ECOReleaseFeed(BaseFeed):
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         return self.feed_remark
+
+class ContainerTrackerFeed(BaseFeed):
+
+    def import_data(self):
+        for tracker_obj in self.data_source:
+            try:
+                transporter_data = self.check_or_create_transporter(transporter_id=tracker_obj['transporter_id'],
+                                                                    name=tracker_obj['tranporter_name'])
+                container_tracker_obj = models.ContainerTracker(zib_indent_num=tracker_obj['zib_indent_num'], 
+                                                                consignment_id=tracker_obj['consignment_id'],
+                                                                truck_no=tracker_obj['truck_no'], 
+                                                                lr_number=tracker_obj['lr_number'],
+                                                                lr_date=tracker_obj['lr_date'],
+                                                                do_num=tracker_obj['do_num'],
+                                                                gatein_date=tracker_obj['gatein_date'], 
+                                                                gatein_time=tracker_obj['gatein_time'],
+                                                                transporter=transporter_data)
+                container_tracker_obj.save() 
+            except Exception as ex:
+                print 3333333, ex
+                logger.info("[Exception: ]: ContainerTrackerFeed {0}".format(ex))
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+        
+        return self.feed_remark
+
     

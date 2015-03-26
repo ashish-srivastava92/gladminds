@@ -17,7 +17,7 @@ all_app = Application([fsc_feed.BrandService,
                        fsc_feed.CreditNoteService,
                        fsc_feed.BillOfMaterialService,
                        fsc_feed.ECOReleaseService,
-                       loyalty_feed.ContainerTrackerService,
+                       fsc_feed.ContainerTrackerService,
                        loyalty_feed.PartMasterService,
                        loyalty_feed.PartUPCService,
                        loyalty_feed.PartPointService,
@@ -114,7 +114,7 @@ eco_release_app = Application([fsc_feed.ECOReleaseService],
                            out_protocol=Soap11()
                            )
  
-container_tracker_app = Application([loyalty_feed.ContainerTrackerService],
+container_tracker_app = Application([fsc_feed.ContainerTrackerService],
                            tns=tns,
                            in_protocol=Soap11(validator='lxml'),
                            out_protocol=Soap11()
