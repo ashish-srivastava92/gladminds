@@ -57,18 +57,20 @@ class FeedbackResource(CustomBaseModelResource):
                         "created_date": ['gte', 'lte'],
                         "closed_date": ['gte', 'lte'],
                         "resolved_date": ['gte', 'lte'],
+                        "due_date" : ['gte', 'lte'],
                         "assignee" : ALL_WITH_RELATIONS,
+                        "reporter" : ALL_WITH_RELATIONS,
                         "due_date" : ALL,
                         "sub_department" : ALL_WITH_RELATIONS
                      }
         
-        ordering = ['created_date']
+        ordering = ['created_date','due_date']
         
     def prepend_urls(self):
         return [
                  url(r"^(?P<resource_name>%s)/add-ticket%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('add_service_desk_ticket'), name="add_service_desk_ticket"),
-                url(r"^(?P<resource_name>%s)/tat-report%s" % (self._meta.resource_name,trailing_slash()),
+                url(r"^(?P<resource_name>%s)/service-desk-reports%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('get_tat'), name="get_tat"),
                 url(r"^(?P<resource_name>%s)/modify-ticket/(?P<feedback_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('modify_service_desk_ticket'), name="modify_service_desk_ticket")
@@ -88,24 +90,47 @@ class FeedbackResource(CustomBaseModelResource):
             LOG.error('Exception while saving data : {0}'.format(ex))
             return HttpResponseBadRequest()
     
-    def get_tat(self, request, **kwargs):
+    def get_sql_data(self, query):
         conn = connections[settings.BRAND]
         cursor = conn.cursor()
-        cursor.execute("select sum(f2.dt) as sums ,count(*) as c , avg(f2.dt) as tat, YEAR(f1.created_date) as year, \
+        cursor.execute(query)
+        data = dictfetchall(cursor)
+        conn.close()
+        return data
+
+    def get_tat(self, request, **kwargs):
+        details = self.get_sql_data("select sum(f2.dt) as sums ,count(*) as c , avg(f2.dt) as tat, YEAR(f1.created_date) as year, \
     MONTH(f1.created_date) as month from gm_feedback f1 inner join (select f2.id, TIMEDIFF(f2.resolved_date,f2.created_date)\
     as dt , f2.created_date from gm_feedback f2 where status= 'resolved') f2 on f2.id=f1.id group by \
     YEAR(f1.created_date), MONTH(f1.created_date)")
-        details = dictfetchall(cursor)
-        conn.close()
+        reports = {}
         result = []
         for data in details:
-            tat ={}
+            tat = {}
             minutes, seconds = divmod(data['tat'], 60)
             tat['tat'] = minutes
             tat['month_of_year'] = str(data['year'])+"-"+ str(data['month'])
             result.append(tat)
-        reports = {}
         reports['TAT'] = result
+
+        fcr_total = self.get_sql_data(" select count(*) as total, concat (YEAR(resolved_date),'-', MONTH(resolved_date)) \
+        as month_of_year from gm_feedback where resolved_date is not null group by \
+         YEAR(resolved_date), MONTH(resolved_date)")
+        
+        fcr_count = self.get_sql_data("select count(*) as cnt, concat(YEAR(resolved_date), '-', MONTH(resolved_date))\
+         as month_of_year from gm_feedback where fcr=1 group by(fcr),YEAR(resolved_date), MONTH(resolved_date)")
+        result = []
+        
+        for data in fcr_count:
+            fcr = {}
+            fcr['month_of_year'] = data['month_of_year']
+            fcrs = filter(lambda fc: fc['month_of_year'] == data['month_of_year'], fcr_total)
+            if fcrs:
+                fcr['fcr'] = (data['cnt']/float(fcrs[0]['total'])) * 100
+            
+            result.append(fcr)
+        
+        reports['FCR'] = result
         return HttpResponse(content=json.dumps(reports),
                                     content_type='application/json')
 
