@@ -213,3 +213,9 @@ class CouponStatus():
     CLOSED_OLD_FSC = 6
 
 WELCOME_KIT_MECHANIC_FIELDS = ['Mechanic ID', 'first_name', 'middle_name', 'last_name', 'phone_number', 'date_of_birth', 'address_line_1', 'address_line_2', 'address_line_3', 'address_line_4', 'address_line_5', 'address_line_6','shop_name', 'shop_address', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url',]
+
+CONSIGNMENT_STATUS = (
+        ('Open', 'Open'),
+        ('Inprogress', 'Inprogress'),
+        ('Closed', 'Closed')
+    )

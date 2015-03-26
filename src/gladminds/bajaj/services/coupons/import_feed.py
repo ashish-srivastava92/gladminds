@@ -570,20 +570,30 @@ class ContainerTrackerFeed(BaseFeed):
     def import_data(self):
         for tracker_obj in self.data_source:
             try:
-                transporter_data = self.check_or_create_transporter(transporter_id=tracker_obj['transporter_id'],
-                                                                    name=tracker_obj['tranporter_name'])
-                container_tracker_obj = models.ContainerTracker(zib_indent_num=tracker_obj['zib_indent_num'], 
-                                                                consignment_id=tracker_obj['consignment_id'],
-                                                                truck_no=tracker_obj['truck_no'], 
-                                                                lr_number=tracker_obj['lr_number'],
-                                                                lr_date=tracker_obj['lr_date'],
-                                                                do_num=tracker_obj['do_num'],
-                                                                gatein_date=tracker_obj['gatein_date'], 
-                                                                gatein_time=tracker_obj['gatein_time'],
-                                                                transporter=transporter_data)
+                try:
+                    container_tracker_obj=models.ContainerTracker.objects.get(consignment_id=tracker_obj['consignment_id'])
+                except ObjectDoesNotExist as odne:
+                    transporter_data = self.check_or_create_transporter(transporter_id=tracker_obj['transporter_id'],
+                                                                        name=tracker_obj['tranporter_name'])
+                    container_tracker_obj = models.ContainerTracker(zib_indent_num=tracker_obj['zib_indent_num'], 
+                                                                    consignment_id=tracker_obj['consignment_id'],
+                                                                    truck_no=tracker_obj['truck_no'], 
+                                                                    lr_number=tracker_obj['lr_number'],
+                                                                    lr_date=tracker_obj['lr_date'],
+                                                                    do_num=tracker_obj['do_num'],
+                                                                    transporter=transporter_data)
+                
+                if tracker_obj['gatein_date'] != "0000-00-00":
+                    gatein_date=datetime.strptime(tracker_obj['gatein_date'], "%Y-%m-%d")
+                    status="Closed"
+                else:
+                    gatein_date=None
+                    status="Open"
+                container_tracker_obj.gatein_date=gatein_date
+                container_tracker_obj.gatein_time=tracker_obj['gatein_time']
+                container_tracker_obj.status=status
                 container_tracker_obj.save() 
             except Exception as ex:
-                print 3333333, ex
                 logger.info("[Exception: ]: ContainerTrackerFeed {0}".format(ex))
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)

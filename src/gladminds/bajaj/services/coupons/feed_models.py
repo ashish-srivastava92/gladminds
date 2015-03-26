@@ -26,6 +26,8 @@ logger = logging.getLogger("gladminds")
 
 
 pattern = r'(\d{4})-(\d{2})-(\d{2})(\d{2})(\d{2})(\d{2})'
+date_pattern = r'(\d{4})-(\d{2})-(\d{2})'
+time_pattern = r'(\d{2}):(\d{2}):(\d{2})'
 tns = settings.WSDL_TNS
 SUCCESS = "SUCCESS"
 FAILED = "FAILURE"
@@ -316,8 +318,8 @@ class ContainerTrackerModel(ComplexModel):
     LR_NUMBER = Unicode
     LR_DATE = Date(default=None)
     DO_NUM = Unicode
-    GATEIN_DATE = Date(default=None)
     GATEIN_TIME = Time(default=None)
+    GATEIN_DATE = Unicode(default=None)
     TRANS_NAME = Unicode
     
 class ContainerTrackerModelList(ComplexModel):
