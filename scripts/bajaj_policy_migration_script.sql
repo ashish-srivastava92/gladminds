@@ -13,3 +13,12 @@ select count(*) from bajaj_coupondata where status not in (2,6) and service_type
 
 
 
+select d2.user_id as prefix_id ,d2.dealer_id as prefix_did, d.dealer_id, d.user_id from bajaj_dealer as d, bajaj_dealer as d2 where d2.dealer_id like concat('00000',d.dealer_id);
+
+update bajaj_coupondata c inner join (select d2.dealer_id as old_id , d.dealer_id as new_id from bajaj_dealer as d, bajaj_dealer as d2 where d2.dealer_id like concat('00000',d.dealer_id)) a on c.servicing_dealer = a.old_id set c.servicing_dealer=a.new_id;
+
+update bajaj_oldfscdata c inner join (select d2.dealer_id as old_id , d.dealer_id as new_id from bajaj_dealer as d, bajaj_dealer as d2 where d2.dealer_id like concat('00000',d.dealer_id)) a on c.servicing_dealer_id = a.old_id set c.servicing_dealer_id=a.new_id;
+
+select servicing_dealer from bajaj_coupondata c inner join (select d2.dealer_id as old_id , d.dealer_id as new_id from bajaj_dealer as d, bajaj_dealer as d2 where d2.dealer_id like concat('00000',d.dealer_id)) a on c.servicing_dealer = a.old_id;
+
+select servicing_dealer from bajaj_oldfscdata c inner join (select d2.dealer_id as old_id , d.dealer_id as new_id from bajaj_dealer as d, bajaj_dealer as d2 where d2.dealer_id like concat('00000',d.dealer_id)) a on c.servicing_dealer = a.old_id;

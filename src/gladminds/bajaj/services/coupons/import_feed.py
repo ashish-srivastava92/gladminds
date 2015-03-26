@@ -368,7 +368,7 @@ class OldFscFeed(BaseFeed):
                     cupon_details.status = 6
                     cupon_details.closed_date = datetime.now()
                     cupon_details.sent_to_sap = True
-                    cupon_details.servicing_dealer = fsc['dealer']
+                    cupon_details.servicing_dealer = str(int(fsc['dealer']))
                     cupon_details.save()
         return self.feed_remark
 
