@@ -119,18 +119,38 @@ class FeedbackResource(CustomBaseModelResource):
         
         fcr_count = self.get_sql_data("select count(*) as cnt, concat(YEAR(resolved_date), '-', MONTH(resolved_date))\
          as month_of_year from gm_feedback where fcr=1 group by(fcr),YEAR(resolved_date), MONTH(resolved_date)")
-        result = []
         
-        for data in fcr_count:
+        result = []
+        for data in fcr_total:
             fcr = {}
             fcr['month_of_year'] = data['month_of_year']
-            fcrs = filter(lambda fc: fc['month_of_year'] == data['month_of_year'], fcr_total)
+            fcrs = filter(lambda fc: fc['month_of_year'] == data['month_of_year'], fcr_count)
             if fcrs:
-                fcr['fcr'] = (data['cnt']/float(fcrs[0]['total'])) * 100
+                fcr['fcr'] = (fcrs[0]['cnt']/float(data['total'])) * 100
             
             result.append(fcr)
-        
+
         reports['FCR'] = result
+
+        
+        reopen_count = self.get_sql_data("select count(*) as cnt, concat(YEAR(created_date), '-', MONTH(created_date))\
+         as month_of_year from gm_activity where new_value='Open' and original_value ='Resolved' or \
+          original_value='Closed' group by YEAR(created_date), MONTH(created_date)")
+         
+        reopen_total = self.get_sql_data("select count(*) as total, concat(YEAR(created_date), '-', \
+        MONTH(created_date)) as month_of_year from gm_feedback group by YEAR(created_date), MONTH(created_date)")
+        
+        result = []
+        for data in reopen_total:
+            reopened = {}
+            reopened['month_of_year'] = data['month_of_year']
+            reopens = filter(lambda reopen : reopen['month_of_year'] == data['month_of_year'], reopen_count)
+            if reopens:
+                reopened['re-open'] = (reopens[0]['cnt']/float(data['total'])) * 100
+            result.append(reopened)
+        
+        reports['RE-OPENED'] = result
+        
         return HttpResponse(content=json.dumps(reports),
                                     content_type='application/json')
 
