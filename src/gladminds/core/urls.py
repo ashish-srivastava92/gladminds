@@ -52,7 +52,6 @@ api_v1.register(dashboard_apis.OverallStatusResource())
 api_v1.register(dashboard_apis.FeedStatusResource())
 api_v1.register(dashboard_apis.SMSReportResource())
 api_v1.register(dashboard_apis.CouponReportResource())
-api_v1.register(dashboard_apis.TicketStatusResource())
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import admin
