@@ -51,10 +51,6 @@ class CustomerTempRegistrationManager(models.Manager):
             if temp_customer_obj:
                 customer_id = temp_customer_obj[0].product_data.customer_id
         return customer_id
-    
-    def get_mobile_number_update_count(self):
-        return super(CustomerTempRegistrationManager, self).get_query_set().filter(mobile_number_update_count__isnull=False).count()
-        
 
 
 class MechanicManager(models.Manager):
