@@ -414,7 +414,9 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.COUPON_WSDL_URL, feed_type='Coupon Redeem Feed')
     feed_export_data = coupon_redeem.export_data()
+    logger.info("[export_coupon_redeem_to_sap]: Got coupon data")
     if len(feed_export_data[0]) > 0:
+        logger.info("[export_coupon_redeem_to_sap]: Entering Export {0}".format(brand))
         coupon_redeem.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:
@@ -475,8 +477,10 @@ def send_mail_customer_phone_number_update_exceeds(*args, **kwargs):
 def send_mail_for_policy_discrepency(*args, **kwargs):
     ''' send mail for policy_discrepency'''
     discrepant_coupons = taskmanager.get_discrepant_coupon_details()
-    mail.discrepant_coupon_update(discrepant_coupons=discrepant_coupons)
-
+    if discrepant_coupons:
+        mail.discrepant_coupon_update(discrepant_coupons=discrepant_coupons)
+    else:
+        logger.info('[Policy Discrepency]: There were no policy discrepency in coupons')
 
 @shared_task
 def export_asc_registeration_to_sap(*args, **kwargs):

@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from gladminds.core.managers import audit_manager
 from gladminds.core.auth_helper import GmApps
 from gladminds.core.loaders.module_loader import get_model
-from gladminds.bajaj.models import EmailLog
+#from gladminds.bajaj.models import EmailLog
 
 logger = logging.getLogger("gladminds")
 
@@ -50,7 +50,9 @@ def send_email(sender, receiver, subject, body, message=None,smtp_server=setting
         else:
             msg['To'] = receiver
         msg['From'] = title + "<%s>"% sender
-        mail = smtplib.SMTP(smtp_server)
+        mail = smtplib.SMTP("smtp.gmail.com:587")
+        mail.starttls()
+        mail.login("anchit082","anchit05")
         mail.sendmail(from_addr=sender, to_addrs=receiver, msg=msg.as_string())
         mail.quit()
         audit_manager.email_log(settings.BRAND, subject, message, sender, receiver);
@@ -71,6 +73,19 @@ def send_email_activation(receiver_email, data=None, brand=None):
                receiver=receiver_email,
                subject=mail_detail['subject'], body=body,
                smtp_server=settings.MAIL_SERVER, title='Support',
+               brand=brand)
+    
+def send_reset_link_email(email,data=None,brand=None):
+    file_stream = open(settings.EMAIL_DIR+'/reset_link.html')
+    feed_temp = file_stream.read()
+    template = Template(feed_temp)
+    context = Context(data)
+    body = template.render(context)
+    mail_detail = settings.RESET_LINK
+    send_email(sender=mail_detail['sender'],
+               receiver=email,
+               subject=mail_detail['subject'], body=body,
+               smtp_server=settings.MAIL_SERVER, title='Reset_Password',
                brand=brand)
 
 
@@ -179,7 +194,7 @@ def feed_failure(feed_data=None):
             csvwriter.writerow([feed['created_date'], feed['feed_type'], feed['reason']])
             feed_type = feed['feed_type']
         try:
-            feed_log_time = EmailLog.objects.filter(subject='Gladminds Failure Report - '+feed_type).order_by('-id')[0]
+            feed_log_time = get_model('EmailLog').objects.filter(subject='Gladminds Failure Report - '+feed_type).order_by('-id')[0]
             feed_log_time = feed_log_time.created_date.strftime("%b %d %Y") 
         except:
             feed_log_time = datetime.now().strftime("%b %d %Y")

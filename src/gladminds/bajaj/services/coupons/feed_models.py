@@ -4,7 +4,7 @@ from spyne.decorator import srpc
 from spyne.model.complex import Array
 from spyne.model.complex import ComplexModel
 from spyne.model.complex import Iterable
-from spyne.model.primitive import Integer, Decimal, Date
+from spyne.model.primitive import Integer, Decimal, Date, Time
 from spyne.model.primitive import Unicode, Mandatory, Boolean
 from spyne.protocol.soap import Soap11
 from spyne.server.django import DjangoApplication
@@ -26,6 +26,8 @@ logger = logging.getLogger("gladminds")
 
 
 pattern = r'(\d{4})-(\d{2})-(\d{2})(\d{2})(\d{2})(\d{2})'
+date_pattern = r'(\d{4})-(\d{2})-(\d{2})'
+time_pattern = r'(\d{2}):(\d{2}):(\d{2})'
 tns = settings.WSDL_TNS
 SUCCESS = "SUCCESS"
 FAILED = "FAILURE"
@@ -281,48 +283,167 @@ class BillOfMaterialList(ComplexModel):
     __namespace__ = tns
     BOMData = Array(BOMModel)
 
+class EcoReleaseModel(ComplexModel):
+    __namespace__ = tns
+    ECO_NUMBER  = Unicode
+    ECO_REL_DATE = Date(default=None)
+    ECO_DESCRIP = Unicode
+    ACTION = Unicode
+    PARENT_PART = Unicode
+    ADD_PART = Unicode
+    ADD_PART_QTY = Decimal
+    ADD_PART_REV = Unicode
+    ADD_PART_LOC_CODE = Unicode
+    DEL_PART = Unicode
+    DEL_PART_QTY = Decimal
+    DEL_PART_REV = Decimal
+    DEL_PART_LOC_CODE = Unicode
+    MODELS_APPLICABLE = Unicode
+    SERVICEABILITY = Unicode
+    INTERCHANGEABILITY = Unicode
+    REASON_FOR_CHANGE = Unicode
+
+class EcoReleaseModelList(ComplexModel):
+    __namespace__ = tns
+    ECOReleaseData = Array(EcoReleaseModel)
+    
+
+class ContainerTrackerModel(ComplexModel):
+    __namespace__ = tns
+
+    ZIB_INDENT_NUM = Unicode
+    CONSIGNMENT_ID = Unicode
+    TRUCK_NO = Unicode
+    TRANSPORTER_ID = Unicode
+    LR_NUMBER = Unicode
+    LR_DATE = Date(default=None)
+    DO_NUM = Unicode
+    GATEIN_TIME = Time(default=None)
+    GATEIN_DATE = Unicode(default=None)
+    TRANS_NAME = Unicode
+    
+class ContainerTrackerModelList(ComplexModel):
+    __namespace__ = tns
+    ContainerTrackerData = Array(ContainerTrackerModel)
+    
+class ContainerTrackerService(ServiceBase):
+    __namespace__ = tns
+    @srpc(ContainerTrackerModelList, AuthenticationModel,  _returns=Unicode)
+    def postContainerTracker(ObjectList, Credential):
+        tracker_list = []
+        feed_remark = FeedLogWithRemark(len(ObjectList.ContainerTrackerData),
+                                        feed_type='ContainerTracker Feed',
+                                        action='Received', status=True)
+
+        for tracker_obj in ObjectList.ContainerTrackerData:
+            tracker_list.append({
+                                'zib_indent_num' :  tracker_obj.ZIB_INDENT_NUM ,
+                                'consignment_id' :  tracker_obj.CONSIGNMENT_ID ,
+                                'truck_no' :  tracker_obj.TRUCK_NO,
+                                'transporter_id' : tracker_obj.TRANSPORTER_ID,
+                                'lr_number' :  tracker_obj.LR_NUMBER,
+                                'lr_date' :  tracker_obj.LR_DATE,
+                                'do_num' :  tracker_obj.DO_NUM,
+                                'gatein_date' :  tracker_obj.GATEIN_DATE,
+                                'gatein_time' :  tracker_obj.GATEIN_TIME,
+                                'tranporter_name' : tracker_obj.TRANS_NAME,
+                            })
+
+        feed_remark = save_to_db(feed_type='container_tracker', data_source=tracker_list, feed_remark=feed_remark)
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
+
+class ECOReleaseService(ServiceBase):
+    __namespace__ = tns
+
+    @srpc(EcoReleaseModelList, AuthenticationModel,  _returns=Unicode)
+    def postECORelease(ObjectList, Credential):
+        eco_list = []
+        feed_remark = FeedLogWithRemark(len(ObjectList.ECOReleaseData), feed_type='ECO Release Feed', action='Received', status=True)
+
+        for eco_obj in ObjectList.ECOReleaseData:
+            eco_list.append({
+                            'eco_number' :  eco_obj.ECO_NUMBER,
+                            'eco_release_date' :  eco_obj.ECO_REL_DATE,
+                            'eco_description' :  eco_obj.ECO_DESCRIP,
+                            'action' :  eco_obj.ACTION,
+                            'parent_part' :  eco_obj.PARENT_PART,
+                            'add_part' :  eco_obj.ADD_PART,
+                            'add_part_qty' :  eco_obj.ADD_PART_QTY,
+                            'add_part_rev' :  eco_obj.ADD_PART_REV,
+                            'add_part_loc_code' :  eco_obj.ADD_PART_LOC_CODE,
+                            'del_part' :  eco_obj.DEL_PART,
+                            'del_part_qty' :  eco_obj.DEL_PART_QTY,
+                            'del_part_rev' :  eco_obj.DEL_PART_REV,
+                            'del_part_loc_code' :  eco_obj.DEL_PART_LOC_CODE,
+                            'models_applicable' :  eco_obj.MODELS_APPLICABLE,
+                            'serviceability' :  eco_obj.SERVICEABILITY,
+                            'interchangebility' :  eco_obj.INTERCHANGEABILITY,
+                            'reason_for_change' :  eco_obj.REASON_FOR_CHANGE,
+                            })
+
+        feed_remark = save_to_db(feed_type='eco_release', data_source=eco_list, feed_remark=feed_remark)
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
+
 class BillOfMaterialService(ServiceBase):
     __namespace__ = tns
 
     @srpc(BillOfMaterialList, AuthenticationModel,  _returns=Unicode)
     def postBillOfMaterial(ObjectList, Credential):
-        try:
-            bom_header_list = []
-            bom_item_list = []
-            for bom_obj in ObjectList.BOMData:
-                for bom in bom_obj.HEADERFIELD:
-	                bom_header_list.append({
-                                 'sku_code': bom.SKU_CODE,
-                                 'plant': bom.PLANT,
-                                 'bom_type': bom.BOM_TYPE,
-                                 'bom_number_header': bom.BOM_NO,
-                                 'created_on': bom.CREATED_ON,
-                                 'valid_from_header': bom.VALID_FROM,
-                                 'valid_to_header': bom.VALID_TO,
-                                 })
-                for bom in bom_obj.ITEMFIELD:
-                    bom_item_list.append({
-                                'bom_number' : bom.BOM_NUMBER, 
-                                'part_number' : bom.PART_NUMBER,  
-                                'revision_number' : bom.REVISION_NO, 
-                                'quantity' : bom.QTY,
-                                'uom' :bom.UOM,
-                                'valid_from' : bom.VALID_FROM,
-                                'valid_to' : bom.VALID_TO,
-                                'plate_id' : bom.PLATE_ID,
-                                'plate_txt' : bom.PLATE_TXT,
-                                'serial_number' : bom.SERIAL_NUMBER,
-                                'change_number' : bom.CHANGE_NUMBER,
-                                'change_number_to' : bom.CHANGE_NUMBER_TO,
-                                'item' : bom.ITEM,
-                                'item_id' : bom.ITEM_ID,
+        bom_header_list = []
+        bom_item_list = []
+        header_count = 0 
+        item_count = 0
+        
+        for bom_obj in ObjectList.BOMData:
+            header_count = header_count + len(bom_obj.HEADERFIELD)
+            item_count = item_count + len(bom_obj.ITEMFIELD)
+            
+            for bom in bom_obj.HEADERFIELD:
+                bom_header_list.append({
+                             'sku_code': bom.SKU_CODE,
+                             'plant': bom.PLANT,
+                             'bom_type': bom.BOM_TYPE,
+                             'bom_number_header': bom.BOM_NO,
+                             'created_on': bom.CREATED_ON,
+                             'valid_from_header': bom.VALID_FROM,
+                             'valid_to_header': bom.VALID_TO,
+                             })
+            
+            for bom in bom_obj.ITEMFIELD:
+                bom_item_list.append({
+                            'bom_number' : bom.BOM_NUMBER, 
+                            'part_number' : bom.PART_NUMBER,  
+                            'revision_number' : bom.REVISION_NO, 
+                            'quantity' : bom.QTY,
+                            'uom' :bom.UOM,
+                            'valid_from' : bom.VALID_FROM,
+                            'valid_to' : bom.VALID_TO,
+                            'plate_id' : bom.PLATE_ID,
+                            'plate_txt' : bom.PLATE_TXT,
+                            'serial_number' : bom.SERIAL_NUMBER,
+                            'change_number' : bom.CHANGE_NUMBER,
+                            'change_number_to' : bom.CHANGE_NUMBER_TO,
+                            'item' : bom.ITEM,
+                            'item_id' : bom.ITEM_ID,
 
-                                'timestamp':bom_obj.BOMTIMESTAMP.TIMESTAMP
-                                })
-            save_to_db(feed_type='BOMHEADER', data_source=bom_header_list)
-            save_to_db(feed_type='BOMITEM', data_source=bom_item_list)
+                            'timestamp':bom_obj.BOMTIMESTAMP.TIMESTAMP
+                            })
+
+        feed_remark_header = FeedLogWithRemark(header_count, feed_type='BOM Header Feed', action='Received', status=True)
+        feed_remark_header = save_to_db(feed_type='bomheader', data_source=bom_header_list, feed_remark=feed_remark_header)
+        feed_remark_header.save_to_feed_log()
+        header_log = get_response(feed_remark_header)
+        
+        feed_remark_item = FeedLogWithRemark(item_count, feed_type='BOM Item Feed', action='Received', status=True)
+        feed_remark_item = save_to_db(feed_type='bomitem', data_source=bom_item_list, feed_remark=feed_remark_item)
+        feed_remark_item.save_to_feed_log()
+        item_log = get_response(feed_remark_item)
+        
+        if item_log == SUCCESS and  item_log == header_log:
             return SUCCESS
-        except Exception as ex:
+        else:
             return FAILED
 
 class BrandService(ServiceBase):

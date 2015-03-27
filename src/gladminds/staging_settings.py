@@ -142,6 +142,7 @@ AFTER_BUY_CONSTANTS = {
 
 ########################SQS Queue Name
 SQS_QUEUE_NAME = "gladminds-staging"
+SQS_QUEUE_NAME_SMS = "gladminds-staging-sms"
 ######################################
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail QA"
 VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]
@@ -152,3 +153,11 @@ MAIL_DETAIL["subject"] = "GladMinds Feed Report QA"
 MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
 #######################################################################
 ENV = "staging"
+
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_elasticache.memcached.ElastiCache',
+#         'LOCATION': 'gladminds-memcache.t2nfas.cfg.use1.cache.amazonaws.com:11211'
+#     }
+# }

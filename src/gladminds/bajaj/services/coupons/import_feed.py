@@ -102,8 +102,10 @@ class SAPFeed(object):
             'old_fsc': OldFscFeed,
             'credit_note': CreditNoteFeed,
             'asc_sa': ASCAndServiceAdvisorFeed,
-            'BOMHEADER': BOMHeaderFeed,
-            'BOMITEM': BOMItemFeed,
+            'bomheader': BOMHeaderFeed,
+            'bomitem': BOMItemFeed,
+            'eco_release': ECOReleaseFeed,
+            'container_tracker':ContainerTrackerFeed,
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
@@ -521,7 +523,11 @@ class BOMItemFeed(BaseFeed):
                                             item=bom['item'], item_id=bom['item_id'])                
                 bom_item_obj.save()
             except Exception as ex:
-                logger.info("[Exception: ]: BOMItemFeed {0}".format(ex))
+                ex="[Exception: ]: BOMItemFeed {0}".format(ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+                
+        return self.feed_remark
 
 class BOMHeaderFeed(BaseFeed):    
 
@@ -534,8 +540,64 @@ class BOMHeaderFeed(BaseFeed):
                                                   valid_to=bom['valid_to_header'])
                 bom_header_obj.save() 
             except Exception as ex:
-                logger.info("[Exception: ]: BOMHeaderFeed {0}".format(ex))
-                
+                ex="[Exception: ]: BOMHeaderFeed {0}".format(ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
 
+        return self.feed_remark
     
+class ECOReleaseFeed(BaseFeed):    
+
+    def import_data(self):
+        for eco_obj in self.data_source:
+            try:
+                eco_release_obj = models.ECORelease(eco_number=eco_obj['eco_number'], eco_release_date=eco_obj['eco_release_date'],
+                                                    eco_description=eco_obj['eco_description'], action=eco_obj['action'], parent_part=eco_obj['parent_part'],
+                                                    add_part=eco_obj['add_part'], add_part_qty=eco_obj['add_part_qty'], add_part_rev=eco_obj['add_part_rev'],
+                                                    add_part_loc_code=eco_obj['add_part_loc_code'], del_part=eco_obj['del_part'], del_part_qty=eco_obj['del_part_qty'],
+                                                    del_part_rev=eco_obj['del_part_rev'], del_part_loc_code=eco_obj['del_part_loc_code'], 
+                                                    models_applicable=eco_obj['models_applicable'], serviceability=eco_obj['serviceability'], 
+                                                    interchangebility=eco_obj['interchangebility'], reason_for_change=eco_obj['reason_for_change'])
+                eco_release_obj.save() 
+            except Exception as ex:
+                ex="[Exception: ]: ECOReleaseFeed {0}".format(ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+        return self.feed_remark
+
+class ContainerTrackerFeed(BaseFeed):
+
+    def import_data(self):
+        for tracker_obj in self.data_source:
+            try:
+                try:
+                    container_tracker_obj=models.ContainerTracker.objects.get(consignment_id=tracker_obj['consignment_id'])
+                except ObjectDoesNotExist as odne:
+                    transporter_data = self.check_or_create_transporter(transporter_id=tracker_obj['transporter_id'],
+                                                                        name=tracker_obj['tranporter_name'])
+                    container_tracker_obj = models.ContainerTracker(zib_indent_num=tracker_obj['zib_indent_num'], 
+                                                                    consignment_id=tracker_obj['consignment_id'],
+                                                                    truck_no=tracker_obj['truck_no'], 
+                                                                    lr_number=tracker_obj['lr_number'],
+                                                                    lr_date=tracker_obj['lr_date'],
+                                                                    do_num=tracker_obj['do_num'],
+                                                                    transporter=transporter_data)
+                
+                if tracker_obj['gatein_date'] != "0000-00-00":
+                    gatein_date=datetime.strptime(tracker_obj['gatein_date'], "%Y-%m-%d")
+                    status="Closed"
+                else:
+                    gatein_date=None
+                    status="Open"
+                container_tracker_obj.gatein_date=gatein_date
+                container_tracker_obj.gatein_time=tracker_obj['gatein_time']
+                container_tracker_obj.status=status
+                container_tracker_obj.save() 
+            except Exception as ex:
+                ex="[Exception: ]: ContainerTrackerFeed {0}".format(ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+        
+        return self.feed_remark
+
     

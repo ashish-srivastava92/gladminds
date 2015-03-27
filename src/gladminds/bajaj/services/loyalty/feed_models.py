@@ -4,7 +4,7 @@ from spyne.decorator import srpc
 from spyne.model.complex import Array
 from spyne.model.complex import ComplexModel
 from spyne.model.complex import Iterable
-from spyne.model.primitive import Integer, Decimal, Date
+from spyne.model.primitive import Integer, Decimal, Date, Time
 from spyne.model.primitive import Unicode, Mandatory
 from spyne.protocol.soap import Soap11
 from spyne.server.django import DjangoApplication

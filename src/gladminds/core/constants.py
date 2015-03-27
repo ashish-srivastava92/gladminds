@@ -149,7 +149,7 @@ FORM_STATUS_CHOICES = (
                        ('Incomplete', 'Incomplete'),
                        )
 
-FEED_TYPES = ['Dispatch Feed', 'Purchase Feed', 'Credit Note Feed', 'CDMS Feed']
+FEED_TYPES = ['Dispatch Feed', 'Purchase Feed', 'Credit Note Feed', 'CDMS Feed', 'Old Fsc Feed']
 
 STATUS_TO_NOTIFY = ['Approved', 'Rejected', 'Accepted', 'Shipped', 'Delivered']
 
@@ -199,6 +199,7 @@ class FeedStatus():
 class FeedSentType():
     COUPON_REDEEM = 'Coupon Redeem Feed'
     CUSTOMER_REGISTRATION = 'Customer Registration Feed'
+    PURCHASE_SYNC_FEED = 'Purchase Sync Feed'
 
 FEED_SENT_TYPES = [getattr(FeedSentType, x) for x in dir(FeedSentType) if (not x.startswith("__"))]
 
@@ -219,3 +220,9 @@ class TicketStatus():
     PENDING = "Pending"
 
 WELCOME_KIT_MECHANIC_FIELDS = ['Mechanic ID', 'first_name', 'middle_name', 'last_name', 'phone_number', 'date_of_birth', 'address_line_1', 'address_line_2', 'address_line_3', 'address_line_4', 'address_line_5', 'address_line_6','shop_name', 'shop_address', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url',]
+
+CONSIGNMENT_STATUS = (
+        ('Open', 'Open'),
+        ('Inprogress', 'Inprogress'),
+        ('Closed', 'Closed')
+    )

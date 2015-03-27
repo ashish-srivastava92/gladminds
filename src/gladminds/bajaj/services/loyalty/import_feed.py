@@ -32,7 +32,7 @@ class LoyaltyFeed(object):
             'distributor': DistributorFeed,
             'mechanic': MechanicFeed,
             'nsm':NSMFeed,
-            'asm':ASMFeed
+            'asm':ASMFeed,
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
@@ -215,7 +215,6 @@ class NSMFeed(BaseFeed):
                     nsm_object.user = user_object
                     nsm_object.save()  
             except Exception as ex:
-                print "4"
                 total_failed += 1
                 ex = "[NSMFeed]: id-{0} :: {1}".format(nsm['phone_number'], ex)
                 logger.error(ex)

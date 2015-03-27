@@ -16,6 +16,8 @@ all_app = Application([fsc_feed.BrandService,
                        fsc_feed.OldFscService,
                        fsc_feed.CreditNoteService,
                        fsc_feed.BillOfMaterialService,
+                       fsc_feed.ECOReleaseService,
+                       fsc_feed.ContainerTrackerService,
                        loyalty_feed.PartMasterService,
                        loyalty_feed.PartUPCService,
                        loyalty_feed.PartPointService,
@@ -106,6 +108,18 @@ bom_app = Application([fsc_feed.BillOfMaterialService],
                            out_protocol=Soap11()
                            )
 
+eco_release_app = Application([fsc_feed.ECOReleaseService],
+                           tns=tns,
+                           in_protocol=Soap11(validator='lxml'),
+                           out_protocol=Soap11()
+                           )
+ 
+container_tracker_app = Application([fsc_feed.ContainerTrackerService],
+                           tns=tns,
+                           in_protocol=Soap11(validator='lxml'),
+                           out_protocol=Soap11()
+                           )
+ 
 all_service = csrf_exempt(DjangoApplication(all_app))
 brand_service = csrf_exempt(DjangoApplication(brand_app))
 dealer_service = csrf_exempt(DjangoApplication(dealer_app))
@@ -120,3 +134,5 @@ part_point_service = csrf_exempt(DjangoApplication(part_point_app))
 distributor_service = csrf_exempt(DjangoApplication(distributor_app))
 mechanic_service = csrf_exempt(DjangoApplication(mechanic_app))
 bom_service = csrf_exempt(DjangoApplication(bom_app))
+eco_release_app = csrf_exempt(DjangoApplication(eco_release_app))
+container_tracker_app = csrf_exempt(DjangoApplication(container_tracker_app))
