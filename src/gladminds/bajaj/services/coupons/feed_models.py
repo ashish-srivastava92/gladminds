@@ -316,7 +316,7 @@ class ContainerTrackerModel(ComplexModel):
     TRUCK_NO = Unicode
     TRANSPORTER_ID = Unicode
     LR_NUMBER = Unicode
-    LR_DATE = Date(default=None)
+    LR_DATE = Unicode(default=None)
     DO_NUM = Unicode
     GATEIN_TIME = Time(default=None)
     GATEIN_DATE = Unicode(default=None)
