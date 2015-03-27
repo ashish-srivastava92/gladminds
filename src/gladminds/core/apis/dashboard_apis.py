@@ -13,7 +13,7 @@ from django.conf import settings
 from gladminds.core.core_utils.utils import dictfetchall
 from django.http.response import HttpResponse
 from tastypie.utils.mime import build_content_type
-
+from django.db.models import Sum
 
 def get_vins():
     return models.ProductData.objects.all().count()
@@ -22,6 +22,9 @@ def get_vins():
 def get_customers_count():
     return models.ProductData.objects.filter(purchase_date__isnull=False).count()
 
+def get_mobile_number_count():
+    sum = models.CustomerTempRegistration.objects.filter(mobile_number_update_count__isnull=False).aggregate(Sum('mobile_number_update_count'))
+    return sum.values()[0] 
 
 def get_success_and_failure_counts(objects):
     fail = 0
@@ -103,7 +106,12 @@ class OverallStatusResource(CustomBaseResource):
                             models.ServiceAdvisor.objects.count)
         sas_active = get_set_cache('gm_sas_active',
                             models.ServiceAdvisor.objects.active_count)
-
+        mobile_number_change_count = get_set_cache('gm_mobile_number_change_count',
+                                                   get_mobile_number_count,
+                                                   timeout=10)
+        sms_sent = get_set_cache('gm_sms_sent', models.SMSLog.objects.filter(action='SENT').count())
+        sms_received = get_set_cache('gm_sms_received', models.SMSLog.objects.filter(action='RECEIVED').count())
+        
         return map(CustomApiObject, [create_dict(["1", "#of Vins", vins]),
                                      create_dict(["2", "Service Coupons Closed",
                                                   coupons_closed]),
@@ -128,7 +136,13 @@ class OverallStatusResource(CustomBaseResource):
                                      create_dict(["12", "# of Active SAs",
                                                   sas_active]),
                                      create_dict(["13", "# of Customers",
-                                                  customers])
+                                                  customers]),
+                                     create_dict(["14", "Mobile updated",
+                                                  mobile_number_change_count]),
+                                     create_dict(["15", "SMS SENT",
+                                                  sms_sent]),
+                                     create_dict(["16", "SMS RECEIVED",
+                                                  sms_received])
                                      ]
                    )
 
