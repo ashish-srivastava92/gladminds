@@ -294,7 +294,6 @@ class LoyaltyService(CoreLoyaltyService):
             if len(unique_product_codes)==1 and invalid_upcs:
                 message=get_template('SEND_INVALID_UPC')
             else:
-                print 111111122222222, added_points, total_points
                 message=get_template('SEND_ACCUMULATED_POINT').format(
                                 mechanic_name=mechanic[0].first_name,
                                 added_points=added_points,
