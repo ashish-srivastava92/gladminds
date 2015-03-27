@@ -237,7 +237,7 @@ class LoyaltyService(CoreLoyaltyService):
 
     def accumulate_point(self, sms_dict, phone_number):
         '''accumulate points with given upc'''
-        unique_product_codes = set((sms_dict['upc'].upper()).split())
+        unique_product_codes = set((sms_dict['upc']).split())
         valid_upc=[]
         valid_product_number=[]
         invalid_upcs_message=''
@@ -294,6 +294,7 @@ class LoyaltyService(CoreLoyaltyService):
             if len(unique_product_codes)==1 and invalid_upcs:
                 message=get_template('SEND_INVALID_UPC')
             else:
+                print 111111122222222, added_points, total_points
                 message=get_template('SEND_ACCUMULATED_POINT').format(
                                 mechanic_name=mechanic[0].first_name,
                                 added_points=added_points,
