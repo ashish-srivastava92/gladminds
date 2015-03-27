@@ -578,10 +578,14 @@ class ContainerTrackerFeed(BaseFeed):
                     container_tracker_obj = models.ContainerTracker(zib_indent_num=tracker_obj['zib_indent_num'], 
                                                                     consignment_id=tracker_obj['consignment_id'],
                                                                     truck_no=tracker_obj['truck_no'], 
-                                                                    lr_number=tracker_obj['lr_number'],
-                                                                    lr_date=tracker_obj['lr_date'],
+                                                                    lr_number=tracker_obj['lr_number'],                                                                    
                                                                     do_num=tracker_obj['do_num'],
                                                                     transporter=transporter_data)
+
+                if tracker_obj['lr_date'] == "0000-00-00" or not tracker_obj['lr_date']:
+                    lr_date=None
+                else:
+                    lr_date=datetime.strptime(tracker_obj['lr_date'], "%Y-%m-%d")
                 
                 if tracker_obj['gatein_date'] != "0000-00-00":
                     gatein_date=datetime.strptime(tracker_obj['gatein_date'], "%Y-%m-%d")
@@ -589,6 +593,7 @@ class ContainerTrackerFeed(BaseFeed):
                 else:
                     gatein_date=None
                     status="Open"
+                container_tracker_obj.lr_date=lr_date
                 container_tracker_obj.gatein_date=gatein_date
                 container_tracker_obj.gatein_time=tracker_obj['gatein_time']
                 container_tracker_obj.status=status
