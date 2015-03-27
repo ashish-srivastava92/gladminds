@@ -103,7 +103,12 @@ class OverallStatusResource(CustomBaseResource):
                             models.ServiceAdvisor.objects.count)
         sas_active = get_set_cache('gm_sas_active',
                             models.ServiceAdvisor.objects.active_count)
-
+        mobile_number_change_count = get_set_cache('gm_mobile_number_change_count',
+                                                   models.CustomerTempRegistration.objects.get_mobile_number_update_count,
+                                                   timeout=10)
+        sms_sent = get_set_cache('gm_sms_sent', models.SMSLog.objects.filter(action='SENT').count())
+        sms_received = get_set_cache('gm_sms_received', models.SMSLog.objects.filter(action='RECEIVED').count())
+        
         return map(CustomApiObject, [create_dict(["1", "#of Vins", vins]),
                                      create_dict(["2", "Service Coupons Closed",
                                                   coupons_closed]),
@@ -128,7 +133,13 @@ class OverallStatusResource(CustomBaseResource):
                                      create_dict(["12", "# of Active SAs",
                                                   sas_active]),
                                      create_dict(["13", "# of Customers",
-                                                  customers])
+                                                  customers]),
+                                     create_dict(["14", "Mobile updated",
+                                                  mobile_number_change_count]),
+                                     create_dict(["15", "SMS SENT",
+                                                  sms_sent]),
+                                     create_dict(["16", "SMS RECEIVED",
+                                                  sms_received])
                                      ]
                    )
 
