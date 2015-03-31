@@ -40,7 +40,8 @@ class UserResource(CustomBaseModelResource):
 #         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get', 'post', 'put']
         filtering = {
-                     "is_active": ALL
+                     "is_active": ALL,
+                     "username" : ALL
                      }
         always_return_data = True
 
@@ -358,6 +359,9 @@ class BrandDepartmentResource(CustomBaseModelResource):
         authorization = Authorization()
         detail_allowed_methods = ['get']
         always_return_data = True
+        filtering = {
+                     "id" : ALL
+                     }
 
 
 class DepartmentSubCategoriesResource(CustomBaseModelResource):
@@ -370,7 +374,8 @@ class DepartmentSubCategoriesResource(CustomBaseModelResource):
         detail_allowed_methods = ['get']
         always_return_data = True
         filtering = { 
-                     "department": ALL_WITH_RELATIONS
+                     "department": ALL_WITH_RELATIONS,
+                     "id" : ALL
                      } 
 
 
@@ -393,6 +398,7 @@ class ServiceDeskUserResource(CustomBaseModelResource):
         always_return_data = True
         filtering = {
                         "user": ALL_WITH_RELATIONS,
-                        "sub_department" : ALL_WITH_RELATIONS
+                        "sub_department" : ALL_WITH_RELATIONS,
+                        "id" : ALL
                      }
 
