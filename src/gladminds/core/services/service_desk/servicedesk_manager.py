@@ -305,6 +305,9 @@ def modify_feedback(feedback_obj, data, user, host):
         assign_number = None
     assign = feedback_obj.assignee
     
+    if data['status'] == status[0] and previous_status == (status[1] or status[2]):
+        feedback_obj.fcr = False
+
     if feedback_obj.due_date:
         due_date = convert_utc_to_local_time(feedback_obj.due_date)
         feedback_obj.due_date = data['due_date']
@@ -421,6 +424,8 @@ def modify_feedback(feedback_obj, data, user, host):
 
 # check if status is resolved
     if feedback_obj.status == status[2]:
+        if previous_status == status[0]:
+            feedback_obj.fcr = True
         servicedesk_obj_all = User.objects.filter(groups__name=Roles.SDMANAGERS)
         feedback_obj.resolved_date = datetime.datetime.now()
         feedback_obj.resolved_date = datetime.datetime.now()

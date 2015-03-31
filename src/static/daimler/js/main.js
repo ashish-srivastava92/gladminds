@@ -146,7 +146,7 @@
 		var data = Utils.getFormData('.servicedesk'),
 		formData = new FormData($(this).get(0)),
 		comment_data = Utils.getFormData('.comment-form'),
-		url = '/aftersell/feedbackdetails/'+data.ticketId+'/comments/'+comment_data.commentId+'/',
+		url = '/v1/comments/modify-comments/'+comment_data.commentId+'/',
 		messageModal = $('.modal.message-modal'),
 		messageBlock = $('.modal-body', messageModal),
 		messageHeader = $('.modal-title', messageModal),

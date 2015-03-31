@@ -99,3 +99,4 @@ alter table gm_member add column total_redemption_req integer(50) default 0;
 
 alter table gm_activity add user_id integer;
 alter table gm_activity add foreign key (user_id) references auth_user(id);
+alter table gm_feedback add column fcr boolean default False;
