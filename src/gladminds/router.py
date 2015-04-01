@@ -1,4 +1,5 @@
 from django.conf import settings
+from importlib import import_module
 from gladminds.core.exceptions import ModelBrandNotMatchingException
 
 _COMMON_APPS = ['auth', 'contenttypes', 'sessions', 'sites', 'admin', 'djcelery', 'provider',
@@ -9,17 +10,16 @@ class DatabaseAppsRouter(object):
     """
     A router to control all database operations on models for different
     databases.
-
     In case an app is not set in settings.DATABASE_APPS_MAPPING, the router
     will fallback to the `default` database.
-
     Settings example:
-
     DATABASE_APPS_MAPPING = {'app1': 'db1', 'app2': 'db2'}
     """
     @staticmethod
     def common_logic(model, hints={}):
-        if model._meta.app_label in _COMMON_APPS:
+
+        if model._meta.app_label in _COMMON_APPS+ ['core']:
+
             if 'instance' in hints.keys():
                 db = hints['instance']._state.db or settings.BRAND
             else:
@@ -65,6 +65,13 @@ class DatabaseAppsRouter(object):
         if model._meta.app_label in ['south'] and db in ['default']:
             return True
 
+        if model._meta.app_label in ['core']:
+            try:
+                import_module('gladminds.{0}.models'.format(db))
+                return False
+            except:
+                return True
+ 
         if db in settings.DATABASE_APPS_MAPPING.values():
             return settings.DATABASE_APPS_MAPPING.get(model._meta.app_label) == db
         elif settings.DATABASE_APPS_MAPPING.has_key(model._meta.app_label):
@@ -72,4 +79,3 @@ class DatabaseAppsRouter(object):
             return False
         
         return None
-    

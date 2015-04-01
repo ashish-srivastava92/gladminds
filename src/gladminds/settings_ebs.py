@@ -14,7 +14,7 @@ ALLOWED_HOSTS = ['*']
 
 
 DATABASES = {
-    'default': {
+    GmApps.GM: {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gladmindsdb',
         'USER': 'gladminds',

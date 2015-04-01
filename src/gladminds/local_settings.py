@@ -11,47 +11,8 @@ OUT_DIR = os.path.join(BASE_DIR, "out")
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'admin')
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gm',
-        'USER': 'root',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-    },
-    'bajaj': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bajaj',
-        'USER': 'root',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-    },
-    'demo': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'demo',
-        'USER': 'root',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-    },
-    'afterbuy': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'afterbuy',
-        'USER': 'root',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-    }
-}
-
-
 BROKER_URL = 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
-
 
 JOBCARD_DIR = '{0}/jobcards/dev/'
 
@@ -96,6 +57,5 @@ LOGGING['loggers']['gladminds']['handlers']=['gladminds_logs']
 ENV = "local"
 
 WSDL_TNS="http://local.bajaj.gladminds.co:8000/api/v1/feed/"
-
-DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+CORE_WSDL_TNS="http://local.bajajcv.gladminds.co:8000/api/v1/feed/"
 

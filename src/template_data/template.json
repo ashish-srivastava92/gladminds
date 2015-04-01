@@ -570,5 +570,14 @@
       "template":  "FSC cannot be closed with this option. Please use CDMS system to close FSC",
       "description": "Send message when dealer not authorized to close coupon"
     }
+   },
+   {
+    "model": "gladminds.messagetemplate",
+    "pk": 64,
+    "fields": {
+      "template_key":"CUSTOMER_SUPPORT_FOR_DFSC",
+      "template":  "",
+      "description": "Send message for change in customer support"
+    }
   }
 ]

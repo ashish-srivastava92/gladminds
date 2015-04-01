@@ -1,6 +1,6 @@
 import sys
 import json
-
+from importlib import import_module
 from django.views.generic import TemplateView
 from django.http import HttpResponse, Http404
 from django.core.exceptions import ImproperlyConfigured
@@ -17,9 +17,16 @@ class TastypieApiMixin(object):
     """
     def __init__(self, *args, **kwargs):
         super(TastypieApiMixin, self).__init__(*args, **kwargs)
-        tastypie_api_module = getattr(settings, 'TASTYPIE_SWAGGER_API_MODULE', None)
-        if settings.BRAND in settings.BRANDS:
-            tastypie_api_module = 'gladminds.{0}.urls.api_v1'.format(settings.BRAND)
+        #tastypie_api_module = getattr(settings, 'TASTYPIE_SWAGGER_API_MODULE', None)
+        tastypie_api_module = 'gladminds.{0}.urls.api_v1'.format(settings.BRAND)
+        if settings.BRAND == 'admin':
+            tastypie_api_module = 'gladminds.urls.api_v1'
+        else:
+            try:
+                import_module('gladminds.{0}.urls'.format(settings.BRAND))
+            except Exception as ex:
+                tastypie_api_module = 'gladminds.core.urls.api_v1'
+        
         path, attr = tastypie_api_module.rsplit('.', 1)
         try:
             tastypie_api = getattr(sys.modules[path], attr, None)

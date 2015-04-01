@@ -17,7 +17,6 @@ class AuditResource(CustomBaseModelResource):
     class Meta:
         queryset = models.AuditLog.objects.all()
         resource_name = 'audit'
-        model_name = 'AuditLog'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
@@ -28,7 +27,6 @@ class SMSLogResource(CustomBaseModelResource):
     class Meta:
         queryset = models.SMSLog.objects.all()
         resource_name = 'sms-logs'
-        model_name = 'SMSLog'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
@@ -43,7 +41,6 @@ class DataFeedLogResource(CustomBaseModelResource):
     class Meta:
         queryset = models.DataFeedLog.objects.all()
         resource_name = "feed-logs"
-        model_name = 'DataFeedLog'
         authorization = MultiAuthorization(DjangoAuthorization())
         authentication = MultiAuthentication(AccessTokenAuthentication())
         detail_allowed_methods = ['get']

@@ -2,6 +2,7 @@
 # Django settings for gladminds project.
 import os
 import djcelery
+from copy import deepcopy
 djcelery.setup_loader()
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -24,7 +25,7 @@ ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
                     'check_point_balance':'chkbal'}
 
 ADMINS = (
-    ('somit', 'somit@hashedin.com'),
+    ('pavan', 'pavankumar.s@hashedin.com'),
     ('naureen', 'naureen.razi@hashedin.com'),
     ('priyanka', 'priyanka.n@hashedin.com')
 )
@@ -107,8 +108,8 @@ SUIT_CONFIG = {
                      'label': 'Area Spares Manager'},
                     {'model': 'distributor',
                      'label': 'Distributor'},
-                   {'model': 'mechanic',
-                     'label': 'Mechanic'},
+                   {'model': 'member',
+                     'label': 'Member'},
                    {'model': 'sparepartmasterdata',
                      'label': 'Spare Part Master Data'},
                    {'model': 'sparepartupc',
@@ -144,49 +145,46 @@ SUIT_CONFIG = {
 MANAGERS = ADMINS
 
 DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
+DB_USER = os.environ.get('DB_USER', 'root')
+DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
+DB_PORT = os.environ.get('DB_PORT', '3306')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'admin')
+
+class GmApps():
+    AFTERBUY = 'afterbuy'
+    BAJAJ = 'bajaj'
+    BAJAJCV = 'bajajcv'
+    DEMO = 'demo'
+    GM = 'default'
+    DAIMLER = 'daimler'
 
 # Mapping is first app name then db name
 DATABASE_APPS_MAPPING = {
-                         'default': 'default',
-                         'bajaj':'bajaj',
-                         'demo': 'demo',
-                         'afterbuy':'afterbuy'
+                         GmApps.GM: 'default',
+                         GmApps.BAJAJ:'bajaj',
+                         GmApps.DEMO: 'demo',
+                         GmApps.AFTERBUY:'afterbuy',
+                         GmApps.BAJAJCV:'bajajcv',
+                         GmApps.DAIMLER:'daimler',
                     }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+db_common = {
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gm',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-    },
-    'bajaj': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'bajaj',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-    },
-    'demo': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'demo',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-    },
-    'afterbuy': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'afterbuy',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     }
-}
+DATABASES = {}
+
+for brand in dir(GmApps):
+    if not brand.startswith('__'):
+        if getattr(GmApps,brand) in ['default']:
+            db_common.update({'NAME': 'gm'})
+        else:
+            db_common.update({'NAME': getattr(GmApps,brand)})
+        DATABASES[getattr(GmApps,brand)] = deepcopy(db_common)
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -309,7 +307,7 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-TEST_IGNORE_APPS = (# 'south',
+TEST_IGNORE_APPS = ( 'south',
                     )
 
 ALL_APPS = (
@@ -336,14 +334,13 @@ ALL_APPS = (
     'storages',
     'tastypie_swagger',
     'django_otp',
-    'django_otp.plugins.otp_totp',
-    'constance.backends.database'
+    'django_otp.plugins.otp_totp'
    # 'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
 
-INSTALLED_APPS = ALL_APPS + TEST_IGNORE_APPS
+INSTALLED_APPS = ALL_APPS
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
@@ -603,7 +600,7 @@ FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
 BRAND = None
 GM_BRAND = 'default'
-OUTSIDE_BRANDS = ['bajaj', 'demo']
+OUTSIDE_BRANDS = ['bajaj', 'demo','bajajcv','daimler']
 
 BRANDS = OUTSIDE_BRANDS + ['afterbuy']
 ###############################################
@@ -622,10 +619,12 @@ SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                   'MOCK': {}
                   }
 
-ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},
-          'demo': {'user': 'demo', 'password': 'demo'},
-          'afterbuy': {'user': 'afterbuy', 'password': 'afterbuy'},
-          'default': {'user': 'gladminds', 'password': 'gladminds'}
+ADMIN_DETAILS = {GmApps.BAJAJ: {'user': 'bajaj', 'password': 'bajaj'},
+          GmApps.DEMO: {'user': 'demo', 'password': 'demo'},
+          GmApps.AFTERBUY: {'user': 'afterbuy', 'password': 'afterbuy'},
+          GmApps.GM: {'user': 'gladminds', 'password': 'gladminds'},
+          GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'bajajcv'},
+          GmApps.DAIMLER: {'user': 'daimler', 'password': 'daimler'}
           }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True
@@ -639,7 +638,9 @@ CONSTANCE_CONFIG = {
     'AFTERBUY_RECYCLE_EMAIL_RECIPIENT' : ('demosupport@gladminds.co', 'Default Email for recycle')
 }
 
-CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+AFTERBUY_FORGOT_PASSWORD_URL = 'http://afterbuy.co/demo/staging_qw741qaz5/change-password.php'
+AFTERBUY_RECYCLE_EMAIL_RECIPIENT = 'demosupport@gladminds.co'
+
 
 SAP_CRM_DETAIL = {
                   'username':'pisuper',
@@ -668,7 +669,11 @@ DISTRIBUTOR_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/distrib
 BRAND_META = {
                "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/"},
                "demo": {"title": "Daimler", "logo": "daimler/img/daimler_logo.gif", "tagline": "2015 Daimler AG",
-                        "basecss": "/daimler/css/base.css","admin_url" :"/admin/"}
+                        "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
+              "daimler": {"title": "Daimler", "logo": "daimler/img/daimler_logo.gif", "tagline": "2015 Daimler AG",
+                        "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
+
+              
                }
 
 HOME_URLS = {
@@ -682,7 +687,13 @@ HOME_URLS = {
                        "Dealers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        "DealerAdmins":[{"SERVICE DESK":"/aftersell/helpdesk"},
                                        {"ADD SERVICE DESK USER":"/add/servicedesk-user"}]
+                       },
+             "daimler" : {"SdManagers":[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "Dealers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "DealerAdmins":[{"SERVICE DESK":"/aftersell/helpdesk"},
+                                       {"ADD SERVICE DESK USER":"/add/servicedesk-user"}]
                        }
              }
 
-LOGIN_URL='login/'
+LOGIN_URL='/login'

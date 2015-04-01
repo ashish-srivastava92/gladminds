@@ -1,3 +1,4 @@
+from datetime import datetime 
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
 from django.db.transaction import atomic
@@ -7,7 +8,8 @@ from gladminds.afterbuy.models import Consumer
 from gladminds.core.auth_helper import AFTERBUY_GROUPS, add_user_to_group,\
     OTHER_GROUPS, Roles, GmApps, AFTERBUY_USER_MODELS, ALL_APPS, ALL_BRANDS
 from django.contrib.contenttypes.models import ContentType
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import get_model
+from gladminds.management.commands.load_state import Command as state_cmd
 from gladminds.management.commands.load_mech_data import Command as mech_cmd
 from gladminds.management.commands.load_part_data import Command as part_cmd
 from gladminds.management.commands.load_area_service_manager_data import Command as asm_cmd
@@ -17,7 +19,8 @@ _DEMO = GmApps.DEMO
 _BAJAJ = GmApps.BAJAJ
 _AFTERBUY = GmApps.AFTERBUY
 _GM = GmApps.GM
-
+_BAJAJCV = GmApps.BAJAJCV
+_DAIMLER = GmApps.DAIMLER
 
 _ALL_APPS = ALL_APPS
 
@@ -28,14 +31,26 @@ _AFTERBUY_ADMINS = [{'email':'karthik.rajagopalan@gladminds.co', 'username': 'ka
 _AFTERBUY_SUPERADMINS = [{'email':'naveen.shankar@gladminds.co', 'username':'naveen.shankar', 'phone':'9880747576'},
                          {'email':'afterbuy@gladminds.co', 'username':'afterbuy', 'phone':'9999999999'}
                     ]
-
-_BAJAJ_LOYALTY_SUPERADMINS = [('gladminds', '', 'gladminds!123'),
-                              ('kumarashish@bajajauto.co.in', 'kumarashish@bajajauto.co.in',
-                               'kumarashish!123')]
-_BAJAJ_LOYALTY_NSM = [('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123', 'NSM002', 'south', 'Raghunath')]
-_BAJAJ_LOYALTY_ASM = [('prajurkar@bajajauto.co.in', 'prajurkar@bajajauto.co.in', 'spremnath!123', 'ASM004', 'PREM NATH', '+919176339712', 'Tamil Nadu')]
 _BAJAJ_ZSM = [('mspendharkar@bajajauto.co.in', 'mspendharkar@bajajauto.co.in', 'milindpendharkar@123', 'Milind Pendharkar')]
+_BAJAJ_LOYALTY_TERRITORY = ['North', 'South', 'East', 'West']
+_BAJAJ_LOYALTY_SUPERADMINS = [('gladminds', '', 'gladminds!123', ''),
+                              ('rkjena@bajajauto.co.in', 'rkjena@bajajauto.co.in', 'rkjena!123', 'Rajib Kumar Jena'),
+                              ('ipattabhi@bajajauto.co.in', 'ipattabhi@bajajauto.co.in', 'ipattabhi!123', 'I Pattabhiramaswamy'),
+                              ('adubey@bajajauto.co.in', 'adubey@bajajauto.co.in', 'adubey!123', 'Awadesh Dubey')]
 
+_BAJAJ_LOYALTY_ADMINS = [('kumarashish@bajajauto.co.in', 'kumarashish@bajajauto.co.in','kumarashish!123', ''),
+                         ('dhazarika@bajajauto.co.in', 'dhazarika@bajajauto.co.in','dhazarika!123', 'Debaranjan Hazarika'),]
+
+_BAJAJ_LOYALTY_NSM = [('rkrishnan@bajajauto.co.in', 'rkrishnan@bajajauto.co.in', 'rkrishnan!123', 'NSM002', 'South', 'Raghunath'),
+                      ('ssaha@bajajauto.co.in', 'ssaha@bajajauto.co.in', 'ssaha!123', 'NSM003', 'North', 'Sourav Saha')]
+
+_BAJAJ_LOYALTY_ASM = [('prajurkar@bajajauto.co.in', 'prajurkar@bajajauto.co.in', 'spremnath!123', 'ASM004', 'PREM NATH', '+919176339712', 'Tamil Nadu'),
+                      ('pgpooyath@bajajauto.co.in', 'pgpooyath@bajajauto.co.in', 'pgpooyath!123', 'ASM005', 'PRAVEEN G POOYATH', '+918111973444', 'Karnataka'),
+                      ('abanerjee@bajajauto.co.in', 'abanerjee@bajajauto.co.in', 'abanerjee!123', 'ASM006', 'Abhijeet Banerjee', '', 'West Bengal'),
+                      ('harpreetsingh@bajajauto.co.in', 'harpreetsingh@bajajauto.co.in', 'harpreetsingh!123', 'ASM007', 'HARPREET SINGH', '', 'Karnataka'),
+                      ('rmishra@bajajauto.co.in', 'rmishra@bajajauto.co.in', 'rmishra!123', 'ASM008', 'RATNESH MISHRA', '', 'Karnataka'),
+                      ('crnarendra@bajajauto.co.in', 'crnarendra@bajajauto.co.in', 'crnarendra!123', 'ASM009', 'CR NARENDRA', '', 'Karnataka'),
+                      ('achinjain@bajajauto.co.in', 'achinjain@bajajauto.co.in', 'achinjain!123', 'ASM0010', 'ACHIN JAIN', '', 'Karnataka'),]
 
 class Command(BaseCommand):
 
@@ -43,13 +58,19 @@ class Command(BaseCommand):
         call_command('syncdb', database=_DEMO, interactive=False)
         call_command('syncdb', database=_BAJAJ, interactive=False)
         call_command('syncdb', database=_AFTERBUY, interactive=False)
+        call_command('syncdb', database=_BAJAJCV, interactive=False)
+        call_command('syncdb', database=_DAIMLER, interactive=False)
         call_command('syncdb', interactive=False)
         self.define_groups()
+        self.upload_state()
         self.create_admin(_DEMO)
         self.create_admin(_BAJAJ)
         self.create_admin(_GM)
+        self.create_admin(_BAJAJCV)
+        self.create_admin(_DAIMLER)
         self.create_afterbuy_admins()
-        self.create_bajaj_admins()
+        self.create_territory_state()
+        self.create_loyalty_admins()
         self.set_afterbuy_permissions()
         self.create_zonal_managers()
         if settings.ENV not in ['qa', 'prod', 'staging']:
@@ -58,12 +79,22 @@ class Command(BaseCommand):
             self.upload_part_data()
         for brand in ALL_BRANDS:
             self.set_brand_permissions(brand)
+            
+    def upload_state(self):
+        '''
+        Uploads state
+        '''
+        try:
+            state_data = state_cmd()
+            state_data.handle()
+        except Exception as ex:
+            print "[upload_state]: ", ex
 
     def define_groups(self):
         for group in AFTERBUY_GROUPS:
             self.add_group(GmApps.AFTERBUY, group)
 
-        for app in [GmApps.BAJAJ, GmApps.DEMO, GmApps.GM]:
+        for app in [GmApps.BAJAJ, GmApps.DEMO, GmApps.GM, GmApps.DAIMLER, GmApps.BAJAJCV]:
             for group in OTHER_GROUPS:
                 self.add_group(app, group)
 
@@ -98,32 +129,49 @@ class Command(BaseCommand):
             self.create_consumer(details, Roles.ADMINS)
         for details in _AFTERBUY_SUPERADMINS:
             self.create_consumer(details, Roles.SUPERADMINS)
+            
+    def create_territory_state(self):
+       from gladminds.core.models import Territory, State
+       for territory in _BAJAJ_LOYALTY_TERRITORY:
+           try:
+               territory_obj = Territory.objects.using(GmApps.BAJAJCV).get(territory=territory)
+           except:
+               territory_obj = Territory(territory=territory)
+               territory_obj.save(using=GmApps.BAJAJCV)
+        
     
     @atomic
-    def create_bajaj_admins(self):
-        from gladminds.bajaj.models import AreaSparesManager, NationalSparesManager
+    def create_loyalty_admins(self):
+        from gladminds.core.models import AreaSparesManager, NationalSparesManager, Territory, State
         try:
             for details in _BAJAJ_LOYALTY_SUPERADMINS:
                 print "create loyalty superadmin", details
-                self.create_user_profile(details, GmApps.BAJAJ, Roles.LOYALTYSUPERADMINS)
+                self.create_user_profile(details, GmApps.BAJAJCV, Roles.LOYALTYSUPERADMINS)
             for details in _BAJAJ_LOYALTY_NSM:
                 print "create loyalty nsm", details
-                profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.NATIONALSPARESMANAGERS)
+                profile_obj = self.create_user_profile(details, GmApps.BAJAJCV, Roles.NATIONALSPARESMANAGERS)
                 try: 
-                    nsm_obj = NationalSparesManager.objects.get(user=profile_obj, nsm_id=details[3])
+                    nsm_obj = NationalSparesManager.objects.using(GmApps.BAJAJCV).get(user=profile_obj, nsm_id=details[3])
                 except:
-                    nsm_obj = NationalSparesManager(user=profile_obj, nsm_id=details[3],
-                                                   name=details[5], email=details[0],
-                                                               territory=details[4])
-                    nsm_obj.save()
+                    
+                    nsm_obj = NationalSparesManager(created_date=datetime.now(),
+                                                    user=profile_obj, nsm_id=details[3],
+                                                   name=details[5], email=details[0])
+                    nsm_obj.save(using=GmApps.BAJAJCV)
+                    territory = Territory.objects.using(GmApps.BAJAJCV).get(territory=details[4])
+                    nsm_obj.territory.add(territory)
+                    nsm_obj.save(using=GmApps.BAJAJCV)
             for details in _BAJAJ_LOYALTY_ASM:
                 print "create loyalty asm", details
-                profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.AREASPARESMANAGERS)
-                if not AreaSparesManager.objects.filter(user=profile_obj, asm_id=details[3]).exists():
+                profile_obj = self.create_user_profile(details, GmApps.BAJAJCV, Roles.AREASPARESMANAGERS)
+                if not AreaSparesManager.objects.using(GmApps.BAJAJCV).filter(user=profile_obj, asm_id=details[3]).exists():
+                    state = State.objects.using(GmApps.BAJAJCV).get(state_name=details[6])
                     asm_obj = AreaSparesManager(nsm=nsm_obj, user=profile_obj, asm_id=details[3],
                                                  name=details[4], email=details[0],
-                                                 phone_number=details[5], state=details[6])
-                    asm_obj.save()
+                                                 phone_number=details[5])
+                    asm_obj.save(using=GmApps.BAJAJCV)
+                    asm_obj.state.add(state)
+                    asm_obj.save(using=GmApps.BAJAJCV)
         except Exception as ex:
             print "[create_bajaj_admins]: ", ex
 
@@ -150,6 +198,7 @@ class Command(BaseCommand):
             admin.set_password(details[2])
             admin.is_staff = True
             admin.email = details[1]
+            admin.first_name = details[3]
             admin.save(using=app)
             if group:
                 add_user_to_group(app, admin.id, group)
@@ -157,7 +206,7 @@ class Command(BaseCommand):
         try:
             return user_profile_class.objects.get(user=admin.id)
         except:
-            profile_obj = user_profile_class(user=admin)
+            profile_obj = user_profile_class(created_date=datetime.now(), user=admin)
             profile_obj.save()
             return profile_obj
 
@@ -232,7 +281,7 @@ class Command(BaseCommand):
         try:
             for group in [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]:
                 model_ids = []
-                for model in ['Distributor', 'Retailer', 'Mechanic']:
+                for model in ['Distributor', 'Retailer', 'Member']:
                     model_ids.append(ContentType.objects.get(app_label__in=[brand, 'auth'], model=model).id)
                 permissions = Permission.objects.using(brand).filter(content_type__id__in=model_ids)
                 group = Group.objects.using(brand).get(name=group)
@@ -248,4 +297,4 @@ class Command(BaseCommand):
                     group.permissions.add(permission)
                 group.save(using=brand)
         except Exception as ex:
-            print "[upload_part_data]: ", ex
+            print "[set_brand_permissions]: ", ex
