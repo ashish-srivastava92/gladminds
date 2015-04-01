@@ -347,6 +347,11 @@ class ECORelease(base_models.ECORelease):
     class Meta:
         app_label = _APP_NAME
 
+class ECOImplementation(base_models.ECOImplementation):
+    '''Detaills of Updated ECO Release'''
+    class Meta:
+        app_label = _APP_NAME
+
 class Transporter(base_models.Transporter):
     '''details of Area Service Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
