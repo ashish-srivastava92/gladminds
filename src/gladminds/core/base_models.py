@@ -870,6 +870,30 @@ class ECORelease(BaseModel):
         abstract = True
         verbose_name_plural = "ECO Release"
 
+class ECOImplementation(BaseModel):
+    ''' details of ECO Implementation'''
+    change_no = models.CharField(max_length=20, null=True, blank=True)
+    change_date = models.DateField(max_length=20, null=True, blank=True)
+    change_time = models.DateField(max_length=20, null=True, blank=True)
+    plant = models.CharField(max_length=20, null=True, blank=True)
+    action = models.CharField(max_length=20, null=True, blank=True)
+    
+    parent_part = models.CharField(max_length=20, null=True, blank=True)
+    added_part = models.CharField(max_length=20, null=True, blank=True)
+    added_part_qty = models.FloatField(max_length=20, null=True, blank=True)
+    deleted_part = models.CharField(max_length=20, null=True, blank=True)
+    deleted_part_qty = models.FloatField(max_length=20, null=True, blank=True)
+    
+    chassis_number = models.CharField(max_length=20, null=True, blank=True)
+    engine_number = models.CharField(max_length=20, null=True, blank=True)
+    eco_number = models.CharField(max_length=20, null=True, blank=True)
+    reason_code = models.CharField(max_length=20, null=True, blank=True)
+    remarks = models.CharField(max_length=20, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "ECO Implementation"
+
 class Transporter(BaseModel):
     ''' details of Container Transporter'''
     transporter_id = models.CharField(
