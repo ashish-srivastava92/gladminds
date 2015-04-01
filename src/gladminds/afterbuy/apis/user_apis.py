@@ -12,6 +12,7 @@ from django.contrib.auth import  login
 from django.conf import settings
 from gladminds.afterbuy import utils as afterbuy_utils
 from gladminds.core.auth import otp_handler
+
 from gladminds.afterbuy import models as afterbuy_model
 from tastypie import fields, http
 from gladminds.core.apis.base_apis import CustomBaseModelResource
@@ -31,6 +32,7 @@ from gladminds.afterbuy.apis.validations import ConsumerValidation,\
     UserValidation
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.model_helpers import format_phone_number
+from gladminds.core.auth import otp_handler
 
 logger = logging.getLogger("gladminds")
 
@@ -104,14 +106,14 @@ class ConsumerResource(CustomBaseModelResource):
             load = json.loads(request.body)
         except:
             return HttpResponse(content_type="application/json", status=404)
-        otp_token = load['otp_token']
+#         otp_token = load['otp_token']
         phone_number = load['phone_number']
-        try:
-            if not (settings.ENV in settings.IGNORE_ENV and otp_token in settings.HARCODED_OTPS):
-                otp_handler.validate_otp(otp_token, phone_number=phone_number)
-        except Exception:
-            raise ImmediateHttpResponse(
-                response=http.HttpBadRequest('Wrong OTP!'))
+#         try:
+#             if not (settings.ENV in settings.IGNORE_ENV and otp_token in settings.HARCODED_OTPS):
+#                 otp_handler.validate_otp(otp_token, phone_number=phone_number)
+#         except Exception:
+#             raise ImmediateHttpResponse(
+#                 response=http.HttpBadRequest('Wrong OTP!'))
         phone_number = load.get('phone_number')
         email_id = load.get('email_id')
         user_name = load.get('username', str(uuid4())[:30])

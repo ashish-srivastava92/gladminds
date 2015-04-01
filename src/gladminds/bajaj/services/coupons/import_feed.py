@@ -16,7 +16,7 @@ from gladminds.bajaj import models
 from gladminds.core.managers.audit_manager import feed_log, sms_log
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.auth_helper import Roles
-from gladminds.bajaj.services.feed_resources import BaseFeed, BaseExportFeed
+from gladminds.core.services.feed_resources import BaseFeed, BaseExportFeed
 logger = logging.getLogger("gladminds")
 
 USER_GROUP = {'dealer': Roles.DEALERS,
@@ -102,9 +102,10 @@ class SAPFeed(object):
             'old_fsc': OldFscFeed,
             'credit_note': CreditNoteFeed,
             'asc_sa': ASCAndServiceAdvisorFeed,
-            'BOMHEADER': BOMHeaderFeed,
-            'BOMITEM': BOMItemFeed,
-            'ECO_RELEASE': ECOReleaseFeed,
+            'bomheader': BOMHeaderFeed,
+            'bomitem': BOMItemFeed,
+            'eco_release': ECOReleaseFeed,
+            'container_tracker':ContainerTrackerFeed,
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
@@ -352,20 +353,20 @@ class OldFscFeed(BaseFeed):
     def import_data(self):
         for fsc in self.data_source:
             product_data = models.ProductData.objects.filter(product_id=fsc['vin'])
-            
+            dealer_id = str(int(fsc['dealer']))
             if len(product_data)==0:
-                self.save_to_old_fsc_table(fsc['dealer'], fsc['service'], 'product_id', fsc['vin'])
+                self.save_to_old_fsc_table(dealer_id, fsc['service'], 'product_id', fsc['vin'])
             else:
                 coupon_data = models.CouponData.objects.filter(product__product_id=fsc['vin'],
                                         service_type=int(fsc['service']))
                 if len(coupon_data) == 0:
-                    self.save_to_old_fsc_table(fsc['dealer'], fsc['service'], 'service_type', fsc['service'], vin = product_data[0] )
+                    self.save_to_old_fsc_table(dealer_id, fsc['service'], 'service_type', fsc['service'], vin = product_data[0] )
                 else:
                     cupon_details = coupon_data[0]
                     cupon_details.status = 6
                     cupon_details.closed_date = datetime.now()
                     cupon_details.sent_to_sap = True
-                    cupon_details.servicing_dealer = fsc['dealer']
+                    cupon_details.servicing_dealer = dealer_id
                     cupon_details.save()
         return self.feed_remark
 
@@ -520,7 +521,7 @@ class BOMItemFeed(BaseFeed):
                                             item=bom['item'], item_id=bom['item_id'])                
                 bom_item_obj.save()
             except Exception as ex:
-                logger.info("[Exception: ]: BOMItemFeed {0}".format(ex))
+                ex="[Exception: ]: BOMItemFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
                 
@@ -537,7 +538,7 @@ class BOMHeaderFeed(BaseFeed):
                                                   valid_to=bom['valid_to_header'])
                 bom_header_obj.save() 
             except Exception as ex:
-                logger.info("[Exception: ]: BOMHeaderFeed {0}".format(ex))
+                ex="[Exception: ]: BOMHeaderFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
 
@@ -557,7 +558,47 @@ class ECOReleaseFeed(BaseFeed):
                                                     interchangebility=eco_obj['interchangebility'], reason_for_change=eco_obj['reason_for_change'])
                 eco_release_obj.save() 
             except Exception as ex:
-                logger.info("[Exception: ]: ECOReleaseFeed {0}".format(ex))
+                ex="[Exception: ]: ECOReleaseFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
+        return self.feed_remark
+
+class ContainerTrackerFeed(BaseFeed):
+
+    def import_data(self):
+        for tracker_obj in self.data_source:
+            try:
+                try:
+                    container_tracker_obj=models.ContainerTracker.objects.get(consignment_id=tracker_obj['consignment_id'])
+                except ObjectDoesNotExist as odne:
+                    transporter_data = self.check_or_create_transporter(transporter_id=tracker_obj['transporter_id'],
+                                                                        name=tracker_obj['tranporter_name'])
+                    container_tracker_obj = models.ContainerTracker(zib_indent_num=tracker_obj['zib_indent_num'], 
+                                                                    consignment_id=tracker_obj['consignment_id'],
+                                                                    truck_no=tracker_obj['truck_no'], 
+                                                                    lr_number=tracker_obj['lr_number'],                                                                    
+                                                                    do_num=tracker_obj['do_num'],
+                                                                    transporter=transporter_data)
+
+                if tracker_obj['lr_date'] == "0000-00-00" or not tracker_obj['lr_date']:
+                    lr_date=None
+                else:
+                    lr_date=datetime.strptime(tracker_obj['lr_date'], "%Y-%m-%d")
+                
+                if tracker_obj['gatein_date'] != "0000-00-00":
+                    gatein_date=datetime.strptime(tracker_obj['gatein_date'], "%Y-%m-%d")
+                    status="Closed"
+                else:
+                    gatein_date=None
+                    status="Open"
+                container_tracker_obj.lr_date=lr_date
+                container_tracker_obj.gatein_date=gatein_date
+                container_tracker_obj.gatein_time=tracker_obj['gatein_time']
+                container_tracker_obj.status=status
+                container_tracker_obj.save() 
+            except Exception as ex:
+                ex="[Exception: ]: ContainerTrackerFeed {0}".format(ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+        
         return self.feed_remark

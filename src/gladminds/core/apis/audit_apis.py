@@ -30,7 +30,10 @@ class SMSLogResource(CustomBaseModelResource):
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
-        filtering = _FILTERING
+        filtering = { "created_date" : ALL,
+                      "sender": ALL,
+                      "receiver" : ALL
+                     }
         ordering = ['created_date']
 
 

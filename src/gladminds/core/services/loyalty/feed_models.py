@@ -4,7 +4,7 @@ from spyne.decorator import srpc
 from spyne.model.complex import Array
 from spyne.model.complex import ComplexModel
 from spyne.model.complex import Iterable
-from spyne.model.primitive import Integer, Decimal, Date
+from spyne.model.primitive import Integer, Decimal, Date, Time
 from spyne.model.primitive import Unicode, Mandatory
 from spyne.protocol.soap import Soap11
 from spyne.server.django import DjangoApplication
@@ -12,7 +12,7 @@ from spyne.server.wsgi import WsgiApplication
 from spyne.service import ServiceBase
 from spyne.util.wsgi_wrapper import WsgiMounter
 
-from gladminds.bajaj.services.loyalty.import_feed import LoyaltyFeed
+from gladminds.core.services.loyalty.import_feed import LoyaltyFeed
 from gladminds.core.soap_authentication import AuthenticationService
 import logging
 from django.conf import settings
@@ -26,7 +26,7 @@ logger = logging.getLogger("gladminds")
 
 
 pattern = r'(\d{4})-(\d{2})-(\d{2})(\d{2})(\d{2})(\d{2})'
-tns = settings.WSDL_TNS
+tns = settings.CORE_WSDL_TNS
 SUCCESS = "SUCCESS"
 FAILED = "FAILURE"
 

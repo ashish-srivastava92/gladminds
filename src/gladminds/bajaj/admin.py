@@ -9,7 +9,7 @@ from django.contrib.admin import DateFieldListFilter
 from django import forms
 
 from gladminds.bajaj import models
-from gladminds.bajaj.services.loyalty.loyalty import loyalty
+from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
 from gladminds.core.auth_helper import GmApps, Roles
 from gladminds.core.admin_helper import GmModelAdmin
@@ -23,7 +23,7 @@ class BajajAdminSite(AdminSite):
 
 
 class UserProfileAdmin(GmModelAdmin):
-    search_fields = ('user__username', 'phone_number')
+    search_fields = ('user__username', 'phone_number',)
     list_display = ('user', 'phone_number', 'status', 'address',
                     'state', 'country', 'pincode', 'date_of_birth', 'gender')
     readonly_fields = ('image_tag',)

@@ -2,7 +2,6 @@ from django.conf.urls import patterns, url, include
 from gladminds.bajaj.admin import brand_admin
 from gladminds.core import urls as core_urls
 from gladminds.core.urls import api_v1
-from gladminds.bajaj.services.loyalty.loyalty import loyalty
 
 urlpatterns = patterns('',
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
@@ -46,7 +45,5 @@ urlpatterns = patterns('',
     url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.modify_servicedesk_tickets', name='modify_servicedesk_tickets'),
     url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/comments/(?P<comment_id>\d+)/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.modify_feedback_comments', name='modify_feedback_comments'),
     url(r'^aftersell/feedbackresponse/(?P<feedback_id>\d+)/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.get_feedback_response', name='get_feedback_response'),
-    url(r'^welcome', loyalty.send_welcome_message, name='send_welcome_message'),
-    url(r'^kit/download/(?P<choice>[a-zA-Z0-9]+)$', loyalty.download_welcome_kit, name='download_welcome_kit'),
     url(r'', include(core_urls)),
 )

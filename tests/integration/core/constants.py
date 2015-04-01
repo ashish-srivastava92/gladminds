@@ -24,6 +24,7 @@ class AfterbuyUrls():
 class BajajUrls():
         COUPONS = 'coupons/'
         LOGIN = 'gm-users/login/'
+        MESSAGES = 'messages/'
         
-COUPON_SCHEMA = open(os.path.join(settings.BASE_DIR, 'tests/smoke/bajaj/testdata/coupon_data.json')).read()
+COUPON_SCHEMA = open(os.path.join(settings.BASE_DIR, 'tests/smoke/core/testdata/coupon_data.json')).read()
 
