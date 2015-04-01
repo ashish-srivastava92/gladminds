@@ -17,6 +17,9 @@ from gladminds.core.model_helpers import validate_image, validate_file
 from gladminds.core.model_helpers import set_service_training_material_path,\
     set_mechanic_image_path,set_product_catalog_image_path,set_redemption_pod_path,\
     set_welcome_kit_pod_path
+from gladminds.core.managers.mail import sent_password_reset_link,\
+    send_email_activation
+
 try:
     from django.utils.timezone import now as datetime_now
 except ImportError:
@@ -45,6 +48,10 @@ class UserProfile(BaseModel):
     country = models.CharField(max_length=255, null=True, blank=True)
     pincode = models.CharField(max_length=15, null=True, blank=True)
     date_of_birth = models.DateTimeField(null=True, blank=True)
+    
+    is_email_verified = models.BooleanField(default=False)
+    is_phone_verified = models.BooleanField(default=False)
+  
     department = models.CharField(max_length=100, null=True, blank=True)
     
     image_url = models.FileField(upload_to=set_user_pic_path,
@@ -65,9 +72,9 @@ class UserProfile(BaseModel):
                               blank=True, null=True)
 
     class Meta:
-        verbose_name_plural = "Brand Users"
-        abstract = True
         db_table = "gm_userprofile"
+        verbose_name_plural = "User Profile"
+        abstract = True
 
     def __unicode__(self):
         return str(self.phone_number or '') + ' ' + self.user.username
@@ -81,8 +88,8 @@ class Industry(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Industries"
         db_table = "gm_industry"
+        verbose_name_plural = "Industries"
 
     def __unicode__(self):
         return self.name
@@ -97,9 +104,9 @@ class Brand(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Brand Data"
         db_table = "gm_brand"
-        
+        verbose_name_plural = "Brand Data"
+
     def __unicode__(self):
         return "Brand: "+self.name+" Industry: "+self.industry.name
 
@@ -110,9 +117,10 @@ class BrandProductCategory(BaseModel):
     description = models.TextField(null=True, blank=True)
 
     class Meta:
+        db_table = "gm_brandproductcategory"
         abstract = True
         verbose_name_plural = "Brand Categories"
-        db_table = "gm_brandproductcategory"
+
 
 class OTPToken(BaseModel):
     '''Stores the OTPs generated'''
@@ -123,8 +131,8 @@ class OTPToken(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "OTPs"
         db_table = "gm_otptoken"
+        verbose_name_plural = "OTPs"
 
     def __unicode__(self):
         return str(self.phone_number or '') + ' ' +self.token
@@ -141,9 +149,9 @@ class Dealer(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Dealer Data"
         db_table = "gm_dealer"
-        
+        verbose_name_plural = "Dealer Data"
+
     def __unicode__(self):
         return self.dealer_id
 
@@ -160,8 +168,8 @@ class AuthorizedServiceCenter(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Service Center Data"
         db_table = "gm_authorizedservicecenter"
+        verbose_name_plural = "Service Center Data"
 
     def __unicode__(self):
         return self.asc_id
@@ -177,8 +185,8 @@ class ServiceAdvisor(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Service Advisor Data"
         db_table = "gm_serviceadvisor"
+        verbose_name_plural = "Service Advisor Data"
 
     def __unicode__(self):
         return self.service_advisor_id
@@ -198,8 +206,8 @@ class ProductType(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Product Type"
         db_table = "gm_producttype"
+        verbose_name_plural = "Product Type"
 
     def __unicode__(self):
         return self.product_type
@@ -229,8 +237,8 @@ class ProductData(BaseModel):
     
     class Meta:
         abstract = True
-        verbose_name_plural = "Product Data"
         db_table = "gm_productdata"
+        verbose_name_plural = "Product Data"
 
     def __unicode__(self):
         return self.product_id
@@ -261,8 +269,8 @@ class CouponData(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Coupon Information"
         db_table = "gm_coupondata"
+        verbose_name_plural = "Coupon Information"
 
     def __unicode__(self):
         return self.unique_service_coupon
@@ -272,8 +280,8 @@ class ServiceAdvisorCouponRelationship(BaseModel):
 
     class Meta:
         abstract = True
+        db_table = "gm_serviceAdvisorcouponrelationship"
         verbose_name_plural = 'Service Advisor And Coupon Relationship'
-        db_table = "gm_serviceadvisorcouponrelationship"
 
 class UCNRecovery(BaseModel):
     '''Details of UCN Recovery'''
@@ -285,8 +293,8 @@ class UCNRecovery(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "UCN recovery logs"
         db_table = "gm_ucnrecovery"
+        verbose_name_plural = "UCN recovery logs"
 
 class OldFscData(BaseModel):
     '''Details of Old Fsc Data'''
@@ -314,8 +322,8 @@ class OldFscData(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Old Coupon Information"
         db_table = "gm_oldfscdata"
+        verbose_name_plural = "Old Coupon Information"
 
 class CDMSData(BaseModel):
     received_date = models.DateTimeField(null=True, blank=True)
@@ -325,8 +333,8 @@ class CDMSData(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "CDMS Information"
         db_table = "gm_cdmsdata"
+        verbose_name_plural = "CDMS Information"
 
 ##################################################################
 ####################Message Template DB Storage###################
@@ -340,8 +348,8 @@ class MessageTemplate(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Message Template"
         db_table = "gm_messagetemplate"
+        verbose_name_plural = "Message Template"
 
     def __unicode__(self):
         return self.template_key
@@ -361,8 +369,8 @@ class EmailTemplate(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Email Template"
         db_table = "gm_emailtemplate"
+        verbose_name_plural = "Email Template"
 
     def __unicode__(self):
         return self.template_key+"- "+ self.subject
@@ -384,8 +392,8 @@ class ASCTempRegistration(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "ASC Save Form"
         db_table = "gm_asctempregistration"
+        verbose_name_plural = "ASC Save Form"
 
 class SATempRegistration(BaseModel):
     '''Details of SA registration'''
@@ -396,8 +404,8 @@ class SATempRegistration(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "SA Save Form"
         db_table = "gm_satempregistration"
+        verbose_name_plural = "SA Save Form"
 
 
 class CustomerTempRegistration(BaseModel):
@@ -417,8 +425,8 @@ class CustomerTempRegistration(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Customer temporary info"
         db_table = "gm_customertempregistration"
+        verbose_name_plural = "Customer temporary info"
 
     def __unicode__(self):
         return self.new_customer_name
@@ -432,8 +440,8 @@ class CustomerUpdateHistory(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Customer temporary Update History"
         db_table = "gm_customerupdatehistory"
+        verbose_name_plural = "Customer temporary Update History"
 
     def __unicode__(self):
         return self.updated_field
@@ -450,8 +458,8 @@ class CustomerUpdateFailure(BaseModel):
     
     class Meta:
         abstract = True
-        verbose_name_plural = 'Update Failures'
         db_table = "gm_customerupdatefailure"
+        verbose_name_plural = 'Update Failures'
     
     def __unicode__(self):
         return self.customer_id
@@ -464,8 +472,8 @@ class EmailToken(models.Model):
 
     class Meta:
         abstract = True
-        verbose_name_plural = 'email_tokens'
         db_table = "gm_emailtoken"
+        verbose_name_plural = 'email_tokens'
 
         def __unicode__(self):
             return u"Registration information for %s" % self.user
@@ -537,7 +545,7 @@ class EmailToken(models.Model):
                     'base_url':settings.DOMAIN_BASE_URL}
         if trigger_mail == 'forgot-password':
             ctx_dict = {'activation_key': self.activation_key,
-                    'link': settings.AFTERBUY_FORGOT_PASSWORD_URL}
+                    'link': settings.FORGOT_PASSWORD_LINK[settings.BRAND]}
             sent_password_reset_link(reciever_email, ctx_dict)
         else:
             send_email_activation(reciever_email, ctx_dict)
@@ -551,16 +559,17 @@ class UserPreference(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "User Preferences"
         db_table = "gm_userpreference"
+        verbose_name_plural = "User Preferences"
 
 
 class BrandPreference(UserPreference):
     '''stores the preferences of a brand'''
     class Meta:
         abstract = True
-        verbose_name_plural = "Brand Preferences"
         db_table = "gm_brandpreference"
+        verbose_name_plural = "Brand Preferences"
+
 
 class SMSLog(BaseModel):
     '''details of the sms sent and received'''
@@ -572,8 +581,8 @@ class SMSLog(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "SMS Log"
         db_table = "gm_smslog"
+        verbose_name_plural = "SMS Log"
 
 class EmailLog(BaseModel):
     '''details of the email sent and received'''
@@ -585,8 +594,8 @@ class EmailLog(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Email Log"
         db_table = "gm_emaillog"
+        verbose_name_plural = "Email Log"
 
 class DataFeedLog(BaseModel):
     '''details of the feeds sent and received'''
@@ -603,8 +612,8 @@ class DataFeedLog(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Feed Log"
         db_table = "gm_datafeedlog"
+        verbose_name_plural = "Feed Log"
 
 
 class FeedFailureLog(BaseModel):
@@ -615,8 +624,8 @@ class FeedFailureLog(BaseModel):
     
     class Meta:
         abstract = True
-        verbose_name_plural = "Feed failure log"
         db_table = "gm_feedfailurelog"
+        verbose_name_plural = "Feed failure log"
 
 class VinSyncFeedLog(BaseModel):
     ''''details of all vins not found in gladminds db'''
@@ -629,8 +638,8 @@ class VinSyncFeedLog(BaseModel):
     
     class Meta:
         abstract =True
-        verbose_name_plural = "Vin Sync Feed"
         db_table = "gm_vinsyncfeedlog"
+        verbose_name_plural = "Vin Sync Feed"
         
 class AuditLog(BaseModel):
     '''details of the requests received'''
@@ -641,8 +650,8 @@ class AuditLog(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Audit log"
         db_table = "gm_auditlog"
+        verbose_name_plural = "Audit log"
 
 class ServiceDeskUser(BaseModel):
     '''details of Service-Desk User'''
@@ -652,8 +661,8 @@ class ServiceDeskUser(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Service Desk Users"
         db_table = "gm_servicedeskuser"
+        verbose_name_plural = "Service Desk Users"
 
 
 class Activity(BaseModel):
@@ -664,8 +673,8 @@ class Activity(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Activity info"
         db_table = "gm_activity"
+        verbose_name_plural = "Activity info"
 
 class BrandDepartment(BaseModel):
     name = models.CharField(max_length=100)
@@ -673,8 +682,8 @@ class BrandDepartment(BaseModel):
     
     class Meta:
         abstract = True
-        verbose_name_plural = "Department Info"
         db_table = "gm_branddepartment"
+        verbose_name_plural = "Department Info"
     
     def __unicode__(self):
         return self.name
@@ -685,8 +694,8 @@ class DepartmentSubCategories(BaseModel):
     
     class Meta:
         abstract = True
-        verbose_name_plural = "Sub-Department Info"
         db_table = "gm_departmentsubcategories"
+        verbose_name_plural = "Sub-Department Info"
 
     def __unicode__(self):
         return self.name
@@ -718,8 +727,8 @@ class Feedback(BaseModel):
 
     class Meta:
         abstract = True
+        db_table = "gm_feedback"
         verbose_name_plural = "Feedback info"
-        db_table = 'gm_feedback'
     
     def __unicode__(self):
         return self.summary
@@ -732,14 +741,15 @@ class Comment(BaseModel):
 
     class Meta:
         abstract = True
+        db_table = "gm_comment"
         verbose_name_plural = "Comment info"
-        db_table = 'gm_comment'
 
 class FeedbackEvent(BaseModel):
     class Meta:
         abstract = True
+        db_table = "gm_feedbackevent"
         verbose_name_plural = "Feedback Event info"
-        db_table = 'gm_feedbackevent'
+
     
 class Duration(CompositeField):
     time = models.PositiveIntegerField()
@@ -772,17 +782,17 @@ class SLA(models.Model):
     
     class Meta:
         abstract = True
+        db_table = "gm_sla"
         verbose_name_plural = "SLA info"
-        db_table = 'gm_sla'
-        
+
 class ServiceType(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
 
     class Meta:
         abstract =True
+        db_table = "gm_servicetype"
         verbose_name_plural = "Service Types"
-        db_table = 'gm_servicetype'
         
     def __unicode__(self):
         return self.name
@@ -801,8 +811,8 @@ class Service(models.Model):
     
     class Meta:
         abstract = True
+        db_table = "gm_service"
         verbose_name_plural = "Services"
-        db_table = 'gm_service'
         
     def __unicode__(self):
         return self.name
@@ -815,8 +825,8 @@ class Constant(BaseModel):
         
     class Meta:
         abstract = True
+        db_table = "gm_constant"
         verbose_name_plural = "Constants"
-        db_table = 'gm_constant'
         
     def __unicode__(self):
         return self.constant_name
@@ -827,8 +837,8 @@ class AreaServiceManager(BaseModel):
     
     class Meta:
         abstract = True
+        db_table = "gm_areaservicemanager"
         verbose_name_plural = "Area Service Managers "
-        db_table = 'gm_areaservicemanager'
     
     def __unicode__(self):
         return self.user.user.username
@@ -839,8 +849,8 @@ class ZonalServiceManager(BaseModel):
     
     class Meta:
         abstract = True
+        db_table = "gm_zonalservicemanager"
         verbose_name_plural = "Zonal Service Managers "
-        db_table = 'gm_zonalservicemanager'
     
     def __unicode__(self):
         return self.user.user.username
@@ -893,13 +903,13 @@ class ECORelease(BaseModel):
     parent_part = models.CharField(max_length=20, null=True, blank=True)
 
     add_part = models.CharField(max_length=20, null=True, blank=True)
-    add_part_qty = models.IntegerField(max_length=20, null=True, blank=True)
+    add_part_qty = models.FloatField(max_length=20, null=True, blank=True)
     add_part_rev = models.CharField(max_length=20, null=True, blank=True)
     add_part_loc_code = models.CharField(max_length=90, null=True, blank=True)
     
     del_part = models.CharField(max_length=20, null=True, blank=True)
-    del_part_qty = models.IntegerField(max_length=20, null=True, blank=True)
-    del_part_rev = models.IntegerField(max_length=20, null=True, blank=True)
+    del_part_qty = models.FloatField(max_length=20, null=True, blank=True)
+    del_part_rev = models.FloatField(max_length=20, null=True, blank=True)
     del_part_loc_code = models.CharField(max_length=90, null=True, blank=True)
     
     models_applicable = models.CharField(max_length=90, null=True, blank=True)
@@ -912,6 +922,59 @@ class ECORelease(BaseModel):
         db_table = "gm_ecorelease"
         verbose_name_plural = "ECO Release"
 
+class ECOImplementation(BaseModel):
+    ''' details of ECO Implementation'''
+    change_no = models.CharField(max_length=20, null=True, blank=True)
+    change_date = models.DateField(max_length=20, null=True, blank=True)
+    change_time = models.DateField(max_length=20, null=True, blank=True)
+    plant = models.CharField(max_length=20, null=True, blank=True)
+    action = models.CharField(max_length=20, null=True, blank=True)
+    
+    parent_part = models.CharField(max_length=20, null=True, blank=True)
+    added_part = models.CharField(max_length=20, null=True, blank=True)
+    added_part_qty = models.FloatField(max_length=20, null=True, blank=True)
+    deleted_part = models.CharField(max_length=20, null=True, blank=True)
+    deleted_part_qty = models.FloatField(max_length=20, null=True, blank=True)
+    
+    chassis_number = models.CharField(max_length=20, null=True, blank=True)
+    engine_number = models.CharField(max_length=20, null=True, blank=True)
+    eco_number = models.CharField(max_length=20, null=True, blank=True)
+    reason_code = models.CharField(max_length=20, null=True, blank=True)
+    remarks = models.CharField(max_length=20, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        verbose_name_plural = "ECO Implementation"
+
+class Transporter(BaseModel):
+    ''' details of Container Transporter'''
+    transporter_id = models.CharField(
+        max_length=15, blank=False, unique=True, null=False)
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_transporter"
+        verbose_name_plural = "Transporter"
+    
+class ContainerTracker(BaseModel):
+    ''' details of Container Tracker'''
+
+    zib_indent_num = models.CharField(max_length=30, null=True, blank=True)
+    consignment_id = models.CharField(max_length=30, null=True, blank=True)
+    truck_no = models.CharField(max_length=30, null=True, blank=True)
+    lr_number = models.CharField(max_length=20, null=True, blank=True)
+    lr_date = models.DateField(max_length=10, null=True, blank=True)
+    do_num = models.CharField(max_length=30, null=True, blank=True)
+    gatein_date = models.DateField(max_length=10, null=True, blank=True)
+    gatein_time = models.TimeField(max_length=10, null=True, blank=True)
+    status = models.CharField(max_length=12, choices=constants.CONSIGNMENT_STATUS, default='Open')
+
+    class Meta:
+        abstract = True
+        db_table = "gm_containertracker"
+        verbose_name_plural = "Container Tracker"
+
+
 #######################LOYALTY TABLES#################################
 
 class NationalSparesManager(BaseModel):
@@ -923,8 +986,8 @@ class NationalSparesManager(BaseModel):
 
     class Meta:
         abstract = True
+        db_table = "gm_nationalsparesmanager"
         verbose_name_plural = "National Spares Managers"
-        db_table = 'gm_nationalsparesmanager'
 
     def __unicode__(self):
         return self.name
@@ -938,8 +1001,8 @@ class AreaSparesManager(BaseModel):
 
     class Meta:
         abstract = True
+        db_table = "gm_areasparesmanager"
         verbose_name_plural = "Area Spares Managers"
-        db_table = 'gm_areasparesmanager'
 
     def __unicode__(self):
         return self.name
@@ -955,8 +1018,8 @@ class Distributor(BaseModel):
 
     class Meta:
         abstract = True
+        db_table = "gm_distributor"
         verbose_name_plural = "Distributors"
-        db_table = 'gm_distributor'
 
     def __unicode__(self):
         return self.distributor_id + ' ' +self.name
@@ -969,8 +1032,8 @@ class Retailer(BaseModel):
 
     class Meta:
         abstract = True
+        db_table = "gm_retailer"
         verbose_name_plural = "Retailers"
-        db_table = 'gm_retailer'
 
     def __unicode__(self):
         return self.retailer_name
@@ -1066,8 +1129,8 @@ class SparePartMasterData(BaseModel):
 
     class Meta:
         abstract = True
+        db_table = "gm_sparepartmasterdata"
         verbose_name_plural = "Spare Parts Master Data"
-        db_table = 'gm_sparepartmasterdata'
 
     def __unicode__(self):
         return self.part_number
@@ -1081,8 +1144,8 @@ class SparePartUPC(BaseModel):
 
     class Meta:
         abstract = True
+        db_table = "gm_sparepartupc"
         verbose_name_plural = "Spare Part UPC"
-        db_table = 'gm_sparepartupc'
 
     def __unicode__(self):
         return self.unique_part_code
@@ -1100,8 +1163,8 @@ class SparePartPoint(BaseModel):
     
     class Meta:
         abstract = True
+        db_table = "gm_sparepartpoint"
         verbose_name_plural = "Spare Part Points"
-        db_table = 'gm_sparepartpoint'
 
     def __unicode__(self):
         return self.territory + ":" + str(self.points)
@@ -1116,8 +1179,8 @@ class AccumulationRequest(BaseModel):
 
     class Meta:
         abstract = True
+        db_table = "gm_accumulationrequest"
         verbose_name_plural = "Accumulation Requests"
-        db_table = 'gm_accumulationrequest'
 
     def __unicode__(self):
         return str(self.transaction_id)
@@ -1131,8 +1194,8 @@ class Partner(BaseModel):
 
     class Meta:
         abstract = True
+        db_table = "gm_partner"
         verbose_name_plural = "Partner"
-        db_table = 'gm_partner'
 
     def __unicode__(self):
         return str(self.name) + ' ' + str(self.partner_id) + '(' + str(self.partner_type) + ')'
@@ -1160,8 +1223,8 @@ class ProductCatalog(BaseModel):
 
     class Meta:
         abstract = True
+        db_table = "gm_productcatalog"
         verbose_name_plural = "product catalog"
-        db_table = 'gm_productcatalog'
         
     def __unicode__(self):
         return str(self.product_id)
@@ -1207,8 +1270,8 @@ class RedemptionRequest(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Redemption Request"
         db_table = "gm_redemptionrequest"
+        verbose_name_plural = "Redemption Request"
         
     def __unicode__(self):
         return str(self.transaction_id)
@@ -1243,8 +1306,8 @@ class WelcomeKit(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Welcome Kit Request"
         db_table = "gm_welcomekit"
+        verbose_name_plural = "Welcome Kit Request"
     
     def __unicode__(self):
         return str(self.transaction_id)
@@ -1257,8 +1320,8 @@ class CommentThread(BaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Comment Thread"
         db_table = "gm_commentthread"
+        verbose_name_plural = "Comment Thread"
     
     def __unicode__(self):
         return str(self.id)
@@ -1268,8 +1331,8 @@ class DiscrepantAccumulation(BaseModel):
     
     class Meta:
         abstract = True
-        verbose_name_plural = "Discrepant Request"
         db_table = "gm_discrepantaccumulation"
+        verbose_name_plural = "Discrepant Request"
 
 class LoyaltySLA(models.Model):
     status = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_STATUS)
@@ -1297,8 +1360,8 @@ class LoyaltySLA(models.Model):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Loyalty SLA info"
         db_table = "gm_loyaltysla"
+        verbose_name_plural = "Loyalty SLA info"
         
     def __unicode__(self):
         return str(self.status)
@@ -1308,8 +1371,8 @@ class Territory(BaseModel):
     
     class Meta:
         abstract = True
-        verbose_name_plural = "Territory info"
         db_table = "gm_territory"
+        verbose_name_plural = "Territory info"
 
     def __unicode__(self):
         return self.territory
@@ -1321,8 +1384,8 @@ class State(BaseModel):
     
     class Meta:
         abstract = True
-        verbose_name_plural = "State info"
         db_table = "gm_state"
+        verbose_name_plural = "State info"
 
     def __unicode__(self):
         return self.state_name
@@ -1332,8 +1395,8 @@ class City(BaseModel):
     
     class Meta:
         abstract = True
-        verbose_name_plural = "City info"
         db_table = "gm_city"
+        verbose_name_plural = "City info"
 
     def __unicode__(self):
         return self.city
@@ -1351,7 +1414,6 @@ class DateDimension(models.Model):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Date Dimensions"
         db_table = "gm_datedimension"
     
     def __str__(self):
@@ -1367,6 +1429,6 @@ class CouponFact(models.Model):
 
     class Meta:
         abstract = True
-        verbose_name_plural = "Coupon Facts"
         db_table = "gm_couponfact"
+
 

@@ -35,6 +35,7 @@ class Roles():
     ASCS = 'AuthorisedServiceCenters'
     DASCS = 'DependentAuthorisedServiceCenters'
     SERVICEADVISOR = 'ServiceAdvisors'
+    TRANSPORTER = 'Transporter'
 
     SDSUPERADMINS = 'SdSuperAdmins'
     SDADMINS = 'SdAdmins'

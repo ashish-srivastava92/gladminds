@@ -53,6 +53,9 @@ class CustomerTempRegistrationResource(CustomBaseModelResource):
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
         always_return_data = True
+        filtering = {
+                      "product_data" : ALL_WITH_RELATIONS 
+                     }
 
 class ProductCatalogResource(CustomBaseModelResource):
     partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)

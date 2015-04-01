@@ -3,14 +3,25 @@ from django.contrib.auth.models import User
 from gladminds.core import base_models, constants
 from gladminds.core.auth_helper import GmApps
 from django.conf import settings
+from django.utils.translation import gettext as _
+from constance import config
+from gladminds.core.managers.email_token_manager import EmailTokenManager
 from gladminds.core.model_helpers import validate_image, validate_file
+from gladminds.core.managers.mail import sent_password_reset_link,\
+    send_email_activation
+import datetime
 
 _APP_NAME = GmApps.BAJAJ
 
+try:
+    from django.utils.timezone import now as datetime_now
+except ImportError:
+    datetime_now = datetime.datetime.now
 
 class BrandProductCategory(base_models.BrandProductCategory):
     class Meta(base_models.BrandProductCategory.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Brand Categories"
 
 
 class UserProfile(base_models.UserProfile):
@@ -19,6 +30,7 @@ class UserProfile(base_models.UserProfile):
     
     class Meta(base_models.UserProfile.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Brand Users"
 
 
 class Dealer(base_models.Dealer):
@@ -27,6 +39,7 @@ class Dealer(base_models.Dealer):
 
     class Meta(base_models.Dealer.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Dealer Data"
 
 class ZonalServiceManager(base_models.ZonalServiceManager):
     '''details of Zonal Service Manager'''
@@ -54,6 +67,7 @@ class AuthorizedServiceCenter(base_models.AuthorizedServiceCenter):
 
     class Meta(base_models.AuthorizedServiceCenter.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Service center Data"
 
 
 class ServiceAdvisor(base_models.ServiceAdvisor):
@@ -64,6 +78,7 @@ class ServiceAdvisor(base_models.ServiceAdvisor):
 
     class Meta(base_models.ServiceAdvisor.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Service Advisor Data"
 
 
 class ServiceDeskUser(base_models.ServiceDeskUser):
@@ -71,17 +86,20 @@ class ServiceDeskUser(base_models.ServiceDeskUser):
 
     class Meta(base_models.ServiceDeskUser.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Service Desk Users"
 
 class BrandDepartment(base_models.BrandDepartment):
     
     class Meta(base_models.BrandDepartment.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Brand Department"
 
 class DepartmentSubCategories(base_models.DepartmentSubCategories):
     department = models.ForeignKey(BrandDepartment, null=True, blank=True)
     
     class Meta(base_models.DepartmentSubCategories.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Department Sub-categories"
         
 class Feedback(base_models.Feedback):
     priority = models.CharField(max_length=12, choices=constants.PRIORITY, default='Low')
@@ -92,6 +110,7 @@ class Feedback(base_models.Feedback):
     
     class Meta(base_models.Feedback.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "user feedback"
 
 
 class Activity(base_models.Activity):
@@ -100,6 +119,7 @@ class Activity(base_models.Activity):
     
     class Meta(base_models.Activity.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "user activity info"
 
 
 class Comment(base_models.Comment):
@@ -107,6 +127,7 @@ class Comment(base_models.Comment):
 
     class Meta(base_models.Comment.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "user comments"
 
 
 class FeedbackEvent(base_models.FeedbackEvent):
@@ -116,6 +137,7 @@ class FeedbackEvent(base_models.FeedbackEvent):
      
     class Meta(base_models.FeedbackEvent.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "user feedback event "
 
 
 class ProductType(base_models.ProductType):
@@ -124,6 +146,7 @@ class ProductType(base_models.ProductType):
 
     class Meta(base_models.ProductType.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Product Type"
 
 
 class ProductData(base_models.ProductData):
@@ -132,6 +155,7 @@ class ProductData(base_models.ProductData):
 
     class Meta(base_models.ProductData.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Product Data"
 
 
 class CouponData(base_models.CouponData):
@@ -140,6 +164,7 @@ class CouponData(base_models.CouponData):
 
     class Meta(base_models.CouponData.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Coupon Information"
 
 
 class ServiceAdvisorCouponRelationship(base_models.ServiceAdvisorCouponRelationship):
@@ -148,6 +173,7 @@ class ServiceAdvisorCouponRelationship(base_models.ServiceAdvisorCouponRelations
 
     class Meta(base_models.ServiceAdvisorCouponRelationship.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = 'Service Advisor And Coupon Relationship'
 
 
 class UCNRecovery(base_models.UCNRecovery):
@@ -155,6 +181,7 @@ class UCNRecovery(base_models.UCNRecovery):
 
     class Meta(base_models.UCNRecovery.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "UCN recovery logs"
 
 
 class OldFscData(base_models.OldFscData):
@@ -162,42 +189,49 @@ class OldFscData(base_models.OldFscData):
 
     class Meta(base_models.OldFscData.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Old Coupon Information"
 
 class CDMSData(base_models.CDMSData):
     unique_service_coupon = models.ForeignKey(CouponData, null=True, editable=False)
 
     class Meta(base_models.CDMSData.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "CDMS Information"
 
 class OTPToken(base_models.OTPToken):
     user = models.ForeignKey(UserProfile, null=True, blank=True, related_name='bajaj_otp_token')
 
     class Meta(base_models.OTPToken.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "OTPs"
 
 
 class MessageTemplate(base_models.MessageTemplate):
 
     class Meta(base_models.MessageTemplate.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Message Template"
 
 
 class EmailTemplate(base_models.EmailTemplate):
 
     class Meta(base_models.EmailTemplate.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Email Template"
 
 
 class ASCTempRegistration(base_models.ASCTempRegistration):
 
     class Meta(base_models.ASCTempRegistration.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "ASC Save Form"
 
 
 class SATempRegistration(base_models.SATempRegistration):
 
     class Meta(base_models.SATempRegistration.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "SA Save Form"
 
 
 class CustomerTempRegistration(base_models.CustomerTempRegistration):
@@ -205,6 +239,7 @@ class CustomerTempRegistration(base_models.CustomerTempRegistration):
 
     class Meta(base_models.CustomerTempRegistration.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Customer temporary info"
 
 class CustomerUpdateFailure(base_models.CustomerUpdateFailure):
     '''stores data when phone number update exceeds the limit'''
@@ -212,6 +247,7 @@ class CustomerUpdateFailure(base_models.CustomerUpdateFailure):
     
     class Meta(base_models.CustomerUpdateFailure.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Update Failures"
         
 class CustomerUpdateHistory(base_models.CustomerUpdateHistory):
     '''Stores the updated values of registered customer'''
@@ -219,6 +255,7 @@ class CustomerUpdateHistory(base_models.CustomerUpdateHistory):
 
     class Meta(base_models.CustomerUpdateHistory.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Customer temporary Update History"
 
 
 class UserPreference(base_models.UserPreference):
@@ -226,6 +263,7 @@ class UserPreference(base_models.UserPreference):
 
     class Meta(base_models.UserPreference.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "user preferences"
         unique_together = ("user", "key")
 
 
@@ -233,30 +271,35 @@ class SMSLog(base_models.SMSLog):
 
     class Meta(base_models.SMSLog.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "SMS Log"
 
 
 class EmailLog(base_models.EmailLog):
 
     class Meta(base_models.EmailLog.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Email Log"
 
 
 class DataFeedLog(base_models.DataFeedLog):
 
     class Meta(base_models.DataFeedLog.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Feed Log"
 
 
 class FeedFailureLog(base_models.FeedFailureLog):
 
     class Meta(base_models.FeedFailureLog.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Feed Failure Log"
 
 
 class VinSyncFeedLog(base_models.VinSyncFeedLog):
 
     class Meta(base_models.VinSyncFeedLog.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Vin Sycn Feed"
 
 
 class AuditLog(base_models.AuditLog):
@@ -268,12 +311,10 @@ class AuditLog(base_models.AuditLog):
 
 class SLA(base_models.SLA):
     priority = models.CharField(max_length=12, choices=constants.SLA_PRIORITY, unique=True)
-    
     class Meta(base_models.SLA.Meta):
         app_label = _APP_NAME
 
 class ServiceType(base_models.ServiceType):
-    
     class Meta(base_models.ServiceType.Meta):
         app_label = _APP_NAME
     
@@ -287,7 +328,6 @@ class Service(base_models.Service):
 
 class Constant(base_models.Constant):
     ''' contains all the constants'''
-    
     class Meta(base_models.Constant.Meta):
         app_label = _APP_NAME
         
@@ -298,12 +338,31 @@ class BOMItem(base_models.BOMItem):
 
 class BOMHeader(base_models.BOMHeader):
     '''Detaills of Header BOM'''
-    class Meta(base_models.BOMHeader.Meta):
+class Meta(base_models.BOMHeader.Meta):
         app_label = _APP_NAME
 
 class ECORelease(base_models.ECORelease):
     '''Detaills of ECO Release'''
     class Meta(base_models.ECORelease.Meta):
+        app_label = _APP_NAME
+
+class ECOImplementation(base_models.ECOImplementation):
+    '''Detaills of ECO Implementation'''
+    class Meta:
+        app_label = _APP_NAME
+
+class Transporter(base_models.Transporter):
+    '''details of Area Service Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    
+    class Meta(base_models.Transporter.Meta):
+        app_label = _APP_NAME 
+
+class ContainerTracker(base_models.ContainerTracker):
+    ''' details of Container Tracker'''
+    transporter = models.ForeignKey(Transporter)
+
+    class Meta(base_models.ContainerTracker.Meta):
         app_label = _APP_NAME
 
 #######################LOYALTY TABLES#################################
@@ -368,7 +427,6 @@ class Member(base_models.Member):
     preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
 
     state = models.ForeignKey(State)
-
 
     class Meta(base_models.Member.Meta):
         app_label = _APP_NAME
@@ -467,6 +525,12 @@ class LoyaltySLA(base_models.LoyaltySLA):
         app_label = _APP_NAME
         unique_together = ("status", "action")
 
+        
+class EmailToken(base_models.EmailToken):
+    class Meta(base_models.EmailToken.Meta):
+        verbose_name_plural = 'email_tokens'
+
+
 class DiscrepantAccumulation(base_models.DiscrepantAccumulation):
     upc = models.ForeignKey(SparePartUPC)
     new_member = models.ForeignKey(Member)
@@ -474,4 +538,3 @@ class DiscrepantAccumulation(base_models.DiscrepantAccumulation):
      
     class Meta(base_models.DiscrepantAccumulation.Meta):
         app_label = _APP_NAME
-
