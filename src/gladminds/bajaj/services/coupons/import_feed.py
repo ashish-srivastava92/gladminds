@@ -106,6 +106,7 @@ class SAPFeed(object):
             'bomitem': BOMItemFeed,
             'eco_release': ECOReleaseFeed,
             'container_tracker':ContainerTrackerFeed,
+            'eco_implementation':ECOImplementationFeed,
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
@@ -601,4 +602,25 @@ class ContainerTrackerFeed(BaseFeed):
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         
+        return self.feed_remark
+
+class ECOImplementationFeed(BaseFeed):
+
+    def import_data(self):
+        for eco_obj in self.data_source:
+            try:
+                eco_implementation_obj = models.ECOImplementation(change_no=eco_obj['change_no'],change_date=eco_obj['change_date'],
+                                                           change_time=eco_obj['change_time'],plant=eco_obj['plant'],
+                                                           action=eco_obj['action'],parent_part=eco_obj['parent_part'],
+                                                           added_part=eco_obj['added_part'],added_part_qty=eco_obj['added_part_qty'],
+                                                           deleted_part=eco_obj['deleted_part'],deleted_part_qty=eco_obj['deleted_part_qty'],
+                                                           chassis_number=eco_obj['chassis_number'],engine_number=eco_obj['engine_number'],
+                                                           eco_number=eco_obj['eco_number'],reason_code=eco_obj['reason_code'],
+                                                           remarks=eco_obj['remarks']
+                                                           )
+                eco_implementation_obj.save() 
+            except Exception as ex:
+                ex="[Exception: ]: ECOImplementationFeed {0}".format(ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
         return self.feed_remark

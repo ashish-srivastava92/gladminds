@@ -326,6 +326,60 @@ class ContainerTrackerModel(ComplexModel):
 class ContainerTrackerModelList(ComplexModel):
     __namespace__ = tns
     ContainerTrackerData = Array(ContainerTrackerModel)
+
+class EcoImplementationModel(ComplexModel):
+    __namespace__ = tns
+    
+    CHANGE_NO = Unicode
+    CHANGE_DATE = Date(default=None)
+    CHANGE_TIME = Date(default=None)
+    PLANT = Unicode
+    ACTION = Unicode
+    PARENT_PART = Unicode
+    ADDED_PART = Unicode
+    ADDED_PART_QTY = Decimal
+    DELETED_PART = Unicode
+    DELETED_PART_QTY = Decimal
+    CHASSIS_NUMBER = Unicode
+    ENGINE_NUMBER = Unicode
+    ECO_NUMBER = Unicode
+    REASON_CODE = Unicode
+    REMARKS = Unicode    
+
+class EcoImplementationList(ComplexModel):
+    __namespace__ = tns
+    EcoImplementationData = Array(EcoImplementationModel)
+    
+class ECOImplementationService(ServiceBase):
+    __namespace__ = tns
+
+    @srpc(EcoImplementationList, AuthenticationModel,  _returns=Unicode)
+    def postECOImplementation(ObjectList, Credential):
+        eco_list = []
+        feed_remark = FeedLogWithRemark(len(ObjectList.EcoImplementationData), feed_type='ECO Implementation Feed', action='Received', status=True)
+
+        for eco_obj in ObjectList.EcoImplementationData:
+            eco_list.append({
+                            'change_no' :  eco_obj.CHANGE_NO,
+                            'change_date' :  eco_obj.CHANGE_DATE,
+                            'change_time' :  eco_obj.CHANGE_TIME,
+                            'plant' :  eco_obj.PLANT,
+                            'action' :  eco_obj.ACTION,
+                            'parent_part' :  eco_obj.PARENT_PART,
+                            'added_part' :  eco_obj.ADDED_PART,
+                            'added_part_qty' :  eco_obj.ADDED_PART_QTY,
+                            'deleted_part' :  eco_obj.DELETED_PART,
+                            'deleted_part_qty' :  eco_obj.DELETED_PART_QTY,
+                            'chassis_number' :  eco_obj.CHASSIS_NUMBER,
+                            'engine_number' :  eco_obj.ENGINE_NUMBER,
+                            'eco_number' :  eco_obj.ECO_NUMBER,
+                            'reason_code' :  eco_obj.REASON_CODE,
+                            'remarks' :  eco_obj.REMARKS,
+                            })
+
+        feed_remark = save_to_db(feed_type='eco_implementation', data_source=eco_list, feed_remark=feed_remark)
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
     
 class ContainerTrackerService(ServiceBase):
     __namespace__ = tns
