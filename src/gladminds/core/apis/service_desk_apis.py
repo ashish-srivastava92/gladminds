@@ -73,7 +73,9 @@ class FeedbackResource(CustomBaseModelResource):
                 url(r"^(?P<resource_name>%s)/service-desk-reports%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('get_tat'), name="get_tat"),
                 url(r"^(?P<resource_name>%s)/modify-ticket/(?P<feedback_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
-                                                        self.wrap_view('modify_service_desk_ticket'), name="modify_service_desk_ticket")
+                                                        self.wrap_view('modify_service_desk_ticket'), name="modify_service_desk_ticket"),
+                url(r"^(?P<resource_name>%s)/load-analysis/(?P<duration>[a-zA-Z.-]+)%s" % (self._meta.resource_name,trailing_slash()),
+                                                        self.wrap_view('get_load_analysis'), name="get_load_analysis")
                 ]
          
     def add_service_desk_ticket(self, request, **kwargs):
@@ -165,6 +167,24 @@ class FeedbackResource(CustomBaseModelResource):
         except Exception as ex:
             LOG.error('Exception while modifying data : {0}'.format(ex))
             return HttpResponseBadRequest()
+    
+    
+    def get_load_analysis(self, request, **kwargs):
+        if kwargs['duration'] == 'hourly':
+            date = datetime.datetime.now().date()
+            date = str(date) + "%"
+            ticket_count = self.get_sql_data("select count(*) as cnt , HOUR(created_date) as hour \
+            from gm_feedback where created_date like '%s' group by HOUR(created_date)" %date)
+            
+            total_tickets = []
+            for data in ticket_count:
+                ticket = {}
+                ticket['hour_of_the_day'] = data['hour']
+                ticket['ticket_raised'] = data['cnt']
+                total_tickets.append(ticket)
+        
+        return HttpResponse(content=json.dumps(total_tickets),
+                            content_type='application/json')
     
 class ActivityResource(CustomBaseModelResource):
     '''
