@@ -871,7 +871,7 @@ class ECORelease(BaseModel):
         verbose_name_plural = "ECO Release"
 
 class ECOImplementation(BaseModel):
-    ''' details of updated ECO release'''
+    ''' details of ECO Implementation'''
     change_no = models.CharField(max_length=20, null=True, blank=True)
     change_date = models.DateField(max_length=20, null=True, blank=True)
     change_time = models.DateField(max_length=20, null=True, blank=True)

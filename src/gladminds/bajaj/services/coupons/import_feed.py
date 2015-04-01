@@ -611,7 +611,7 @@ class ECOImplementationFeed(BaseFeed):
     def import_data(self):
         for eco_obj in self.data_source:
             try:
-                eco_release_obj = models.ECOImplementation(change_no=eco_obj['change_no'],change_date=eco_obj['change_date'],
+                eco_implementation_obj = models.ECOImplementation(change_no=eco_obj['change_no'],change_date=eco_obj['change_date'],
                                                            change_time=eco_obj['change_time'],plant=eco_obj['plant'],
                                                            action=eco_obj['action'],parent_part=eco_obj['parent_part'],
                                                            added_part=eco_obj['added_part'],added_part_qty=eco_obj['added_part_qty'],
@@ -620,7 +620,7 @@ class ECOImplementationFeed(BaseFeed):
                                                            eco_number=eco_obj['eco_number'],reason_code=eco_obj['reason_code'],
                                                            remarks=eco_obj['remarks']
                                                            )
-                eco_release_obj.save() 
+                eco_implementation_obj.save() 
             except Exception as ex:
                 ex="[Exception: ]: ECOImplementationFeed {0}".format(ex)
                 logger.error(ex)

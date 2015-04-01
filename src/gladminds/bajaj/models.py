@@ -348,7 +348,7 @@ class ECORelease(base_models.ECORelease):
         app_label = _APP_NAME
 
 class ECOImplementation(base_models.ECOImplementation):
-    '''Detaills of Updated ECO Release'''
+    '''Detaills of ECO Implementation'''
     class Meta:
         app_label = _APP_NAME
 
