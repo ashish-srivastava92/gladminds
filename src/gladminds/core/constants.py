@@ -245,3 +245,5 @@ CONSIGNMENT_STATUS = (
         ('Inprogress', 'Inprogress'),
         ('Closed', 'Closed')
     )
+
+KTM_VIN ='VBK'

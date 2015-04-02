@@ -31,7 +31,7 @@ ADMINS = (
 )
 API_FLAG = False
 COUPON_VALID_DAYS = 30
-COUPON_URL = 'local.bajaj.gladmindsplatform.co'
+COUPON_URL = 'local.bajaj.gladminds.co'
 TOTP_SECRET_KEY = '93424'
 OTP_VALIDITY = 120
 HARCODED_OTPS = ['000000']

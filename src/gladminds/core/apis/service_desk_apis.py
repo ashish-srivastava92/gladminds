@@ -73,7 +73,9 @@ class FeedbackResource(CustomBaseModelResource):
                 url(r"^(?P<resource_name>%s)/service-desk-reports%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('get_tat'), name="get_tat"),
                 url(r"^(?P<resource_name>%s)/modify-ticket/(?P<feedback_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
-                                                        self.wrap_view('modify_service_desk_ticket'), name="modify_service_desk_ticket")
+                                                        self.wrap_view('modify_service_desk_ticket'), name="modify_service_desk_ticket"),
+                url(r"^(?P<resource_name>%s)/load-analysis/(?P<duration>[a-zA-Z.-]+)%s" % (self._meta.resource_name,trailing_slash()),
+                                                        self.wrap_view('get_load_analysis'), name="get_load_analysis")
                 ]
          
     def add_service_desk_ticket(self, request, **kwargs):
@@ -119,18 +121,38 @@ class FeedbackResource(CustomBaseModelResource):
         
         fcr_count = self.get_sql_data("select count(*) as cnt, concat(YEAR(resolved_date), '-', MONTH(resolved_date))\
          as month_of_year from gm_feedback where fcr=1 group by(fcr),YEAR(resolved_date), MONTH(resolved_date)")
-        result = []
         
-        for data in fcr_count:
+        result = []
+        for data in fcr_total:
             fcr = {}
             fcr['month_of_year'] = data['month_of_year']
-            fcrs = filter(lambda fc: fc['month_of_year'] == data['month_of_year'], fcr_total)
+            fcrs = filter(lambda fc: fc['month_of_year'] == data['month_of_year'], fcr_count)
             if fcrs:
-                fcr['fcr'] = (data['cnt']/float(fcrs[0]['total'])) * 100
+                fcr['fcr'] = (fcrs[0]['cnt']/float(data['total'])) * 100
             
             result.append(fcr)
-        
+
         reports['FCR'] = result
+
+        
+        reopen_count = self.get_sql_data("select count(*) as cnt, concat(YEAR(created_date), '-', MONTH(created_date))\
+         as month_of_year from gm_activity where new_value='Open' and original_value ='Resolved' or \
+          original_value='Closed' group by YEAR(created_date), MONTH(created_date)")
+         
+        reopen_total = self.get_sql_data("select count(*) as total, concat(YEAR(created_date), '-', \
+        MONTH(created_date)) as month_of_year from gm_feedback group by YEAR(created_date), MONTH(created_date)")
+        
+        result = []
+        for data in reopen_total:
+            reopened = {}
+            reopened['month_of_year'] = data['month_of_year']
+            reopens = filter(lambda reopen : reopen['month_of_year'] == data['month_of_year'], reopen_count)
+            if reopens:
+                reopened['re-open'] = (reopens[0]['cnt']/float(data['total'])) * 100
+            result.append(reopened)
+        
+        reports['RE-OPENED'] = result
+        
         return HttpResponse(content=json.dumps(reports),
                                     content_type='application/json')
 
@@ -145,6 +167,24 @@ class FeedbackResource(CustomBaseModelResource):
         except Exception as ex:
             LOG.error('Exception while modifying data : {0}'.format(ex))
             return HttpResponseBadRequest()
+    
+    
+    def get_load_analysis(self, request, **kwargs):
+        if kwargs['duration'] == 'hourly':
+            date = datetime.datetime.now().date()
+            date = str(date) + "%"
+            ticket_count = self.get_sql_data("select count(*) as cnt , HOUR(created_date) as hour \
+            from gm_feedback where created_date like '%s' group by HOUR(created_date)" %date)
+            
+            total_tickets = []
+            for data in ticket_count:
+                ticket = {}
+                ticket['hour_of_the_day'] = data['hour']
+                ticket['ticket_raised'] = data['cnt']
+                total_tickets.append(ticket)
+        
+        return HttpResponse(content=json.dumps(total_tickets),
+                            content_type='application/json')
     
 class ActivityResource(CustomBaseModelResource):
     '''
