@@ -3,10 +3,11 @@ This contains the dasboards apis
 '''
 from gladminds.core.apis.base_apis import CustomBaseResource, CustomApiObject
 from tastypie import fields
+from gladminds.bajaj import models
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.core_utils.cache_utils import Cache
 from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES,\
-    CouponStatus, TicketStatus
+    CouponStatus
 from django.db import connections
 from django.conf import settings
 from gladminds.core.core_utils.utils import dictfetchall
@@ -15,13 +16,18 @@ from tastypie.utils.mime import build_content_type
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.auth_helper import Roles
     
+from django.db.models import Sum
+
 def get_vins():
-    return get_model('ProductData').objects.all().count()
+    return models.ProductData.objects.all().count()
 
 
 def get_customers_count():
-    return get_model('ProductData').objects.filter(purchase_date__isnull=False).count()
+    return models.ProductData.objects.filter(purchase_date__isnull=False).count()
 
+def get_mobile_number_count():
+    sum = models.CustomerTempRegistration.objects.filter(mobile_number_update_count__isnull=False).aggregate(Sum('mobile_number_update_count'))
+    return sum.values()[0] 
 
 def get_success_and_failure_counts(objects):
     fail = 0
@@ -42,7 +48,7 @@ def get_set_cache(key, data_func, timeout=15):
     :param timeout:
     :type int:
     '''
-    result = Cache.get(key)
+    result = cache.get(key)
     if result is None:
         if data_func is None:
             raise
@@ -50,7 +56,7 @@ def get_set_cache(key, data_func, timeout=15):
             result = data_func
         else:
             result = data_func()
-        Cache.set(key, result, timeout*60)
+        cache.set(key, result, timeout*60)
     return result
 
 _KEYS = ["id", "name", "value"]
@@ -79,31 +85,36 @@ class OverallStatusResource(CustomBaseResource):
         vins = get_set_cache('gm_vins', get_vins, timeout=30)
         customers = get_set_cache('gm_customers', get_customers_count, timeout=35)
         coupons_closed = get_set_cache('gm_coupons_closed',
-                                       get_model('CouponData').objects.closed_count,
+                                       models.CouponData.objects.closed_count,
                                        timeout=13)
         coupons_progress = get_set_cache('gm_coupons_progress',
-                                         get_model('CouponData').objects.inprogress_count,
+                                         models.CouponData.objects.inprogress_count,
                                          timeout=11)
         coupons_expired = get_set_cache('gm_coupons_expired',
-                                        get_model('CouponData').objects.expired_count,
+                                        models.CouponData.objects.expired_count,
                                         timeout=16)
         tickets_raised = get_set_cache('gm_ticket_raised',
-                                       get_model('Feedback').objects.raised_count)
+                                       models.Feedback.objects.raised_count)
         tickets_progress = get_set_cache('gm_ticket_progress',
-                                         get_model('Feedback').objects.inprogress_count)
+                                         models.Feedback.objects.inprogress_count)
         dealers = get_set_cache('gm_dealers',
-                               get_model('Dealer').objects.count)
+                               models.Dealer.objects.count)
         dealers_active = get_set_cache('gm_dealers_active',
-                               get_model('Dealer').objects.active_count)
+                               models.Dealer.objects.active_count)
         ascs = get_set_cache('gm_ascs',
-                               get_model('AuthorizedServiceCenter').objects.count)
+                               models.AuthorizedServiceCenter.objects.count)
         ascs_active = get_set_cache('gm_ascs_active',
-                               get_model('AuthorizedServiceCenter').objects.active_count)
+                               models.AuthorizedServiceCenter.objects.active_count)
         sas = get_set_cache('gm_sas',
-                            get_model('ServiceAdvisor').objects.count)
+                            models.ServiceAdvisor.objects.count)
         sas_active = get_set_cache('gm_sas_active',
-                            get_model('ServiceAdvisor').objects.active_count)
-
+                            models.ServiceAdvisor.objects.active_count)
+        mobile_number_change_count = get_set_cache('gm_mobile_number_change_count',
+                                                   get_mobile_number_count,
+                                                   timeout=10)
+        sms_sent = get_set_cache('gm_sms_sent', models.SMSLog.objects.filter(action='SENT').count())
+        sms_received = get_set_cache('gm_sms_received', models.SMSLog.objects.filter(action='RECEIVED').count())
+        
         return map(CustomApiObject, [create_dict(["1", "#of Vins", vins]),
                                      create_dict(["2", "Service Coupons Closed",
                                                   coupons_closed]),
@@ -128,7 +139,13 @@ class OverallStatusResource(CustomBaseResource):
                                      create_dict(["12", "# of Active SAs",
                                                   sas_active]),
                                      create_dict(["13", "# of Customers",
-                                                  customers])
+                                                  customers]),
+                                     create_dict(["14", "Mobile updated",
+                                                  mobile_number_change_count]),
+                                     create_dict(["15", "SMS SENT",
+                                                  sms_sent]),
+                                     create_dict(["16", "SMS RECEIVED",
+                                                  sms_received])
                                      ]
                    )
 
@@ -178,7 +195,7 @@ class FeedStatusResource(CustomBaseResource):
         if output:
             return map(CustomApiObject, output)
 
-        objects = get_model('DataFeedLog').objects.filter(**filters)
+        objects = models.DataFeedLog.objects.filter(**filters)
 
         for feed_type in FEED_SENT_TYPES + FEED_TYPES:
             data_map[feed_type] = [0, 0]
@@ -245,7 +262,7 @@ class SMSReportResource(CustomBaseResource):
         return response_class(content=serialized, content_type=build_content_type(desired_format), **response_kwargs)
 
     def get_sms_count(self, action):
-        data = self.get_sql_data("select count(*) as count from gm_smslog where action=%(action)s",
+        data = self.get_sql_data("select count(*) as count from bajaj_smslog where action=%(action)s",
                                  filters={'action': action})
         return data[0]['count']
 
@@ -266,7 +283,7 @@ class SMSReportResource(CustomBaseResource):
         dtstart = params.get('created_date__gte')
         dtend = params.get('created_date__lte')
         where_and = " AND "
-        query = "select DATE(created_date) as date, action, count(*) as count from gm_smslog where action!='SEND TO QUEUE' "
+        query = "select DATE(created_date) as date, action, count(*) as count from bajaj_smslog where action!='SEND TO QUEUE' "
 
         if dtstart:
             query = query + where_and + "DATE(created_date) >= %(dtstart)s "
@@ -319,7 +336,7 @@ class CouponReportResource(CustomBaseResource):
         try:
             return get_set_cache('gm_coupon_counter' + status, None)
         except:
-            data = self.get_sql_data("select count(*) as count from gm_coupondata where status=%(status)s",
+            data = self.get_sql_data("select count(*) as count from bajaj_coupondata where status=%(status)s",
                                  filters={'status': status})
             return get_set_cache('gm_coupon_counter' + status, data[0]['count'])
 
@@ -340,8 +357,8 @@ class CouponReportResource(CustomBaseResource):
         dtstart = params.get('created_date__gte')
         dtend = params.get('created_date__lte')
         where_and = " AND "
-        query = "select c.*, d.date from gm_couponfact c inner join \
-        gm_datedimension d on c.date_id=d.date_id where c.data_type='TOTAL' ";
+        query = "select c.*, d.date from bajaj_couponfact c inner join \
+        bajaj_datedimension d on c.date_id=d.date_id where c.data_type='TOTAL' ";
         if dtstart:
             query = query + where_and + "DATE(d.date) >= %(dtstart)s "
             filters['dtstart'] = dtstart

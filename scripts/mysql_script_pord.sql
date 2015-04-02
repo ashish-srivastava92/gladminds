@@ -47,3 +47,6 @@
 
 --alter table bajaj_productdata add constraint unique(engine);
 --alter table bajaj_productdata add column sku_code varchar(25) null;
+
+alter table bajaj_userprofile add column is_email_verified boolean default False;
+alter table bajaj_userprofile add column is_phone_verified boolean default False;

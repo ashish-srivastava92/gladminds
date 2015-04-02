@@ -10,9 +10,8 @@ from gladminds.core.managers.sms_client_manager import load_gateway, MessageSent
 from gladminds.core.managers import mail
 from gladminds.core.cron_jobs import taskmanager
 from gladminds.bajaj.services.coupons import import_feed, export_feed
-from gladminds.bajaj.services.loyalty import export_feed as loyalty_export
+from gladminds.core.services.loyalty import export_feed as loyalty_export
 from gladminds.core.services import  message_template as templates
-
 import pytz
 import logging
 from gladminds.core.managers.mail import send_due_date_exceeded,\
@@ -432,7 +431,9 @@ def export_coupon_redeem_to_sap(*args, **kwargs):
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.COUPON_WSDL_URL, feed_type='Coupon Redeem Feed')
     feed_export_data = coupon_redeem.export_data()
+    logger.info("[export_coupon_redeem_to_sap]: Got coupon data")
     if len(feed_export_data[0]) > 0:
+        logger.info("[export_coupon_redeem_to_sap]: Entering Export {0}".format(brand))
         coupon_redeem.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
     else:

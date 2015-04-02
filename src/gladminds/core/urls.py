@@ -9,6 +9,8 @@ from gladminds.core.apis import user_apis, preferences_apis, coupon_apis, produc
 from gladminds.core.managers.sms_handler import SMSResources
 from gladminds.core.apis.image_apis import upload_files
 from gladminds.core.admin import brand_admin
+from gladminds.core.services.loyalty.loyalty import loyalty
+
 
 api_v1 = Api(api_name="v1")
 
@@ -55,7 +57,6 @@ api_v1.register(dashboard_apis.OverallStatusResource())
 api_v1.register(dashboard_apis.FeedStatusResource())
 api_v1.register(dashboard_apis.SMSReportResource())
 api_v1.register(dashboard_apis.CouponReportResource())
-api_v1.register(dashboard_apis.TicketStatusResource())
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import admin
@@ -71,6 +72,10 @@ urlpatterns = patterns('',
     url(r'^login/$', 'gladminds.core.views.auth_login'),
     url(r'^logout/$', 'gladminds.core.views.user_logout'),
     url(r'^services/$', 'gladminds.core.views.home'),
+
+    url(r'^api/v1/feed/\?wsdl$', 'gladminds.core.webservice.all_service'),
+    url(r'^api/v1/feed/$', 'gladminds.core.webservice.all_service'),
+    
     url(r'^add/servicedesk-user/$', 'gladminds.core.services.service_desk.servicedesk_views.add_servicedesk_user', name='add_servicedesk_user'),
     url(r'^aftersell/users/(?P<users>[a-zA-Z0-9]+)$', 'gladminds.core.views.users'),
     url(r'^aftersell/sa/(?P<id>[a-zA-Z0-9]+)/$', 'gladminds.core.views.get_sa_under_asc'),
@@ -108,5 +113,6 @@ urlpatterns = patterns('',
     url(r'^trigger-tasks', 'gladminds.core.views.trigger_sqs_tasks'),
     url(r'^tasks', SqsHandler.as_view(task_map=_tasks_map)),
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
-
+    url(r'^welcome', loyalty.send_welcome_message, name='send_welcome_message'),
+    url(r'^kit/download/(?P<choice>[a-zA-Z0-9]+)$', loyalty.download_welcome_kit, name='download_welcome_kit'),
 )

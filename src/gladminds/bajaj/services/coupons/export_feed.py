@@ -6,7 +6,7 @@ import logging
 from gladminds.core import utils
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.bajaj.services.coupons.feed_models import save_to_db
-from gladminds.bajaj.services.feed_resources import BaseExportFeed
+from gladminds.core.services.feed_resources import BaseExportFeed
 import json
 logger = logging.getLogger("gladminds")
 
@@ -14,7 +14,7 @@ class ExportCouponRedeemFeed(BaseExportFeed):
     
     def export_data(self, start_date=None, end_date=None):
         results = models.CouponData.objects.filter(sent_to_sap=0,
-                            status=2).select_related('product_id', 'customer_phone_number')
+                            status=2).select_related('product_id')
         items = []
         total_failed = 0
         item_batch = {
@@ -45,8 +45,7 @@ class ExportCouponRedeemFeed(BaseExportFeed):
                 logger.error("[ExportCouponRedeemFeed]: error fetching from db {0}".format(ex))
                 total_failed = total_failed + 1
                 self.feed_remark.fail_remarks(ex)
-        
-        self.feed_remark.save_to_feed_log()
+        logger.info("[ExportCouponRedeemFeed]: processed coupon")
         return items, item_batch, total_failed
 
     def export(self, brand, items=None, item_batch=None, total_failed_on_feed=0):
@@ -85,7 +84,6 @@ class ExportCouponRedeemFeed(BaseExportFeed):
                  + total_failed_on_feed, failed_data_count=total_failed,\
                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
                  action='Sent', status=export_status)
-        self.feed_remark.save_to_feed_log()
 
 class ExportASCRegistrationFeed(BaseExportFeed):
     def export_data(self, asc_phone_number=None):

@@ -4,7 +4,6 @@ from spyne.application import Application
 from spyne.protocol.soap import Soap11
 from spyne.server.django import DjangoApplication
 from gladminds.bajaj.services.coupons import feed_models as fsc_feed
-from gladminds.bajaj.services.loyalty import feed_models as loyalty_feed
 
 tns = settings.WSDL_TNS
 
@@ -17,13 +16,9 @@ all_app = Application([fsc_feed.BrandService,
                        fsc_feed.CreditNoteService,
                        fsc_feed.BillOfMaterialService,
                        fsc_feed.ECOReleaseService,
-                       loyalty_feed.PartMasterService,
-                       loyalty_feed.PartUPCService,
-                       loyalty_feed.PartPointService,
-                       loyalty_feed.DistributorService,
-                       loyalty_feed.MechanicService,
-                       loyalty_feed.NSMService,
-                       loyalty_feed.ASMService],
+                       fsc_feed.ContainerTrackerService,
+                       fsc_feed.ECOImplementationService,
+                       ],
                       tns=tns,
                       in_protocol=Soap11(validator='lxml'),
                       out_protocol=Soap11()
@@ -77,36 +72,6 @@ bom_app = Application([fsc_feed.BillOfMaterialService],
                            out_protocol=Soap11()
                            )
 
-part_master_app = Application([loyalty_feed.PartMasterService],
-                           tns=tns,
-                           in_protocol=Soap11(validator='lxml'),
-                           out_protocol=Soap11()
-                           )
-
-part_upc_app = Application([loyalty_feed.PartUPCService],
-                           tns=tns,
-                           in_protocol=Soap11(validator='lxml'),
-                           out_protocol=Soap11()
-                           )
-
-part_point_app = Application([loyalty_feed.PartPointService],
-                           tns=tns,
-                           in_protocol=Soap11(validator='lxml'),
-                           out_protocol=Soap11()
-                           )
-
-distributor_app = Application([loyalty_feed.DistributorService],
-                           tns=tns,
-                           in_protocol=Soap11(validator='lxml'),
-                           out_protocol=Soap11()
-                           )
-
-mechanic_app = Application([loyalty_feed.MechanicService],
-                           tns=tns,
-                           in_protocol=Soap11(validator='lxml'),
-                           out_protocol=Soap11()
-                           )
-
 bom_app = Application([fsc_feed.BillOfMaterialService],
                            tns=tns,
                            in_protocol=Soap11(validator='lxml'),
@@ -119,6 +84,19 @@ eco_release_app = Application([fsc_feed.ECOReleaseService],
                            out_protocol=Soap11()
                            )
  
+container_tracker_app = Application([fsc_feed.ContainerTrackerService],
+                           tns=tns,
+                           in_protocol=Soap11(validator='lxml'),
+                           out_protocol=Soap11()
+                           )
+
+eco_implementation_app = Application([fsc_feed.ECOImplementationService],
+                           tns=tns,
+                           in_protocol=Soap11(validator='lxml'),
+                           out_protocol=Soap11()
+                           )
+ 
+ 
 all_service = csrf_exempt(DjangoApplication(all_app))
 brand_service = csrf_exempt(DjangoApplication(brand_app))
 dealer_service = csrf_exempt(DjangoApplication(dealer_app))
@@ -127,10 +105,7 @@ dispatch_service = csrf_exempt(DjangoApplication(dispatch_app))
 purchase_service = csrf_exempt(DjangoApplication(purchase_app))
 old_fsc_service = csrf_exempt(DjangoApplication(old_fsc_app))
 credit_note_service = csrf_exempt(DjangoApplication(credit_note_app))
-part_master_service = csrf_exempt(DjangoApplication(part_master_app))
-part_upc_service = csrf_exempt(DjangoApplication(part_upc_app))
-part_point_service = csrf_exempt(DjangoApplication(part_point_app))
-distributor_service = csrf_exempt(DjangoApplication(distributor_app))
-mechanic_service = csrf_exempt(DjangoApplication(mechanic_app))
 bom_service = csrf_exempt(DjangoApplication(bom_app))
 eco_release_app = csrf_exempt(DjangoApplication(eco_release_app))
+container_tracker_app = csrf_exempt(DjangoApplication(container_tracker_app))
+eco_implementation_app = csrf_exempt(DjangoApplication(eco_implementation_app))
