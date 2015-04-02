@@ -1,6 +1,7 @@
 from uuid import uuid4
 import json
 import logging
+import requests
 import re
 from gladminds.core.utils import check_password
 from django.http.response import HttpResponse
@@ -12,6 +13,7 @@ from django.contrib.auth import  login
 from django.conf import settings
 from gladminds.afterbuy import utils as afterbuy_utils
 from gladminds.core.auth import otp_handler
+from gladminds.settings import API_FLAG, COUPON_URL
 
 from gladminds.afterbuy import models as afterbuy_model
 from tastypie import fields, http
@@ -73,7 +75,8 @@ class ConsumerResource(CustomBaseModelResource):
             url(r"^(?P<resource_name>%s)/forgot-password/(?P<type>[a-zA-Z0-9.-]+)%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('change_user_password'), name="change_user_password"),
             url(r"^(?P<resource_name>%s)/login%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('auth_login'), name="auth_login"),
             url(r"^(?P<resource_name>%s)/validate-otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('validate_otp'), name="validate_otp"),
-            url(r"^(?P<resource_name>%s)/logout%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('logout'), name="logout")
+            url(r"^(?P<resource_name>%s)/logout%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('logout'), name="logout"),
+            url(r"^(?P<resource_name>%s)/product-details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_details'), name="get_product_details")
         ]
 
     def sent_otp_user_phone_number(self, request, **kwargs):
@@ -319,7 +322,42 @@ class ConsumerResource(CustomBaseModelResource):
                 logger.info("[Exception get_user_login_information]:{0}".
                             format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
+    
+    def get_product_details(self, request, **kwargs):
+        port = request.META['SERVER_PORT']
+        access_token = request.META['QUERY_STRING'] 
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
 
+        phone_number = load.get('phone_number', None)
+        product_id = load.get('product_id', None)
+        query = '/v1/coupons/?'+ access_token
+        
+        if product_id:
+            if product_id[:3]!= 'VBK':
+                return HttpResponse(json.dumps({'message':'Incorrect VIN'}), content_type='application/json')
+            query = query + '&product__product_id='+product_id
+        
+        if phone_number:
+            query = query + '&product__customer_phone_number__contains='+phone_number+'&product__product_id__startswith=VBK'
+        
+        try:
+            if not API_FLAG:
+                result = requests.get('http://'+COUPON_URL+':'+port+query)
+            else:
+                result = requests.get('http://'+COUPON_URL+query)
+
+            if len(json.loads(result.content)['objects']) == 0:
+                    return HttpResponse(json.dumps({'message' : 'Invalid Details'}), content_type='application/json')
+            else:
+                return HttpResponse(json.dumps({'result': json.loads(result.content)}), content_type='application/json')
+        
+        except Exception as ex:
+            logger.info("[Exception while fetching product details]:{0}".format(ex))
 
 class UserNotificationResource(CustomBaseModelResource):
     consumer = fields.ForeignKey(ConsumerResource, 'consumer', null=True, blank=True, full=True)

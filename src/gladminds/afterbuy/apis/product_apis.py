@@ -82,14 +82,15 @@ class UserProductResource(CustomBaseModelResource):
     def get_product_coupons(self, request, **kwargs):
         port = request.META['SERVER_PORT']
         product_id = kwargs.get('product_id')
+        access_token = request.META['QUERY_STRING'] 
         try:
             if product_id:
                 product_info = afterbuy_models.UserProduct.objects.get(id=product_id)
                 brand_product_id = product_info.brand_product_id
                 if not API_FLAG:
-                    return HttpResponseRedirect('http://'+COUPON_URL+':'+port+'/v1/coupons/?product='+brand_product_id)
+                    return HttpResponseRedirect('http://'+COUPON_URL+':'+port+'/v1/coupons/?product__product_id='+brand_product_id+'&'+access_token)
                 else:
-                    return HttpResponseRedirect('http://'+COUPON_URL+'/v1/coupons/?product='+brand_product_id)
+                    return HttpResponseRedirect('http://'+COUPON_URL+'/v1/coupons/?product__product_id='+brand_product_id+'&'+access_token)
         except Exception as ex:
             logger.error('Invalid details')
 
