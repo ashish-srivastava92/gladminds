@@ -8,15 +8,14 @@ from django.conf import settings
 import logging
 from gladminds.core import utils
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
-from gladminds.bajaj.services.coupons.feed_models import save_to_db
-from gladminds.bajaj.services.feed_resources import BaseExportFeed
+from gladminds.core.services.feed_resources import BaseExportFeed
 import json
 logger = logging.getLogger("gladminds")
 
 class ExportMemberTempFeed(BaseExportFeed):
     
     def export_data(self):
-        results = models.Mechanic.objects.filter(sent_to_sap=0, form_status='Complete')
+        results = models.Member.objects.filter(sent_to_sap=0, form_status='Complete')
         items = []
         total_failed = 0
         item_batch = {
@@ -61,7 +60,7 @@ class ExportMemberTempFeed(BaseExportFeed):
                 logger.info("[ExportMemberTempFeed]: Response from SAP: {0}".format(result))
                 if result[0]['item'][0]['STATUS'] == 'SUCCESS':
                     try:
-                        member_detail = models.Mechanic.objects.get(mechanic_id=item['TEMP_ID'])
+                        member_detail = models.Member.objects.get(mechanic_id=item['TEMP_ID'])
                         member_detail.sent_to_sap = True
                         member_detail.save()
                         logger.info("[ExportMemberTempFeed]: Sent the details of member {0} to sap".format(item['TEMP_ID']))

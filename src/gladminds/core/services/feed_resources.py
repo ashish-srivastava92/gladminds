@@ -44,16 +44,16 @@ class BaseFeed(object):
                       state='', pincode=''):
         logger.info('New {0} Registration with id - {1}'.format(group, username))
         try:
-            user_group = Group.objects.get(name=group)
+            user_group = Group.objects.using(settings.BRAND).get(name=group)
         except ObjectDoesNotExist as ex:
             logger.info(
                 "[Exception: new_ registration]: {0}"
                 .format(ex))
             user_group = Group.objects.create(name=group)
-            user_group.save()
+            user_group.save(using=settings.BRAND)
         if username:
             try:
-                user_details = get_model('UserProfile', settings.BRAND).objects.select_related('user').get(user__username=username)
+                user_details = get_model('UserProfile').objects.select_related('user').get(user__username=username)
             except ObjectDoesNotExist as ex:
                 logger.info(
                     "[Exception: new_ registration]: {0}"
@@ -73,7 +73,7 @@ class BaseFeed(object):
                 new_user.groups.add(user_group)
                 new_user.save(using=settings.BRAND)
                 logger.info(group + ' {0} registered successfully'.format(username))
-                user_details = get_model('UserProfile', settings.BRAND)(user=new_user,
+                user_details = get_model('UserProfile')(user=new_user,
                                         phone_number=phone_number, address=address,
                                         state=state, pincode=pincode)
                 user_details.save()
@@ -84,7 +84,7 @@ class BaseFeed(object):
 
     def check_or_create_dealer(self, dealer_id, address=None, cdms_flag=0):
         try:
-            dealer_data = get_model('Dealer', settings.BRAND).objects.select_related('user__user').get(
+            dealer_data = get_model('Dealer').objects.select_related('user__user').get(
                 dealer_id=dealer_id)
             dealer_data.use_cdms = cdms_flag
             dealer_data.save()
@@ -93,14 +93,14 @@ class BaseFeed(object):
                 "[Exception: new_dealer_data]: {0}"
                 .format(odne))
             user = self.register_user(Roles.DEALERS, username=dealer_id)
-            dealer_data = get_model('Dealer', settings.BRAND)(user=user,
+            dealer_data = get_model('Dealer')(user=user,
                 dealer_id=dealer_id, use_cdms=cdms_flag)
             dealer_data.save()            
         return dealer_data
     
     def check_or_create_transporter(self, transporter_id, name):
         try:
-            transporter_data = get_model('Transporter', settings.BRAND).objects.select_related('user__user').get(
+            transporter_data = models.Transporter.objects.select_related('user__user').get(
                 transporter_id=transporter_id)
         except ObjectDoesNotExist as odne:
             logger.debug(
@@ -108,7 +108,7 @@ class BaseFeed(object):
                 .format(odne))
             user = self.register_user(Roles.TRANSPORTER, username=transporter_id,
                                       first_name=name)
-            transporter_data = get_model('Transporter', settings.BRAND)(user=user,
+            transporter_data = models.Transporter(user=user,
                 transporter_id=transporter_id)
             transporter_data.save()            
         return transporter_data

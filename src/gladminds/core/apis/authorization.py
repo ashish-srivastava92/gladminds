@@ -8,6 +8,7 @@ from gladminds.core.auth_helper import Roles
 from gladminds.bajaj import models
 import operator
 from django.db.models.query_utils import Q
+from gladminds.core.model_fetcher import get_model
 
 class CustomAuthorization(Authorization):
 
@@ -198,7 +199,7 @@ class LoyaltyCustomAuthorization():
                 object_list = object_list.filter(reduce(operator.and_, query['query']))
         except:
             if klass_name == 'redemptionrequest' and user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-                asm_state_list= models.AreaSparesManager.objects.get(user__user= user).state.all()
+                asm_state_list= get_model('AreaSparesManager').objects.get(user__user= user).state.all()
                 object_list=object_list.filter(member__state__in=asm_state_list)            
 
         try:
@@ -223,3 +224,15 @@ class LoyaltyCustomAuthorization():
 
     def delete_detail(self, object_list, bundle):
         return True
+
+class ServiceDeskCustomAuthorization():
+    
+    def read_list(self, object_list, bundle):
+        if bundle.request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.DEALERADMIN]):
+            object_list = object_list.all()
+        elif bundle.request.user.groups.filter(name=Roles.SDOWNERS):
+            object_list = object_list.filter(assignee__user_profile__user_id=int(bundle.request.user.id))
+        elif bundle.request.user.groups.filter(name=Roles.DEALERS):
+            object_list = object_list.filter(reporter__user_profile__user_id=int(bundle.request.user.id))
+        return object_list
+    

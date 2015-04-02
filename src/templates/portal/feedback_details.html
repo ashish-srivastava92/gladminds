@@ -226,10 +226,11 @@
 					<label class="control-label">Departments*:</label>
 					</div>
 					<div class="col-md-9 form-group">
-						<select class="form-control department" name="department" id="department" required >
-							<option value=""></option> {% for department in departments %}
+						<select class="form-control department" name="department" id="department" onchange="getSubCategories(this, {{department_sub_categories}})" required >
+						<option value=""></option>
+							{% for department in department_sub_categories %}
 							<option value="{{department.id}}">{{department.name}}</option>
-							{% endfor %}
+							{% endfor %}						
 						</select>
 					</div>
 				</div>

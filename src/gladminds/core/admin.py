@@ -8,7 +8,7 @@ from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib.admin import DateFieldListFilter
 from django import forms
 
-from gladminds.bajaj import models
+from gladminds.core.model_fetcher import models
 from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
 from gladminds.core.auth_helper import GmApps, Roles
@@ -18,12 +18,12 @@ from django.conf import settings
 from gladminds.core.auth_helper import Roles
 from gladminds.core import constants
 
-class BajajAdminSite(AdminSite):
+class CoreAdminSite(AdminSite):
     pass
 
 
 class UserProfileAdmin(GmModelAdmin):
-    search_fields = ('user__username', 'phone_number',)
+    search_fields = ('user__username', 'phone_number')
     list_display = ('user', 'phone_number', 'status', 'address',
                     'state', 'country', 'pincode', 'date_of_birth', 'gender')
     readonly_fields = ('image_tag',)
@@ -817,7 +817,7 @@ class ConstantAdmin(GmModelAdmin):
     search_fields = ('constant_name',  'constant_value')
     list_display = ('constant_name',  'constant_value',)
 
-brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
+brand_admin = CoreAdminSite(name='Core')
 
 brand_admin.register(User, UserAdmin)
 brand_admin.register(Group, GroupAdmin)
@@ -868,3 +868,5 @@ brand_admin.register(models.ServiceType)
 brand_admin.register(models.Constant, ConstantAdmin)
 brand_admin.register(models.Feedback)
 brand_admin.register(models.Territory)
+brand_admin.register(models.BrandDepartment)
+brand_admin.register(models.DepartmentSubCategories)

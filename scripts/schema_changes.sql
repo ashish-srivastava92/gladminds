@@ -65,8 +65,12 @@ rename table bajaj_coupondata to gm_coupondata;
 rename table bajaj_departmentsubcategories to gm_departmentsubcategories;
 rename table bajaj_feedback to gm_feedback;
 rename table bajaj_productdata to gm_productdata;
-
-
+rename table bajaj_asctempregistration to gm_asctempregistration;
+rename table bajaj_bomheader to gm_bomheader;
+rename table bajaj_bomitem to gm_bomitem;
+rename table bajaj_containertracker to gm_containertracker;
+rename table bajaj_ecorelease to gm_ecorelease;
+rename table bajaj_transporter to gm_transporter;
 
 -------------------------------------------------- DEMO DATABASE----------------------------------------------------------
 

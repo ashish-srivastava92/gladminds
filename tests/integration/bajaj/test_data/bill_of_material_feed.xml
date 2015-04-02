@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://local.bajaj.gladminds.co:8000/api/v1/feed/">
+  <SOAP-ENV:Body>
+    <ns1:postBillOfMaterial>
+      <ns1:ObjectList>
+        <ns1:BOMData>
+         <ns1:BOMModel>
+          <ns1:BOMTIMESTAMP>        
+            	<ns1:TIMESTAMP>2005-08-01000000</ns1:TIMESTAMP>
+		   </ns1:BOMTIMESTAMP>
+		   <ns1:HEADERFIELD>
+                <ns1:PLANT>bhopal</ns1:PLANT>
+                <ns1:VALID_FROM>1958-08-01</ns1:VALID_FROM>		
+                <ns1:BOM_NO>1984</ns1:BOM_NO>
+			    <ns1:VALID_TO>1983-08-01</ns1:VALID_TO>            
+		        <ns1:SKU_CODE>98765</ns1:SKU_CODE>            		
+           	    <ns1:CREATED_ON>1956-08-01</ns1:CREATED_ON>
+				<ns1:BOM_TYPE>BIKE</ns1:BOM_TYPE>
+  	    	</ns1:HEADERFIELD>
+           <ns1:ITEMFIELD>
+	 			<ns1:PLATE_TXT>"hello"</ns1:PLATE_TXT>
+	            <ns1:VALID_FROM>2014-12-12</ns1:VALID_FROM>
+				<ns1:REVISION_NO>1234</ns1:REVISION_NO>
+             	<ns1:BOM_NUMBER>1234567</ns1:BOM_NUMBER>
+                <ns1:PLATE_ID>123456</ns1:PLATE_ID>
+             	<ns1:VALID_TO>2014-12-12</ns1:VALID_TO>
+                <ns1:ITEM>"spoke"</ns1:ITEM>
+				<ns1:PART_NUMBER>1234567</ns1:PART_NUMBER>
+				<ns1:CHANGE_NUMBER_TO>1234</ns1:CHANGE_NUMBER_TO>
+				<ns1:ITEM_ID>123456</ns1:ITEM_ID>
+				<ns1:SERIAL_NUMBER>098765</ns1:SERIAL_NUMBER>
+				<ns1:CHANGE_NUMBER>123</ns1:CHANGE_NUMBER>
+				<ns1:UOM>123456</ns1:UOM>
+				<ns1:QUANTITY>2</ns1:QUANTITY>
+        	</ns1:ITEMFIELD>
+         </ns1:BOMModel>
+        </ns1:BOMData>
+      </ns1:ObjectList>
+      <ns1:Credential>
+        <ns1:UserName>bajaj</ns1:UserName>
+        <ns1:Password>bajaj</ns1:Password>
+      </ns1:Credential>
+    </ns1:postBillOfMaterial>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

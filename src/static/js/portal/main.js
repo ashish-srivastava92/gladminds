@@ -297,7 +297,7 @@ function vinSyncFeed(data){
             waitingModal = $('.modal.waiting-dialog'),
       jqXHR = $.ajax({
             type: 'POST',
-            url: '/aftersell/servicedesk/helpdesk',
+            url: '/v1/feedbacks/add-ticket/',
             data: formData,
             cache: false,
             processData: false,
@@ -338,7 +338,7 @@ function vinSyncFeed(data){
             waitingModal = $('.modal.waiting-dialog'),
       jqXHR = $.ajax({
             type: 'POST',
-            url: '/aftersell/servicedesk/save-feedback/',
+            url: '/v1/feedbacks/add-ticket/',
             data: formData,
             cache: false,
             processData: false,
