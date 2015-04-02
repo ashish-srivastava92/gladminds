@@ -3,15 +3,15 @@ import datetime
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import get_model
 from gladminds.core.utils import generate_temp_id, mobile_format
-APP='bajaj'
+APP='bajajcv'
 
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.upload_dist_data()
-#         self.upload_mech_data()
+        self.upload_mech_data()
     
     def upload_dist_data(self):
         print "Started uploading distributor..."
@@ -36,9 +36,9 @@ class Command(BaseCommand):
                     dealer_list.append(temp)
         
         for dealer in dealer_list:
-            dist_object = dist.objects.filter(distributor_id=dealer['id'])
+            dist_object = dist.objects.filter(distributor_id=dealer['id']).using(APP)
             if not dist_object:
-                dist_user_pro_object = user_profile.objects.filter(user__username=dealer['id'])
+                dist_user_pro_object = user_profile.objects.filter(user__username=dealer['id']).using(APP)
                 if not dist_user_pro_object:
                     password=dealer['id']+'@123'
                     dist_user_object = User.objects.using(APP).create(username=dealer['id'])
@@ -49,10 +49,10 @@ class Command(BaseCommand):
                     dist_user_pro_object = user_profile(user=dist_user_object,
                                                 phone_number=dealer['mobile'],
                                                 address=dealer['city'])
-                    dist_user_pro_object.save()
+                    dist_user_pro_object.save(using=APP)
                 else:
                     dist_user_pro_object = dist_user_pro_object[0]
-                asm_object = asm.objects.get(asm_id=dealer['asm_id'])
+                asm_object = asm.objects.using(APP).get(asm_id=dealer['asm_id'])
                 dist_object = dist(distributor_id=dealer['id'],
                                           asm=asm_object,
                                           user=dist_user_pro_object,
@@ -60,7 +60,7 @@ class Command(BaseCommand):
                                           email=dealer['email'],
                                           phone_number=dealer['mobile'],
                                           city=dealer['city'])
-                dist_object.save()
+                dist_object.save(using=APP)
 
     def empty_to_none(self, value):
         if value=='':
@@ -75,8 +75,8 @@ class Command(BaseCommand):
         retailer = get_model('Retailer', APP)
         dist = get_model('Distributor', APP)
         user_profile = get_model('UserProfile', APP)
-        mech = get_model('Mechanic', APP)
-
+        mech = get_model('Member', APP)
+        State = get_model('State', APP)
         for i in range(0, 1):
             with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
@@ -125,25 +125,25 @@ class Command(BaseCommand):
                     mech_list.append(temp)
         for mechanic in mech_list:
             mobile = mobile_format(mechanic['mobile'])
-            mech_object = mech.objects.filter(phone_number=mobile)
+            mech_object = mech.objects.filter(phone_number=mobile).using(APP)
             if not mech_object:
                 if not mechanic['mech_id']:
                     mech_id = generate_temp_id('TME')
                 else:
                     mech_id=mechanic['mech_id']
                 if mechanic['dist_id']:
-                    dist_object = dist.objects.get(distributor_id=mechanic['dist_id'])
+                    dist_object = dist.objects.using(APP).get(distributor_id=mechanic['dist_id'])
                 else:
                     dist_object = None
                 
-                ret_obj = retailer.objects.filter(retailer_name=mechanic['ret_name'])
+                ret_obj = retailer.objects.filter(retailer_name=mechanic['ret_name']).using(APP)
                 if not ret_obj:
                     ret_obj = retailer(retailer_name=mechanic['ret_name'],
                              retailer_town=mechanic['ret_town'])
-                    ret_obj.save()
+                    ret_obj.save(using=APP)
                 else:
                     ret_obj = ret_obj[0]
-                
+                state = State.objects.using(APP).get(state_name=mechanic['state'])
                 mech_object = mech(registered_by_distributor=dist_object,
                                 preferred_retailer=ret_obj,
                                 mechanic_id=mech_id,
@@ -159,7 +159,7 @@ class Command(BaseCommand):
                                 locality =  mechanic['locality'],
                                 tehsil =  mechanic['tehsil'],
                                 district =  mechanic['district'],
-                                state =  mechanic['state'],
+                                state =  state,
                                 pincode =  mechanic['pincode'],
                                 shop_wall_length =  mechanic['wall_len'],
                                 shop_wall_width =  mechanic['wall_width'],
@@ -171,4 +171,4 @@ class Command(BaseCommand):
                                 genuine_parts_used =  mechanic['genuine'],
                                 form_status = mechanic['complete']
                                 )
-                mech_object.save()
+                mech_object.save(using=APP)

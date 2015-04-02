@@ -376,7 +376,7 @@ class DistributorAdmin(GmModelAdmin):
     list_display = ('distributor_id', 'name', 'email',
                     'phone_number', 'city', 'asm')
 
-class MechanicAdmin(GmModelAdmin):
+class MemberAdmin(GmModelAdmin):
     list_filter = ('form_status',)
     search_fields = ('mechanic_id',
                      'phone_number', 'first_name','district')
@@ -395,7 +395,7 @@ class MechanicAdmin(GmModelAdmin):
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points')
-        form = super(MechanicAdmin, self).get_form(request, obj, **kwargs)
+        form = super(MemberAdmin, self).get_form(request, obj, **kwargs)
         return form
 
     def save_model(self, request, obj, form, change):
@@ -403,7 +403,7 @@ class MechanicAdmin(GmModelAdmin):
             #send_welcome_sms(obj)
             obj.sent_sms=True
         obj.phone_number= format_phone_number(obj.phone_number)
-        super(MechanicAdmin, self).save_model(request, obj, form, change)    
+        super(MemberAdmin, self).save_model(request, obj, form, change)    
 
 class SparePartMasterAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.LOYALTYSUPERADMINS]
@@ -483,7 +483,7 @@ brand_admin.register(models.DataFeedLog, FeedLogAdmin)
 brand_admin.register(models.NationalSparesManager, NSMAdmin)
 brand_admin.register(models.AreaSparesManager, ASMAdmin)
 brand_admin.register(models.Distributor, DistributorAdmin)
-brand_admin.register(models.Mechanic, MechanicAdmin)
+brand_admin.register(models.Member, MemberAdmin)
 
 brand_admin.register(models.SparePartMasterData, SparePartMasterAdmin)
 brand_admin.register(models.SparePartUPC, SparePartUPCAdmin)

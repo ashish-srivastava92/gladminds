@@ -6,8 +6,9 @@ from gladminds.default import models
 
 _BAJAJ_SERVICES = [Services.AFTERBUY, Services.FREE_SERVICE_COUPON, Services.LOYALTY, Services.SERVICE_DESK]
 _DEMO_SERVICES = [Services.SERVICE_DESK]
+_DAIMLER_SERVICES = [Services.SERVICE_DESK]
 _INDUSTRIES = ['automobiles']
-_BRANDS = {'bajaj': [_INDUSTRIES[0]], 'demo': [_INDUSTRIES[0]]}
+_BRANDS = {'bajaj': [_INDUSTRIES[0]], 'demo': [_INDUSTRIES[0]], 'daimler': [_INDUSTRIES[0]]}
 
 class Command(BaseCommand): 
     
@@ -76,6 +77,8 @@ class Command(BaseCommand):
                         SERVICES = _BAJAJ_SERVICES
                     elif brand == 'demo':
                         SERVICES = _DEMO_SERVICES
+                    elif brand == 'daimler':
+                        SERVICES = _DAIMLER_SERVICES
                     for service in SERVICES:                        
                         try:
                             brand_service_obj = models.BrandService.objects.get(brand=brand_obj[0],

@@ -1,7 +1,9 @@
 from django.conf import settings
 from django.utils.cache import patch_vary_headers
+import os
 
 import logging
+from django_extensions.management.utils import import_module
 logger = logging.getLogger('gladminds')
 
 def make_tls_property(default=None):
@@ -42,17 +44,15 @@ class DynamicSitesMiddleware(object):
         self.request = request
         self.domain, self.port = self.get_domain_and_port()
         BRAND.value = self.get_fields(self.domain)
-        if BRAND.value not in settings.BRANDS:
-            BRAND.value = settings.GM_BRAND
-
+            
+        if BRAND.value == 'admin':
+            request.urlconf = 'gladminds.urls'
+            return
         try:
-            if BRAND.value not in settings.GM_BRAND:
-                request.urlconf = 'gladminds.{0}.urls'.format(BRAND.value)
-        except KeyError:
-            # use default urlconf (settings.ROOT_URLCONF)
-            pass
-#         logger.info('BRAND is {0}, HOST is {1}'.format(BRAND.value,
-#                                                        request.get_host()))
+            import_module('gladminds.{0}.urls'.format(BRAND.value))
+            request.urlconf = 'gladminds.{0}.urls'.format(BRAND.value)
+        except:
+            request.urlconf = 'gladminds.core.urls'
 
     def process_response(self, request, response):
         if getattr(request, "urlconf", None):

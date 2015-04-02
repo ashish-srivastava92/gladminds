@@ -8,49 +8,10 @@ STATIC_DIR = os.path.join(BASE_DIR, "src/static")
 TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladmindsqa2')
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gm',
-        'USER': 'gladminds',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com',
-        'PORT': '3306',
-    },
-    'bajaj': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bajaj',
-        'USER': 'gladminds',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com',
-        'PORT': '3306',
-    },
-    'demo': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'demo',
-        'USER': 'gladminds',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com',
-        'PORT': '3306',
-    },
-    'afterbuy': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'afterbuy',
-        'USER': 'gladminds',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com',
-        'PORT': '3306',
-    }
-}
-
-
 
 BROKER_URL = 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'

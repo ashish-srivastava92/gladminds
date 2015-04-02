@@ -3,7 +3,10 @@ import json
 import random
 import datetime
 import operator
+import re
 
+from gladminds.core.utils import check_password
+from tastypie.http import HttpBadRequest
 from collections import OrderedDict
 from django.shortcuts import render_to_response, render
 from django.http.response import HttpResponseRedirect, HttpResponse,\
@@ -84,10 +87,9 @@ def user_logout(request):
         return HttpResponseBadRequest()
     return HttpResponseBadRequest('Not Allowed')
 
-
 @check_service_active(Services.FREE_SERVICE_COUPON)
 @login_required()
-def change_password(request): 
+def change_password(request):
     if request.method == 'GET':
         return render(request, 'portal/change_password.html')
     if request.method == 'POST':
@@ -98,9 +100,13 @@ def change_password(request):
             new_password = request.POST.get('newPassword')
             check_pass = user.check_password(str(old_password))
             if check_pass:
-                user.set_password(str(new_password))
-                user.save()
-                data = {'message': 'Password Changed successfully', 'status': True}
+                invalid_password = check_password(new_password)
+                if (invalid_password):
+                    data = {'message':"password does not match the rules",'status':False}
+                else:    
+                    user.set_password(str(new_password))
+                    user.save()
+                    data = {'message': 'Password Changed successfully', 'status': True}
             else:
                 data = {'message': 'Old password wrong', 'status': False}
             return HttpResponse(json.dumps(data), content_type='application/json')
@@ -547,8 +553,6 @@ def trigger_sqs_tasks(request):
 
 
 def site_info(request):
-    if settings.ENV in ['qa']:
-        send_mail_for_feed_failure()
     if request.method != 'GET':
         raise Http404
     brand = settings.BRAND

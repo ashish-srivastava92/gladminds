@@ -61,6 +61,7 @@ def service_desk(request):
     groups = utils.stringify_groups(request.user)
     brand_departments = get_brand_departments()
     training_material = models.Service.objects.filter(service_type__name=Services.SERVICE_DESK)
+    department_sub_categories= get_subcategories()
     if len(training_material)>0:
         training_material = training_material[0].training_material_url
     else:
@@ -80,6 +81,7 @@ def service_desk(request):
                                           "pagination_links": PAGINATION_LINKS,
                                           "page_details": page_details,
                                           "departments": brand_departments,
+                                          "department_sub_categories" : department_sub_categories,
                                           "record_showing_counts": RECORDS_PER_PAGE,
                                           "types": utils.get_list_from_set(FEEDBACK_TYPE),
                                           "priorities": utils.get_list_from_set(DEMO_PRIORITY),
@@ -88,14 +90,6 @@ def service_desk(request):
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
                                                             'count': str(count), 'search': search}}
                                         )
-    elif request.method == 'POST':
-        try:
-            data = save_help_desk_data(request)
-            return HttpResponse(content=json.dumps(data),
-                                content_type='application/json')
-        except Exception as ex:
-            LOG.error('Exception while saving data : {0}'.format(ex))
-            return HttpResponseBadRequest()
     else:
         return HttpResponseBadRequest()
 
@@ -158,6 +152,7 @@ def get_servicedesk_tickets(request):
     page_details['from'] = feedbacks.start_index()
     page_details['to'] = feedbacks.end_index()
     brand_departments = get_brand_departments()
+    department_sub_categories= get_subcategories()
     training_material = models.Service.objects.filter(service_type__name=Services.SERVICE_DESK)
     if len(training_material)>0:
         training_material = training_material[0].training_material_url
@@ -170,22 +165,32 @@ def get_servicedesk_tickets(request):
                                           "priorities": utils.get_list_from_set(DEMO_PRIORITY),
                                           "pagination_links": PAGINATION_LINKS,
                                           "page_details": page_details,
-                                          "departments": brand_departments, 
+                                          "departments": brand_departments,
+                                          "department_sub_categories" : department_sub_categories, 
                                           "record_showing_counts": RECORDS_PER_PAGE,
                                           "training_material" : training_material,
                                           "filter_params": {'status': status, 'priority': priority, 'type': type,
                                                             'count': str(count), 'search': search}}
                                         )
 
-def get_subcategories(request):
-    sub_departments = models.DepartmentSubCategories.objects.filter(department__id=request.POST.get('department'))
-    brand_sub_departments = []
-    for sub_department in sub_departments:
-        brand_sub_department = {}
-        brand_sub_department['name'] = sub_department.name
-        brand_sub_department['id'] = sub_department.id
-        brand_sub_departments.append(brand_sub_department)
-    return HttpResponse(content=json.dumps(brand_sub_departments), content_type='application/json')
+def get_subcategories():
+    departments = models.BrandDepartment.objects.all()
+    sub_departments = models.DepartmentSubCategories.objects.all()
+    all_departments = []
+    for department in departments:
+        brand_departments = {}
+        brand_departments['id']= str(department.id)
+        brand_departments['name']= str(department.name)    
+        brand_departments['value'] = []
+        for sub_department in sub_departments:
+            if sub_department.department.id == department.id:
+                sub_departments_list= {}
+                sub_departments_list['id'] = str(sub_department.id)
+                sub_departments_list['name'] = str(sub_department.name)
+                brand_departments['value'].append(sub_departments_list)
+        all_departments.append(brand_departments)
+    
+    return all_departments
 
 def get_brand_users(request):
     sub_department_users = models.ServiceDeskUser.objects.filter(sub_department__department__id=request.POST.get('department'))
@@ -208,7 +213,7 @@ def modify_servicedesk_tickets(request, feedback_id):
     feedback_types = get_list_from_set(FEEDBACK_TYPE)
     root_cause = get_list_from_set(ROOT_CAUSE)
     feedback_obj = get_feedback(feedback_id, request.user)
-    servicedesk_users = get_servicedesk_users(designation=[Roles.SDOWNERS,Roles.SDMANAGERS], feedback_obj=feedback_obj )
+    servicedesk_users = get_servicedesk_users(designation=[Roles.SDOWNERS,Roles.SDMANAGERS, Roles.SDREADONLY] )
     comments = get_comments(feedback_id)
     
     if request.method == 'POST':
@@ -240,7 +245,8 @@ def modify_feedback_comments(request, feedback_id, comment_id):
         comment.comment = data['commentDescription']
         comment.modified_date = datetime.datetime.now()
         comment.save()
-        update_feedback_activities(feedback_obj, SDActions.COMMENT_UPDATE, previous_comment, data['commentDescription'])
+        update_feedback_activities(feedback_obj, SDActions.COMMENT_UPDATE, previous_comment,
+                                   data['commentDescription'], request.user)
         return HttpResponse("Success")
 
     except Exception as ex:

@@ -16,7 +16,7 @@ from gladminds.bajaj import models
 from gladminds.core.managers.audit_manager import feed_log, sms_log
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.auth_helper import Roles
-from gladminds.bajaj.services.feed_resources import BaseFeed, BaseExportFeed
+from gladminds.core.services.feed_resources import BaseFeed, BaseExportFeed
 logger = logging.getLogger("gladminds")
 
 USER_GROUP = {'dealer': Roles.DEALERS,
@@ -106,6 +106,7 @@ class SAPFeed(object):
             'bomitem': BOMItemFeed,
             'eco_release': ECOReleaseFeed,
             'container_tracker':ContainerTrackerFeed,
+            'eco_implementation':ECOImplementationFeed,
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
@@ -192,11 +193,9 @@ class ProductDispatchFeed(BaseFeed):
                     '[Info: ProductDispatchFeed_product_data]: {0}'.format(done))
                 try:
                     dealer_data = self.check_or_create_dealer(dealer_id=product['dealer_id'])
-#                     self.get_or_create_product_type(
-#                         product_type=product['product_type'])
-#                     producttype_data = models.ProductType.objects.get( product_type=product['product_type'])
                     product_data = models.ProductData(
-                        product_id=product['vin'], sku_code=product['product_type'], invoice_date=product['invoice_date'], dealer_id=dealer_data)
+                        product_id=product['vin'], invoice_date=product['invoice_date'], 
+                        dealer_id=dealer_data, sku_code=product['product_type'])
                     product_data.save()
                     logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN-{0} UCN-{1}'.format(product['vin'], product['unique_service_coupon']))
                 except Exception as ex:
@@ -605,4 +604,23 @@ class ContainerTrackerFeed(BaseFeed):
         
         return self.feed_remark
 
-    
+class ECOImplementationFeed(BaseFeed):
+
+    def import_data(self):
+        for eco_obj in self.data_source:
+            try:
+                eco_implementation_obj = models.ECOImplementation(change_no=eco_obj['change_no'],change_date=eco_obj['change_date'],
+                                                           change_time=eco_obj['change_time'],plant=eco_obj['plant'],
+                                                           action=eco_obj['action'],parent_part=eco_obj['parent_part'],
+                                                           added_part=eco_obj['added_part'],added_part_qty=eco_obj['added_part_qty'],
+                                                           deleted_part=eco_obj['deleted_part'],deleted_part_qty=eco_obj['deleted_part_qty'],
+                                                           chassis_number=eco_obj['chassis_number'],engine_number=eco_obj['engine_number'],
+                                                           eco_number=eco_obj['eco_number'],reason_code=eco_obj['reason_code'],
+                                                           remarks=eco_obj['remarks']
+                                                           )
+                eco_implementation_obj.save() 
+            except Exception as ex:
+                ex="[Exception: ]: ECOImplementationFeed {0}".format(ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+        return self.feed_remark

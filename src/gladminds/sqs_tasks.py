@@ -10,13 +10,12 @@ from gladminds.core.managers.sms_client_manager import load_gateway, MessageSent
 from gladminds.core.managers import mail
 from gladminds.core.cron_jobs import taskmanager
 from gladminds.bajaj.services.coupons import import_feed, export_feed
-from gladminds.bajaj.services.loyalty import export_feed as loyalty_export
+from gladminds.core.services.loyalty import export_feed as loyalty_export
 from gladminds.core.services import  message_template as templates
-
 import pytz
 import logging
 from gladminds.core.managers.mail import send_due_date_exceeded,\
-    send_due_date_reminder
+    send_due_date_reminder, send_email_to_asc_customer_support
 from django.contrib.auth.models import User
 from gladminds.core.constants import DATE_FORMAT, FEED_TYPES
 from gladminds.core.cron_jobs.queue_utils import get_task_queue,\
@@ -27,6 +26,7 @@ from gladminds.core.managers.mail import get_email_template,send_email_to_redeem
     send_email_to_welcomekit_escaltion_group
 from gladminds.core.auth_helper import Roles
 from django.db.models import Q
+import textwrap
 
 
 logger = logging.getLogger("gladminds")
@@ -221,6 +221,23 @@ def send_loyalty_escalation_message(*args, **kwargs):
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         sms_log(brand,status=status, receiver=phone_number, message=message)
+
+@shared_task
+def send_dfsc_customer_support(*args, **kwargs):
+    """
+    sends customer support phone number 
+    """
+    status = "success"
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        set_gateway(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        send_reminder_message.retry(
+            exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        sms_log(status=status, receiver=phone_number, message=message)
 
 @shared_task
 def send_otp(*args, **kwargs):
@@ -612,12 +629,12 @@ def send_reminders_for_servicedesk(*args, **kwargs):
 @shared_task
 def export_member_temp_id_to_sap(*args, **kwargs):
     '''
-    send info of registered Mechanic
+    send info of registered Member
     '''
     brand= kwargs.get('brand', None)
     member_registered = loyalty_export.ExportMemberTempFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
-                  wsdl_url=settings.MEMBER_SYNC_WSDL_URL, feed_type='Mechanic Registration Feed')
+                  wsdl_url=settings.MEMBER_SYNC_WSDL_URL, feed_type='Member Registration Feed')
     feed_export_data = member_registered.export_data()
     if len(feed_export_data[0]) > 0:
         member_registered.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
@@ -695,6 +712,29 @@ def redemption_request_due_date_escalation(*args, **kwargs):
         redemption_request.resolution_flag = True
         redemption_request.save()
 
+def customer_support_helper(obj_list, data, message):   
+    for obj in obj_list:
+        try:
+            phone = obj.user.phone_number
+            send_email_to_asc_customer_support(data, obj.user.user.email)
+            sms_log(receiver = phone, action=AUDIT_ACTION, message=message)
+            send_job_to_queue(send_dfsc_customer_support,
+                                   {"phone_number":phone, "message":message, "sms_client":settings.SMS_CLIENT})
+        except Exception as ex:
+            logger.info("[Exception fail to send SMS to ASCs/Dealers on Customer Support]  {0}".format(ex))
+            
+def dfsc_customer_support(*args, **kwargs):    
+    asc_obj = models.AuthorizedServiceCenter.objects.filter(user__state='MAH').select_related('user, user__user')
+    dealer_obj = models.Dealer.objects.filter(user__state='MAH').select_related('user, user__user')
+    
+    data = get_email_template('CUSTOMER_SUPPORT_FOR_DFSC')
+    data['newsubject'] = data['subject']
+    data['content'] = data['body']
+    message = templates.get_template('CUSTOMER_SUPPORT_FOR_DFSC')
+    
+    customer_support_helper(asc_obj, data, message)
+    customer_support_helper(dealer_obj, data, message)    
+    
 @shared_task
 def export_member_accumulation_to_sap(*args, **kwargs):
     '''
@@ -823,6 +863,7 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "export_member_redemption_to_sap": export_member_redemption_to_sap,
               
-              "export_distributor_to_sap": export_distributor_to_sap
+              "export_distributor_to_sap": export_distributor_to_sap,
               
+              "dfsc_customer_support": dfsc_customer_support
               }

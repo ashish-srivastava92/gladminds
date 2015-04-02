@@ -31,6 +31,18 @@ import pytz
 
 logger = logging.getLogger('gladminds')
 
+def check_password(password):
+    s = password
+    rules = [lambda s:any(x.isupper() for x in s),
+        lambda s:any(x.islower() for x in s),
+        lambda s:any(x.isdigit() for x in s),
+        lambda s:len(s) >= 6,
+        lambda s:bool(re.search(r'[^a-zA-Z0-9]',s))
+        ]
+    #if not all(rule(s) for rule in rules):
+        #return True
+    return True
+
 def generate_temp_id(prefix_value):
     for x in range(5):
         key = base64.b64encode(hashlib.sha256(str(datetime.datetime.now())).digest())
@@ -44,6 +56,10 @@ def generate_temp_id(prefix_value):
 def get_handler(handler, brand=None):
     if not brand:
         brand = settings.BRAND
+    try:
+        import_module('gladminds.{0}'.format(brand))
+    except Exception as ex:
+        brand='core'
     func_handler = '.'.join(handler.split('.')[-1:])
     service_handler = '.'.join(handler.split('.')[-2:-1])
     try:

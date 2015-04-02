@@ -12,12 +12,12 @@ from django.db.models import signals
 
 from gladminds.core.services import message_template as templates
 from gladminds.core import utils
-from gladminds.bajaj import models
+from gladminds.core.model_fetcher import get_model
 from gladminds.core.managers.audit_manager import feed_log, sms_log
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
-from gladminds.bajaj.services.feed_resources import BaseFeed
+from gladminds.core.services.feed_resources import BaseFeed
 from gladminds.core.auth_helper import Roles
-from gladminds.bajaj.services.loyalty.loyalty import LoyaltyService
+from gladminds.core.services.loyalty.loyalty import loyalty
 
 logger = logging.getLogger("gladminds")
 USER_GROUP = {'dealer': 'dealers', 'ASC': 'ascs', 'SA':'sas', 'customer':"customer"}
@@ -30,7 +30,7 @@ class LoyaltyFeed(object):
             'part_upc': PartUPCFeed,
             'part_point': PartPointFeed,
             'distributor': DistributorFeed,
-            'mechanic': MechanicFeed,
+            'mechanic': MemberFeed,
             'nsm':NSMFeed,
             'asm':ASMFeed,
         }
@@ -44,18 +44,18 @@ class PartMasterFeed(BaseFeed):
         total_failed = 0
         for spare in self.data_source:
             try:
-                part_data = models.SparePartMasterData.objects.get(part_number=spare['part_number'])
+                part_data = get_model('SparePartMasterData').objects.get(part_number=spare['part_number'])
             except ObjectDoesNotExist as done:
                 logger.info(
                     '[Info: PartMasterFeed_part_data]: {0}'.format(done))
                 try:
-                    spare_type_object = models.ProductType.objects.filter(product_type=spare['part_type'])
+                    spare_type_object = get_model('ProductType').objects.filter(product_type=spare['part_type'])
                     if not spare_type_object:
-                        spare_type_object = models.ProductType(product_type=spare['part_type'])
+                        spare_type_object = get_model('ProductType')(product_type=spare['part_type'])
                         spare_type_object.save()
                     else:
                         spare_type_object = spare_type_object[0]
-                    spare_object = models.SparePartMasterData(
+                    spare_object = get_model('SparePartMasterData')(
                                                 product_type=spare_type_object,
                                                 part_number = spare['part_number'],
                                                 part_model = spare['part_model'],
@@ -80,8 +80,8 @@ class PartUPCFeed(BaseFeed):
         total_failed = 0
         for spare in self.data_source:
             try:
-                part_data = models.SparePartMasterData.objects.get(part_number=spare['part_number'])
-                spare_object = models.SparePartUPC(
+                part_data = get_model('SparePartMasterData').objects.get(part_number=spare['part_number'])
+                spare_object = get_model('SparePartUPC')(
                                             part_number=part_data,
                                             unique_part_code = spare['UPC'])
                 spare_object.save()
@@ -101,11 +101,11 @@ class PartPointFeed(BaseFeed):
         total_failed = 0
         for spare in self.data_source:
             try:
-                part_data = models.SparePartMasterData.objects.get(part_number=spare['part_number'])
-                spare_object = models.SparePartPoint.objects.filter(part_number=part_data,
+                part_data = get_model('SparePartMasterData').objects.get(part_number=spare['part_number'])
+                spare_object = get_model('SparePartPoint').objects.filter(part_number=part_data,
                                                      territory=spare['territory'])
                 if not spare_object:
-                    spare_object = models.SparePartPoint(part_number = part_data,
+                    spare_object = get_model('SparePartPoint')(part_number = part_data,
                                               points = spare['points'],
                                               price = spare['price'],
                                               MRP = spare['mrp'],
@@ -130,7 +130,7 @@ class DistributorFeed(BaseFeed):
         total_failed = 0
         for distributor in self.data_source:
             try:
-                dist_object = models.Distributor.objects.filter(distributor_id=distributor['id'])
+                dist_object = get_model('Distributor').objects.filter(distributor_id=distributor['id'])
                 if not dist_object:
                     password=distributor['id']+'@123'
                     dist_user_object = User.objects.using(settings.BRAND).create(username=distributor['id'])
@@ -138,12 +138,12 @@ class DistributorFeed(BaseFeed):
                     dist_user_object.email = distributor['email']
                     dist_user_object.first_name = distributor['name']
                     dist_user_object.save(using=settings.BRAND)
-                    dist_user_pro_object = models.UserProfile(user=dist_user_object,
+                    dist_user_pro_object = get_model('UserProfile')(user=dist_user_object,
                                                 phone_number=distributor['mobile'],
                                                 address=distributor['city'])
                     dist_user_pro_object.save()
-                    asm_object = models.AreaSparesManager.objects.get(asm_id=distributor['asm_id'])
-                    dist_object = models.Distributor(distributor_id=distributor['id'],
+                    asm_object = get_model('AreaSparesManager').objects.get(asm_id=distributor['asm_id'])
+                    dist_object = get_model('Distributor')(distributor_id=distributor['id'],
                                               asm=asm_object,
                                               user=dist_user_pro_object,
                                               name=distributor['name'],
@@ -162,23 +162,23 @@ class DistributorFeed(BaseFeed):
 
         return self.feed_remark
 
-class MechanicFeed(BaseFeed):
+class MemberFeed(BaseFeed):
 
     def import_data(self):
         total_failed = 0
         for mechanic in self.data_source:
             try:
-                mech_object = models.Mechanic.objects.get(mechanic_id=mechanic['temp_id'])
+                mech_object = get_model('Member').objects.get(mechanic_id=mechanic['temp_id'])
                 mech_object.permanent_id=mechanic['mechanic_id']
                 mech_object.save()
                 if not mech_object.sent_sms:
-                    LoyaltyService.send_welcome_sms(mech_object)
+                    loyalty.send_welcome_sms(mech_object)
                     mech_object.sent_sms = True
                     mech_object.save()
-                    LoyaltyService.initiate_welcome_kit(mech_object)
+                    loyalty.initiate_welcome_kit(mech_object)
             except Exception as ex:
                 total_failed += 1
-                ex = "[MechanicFeed]: id-{0} :: {1}".format(mechanic['temp_id'], ex)
+                ex = "[MemberFeed]: id-{0} :: {1}".format(mechanic['temp_id'], ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
                 continue
@@ -191,21 +191,22 @@ class NSMFeed(BaseFeed):
         total_failed = 0
         for nsm in self.data_source:
             try:
-                nsm_object = models.NationalSparesManager.objects.filter(territory=nsm['territory'])
+                territory = get_model('Territory').objects.get(territory=nsm['territory'])
+                nsm_object = get_model('NationalSparesManager').objects.filter(territory=territory)
                 try:
-                    user_object = models.UserProfile.objects.get(user__username=nsm['email'])
+                    user_object = get_model('UserProfile').objects.get(user__username=nsm['email'])
                 except ObjectDoesNotExist as ex:
                     logger.error("[import_nsm_data] {0} : {1}".format(nsm['phone_number'], ex))
                     user_object = self.register_user(Roles.NATIONALSPARESMANAGERS,username=nsm['email'],phone_number=nsm['phone_number'],
                                                      first_name=nsm['name'], email=nsm['email'])
                 if not nsm_object:
                     nsm_temp_id = utils.generate_temp_id('TNSM')
-                    nsm_object = models.NationalSparesManager(nsm_id=nsm_temp_id,
+                    nsm_object = get_model('NationalSparesManager')(nsm_id=nsm_temp_id,
                                                              name=nsm['name'],
                                                              email=nsm['email'],
                                                              phone_number=nsm['phone_number'],
-                                                             territory=nsm['territory'],
                                                              user=user_object)
+                    nsm_object.territory.add(territory)
                     nsm_object.save()
                 else:
                     nsm_object = nsm_object[0]
@@ -229,15 +230,16 @@ class ASMFeed(BaseFeed):
         for asm in self.data_source:
             try:
                 try:
-                    user_object = models.UserProfile.objects.get(user__username=asm['email'])
+                    user_object = get_model('UserProfile').objects.get(user__username=asm['email'])
                 except ObjectDoesNotExist as ex:
                     logger.error("[import_asm_data] {0} : {1}".format(asm['phone_number'], ex))
                     user_object = self.register_user(Roles.AREASPARESMANAGERS,username=asm['email'],phone_number=asm['phone_number'],
                                                      first_name=asm['name'], state=asm['state'], email=asm['email'])                    
                 try:
-                    nsm_obj = models.NationalSparesManager.objects.get(territory=asm['territory'])
+                    territory = get_model('Territory').objects.get(territory=asm['territory'])
+                    nsm_obj = get_model('NationalSparesManager').objects.get(territory=territory)
                     try:
-                        asm_object = models.AreaSparesManager.objects.get(state=asm['state'])   
+                        asm_object = get_model('AreaSparesManager').objects.get(state=asm['state'])   
                         asm_object.name = asm['name']
                         asm_object.email= asm['email']
                         asm_object.phone_number = asm['phone_number']
@@ -246,13 +248,15 @@ class ASMFeed(BaseFeed):
                         asm_object.save()
                     except:
                         asm_temp_id = utils.generate_temp_id('TASM')
-                        asm_object = models.AreaSparesManager(asm_id=asm_temp_id,
+                        state = get_model('State').objects.get(state_name=asm['state'])
+                        asm_object = get_model('AreaSparesManager')(asm_id=asm_temp_id,
                                                                  nsm=nsm_obj,
                                                                  name=asm['name'],
                                                                  email=asm['email'],
                                                                  phone_number=asm['phone_number'],
-                                                                 state=asm['state'],
-                                                                 user=user_object)                                                        
+                                                                 user=user_object)
+                        asm_object.save()
+                        asm_object.state.add(state)                                                       
                         asm_object.save()
                 
                 except ObjectDoesNotExist as ex:
