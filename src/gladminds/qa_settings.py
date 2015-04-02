@@ -73,7 +73,7 @@ COUPON_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/coupon-redeem/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
 VIN_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/vin-sync/?wsdl&v0"
 PURCHASE_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/purchase-sync/?wsdl&v0"
-CTS_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/container-tracker/?wsdl&v0"
+CTS_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/container-tracker/?wsdl&v0"
 
 MEMBER_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/member-sync/?wsdl&v0"
 ACCUMULATION_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/accumulation-request/?wsdl&v0"
