@@ -66,3 +66,4 @@ VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["priyanka.n@hashedin.com","somit@hashed
 ENV = "dev"
 
 WSDL_TNS="http://dev.bajaj.gladminds.co/api/v1/feed/"
+CORE_WSDL_TNS="http://dev.bajajcv.gladminds.co/api/v1/feed/"

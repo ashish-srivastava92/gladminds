@@ -80,6 +80,7 @@ REDEMPTION_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/redemption-reque
 DISTRIBUTOR_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/distributor-sync/?wsdl&v0"
 
 WSDL_TNS="http://qa.bajaj.gladminds.co/api/v1/feed/"
+CORE_WSDL_TNS="http://qa.bajajcv.gladminds.co/api/v1/feed/"
 
 ENABLE_AMAZON_SQS = True
 
