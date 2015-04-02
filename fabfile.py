@@ -137,7 +137,7 @@ def create_new_qa_version(version):
     upload_to_s3(BUCKET_NAME, version, FILE_NAME)
     create_version(APPLICATION_NAME, version)
 
-    ENVIRONMENT_NAME = 'gladminds-worker-qa2'
+    ENVIRONMENT_NAME = 'gladminds-worker-qa2-1'
     update_environment(ENVIRONMENT_NAME, version)
     
     ENVIRONMENT_NAME = 'gladminds-webserver-qa2'
@@ -191,8 +191,8 @@ def check():
     js_lint = lint_js().split('\n')
     py_lint = lint_py().split('\n')
     css_lint = lint_css()
-    coverage = ET.parse(open('out/coverage.xml')).getroot().attrib
-    tests = ET.parse(open('out/xunit.xml')).getroot().attrib
+    coverage = ET.parse(open('out/coverage.xml', 'a+')).getroot().attrib
+    tests = ET.parse(open('out/xunit.xml', 'a+')).getroot().attrib
  
     summary = {'8. Py Errors': len(py_lint),
                '7. JS Errors': len(js_lint),
@@ -208,7 +208,7 @@ def check():
     ROW_MAPPER = lambda x: "<tr><td>{0}</td><td>{1}</td></tr>".format(x[0], x[1])
     rows = sorted(map(ROW_MAPPER, summary.items()))
 
-    summary_file = open('out/summary.html', 'w')
+    summary_file = open('out/summary.html', 'a+')
     summary_file.write('''
         <h4 style="color:red;">Checks Failed. Please Fix.</h4>
         <table style="text-align:left; width:200px;" border="1">
