@@ -968,6 +968,10 @@ class ContainerTracker(BaseModel):
     gatein_date = models.DateField(max_length=10, null=True, blank=True)
     gatein_time = models.TimeField(max_length=10, null=True, blank=True)
     status = models.CharField(max_length=12, choices=constants.CONSIGNMENT_STATUS, default='Open')
+    seal_no = models.CharField(max_length=20, null=True, blank=True)
+    container_no = models.CharField(max_length=20, null=True, blank=True)
+    transaction_id = models.CharField(max_length=20, null=True, blank=True)
+    sent_to_sap = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
