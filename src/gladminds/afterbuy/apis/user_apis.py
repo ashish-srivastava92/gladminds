@@ -35,6 +35,7 @@ from gladminds.afterbuy.apis.validations import ConsumerValidation,\
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.model_helpers import format_phone_number
 from gladminds.core.auth import otp_handler
+from gladminds.core import constants
 
 logger = logging.getLogger("gladminds")
 
@@ -338,7 +339,7 @@ class ConsumerResource(CustomBaseModelResource):
         query = '/v1/coupons/?'+ access_token
         
         if product_id:
-            if product_id[:3]!= 'VBK':
+            if product_id[:3].upper()!= constants.KTM_VIN:
                 return HttpResponse(json.dumps({'message':'Incorrect VIN'}), content_type='application/json')
             query = query + '&product__product_id='+product_id
         
