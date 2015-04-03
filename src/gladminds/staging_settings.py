@@ -122,6 +122,7 @@ PURCHASE_SYNC_WSDL_URL="http://staging.bajaj.gladminds.co/api/v1/purchase-sync-f
 PURCHASE_SYNC_WSDL='qa_purchase_sync_feed.wsdl'
 
 WSDL_TNS="http://staging.bajaj.gladminds.co/api/v1/feed/"
+CORE_WSDL_TNS="http://staging.bajajcv.gladminds.co/api/v1/feed/"
 
 ENABLE_AMAZON_SQS = True
 
