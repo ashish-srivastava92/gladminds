@@ -100,7 +100,7 @@ class BaseFeed(object):
     
     def check_or_create_transporter(self, transporter_id, name):
         try:
-            transporter_data = models.Transporter.objects.select_related('user__user').get(
+            transporter_data = get_model('Transporter').objects.select_related('user__user').get(
                 transporter_id=transporter_id)
         except ObjectDoesNotExist as odne:
             logger.debug(
@@ -108,8 +108,8 @@ class BaseFeed(object):
                 .format(odne))
             user = self.register_user(Roles.TRANSPORTER, username=transporter_id,
                                       first_name=name)
-            transporter_data = models.Transporter(user=user,
-                transporter_id=transporter_id)
+            transporter_data = get_model('Transporter')(user=user,
+                                                        transporter_id=transporter_id)
             transporter_data.save()            
         return transporter_data
 

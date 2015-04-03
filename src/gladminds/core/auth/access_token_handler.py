@@ -39,13 +39,16 @@ def verify_access_token(key, user=None):
     if  (settings.ENV in settings.IGNORE_ENV and key in settings.HARCODED_TOKEN):
         return key
     try:
-        token = AccessToken.objects.using(settings.BRAND).get(token=key)
+        token = AccessToken.objects.using(settings.BRAND).get(token=key) 
         # Check if token has expired
         if token.expires < timezone.now():
             raise AuthError('AccessToken has expired.')
     except AccessToken.DoesNotExist, e:
-        logging.info('InValid access : {0}'.format(e))
-        raise AuthError('AccessToken not found at all.')
+        try:
+            token =  AccessToken.objects.using('afterbuy').get(token=key)
+        except AccessToken.DoesNotExist, e:
+            logging.info('InValid access : {0}'.format(e))
+            raise AuthError('AccessToken not found at all.')
 
     logging.info('Valid access')
     return token

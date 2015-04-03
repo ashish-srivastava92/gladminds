@@ -14,7 +14,8 @@ def view_wsdl(request, feed_type, show_indexes=False):
                 'purchase-sync': settings.PURCHASE_SYNC_WSDL,
                 'accumulation-request': settings.ACCUMULATION_SYNC_WSDL,
                 'redemption-request':settings.REDEMPTION_SYNC_WSDL,
-                'distributor-sync': settings.DISTRIBUTOR_SYNC_WSDL
+                'distributor-sync': settings.DISTRIBUTOR_SYNC_WSDL,
+                'container-tracker': settings.CTS_WSDL
                 }
     try:
         return render_to_response(WSDL_URL[feed_type], content_type = 'application/xml')

@@ -31,7 +31,7 @@ ADMINS = (
 )
 API_FLAG = False
 COUPON_VALID_DAYS = 30
-COUPON_URL = 'local.bajaj.gladmindsplatform.co'
+COUPON_URL = 'local.bajaj.gladminds.co'
 TOTP_SECRET_KEY = '93424'
 OTP_VALIDITY = 120
 HARCODED_OTPS = ['000000']
@@ -656,6 +656,7 @@ PURCHASE_SYNC_WSDL='qa_purchase_sync_feed.wsdl'
 ACCUMULATION_SYNC_WSDL = 'qa_accumulation_feed.wsdl'
 REDEMPTION_SYNC_WSDL = 'qa_redemption_feed.wsdl'
 DISTRIBUTOR_SYNC_WSDL = 'qa_distributor_sync_feed.wsdl'                
+CTS_WSDL = 'qa_container_tracker_feed.wsdl'
 
 COUPON_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/coupon-redeem/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/customer-feed/?wsdl&v0"
@@ -665,6 +666,7 @@ PURCHASE_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/purchase-syn
 ACCUMULATION_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/accumulation-request/?wsdl&v0"
 REDEMPTION_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/redemption-request/?wsdl&v0"
 DISTRIBUTOR_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/distributor-sync/?wsdl&v0"
+CTS_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/container-tracker/?wsdl&v0"
 
 BRAND_META = {
                "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/"},

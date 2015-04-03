@@ -48,7 +48,7 @@ def get_set_cache(key, data_func, timeout=15):
     :param timeout:
     :type int:
     '''
-    result = cache.get(key)
+    result = Cache.get(key)
     if result is None:
         if data_func is None:
             raise
@@ -56,7 +56,7 @@ def get_set_cache(key, data_func, timeout=15):
             result = data_func
         else:
             result = data_func()
-        cache.set(key, result, timeout*60)
+        Cache.set(key, result, timeout*60)
     return result
 
 _KEYS = ["id", "name", "value"]

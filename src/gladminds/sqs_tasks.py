@@ -782,6 +782,20 @@ def export_distributor_to_sap(*args, **kwargs):
                              1], total_failed_on_feed=feed_export_data[2])
     else:
         logger.info("[export_distributor_to_sap]: No distributor registered since last feed")
+
+@shared_task
+def export_cts_to_sap(*args, **kwargs):
+    '''
+    send container tracking system info to sap
+    '''
+    cts = export_feed.ExportCTSFeed(username=settings.SAP_CRM_DETAIL['username'],
+                                    password=settings.SAP_CRM_DETAIL['password'],
+                                    wsdl_url=settings.CTS_WSDL_URL, feed_type='CTS Feed')
+    feed_export_data = cts.export_data()
+    if len(feed_export_data[0]) > 0:
+        logger.info("[export_cts_to_sap]: sending cts data")
+        cts.export(items=feed_export_data[0], item_batch=feed_export_data[1],
+                   total_failed_on_feed=feed_export_data[2])    
  
 _tasks_map = {"send_registration_detail": send_registration_detail,
 
@@ -865,5 +879,7 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "export_distributor_to_sap": export_distributor_to_sap,
               
-              "dfsc_customer_support": dfsc_customer_support
+              "dfsc_customer_support": dfsc_customer_support,
+
+              "export_cts_to_sap": export_cts_to_sap
               }

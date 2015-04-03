@@ -109,7 +109,6 @@
                       $('.modal-header .close').css("display", "none");
                       setTimeout(function(){
                       	messageModal.modal('hide');
-                      	waitingModal.modal('show');
                       }, 3000);
                 	  vinSyncFeed(data);
                   }
@@ -135,11 +134,12 @@ function vinSyncFeed(data){
         success: function(data){
         if (data['message']) {
             $('.modal-header .close').css("display", "none");
-            waitingModal.modal('hide');
+        	waitingModal.modal('show');
             messageBlock.text(data.message);
             messageModal.modal('show');
             setTimeout(function(){
             	messageModal.modal('hide');
+            	waitingModal.modal('hide');
             }, 5000);
             }
         },

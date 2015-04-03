@@ -62,7 +62,7 @@ class CustomBaseModelResource(BaseCorsResource, ModelResource):
         if self._meta and hasattr(self._meta, 'queryset'):
             if settings.BRAND in settings.OUTSIDE_BRANDS:
                 model = get_model(self._meta.queryset.model.__name__, brand=settings.BRAND)
-            setattr(self._meta, 'object_class', model)
+                setattr(self._meta, 'object_class', model)
         return super(CustomBaseModelResource, self).dispatch(request_type, request, **kwargs)
  
     def get_object_list(self, request):
