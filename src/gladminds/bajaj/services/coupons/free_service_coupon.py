@@ -153,7 +153,6 @@ def update_exceed_limit_coupon(actual_kms, product, service_advisor):
     exceed_limit_coupon = models.CouponData.objects\
         .filter(Q(status=1) | Q(status=4), product=product, valid_kms__lt=actual_kms)\
         .update(status=5, actual_kms=actual_kms, service_advisor=service_advisor, actual_service_date=datetime.now())
-    print "__________________________________________________________"
     LOG.info("%s are exceed limit coupon" % exceed_limit_coupon)
 
 
@@ -226,7 +225,6 @@ def validate_coupon(sms_dict, phone_number):
         valid_coupon = models.CouponData.objects.filter(Q(status=1) | Q(status=4) | Q(status=5), product=product,
                         valid_kms__gte=actual_kms, service_type=service_type) \
                        .select_related('vin', 'customer_phone_number__phone_number').order_by('service_type')
-        print "**************************************************valid coupon", valid_coupon
         LOG.info("List of available valid coupons %s" % valid_coupon)
         if len(valid_coupon) > 0:
             update_higher_range_coupon(valid_coupon[0].valid_kms, product)
@@ -234,12 +232,10 @@ def validate_coupon(sms_dict, phone_number):
             LOG.info("valid coupon %s" % valid_coupon)
             coupon_sa_obj = models.ServiceAdvisorCouponRelationship.objects.filter(unique_service_coupon=valid_coupon\
                                                                                    ,service_advisor=service_advisor)
-            print "coupon_sa_obj **********&&&&&&&&&&&&&**********", coupon_sa_obj
             LOG.info('Coupon_sa_obj exists: %s' % coupon_sa_obj)
             if not len(coupon_sa_obj):
                 coupon_sa_obj = models.ServiceAdvisorCouponRelationship(unique_service_coupon=valid_coupon\
                                                                         ,service_advisor=service_advisor)
-                print "ccccccccc%55555555555555%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", coupon_sa_obj
                 coupon_sa_obj.save()
                 LOG.info('Coupon obj created: %s' % coupon_sa_obj)
 
