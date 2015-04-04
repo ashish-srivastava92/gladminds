@@ -12,7 +12,8 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 
-COUPON_URL = 'bajaj.gladmindsplatform.co'
+COUPON_URL = 'staging.bajaj.gladmindsplatform.co'
+API_FLAG = True 
 BROKER_URL = 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
 

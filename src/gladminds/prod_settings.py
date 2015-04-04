@@ -202,3 +202,6 @@ SUIT_CONFIG = {
 #         'LOCATION': 'gladminds-memcache.t2nfas.cfg.use1.cache.amazonaws.com:11211'
 #     }
 # }
+
+COUPON_URL = 'bajaj.gladmindsplatform.co'
+API_FLAG = True 
