@@ -121,5 +121,5 @@ ENV = "qa"
 #     }
 # }
 
-COUPON_URL = 'qa.bajaj.gladmindsplatform.co'
+COUPON_URL = 'qa.bajaj.gladminds.co'
 API_FLAG = True 

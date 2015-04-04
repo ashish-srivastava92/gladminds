@@ -203,5 +203,5 @@ SUIT_CONFIG = {
 #     }
 # }
 
-COUPON_URL = 'bajaj.gladmindsplatform.co'
+COUPON_URL = 'bajaj.gladminds.co'
 API_FLAG = True 
