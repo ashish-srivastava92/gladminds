@@ -350,7 +350,9 @@ class ConsumerResource(CustomBaseModelResource):
             if not API_FLAG:
                 result = requests.get('http://'+COUPON_URL+':'+port+query)
             else:
-                result = requests.get('http://'+COUPON_URL+query)
+#                 result = requests.get('http://'+COUPON_URL+query)
+                result = requests.get('http://qa.bajaj.gladminds.co'+query)
+                logger.info("[Product details - KTM settings.evn]:{0}".format(settings.ENV))
 
             if len(json.loads(result.content)['objects']) == 0:
                     return HttpResponse(json.dumps({'message' : 'Invalid Details'}), content_type='application/json')

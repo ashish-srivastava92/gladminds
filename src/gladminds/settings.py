@@ -29,7 +29,7 @@ ADMINS = (
     ('naureen', 'naureen.razi@hashedin.com'),
     ('priyanka', 'priyanka.n@hashedin.com')
 )
-API_FLAG = False
+API_FLAG = True
 COUPON_VALID_DAYS = 30
 COUPON_URL = 'local.bajaj.gladminds.co'
 TOTP_SECRET_KEY = '93424'
