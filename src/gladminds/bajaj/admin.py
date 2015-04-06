@@ -58,7 +58,7 @@ class DispatchedProduct(models.ProductData):
 class ListDispatchedProduct(GmModelAdmin):
     search_fields = ('product_id', 'dealer_id__dealer_id')
     list_display = (
-        'product_id', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
+        'product_id', 'sku_code', 'engine', 'UCN', 'dealer_id', "invoice_date")
     list_per_page = 50
 
     def queryset(self, request):
