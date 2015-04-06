@@ -272,7 +272,7 @@ class CoreLoyaltyService(Services):
                 accumulation_log.save(using=settings.BRAND)
                 for spare in spares:
                     valid_product_number.append(spare.part_number)
-                    valid_upc.append(spare.unique_part_code)
+                    valid_upc.append(spare.unique_part_code.upper())
                     accumulation_log.upcs.add(spare)
                 spare_points = get_model('SparePartPoint').objects.get_part_number(valid_product_number)
                 for spare_point in spare_points:
