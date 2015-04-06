@@ -241,7 +241,6 @@ def validate_coupon(sms_dict, phone_number):
 
         in_progress_coupon = models.CouponData.objects.filter(product=product, valid_kms__gte=actual_kms, status=4) \
                              .select_related ('product').order_by('service_type')
-        print "in progree", in_progress_coupon
         try:
             customer_phone_number = product.customer_phone_number
         except Exception as ax:
