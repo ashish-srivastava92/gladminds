@@ -13,7 +13,6 @@ from django.contrib.auth import  login
 from django.conf import settings
 from gladminds.afterbuy import utils as afterbuy_utils
 from gladminds.core.auth import otp_handler
-from gladminds.settings import API_FLAG, COUPON_URL
 
 from gladminds.afterbuy import models as afterbuy_model
 from tastypie import fields, http
@@ -347,11 +346,10 @@ class ConsumerResource(CustomBaseModelResource):
             query = query + '&product__customer_phone_number__contains='+phone_number+'&product__product_id__startswith=VBK'
         
         try:
-            if not API_FLAG:
-                result = requests.get('http://'+COUPON_URL+':'+port+query)
+            if not settings.API_FLAG:
+                result = requests.get('http://'+settings.COUPON_URL+':'+port+query)
             else:
-#                 result = requests.get('http://'+COUPON_URL+query)
-                result = requests.get('http://qa.bajaj.gladminds.co'+query)
+                result = requests.get('http://'+settings.COUPON_URL+query)
                 logger.info("[Product details - KTM settings.evn]:{0}".format(settings.ENV))
 
             if len(json.loads(result.content)['objects']) == 0:
