@@ -9,12 +9,13 @@ def sms_log(brand, action='SENT', sender='+1 469-513-9856', receiver=None,
               message=None, status='success'):
     if receiver == '9999999999':
         status = 'fail'
-    logger.info('sms_log :: {0}'.format(brand))
+    logger.info('sms_log BRAND :: {0}'.format(brand))
     sm_model = get_model('SMSLog', brand=brand)
+    logger.info('sms_log SMS MODEL :: {0}'.format(sm_model))
     sms_log = sm_model(action=action, sender=sender,
                                receiver=receiver, status=status,
                                message=message)
-    sms_log.save()
+    sms_log.save(using=brand)
 
 
 def feed_log(brand, feed_type=None, total_data_count=None, failed_data_count=None,
@@ -27,7 +28,7 @@ def feed_log(brand, feed_type=None, total_data_count=None, failed_data_count=Non
                                      success_data_count=success_data_count,
                                      status=status, action=action,
                                      remarks=remarks, file_location=file_location)
-    data_feed_log.save()
+    data_feed_log.save(using=brand)
 
 def email_log(brand, subject, message, sender, receiver):
     email_model = get_model('EmailLog', brand=brand)
@@ -38,5 +39,5 @@ def feed_failure_log(brand, feed_type=None, reason=None):
     feed_failure_log_model = get_model('FeedFailureLog', brand=brand)
     feed_failure_log = feed_failure_log_model(feed_type=feed_type,
                                      reason=reason, created_date=datetime.datetime.now())
-    feed_failure_log.save()
+    feed_failure_log.save(using=brand)
     
