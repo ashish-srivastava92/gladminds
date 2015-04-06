@@ -280,7 +280,7 @@ class ServiceAdvisorCouponRelationship(BaseModel):
 
     class Meta:
         abstract = True
-        db_table = "gm_serviceAdvisorcouponrelationship"
+        db_table = "gm_serviceadvisorcouponrelationship"
         verbose_name_plural = 'Service Advisor And Coupon Relationship'
 
 class UCNRecovery(BaseModel):

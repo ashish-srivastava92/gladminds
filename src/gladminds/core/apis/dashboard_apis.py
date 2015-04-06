@@ -7,7 +7,7 @@ from gladminds.bajaj import models
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.core_utils.cache_utils import Cache
 from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES,\
-    CouponStatus
+    CouponStatus, TicketStatus
 from django.db import connections
 from django.conf import settings
 from gladminds.core.core_utils.utils import dictfetchall
@@ -262,7 +262,7 @@ class SMSReportResource(CustomBaseResource):
         return response_class(content=serialized, content_type=build_content_type(desired_format), **response_kwargs)
 
     def get_sms_count(self, action):
-        data = self.get_sql_data("select count(*) as count from bajaj_smslog where action=%(action)s",
+        data = self.get_sql_data("select count(*) as count from gm_smslog where action=%(action)s",
                                  filters={'action': action})
         return data[0]['count']
 
@@ -283,7 +283,7 @@ class SMSReportResource(CustomBaseResource):
         dtstart = params.get('created_date__gte')
         dtend = params.get('created_date__lte')
         where_and = " AND "
-        query = "select DATE(created_date) as date, action, count(*) as count from bajaj_smslog where action!='SEND TO QUEUE' "
+        query = "select DATE(created_date) as date, action, count(*) as count from gm_smslog where action!='SEND TO QUEUE' "
 
         if dtstart:
             query = query + where_and + "DATE(created_date) >= %(dtstart)s "
@@ -336,7 +336,7 @@ class CouponReportResource(CustomBaseResource):
         try:
             return get_set_cache('gm_coupon_counter' + status, None)
         except:
-            data = self.get_sql_data("select count(*) as count from bajaj_coupondata where status=%(status)s",
+            data = self.get_sql_data("select count(*) as count from gm_coupondata where status=%(status)s",
                                  filters={'status': status})
             return get_set_cache('gm_coupon_counter' + status, data[0]['count'])
 
@@ -357,8 +357,8 @@ class CouponReportResource(CustomBaseResource):
         dtstart = params.get('created_date__gte')
         dtend = params.get('created_date__lte')
         where_and = " AND "
-        query = "select c.*, d.date from bajaj_couponfact c inner join \
-        bajaj_datedimension d on c.date_id=d.date_id where c.data_type='TOTAL' ";
+        query = "select c.*, d.date from gm_couponfact c inner join \
+        gm_datedimension d on c.date_id=d.date_id where c.data_type='TOTAL' ";
         if dtstart:
             query = query + where_and + "DATE(d.date) >= %(dtstart)s "
             filters['dtstart'] = dtstart
