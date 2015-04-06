@@ -9,6 +9,7 @@ def sms_log(brand, action='SENT', sender='+1 469-513-9856', receiver=None,
               message=None, status='success'):
     if receiver == '9999999999':
         status = 'fail'
+    logger.info('sms_log :: {0}'.format(brand))
     sm_model = get_model('SMSLog', brand=brand)
     sms_log = sm_model(action=action, sender=sender,
                                receiver=receiver, status=status,

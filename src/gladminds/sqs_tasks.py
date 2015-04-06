@@ -359,9 +359,13 @@ def send_point(*args, **kwargs):
         logger.error("[Eception:send_point]:{0}".format(ex))
         send_point.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        logger.info("[INFO:send_point]:BRAND still still is {0}".format(brand))
-        sms_log(brand,status=status, receiver=phone_number, message=message)
-        logger.info('[send_point]: SENT MESSAGE FINALLY')
+        try:
+            logger.info("[INFO:send_point]:BRAND still is {0}".format(brand))
+            sms_log(brand,status=status, receiver=phone_number, message=message)
+            logger.info('[send_point]: SENT MESSAGE FINALLY')
+        except Exception as ex:
+            logger.error("[Eception:send_point]:{0}".format(ex))
+            logger.info('[send_point]: MESSAGE FAILED')
 
 @shared_task
 def send_loyalty_sms(*args, **kwargs):
