@@ -212,6 +212,13 @@ class CouponStatus():
     EXCEEDS_LIMIT = 5
     CLOSED_OLD_FSC = 6
 
+class TicketStatus():
+    OPEN = 'Open'
+    CLOSED = 'Closed'
+    IN_PROGRESS = 'In Progress'
+    RESOLVED = 'Resolved'
+    PENDING = 'Pending'
+
 WELCOME_KIT_MECHANIC_FIELDS = ['Mechanic ID', 'first_name', 'middle_name', 'last_name', 'phone_number', 'date_of_birth', 'address_line_1', 'address_line_2', 'address_line_3', 'address_line_4', 'address_line_5', 'address_line_6','shop_name', 'shop_address', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url',]
 
 LOYALTY_ACCESS = {
