@@ -146,6 +146,7 @@ class Dealer(BaseModel):
     use_cdms = models.BooleanField(default=True)
 
     objects = user_manager.DealerManager()
+    last_transaction_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -165,6 +166,7 @@ class AuthorizedServiceCenter(BaseModel):
     asc_owner_phone = models.CharField(max_length=50, null=True, blank=True)
     asc_owner_email = models.CharField(max_length=100, null=True, blank=True)
     objects = user_manager.AuthorizedServiceCenterManager()
+    last_transaction_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -1435,4 +1437,5 @@ class CouponFact(models.Model):
         abstract = True
         db_table = "gm_couponfact"
 
+    
 
