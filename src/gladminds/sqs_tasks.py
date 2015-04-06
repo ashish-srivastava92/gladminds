@@ -353,8 +353,7 @@ def send_point(*args, **kwargs):
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         set_gateway(**kwargs)
-        logger.info("[INFO:send_point]:BRAND still is {0}".format(brand))
-        logger.info('[send_point]: SENT MESSAGE')
+        logger.info("[INFO:send_point]:SENT MESSAGE :: {0}".format(brand))
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         logger.error("[Eception:send_point]:{0}".format(ex))
@@ -376,8 +375,7 @@ def send_loyalty_sms(*args, **kwargs):
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         set_gateway(**kwargs)
-        logger.info("[INFO:send_loyalty_sms]:BRAND still is {0}".format(brand))
-        logger.info('[send_loyalty_sms]: SENT MESSAGE')
+        logger.info("[INFO:send_loyalty_sms]:SENT MESSAGE :: {0}".format(brand))
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_loyalty_sms.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
