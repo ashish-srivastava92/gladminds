@@ -129,8 +129,8 @@ def send_coupon_detail_customer(*args, **kwargs):
         send_coupon_detail_customer.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        logger.info('[send_coupon_detail_customer]: SENT MESSAGE FINALLY')
         sms_log(brand,status=status, receiver=phone_number, message=message)
+        logger.info('[send_coupon_detail_customer]: SENT MESSAGE FINALLY')
 
 @shared_task
 def send_servicedesk_feedback_detail(*args, **kwargs):
@@ -348,17 +348,20 @@ def send_point(*args, **kwargs):
     """    
     status = "success"
     brand= kwargs.get('brand', None)
+    logger.info("[INFO:send_point]:BRAND is {0}".format(brand))
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        logger.info("request for sending sms received {0} message {1}".format(phone_number, message))
         set_gateway(**kwargs)
+        logger.info("[INFO:send_point]:SENT MESSAGE :: {0}".format(brand))
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         logger.error("[Eception:send_point]:{0}".format(ex))
         send_point.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
+        logger.info("[INFO:send_point]:BRAND still still is {0}".format(brand))
         sms_log(brand,status=status, receiver=phone_number, message=message)
+        logger.info('[send_point]: SENT MESSAGE FINALLY')
 
 @shared_task
 def send_loyalty_sms(*args, **kwargs):
@@ -367,16 +370,19 @@ def send_loyalty_sms(*args, **kwargs):
     """
     status = "success"
     brand= kwargs.get('brand', None)
+    logger.info("[INFO:send_loyalty_sms]:BRAND is {0}".format(brand))
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        brand = kwargs.get('brand', 'bajaj')
         set_gateway(**kwargs)
+        logger.info("[INFO:send_loyalty_sms]:SENT MESSAGE :: {0}".format(brand))
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_loyalty_sms.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
+        logger.info("[INFO:send_loyalty_sms]:BRAND still still is {0}".format(brand))
         sms_log(brand,status=status, receiver=phone_number, message=message)
+        logger.info('[send_loyalty_sms]: SENT MESSAGE FINALLY')
 
 @shared_task
 def send_reminder(*args, **kwargs):
