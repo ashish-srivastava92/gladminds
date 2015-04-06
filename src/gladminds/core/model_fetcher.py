@@ -1,8 +1,5 @@
 from importlib import import_module
 from django.conf import settings
-import logging
-logger = logging.getLogger("gladminds")
-
 
 class ModelFetcher(object):
     """
@@ -38,8 +35,6 @@ def get_model(model, brand=None):
     if not brand:
         brand = settings.BRAND
     try:
-        logger.info("[INFO: get_model] {0}".format(brand))
         return getattr(import_module('gladminds.{0}.models'.format(brand)), model)
     except:
-        logger.info("[INFO: get_model] in exception {0}".format(brand))
         return getattr(import_module('gladminds.core.models'), model)
