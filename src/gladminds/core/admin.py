@@ -823,7 +823,7 @@ brand_admin.register(User, UserAdmin)
 brand_admin.register(Group, GroupAdmin)
 brand_admin.register(models.UserProfile, UserProfileAdmin)
 
-if settings.BRAND not in ['bajajcv']:
+if settings.ENV not in ['prod']:
     brand_admin.register(models.Dealer, DealerAdmin)
     brand_admin.register(models.AuthorizedServiceCenter, AuthorizedServiceCenterAdmin)
     brand_admin.register(models.ServiceAdvisor, ServiceAdvisorAdmin)
