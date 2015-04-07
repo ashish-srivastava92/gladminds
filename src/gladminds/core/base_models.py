@@ -926,7 +926,7 @@ class ECOImplementation(BaseModel):
     ''' details of ECO Implementation'''
     change_no = models.CharField(max_length=20, null=True, blank=True)
     change_date = models.DateField(max_length=20, null=True, blank=True)
-    change_time = models.DateField(max_length=20, null=True, blank=True)
+    change_time = models.TimeField(max_length=20, null=True, blank=True)
     plant = models.CharField(max_length=20, null=True, blank=True)
     action = models.CharField(max_length=20, null=True, blank=True)
     

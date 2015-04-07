@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://local.bajaj.gladminds.co:8000/api/v1/feed/">
+  <SOAP-ENV:Body>
+    <ns1:postECOImplementation>
+    	<ns1:ObjectList>
+          <ns1:EcoImplementationData>
+            <ns1:EcoImplementationModel>
+              <ns1:REASON_CODE>qqqq</ns1:REASON_CODE>
+              <ns1:ADDED_PART>q</ns1:ADDED_PART>
+              <ns1:CHANGE_TIME>00:00:00</ns1:CHANGE_TIME>
+              <ns1:DELETED_PART_QTY>6445</ns1:DELETED_PART_QTY>
+              <ns1:CHANGE_NO>qqq</ns1:CHANGE_NO>
+              <ns1:PLANT>qqq</ns1:PLANT>
+              <ns1:ADDED_PART_QTY>11</ns1:ADDED_PART_QTY>
+              <ns1:ACTION>qq</ns1:ACTION>
+              <ns1:REMARKS>q</ns1:REMARKS>
+              <ns1:ECO_NUMBER>q</ns1:ECO_NUMBER>
+              <ns1:CHANGE_DATE>0000-00-00</ns1:CHANGE_DATE>
+              <ns1:DELETED_PART>q</ns1:DELETED_PART>
+              <ns1:CHASSIS_NUMBER>q</ns1:CHASSIS_NUMBER>
+              <ns1:ENGINE_NUMBER>q</ns1:ENGINE_NUMBER>
+              <ns1:PARENT_PART>q</ns1:PARENT_PART>
+            </ns1:EcoImplementationModel>
+          </ns1:EcoImplementationData>
+      </ns1:ObjectList>
+      <ns1:Credential>
+        <ns1:UserName>bajaj</ns1:UserName>
+        <ns1:Password>bajaj</ns1:Password>
+      </ns1:Credential>
+    </ns1:postECOImplementation>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
