@@ -123,13 +123,11 @@ def send_coupon_detail_customer(*args, **kwargs):
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         set_gateway(**kwargs)
-        logger.info('[send_coupon_detail_customer]: SENT MESSAGE')
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_detail_customer.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        logger.info('[send_coupon_detail_customer]: SENT MESSAGE FINALLY')
         sms_log(brand,status=status, receiver=phone_number, message=message)
 
 @shared_task
@@ -351,11 +349,9 @@ def send_point(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        logger.info("request for sending sms received {0} message {1}".format(phone_number, message))
         set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
-        logger.error("[Eception:send_point]:{0}".format(ex))
         send_point.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         sms_log(brand,status=status, receiver=phone_number, message=message)
@@ -370,7 +366,6 @@ def send_loyalty_sms(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        brand = kwargs.get('brand', 'bajaj')
         set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
