@@ -118,12 +118,7 @@ class ContainerTrackerResource(CustomBaseModelResource):
                 ]
         
     def  get_status_count(self, request, **kwargs):
-        try:
-            load = request.GET
-        except Exception as ex:
-            return HttpResponse(content_type='application/json', status=404)
-        
+        self.is_authenticated(request)
         count = get_sql_data("select count(*) as cnt, status from gm_containertracker group by status")
-        
         return HttpResponse(content=json.dumps(count), content_type='application/json')
     
