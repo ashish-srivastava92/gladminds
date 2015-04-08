@@ -144,6 +144,7 @@ class Dealer(BaseModel):
         max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
     use_cdms = models.BooleanField(default=True)
+    last_transaction_date = models.DateTimeField(null=True, blank=True)
 
     objects = user_manager.DealerManager()
 
@@ -165,6 +166,7 @@ class AuthorizedServiceCenter(BaseModel):
     asc_owner_phone = models.CharField(max_length=50, null=True, blank=True)
     asc_owner_email = models.CharField(max_length=100, null=True, blank=True)
     objects = user_manager.AuthorizedServiceCenterManager()
+    last_transaction_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -946,6 +948,16 @@ class ECOImplementation(BaseModel):
         abstract = True
         verbose_name_plural = "ECO Implementation"
 
+class Supervisor(BaseModel):
+    ''' details of Supervisor'''
+    supervisor_id = models.CharField(
+        max_length=15, blank=False, unique=True, null=False)
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_supervisor"
+        verbose_name_plural = "Supervisors"
+
 class Transporter(BaseModel):
     ''' details of Container Transporter'''
     transporter_id = models.CharField(
@@ -959,6 +971,7 @@ class Transporter(BaseModel):
 class ContainerTracker(BaseModel):
     ''' details of Container Tracker'''
 
+    transaction_id = models.AutoField(primary_key=True)
     zib_indent_num = models.CharField(max_length=30, null=True, blank=True)
     consignment_id = models.CharField(max_length=30, null=True, blank=True)
     truck_no = models.CharField(max_length=30, null=True, blank=True)
@@ -970,7 +983,6 @@ class ContainerTracker(BaseModel):
     status = models.CharField(max_length=12, choices=constants.CONSIGNMENT_STATUS, default='Open')
     seal_no = models.CharField(max_length=20, null=True, blank=True)
     container_no = models.CharField(max_length=20, null=True, blank=True)
-    transaction_id = models.CharField(max_length=20, null=True, blank=True)
     sent_to_sap = models.BooleanField(default=False)
 
     class Meta:

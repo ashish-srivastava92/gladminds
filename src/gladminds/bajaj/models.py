@@ -332,31 +332,41 @@ class Constant(base_models.Constant):
         app_label = _APP_NAME
         
 class BOMItem(base_models.BOMItem):
-    '''Detaills of  Service Billing of Material'''
+    '''Details of  Service Billing of Material'''
     class Meta(base_models.BOMItem.Meta):
         app_label = _APP_NAME
 
 class BOMHeader(base_models.BOMHeader):
-    '''Detaills of Header BOM'''
+    '''Details of Header BOM'''
 class Meta(base_models.BOMHeader.Meta):
         app_label = _APP_NAME
 
 class ECORelease(base_models.ECORelease):
-    '''Detaills of ECO Release'''
+    '''Details of ECO Release'''
     class Meta(base_models.ECORelease.Meta):
         app_label = _APP_NAME
 
 class ECOImplementation(base_models.ECOImplementation):
-    '''Detaills of ECO Implementation'''
+    '''Details of ECO Implementation'''
     class Meta:
         app_label = _APP_NAME
 
 class Transporter(base_models.Transporter):
-    '''details of Area Service Manager'''
+    '''details of Transporter'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
     
     class Meta(base_models.Transporter.Meta):
         app_label = _APP_NAME 
+
+
+class Supervisor(base_models.Supervisor):
+    '''details of Supervisor'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    transporter = models.ForeignKey(Transporter, null=True, blank=True)
+    
+    class Meta(base_models.Supervisor.Meta):
+        app_label = _APP_NAME 
+
 
 class ContainerTracker(base_models.ContainerTracker):
     ''' details of Container Tracker'''
