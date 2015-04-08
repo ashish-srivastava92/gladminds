@@ -105,6 +105,9 @@ alter table gm_containertracker change id transaction_id int(11) not null auto_i
 alter table gm_containertracker add column sent_to_sap boolean default False;
 alter table gm_containertracker add column seal_no varchar(20) null;
 alter table gm_containertracker add column container_no varchar(20) null;
+alter table gm_dealer add column last_transaction_date datetime;
+alter table gm_authorizedservicecenter add column last_transaction_date datetime;
+
 
 
 
