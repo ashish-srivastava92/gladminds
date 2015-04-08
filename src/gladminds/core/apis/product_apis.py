@@ -123,14 +123,7 @@ class ContainerTrackerResource(CustomBaseModelResource):
         except Exception as ex:
             return HttpResponse(content_type='application/json', status=404)
         
-        status = load.get('status')
-        if not status:
-            return HttpBadRequest("Status is required")
-        count = get_sql_data("select count(*) as cnt from gm_containertracker where status='%s'" %status)
-        result = []
-        data = {}
-        data['status'] = status
-        data['count'] = count[0]['cnt']
-        result.append(data)
-        return HttpResponse(content=json.dumps(result), content_type='application/json')
+        count = get_sql_data("select count(*) as cnt, status from gm_containertracker group by status")
+        
+        return HttpResponse(content=json.dumps(count), content_type='application/json')
     

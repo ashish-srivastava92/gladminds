@@ -970,7 +970,8 @@ class Transporter(BaseModel):
     
 class ContainerTracker(BaseModel):
     ''' details of Container Tracker'''
-
+    
+    transaction_id = models.AutoField(primary_key=True)
     zib_indent_num = models.CharField(max_length=30, null=True, blank=True)
     consignment_id = models.CharField(max_length=30, null=True, blank=True)
     truck_no = models.CharField(max_length=30, null=True, blank=True)
@@ -988,6 +989,9 @@ class ContainerTracker(BaseModel):
         abstract = True
         db_table = "gm_containertracker"
         verbose_name_plural = "Container Tracker"
+    
+    def __unicode__(self):
+        return str(self.transaction_id)
 
 
 #######################LOYALTY TABLES#################################
