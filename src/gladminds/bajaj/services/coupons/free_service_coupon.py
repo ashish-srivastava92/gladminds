@@ -278,6 +278,7 @@ def validate_coupon(sms_dict, phone_number):
                           delay_seconds=customer_message_countdown)
 
     except Exception as ex:
+        #print "*88888888888800000000000000000000000000000000",ex
         LOG.info('[validate_coupon]:Exception : '.format(ex))
         dealer_message = templates.get_template('SEND_INVALID_MESSAGE')
     finally:
@@ -341,6 +342,13 @@ def validate_service_advisor(phone_number, close_action=False):
         send_job_to_queue(send_service_detail, {"phone_number":sa_phone, "message": message, "sms_client":settings.SMS_CLIENT})
         return None
     service_advisor_obj = all_sa_dealer_obj[0]
+    if service_advisor_obj.dealer:
+        dealer_asc_obj = service_advisor_obj.dealer
+        dealer_asc_obj.last_transaction_date = datetime.now()
+    else:
+        dealer_asc_obj = service_advisor_obj.asc
+        dealer_asc_obj.last_transaction_date = datetime.now()
+    dealer_asc_obj.save(using=settings.BRAND) 
     return service_advisor_obj
 
 
