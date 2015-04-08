@@ -1,11 +1,18 @@
-from tastypie.constants import ALL, ALL_WITH_RELATIONS
-from tastypie.authorization import DjangoAuthorization, Authorization
+from django.conf.urls import url
 from tastypie import fields 
-from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.core.model_fetcher import models
-from gladminds.core.apis.authorization import MultiAuthorization
+from tastypie.authorization import DjangoAuthorization, Authorization
+from tastypie.constants import ALL, ALL_WITH_RELATIONS
+from tastypie.utils.urls import trailing_slash
+
 from gladminds.core.apis.authentication import AccessTokenAuthentication
+from gladminds.core.apis.authorization import MultiAuthorization
+from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.apis.user_apis import DealerResource, PartnerResource
+from gladminds.core.model_fetcher import models
+from django.http.response import HttpResponse
+from tastypie.http import HttpBadRequest
+from gladminds.core.utils import get_sql_data
+import json
 
 
 class ProductTypeResource(CustomBaseModelResource):
@@ -93,3 +100,25 @@ class SparePartUPCResource(CustomBaseModelResource):
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
+
+
+class ContainerTrackerResource(CustomBaseModelResource):
+    
+    class Meta:
+        queryset = models.ContainerTracker.objects.all()
+        resource_name = 'container-trackers'
+        authorization = Authorization()
+        detailed_allowed_methods = ['get']
+        always_return_data =True
+        
+    def prepend_urls(self):
+        return [
+                url(r"^(?P<resource_name>%s)/count%s" % (self._meta.resource_name,trailing_slash()),
+                self.wrap_view('get_status_count'), name="get_status_count")
+                ]
+        
+    def  get_status_count(self, request, **kwargs):
+        self.is_authenticated(request)
+        count = get_sql_data("select count(*) as cnt, status from gm_containertracker group by status")
+        return HttpResponse(content=json.dumps(count), content_type='application/json')
+    

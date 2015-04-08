@@ -1,22 +1,24 @@
 '''
 This contains the dasboards apis
 '''
-from gladminds.core.apis.base_apis import CustomBaseResource, CustomApiObject
+from django.conf import settings
+from django.db import connections
+from django.db.models import Sum
+from django.db.models.query_utils import Q
+from django.http.response import HttpResponse
 from tastypie import fields
+from tastypie.utils.mime import build_content_type
+
 from gladminds.bajaj import models
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from gladminds.core.core_utils.cache_utils import Cache
-from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES,\
-    CouponStatus, TicketStatus
-from django.db import connections
-from django.conf import settings
-from gladminds.core.core_utils.utils import dictfetchall
-from django.http.response import HttpResponse
-from tastypie.utils.mime import build_content_type
-from gladminds.core.model_fetcher import get_model
+from gladminds.core.apis.base_apis import CustomBaseResource, CustomApiObject
 from gladminds.core.auth_helper import Roles
-    
-from django.db.models import Sum
+from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES, \
+    CouponStatus, TicketStatus
+from gladminds.core.core_utils.cache_utils import Cache
+from gladminds.core.core_utils.utils import dictfetchall
+from gladminds.core.model_fetcher import get_model
+
 
 def get_vins():
     return models.ProductData.objects.all().count()
@@ -28,6 +30,10 @@ def get_customers_count():
 def get_mobile_number_count():
     sum = models.CustomerTempRegistration.objects.filter(mobile_number_update_count__isnull=False).aggregate(Sum('mobile_number_update_count'))
     return sum.values()[0] 
+
+def get_total_sms():
+    total_sms = models.SMSLog.objects.filter(Q(action='SENT') | Q(action='RECEIVED')).count()
+    return total_sms
 
 def get_success_and_failure_counts(objects):
     fail = 0
@@ -112,8 +118,8 @@ class OverallStatusResource(CustomBaseResource):
         mobile_number_change_count = get_set_cache('gm_mobile_number_change_count',
                                                    get_mobile_number_count,
                                                    timeout=10)
-        sms_sent = get_set_cache('gm_sms_sent', models.SMSLog.objects.filter(action='SENT').count())
-        sms_received = get_set_cache('gm_sms_received', models.SMSLog.objects.filter(action='RECEIVED').count())
+        total_sms = get_set_cache('gm_total_sms', get_total_sms, timeout=12)
+        
         
         return map(CustomApiObject, [create_dict(["1", "#of Vins", vins]),
                                      create_dict(["2", "Service Coupons Closed",
@@ -142,10 +148,8 @@ class OverallStatusResource(CustomBaseResource):
                                                   customers]),
                                      create_dict(["14", "Mobile updated",
                                                   mobile_number_change_count]),
-                                     create_dict(["15", "SMS SENT",
-                                                  sms_sent]),
-                                     create_dict(["16", "SMS RECEIVED",
-                                                  sms_received])
+                                     create_dict(["15", "Recent Trails",
+                                                  total_sms])
                                      ]
                    )
 

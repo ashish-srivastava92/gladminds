@@ -477,3 +477,27 @@ class DiscrepantAccumulation(base_models.DiscrepantAccumulation):
      
     class Meta(base_models.DiscrepantAccumulation.Meta):
         app_label = _APP_NAME
+
+class Transporter(base_models.Transporter):
+    '''details of Area Service Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    
+    class Meta(base_models.Transporter.Meta):
+        app_label = _APP_NAME 
+
+
+class Supervisor(base_models.Supervisor):
+    '''details of Supervisor'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    transporter = models.ForeignKey(Transporter, null=True, blank=True)
+    
+    class Meta(base_models.Supervisor.Meta):
+        app_label = _APP_NAME 
+
+
+class ContainerTracker(base_models.ContainerTracker):
+    ''' details of Container Tracker'''
+    transporter = models.ForeignKey(Transporter)
+
+    class Meta(base_models.ContainerTracker.Meta):
+        app_label = _APP_NAME
