@@ -100,3 +100,11 @@ alter table gm_member add column total_redemption_req integer(50) default 0;
 alter table gm_activity add user_id integer;
 alter table gm_activity add foreign key (user_id) references auth_user(id);
 alter table gm_feedback add column fcr boolean default False;
+
+alter table gm_containertracker change id transaction_id int(11) not null auto_increment;
+alter table gm_containertracker add column sent_to_sap boolean default False;
+alter table gm_containertracker add column seal_no varchar(20) null;
+alter table gm_containertracker add column container_no varchar(20) null;
+
+
+
