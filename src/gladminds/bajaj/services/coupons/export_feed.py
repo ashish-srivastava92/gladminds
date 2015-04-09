@@ -151,7 +151,7 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
             logger.info("[ExportCustomerRegistrationFeed]: Sending customer - {0}"\
                         .format(item['CUSTOMER_ID']))
             try:
-                result = client.service.SI_GCPCstID_sync(
+                result = client.service.SI_CstID_sync(
                     item_custveh=[{"item": item}], item=item_batch)
                 logger.info("[ExportCustomerRegistrationFeed]: Response from SAP: {0}".format(result))
                 if result[0]['item'][0]['STATUS'] == 'SUCCESS':

@@ -1,4 +1,5 @@
 import logging
+from itertools import izip_longest
 from suds.client import Client
 from suds.transport.http import HttpAuthenticated
 from django.conf import settings
@@ -29,6 +30,16 @@ class BaseExportFeed(object):
         cache = client.options.cache
         cache.setduration(seconds=settings.FILE_CACHE_DURATION)
         return client
+
+    def get_chunk(self, iterable, chunk_size):
+        result = []
+        for item in iterable:
+            result.append(item)
+            if len(result) == chunk_size:
+                yield tuple(result)
+                result = []
+        if len(result) > 0:
+            yield tuple(result)
 
 class BaseFeed(object):
 

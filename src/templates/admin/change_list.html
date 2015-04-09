@@ -5,7 +5,8 @@
 
 {% block extrastyle %}
   {{ block.super }}
-  {#  <link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}" />#}
+  {# <link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}" />#}
+  <link rel="stylesheet" type="text/css" href="/static/libs/datepicker/css/jquery-ui.css" />
   {% if cl.formset %}
     {#    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />#}
   {% endif %}
@@ -20,7 +21,6 @@
     </style>
   {% endif %}
 {% endblock %}
-
 {% block extrahead %}
   {{ block.super }}
   {{ media.js }}
@@ -34,9 +34,7 @@
     </script>
   {% endif %}{% endif %}
 {% endblock %}
-
 {% block bodyclass %}change-list{% endblock %}
-
 {% if not is_popup %}
   {% block breadcrumbs %}
     <ul class="breadcrumb">
@@ -48,17 +46,13 @@
       <li class="active">{{ cl.opts.verbose_name_plural|capfirst }}</li>
     </ul>
   {% endblock %}
+  
 {% endif %}
-
 {% block coltype %}flex{% endblock %}
-
 {% block content %}
-
   <div id="content-main">
-
     <div class="inner-center-column">
       <div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
-
         <div class="toolbar-content clearfix">
           {% block object-tools %}
             {% if has_add_permission %}
@@ -72,7 +66,12 @@
               </div>
             {% endif %}
           {% endblock %}
-
+          {% ifequal cl.opts.verbose_name "member" %}
+          {%include "admin/download_option.html" %}
+          <div class="object-tools">
+            <a href="" class="btn btn-info" data-toggle="modal" data-target="#downloadModal">Download welcome kit details</a>
+          </div>
+          {% endifequal %}
 		  {% if custom_search %}
 		  	  <div class="search-container form-inline">
 	          	<input type="text" size="40" id="cust-searchbar" placeholder="Keyword" value = "{% if cl.query %}{{cl.query|get_coupon_status}}{% else %}{% endif %}" />&nbsp;
@@ -108,39 +107,73 @@
 	      {% else %}
           	{% block search %}{% search_form cl %}{% endblock %}
           {% endif %}	
+          {% if created_date_search %}
+          <div style="padding: 1px; margin: 1px;">
+        	<div style="display: inline-block;">From: <input type="text" class="feed_start_date" value="{{ feed_start_date|default:'' }}" placeholder="yyyy-mm-dd"></div>
+			<div style="display: inline-block;">To: <input type="text" class="feed_end_date" value="{{ feed_end_date|default:'' }}" placeholder="yyyy-mm-dd"></div>
+			<div style="display: inline-block;"><input type="button" value="Filter" class="btn btn-info" style="margin-bottom: 10px;" onclick="javascript:applyDateFilters();"></div>	
+		</div>
+	<script src="/static/libs/datepicker/js/jquery-ui.js"></script>
+	<script src="/static/libs/jquery.datetimepicker.js"></script>
+	<script type="text/javascript">
+    $('.feed_start_date').datepicker({dateFormat: 'yy-mm-dd'{% if feed_start_date %}, defaultDate: '{{ feed_start_date }}'{% endif %} }); 
+    $('.feed_end_date').datepicker({ dateFormat: 'yy-mm-dd'{% if feed_end_date %}, defaultDate: '{{ feed_end_date }}'{% endif %} });
+    
+    function applyDateFilters(){
+    	current_location = location.search;
+
+        if (current_location.charAt(0) == '?') current_location = current_location.substring(1);
+
+        var components = current_location.split(/[&;]/g);
+        new_location = [];
+        for (var index = 0; index < components.length; index ++){
+
+            var keyValuePair = components[index].split('=');
+            var key          = keyValuePair[0];
+            var value        = keyValuePair[1];
+            if(key == 'created_date__gte' || key == 'created_date__lte' || key == '') {
+                continue;
+            } else {
+            	new_location[index] = key + '=' + value;
+            }
+        }
+        if($('.feed_start_date' ).val() != '') {
+        	new_location[new_location.length] = 'created_date__gte=' + $( '.feed_start_date' ).val();
+        }
+        if($('.feed_end_date').val() != '') {
+        	new_location[new_location.length] = 'created_date__lte=' + $( '.feed_end_date' ).val();
+        }
+        window.location = '?' + new_location.join("&");
+    }
+	</script>
+    {% endif %}
           
-          
-          {% if searchable_fields or cl.search_fields%}
-          <p><i>Note: searchable fields are {% if searchable_fields %}{{searchable_fields}}{% else %}{{cl.search_fields}}{% endif %}</i></p>
+          {% if searchable_fields %}
+          <p><i>Note: searchable fields are {% if searchable_fields %}{{searchable_fields}}{% endif %}</i></p>
           {% endif %}
         </div>
-
         {% block date_hierarchy %}
           {% if cl.date_hierarchy %}
             {% date_hierarchy cl %}
           {% endif %}
         {% endblock %}
-
         {% if cl.formset.errors %}
           <div class="alert alert-error errornote">
             {% blocktrans count cl.formset.errors|length as counter %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktrans %}
           </div>
           {{ cl.formset.non_form_errors }}
         {% endif %}
-
         <form id="changelist-form" action="" method="post"
             {% if cl.formset.is_multipart %}
               enctype="multipart/form-data"{% endif %} class="form-inline">{% csrf_token %}
           {% if cl.formset %}
             <div>{{ cl.formset.management_form }}</div>
           {% endif %}
-
           {% block result_list %}
             {% if cl.result_count %}
               {% if action_form and actions_on_top and cl.full_result_count %}
                 {% admin_actions %}{% endif %}
               {% result_list_with_context cl %}
-
               {% if action_form and actions_on_bottom and cl.full_result_count %}
                 {% admin_actions %}{% endif %}
             {% else %}
@@ -158,7 +191,6 @@
               </div>
             {% endif %}
           {% endblock %}
-
           {% block pagination %}
             {% if cl.result_count %}
               {% if action_form and actions_on_bottom and cl.full_result_count %}

@@ -49,9 +49,7 @@ def send_email(sender, receiver, subject, body, message=None,smtp_server=setting
         else:
             msg['To'] = receiver
         msg['From'] = title + "<%s>"% sender
-        mail = smtplib.SMTP("smtp.gmail.com:587")
-        mail.starttls()
-        mail.login("anchit082","anchit05")
+        mail = smtplib.SMTP(smtp_server)
         mail.sendmail(from_addr=sender, to_addrs=receiver, msg=msg.as_string())
         mail.quit()
         audit_manager.email_log(settings.BRAND, subject, message, sender, receiver);
