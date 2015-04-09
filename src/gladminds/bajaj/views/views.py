@@ -781,7 +781,6 @@ def get_active_asc_report(request, role=None):
                 active[0]['coupon_closed'][day]= asc['cnt']
                 active[0]['total_coupon_closed'] = active[0]['total_coupon_closed'] + asc['cnt']
     except Exception as ex:
-        print "455555555555", ex
         logger.error('Exception while counting data : {0}'.format(ex))
         return HttpResponseBadRequest()
     years = utils.gernate_years()
