@@ -69,7 +69,7 @@ class CouponDataResource(CustomBaseModelResource):
                                       left outer join auth_user f on a.asc_id = f.username \
                                       where YEAR(closed_date)={0} and MONTH(closed_date)={1} \
                                       and a.last_transaction_date > \"{2}\"\
-                                      group by c.closed_date,a.asc_id;".format( year, month, trans_date)
+                                      group by date(c.closed_date),a.asc_id;".format( year, month, trans_date)
             details = self.get_sql_data(query)
         except Exception as ex:
             LOG.error('Exception while quering data : {0}'.format(ex))

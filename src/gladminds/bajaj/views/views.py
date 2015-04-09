@@ -746,9 +746,9 @@ def get_active_asc_report(request, role=None):
         now = datetime.datetime.now()
         year = now.year
         month = now.month
-    data_list = []
     port = request.META['SERVER_PORT']
     access_token = request.META['QUERY_STRING'] 
+    no_of_days = utils.get_number_of_days(year, month)
     if request.method != 'GET':
         return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
     try:
@@ -760,12 +760,12 @@ def get_active_asc_report(request, role=None):
         for asc in x:
             
             active = filter(lambda active: active['id']==asc['asc_id'], asc_list)
+            print "aa22222222222222aaaa", asc['cnt'], asc['asc_id']
             if not active:
                 temp= {}
                 temp['id'] = asc['asc_id'] 
                 temp['name'] = asc['first_name']
                 temp['address'] = asc['address']
-                no_of_days = utils.get_number_of_days(year, month)
                 temp['coupon_closed'] = {}
                 for day in range(1, no_of_days):
                     temp['coupon_closed'][day] = 0
@@ -781,7 +781,6 @@ def get_active_asc_report(request, role=None):
     except Exception as ex:
         logger.error('Exception while counting data : {0}'.format(ex))
         return HttpResponseBadRequest()
-    no_of_days = utils.get_number_of_days(year, month)
     years = utils.gernate_years()
     return render(request, 'portal/asc_report.html',\
                   {"data": asc_list,
