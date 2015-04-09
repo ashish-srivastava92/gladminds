@@ -1280,10 +1280,10 @@ class RedemptionRequest(BaseModel):
         if self.status=='Approved' and self.refunded_points:
             if self.member.total_points<self.product.points:
                 raise ValidationError("Member now does not not have sufficient points to approve the request")
-        if self.status=='Packed' and (not self.partner or self.partner.partner_type not in ['Redemption','Logistics']):
-            raise ValidationError("Please assign a partner")
-        elif self.status=='Approved' and (not self.partner or self.partner.partner_type!='Redemption'):
-            raise ValidationError("Please assign a redemption partner")
+#         if self.status=='Packed' and (not self.partner or self.partner.partner_type not in ['Redemption','Logistics']):
+#             raise ValidationError("Please assign a partner")
+#         elif self.status=='Approved' and (not self.partner or self.partner.partner_type!='Redemption'):
+#             raise ValidationError("Please assign a redemption partner")
         
         super(RedemptionRequest, self).clean(*args, **kwargs)
 
