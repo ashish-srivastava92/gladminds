@@ -13,7 +13,6 @@ from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.services.feed_resources import BaseExportFeed
 import json
 logger = logging.getLogger("gladminds")
-BATCH_SIZE = 100
 
 class ExportMemberTempFeed(BaseExportFeed):
     
@@ -83,7 +82,7 @@ class ExportMemberTempFeed(BaseExportFeed):
 class ExportAccumulationFeed(BaseExportFeed):
 
     def export_data(self, brand=None):
-        results = get_model('AccumulationRequest', brand).objects.filter(sent_to_sap=0).order_by('transaction_id')
+        results = get_model('AccumulationRequest', brand).objects.filter(sent_to_sap=0)
         items = []
         total_failed = 0
         item_batch = {
@@ -104,8 +103,7 @@ class ExportAccumulationFeed(BaseExportFeed):
             except Exception as ex:
                 logger.error("[ExportAccumulationFeed]: error fetching from db {0}".format(ex))
                 total_failed = total_failed + 1
-        sorted_items = sorted(items, key=itemgetter('TANSSID')) 
-        return sorted_items, item_batch, total_failed
+        return items, item_batch, total_failed
     
     def export(self, brand, items=None, item_stamp=None, total_failed_on_feed=0):
         logger.info(
@@ -113,7 +111,7 @@ class ExportAccumulationFeed(BaseExportFeed):
         export_status = False
         client = self.get_client()
         total_failed = total_failed_on_feed
-        item_batch=self.get_chunk(items, BATCH_SIZE)
+        item_batch=self.get_chunk(items, settings.BATCH_SIZE)
         for item in item_batch:
             try:
                 result = client.service.SI_Acc_Sync(
@@ -199,7 +197,7 @@ class ExportRedemptionFeed(BaseExportFeed):
         export_status = False
         client = self.get_client()
         total_failed = total_failed_on_feed
-        item_batch=self.get_chunk(items, BATCH_SIZE)
+        item_batch=self.get_chunk(items, settings.BATCH_SIZE)
         for item in item_batch:
             try: 
                 result = client.service.SI_Redum_Sync(
