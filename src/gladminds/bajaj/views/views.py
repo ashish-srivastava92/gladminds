@@ -760,7 +760,6 @@ def get_active_asc_report(request, role=None):
         for asc in x:
             
             active = filter(lambda active: active['id']==asc['asc_id'], asc_list)
-            print "aa22222222222222aaaa", asc['cnt'], asc['asc_id']
             if not active:
                 temp= {}
                 temp['id'] = asc['asc_id'] 
