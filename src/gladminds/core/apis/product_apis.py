@@ -10,7 +10,8 @@ from tastypie.http import HttpBadRequest
 from tastypie.utils.urls import trailing_slash
 
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from gladminds.core.apis.authorization import MultiAuthorization
+from gladminds.core.apis.authorization import MultiAuthorization,\
+    CTSCustomAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.apis.user_apis import DealerResource, PartnerResource
 from gladminds.core.model_fetcher import models
@@ -118,7 +119,7 @@ class ContainerTrackerResource(CustomBaseModelResource):
     class Meta:
         queryset = models.ContainerTracker.objects.all()
         resource_name = 'container-trackers'
-        authorization = MultiAuthorization(DjangoAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization(), CTSCustomAuthorization())
         authentication = MultiAuthentication(AccessTokenAuthentication())
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data =True
@@ -126,9 +127,11 @@ class ContainerTrackerResource(CustomBaseModelResource):
                      'transporter': ALL_WITH_RELATIONS,
                      'transaction_id' : ALL,
                      'lr_date' : ['gte', 'lte'],
-                     'gatein_date' : ['gte', 'lte']
+                     'gatein_date' : ['gte', 'lte'],
+                     'status' : ALL
                      
                      }
+        ordering = ['lr_date', 'gatein_date' ,'created_date']
         
     def prepend_urls(self):
         return [

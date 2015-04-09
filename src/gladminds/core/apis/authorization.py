@@ -225,7 +225,15 @@ class LoyaltyCustomAuthorization():
     def delete_detail(self, object_list, bundle):
         return True
 
-class ServiceDeskCustomAuthorization():
+class ServiceDeskCustomAuthorization(Authorization):
+    def get_sa_under_dealer(self, dealer_id):
+        sa_obj = get_model('ServiceAdvisor').objects.filter(dealer__user__user_id=dealer_id).values('user__user_id')
+        sa_list = []
+        for sa in sa_obj:
+            sa_list.append(int(sa['user__user_id']))
+        sa_list.append(dealer_id)
+
+        return sa_list
     
     def read_list(self, object_list, bundle):
         if bundle.request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.DEALERADMIN]):
@@ -233,6 +241,41 @@ class ServiceDeskCustomAuthorization():
         elif bundle.request.user.groups.filter(name=Roles.SDOWNERS):
             object_list = object_list.filter(assignee__user_profile__user_id=int(bundle.request.user.id))
         elif bundle.request.user.groups.filter(name=Roles.DEALERS):
-            object_list = object_list.filter(reporter__user_profile__user_id=int(bundle.request.user.id))
+            sa_list = self.get_sa_under_dealer(bundle.request.user.id)
+            object_list = object_list.filter(reporter__user_profile__user_id__in=sa_list)
+        else:
+            object_list = []
         return object_list
+    
+    def read_detail(self, object_list, bundle):
+        if bundle.request.user.groups.filter(name=Roles.SDOWNERS):
+            if bundle.obj.assignee.user_profile.user.id != bundle.request.user.id:
+                return False 
+        elif bundle.request.user.groups.filter(name=Roles.DEALERS):
+            sa_list = self.get_sa_under_dealer(bundle.request.user.id)
+            if bundle.obj.reporter.user_profile.user.id not in sa_list:
+                return False
+        return True
+    
+
+class CTSCustomAuthorization(Authorization):
+    def read_list(self, object_list, bundle):
+        if bundle.request.user.groups.filter(name=Roles.TRANSPORTER):
+            object_list = object_list.filter(transporter__user__user_id=int(bundle.request.user.id))
+        elif bundle.request.user.groups.filter(name=Roles.SUPERVISOR):
+            transporter = get_model('Supervisor').objects.get(user__user_id=bundle.request.user.id).transporter
+            object_list = object_list.filter(transporter=transporter)
+
+        return object_list
+
+    def read_detail(self, object_list, bundle):
+        if bundle.request.user.groups.filter(name=Roles.TRANSPORTER):
+            if bundle.obj.transporter.user.user_id != bundle.request.user.id:
+                return False
+        elif bundle.request.user.groups.filter(name=Roles.SUPERVISOR):
+            transporter = get_model('Supervisor').objects.get(user__user_id=bundle.request.user.id).transporter
+            if bundle.obj.transporter.user.user_id != transporter.user.user_id:
+                return False
+        
+        return True
     
