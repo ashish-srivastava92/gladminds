@@ -44,7 +44,7 @@ class CoreLoyaltyService(Services):
                                               redemption=redemption)
         comment_thread.save(using=settings.BRAND)
         return comment_thread
-        
+
     def download_welcome_kit(self, request, choice):
         '''Download list of new or all registered member'''
         kwargs = {}
@@ -53,8 +53,8 @@ class CoreLoyaltyService(Services):
         if choice=='new':
             kwargs['download_detail'] = False
         kwargs['form_status'] = 'Complete'
-        
-        mechanics = get_model('Member').objects.filter(**kwargs)
+
+        mechanics = get_model('Member').objects.using(settings.BRAND).filter(**kwargs)
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(headers)
@@ -72,7 +72,7 @@ class CoreLoyaltyService(Services):
                 else:
                     data.append(getattr(mechanic, field))
             csvwriter.writerow(data)
-        mechanics.update(download_detail=True)
+        mechanics.using(settings.BRAND).update(download_detail=True)
         response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
         response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
         return response
@@ -95,7 +95,7 @@ class CoreLoyaltyService(Services):
             return HttpResponse(json.dumps({'msg': 'SMS not allowed in ENV'}),
                                 content_type='application/json')
         phone_list=[]
-        mechanics = get_model('Member').objects.filter(sent_sms=False)
+        mechanics = get_model('Member').objects.using(settings.BRAND).filter(sent_sms=False)
         for mech in mechanics:
             self.send_welcome_sms(mech)
             phone_list.append(mech.phone_number)
