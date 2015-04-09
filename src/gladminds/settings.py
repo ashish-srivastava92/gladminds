@@ -128,6 +128,15 @@ SUIT_CONFIG = {
                      'label': 'Welcome Kit'},
                    {'model': 'loyaltysla',
                      'label': 'Loyalty Sla'},)},
+        {'app': 'bajaj', 'label': 'CTS', 'icon': ' icon-folder-open',
+         'models':(
+                    {'model': 'transporter',
+                     'label': 'Transporter'},
+                    {'model': 'supervisor',
+                     'label': 'Supervisor'},
+                   {'model': 'containertracker',
+                     'label': 'Container Tracker'},
+                   )},
         {'app': 'bajaj', 'label': 'User Registrations', 'icon': ' icon-folder-open',
          'models':(
                     {'model': 'asctempregistration',
