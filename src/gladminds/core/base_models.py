@@ -666,7 +666,9 @@ class ServiceDeskUser(BaseModel):
         db_table = "gm_servicedeskuser"
         verbose_name_plural = "Service Desk Users"
 
-
+    def __unicode__(self):
+        return self.user_profile.user.username
+    
 class Activity(BaseModel):
     '''details of activities done by service-desk user'''
     action = models.TextField(null=True, blank=True)
@@ -957,7 +959,10 @@ class Supervisor(BaseModel):
         abstract = True
         db_table = "gm_supervisor"
         verbose_name_plural = "Supervisors"
-
+    
+    def __unicode__(self):
+        return self.supervisor_id
+    
 class Transporter(BaseModel):
     ''' details of Container Transporter'''
     transporter_id = models.CharField(
@@ -968,6 +973,9 @@ class Transporter(BaseModel):
         db_table = "gm_transporter"
         verbose_name_plural = "Transporter"
     
+    def __unicode__(self):
+        return self.transporter_id
+
 class ContainerTracker(BaseModel):
     ''' details of Container Tracker'''
     

@@ -32,7 +32,8 @@ class SMSLogResource(CustomBaseModelResource):
         detail_allowed_methods = ['get']
         filtering = { "created_date" : ALL,
                       "sender": ALL,
-                      "receiver" : ALL
+                      "receiver" : ALL,
+                      'action' : ALL
                      }
         ordering = ['created_date']
 

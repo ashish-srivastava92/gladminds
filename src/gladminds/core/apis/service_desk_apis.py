@@ -101,6 +101,7 @@ class FeedbackResource(CustomBaseModelResource):
         return data
 
     def get_tat(self, request, **kwargs):
+        self.is_authenticated(request)
         details = self.get_sql_data("select sum(f2.dt) as sums ,count(*) as c , avg(f2.dt) as tat, YEAR(f1.created_date) as year, \
     MONTH(f1.created_date) as month from gm_feedback f1 inner join (select f2.id, TIMEDIFF(f2.resolved_date,f2.created_date)\
     as dt , f2.created_date from gm_feedback f2 where status= 'resolved') f2 on f2.id=f1.id group by \
@@ -170,6 +171,7 @@ class FeedbackResource(CustomBaseModelResource):
     
     
     def get_load_analysis(self, request, **kwargs):
+        self.is_authenticated(request)
         if kwargs['duration'] == 'hourly':
             date = datetime.datetime.now().date()
             date = str(date) + "%"
