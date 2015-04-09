@@ -709,3 +709,4 @@ HOME_URLS = {
              }
 
 LOGIN_URL='/login'
+BATCH_SIZE = 100
