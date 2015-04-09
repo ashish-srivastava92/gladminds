@@ -154,7 +154,7 @@ def discrepant_coupon_update(discrepant_coupons, brand=None):
                                 coupon['valid_days'], coupon['valid_kms']])
                     
         send_email_with_file_attachment(mail_detail['sender'], receivers, mail_detail['subject'],
-                                          mail_detail['body'].format(date=yesterday.strftime("%b %d %Y")), 'customer_phone_number_update_',
+                                          mail_detail['body'].format(date=yesterday.strftime("%b %d %Y")), 'discrepant_coupon_update_',
                                           csvfile)
         logger.info("Sending out discrepant coupon update emails")
     except Exception as ex:
