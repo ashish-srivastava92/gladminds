@@ -17,7 +17,7 @@ logger = logging.getLogger("gladminds")
 class ExportMemberTempFeed(BaseExportFeed):
     
     def export_data(self, brand=None):
-        results = get_model('Member', brand).objects.filter(sent_to_sap=0, form_status='Complete')
+        results = get_model('Member').objects.using(brand).filter(sent_to_sap=0, form_status='Complete')
         items = []
         total_failed = 0
         item_batch = {
@@ -62,7 +62,7 @@ class ExportMemberTempFeed(BaseExportFeed):
                 logger.info("[ExportMemberTempFeed]: Response from SAP: {0}".format(result))
                 if result[0]['item'][0]['STATUS'] == 'SUCCESS':
                     try:
-                        member_detail = get_model('Member', brand).objects.get(mechanic_id=item['TEMP_ID'])
+                        member_detail = get_model('Member').objects.using(brand).get(mechanic_id=item['TEMP_ID'])
                         member_detail.sent_to_sap = True
                         member_detail.save(using=brand)
                         logger.info("[ExportMemberTempFeed]: Sent the details of member {0} to sap".format(item['TEMP_ID']))
@@ -82,33 +82,28 @@ class ExportMemberTempFeed(BaseExportFeed):
 class ExportAccumulationFeed(BaseExportFeed):
 
     def export_data(self, brand=None):
-        try:
-            logger.info("ENEREDDDDDDDDDDDD")
-            results = get_model('AccumulationRequest', brand).objects.filter(sent_to_sap=0)
-            logger.info("GOT THE RESUT {0}".format(results))
-            items = []
-            total_failed = 0
-            item_batch = {
-                'T_STAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
-            for accumulation in results:
-                try:                
-                    item = {
-                            "CRDAT": accumulation.created_date.date().strftime("%Y-%m-%d"),
-                            "TANSSID": accumulation.transaction_id,
-                            "POINTS": accumulation.points,
-                            "MECHID": accumulation.member.permanent_id,
-                            "MOBNO": str(accumulation.member.phone_number),
-                        }
-                    upcs = accumulation.upcs.all()
-                    for upc in upcs:
-                        item['UPCED'] = str(upc.unique_part_code)
-                        items.append(item)
-                except Exception as ex:
-                    logger.error("[ExportAccumulationFeed]: error fetching from db {0}".format(ex))
-                    total_failed = total_failed + 1
-            return items, item_batch, total_failed
-        except Exception as ex:
-            logger.error("[ExportAccumulationFeed]: Error in sending accumulation :{0}".format(ex))
+        results = get_model('AccumulationRequest').using(brand).objects.filter(sent_to_sap=0)
+        items = []
+        total_failed = 0
+        item_batch = {
+            'T_STAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
+        for accumulation in results:
+            try:                
+                item = {
+                        "CRDAT": accumulation.created_date.date().strftime("%Y-%m-%d"),
+                        "TANSSID": accumulation.transaction_id,
+                        "POINTS": accumulation.points,
+                        "MECHID": accumulation.member.permanent_id,
+                        "MOBNO": str(accumulation.member.phone_number),
+                    }
+                upcs = accumulation.upcs.all()
+                for upc in upcs:
+                    item['UPCED'] = str(upc.unique_part_code)
+                    items.append(item)
+            except Exception as ex:
+                logger.error("[ExportAccumulationFeed]: error fetching from db {0}".format(ex))
+                total_failed = total_failed + 1
+        return items, item_batch, total_failed
     
     def export(self, brand, items=None, item_stamp=None, total_failed_on_feed=0):
         logger.info(
@@ -126,7 +121,7 @@ class ExportAccumulationFeed(BaseExportFeed):
                     transaction_id_list=[]
                     for accumulation in item:
                         transaction_id_list.append(accumulation['TANSSID'])
-                    results = get_model('AccumulationRequest', brand).objects.filter(transaction_id__in=transaction_id_list)
+                    results = get_model('AccumulationRequest').objects.using(brand).filter(transaction_id__in=transaction_id_list)
                     results.using(brand).update(sent_to_sap=True)
                     logger.error("[ExportAccumulationFeed]: Sent details o SAP")
                 else:
@@ -169,7 +164,7 @@ class ExportRedemptionFeed(BaseExportFeed):
     
     def export_data(self, brand=None):
         args = {}
-        results = get_model('RedemptionRequest', brand).objects.filter(~Q(image_url=''), Q(status='Delivered'), Q(sent_to_sap=0))
+        results = get_model('RedemptionRequest').using(brand).objects.filter(~Q(image_url=''), Q(status='Delivered'), Q(sent_to_sap=0))
         items = []
         total_failed = 0
         item_batch = {
@@ -212,7 +207,7 @@ class ExportRedemptionFeed(BaseExportFeed):
                     transaction_id_list=[]
                     for redemption in item:
                         transaction_id_list.append(redemption['TRANSID'])
-                    results = get_model('RedemptionRequest', brand).objects.filter(transaction_id__in=transaction_id_list)
+                    results = get_model('RedemptionRequest').objects.using(brand).filter(transaction_id__in=transaction_id_list)
                     results.using(brand).update(sent_to_sap=True)
                     export_status = True
                     logger.error("[ExportRedemptionFeed]: Sent details o SAP")
@@ -254,9 +249,9 @@ class ExportRedemptionFeed(BaseExportFeed):
 
 class ExportDistributorFeed(BaseExportFeed):
 
-    def export_data(self):
+    def export_data(self, brand=None):
         args = {}
-        results = models.Distributor.objects.filter(sent_to_sap=0)
+        results = get_model('Distributor').objects.using(brand).filter(sent_to_sap=0)
         items = []
         total_failed = 0
         item_batch = {
@@ -296,9 +291,9 @@ class ExportDistributorFeed(BaseExportFeed):
                 logger.info("[ExportDistributorFeed]: Response from SAP: {0}".format(result))
                 if result[0]['STATUS'] == 'SUCCESS':
                     try:
-                        distributor_detail = models.Distributor.objects.get(distributor_id=item['DISTID'])
+                        distributor_detail = get_model('Distributor').objects.using(brand).get(distributor_id=item['DISTID'])
                         distributor_detail.sent_to_sap = True
-                        distributor_detail.save()
+                        distributor_detail.save(using=brand)
                         logger.info("[ExportDistributorFeed]: Sent the details of member {0} to sap".format(item['DISTID']))
                         export_status = True
                     except Exception as ex:
