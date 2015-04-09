@@ -107,7 +107,7 @@ class CoreLoyaltyService(Services):
 
     def send_welcome_kit_mail_to_partner(self, welcome_kit_obj):
         '''Send mail to GP and LP when welcome Kit is assigned to them'''
-        data = get_email_template('ASSIGNEE_WELCOME_KIT_MAIL')
+        data = get_email_template('ASSIGNEE_WELCOME_KIT_MAIL', settings.BRAND)
         data['newsubject'] = data['subject'].format(id = welcome_kit_obj.transaction_id)
         url_link='http://bajaj.gladminds.co'
         data['content'] = data['body'].format(id=welcome_kit_obj.transaction_id,
@@ -141,7 +141,7 @@ class CoreLoyaltyService(Services):
                                                    mechanic_obj.shop_name,
                                                    mechanic_obj.shop_address)))
         partner=None
-        partner_list = get_model('Partner').objects.all()
+        partner_list = get_model('Partner').objects.using(settings.BRAND).all()
         if len(partner_list)==1:
             partner=partner_list[0]
         welcome_kit=get_model('WelcomeKit')(member=mechanic_obj,
@@ -154,7 +154,7 @@ class CoreLoyaltyService(Services):
     def send_mail_to_partner(self, redemption_obj):
         '''Send mail to GP and LP when redemption
            request is assigned to them'''
-        data = get_email_template('ASSIGNEE_REDEMPTION_MAIL_DETAIL')
+        data = get_email_template('ASSIGNEE_REDEMPTION_MAIL_DETAIL', settings.BRAND)
         data['newsubject'] = data['subject'].format(id = redemption_obj.transaction_id)
         url_link='http://bajaj.gladminds.co'
         data['content'] = data['body'].format(id=redemption_obj.transaction_id,
@@ -224,7 +224,7 @@ class CoreLoyaltyService(Services):
     def check_point_balance(self, sms_dict, phone_number):
         '''send balance point of the user'''
         try:
-            mechanic = get_model('Member').objects.filter(phone_number=utils.mobile_format(phone_number))
+            mechanic = get_model('Member').objects.using(settings.BRAND).filter(phone_number=utils.mobile_format(phone_number))
             if not mechanic:
                 message=get_template('UNREGISTERED_USER')
                 raise ValueError('Unregistered user')
@@ -260,7 +260,7 @@ class CoreLoyaltyService(Services):
                 message=get_template('MAX_ALLOWED_UPC').format(
                                         max_limit=constants.MAX_UPC_ALLOWED)
                 raise ValueError('Maximum allowed upc exceeded')
-            mechanic = get_model('Member').objects.filter(phone_number=utils.mobile_format(phone_number))
+            mechanic = get_model('Member').objects.using(settings.BRAND).filter(phone_number=utils.mobile_format(phone_number))
             if not mechanic:
                 message=get_template('UNREGISTERED_USER')
                 raise ValueError('Unregistered user')
@@ -293,7 +293,7 @@ class CoreLoyaltyService(Services):
                                               (', '.join(invalid_upcs)))
                 used_upcs = get_model('SparePartUPC').objects.get_spare_parts(invalid_upcs, is_used=True) 
                 if used_upcs:
-                    accumulation_requests = get_model('AccumulationRequest').objects.filter(upcs__in=used_upcs).prefetch_related('upcs').select_related('upcs')
+                    accumulation_requests = get_model('AccumulationRequest').objects.using(settings.BRAND).filter(upcs__in=used_upcs).prefetch_related('upcs').select_related('upcs')
                     accumulation_dict = {}
                     try:
                         for accumulation_request in accumulation_requests:
@@ -327,7 +327,7 @@ class CoreLoyaltyService(Services):
         '''redeem points with given upc'''
         product_codes = sms_dict['product_id'].upper().split()
         try:
-            mechanic = get_model('Member').objects.filter(phone_number=utils.mobile_format(phone_number))
+            mechanic = get_model('Member').objects.using(settings.BRAND).filter(phone_number=utils.mobile_format(phone_number))
             if not mechanic:
                 message=get_template('UNREGISTERED_USER')
                 raise ValueError('Unregistered user')
@@ -337,7 +337,7 @@ class CoreLoyaltyService(Services):
             elif mechanic and (mechanic[0].mechanic_id!=sms_dict['member_id'] and mechanic[0].permanent_id!=sms_dict['member_id']):
                 message=get_template('INVALID_MEMBER_ID').format(mechanic_name=mechanic[0].first_name)
                 raise ValueError('Invalid user-ID')
-            products=get_model('ProductCatalog').objects.filter(product_id__in=product_codes)
+            products=get_model('ProductCatalog').objects.using(settings.BRAND).filter(product_id__in=product_codes)
             redeem_points=0
             if len(products)==len(product_codes):
                 for product in products:
@@ -374,7 +374,7 @@ class CoreLoyaltyService(Services):
         return {'status': True, 'message': message}
 
     def set_date(self,action,status):
-        loyalty_sla_obj = get_model('LoyaltySLA').objects.get(action=action, status=status)
+        loyalty_sla_obj = get_model('LoyaltySLA').objects.using(settings.BRAND).get(action=action, status=status)
         total_seconds = get_time_in_seconds(loyalty_sla_obj.resolution_time, loyalty_sla_obj.resolution_unit)
         due_date = datetime.now() + timedelta(seconds=total_seconds)
         total_seconds = get_time_in_seconds(loyalty_sla_obj.member_resolution_time, loyalty_sla_obj.member_resolution_unit)

@@ -417,7 +417,7 @@ def get_customer_info_old(data):
             data['groups'][0] = "Dealer"
         else:
             data['groups'][0] = "ASC"
-        template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
+        template = get_email_template('VIN DOES NOT EXIST', settings.BRAND)['body'].format(data['current_user'], data['vin'], data['groups'][0])
         send_mail_when_vin_does_not_exist(data=template)
         return {'message': message, 'status': 'fail'}
     if product_obj.purchase_date:
