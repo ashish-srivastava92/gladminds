@@ -15,5 +15,3 @@ sudo crontab -l | (cat;echo "00 19 * * *  python /opt/app/gladminds/src/gladmind
 sudo crontab -l | (cat;echo "00 19 * * *  python /opt/app/gladminds/src/gladminds/core/cron_jobs/trigger_sqs_tasks.py send_mail_customer_phone_number_update_exceeds gladminds-prod2") | sudo crontab
 sudo crontab -l | (cat;echo "00 19 * * *  python /opt/app/gladminds/src/gladminds/core/cron_jobs/trigger_sqs_tasks.py send_mail_for_policy_discrepency gladminds-prod2") | sudo crontab 
 
-sudo crontab -l | (cat;echo "00 19 * * *  python /opt/app/gladminds/src/gladminds/core/cron_jobs/trigger_sqs_tasks.py export_member_temp_id_to_sap gladminds-qa2 bajajcv") | sudo crontab
-
