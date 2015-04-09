@@ -2,6 +2,7 @@ from tastypie.constants import ALL_WITH_RELATIONS, ALL
 from tastypie.authorization import DjangoAuthorization
 from tastypie import fields
 import json
+import logging
 from django.conf.urls import url
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.apis.authentication import AccessTokenAuthentication
@@ -10,7 +11,7 @@ from tastypie.authentication import MultiAuthentication
 from gladminds.core.model_fetcher import models
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
-from django.http.response import HttpResponse
+from django.http.response import HttpResponse,HttpResponseBadRequest
 from gladminds.core.core_utils.utils import dictfetchall
 from django.db import connections
 from tastypie.utils.urls import trailing_slash
@@ -18,6 +19,7 @@ from gladminds.core.apis.product_apis import ProductResource
 from gladminds.core.apis.user_apis import ServiceAdvisorResource
 import datetime
 
+LOG = logging.getLogger('gladminds')
 
 class CouponDataResource(CustomBaseModelResource):
     product = fields.ForeignKey(ProductResource, 'product', full=True)
@@ -56,7 +58,6 @@ class CouponDataResource(CustomBaseModelResource):
         date = request.GET
         year = date.get('year')
         month = date.get('month')
-        print year,month
         trans_date = datetime.datetime.now() - datetime.timedelta(days=30)
         try:
             query = "select count(*) as cnt, day(c.closed_date) as day, a.asc_id, e.address, f.first_name \
@@ -71,6 +72,7 @@ class CouponDataResource(CustomBaseModelResource):
                                       group by c.closed_date,a.asc_id;".format( year, month, trans_date)
             details = self.get_sql_data(query)
         except Exception as ex:
-            print "eeeeee",ex
+            LOG.error('Exception while quering data : {0}'.format(ex))
+            return HttpResponseBadRequest()
         data =  json.dumps(details, cls=DjangoJSONEncoder)
         return HttpResponse(content=data,content_type='application/json')

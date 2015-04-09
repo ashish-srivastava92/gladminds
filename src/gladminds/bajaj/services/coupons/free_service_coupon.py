@@ -278,7 +278,6 @@ def validate_coupon(sms_dict, phone_number):
                           delay_seconds=customer_message_countdown)
 
     except Exception as ex:
-        #print "*88888888888800000000000000000000000000000000",ex
         LOG.info('[validate_coupon]:Exception : '.format(ex))
         dealer_message = templates.get_template('SEND_INVALID_MESSAGE')
     finally:
