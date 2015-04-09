@@ -106,7 +106,7 @@ FEED_FAILURE["receiver"] = ["gmdev@hashedin.com"]
 VIN_SYNC_FEED["receiver"] = ["gmdev@hashedin.com"]
 ###################Change Mail Subject on QA##########################
 MAIL_DETAIL["subject"] = "GladMinds Feed Report QA"
-MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
+MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
 #######################################################################
 ENV = "qa"
 
