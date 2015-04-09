@@ -9,7 +9,6 @@ import requests
 from gladminds.core.utils import check_password
 from tastypie.http import HttpBadRequest
 from collections import OrderedDict
-from gladminds.settings import COUPON_URL
 from django.shortcuts import render_to_response, render
 from django.http.response import HttpResponseRedirect, HttpResponse,\
     HttpResponseBadRequest, Http404
@@ -754,7 +753,11 @@ def get_active_asc_report(request, role=None):
     try:
         query = '/v1/coupons/closed-ticket-count?'+ access_token
         query = query + '&year='+ str(year) + '&month=' + str(month)
-        asc_query_list = requests.get('http://'+COUPON_URL+':'+port+query)
+        if not settings.API_FLAG:
+            asc_query_list = requests.get('http://'+settings.COUPON_URL+':'+port+query)
+        else:
+            asc_query_list = requests.get('http://'+settings.COUPON_URL+query)
+        
         asc_list = []
         x=json.loads(asc_query_list.content)
         for asc in x:
