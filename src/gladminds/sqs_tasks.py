@@ -721,7 +721,7 @@ def export_distributor_to_sap(*args, **kwargs):
     distributors = loyalty_export.ExportDistributorFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.DISTRIBUTOR_SYNC_WSDL_URL, feed_type='Distributor Registration Feed')
-    feed_export_data = distributors.export_data()
+    feed_export_data = distributors.export_data(brand)
     if len(feed_export_data[0]) > 0:
         distributors.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
