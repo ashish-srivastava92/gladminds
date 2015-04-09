@@ -666,6 +666,7 @@ def export_member_temp_id_to_sap(*args, **kwargs):
     send info of registered Member
     '''
     brand= kwargs.get('brand', None)
+    logger.info("[export_member_temp_id_to_sap] BRAND: {0}".format(brand))
     member_registered = loyalty_export.ExportMemberTempFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.MEMBER_SYNC_WSDL_URL, feed_type='Member Registration Feed')
@@ -682,13 +683,11 @@ def export_member_accumulation_to_sap(*args, **kwargs):
     send info of accumulation requests
     '''
     brand= kwargs.get('brand', None)
-    logger.info("[branddddddddd] {0}".format(brand))
+    logger.info("[export_member_accumulation_to_sap] BRAND: {0}".format(brand))
     accumulation_requests = loyalty_export.ExportAccumulationFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.ACCUMULATION_SYNC_WSDL_URL, feed_type='Accumulation Request Feed')
-    logger.info("[branddddddddd] {0}".format(accumulation_requests))
     feed_export_data = accumulation_requests.export_data(brand)
-    logger.info("[branddddddddd] {0}".format(feed_export_data))
     if len(feed_export_data[0]) > 0:
         accumulation_requests.export(brand, items=feed_export_data[0], item_stamp=feed_export_data[
                              1], total_failed_on_feed=feed_export_data[2])
@@ -701,6 +700,7 @@ def export_member_redemption_to_sap(*args, **kwargs):
     send info of redemption requests
     '''
     brand= kwargs.get('brand', None)
+    logger.info("[export_member_redemption_to_sap] BRAND: {0}".format(brand))
     redemption_requests = loyalty_export.ExportRedemptionFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.REDEMPTION_SYNC_WSDL_URL, feed_type='Redemption Request Feed')
@@ -717,6 +717,7 @@ def export_distributor_to_sap(*args, **kwargs):
     send info of redemption requests
     '''
     brand= kwargs.get('brand', None)
+    logger.info("[export_distributor_to_sap] BRAND: {0}".format(brand))
     distributors = loyalty_export.ExportDistributorFeed(username=settings.SAP_CRM_DETAIL[
                    'username'], password=settings.SAP_CRM_DETAIL['password'],
                   wsdl_url=settings.DISTRIBUTOR_SYNC_WSDL_URL, feed_type='Distributor Registration Feed')
