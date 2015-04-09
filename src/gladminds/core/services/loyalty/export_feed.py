@@ -82,28 +82,33 @@ class ExportMemberTempFeed(BaseExportFeed):
 class ExportAccumulationFeed(BaseExportFeed):
 
     def export_data(self, brand=None):
-        results = get_model('AccumulationRequest', brand).objects.filter(sent_to_sap=0)
-        items = []
-        total_failed = 0
-        item_batch = {
-            'T_STAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
-        for accumulation in results:
-            try:                
-                item = {
-                        "CRDAT": accumulation.created_date.date().strftime("%Y-%m-%d"),
-                        "TANSSID": accumulation.transaction_id,
-                        "POINTS": accumulation.points,
-                        "MECHID": accumulation.member.permanent_id,
-                        "MOBNO": str(accumulation.member.phone_number),
-                    }
-                upcs = accumulation.upcs.all()
-                for upc in upcs:
-                    item['UPCED'] = str(upc.unique_part_code)
-                    items.append(item)
-            except Exception as ex:
-                logger.error("[ExportAccumulationFeed]: error fetching from db {0}".format(ex))
-                total_failed = total_failed + 1
-        return items, item_batch, total_failed
+        try:
+            logger.info("ENEREDDDDDDDDDDDD")
+            results = get_model('AccumulationRequest', brand).objects.filter(sent_to_sap=0)
+            logger.info("GOT THE RESUT {0}".format(results))
+            items = []
+            total_failed = 0
+            item_batch = {
+                'T_STAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
+            for accumulation in results:
+                try:                
+                    item = {
+                            "CRDAT": accumulation.created_date.date().strftime("%Y-%m-%d"),
+                            "TANSSID": accumulation.transaction_id,
+                            "POINTS": accumulation.points,
+                            "MECHID": accumulation.member.permanent_id,
+                            "MOBNO": str(accumulation.member.phone_number),
+                        }
+                    upcs = accumulation.upcs.all()
+                    for upc in upcs:
+                        item['UPCED'] = str(upc.unique_part_code)
+                        items.append(item)
+                except Exception as ex:
+                    logger.error("[ExportAccumulationFeed]: error fetching from db {0}".format(ex))
+                    total_failed = total_failed + 1
+            return items, item_batch, total_failed
+        except Exception as ex:
+            logger.error("[ExportAccumulationFeed]: Error in sending accumulation :{0}".format(ex))
     
     def export(self, brand, items=None, item_stamp=None, total_failed_on_feed=0):
         logger.info(
