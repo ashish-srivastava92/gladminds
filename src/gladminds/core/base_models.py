@@ -147,6 +147,7 @@ class Dealer(BaseModel):
     last_transaction_date = models.DateTimeField(null=True, blank=True)
 
     objects = user_manager.DealerManager()
+    last_transaction_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -1458,4 +1459,5 @@ class CouponFact(models.Model):
         abstract = True
         db_table = "gm_couponfact"
 
+    
 
