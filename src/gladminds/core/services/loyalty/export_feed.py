@@ -82,7 +82,7 @@ class ExportMemberTempFeed(BaseExportFeed):
 class ExportAccumulationFeed(BaseExportFeed):
 
     def export_data(self, brand=None):
-        results = get_model('AccumulationRequest').using(brand).objects.filter(sent_to_sap=0)
+        results = get_model('AccumulationRequest').objects.using(brand).filter(sent_to_sap=0)
         items = []
         total_failed = 0
         item_batch = {
@@ -164,7 +164,7 @@ class ExportRedemptionFeed(BaseExportFeed):
     
     def export_data(self, brand=None):
         args = {}
-        results = get_model('RedemptionRequest').using(brand).objects.filter(~Q(image_url=''), Q(status='Delivered'), Q(sent_to_sap=0))
+        results = get_model('RedemptionRequest').objects.using(brand).filter(~Q(image_url=''), Q(status='Delivered'), Q(sent_to_sap=0))
         items = []
         total_failed = 0
         item_batch = {
