@@ -125,9 +125,10 @@ class ExportAccumulationFeed(BaseExportFeed):
                     results.using(brand).update(sent_to_sap=True)
                     logger.error("[ExportAccumulationFeed]: Sent details o SAP")
                 else:
-                    total_failed = total_failed + 1
+                    total_failed = total_failed + len(item)
                     logger.error("[ExportAccumulationFeed]: Not received success from sap")
             except Exception as ex:
+                total_failed = total_failed + len(item)
                 logger.error("[ExportAccumulationFeed]: Error in sending accumulation :{0}".format(ex))
             feed_log(brand, feed_type=self.feed_type, total_data_count=len(item)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
@@ -212,9 +213,10 @@ class ExportRedemptionFeed(BaseExportFeed):
                     export_status = True
                     logger.error("[ExportRedemptionFeed]: Sent details o SAP")
                 else:
-                    total_failed = total_failed + len(items)
+                    total_failed = total_failed + len(item)
                     logger.error("[ExportRedemptionFeed]: Not received success from sap")
             except Exception as ex:
+                    total_failed = total_failed + len(item)
                     logger.error("[ExportRedemptionFeed]: Error in sending accumulation :{0}".format(ex))
             feed_log(brand, feed_type=self.feed_type, total_data_count=len(item)\
                  + total_failed_on_feed, failed_data_count=total_failed,\
