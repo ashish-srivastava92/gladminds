@@ -1,33 +1,36 @@
-import os
-import datetime
-from importlib import import_module
 import base64
-import re
 import calendar
+import datetime
+import hashlib
+from importlib import import_module
+import logging
+import operator
+import os
+from random import randint
+import re
 import uuid
 
 from dateutil import tz
-from random import randint
-from django.utils import timezone
 from django.conf import settings
-from django_otp.oath import TOTP
 from django.contrib.auth.models import User
-
-from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
-from gladminds.core.base_models import STATUS_CHOICES
-from gladminds.bajaj import models
-from django.db.models.fields.files import FieldFile
-from gladminds.core.constants import TIME_FORMAT, DATE_FORMAT
+from django.db import connections
 from django.db.models import Count
-from gladminds.core.auth_helper import Roles
-import logging
-from gladminds.core.apis.image_apis import uploadFileToS3
-import hashlib
-from gladminds.core.core_utils.date_utils import convert_utc_to_local_time
-from gladminds.core.managers.mail import get_email_template
+from django.db.models.fields.files import FieldFile
 from django.db.models.query_utils import Q
-import operator
+from django.utils import timezone
+from django_otp.oath import TOTP
 import pytz
+
+from gladminds.bajaj import models
+from gladminds.core.apis.image_apis import uploadFileToS3
+from gladminds.core.auth_helper import Roles
+from gladminds.core.base_models import STATUS_CHOICES
+from gladminds.core.constants import TIME_FORMAT, DATE_FORMAT
+from gladminds.core.core_utils.date_utils import convert_utc_to_local_time
+from gladminds.core.core_utils.utils import dictfetchall
+from gladminds.core.managers.mail import get_email_template
+from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
+
 
 logger = logging.getLogger('gladminds')
 
@@ -444,6 +447,13 @@ def service_advisor_search(data):
         return service_advisor_details
     return {'message': message, 'status': 'fail'}
 
+def get_sql_data(query):
+    conn = connections[settings.BRAND]
+    cursor = conn.cursor()
+    cursor.execute(query)
+    data = dictfetchall(cursor)
+    conn.close()
+    return data
 
 def total_time_spent(feedback_obj):
     wait_time = feedback_obj.wait_time

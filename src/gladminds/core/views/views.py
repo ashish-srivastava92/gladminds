@@ -407,7 +407,7 @@ def get_customer_info(data):
         product_obj = models.ProductData.objects.get(product_id=data['vin'])
     except Exception as ex:
         logger.info(ex)
-        message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
+        message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-7847011011.'''.format(data['vin'])
         try:
             vin_sync_feed = export_feed.ExportUnsyncProductFeed(username=settings.SAP_CRM_DETAIL[
                        'username'], password=settings.SAP_CRM_DETAIL['password'],
@@ -523,7 +523,8 @@ def trigger_sqs_tasks(request):
         'send_mail_for_policy_discrepency': 'send_mail_for_policy_discrepency',
         'export_member_accumulation_to_sap': 'export_member_accumulation_to_sap',
         'export_member_redemption_to_sap':'export_member_redemption_to_sap',
-        'export_distributor_to_sap': 'export_distributor_to_sap'
+        'export_distributor_to_sap': 'export_distributor_to_sap',
+        'export_cts_to_sap': 'export_cts_to_sap'
     }
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)
     taskqueue.add(sqs_tasks[request.POST['task']], settings.BRAND)

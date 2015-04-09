@@ -1,7 +1,6 @@
 from importlib import import_module
 from django.conf import settings
 
-
 class ModelFetcher(object):
     """
     The global config wrapper that handles the backend.

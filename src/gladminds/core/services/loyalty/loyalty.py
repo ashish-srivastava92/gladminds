@@ -44,7 +44,7 @@ class CoreLoyaltyService(Services):
                                               redemption=redemption)
         comment_thread.save(using=settings.BRAND)
         return comment_thread
-        
+
     def download_welcome_kit(self, request, choice):
         '''Download list of new or all registered member'''
         kwargs = {}
@@ -53,8 +53,8 @@ class CoreLoyaltyService(Services):
         if choice=='new':
             kwargs['download_detail'] = False
         kwargs['form_status'] = 'Complete'
-        
-        mechanics = get_model('Member').objects.filter(**kwargs)
+
+        mechanics = get_model('Member').objects.using(settings.BRAND).filter(**kwargs)
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(headers)
@@ -72,7 +72,7 @@ class CoreLoyaltyService(Services):
                 else:
                     data.append(getattr(mechanic, field))
             csvwriter.writerow(data)
-        mechanics.update(download_detail=True)
+        mechanics.using(settings.BRAND).update(download_detail=True)
         response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
         response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
         return response
@@ -95,11 +95,11 @@ class CoreLoyaltyService(Services):
             return HttpResponse(json.dumps({'msg': 'SMS not allowed in ENV'}),
                                 content_type='application/json')
         phone_list=[]
-        mechanics = get_model('Member').objects.filter(sent_sms=False)
+        mechanics = get_model('Member').objects.using(settings.BRAND).filter(sent_sms=False)
         for mech in mechanics:
             self.send_welcome_sms(mech)
             phone_list.append(mech.phone_number)
-        mechanics.update(sent_sms=True)
+        mechanics.using(settings.BRAND).update(sent_sms=True)
         response = 'Message sent to {0} mechanics. phone numbers: {1}'.format(
                                 len(phone_list), (', '.join(phone_list)))
         return HttpResponse(json.dumps({'msg': response}),
@@ -120,7 +120,7 @@ class CoreLoyaltyService(Services):
                         url_link=url_link)
         partner_email_id=welcome_kit_obj.partner.user.user.email
         send_email_to_redemption_request_partner(data, partner_email_id)
-        LOG.error('[send_welcome_kit_mail_to_partner]:{0}:: welcome kit request email sent'.format(
+        LOG.info('[send_welcome_kit_mail_to_partner]:{0}:: welcome kit request email sent'.format(
                                     partner_email_id))
         
     def send_welcome_kit_delivery(self, redemption_request):
@@ -140,11 +140,15 @@ class CoreLoyaltyService(Services):
         delivery_address = ', '.join(filter(None, (mechanic_obj.shop_number,
                                                    mechanic_obj.shop_name,
                                                    mechanic_obj.shop_address)))
+        partner=None
+        partner_list = get_model('Partner').objects.all()
+        if len(partner_list)==1:
+            partner=partner_list[0]
         welcome_kit=get_model('WelcomeKit')(member=mechanic_obj,
-                                    delivery_address=delivery_address)
+                                    delivery_address=delivery_address,
+                                    partner=partner)
         welcome_kit.save(using=settings.BRAND)
-        mechanic_obj.sent_sms=True
-        mechanic_obj.save(using=settings.BRAND)
+        self.send_welcome_kit_mail_to_partner(welcome_kit)
         return welcome_kit
 
     def send_mail_to_partner(self, redemption_obj):
@@ -272,7 +276,7 @@ class CoreLoyaltyService(Services):
                 accumulation_log.save(using=settings.BRAND)
                 for spare in spares:
                     valid_product_number.append(spare.part_number)
-                    valid_upc.append(spare.unique_part_code)
+                    valid_upc.append(spare.unique_part_code.upper())
                     accumulation_log.upcs.add(spare)
                 spare_points = get_model('SparePartPoint').objects.get_part_number(valid_product_number)
                 for spare_point in spare_points:
@@ -280,7 +284,7 @@ class CoreLoyaltyService(Services):
                 total_points=self.update_points(mechanic[0],
                                     accumulate=added_points)
                 accumulation_log.points=added_points
-                spares.update(is_used=True)
+                spares.using(settings.BRAND).update(is_used=True)
                 accumulation_log.total_points=total_points
                 accumulation_log.save(using=settings.BRAND)
             invalid_upcs = list(set(unique_product_codes).difference(valid_upc))

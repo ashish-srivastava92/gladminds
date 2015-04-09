@@ -151,17 +151,18 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
             logger.info("[ExportCustomerRegistrationFeed]: Sending customer - {0}"\
                         .format(item['CUSTOMER_ID']))
             try:
-                result = client.service.SI_GCPCstID_sync(
+                result = client.service.SI_CstID_sync(
                     item_custveh=[{"item": item}], item=item_batch)
                 logger.info("[ExportCustomerRegistrationFeed]: Response from SAP: {0}".format(result))
+                logger.info("[ExportCustomerRegistrationFeed]: Response from SAP: {0}".format(result[0]['item'][0]['STATUS']))
                 if result[0]['item'][0]['STATUS'] == 'SUCCESS':
                     try:
                         temp_customer_object = models.CustomerTempRegistration.objects.get(temp_customer_id=item['CUSTOMER_ID'])
                         temp_customer_object.sent_to_sap = True
-                        if result[2]:
-                            temp_customer_object.remarks = result[2]['item'][0]['REMARKS']
-                        else: 
-                            temp_customer_object.tagged_sap_id = result[1]['item'][0]['PARTNER']
+#                         if result[2]:
+#                             temp_customer_object.remarks = result[2]['item'][0]['REMARKS']
+#                         else: 
+#                             temp_customer_object.tagged_sap_id = result[1]['item'][0]['PARTNER']
                         temp_customer_object.save()
                         export_status = True
                         logger.info("[ExportCustomerRegistrationFeed]: Sent customer ID - {0}".format(item['CUSTOMER_ID']))

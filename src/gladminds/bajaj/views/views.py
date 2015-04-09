@@ -413,7 +413,7 @@ def get_customer_info_old(data):
         product_obj = models.ProductData.objects.get(product_id=data['vin'])
     except Exception as ex:
         logger.info(ex)
-        message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
+        message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-7847011011.'''.format(data['vin'])
         if data['groups'][0] == Roles.DEALERS:
             data['groups'][0] = "Dealer"
         else:

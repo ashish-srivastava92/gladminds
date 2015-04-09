@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import logging
 
 from django.conf import settings
@@ -15,7 +16,8 @@ class DealerManager(models.Manager):
         return super(DealerManager, self).get_query_set().filter(user__user__is_active=1)
 
     def active_count(self):
-        return super(DealerManager, self).get_query_set().filter(user__user__is_active=1).count()
+        active_period = datetime.now() - timedelta(30)
+        return super(DealerManager, self).get_query_set().filter(last_transaction_date__gte=active_period).count()
 
     def count(self):
         return super(DealerManager, self).get_query_set().all().count()
@@ -23,7 +25,8 @@ class DealerManager(models.Manager):
 
 class AuthorizedServiceCenterManager(models.Manager):
     def active_count(self):
-        return super(AuthorizedServiceCenterManager, self).get_query_set().filter(user__user__is_active=1).count()
+        active_period = datetime.now() - timedelta(30)
+        return super(AuthorizedServiceCenterManager, self).get_query_set().filter(last_transaction_date__gte=active_period).count()
 
     def count(self):
         return super(AuthorizedServiceCenterManager, self).get_query_set().all().count()

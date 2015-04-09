@@ -56,7 +56,7 @@ class TestUtils(GladmindsUnitTestCase):
         self.assertEqual("VIN '12345678999' has no associated customer. Please register the customer.",result['message'])
         request = RequestObject(data={'vin':'123456789', 'current_user':'TestUser', 'groups':['dealers']})
         result = get_customer_info(request.POST)
-        self.assertEqual("VIN '123456789' does not exist in our records. Please contact customer support: +91-9741775128.",
+        self.assertEqual("VIN '123456789' does not exist in our records. Please contact customer support: +91-7847011011.",
                                         result['message'])
         self.assertEqual("fail",result['status'])
         request = RequestObject(data={'vin':'VINXXX001', 'groups':['dealers']})

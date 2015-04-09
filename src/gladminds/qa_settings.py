@@ -65,10 +65,6 @@ SAP_CRM_DETAIL = {
                   'password':'welcome123'
                   }
 
-MEMBER_SYNC_WSDL='prod_member_sync_feed.wsdl'
-
-ASC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
-
 COUPON_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/coupon-redeem/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
 VIN_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/vin-sync/?wsdl&v0"
@@ -102,6 +98,7 @@ AFTER_BUY_CONSTANTS = {
 
 ########################SQS Queue Name
 SQS_QUEUE_NAME = "gladminds-qa2"
+SQS_QUEUE_NAME_SMS = "gladminds-qa2"
 ######################################
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail QA"
 VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]

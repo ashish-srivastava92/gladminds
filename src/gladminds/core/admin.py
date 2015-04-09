@@ -672,7 +672,12 @@ class RedemptionRequestAdmin(GmModelAdmin):
         if 'status' in form.changed_data:
             if obj.status=='Approved':
                 obj.is_approved=True
-                obj.packed_by=obj.partner.user.user.username
+                partner=None
+                partner_list = models.Partner.objects.all()
+                if len(partner_list)==1:
+                    partner=partner_list[0]
+                obj.partner=partner
+                obj.packed_by=partner.user.user.username
                 obj.approved_date=datetime.datetime.now()
             elif obj.status in ['Rejected', 'Open'] :
                 obj.is_approved=False
@@ -823,41 +828,41 @@ brand_admin.register(User, UserAdmin)
 brand_admin.register(Group, GroupAdmin)
 brand_admin.register(models.UserProfile, UserProfileAdmin)
 
-brand_admin.register(models.Dealer, DealerAdmin)
-brand_admin.register(models.AuthorizedServiceCenter, AuthorizedServiceCenterAdmin)
-brand_admin.register(models.ServiceAdvisor, ServiceAdvisorAdmin)
-
-brand_admin.register(models.BrandProductCategory, BrandProductCategoryAdmin)
-brand_admin.register(models.ProductType, ProductTypeAdmin)
-brand_admin.register(DispatchedProduct, ListDispatchedProduct)
-brand_admin.register(models.ProductData, ProductDataAdmin)
-brand_admin.register(models.CouponData, CouponAdmin)
-
+if settings.ENV not in ['prod']:
+    brand_admin.register(models.Dealer, DealerAdmin)
+    brand_admin.register(models.AuthorizedServiceCenter, AuthorizedServiceCenterAdmin)
+    brand_admin.register(models.ServiceAdvisor, ServiceAdvisorAdmin)
+    
+    brand_admin.register(models.BrandProductCategory, BrandProductCategoryAdmin)
+    brand_admin.register(models.ProductType, ProductTypeAdmin)
+    brand_admin.register(DispatchedProduct, ListDispatchedProduct)
+    brand_admin.register(models.ProductData, ProductDataAdmin)
+    brand_admin.register(models.CouponData, CouponAdmin)
+    
+    brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)
+    brand_admin.register(models.SATempRegistration, SATempRegistrationAdmin)
+    brand_admin.register(models.CustomerTempRegistration, CustomerTempRegistrationAdmin)
+    
 brand_admin.register(models.SMSLog, SMSLogAdmin)
 brand_admin.register(models.EmailLog, EmailLogAdmin)
 brand_admin.register(models.DataFeedLog, FeedLogAdmin)
 brand_admin.register(models.FeedFailureLog)
 
-if settings.ENV not in ['prod']:
-    brand_admin.register(models.NationalSparesManager, NSMAdmin)
-    brand_admin.register(models.AreaSparesManager, ASMAdmin)
-    brand_admin.register(models.Distributor, DistributorAdmin)
-    brand_admin.register(models.Member, MemberAdmin)
+brand_admin.register(models.NationalSparesManager, NSMAdmin)
+brand_admin.register(models.AreaSparesManager, ASMAdmin)
+brand_admin.register(models.Distributor, DistributorAdmin)
+brand_admin.register(models.Member, MemberAdmin)
 
-    brand_admin.register(models.SparePartMasterData, SparePartMasterAdmin)
-    brand_admin.register(models.SparePartUPC, SparePartUPCAdmin)
-    brand_admin.register(models.SparePartPoint, SparePartPointAdmin)
-    brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
-    brand_admin.register(models.LoyaltySLA, LoyaltySlaAdmin)
+brand_admin.register(models.SparePartMasterData, SparePartMasterAdmin)
+brand_admin.register(models.SparePartUPC, SparePartUPCAdmin)
+brand_admin.register(models.SparePartPoint, SparePartPointAdmin)
+brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
+brand_admin.register(models.LoyaltySLA, LoyaltySlaAdmin)
 
-    brand_admin.register(models.Partner, PartnerAdmin)
-    brand_admin.register(models.ProductCatalog, ProductCatalogAdmin)
-    brand_admin.register(models.RedemptionRequest, RedemptionRequestAdmin)
-    brand_admin.register(models.WelcomeKit, WelcomeKitAdmin)
-
-brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)
-brand_admin.register(models.SATempRegistration, SATempRegistrationAdmin)
-brand_admin.register(models.CustomerTempRegistration, CustomerTempRegistrationAdmin)
+brand_admin.register(models.Partner, PartnerAdmin)
+brand_admin.register(models.ProductCatalog, ProductCatalogAdmin)
+brand_admin.register(models.RedemptionRequest, RedemptionRequestAdmin)
+brand_admin.register(models.WelcomeKit, WelcomeKitAdmin)
 
 brand_admin.register(models.EmailTemplate, EmailTemplateAdmin)
 brand_admin.register(models.MessageTemplate, MessageTemplateAdmin)

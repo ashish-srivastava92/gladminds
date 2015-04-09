@@ -52,7 +52,7 @@ class PartMasterFeed(BaseFeed):
                     spare_type_object = get_model('ProductType').objects.filter(product_type=spare['part_type'])
                     if not spare_type_object:
                         spare_type_object = get_model('ProductType')(product_type=spare['part_type'])
-                        spare_type_object.save()
+                        spare_type_object.save(using=settings.BRAND)
                     else:
                         spare_type_object = spare_type_object[0]
                     spare_object = get_model('SparePartMasterData')(
@@ -64,7 +64,7 @@ class PartMasterFeed(BaseFeed):
                                                 segment_type = spare['segment'],
                                                 supplier = spare['supplier']
                                     )
-                    spare_object.save()
+                    spare_object.save(using=settings.BRAND)
                 except Exception as ex:
                     total_failed += 1
                     ex = "[PartMasterFeed]: part-{0} :: {1}".format(spare['part_number'], ex)
@@ -84,7 +84,7 @@ class PartUPCFeed(BaseFeed):
                 spare_object = get_model('SparePartUPC')(
                                             part_number=part_data,
                                             unique_part_code = spare['UPC'])
-                spare_object.save()
+                spare_object.save(using=settings.BRAND)
             except Exception as ex:
                 total_failed += 1
                 ex = "[PartUPCFeed]: part-{0} , UPC-{1} :: {2}".format(spare['part_number'],
@@ -112,7 +112,7 @@ class PartPointFeed(BaseFeed):
                                               valid_from = spare['valid_from'],
                                               valid_till = spare['valid_to'],
                                               territory = spare['territory'])
-                    spare_object.save()
+                    spare_object.save(using=settings.BRAND)
                 else:
                     raise ValueError('Points of the part already exists for the territory: ' + spare['territory'])
             except Exception as ex:
@@ -141,7 +141,7 @@ class DistributorFeed(BaseFeed):
                     dist_user_pro_object = get_model('UserProfile')(user=dist_user_object,
                                                 phone_number=distributor['mobile'],
                                                 address=distributor['city'])
-                    dist_user_pro_object.save()
+                    dist_user_pro_object.save(using=settings.BRAND)
                     asm_object = get_model('AreaSparesManager').objects.get(asm_id=distributor['asm_id'])
                     dist_object = get_model('Distributor')(distributor_id=distributor['id'],
                                               asm=asm_object,
@@ -150,7 +150,7 @@ class DistributorFeed(BaseFeed):
                                               email=distributor['email'],
                                               phone_number=distributor['mobile'],
                                               city=distributor['city'])
-                    dist_object.save()
+                    dist_object.save(using=settings.BRAND)
                 else:
                     raise ValueError('Distributor ID already exists')
             except Exception as ex:
@@ -170,12 +170,12 @@ class MemberFeed(BaseFeed):
             try:
                 mech_object = get_model('Member').objects.get(mechanic_id=mechanic['temp_id'])
                 mech_object.permanent_id=mechanic['mechanic_id']
-                mech_object.save()
+                mech_object.save(using=settings.BRAND)
                 if not mech_object.sent_sms:
+                    loyalty.initiate_welcome_kit(mech_object)
                     loyalty.send_welcome_sms(mech_object)
                     mech_object.sent_sms = True
-                    mech_object.save()
-                    loyalty.initiate_welcome_kit(mech_object)
+                    mech_object.save(using=settings.BRAND)
             except Exception as ex:
                 total_failed += 1
                 ex = "[MemberFeed]: id-{0} :: {1}".format(mechanic['temp_id'], ex)
@@ -207,14 +207,14 @@ class NSMFeed(BaseFeed):
                                                              phone_number=nsm['phone_number'],
                                                              user=user_object)
                     nsm_object.territory.add(territory)
-                    nsm_object.save()
+                    nsm_object.save(using=settings.BRAND)
                 else:
                     nsm_object = nsm_object[0]
                     nsm_object.name = nsm['name']
                     nsm_object.email= nsm['email']
                     nsm_object.phone_number = nsm['phone_number']
                     nsm_object.user = user_object
-                    nsm_object.save()  
+                    nsm_object.save(using=settings.BRAND)  
             except Exception as ex:
                 total_failed += 1
                 ex = "[NSMFeed]: id-{0} :: {1}".format(nsm['phone_number'], ex)
@@ -245,7 +245,7 @@ class ASMFeed(BaseFeed):
                         asm_object.phone_number = asm['phone_number']
                         asm_object.user = user_object
                         asm_object.nsm = nsm_obj
-                        asm_object.save()
+                        asm_object.save(using=settings.BRAND)
                     except:
                         asm_temp_id = utils.generate_temp_id('TASM')
                         state = get_model('State').objects.get(state_name=asm['state'])
@@ -255,9 +255,9 @@ class ASMFeed(BaseFeed):
                                                                  email=asm['email'],
                                                                  phone_number=asm['phone_number'],
                                                                  user=user_object)
-                        asm_object.save()
+                        asm_object.save(using=settings.BRAND)
                         asm_object.state.add(state)                                                       
-                        asm_object.save()
+                        asm_object.save(using=settings.BRAND)
                 
                 except ObjectDoesNotExist as ex:
                     logger.error("[import_asm_data] {0} : {1}".format(asm['phone_number'], ex))

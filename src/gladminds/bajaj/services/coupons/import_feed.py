@@ -175,8 +175,9 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
 
 def compare_purchase_date(date_of_purchase):
     valid_msg_days = models.Constant.objects.get(constant_name = "welcome_msg_active_days").constant_value
-    days = datetime.now().date()-date_of_purchase
-    if days <= valid_msg_days:
+    valid_msg_days_delta = timedelta(days=int(valid_msg_days))
+    purchased_days = datetime.now().date()-date_of_purchase
+    if purchased_days <= valid_msg_days_delta:
         return True
     else:
         return False
@@ -550,7 +551,11 @@ class ECOReleaseFeed(BaseFeed):
     def import_data(self):
         for eco_obj in self.data_source:
             try:
-                eco_release_obj = models.ECORelease(eco_number=eco_obj['eco_number'], eco_release_date=eco_obj['eco_release_date'],
+                if eco_obj['eco_release_date'] == "0000-00-00" or not eco_obj['eco_release_date']:
+                    eco_release_date=None
+                else:
+                    eco_release_date=datetime.strptime(eco_obj['eco_release_date'], "%Y-%m-%d")
+                eco_release_obj = models.ECORelease(eco_number=eco_obj['eco_number'], eco_release_date=eco_release_date,
                                                     eco_description=eco_obj['eco_description'], action=eco_obj['action'], parent_part=eco_obj['parent_part'],
                                                     add_part=eco_obj['add_part'], add_part_qty=eco_obj['add_part_qty'], add_part_rev=eco_obj['add_part_rev'],
                                                     add_part_loc_code=eco_obj['add_part_loc_code'], del_part=eco_obj['del_part'], del_part_qty=eco_obj['del_part_qty'],
@@ -609,7 +614,11 @@ class ECOImplementationFeed(BaseFeed):
     def import_data(self):
         for eco_obj in self.data_source:
             try:
-                eco_implementation_obj = models.ECOImplementation(change_no=eco_obj['change_no'],change_date=eco_obj['change_date'],
+                if eco_obj['change_date'] == "0000-00-00" or not eco_obj['change_date']:
+                    change_date=None
+                else:
+                    change_date=datetime.strptime(eco_obj['change_date'], "%Y-%m-%d")
+                eco_implementation_obj = models.ECOImplementation(change_no=eco_obj['change_no'],change_date=change_date,
                                                            change_time=eco_obj['change_time'],plant=eco_obj['plant'],
                                                            action=eco_obj['action'],parent_part=eco_obj['parent_part'],
                                                            added_part=eco_obj['added_part'],added_part_qty=eco_obj['added_part_qty'],
