@@ -5,23 +5,14 @@
       <ns1:ObjectList>
         <ns1:MechanicData>
           <ns1:MechanicModel>
-            <ns1:PHONE_NUMBER></ns1:PHONE_NUMBER>
-            <ns1:LAST_NAME></ns1:LAST_NAME>
             <ns1:MECH_ID>123444555</ns1:MECH_ID>
-            <ns1:TEMP_MECH_ID>TMEKVII0E</ns1:TEMP_MECH_ID>
-            <ns1:DOB></ns1:DOB>
-            <ns1:FIRST_NAME></ns1:FIRST_NAME>
-            <ns1:SHOP_NAME></ns1:SHOP_NAME>
-            <ns1:DISTRICT></ns1:DISTRICT>
-            <ns1:STATE></ns1:STATE>
-            <ns1:PINCODE></ns1:PINCODE>
-            <ns1:DIST_ID></ns1:DIST_ID>
+            <ns1:TEMP_MECH_ID>TME3YEGNK</ns1:TEMP_MECH_ID>
           </ns1:MechanicModel>
         </ns1:MechanicData>
       </ns1:ObjectList>
       <ns1:Credential>
-        <ns1:UserName>bajaj</ns1:UserName>
-        <ns1:Password>bajaj</ns1:Password>
+        <ns1:UserName>bajajcv</ns1:UserName>
+        <ns1:Password>bajajcv</ns1:Password>
       </ns1:Credential>
     </ns1:postMechanic>
   </SOAP-ENV:Body>

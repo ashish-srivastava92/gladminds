@@ -397,6 +397,7 @@ class SparePartPoint(base_models.SparePartPoint):
 
     class Meta(base_models.SparePartPoint.Meta):
         app_label = _APP_NAME
+        unique_together = ('part_number', 'territory',)
 
 
 class AccumulationRequest(base_models.AccumulationRequest):
