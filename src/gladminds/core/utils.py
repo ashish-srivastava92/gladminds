@@ -294,7 +294,7 @@ def create_context(email_template_name, feedback_obj, comment_obj=None):
         type = feedback_obj.type
     else:
         type = "feedback"
-    data = get_email_template(email_template_name)
+    data = get_email_template(email_template_name, settings.BRAND)
     data['newsubject'] = data['subject'].format(id = feedback_obj.id)
     data['content'] = data['body'].format(id=feedback_obj.id, type = type, reporter = feedback_obj.reporter.user_profile.user.username, 
                                           message = feedback_obj.description, created_date = created_date, 

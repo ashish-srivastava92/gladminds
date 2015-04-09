@@ -439,30 +439,33 @@ def send_report_mail_for_feed(*args, **kwargs):
     '''
     send report email for data feed
     '''
+    brand= kwargs.get('brand', None)
     day = kwargs['day_duration']
     today = datetime.now().date()
     start_date = today - timedelta(days=day)
     feed_data = taskmanager.get_data_feed_log_detail(
         start_date=start_date, end_date=today)
-    mail.feed_report(feed_data=feed_data)
+    mail.feed_report(feed_data=feed_data, brand=brand)
 
 @shared_task
 def send_mail_for_feed_failure(*args, **kwargs):
     '''
     send feed failure email
     '''
+    brand= kwargs.get('brand', None)
     for feed_type in FEED_TYPES:
         feed_data = taskmanager.get_feed_failure_log_detail(type=feed_type)
         if feed_data['feed_data']:
-            mail.feed_failure(feed_data=feed_data['feed_data'])
+            mail.feed_failure(feed_data=feed_data['feed_data'], brand=brand)
             feed_data['feed_logs'].update(email_flag=True)
 
 @shared_task
 def send_vin_sync_feed_details(*args, **kwargs):
     ''' send vin sync feeds'''
+    brand= kwargs.get('brand', None)
     feed_data = taskmanager.get_vin_sync_feeds_detail()
     if feed_data['feed_data']:
-        mail.send_vin_sync_feed_report(feed_data=feed_data['feed_data'])
+        mail.send_vin_sync_feed_report(feed_data=feed_data['feed_data'], brand=brand)
         feed_data['feed_logs'].update(email_flag=True)
 
 @shared_task
@@ -470,9 +473,10 @@ def send_mail_for_customer_phone_number_update(*args, **kwargs):
     '''
     send customer phone number update email
     '''
+    brand= kwargs.get('brand', None)
     customer_details = taskmanager.get_customer_details()
     if customer_details['customer_data']:
-        mail.customer_phone_number_update(customer_details=customer_details['customer_data'])
+        mail.customer_phone_number_update(customer_details=customer_details['customer_data'], brand=brand)
         customer_details['customer_details'].update(email_flag=True)
 
 @shared_task
@@ -480,17 +484,19 @@ def send_mail_customer_phone_number_update_exceeds(*args, **kwargs):
     '''
     send email to asm when customer number update exceeds
     '''
+    brand= kwargs.get('brand', None)
     update_details = taskmanager.get_update_number_exceeds()
     if update_details['update_data']:
-        mail.send_phone_number_update_count_exceeded(update_details=update_details['update_data'])
+        mail.send_phone_number_update_count_exceeded(update_details=update_details['update_data'], brand=brand)
         update_details['update_details'].update(email_flag=True) 
 
 @shared_task
 def send_mail_for_policy_discrepency(*args, **kwargs):
     ''' send mail for policy_discrepency'''
+    brand= kwargs.get('brand', None)
     discrepant_coupons = taskmanager.get_discrepant_coupon_details()
     if discrepant_coupons:
-        mail.discrepant_coupon_update(discrepant_coupons=discrepant_coupons)
+        mail.discrepant_coupon_update(discrepant_coupons=discrepant_coupons, brand=brand)
     else:
         logger.info('[Policy Discrepency]: There were no policy discrepency in coupons')
 
@@ -575,7 +581,7 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None, brand=
     try:
         if feedback_obj.reporter:
             reporter = feedback_obj.reporter.user_profile
-        message = templates.get_template(template_name).format(type=feedback_obj.type,
+        message = templates.get_template(template_name,brand).format(type=feedback_obj.type,
                                                                reporter=reporter,
                                                                message=feedback_obj.description,
                                                                created_date=created_date,
@@ -586,7 +592,7 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None, brand=
             message = message + 'Note :' + comment_obj.comment
     except Exception as ex:
         logger.info("send_sms: {0}".format(ex))
-        message = templates.get_template('SEND_INVALID_MESSAGE')
+        message = templates.get_template('SEND_INVALID_MESSAGE',brand)
     finally:
         logger.info("Send complain message received successfully with %s" % message)
         phone_number = utils.get_phone_number_format(phone_number)
@@ -648,14 +654,15 @@ def customer_support_helper(obj_list, data, message):
         except Exception as ex:
             logger.info("[Exception fail to send SMS to ASCs/Dealers on Customer Support]  {0}".format(ex))
             
-def dfsc_customer_support(*args, **kwargs):    
+def dfsc_customer_support(*args, **kwargs):
+    brand= kwargs.get('brand', None)    
     asc_obj = models.AuthorizedServiceCenter.objects.filter(user__state='MAH').select_related('user, user__user')
     dealer_obj = models.Dealer.objects.filter(user__state='MAH').select_related('user, user__user')
     
-    data = get_email_template('CUSTOMER_SUPPORT_FOR_DFSC')
+    data = get_email_template('CUSTOMER_SUPPORT_FOR_DFSC', brand)
     data['newsubject'] = data['subject']
     data['content'] = data['body']
-    message = templates.get_template('CUSTOMER_SUPPORT_FOR_DFSC')
+    message = templates.get_template('CUSTOMER_SUPPORT_FOR_DFSC', brand)
     
     customer_support_helper(asc_obj, data, message)
     customer_support_helper(dealer_obj, data, message)    
@@ -751,7 +758,7 @@ def welcome_kit_due_date_escalation(*args, **kwargs):
     args=[Q(due_date__lte=time), Q(resolution_flag=False),~Q(status='Shipped')]
     welcome_kit_obj = models.WelcomeKit.objects.filter(reduce(operator.and_, args))
     for welcome_kit in welcome_kit_obj:
-        data = get_email_template('WELCOME_KIT_DUE_DATE_EXCEED_MAIL_TO_MANAGER')
+        data = get_email_template('WELCOME_KIT_DUE_DATE_EXCEED_MAIL_TO_MANAGER',brand)
         data['newsubject'] = data['subject'].format(id = welcome_kit.transaction_id)
         data['content'] = data['body'].format(transaction_id=welcome_kit.transaction_id, 
                                       due_date=welcome_kit.due_date, status=welcome_kit.status )
@@ -759,7 +766,7 @@ def welcome_kit_due_date_escalation(*args, **kwargs):
         escalation_list_detail = utils.get_escalation_mailing_list(escalation_list)
         send_email_to_welcomekit_escaltion_group(data, escalation_list_detail)
 
-        message = templates.get_template('LOYALTY_DUE_DATE_EXCEED_ESCALATION').format(transaction_id=welcome_kit.transaction_id,
+        message = templates.get_template('LOYALTY_DUE_DATE_EXCEED_ESCALATION',brand).format(transaction_id=welcome_kit.transaction_id,
                                                                                       status=welcome_kit.status)    
         for phone_number in escalation_list_detail['sms']: 
             phone_number = utils.get_phone_number_format(phone_number)
@@ -778,7 +785,7 @@ def redemption_request_due_date_escalation(*args, **kwargs):
     args=[Q(due_date__lte=time), Q(resolution_flag=False),~Q(status='Delivered')]
     redemption_request_obj = models.RedemptionRequest.objects.filter(reduce(operator.and_, args))
     for redemption_request in redemption_request_obj:
-        data = get_email_template('REDEMPTION_REQUEST_DUE_DATE_EXCEED_MAIL_TO_MANAGER')
+        data = get_email_template('REDEMPTION_REQUEST_DUE_DATE_EXCEED_MAIL_TO_MANAGER',brand)
         data['newsubject'] = data['subject'].format(id = redemption_request.transaction_id)
         data['content'] = data['body'].format(transaction_id=redemption_request.transaction_id,
                                                                   status=redemption_request.status)
@@ -786,7 +793,7 @@ def redemption_request_due_date_escalation(*args, **kwargs):
         escalation_list_detail = utils.get_escalation_mailing_list(escalation_list)
         send_email_to_redeem_escaltion_group(data, escalation_list_detail)
         
-        message = templates.get_template('LOYALTY_DUE_DATE_EXCEED_ESCALATION').format(transaction_id=redemption_request.transaction_id,
+        message = templates.get_template('LOYALTY_DUE_DATE_EXCEED_ESCALATION',brand).format(transaction_id=redemption_request.transaction_id,
                                                                                       status=redemption_request.status)    
         for phone_number in escalation_list_detail['sms']: 
             phone_number = utils.get_phone_number_format(phone_number)
