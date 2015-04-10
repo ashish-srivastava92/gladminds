@@ -129,7 +129,8 @@ class ContainerTrackerResource(CustomBaseModelResource):
                      'transaction_id' : ALL,
                      'lr_date' : ['gte', 'lte'],
                      'gatein_date' : ['gte', 'lte'],
-                     'status' : ALL
+                     'status' : ALL,
+                     "zib_indent_num" : ALL
                      
                      }
         ordering = ['lr_date', 'gatein_date' ,'created_date']
