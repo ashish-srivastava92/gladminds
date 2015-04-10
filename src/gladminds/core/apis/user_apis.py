@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import json
 import logging
 
@@ -45,6 +45,7 @@ from django.contrib.sites.models import RequestSite
 from gladminds.core.model_helpers import format_phone_number
 from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.managers.mail import send_reset_link_email
+from gladminds.core.utils import get_sql_data
 
 logger = logging.getLogger('gladminds')
 
@@ -330,7 +331,10 @@ class DealerResource(CustomBaseModelResource):
     def prepend_urls(self):
         return [
                  url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),
-                     self.wrap_view('register_dealer'), name="register_dealer")]
+                     self.wrap_view('register_dealer'), name="register_dealer"),
+                url(r"^(?P<resource_name>%s)/active%s" % (self._meta.resource_name,trailing_slash()),
+                                                        self.wrap_view('get_active_dealer'), name="get_active_dealer")
+                ]
     
     
     def register_dealer(self, request, **kwargs):
@@ -359,7 +363,30 @@ class DealerResource(CustomBaseModelResource):
 
         return HttpResponse(json.dumps(data), content_type="application/json")
     
-              
+    def get_active_dealer(self, request, **kwargs):
+        print request.GET
+        result = []
+        active_today = models.Dealer.objects.filter(last_transaction_date__startswith=date.today()).count()
+        today = {}
+        today['count_on'] = 'Today'
+        today['active'] = active_today
+        result.append(today)
+        try:
+            load = request.GET
+        except Exception as ex:
+            return HttpResponse(content_type="application/json", status=404)
+        
+#         month = load.get('month', None)
+#         year = load.get('year', None)
+#         if month and year:
+#             actual = str(year) + "-" + str(month) + "%"
+#             active_count = get_sql_data("select count(*) as cnt from gm_dealer where last_transaction_date\
+#              like '%s' " %actual)
+# #             active_count = models.Dealer.objects.filter(last_transaction_date__year=year,
+# #                                                         last_transaction_date__month=month).count()
+        return HttpResponse(content=json.dumps(result), 
+                            content_type='application/json')
+    
 class AuthorizedServiceCenterResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
     dealer = fields.ForeignKey(DealerResource, 'dealer', null=True, blank=True, full=True)

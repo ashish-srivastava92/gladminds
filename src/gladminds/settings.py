@@ -658,22 +658,25 @@ FILE_CACHE_DURATION = 0
 COUPON_WSDL = 'qa_coupon_redeem.wsdl'
 CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
 VIN_SYNC_WSDL='qa_vin_sync.wsdl'
-MEMBER_SYNC_WSDL='qa_member_sync_feed.wsdl'
 PURCHASE_SYNC_WSDL='qa_purchase_sync_feed.wsdl'
+CTS_WSDL = 'qa_container_tracker_feed.wsdl'
+
+MEMBER_SYNC_WSDL='qa_member_sync_feed.wsdl'
 ACCUMULATION_SYNC_WSDL = 'qa_accumulation_feed.wsdl'
 REDEMPTION_SYNC_WSDL = 'qa_redemption_feed.wsdl'
 DISTRIBUTOR_SYNC_WSDL = 'qa_distributor_sync_feed.wsdl'                
-CTS_WSDL = 'qa_container_tracker_feed.wsdl'
 
 COUPON_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/coupon-redeem/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/customer-feed/?wsdl&v0"
 VIN_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/vin-sync/?wsdl&v0"
-MEMBER_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/member-sync/?wsdl&v0"
 PURCHASE_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/purchase-sync/?wsdl&v0"
+CTS_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/container-tracker/?wsdl&v0"
+
+MEMBER_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/member-sync/?wsdl&v0"
 ACCUMULATION_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/accumulation-request/?wsdl&v0"
 REDEMPTION_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/redemption-request/?wsdl&v0"
 DISTRIBUTOR_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/distributor-sync/?wsdl&v0"
-CTS_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/container-tracker/?wsdl&v0"
+
 
 BRAND_META = {
                "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/"},
@@ -683,10 +686,6 @@ BRAND_META = {
                         "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
             "bajajcv": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/",
                         "basecss": "/css/portal.css"},
-
-
-
-              
                }
 
 HOME_URLS = {
@@ -710,3 +709,4 @@ HOME_URLS = {
              }
 
 LOGIN_URL='/login'
+BATCH_SIZE = 100

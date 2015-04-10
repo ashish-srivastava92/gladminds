@@ -65,10 +65,6 @@ SAP_CRM_DETAIL = {
                   'password':'welcome123'
                   }
 
-MEMBER_SYNC_WSDL='prod_member_sync_feed.wsdl'
-
-ASC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
-
 COUPON_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/coupon-redeem/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
 VIN_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/vin-sync/?wsdl&v0"
@@ -110,7 +106,7 @@ FEED_FAILURE["receiver"] = ["gmdev@hashedin.com"]
 VIN_SYNC_FEED["receiver"] = ["gmdev@hashedin.com"]
 ###################Change Mail Subject on QA##########################
 MAIL_DETAIL["subject"] = "GladMinds Feed Report QA"
-MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
+MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
 #######################################################################
 ENV = "qa"
 

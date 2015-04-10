@@ -144,8 +144,10 @@ class Dealer(BaseModel):
         max_length=25, blank=False, null=False, unique=True,
         help_text="Dealer Code must be unique")
     use_cdms = models.BooleanField(default=True)
+    last_transaction_date = models.DateTimeField(null=True, blank=True)
 
     objects = user_manager.DealerManager()
+    last_transaction_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -165,6 +167,7 @@ class AuthorizedServiceCenter(BaseModel):
     asc_owner_phone = models.CharField(max_length=50, null=True, blank=True)
     asc_owner_email = models.CharField(max_length=100, null=True, blank=True)
     objects = user_manager.AuthorizedServiceCenterManager()
+    last_transaction_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -664,7 +667,9 @@ class ServiceDeskUser(BaseModel):
         db_table = "gm_servicedeskuser"
         verbose_name_plural = "Service Desk Users"
 
-
+    def __unicode__(self):
+        return self.user_profile.user.username
+    
 class Activity(BaseModel):
     '''details of activities done by service-desk user'''
     action = models.TextField(null=True, blank=True)
@@ -946,6 +951,19 @@ class ECOImplementation(BaseModel):
         abstract = True
         verbose_name_plural = "ECO Implementation"
 
+class Supervisor(BaseModel):
+    ''' details of Supervisor'''
+    supervisor_id = models.CharField(
+        max_length=15, blank=False, unique=True, null=False)
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_supervisor"
+        verbose_name_plural = "Supervisors"
+    
+    def __unicode__(self):
+        return self.supervisor_id
+    
 class Transporter(BaseModel):
     ''' details of Container Transporter'''
     transporter_id = models.CharField(
@@ -956,9 +974,13 @@ class Transporter(BaseModel):
         db_table = "gm_transporter"
         verbose_name_plural = "Transporter"
     
+    def __unicode__(self):
+        return self.transporter_id
+
 class ContainerTracker(BaseModel):
     ''' details of Container Tracker'''
-
+    
+    transaction_id = models.AutoField(primary_key=True)
     zib_indent_num = models.CharField(max_length=30, null=True, blank=True)
     consignment_id = models.CharField(max_length=30, null=True, blank=True)
     truck_no = models.CharField(max_length=30, null=True, blank=True)
@@ -970,13 +992,15 @@ class ContainerTracker(BaseModel):
     status = models.CharField(max_length=12, choices=constants.CONSIGNMENT_STATUS, default='Open')
     seal_no = models.CharField(max_length=20, null=True, blank=True)
     container_no = models.CharField(max_length=20, null=True, blank=True)
-    transaction_id = models.CharField(max_length=20, null=True, blank=True)
     sent_to_sap = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
         db_table = "gm_containertracker"
         verbose_name_plural = "Container Tracker"
+    
+    def __unicode__(self):
+        return str(self.transaction_id)
 
 
 #######################LOYALTY TABLES#################################
@@ -1265,10 +1289,10 @@ class RedemptionRequest(BaseModel):
         if self.status=='Approved' and self.refunded_points:
             if self.member.total_points<self.product.points:
                 raise ValidationError("Member now does not not have sufficient points to approve the request")
-        if self.status=='Packed' and (not self.partner or self.partner.partner_type not in ['Redemption','Logistics']):
-            raise ValidationError("Please assign a partner")
-        elif self.status=='Approved' and (not self.partner or self.partner.partner_type!='Redemption'):
-            raise ValidationError("Please assign a redemption partner")
+#         if self.status=='Packed' and (not self.partner or self.partner.partner_type not in ['Redemption','Logistics']):
+#             raise ValidationError("Please assign a partner")
+#         elif self.status=='Approved' and (not self.partner or self.partner.partner_type!='Redemption'):
+#             raise ValidationError("Please assign a redemption partner")
         
         super(RedemptionRequest, self).clean(*args, **kwargs)
 
@@ -1435,4 +1459,5 @@ class CouponFact(models.Model):
         abstract = True
         db_table = "gm_couponfact"
 
+    
 
