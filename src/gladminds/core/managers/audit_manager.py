@@ -13,7 +13,7 @@ def sms_log(brand, action='SENT', sender='+1 469-513-9856', receiver=None,
                                receiver=receiver, status=status,
                                message=message)
     sms_log.save(using=brand)
-    if settings.ENV not in settings.IGNORE_ENV:
+    if settings.ENV not in ['prod']:
         LOGGER.post_event("sms_sent", {'receiver':receiver,
                                       'message':message,
                                       'brand':brand})
