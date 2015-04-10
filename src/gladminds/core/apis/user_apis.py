@@ -46,6 +46,7 @@ from gladminds.core.model_helpers import format_phone_number
 from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.managers.mail import send_reset_link_email
 from gladminds.core.utils import get_sql_data
+from django.core.serializers.json import DjangoJSONEncoder
 
 logger = logging.getLogger('gladminds')
 
@@ -293,10 +294,13 @@ class UserProfileResource(CustomBaseModelResource):
 
         if user_auth is not None:
             access_token = create_access_token(user_auth, http_host)
+            user_groups = []
+            for group in request.user.groups.values():
+                user_groups.append(group['name'])
             if user_auth.is_active:
                 login(request, user_auth)
                 data = {'status': 1, 'message': "login successfully",
-                        'access_token': access_token, "user_id": user_auth.id}
+                        'access_token': access_token, "user_id": user_auth.id, "user_groups" : user_groups}
         else:
             data = {'status': 0, 'message': "login unsuccessful"}
         return HttpResponse(json.dumps(data), content_type="application/json")
