@@ -1,21 +1,22 @@
 import json
 
 from django.conf.urls import url
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models.aggregates import Count
 from django.http.response import HttpResponse
 from tastypie import fields 
 from tastypie.authentication import MultiAuthentication
 from tastypie.authorization import DjangoAuthorization, Authorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
-from tastypie.http import HttpBadRequest
 from tastypie.utils.urls import trailing_slash
 
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from gladminds.core.apis.authorization import MultiAuthorization,\
+from gladminds.core.apis.authorization import MultiAuthorization, \
     CTSCustomAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.apis.user_apis import DealerResource, PartnerResource
+from gladminds.core.auth_helper import Roles
 from gladminds.core.model_fetcher import models
-from gladminds.core.utils import get_sql_data
 
 
 class ProductTypeResource(CustomBaseModelResource):
@@ -141,5 +142,12 @@ class ContainerTrackerResource(CustomBaseModelResource):
         
     def  get_status_count(self, request, **kwargs):
         self.is_authenticated(request)
-        count = get_sql_data("select count(*) as cnt, status from gm_containertracker group by status")
-        return HttpResponse(content=json.dumps(count), content_type='application/json')
+        if request.user.groups.filter(name=Roles.TRANSPORTER):
+            data = models.ContainerTracker.objects.filter(transporter__user__user_id=request.user.id).values('status').annotate(total=Count('status'))
+        elif request.user.groups.filter(name=Roles.SUPERVISOR):
+            transporter = models.Supervisor.objects.get(user__user_id=request.user.id).transporter
+            data = models.ContainerTracker.objects.filter(transporter=transporter).values('status').annotate(total=Count('status'))
+        else:
+            data = models.ContainerTracker.objects.all().values('status').annotate(total=Count('status'))
+            
+        return HttpResponse(content=json.dumps(list(data), cls=DjangoJSONEncoder), content_type='application/json')
