@@ -83,7 +83,7 @@ class ProductResource(CustomBaseModelResource):
         always_return_data = True
         
 class RedemptionResource(CustomBaseModelResource):
-    member = fields.ForeignKey(MemberResource, 'member')
+    member = fields.ForeignKey(MemberResource, 'member', full=True)
     product_catalog = fields.ForeignKey(ProductCatalogResource, 'product')
     partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)    
 
@@ -95,14 +95,13 @@ class RedemptionResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         args = constants.LOYALTY_ACCESS
-         
-        authorization = MultiAuthorization(Authorization(), LoyaltyCustomAuthorization
-                                           (display_field=args['display_field'], query_field=args['query_field']))
+        authorization = MultiAuthorization(LoyaltyCustomAuthorization(display_field=args['display_field'], query_field=args['query_field']))
         filtering = {
                      "member": ALL_WITH_RELATIONS,
                      "resolution_flag":ALL,
                      }
- 
+        ordering = ["created_date", "status", "member"]
+
     def prepend_urls(self):
         return [
                 url(r"^(?P<resource_name>%s)/members-details/(?P<status>[a-zA-Z.-]+)%s" % (self._meta.resource_name,trailing_slash()),
