@@ -154,7 +154,6 @@ class ExportCustomerRegistrationFeed(BaseExportFeed):
                 result = client.service.SI_CstID_sync(
                     item_custveh=[{"item": item}], item=item_batch)
                 logger.info("[ExportCustomerRegistrationFeed]: Response from SAP: {0}".format(result))
-                logger.info("[ExportCustomerRegistrationFeed]: Response from SAP: {0}".format(result[0]['item'][0]['STATUS']))
                 if result[0]['item'][0]['STATUS'] == 'SUCCESS':
                     try:
                         temp_customer_object = models.CustomerTempRegistration.objects.get(temp_customer_id=item['CUSTOMER_ID'])
@@ -330,7 +329,8 @@ class ExportCTSFeed(BaseExportFeed):
             logger.error("[ExportCTSFeed]: sending CTS:{0}".format(item['Consigment_Id']))
             try:
                 result = client.service.SI_CTS_Sync(
-                    DT_CTS_Item={'Item':[item]}, DT_STAMP={'Item_STAMP':item_batch})                
+                    DT_CTS_Item={'Item':[item]}, DT_STAMP={'Item_STAMP':item_batch})
+                logger.info("[ExportCTSFeed]: Response from SAP: {0}".format(result))                
                 if result[0]['STATUS'] == 'SUCCESS':
                     try:
                         cts = models.ContainerTracker.objects.get(consignment_id=item['Consigment_Id'])
