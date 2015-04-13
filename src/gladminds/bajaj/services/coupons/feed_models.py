@@ -504,7 +504,6 @@ class ProductDispatchService(ServiceBase):
                 feed_remark.fail_remarks(ex)
                 logger.error(ex)
 
-        print 22222222222222222
         feed_remark = save_to_db(
             feed_type='dispatch', data_source=product_dispatch_list,
                                         feed_remark=feed_remark)

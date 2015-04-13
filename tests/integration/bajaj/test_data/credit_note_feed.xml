@@ -6,14 +6,16 @@
         <ns1:CreditNoteData>
             <ns1:CreditNoteModel>
               <ns1:GCP_KMS>444</ns1:GCP_KMS>
+              <ns1:CREDIT_NOTE>Well Done</ns1:CREDIT_NOTE>
               <ns1:CDMS_DOC_NO>2</ns1:CDMS_DOC_NO>
-              <ns1:GCP_UCN_NO>USC0077</ns1:GCP_UCN_NO>
-              <ns1:CHASSIS>12345678901234577</ns1:CHASSIS>
+              <ns1:GCP_UCN_NO>USC9217</ns1:GCP_UCN_NO>
+              <ns1:CHASSIS>12345678901232792</ns1:CHASSIS>
               <ns1:SER_AVL_DT>2014-12-12</ns1:SER_AVL_DT>
               <ns1:CDMS_DT>2014-12-12</ns1:CDMS_DT>
               <ns1:SERVICE_TYPE>1</ns1:SERVICE_TYPE>
               <ns1:GCPDATA_RECV_DT>2014-12-12</ns1:GCPDATA_RECV_DT>
-              <ns1:GCP_KUNNR>HIDealer002</ns1:GCP_KUNNR>
+              <ns1:GCP_KUNNR>GMDEALER001</ns1:GCP_KUNNR>
+              <ns1:CREDIT_DATE>2015-03-25</ns1:CREDIT_DATE>
             </ns1:CreditNoteModel>
         </ns1:CreditNoteData>
       </ns1:ObjectList>

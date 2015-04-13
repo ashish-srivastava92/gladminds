@@ -10,11 +10,11 @@
             <ns1:TIMESTAMP>2005-08-01000000</ns1:TIMESTAMP>
             <ns1:VEC_DIS_DT>2014-03-20</ns1:VEC_DIS_DT>
             <ns1:DAYS_LIMIT_FROM>25</ns1:DAYS_LIMIT_FROM>
-            <ns1:CHASSIS>12345678901234565</ns1:CHASSIS>
+            <ns1:CHASSIS>12345678901232792</ns1:CHASSIS>
             <ns1:DAYS_LIMIT_TO>365</ns1:DAYS_LIMIT_TO>
             <ns1:KMS_FROM>400</ns1:KMS_FROM>
             <ns1:SERVICE_TYPE>1</ns1:SERVICE_TYPE>
-            <ns1:UCN_NO>USC0031</ns1:UCN_NO>
+            <ns1:UCN_NO>USC9217</ns1:UCN_NO>
             <ns1:KUNNR>GMDEALER001</ns1:KUNNR>
           </ns1:ProductDispatchModel>
           <ns1:ProductDispatchModel>
@@ -23,11 +23,11 @@
             <ns1:TIMESTAMP>2005-08-01000000</ns1:TIMESTAMP>
             <ns1:VEC_DIS_DT>2014-03-20</ns1:VEC_DIS_DT>
             <ns1:DAYS_LIMIT_FROM>25</ns1:DAYS_LIMIT_FROM>
-            <ns1:CHASSIS>12345678901234565</ns1:CHASSIS>
+            <ns1:CHASSIS>12345678901232792</ns1:CHASSIS>
             <ns1:DAYS_LIMIT_TO>730</ns1:DAYS_LIMIT_TO>
             <ns1:KMS_FROM>400</ns1:KMS_FROM>
             <ns1:SERVICE_TYPE>2</ns1:SERVICE_TYPE>
-            <ns1:UCN_NO>USC0032</ns1:UCN_NO>
+            <ns1:UCN_NO>USC9227</ns1:UCN_NO>
             <ns1:KUNNR>GMDEALER001</ns1:KUNNR>
           </ns1:ProductDispatchModel>
           <ns1:ProductDispatchModel>
@@ -36,11 +36,11 @@
             <ns1:TIMESTAMP>2005-08-01000000</ns1:TIMESTAMP>
             <ns1:VEC_DIS_DT>2014-03-20</ns1:VEC_DIS_DT>
             <ns1:DAYS_LIMIT_FROM>25</ns1:DAYS_LIMIT_FROM>
-            <ns1:CHASSIS>12345678901234565</ns1:CHASSIS>
+            <ns1:CHASSIS>12345678901232792</ns1:CHASSIS>
             <ns1:DAYS_LIMIT_TO>730</ns1:DAYS_LIMIT_TO>
             <ns1:KMS_FROM>400</ns1:KMS_FROM>
             <ns1:SERVICE_TYPE>3</ns1:SERVICE_TYPE>
-            <ns1:UCN_NO>USC0033</ns1:UCN_NO>
+            <ns1:UCN_NO>USC9237</ns1:UCN_NO>
             <ns1:KUNNR>GMDEALER001</ns1:KUNNR>
           </ns1:ProductDispatchModel>
         </ns1:ProductDispatchData>

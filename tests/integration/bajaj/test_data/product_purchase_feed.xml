@@ -6,18 +6,18 @@
         <ns1:ProductPurchaseData>
           <ns1:ProductPurchaseModel>
             <ns1:PIN_NO>111111</ns1:PIN_NO>
-            <ns1:CUST_MOBILE>6666666666</ns1:CUST_MOBILE>
+            <ns1:CUST_MOBILE>7777777777</ns1:CUST_MOBILE>
             <ns1:VEH_SL_DLR>GMDEALER001</ns1:VEH_SL_DLR>
             <ns1:KUNNR>GMDEALER001</ns1:KUNNR>
-            <ns1:ENGINE>DSEWWE65</ns1:ENGINE>
+            <ns1:ENGINE>DSEWWE27</ns1:ENGINE>
             <ns1:CITY>Bagalore</ns1:CITY>
             <ns1:TIMESTAMP>2005-08-01000000</ns1:TIMESTAMP>
             <ns1:VEH_REG_NO>423423</ns1:VEH_REG_NO>
             <ns1:STATE>Karnataka</ns1:STATE>
-            <ns1:CHASSIS>12345678901234565</ns1:CHASSIS>
+            <ns1:CHASSIS>12345678901232792</ns1:CHASSIS>
             <ns1:VEH_SL_DT>2012-02-12</ns1:VEH_SL_DT>
-            <ns1:CUSTOMER_ID>GMCUSTOMER65</ns1:CUSTOMER_ID>
-            <ns1:CUSTOMER_NAME>TestCustomer</ns1:CUSTOMER_NAME>
+            <ns1:CUSTOMER_ID>TM-29122701</ns1:CUSTOMER_ID>
+            <ns1:CUSTOMER_NAME>TestU2927</ns1:CUSTOMER_NAME>
           </ns1:ProductPurchaseModel>
         </ns1:ProductPurchaseData>
       </ns1:ObjectList>
