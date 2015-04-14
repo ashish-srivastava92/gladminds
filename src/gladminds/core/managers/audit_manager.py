@@ -2,7 +2,7 @@ from gladminds.core.model_fetcher import get_model
 import datetime
 from django.conf import settings
 from gladminds.core.auth_helper import GmApps
-from gladminds.core.stats import LOGGER
+# from gladminds.core.stats import LOGGER
 import logging
 logger = logging.getLogger("gladminds")
 
@@ -15,13 +15,13 @@ def sms_log(brand, action='SENT', sender='+1 469-513-9856', receiver=None,
                                receiver=receiver, status=status,
                                message=message)
     sms_log.save(using=brand)
-    if settings.ENV not in ['prod']:
-        try:
-            LOGGER.post_event("sms_sent", {'receiver':receiver,
-                                          'message':message,
-                                          'brand':brand})
-        except Exception as ex:
-            logger.error("[sms_log]:: {0}".format(ex))
+#     if settings.ENV not in ['prod']:
+#         try:
+#             LOGGER.post_event("sms_sent", {'receiver':receiver,
+#                                           'message':message,
+#                                           'brand':brand})
+#         except Exception as ex:
+#             logger.error("[sms_log]:: {0}".format(ex))
 
 
 def feed_log(brand, feed_type=None, total_data_count=None, failed_data_count=None,

@@ -575,7 +575,8 @@ class ContainerTrackerFeed(BaseFeed):
         for tracker_obj in self.data_source:
             try:
                 try:
-                    container_tracker_obj=models.ContainerTracker.objects.get(consignment_id=tracker_obj['consignment_id'])
+                    container_tracker_obj=models.ContainerTracker.objects.get(zib_indent_num=tracker_obj['zib_indent_num'],
+                                                                              lr_number=tracker_obj['lr_number'])
                 except ObjectDoesNotExist as odne:
                     transporter_data = self.check_or_create_transporter(transporter_id=tracker_obj['transporter_id'],
                                                                         name=tracker_obj['tranporter_name'])

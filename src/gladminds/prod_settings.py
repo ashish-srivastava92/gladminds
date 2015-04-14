@@ -132,7 +132,8 @@ POLICY_DISCREPANCY_MAIL_TO_MANAGER ["receiver"] = ["suresh@hashedin.com", "jojib
 MAIL_DETAIL["subject"] = "Report: GladMinds Feed Summary"
 MAIL_DETAIL["receiver"] = ["jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in", "skolluri@bajajauto.co.in",
                             "sudhir.patil@gladminds.co", "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
-                            "gladminds@hashedin.com", "suresh@hashedin.com", "naveen.shankar@gladminds.co", "sudhir.patil@gladminds.co"]
+                            "gladminds@hashedin.com", "suresh@hashedin.com", "naveen.shankar@gladminds.co",
+                            "sudhir.patil@gladminds.co", "ashakiran@gladminds.co", "aparajita.reang@gladminds.co"]
 
 #######################Feed Fail Failure Info###########################
 FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/dev/'
