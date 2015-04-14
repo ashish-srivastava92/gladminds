@@ -11,14 +11,16 @@ warnings.filterwarnings("ignore", category=exceptions.RuntimeWarning, module='dj
 OUT_DIR = os.path.join(BASE_DIR, "out")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/testdata")
 
-DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
-DATABASES['default']['NAME'] = os.path.join(OUT_DIR, 'test.db')  # "/tmp/test.db"
-DATABASES['bajaj']['ENGINE'] = 'django.db.backends.sqlite3'
-DATABASES['bajaj']['NAME'] = os.path.join(OUT_DIR, 'bajaj.db')  # "/tmp/test.db"
-DATABASES['demo']['ENGINE'] = 'django.db.backends.sqlite3'
-DATABASES['demo']['NAME'] = os.path.join(OUT_DIR, 'demo.db')  # "/tmp/test.db"
-DATABASES['afterbuy']['ENGINE'] = 'django.db.backends.sqlite3'
-DATABASES['afterbuy']['NAME'] = os.path.join(OUT_DIR, 'afterbuy.db')  # "/tmp/test.db"
+DATABASES[GmApps.GM]['ENGINE'] = 'django.db.backends.sqlite3'
+DATABASES[GmApps.GM]['NAME'] = os.path.join(OUT_DIR, 'test.db')  # "/tmp/test.db"
+DATABASES[GmApps.BAJAJ]['ENGINE'] = 'django.db.backends.sqlite3'
+DATABASES[GmApps.BAJAJ]['NAME'] = os.path.join(OUT_DIR, 'bajaj.db')  # "/tmp/test.db"
+DATABASES[GmApps.DEMO]['ENGINE'] = 'django.db.backends.sqlite3'
+DATABASES[GmApps.DEMO]['NAME'] = os.path.join(OUT_DIR, 'demo.db')  # "/tmp/test.db"
+DATABASES[GmApps.AFTERBUY]['ENGINE'] = 'django.db.backends.sqlite3'
+DATABASES[GmApps.AFTERBUY]['NAME'] = os.path.join(OUT_DIR, 'afterbuy.db')  # "/tmp/test.db"
+DATABASES[GmApps.BAJAJCV]['ENGINE'] = 'django.db.backends.sqlite3'
+DATABASES[GmApps.BAJAJCV]['NAME'] = os.path.join(OUT_DIR, 'afterbuy.db')
 
 TEST_IGNORE_APPS = ()
 

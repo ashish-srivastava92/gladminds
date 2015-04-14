@@ -8,50 +8,12 @@ STATIC_DIR = os.path.join(BASE_DIR, "src/static")
 TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
-DB_PASSWORD = os.environ.get('DB_PASSWORD')
 
 DEBUG = False
 ALLOWED_HOSTS = ['*']
 TEMPLATE_DEBUG = DEBUG
 
 MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gm',
-        'USER': 'gladminds',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-prod.chnnvvffqwop.us-east-1.rds.amazonaws.com',
-        'PORT': '3306',
-    },
-    'bajaj': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bajaj',
-        'USER': 'gladminds',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-prod.chnnvvffqwop.us-east-1.rds.amazonaws.com',
-        'PORT': '3306',
-    },
-    'demo': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'demo',
-        'USER': 'gladminds',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-prod.chnnvvffqwop.us-east-1.rds.amazonaws.com',
-        'PORT': '3306',
-    },
-    'afterbuy': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'afterbuy',
-        'USER': 'gladminds',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-prod.chnnvvffqwop.us-east-1.rds.amazonaws.com',
-        'PORT': '3306',
-    }
-}
-
-
 
 BROKER_URL = 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
@@ -110,14 +72,23 @@ COUPON_WSDL = 'prod_coupon_redeem.wsdl'
 CUSTOMER_REGISTRATION_WSDL = 'prod_customer_registration.wsdl'
 VIN_SYNC_WSDL='prod_vin_sync.wsdl'
 PURCHASE_SYNC_WSDL='prod_purchase_sync_feed.wsdl'
+CTS_WSDL = 'prod_container_tracker.wsdl'
 
+MEMBER_SYNC_WSDL='prod_member_sync_feed.wsdl'
+ACCUMULATION_SYNC_WSDL = 'prod_accumulation_feed.wsdl'
+REDEMPTION_SYNC_WSDL = 'prod_redemption_feed.wsdl'
+DISTRIBUTOR_SYNC_WSDL = 'prod_distributor_sync_feed.wsdl' 
 
-ASC_WSDL_URL = "http://bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
 COUPON_WSDL_URL = "http://bajaj.gladminds.co/api/v1/coupon-redeem/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL_URL = "http://bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
 VIN_SYNC_WSDL_URL="http://bajaj.gladminds.co/api/v1/vin-sync/?wsdl&v0"
 PURCHASE_SYNC_WSDL_URL="http://bajaj.gladminds.co/api/v1/purchase-sync/?wsdl&v0"
+CTS_WSDL_URL = "http://bajaj.gladminds.co/api/v1/container-tracker/?wsdl&v0"
 
+MEMBER_SYNC_WSDL_URL="http://bajaj.gladminds.co/api/v1/member-sync/?wsdl&v0"
+ACCUMULATION_SYNC_WSDL_URL = "http://bajaj.gladminds.co/api/v1/accumulation-request/?wsdl&v0"
+REDEMPTION_SYNC_WSDL_URL = "http://bajaj.gladminds.co/api/v1/redemption-request/?wsdl&v0"
+DISTRIBUTOR_SYNC_WSDL_URL = "http://bajaj.gladminds.co/api/v1/distributor-sync/?wsdl&v0"
 
 ENABLE_AMAZON_SQS = True
 
@@ -161,7 +132,8 @@ POLICY_DISCREPANCY_MAIL_TO_MANAGER ["receiver"] = ["suresh@hashedin.com", "jojib
 MAIL_DETAIL["subject"] = "Report: GladMinds Feed Summary"
 MAIL_DETAIL["receiver"] = ["jojibabu.vege@gladminds.co", "ssozarde@bajajauto.co.in", "skolluri@bajajauto.co.in",
                             "sudhir.patil@gladminds.co", "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
-                            "gladminds@hashedin.com", "suresh@hashedin.com", "naveen.shankar@gladminds.co", "sudhir.patil@gladminds.co"]
+                            "gladminds@hashedin.com", "suresh@hashedin.com", "naveen.shankar@gladminds.co",
+                            "sudhir.patil@gladminds.co", "ashakiran@gladminds.co", "aparajita.reang@gladminds.co"]
 
 #######################Feed Fail Failure Info###########################
 FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/dev/'
@@ -171,64 +143,15 @@ ENABLE_SERVICE_DESK = False
 ENV = "prod"
 
 WSDL_TNS="http://bajaj.gladminds.co/api/v1/feed/"
+CORE_WSDL_TNS="http://bajajcv.gladminds.co/api/v1/feed/"
 
-ADMIN_DETAILS = {'bajaj': {'user': 'bajaj001', 'password': 'bajaj001'},
-          'demo': {'user': 'demo', 'password': 'demo'},
-          'afterbuy': {'user': 'afterbuy', 'password': 'afterbuy'},
-          'default': {'user': 'gladminds', 'password': 'gladminds'}
+ADMIN_DETAILS = {GmApps.BAJAJ: {'user': 'bajaj001', 'password': 'bajaj001'},
+          GmApps.DEMO: {'user': 'demo', 'password': 'demo'},
+          GmApps.AFTERBUY: {'user': 'afterbuy', 'password': 'afterbuy'},
+          GmApps.GM: {'user': 'gladminds', 'password': 'gladminds'},
+          GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'bajajcv'},
+          GmApps.DAIMLER: {'user': 'daimler', 'password': 'daimler'}
           }
-
-
-SUIT_CONFIG = {
-    'ADMIN_NAME': 'GladMinds',
-    'CONFIRM_UNSAVED_CHANGES': True,
-    'SEARCH_URL': '',
-    'MENU_EXCLUDE': ('auth.group', 'auth', 'sites'),
-    'MENU_OPEN_FIRST_CHILD': True,
-    'LIST_PER_PAGE': 20,
-    'SHOW_REQUIRED_ASTERISK': True,
-    'MENU': (
-        {'app': 'bajaj', 'label': 'Users', 'icon': ' icon-folder-open',
-         'models': ('user', 'userprofile',
-                    {'model': 'dealer',
-                     'label': 'Dealer'},
-                    {'model': 'authorizedservicecenter',
-                     'label': 'Authorized Service Center'},
-                    {'model': 'serviceadvisor',
-                     'label': 'Service Advisor'},)},
-        {'app': 'bajaj', 'label': 'Products', 'icon': ' icon-folder-open',
-         'models':({'model': 'brandproductcategory',
-                     'label': 'Brand Product Category'},
-                    {'model': 'producttype',
-                     'label': 'Product Type'},
-                    {'model': 'dispatchedproduct',
-                     'label': 'Product Dispatch'},
-                    {'model': 'productdata',
-                     'label': 'Product Purchase'},
-                    {'model': 'coupondata',
-                     'label': 'Coupon Redemption'},)},
-        {'app': 'bajaj', 'label': 'Logs', 'icon': ' icon-folder-open',
-         'models':(
-                    {'model': 'smslog',
-                     'label': 'SMS Log'},
-                   {'model': 'emaillog',
-                     'label': 'Email Log'},
-                    {'model': 'datafeedlog',
-                     'label': 'Feed Log'},
-                   {'model': 'feedFailureLog',
-                     'label': 'Feed Failure Log'})},
-        {'app': 'bajaj', 'label': 'User Registrations', 'icon': ' icon-folder-open',
-         'models':(
-                    {'model': 'asctempregistration',
-                     'label': ' ASC registration'},
-                    {'model': 'satempregistration',
-                     'label': 'SA registration'},
-                    {'model': 'customertempregistration',
-                     'label': ' Customer registration'},)},
-        {'app': 'bajaj', 'label': 'Templates', 'icon': ' icon-folder-open',
-         'models':(
-                    'messagetemplate', 'emailtemplate',)},)
-}
 
 
 # CACHES = {
@@ -237,3 +160,6 @@ SUIT_CONFIG = {
 #         'LOCATION': 'gladminds-memcache.t2nfas.cfg.use1.cache.amazonaws.com:11211'
 #     }
 # }
+
+COUPON_URL = 'bajaj.gladminds.co'
+API_FLAG = True 

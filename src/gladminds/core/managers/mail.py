@@ -9,14 +9,13 @@ from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 from gladminds.core.managers import audit_manager
 from gladminds.core.auth_helper import GmApps
-from gladminds.core.loaders.module_loader import get_model
-from gladminds.bajaj.models import EmailLog
+from gladminds.core.model_fetcher import get_model
 
 logger = logging.getLogger("gladminds")
 
 
-def get_email_template(key):
-    template_object = get_model('EmailTemplate').objects.filter(template_key=key).values()
+def get_email_template(key, brand=None):
+    template_object = get_model('EmailTemplate').objects.using(brand).filter(template_key=key).values()
     return template_object[0]
 
 def get_mail_receiver(template_name, mail_detail):
@@ -33,7 +32,7 @@ def send_email_with_file_attachment(sender, receiver, subject, body, filename, c
         message = EmailMessage(subject, body, sender, receiver)
         message.attach(filename + yesterday.strftime("%b %d %Y") +'.csv', content.getvalue(), 'text/csv')
         message.send()
-        audit_manager.email_log(settings.BRAND, subject, " ", sender, receiver);
+        audit_manager.email_log(brand, subject, " ", sender, receiver);
         return True
     except Exception as ex:
         logger.error('Exception while sending mail {0}'.format(ex))
@@ -53,7 +52,7 @@ def send_email(sender, receiver, subject, body, message=None,smtp_server=setting
         mail = smtplib.SMTP(smtp_server)
         mail.sendmail(from_addr=sender, to_addrs=receiver, msg=msg.as_string())
         mail.quit()
-        audit_manager.email_log(settings.BRAND, subject, message, sender, receiver);
+        audit_manager.email_log(brand, subject, message, sender, receiver);
         return True
     except Exception as ex:
         logger.error('Exception while sending mail: {0}'.format(ex))
@@ -72,6 +71,19 @@ def send_email_activation(receiver_email, data=None, brand=None):
                subject=mail_detail['subject'], body=body,
                smtp_server=settings.MAIL_SERVER, title='Support',
                brand=brand)
+    
+def send_reset_link_email(email,data=None,brand=None):
+    file_stream = open(settings.EMAIL_DIR+'/reset_link.html')
+    feed_temp = file_stream.read()
+    template = Template(feed_temp)
+    context = Context(data)
+    body = template.render(context)
+    mail_detail = settings.RESET_LINK
+    send_email(sender=mail_detail['sender'],
+               receiver=email,
+               subject=mail_detail['subject'], body=body,
+               smtp_server=settings.MAIL_SERVER, title='Reset_Password',
+               brand=brand)
 
 
 def send_recycle_mail(sender_id, data=None):
@@ -88,7 +100,7 @@ def send_recycle_mail(sender_id, data=None):
                brand=GmApps.AFTERBUY)
 
 
-def feed_report(feed_data=None):
+def feed_report(feed_data=None, brand=None):
     try:
         yesterday = datetime.now().date() - timedelta(days=1)
         file_stream = open(settings.EMAIL_DIR+'/feed_report.html')
@@ -106,10 +118,10 @@ def feed_report(feed_data=None):
         logger.info("[Exception feed_report]: {0}".format(ex))
 
 
-def customer_phone_number_update(customer_details=None):
+def customer_phone_number_update(customer_details=None, brand=None):
     try:
         yesterday = datetime.now().date() - timedelta(days=1)
-        mail_detail = get_email_template('CUSTOMER_PHONE_NUMBER_UPDATE')
+        mail_detail = get_email_template('CUSTOMER_PHONE_NUMBER_UPDATE', brand)
         receivers = get_mail_receiver(settings.CUSTOMER_PHONE_NUMBER_UPDATE, mail_detail)
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
@@ -128,10 +140,10 @@ def customer_phone_number_update(customer_details=None):
         logger.info("[Exception customer phone number update]: {0}".format(ex))
 
 
-def discrepant_coupon_update(discrepant_coupons=None):
+def discrepant_coupon_update(discrepant_coupons, brand=None):
     try:
         yesterday = datetime.now().date() - timedelta(days=1)
-        mail_detail = get_email_template('POLICY_DISCREPANCY_MAIL_TO_MANAGER')
+        mail_detail = get_email_template('POLICY_DISCREPANCY_MAIL_TO_MANAGER', brand)
         receivers = get_mail_receiver(settings.POLICY_DISCREPANCY_MAIL_TO_MANAGER, mail_detail)
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
@@ -142,16 +154,16 @@ def discrepant_coupon_update(discrepant_coupons=None):
                                 coupon['valid_days'], coupon['valid_kms']])
                     
         send_email_with_file_attachment(mail_detail['sender'], receivers, mail_detail['subject'],
-                                          mail_detail['body'].format(date=yesterday.strftime("%b %d %Y")), 'customer_phone_number_update_',
+                                          mail_detail['body'].format(date=yesterday.strftime("%b %d %Y")), 'discrepant_coupon_update_',
                                           csvfile)
         logger.info("Sending out discrepant coupon update emails")
     except Exception as ex:
         logger.info("[Exception discrepant coupon update ]: {0}".format(ex))
 
-def send_vin_sync_feed_report(feed_data=None):
+def send_vin_sync_feed_report(feed_data=None, brand=None):
     try:
         yesterday = datetime.now().date() - timedelta(days=1)
-        mail_detail = get_email_template('VIN_SYNC_FEED')
+        mail_detail = get_email_template('VIN_SYNC_FEED', brand)
         receivers = get_mail_receiver(settings.VIN_SYNC_FEED, mail_detail)
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
@@ -166,9 +178,9 @@ def send_vin_sync_feed_report(feed_data=None):
         logger.info("[Exception feed_fail_report]: {0}".format(ex))
 
 
-def feed_failure(feed_data=None):
+def feed_failure(feed_data=None, brand=None):
     try:
-        mail_detail = get_email_template('FEED_FAILURE')
+        mail_detail = get_email_template('FEED_FAILURE', brand)
         receivers = get_mail_receiver(settings.FEED_FAILURE, mail_detail)
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
@@ -179,7 +191,7 @@ def feed_failure(feed_data=None):
             csvwriter.writerow([feed['created_date'], feed['feed_type'], feed['reason']])
             feed_type = feed['feed_type']
         try:
-            feed_log_time = EmailLog.objects.filter(subject='Gladminds Failure Report - '+feed_type).order_by('-id')[0]
+            feed_log_time = get_model('EmailLog').objects.filter(subject='Gladminds Failure Report - '+feed_type).order_by('-id')[0]
             feed_log_time = feed_log_time.created_date.strftime("%b %d %Y") 
         except:
             feed_log_time = datetime.now().strftime("%b %d %Y")
@@ -442,6 +454,19 @@ def send_email_to_redeem_escaltion_group(data, redeem_escaltion_email):
     except Exception as ex:
         logger.info("[Exception fail to send mail to redemption escalation group]  {0}".format(ex))        
 
+def send_email_to_asc_customer_support(data, asc_email_id):
+    try:
+        file_stream = open(settings.EMAIL_DIR+'/customer_support.html')
+        feed_temp = file_stream.read()
+        template = Template(feed_temp)
+        context = Context({"content": data['content']})
+        body = template.render(context)
+        send_email(sender = data['sender'], receiver = asc_email_id, 
+                   subject = data['subject'], body = body, message=data['content'],
+                   smtp_server = settings.MAIL_SERVER)
+    except Exception as ex:
+        logger.info("[Exception fail to send mail to ASCs on Customer Support]  {0}".format(ex))
+    
 def send_email_to_welcomekit_escaltion_group(data, welcomekit_escaltion_email):
     try:
         context = Context({"content": data['content']})
@@ -495,19 +520,19 @@ def send_asc_registration_mail(data=None):
     except Exception as ex:
         logger.info("[Exception asc registration email]: {0}".format(ex))
 
-def send_recovery_email_to_admin(file_obj, coupon_data):
+def send_recovery_email_to_admin(file_obj, coupon_data, brand=None):
     file_location = file_obj.file_location
     reason = file_obj.reason
     customer_id = file_obj.customer_id
     requester = str(file_obj.user.user.username)
-    data = get_email_template('UCN_REQUEST_ALERT')['body'].format(requester,coupon_data.service_type,
+    data = get_email_template('UCN_REQUEST_ALERT', brand)['body'].format(requester,coupon_data.service_type,
                 customer_id, coupon_data.actual_kms, reason, file_location)
     send_ucn_request_alert(data=data)
 
-def send_phone_number_update_count_exceeded(update_details=None):
+def send_phone_number_update_count_exceeded(update_details=None, brand=None):
     try:
         yesterday = datetime.now().date() - timedelta(days=1)
-        mail_detail = get_email_template('PHONE_NUMBER_UPDATE_COUNT_EXCEEDED')
+        mail_detail = get_email_template('PHONE_NUMBER_UPDATE_COUNT_EXCEEDED', brand)
         receivers = get_mail_receiver(settings.PHONE_NUMBER_UPDATE_COUNT_EXCEEDED_MAIL_TO_ASM, mail_detail)
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)

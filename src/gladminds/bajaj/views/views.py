@@ -3,7 +3,11 @@ import json
 import random
 import datetime
 import operator
+import re
+import requests
 
+from gladminds.core.utils import check_password
+from tastypie.http import HttpBadRequest
 from collections import OrderedDict
 from django.shortcuts import render_to_response, render
 from django.http.response import HttpResponseRedirect, HttpResponse,\
@@ -38,6 +42,7 @@ from gladminds.core.services.message_template import get_template
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services.coupons import export_feed
 from gladminds.core.auth import otp_handler
+from django.core.serializers.json import DjangoJSONEncoder
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
@@ -84,10 +89,9 @@ def user_logout(request):
         return HttpResponseBadRequest()
     return HttpResponseBadRequest('Not Allowed')
 
-
 @check_service_active(Services.FREE_SERVICE_COUPON)
 @login_required()
-def change_password(request): 
+def change_password(request):
     if request.method == 'GET':
         return render(request, 'portal/change_password.html')
     if request.method == 'POST':
@@ -98,9 +102,13 @@ def change_password(request):
             new_password = request.POST.get('newPassword')
             check_pass = user.check_password(str(old_password))
             if check_pass:
-                user.set_password(str(new_password))
-                user.save()
-                data = {'message': 'Password Changed successfully', 'status': True}
+                invalid_password = check_password(new_password)
+                if (invalid_password):
+                    data = {'message':"password does not match the rules",'status':False}
+                else:    
+                    user.set_password(str(new_password))
+                    user.save()
+                    data = {'message': 'Password Changed successfully', 'status': True}
             else:
                 data = {'message': 'Old password wrong', 'status': False}
             return HttpResponse(json.dumps(data), content_type='application/json')
@@ -404,12 +412,12 @@ def get_customer_info_old(data):
         product_obj = models.ProductData.objects.get(product_id=data['vin'])
     except Exception as ex:
         logger.info(ex)
-        message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
+        message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-7847011011.'''.format(data['vin'])
         if data['groups'][0] == Roles.DEALERS:
             data['groups'][0] = "Dealer"
         else:
             data['groups'][0] = "ASC"
-        template = get_email_template('VIN DOES NOT EXIST')['body'].format(data['current_user'], data['vin'], data['groups'][0])
+        template = get_email_template('VIN DOES NOT EXIST', settings.BRAND)['body'].format(data['current_user'], data['vin'], data['groups'][0])
         send_mail_when_vin_does_not_exist(data=template)
         return {'message': message, 'status': 'fail'}
     if product_obj.purchase_date:
@@ -547,8 +555,6 @@ def trigger_sqs_tasks(request):
 
 
 def site_info(request):
-    if settings.ENV in ['qa']:
-        send_mail_for_feed_failure()
     if request.method != 'GET':
         raise Http404
     brand = settings.BRAND
@@ -732,35 +738,58 @@ def get_active_asc_info(data, limit, offset, data_dict, data_list):
 def get_active_asc_report(request, role=None):
     '''get city and state from parameter'''
     data = request.GET.copy()
-    if data.has_key('month') and data.has_key('month') :
+    if data.has_key('month'):
         month = MONTHS.index(data['month']) + 1
         year = data['year']
     else:
         now = datetime.datetime.now()
         year = now.year
         month = now.month
-    data_list = []
-    asc_details = utils.get_asc_data(data, role)
-    active_asc_list = asc_details.filter(~Q(date_joined=F('last_login')))
-    active_ascs = active_asc_list.values_list('username', flat=True)
-    active_user_profile = models.UserProfile.objects.filter(user__username__in=active_ascs)
-    for asc_data in active_user_profile:
-        active_ascs = OrderedDict();
-        active_ascs['id'] = asc_data.user.username
-        active_ascs['name'] = asc_data.user.first_name
-        active_ascs['address'] = asc_data.address
-        active_ascs = utils.get_state_city(active_ascs, asc_data.address)
-        active_ascs['coupon_closed'] = utils.asc_cuopon_details(asc_data, 2, year, month,role)
-        active_ascs['total_coupon_closed'] = utils.total_coupon_closed(active_ascs['coupon_closed'])
-        data_list.append(active_ascs)
+    port = request.META['SERVER_PORT']
+    access_token = request.META['QUERY_STRING'] 
     no_of_days = utils.get_number_of_days(year, month)
+    if request.method != 'GET':
+        return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+    try:
+        query = '/v1/coupons/closed-ticket-count?'+ access_token
+        query = query + '&year='+ str(year) + '&month=' + str(month)
+        if not settings.API_FLAG:
+            asc_query_list = requests.get('http://'+settings.COUPON_URL+':'+port+query)
+        else:
+            asc_query_list = requests.get('http://'+settings.COUPON_URL+query)
+        
+        asc_list = []
+        x=json.loads(asc_query_list.content)
+        for asc in x:
+            
+            active = filter(lambda active: active['id']==asc['asc_id'], asc_list)
+            if not active:
+                temp= {}
+                temp['id'] = asc['asc_id'] 
+                temp['name'] = asc['first_name']
+                temp['address'] = asc['address']
+                temp['coupon_closed'] = {}
+                for day in range(1, no_of_days):
+                    temp['coupon_closed'][day] = 0
+                day = int(asc['day'])
+                temp['total_coupon_closed'] = 0 
+                temp['coupon_closed'][day]= asc['cnt']
+                temp['total_coupon_closed'] = temp['total_coupon_closed'] + asc['cnt']
+                asc_list.append(temp)
+            else:
+                day = int(asc['day'])
+                active[0]['coupon_closed'][day]= asc['cnt']
+                active[0]['total_coupon_closed'] = active[0]['total_coupon_closed'] + asc['cnt']
+    except Exception as ex:
+        logger.error('Exception while counting data : {0}'.format(ex))
+        return HttpResponseBadRequest()
     years = utils.gernate_years()
     return render(request, 'portal/asc_report.html',\
-                  {"data": data_list,
+                  {"data": asc_list,
                    "range": range(1, no_of_days),
                    "month": MONTHS,
                    "years": years,
-                   "mon": MONTHS[month-1],
+                   "mon": MONTHS[int(month)-1],
                    "cyear": str(year),
                    "role": role
                    })

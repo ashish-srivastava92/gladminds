@@ -12,45 +12,8 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds123')
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gm',
-        'USER': 'gladminds',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-    },
-    'bajaj': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bajaj',
-        'USER': 'gladminds',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-    },
-    'demo': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'demo',
-        'USER': 'gladminds',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-    },
-    'afterbuy': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'afterbuy',
-        'USER': 'gladminds',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-    }
-}
-
-
-COUPON_URL = 'bajaj.gladmindsplatform.co'
+COUPON_URL = 'staging.bajaj.gladminds.co'
+API_FLAG = True 
 BROKER_URL = 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
 
@@ -104,3 +67,4 @@ VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["priyanka.n@hashedin.com","somit@hashed
 ENV = "dev"
 
 WSDL_TNS="http://dev.bajaj.gladminds.co/api/v1/feed/"
+CORE_WSDL_TNS="http://dev.bajajcv.gladminds.co/api/v1/feed/"

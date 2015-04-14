@@ -112,7 +112,7 @@
     "pk": 13,
     "fields": {
       "template_key":"SEND_INVALID_MESSAGE",
-      "template":"Invalid message For any assistance please contact our customer care at ++91-9741775128",
+      "template":"Invalid message For any assistance please contact our customer care at ++91-7847011011",
       "description":"Send SMS when received message is invalid"
     }
   },
@@ -369,7 +369,7 @@
     "pk": 41,
     "fields": {
       "template_key":"SEND_INVALID_UPC",
-      "template":"Invalid Entry... UPC does not exist in our records. Please contact our Customer Care at: +91-9741775128",
+      "template":"Invalid Entry... UPC does not exist in our records. Please contact our Customer Care at: +91-7847011011",
       "description":"Send this message when single UPC does not exists in our records"
     }
   },
@@ -405,7 +405,7 @@
     "pk": 45,
     "fields": {
       "template_key":"UNREGISTERED_USER",
-      "template":"You have not registered for the loyalty program. Please contact our Customer Care +91-9741775128",
+      "template":"You have not registered for the loyalty program. Please contact our Customer Care +91-7847011011",
       "description":"Send this message when mechanic is unregistered"
     }
   },
@@ -450,7 +450,7 @@
     "pk": 50,
     "fields": {
       "template_key":"INCOMPLETE_FORM",
-      "template":"Incomplete form status. Please contact our customer care +91-9741775128 to complete the form.",
+      "template":"Incomplete form status. Please contact our customer care +91-7847011011 to complete the form.",
       "description":"Send this message when mechanic has incomplete form"
     }
   },
@@ -459,7 +459,7 @@
     "pk": 51,
     "fields": {
       "template_key": "FAILED_UPDATE_PHONE_NUMBER",
-      "template": "Mobile number {phone_number} already exists. Please contact Customer support at +91-9741775128",
+      "template": "Mobile number {phone_number} already exists. Please contact Customer support at +91-7847011011",
       "description": "Send this message when customer phone number cannot be updated"
     }
   } ,
@@ -486,7 +486,7 @@
     "pk": 54,
     "fields": {
       "template_key": "SEND_BALANCE_POINT",
-      "template": "Dear {mechanic_name}, Total Points as of {today} is {total_points}. Please contact Customer Care +91-9741775128 for any queries.",
+      "template": "Dear {mechanic_name}, Total Points as of {today} is {total_points}. Please contact Customer Care +91-7847011011 for any queries.",
       "description": "Send this message when user checks his balance points"
      }
   },
@@ -495,7 +495,7 @@
     "pk": 55,
     "fields": {
       "template_key": "CUSTOMER_MOBILE_NUMBER_UPDATE",
-      "template": "Dear {customer_name}, your registered mobile number with Bajaj Auto has been changed to {new_number}. If you notice any discrepancy please contact +91-9741775128",
+      "template": "Dear {customer_name}, your registered mobile number with Bajaj Auto has been changed to {new_number}. If you notice any discrepancy please contact +91-7847011011",
       "description": "Send this message when customer phone number cannot be updated"
     }
   },
@@ -513,7 +513,7 @@
     "pk": 57,
     "fields": {
       "template_key":"INVALID_PRODUCT_ID",
-      "template":"Invalid Entry... Product ID does not exist in our records. Please contact our Customer Care at: +91-9741775128",
+      "template":"Invalid Entry... Product ID does not exist in our records. Please contact our Customer Care at: +91-7847011011",
       "description":"Send this message when redemption product-ID does not exists in our records"
     }
   },
@@ -558,7 +558,7 @@
     "pk": 62,
     "fields": {
       "template_key": "PHONE_NUMBER_UPDATE_COUNT_EXCEEDED",
-      "template": "Mobile number update not allowed. Please contact customer support: +91-9741775128.",
+      "template": "Mobile number update not allowed. Please contact customer support: +91-7847011011.",
       "description": "Send this message when customer phone number cannot be updated"
     }
   },
@@ -569,6 +569,15 @@
       "template_key":"DEALER_UNAUTHORISED",
       "template":  "FSC cannot be closed with this option. Please use CDMS system to close FSC",
       "description": "Send message when dealer not authorized to close coupon"
+    }
+   },
+   {
+    "model": "gladminds.messagetemplate",
+    "pk": 64,
+    "fields": {
+      "template_key":"CUSTOMER_SUPPORT_FOR_DFSC",
+      "template":  "",
+      "description": "Send message for change in customer support"
     }
   }
 ]

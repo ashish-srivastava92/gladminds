@@ -4,7 +4,7 @@ from suds.transport.http import HttpAuthenticated
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User, Group
-from gladminds.bajaj import models
+from gladminds.core.model_fetcher import get_model
 from gladminds.core.auth_helper import Roles
 logger = logging.getLogger("gladminds")
 
@@ -53,11 +53,15 @@ class BaseFeed(object):
             user_group.save()
         if username:
             try:
-                user_details = models.UserProfile.objects.select_related('user').get(user__username=username)
+                user_details = get_model('UserProfile', settings.BRAND).objects.select_related('user').get(user__username=username)
             except ObjectDoesNotExist as ex:
                 logger.info(
                     "[Exception: new_ registration]: {0}"
-                    .format(ex))    
+                    .format(ex))
+                if len(first_name)>30:
+                    full_name = first_name.split(' ')
+                    first_name = ' '.join(full_name[0:3])
+                    last_name = ' '.join(full_name[3:])
                 new_user = User(
                     username=username, first_name=first_name, last_name=last_name, email=email)
                 if group =='customer':
@@ -65,11 +69,11 @@ class BaseFeed(object):
                 else:
                     password = username + settings.PASSWORD_POSTFIX
                 new_user.set_password(password)
-                new_user.save()
+                new_user.save(using=settings.BRAND)
                 new_user.groups.add(user_group)
-                new_user.save()
+                new_user.save(using=settings.BRAND)
                 logger.info(group + ' {0} registered successfully'.format(username))
-                user_details = models.UserProfile(user=new_user,
+                user_details = get_model('UserProfile', settings.BRAND)(user=new_user,
                                         phone_number=phone_number, address=address,
                                         state=state, pincode=pincode)
                 user_details.save()
@@ -80,7 +84,7 @@ class BaseFeed(object):
 
     def check_or_create_dealer(self, dealer_id, address=None, cdms_flag=0):
         try:
-            dealer_data = models.Dealer.objects.select_related('user__user').get(
+            dealer_data = get_model('Dealer', settings.BRAND).objects.select_related('user__user').get(
                 dealer_id=dealer_id)
             dealer_data.use_cdms = cdms_flag
             dealer_data.save()
@@ -89,8 +93,23 @@ class BaseFeed(object):
                 "[Exception: new_dealer_data]: {0}"
                 .format(odne))
             user = self.register_user(Roles.DEALERS, username=dealer_id)
-            dealer_data = models.Dealer(user=user,
+            dealer_data = get_model('Dealer', settings.BRAND)(user=user,
                 dealer_id=dealer_id, use_cdms=cdms_flag)
             dealer_data.save()            
         return dealer_data
+    
+    def check_or_create_transporter(self, transporter_id, name):
+        try:
+            transporter_data = get_model('Transporter', settings.BRAND).objects.select_related('user__user').get(
+                transporter_id=transporter_id)
+        except ObjectDoesNotExist as odne:
+            logger.debug(
+                "[Exception: new_dealer_data]: {0}"
+                .format(odne))
+            user = self.register_user(Roles.TRANSPORTER, username=transporter_id,
+                                      first_name=name)
+            transporter_data = get_model('Transporter', settings.BRAND)(user=user,
+                transporter_id=transporter_id)
+            transporter_data.save()            
+        return transporter_data
 

@@ -1,7 +1,8 @@
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import get_model
 import datetime
 from django.conf import settings
 from gladminds.core.auth_helper import GmApps
+# from gladminds.core.stats import LOGGER
 import logging
 logger = logging.getLogger("gladminds")
 
@@ -13,7 +14,14 @@ def sms_log(brand, action='SENT', sender='+1 469-513-9856', receiver=None,
     sms_log = sm_model(action=action, sender=sender,
                                receiver=receiver, status=status,
                                message=message)
-    sms_log.save()
+    sms_log.save(using=brand)
+#     if settings.ENV not in ['prod']:
+#         try:
+#             LOGGER.post_event("sms_sent", {'receiver':receiver,
+#                                           'message':message,
+#                                           'brand':brand})
+#         except Exception as ex:
+#             logger.error("[sms_log]:: {0}".format(ex))
 
 
 def feed_log(brand, feed_type=None, total_data_count=None, failed_data_count=None,
@@ -26,7 +34,7 @@ def feed_log(brand, feed_type=None, total_data_count=None, failed_data_count=Non
                                      success_data_count=success_data_count,
                                      status=status, action=action,
                                      remarks=remarks, file_location=file_location)
-    data_feed_log.save()
+    data_feed_log.save(using=brand)
 
 def email_log(brand, subject, message, sender, receiver):
     email_model = get_model('EmailLog', brand=brand)
@@ -37,5 +45,5 @@ def feed_failure_log(brand, feed_type=None, reason=None):
     feed_failure_log_model = get_model('FeedFailureLog', brand=brand)
     feed_failure_log = feed_failure_log_model(feed_type=feed_type,
                                      reason=reason, created_date=datetime.datetime.now())
-    feed_failure_log.save()
+    feed_failure_log.save(using=brand)
     

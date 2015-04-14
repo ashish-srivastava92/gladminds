@@ -109,7 +109,6 @@
                       $('.modal-header .close').css("display", "none");
                       setTimeout(function(){
                       	messageModal.modal('hide');
-                      	waitingModal.modal('show');
                       }, 3000);
                 	  vinSyncFeed(data);
                   }
@@ -117,7 +116,7 @@
             		
             },
             error: function() {
-            	messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
+            	messageBlock.text('Some error occurred. Please contact customer support: +91-7847011011');
                 messageModal.modal('show');
             }
         });
@@ -135,16 +134,17 @@ function vinSyncFeed(data){
         success: function(data){
         if (data['message']) {
             $('.modal-header .close').css("display", "none");
-            waitingModal.modal('hide');
+        	waitingModal.modal('show');
             messageBlock.text(data.message);
             messageModal.modal('show');
             setTimeout(function(){
             	messageModal.modal('hide');
+            	waitingModal.modal('hide');
             }, 5000);
             }
         },
         error: function() {
-            messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
+            messageBlock.text('Some error occurred. Please contact customer support: +91-7847011011');
             messageModal.modal('show');
         }
     });
@@ -182,7 +182,7 @@ function vinSyncFeed(data){
             	}
             },
             error: function() {
-            	messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
+            	messageBlock.text('Some error occurred. Please contact customer support: +91-7847011011');
                 messageModal.modal('show');
             }
           });
@@ -213,7 +213,7 @@ function vinSyncFeed(data){
                 error: function(data) {
                     var messageModal = $('.modal.message-modal'),
                         messageBlock = $('.modal-body', messageModal);
-                    messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
+                    messageBlock.text('Some error occurred. Please contact customer support: +91-7847011011');
                     messageModal.modal('show');
                 }
             });
@@ -252,7 +252,7 @@ function vinSyncFeed(data){
                 }
             },
             error: function() {
-                    messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
+                    messageBlock.text('Some error occurred. Please contact customer support: +91-7847011011');
                     messageModal.modal('show');
                 }
         });
@@ -297,7 +297,7 @@ function vinSyncFeed(data){
             waitingModal = $('.modal.waiting-dialog'),
       jqXHR = $.ajax({
             type: 'POST',
-            url: '/aftersell/servicedesk/helpdesk',
+            url: '/v1/feedbacks/add-ticket/',
             data: formData,
             cache: false,
             processData: false,
@@ -338,7 +338,7 @@ function vinSyncFeed(data){
             waitingModal = $('.modal.waiting-dialog'),
       jqXHR = $.ajax({
             type: 'POST',
-            url: '/aftersell/servicedesk/save-feedback/',
+            url: '/v1/feedbacks/add-ticket/',
             data: formData,
             cache: false,
             processData: false,
@@ -542,7 +542,7 @@ function vinSyncFeed(data){
                 }
             },
             error: function() {
-                    messageBlock.text('Some error occurred. Please contact customer support: +91-9741775128');
+                    messageBlock.text('Some error occurred. Please contact customer support: +91-7847011011');
                     messageModal.modal('show');
                 }
         });

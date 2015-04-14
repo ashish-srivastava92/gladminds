@@ -4,7 +4,7 @@ from spyne.decorator import srpc
 from spyne.model.complex import Array
 from spyne.model.complex import ComplexModel
 from spyne.model.complex import Iterable
-from spyne.model.primitive import Integer, Decimal, Date
+from spyne.model.primitive import Integer, Decimal, Date, Time
 from spyne.model.primitive import Unicode, Mandatory, Boolean
 from spyne.protocol.soap import Soap11
 from spyne.server.django import DjangoApplication
@@ -26,6 +26,8 @@ logger = logging.getLogger("gladminds")
 
 
 pattern = r'(\d{4})-(\d{2})-(\d{2})(\d{2})(\d{2})(\d{2})'
+date_pattern = r'(\d{4})-(\d{2})-(\d{2})'
+time_pattern = r'(\d{2}):(\d{2}):(\d{2})'
 tns = settings.WSDL_TNS
 SUCCESS = "SUCCESS"
 FAILED = "FAILURE"
@@ -171,7 +173,8 @@ class ProductDispatchModel(ComplexModel):
     SERVICE_TYPE = Unicode
     #UCN_Status = Unicode
     TIMESTAMP = Unicode(pattern=pattern)
-
+#     SKU_CODE = Unicode
+#     ENGINE = Unicode
 
 class ProductDispatchModelList(ComplexModel):
     __namespace__ = tns
@@ -284,7 +287,7 @@ class BillOfMaterialList(ComplexModel):
 class EcoReleaseModel(ComplexModel):
     __namespace__ = tns
     ECO_NUMBER  = Unicode
-    ECO_REL_DATE = Date(default=None)
+    ECO_REL_DATE = Unicode(default=None)
     ECO_DESCRIP = Unicode
     ACTION = Unicode
     PARENT_PART = Unicode
@@ -304,6 +307,106 @@ class EcoReleaseModel(ComplexModel):
 class EcoReleaseModelList(ComplexModel):
     __namespace__ = tns
     ECOReleaseData = Array(EcoReleaseModel)
+    
+
+class ContainerTrackerModel(ComplexModel):
+    __namespace__ = tns
+
+    ZIB_INDENT_NUM = Unicode
+    CONSIGNMENT_ID = Unicode
+    TRUCK_NO = Unicode
+    TRANSPORTER_ID = Unicode
+    LR_NUMBER = Unicode
+    LR_DATE = Unicode(default=None)
+    DO_NUM = Unicode
+    GATEIN_TIME = Time(default=None)
+    GATEIN_DATE = Unicode(default=None)
+    TRANS_NAME = Unicode
+    
+class ContainerTrackerModelList(ComplexModel):
+    __namespace__ = tns
+    ContainerTrackerData = Array(ContainerTrackerModel)
+
+class EcoImplementationModel(ComplexModel):
+    __namespace__ = tns
+    
+    CHANGE_NO = Unicode
+    CHANGE_DATE = Unicode(default=None)
+    CHANGE_TIME = Time(default=None)
+    PLANT = Unicode
+    ACTION = Unicode
+    PARENT_PART = Unicode
+    ADDED_PART = Unicode
+    ADDED_PART_QTY = Decimal
+    DELETED_PART = Unicode
+    DELETED_PART_QTY = Decimal
+    CHASSIS_NUMBER = Unicode
+    ENGINE_NUMBER = Unicode
+    ECO_NUMBER = Unicode
+    REASON_CODE = Unicode
+    REMARKS = Unicode    
+
+class EcoImplementationList(ComplexModel):
+    __namespace__ = tns
+    EcoImplementationData = Array(EcoImplementationModel)
+    
+class ECOImplementationService(ServiceBase):
+    __namespace__ = tns
+
+    @srpc(EcoImplementationList, AuthenticationModel,  _returns=Unicode)
+    def postECOImplementation(ObjectList, Credential):
+        eco_list = []
+        feed_remark = FeedLogWithRemark(len(ObjectList.EcoImplementationData), feed_type='ECO Implementation Feed', action='Received', status=True)
+
+        for eco_obj in ObjectList.EcoImplementationData:
+            eco_list.append({
+                            'change_no' :  eco_obj.CHANGE_NO,
+                            'change_date' :  eco_obj.CHANGE_DATE,
+                            'change_time' :  eco_obj.CHANGE_TIME,
+                            'plant' :  eco_obj.PLANT,
+                            'action' :  eco_obj.ACTION,
+                            'parent_part' :  eco_obj.PARENT_PART,
+                            'added_part' :  eco_obj.ADDED_PART,
+                            'added_part_qty' :  eco_obj.ADDED_PART_QTY,
+                            'deleted_part' :  eco_obj.DELETED_PART,
+                            'deleted_part_qty' :  eco_obj.DELETED_PART_QTY,
+                            'chassis_number' :  eco_obj.CHASSIS_NUMBER,
+                            'engine_number' :  eco_obj.ENGINE_NUMBER,
+                            'eco_number' :  eco_obj.ECO_NUMBER,
+                            'reason_code' :  eco_obj.REASON_CODE,
+                            'remarks' :  eco_obj.REMARKS,
+                            })
+
+        feed_remark = save_to_db(feed_type='eco_implementation', data_source=eco_list, feed_remark=feed_remark)
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
+    
+class ContainerTrackerService(ServiceBase):
+    __namespace__ = tns
+    @srpc(ContainerTrackerModelList, AuthenticationModel,  _returns=Unicode)
+    def postContainerTracker(ObjectList, Credential):
+        tracker_list = []
+        feed_remark = FeedLogWithRemark(len(ObjectList.ContainerTrackerData),
+                                        feed_type='ContainerTracker Feed',
+                                        action='Received', status=True)
+
+        for tracker_obj in ObjectList.ContainerTrackerData:
+            tracker_list.append({
+                                'zib_indent_num' :  tracker_obj.ZIB_INDENT_NUM ,
+                                'consignment_id' :  tracker_obj.CONSIGNMENT_ID ,
+                                'truck_no' :  tracker_obj.TRUCK_NO,
+                                'transporter_id' : tracker_obj.TRANSPORTER_ID,
+                                'lr_number' :  tracker_obj.LR_NUMBER,
+                                'lr_date' :  tracker_obj.LR_DATE,
+                                'do_num' :  tracker_obj.DO_NUM,
+                                'gatein_date' :  tracker_obj.GATEIN_DATE,
+                                'gatein_time' :  tracker_obj.GATEIN_TIME,
+                                'tranporter_name' : tracker_obj.TRANS_NAME,
+                            })
+
+        feed_remark = save_to_db(feed_type='container_tracker', data_source=tracker_list, feed_remark=feed_remark)
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
 
 class ECOReleaseService(ServiceBase):
     __namespace__ = tns
@@ -334,7 +437,7 @@ class ECOReleaseService(ServiceBase):
                             'reason_for_change' :  eco_obj.REASON_FOR_CHANGE,
                             })
 
-        feed_remark = save_to_db(feed_type='ECO_RELEASE', data_source=eco_list, feed_remark=feed_remark)
+        feed_remark = save_to_db(feed_type='eco_release', data_source=eco_list, feed_remark=feed_remark)
         feed_remark.save_to_feed_log()
         return get_response(feed_remark)
 
@@ -384,12 +487,12 @@ class BillOfMaterialService(ServiceBase):
                             })
 
         feed_remark_header = FeedLogWithRemark(header_count, feed_type='BOM Header Feed', action='Received', status=True)
-        feed_remark_header = save_to_db(feed_type='BOMHEADER', data_source=bom_header_list, feed_remark=feed_remark_header)
+        feed_remark_header = save_to_db(feed_type='bomheader', data_source=bom_header_list, feed_remark=feed_remark_header)
         feed_remark_header.save_to_feed_log()
         header_log = get_response(feed_remark_header)
         
         feed_remark_item = FeedLogWithRemark(item_count, feed_type='BOM Item Feed', action='Received', status=True)
-        feed_remark_item = save_to_db(feed_type='BOMITEM', data_source=bom_item_list, feed_remark=feed_remark_item)
+        feed_remark_item = save_to_db(feed_type='bomitem', data_source=bom_item_list, feed_remark=feed_remark_item)
         feed_remark_item.save_to_feed_log()
         item_log = get_response(feed_remark_item)
         
@@ -498,6 +601,8 @@ class ProductDispatchService(ServiceBase):
                     'valid_kms': product.KMS_TO,
                     'service_type': product.SERVICE_TYPE,
                     'coupon_status': settings.DEFAULT_COUPON_STATUS,
+#                     'sku_code':product.SKU_CODE
+#                     'engine':product.ENGINE,
                 })
             except Exception as ex:
                 ex = "ProductDispatchService: {0}  Error on Validating {1}".format(product, ex)

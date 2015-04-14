@@ -1,6 +1,9 @@
 from uuid import uuid4
 import json
 import logging
+import requests
+import re
+from gladminds.core.utils import check_password
 from django.http.response import HttpResponse
 from django.conf.urls import url
 from tastypie.http import HttpBadRequest
@@ -9,7 +12,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import  login
 from django.conf import settings
 from gladminds.afterbuy import utils as afterbuy_utils
-from gladminds.afterbuy import otp_handler
+from gladminds.core.auth import otp_handler
+
 from gladminds.afterbuy import models as afterbuy_model
 from tastypie import fields, http
 from gladminds.core.apis.base_apis import CustomBaseModelResource
@@ -29,6 +33,8 @@ from gladminds.afterbuy.apis.validations import ConsumerValidation,\
     UserValidation
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.model_helpers import format_phone_number
+from gladminds.core.auth import otp_handler
+from gladminds.core import constants
 
 logger = logging.getLogger("gladminds")
 
@@ -42,8 +48,7 @@ class DjangoUserResources(ModelResource):
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         excludes = ['password', 'is_superuser']
         always_return_data = True
-
-
+        
 class ConsumerResource(CustomBaseModelResource):
 
     user = fields.ForeignKey(DjangoUserResources, 'user', null=True, blank=True, full=True)
@@ -70,7 +75,8 @@ class ConsumerResource(CustomBaseModelResource):
             url(r"^(?P<resource_name>%s)/forgot-password/(?P<type>[a-zA-Z0-9.-]+)%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('change_user_password'), name="change_user_password"),
             url(r"^(?P<resource_name>%s)/login%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('auth_login'), name="auth_login"),
             url(r"^(?P<resource_name>%s)/validate-otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('validate_otp'), name="validate_otp"),
-            url(r"^(?P<resource_name>%s)/logout%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('logout'), name="logout")
+            url(r"^(?P<resource_name>%s)/logout%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('logout'), name="logout"),
+            url(r"^(?P<resource_name>%s)/product-details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_details'), name="get_product_details")
         ]
 
     def sent_otp_user_phone_number(self, request, **kwargs):
@@ -94,7 +100,7 @@ class ConsumerResource(CustomBaseModelResource):
             logger.error('Invalid details, mobile {0} and exception {1}'.format(request.POST.get('phone_number', ''),ex))
             data = {'status': 0, 'message': ex}
         return HttpResponse(json.dumps(data), content_type="application/json")
-
+            
     @atomic(using=GmApps.AFTERBUY)
     def user_registration(self, request, **kwargs):
         if request.method != 'POST':
@@ -103,20 +109,23 @@ class ConsumerResource(CustomBaseModelResource):
             load = json.loads(request.body)
         except:
             return HttpResponse(content_type="application/json", status=404)
-        otp_token = load['otp_token']
+#         otp_token = load['otp_token']
         phone_number = load['phone_number']
-        try:
-            if not (settings.ENV in settings.IGNORE_ENV and otp_token in settings.HARCODED_OTPS):
-                otp_handler.validate_otp(otp_token, phone_number=phone_number)
-        except Exception:
-            raise ImmediateHttpResponse(
-                response=http.HttpBadRequest('Wrong OTP!'))
+#         try:
+#             if not (settings.ENV in settings.IGNORE_ENV and otp_token in settings.HARCODED_OTPS):
+#                 otp_handler.validate_otp(otp_token, phone_number=phone_number)
+#         except Exception:
+#             raise ImmediateHttpResponse(
+#                 response=http.HttpBadRequest('Wrong OTP!'))
         phone_number = load.get('phone_number')
         email_id = load.get('email_id')
         user_name = load.get('username', str(uuid4())[:30])
         first_name = load.get('first_name')
         last_name = load.get('last_name','')
         password = load.get('password')
+        invalid_password = check_password(password)
+        if not invalid_password:
+            return HttpBadRequest("password is not meant according to the rules")
         if not phone_number or not password:
             return HttpBadRequest("phone_number, password required.")
         try:
@@ -230,6 +239,9 @@ class ConsumerResource(CustomBaseModelResource):
         otp_token = load.get('otp_token')
         password = load.get('password1')
         repassword = load.get('password2')
+        invalid_password = check_password(repassword)
+        if (invalid_password):
+            return HttpBadRequest("password is not meant according to the rules")
         auth_key = load.get('auth_key')
         user_details = {}
         if not type:
@@ -310,7 +322,43 @@ class ConsumerResource(CustomBaseModelResource):
                 logger.info("[Exception get_user_login_information]:{0}".
                             format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
+    
+    def get_product_details(self, request, **kwargs):
+        port = request.META['SERVER_PORT']
+        access_token = request.META['QUERY_STRING'] 
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
 
+        phone_number = load.get('phone_number', None)
+        product_id = load.get('product_id', None)
+        query = '/v1/coupons/?'+ access_token
+        
+        if product_id:
+            if product_id[:3].upper()!= constants.KTM_VIN:
+                return HttpResponse(json.dumps({'message':'Incorrect VIN'}), content_type='application/json')
+            query = query + '&product__product_id='+product_id
+        
+        if phone_number:
+            query = query + '&product__customer_phone_number__contains='+phone_number+'&product__product_id__startswith=VBK'
+        
+        try:
+            if not settings.API_FLAG:
+                result = requests.get('http://'+settings.COUPON_URL+':'+port+query)
+            else:
+                result = requests.get('http://'+settings.COUPON_URL+query)
+                logger.info("[Product details - KTM settings.evn]:{0}".format(settings.ENV))
+
+            if len(json.loads(result.content)['objects']) == 0:
+                    return HttpResponse(json.dumps({'message' : 'Invalid Details'}), content_type='application/json')
+            else:
+                return HttpResponse(json.dumps({'result': json.loads(result.content)}), content_type='application/json')
+        
+        except Exception as ex:
+            logger.info("[Exception while fetching product details]:{0}".format(ex))
 
 class UserNotificationResource(CustomBaseModelResource):
     consumer = fields.ForeignKey(ConsumerResource, 'consumer', null=True, blank=True, full=True)

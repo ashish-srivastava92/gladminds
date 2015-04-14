@@ -2,6 +2,7 @@
 # Django settings for gladminds project.
 import os
 import djcelery
+from copy import deepcopy
 djcelery.setup_loader()
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -24,13 +25,13 @@ ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
                     'check_point_balance':'chkbal'}
 
 ADMINS = (
-    ('somit', 'somit@hashedin.com'),
+    ('pavan', 'pavankumar.s@hashedin.com'),
     ('naureen', 'naureen.razi@hashedin.com'),
     ('priyanka', 'priyanka.n@hashedin.com')
 )
 API_FLAG = False
 COUPON_VALID_DAYS = 30
-COUPON_URL = 'local.bajaj.gladmindsplatform.co'
+COUPON_URL = 'local.bajaj.gladminds.co'
 TOTP_SECRET_KEY = '93424'
 OTP_VALIDITY = 120
 HARCODED_OTPS = ['000000']
@@ -107,8 +108,8 @@ SUIT_CONFIG = {
                      'label': 'Area Spares Manager'},
                     {'model': 'distributor',
                      'label': 'Distributor'},
-                   {'model': 'mechanic',
-                     'label': 'Mechanic'},
+                   {'model': 'member',
+                     'label': 'Member'},
                    {'model': 'sparepartmasterdata',
                      'label': 'Spare Part Master Data'},
                    {'model': 'sparepartupc',
@@ -127,6 +128,15 @@ SUIT_CONFIG = {
                      'label': 'Welcome Kit'},
                    {'model': 'loyaltysla',
                      'label': 'Loyalty Sla'},)},
+        {'app': 'bajaj', 'label': 'CTS', 'icon': ' icon-folder-open',
+         'models':(
+                    {'model': 'transporter',
+                     'label': 'Transporter'},
+                    {'model': 'supervisor',
+                     'label': 'Supervisor'},
+                   {'model': 'containertracker',
+                     'label': 'Container Tracker'},
+                   )},
         {'app': 'bajaj', 'label': 'User Registrations', 'icon': ' icon-folder-open',
          'models':(
                     {'model': 'asctempregistration',
@@ -144,49 +154,46 @@ SUIT_CONFIG = {
 MANAGERS = ADMINS
 
 DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
+DB_USER = os.environ.get('DB_USER', 'root')
+DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
+DB_PORT = os.environ.get('DB_PORT', '3306')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'admin')
+
+class GmApps():
+    AFTERBUY = 'afterbuy'
+    BAJAJ = 'bajaj'
+    BAJAJCV = 'bajajcv'
+    DEMO = 'demo'
+    GM = 'default'
+    DAIMLER = 'daimler'
 
 # Mapping is first app name then db name
 DATABASE_APPS_MAPPING = {
-                         'default': 'default',
-                         'bajaj':'bajaj',
-                         'demo': 'demo',
-                         'afterbuy':'afterbuy'
+                         GmApps.GM: 'default',
+                         GmApps.BAJAJ:'bajaj',
+                         GmApps.DEMO: 'demo',
+                         GmApps.AFTERBUY:'afterbuy',
+                         GmApps.BAJAJCV:'bajajcv',
+                         GmApps.DAIMLER:'daimler',
                     }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+db_common = {
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gm',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-    },
-    'bajaj': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'bajaj',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-    },
-    'demo': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'demo',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-    },
-    'afterbuy': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'afterbuy',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     }
-}
+DATABASES = {}
+
+for brand in dir(GmApps):
+    if not brand.startswith('__'):
+        if getattr(GmApps,brand) in ['default']:
+            db_common.update({'NAME': 'gm'})
+        else:
+            db_common.update({'NAME': getattr(GmApps,brand)})
+        DATABASES[getattr(GmApps,brand)] = deepcopy(db_common)
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -309,7 +316,7 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-TEST_IGNORE_APPS = (# 'south',
+TEST_IGNORE_APPS = ( 'south',
                     )
 
 ALL_APPS = (
@@ -336,14 +343,13 @@ ALL_APPS = (
     'storages',
     'tastypie_swagger',
     'django_otp',
-    'django_otp.plugins.otp_totp',
-    'constance.backends.database'
+    'django_otp.plugins.otp_totp'
    # 'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
 
-INSTALLED_APPS = ALL_APPS + TEST_IGNORE_APPS
+INSTALLED_APPS = ALL_APPS
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
@@ -527,6 +533,13 @@ RECYCLE_MAIL = {
                 
                 }
 
+RESET_LINK = {
+              "sender":"anchit082@gmail.com",
+              "subject":"Reset your password",
+              "receiver":["anchit.gupta@hashedin.com"],
+              "body": """""",
+              }
+
 # AfterBuy File Upload location configuration
 AFTERBUY_LOC = os.path.join(PROJECT_DIR, "afterbuy")
 AFTERBUY_USER_LOC = os.path.join(AFTERBUY_LOC, "users")
@@ -596,7 +609,7 @@ FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
 BRAND = None
 GM_BRAND = 'default'
-OUTSIDE_BRANDS = ['bajaj', 'demo']
+OUTSIDE_BRANDS = ['bajaj', 'demo','bajajcv','daimler']
 
 BRANDS = OUTSIDE_BRANDS + ['afterbuy']
 ###############################################
@@ -606,32 +619,44 @@ SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                               'pass':'bajaj',
                               'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',
                               'message_url': 'http://117.99.128.32:80/login/pushsms.php'},
-                  'KAP': {'login':'GladMinds1',
+                  'KAP_OLD': {
+                          'login':'GladMinds1',
                           'pass':'kap@user!23',
                           'message_url': 'http://alerts.kapsystem.com/api/web2sms.php',
                           'working_key': '2uj6gnnnlbx37x436cppq87176j660w9',
                           'sender_id': 'GLADMS',
                           'params': 'kap'},
+                  'KAP': {
+                          'login':'gladminds1',
+                          'pass':'kap@user!789',
+                          'message_url': 'http://123.63.33.43/blank/sms/user/urlsmstemp.php?',
+                          'sender_id': 'GLADMS',
+                          'params': 'kap'},
                   'MOCK': {}
                   }
 
-ADMIN_DETAILS = {'bajaj': {'user': 'bajaj', 'password': 'bajaj'},
-          'demo': {'user': 'demo', 'password': 'demo'},
-          'afterbuy': {'user': 'afterbuy', 'password': 'afterbuy'},
-          'default': {'user': 'gladminds', 'password': 'gladminds'}
+ADMIN_DETAILS = {GmApps.BAJAJ: {'user': 'bajaj', 'password': 'bajaj'},
+          GmApps.DEMO: {'user': 'demo', 'password': 'demo'},
+          GmApps.AFTERBUY: {'user': 'afterbuy', 'password': 'afterbuy'},
+          GmApps.GM: {'user': 'gladminds', 'password': 'gladminds'},
+          GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'bajajcv'},
+          GmApps.DAIMLER: {'user': 'daimler', 'password': 'daimler'}
           }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True
 
 DEFAULT_IMAGE_ID = 'guest.png'
 
+FORGOT_PASSWORD_LINK = {'bajaj':'x'}
 CONSTANCE_CONFIG = {
     'DEFAULT_IMAGE': ('guest.png', 'Default image to be used by any app'),
     'AFTERBUY_FORGOT_PASSWORD_URL': ('http://afterbuy.co/demo/staging_qw741qaz5/change-password.php', 'Afterbuy forgot password url'),
     'AFTERBUY_RECYCLE_EMAIL_RECIPIENT' : ('demosupport@gladminds.co', 'Default Email for recycle')
 }
 
-CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+AFTERBUY_FORGOT_PASSWORD_URL = 'http://afterbuy.co/demo/staging_qw741qaz5/change-password.php'
+AFTERBUY_RECYCLE_EMAIL_RECIPIENT = 'demosupport@gladminds.co'
+
 
 SAP_CRM_DETAIL = {
                   'username':'pisuper',
@@ -642,8 +667,10 @@ FILE_CACHE_DURATION = 0
 COUPON_WSDL = 'qa_coupon_redeem.wsdl'
 CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
 VIN_SYNC_WSDL='qa_vin_sync.wsdl'
-MEMBER_SYNC_WSDL='qa_member_sync_feed.wsdl'
 PURCHASE_SYNC_WSDL='qa_purchase_sync_feed.wsdl'
+CTS_WSDL = 'qa_container_tracker_feed.wsdl'
+
+MEMBER_SYNC_WSDL='qa_member_sync_feed.wsdl'
 ACCUMULATION_SYNC_WSDL = 'qa_accumulation_feed.wsdl'
 REDEMPTION_SYNC_WSDL = 'qa_redemption_feed.wsdl'
 DISTRIBUTOR_SYNC_WSDL = 'qa_distributor_sync_feed.wsdl'                
@@ -651,16 +678,23 @@ DISTRIBUTOR_SYNC_WSDL = 'qa_distributor_sync_feed.wsdl'
 COUPON_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/coupon-redeem/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/customer-feed/?wsdl&v0"
 VIN_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/vin-sync/?wsdl&v0"
-MEMBER_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/member-sync/?wsdl&v0"
 PURCHASE_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/purchase-sync/?wsdl&v0"
+CTS_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/container-tracker/?wsdl&v0"
+
+MEMBER_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/member-sync/?wsdl&v0"
 ACCUMULATION_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/accumulation-request/?wsdl&v0"
 REDEMPTION_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/redemption-request/?wsdl&v0"
 DISTRIBUTOR_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/distributor-sync/?wsdl&v0"
 
+
 BRAND_META = {
                "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/"},
-               "demo": {"title": "Daimler", "logo": "daimler/img/daimler_logo.gif", "tagline": "2015 Daimler AG",
-                        "basecss": "/daimler/css/base.css","admin_url" :"/admin/"}
+               "demo": {"title": "Daimler", "logo": "daimler/img/Daimler-logo.png", "tagline": "2015 Daimler AG",
+                        "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
+              "daimler": {"title": "Daimler", "logo": "daimler/img/Daimler-logo.png", "tagline": "2015 Daimler AG",
+                        "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
+            "bajajcv": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/",
+                        "basecss": "/css/portal.css"},
                }
 
 HOME_URLS = {
@@ -674,7 +708,14 @@ HOME_URLS = {
                        "Dealers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        "DealerAdmins":[{"SERVICE DESK":"/aftersell/helpdesk"},
                                        {"ADD SERVICE DESK USER":"/add/servicedesk-user"}]
+                       },
+             "daimler" : {"SdManagers":[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "Dealers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
+                       "DealerAdmins":[{"SERVICE DESK":"/aftersell/helpdesk"},
+                                       {"ADD SERVICE DESK USER":"/add/servicedesk-user"}]
                        }
              }
 
-LOGIN_URL='login/'
+LOGIN_URL='/login'
+BATCH_SIZE = 100

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://local.bajaj.gladminds.co:8000/api/v1/feed/">
+  <SOAP-ENV:Body>
+        <ns1:postContainerTracker>
+            <ns1:ObjectList>
+                <ns1:ContainerTrackerData>
+                    <ns1:ContainerTrackerModel>
+                        <ns1:GATEIN_TIME>05:30:02</ns1:GATEIN_TIME>
+                        <ns1:ZIB_INDENT_NUM>1</ns1:ZIB_INDENT_NUM>
+                        <ns1:CONSIGNMENT_ID>abcd</ns1:CONSIGNMENT_ID>
+                        <ns1:TRANSPORTER_ID>121213</ns1:TRANSPORTER_ID>
+                        <ns1:LR_NUMBER>123</ns1:LR_NUMBER>
+                        <ns1:TRANS_NAME>new trans agian and again pvt ltd</ns1:TRANS_NAME>
+                        <ns1:LR_DATE>2015-03-04</ns1:LR_DATE>
+                        <ns1:DO_NUM>1</ns1:DO_NUM>
+                        <ns1:TRUCK_NO>45</ns1:TRUCK_NO>
+                        <ns1:GATEIN_DATE>2015-02-04</ns1:GATEIN_DATE>
+                    </ns1:ContainerTrackerModel>
+                </ns1:ContainerTrackerData>
+            </ns1:ObjectList>
+            <ns1:Credential>
+                <ns1:UserName>bajaj</ns1:UserName>
+                <ns1:Password>bajaj</ns1:Password>
+            </ns1:Credential>
+        </ns1:postContainerTracker>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

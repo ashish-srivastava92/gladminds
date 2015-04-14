@@ -77,7 +77,6 @@ class SmsClientBaseObject(object):
 class KapSmsClient(SmsClientBaseObject):
     
     def __init__(self, *args, **kwargs):
-        self.working_key  = kwargs['working_key']
         self.sender_id = kwargs['sender_id']
         self.login = kwargs['login']
         self.password = kwargs['pass']
@@ -91,10 +90,13 @@ class KapSmsClient(SmsClientBaseObject):
         message = kwargs['message']
         LOGGER.info(
             '[INFO]: sending message {0} to {1} through kap'.format(message, phone_number))
-        params = {'to' : phone_number,
+        params = {'username': self.login,
+                  'pass': self.password,
+                  'senderid': self.sender_id,
+                  'dest_mobileno' : phone_number,
                   'message' : message,
-                  'workingkey' : self.working_key,
-                  'sender': self.sender_id}
+                  'response' : 'Y',
+                  }
         return self.send_request(url = self.message_url, params = params)
 
     def send_stateful(self, **kwargs):
@@ -102,10 +104,13 @@ class KapSmsClient(SmsClientBaseObject):
         message = kwargs['message']
         LOGGER.info(
             '[INFO]: sending message {0} to {1} through kap'.format(message, phone_number))
-        params = {'workingkey' : self.working_key,
-                  'sender': self.sender_id,
-                  'to' : phone_number,
-                  'message' : message}
+        params = {'username': self.login,
+                  'pass': self.password,
+                  'senderid': self.sender_id,
+                  'dest_mobileno' : phone_number,
+                  'message' : message,
+                  'response' : 'Y',
+                  }
         return self.send_request(url = self.message_url, params = params)
 
     def send_request(self, url, params):

@@ -16,7 +16,7 @@ from gladminds.bajaj import models
 from gladminds.core.managers.audit_manager import feed_log, sms_log
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.auth_helper import Roles
-from gladminds.bajaj.services.feed_resources import BaseFeed, BaseExportFeed
+from gladminds.core.services.feed_resources import BaseFeed, BaseExportFeed
 logger = logging.getLogger("gladminds")
 
 USER_GROUP = {'dealer': Roles.DEALERS,
@@ -102,9 +102,11 @@ class SAPFeed(object):
             'old_fsc': OldFscFeed,
             'credit_note': CreditNoteFeed,
             'asc_sa': ASCAndServiceAdvisorFeed,
-            'BOMHEADER': BOMHeaderFeed,
-            'BOMITEM': BOMItemFeed,
-            'ECO_RELEASE': ECOReleaseFeed,
+            'bomheader': BOMHeaderFeed,
+            'bomitem': BOMItemFeed,
+            'eco_release': ECOReleaseFeed,
+            'container_tracker':ContainerTrackerFeed,
+            'eco_implementation':ECOImplementationFeed,
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
@@ -173,8 +175,9 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
 
 def compare_purchase_date(date_of_purchase):
     valid_msg_days = models.Constant.objects.get(constant_name = "welcome_msg_active_days").constant_value
-    days = datetime.now().date()-date_of_purchase
-    if days <= valid_msg_days:
+    valid_msg_days_delta = timedelta(days=int(valid_msg_days))
+    purchased_days = datetime.now().date()-date_of_purchase
+    if purchased_days <= valid_msg_days_delta:
         return True
     else:
         return False
@@ -191,11 +194,9 @@ class ProductDispatchFeed(BaseFeed):
                     '[Info: ProductDispatchFeed_product_data]: {0}'.format(done))
                 try:
                     dealer_data = self.check_or_create_dealer(dealer_id=product['dealer_id'])
-#                     self.get_or_create_product_type(
-#                         product_type=product['product_type'])
-#                     producttype_data = models.ProductType.objects.get( product_type=product['product_type'])
                     product_data = models.ProductData(
-                        product_id=product['vin'], sku_code=product['product_type'], invoice_date=product['invoice_date'], dealer_id=dealer_data)
+                        product_id=product['vin'], invoice_date=product['invoice_date'], 
+                        dealer_id=dealer_data, sku_code=product['product_type'])
                     product_data.save()
                     logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN-{0} UCN-{1}'.format(product['vin'], product['unique_service_coupon']))
                 except Exception as ex:
@@ -354,20 +355,20 @@ class OldFscFeed(BaseFeed):
     def import_data(self):
         for fsc in self.data_source:
             product_data = models.ProductData.objects.filter(product_id=fsc['vin'])
-            
+            dealer_id = str(int(fsc['dealer']))
             if len(product_data)==0:
-                self.save_to_old_fsc_table(fsc['dealer'], fsc['service'], 'product_id', fsc['vin'])
+                self.save_to_old_fsc_table(dealer_id, fsc['service'], 'product_id', fsc['vin'])
             else:
                 coupon_data = models.CouponData.objects.filter(product__product_id=fsc['vin'],
                                         service_type=int(fsc['service']))
                 if len(coupon_data) == 0:
-                    self.save_to_old_fsc_table(fsc['dealer'], fsc['service'], 'service_type', fsc['service'], vin = product_data[0] )
+                    self.save_to_old_fsc_table(dealer_id, fsc['service'], 'service_type', fsc['service'], vin = product_data[0] )
                 else:
                     cupon_details = coupon_data[0]
                     cupon_details.status = 6
                     cupon_details.closed_date = datetime.now()
                     cupon_details.sent_to_sap = True
-                    cupon_details.servicing_dealer = fsc['dealer']
+                    cupon_details.servicing_dealer = dealer_id
                     cupon_details.save()
         return self.feed_remark
 
@@ -522,7 +523,7 @@ class BOMItemFeed(BaseFeed):
                                             item=bom['item'], item_id=bom['item_id'])                
                 bom_item_obj.save()
             except Exception as ex:
-                logger.info("[Exception: ]: BOMItemFeed {0}".format(ex))
+                ex="[Exception: ]: BOMItemFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
                 
@@ -539,7 +540,7 @@ class BOMHeaderFeed(BaseFeed):
                                                   valid_to=bom['valid_to_header'])
                 bom_header_obj.save() 
             except Exception as ex:
-                logger.info("[Exception: ]: BOMHeaderFeed {0}".format(ex))
+                ex="[Exception: ]: BOMHeaderFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
 
@@ -550,7 +551,11 @@ class ECOReleaseFeed(BaseFeed):
     def import_data(self):
         for eco_obj in self.data_source:
             try:
-                eco_release_obj = models.ECORelease(eco_number=eco_obj['eco_number'], eco_release_date=eco_obj['eco_release_date'],
+                if eco_obj['eco_release_date'] == "0000-00-00" or not eco_obj['eco_release_date']:
+                    eco_release_date=None
+                else:
+                    eco_release_date=datetime.strptime(eco_obj['eco_release_date'], "%Y-%m-%d")
+                eco_release_obj = models.ECORelease(eco_number=eco_obj['eco_number'], eco_release_date=eco_release_date,
                                                     eco_description=eco_obj['eco_description'], action=eco_obj['action'], parent_part=eco_obj['parent_part'],
                                                     add_part=eco_obj['add_part'], add_part_qty=eco_obj['add_part_qty'], add_part_rev=eco_obj['add_part_rev'],
                                                     add_part_loc_code=eco_obj['add_part_loc_code'], del_part=eco_obj['del_part'], del_part_qty=eco_obj['del_part_qty'],
@@ -559,8 +564,73 @@ class ECOReleaseFeed(BaseFeed):
                                                     interchangebility=eco_obj['interchangebility'], reason_for_change=eco_obj['reason_for_change'])
                 eco_release_obj.save() 
             except Exception as ex:
-                logger.info("[Exception: ]: ECOReleaseFeed {0}".format(ex))
+                ex="[Exception: ]: ECOReleaseFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         return self.feed_remark
-    
+
+class ContainerTrackerFeed(BaseFeed):
+
+    def import_data(self):
+        for tracker_obj in self.data_source:
+            try:
+                try:
+                    container_tracker_obj=models.ContainerTracker.objects.get(zib_indent_num=tracker_obj['zib_indent_num'],
+                                                                              lr_number=tracker_obj['lr_number'])
+                except ObjectDoesNotExist as odne:
+                    transporter_data = self.check_or_create_transporter(transporter_id=tracker_obj['transporter_id'],
+                                                                        name=tracker_obj['tranporter_name'])
+                    container_tracker_obj = models.ContainerTracker(zib_indent_num=tracker_obj['zib_indent_num'], 
+                                                                    consignment_id=tracker_obj['consignment_id'],
+                                                                    truck_no=tracker_obj['truck_no'], 
+                                                                    lr_number=tracker_obj['lr_number'],                                                                    
+                                                                    do_num=tracker_obj['do_num'],
+                                                                    transporter=transporter_data)
+
+                if tracker_obj['lr_date'] == "0000-00-00" or not tracker_obj['lr_date']:
+                    lr_date=None
+                else:
+                    lr_date=datetime.strptime(tracker_obj['lr_date'], "%Y-%m-%d")
+                
+                if tracker_obj['gatein_date'] != "0000-00-00":
+                    gatein_date=datetime.strptime(tracker_obj['gatein_date'], "%Y-%m-%d")
+                    status="Closed"
+                else:
+                    gatein_date=None
+                    status="Open"
+                container_tracker_obj.lr_date=lr_date
+                container_tracker_obj.gatein_date=gatein_date
+                container_tracker_obj.gatein_time=tracker_obj['gatein_time']
+                container_tracker_obj.status=status
+                container_tracker_obj.save() 
+            except Exception as ex:
+                ex="[Exception: ]: ContainerTrackerFeed {0}".format(ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+        
+        return self.feed_remark
+
+class ECOImplementationFeed(BaseFeed):
+
+    def import_data(self):
+        for eco_obj in self.data_source:
+            try:
+                if eco_obj['change_date'] == "0000-00-00" or not eco_obj['change_date']:
+                    change_date=None
+                else:
+                    change_date=datetime.strptime(eco_obj['change_date'], "%Y-%m-%d")
+                eco_implementation_obj = models.ECOImplementation(change_no=eco_obj['change_no'],change_date=change_date,
+                                                           change_time=eco_obj['change_time'],plant=eco_obj['plant'],
+                                                           action=eco_obj['action'],parent_part=eco_obj['parent_part'],
+                                                           added_part=eco_obj['added_part'],added_part_qty=eco_obj['added_part_qty'],
+                                                           deleted_part=eco_obj['deleted_part'],deleted_part_qty=eco_obj['deleted_part_qty'],
+                                                           chassis_number=eco_obj['chassis_number'],engine_number=eco_obj['engine_number'],
+                                                           eco_number=eco_obj['eco_number'],reason_code=eco_obj['reason_code'],
+                                                           remarks=eco_obj['remarks']
+                                                           )
+                eco_implementation_obj.save() 
+            except Exception as ex:
+                ex="[Exception: ]: ECOImplementationFeed {0}".format(ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+        return self.feed_remark

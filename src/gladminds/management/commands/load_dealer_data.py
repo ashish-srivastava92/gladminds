@@ -9,7 +9,7 @@ from django.contrib.auth.models import User, Group
 # from gladminds.core import utils
 
 from gladminds.core.auth_helper import Roles
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import get_model
 APP='bajaj'
 user_profile = get_model('UserProfile', APP)
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX

@@ -40,7 +40,7 @@ var Utils = {
 			},
 			error : function() {
 				waitingModal.modal("hide");
-				messageBlock.text("Some error occurred. Please contact customer support: +91-9741775128");
+				messageBlock.text("Some error occurred. Please contact customer support: +91-7847011011");
 				messageModal.modal("show");
 			}
 		});

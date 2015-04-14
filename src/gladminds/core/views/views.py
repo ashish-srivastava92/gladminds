@@ -19,7 +19,7 @@ from django.db.models import F
 
 from gladminds.default.models import BrandService
 from gladminds.core.services import message_template
-from gladminds.core import utils
+from gladminds.core import utils, model_fetcher
 from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message
 from gladminds.core.managers.mail import sent_otp_email,\
     send_recovery_email_to_admin, send_mail_when_vin_does_not_exist
@@ -42,11 +42,13 @@ from django.core.context_processors import csrf
 from gladminds.core.model_fetcher import models
 from gladminds.core.model_helpers import format_phone_number
 from tastypie.http import HttpBadRequest
+from django.views.decorators.http import require_http_methods
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
 AUDIT_ACTION = 'SEND TO QUEUE'
+
 
 @login_required()
 def redirect_url(request):
@@ -65,12 +67,12 @@ def redirect_url(request):
 
     for user_group in user_groups:
         if user_group in brand_url.keys():
-            return "/"
+            return "/services"
 
     return brand_meta.get('admin_url', '/admin')
 
 @login_required()
-def get_services(request):
+def home(request):
     if request.method == 'GET':
         user_groups = utils.get_user_groups(request.user)
         brand_url = settings.HOME_URLS.get(settings.BRAND, {})
@@ -86,6 +88,8 @@ def get_services(request):
                     brand_services.append(services)
         if len(brand_services)==1:
             return HttpResponseRedirect(brand_services[0]['url'])
+        elif len(brand_services)==0:
+            return HttpResponseRedirect('/admin')
         else:
             return render(request, 'portal/services.html')
 
@@ -123,18 +127,17 @@ def redirect_user(request):
             return HttpResponseRedirect(REDIRECT_USER.get(group))
     return HttpResponseBadRequest()
 
-
+@require_http_methods(["GET"])
 def user_logout(request):
-    if request.method == 'GET':
-        #TODO: Implement brand restrictions.
-        user_groups = utils.get_user_groups(request.user)
-        for group in USER_GROUPS:
-            if group in user_groups:
-                logout(request)
-                return HttpResponseRedirect('/login/')
-
-        return HttpResponseBadRequest()
-    return HttpResponseBadRequest('Not Allowed')
+    user_groups = utils.get_user_groups(request.user)
+    for group in USER_GROUPS:
+        if group in user_groups:
+            logout(request)
+            return HttpResponseRedirect('/login/') 
+    
+    next_url = request.GET.get('next', '/')
+    logout(request)
+    return HttpResponseRedirect('/login/?next='+next_url)   
 
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
@@ -404,7 +407,7 @@ def get_customer_info(data):
         product_obj = models.ProductData.objects.get(product_id=data['vin'])
     except Exception as ex:
         logger.info(ex)
-        message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-9741775128.'''.format(data['vin'])
+        message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-7847011011.'''.format(data['vin'])
         try:
             vin_sync_feed = export_feed.ExportUnsyncProductFeed(username=settings.SAP_CRM_DETAIL[
                        'username'], password=settings.SAP_CRM_DETAIL['password'],
@@ -502,6 +505,7 @@ def get_sa_under_asc(request, id=None):
     return render(request, template, {'active_menu':'sa',"data": data})
 
 
+@login_required()
 def sqs_tasks_view(request):
     return render_to_response('trigger-sqs-tasks.html')
 
@@ -519,7 +523,8 @@ def trigger_sqs_tasks(request):
         'send_mail_for_policy_discrepency': 'send_mail_for_policy_discrepency',
         'export_member_accumulation_to_sap': 'export_member_accumulation_to_sap',
         'export_member_redemption_to_sap':'export_member_redemption_to_sap',
-        'export_distributor_to_sap': 'export_distributor_to_sap'
+        'export_distributor_to_sap': 'export_distributor_to_sap',
+        'export_cts_to_sap': 'export_cts_to_sap'
     }
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)
     taskqueue.add(sqs_tasks[request.POST['task']], settings.BRAND)

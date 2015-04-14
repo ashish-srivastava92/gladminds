@@ -1,8 +1,8 @@
 from django.conf import settings
-from gladminds.core.loaders.module_loader import get_model
+from gladminds.core.model_fetcher import get_model
 
-def get_template(template_key):
-    object = get_model('MessageTemplate').objects.get(template_key=template_key)
+def get_template(template_key, brand=None):
+    object = get_model('MessageTemplate').objects.using(brand).get(template_key=template_key)
     return object.template
 
 RCV_MESSAGE_FORMAT = "{key} {message}"

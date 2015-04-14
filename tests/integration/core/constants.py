@@ -24,6 +24,7 @@ class AfterbuyUrls():
 class BajajUrls():
         COUPONS = 'coupons/'
         LOGIN = 'gm-users/login/'
+        MESSAGES = 'messages/'
         LOGOUT = 'gm-users/logout/'
         DEALER_LOGIN = 'aftersell/dealer/login/'
         

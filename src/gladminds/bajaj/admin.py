@@ -9,7 +9,7 @@ from django.contrib.admin import DateFieldListFilter
 from django import forms
 
 from gladminds.bajaj import models
-from gladminds.bajaj.services.loyalty.loyalty import loyalty
+from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
 from gladminds.core.auth_helper import GmApps, Roles
 from gladminds.core.admin_helper import GmModelAdmin
@@ -23,7 +23,7 @@ class BajajAdminSite(AdminSite):
 
 
 class UserProfileAdmin(GmModelAdmin):
-    search_fields = ('user__username', 'phone_number')
+    search_fields = ('user__username', 'phone_number',)
     list_display = ('user', 'phone_number', 'status', 'address',
                     'state', 'country', 'pincode', 'date_of_birth', 'gender')
     readonly_fields = ('image_tag',)
@@ -58,7 +58,7 @@ class DispatchedProduct(models.ProductData):
 class ListDispatchedProduct(GmModelAdmin):
     search_fields = ('product_id', 'dealer_id__dealer_id')
     list_display = (
-        'product_id', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
+        'product_id', 'sku_code', 'engine', 'UCN', 'dealer_id', "invoice_date")
     list_per_page = 50
 
     def queryset(self, request):
@@ -536,18 +536,18 @@ class AccumulationRequestAdmin(GmModelAdmin):
                         }
         return super(AccumulationRequestAdmin, self).changelist_view(request, extra_context=extra_context)
 
-class MechanicForm(forms.ModelForm):
+class MemberForm(forms.ModelForm):
     class Meta:
-        model = models.Mechanic
+        model = models.Member
     
     def __init__(self, *args, **kwargs):
-        super(MechanicForm, self).__init__(*args, **kwargs)
+        super(MemberForm, self).__init__(*args, **kwargs)
         for field in constants.MANDATORY_MECHANIC_FIELDS:
             self.fields[field].label = self.fields[field].label + ' * '
 
-class MechanicAdmin(GmModelAdmin):
+class MemberAdmin(GmModelAdmin):
     list_filter = ('form_status',)
-    form = MechanicForm
+    form = MemberForm
     search_fields = ('mechanic_id', 'permanent_id',
                      'phone_number', 'first_name',
                      'state__state_name', 'district')
@@ -578,13 +578,13 @@ class MechanicAdmin(GmModelAdmin):
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('mechanic_id','form_status', 'sent_sms', 'total_points', 'sent_to_sap', 'permanent_id', 'download_detail')
-        form = super(MechanicAdmin, self).get_form(request, obj, **kwargs)
+        form = super(MemberAdmin, self).get_form(request, obj, **kwargs)
         return form
 
 #     def save_model(self, request, obj, form, change):
 #         if not (obj.phone_number == '' or (len(obj.phone_number) < 10)):
 #             obj.phone_number=utils.mobile_format(obj.phone_number)
-#         super(MechanicAdmin, self).save_model(request, obj, form, change)
+#         super(MemberAdmin, self).save_model(request, obj, form, change)
 
 class CommentThreadInline(TabularInline):
     model = models.CommentThread
@@ -838,23 +838,6 @@ brand_admin.register(models.EmailLog, EmailLogAdmin)
 brand_admin.register(models.DataFeedLog, FeedLogAdmin)
 brand_admin.register(models.FeedFailureLog)
 
-if settings.ENV not in ['prod']:
-    brand_admin.register(models.NationalSparesManager, NSMAdmin)
-    brand_admin.register(models.AreaSparesManager, ASMAdmin)
-    brand_admin.register(models.Distributor, DistributorAdmin)
-    brand_admin.register(models.Mechanic, MechanicAdmin)
-
-    brand_admin.register(models.SparePartMasterData, SparePartMasterAdmin)
-    brand_admin.register(models.SparePartUPC, SparePartUPCAdmin)
-    brand_admin.register(models.SparePartPoint, SparePartPointAdmin)
-    brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
-    brand_admin.register(models.LoyaltySLA, LoyaltySlaAdmin)
-
-    brand_admin.register(models.Partner, PartnerAdmin)
-    brand_admin.register(models.ProductCatalog, ProductCatalogAdmin)
-    brand_admin.register(models.RedemptionRequest, RedemptionRequestAdmin)
-    brand_admin.register(models.WelcomeKit, WelcomeKitAdmin)
-
 brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)
 brand_admin.register(models.SATempRegistration, SATempRegistrationAdmin)
 brand_admin.register(models.CustomerTempRegistration, CustomerTempRegistrationAdmin)
@@ -867,3 +850,7 @@ brand_admin.register(models.Service, ServiceAdmin)
 brand_admin.register(models.ServiceType)
 brand_admin.register(models.Constant, ConstantAdmin)
 brand_admin.register(models.Feedback)
+brand_admin.register(models.Territory)
+brand_admin.register(models.Transporter)
+brand_admin.register(models.Supervisor)
+brand_admin.register(models.ContainerTracker)

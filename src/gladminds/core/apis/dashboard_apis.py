@@ -1,18 +1,23 @@
 '''
 This contains the dasboards apis
 '''
-from gladminds.core.apis.base_apis import CustomBaseResource, CustomApiObject
+from django.conf import settings
+from django.db import connections
+from django.db.models import Sum
+from django.db.models.query_utils import Q
+from django.http.response import HttpResponse
 from tastypie import fields
+from tastypie.utils.mime import build_content_type
+
 from gladminds.bajaj import models
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from django.core.cache import cache
-from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES,\
-    CouponStatus
-from django.db import connections
-from django.conf import settings
+from gladminds.core.apis.base_apis import CustomBaseResource, CustomApiObject
+from gladminds.core.auth_helper import Roles
+from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES, \
+    CouponStatus, TicketStatus
+from gladminds.core.core_utils.cache_utils import Cache
 from gladminds.core.core_utils.utils import dictfetchall
-from django.http.response import HttpResponse
-from tastypie.utils.mime import build_content_type
+from gladminds.core.model_fetcher import get_model
 
 
 def get_vins():
@@ -22,6 +27,13 @@ def get_vins():
 def get_customers_count():
     return models.ProductData.objects.filter(purchase_date__isnull=False).count()
 
+def get_mobile_number_count():
+    sum = models.CustomerTempRegistration.objects.filter(mobile_number_update_count__isnull=False).aggregate(Sum('mobile_number_update_count'))
+    return sum.values()[0] 
+
+def get_total_sms():
+    total_sms = models.SMSLog.objects.filter(Q(action='SENT') | Q(action='RECEIVED')).count()
+    return total_sms
 
 def get_success_and_failure_counts(objects):
     fail = 0
@@ -42,7 +54,7 @@ def get_set_cache(key, data_func, timeout=15):
     :param timeout:
     :type int:
     '''
-    result = cache.get(key)
+    result = Cache.get(key)
     if result is None:
         if data_func is None:
             raise
@@ -50,7 +62,7 @@ def get_set_cache(key, data_func, timeout=15):
             result = data_func
         else:
             result = data_func()
-        cache.set(key, result, timeout*60)
+        Cache.set(key, result, timeout*60)
     return result
 
 _KEYS = ["id", "name", "value"]
@@ -103,7 +115,12 @@ class OverallStatusResource(CustomBaseResource):
                             models.ServiceAdvisor.objects.count)
         sas_active = get_set_cache('gm_sas_active',
                             models.ServiceAdvisor.objects.active_count)
-
+        mobile_number_change_count = get_set_cache('gm_mobile_number_change_count',
+                                                   get_mobile_number_count,
+                                                   timeout=10)
+        total_sms = get_set_cache('gm_total_sms', get_total_sms, timeout=12)
+        
+        
         return map(CustomApiObject, [create_dict(["1", "#of Vins", vins]),
                                      create_dict(["2", "Service Coupons Closed",
                                                   coupons_closed]),
@@ -128,7 +145,11 @@ class OverallStatusResource(CustomBaseResource):
                                      create_dict(["12", "# of Active SAs",
                                                   sas_active]),
                                      create_dict(["13", "# of Customers",
-                                                  customers])
+                                                  customers]),
+                                     create_dict(["14", "Mobile updated",
+                                                  mobile_number_change_count]),
+                                     create_dict(["15", "Recent Trails",
+                                                  total_sms])
                                      ]
                    )
 
@@ -174,7 +195,7 @@ class FeedStatusResource(CustomBaseResource):
         result = []
         filters['feed_type__in'] = FEED_SENT_TYPES + FEED_TYPES
 
-        output = cache.get(hash_key)
+        output = Cache.get(hash_key)
         if output:
             return map(CustomApiObject, output)
 
@@ -196,7 +217,7 @@ class FeedStatusResource(CustomBaseResource):
                                           key,
                                           value[1],
                                           value[0]]))
-        cache.set(hash_key, result, 15*60)
+        Cache.set(hash_key, result, 15*60)
         return map(CustomApiObject, result)
 #         data = []   
 #         filters['action'] = FeedStatus.RECEIVED
@@ -245,7 +266,7 @@ class SMSReportResource(CustomBaseResource):
         return response_class(content=serialized, content_type=build_content_type(desired_format), **response_kwargs)
 
     def get_sms_count(self, action):
-        data = self.get_sql_data("select count(*) as count from bajaj_smslog where action=%(action)s",
+        data = self.get_sql_data("select count(*) as count from gm_smslog where action=%(action)s",
                                  filters={'action': action})
         return data[0]['count']
 
@@ -266,7 +287,7 @@ class SMSReportResource(CustomBaseResource):
         dtstart = params.get('created_date__gte')
         dtend = params.get('created_date__lte')
         where_and = " AND "
-        query = "select DATE(created_date) as date, action, count(*) as count from bajaj_smslog where action!='SEND TO QUEUE' "
+        query = "select DATE(created_date) as date, action, count(*) as count from gm_smslog where action!='SEND TO QUEUE' "
 
         if dtstart:
             query = query + where_and + "DATE(created_date) >= %(dtstart)s "
@@ -319,7 +340,7 @@ class CouponReportResource(CustomBaseResource):
         try:
             return get_set_cache('gm_coupon_counter' + status, None)
         except:
-            data = self.get_sql_data("select count(*) as count from bajaj_coupondata where status=%(status)s",
+            data = self.get_sql_data("select count(*) as count from gm_coupondata where status=%(status)s",
                                  filters={'status': status})
             return get_set_cache('gm_coupon_counter' + status, data[0]['count'])
 
@@ -340,8 +361,8 @@ class CouponReportResource(CustomBaseResource):
         dtstart = params.get('created_date__gte')
         dtend = params.get('created_date__lte')
         where_and = " AND "
-        query = "select c.*, d.date from bajaj_couponfact c inner join \
-        bajaj_datedimension d on c.date_id=d.date_id where c.data_type='TOTAL' ";
+        query = "select c.*, d.date from gm_couponfact c inner join \
+        gm_datedimension d on c.date_id=d.date_id where c.data_type='TOTAL' ";
         if dtstart:
             query = query + where_and + "DATE(d.date) >= %(dtstart)s "
             filters['dtstart'] = dtstart
@@ -351,3 +372,67 @@ class CouponReportResource(CustomBaseResource):
 
         all_data = self.get_sql_data(query, filters)
         return map(CustomApiObject, all_data)
+
+class TicketStatusResource(CustomBaseResource):
+    """
+    It is a preferences resource
+    """
+    id = fields.CharField(attribute="id")
+    name = fields.CharField(attribute="name")
+    value = fields.CharField(attribute='value', null=True)
+
+    class Meta:
+        resource_name = 'ticket-status'
+        authentication = AccessTokenAuthentication()
+        object_class = CustomApiObject
+    
+    def get_ticket_count(self, request, status):
+        status = str(status)
+        if request.user.groups.filter(name=Roles.SDOWNERS):
+            assignee_id = get_model('ServiceDeskUser').objects.get(user_profile__user_id=int(request.user.id)).id
+            data = self.get_sql_data("select count(*) as count from gm_feedback where status=%(status)s and assignee_id=%(assignee_id)s",
+                     filters={'status' : status, 'assignee_id' : assignee_id})
+        
+        elif request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.DEALERADMIN]):
+            data = self.get_sql_data("select count(*) as count from gm_feedback where status=%(status)s",
+                                 filters={'status' : status})
+        
+        elif request.user.groups.filter(name=Roles.DEALERS):
+            reporter_id = get_model('ServiceDeskUser').objects.get(user_profile__user_id=int(request.user.id)).id
+            data = self.get_sql_data("select count(*) as count from gm_feedback where status=%(status)s and reporter_id=%(reporter_id)s",
+                     filters={'status' : status, 'reporter_id' : reporter_id})
+            
+        return get_set_cache('gm_ticket_count' + status, data[0]['count'])
+    
+    def get_sql_data(self, query, filters={}):
+        conn = connections[settings.BRAND]
+        cursor = conn.cursor()
+        cursor.execute(query, filters)
+        data = dictfetchall(cursor)
+        conn.close()
+        return data
+        
+    def obj_get_list(self, bundle, **kwargs):
+        self.is_authenticated(bundle.request)
+        tickets_open = self.get_ticket_count(bundle.request, TicketStatus.OPEN)
+        tickets_progress = self.get_ticket_count(bundle.request, TicketStatus.IN_PROGRESS)
+        tickets_pending = self.get_ticket_count(bundle.request, TicketStatus.PENDING)
+        tickets_resolved = self.get_ticket_count(bundle.request, TicketStatus.RESOLVED)
+        tickets_closed = self.get_ticket_count(bundle.request, TicketStatus.CLOSED)
+        tickets_raised = tickets_open + tickets_progress + tickets_pending + tickets_resolved + tickets_closed 
+
+        return map(CustomApiObject, [
+                                     create_dict(["1", "Tickets Raised",
+                                                  tickets_raised]),
+                                     create_dict(["2", "Tickets Open",
+                                                  tickets_open]),
+                                     create_dict(["3", "Tickets In Progress",
+                                                  tickets_progress]),
+                                     create_dict(["4", "Tickets Pending",
+                                                 tickets_pending]),
+                                     create_dict(["5", "Tickets Resolved",
+                                                 tickets_resolved]),
+                                     create_dict(["6", "Tickets Closed",
+                                                 tickets_closed])
+                                     ]
+                   )
