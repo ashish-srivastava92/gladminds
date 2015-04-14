@@ -5,12 +5,22 @@ class TestRegistrations(UtilityResourceTest):
     def test_register_customer(self):
         self.send_dispatch_feed()
         self.register_customer("10316", "123")
-        self.get_sa_feed(phone="1111111111")
     
+    def test_search_existing_customer(self):
+        self.send_dispatch_feed()
+        self.register_customer("10316", "123")
+        result=self.search_vin("10316","123")
+        self.check_result(result=result,parameter="name",value="TestU2927")
+                 
     def test_register_sa(self):
         self.register_sa("10316","123")
         result=self.get_sa_feed(phone="6767676767")
         self.check_result(result=result['objects'][0]['user'], value="SA29", parameter="user", inner_parameter="first_name")
+    
+    def test_search_existing_sa(self):
+        self.register_sa("10316","123")
+        result=self.search_mobile("10316","123")
+        self.check_result(result=result, value="SA29", parameter="name")
     
     def test_register_existing_sa(self):
         self.send_service_advisor_feed()

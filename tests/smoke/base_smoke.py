@@ -98,6 +98,7 @@ class BrandResourceTestCase(TestCase):
             else:
                 resp = c.post(self.base_version+uri, data=json.dumps(data), headers=headers)
         self.assertSuccess(resp.status_code)
+        return json.loads(resp.content)
         
         
     def check_coupon(self,phone_number,data):

@@ -1,6 +1,7 @@
 from base_smoke import BrandResourceTestCase
+import json
 from integration.core.constants import DISPATCH_XML_DATA,PURCHASE_XML_DATA,SERVICE_ADVISOR_DATA,OLD_FSC_DATA\
-,CREDIT_NOTE_DATA,CUSTOMER_DATA,ASC_DATA,SA_DATA,EXISTING_SA_DATA,UPDATE_SA_DATA
+,CREDIT_NOTE_DATA,CUSTOMER_DATA,ASC_DATA,SA_DATA,VIN_DATA,MOBILE_DATA
 
 class UtilityResourceTest(BrandResourceTestCase):
     def send_dispatch_feed(self):
@@ -46,6 +47,18 @@ class UtilityResourceTest(BrandResourceTestCase):
         url="v1/products/?product_id=12345678901232792"
         result = self.get(url)
         self.check_result(result=result['objects'][0],parameter="customer_phone_number",value="+917777777777")
+    
+    def search_vin(self,username,password):
+        data=VIN_DATA
+        uri="aftersell/exceptions/customer"
+        result=self.post_as_dealer(uri=uri, username=username, password=password, data=data,isjson="False")
+        return result
+    
+    def search_mobile(self,username,password):
+        data=MOBILE_DATA
+        uri="aftersell/exceptions/serviceadvisor"
+        result=self.post_as_dealer(uri=uri,data=data,isjson="False",username=username,password=password)
+        return result
     
     def register_sa(self,username,password,data=SA_DATA):
         uri="aftersell/register/sa"

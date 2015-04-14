@@ -6,7 +6,7 @@ from smoke import base_smoke
 from integration.core.constants import BajajUrls, Constants, COUPON_SCHEMA
 from gladminds.core.constants import CouponStatus
 
-class TestBajajCouponDataApi(base_smoke.BajajResourceTestCase):
+class TestBajajCouponDataApi(base_smoke.BrandResourceTestCase):
     def setUp(self):
         super(TestBajajCouponDataApi, self).setUp()
 
