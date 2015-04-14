@@ -58,7 +58,7 @@ class DispatchedProduct(models.ProductData):
 class ListDispatchedProduct(GmModelAdmin):
     search_fields = ('product_id', 'dealer_id__dealer_id')
     list_display = (
-        'product_id', 'product_type', 'engine', 'UCN', 'dealer_id', "invoice_date")
+        'product_id', 'sku_code', 'engine', 'UCN', 'dealer_id', "invoice_date")
     list_per_page = 50
 
     def queryset(self, request):
@@ -838,23 +838,6 @@ brand_admin.register(models.EmailLog, EmailLogAdmin)
 brand_admin.register(models.DataFeedLog, FeedLogAdmin)
 brand_admin.register(models.FeedFailureLog)
 
-if settings.ENV not in ['prod']:
-    brand_admin.register(models.NationalSparesManager, NSMAdmin)
-    brand_admin.register(models.AreaSparesManager, ASMAdmin)
-    brand_admin.register(models.Distributor, DistributorAdmin)
-    brand_admin.register(models.Member, MemberAdmin)
-
-    brand_admin.register(models.SparePartMasterData, SparePartMasterAdmin)
-    brand_admin.register(models.SparePartUPC, SparePartUPCAdmin)
-    brand_admin.register(models.SparePartPoint, SparePartPointAdmin)
-    brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
-    brand_admin.register(models.LoyaltySLA, LoyaltySlaAdmin)
-
-    brand_admin.register(models.Partner, PartnerAdmin)
-    brand_admin.register(models.ProductCatalog, ProductCatalogAdmin)
-    brand_admin.register(models.RedemptionRequest, RedemptionRequestAdmin)
-    brand_admin.register(models.WelcomeKit, WelcomeKitAdmin)
-
 brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)
 brand_admin.register(models.SATempRegistration, SATempRegistrationAdmin)
 brand_admin.register(models.CustomerTempRegistration, CustomerTempRegistrationAdmin)
@@ -868,3 +851,6 @@ brand_admin.register(models.ServiceType)
 brand_admin.register(models.Constant, ConstantAdmin)
 brand_admin.register(models.Feedback)
 brand_admin.register(models.Territory)
+brand_admin.register(models.Transporter)
+brand_admin.register(models.Supervisor)
+brand_admin.register(models.ContainerTracker)

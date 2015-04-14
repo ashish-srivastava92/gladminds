@@ -123,13 +123,11 @@ def send_coupon_detail_customer(*args, **kwargs):
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
         set_gateway(**kwargs)
-        logger.info('[send_coupon_detail_customer]: SENT MESSAGE')
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
         send_coupon_detail_customer.retry(
             exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
-        logger.info('[send_coupon_detail_customer]: SENT MESSAGE FINALLY')
         sms_log(brand,status=status, receiver=phone_number, message=message)
 
 @shared_task
@@ -351,11 +349,9 @@ def send_point(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        logger.info("request for sending sms received {0} message {1}".format(phone_number, message))
         set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
-        logger.error("[Eception:send_point]:{0}".format(ex))
         send_point.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
     finally:
         sms_log(brand,status=status, receiver=phone_number, message=message)
@@ -370,7 +366,6 @@ def send_loyalty_sms(*args, **kwargs):
     try:
         phone_number = kwargs.get('phone_number', None)
         message = kwargs.get('message', None)
-        brand = kwargs.get('brand', 'bajaj')
         set_gateway(**kwargs)
     except (Exception, MessageSentFailed) as ex:
         status = "failed"
@@ -444,30 +439,33 @@ def send_report_mail_for_feed(*args, **kwargs):
     '''
     send report email for data feed
     '''
+    brand= kwargs.get('brand', None)
     day = kwargs['day_duration']
     today = datetime.now().date()
     start_date = today - timedelta(days=day)
     feed_data = taskmanager.get_data_feed_log_detail(
         start_date=start_date, end_date=today)
-    mail.feed_report(feed_data=feed_data)
+    mail.feed_report(feed_data=feed_data, brand=brand)
 
 @shared_task
 def send_mail_for_feed_failure(*args, **kwargs):
     '''
     send feed failure email
     '''
+    brand= kwargs.get('brand', None)
     for feed_type in FEED_TYPES:
         feed_data = taskmanager.get_feed_failure_log_detail(type=feed_type)
         if feed_data['feed_data']:
-            mail.feed_failure(feed_data=feed_data['feed_data'])
+            mail.feed_failure(feed_data=feed_data['feed_data'], brand=brand)
             feed_data['feed_logs'].update(email_flag=True)
 
 @shared_task
 def send_vin_sync_feed_details(*args, **kwargs):
     ''' send vin sync feeds'''
+    brand= kwargs.get('brand', None)
     feed_data = taskmanager.get_vin_sync_feeds_detail()
     if feed_data['feed_data']:
-        mail.send_vin_sync_feed_report(feed_data=feed_data['feed_data'])
+        mail.send_vin_sync_feed_report(feed_data=feed_data['feed_data'], brand=brand)
         feed_data['feed_logs'].update(email_flag=True)
 
 @shared_task
@@ -475,9 +473,10 @@ def send_mail_for_customer_phone_number_update(*args, **kwargs):
     '''
     send customer phone number update email
     '''
+    brand= kwargs.get('brand', None)
     customer_details = taskmanager.get_customer_details()
     if customer_details['customer_data']:
-        mail.customer_phone_number_update(customer_details=customer_details['customer_data'])
+        mail.customer_phone_number_update(customer_details=customer_details['customer_data'], brand=brand)
         customer_details['customer_details'].update(email_flag=True)
 
 @shared_task
@@ -485,17 +484,19 @@ def send_mail_customer_phone_number_update_exceeds(*args, **kwargs):
     '''
     send email to asm when customer number update exceeds
     '''
+    brand= kwargs.get('brand', None)
     update_details = taskmanager.get_update_number_exceeds()
     if update_details['update_data']:
-        mail.send_phone_number_update_count_exceeded(update_details=update_details['update_data'])
+        mail.send_phone_number_update_count_exceeded(update_details=update_details['update_data'], brand=brand)
         update_details['update_details'].update(email_flag=True) 
 
 @shared_task
 def send_mail_for_policy_discrepency(*args, **kwargs):
     ''' send mail for policy_discrepency'''
+    brand= kwargs.get('brand', None)
     discrepant_coupons = taskmanager.get_discrepant_coupon_details()
     if discrepant_coupons:
-        mail.discrepant_coupon_update(discrepant_coupons=discrepant_coupons)
+        mail.discrepant_coupon_update(discrepant_coupons=discrepant_coupons, brand=brand)
     else:
         logger.info('[Policy Discrepency]: There were no policy discrepency in coupons')
 
@@ -580,7 +581,7 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None, brand=
     try:
         if feedback_obj.reporter:
             reporter = feedback_obj.reporter.user_profile
-        message = templates.get_template(template_name).format(type=feedback_obj.type,
+        message = templates.get_template(template_name,brand).format(type=feedback_obj.type,
                                                                reporter=reporter,
                                                                message=feedback_obj.description,
                                                                created_date=created_date,
@@ -591,7 +592,7 @@ def send_sms(template_name, phone_number, feedback_obj, comment_obj=None, brand=
             message = message + 'Note :' + comment_obj.comment
     except Exception as ex:
         logger.info("send_sms: {0}".format(ex))
-        message = templates.get_template('SEND_INVALID_MESSAGE')
+        message = templates.get_template('SEND_INVALID_MESSAGE',brand)
     finally:
         logger.info("Send complain message received successfully with %s" % message)
         phone_number = utils.get_phone_number_format(phone_number)
@@ -627,22 +628,6 @@ def send_reminders_for_servicedesk(*args, **kwargs):
         feedback.save()
 
 @shared_task
-def export_member_temp_id_to_sap(*args, **kwargs):
-    '''
-    send info of registered Member
-    '''
-    brand= kwargs.get('brand', None)
-    member_registered = loyalty_export.ExportMemberTempFeed(username=settings.SAP_CRM_DETAIL[
-                   'username'], password=settings.SAP_CRM_DETAIL['password'],
-                  wsdl_url=settings.MEMBER_SYNC_WSDL_URL, feed_type='Member Registration Feed')
-    feed_export_data = member_registered.export_data()
-    if len(feed_export_data[0]) > 0:
-        member_registered.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
-                             1], total_failed_on_feed=feed_export_data[2])
-    else:
-        logger.info("[export_member_temp_id_to_sap]: No member registered since last feed")
-
-@shared_task
 def export_purchase_feed_sync_to_sap(*args, **kwargs):
     '''
     send info of purchase feed failed due to no matching VIN in GM
@@ -658,6 +643,112 @@ def export_purchase_feed_sync_to_sap(*args, **kwargs):
     else:
         logger.info("[export_purchase_feed_sync_to_sap]: No Purchase Feed failed since last feed")
 
+def customer_support_helper(obj_list, data, message):   
+    for obj in obj_list:
+        try:
+            phone = obj.user.phone_number
+            send_email_to_asc_customer_support(data, obj.user.user.email)
+            sms_log(receiver = phone, action=AUDIT_ACTION, message=message)
+            send_job_to_queue(send_dfsc_customer_support,
+                                   {"phone_number":phone, "message":message, "sms_client":settings.SMS_CLIENT})
+        except Exception as ex:
+            logger.info("[Exception fail to send SMS to ASCs/Dealers on Customer Support]  {0}".format(ex))
+            
+def dfsc_customer_support(*args, **kwargs):
+    brand= kwargs.get('brand', None)    
+    asc_obj = models.AuthorizedServiceCenter.objects.filter(user__state='MAH').select_related('user, user__user')
+    dealer_obj = models.Dealer.objects.filter(user__state='MAH').select_related('user, user__user')
+    
+    data = get_email_template('CUSTOMER_SUPPORT_FOR_DFSC', brand)
+    data['newsubject'] = data['subject']
+    data['content'] = data['body']
+    message = templates.get_template('CUSTOMER_SUPPORT_FOR_DFSC', brand)
+    
+    customer_support_helper(asc_obj, data, message)
+    customer_support_helper(dealer_obj, data, message)    
+
+@shared_task
+def export_member_temp_id_to_sap(*args, **kwargs):
+    '''
+    send info of registered Member
+    '''
+    brand= kwargs.get('brand', None)
+    logger.info("[export_member_temp_id_to_sap] BRAND: {0}".format(brand))
+    member_registered = loyalty_export.ExportMemberTempFeed(username=settings.SAP_CRM_DETAIL[
+                   'username'], password=settings.SAP_CRM_DETAIL['password'],
+                  wsdl_url=settings.MEMBER_SYNC_WSDL_URL, feed_type='Member Registration Feed')
+    feed_export_data = member_registered.export_data(brand=brand)
+    if len(feed_export_data[0]) > 0:
+        member_registered.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
+                             1], total_failed_on_feed=feed_export_data[2])
+    else:
+        logger.info("[export_member_temp_id_to_sap]: No member registered since last feed")
+
+@shared_task
+def export_member_accumulation_to_sap(*args, **kwargs):
+    '''
+    send info of accumulation requests
+    '''
+    brand= kwargs.get('brand', None)
+    logger.info("[export_member_accumulation_to_sap] BRAND: {0}".format(brand))
+    accumulation_requests = loyalty_export.ExportAccumulationFeed(username=settings.SAP_CRM_DETAIL[
+                   'username'], password=settings.SAP_CRM_DETAIL['password'],
+                  wsdl_url=settings.ACCUMULATION_SYNC_WSDL_URL, feed_type='Accumulation Request Feed')
+    feed_export_data = accumulation_requests.export_data(brand)
+    if len(feed_export_data[0]) > 0:
+        accumulation_requests.export(brand, items=feed_export_data[0], item_stamp=feed_export_data[
+                             1], total_failed_on_feed=feed_export_data[2])
+    else:
+        logger.info("[export_member_accumulation_to_sap]: No accumulation request since last feed")
+        
+@shared_task
+def export_member_redemption_to_sap(*args, **kwargs):
+    '''
+    send info of redemption requests
+    '''
+    brand= kwargs.get('brand', None)
+    logger.info("[export_member_redemption_to_sap] BRAND: {0}".format(brand))
+    redemption_requests = loyalty_export.ExportRedemptionFeed(username=settings.SAP_CRM_DETAIL[
+                   'username'], password=settings.SAP_CRM_DETAIL['password'],
+                  wsdl_url=settings.REDEMPTION_SYNC_WSDL_URL, feed_type='Redemption Request Feed')
+    feed_export_data = redemption_requests.export_data(brand)
+    if len(feed_export_data[0]) > 0:
+        redemption_requests.export(brand, items=feed_export_data[0], item_stamp=feed_export_data[
+                             1], total_failed_on_feed=feed_export_data[2])
+    else:
+        logger.info("[export_member_redemption_to_sap]: No redemption request since last feed")
+        
+@shared_task
+def export_distributor_to_sap(*args, **kwargs):
+    '''
+    send info of redemption requests
+    '''
+    brand= kwargs.get('brand', None)
+    logger.info("[export_distributor_to_sap] BRAND: {0}".format(brand))
+    distributors = loyalty_export.ExportDistributorFeed(username=settings.SAP_CRM_DETAIL[
+                   'username'], password=settings.SAP_CRM_DETAIL['password'],
+                  wsdl_url=settings.DISTRIBUTOR_SYNC_WSDL_URL, feed_type='Distributor Registration Feed')
+    feed_export_data = distributors.export_data(brand)
+    if len(feed_export_data[0]) > 0:
+        distributors.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
+                             1], total_failed_on_feed=feed_export_data[2])
+    else:
+        logger.info("[export_distributor_to_sap]: No distributor registered since last feed")
+
+@shared_task
+def export_cts_to_sap(*args, **kwargs):
+    '''
+    send container tracking system info to sap
+    '''
+    cts = export_feed.ExportCTSFeed(username=settings.SAP_CRM_DETAIL['username'],
+                                    password=settings.SAP_CRM_DETAIL['password'],
+                                    wsdl_url=settings.CTS_WSDL_URL, feed_type='CTS Feed')
+    feed_export_data = cts.export_data()
+    if len(feed_export_data[0]) > 0:
+        logger.info("[export_cts_to_sap]: sending cts data")
+        cts.export(items=feed_export_data[0], item_batch=feed_export_data[1],
+                   total_failed_on_feed=feed_export_data[2])
+
 def welcome_kit_due_date_escalation(*args, **kwargs):
     time = datetime.now()
     '''
@@ -667,7 +758,7 @@ def welcome_kit_due_date_escalation(*args, **kwargs):
     args=[Q(due_date__lte=time), Q(resolution_flag=False),~Q(status='Shipped')]
     welcome_kit_obj = models.WelcomeKit.objects.filter(reduce(operator.and_, args))
     for welcome_kit in welcome_kit_obj:
-        data = get_email_template('WELCOME_KIT_DUE_DATE_EXCEED_MAIL_TO_MANAGER')
+        data = get_email_template('WELCOME_KIT_DUE_DATE_EXCEED_MAIL_TO_MANAGER',brand)
         data['newsubject'] = data['subject'].format(id = welcome_kit.transaction_id)
         data['content'] = data['body'].format(transaction_id=welcome_kit.transaction_id, 
                                       due_date=welcome_kit.due_date, status=welcome_kit.status )
@@ -675,7 +766,7 @@ def welcome_kit_due_date_escalation(*args, **kwargs):
         escalation_list_detail = utils.get_escalation_mailing_list(escalation_list)
         send_email_to_welcomekit_escaltion_group(data, escalation_list_detail)
 
-        message = templates.get_template('LOYALTY_DUE_DATE_EXCEED_ESCALATION').format(transaction_id=welcome_kit.transaction_id,
+        message = templates.get_template('LOYALTY_DUE_DATE_EXCEED_ESCALATION',brand).format(transaction_id=welcome_kit.transaction_id,
                                                                                       status=welcome_kit.status)    
         for phone_number in escalation_list_detail['sms']: 
             phone_number = utils.get_phone_number_format(phone_number)
@@ -694,7 +785,7 @@ def redemption_request_due_date_escalation(*args, **kwargs):
     args=[Q(due_date__lte=time), Q(resolution_flag=False),~Q(status='Delivered')]
     redemption_request_obj = models.RedemptionRequest.objects.filter(reduce(operator.and_, args))
     for redemption_request in redemption_request_obj:
-        data = get_email_template('REDEMPTION_REQUEST_DUE_DATE_EXCEED_MAIL_TO_MANAGER')
+        data = get_email_template('REDEMPTION_REQUEST_DUE_DATE_EXCEED_MAIL_TO_MANAGER',brand)
         data['newsubject'] = data['subject'].format(id = redemption_request.transaction_id)
         data['content'] = data['body'].format(transaction_id=redemption_request.transaction_id,
                                                                   status=redemption_request.status)
@@ -702,7 +793,7 @@ def redemption_request_due_date_escalation(*args, **kwargs):
         escalation_list_detail = utils.get_escalation_mailing_list(escalation_list)
         send_email_to_redeem_escaltion_group(data, escalation_list_detail)
         
-        message = templates.get_template('LOYALTY_DUE_DATE_EXCEED_ESCALATION').format(transaction_id=redemption_request.transaction_id,
+        message = templates.get_template('LOYALTY_DUE_DATE_EXCEED_ESCALATION',brand).format(transaction_id=redemption_request.transaction_id,
                                                                                       status=redemption_request.status)    
         for phone_number in escalation_list_detail['sms']: 
             phone_number = utils.get_phone_number_format(phone_number)
@@ -712,77 +803,6 @@ def redemption_request_due_date_escalation(*args, **kwargs):
         redemption_request.resolution_flag = True
         redemption_request.save()
 
-def customer_support_helper(obj_list, data, message):   
-    for obj in obj_list:
-        try:
-            phone = obj.user.phone_number
-            send_email_to_asc_customer_support(data, obj.user.user.email)
-            sms_log(receiver = phone, action=AUDIT_ACTION, message=message)
-            send_job_to_queue(send_dfsc_customer_support,
-                                   {"phone_number":phone, "message":message, "sms_client":settings.SMS_CLIENT})
-        except Exception as ex:
-            logger.info("[Exception fail to send SMS to ASCs/Dealers on Customer Support]  {0}".format(ex))
-            
-def dfsc_customer_support(*args, **kwargs):    
-    asc_obj = models.AuthorizedServiceCenter.objects.filter(user__state='MAH').select_related('user, user__user')
-    dealer_obj = models.Dealer.objects.filter(user__state='MAH').select_related('user, user__user')
-    
-    data = get_email_template('CUSTOMER_SUPPORT_FOR_DFSC')
-    data['newsubject'] = data['subject']
-    data['content'] = data['body']
-    message = templates.get_template('CUSTOMER_SUPPORT_FOR_DFSC')
-    
-    customer_support_helper(asc_obj, data, message)
-    customer_support_helper(dealer_obj, data, message)    
-    
-@shared_task
-def export_member_accumulation_to_sap(*args, **kwargs):
-    '''
-    send info of accumulation requests
-    '''
-    brand= kwargs.get('brand', None)
-    accumulation_requests = loyalty_export.ExportAccumulationFeed(username=settings.SAP_CRM_DETAIL[
-                   'username'], password=settings.SAP_CRM_DETAIL['password'],
-                  wsdl_url=settings.ACCUMULATION_SYNC_WSDL_URL, feed_type='Accumulation Request Feed')
-    feed_export_data = accumulation_requests.export_data()
-    if len(feed_export_data[0]) > 0:
-        accumulation_requests.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
-                             1], total_failed_on_feed=feed_export_data[2], query_set=feed_export_data[3])
-    else:
-        logger.info("[export_member_accumulation_to_sap]: No accumulation request since last feed")
-        
-@shared_task
-def export_member_redemption_to_sap(*args, **kwargs):
-    '''
-    send info of redemption requests
-    '''
-    brand= kwargs.get('brand', None)
-    redemption_requests = loyalty_export.ExportRedemptionFeed(username=settings.SAP_CRM_DETAIL[
-                   'username'], password=settings.SAP_CRM_DETAIL['password'],
-                  wsdl_url=settings.REDEMPTION_SYNC_WSDL_URL, feed_type='Redemption Request Feed')
-    feed_export_data = redemption_requests.export_data()
-    if len(feed_export_data[0]) > 0:
-        redemption_requests.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
-                             1], total_failed_on_feed=feed_export_data[2], query_set=feed_export_data[3])
-    else:
-        logger.info("[export_member_redemption_to_sap]: No redemption request since last feed")
-        
-@shared_task
-def export_distributor_to_sap(*args, **kwargs):
-    '''
-    send info of redemption requests
-    '''
-    brand= kwargs.get('brand', None)
-    distributors = loyalty_export.ExportDistributorFeed(username=settings.SAP_CRM_DETAIL[
-                   'username'], password=settings.SAP_CRM_DETAIL['password'],
-                  wsdl_url=settings.DISTRIBUTOR_SYNC_WSDL_URL, feed_type='Distributor Registration Feed')
-    feed_export_data = distributors.export_data()
-    if len(feed_export_data[0]) > 0:
-        distributors.export(brand, items=feed_export_data[0], item_batch=feed_export_data[
-                             1], total_failed_on_feed=feed_export_data[2])
-    else:
-        logger.info("[export_distributor_to_sap]: No distributor registered since last feed")
- 
 _tasks_map = {"send_registration_detail": send_registration_detail,
 
               "send_service_detail": send_service_detail,
@@ -830,40 +850,43 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               "customer_detail_recovery": customer_detail_recovery,
               
               "send_point": send_point,
-              
+
               "send_loyalty_sms": send_loyalty_sms,
-              
+
               "send_reminders_for_servicedesk": send_reminders_for_servicedesk,
-              
+
               "send_mail_for_feed_failure" : send_mail_for_feed_failure,
-              
+
               "send_servicedesk_feedback_detail" : send_servicedesk_feedback_detail,
-              
+
               "send_customer_phone_number_update_message" : send_customer_phone_number_update_message,
-              
+
               "send_mail_customer_phone_number_update_exceeds" : send_mail_customer_phone_number_update_exceeds,
-              
+
               "send_vin_sync_feed_details" : send_vin_sync_feed_details,
 
               "update_coupon_history": update_coupon_history_data, 
-              
-              "redemption_request_due_date_escalation":redemption_request_due_date_escalation,
-              
-              "export_member_temp_id_to_sap": export_member_temp_id_to_sap,
 
               "export_purchase_feed_sync_to_sap": export_purchase_feed_sync_to_sap,
 
-              "welcome_kit_due_date_escalation":welcome_kit_due_date_escalation,
-              
               "send_mail_for_customer_phone_number_update" : send_mail_for_customer_phone_number_update,
-              
+
               "send_mail_for_policy_discrepency": send_mail_for_policy_discrepency,
+
+              "dfsc_customer_support": dfsc_customer_support,
               
+              "export_member_temp_id_to_sap": export_member_temp_id_to_sap,
+
               "export_member_accumulation_to_sap": export_member_accumulation_to_sap,
-              
+
               "export_member_redemption_to_sap": export_member_redemption_to_sap,
-              
+
               "export_distributor_to_sap": export_distributor_to_sap,
-              
-              "dfsc_customer_support": dfsc_customer_support
+
+              "export_cts_to_sap": export_cts_to_sap,
+
+              "redemption_request_due_date_escalation":redemption_request_due_date_escalation,
+
+              "welcome_kit_due_date_escalation":welcome_kit_due_date_escalation,
+
               }

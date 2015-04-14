@@ -1,4 +1,5 @@
 import logging
+from itertools import izip_longest
 from suds.client import Client
 from suds.transport.http import HttpAuthenticated
 from django.conf import settings
@@ -29,6 +30,16 @@ class BaseExportFeed(object):
         cache = client.options.cache
         cache.setduration(seconds=settings.FILE_CACHE_DURATION)
         return client
+
+    def get_chunk(self, iterable, chunk_size):
+        result = []
+        for item in iterable:
+            result.append(item)
+            if len(result) == chunk_size:
+                yield tuple(result)
+                result = []
+        if len(result) > 0:
+            yield tuple(result)
 
 class BaseFeed(object):
 
@@ -100,7 +111,7 @@ class BaseFeed(object):
     
     def check_or_create_transporter(self, transporter_id, name):
         try:
-            transporter_data = models.Transporter.objects.select_related('user__user').get(
+            transporter_data = get_model('Transporter').objects.select_related('user__user').get(
                 transporter_id=transporter_id)
         except ObjectDoesNotExist as odne:
             logger.debug(
@@ -108,8 +119,8 @@ class BaseFeed(object):
                 .format(odne))
             user = self.register_user(Roles.TRANSPORTER, username=transporter_id,
                                       first_name=name)
-            transporter_data = models.Transporter(user=user,
-                transporter_id=transporter_id)
+            transporter_data = get_model('Transporter')(user=user,
+                                                        transporter_id=transporter_id)
             transporter_data.save()            
         return transporter_data
 

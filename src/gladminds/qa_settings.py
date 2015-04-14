@@ -65,14 +65,11 @@ SAP_CRM_DETAIL = {
                   'password':'welcome123'
                   }
 
-MEMBER_SYNC_WSDL='prod_member_sync_feed.wsdl'
-
-ASC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
-
 COUPON_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/coupon-redeem/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
 VIN_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/vin-sync/?wsdl&v0"
 PURCHASE_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/purchase-sync/?wsdl&v0"
+CTS_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/container-tracker/?wsdl&v0"
 
 MEMBER_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/member-sync/?wsdl&v0"
 ACCUMULATION_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/accumulation-request/?wsdl&v0"
@@ -80,6 +77,7 @@ REDEMPTION_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/redemption-reque
 DISTRIBUTOR_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/distributor-sync/?wsdl&v0"
 
 WSDL_TNS="http://qa.bajaj.gladminds.co/api/v1/feed/"
+CORE_WSDL_TNS="http://qa.bajajcv.gladminds.co/api/v1/feed/"
 
 ENABLE_AMAZON_SQS = True
 
@@ -100,6 +98,7 @@ AFTER_BUY_CONSTANTS = {
 
 ########################SQS Queue Name
 SQS_QUEUE_NAME = "gladminds-qa2"
+SQS_QUEUE_NAME_SMS = "gladminds-qa2"
 ######################################
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail QA"
 VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]
@@ -107,7 +106,7 @@ FEED_FAILURE["receiver"] = ["gmdev@hashedin.com"]
 VIN_SYNC_FEED["receiver"] = ["gmdev@hashedin.com"]
 ###################Change Mail Subject on QA##########################
 MAIL_DETAIL["subject"] = "GladMinds Feed Report QA"
-MAIL_DETAIL["receiver"] = ["gmdev@hashedin.com"]
+MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
 #######################################################################
 ENV = "qa"
 
@@ -118,3 +117,6 @@ ENV = "qa"
 #         'LOCATION': 'gladminds-memcache.t2nfas.cfg.use1.cache.amazonaws.com:11211'
 #     }
 # }
+
+COUPON_URL = 'qa.bajaj.gladminds.co'
+API_FLAG = True 

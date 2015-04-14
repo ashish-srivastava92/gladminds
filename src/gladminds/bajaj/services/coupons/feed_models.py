@@ -287,7 +287,7 @@ class BillOfMaterialList(ComplexModel):
 class EcoReleaseModel(ComplexModel):
     __namespace__ = tns
     ECO_NUMBER  = Unicode
-    ECO_REL_DATE = Date(default=None)
+    ECO_REL_DATE = Unicode(default=None)
     ECO_DESCRIP = Unicode
     ACTION = Unicode
     PARENT_PART = Unicode
@@ -331,8 +331,8 @@ class EcoImplementationModel(ComplexModel):
     __namespace__ = tns
     
     CHANGE_NO = Unicode
-    CHANGE_DATE = Date(default=None)
-    CHANGE_TIME = Date(default=None)
+    CHANGE_DATE = Unicode(default=None)
+    CHANGE_TIME = Time(default=None)
     PLANT = Unicode
     ACTION = Unicode
     PARENT_PART = Unicode

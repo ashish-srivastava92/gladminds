@@ -35,6 +35,7 @@ api_v1.register(product_apis.SpareMasterResource())
 api_v1.register(product_apis.ProductCatalogResource())
 api_v1.register(product_apis.SparePartUPCResource())
 api_v1.register(product_apis.SparePartPointResource())
+api_v1.register(product_apis.ContainerTrackerResource())
 
 api_v1.register(coupon_apis.CouponDataResource())
 
@@ -57,6 +58,7 @@ api_v1.register(dashboard_apis.OverallStatusResource())
 api_v1.register(dashboard_apis.FeedStatusResource())
 api_v1.register(dashboard_apis.SMSReportResource())
 api_v1.register(dashboard_apis.CouponReportResource())
+api_v1.register(dashboard_apis.TicketStatusResource())
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import admin
