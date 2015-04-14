@@ -31,7 +31,6 @@ _AFTERBUY_ADMINS = [{'email':'karthik.rajagopalan@gladminds.co', 'username': 'ka
 _AFTERBUY_SUPERADMINS = [{'email':'naveen.shankar@gladminds.co', 'username':'naveen.shankar', 'phone':'9880747576'},
                          {'email':'afterbuy@gladminds.co', 'username':'afterbuy', 'phone':'9999999999'}
                     ]
-_BAJAJ_ZSM = [('mspendharkar@bajajauto.co.in', 'mspendharkar@bajajauto.co.in', 'milindpendharkar@123', 'Milind Pendharkar')]
 _BAJAJ_LOYALTY_TERRITORY = ['North', 'South', 'East', 'West']
 _BAJAJ_LOYALTY_SUPERADMINS = [('gladminds', '', 'gladminds!123', ''),
                               ('rkjena@bajajauto.co.in', 'rkjena@bajajauto.co.in', 'rkjena!123', 'Rajib Kumar Jena'),
@@ -72,7 +71,6 @@ class Command(BaseCommand):
         self.create_territory_state()
         self.create_loyalty_admins()
         self.set_afterbuy_permissions()
-        self.create_zonal_managers()
         if settings.ENV not in ['qa', 'prod', 'staging']:
             self.upload_loyalty_user()
             self.upload_asm_user()
@@ -174,20 +172,6 @@ class Command(BaseCommand):
                     asm_obj.save(using=GmApps.BAJAJCV)
         except Exception as ex:
             print "[create_bajaj_admins]: ", ex
-
-    def create_zonal_managers(self):
-        from gladminds.bajaj.models import ZonalServiceManager
-        try:
-            for details in _BAJAJ_ZSM:
-                print "create zonal managers", details
-                profile_obj = self.create_user_profile(details, GmApps.BAJAJ, Roles.ZSM)
-                try:
-                    zsm_obj =  ZonalServiceManager.objects.get(user=profile_obj)
-                except:
-                    zsm_obj = ZonalServiceManager(user=profile_obj)
-                    zsm_obj.save()
-        except Exception as ex:
-            print "[create zsm ]" , ex
             
     def create_user_profile(self, details, app, group=None):
         users = User.objects.filter(username=details[0]).using(app)
