@@ -63,10 +63,6 @@ def get_handler(handler, brand=None):
         import_module('gladminds.{0}'.format(brand))
     except Exception as ex:
         brand='core'
-    
-#     if brand=='bajajcv':
-#         brand='core'
-        
     func_handler = '.'.join(handler.split('.')[-1:])
     service_handler = '.'.join(handler.split('.')[-2:-1])
     try:

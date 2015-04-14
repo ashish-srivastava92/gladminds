@@ -222,12 +222,6 @@ class TicketStatus():
 WELCOME_KIT_MECHANIC_FIELDS = ['Mechanic ID', 'first_name', 'middle_name', 'last_name', 'phone_number', 'date_of_birth', 'address_line_1', 'address_line_2', 'address_line_3', 'address_line_4', 'address_line_5', 'address_line_6','shop_name', 'shop_address', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url',]
 
 LOYALTY_ACCESS = {
-                'display_field' : {
-                                    Roles.AREASPARESMANAGERS:[],
-                                    Roles.NATIONALSPARESMANAGERS:[],
-                                    Roles.RPS:[],
-                                    Roles.LPS:[]
-                                   },
                 'query_field' : {
                                   Roles.RPS:{
                                              'user':'packed_by' 
@@ -245,6 +239,12 @@ LOYALTY_ACCESS = {
                                                 'area':'state__in',
                                                 'group_region': 'state__state_name'
                                                },
+                                 Roles.NATIONALSPARESMANAGERS : {
+                                                'user':'member__state__territory__in',
+                                                'area':'state__territory__in',
+                                                'group_region': 'state__territory__territory'
+                                               },
+                                
                                 }
                 }
 CONSIGNMENT_STATUS = (

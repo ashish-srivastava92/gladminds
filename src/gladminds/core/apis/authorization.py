@@ -171,14 +171,17 @@ class MultiAuthorization(Authorization):
 
 class LoyaltyCustomAuthorization(Authorization):
 
-    def __init__(self, display_field=None, query_field=None):
-        self.display_field = display_field
+    def __init__(self, query_field=None):
         self.query_field = query_field
 
-    def get_filter_query(self, user, query): 
+    def get_filter_query(self, user, query, klass_name): 
         if not user.is_superuser:
             user_group = user.groups.values()[0]['name']
             q_user = self.query_field[user_group]['user']
+            
+            ''' based on class name, change the query'''
+            if not klass_name=="redemptionrequest" and self.query_field[user_group].has_key('area'):
+                q_user = self.query_field[user_group]['area']
 
             if user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
                 nsm_territory_list=models.NationalSparesManager.objects.get(user__user=user).territory.all()
@@ -194,10 +197,11 @@ class LoyaltyCustomAuthorization(Authorization):
         return query
 
     def read_list(self, object_list, bundle):           
+        klass_name = bundle.obj.__class__._meta.module_name
         ''' filter the object list based on query defined for specific Role'''
         query = {}
-        query = self.get_filter_query(bundle.request.user, query)
-        object_list = get_model('RedemptionRequest').objects.filter(**query)
+        query = self.get_filter_query(bundle.request.user, query, klass_name)
+        object_list = object_list.filter(**query)
         return object_list
 
 class ServiceDeskCustomAuthorization(Authorization):

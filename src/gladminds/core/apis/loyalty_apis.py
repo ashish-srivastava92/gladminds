@@ -84,7 +84,7 @@ class ProductResource(CustomBaseModelResource):
         
 class RedemptionResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member', full=True)
-    product_catalog = fields.ForeignKey(ProductCatalogResource, 'product')
+    product_catalog = fields.ForeignKey(ProductCatalogResource, 'product', full=True)
     partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)    
 
     class Meta:
@@ -95,7 +95,7 @@ class RedemptionResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         args = constants.LOYALTY_ACCESS
-        authorization = MultiAuthorization(LoyaltyCustomAuthorization(display_field=args['display_field'], query_field=args['query_field']))
+        authorization = MultiAuthorization(LoyaltyCustomAuthorization(query_field=args['query_field']))
         filtering = {
                      "member": ALL_WITH_RELATIONS,
                      "resolution_flag":ALL,

@@ -24,7 +24,8 @@ from tastypie.utils.urls import trailing_slash
 
 from gladminds.core import constants
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from gladminds.core.apis.authorization import MultiAuthorization
+from gladminds.core.apis.authorization import MultiAuthorization,\
+    LoyaltyCustomAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.auth.access_token_handler import create_access_token, \
     delete_access_token
@@ -481,15 +482,16 @@ class MemberResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Member.objects.all()
         resource_name = "members"
-        authorization = Authorization()
+        args = constants.LOYALTY_ACCESS
+        authorization = MultiAuthorization(Authorization(), LoyaltyCustomAuthorization(query_field=args['query_field']))
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
-        args = constants.LOYALTY_ACCESS
         filtering = {
                      "state": ALL,
                      "locality":ALL,
                      "district":ALL,
+                     "last_transaction_date":['gte', 'lte'],
                      }
         ordering = ["created_date", "member_id"]
         
