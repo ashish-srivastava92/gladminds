@@ -24,7 +24,8 @@ from tastypie.utils.urls import trailing_slash
 
 from gladminds.core import constants
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from gladminds.core.apis.authorization import MultiAuthorization
+from gladminds.core.apis.authorization import MultiAuthorization, \
+     ZSMCustomAuthorization, DealerCustomAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.auth.access_token_handler import create_access_token, \
     delete_access_token
@@ -32,7 +33,6 @@ from gladminds.core.auth_helper import Roles
 from gladminds.core.managers.user_manager import RegisterUser
 from gladminds.core.model_fetcher import models
 
-from gladminds.core.model_fetcher import models
 from gladminds.sqs_tasks import send_otp
 from gladminds.core.auth.access_token_handler import create_access_token,\
     delete_access_token
@@ -235,7 +235,7 @@ class UserProfileResource(CustomBaseModelResource):
         except Exception as ex:
             return HttpBadRequest("Either your email is not verified or its not exist")
         site = RequestSite(request)
-        token = get_model('EmailToken').objects.create_email_token(user_obj, email, site, trigger_mail='forgot-password')
+        token = models.EmailToken.objects.create_email_token(user_obj, email, site, trigger_mail='forgot-password')
         activation_key = token.activation_key
         data = {'status': 1, 'message': "Password reset link sent successfully"}
         return HttpResponse(json.dumps(data), content_type="application/json")
@@ -316,15 +316,48 @@ class UserProfileResource(CustomBaseModelResource):
                         format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
 
+class ZonalServiceManagerResource(CustomBaseModelResource):
+    user = fields.ForeignKey(UserProfileResource, 'user', full=True)
+
+    class Meta:
+        queryset = models.ZonalServiceManager.objects.all()
+        resource_name = "zonal-service-managers"
+        authentication = AccessTokenAuthentication()
+        authorization = MultiAuthorization(DjangoAuthorization())
+        detail_allowed_methods = ['get']
+        filtering = {
+                     "user": ALL_WITH_RELATIONS,
+                     "zsm_id": ALL,
+                     }
+        always_return_data = True
+
+class AreaServiceManagerResource(CustomBaseModelResource):
+    user = fields.ForeignKey(UserProfileResource, 'user', full=True)
+    zsm = fields.ForeignKey(ZonalServiceManagerResource, 'zsm', full=True)
+
+    class Meta:
+        queryset = models.AreaServiceManager.objects.all()
+        resource_name = "area-service-managers"
+        authentication = AccessTokenAuthentication()
+        authorization = MultiAuthorization(DjangoAuthorization(), ZSMCustomAuthorization())
+        detail_allowed_methods = ['get']
+        filtering = {
+                     "user": ALL_WITH_RELATIONS,
+                     "asm_id": ALL_WITH_RELATIONS, 
+                     "zsm_id": ALL,
+                     }
+        always_return_data = True
+
 
 class DealerResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
+    asm = fields.ForeignKey(AreaServiceManagerResource, 'asm', full=True)
     
     class Meta:
         queryset = models.Dealer.objects.all()
         resource_name = "dealers"
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization(), DealerCustomAuthorization())
         detail_allowed_methods = ['get', 'post']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
@@ -337,7 +370,7 @@ class DealerResource(CustomBaseModelResource):
                  url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),
                      self.wrap_view('register_dealer'), name="register_dealer"),
                 url(r"^(?P<resource_name>%s)/active%s" % (self._meta.resource_name,trailing_slash()),
-                                                        self.wrap_view('get_active_dealer'), name="get_active_dealer")
+                                                        self.wrap_view('get_active_dealer'), name="get_active_dealer"),
                 ]
     
     

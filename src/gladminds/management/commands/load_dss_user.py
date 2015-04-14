@@ -16,8 +16,8 @@ _BAJAJ_ZSM = [('mspendharkar@bajajauto.co.in', 'mspendharkar@bajajauto.co.in', '
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        self.create_zonal_managers()
-        self.upload_asm_data()
+#         self.create_zonal_managers()
+#         self.upload_asm_data()
         self.upload_asm_dealer_data()
     
     def register_user(self, group, username=None, phone_number=None,
@@ -35,8 +35,8 @@ class Command(BaseCommand):
             user_group.save(using=APP)
         if len(first_name)>30:
             full_name = first_name.split(' ')
-            first_name = ' '.join(full_name[0:3])
-            last_name = ' '.join(full_name[3:])
+            first_name = ' '.join(full_name[0:2])
+            last_name = ' '.join(full_name[2:])
         else:
             first_name = first_name
             last_name = ' '
@@ -48,6 +48,7 @@ class Command(BaseCommand):
                 user_details.address=address
                 user_details.save()
                 new_user.first_name=first_name
+                new_user.last_name=last_name
                 new_user.save(using=APP)
             except ObjectDoesNotExist as ex:
                 logger.info(
@@ -135,7 +136,7 @@ class Command(BaseCommand):
                     asm_list.append(temp)
         try:            
             for asm in asm_list:
-                print "create zonal managers", asm
+                print "create area managers", asm
                 asm_user_pro = self.register_user(Roles.AREASERVICEMANAGER,
                                                            username=asm['email'],
                                                            phone_number=asm['number'],
@@ -158,6 +159,7 @@ class Command(BaseCommand):
         print ''' Started uploading Area Service Manager data'''
         file_list = ['DSSS_ASM_DEALER_MAP.csv']
         dealer_list = []
+        count=0
         DEALER = get_model('Dealer', APP)
         ASM = get_model('AreaServiceManager', APP)
         USER_PROFILE = get_model('UserProfile', APP)
@@ -174,7 +176,8 @@ class Command(BaseCommand):
                     temp['area'] = row_list[3].strip().upper()
                     dealer_list.append(temp)
         for dealer in dealer_list:
-            try:            
+            try:
+                print "map dealer", dealer            
                 asm_object = ASM.objects.get(asm_id=dealer['asm_id'])
                 dealer_user_pro = self.register_user(Roles.DEALERS,
                                                            username=dealer['dealer_id'],
@@ -189,5 +192,7 @@ class Command(BaseCommand):
                 dealer_object.asm=asm_object
                 dealer_object.save()
             except Exception as ex:
+                count = count + 1
+                print "count:", count
                 print "[map dealer and asm ]" , ex, dealer
                 continue

@@ -33,12 +33,12 @@ class ZonalServiceManagerAdmin(GmModelAdmin):
     list_display = ('zsm_id', 'get_user', 'get_profile_number', 'regional_office')
     
 class AreaServiceManagerAdmin(GmModelAdmin):
-    search_fields = ('asm_id',)
+    search_fields = ('asm_id','zsm__zsm_id')
     list_display = ('asm_id', 'get_user', 'get_profile_number', 'get_profile_address','area', 'zsm')
     
 class DealerAdmin(GmModelAdmin):
-    search_fields = ('dealer_id',)
-    list_display = ('dealer_id', 'get_user', 'get_profile_number', 'get_profile_address')
+    search_fields = ('dealer_id','asm__asm_id')
+    list_display = ('dealer_id', 'get_user', 'get_profile_number', 'get_profile_address', 'asm')
 
 class AuthorizedServiceCenterAdmin(GmModelAdmin):
     search_fields = ('asc_id', 'dealer__dealer_id')
