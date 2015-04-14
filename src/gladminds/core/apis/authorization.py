@@ -5,16 +5,9 @@ from django.conf import settings
 
 from gladminds.afterbuy import models as afterbuy
 from gladminds.core.auth_helper import Roles
-<<<<<<< HEAD
-# from gladminds.bajaj import models
 import operator
 from django.db.models.query_utils import Q
 from gladminds.core.model_fetcher import get_model, models
-=======
-from gladminds.core.model_fetcher import models, get_model
-# import operator
-# from django.db.models.query_utils import Q
->>>>>>> 64aed81... GM-834:Loyalty Report 4
 
 class CustomAuthorization(Authorization):
 
@@ -181,23 +174,15 @@ class LoyaltyCustomAuthorization(Authorization):
     def __init__(self, display_field=None, query_field=None):
         self.display_field = display_field
         self.query_field = query_field
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> 64aed81... GM-834:Loyalty Report 4
     def get_filter_query(self, user, query): 
         if not user.is_superuser:
             user_group = user.groups.values()[0]['name']
             q_user = self.query_field[user_group]['user']
-<<<<<<< HEAD
+
             if user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
                 nsm_territory_list=models.NationalSparesManager.objects.get(user__user=user).territory.all()
                 query[q_user] = nsm_territory_list
             elif user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-=======
-            if user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
->>>>>>> 64aed81... GM-834:Loyalty Report 4
                 asm_state_list=models.AreaSparesManager.objects.get(user__user=user).state.all()
                 query[q_user] = asm_state_list
             elif user.groups.filter(name=Roles.DISTRIBUTORS).exists():
@@ -213,21 +198,7 @@ class LoyaltyCustomAuthorization(Authorization):
         query = self.get_filter_query(bundle.request.user, query)
         object_list = get_model('RedemptionRequest').objects.filter(**query)
         return object_list
-<<<<<<< HEAD
-=======
     
-#         user = bundle.request.user
-#         user_name = user.groups.values()[0]['name']
-#         try:
-#             ''' hides the fields in object_list '''            
-#             if self.display_field:
-#                 for obj in object_list:
-#                     for x in self.display_field[user_name]:
-#                         delattr(obj, x)
-#             return object_list
-#         except:
->>>>>>> 64aed81... GM-834:Loyalty Report 4
-
 class ServiceDeskCustomAuthorization(Authorization):
     def get_sa_under_dealer(self, dealer_id):
         sa_obj = get_model('ServiceAdvisor').objects.filter(dealer__user__user_id=dealer_id).values('user__user_id')
