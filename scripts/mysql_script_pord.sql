@@ -52,6 +52,6 @@
 --alter table gm_userprofile add column is_phone_verified boolean default False;
 
 delete from gm_areaservicemanager where id not in (1, 13, 22, 45, 62, 81, 105);
-alter table gm_areaservicemanager add column regional_office varchar(100) null;
+alter table gm_zonalservicemanager add column regional_office varchar(100) null;
 alter table gm_areaservicemanager add column area varchar(100) null;
 
