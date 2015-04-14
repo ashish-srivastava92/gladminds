@@ -491,6 +491,7 @@ class MemberResource(CustomBaseModelResource):
                      "locality":ALL,
                      "district":ALL,
                      }
+        ordering = ["created_date", "member_id"]
         
     def prepend_urls(self):
         return [
@@ -503,7 +504,10 @@ class MemberResource(CustomBaseModelResource):
         ]
    
     def get_role_access_query(self, user, area, args):
-        if user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+        if user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
+            nsm_territory_list=models.NationalSparesManager.objects.get(user__user=user).territory.all()
+            args[area] = nsm_territory_list
+        elif user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm_state_list=models.AreaSparesManager.objects.get(user__user=user).state.all()
             args[area] = asm_state_list
         elif user.groups.filter(name=Roles.DISTRIBUTORS).exists():

@@ -688,10 +688,10 @@ class RedemptionRequestAdmin(GmModelAdmin):
                 obj.delivery_date=datetime.datetime.now()
         if 'status' in form.changed_data:
             if obj.status=='Approved' and obj.refunded_points:
-                loyalty.update_points(obj.member, redeem=obj.product.points)
+                loyalty.update_points(obj.member, redeem=obj.product.points, refund_flag=True)
                 obj.refunded_points = False
             elif obj.status=='Rejected' and not obj.refunded_points:
-                loyalty.update_points(obj.member, accumulate=obj.product.points)
+                loyalty.update_points(obj.member, accumulate=obj.product.points, refund_flag=True)
                 obj.refunded_points = True
         super(RedemptionRequestAdmin, self).save_model(request, obj, form, change)
         if 'status' in form.changed_data and obj.status in constants.STATUS_TO_NOTIFY:

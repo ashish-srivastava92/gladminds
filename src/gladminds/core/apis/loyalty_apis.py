@@ -115,7 +115,10 @@ class RedemptionResource(CustomBaseModelResource):
         if not user.is_superuser:
             user_group = user.groups.values()[0]['name']
             q_user = self._meta.args['query_field'][user_group]['user']
-            if user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            if user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
+                nsm_territory_list=models.NationalSparesManager.objects.get(user__user=user).territory.all()
+                query[q_user] = nsm_territory_list
+            elif user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
                 asm_state_list=models.AreaSparesManager.objects.get(user__user=user).state.all()
                 query[q_user] = asm_state_list
             elif user.groups.filter(name=Roles.DISTRIBUTORS).exists():
