@@ -47,30 +47,22 @@ class UtilityResourceTest(BrandResourceTestCase):
         result = self.get(url)
         self.check_result(result=result['objects'][0],parameter="customer_phone_number",value="+917777777777")
     
-    def register_sa(self,username,password):
-        data=SA_DATA
-        ex_data=EXISTING_SA_DATA
-        update_data=UPDATE_SA_DATA
-        self.send_service_advisor_feed()
+    def register_sa(self,username,password,data=SA_DATA):
         uri="aftersell/register/sa"
-        self.post_as_dealer(uri=uri,data=ex_data,isjson="False",username=username,password=password)
-        url="v1/service-advisors/?user__phone_number__contains=1111111111&status=Y"
-        result=self.get(url)
-        self.assertEqual(result['objects'].__len__(),1)
-        self.check_result(result=result['objects'][0],parameter="dealer",value="GMDEALER031",inner_parameter="dealer_id")
-        self.post_as_dealer(uri=uri,data=update_data,isjson="False",username=username,password=password)
-        url="v1/service-advisors/?service_advisor_id=GMDEALER001SA31"
-        result=self.get(url)
-        self.check_result(result=result['objects'][0],parameter="status",value="N")
         self.post_as_dealer(uri=uri,data=data,isjson="False",username=username,password=password)
-        url="v1/service-advisors/?user__phone_number__contains=6767676767"
-        result=self.get(url)
-        self.check_result(result=result['objects'][0]['user'], value="SA29", parameter="user", inner_parameter="first_name")
     
     def register_asc(self,username,password):
         data=ASC_DATA
         uri="aftersell/register/asc"
         self.post_as_dealer(uri=uri,data=data,isjson="False",username=username,password=password)
+    
+    def get_sa_feed(self,phone,status=None):
+        if status != None:
+            url="v1/service-advisors/?user__phone_number__contains="+phone+"&status="+status
+        else:
+            url="v1/service-advisors/?user__phone_number__contains="+phone
+        result=self.get(url)
+        return result
 
         
         
