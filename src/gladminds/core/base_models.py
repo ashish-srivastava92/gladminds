@@ -137,6 +137,32 @@ class OTPToken(BaseModel):
     def __unicode__(self):
         return str(self.phone_number or '') + ' ' +self.token
 
+     
+class ZonalServiceManager(BaseModel):
+    '''details of Zonal Service Manager'''
+    zsm_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    regional_office = models.CharField(max_length=100, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_zonalservicemanager"
+        verbose_name_plural = "Zonal Service Managers "
+    
+    def __unicode__(self):
+        return self.zsm_id
+
+class AreaServiceManager(BaseModel):
+    '''details of Area Service Manager'''
+    asm_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    area = models.CharField(max_length=100, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_areaservicemanager"
+        verbose_name_plural = "Area Service Managers "
+    
+    def __unicode__(self):
+        return self.asm_id
 
 class Dealer(BaseModel):
     '''Details of Dealer'''
@@ -835,30 +861,6 @@ class Constant(BaseModel):
         
     def __unicode__(self):
         return self.constant_name
-
-class AreaServiceManager(BaseModel):
-    '''details of Area Service Manager'''
-    asm_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
-    
-    class Meta:
-        abstract = True
-        db_table = "gm_areaservicemanager"
-        verbose_name_plural = "Area Service Managers "
-    
-    def __unicode__(self):
-        return self.user.user.username
-     
-class ZonalServiceManager(BaseModel):
-    '''details of Zonal Service Manager'''
-    zsm_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
-    
-    class Meta:
-        abstract = True
-        db_table = "gm_zonalservicemanager"
-        verbose_name_plural = "Zonal Service Managers "
-    
-    def __unicode__(self):
-        return self.user.user.username
 
 class BOMHeader(BaseModel):
     '''Detaills of  Header fields BOM'''

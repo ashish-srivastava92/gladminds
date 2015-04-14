@@ -5,7 +5,7 @@
             <ns1:ObjectList>
                 <ns1:ContainerTrackerData>
                     <ns1:ContainerTrackerModel>
-                        <ns1:GATEIN_TIME>05:30:02</ns1:GATEIN_TIME>
+                        <ns1:GATEIN_TIME>00:00:00</ns1:GATEIN_TIME>
                         <ns1:ZIB_INDENT_NUM>1</ns1:ZIB_INDENT_NUM>
                         <ns1:CONSIGNMENT_ID>abcd</ns1:CONSIGNMENT_ID>
                         <ns1:TRANSPORTER_ID>121213</ns1:TRANSPORTER_ID>
@@ -14,7 +14,7 @@
                         <ns1:LR_DATE>2015-03-04</ns1:LR_DATE>
                         <ns1:DO_NUM>1</ns1:DO_NUM>
                         <ns1:TRUCK_NO>45</ns1:TRUCK_NO>
-                        <ns1:GATEIN_DATE>2015-02-04</ns1:GATEIN_DATE>
+                        <ns1:GATEIN_DATE>0000-00-00</ns1:GATEIN_DATE>
                     </ns1:ContainerTrackerModel>
                 </ns1:ContainerTrackerData>
             </ns1:ObjectList>
