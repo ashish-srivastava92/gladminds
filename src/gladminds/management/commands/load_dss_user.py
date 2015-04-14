@@ -16,7 +16,7 @@ _BAJAJ_ZSM = [('mspendharkar@bajajauto.co.in', 'mspendharkar@bajajauto.co.in', '
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-#         self.create_zonal_managers()
+        self.create_zonal_managers()
         self.upload_asm_data()
     
     def register_user(self, group, username=None, phone_number=None,
