@@ -192,7 +192,5 @@ class Command(BaseCommand):
                 dealer_object.asm=asm_object
                 dealer_object.save()
             except Exception as ex:
-                count = count + 1
-                print "count:", count
                 print "[map dealer and asm ]" , ex, dealer
                 continue
