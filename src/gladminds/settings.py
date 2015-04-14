@@ -73,6 +73,10 @@ SUIT_CONFIG = {
     'MENU': (
         {'app': 'bajaj', 'label': 'Users', 'icon': ' icon-folder-open',
          'models': ('user', 'userprofile',
+                    {'model': 'zonalservicemanager',
+                     'label': 'Zonal Service Manager'},
+                    {'model': 'areaservicemanager',
+                     'label': 'Area Service Manager'},
                     {'model': 'dealer',
                      'label': 'Dealer'},
                     {'model': 'authorizedservicecenter',
