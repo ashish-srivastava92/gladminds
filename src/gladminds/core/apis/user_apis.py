@@ -46,6 +46,7 @@ from gladminds.core.model_helpers import format_phone_number
 from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.managers.mail import send_reset_link_email
 from gladminds.core.utils import get_sql_data
+from django.core.serializers.json import DjangoJSONEncoder
 
 logger = logging.getLogger('gladminds')
 
@@ -65,7 +66,7 @@ class UserResource(CustomBaseModelResource):
                      "username" : ALL
                      }
         always_return_data = True
-
+        ordering = ['username', 'email']
 
 class UserProfileResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserResource, 'user', null=True, blank=True, full=True)
@@ -85,7 +86,8 @@ class UserProfileResource(CustomBaseModelResource):
                      "pincode": ALL
                      }
         always_return_data = True 
-
+        ordering = ['user', 'phone_number']
+        
     def prepend_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/login%s" % (self._meta.resource_name,
@@ -293,10 +295,13 @@ class UserProfileResource(CustomBaseModelResource):
 
         if user_auth is not None:
             access_token = create_access_token(user_auth, http_host)
+            user_groups = []
+            for group in request.user.groups.values():
+                user_groups.append(group['name'])
             if user_auth.is_active:
                 login(request, user_auth)
                 data = {'status': 1, 'message': "login successfully",
-                        'access_token': access_token, "user_id": user_auth.id}
+                        'access_token': access_token, "user_id": user_auth.id, "user_groups" : user_groups}
         else:
             data = {'status': 0, 'message': "login unsuccessful"}
         return HttpResponse(json.dumps(data), content_type="application/json")
@@ -327,7 +332,8 @@ class DealerResource(CustomBaseModelResource):
                      "dealer_id": ALL,
                      }
         always_return_data = True
-
+        ordering = ['user']
+        
     def prepend_urls(self):
         return [
                  url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),

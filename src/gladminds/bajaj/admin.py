@@ -27,6 +27,14 @@ class UserProfileAdmin(GmModelAdmin):
     list_display = ('user', 'phone_number', 'status', 'address',
                     'state', 'country', 'pincode', 'date_of_birth', 'gender')
     readonly_fields = ('image_tag',)
+
+class ZonalServiceManagerAdmin(GmModelAdmin):
+    search_fields = ('zsm_id',)
+    list_display = ('zsm_id', 'get_user', 'get_profile_number', 'get_profile_address')
+    
+class AreaServiceManagerAdmin(GmModelAdmin):
+    search_fields = ('asm_id',)
+    list_display = ('asm_id', 'get_user', 'get_profile_number', 'get_profile_address')
     
 class DealerAdmin(GmModelAdmin):
     search_fields = ('dealer_id',)
@@ -35,7 +43,7 @@ class DealerAdmin(GmModelAdmin):
 
 class AuthorizedServiceCenterAdmin(GmModelAdmin):
     search_fields = ('asc_id', 'dealer__dealer_id')
-    list_display = ('asc_id', 'get_user', 'get_profile_number', 'get_profile_address', 'dealer', 'asm')
+    list_display = ('asc_id', 'get_user', 'get_profile_number', 'get_profile_address', 'dealer')
 
 class ServiceAdvisorAdmin(GmModelAdmin):
     search_fields = ('service_advisor_id', 'dealer__dealer_id', 'asc__asc_id')
@@ -822,6 +830,9 @@ brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
 brand_admin.register(User, UserAdmin)
 brand_admin.register(Group, GroupAdmin)
 brand_admin.register(models.UserProfile, UserProfileAdmin)
+
+brand_admin.register(models.ZonalServiceManager, ZonalServiceManagerAdmin)
+brand_admin.register(models.AreaServiceManager, AreaServiceManagerAdmin)
 
 brand_admin.register(models.Dealer, DealerAdmin)
 brand_admin.register(models.AuthorizedServiceCenter, AuthorizedServiceCenterAdmin)
