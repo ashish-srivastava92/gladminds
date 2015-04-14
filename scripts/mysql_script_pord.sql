@@ -54,4 +54,5 @@
 delete from gm_areaservicemanager where id not in (1, 13, 22, 45, 62, 81, 105);
 alter table gm_zonalservicemanager add column regional_office varchar(100) null;
 alter table gm_areaservicemanager add column area varchar(100) null;
-
+alter table gm_dealer add asm_id integer;
+alter table gm_dealer add foreign key (asm_id) references gm_areaservicemanager(id);

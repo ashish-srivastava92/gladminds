@@ -15,6 +15,8 @@ from gladminds.core.services.loyalty.loyalty import loyalty
 api_v1 = Api(api_name="v1")
 
 api_v1.register(user_apis.UserProfileResource())
+api_v1.register(user_apis.ZonalServiceManagerResource())
+api_v1.register(user_apis.AreaServiceManagerResource())
 api_v1.register(user_apis.DealerResource())
 api_v1.register(user_apis.AuthorizedServiceCenterResource())
 api_v1.register(user_apis.ServiceAdvisorResource())
