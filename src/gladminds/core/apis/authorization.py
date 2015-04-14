@@ -174,6 +174,7 @@ class LoyaltyCustomAuthorization(Authorization):
     def __init__(self, display_field=None, query_field=None):
         self.display_field = display_field
         self.query_field = query_field
+
     def get_filter_query(self, user, query): 
         if not user.is_superuser:
             user_group = user.groups.values()[0]['name']
@@ -198,7 +199,7 @@ class LoyaltyCustomAuthorization(Authorization):
         query = self.get_filter_query(bundle.request.user, query)
         object_list = get_model('RedemptionRequest').objects.filter(**query)
         return object_list
-    
+
 class ServiceDeskCustomAuthorization(Authorization):
     def get_sa_under_dealer(self, dealer_id):
         sa_obj = get_model('ServiceAdvisor').objects.filter(dealer__user__user_id=dealer_id).values('user__user_id')
