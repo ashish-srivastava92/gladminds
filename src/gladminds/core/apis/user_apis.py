@@ -66,7 +66,7 @@ class UserResource(CustomBaseModelResource):
                      "username" : ALL
                      }
         always_return_data = True
-
+        ordering = ['username', 'email']
 
 class UserProfileResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserResource, 'user', null=True, blank=True, full=True)
@@ -86,7 +86,8 @@ class UserProfileResource(CustomBaseModelResource):
                      "pincode": ALL
                      }
         always_return_data = True 
-
+        ordering = ['user', 'phone_number']
+        
     def prepend_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/login%s" % (self._meta.resource_name,
@@ -331,7 +332,8 @@ class DealerResource(CustomBaseModelResource):
                      "dealer_id": ALL,
                      }
         always_return_data = True
-
+        ordering = ['user']
+        
     def prepend_urls(self):
         return [
                  url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),
