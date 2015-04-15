@@ -411,6 +411,8 @@ class CreditNoteFeed(BaseFeed):
                         valid_coupon.credit_note = credit_note['credit_note']
                         valid_coupon.credit_date = credit_note['credit_date']
                         valid_coupon.servicing_dealer = credit_note['dealer']
+#                         valid_coupon.closed_date = credit_note['closed_date']
+                        valid_coupon.closed_date = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
                         valid_coupon.save()
                 logger.info("updated credit details:: vin : {0} coupon : {1} service_type : {2}".format(
                                 credit_note['vin'], credit_note['unique_service_coupon'],
@@ -587,10 +589,11 @@ class ContainerTrackerFeed(BaseFeed):
                                                                     do_num=tracker_obj['do_num'],
                                                                     transporter=transporter_data)
 
-                if tracker_obj['lr_date'] == "0000-00-00" or not tracker_obj['lr_date']:
-                    lr_date=None
-                else:
-                    lr_date=datetime.strptime(tracker_obj['lr_date'], "%Y-%m-%d")
+                    if tracker_obj['lr_date'] == "0000-00-00" or not tracker_obj['lr_date']:
+                        lr_date=None
+                    else:
+                        lr_date=datetime.strptime(tracker_obj['lr_date'], "%Y-%m-%d")
+                    container_tracker_obj.lr_date=lr_date
                 
                 if tracker_obj['gatein_date'] != "0000-00-00":
                     gatein_date=datetime.strptime(tracker_obj['gatein_date'], "%Y-%m-%d")
@@ -598,7 +601,6 @@ class ContainerTrackerFeed(BaseFeed):
                 else:
                     gatein_date=None
                     status="Open"
-                container_tracker_obj.lr_date=lr_date
                 container_tracker_obj.gatein_date=gatein_date
                 container_tracker_obj.gatein_time=tracker_obj['gatein_time']
                 container_tracker_obj.status=status

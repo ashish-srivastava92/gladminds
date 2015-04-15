@@ -257,4 +257,19 @@ class CTSCustomAuthorization(Authorization):
                 return False
         
         return True
-    
+
+class ZSMCustomAuthorization(Authorization):
+    def read_list(self, object_list, bundle):
+        if bundle.request.user.groups.filter(name=Roles.ZSM):
+            object_list = object_list.filter(zsm__user__user_id=int(bundle.request.user.id))
+        elif bundle.request.user.groups.filter(name=Roles.AREASERVICEMANAGER):
+            object_list = object_list.filter(user__user_id=int(bundle.request.user.id))
+        return object_list
+
+class DealerCustomAuthorization(Authorization):
+    def read_list(self, object_list, bundle):
+        if bundle.request.user.groups.filter(name=Roles.ZSM):
+            object_list = object_list.filter(asm__zsm__user__user_id=int(bundle.request.user.id))
+        elif bundle.request.user.groups.filter(name=Roles.AREASERVICEMANAGER):
+            object_list = object_list.filter(asm__user__user_id=int(bundle.request.user.id))
+        return object_list

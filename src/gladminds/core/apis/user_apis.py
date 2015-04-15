@@ -24,8 +24,10 @@ from tastypie.utils.urls import trailing_slash
 
 from gladminds.core import constants
 from gladminds.core.apis.authentication import AccessTokenAuthentication
+
 from gladminds.core.apis.authorization import MultiAuthorization,\
-    LoyaltyCustomAuthorization
+    LoyaltyCustomAuthorization,\
+     ZSMCustomAuthorization, DealerCustomAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.auth.access_token_handler import create_access_token, \
     delete_access_token
@@ -33,7 +35,6 @@ from gladminds.core.auth_helper import Roles
 from gladminds.core.managers.user_manager import RegisterUser
 from gladminds.core.model_fetcher import models
 
-from gladminds.core.model_fetcher import models
 from gladminds.sqs_tasks import send_otp
 from gladminds.core.auth.access_token_handler import create_access_token,\
     delete_access_token
@@ -48,6 +49,7 @@ from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.managers.mail import send_reset_link_email
 from gladminds.core.utils import get_sql_data
 from django.core.serializers.json import DjangoJSONEncoder
+from tastypie.authentication import MultiAuthentication
 
 logger = logging.getLogger('gladminds')
 
@@ -64,10 +66,11 @@ class UserResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'put']
         filtering = {
                      "is_active": ALL,
-                     "username" : ALL
+                     "username" : ALL,
+                     "id" : ALL
                      }
         always_return_data = True
-
+        ordering = ['username', 'email']
 
 class UserProfileResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserResource, 'user', null=True, blank=True, full=True)
@@ -87,7 +90,8 @@ class UserProfileResource(CustomBaseModelResource):
                      "pincode": ALL
                      }
         always_return_data = True 
-
+        ordering = ['user', 'phone_number']
+        
     def prepend_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/login%s" % (self._meta.resource_name,
@@ -236,7 +240,7 @@ class UserProfileResource(CustomBaseModelResource):
         except Exception as ex:
             return HttpBadRequest("Either your email is not verified or its not exist")
         site = RequestSite(request)
-        token = get_model('EmailToken').objects.create_email_token(user_obj, email, site, trigger_mail='forgot-password')
+        token = models.EmailToken.objects.create_email_token(user_obj, email, site, trigger_mail='forgot-password')
         activation_key = token.activation_key
         data = {'status': 1, 'message': "Password reset link sent successfully"}
         return HttpResponse(json.dumps(data), content_type="application/json")
@@ -317,28 +321,63 @@ class UserProfileResource(CustomBaseModelResource):
                         format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
 
+class ZonalServiceManagerResource(CustomBaseModelResource):
+    user = fields.ForeignKey(UserProfileResource, 'user', full=True)
+
+    class Meta:
+        queryset = models.ZonalServiceManager.objects.all()
+        resource_name = "zonal-service-managers"
+        authentication = AccessTokenAuthentication()
+        authorization = MultiAuthorization(DjangoAuthorization())
+        detail_allowed_methods = ['get']
+        filtering = {
+                     "user": ALL_WITH_RELATIONS,
+                     "zsm_id": ALL,
+                     }
+        always_return_data = True
+
+class AreaServiceManagerResource(CustomBaseModelResource):
+    user = fields.ForeignKey(UserProfileResource, 'user', full=True)
+    zsm = fields.ForeignKey(ZonalServiceManagerResource, 'zsm', full=True)
+
+    class Meta:
+        queryset = models.AreaServiceManager.objects.all()
+        resource_name = "area-service-managers"
+        authentication = AccessTokenAuthentication()
+        authorization = MultiAuthorization(DjangoAuthorization(), ZSMCustomAuthorization())
+        detail_allowed_methods = ['get']
+        filtering = {
+                     "user": ALL_WITH_RELATIONS,
+                     "asm_id": ALL, 
+                     "zsm": ALL_WITH_RELATIONS,
+                     }
+        always_return_data = True
+
 
 class DealerResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
+    asm = fields.ForeignKey(AreaServiceManagerResource, 'asm', full=True)
     
     class Meta:
         queryset = models.Dealer.objects.all()
         resource_name = "dealers"
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization(), DealerCustomAuthorization())
         detail_allowed_methods = ['get', 'post']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "dealer_id": ALL,
+                     "asm":ALL_WITH_RELATIONS,
                      }
         always_return_data = True
-
+        ordering = ['user']
+        
     def prepend_urls(self):
         return [
                  url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),
                      self.wrap_view('register_dealer'), name="register_dealer"),
                 url(r"^(?P<resource_name>%s)/active%s" % (self._meta.resource_name,trailing_slash()),
-                                                        self.wrap_view('get_active_dealer'), name="get_active_dealer")
+                                                        self.wrap_view('get_active_dealer'), name="get_active_dealer"),
                 ]
     
     
@@ -369,7 +408,6 @@ class DealerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def get_active_dealer(self, request, **kwargs):
-        print request.GET
         result = []
         active_today = models.Dealer.objects.filter(last_transaction_date__startswith=date.today()).count()
         today = {}
@@ -574,7 +612,8 @@ class BrandDepartmentResource(CustomBaseModelResource):
         detail_allowed_methods = ['get']
         always_return_data = True
         filtering = {
-                     "id" : ALL
+                     "id" : ALL,
+                     "name" : ALL
                      }
 
 

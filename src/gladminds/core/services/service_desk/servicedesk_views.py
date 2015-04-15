@@ -218,7 +218,7 @@ def modify_servicedesk_tickets(request, feedback_id):
     
     if request.method == 'POST':
         host = request.get_host()
-        modify_feedback(feedback_obj, request.POST, request.user, host)
+        ret = modify_feedback(feedback_obj, request.POST, request.user, host)
     if feedback_obj:
         return render(request, 'service-desk/ticket_modify.html',\
                   {"feedback": feedback_obj, "FEEDBACK_STATUS": status,\
