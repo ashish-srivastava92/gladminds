@@ -38,7 +38,7 @@ from gladminds.core.auth.access_token_handler import create_access_token,\
     delete_access_token
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from gladminds.core.apis.authorization import MultiAuthorization
+
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.auth import otp_handler
 from django.contrib.sites.models import RequestSite
@@ -327,12 +327,79 @@ class ZonalServiceManagerResource(CustomBaseModelResource):
         resource_name = "zonal-service-managers"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get']
+        detail_allowed_methods = ['get', 'delete']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "zsm_id": ALL,
                      }
         always_return_data = True
+
+    def prepend_urls(self):
+        return [
+                 url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('register_zonal_service_manager'), name="register_zonal_service_manager"),
+                 url(r"^(?P<resource_name>%s)/update/(?P<zsm_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('update_zonal_service_manager'), name="update_zonal_service_manager"),
+                ]
+    
+    
+    def register_zonal_service_manager(self, request, **kwargs):
+        self.is_authenticated(request)
+        if not request.user.is_superuser or request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=401)
+
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        zsm_id = load.get('id')
+        name = load.get('name')
+        regional_office = load.get('regional-office')
+        phone_number = load.get('phone-number')
+        email = load.get('email')
+        try:
+            user = models.ZonalServiceManager.objects.get(zsm_id=zsm_id)
+            data = {'status': 0 , 'message' : 'Regional service manager with this id already exists'}
+        except Exception as ex:
+            logger.info("Exception while registering ZSM {0}".format(ex))
+            user_data = register_user.register_user(Roles.ZSM,username=email,
+                                             phone_number=phone_number,
+                                             first_name=name,
+                                             email = email,
+                                             APP=settings.BRAND)
+            zsm_data = models.ZonalServiceManager(zsm_id=zsm_id, user=user_data,
+                                        regional_office=regional_office)
+            zsm_data.save()
+            data = {"status": 1 , "message" : "Zonal service manager registered successfully"}
+        return HttpResponse(json.dumps(data), content_type="application/json")
+    
+    def update_zonal_service_manager(self, request, **kwargs):
+        self.is_authenticated(request)
+        if not request.user.is_superuser or request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=401)
+        zsm_id=kwargs['zsm_id']
+        try:
+            zsm_obj = models.ZonalServiceManager.objects.get(zsm_id=zsm_id)
+            load = json.loads(request.body)
+            
+            zsm_profile = zsm_obj.user
+            zsm_profile.phone_number = load.get('phone-number')
+            
+            zsm_user= zsm_obj.user.user
+            zsm_user.first_name=load.get('name')
+            
+            zsm_obj.regional_office = load.get('regional-office')
+            
+            zsm_user.save(using=settings.BRAND)
+            zsm_profile.save()
+            zsm_obj.save()
+            data = {'status': 0 , 'message' : 'Regional service manager updated successfully'}
+        except Exception as ex:
+            logger.info("Exception while registering ZSM {0}".format(ex))
+            return HttpResponse(json.dumps({"message" : "RSM ID not found"}),content_type="application/json", status=404)
+        return HttpResponse(json.dumps(data), content_type="application/json")
 
 class AreaServiceManagerResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
