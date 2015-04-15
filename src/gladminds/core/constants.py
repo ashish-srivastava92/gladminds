@@ -74,6 +74,19 @@ DEMO_PRIORITY = (
         ('P1', 'P1'),
     )
 
+PRIORITIES = { 'bajaj' : (
+        ('Low', 'Low'),
+        ('High', 'High'),
+        ('Medium', 'Medium'),
+        ('Urgent', 'Urgent'),
+    ),
+            'daimler' : (
+        ('P3', 'P3'),
+        ('P2', 'P2'),
+        ('P1', 'P1'),
+    ),
+}
+
 FEEDBACK_TYPE = (('Problem', 'Problem'),
                  ('Question', 'Question'),
                  ('Feature Request', 'Feature Request'),
