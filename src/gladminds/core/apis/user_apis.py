@@ -492,8 +492,18 @@ class MemberResource(CustomBaseModelResource):
                      "locality":ALL,
                      "district":ALL,
                      "last_transaction_date":['gte', 'lte'],
+                     "total_accumulation_req":ALL,
+                     "total_accumulation_points":ALL,
+                     "total_redemption_points":ALL,
+                     "total_redemption_req":ALL,
+                     "first_name":ALL,
+                     "middle_name":ALL,
+                     "last_name":ALL,
+                     "registered_date":ALL
                      }
-        ordering = ["created_date", "member_id"]
+        ordering = ["state", "locality", "district", "registered_date",
+                    "created_date", "mechanic_id", "last_transaction_date", "total_accumulation_req"
+                    "total_accumulation_points", "total_redemption_points", "total_redemption_req" ]
         
     def prepend_urls(self):
         return [
