@@ -83,8 +83,8 @@ class ProductResource(CustomBaseModelResource):
         always_return_data = True
         
 class RedemptionResource(CustomBaseModelResource):
-    member = fields.ForeignKey(MemberResource, 'member')
-    product_catalog = fields.ForeignKey(ProductCatalogResource, 'product')
+    member = fields.ForeignKey(MemberResource, 'member', full=True)
+    product_catalog = fields.ForeignKey(ProductCatalogResource, 'product', full=True)
     partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)    
 
     class Meta:
@@ -95,14 +95,13 @@ class RedemptionResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         args = constants.LOYALTY_ACCESS
-         
-        authorization = MultiAuthorization(Authorization(), LoyaltyCustomAuthorization
-                                           (display_field=args['display_field'], query_field=args['query_field']))
+        authorization = MultiAuthorization(LoyaltyCustomAuthorization(query_field=args['query_field']))
         filtering = {
                      "member": ALL_WITH_RELATIONS,
                      "resolution_flag":ALL,
                      }
- 
+        ordering = ["created_date", "status", "member"]
+
     def prepend_urls(self):
         return [
                 url(r"^(?P<resource_name>%s)/members-details/(?P<status>[a-zA-Z.-]+)%s" % (self._meta.resource_name,trailing_slash()),
@@ -115,7 +114,10 @@ class RedemptionResource(CustomBaseModelResource):
         if not user.is_superuser:
             user_group = user.groups.values()[0]['name']
             q_user = self._meta.args['query_field'][user_group]['user']
-            if user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            if user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
+                nsm_territory_list=models.NationalSparesManager.objects.get(user__user=user).territory.all()
+                query[q_user] = nsm_territory_list
+            elif user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
                 asm_state_list=models.AreaSparesManager.objects.get(user__user=user).state.all()
                 query[q_user] = asm_state_list
             elif user.groups.filter(name=Roles.DISTRIBUTORS).exists():
