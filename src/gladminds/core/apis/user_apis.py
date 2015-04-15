@@ -47,6 +47,7 @@ from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.managers.mail import send_reset_link_email
 from gladminds.core.utils import get_sql_data
 from django.core.serializers.json import DjangoJSONEncoder
+from tastypie.authentication import MultiAuthentication
 
 logger = logging.getLogger('gladminds')
 
@@ -63,7 +64,8 @@ class UserResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'put']
         filtering = {
                      "is_active": ALL,
-                     "username" : ALL
+                     "username" : ALL,
+                     "id" : ALL
                      }
         always_return_data = True
         ordering = ['username', 'email']
@@ -404,7 +406,6 @@ class DealerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def get_active_dealer(self, request, **kwargs):
-        print request.GET
         result = []
         active_today = models.Dealer.objects.filter(last_transaction_date__startswith=date.today()).count()
         today = {}
@@ -615,7 +616,8 @@ class BrandDepartmentResource(CustomBaseModelResource):
         detail_allowed_methods = ['get']
         always_return_data = True
         filtering = {
-                     "id" : ALL
+                     "id" : ALL,
+                     "name" : ALL
                      }
 
 
