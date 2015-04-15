@@ -505,17 +505,6 @@ class MemberResource(CustomBaseModelResource):
                 self.wrap_view('get_total_points'), name="get_total_points"),
         ]
    
-    def get_role_access_query(self, user, area, args):
-        if user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
-            nsm_territory_list=models.NationalSparesManager.objects.get(user__user=user).territory.all()
-            args[area] = nsm_territory_list
-        elif user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm_state_list=models.AreaSparesManager.objects.get(user__user=user).state.all()
-            args[area] = asm_state_list
-        elif user.groups.filter(name=Roles.DISTRIBUTORS).exists():
-            distributor_city =  models.Distributor.objects.get(user__user=user).city
-            args[area] = str(distributor_city)
-        return args
 
     def get_active_member(self, request, **kwargs):
         self.is_authenticated(request)
@@ -532,7 +521,7 @@ class MemberResource(CustomBaseModelResource):
                 user_group = request.user.groups.values()[0]['name']
                 area = self._meta.args['query_field'][user_group]['area']
                 region = self._meta.args['query_field'][user_group]['group_region']
-                args = self.get_role_access_query(request.user, area, args)
+                args = LoyaltyCustomAuthorization.get_filter_query(user=request.user, q_user=area, query=args)
             registered_member = models.Member.objects.filter(**args).values(region).annotate(count= Count('mechanic_id'))
             args['last_transaction_date__gte']=datetime.now()-timedelta(int(active_days))
             active_member = models.Member.objects.filter(**args).values(region).annotate(count= Count('mechanic_id'))
@@ -561,7 +550,7 @@ class MemberResource(CustomBaseModelResource):
                 user_group = request.user.groups.values()[0]['name']
                 area = 'member__' + self._meta.args['query_field'][user_group]['area']
                 region = 'member__' + self._meta.args['query_field'][user_group]['group_region']
-                args = self.get_role_access_query(request.user, area, args)
+                args = LoyaltyCustomAuthorization.get_filter_query(user=request.user, q_user=area, query=args)
             total_redeem_points = models.RedemptionRequest.objects.filter(**args).values(region).annotate(sum=Sum('points'))
             total_accumulate_points = models.AccumulationRequest.objects.filter(**args).values(region).annotate(sum=Sum('points'))
             member_report={}
