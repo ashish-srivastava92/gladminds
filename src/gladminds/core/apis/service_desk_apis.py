@@ -24,6 +24,10 @@ from gladminds.core.core_utils.utils import dictfetchall
 from gladminds.core.model_fetcher import models
 from gladminds.core.services.service_desk.servicedesk_manager import SDActions, \
     update_feedback_activities, get_feedback
+from tastypie.utils.mime import build_content_type
+from gladminds.core.constants import FEEDBACK_STATUS, DEMO_PRIORITY, PRIORITIES
+from gladminds.core.utils import get_list_from_set
+from django.forms.models import model_to_dict
 
 
 LOG = logging.getLogger('gladminds')
@@ -77,7 +81,19 @@ class FeedbackResource(CustomBaseModelResource):
                 url(r"^(?P<resource_name>%s)/load-analysis/(?P<args>[a-zA-Z.-]+)%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('get_load_analysis'), name="get_load_analysis")
                 ]
-         
+  
+    def dehydrate(self, bundle):
+        if PRIORITIES.has_key(settings.BRAND):
+            priority =  PRIORITIES[settings.BRAND]
+        else:
+            priority =  PRIORITIES['bajaj']
+            
+        bundle.data['STATUS'] = get_list_from_set(FEEDBACK_STATUS)
+        bundle.data['PRIORITY'] = get_list_from_set(priority)
+        comments = models.Comment.objects.filter(feedback_object=bundle.data['id'])
+        bundle.data['comments'] = [model_to_dict(c) for c in comments]
+        return bundle
+
     def add_service_desk_ticket(self, request, **kwargs):
         try:
             brand = settings.BRAND

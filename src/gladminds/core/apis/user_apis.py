@@ -47,6 +47,7 @@ from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.managers.mail import send_reset_link_email
 from gladminds.core.utils import get_sql_data
 from django.core.serializers.json import DjangoJSONEncoder
+from tastypie.authentication import MultiAuthentication
 
 logger = logging.getLogger('gladminds')
 
@@ -581,7 +582,8 @@ class BrandDepartmentResource(CustomBaseModelResource):
         detail_allowed_methods = ['get']
         always_return_data = True
         filtering = {
-                     "id" : ALL
+                     "id" : ALL,
+                     "name" : ALL
                      }
 
 
