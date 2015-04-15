@@ -103,22 +103,22 @@ def validate_file(fieldfile_obj):
             raise ValidationError("File size cannot exceed %sMB" % str(megabyte_limit))
 
 
-def create_upload_path(folder, instance):
+def create_upload_path(folder, instance, filename):
     brand_path =  getattr(instance, '_state').__dict__['db']
-    return u'{0}/{1}/{2}'.format(settings.ENV,brand_path, folder)
+    return u'{0}/{1}/{2}/{3}'.format(settings.ENV,brand_path, folder, filename)
 
 
 def set_service_training_material_path(instance,filename):
-    return create_upload_path('training_material', instance)
+    return create_upload_path('training_material', instance, filename)
 
 def set_mechanic_image_path(instance,filename):
-    return create_upload_path('mechanics', instance)
+    return create_upload_path('mechanics', instance, filename)
 
 def set_product_catalog_image_path(instance,filename):
-    return create_upload_path('product', instance)
+    return create_upload_path('product', instance, filename)
 
 def set_redemption_pod_path(instance,filename):
-    return create_upload_path('redemption', instance)
+    return create_upload_path('redemption', instance, filename)
 
 def set_welcome_kit_pod_path(instance,filename):
-    return create_upload_path('welcome', instance)
+    return create_upload_path('welcome', instance, filename)
