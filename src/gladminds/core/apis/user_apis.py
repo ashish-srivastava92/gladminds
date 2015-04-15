@@ -343,7 +343,7 @@ class AreaServiceManagerResource(CustomBaseModelResource):
         detail_allowed_methods = ['get']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
-                     "asm_id": ALL_WITH_RELATIONS, 
+                     "asm_id": ALL, 
                      "zsm": ALL_WITH_RELATIONS,
                      }
         always_return_data = True
