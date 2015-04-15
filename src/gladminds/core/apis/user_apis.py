@@ -344,7 +344,7 @@ class AreaServiceManagerResource(CustomBaseModelResource):
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "asm_id": ALL_WITH_RELATIONS, 
-                     "zsm_id": ALL,
+                     "zsm": ALL_WITH_RELATIONS,
                      }
         always_return_data = True
 
@@ -362,6 +362,7 @@ class DealerResource(CustomBaseModelResource):
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "dealer_id": ALL,
+                     "asm":ALL_WITH_RELATIONS,
                      }
         always_return_data = True
 
