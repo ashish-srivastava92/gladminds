@@ -8,7 +8,7 @@
 		waitingModal = $('.modal.waiting-dialog'),
 		jqXHR = $.ajax({
 			type: 'POST',
-			url: '/v1/feedbacks/add-ticket/',
+			url: '/aftersell/servicedesk/helpdesk',
 			data: formData,
 			cache: false,
 			processData: false,
@@ -50,7 +50,7 @@
 		waitingModal = $('.modal.waiting-dialog'),
 		jqXHR = $.ajax({
 			type: 'POST',
-			url: '/v1/feedbacks/add-ticket/',
+			url: '/aftersell/servicedesk/save-feedback/',
 			data: formData,
 			cache: false,
 			processData: false,
@@ -192,7 +192,7 @@
 	$('.servicedesk').on('submit', function(e) {
 		var data = Utils.getFormData('.servicedesk'),
 		formData = new FormData($(this).get(0)),
-		url = '/v1/feedbacks/modify-ticket/'+data.ticketId+'/',
+		url = '/aftersell/feedbackdetails/'+data.ticketId+'/',
 		messageModal = $('.modal.message-modal'),
 		messageBlock = $('.modal-body', messageModal),
 		messageHeader = $('.modal-title', messageModal),

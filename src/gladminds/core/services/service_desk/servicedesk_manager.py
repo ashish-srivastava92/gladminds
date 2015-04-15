@@ -286,191 +286,196 @@ def get_dealer_asc_email(feedback_obj):
 
 @atomic
 def modify_feedback(feedback_obj, data, user, host):
-    status = get_list_from_set(FEEDBACK_STATUS)
-    comment_object = None
-    assign_status = False
-    pending_status = False
-    reporter_email_id = get_reporter_details(feedback_obj.reporter, "email")
-    reporter_phone_number = get_reporter_details(feedback_obj.reporter)
-    previous_status = feedback_obj.status
-    dealer_asc_obj = get_dealer_asc_email(feedback_obj)
+    try:
+        status = get_list_from_set(FEEDBACK_STATUS)
+        comment_object = None
+        assign_status = False
+        pending_status = False
+        reporter_email_id = get_reporter_details(feedback_obj.reporter, "email")
+        reporter_phone_number = get_reporter_details(feedback_obj.reporter)
+        previous_status = feedback_obj.status
+        dealer_asc_obj = get_dealer_asc_email(feedback_obj)
+        
+        # check if status is pending
+        if feedback_obj.status == status[4]:
+            pending_status = True
+     
+        if feedback_obj.assignee:
+            assign_number = feedback_obj.assignee.user_profile.phone_number
+        else:
+            assign_number = None
+        assign = feedback_obj.assignee
+        
+        if data['status'] == status[0] and previous_status == (status[1] or status[2]):
+            feedback_obj.fcr = False
     
-    # check if status is pending
-    if feedback_obj.status == status[4]:
-        pending_status = True
- 
-    if feedback_obj.assignee:
-        assign_number = feedback_obj.assignee.user_profile.phone_number
-    else:
-        assign_number = None
-    assign = feedback_obj.assignee
-    
-    if data['status'] == status[0] and previous_status == (status[1] or status[2]):
-        feedback_obj.fcr = False
-
-    if feedback_obj.due_date:
-        due_date = convert_utc_to_local_time(feedback_obj.due_date)
-        feedback_obj.due_date = data['due_date']
-        feedback_obj.due_date = datetime.datetime.strptime(data['due_date'], '%Y-%m-%d %H:%M:%S')
-        feedback_obj.save()
-        if due_date != feedback_obj.due_date:
-            update_feedback_activities(feedback_obj, SDActions.DUE_DATE, due_date, feedback_obj.due_date, user)
-            if reporter_email_id:
-                send_mail_to_reporter(reporter_email_id, feedback_obj, 'DUE_DATE_MAIL_TO_INITIATOR')
-            else:
-                LOG.info("Reporter emailId not found.")
-                
-                if dealer_asc_obj.user.email:
-                    send_mail_to_dealer(feedback_obj, dealer_asc_obj.user.email, 'DUE_DATE_MAIL_TO_DEALER')
+        if feedback_obj.due_date:
+            due_date = convert_utc_to_local_time(feedback_obj.due_date)
+            feedback_obj.due_date = data['due_date']
+            feedback_obj.due_date = datetime.datetime.strptime(data['due_date'], '%Y-%m-%d %H:%M:%S')
+            feedback_obj.save()
+            if due_date != feedback_obj.due_date:
+                update_feedback_activities(feedback_obj, SDActions.DUE_DATE, due_date, feedback_obj.due_date, user)
+                if reporter_email_id:
+                    send_mail_to_reporter(reporter_email_id, feedback_obj, 'DUE_DATE_MAIL_TO_INITIATOR')
                 else:
-                    LOG.info("Dealer / Asc emailId not found.")
-
-            send_sms('INITIATOR_FEEDBACK_DUE_DATE_CHANGE', reporter_phone_number,
-                 feedback_obj)
+                    LOG.info("Reporter emailId not found.")
+                    
+                    if dealer_asc_obj.user.email:
+                        send_mail_to_dealer(feedback_obj, dealer_asc_obj.user.email, 'DUE_DATE_MAIL_TO_DEALER')
+                    else:
+                        LOG.info("Dealer / Asc emailId not found.")
     
-    if feedback_obj.priority:
-        priority = feedback_obj.priority
-        feedback_obj.priority = data['Priority']
+                send_sms('INITIATOR_FEEDBACK_DUE_DATE_CHANGE', reporter_phone_number,
+                     feedback_obj)
+        
+        if feedback_obj.priority:
+            priority = feedback_obj.priority
+            feedback_obj.priority = data['Priority']
+            feedback_obj.save()
+            if priority != feedback_obj.priority:
+                due_date = feedback_obj.due_date
+                date = set_due_date(data['Priority'], feedback_obj)
+                feedback_obj.due_date = date['due_date']
+                feedback_obj.reminder_date = date['reminder_date'] 
+                feedback_obj.save()
+                update_feedback_activities(feedback_obj, SDActions.PRIORITY, priority, feedback_obj.priority, user)
+                update_feedback_activities(feedback_obj, SDActions.DUE_DATE, due_date, feedback_obj.due_date, user)
+                if due_date != convert_utc_to_local_time(feedback_obj.due_date):
+                    if reporter_email_id:
+                        send_mail_to_reporter(reporter_email_id, feedback_obj, 'DUE_DATE_MAIL_TO_INITIATOR')
+                else:
+                    LOG.info("Reporter emailId not found.")
+                    if dealer_asc_obj.user.email:
+                        send_mail_to_dealer(feedback_obj, dealer_asc_obj.user.email, 'DUE_DATE_MAIL_TO_DEALER')
+                    else:
+                        LOG.info("Dealer / Asc emailId not found.")
+                send_sms('INITIATOR_FEEDBACK_DUE_DATE_CHANGE', reporter_phone_number,
+                     feedback_obj)
+            
+        if assign is None:
+            assign_status = True
+        if data['assign_to'] == '':
+            feedback_obj.status = data['status']
+            feedback_obj.priority = data['Priority']
+            feedback_obj.assignee = None
+         
+        else:
+            if json.loads(data.get('reporter_status')):
+                feedback_obj.previous_assignee = feedback_obj.assignee
+                feedback_obj.assign_to_reporter = True
+                feedback_obj.assignee = feedback_obj.reporter
+                
+            else:
+                if data['assign_to'] :
+                    servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile__user__username=str(data['assign_to']))
+                    feedback_obj.assignee = servicedesk_user[0]
+                    feedback_obj.assign_to_reporter = False
+            feedback_obj.status = data['status']
+            feedback_obj.priority = data['Priority']
+    
+        # check if status is pending
+        if data['status'] == status[4]:
+            feedback_obj.pending_from = datetime.datetime.now()
+        
+        # check if status is progress
+        if data['status'] == status[3]:
+            if previous_status == 'Pending':
+                feedback_obj.assignee = feedback_obj.previous_assignee
+        
+        # check if status is closed
+        if data['status'] == status[1]:
+            feedback_obj.closed_date = datetime.datetime.now()
         feedback_obj.save()
-        if priority != feedback_obj.priority:
-            due_date = feedback_obj.due_date
+    
+        if assign_status and feedback_obj.assignee:
+            feedback_obj.previous_assignee = feedback_obj.assignee
+            feedback_obj.assignee_created_date = datetime.datetime.now()
             date = set_due_date(data['Priority'], feedback_obj)
             feedback_obj.due_date = date['due_date']
             feedback_obj.reminder_date = date['reminder_date'] 
             feedback_obj.save()
-            update_feedback_activities(feedback_obj, SDActions.PRIORITY, priority, feedback_obj.priority, user)
-            update_feedback_activities(feedback_obj, SDActions.DUE_DATE, due_date, feedback_obj.due_date, user)
-            if due_date != convert_utc_to_local_time(feedback_obj.due_date):
-                if reporter_email_id:
-                    send_mail_to_reporter(reporter_email_id, feedback_obj, 'DUE_DATE_MAIL_TO_INITIATOR')
+            update_feedback_activities(feedback_obj, SDActions.STATUS, None, data['status'], user)
+            context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL',
+                                     feedback_obj)
+            if reporter_email_id:
+                mail.send_email_to_initiator_after_issue_assigned(context,
+                                                             reporter_email_id)
             else:
                 LOG.info("Reporter emailId not found.")
                 if dealer_asc_obj.user.email:
-                    send_mail_to_dealer(feedback_obj, dealer_asc_obj.user.email, 'DUE_DATE_MAIL_TO_DEALER')
+                    context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL_TO_DEALER',
+                                     feedback_obj)
+                    mail.send_email_to_dealer_after_issue_assigned(context,
+                                                             dealer_asc_obj.user.email)
                 else:
                     LOG.info("Dealer / Asc emailId not found.")
-            send_sms('INITIATOR_FEEDBACK_DUE_DATE_CHANGE', reporter_phone_number,
-                 feedback_obj)
+    
+            send_sms('INITIATOR_FEEDBACK_DETAILS', reporter_phone_number,
+                     feedback_obj)
+    
+        if data['comments']:
+            comment_object = models.Comment(
+                                            comment=data['comments'],
+                                            user=user, created_date=datetime.datetime.now(),
+                                            modified_date=datetime.datetime.now(),
+                                            feedback_object=feedback_obj)
+            comment_object.save()
+            update_feedback_activities(feedback_obj, SDActions.COMMENT, None, data['comments'], user)
+    
+    # check if status is resolved
+        if feedback_obj.status == status[2]:
+            if previous_status == status[0]:
+                feedback_obj.fcr = True
+            servicedesk_obj_all = User.objects.filter(groups__name=Roles.SDMANAGERS)
+            feedback_obj.resolved_date = datetime.datetime.now()
+            feedback_obj.resolved_date = datetime.datetime.now()
+            feedback_obj.root_cause = data['rootcause']
+            feedback_obj.resolution = data['resolution']
+            feedback_obj.save()
+            comments = models.Comment.objects.filter(feedback_object=feedback_obj.id).order_by('-created_date')
+            if reporter_email_id:
+                context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL',
+                                      feedback_obj, comments[0])
+                mail.send_email_to_initiator_after_issue_resolved(context,
+                                                              feedback_obj, host, reporter_email_id)
+            else:
+                LOG.info("Reporter emailId not found.")
+                if dealer_asc_obj.user.email:
+                    context = create_context('FEEDBACK_RESOLVED_MAIL_TO_DEALER',
+                                     feedback_obj)
+                    mail.send_email_to_dealer_after_issue_assigned(context,
+                                                             dealer_asc_obj.user.email)
+                else:
+                    LOG.info("Dealer / Asc emailId not found.")
+    
+            context = create_context('TICKET_RESOLVED_DETAIL_TO_BAJAJ',
+                                     feedback_obj)
+            mail.send_email_to_bajaj_after_issue_resolved(context)
+            context = create_context('TICKET_RESOLVED_DETAIL_TO_MANAGER',
+                                     feedback_obj)
+            mail.send_email_to_manager_after_issue_resolved(context, servicedesk_obj_all[0])
+            send_sms('INITIATOR_FEEDBACK_STATUS', reporter_phone_number,
+                     feedback_obj)
         
-    if assign is None:
-        assign_status = True
-    if data['assign_to'] == '':
-        feedback_obj.status = data['status']
-        feedback_obj.priority = data['Priority']
-        feedback_obj.assignee = None
-     
-    else:
-        if json.loads(data.get('reporter_status')):
-            feedback_obj.previous_assignee = feedback_obj.assignee
-            feedback_obj.assign_to_reporter = True
-            feedback_obj.assignee = feedback_obj.reporter
+        if previous_status != feedback_obj.status:
+            update_feedback_activities(feedback_obj, SDActions.STATUS, previous_status, feedback_obj.status, user)
             
-        else:
-            if data['assign_to'] :
-                servicedesk_user = models.ServiceDeskUser.objects.filter(user_profile__user__username=str(data['assign_to']))
-                feedback_obj.assignee = servicedesk_user[0]
-                feedback_obj.assign_to_reporter = False
-        feedback_obj.status = data['status']
-        feedback_obj.priority = data['Priority']
+        if pending_status:
+            set_wait_time(feedback_obj)
+     
+        if feedback_obj.assignee:
+            if assign_number != feedback_obj.assignee.user_profile.phone_number:
+                update_feedback_activities(feedback_obj, SDActions.ASSIGNEE, assign_number,
+                                           feedback_obj.assignee.user_profile.phone_number, user)
+                context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL',
+                                          feedback_obj)
+                mail.send_email_to_assignee(context, feedback_obj.assignee.user_profile.user.email)
+                send_sms('SEND_MSG_TO_ASSIGNEE',
+                         feedback_obj.assignee.user_profile.phone_number,
+                         feedback_obj, comment_object)
+        return True
 
-    # check if status is pending
-    if data['status'] == status[4]:
-        feedback_obj.pending_from = datetime.datetime.now()
-    
-    # check if status is progress
-    if data['status'] == status[3]:
-        if previous_status == 'Pending':
-            feedback_obj.assignee = feedback_obj.previous_assignee
-    
-    # check if status is closed
-    if data['status'] == status[1]:
-        feedback_obj.closed_date = datetime.datetime.now()
-    feedback_obj.save()
-
-    if assign_status and feedback_obj.assignee:
-        feedback_obj.previous_assignee = feedback_obj.assignee
-        feedback_obj.assignee_created_date = datetime.datetime.now()
-        date = set_due_date(data['Priority'], feedback_obj)
-        feedback_obj.due_date = date['due_date']
-        feedback_obj.reminder_date = date['reminder_date'] 
-        feedback_obj.save()
-        update_feedback_activities(feedback_obj, SDActions.STATUS, None, data['status'], user)
-        context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL',
-                                 feedback_obj)
-        if reporter_email_id:
-            mail.send_email_to_initiator_after_issue_assigned(context,
-                                                         reporter_email_id)
-        else:
-            LOG.info("Reporter emailId not found.")
-            if dealer_asc_obj.user.email:
-                context = create_context('INITIATOR_FEEDBACK_MAIL_DETAIL_TO_DEALER',
-                                 feedback_obj)
-                mail.send_email_to_dealer_after_issue_assigned(context,
-                                                         dealer_asc_obj.user.email)
-            else:
-                LOG.info("Dealer / Asc emailId not found.")
-
-        send_sms('INITIATOR_FEEDBACK_DETAILS', reporter_phone_number,
-                 feedback_obj)
-
-    if data['comments']:
-        comment_object = models.Comment(
-                                        comment=data['comments'],
-                                        user=user, created_date=datetime.datetime.now(),
-                                        modified_date=datetime.datetime.now(),
-                                        feedback_object=feedback_obj)
-        comment_object.save()
-        update_feedback_activities(feedback_obj, SDActions.COMMENT, None, data['comments'], user)
-
-# check if status is resolved
-    if feedback_obj.status == status[2]:
-        if previous_status == status[0]:
-            feedback_obj.fcr = True
-        servicedesk_obj_all = User.objects.filter(groups__name=Roles.SDMANAGERS)
-        feedback_obj.resolved_date = datetime.datetime.now()
-        feedback_obj.resolved_date = datetime.datetime.now()
-        feedback_obj.root_cause = data['rootcause']
-        feedback_obj.resolution = data['resolution']
-        feedback_obj.save()
-        comments = models.Comment.objects.filter(feedback_object=feedback_obj.id).order_by('-created_date')
-        if reporter_email_id:
-            context = create_context('INITIATOR_FEEDBACK_RESOLVED_MAIL_DETAIL',
-                                  feedback_obj, comments[0])
-            mail.send_email_to_initiator_after_issue_resolved(context,
-                                                          feedback_obj, host, reporter_email_id)
-        else:
-            LOG.info("Reporter emailId not found.")
-            if dealer_asc_obj.user.email:
-                context = create_context('FEEDBACK_RESOLVED_MAIL_TO_DEALER',
-                                 feedback_obj)
-                mail.send_email_to_dealer_after_issue_assigned(context,
-                                                         dealer_asc_obj.user.email)
-            else:
-                LOG.info("Dealer / Asc emailId not found.")
-
-        context = create_context('TICKET_RESOLVED_DETAIL_TO_BAJAJ',
-                                 feedback_obj)
-        mail.send_email_to_bajaj_after_issue_resolved(context)
-        context = create_context('TICKET_RESOLVED_DETAIL_TO_MANAGER',
-                                 feedback_obj)
-        mail.send_email_to_manager_after_issue_resolved(context, servicedesk_obj_all[0])
-        send_sms('INITIATOR_FEEDBACK_STATUS', reporter_phone_number,
-                 feedback_obj)
-    
-    if previous_status != feedback_obj.status:
-        update_feedback_activities(feedback_obj, SDActions.STATUS, previous_status, feedback_obj.status, user)
-        
-    if pending_status:
-        set_wait_time(feedback_obj)
- 
-    if feedback_obj.assignee:
-        if assign_number != feedback_obj.assignee.user_profile.phone_number:
-            update_feedback_activities(feedback_obj, SDActions.ASSIGNEE, assign_number,
-                                       feedback_obj.assignee.user_profile.phone_number, user)
-            context = create_context('ASSIGNEE_FEEDBACK_MAIL_DETAIL',
-                                      feedback_obj)
-            mail.send_email_to_assignee(context, feedback_obj.assignee.user_profile.user.email)
-            send_sms('SEND_MSG_TO_ASSIGNEE',
-                     feedback_obj.assignee.user_profile.phone_number,
-                     feedback_obj, comment_object)
-
+    except Exception as ex:
+        LOG.error('Exception while modifying ticket details : {0}'.format(ex))
+        return False
