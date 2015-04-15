@@ -371,7 +371,6 @@ class DealerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def get_active_dealer(self, request, **kwargs):
-        print request.GET
         result = []
         active_today = models.Dealer.objects.filter(last_transaction_date__startswith=date.today()).count()
         today = {}
