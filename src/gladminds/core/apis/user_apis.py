@@ -64,7 +64,8 @@ class UserResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'put']
         filtering = {
                      "is_active": ALL,
-                     "username" : ALL
+                     "username" : ALL,
+                     "id" : ALL
                      }
         always_return_data = True
         ordering = ['username', 'email']
