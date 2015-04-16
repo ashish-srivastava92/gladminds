@@ -48,5 +48,11 @@
 --alter table bajaj_productdata add constraint unique(engine);
 --alter table bajaj_productdata add column sku_code varchar(25) null;
 
-alter table gm_userprofile add column is_email_verified boolean default False;
-alter table gm_userprofile add column is_phone_verified boolean default False;
+--alter table gm_userprofile add column is_email_verified boolean default False;
+--alter table gm_userprofile add column is_phone_verified boolean default False;
+
+delete from gm_areaservicemanager where id not in (1, 13, 22, 45, 62, 81, 105);
+alter table gm_zonalservicemanager add column regional_office varchar(100) null;
+alter table gm_areaservicemanager add column area varchar(100) null;
+alter table gm_dealer add asm_id integer;
+alter table gm_dealer add foreign key (asm_id) references gm_areaservicemanager(id);

@@ -32,31 +32,29 @@ class UserProfile(base_models.UserProfile):
         app_label = _APP_NAME
         verbose_name_plural = "Brand Users"
 
-
-class Dealer(base_models.Dealer):
-    user = models.OneToOneField(UserProfile, primary_key=True,
-                                related_name='bajaj_registered_dealer')
-
-    class Meta(base_models.Dealer.Meta):
-        app_label = _APP_NAME
-        verbose_name_plural = "Dealer Data"
-
 class ZonalServiceManager(base_models.ZonalServiceManager):
     '''details of Zonal Service Manager'''
-    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    user = models.OneToOneField(UserProfile, null=True, blank=True)
     
     class Meta(base_models.ZonalServiceManager.Meta):
         app_label = _APP_NAME 
 
-
 class AreaServiceManager(base_models.AreaServiceManager):
     '''details of Area Service Manager'''
-    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    user = models.OneToOneField(UserProfile, null=True, blank=True)
     zsm = models.ForeignKey(ZonalServiceManager, null=True, blank=True)
     
     class Meta(base_models.AreaServiceManager.Meta):
         app_label = _APP_NAME 
 
+class Dealer(base_models.Dealer):
+    user = models.OneToOneField(UserProfile, primary_key=True,
+                                related_name='bajaj_registered_dealer')
+    asm = models.ForeignKey(AreaServiceManager, null=True, blank=True)
+
+    class Meta(base_models.Dealer.Meta):
+        app_label = _APP_NAME
+        verbose_name_plural = "Dealer Data"
 
 class AuthorizedServiceCenter(base_models.AuthorizedServiceCenter):
     user = models.OneToOneField(UserProfile, primary_key=True,

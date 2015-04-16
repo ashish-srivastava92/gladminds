@@ -23,7 +23,11 @@ from gladminds.core.apis.user_apis import ServiceDeskUserResource, \
 from gladminds.core.core_utils.utils import dictfetchall
 from gladminds.core.model_fetcher import models
 from gladminds.core.services.service_desk.servicedesk_manager import SDActions, \
-    update_feedback_activities
+    update_feedback_activities, get_feedback
+from tastypie.utils.mime import build_content_type
+from gladminds.core.constants import FEEDBACK_STATUS, DEMO_PRIORITY, PRIORITIES
+from gladminds.core.utils import get_list_from_set
+from django.forms.models import model_to_dict
 
 
 LOG = logging.getLogger('gladminds')
@@ -72,12 +76,24 @@ class FeedbackResource(CustomBaseModelResource):
                                                         self.wrap_view('add_service_desk_ticket'), name="add_service_desk_ticket"),
                 url(r"^(?P<resource_name>%s)/service-desk-reports%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('get_tat'), name="get_tat"),
-                url(r"^(?P<resource_name>%s)/modify-ticket/(?P<feedback_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                url(r"^(?P<resource_name>%s)/(?P<feedback_id>\d+)/modify-ticket%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('modify_service_desk_ticket'), name="modify_service_desk_ticket"),
-                url(r"^(?P<resource_name>%s)/load-analysis/(?P<duration>[a-zA-Z.-]+)%s" % (self._meta.resource_name,trailing_slash()),
+                url(r"^(?P<resource_name>%s)/load-analysis/(?P<args>[a-zA-Z.-]+)%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('get_load_analysis'), name="get_load_analysis")
                 ]
-         
+  
+    def dehydrate(self, bundle):
+        if PRIORITIES.has_key(settings.BRAND):
+            priority =  PRIORITIES[settings.BRAND]
+        else:
+            priority =  PRIORITIES['bajaj']
+            
+        bundle.data['STATUS'] = get_list_from_set(FEEDBACK_STATUS)
+        bundle.data['PRIORITY'] = get_list_from_set(priority)
+        comments = models.Comment.objects.filter(feedback_object=bundle.data['id'])
+        bundle.data['comments'] = [model_to_dict(c) for c in comments]
+        return bundle
+
     def add_service_desk_ticket(self, request, **kwargs):
         try:
             brand = settings.BRAND
@@ -158,13 +174,19 @@ class FeedbackResource(CustomBaseModelResource):
                                     content_type='application/json')
 
     def modify_service_desk_ticket(self, request, **kwargs):
+        self.is_authenticated(request)
         try:
             brand = settings.BRAND
+            data = request.POST
+            feedback_obj = get_feedback(data['ticketId'], request.user)
+            host = request.get_host()
             try:
-                modify_ticket = getattr(import_module('gladminds.{0}.services.service_desk.servicedesk_views'.format(brand), 'modify_servicedesk_tickets'))
+                modify_ticket = getattr(import_module('gladminds.{0}.services.service_desk.servicedesk_manager'.format(brand), 'modify_feedback'))
             except Exception as ex:
-                modify_ticket = getattr(import_module('gladminds.core.services.service_desk.servicedesk_views'), 'modify_servicedesk_tickets')       
-            return modify_ticket(request, kwargs['feedback_id'])
+                modify_ticket = getattr(import_module('gladminds.core.services.service_desk.servicedesk_manager'), 'modify_feedback')       
+            ret_value = modify_ticket(feedback_obj, data, request.user, host)
+            data = {'status' : ret_value}
+            return HttpResponse(json.dumps(data), content_type='application/json')
         except Exception as ex:
             LOG.error('Exception while modifying data : {0}'.format(ex))
             return HttpResponseBadRequest()
@@ -172,19 +194,31 @@ class FeedbackResource(CustomBaseModelResource):
     
     def get_load_analysis(self, request, **kwargs):
         self.is_authenticated(request)
-        if kwargs['duration'] == 'hourly':
+        total_tickets = []
+
+        if kwargs['args'] == 'hourly':
             date = datetime.datetime.now().date()
             date = str(date) + "%"
             ticket_count = self.get_sql_data("select count(*) as cnt , HOUR(created_date) as hour \
             from gm_feedback where created_date like '%s' group by HOUR(created_date)" %date)
             
-            total_tickets = []
             for data in ticket_count:
                 ticket = {}
                 ticket['hour_of_the_day'] = data['hour']
                 ticket['ticket_raised'] = data['cnt']
                 total_tickets.append(ticket)
         
+        elif kwargs['args'] == 'agents':
+            ticket_count = self.get_sql_data(" select f.id , f.assignee_id, count(*) as cnt ,au.username\
+             from gm_feedback f left outer join gm_servicedeskuser s on s.id= f.assignee_id left outer\
+              join gm_userprofile u on s.user_profile_id=u.user_id left outer join auth_user au on \
+              u.user_id = au.id group by f.assignee_id ")
+            for data in ticket_count:
+                ticket = {}
+                ticket['agent_name'] = data['username']
+                ticket['total_tickets'] = data['cnt']
+                total_tickets.append(ticket)
+                
         return HttpResponse(content=json.dumps(total_tickets),
                             content_type='application/json')
     
