@@ -30,20 +30,19 @@ class UserProfileAdmin(GmModelAdmin):
 
 class ZonalServiceManagerAdmin(GmModelAdmin):
     search_fields = ('zsm_id',)
-    list_display = ('zsm_id', 'get_user', 'get_profile_number', 'get_profile_address')
+    list_display = ('zsm_id', 'get_user', 'get_profile_number', 'regional_office')
     
 class AreaServiceManagerAdmin(GmModelAdmin):
-    search_fields = ('asm_id',)
-    list_display = ('asm_id', 'get_user', 'get_profile_number', 'get_profile_address')
+    search_fields = ('asm_id','zsm__zsm_id')
+    list_display = ('asm_id', 'get_user', 'get_profile_number', 'get_profile_address','area', 'zsm')
     
 class DealerAdmin(GmModelAdmin):
-    search_fields = ('dealer_id',)
-    list_display = ('dealer_id', 'get_user', 'get_profile_number', 'get_profile_address')
-
+    search_fields = ('dealer_id','asm__asm_id')
+    list_display = ('dealer_id', 'get_user', 'get_profile_number', 'get_profile_address', 'asm')
 
 class AuthorizedServiceCenterAdmin(GmModelAdmin):
     search_fields = ('asc_id', 'dealer__dealer_id')
-    list_display = ('asc_id', 'get_user', 'get_profile_number', 'get_profile_address', 'dealer')
+    list_display = ('asc_id', 'get_user', 'get_profile_number', 'get_profile_address', 'dealer', 'asm')
 
 class ServiceAdvisorAdmin(GmModelAdmin):
     search_fields = ('service_advisor_id', 'dealer__dealer_id', 'asc__asc_id')

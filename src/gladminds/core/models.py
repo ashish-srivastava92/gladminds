@@ -20,14 +20,6 @@ class UserProfile(base_models.UserProfile):
     class Meta(base_models.UserProfile.Meta):
         app_label = _APP_NAME
 
-
-class Dealer(base_models.Dealer):
-    user = models.OneToOneField(UserProfile, primary_key=True,
-                                related_name='core_registered_dealer')
-
-    class Meta(base_models.Dealer.Meta):
-        app_label = _APP_NAME
-
 class ZonalServiceManager(base_models.ZonalServiceManager):
     '''details of Zonal Service Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
@@ -44,6 +36,12 @@ class AreaServiceManager(base_models.AreaServiceManager):
     class Meta(base_models.AreaServiceManager.Meta):
         app_label = _APP_NAME 
 
+class Dealer(base_models.Dealer):
+    user = models.OneToOneField(UserProfile, primary_key=True,
+                                related_name='core_registered_dealer')
+
+    class Meta(base_models.Dealer.Meta):
+        app_label = _APP_NAME
 
 class AuthorizedServiceCenter(base_models.AuthorizedServiceCenter):
     user = models.OneToOneField(UserProfile, primary_key=True,

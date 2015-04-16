@@ -153,7 +153,7 @@ class ZonalServiceManager(BaseModel):
 
 class AreaServiceManager(BaseModel):
     '''details of Area Service Manager'''
-    asm_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    asm_id = models.CharField(max_length=50, unique=True, null=False, blank=False)
     area = models.CharField(max_length=100, null=True, blank=True)
     
     class Meta:

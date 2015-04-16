@@ -237,6 +237,7 @@ class CreditNoteModel(ComplexModel):
     CREDIT_DATE = Date(default=None)
     CDMS_DOC_NO = Unicode(default=None)
     CDMS_DT = Date(default=None)
+#    CLOSED_DATE = Date(default=None)
 
 class CreditNoteModelList(ComplexModel):
     __namespace__ = tns
@@ -705,6 +706,7 @@ class CreditNoteService(ServiceBase):
                     'credit_date': credit_note.CREDIT_DATE,
                     'cdms_doc_number': credit_note.CDMS_DOC_NO,
                     'cdms_date': credit_note.CDMS_DT
+#                    'closed_date': credit_note.CLOSED_DATE
                 })
 
             except Exception as ex:

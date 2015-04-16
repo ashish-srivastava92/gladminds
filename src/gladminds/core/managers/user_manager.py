@@ -7,6 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
 from gladminds.core.model_fetcher import get_model
+from gladminds.core.auth_helper import Roles
 
 
 logger = logging.getLogger("gladminds")
@@ -104,6 +105,9 @@ class RegisterUser():
                     username=username, first_name=first_name, last_name=last_name, email=email)
                 if group =='customer':
                     password = settings.PASSWORD_POSTFIX
+                elif group in [Roles.ZSM, Roles.AREASERVICEMANAGER]:
+                    password = username.split('@')[0] + settings.ADMIN_PASSWORD_POSTFIX
+                    new_user.is_staff = True
                 else:
                     password = username + settings.PASSWORD_POSTFIX
                 new_user.set_password(password)
