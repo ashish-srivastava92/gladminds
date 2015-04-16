@@ -271,6 +271,14 @@ class ProductPurchaseFeed(BaseFeed):
                 
                 post_save.connect(
                     update_coupon_data, sender=models.ProductData)
+# 
+#                 if str(product['vin']).upper().startswith('VBK', 0, 3):
+#                     from gladminds.sqs_tasks import send_on_product_purchase
+#                     message = templates.get_template('SEND_CUSTOMER_REGISTER_KTM'
+#                                                      ).format(customer_name=product_data.customer_name, ktm_url="http://tinyurl.com/com-ktm-ab")            
+#                     sms_log(settings.BRAND, receiver=product_data.customer_phone_number, action='SEND TO QUEUE', message=message)
+#                     send_job_to_queue(send_on_product_purchase, {"phone_number":product_data.customer_phone_number, "message":message, "sms_client":settings.SMS_CLIENT}) 
+
             except ObjectDoesNotExist as done:
                 ex='[Info: ProductPurchaseFeed_product_data]: VIN- {0} :: {1}'''.format(product['vin'], done)
                 logger.error(ex)
