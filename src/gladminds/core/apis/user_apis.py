@@ -352,7 +352,7 @@ class AreaServiceManagerResource(CustomBaseModelResource):
 
 class DealerResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
-    asm = fields.ForeignKey(AreaServiceManagerResource, 'asm', full=True)
+    asm = fields.ForeignKey(AreaServiceManagerResource, 'asm', full=True, null=True)
     
     class Meta:
         queryset = models.Dealer.objects.all()
