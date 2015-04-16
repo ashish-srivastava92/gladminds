@@ -22,9 +22,9 @@ class AfterbuyUrls():
         INDUSTRY = 'industries/'
         
 class BajajUrls():
-        COUPONS = 'coupons/'
+        COUPONS = 'v1/coupons/'
         LOGIN = 'gm-users/login/'
-        MESSAGES = 'messages/'
+        MESSAGES = 'v1/messages/'
         LOGOUT = 'gm-users/logout/'
         DEALER_LOGIN = 'aftersell/dealer/login/'
         
@@ -41,3 +41,5 @@ UPDATE_SA_DATA=(('sa-id','GMDEALER001SA31'),('phone-number','1111111111'),('name
 ASC_DATA=(('name','ASC29'),('address','#66/2A,AFS,Jalahalli(west)'),('password','123'),('phone-number','9999999999'),('email','SA1@hashedin'),('pincode','560015')) 
 VIN_DATA={'vin':'12345678901232792'}
 MOBILE_DATA={'phone_number':'6767676767'}
+COUPON_DISPATCH_XML_DATA = open(os.path.join(settings.BASE_DIR, 'tests/integration/bajaj/test_data/coupon_product_dispatch_feed.xml')).read()
+COUPON_PURCHASE_XML_DATA = open(os.path.join(settings.BASE_DIR, 'tests/integration/bajaj/test_data/coupon_product_purchase_feed.xml')).read()

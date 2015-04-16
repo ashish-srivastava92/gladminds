@@ -39,10 +39,10 @@ class BrandResourceTestCase(TestCase):
             
 
     def post(self, uri, content_type='application/json', data=None,
-             headers={'content_type': 'application/json'},isjson="True", params={}):
+             headers={'content_type': 'application/json'},isjson=True, params={}):
         params.update({'access_token': self.login(url="v1/")})
-        if isjson=="False":
-            resp = requests.post(self.base_version+uri, data=data, headers=headers)
+        if isjson is False:
+            resp = requests.post(self.base_version+uri, data=data)
         else:
             resp = requests.post(self.base_version+uri, data=json.dumps(data), headers=headers)
         self.assertSuccess(resp.status_code)
@@ -90,18 +90,12 @@ class BrandResourceTestCase(TestCase):
             self.assertEqual(result[parameter],value)
     
     def post_as_dealer(self, uri, username, password, content_type='application/json', data=None,
-             headers={'content_type': 'application/json'},isjson="True", params={}):
+             headers={'content_type': 'application/json'},isjson=True, params={}):
         with session() as c:
             resp = c.post(self.base_version+BajajUrls.DEALER_LOGIN, data=(('username',username), ('password',password)))
-            if isjson=="False":
+            if isjson is False:
                 resp = c.post(self.base_version+uri, data=data)                
             else:
                 resp = c.post(self.base_version+uri, data=json.dumps(data), headers=headers)
         self.assertSuccess(resp.status_code)
-        return json.loads(resp.content)
-        
-        
-    def check_coupon(self,phone_number,data):
-        data={'text': data, 'phoneNumber' : phone_number}
-        coupon_data = self.post(BajajUrls.MESSAGES,content_type=None, data=data)
-        self.assertTrue(coupon_data['status'])
+        return json.loads(resp.content)      
