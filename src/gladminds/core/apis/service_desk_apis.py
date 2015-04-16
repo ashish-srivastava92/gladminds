@@ -78,6 +78,8 @@ class FeedbackResource(CustomBaseModelResource):
                                                         self.wrap_view('get_tat'), name="get_tat"),
                 url(r"^(?P<resource_name>%s)/(?P<feedback_id>\d+)/modify-ticket%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('modify_service_desk_ticket'), name="modify_service_desk_ticket"),
+                url(r"^(?P<resource_name>%s)/load-analysis/hourly%s" % (self._meta.resource_name,trailing_slash()),
+                                                        self.wrap_view('get_hourly_load_analysis'), name="get_hourly_load_analysis"),
                 url(r"^(?P<resource_name>%s)/load-analysis/(?P<args>[a-zA-Z.-]+)%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('get_load_analysis'), name="get_load_analysis")
                 ]
@@ -192,34 +194,55 @@ class FeedbackResource(CustomBaseModelResource):
             return HttpResponseBadRequest()
     
     
-    def get_load_analysis(self, request, **kwargs):
+    def get_hourly_load_analysis(self, request, **kwargs):
         self.is_authenticated(request)
         total_tickets = []
-
-        if kwargs['args'] == 'hourly':
-            date = datetime.datetime.now().date()
-            date = str(date) + "%"
-            ticket_count = self.get_sql_data("select count(*) as cnt , HOUR(created_date) as hour \
-            from gm_feedback where created_date like '%s' group by HOUR(created_date)" %date)
-            
-            for data in ticket_count:
-                ticket = {}
-                ticket['hour_of_the_day'] = data['hour']
-                ticket['ticket_raised'] = data['cnt']
-                total_tickets.append(ticket)
+        date = datetime.datetime.now().date()
+        date = str(date) + "%"
+        ticket_count = self.get_sql_data("select count(*) as cnt , HOUR(created_date) as hour \
+        from gm_feedback where created_date like '%s' group by HOUR(created_date)" %date)
         
-        elif kwargs['args'] == 'agents':
-            ticket_count = self.get_sql_data(" select f.id , f.assignee_id, count(*) as cnt ,au.username\
-             from gm_feedback f left outer join gm_servicedeskuser s on s.id= f.assignee_id left outer\
-              join gm_userprofile u on s.user_profile_id=u.user_id left outer join auth_user au on \
-              u.user_id = au.id group by f.assignee_id ")
+        for data in ticket_count:
+            ticket = {}
+            ticket['hour_of_the_day'] = data['hour']
+            ticket['ticket_raised'] = data['cnt']
+            total_tickets.append(ticket)
+        
+        return HttpResponse(content=json.dumps(total_tickets),
+                            content_type='application/json')
+        
+    def get_load_analysis(self, request, **kwargs):
+        self.is_authenticated(request)
+        data = request.GET
+        year = data.get('year', datetime.datetime.now().year)
+        month = data.get('month', datetime.datetime.now().month)
+        total_tickets = []
+        if kwargs['args'] == 'agents':
+            query = "select f.id , f.created_date, f.assignee_id, count(*) as cnt \
+            ,au.username from gm_feedback f left outer join gm_servicedeskuser s on s.id= f.assignee_id\
+             left outer join gm_userprofile u on s.user_profile_id=u.user_id left outer join auth_user au on\
+              u.user_id = au.id where MONTH(f.created_date)={0} and YEAR(f.created_date) = {1} group by \
+               f.assignee_id".format(month, year) 
+            ticket_count = self.get_sql_data(query)
             for data in ticket_count:
                 ticket = {}
                 ticket['agent_name'] = data['username']
-                ticket['total_tickets'] = data['cnt']
+                ticket['count'] = data['cnt']
+                total_tickets.append(ticket)
+        
+        elif kwargs['args'] == 'departments':
+            query = "select f.id , count(*) as cnt , dept.name, f.created_date from gm_feedback \
+            f left outer join gm_departmentsubcategories sub on sub.id=f.sub_department_id left outer \
+            join gm_branddepartment dept on dept.id=sub.department_id where month(f.created_date)={0} and \
+            year(f.created_date)={1} group by dept.id".format(month, year)
+            ticket_count = self.get_sql_data(query)
+            for data in ticket_count:
+                ticket = {}
+                ticket['department_name'] = data['name']
+                ticket['count'] = data['cnt']
                 total_tickets.append(ticket)
                 
-        return HttpResponse(content=json.dumps(total_tickets),
+        return HttpResponse(content=json.dumps(total_tickets), 
                             content_type='application/json')
     
 class ActivityResource(CustomBaseModelResource):
