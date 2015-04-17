@@ -1,11 +1,10 @@
 from smoke.utility import UtilityResourceTest
-from integration.core.constants import BajajUrls, Constants, COUPON_SCHEMA
 from integration.core.constants import COUPON_DISPATCH_XML_DATA, COUPON_PURCHASE_XML_DATA
 
 
-class TestBajajCouponDataApi(UtilityResourceTest):
+class TestCouponDataApi(UtilityResourceTest):
     def setUp(self):
-        super(TestBajajCouponDataApi, self).setUp()
+        super(TestCouponDataApi, self).setUp()
         self.send_dispatch_feed(xml_data=COUPON_DISPATCH_XML_DATA)
         self.send_purchase_feed(xml_data=COUPON_PURCHASE_XML_DATA)
 

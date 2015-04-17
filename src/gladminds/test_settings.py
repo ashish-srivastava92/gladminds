@@ -20,7 +20,9 @@ DATABASES[GmApps.DEMO]['NAME'] = os.path.join(OUT_DIR, 'demo.db')  # "/tmp/test.
 DATABASES[GmApps.AFTERBUY]['ENGINE'] = 'django.db.backends.sqlite3'
 DATABASES[GmApps.AFTERBUY]['NAME'] = os.path.join(OUT_DIR, 'afterbuy.db')  # "/tmp/test.db"
 DATABASES[GmApps.BAJAJCV]['ENGINE'] = 'django.db.backends.sqlite3'
-DATABASES[GmApps.BAJAJCV]['NAME'] = os.path.join(OUT_DIR, 'afterbuy.db')
+DATABASES[GmApps.BAJAJCV]['NAME'] = os.path.join(OUT_DIR, 'bajajcv.db')
+DATABASES[GmApps.DAIMLER]['ENGINE'] = 'django.db.backends.sqlite3'
+DATABASES[GmApps.DAIMLER]['NAME'] = os.path.join(OUT_DIR, 'bajajcv.db')
 
 TEST_IGNORE_APPS = ()
 

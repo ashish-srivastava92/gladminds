@@ -43,3 +43,4 @@ VIN_DATA={'vin':'12345678901232792'}
 MOBILE_DATA={'phone_number':'6767676767'}
 COUPON_DISPATCH_XML_DATA = open(os.path.join(settings.BASE_DIR, 'tests/integration/bajaj/test_data/coupon_product_dispatch_feed.xml')).read()
 COUPON_PURCHASE_XML_DATA = open(os.path.join(settings.BASE_DIR, 'tests/integration/bajaj/test_data/coupon_product_purchase_feed.xml')).read()
+SERVICEDESK_FEEDBACK_DATA = (('description','test'),('advisorMobile','10316'),('type','Problem'),('summary','hello'))

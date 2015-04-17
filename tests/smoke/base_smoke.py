@@ -49,8 +49,8 @@ class BrandResourceTestCase(TestCase):
         return json.loads(resp.content)
 
     def get(self, uri, content_type='application/json',
-            headers={'content_type':'application/json'}, params={}):
-        params.update({'access_token': self.login(url="v1/")})
+            headers={'content_type':'application/json'}, params={},dct=None):
+        params.update({'access_token': self.login(url="v1/",dct=dct)})
         resp = requests.get(self.base_version+uri, headers=headers, params=params)
         self.assertSuccess(resp.status_code)   
         return json.loads(resp.content)

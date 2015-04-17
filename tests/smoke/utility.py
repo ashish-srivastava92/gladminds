@@ -1,8 +1,11 @@
 from base_smoke import BrandResourceTestCase
+import datetime
+import requests
+from requests import session
 from gladminds.core.constants import CouponStatus
 from integration.core.constants import BajajUrls
 from integration.core.constants import DISPATCH_XML_DATA,PURCHASE_XML_DATA,SERVICE_ADVISOR_DATA,OLD_FSC_DATA\
-,CREDIT_NOTE_DATA,CUSTOMER_DATA,ASC_DATA,SA_DATA,VIN_DATA,MOBILE_DATA
+,CREDIT_NOTE_DATA,CUSTOMER_DATA,ASC_DATA,SA_DATA,VIN_DATA,MOBILE_DATA,SERVICEDESK_FEEDBACK_DATA
 
 class UtilityResourceTest(BrandResourceTestCase):
     def send_dispatch_feed(self,xml_data=DISPATCH_XML_DATA):
@@ -105,4 +108,47 @@ class UtilityResourceTest(BrandResourceTestCase):
         data=(('text',data), ('phoneNumber',phone_number))
         coupon_data = self.post(BajajUrls.MESSAGES,isjson=False,data=data)
         self.assertFalse(coupon_data['status'])     
+    
+    def post_feedback(self,username,password):
+        data = SERVICEDESK_FEEDBACK_DATA
+        uri="aftersell/servicedesk/helpdesk"
+        self.post_as_dealer(uri=uri, username=username, password=password, data=data, isjson=False)
+    
+    def get_sms(self,phone_number):
+        uri="v1/sms-logs/?&order_by=-created_date&receiver="+phone_number
+        resp=self.get(uri=uri)
+        return resp['objects']
+    
+    def get_feedbacks(self,username,password):
+        uri="v1/feedbacks/?order_by=-created_date"
+        dct={
+                'username':username,
+                'password':password
+             }
+        resp=self.get(uri=uri, dct=dct)        
+        return resp['objects'][0]
+    
+    def get_feedbacks_as_sduser(self,username,password):
+        uri="aftersell/servicedesk/"
+        dct=(('username',username),('password',password))
+        resp=requests.post(self.base_version+uri, data=dct)
+        self.assertSuccess(resp.status_code)
+    
+    def update_feedback(self,username,password,**kwargs):
+        uri_login="aftersell/helpdesk/login/"
+        result=self.get_feedbacks('10316','123')
+        ticket_id=str(result['id'])
+        uri_update="aftersell/feedbackdetails/"+ticket_id+"/"
+        status=kwargs.get('status','Open')
+        assign_to=kwargs.get('assign_to','sdo')
+        due_date=kwargs.get('due_date',datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        reporter_status=kwargs.get('reporter_status','false')
+        comments=kwargs.get('comments','testing')
+        data_update = (('assign_to',assign_to),('status',status),('Priority','High'),('comments',comments),('rootcause','testing'),('resolution','testing'),('reporter_status',reporter_status),('due_date',due_date))
+        with session() as c:
+            resp = c.post(self.base_version+uri_login, data=(('username',username), ('password',password)))
+            self.assertSuccess(resp.status_code)
+            resp = c.post(self.base_version+uri_update, data=data_update)                
+            self.assertSuccess(resp.status_code)
+        return resp
         
