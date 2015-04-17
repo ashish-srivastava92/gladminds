@@ -39,7 +39,8 @@
     	});
     });
 	
-    $('#dss_report').attr('href', 'http://bajajautomcdss.gladminds.co/redirect.html?id='+ localStorage.id + '&access_token='+ localStorage.token)
+    var dealer_id = $('[name="dealer_id"]').val();
+    $('#dss_report').attr('href', 'http://bajajautomcdss.gladminds.co/redirect.html?id='+ dealer_id + '&access_token='+ localStorage.token)
 	
     $('.asc-form').on('submit', function(e) {
         var data = Utils.getFormData('.asc-form');
