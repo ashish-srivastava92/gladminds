@@ -17,6 +17,32 @@
         return false;
     });
 
+    var access_token = null, user_id = null;
+    
+    $('#dealer-log-in').on('submit', function(e) {
+    	e.preventDefault();
+    	var username = $('#username').val(),
+    	password =$('#password').val(),
+    	formData = JSON.stringify({'username': username, 'password':password});
+    	
+    	$.ajax({
+            type: 'POST',
+            url: '/v1/gm-users/login/',
+            data: formData,
+            success: function(data){
+            	e.preventDefault();
+            	access_token = data['access_token'];
+               	user_id = data['user_id'];            	 
+            	window.location.replace('/aftersell/provider/redirect')
+            },
+    		error: function(data){
+    			e.preventDefault();
+    		}
+    	});
+    });
+	
+    $('#dss_report').attr('href', 'http://bajajautomcdss.gladminds.co/redirect.html?id='+ user_id + '&access_token='+ access_token)
+	
     $('.asc-form').on('submit', function(e) {
         var data = Utils.getFormData('.asc-form');
         Utils.submitForm(e, data, '/aftersell/register/asc');
