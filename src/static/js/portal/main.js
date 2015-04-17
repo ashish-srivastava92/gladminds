@@ -17,8 +17,6 @@
         return false;
     });
 
-    var access_token = null, user_id = null;
-    
     $('#dealer-log-in').on('submit', function(e) {
     	e.preventDefault();
     	var username = $('#username').val(),
@@ -31,8 +29,8 @@
             data: formData,
             success: function(data){
             	e.preventDefault();
-            	access_token = data['access_token'];
-               	user_id = data['user_id'];            	 
+            	localStorage.id = data['user_id'];
+            	localStorage.token = data['access_token'];
             	window.location.replace('/aftersell/provider/redirect')
             },
     		error: function(data){
@@ -41,7 +39,7 @@
     	});
     });
 	
-    $('#dss_report').attr('href', 'http://bajajautomcdss.gladminds.co/redirect.html?id='+ user_id + '&access_token='+ access_token)
+    $('#dss_report').attr('href', 'http://bajajautomcdss.gladminds.co/redirect.html?id='+ localStorage.id + '&access_token='+ localStorage.token)
 	
     $('.asc-form').on('submit', function(e) {
         var data = Utils.getFormData('.asc-form');
