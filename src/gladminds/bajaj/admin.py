@@ -823,6 +823,18 @@ class LoyaltySlaAdmin(GmModelAdmin):
 class ConstantAdmin(GmModelAdmin):
     search_fields = ('constant_name',  'constant_value')
     list_display = ('constant_name',  'constant_value',)
+    
+
+class TransporterAdmin(GmModelAdmin):
+    list_display = ('transporter_id', 'get_transporter_name')
+
+class SupervisorAdmin(GmModelAdmin):
+    list_display = ('supervisor_id', 'get_transporter_name')
+
+class ContainerTrackerAdmin(GmModelAdmin):
+    list_display = ('get_transporter', 'zib_indent_num', 'consignment_id',
+                    'gatein_date', 'seal_no', 'lr_number', 'status')
+
 
 brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
 
@@ -861,6 +873,6 @@ brand_admin.register(models.ServiceType)
 brand_admin.register(models.Constant, ConstantAdmin)
 brand_admin.register(models.Feedback)
 brand_admin.register(models.Territory)
-brand_admin.register(models.Transporter)
-brand_admin.register(models.Supervisor)
-brand_admin.register(models.ContainerTracker)
+brand_admin.register(models.Transporter, TransporterAdmin)
+brand_admin.register(models.Supervisor, SupervisorAdmin)
+brand_admin.register(models.ContainerTracker, ContainerTrackerAdmin)
