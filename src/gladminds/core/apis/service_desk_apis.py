@@ -81,7 +81,9 @@ class FeedbackResource(CustomBaseModelResource):
                 url(r"^(?P<resource_name>%s)/load-analysis/hourly%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('get_hourly_load_analysis'), name="get_hourly_load_analysis"),
                 url(r"^(?P<resource_name>%s)/load-analysis/(?P<args>[a-zA-Z.-]+)%s" % (self._meta.resource_name,trailing_slash()),
-                                                        self.wrap_view('get_load_analysis'), name="get_load_analysis")
+                                                        self.wrap_view('get_load_analysis'), name="get_load_analysis"),
+                url(r"^(?P<resource_name>%s)/agent-comparison/(?P<type>[a-zA-Z.-]+)%s" % (self._meta.resource_name,trailing_slash()),
+                                                        self.wrap_view('get_agent_comparison'), name="get_agent_comparison")
                 ]
   
     def dehydrate(self, bundle):
@@ -119,62 +121,66 @@ class FeedbackResource(CustomBaseModelResource):
         return data
 
     def get_tat(self, request, **kwargs):
-        self.is_authenticated(request)
-        details = self.get_sql_data("select sum(f2.dt) as sums ,count(*) as c , avg(f2.dt) as tat, YEAR(f1.created_date) as year, \
-    MONTH(f1.created_date) as month from gm_feedback f1 inner join (select f2.id, TIMEDIFF(f2.resolved_date,f2.created_date)\
-    as dt , f2.created_date from gm_feedback f2 where status= 'resolved') f2 on f2.id=f1.id group by \
-    YEAR(f1.created_date), MONTH(f1.created_date)")
-        reports = {}
-        result = []
-        for data in details:
-            tat = {}
-            minutes, seconds = divmod(data['tat'], 60)
-            tat['tat'] = minutes
-            tat['month_of_year'] = str(data['year'])+"-"+ str(data['month'])
-            result.append(tat)
-        reports['TAT'] = result
+        try:
+            self.is_authenticated(request)
+            details = self.get_sql_data("select sum(f2.dt) as sums ,count(*) as c , avg(f2.dt) as tat, YEAR(f1.created_date) as year, \
+        MONTH(f1.created_date) as month from gm_feedback f1 inner join (select f2.id, TIMEDIFF(f2.resolved_date,f2.created_date)\
+        as dt , f2.created_date from gm_feedback f2 where status= 'resolved') f2 on f2.id=f1.id group by \
+        YEAR(f1.created_date), MONTH(f1.created_date)")
+            reports = {}
+            result = []
+            for data in details:
+                tat = {}
+                minutes, seconds = divmod(data['tat'], 60)
+                tat['tat'] = minutes
+                tat['month_of_year'] = str(data['year'])+"-"+ str(data['month'])
+                result.append(tat)
+            reports['TAT'] = result
 
-        fcr_total = self.get_sql_data(" select count(*) as total, concat (YEAR(resolved_date),'-', MONTH(resolved_date)) \
-        as month_of_year from gm_feedback where resolved_date is not null group by \
-         YEAR(resolved_date), MONTH(resolved_date)")
-        
-        fcr_count = self.get_sql_data("select count(*) as cnt, concat(YEAR(resolved_date), '-', MONTH(resolved_date))\
-         as month_of_year from gm_feedback where fcr=1 group by(fcr),YEAR(resolved_date), MONTH(resolved_date)")
-        
-        result = []
-        for data in fcr_total:
-            fcr = {}
-            fcr['month_of_year'] = data['month_of_year']
-            fcrs = filter(lambda fc: fc['month_of_year'] == data['month_of_year'], fcr_count)
-            if fcrs:
-                fcr['fcr'] = (fcrs[0]['cnt']/float(data['total'])) * 100
+            fcr_total = self.get_sql_data("select count(*) as total, concat (YEAR(resolved_date),'-', MONTH(resolved_date)) \
+            as month_of_year from gm_feedback where resolved_date is not null group by \
+             YEAR(resolved_date), MONTH(resolved_date)")
             
-            result.append(fcr)
-
-        reports['FCR'] = result
-
-        
-        reopen_count = self.get_sql_data("select count(*) as cnt, concat(YEAR(created_date), '-', MONTH(created_date))\
-         as month_of_year from gm_activity where new_value='Open' and original_value ='Resolved' or \
-          original_value='Closed' group by YEAR(created_date), MONTH(created_date)")
-         
-        reopen_total = self.get_sql_data("select count(*) as total, concat(YEAR(created_date), '-', \
-        MONTH(created_date)) as month_of_year from gm_feedback group by YEAR(created_date), MONTH(created_date)")
-        
-        result = []
-        for data in reopen_total:
-            reopened = {}
-            reopened['month_of_year'] = data['month_of_year']
-            reopens = filter(lambda reopen : reopen['month_of_year'] == data['month_of_year'], reopen_count)
-            if reopens:
-                reopened['re-open'] = (reopens[0]['cnt']/float(data['total'])) * 100
-            result.append(reopened)
-        
-        reports['RE-OPENED'] = result
-        
-        return HttpResponse(content=json.dumps(reports),
+            fcr_count = self.get_sql_data("select count(*) as cnt, concat(YEAR(resolved_date), '-', MONTH(resolved_date))\
+             as month_of_year from gm_feedback where fcr=1 group by(fcr),YEAR(resolved_date), MONTH(resolved_date)")
+            
+            result = []
+            for data in fcr_total:
+                fcr = {}
+                fcr['month_of_year'] = data['month_of_year']
+                fcrs = filter(lambda fc: fc['month_of_year'] == data['month_of_year'], fcr_count)
+                if fcrs:
+                    fcr['fcr'] = (fcrs[0]['cnt']/float(data['total'])) * 100
+                
+                result.append(fcr)
+    
+            reports['FCR'] = result
+    
+            
+            reopen_count = self.get_sql_data("select count(*) as cnt, concat(YEAR(created_date), '-', MONTH(created_date))\
+             as month_of_year from gm_activity where new_value='Open' and original_value ='Resolved' or \
+              original_value='Closed' group by YEAR(created_date), MONTH(created_date)")
+             
+            reopen_total = self.get_sql_data("select count(*) as total, concat(YEAR(created_date), '-', \
+            MONTH(created_date)) as month_of_year from gm_feedback group by YEAR(created_date), MONTH(created_date)")
+            
+            result = []
+            for data in reopen_total:
+                reopened = {}
+                reopened['month_of_year'] = data['month_of_year']
+                reopens = filter(lambda reopen : reopen['month_of_year'] == data['month_of_year'], reopen_count)
+                if reopens:
+                    reopened['re-open'] = (reopens[0]['cnt']/float(data['total'])) * 100
+                result.append(reopened)
+            
+            reports['RE-OPENED'] = result
+            return HttpResponse(content=json.dumps(reports),
                                     content_type='application/json')
 
+        except Exception as ex:
+            LOG.error('Exception while generating TAT and FCR report : {0}'.format(ex))
+            return HttpResponseBadRequest()
+        
     def modify_service_desk_ticket(self, request, **kwargs):
         self.is_authenticated(request)
         try:
@@ -195,55 +201,113 @@ class FeedbackResource(CustomBaseModelResource):
     
     
     def get_hourly_load_analysis(self, request, **kwargs):
-        self.is_authenticated(request)
-        total_tickets = []
-        date = datetime.datetime.now().date()
-        date = str(date) + "%"
-        ticket_count = self.get_sql_data("select count(*) as cnt , HOUR(created_date) as hour \
-        from gm_feedback where created_date like '%s' group by HOUR(created_date)" %date)
-        
-        for data in ticket_count:
-            ticket = {}
-            ticket['hour_of_the_day'] = data['hour']
-            ticket['ticket_raised'] = data['cnt']
-            total_tickets.append(ticket)
-        
-        return HttpResponse(content=json.dumps(total_tickets),
-                            content_type='application/json')
+        try:
+            self.is_authenticated(request)
+            total_tickets = []
+            date = datetime.datetime.now().date()
+            date = str(date) + "%"
+            ticket_count = self.get_sql_data("select count(*) as cnt , HOUR(created_date) as hour \
+            from gm_feedback where created_date like '%s' group by HOUR(created_date)" %date)
+            
+            for data in ticket_count:
+                ticket = {}
+                ticket['hour_of_the_day'] = data['hour']
+                ticket['ticket_raised'] = data['cnt']
+                total_tickets.append(ticket)
+            return HttpResponse(content=json.dumps(total_tickets),
+                                content_type='application/json')
+        except Exception as ex:
+            LOG.error('Exception while hourly load analysis : {0}'.format(ex))
+            return HttpResponseBadRequest()
         
     def get_load_analysis(self, request, **kwargs):
         self.is_authenticated(request)
-        data = request.GET
-        year = data.get('year', datetime.datetime.now().year)
-        month = data.get('month', datetime.datetime.now().month)
-        total_tickets = []
-        if kwargs['args'] == 'agents':
-            query = "select f.id , f.created_date, f.assignee_id, count(*) as cnt \
-            ,au.username from gm_feedback f left outer join gm_servicedeskuser s on s.id= f.assignee_id\
-             left outer join gm_userprofile u on s.user_profile_id=u.user_id left outer join auth_user au on\
-              u.user_id = au.id where MONTH(f.created_date)={0} and YEAR(f.created_date) = {1} group by \
-               f.assignee_id".format(month, year) 
-            ticket_count = self.get_sql_data(query)
-            for data in ticket_count:
-                ticket = {}
-                ticket['agent_name'] = data['username']
-                ticket['count'] = data['cnt']
-                total_tickets.append(ticket)
-        
-        elif kwargs['args'] == 'departments':
-            query = "select f.id , count(*) as cnt , dept.name, f.created_date from gm_feedback \
-            f left outer join gm_departmentsubcategories sub on sub.id=f.sub_department_id left outer \
-            join gm_branddepartment dept on dept.id=sub.department_id where month(f.created_date)={0} and \
-            year(f.created_date)={1} group by dept.id".format(month, year)
-            ticket_count = self.get_sql_data(query)
-            for data in ticket_count:
-                ticket = {}
-                ticket['department_name'] = data['name']
-                ticket['count'] = data['cnt']
-                total_tickets.append(ticket)
-                
-        return HttpResponse(content=json.dumps(total_tickets), 
+        try:
+            data = request.GET
+            year = data.get('year', datetime.datetime.now().year)
+            month = data.get('month', datetime.datetime.now().month)
+            total_tickets = []
+            if kwargs['args'] == 'agents':
+                query = "select f.id , f.created_date, f.assignee_id, count(*) as cnt \
+                ,au.username from gm_feedback f left outer join gm_servicedeskuser s on s.id= f.assignee_id\
+                 left outer join gm_userprofile u on s.user_profile_id=u.user_id left outer join auth_user au on\
+                  u.user_id = au.id where MONTH(f.created_date)={0} and YEAR(f.created_date) = {1} group by \
+                   f.assignee_id".format(month, year) 
+                ticket_count = self.get_sql_data(query)
+                for data in ticket_count:
+                    ticket = {}
+                    ticket['agent_name'] = data['username']
+                    ticket['count'] = data['cnt']
+                    total_tickets.append(ticket)
+            
+            elif kwargs['args'] == 'departments':
+                query = "select f.id , count(*) as cnt , dept.name, f.created_date from gm_feedback \
+                f left outer join gm_departmentsubcategories sub on sub.id=f.sub_department_id left outer \
+                join gm_branddepartment dept on dept.id=sub.department_id where month(f.created_date)={0} and \
+                year(f.created_date)={1} group by dept.id".format(month, year)
+                ticket_count = self.get_sql_data(query)
+                for data in ticket_count:
+                    ticket = {}
+                    ticket['department_name'] = data['name']
+                    ticket['count'] = data['cnt']
+                    total_tickets.append(ticket)
+            return HttpResponse(content=json.dumps(total_tickets), 
                             content_type='application/json')
+        except Exception as ex:
+            LOG.error('Exception during load analysis - agents and departments : {0}'.format(ex))
+            return HttpResponseBadRequest()
+    
+    def get_agent_comparison(self, request, **kwargs):
+        self.is_authenticated(request)
+        try:
+            data = request.GET
+            year = data.get('year', datetime.datetime.now().year)
+            month = data.get('month', datetime.datetime.now().month)
+            total_tickets = []
+            if kwargs['type'] == 'tat':
+                query = "select au.username, sum(f2.dt) as sums ,count(*) as c , avg(f2.dt) as tat, \
+                YEAR(f1.created_date) as year, MONTH(f1.created_date) as month , f1.assignee_id from \
+                gm_feedback f1 inner join (select f2.id, TIMEDIFF(f2.resolved_date,f2.created_date) \
+                as dt , f2.created_date from gm_feedback f2 where status= 'resolved') f2 on f2.id=f1.id left \
+                outer join gm_servicedeskuser s on s.id= f1.assignee_id left outer join gm_userprofile u on \
+                s.user_profile_id=u.user_id  left outer join auth_user au on u.user_id=au.id where \
+                YEAR(f1.created_date)={0} and MONTH(f1.created_date) = {1} group by YEAR(f1.created_date),\
+                 MONTH(f1.created_date), f1.assignee_id;".format(year, month)
+                tickets = self.get_sql_data(query)
+                for data in tickets:
+                    tat = {}
+                    minutes, seconds = divmod(data['tat'], 60)
+                    tat['tat'] = minutes
+                    tat['username'] = data['username']
+                    total_tickets.append(tat)
+            
+            elif kwargs['type'] == 'fcr':
+                query = "select au.username ,f.assignee_id, count(*) as total, \
+                concat (YEAR(f.resolved_date),'-', MONTH(f.resolved_date)) as month_of_year from gm_feedback f \
+                left outer join gm_servicedeskuser s on s.id=f.assignee_id left outer join gm_userprofile u on \
+                s.user_profile_id=u.user_id  left outer join auth_user au on u.user_id=au.id where f.resolved_date is not null\
+                and month(f.resolved_date) = {0} and year(f.resolved_date)={1} group by  f.assignee_id;".format(month, year)
+                fcr_total = self.get_sql_data(query)
+                
+                query = "select au.username ,count(*) as cnt, concat(YEAR(f.resolved_date), '-', MONTH(f.resolved_date)) as \
+                month_of_year from gm_feedback f left outer join gm_servicedeskuser s on s.id= f.assignee_id left outer join \
+                gm_userprofile u on s.user_profile_id=u.user_id left outer join auth_user au on u.user_id = au.id where f.fcr=1 \
+                and month(f.resolved_date)={0} and year(f.resolved_date)={1} group by f.assignee_id;".format(month, year)
+                
+                fcr_count = self.get_sql_data(query)
+                
+                for data in fcr_total:
+                    fcrs = filter(lambda fc: fc['username'] == data['username'], fcr_count)
+                    if fcrs:
+                        fcr = {}
+                        fcr['username'] = data['username']
+                        fcr['fcr'] = (fcrs[0]['cnt']/float(data['total'])) * 100
+                        total_tickets.append(fcr)
+            return HttpResponse(content=json.dumps(total_tickets),
+                            content_type='application/json') 
+        except Exception as ex:
+            LOG.error('Exception while comparing tat and fcr for agents : {0}'.format(ex))
+            return HttpResponseBadRequest() 
     
 class ActivityResource(CustomBaseModelResource):
     '''
