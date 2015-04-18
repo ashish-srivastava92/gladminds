@@ -151,4 +151,21 @@ class UtilityResourceTest(BrandResourceTestCase):
             resp = c.post(self.base_version+uri_update, data=data_update)                
             self.assertSuccess(resp.status_code)
         return resp
+    
+    def get_comments(self):
+        uri="v1/comments/?order_by=-created_date"
+        resp=self.get(uri=uri)
+        return resp['objects'][0]
+    
+    def update_comments(self,username=None,password=None,ticket_id="1",comment_id="1",**kwargs):
+        uri_login="aftersell/helpdesk/login/"
+        update_comment="aftersell/feedbackdetails/"+ticket_id+"/comments/"+comment_id+"/"
+        commentDescription=kwargs.get('commentDescription','hello')
+        data = (('commentId','1'),('commentUser','sdm'),('commentDescription',commentDescription))
+        with session() as c:
+            resp=c.post(self.base_version+uri_login, data=(('username',username), ('password',password)))
+            self.assertSuccess(resp.status_code)
+            resp=c.post(self.base_version+update_comment,data=data)
+            self.assertSuccess(resp.status_code)
+        return resp
         

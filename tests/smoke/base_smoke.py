@@ -39,8 +39,8 @@ class BrandResourceTestCase(TestCase):
             
 
     def post(self, uri, content_type='application/json', data=None,
-             headers={'content_type': 'application/json'},isjson=True, params={}):
-        params.update({'access_token': self.login(url="v1/")})
+             headers={'content_type': 'application/json'},isjson=True, params={},dct=None):
+        params.update({'access_token': self.login(url="v1/",dct=dct)})
         if isjson is False:
             resp = requests.post(self.base_version+uri, data=data)
         else:
