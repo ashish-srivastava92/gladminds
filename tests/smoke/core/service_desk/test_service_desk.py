@@ -1,7 +1,10 @@
 from smoke.utility import UtilityResourceTest
 from time import sleep
 import datetime
-class TestServiceDesk(UtilityResourceTest):        
+class TestServiceDesk(UtilityResourceTest): 
+    def setUp(self):
+        super(TestServiceDesk, self).setUp()
+               
     def test_send_servicedesk_feedback(self):
         self.post_feedback('10316','123')
         sms=self.get_sms(phone_number='1111222292')
@@ -55,7 +58,6 @@ class TestServiceDesk(UtilityResourceTest):
         sleep(50)
         self.update_feedback(username='sdm',password='123',status='Resolved')
         result=self.get_feedbacks('sdm','123')
-        raise
         self.assertTrue(result['wait_time'] >= 50.0)
     
     def test_assign_to_reporter_when_pending(self):

@@ -3,7 +3,7 @@ import datetime
 import requests
 from requests import session
 from gladminds.core.constants import CouponStatus
-from integration.core.constants import BajajUrls
+from integration.core.constants import Urls
 from integration.core.constants import DISPATCH_XML_DATA,PURCHASE_XML_DATA,SERVICE_ADVISOR_DATA,OLD_FSC_DATA\
 ,CREDIT_NOTE_DATA,CUSTOMER_DATA,ASC_DATA,SA_DATA,VIN_DATA,MOBILE_DATA,SERVICEDESK_FEEDBACK_DATA
 
@@ -80,33 +80,33 @@ class UtilityResourceTest(BrandResourceTestCase):
         return result
 
     def check_coupon_open(self,unique_service_coupon):
-        coupon = self.get(BajajUrls.COUPONS+'?unique_service_coupon='+unique_service_coupon)
+        coupon = self.get(Urls.COUPONS+'?unique_service_coupon='+unique_service_coupon)
         self.assertEqual(coupon['objects'][0]['status'], CouponStatus.OPEN)
          
     def check_coupon_expired(self, unique_service_coupon):
-        coupon = self.get(BajajUrls.COUPONS+'?unique_service_coupon='+unique_service_coupon)
+        coupon = self.get(Urls.COUPONS+'?unique_service_coupon='+unique_service_coupon)
         self.assertEqual(coupon['objects'][0]['status'], CouponStatus.EXPIRED)
     
     def check_coupon_exceed_limit(self,unique_service_coupon):
-        coupon = self.get(BajajUrls.COUPONS+'?unique_service_coupon='+unique_service_coupon)
+        coupon = self.get(Urls.COUPONS+'?unique_service_coupon='+unique_service_coupon)
         self.assertEqual(coupon['objects'][0]['status'], CouponStatus.EXCEEDS_LIMIT)
         
     def check_coupon_inprogress(self,unique_service_coupon):
-        coupon = self.get(BajajUrls.COUPONS+'?unique_service_coupon='+unique_service_coupon)
+        coupon = self.get(Urls.COUPONS+'?unique_service_coupon='+unique_service_coupon)
         self.assertEqual(coupon['objects'][0]['status'], CouponStatus.IN_PROGRESS)
         
     def check_coupon_closed(self,unique_service_coupon):
-        coupon = self.get(BajajUrls.COUPONS+'?unique_service_coupon='+unique_service_coupon)
+        coupon = self.get(Urls.COUPONS+'?unique_service_coupon='+unique_service_coupon)
         self.assertEqual(coupon['objects'][0]['status'], CouponStatus.CLOSED)
     
     def check_coupon(self,phone_number,data):
         data=(('text',data), ('phoneNumber',phone_number))
-        coupon_data = self.post(BajajUrls.MESSAGES,isjson=False,data=data)
+        coupon_data = self.post(Urls.MESSAGES,isjson=False,data=data)
         self.assertTrue(coupon_data['status'])
     
     def check_coupon_false(self,phone_number,data):
         data=(('text',data), ('phoneNumber',phone_number))
-        coupon_data = self.post(BajajUrls.MESSAGES,isjson=False,data=data)
+        coupon_data = self.post(Urls.MESSAGES,isjson=False,data=data)
         self.assertFalse(coupon_data['status'])     
     
     def post_feedback(self,username,password):
@@ -168,4 +168,3 @@ class UtilityResourceTest(BrandResourceTestCase):
             resp=c.post(self.base_version+update_comment,data=data)
             self.assertSuccess(resp.status_code)
         return resp
-        

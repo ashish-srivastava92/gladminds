@@ -1,6 +1,8 @@
 from smoke.utility import UtilityResourceTest
 
 class TestFeeds(UtilityResourceTest):
+    def setUp(self):
+        super(TestFeeds, self).setUp()
         
     def test_product_dispatch(self):
         self.send_dispatch_feed()        

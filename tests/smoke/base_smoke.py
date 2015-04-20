@@ -2,7 +2,7 @@ import json
 import requests
 from django.test.testcases import TestCase
 import os
-from integration.core.constants import BajajUrls
+from integration.core.constants import Urls
 import urllib
 from django.test.client import Client
 from requests import session
@@ -24,7 +24,7 @@ class BrandResourceTestCase(TestCase):
     def login(self,url, dct=None):
         if dct is None:
             dct = {"username": os.environ['USERNAME'], "password": os.environ['PASSWORD']}
-        resp = requests.post(self.base_version+url+BajajUrls.LOGIN, data=json.dumps(dct),
+        resp = requests.post(self.base_version+url+Urls.LOGIN, data=json.dumps(dct),
                              headers={'content_type': 'application/json'})
         self.assertSuccess(resp.status_code)
         return json.loads(resp.content)['access_token']
@@ -32,7 +32,7 @@ class BrandResourceTestCase(TestCase):
     def logout(self,url,dct=None):
         if dct is None:
             dct = {"username": os.environ['USERNAME'], "password": os.environ['PASSWORD']}
-        resp = requests.post(self.base_version+url+BajajUrls.LOGOUT, data=json.dumps(dct),
+        resp = requests.post(self.base_version+url+Urls.LOGOUT, data=json.dumps(dct),
                              headers={'content_type': 'application/json'})
         self.assertSuccess(resp.status_code)
         return json.loads(resp.content)
@@ -92,7 +92,7 @@ class BrandResourceTestCase(TestCase):
     def post_as_dealer(self, uri, username, password, content_type='application/json', data=None,
              headers={'content_type': 'application/json'},isjson=True, params={}):
         with session() as c:
-            resp = c.post(self.base_version+BajajUrls.DEALER_LOGIN, data=(('username',username), ('password',password)))
+            resp = c.post(self.base_version+Urls.DEALER_LOGIN, data=(('username',username), ('password',password)))
             if isjson is False:
                 resp = c.post(self.base_version+uri, data=data)                
             else:

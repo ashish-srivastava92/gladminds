@@ -21,7 +21,7 @@ class AfterbuyUrls():
         BRAND = 'brands/'
         INDUSTRY = 'industries/'
         
-class BajajUrls():
+class Urls():
         COUPONS = 'v1/coupons/'
         LOGIN = 'gm-users/login/'
         MESSAGES = 'v1/messages/'

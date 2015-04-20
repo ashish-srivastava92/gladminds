@@ -2,6 +2,9 @@ from smoke.utility import UtilityResourceTest
 from integration.core.constants import EXISTING_SA_DATA,UPDATE_SA_DATA
 
 class TestRegistrations(UtilityResourceTest):
+    def setUp(self):
+        super(TestRegistrations, self).setUp()
+        
     def test_register_customer(self):
         self.send_dispatch_feed()
         self.register_customer("10316", "123")
