@@ -579,5 +579,14 @@
       "template":  "",
       "description": "Send message for change in customer support"
     }
+   },
+   {
+    "model": "gladminds.messagetemplate",
+    "pk": 65,
+    "fields": {
+      "template_key":"SEND_CUSTOMER_REGISTER_KTM",
+      "template":  "Dear {customer_name}, Congratulations for owning KTM Duke Bike. Download link for KTM Duke Owner's Manual at {ktm_url}. Welcome to Orange World.",
+      "description": "Send message on KTM bike purchase"
+    }
   }
 ]

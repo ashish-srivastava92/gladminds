@@ -24,6 +24,7 @@ class TestServiceDeskFlow(BaseTestCase):
         brand = self.brand
         system = self.system
         self.create_user(username='gladminds', email='gladminds@gladminds.co', password='gladminds')
+        self.create_user(username='bajaj', email='bajaj@gladminds.co', password='bajaj')
         brand.send_service_advisor_feed()
         system.create_sdo(username='sdo', email='gm@gm.com', password='123', phone_number="+910000000000")
         system.create_sdm(username='sdm', email='gm@gm.com', password='123', phone_number="+911234567890")
@@ -45,7 +46,7 @@ class TestServiceDeskFlow(BaseTestCase):
         initiator = self.system
         initiator.post_feedback()
         service_desk_owner = self.system
-        service_desk_owner.login(username='sdo', password='123', provider='desk', group_name=Roles.SDOWNERS)
+        service_desk_owner.login(username='sdo', password='123', provider='helpdesk', group_name=Roles.SDOWNERS)
         service_desk_owner.get_feedback_information()
         feedback_obj = Feedback.objects.all()
         system = self.system
@@ -56,7 +57,7 @@ class TestServiceDeskFlow(BaseTestCase):
         initiator = self.system
         initiator.post_feedback()
         service_desk_manager = self.system
-        service_desk_manager.login(username='sdm', password='123', provider='desk', group_name=Roles.SDMANAGERS)
+        service_desk_manager.login(username='sdm', password='123', provider='helpdesk', group_name=Roles.SDMANAGERS)
         service_desk_manager.get_feedback_information()
         feedback_obj = Feedback.objects.all()
         system = self.system

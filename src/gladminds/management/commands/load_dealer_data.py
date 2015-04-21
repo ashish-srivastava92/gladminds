@@ -37,7 +37,7 @@ class Command(BaseCommand):
 
     def upload_dealer_data(self):
         print "Started running dealer function..."
-        file_list = ['dealer_data.csv']
+        file_list = ['sa_data_goa_dl_hr.csv']
         dealer_list = []
         dealer_model = get_model('Dealer', APP)
 
@@ -82,7 +82,7 @@ class Command(BaseCommand):
 
     def upload_service_advisor_data(self):
         print "Started running SA function..."
-        file_list = ['dealer_data.csv']
+        file_list = ['sa_data_goa_dl_hr.csv']
         file = open("sa_details.txt", "w")
         sa_list = []
         dealer_model = get_model('Dealer', APP)
