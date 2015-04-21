@@ -20,7 +20,9 @@ DATABASES[GmApps.DEMO]['NAME'] = os.path.join(OUT_DIR, 'demo.db')  # "/tmp/test.
 DATABASES[GmApps.AFTERBUY]['ENGINE'] = 'django.db.backends.sqlite3'
 DATABASES[GmApps.AFTERBUY]['NAME'] = os.path.join(OUT_DIR, 'afterbuy.db')  # "/tmp/test.db"
 DATABASES[GmApps.BAJAJCV]['ENGINE'] = 'django.db.backends.sqlite3'
-DATABASES[GmApps.BAJAJCV]['NAME'] = os.path.join(OUT_DIR, 'afterbuy.db')
+DATABASES[GmApps.BAJAJCV]['NAME'] = os.path.join(OUT_DIR, 'bajajcv.db')
+DATABASES[GmApps.DAIMLER]['ENGINE'] = 'django.db.backends.sqlite3'
+DATABASES[GmApps.DAIMLER]['NAME'] = os.path.join(OUT_DIR, 'bajajcv.db')
 
 TEST_IGNORE_APPS = ()
 
@@ -71,6 +73,7 @@ BRAND = 'bajaj'
 ENV = "test"
 MAIL_SERVER = 'localhost'
 
+CORE_WSDL_TNS="http://local.bajajcv.gladminds.co:8000/api/v1/feed/"
 WSDL_TNS="http://local.bajaj.gladminds.co:8000/api/v1/feed/"
 
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'

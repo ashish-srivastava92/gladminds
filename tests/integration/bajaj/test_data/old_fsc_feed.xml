@@ -8,8 +8,8 @@
               <ns1:OldFscItem>
 	            <ns1:MATNR>HSR</ns1:MATNR>                
 	            <ns1:SERVICE>2</ns1:SERVICE>                
-	            <ns1:KUNNAR>GMDEALER001</ns1:KUNNAR>
-                <ns1:CHASSIS>XXXXXXXXXX</ns1:CHASSIS>
+	            <ns1:KUNNAR>1</ns1:KUNNAR>
+                <ns1:CHASSIS>12345678901232792</ns1:CHASSIS>
 	            <ns1:CHARG>ASC001</ns1:CHARG>
              </ns1:OldFscItem>
             </ns1:GT_OLD_FSC>
@@ -20,8 +20,8 @@
         </ns1:OldFSCData>
       </ns1:ObjectList>
       <ns1:Credential>
-        <ns1:UserName>gladminds</ns1:UserName>
-        <ns1:Password>gladminds</ns1:Password>
+        <ns1:UserName>bajaj</ns1:UserName>
+        <ns1:Password>bajaj</ns1:Password>
       </ns1:Credential>
     </ns1:postOldFsc>
   </SOAP-ENV:Body>

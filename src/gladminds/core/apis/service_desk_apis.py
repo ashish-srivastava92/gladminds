@@ -363,6 +363,7 @@ class CommentsResource(CustomBaseModelResource):
                      "feedback" : ALL_WITH_RELATIONS,
                      "id" : ALL
                      }
+        ordering = ['created_date']
         
     def prepend_urls(self):
         return [
