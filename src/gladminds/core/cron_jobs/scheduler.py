@@ -2,6 +2,8 @@
 import sys
 import json
 from boto.sqs.connection import SQSConnection
+ACCESS_KEY = 'AKIAIL7IDCSTNCG2R6JA'
+SECRET_KEY = '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'
 
 
 class TaskQueue:
@@ -43,7 +45,7 @@ task_info = {
 class SqsTaskQueue(TaskQueue):
 
     def __init__(self, sqs_name, brand):
-        self._conn = SQSConnection()
+        self._conn = SQSConnection(ACCESS_KEY, SECRET_KEY)
         self._q = self._conn.get_queue(sqs_name)
         self.brand = brand
 
