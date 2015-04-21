@@ -32,38 +32,6 @@ from gladminds.core.core_utils.utils import dictfetchall
 from django.db import connections
 logger = logging.getLogger("gladminds")
 
-class TerritoryResource(CustomBaseModelResource):
-    
-    class Meta:
-        queryset = models.Territory.objects.all()
-        resource_name = "territories"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'put', 'delete']
-        always_return_data = True
-
-class StateResource(CustomBaseModelResource):
-    territory = fields.ForeignKey(TerritoryResource, 'territory')
-    
-    class Meta:
-        queryset = models.State.objects.all()
-        resource_name = "states"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put', 'delete']
-        always_return_data = True
-        filtering = {
-                     "state_name":ALL, 
-                     }
-        
-class CityResource(CustomBaseModelResource):    
-    state = fields.ForeignKey(StateResource, 'state')
-    
-    class Meta:
-        queryset = models.City.objects.all()
-        resource_name = "cities"
-        authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put', 'delete']
-        always_return_data = True
-
 class LoyaltySLAResource(CustomBaseModelResource):
     class Meta:
         queryset = models.LoyaltySLA.objects.all()
@@ -90,12 +58,11 @@ class RedemptionResource(CustomBaseModelResource):
     class Meta:
         queryset = get_model('RedemptionRequest').objects.all()
         resource_name = "redemption-requests"
-        authorization = Authorization()
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         args = constants.LOYALTY_ACCESS
-        authorization = MultiAuthorization(LoyaltyCustomAuthorization(query_field=args['query_field']))
+        authorization = MultiAuthorization(Authorization(), LoyaltyCustomAuthorization(query_field=args['query_field']))
         filtering = {
                      "member": ALL_WITH_RELATIONS,
                      "resolution_flag":ALL,

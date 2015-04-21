@@ -8,24 +8,29 @@ from test_constants import NATIONAL_SPARES_MANAGER, AREA_SPARES_MANAGER,DISTRIBU
     STATE, CITY
 from gladminds.core.auth_helper import Roles
 from gladminds.core.model_fetcher import models
+from gladminds.management.commands import load_gm_migration_data
 
-client=Client(SERVER_NAME='bajaj')
+client=Client(SERVER_NAME='bajajcv')
 
 class LoyaltyApiTests(ResourceTestCase):
     multi_db=True
     def setUp(self):
         super(LoyaltyApiTests, self).setUp()
+        load_obj = load_gm_migration_data.Command()
+        load_obj.add_sms_template()
 
-    def post(self,uri,data,content_type='application/json'):
+    def post(self, uri, data, access_token=None, content_type='application/json'):
+        if access_token:
+            uri = uri+'?access_token='+access_token
         resp = client.post(uri, data=json.dumps(data), content_type=content_type)
         return resp
 
-    def get(self,uri,content_type='application/json'):
-        resp = client.get(uri,content_type=content_type)
+    def get(self, uri, access_token, content_type='application/json'):
+        resp = client.get(uri+'?access_token='+access_token, content_type=content_type)
         return resp
 
-    def put(self,uri,data,content_type='application/json'):
-        resp = client.put(uri,data=json.dumps(data), content_type=content_type)
+    def put(self, uri, access_token, data, content_type='application/json'):
+        resp = client.put(uri+'?access_token='+access_token, data=json.dumps(data), content_type=content_type)
         return resp
 
     def create_new_user(self, username, group_name, email):
@@ -34,92 +39,128 @@ class LoyaltyApiTests(ResourceTestCase):
 
     def login(self):
         client.login(username='user', password='123')
-
-    def test_create_nsm(self):
-        self.test_create_territory();
-        uri = '/v1/nsms/'
-        resp = self.post(uri,data=NATIONAL_SPARES_MANAGER)
-        self.assertEquals(resp.status_code,201)
-        return resp
- 
-    def test_get_nsm(self):
-        resp = self.test_create_nsm()
-        self.assertEquals(resp.status_code,201)
-        uri = '/v1/nsms/1/'
-        resp = self.get(uri)
-        self.assertEquals(resp.status_code,200)
-        self.assertEqual(self.deserialize(resp)['phone_number'], "1234567890")
-        return resp
- 
-    def test_update_nsm(self):
-        resp = self.test_get_nsm()
-        self.assertEquals(resp.status_code,200)
-        a={"phone_number":"1234512345"}
-        uri = '/v1/nsms/1/'
-        resp = self.put(uri,a)
-        self.assertEquals(resp.status_code, 200)
-        uri = '/v1/nsms/1/'
-        resp = self.get(uri)
-        self.assertEqual(self.deserialize(resp)['phone_number'], "1234512345")
+        
+    ''' function returns access_token after login'''
+    def user_login(self, group_name):
+        self.create_user(username='user', email='asc@xyz.com', password='123', 
+                        group_name=group_name, phone_number="+911234567890", brand='bajajcv')
+        data={"username": "user", "password": "123" }
+        resp=self.post(uri='/v1/gm-users/login/', data=data)
+        return json.loads(resp.content)['access_token']
  
     def test_create_asm(self, data=AREA_SPARES_MANAGER):
-        self.test_create_state(data=STATE)
-        uri = '/v1/asms/'
-        resp = self.post(uri,data=data)
+        access_token = self.user_login(group_name=Roles.NATIONALSPARESMANAGERS)
+        uri = '/v1/area-spares-managers/'
+        resp = self.post(uri, data=data, access_token=access_token)
         self.assertEquals(resp.status_code,201)
-        return resp
- 
+        return access_token
+
     def test_get_asm(self):
-        resp = self.test_create_asm()
-        self.assertEquals(resp.status_code,201)
-        resp = client.get('/v1/asms/1/',content_type='application/json')
+        access_token = self.test_create_asm()
+        resp = client.get('/v1/area-spares-managers/1/' , access_token=access_token, content_type='application/json')
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['phone_number'], "9999999999")
-        return resp
- 
+        return access_token
+
     def test_update_asm(self):
-        resp = self.test_get_asm()
-        self.assertEquals(resp.status_code,200)
+        access_token = self.test_get_asm()
         a={"phone_number":"9999999998"}
-        resp = client.put('/v1/asms/1/', data=json.dumps(a), content_type='application/json')
+        resp = self.put('/v1/area-spares-managers/1/', access_token=access_token, data=json.dumps(a), content_type='application/json')
         self.assertEquals(resp.status_code, 200)
-        resp = client.get('/v1/asms/1/',content_type='application/json')
+        resp = self.get('/v1/area-spares-managers/1/',content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
         self.assertEqual(self.deserialize(resp)['phone_number'], "9999999998")
- 
-    def test_create_partner(self):
-        uri = '/v1/partners/'
-        resp = self.post(uri,data=PARTNER)
+
+    def test_create_nsm(self):
+        access_token = self.user_login(group_name=Roles.LOYALTYSUPERADMINS)
+        uri = '/v1/national-spares-managers/'
+        resp = self.post(uri,data=NATIONAL_SPARES_MANAGER, access_token=access_token)
         self.assertEquals(resp.status_code,201)
-        return resp
+        return access_token
+ 
+    def test_get_nsm(self):
+        access_token = self.test_create_nsm()
+        uri = '/v1/national-spares-managers/1/'
+        resp = self.get(uri, access_token=access_token)
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['phone_number'], "1234567890")
+        return access_token
+ 
+    def test_update_nsm(self):
+        access_token = self.test_get_asm()
+        a={"phone_number":"1234512345"}
+        uri = '/v1/national-spares-managers/1/'
+        resp = self.put(uri, access_token, a)
+        self.assertEquals(resp.status_code, 200)
+        uri = '/v1/national-spares-managers/1/'
+        resp = self.get(uri, access_token=access_token)
+        self.assertEqual(self.deserialize(resp)['phone_number'], "1234512345")
+
+    def test_create_partner(self, group_name=Roles.AREASPARESMANAGERS):
+        access_token = self.user_login(group_name=group_name)
+        uri = '/v1/partners/'
+        resp = self.post(uri,data=PARTNER, access_token=access_token)
+        self.assertEquals(resp.status_code,201)
+        return resp, access_token
  
     def test_get_partner(self):
         resp = self.test_create_partner()
-        self.assertEquals(resp.status_code,201)
-        resp = client.get('/v1/partners/1/',content_type='application/json')
+        access_token = resp[1]
+        resp = self.get(uri='/v1/partners/1/',access_token=access_token)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['name'], "Anchit")
-        return resp
+        return resp, access_token
  
     def test_update_partner(self):
         resp = self.test_get_partner()
-        self.assertEquals(resp.status_code,200)
+        self.assertEquals(resp[0].status_code,200)
         a={"name":"Abhinav"}
-        resp = client.put('/v1/partners/1/', data=json.dumps(a), content_type='application/json')
+        resp = self.put(uri='/v1/partners/1/', access_token=resp[1] ,data=json.dumps(a))
         self.assertEquals(resp.status_code, 200)
-        resp = client.get('/v1/partners/1/',content_type='application/json')
+        resp = self.get(uri='/v1/partners/1/', access_token=resp[1])
         self.assertEqual(self.deserialize(resp)['name'], "Abhinav")
- 
-    def test_create_distributor(self):
-        uri = '/v1/distributors/'
-        resp = self.post(uri,data = DISTRIBUTOR)
+
+    def test_create_member(self, access_token, data=MEMBER):
+        uri = '/v1/members/'
+        resp = self.post(uri,data=data, access_token=access_token)
         self.assertEquals(resp.status_code,201)
         return resp
  
+    def test_get_member(self):
+        access_token=self.test_create_distributor()
+        resp = self.test_create_member(access_token)
+        self.assertEquals(resp.status_code,201)
+        uri = '/v1/members/1/'
+        resp = self.get(uri, access_token=access_token)
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['phone_number'],"+9198424618001")
+        return resp
+ 
+    def test_update_member(self):
+        access_token = self.user_login(group_name=Roles.AREASPARESMANAGERS)
+        resp = self.test_create_member(access_token)
+        self.assertEquals(resp.status_code,201)
+        data={"phone_number":"+919842461801"}
+        uri = '/v1/members/1/'
+        resp = self.put(uri, data=data, access_token=access_token)
+        self.assertEquals(resp.status_code, 200)
+        uri = '/v1/members/1/'
+        resp = self.get(uri, access_token)
+        self.assertEqual(self.deserialize(resp)['phone_number'],"+919842461801")
+
+    def test_create_distributor(self):
+        access_token = self.user_login(group_name=Roles.AREASPARESMANAGERS)
+        uri = '/v1/distributors/'
+        resp = self.post(uri,data=DISTRIBUTOR, access_token=access_token)
+        self.assertEquals(resp.status_code,201)
+        return resp, access_token
+ 
     def test_get_distributor(self):
         resp = self.test_create_distributor()
-        self.assertEquals(resp.status_code,201)
+        self.assertEquals(resp[0].status_code,201)
+        access_token = resp[1]
         uri = '/v1/distributors/1/'
-        resp = self.get(uri)
+        resp = self.get(uri, access_token=access_token)
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['phone_number'], "1111111111")
         self.assertEqual(self.deserialize(resp)["asm"]['asm_id'],"ASM005")
@@ -137,6 +178,142 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['phone_number'], "2222222222")
  
+    def test_create_product(self, access_token):
+        uri = '/v1/product-catalogs/'
+        resp = self.post(uri,data=PRODUCT, access_token=access_token)
+        self.assertEquals(resp.status_code,201)
+        return resp
+ 
+    def test_get_product(self):
+        access_token = self.user_login(group_name=Roles.AREASPARESMANAGERS)       
+        resp = self.test_create_product(access_token=access_token)
+        self.assertEquals(resp.status_code,201)
+        uri = '/v1/product-catalogs/1/'
+        resp = self.get(uri, access_token=access_token)
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['image_url'], None)
+        return resp, access_token
+ 
+    def test_update_product(self):
+        resp = self.test_get_product()
+        self.assertEquals(resp[0].status_code,200)
+        access_token = resp[1]
+        data={"image_url":"qwer/alalpur"}
+        uri = '/v1/product-catalogs/1/'
+        resp = self.put(uri,data=data, access_token=access_token)
+        self.assertEquals(resp.status_code, 200)
+        uri = '/v1/product-catalogs/1/'
+        resp = self.get(uri, access_token=access_token)
+        self.assertEqual(self.deserialize(resp)['image_url'], "/media/qwer/alalpur")
+ 
+    def test_create_sla(self, access_token=None):
+        if not access_token:
+            access_token = self.user_login(group_name=Roles.AREASPARESMANAGERS)
+        uri = '/v1/loyalty-slas/'
+        resp = self.post(uri,data=SLA, access_token=access_token)
+        self.assertEquals(resp.status_code,201)
+        return resp
+ 
+    def test_get_sla(self):
+        access_token = self.user_login(group_name=Roles.AREASPARESMANAGERS)
+        resp = self.test_create_sla(access_token)
+        self.assertEquals(resp.status_code,201)
+        uri = '/v1/loyalty-slas/1/'
+        resp = self.get(uri, access_token=access_token)
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['action'], "Redemption")
+        self.assertEqual(self.deserialize(resp)['resolution_time'], 6)
+        self.assertEqual(self.deserialize(resp)['resolution_unit'], "hrs")
+        return resp, access_token
+ 
+    def test_update_sla(self):
+        resp = self.test_get_sla()
+        self.assertEquals(resp[0].status_code,200)
+        access_token = resp[1]
+        data={"member_resolution_time": 10}
+        uri = '/v1/loyalty-slas/1/'
+        resp = self.put(uri,data=data, access_token=access_token)
+        self.assertEquals(resp.status_code, 200)
+        uri = '/v1/loyalty-slas/1/'
+        resp = self.get(uri, access_token=access_token)
+        self.assertEqual(self.deserialize(resp)['member_resolution_time'], 10)
+
+    def test_create_redemptiomrequest(self):
+        
+        access_token = self.user_login(group_name=Roles.AREASPARESMANAGERS)
+        
+        
+        resp = self.test_create_member(access_token)
+        self.assertEquals(resp.status_code,201)
+        
+        self.test_create_sla(access_token)
+        resp = self.test_create_product(access_token)
+        self.assertEquals(resp.status_code,201)
+        
+        uri = '/v1/messages'
+        rrmsg = {'text': "RD ME00003 123", 'phoneNumber': "+919842461800"}
+        resp = client.post(uri, rrmsg)
+        return resp, access_token
+ 
+    def test_get_redemptiomrequest(self):
+        resp = self.test_create_redemptiomrequest()
+        self.assertEquals(resp[0].status_code,200)
+        access_token=resp[1]
+        uri = '/v1/redemption-requests/1/'
+        resp = self.get(uri, access_token=access_token)
+        self.assertEquals(resp.status_code,200)
+        self.assertEqual(self.deserialize(resp)['delivery_address'], '34, SRI MEENAKSHI AMMAN AUTO WORKS, SELLUR')
+        return resp
+ 
+    def test_update_redemptiomrequest(self):
+        resp = self.test_create_redemptiomrequest()
+        self.assertEquals(resp[0].status_code,200)
+        access_token = resp[1]
+        data={"resolution_flag":False}
+        uri = '/v1/redemption-requests/1/'
+        resp = self.put(uri,data=data, access_token=access_token)
+        self.assertEquals(resp.status_code, 200)
+        uri = '/v1/redemption-requests/1/'
+        resp = self.get(uri, access_token=access_token)
+        self.assertEqual(self.deserialize(resp)['is_approved'], False)
+
+    ''' within sla and overdue test case '''
+ 
+    def test_get_redemptiomrequest_by_overdue(self):
+        resp = self.test_create_redemptiomrequest()
+        self.assertEquals(resp[0].status_code,200)
+        access_token = resp[1]
+        
+        uri = '/v1/redemption-requests/'
+        resp = client.get(uri+'?access_token='+access_token+'&resolution_flag=True', content_type='application/json')
+        self.assertEquals(resp.status_code,200)
+        
+        data={"resolution_flag":False}
+        uri = '/v1/redemption-requests/1/'
+        resp = self.put(uri,data=data, access_token=access_token)
+        
+        uri = '/v1/redemption-requests/'
+        resp = client.get(uri+'?access_token='+access_token+'&resolution_flag=False', content_type='application/json')
+        self.assertEquals(resp.status_code,200)
+        
+        resp = self.get(uri, access_token=access_token)
+        
+        self.assertEquals(resp.status_code,200)
+ 
+    def test_get_redemptiomrequest_by_state(self):
+        resp = self.test_create_redemptiomrequest()
+        self.assertEquals(resp.status_code,201)
+        uri = '/v1/redemption-requests/?member__state=karnataka'
+        resp = self.get(uri)
+        self.assertEquals(resp.status_code,200)
+ 
+    def test_get_mechanic_list(self):
+        resp = self.test_create_redemptiomrequest()
+        self.assertEquals(resp.status_code,201)
+        uri = '/v1/redemption-requests/members-details/open/'
+        resp = self.get(uri)
+        self.assertEquals(resp.status_code,200)
+
     def test_create_retailer(self):
         uri = '/v1/retailers/'
         resp = self.post(uri,data = RETAILER)
@@ -191,59 +368,6 @@ class LoyaltyApiTests(ResourceTestCase):
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['part_model'], "3S")
  
-    def test_create_product(self):
-        uri = '/v1/product-catalogs/'
-        create_mock_data = PRODUCT
-        resp = self.post(uri,data=create_mock_data)
-        self.assertEquals(resp.status_code,201)
-        return resp
- 
-    def test_get_product(self):
-        resp = self.test_create_product()
-        self.assertEquals(resp.status_code,201)
-        uri = '/v1/product-catalogs/1/'
-        resp = self.get(uri)
-        self.assertEquals(resp.status_code,200)
-        self.assertEqual(self.deserialize(resp)['image_url'], None)
-        return resp
- 
-    def test_update_product(self):
-        resp = self.test_get_product()
-        self.assertEquals(resp.status_code,200)
-        data={"image_url":"qwer/alalpur"}
-        uri = '/v1/product-catalogs/1/'
-        resp = self.put(uri,data)
-        self.assertEquals(resp.status_code, 200)
-        uri = '/v1/product-catalogs/1/'
-        resp = self.get(uri)
-        self.assertEqual(self.deserialize(resp)['image_url'], "/media/qwer/alalpur")
- 
-    def test_create_redemptiomrequest(self,data = REDEMPTION_REQUEST):
-        uri = '/v1/redemption-requests/'
-        resp = self.post(uri,data=data)
-        self.assertEquals(resp.status_code,201)
-        return resp
- 
-    def test_get_redemptiomrequest(self):
-        resp = self.test_create_redemptiomrequest()
-        self.assertEquals(resp.status_code,201)
-        uri = '/v1/redemption-requests/1/'
-        resp = self.get(uri)
-        self.assertEquals(resp.status_code,200)
-        self.assertEqual(self.deserialize(resp)['image_url'], None)
-        return resp
- 
-    def test_update_redemptiomrequest(self):
-        resp = self.test_get_redemptiomrequest()
-        self.assertEquals(resp.status_code,200)
-        data={"resolution_flag":False}
-        uri = '/v1/redemption-requests/1/'
-        resp = self.put(uri,data)
-        self.assertEquals(resp.status_code, 200)
-        uri = '/v1/redemption-requests/1/'
-        resp = self.get(uri)
-        self.assertEqual(self.deserialize(resp)['is_approved'], False)
- 
     def test_create_spare_part_upc(self):
         self.test_create_spare_master()
         uri = '/v1/spare-upcs/'
@@ -272,33 +396,6 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEqual(self.deserialize(resp)['unique_part_code'], "UPCC51")
  
  
-    ''' within sla and overdue test case '''
- 
-    def test_get_redemptiomrequest_by_overdue(self):
-        resp = self.test_create_redemptiomrequest()
-        self.assertEquals(resp.status_code,201)
-        uri = '/v1/redemption-requests/?resolution_flag=True'
-        resp = self.get(uri)
-        self.assertEquals(resp.status_code,200)
-        self.test_update_redemptiomrequest()
-        uri = '/v1/redemption-requests/?resolution_flag=False'
-        resp = self.get(uri)
-        self.assertEquals(resp.status_code,200)
- 
-    def test_get_redemptiomrequest_by_state(self):
-        resp = self.test_create_redemptiomrequest()
-        self.assertEquals(resp.status_code,201)
-        uri = '/v1/redemption-requests/?member__state=karnataka'
-        resp = self.get(uri)
-        self.assertEquals(resp.status_code,200)
- 
-    def test_get_mechanic_list(self):
-        resp = self.test_create_redemptiomrequest()
-        self.assertEquals(resp.status_code,201)
-        uri = '/v1/redemption-requests/members-details/open/'
-        resp = self.get(uri)
-        self.assertEquals(resp.status_code,200)
- 
     def test_create_spare_part_point(self):
         self.test_create_spare_master()
         uri = '/v1/spare-points/'
@@ -326,35 +423,6 @@ class LoyaltyApiTests(ResourceTestCase):
         uri = '/v1/spare-points/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['MRP'], 31)
- 
-    def test_create_sla(self):
-        uri = '/v1/loyalty-slas/'
-        resp = self.post(uri,data = SLA)
-        self.assertEquals(resp.status_code,201)
-        return resp
- 
-    def test_get_sla(self):
-        resp = self.test_create_sla()
-        self.assertEquals(resp.status_code,201)
-        uri = '/v1/loyalty-slas/1/'
-        resp = self.get(uri)
-        self.assertEquals(resp.status_code,200)
-        self.assertEqual(self.deserialize(resp)['action'], "Welcome Kit")
-        self.assertEqual(self.deserialize(resp)['resolution_time'], 6)
-        self.assertEqual(self.deserialize(resp)['resolution_unit'], "hrs")
-        return resp
- 
-    def test_update_sla(self):
-        resp = self.test_get_sla()
-        self.assertEquals(resp.status_code,200)
-        data={"member_resolution_time": 10}
-        uri = '/v1/loyalty-slas/1/'
-        resp = self.put(uri,data)
-        self.assertEquals(resp.status_code, 200)
-        uri = '/v1/loyalty-slas/1/'
-        resp = self.get(uri)
-        self.assertEqual(self.deserialize(resp)['member_resolution_time'], 10)
- 
     def test_create_accumulation(self):
         uri = '/v1/asms/'
         resp = self.post(uri,data=AREA_SPARES_MANAGER)
@@ -377,34 +445,7 @@ class LoyaltyApiTests(ResourceTestCase):
         self.assertEquals(resp.status_code,200)
         self.assertEqual(self.deserialize(resp)['transaction_id'], 1)
         return resp
- 
-    def test_create_member(self,data = MEMBER):
-        self.test_create_state(data=STATE)
-        uri = '/v1/members/'
-        resp = self.post(uri,data = data)
-        self.assertEquals(resp.status_code,201)
-        return resp
- 
-    def test_get_member(self):
-        resp = self.test_create_member()
-        self.assertEquals(resp.status_code,201)
-        uri = '/v1/members/1/'
-        resp = self.get(uri)
-        self.assertEquals(resp.status_code,200)
-        self.assertEqual(self.deserialize(resp)['phone_number'],"+919842461800")
-        return resp
- 
-    def test_update_member(self):
-        resp = self.test_create_member()
-        self.assertEquals(resp.status_code,201)
-        data={"phone_number":"+919842461801"}
-        uri = '/v1/members/1/'
-        resp = self.put(uri,data)
-        self.assertEquals(resp.status_code, 200)
-        uri = '/v1/members/1/'
-        resp = self.get(uri)
-        self.assertEqual(self.deserialize(resp)['phone_number'],"+919842461801")
- 
+  
     def test_create_welcomekit(self):
         self.test_create_sla()
         self.test_create_member()
