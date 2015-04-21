@@ -8,19 +8,15 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.db.models.aggregates import Count, Sum
 from django.http.response import HttpResponse
-from tastypie import fields
+from django.core.serializers.json import DjangoJSONEncoder
+
 from tastypie.utils.urls import trailing_slash
 from tastypie import fields,http
-from django.http.response import HttpResponse
 from tastypie.http import HttpBadRequest
-from django.contrib.auth import authenticate, login
-from django.conf import settings
-from gladminds.afterbuy import utils as core_utils
+from tastypie.authentication import MultiAuthentication
 from tastypie.authorization import Authorization
 from tastypie.authorization import DjangoAuthorization
 from tastypie.constants import ALL_WITH_RELATIONS, ALL
-from tastypie.http import HttpBadRequest
-from tastypie.utils.urls import trailing_slash
 
 from gladminds.core import constants
 from gladminds.core.apis.authentication import AccessTokenAuthentication
@@ -36,11 +32,6 @@ from gladminds.core.managers.user_manager import RegisterUser
 from gladminds.core.model_fetcher import models
 
 from gladminds.sqs_tasks import send_otp
-from gladminds.core.auth.access_token_handler import create_access_token,\
-    delete_access_token
-from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.core.apis.authentication import AccessTokenAuthentication
-from gladminds.core.apis.authorization import MultiAuthorization
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.auth import otp_handler
 from django.contrib.sites.models import RequestSite
@@ -48,8 +39,7 @@ from gladminds.core.model_helpers import format_phone_number
 from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.managers.mail import send_reset_link_email
 from gladminds.core.utils import get_sql_data
-from django.core.serializers.json import DjangoJSONEncoder
-from tastypie.authentication import MultiAuthentication
+from gladminds.afterbuy import utils as core_utils
 
 logger = logging.getLogger('gladminds')
 
@@ -329,12 +319,84 @@ class ZonalServiceManagerResource(CustomBaseModelResource):
         resource_name = "zonal-service-managers"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get']
+        detail_allowed_methods = ['get', 'delete']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "zsm_id": ALL,
                      }
         always_return_data = True
+
+    def prepend_urls(self):
+        return [
+                 url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('register_zonal_service_manager'), name="register_zonal_service_manager"),
+                 url(r"^(?P<resource_name>%s)/update/(?P<zsm_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('update_zonal_service_manager'), name="update_zonal_service_manager"),
+                ]
+    
+    
+    def register_zonal_service_manager(self, request, **kwargs):
+        self.is_authenticated(request)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+        if not request.user.is_superuser:
+            return HttpResponse(json.dumps({"message" : "Not Authorized to add RSM"}), content_type= "application/json",
+                                status=401)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        zsm_id = load.get('id')
+        try:
+            zsm_data = models.ZonalServiceManager.objects.get(zsm_id=zsm_id)
+            data = {'status': 0 , 'message' : 'Regional service manager with this id already exists'}
+        except Exception as ex:
+            logger.info("[register_zonal_service_manager]:New RSM registration:: {0}".format(ex))
+            name = load.get('name')
+            regional_office = load.get('regional-office')
+            phone_number = load.get('phone-number')
+            email = load.get('email')
+            user_data = register_user.register_user(Roles.ZSM,username=email,
+                                             phone_number=phone_number,
+                                             first_name=name,
+                                             email = email,
+                                             APP=settings.BRAND)
+            zsm_data = models.ZonalServiceManager(zsm_id=zsm_id, user=user_data,
+                                        regional_office=regional_office)
+            zsm_data.save()
+            data = {"status": 1 , "message" : "Regional service manager registered successfully"}
+        return HttpResponse(json.dumps(data), content_type="application/json")
+    
+    def update_zonal_service_manager(self, request, **kwargs):
+        self.is_authenticated(request)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+        if not request.user.is_superuser:
+            return HttpResponse(json.dumps({"message" : "Not Authorized to edit RSM"}), content_type= "application/json",
+                                status=401)
+        zsm_id=kwargs['zsm_id']
+        try:
+            zsm_obj = models.ZonalServiceManager.objects.get(pk=zsm_id)
+            load = json.loads(request.body)
+            
+            zsm_profile = zsm_obj.user
+            zsm_profile.phone_number = load.get('phone-number')
+            
+            zsm_user= zsm_obj.user.user
+            zsm_user.first_name=load.get('name')
+            
+            zsm_obj.regional_office = load.get('regional-office')
+            
+            zsm_user.save(using=settings.BRAND)
+            zsm_profile.save()
+            zsm_obj.save()
+            data = {'status': 0 , 'message' : 'Regional service manager updated successfully'}
+        except Exception as ex:
+            logger.info("[update_zonal_service_manager]: Invalid RSM ID:: {0}".format(ex))
+            return HttpResponse(json.dumps({"message" : "RSM ID not found"}),content_type="application/json", status=404)
+        return HttpResponse(json.dumps(data), content_type="application/json")
 
 class AreaServiceManagerResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
@@ -345,25 +407,105 @@ class AreaServiceManagerResource(CustomBaseModelResource):
         resource_name = "area-service-managers"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization(), ZSMCustomAuthorization())
-        detail_allowed_methods = ['get']
+        detail_allowed_methods = ['get', 'delete']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "asm_id": ALL, 
                      "zsm": ALL_WITH_RELATIONS,
+                     "area": ALL,
                      }
         always_return_data = True
+
+    def prepend_urls(self):
+        return [
+                 url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('register_area_service_manager'), name="register_area_service_manager"),
+                 url(r"^(?P<resource_name>%s)/update/(?P<asm_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('update_area_service_manager'), name="update_area_service_manager"),
+                ]
+    
+    
+    def register_area_service_manager(self, request, **kwargs):
+        self.is_authenticated(request)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+        if not request.user.is_superuser and not request.user.groups.filter(name=Roles.ZSM).exists():
+            return HttpResponse(json.dumps({"message" : "Not Authorized to add ASM"}), content_type= "application/json",
+                                status=401)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        asm_id = load.get('id')
+        try:
+            asm_data = models.AreaServiceManager.objects.get(asm_id=asm_id)
+            data = {'status': 0 , 'message' : 'Area service manager with this id already exists'}
+        except Exception as ex:
+            logger.info("[register_area_service_manager]: New ASM registration:: {0}".format(ex))
+            name = load.get('name')
+            area = load.get('area')
+            phone_number = load.get('phone-number')
+            email = load.get('email')
+            zsm_id = load.get('zsm_id')
+            zsm_data = models.ZonalServiceManager.objects.get(zsm_id=zsm_id)
+            user_data = register_user.register_user(Roles.AREASERVICEMANAGER,
+                                             username=email,
+                                             phone_number=phone_number,
+                                             first_name=name,
+                                             email = email,
+                                             APP=settings.BRAND)
+            asm_data = models.AreaServiceManager(asm_id=asm_id, user=user_data,
+                                        area=area, zsm=zsm_data)
+            asm_data.save()
+            data = {"status": 1 , "message" : "Area service manager registered successfully"}
+        return HttpResponse(json.dumps(data), content_type="application/json")
+    
+    def update_area_service_manager(self, request, **kwargs):
+        self.is_authenticated(request)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+        if not request.user.is_superuser and not request.user.groups.filter(name=Roles.ZSM).exists():
+            return HttpResponse(json.dumps({"message" : "Not Authorized to edit ASM"}), content_type= "application/json",
+                                status=401)
+        asm_id=kwargs['asm_id']
+        try:
+            asm_obj = models.AreaServiceManager.objects.get(pk=asm_id)
+            load = json.loads(request.body)
+            
+            asm_profile = asm_obj.user
+            asm_profile.phone_number = load.get('phone-number')
+            
+            asm_user= asm_obj.user.user
+            asm_user.first_name=load.get('name')
+            
+            asm_obj.area = load.get('area')
+            
+            zsm_id=load.get('zsm_id')
+            zsm_data = models.ZonalServiceManager.objects.get(zsm_id=zsm_id)
+            asm_obj.zsm=zsm_data
+
+            asm_user.save(using=settings.BRAND)
+            asm_profile.save()
+            asm_obj.save()
+            data = {'status': 0 , 'message' : 'Regional service manager updated successfully'}
+        except Exception as ex:
+            logger.info("[update_area_service_manager]: Invalid ASM ID :: {0}".format(ex))
+            return HttpResponse(json.dumps({"message" : "ASM ID not found"}),content_type="application/json", status=404)
+        return HttpResponse(json.dumps(data), content_type="application/json")
 
 
 class DealerResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
-    asm = fields.ForeignKey(AreaServiceManagerResource, 'asm', full=True)
+    asm = fields.ForeignKey(AreaServiceManagerResource, 'asm', full=True, null=True)
     
     class Meta:
         queryset = models.Dealer.objects.all()
         resource_name = "dealers"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization(), DealerCustomAuthorization())
-        detail_allowed_methods = ['get', 'post']
+        detail_allowed_methods = ['get', 'post', 'delete']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "dealer_id": ALL,
@@ -378,13 +520,15 @@ class DealerResource(CustomBaseModelResource):
                      self.wrap_view('register_dealer'), name="register_dealer"),
                 url(r"^(?P<resource_name>%s)/active%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('get_active_dealer'), name="get_active_dealer"),
+                url(r"^(?P<resource_name>%s)/update/(?P<dealer_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('update_dealer'), name="update_dealer"),
                 ]
     
     
     def register_dealer(self, request, **kwargs):
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
-                                status=401)
+                                status=400)
         try:
             load = json.loads(request.body)
         except:
@@ -392,16 +536,19 @@ class DealerResource(CustomBaseModelResource):
         username = load.get('username')
         phone_number = load.get('phone-number')
         email = load.get('email')
+        asm = load.get('asm_id', None)
         try:
             user = models.Dealer.objects.get(user__phone_number=phone_number, dealer_id=username)
             data = {'status': 0 , 'message' : 'Dealer with this id or phone number already exists'}
 
         except Exception as ex:
-            logger.info("Exception while registering dealer {0}".format(ex))
+            logger.info("[register_dealer] : New dealer registration :: {0}".format(ex))
             user_data = register_user.register_user(Roles.DEALERS,username=username,
                                              phone_number=phone_number,
                                              email = email, APP=settings.BRAND)
-            dealer_data = models.Dealer(dealer_id=username, user=user_data)
+            if asm:
+                asm = models.AreaServiceManager.objects.get(asm_id=asm)
+            dealer_data = models.Dealer(dealer_id=username, user=user_data, asm=asm)
             dealer_data.save()
             data = {"status": 1 , "message" : "Dealer registered successfully"}
 
@@ -429,6 +576,31 @@ class DealerResource(CustomBaseModelResource):
 # #                                                         last_transaction_date__month=month).count()
         return HttpResponse(content=json.dumps(result), 
                             content_type='application/json')
+        
+    def update_dealer(self, request, **kwargs):
+        self.is_authenticated(request)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+        dealer_id=kwargs['dealer_id']
+        try:
+            dealer_obj = models.Dealer.objects.get(user__user__id=dealer_id)
+            load = json.loads(request.body)
+            
+            dealer_profile = dealer_obj.user
+            dealer_profile.phone_number = load.get('phone-number')
+            
+            dealer_user= dealer_obj.user.user
+            dealer_user.email=load.get('email')
+
+            dealer_user.save(using=settings.BRAND)
+            dealer_profile.save()
+            dealer_obj.save()
+            data = {'status': 0 , 'message' : 'Dealer details updated successfully'}
+        except Exception as ex:
+            logger.info("[update_dealer] : Invalid Dealer ID ::{0}".format(ex))
+            return HttpResponse(json.dumps({"message" : "Dealer ID not found"}),content_type="application/json", status=404)
+        return HttpResponse(json.dumps(data), content_type="application/json")
     
 class AuthorizedServiceCenterResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
