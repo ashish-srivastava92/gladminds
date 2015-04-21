@@ -14,9 +14,12 @@ from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import MultiAuthorization, \
     CTSCustomAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.core.apis.user_apis import DealerResource, PartnerResource
+from gladminds.core.apis.user_apis import DealerResource, PartnerResource,\
+    TransporterResource
 from gladminds.core.auth_helper import Roles
 from gladminds.core.model_fetcher import models
+from django.db.models.query_utils import Q
+import operator
 
 
 class ProductTypeResource(CustomBaseModelResource):
@@ -105,15 +108,6 @@ class SparePartUPCResource(CustomBaseModelResource):
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
-
-class TransporterResource(CustomBaseModelResource):
-    class Meta:
-        queryset = models.Transporter.objects.all()
-        resource_name = 'transporters'
-        authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get']
-        always_return_data = True
-        
 class ContainerTrackerResource(CustomBaseModelResource):
     transporter = fields.ForeignKey(TransporterResource, 'transporter', null=True,
                                     blank=True, full=True)
@@ -152,3 +146,20 @@ class ContainerTrackerResource(CustomBaseModelResource):
             data = models.ContainerTracker.objects.all().values('status').annotate(total=Count('status'))
             
         return HttpResponse(content=json.dumps(list(data), cls=DjangoJSONEncoder), content_type='application/json')
+
+#     def  get_status_count(self, request, **kwargs):
+#         self.is_authenticated(request)
+#         from_date = json.loads(request.body)['from']
+#         to_date = json.loads(request.body)['to']
+#         if request.user.groups.filter(name=Roles.TRANSPORTER):
+#             args = [Q(created_date__range=[from_date, to_date]), Q(transporter__user__user_id=request.user.id)]
+#             for supervisor_id in json.loads(request.body):
+#                 supervisor_id = json.loads(request.body)['supervisor_id']
+#                 args.append(Q(submitted_by=supervisor_id))
+#             data = models.ContainerTracker.objects.filter(reduce(operator.and_, args)|Q(submitted_by=None)  ).values('status').annotate(total=Count('status'))
+#         elif request.user.groups.filter(name=Roles.SUPERVISOR):
+#             supervisor = models.Supervisor.objects.get(user__user_id=request.user.id)
+#             data = models.ContainerTracker.objects.filter((Q(submitted_by=supervisor.supervisor_id)|Q(submitted_by=None))).values('status').annotate(total=Count('status'))
+#         else:
+#             data = models.ContainerTracker.objects.all().values('status').annotate(total=Count('status'))
+#         return HttpResponse(content=json.dumps(list(data), cls=DjangoJSONEncoder), content_type='application/json')

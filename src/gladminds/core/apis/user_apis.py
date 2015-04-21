@@ -831,3 +831,12 @@ class ServiceDeskUserResource(CustomBaseModelResource):
                         "id" : ALL
                      }
 
+class TransporterResource(CustomBaseModelResource):
+    class Meta:
+        queryset = models.Transporter.objects.all()
+        resource_name = 'transporters'
+        authorization = MultiAuthorization(DjangoAuthorization())
+        detail_allowed_methods = ['get']
+        always_return_data = True
+        
+
