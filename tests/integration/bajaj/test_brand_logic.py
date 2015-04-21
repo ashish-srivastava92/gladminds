@@ -125,18 +125,18 @@ class Brand(object):
         self.tester.assertEquals('Y', sa_dealer_rel_obj_2.status)
  
     def check_data_saved_to_database(self):
-        sa_obj_1 = models.ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
-        self.tester.assertEquals('+919999999999', sa_obj_1[0].user.phone_number)
-        dealer_obj_1 = models.Dealer.objects.filter(dealer_id='GMDEALER001')
+        sa_obj_1 = models.ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA31')
+        self.tester.assertEquals('+911111111111', sa_obj_1[0].user.phone_number)
+        dealer_obj_1 = models.Dealer.objects.filter(dealer_id='GMDEALER031')
         sa_dealer_rel_obj_1 = models.ServiceAdvisor.objects.get(service_advisor_id=sa_obj_1[0], dealer_id=dealer_obj_1[0])
         self.tester.assertEquals('N', sa_dealer_rel_obj_1.status)
-        sa_obj_2 = models.ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA02')
-        dealer_obj_2 = models.Dealer.objects.filter(dealer_id='GMDEALER003')
+        sa_obj_2 = models.ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA32')
+        dealer_obj_2 = models.Dealer.objects.filter(dealer_id='GMDEALER032')
         sa_dealer_rel_obj_2 = models.ServiceAdvisor.objects.get(service_advisor_id=sa_obj_2[0], dealer_id=dealer_obj_2[0])
         self.tester.assertEquals('Y', sa_dealer_rel_obj_2.status)
  
     def coupon_data_saved_to_database(self):
-        self.tester.assertEqual(models.CouponData.objects.count(), 2, "Two coupon created")
+        self.tester.assertEqual(models.CouponData.objects.count(), 3, "Three coupon created")
         coupon_data = models.CouponData.objects.filter(unique_service_coupon='USC9217')[0]
         self.tester.assertEquals(u"USC9217", coupon_data.unique_service_coupon)
         coupon_data.status = 2
@@ -156,22 +156,22 @@ class Brand(object):
     def check_product_data_saved_to_database(self):
         self.tester.assertEquals(1, models.ProductData.objects.count())
         product_data = models.ProductData.objects.all()[0]
-        self.tester.assertEquals(u"12345678901232192", product_data.product_id)
-        self.tester.assertEquals(2, models.CouponData.objects.count())
+        self.tester.assertEquals(u"12345678901232792", product_data.product_id)
+        self.tester.assertEquals(3, models.CouponData.objects.count())
         coupon_data = models.CouponData.objects.all()[0]
-        self.tester.assertEquals(u"USC2917", coupon_data.unique_service_coupon)
+        self.tester.assertEquals(u"USC9217", coupon_data.unique_service_coupon)
  
     def service_advisor_database_upadted(self):
-        sa_obj_1 = models.ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA01')
-        dealer_obj_1 = models.Dealer.objects.filter(dealer_id='GMDEALER001')
-        self.tester.assertEquals('+919999999999', sa_obj_1[0].user.phone_number)
+        sa_obj_1 = models.ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA31')
+        dealer_obj_1 = models.Dealer.objects.filter(dealer_id='GMDEALER031')
+        self.tester.assertEquals('+911234555555', sa_obj_1[0].user.phone_number)
         sa_dealer_rel_obj_2 = models.ServiceAdvisor.objects.get(service_advisor_id=sa_obj_1[0], dealer_id=dealer_obj_1[0])
         self.tester.assertEquals('N', sa_dealer_rel_obj_2.status)
-        sa_obj_2 = models.ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA02')
-        dealer_obj_2 = models.Dealer.objects.filter(dealer_id='GMDEALER002')
-        self.tester.assertEquals('+91555551', sa_obj_2[0].user.phone_number)
-        dealer_obj_3 = models.Dealer.objects.filter(dealer_id='GMDEALER003')
-        sa_obj_3 = models.ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA03')
-        self.tester.assertEquals(0, len(sa_obj_3))
+        sa_obj_2 = models.ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA32')
+        dealer_obj_2 = models.Dealer.objects.filter(dealer_id='GMDEALER032')
+        self.tester.assertEquals('+914444455555', sa_obj_2[0].user.phone_number)
+        dealer_obj_3 = models.Dealer.objects.filter(dealer_id='GMDEALER034')
+        sa_obj_3 = models.ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA33')
+        self.tester.assertEquals(1, len(sa_obj_3))
         self.tester.assertEquals(0, len(dealer_obj_3))
 

@@ -73,6 +73,7 @@ BRAND = 'bajaj'
 ENV = "test"
 MAIL_SERVER = 'localhost'
 
+CORE_WSDL_TNS="http://local.bajajcv.gladminds.co:8000/api/v1/feed/"
 WSDL_TNS="http://local.bajaj.gladminds.co:8000/api/v1/feed/"
 
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'

@@ -91,8 +91,8 @@ class FeedsResourceTest(BaseTestCase):
         brand = self.brand
         self.create_user(username='testuser', email='testuserpassword@gladminds.co', password='testuserpassword')
         brand.check_for_auth()
- 
-    @unittest.skip("Skipping Adding this functionality in future")
+  
+#     @unittest.skip("Skipping Adding this functionality in future")
     def test_coupon_status_on_dispatch_feed(self):
         brand = self.brand
         system = self.system
@@ -102,14 +102,14 @@ class FeedsResourceTest(BaseTestCase):
         '''
  
         brand.send_dispatch_feed()
-        system.verify_result(input=CouponData.objects.count(), output=2)
+        system.verify_result(input=CouponData.objects.count(), output=3)
         coupon_data = CouponData.objects.all()[0]
-        system.verify_result(input=CouponData.objects.count(), output=2)
+        system.verify_result(input=CouponData.objects.count(), output=3)
         system.verify_result(input=coupon_data.unique_service_coupon, output=u"USC9217")
-        system.verify_result(input=coupon_data.status, output=2)
+        system.verify_result(input=coupon_data.status, output=1)
         coupon_data = CouponData.objects.all()[1]
-        system.verify_result(input=coupon_data.status, output=2)
-        system.verify_result(input=coupon_data.unique_service_coupons, output=u"USC9227")
+        system.verify_result(input=coupon_data.status, output=1)
+        system.verify_result(input=coupon_data.unique_service_coupon, output=u"USC9227")
         system.verify_result(input=coupon_data.status, output=1)
  
     def test_coupon_status_without_ucn(self):
