@@ -588,9 +588,11 @@ class ContainerTrackerFeed(BaseFeed):
         for tracker_obj in self.data_source:
             try:
                 try:
+                    if not tracker_obj['lr_number'] or not tracker_obj['zib_indent_num']:
+                        raise ValueError('Indent number or LR number missing')
                     container_tracker_obj=models.ContainerTracker.objects.get(zib_indent_num=tracker_obj['zib_indent_num'],
                                                                               lr_number=tracker_obj['lr_number'])
-                except ObjectDoesNotExist as odne:
+                except ObjectDoesNotExist as done:
                     transporter_data = self.check_or_create_transporter(transporter_id=tracker_obj['transporter_id'],
                                                                         name=tracker_obj['tranporter_name'])
                     container_tracker_obj = models.ContainerTracker(zib_indent_num=tracker_obj['zib_indent_num'], 
