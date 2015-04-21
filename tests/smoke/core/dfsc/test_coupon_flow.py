@@ -10,7 +10,7 @@ class TestCouponDataApi(UtilityResourceTest):
 
     def test_couponcheck(self):
         phone_number="9999999999"
-        self.check_coupon_open('USC2917')
+        self.check_coupon_unused('USC2917')
         data = 'A {0} {1} {2}'.format('TM-2912270', 450, 1)
         self.check_coupon(phone_number, data)
         self.check_coupon_inprogress('USC2917')
@@ -22,9 +22,9 @@ class TestCouponDataApi(UtilityResourceTest):
         self.check_coupon(phone_number, data)
         self.check_coupon_closed('USC2917') 
     
-    def test_close_opened_coupon(self): 
+    def test_close_unused_coupon(self): 
         phone_number="9999999999"
-        self.check_coupon_open('USC2927')
+        self.check_coupon_unused('USC2927')
         data = 'C {0} {1}'.format('TM-2912270', 'USC2927')
         self.check_coupon_false(phone_number, data)
     
@@ -60,8 +60,8 @@ class TestCouponDataApi(UtilityResourceTest):
     def test_progress_next_already_one_inprogress(self):
         phone_number="9999999999"
         self.check_coupon_inprogress('USC2927')
-        self.check_coupon_open('USC2937')
+        self.check_coupon_unused('USC2937')
         data = 'A {0} {1} {2}'.format('TM-2912270',7000, 3)
         self.check_coupon(phone_number, data)
-        self.check_coupon_open('USC2937')
+        self.check_coupon_unused('USC2937')
         self.check_coupon_inprogress('USC2927')

@@ -205,7 +205,7 @@ FEED_SENT_TYPES = [getattr(FeedSentType, x) for x in dir(FeedSentType) if (not x
 
 
 class CouponStatus():
-    OPEN = 1
+    UNUSED = 1
     CLOSED = 2
     EXPIRED = 3
     IN_PROGRESS = 4

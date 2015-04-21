@@ -79,9 +79,9 @@ class UtilityResourceTest(BrandResourceTestCase):
         result=self.get(url)
         return result
 
-    def check_coupon_open(self,unique_service_coupon):
+    def check_coupon_unused(self,unique_service_coupon):
         coupon = self.get(Urls.COUPONS+'?unique_service_coupon='+unique_service_coupon)
-        self.assertEqual(coupon['objects'][0]['status'], CouponStatus.OPEN)
+        self.assertEqual(coupon['objects'][0]['status'], CouponStatus.UNUSED)
          
     def check_coupon_expired(self, unique_service_coupon):
         coupon = self.get(Urls.COUPONS+'?unique_service_coupon='+unique_service_coupon)
