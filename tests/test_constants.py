@@ -347,6 +347,7 @@ AFTERBUY_REGISTATION = {
                         }
 
 USER_PROFILE = {
+                "created_date":"2015-04-10T12:43:33",
                 "address":"CHENNAI",
                 "country":"",
                 "date_of_birth":"1992-12-29T00:00:00",
@@ -374,7 +375,11 @@ AREA_SPARES_MANAGER = {
         "email": "spremnath@bajajauto.co.in",
         "name": "PREM NATH",
         "phone_number": "9999999999",
-        "state": "/v1/states/1/",
+        "state": {
+         'state_name':'Karnataka',
+         'state_code':'KAR',
+         'territory': "/v1/territories/1/",
+         },
         "user":USER,
         "nsm":""
        }
@@ -391,11 +396,15 @@ PARTNER = {
 DISTRIBUTOR = {
                "user": USER_PROFILE,
                "asm":AREA_SPARES_MANAGER,
-               "distributor_id": 15689, 
-               "name": "Mrugen",
-               "email": "test@gladminds.co",
-               "phone_number": 1111111111,
-               "city": "bhuj"
+                "city": "VASAI EAS",
+                "created_date": "2015-04-10T12:43:33",
+               "distributor_id": "15666",
+                "email": "",
+                "id": 1,
+                "modified_date": "2015-04-10T12:43:33",
+                "name": "SAI SERVICE AGENCY",
+                "phone_number": "1111111111",
+                "sent_to_sap": False
                }
 
 RETAILER = {
@@ -450,7 +459,7 @@ MEMBER = {
             "form_number": 9156,
             "form_status": "Incomplete",
             "genuine_parts_used": 85,
-            "image_url": "",
+            "image_url": "ww",
             "last_name": "M",
             "locality": "",
             "mechanic_id": "ME00003",
@@ -471,11 +480,17 @@ MEMBER = {
             "shop_wall_length": 0,
             "shop_wall_width": 0,
             "spare_per_month": 50000,
-            "state": "/v1/states/1/",
+            "state": {
+                     'state_name':'Karnataka',
+                     'state_code':'KAR',
+                     'territory':{
+                                  'territory':'NORTH' 
+                                  },
+                     },
             "tehsil": "",
-            "total_points": 1000
-                        }
-
+            "total_points": 1000,
+            "distributor":DISTRIBUTOR
+            }
 MEMBER1 = {
             "address_line_1": "",
             "address_line_2": "",
@@ -489,7 +504,7 @@ MEMBER1 = {
             "form_number": 9156,
             "form_status": "Incomplete",
             "genuine_parts_used": 85,
-            "image_url": "",
+            "image_url": "qqq",
             "last_name": "M",
             "locality": "",
             "mechanic_id": "ME00004",
@@ -516,7 +531,7 @@ MEMBER1 = {
                         }
 
 REDEMPTION_REQUEST =  {
-                        "delivery_address": "yhghj",
+                        "delivery_address": "HSR",
                         "due_date": "2015-02-09T17:49:45",
                         "expected_delivery_date": "2015-02-10T16:49:45",
                         "image_url": "",
@@ -555,8 +570,8 @@ SPARE_POINT = {
                }
 
 SLA = {  
-       "status":"open",
-       "action":"Welcome Kit",
+       "status":"Open",
+       "action":"Redemption",
        "reminder_time":4,
        "reminder_unit":"hrs",
        "resolution_time": 6,
@@ -608,10 +623,91 @@ TERRITORY = {
 STATE = {
          'state_name':'Karnataka',
          'state_code':'KAR',
-         'territory': "/v1/territories/1/",
+         'territory':  {
+             'territory':'NORTH' 
+             },
          }
 
 CITY = {
         'city':'Bangalore',     
-        'state':"/v1/states/1/",      
+        'state':{
+                 'state_name':'Karnataka',
+                 'state_code':'KAR',
+                 'territory':{
+                              'territory':'NORTH' 
+                            },
+                 }
         }
+
+REDEMPTION_REQUEST1={   
+                    "delivery_address": "HSR",
+                    "due_date": "2015-02-09 17:49:45",
+                    "expected_delivery_date": "2015-02-10 16:49:45",
+                    "image_url": None,
+                    "is_approved": False,
+                    "member": {
+                        "address_line_1": "",
+                        "address_line_2": "",
+                        "address_line_3": "",
+                        "address_line_4": "",
+                        "address_line_5": "",
+                        "address_line_6": "",
+                        "date_of_birth": "1971-10-20T05:30:00",
+                        "district": "MADURAI",
+                        "first_name": "Ramu",
+                        "form_number": 9156,
+                        "form_status": "Incomplete",
+                        "genuine_parts_used": 85,
+                        "image_url": "",
+                        "last_name": "M",
+                        "locality": "aaaaaa",
+                        "mechanic_id": "ME00003",
+                        "middle_name": "",
+                        "phone_number": "+919842461800",
+                        "pincode": "625002",
+                        "registered_date": "2014-09-06T00:00:00",
+                        "resource_uri": "",
+                        "sent_sms": False,
+                        "sent_to_sap": False,
+                        "serviced_2S": 180,
+                        "serviced_4S": 20,
+                        "serviced_CNG_LPG": 0,
+                        "serviced_diesel": 0,
+                        "shop_address": "SELLUR",
+                        "shop_name": "SRI MEENAKSHI AMMAN AUTO WORKS",
+                        "shop_number": "34",
+                        "shop_wall_length": 0,
+                        "shop_wall_width": 0,
+                        "spare_per_month": 50000,
+                        "state": {
+                            "state_name": "Karnataka",
+                            "state_code": "KAR",
+                            "territory": {
+                                "territory": "NORTH"
+                            }
+                        },
+                        "tehsil": "",
+                        "total_points": 1000
+                    },
+                    "packed_by": "user",
+                    "refunded_points": False,
+                    "resolution_flag": True,
+                    "status": "Open",
+                    "tracking_id": "",
+                    "product": {
+                        "partner": {},
+                        "brand": "",
+                        "category": "",
+                        "description": "",
+                        "image_url": "",
+                        "is_active": True,
+                        "model": "",
+                        "points": 123,
+                        "price": 12,
+                        "product_id": 123,
+                        "sub_category": "",
+                        "variation": ""
+                    },
+                    "partner": PARTNER,
+                    "points": 123
+                }
