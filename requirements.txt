@@ -28,3 +28,4 @@ django-composite-field
 django-registration==1.0
 django-picklefield==0.3.1
 django-constance
+hashedin-logan

@@ -297,6 +297,12 @@ class FeedLogAdmin(GmModelAdmin):
         css_class = class_map.get(str(obj.status))
         if css_class:
             return {'class': css_class}
+    
+    def queryset(self, request):
+        query_set = self.model._default_manager.get_query_set()
+        if request.user.groups.filter(name=Roles.CTSADMIN).exists():
+            query_set=query_set.filter(feed_type__in=['ContainerTracker Feed', 'CTS Feed'])
+        return query_set
         
     def changelist_view(self, request, extra_context=None):
         extra_context = {'created_date_search': True
@@ -832,8 +838,19 @@ class SupervisorAdmin(GmModelAdmin):
     list_display = ('supervisor_id', 'get_transporter_name')
 
 class ContainerTrackerAdmin(GmModelAdmin):
-    list_display = ('get_transporter', 'zib_indent_num', 'consignment_id',
-                    'gatein_date', 'seal_no', 'lr_number', 'status')
+    list_display = ('zib_indent_num', 'lr_number', 'consignment_id',
+                    'seal_no', 'status', 'gatein_date',
+                    'get_transporter', 'submitted_by')
+
+    def suit_row_attributes(self, obj):
+        class_map = {
+            'Open': 'success',
+            'Closed': 'warning',
+            'Inprogress': 'info',
+        }
+        css_class = class_map.get(str(obj.status))
+        if css_class:
+            return {'class': css_class}
 
 
 brand_admin = BajajAdminSite(name=GmApps.BAJAJ)

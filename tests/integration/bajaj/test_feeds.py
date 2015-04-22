@@ -20,6 +20,7 @@ class FeedsResourceTest(BaseTestCase):
         self.system = System(self)
         BaseTestCase.setUp(self)
         self.create_user(username='gladminds', email='gladminds@gladminds.co', password='gladminds')
+        self.create_user(username='bajaj', email='bajaj@gladminds.co', password='bajaj')
 
     def test_service_advisor_feed(self):
         brand = self.brand
@@ -82,7 +83,7 @@ class FeedsResourceTest(BaseTestCase):
         gm_user = UserProfile.objects.all()
         system.verify_result(input=len(gm_user), output=1)
         brand.send_purchase_feed_with_diff_cust_num()
-        product_object = system.get_product_details(product_id='XXXXXXXXXX')
+        product_object = system.get_product_details(product_id='12345678901232792')
         system.verify_result(input=product_object.customer_phone_number, output="+919845340297")
         system.verify_result(input=UserProfile.objects.count(), output=1)
   
@@ -90,8 +91,8 @@ class FeedsResourceTest(BaseTestCase):
         brand = self.brand
         self.create_user(username='testuser', email='testuserpassword@gladminds.co', password='testuserpassword')
         brand.check_for_auth()
- 
-    @unittest.skip("Skipping Adding this functionality in future")
+  
+#     @unittest.skip("Skipping Adding this functionality in future")
     def test_coupon_status_on_dispatch_feed(self):
         brand = self.brand
         system = self.system
@@ -101,14 +102,14 @@ class FeedsResourceTest(BaseTestCase):
         '''
  
         brand.send_dispatch_feed()
-        system.verify_result(input=CouponData.objects.count(), output=2)
+        system.verify_result(input=CouponData.objects.count(), output=3)
         coupon_data = CouponData.objects.all()[0]
-        system.verify_result(input=CouponData.objects.count(), output=2)
-        system.verify_result(input=coupon_data.unique_service_coupon, output=u"USC001")
-        system.verify_result(input=coupon_data.status, output=2)
+        system.verify_result(input=CouponData.objects.count(), output=3)
+        system.verify_result(input=coupon_data.unique_service_coupon, output=u"USC9217")
+        system.verify_result(input=coupon_data.status, output=1)
         coupon_data = CouponData.objects.all()[1]
-        system.verify_result(input=coupon_data.status, output=2)
-        system.verify_result(input=coupon_data.unique_service_coupons, output=u"USC002")
+        system.verify_result(input=coupon_data.status, output=1)
+        system.verify_result(input=coupon_data.unique_service_coupon, output=u"USC9227")
         system.verify_result(input=coupon_data.status, output=1)
  
     def test_coupon_status_without_ucn(self):
