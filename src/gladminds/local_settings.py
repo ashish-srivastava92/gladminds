@@ -46,7 +46,7 @@ MAIL_DETAIL["subject"] = "GladMinds Feed Report DEV"
 MAIL_DETAIL["receiver"] = ["priyanka.n@hashedin.com"]
 
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail DEV"
-VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["priyanka.n@hashedin.com"]
 
 LOG_BASE_PATH = 'log'
 LOGGING['handlers']['gladminds_logs']['filename'] = 'log/gladminds.log'

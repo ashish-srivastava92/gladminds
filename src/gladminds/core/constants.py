@@ -162,7 +162,7 @@ FORM_STATUS_CHOICES = (
                        ('Incomplete', 'Incomplete'),
                        )
 
-FEED_TYPES = ['Dispatch Feed', 'Purchase Feed', 'Credit Note Feed', 'CDMS Feed', 'Old Fsc Feed']
+FEED_TYPES = ['Dispatch Feed', 'Purchase Feed', 'Credit Note Feed', 'CDMS Feed', 'Old Fsc Feed', 'ContainerTracker Feed']
 
 STATUS_TO_NOTIFY = ['Approved', 'Rejected', 'Accepted', 'Shipped', 'Delivered']
 
