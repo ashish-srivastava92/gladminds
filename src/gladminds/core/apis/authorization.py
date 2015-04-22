@@ -5,10 +5,9 @@ from django.conf import settings
 
 from gladminds.afterbuy import models as afterbuy
 from gladminds.core.auth_helper import Roles
-from gladminds.bajaj import models
 import operator
 from django.db.models.query_utils import Q
-from gladminds.core.model_fetcher import get_model
+from gladminds.core.model_fetcher import get_model, models
 
 class CustomAuthorization(Authorization):
 
@@ -170,60 +169,40 @@ class MultiAuthorization(Authorization):
         return True
 
 
-class LoyaltyCustomAuthorization():
+class LoyaltyCustomAuthorization(Authorization):
 
-    def __init__(self, display_field=None, query_field=None):
-        self.display_field = display_field
+    def __init__(self, query_field=None):
         self.query_field = query_field
-        
-    def read_list(self, object_list, bundle):  
-        user = bundle.request.user
-        user_name = user.groups.values()[0]['name']    
-        klass_name = bundle.obj.__class__._meta.module_name
-        
-        try:
-            ''' filter the object list based on query defined for specific Role'''
-            query = self.query_field[user_name]
-            query.setdefault('query', [])
-            query.setdefault('user_name', None)
-            query.setdefault('user', None)
-            
-            if query:
-                q_object = Q()
-                if query['user_name']:
-                    q_object.add(query['user_name'], user.username)
-                    query['query'].append(q_object)
-                if query['user']:
-                    q_object.add(query['user'], user)
-                    query['query'].append(q_object)
-                object_list = object_list.filter(reduce(operator.and_, query['query']))
-        except:
-            if klass_name == 'redemptionrequest' and user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-                asm_state_list= get_model('AreaSparesManager').objects.get(user__user= user).state.all()
-                object_list=object_list.filter(member__state__in=asm_state_list)            
 
-        try:
-            ''' hides the fields in object_list '''            
-            if self.display_field:
-                for obj in object_list:
-                    for x in self.display_field[user_name]:
-                        delattr(obj, x)
-            return object_list
-        except:
-            return object_list
-        
-    def read_detail(self, object_list, bundle):
-        if self.read_list(object_list, bundle):
-            return True
+    @staticmethod
+    def get_filter_query(user, q_user, query): 
+        if user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
+            nsm_territory_list=models.NationalSparesManager.objects.get(user__user=user).territory.all()
+            query[q_user] = nsm_territory_list
+        elif user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list=models.AreaSparesManager.objects.get(user__user=user).state.all()
+            query[q_user] = asm_state_list
+        elif user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+            distributor_city =  models.Distributor.objects.get(user__user=user).city
+            query[q_user] = str(distributor_city)
+        else:
+            query[q_user] = user.username
+        return query
     
-    def create_detail(self, object_list, bundle):
-        return True
-
-    def update_detail(self, object_list, bundle):
-        return True
-
-    def delete_detail(self, object_list, bundle):
-        return True
+    ''' filter the object list based on query defined for specific Role'''
+    def read_list(self, object_list, bundle):           
+        klass_name = bundle.obj.__class__._meta.module_name
+        user = bundle.request.user
+        if not user.is_superuser:
+            query = {}
+            user_group = user.groups.values()[0]['name']
+            q_user = self.query_field[user_group]['user']
+            if klass_name=="member" and self.query_field[user_group].has_key('area'):
+                q_user = self.query_field[user_group]['area']
+                 
+            query = self.get_filter_query(user, q_user, query)
+            object_list = object_list.filter(**query)
+        return object_list
 
 class ServiceDeskCustomAuthorization(Authorization):
     def get_sa_under_dealer(self, dealer_id):
@@ -278,7 +257,7 @@ class CTSCustomAuthorization(Authorization):
                 return False
         
         return True
-    
+
 class ZSMCustomAuthorization(Authorization):
     def read_list(self, object_list, bundle):
         if bundle.request.user.groups.filter(name=Roles.ZSM):
