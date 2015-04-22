@@ -67,6 +67,12 @@ class GmModelAdmin(ModelAdmin):
     def get_supervisor_name(self, obj):
         return obj.user.user.username
 
+    def get_supervisor_first_name(self, obj):
+        return obj.user.user.first_name
+    
+    def get_supervisor_last_name(self, obj):
+        return obj.user.user.last_name
+
     def get_mechanic_pincode(self, obj):
         return obj.member.pincode
 
@@ -85,7 +91,9 @@ class GmModelAdmin(ModelAdmin):
     get_mechanic_district.short_description = 'City'
     get_mechanic_state.short_description = 'State'
     get_transporter_name.short_description = 'Name'
-    get_supervisor_name.short_description = 'Name'
+    get_supervisor_first_name.short_description = 'First Name'
+    get_supervisor_last_name.short_description = 'Last Name'
+    get_supervisor_name.short_description = 'Username'
     get_transporter.short_description = 'Transporter ID'
     
     def get_part_description(self, obj):
