@@ -20,6 +20,7 @@ from gladminds.core.auth_helper import Roles
 from gladminds.core.model_fetcher import models
 from django.db.models.query_utils import Q
 import operator
+from datetime import date, datetime, timedelta
 
 
 class ProductTypeResource(CustomBaseModelResource):
@@ -137,29 +138,27 @@ class ContainerTrackerResource(CustomBaseModelResource):
         
     def  get_status_count(self, request, **kwargs):
         self.is_authenticated(request)
+        args = request.GET
+        from_date = args.get('from', datetime.now() - timedelta(days=30))
+        to_date = args.get('to', datetime.now())
+        query_args = [Q(created_date__range=[from_date, to_date])]
+        
         if request.user.groups.filter(name=Roles.TRANSPORTER):
-            data = models.ContainerTracker.objects.filter(transporter__user__user_id=request.user.id).values('status').annotate(total=Count('status'))
+            query_args.append(Q(transporter__user_id=request.user.id))
+            supervisor_id = args.get('supervisor_id', None)
+            if supervisor_id:
+                query_args1 = [Q(submitted_by=supervisor_id), Q(submitted_by=None)]
+                data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args)
+                                                              & reduce(operator.or_, query_args1)
+                                                              ).values('status').annotate(total=Count('status'))
+            else:
+                data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args)                                                              ).values('status').annotate(total=Count('status'))
         elif request.user.groups.filter(name=Roles.SUPERVISOR):
-            transporter = models.Supervisor.objects.get(user__user_id=request.user.id).transporter
-            data = models.ContainerTracker.objects.filter(transporter=transporter).values('status').annotate(total=Count('status'))
+            supervisor = models.Supervisor.objects.get(user__user_id=request.user.id)
+            query_args.append(Q(transporter=supervisor.transporter))
+            data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args) &
+                                                          (Q(submitted_by=supervisor_id)| Q(submitted_by=None))
+                                                          ).values('status').annotate(total=Count('status'))
         else:
-            data = models.ContainerTracker.objects.all().values('status').annotate(total=Count('status'))
-            
+            data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args)).values('status').annotate(total=Count('status'))
         return HttpResponse(content=json.dumps(list(data), cls=DjangoJSONEncoder), content_type='application/json')
-
-#     def  get_status_count(self, request, **kwargs):
-#         self.is_authenticated(request)
-#         from_date = json.loads(request.body)['from']
-#         to_date = json.loads(request.body)['to']
-#         if request.user.groups.filter(name=Roles.TRANSPORTER):
-#             args = [Q(created_date__range=[from_date, to_date]), Q(transporter__user__user_id=request.user.id)]
-#             for supervisor_id in json.loads(request.body):
-#                 supervisor_id = json.loads(request.body)['supervisor_id']
-#                 args.append(Q(submitted_by=supervisor_id))
-#             data = models.ContainerTracker.objects.filter(reduce(operator.and_, args)|Q(submitted_by=None)  ).values('status').annotate(total=Count('status'))
-#         elif request.user.groups.filter(name=Roles.SUPERVISOR):
-#             supervisor = models.Supervisor.objects.get(user__user_id=request.user.id)
-#             data = models.ContainerTracker.objects.filter((Q(submitted_by=supervisor.supervisor_id)|Q(submitted_by=None))).values('status').annotate(total=Count('status'))
-#         else:
-#             data = models.ContainerTracker.objects.all().values('status').annotate(total=Count('status'))
-#         return HttpResponse(content=json.dumps(list(data), cls=DjangoJSONEncoder), content_type='application/json')
