@@ -877,11 +877,26 @@ class ServiceDeskUserResource(CustomBaseModelResource):
                      }
 
 class TransporterResource(CustomBaseModelResource):
+    user = fields.ForeignKey(UserProfileResource, 'user', full=True, null=True, blank=True)
     class Meta:
         queryset = models.Transporter.objects.all()
         resource_name = 'transporters'
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
         always_return_data = True
-        
+        filtering = {
+                     'user':ALL_WITH_RELATIONS
+                     }
+
+class SupervisorResource(CustomBaseModelResource):
+    transporter = fields.ForeignKey(TransporterResource, 'transporter', full=True, null=True, blank=True)
+    class Meta:
+        queryset = models.Supervisor.objects.all()
+        resource_name = 'supervisors'
+        authorization = MultiAuthorization(DjangoAuthorization())
+        detail_allowed_methods = ['get']
+        always_return_data = True
+        filtering = {
+                     'transporter': ALL_WITH_RELATIONS
+                     }
 
