@@ -122,12 +122,13 @@ class ContainerTrackerResource(CustomBaseModelResource):
         filtering = {
                      'transporter': ALL_WITH_RELATIONS,
                      'transaction_id' : ALL,
-                     'lr_date' : ['gte', 'lte'],
-                     'gatein_date' : ['gte', 'lte'],
+                     'lr_date' : ALL,
+                     'gatein_date' :ALL,
                      'status' : ALL,
-                     "zib_indent_num" : ALL
-                     
+                     'zib_indent_num' : ALL,
+                     'created_date': ALL
                      }
+        
         ordering = ['lr_date', 'gatein_date' ,'created_date']
         
     def prepend_urls(self):
