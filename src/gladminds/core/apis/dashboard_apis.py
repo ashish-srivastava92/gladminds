@@ -414,13 +414,13 @@ class TicketStatusResource(CustomBaseResource):
         self.is_authenticated(bundle.request)
         ticket_count = self.get_ticket_count(bundle.request)
         all_status =  []
-        id = 1
+        status_id = 1
         for status in dict(FEEDBACK_STATUS).keys():
             data = {}
-            data['id'] = id
+            data['id'] = status_id
             data['value'] = 0
             data['name'] = status
-            id = id+1
+            status_id = status_id+1
             all_status.append(data)
           
         tickets_raised=0
@@ -429,5 +429,5 @@ class TicketStatusResource(CustomBaseResource):
             if ticket_status:
                 ticket_status[0]['value'] = data['count']
                 tickets_raised = tickets_raised + data['count']
-        all_status.append({'id':id, 'name':'tickets_raised', 'value':tickets_raised}) 
+        all_status.append({'id':status_id, 'name':'tickets_raised', 'value':tickets_raised}) 
         return map(CustomApiObject, all_status)
