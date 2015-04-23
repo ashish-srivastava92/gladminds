@@ -20,7 +20,9 @@ from tastypie.constants import ALL_WITH_RELATIONS, ALL
 
 from gladminds.core import constants
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from gladminds.core.apis.authorization import MultiAuthorization, \
+
+from gladminds.core.apis.authorization import MultiAuthorization,\
+    LoyaltyCustomAuthorization,\
      ZSMCustomAuthorization, DealerCustomAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.auth.access_token_handler import create_access_token, \
@@ -637,7 +639,45 @@ class ServiceAdvisorResource(CustomBaseModelResource):
                      "status": ALL
                      }
         always_return_data = True
-    
+
+class TerritoryResource(CustomBaseModelResource):    
+    class Meta:
+        queryset = models.Territory.objects.all()
+        resource_name = "territories"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'put', 'delete']
+        always_return_data = True
+        filtering = {
+                     "territory":ALL
+                     }
+
+
+class StateResource(CustomBaseModelResource):
+    territory = fields.ForeignKey(TerritoryResource, 'territory')
+    class Meta:
+        queryset = models.State.objects.all()
+        resource_name = "states"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        always_return_data = True
+        filtering = {
+                     "state_name":ALL_WITH_RELATIONS, 
+                     }
+
+class CityResource(CustomBaseModelResource):
+    state = fields.ForeignKey(StateResource, 'state')
+    class Meta:
+        queryset = models.City.objects.all()
+        resource_name = "cities"
+        authorization = Authorization()
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        always_return_data = True
+        filtering = {
+                     "city":ALL,
+                     "state":ALL_WITH_RELATIONS, 
+                     }
+
+
 class NationalSparesManagerResource(CustomBaseModelResource):
     class Meta:
         queryset = models.NationalSparesManager.objects.all()
@@ -686,20 +726,33 @@ class RetailerResource(CustomBaseModelResource):
 class MemberResource(CustomBaseModelResource):
     distributor = fields.ForeignKey(DistributorResource, 'registered_by_distributor', null=True, blank=True, full=True) 
     preferred_retailer = fields.ForeignKey(RetailerResource, 'preferred_retailer', null=True, blank=True, full=True)
+    state = fields.ForeignKey(StateResource, 'state', full=True)
     
     class Meta:
         queryset = models.Member.objects.all()
         resource_name = "members"
-        authorization = Authorization()
+        args = constants.LOYALTY_ACCESS
+        authorization = MultiAuthorization(Authorization(), LoyaltyCustomAuthorization(query_field=args['query_field']))
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
-        args = constants.LOYALTY_ACCESS
         filtering = {
-                     "state": ALL,
+                     "state": ALL_WITH_RELATIONS,
                      "locality":ALL,
                      "district":ALL,
+                     "last_transaction_date":['gte', 'lte'],
+                     "total_accumulation_req":ALL,
+                     "total_accumulation_points":ALL,
+                     "total_redemption_points":ALL,
+                     "total_redemption_req":ALL,
+                     "first_name":ALL,
+                     "middle_name":ALL,
+                     "last_name":ALL,
+                     "registered_date":ALL
                      }
+        ordering = ["state", "locality", "district", "registered_date",
+                    "created_date", "mechanic_id", "last_transaction_date", "total_accumulation_req"
+                    "total_accumulation_points", "total_redemption_points", "total_redemption_req" ]
         
     def prepend_urls(self):
         return [
@@ -711,14 +764,6 @@ class MemberResource(CustomBaseModelResource):
                 self.wrap_view('get_total_points'), name="get_total_points"),
         ]
    
-    def get_role_access_query(self, user, area, args):
-        if user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm_state_list=models.AreaSparesManager.objects.get(user__user=user).state.all()
-            args[area] = asm_state_list
-        elif user.groups.filter(name=Roles.DISTRIBUTORS).exists():
-            distributor_city =  models.Distributor.objects.get(user__user=user).city
-            args[area] = str(distributor_city)
-        return args
 
     def get_active_member(self, request, **kwargs):
         self.is_authenticated(request)
@@ -735,7 +780,7 @@ class MemberResource(CustomBaseModelResource):
                 user_group = request.user.groups.values()[0]['name']
                 area = self._meta.args['query_field'][user_group]['area']
                 region = self._meta.args['query_field'][user_group]['group_region']
-                args = self.get_role_access_query(request.user, area, args)
+                args = LoyaltyCustomAuthorization.get_filter_query(user=request.user, q_user=area, query=args)
             registered_member = models.Member.objects.filter(**args).values(region).annotate(count= Count('mechanic_id'))
             args['last_transaction_date__gte']=datetime.now()-timedelta(int(active_days))
             active_member = models.Member.objects.filter(**args).values(region).annotate(count= Count('mechanic_id'))
@@ -764,7 +809,7 @@ class MemberResource(CustomBaseModelResource):
                 user_group = request.user.groups.values()[0]['name']
                 area = 'member__' + self._meta.args['query_field'][user_group]['area']
                 region = 'member__' + self._meta.args['query_field'][user_group]['group_region']
-                args = self.get_role_access_query(request.user, area, args)
+                args = LoyaltyCustomAuthorization.get_filter_query(user=request.user, q_user=area, query=args)
             total_redeem_points = models.RedemptionRequest.objects.filter(**args).values(region).annotate(sum=Sum('points'))
             total_accumulate_points = models.AccumulationRequest.objects.filter(**args).values(region).annotate(sum=Sum('points'))
             member_report={}

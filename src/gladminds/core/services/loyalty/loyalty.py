@@ -209,15 +209,18 @@ class CoreLoyaltyService(Services):
         transactions = (', '.join(transaction_ids))
         return transactions
 
-    def update_points(self, mechanic, accumulate=0, redeem=0):
+    def update_points(self, mechanic, accumulate=0, redeem=0, refund_flag=False):
         '''Update the loyalty points of the user'''
-        total_points = mechanic.total_points + accumulate -redeem
+        total_points = mechanic.total_points + accumulate - redeem
         mechanic.total_points = total_points
-        if accumulate>0:
+        if accumulate>0 and not refund_flag:
             mechanic.total_accumulation_req=mechanic.total_accumulation_req+1
-        elif redeem>0:
-            mechanic.redemption_req=mechanic.total_redemption_req+1
-        mechanic.last_transaction_date=datetime.now()
+            mechanic.total_accumulation_points=mechanic.total_accumulation_points+accumulate
+            mechanic.last_transaction_date=datetime.now() 
+        elif redeem>0 and not refund_flag:
+            mechanic.total_redemption_req=mechanic.total_redemption_req+1
+            mechanic.total_redemption_points=mechanic.total_redemption_points+redeem
+            mechanic.last_transaction_date=datetime.now()
         mechanic.save(using=settings.BRAND)
         return total_points
 
