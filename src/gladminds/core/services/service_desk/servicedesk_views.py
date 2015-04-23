@@ -132,7 +132,7 @@ def save_help_desk_data(request):
     email = getattr(user_profile.user, 'email') or None
     return create_feedback(sms_dict, phone_number, email,
                                                 user_profile.user.username, dealer_asc_email,
-                                                with_detail=True)    
+                                                request.user, with_detail=True)    
 
 @check_service_active(Services.SERVICE_DESK)
 @login_required()

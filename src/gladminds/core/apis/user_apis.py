@@ -290,9 +290,9 @@ class UserProfileResource(CustomBaseModelResource):
         if user_auth is not None:
             access_token = create_access_token(user_auth, http_host)
             user_groups = []
-            for group in request.user.groups.values():
-                user_groups.append(group['name'])
             if user_auth.is_active:
+                for group in user_auth.groups.values():
+                    user_groups.append(group['name'])
                 login(request, user_auth)
                 data = {'status': 1, 'message': "login successfully",
                         'access_token': access_token, "user_id": user_auth.id, "user_groups" : user_groups}

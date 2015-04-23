@@ -110,5 +110,5 @@
 	
 --alter table gm_member add column total_accumulation_points integer(50) default 0;
 --alter table gm_member add column total_redemption_points integer(50) default 0;
-
+alter table gm_containertracker add column submitted_by varchar(50) null;
 

@@ -14,7 +14,7 @@ from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.base_apis import CustomBaseResource, CustomApiObject
 from gladminds.core.auth_helper import Roles
 from gladminds.core.constants import FEED_TYPES, FeedStatus, FEED_SENT_TYPES, \
-    CouponStatus, TicketStatus
+    CouponStatus, TicketStatus, FEEDBACK_STATUS
 from gladminds.core.core_utils.cache_utils import Cache
 from gladminds.core.core_utils.utils import dictfetchall
 from gladminds.core.model_fetcher import get_model
@@ -386,23 +386,21 @@ class TicketStatusResource(CustomBaseResource):
         authentication = AccessTokenAuthentication()
         object_class = CustomApiObject
     
-    def get_ticket_count(self, request, status):
-        status = str(status)
+    def get_ticket_count(self, request):
         if request.user.groups.filter(name=Roles.SDOWNERS):
             assignee_id = get_model('ServiceDeskUser').objects.get(user_profile__user_id=int(request.user.id)).id
-            data = self.get_sql_data("select count(*) as count from gm_feedback where status=%(status)s and assignee_id=%(assignee_id)s",
-                     filters={'status' : status, 'assignee_id' : assignee_id})
+            data = self.get_sql_data("select status, count(*) as count from gm_feedback where assignee_id=%(assignee_id)s group by status",
+                     filters={'assignee_id' : assignee_id})
         
         elif request.user.groups.filter(name__in=[Roles.SDMANAGERS, Roles.DEALERADMIN]):
-            data = self.get_sql_data("select count(*) as count from gm_feedback where status=%(status)s",
-                                 filters={'status' : status})
+            data = self.get_sql_data("select status, count(*) as count from gm_feedback group by status")
         
         elif request.user.groups.filter(name=Roles.DEALERS):
             reporter_id = get_model('ServiceDeskUser').objects.get(user_profile__user_id=int(request.user.id)).id
-            data = self.get_sql_data("select count(*) as count from gm_feedback where status=%(status)s and reporter_id=%(reporter_id)s",
-                     filters={'status' : status, 'reporter_id' : reporter_id})
+            data = self.get_sql_data("select status, count(*) as count from gm_feedback where reporter_id=%(reporter_id)s group by status",
+                     filters={'reporter_id' : reporter_id})
             
-        return get_set_cache('gm_ticket_count' + status, data[0]['count'])
+        return get_set_cache('gm_ticket_count' + str(request.user.id), data)
     
     def get_sql_data(self, query, filters={}):
         conn = connections[settings.BRAND]
@@ -414,25 +412,22 @@ class TicketStatusResource(CustomBaseResource):
         
     def obj_get_list(self, bundle, **kwargs):
         self.is_authenticated(bundle.request)
-        tickets_open = self.get_ticket_count(bundle.request, TicketStatus.OPEN)
-        tickets_progress = self.get_ticket_count(bundle.request, TicketStatus.IN_PROGRESS)
-        tickets_pending = self.get_ticket_count(bundle.request, TicketStatus.PENDING)
-        tickets_resolved = self.get_ticket_count(bundle.request, TicketStatus.RESOLVED)
-        tickets_closed = self.get_ticket_count(bundle.request, TicketStatus.CLOSED)
-        tickets_raised = tickets_open + tickets_progress + tickets_pending + tickets_resolved + tickets_closed 
-
-        return map(CustomApiObject, [
-                                     create_dict(["1", "Tickets Raised",
-                                                  tickets_raised]),
-                                     create_dict(["2", "Tickets Open",
-                                                  tickets_open]),
-                                     create_dict(["3", "Tickets In Progress",
-                                                  tickets_progress]),
-                                     create_dict(["4", "Tickets Pending",
-                                                 tickets_pending]),
-                                     create_dict(["5", "Tickets Resolved",
-                                                 tickets_resolved]),
-                                     create_dict(["6", "Tickets Closed",
-                                                 tickets_closed])
-                                     ]
-                   )
+        ticket_count = self.get_ticket_count(bundle.request)
+        all_status =  []
+        status_id = 1
+        for status in dict(FEEDBACK_STATUS).keys():
+            data = {}
+            data['id'] = status_id
+            data['value'] = 0
+            data['name'] = status
+            status_id = status_id+1
+            all_status.append(data)
+          
+        tickets_raised=0
+        for data in ticket_count:
+            ticket_status = filter(lambda status: status['name'] == data['status'], all_status)
+            if ticket_status:
+                ticket_status[0]['value'] = data['count']
+                tickets_raised = tickets_raised + data['count']
+        all_status.append({'id':status_id, 'name':'tickets_raised', 'value':tickets_raised}) 
+        return map(CustomApiObject, all_status)
