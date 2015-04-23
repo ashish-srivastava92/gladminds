@@ -29,6 +29,8 @@ api_v1.register(user_apis.MemberResource())
 api_v1.register(user_apis.ServiceDeskUserResource())
 api_v1.register(user_apis.DepartmentSubCategoriesResource())
 api_v1.register(user_apis.BrandDepartmentResource())
+api_v1.register(user_apis.SupervisorResource())
+api_v1.register(user_apis.TransporterResource())
 
 api_v1.register(product_apis.ProductTypeResource())
 api_v1.register(product_apis.ProductResource())
