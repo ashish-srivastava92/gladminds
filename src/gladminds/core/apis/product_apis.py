@@ -145,9 +145,9 @@ class ContainerTrackerResource(CustomBaseModelResource):
         from_date = args.get('from', datetime.now() - timedelta(days=30))
         to_date = args.get('to', datetime.now())
         query_args = [Q(created_date__range=[from_date, to_date])]
-        supervisor_id = args.get('supervisor_id', None)
         try:
             if request.user.groups.filter(name=Roles.TRANSPORTER):
+                supervisor_id = args.get('supervisor_id', None)
                 query_args.append(Q(transporter__user_id=request.user.id))
                 if supervisor_id:
                     query_args1 = [Q(submitted_by=supervisor_id), Q(submitted_by=None)]
@@ -160,7 +160,7 @@ class ContainerTrackerResource(CustomBaseModelResource):
                 supervisor = models.Supervisor.objects.get(user__user_id=request.user.id)
                 query_args.append(Q(transporter=supervisor.transporter))
                 data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args) &
-                                                              (Q(submitted_by=supervisor_id)| Q(submitted_by=None))
+                                                              (Q(submitted_by=supervisor.supervisor_id)| Q(submitted_by=None))
                                                               ).values('status').annotate(total=Count('status'))
             else:
                 data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args)).values('status').annotate(total=Count('status'))
