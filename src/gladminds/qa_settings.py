@@ -120,3 +120,5 @@ ENV = "qa"
 
 COUPON_URL = 'qa.bajaj.gladminds.co'
 API_FLAG = True 
+LOGAN_ACTIVE = True
+
