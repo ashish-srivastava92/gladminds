@@ -99,6 +99,7 @@ class FeedbackResource(CustomBaseModelResource):
         return bundle
 
     def add_service_desk_ticket(self, request, **kwargs):
+        self.is_authenticated(request)
         try:
             brand = settings.BRAND
             try:
