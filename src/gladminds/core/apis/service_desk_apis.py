@@ -113,7 +113,6 @@ class FeedbackResource(CustomBaseModelResource):
             return HttpResponse(content=json.dumps(data),
                                     content_type='application/json')
         except Exception as ex:
-            print "===========", ex
             LOG.error('Exception while saving data : {0}'.format(ex))
             return HttpResponseBadRequest()
     
@@ -322,13 +321,11 @@ class FeedbackResource(CustomBaseModelResource):
               a2.feedback_id, a2.id from gm_activity a2 where original_value is null and new_value='Open') a2 \
               on a1.feedback_id=a2.feedback_id where a1.original_value='Open' and a1.new_value is not null \
               group by year(a1.created_date) , month(a1.created_date), a1.feedback_id")
-            print "00000000000000000000000000000", tickets
             for ticket in tickets:
                 data = {}
                 data 
             return HttpResponse(content=json.dumps(total_tickets), content_type='application/json')
         except Exception as ex:
-            print ">>>>>>>>>>>>>>>>>>>>>>", ex
             return HttpResponseBadRequest()
     
 class ActivityResource(CustomBaseModelResource):
