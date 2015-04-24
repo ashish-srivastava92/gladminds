@@ -395,6 +395,7 @@ class CommentsResource(CustomBaseModelResource):
         
     
     def modify_comment(self, request, **kwargs):
+        self.is_authenticated(request)
         data = request.POST
         try:
             comment = models.Comment.objects.get(id=data['commentId'])
