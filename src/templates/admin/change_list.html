@@ -50,6 +50,10 @@
 {% endif %}
 {% block coltype %}flex{% endblock %}
 {% block content %}
+<div class="alert alert-danger download-fail hide">
+   <button class="close" data-dismiss="alert">×</button>
+   No new details to download.
+</div>
   <div id="content-main">
     <div class="inner-center-column">
       <div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
