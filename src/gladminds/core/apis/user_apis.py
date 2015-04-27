@@ -400,7 +400,7 @@ class ZonalServiceManagerResource(CustomBaseModelResource):
 
 class AreaServiceManagerResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
-    zsm = fields.ForeignKey(ZonalServiceManagerResource, 'zsm', full=True)
+    zsm = fields.ForeignKey(ZonalServiceManagerResource, 'zsm')
 
     class Meta:
         queryset = models.AreaServiceManager.objects.all()
@@ -536,6 +536,7 @@ class DealerResource(CustomBaseModelResource):
         username = load.get('username')
         phone_number = load.get('phone-number')
         email = load.get('email')
+        name = load.get('name', '')
         asm = load.get('asm_id', None)
         try:
             user = models.Dealer.objects.get(user__phone_number=phone_number, dealer_id=username)
@@ -545,6 +546,7 @@ class DealerResource(CustomBaseModelResource):
             logger.info("[register_dealer] : New dealer registration :: {0}".format(ex))
             user_data = register_user.register_user(Roles.DEALERS,username=username,
                                              phone_number=phone_number,
+                                             first_name=name,
                                              email = email, APP=settings.BRAND)
             if asm:
                 asm = models.AreaServiceManager.objects.get(asm_id=asm)
@@ -592,6 +594,7 @@ class DealerResource(CustomBaseModelResource):
             
             dealer_user= dealer_obj.user.user
             dealer_user.email=load.get('email')
+            dealer_user.first_name=load.get('name')
 
             dealer_user.save(using=settings.BRAND)
             dealer_profile.save()
