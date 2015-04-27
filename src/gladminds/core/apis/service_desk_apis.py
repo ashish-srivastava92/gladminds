@@ -307,23 +307,67 @@ class FeedbackResource(CustomBaseModelResource):
                         fcr['username'] = data['username']
                         fcr['fcr'] = (fcrs[0]['cnt']/float(data['total'])) * 100
                         total_tickets.append(fcr)
+                        
+            elif kwargs['type'] == 'response':
+                query = "select au.username,sum(res.dt) as response, yr, mnt,fid  from\
+                 (select TIMESTAMPDIFF(second, a2.created_date,a1.created_date) as dt, a1.feedback_id as fid, a1.id,\
+                  year(a1.created_date) as yr ,month(a1.created_date) as mnt  from gm_activity a1 inner join(select\
+                   a2.created_date, a2.feedback_id, a2.id from gm_activity a2 where original_value is null \
+                   and new_value='Open') a2 on a1.feedback_id=a2.feedback_id where a1.original_value='Open'\
+                    and a1.new_value is not null and year(a1.created_date) ={0} and month(a1.created_date) ={1} \
+                    group by year(a1.created_date) , month(a1.created_date), a1.feedback_id) res left outer join \
+                    gm_feedback f on f.id=res.fid left outer join gm_servicedeskuser s on s.id= f.assignee_id left \
+                    outer join gm_userprofile u on s.user_profile_id=u.user_id  left outer join auth_user au on \
+                    u.user_id=au.id group by res.yr, res.mnt ,f.assignee_id;".format(year, month)
+                tickets = self.get_sql_data(query)
+                query = "select count(*) as cnt , month(created_date) as month,\
+                 year(created_date) as year from gm_feedback where year(created_date)={0} and \
+                 month(created_date)={1};".format(year, month)
+                count_of_tickets = self.get_sql_data(query)
+                for ticket in tickets:
+                    data = {}
+                    data['response'] = ticket['response'] / count_of_tickets[0]['cnt']
+                    minutes, seconds = divmod(ticket['response'], 60)
+                    data['response'] = float(minutes)
+                    data['agent'] = ticket['username']
+                    total_tickets.append(data)
             return HttpResponse(content=json.dumps(total_tickets),
                             content_type='application/json') 
         except Exception as ex:
-            LOG.error('Exception while comparing tat and fcr for agents : {0}'.format(ex))
+            LOG.error('Exception while comparing tat , fcr or response time for agents : {0}'.format(ex))
             return HttpResponseBadRequest() 
     
     def get_response_time(self, request, **kwargs):
+        self.is_authenticated(request)
         try:
             total_tickets = []
-            tickets = self.get_sql_data("select TIMEDIFF(a1.created_date,a2.created_date) as dt, a1.feedback_id, a1.id,\
-             year(a1.created_date) ,month(a1.created_date)  from gm_activity a1 inner join(select a2.created_date,\
-              a2.feedback_id, a2.id from gm_activity a2 where original_value is null and new_value='Open') a2 \
-              on a1.feedback_id=a2.feedback_id where a1.original_value='Open' and a1.new_value is not null \
-              group by year(a1.created_date) , month(a1.created_date), a1.feedback_id")
+            tickets = self.get_sql_data("select sum(res.dt) as response, yr, mnt from \
+            (select TIMESTAMPDIFF(second, a2.created_date,a1.created_date) as dt, a1.feedback_id, a1.id,\
+             year(a1.created_date) as yr ,month(a1.created_date) as mnt  from gm_activity a1 inner \
+             join(select a2.created_date, a2.feedback_id, a2.id from gm_activity a2 where original_value is \
+             null and new_value='Open') a2 on a1.feedback_id=a2.feedback_id where a1.original_value='Open' \
+             and a1.new_value is not null group by year(a1.created_date) , month(a1.created_date), a1.feedback_id)\
+              res group by res.yr, res.mnt")
+            
+            count_of_tickets = self.get_sql_data("select count(*) as cnt , month(created_date) as month,\
+             year(created_date) as year from gm_feedback group by month(created_date), year(created_date)")
+            
+            ticket_details = []
             for ticket in tickets:
                 data = {}
-                data 
+                data['month_of_year'] = str(ticket['yr'])+"-"+ str(ticket['mnt'])
+                data['response'] = ticket['response']
+                ticket_details.append(data)
+                 
+            for details in count_of_tickets:
+                data = {}
+                data['month_of_year'] = str(details['year'])+"-"+ str(details['month'])
+                response = filter(lambda ticket:ticket['month_of_year'] == data['month_of_year'] , ticket_details)
+                if response:
+                    ticket['response'] = ticket['response'] / details['cnt']
+                    minutes, seconds = divmod(ticket['response'], 60)
+                    data['response'] = float(minutes)
+                    total_tickets.append(data)
             return HttpResponse(content=json.dumps(total_tickets), content_type='application/json')
         except Exception as ex:
             return HttpResponseBadRequest()
@@ -377,6 +421,8 @@ class CommentsResource(CustomBaseModelResource):
         resource_name = 'comments'
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post', 'put']
+        authentication = MultiAuthentication(AccessTokenAuthentication())
+        authorization = Authorization()
         always_return_data = True
         filtering = {
                      "feedback" : ALL_WITH_RELATIONS,
