@@ -30,7 +30,7 @@ from gladminds.core.core_utils.date_utils import convert_utc_to_local_time
 from gladminds.core.core_utils.utils import dictfetchall
 from gladminds.core.managers.mail import get_email_template
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
-
+from django.forms.models import model_to_dict   
 
 logger = logging.getLogger('gladminds')
 
@@ -555,3 +555,12 @@ def get_escalation_mailing_list(escalation_list):
         escalation_mailing_list.append(element.user.email)
         escalation_mobile_list.append(element.phone_number)
     return {'mail': escalation_mailing_list, 'sms': escalation_mobile_list}
+
+def model_to_dict_for_datetime(object):
+    data = model_to_dict(object)
+    data['created_date'] = object.created_date
+    data['modified_date'] = object.modified_date
+    return data
+    
+    
+    

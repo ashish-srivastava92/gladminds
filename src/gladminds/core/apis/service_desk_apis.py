@@ -26,7 +26,7 @@ from gladminds.core.services.service_desk.servicedesk_manager import SDActions, 
     update_feedback_activities, get_feedback
 from tastypie.utils.mime import build_content_type
 from gladminds.core.constants import FEEDBACK_STATUS, DEMO_PRIORITY, PRIORITIES
-from gladminds.core.utils import get_list_from_set
+from gladminds.core.utils import get_list_from_set, model_to_dict_for_datetime
 from django.forms.models import model_to_dict
 
 
@@ -98,7 +98,8 @@ class FeedbackResource(CustomBaseModelResource):
         bundle.data['STATUS'] = get_list_from_set(FEEDBACK_STATUS)
         bundle.data['PRIORITY'] = get_list_from_set(priority)
         comments = models.Comment.objects.filter(feedback_object=bundle.data['id'])
-        bundle.data['comments'] = [model_to_dict(c) for c in comments]
+        bundle.data['comments'] = [model_to_dict_for_datetime(c) for c in comments]
+        
         return bundle
 
     def add_service_desk_ticket(self, request, **kwargs):
