@@ -8,49 +8,10 @@ STATIC_DIR = os.path.join(BASE_DIR, "src/static")
 TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladmindsqa2')
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
-CONN_MAX_AGE = None
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gm',
-        'USER': 'gladminds',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-staging.chnnvvffqwop.us-east-1.rds.amazonaws.com',
-        'PORT': '3306',
-    },
-    'bajaj': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bajaj',
-        'USER': 'gladminds',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-staging.chnnvvffqwop.us-east-1.rds.amazonaws.com',
-        'PORT': '3306',
-    },
-    'demo': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'demo',
-        'USER': 'gladminds',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-staging.chnnvvffqwop.us-east-1.rds.amazonaws.com',
-        'PORT': '3306',
-    },
-    'afterbuy': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'afterbuy',
-        'USER': 'gladminds',
-        'PASSWORD': DB_PASSWORD,
-        'HOST': 'gladminds-staging.chnnvvffqwop.us-east-1.rds.amazonaws.com',
-        'PORT': '3306',
-    }
-}
-
-
 
 BROKER_URL = 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
@@ -110,16 +71,14 @@ COUPON_WSDL_URL = "http://staging.bajaj.gladminds.co/api/v1/redeem-feed/?wsdl&v0
 COUPON_WSDL = 'qa_coupon_redeem.wsdl'
 
 CUSTOMER_REGISTRATION_WSDL_URL = "http://staging.bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
-CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
-
 VIN_SYNC_WSDL_URL="http://staging.bajaj.gladminds.co/api/v1/vin-sync-feed/?wsdl&v0"
-VIN_SYNC_WSDL='qa_vin_sync.wsdl'
+PURCHASE_SYNC_WSDL_URL="http://staging.bajaj.gladminds.co/api/v1/purchase-sync-feed/?wsdl&v0"
+CTS_WSDL_URL = "http://staging.bajaj.gladminds.co/api/v1/container-tracker/?wsdl&v0"
 
 MEMBER_SYNC_WSDL_URL="http://staging.bajaj.gladminds.co/api/v1/member-sync-feed/?wsdl&v0"
-MEMBER_SYNC_WSDL='qa_member_sync_feed.wsdl'
-
-PURCHASE_SYNC_WSDL_URL="http://staging.bajaj.gladminds.co/api/v1/purchase-sync-feed/?wsdl&v0"
-PURCHASE_SYNC_WSDL='qa_purchase_sync_feed.wsdl'
+ACCUMULATION_SYNC_WSDL_URL = "http://staging.bajaj.gladminds.co/api/v1/accumulation-request/?wsdl&v0"
+REDEMPTION_SYNC_WSDL_URL = "http://staging.bajaj.gladminds.co/api/v1/redemption-request/?wsdl&v0"
+DISTRIBUTOR_SYNC_WSDL_URL = "http://staging.bajaj.gladminds.co/api/v1/distributor-sync/?wsdl&v0"
 
 WSDL_TNS="http://staging.bajaj.gladminds.co/api/v1/feed/"
 CORE_WSDL_TNS="http://staging.bajajcv.gladminds.co/api/v1/feed/"
@@ -162,3 +121,7 @@ ENV = "staging"
 #         'LOCATION': 'gladminds-memcache.t2nfas.cfg.use1.cache.amazonaws.com:11211'
 #     }
 # }
+
+COUPON_URL = 'staging.bajaj.gladminds.co'
+API_FLAG = True 
+LOGAN_ACTIVE = True
