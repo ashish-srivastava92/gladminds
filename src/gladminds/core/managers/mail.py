@@ -145,16 +145,15 @@ def discrepant_coupon_update(csv_file, brand=None):
         yesterday = datetime.now().date() - timedelta(days=1)
         mail_detail = get_email_template('POLICY_DISCREPANCY_MAIL_TO_MANAGER', brand)
         receivers = get_mail_receiver(settings.POLICY_DISCREPANCY_MAIL_TO_MANAGER, mail_detail)
+        logger.info(" policy cron emails: {0} : {1}".format(mail_detail, receivers))
 
         send_email_with_file_attachment(mail_detail['sender'], receivers, mail_detail['subject'],
                                           mail_detail['body'].format(date=yesterday.strftime("%b %d %Y")), 
                                           'discrepant_coupon_update_', csv_file)
 
         logger.info("Sending out discrepant coupon update emails")
-        return True 
     except Exception as ex:
         logger.info("[Exception discrepant coupon update ]: {0}".format(ex))
-        return False
 
 def send_vin_sync_feed_report(feed_data=None, brand=None):
     try:
