@@ -68,8 +68,6 @@ SAP_CRM_DETAIL = {
 ASC_WSDL_URL = "http://staging.bajaj.gladminds.co/api/v1/asc-feed/?wsdl&v0"
 
 COUPON_WSDL_URL = "http://staging.bajaj.gladminds.co/api/v1/redeem-feed/?wsdl&v0"
-COUPON_WSDL = 'qa_coupon_redeem.wsdl'
-
 CUSTOMER_REGISTRATION_WSDL_URL = "http://staging.bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
 VIN_SYNC_WSDL_URL="http://staging.bajaj.gladminds.co/api/v1/vin-sync-feed/?wsdl&v0"
 PURCHASE_SYNC_WSDL_URL="http://staging.bajaj.gladminds.co/api/v1/purchase-sync-feed/?wsdl&v0"
