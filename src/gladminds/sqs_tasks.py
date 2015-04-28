@@ -493,9 +493,9 @@ def send_mail_customer_phone_number_update_exceeds(*args, **kwargs):
 @shared_task
 def send_mail_for_policy_discrepency(*args, **kwargs):
     ''' send mail for policy_discrepency'''
-    brand= kwargs.get('brand', None)
-    discrepant_coupons_csv = taskmanager.get_discrepant_coupon_details()
-    taskmanager.update_coupon()
+    brand= kwargs.get('brand', 'bajaj')
+    discrepant_coupons_csv = taskmanager.get_discrepant_coupon_details(brand=brand)
+    taskmanager.update_coupon(brand=brand)
     mail.discrepant_coupon_update(csv_file=discrepant_coupons_csv, brand=brand)
 
 @shared_task
