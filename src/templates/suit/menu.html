@@ -15,6 +15,7 @@
     {% get_menu request as app_list %}
     {% if app_list %}
       {% for app in app_list %}
+      {{app_list}}
       {% if app.models %}
         {% if app.separator %}
           <li class="separator"></li>
@@ -25,6 +26,7 @@
             {% if app.models %}
               <ul>
                 {% for model in app.models %}
+                {{model}}
                   <li{{ model.is_active|yesno:' class=active,' }}>
                     <a href="{{ model.url }}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a></li>
                 {% endfor %}
