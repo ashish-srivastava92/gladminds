@@ -498,7 +498,8 @@ def send_mail_for_policy_discrepency(*args, **kwargs):
     if discrepant_coupons_csv:
         mail.discrepant_coupon_update(csv_file=discrepant_coupons_csv, brand=brand)
     else:
-        logger.info("[Policy Discrepency]: No coupons were update on {0}".format(datetime.now())
+        logger.info("[Policy Discrepency]: No coupons were update on {0}".format(datetime.now()))
+
 @shared_task
 def export_asc_registeration_to_sap(*args, **kwargs):
     '''
