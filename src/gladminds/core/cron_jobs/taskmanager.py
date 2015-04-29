@@ -163,11 +163,12 @@ def get_discrepant_coupon_details(brand):
         for service_type in service_type_obj:
             service_dict.update({service_type.constant_name:service_type.constant_value})
 
-        query = "select c.product_id,  c.service_type, c.valid_days, c.valid_kms, c.created_date\
-                from gm_coupondata c where ( c.status not in (2,6)\
-                and ( (c.service_type = 1 and (c.valid_kms!={0} or c.valid_days!={1}))\
-                or ( c.service_type = 2 and (c.valid_kms!={2} or c.valid_days!={3}))\
-                or ( c.service_type = 3 and (c.valid_kms!={4} or c.valid_days!={5}))\
+        query = "select p.product_id,  c.service_type, c.valid_days, c.valid_kms, c.created_date \
+                from gm_coupondata as c \
+                inner join gm_productdata as p on c.product_id = p.id where ( c.status not in (2,6) \
+                and ( (c.service_type = 1 and (c.valid_kms!={0} or c.valid_days!={1})) \
+                or ( c.service_type = 2 and (c.valid_kms!={2} or c.valid_days!={3})) \
+                or ( c.service_type = 3 and (c.valid_kms!={4} or c.valid_days!={5})) \
                 ));".format(service_dict['service_1_valid_kms'], service_dict['service_1_valid_days'], 
                         service_dict['service_2_valid_kms'], service_dict['service_2_valid_days'],
                         service_dict['service_3_valid_kms'], service_dict['service_3_valid_days'])
