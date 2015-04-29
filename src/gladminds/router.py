@@ -1,6 +1,8 @@
 from django.conf import settings
 from importlib import import_module
 from gladminds.core.exceptions import ModelBrandNotMatchingException
+import logging
+LOG = logging.getLogger("gladminds")
 
 _COMMON_APPS = ['auth', 'contenttypes', 'sessions', 'sites', 'admin', 'djcelery', 'provider',
                 'oauth2', 'django_otp', 'permission', 'group', 'messages', 'staticfiles',
@@ -17,7 +19,7 @@ class DatabaseAppsRouter(object):
     """
     @staticmethod
     def common_logic(model, hints={}):
-
+        LOG.info('settings.BRAND:{0}; META:{1}'.format(settings.BRAND, model._meta.app_label))
         if model._meta.app_label in _COMMON_APPS+ ['core']:
 
             if 'instance' in hints.keys():
@@ -25,7 +27,6 @@ class DatabaseAppsRouter(object):
             else:
                 db = settings.BRAND
             return settings.DATABASE_APPS_MAPPING.get(db)
-
         if settings.BRAND in settings.OUTSIDE_BRANDS and model._meta.app_label in settings.OUTSIDE_BRANDS and settings.BRAND != model._meta.app_label:
             raise ModelBrandNotMatchingException('setings.BRAND:{0}; META:{1}'.
                                                  format(settings.BRAND,

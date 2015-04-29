@@ -164,24 +164,27 @@ def get_discrepant_coupon_details(brand):
             service_dict.update({service_type.constant_name:service_type.constant_value})
 
         query = "select c.product_id,  c.service_type, c.valid_days, c.valid_kms, c.created_date\
-                from gm_coupondata c where (c.status not in (2,6) and c.service_type = 1 and (c.valid_kms!={0} or c.valid_days!={1}))\
-                or (c.status not in (2,6) and c.service_type = 2 and (c.valid_kms!={2} or c.valid_days!={3}))\
-                or (c.status not in (2,6) and c.service_type = 3 and (c.valid_kms!={4} or c.valid_days!={5}));".format(service_dict['service_1_valid_kms'], service_dict['service_1_valid_days'], 
+                from gm_coupondata c where ( c.status not in (2,6)\
+                and ( (c.service_type = 1 and (c.valid_kms!={0} or c.valid_days!={1}))\
+                or ( c.service_type = 2 and (c.valid_kms!={2} or c.valid_days!={3}))\
+                or ( c.service_type = 3 and (c.valid_kms!={4} or c.valid_days!={5}))\
+                ));".format(service_dict['service_1_valid_kms'], service_dict['service_1_valid_days'], 
                         service_dict['service_2_valid_kms'], service_dict['service_2_valid_days'],
                         service_dict['service_3_valid_kms'], service_dict['service_3_valid_days'])
     
         discrepant_coupons = get_sql_data(query, brand)
-        logger.info("[discrepant_coupons Policy discpancy ]: {0}".format(len(discrepant_coupons)))
-        csvfile = StringIO.StringIO()
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(["DATE", "VIN", "SERVICE TYPE", "VALID DAYS", "VALID KMS"])
-        for coupon in discrepant_coupons:
-            csvwriter.writerow([coupon['created_date'].strftime("%d/%m/%y"), coupon['product_id'], coupon['service_type'],
-                                coupon['valid_days'], coupon['valid_kms']])
-
-        return csvfile
+        
+        if len(discrepant_coupons) > 0:
+            csvfile = StringIO.StringIO()
+            csvwriter = csv.writer(csvfile)
+            csvwriter.writerow(["VIN", "SERVICE TYPE", "VALID DAYS", "VALID KMS"])
+            for coupon in discrepant_coupons:
+                csvwriter.writerow([coupon['product_id'], coupon['service_type'], coupon['valid_days'], coupon['valid_kms']])
+            update_coupon(brand)
+            return csvfile
+        return False
     except Exception as ex:
-        logger.info("[Exception Policy discpancy ]: {0}".format(ex))
+        logger.info("[Exception Policy discrepancy ]: {0}".format(ex))
 
 def update_coupon(brand):
     update_days_kms = "update gm_coupondata c set c.valid_kms = (case when c.service_type=1 then {0} when \
