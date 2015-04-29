@@ -495,9 +495,10 @@ def send_mail_for_policy_discrepency(*args, **kwargs):
     ''' send mail for policy_discrepency'''
     brand= kwargs.get('brand', 'bajaj')
     discrepant_coupons_csv = taskmanager.get_discrepant_coupon_details(brand=brand)
-    taskmanager.update_coupon(brand=brand)
-    mail.discrepant_coupon_update(csv_file=discrepant_coupons_csv, brand=brand)
-
+    if discrepant_coupons_csv:
+        mail.discrepant_coupon_update(csv_file=discrepant_coupons_csv, brand=brand)
+    else:
+        logger.info("[Policy Discrepency]: No coupons were update on {0}".format(datetime.now())
 @shared_task
 def export_asc_registeration_to_sap(*args, **kwargs):
     '''
