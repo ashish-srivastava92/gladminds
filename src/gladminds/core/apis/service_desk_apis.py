@@ -128,10 +128,15 @@ class FeedbackResource(CustomBaseModelResource):
     def get_tat(self, request, **kwargs):
         try:
             self.is_authenticated(request)
-            details = self.get_sql_data("select sum(f2.dt) as sums ,count(*) as c , avg(f2.dt) as tat, YEAR(f1.created_date) as year, \
+            conn = connections[settings.BRAND]
+            cursor = conn.cursor()
+            query = ("select sum(f2.dt) as sums ,count(*) as c , avg(f2.dt) as tat, YEAR(f1.created_date) as year, \
         MONTH(f1.created_date) as month from gm_feedback f1 inner join (select f2.id, TIMEDIFF(f2.resolved_date,f2.created_date)\
-        as dt , f2.created_date from gm_feedback f2 where status= 'resolved') f2 on f2.id=f1.id group by \
+        as dt , f2.created_date from gm_feedback f2 where status= 'resolved' and \
+        ((f2.created_date) > date_sub(curdate(), interval 6 month))) f2 on f2.id=f1.id group by \
         YEAR(f1.created_date), MONTH(f1.created_date)")
+            cursor.execute(query)
+            details = dictfetchall(cursor)
             reports = {}
             result = []
             for data in details:
@@ -142,13 +147,18 @@ class FeedbackResource(CustomBaseModelResource):
                 result.append(tat)
             reports['TAT'] = result
 
-            fcr_total = self.get_sql_data("select count(*) as total, concat (YEAR(resolved_date),'-', MONTH(resolved_date)) \
-            as month_of_year from gm_feedback where resolved_date is not null group by \
-             YEAR(resolved_date), MONTH(resolved_date)")
-            
-            fcr_count = self.get_sql_data("select count(*) as cnt, concat(YEAR(resolved_date), '-', MONTH(resolved_date))\
-             as month_of_year from gm_feedback where fcr=1 group by(fcr),YEAR(resolved_date), MONTH(resolved_date)")
-            
+            query = ("select count(*) as total, concat (YEAR(resolved_date),'-', MONTH(resolved_date)) \
+            as month_of_year from gm_feedback where resolved_date is not null and \
+             (resolved_date > DATE_SUB(CURDATE(), INTERVAL 6 MONTH)) group by YEAR(resolved_date), MONTH(resolved_date)")
+            cursor.execute(query)
+            fcr_total = dictfetchall(cursor)
+                        
+            query = ("select count(*) as cnt, concat(YEAR(resolved_date), '-', MONTH(resolved_date))\
+             as month_of_year from gm_feedback where fcr=1 and resolved_date > DATE_SUB(CURDATE(), INTERVAL 6 MONTH) \
+             group by(fcr),YEAR(resolved_date), MONTH(resolved_date)")
+            cursor.execute(query)
+            fcr_count = dictfetchall(cursor)
+
             result = []
             for data in fcr_total:
                 fcr = {}
@@ -156,18 +166,25 @@ class FeedbackResource(CustomBaseModelResource):
                 fcrs = filter(lambda fc: fc['month_of_year'] == data['month_of_year'], fcr_count)
                 if fcrs:
                     fcr['fcr'] = (fcrs[0]['cnt']/float(data['total'])) * 100
-                
-                result.append(fcr)
+                    result.append(fcr)
     
             reports['FCR'] = result
     
             
-            reopen_count = self.get_sql_data("select count(*) as cnt, concat(YEAR(created_date), '-', MONTH(created_date))\
-             as month_of_year from gm_activity where new_value='Open' and original_value ='Resolved' or \
-              original_value='Closed' group by YEAR(created_date), MONTH(created_date)")
+            query = ("select count(*) as cnt, concat(YEAR(created_date), '-', MONTH(created_date))\
+             as month_of_year from gm_activity where new_value='Open' and (original_value ='Resolved' or \
+              original_value='Closed')  and created_date > DATE_SUB(CURDATE(), INTERVAL 6 MONTH) \
+              group by YEAR(created_date), MONTH(created_date)")
              
-            reopen_total = self.get_sql_data("select count(*) as total, concat(YEAR(created_date), '-', \
-            MONTH(created_date)) as month_of_year from gm_feedback group by YEAR(created_date), MONTH(created_date)")
+            cursor.execute(query)
+            reopen_count = dictfetchall(cursor)
+            
+            query = ("select count(*) as total, concat(YEAR(created_date), '-', \
+            MONTH(created_date)) as month_of_year from gm_feedback  where \
+            (created_date > DATE_SUB(CURDATE(), INTERVAL 6 MONTH)) group by YEAR(created_date), MONTH(created_date)")
+            
+            cursor.execute(query)
+            reopen_total = dictfetchall(cursor)
             
             result = []
             for data in reopen_total:
@@ -176,13 +193,15 @@ class FeedbackResource(CustomBaseModelResource):
                 reopens = filter(lambda reopen : reopen['month_of_year'] == data['month_of_year'], reopen_count)
                 if reopens:
                     reopened['re-open'] = (reopens[0]['cnt']/float(data['total'])) * 100
-                result.append(reopened)
+                    result.append(reopened)
             
             reports['RE-OPENED'] = result
+            conn.close()
             return HttpResponse(content=json.dumps(reports),
                                     content_type='application/json')
 
         except Exception as ex:
+            conn.close()
             LOG.error('Exception while generating TAT and FCR report : {0}'.format(ex))
             return HttpResponseBadRequest()
         
@@ -454,6 +473,3 @@ class CommentsResource(CustomBaseModelResource):
         except Exception as ex:
             LOG.info("[Exception while modifying comment]: {0}".format(ex))
             return HttpResponseNotFound()
-
-    
-    
