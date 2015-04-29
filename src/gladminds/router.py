@@ -20,7 +20,6 @@ class DatabaseAppsRouter(object):
     @staticmethod
     def common_logic(model, hints={}):
         LOG.info('settings.BRAND:{0}; META:{1}'.format(settings.BRAND, model._meta.app_label))
-        print 'settings.BRAND:{0}; META:{1}'.format(settings.BRAND, model._meta.app_label)
         if model._meta.app_label in _COMMON_APPS+ ['core']:
 
             if 'instance' in hints.keys():
