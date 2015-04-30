@@ -65,7 +65,9 @@ class FeedbackResource(CustomBaseModelResource):
                         "assignee" : ALL_WITH_RELATIONS,
                         "reporter" : ALL_WITH_RELATIONS,
                         "due_date" : ALL,
-                        "sub_department" : ALL_WITH_RELATIONS
+                        "sub_department" : ALL_WITH_RELATIONS,
+                        "id": ALL,
+                        "description" : ALL
                      }
         
         ordering = ['created_date','due_date']
