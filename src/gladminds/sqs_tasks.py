@@ -493,12 +493,12 @@ def send_mail_customer_phone_number_update_exceeds(*args, **kwargs):
 @shared_task
 def send_mail_for_policy_discrepency(*args, **kwargs):
     ''' send mail for policy_discrepency'''
-    brand= kwargs.get('brand', None)
-    discrepant_coupons = taskmanager.get_discrepant_coupon_details()
-    if discrepant_coupons:
-        mail.discrepant_coupon_update(discrepant_coupons=discrepant_coupons, brand=brand)
+    brand= kwargs.get('brand', 'bajaj')
+    discrepant_coupons_csv = taskmanager.get_discrepant_coupon_details(brand=brand)
+    if discrepant_coupons_csv:
+        mail.discrepant_coupon_update(csv_file=discrepant_coupons_csv, brand=brand)
     else:
-        logger.info('[Policy Discrepency]: There were no policy discrepency in coupons')
+        logger.info("[Policy Discrepency]: No coupons were update on {0}".format(datetime.now()))
 
 @shared_task
 def export_asc_registeration_to_sap(*args, **kwargs):

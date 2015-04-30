@@ -22,6 +22,7 @@ from gladminds.settings import COUPON_VALID_DAYS
 from gladminds.core.base_models import STATUS_CHOICES
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.core_utils.utils import log_time
+from gladminds.core.stats import LOGGER
 
 LOG = logging.getLogger('gladminds')
 json = utils.import_json()
@@ -214,6 +215,9 @@ def validate_coupon(sms_dict, phone_number):
     customer_message_countdown = settings.DELAY_IN_CUSTOMER_UCN_MESSAGE
     sap_customer_id = sms_dict.get('sap_customer_id', None)
     service_advisor = validate_service_advisor(phone_number)
+    if settings.LOGAN_ACTIVE:
+        LOGGER.post_event("check_coupon", {'sender':phone_number,
+                                          'brand':settings.BRAND})
     if not service_advisor:
         return {'status': False, 'message': templates.get_template('UNAUTHORISED_SA')}
     if not is_valid_data(customer_id=sap_customer_id, sa_phone=phone_number):
@@ -295,6 +299,9 @@ def close_coupon(sms_dict, phone_number):
     unique_service_coupon = sms_dict['usc']
     sap_customer_id = sms_dict.get('sap_customer_id', None)
     message = None
+    if settings.LOGAN_ACTIVE:
+        LOGGER.post_event("close_coupon", {'sender':phone_number,
+                                          'brand':settings.BRAND})
     if not service_advisor:
         return {'status': False, 'message': templates.get_template('UNAUTHORISED_SA')}
     if not is_valid_data(customer_id=sap_customer_id, coupon=unique_service_coupon, sa_phone=phone_number):

@@ -242,9 +242,9 @@ class CTSCustomAuthorization(Authorization):
         if bundle.request.user.groups.filter(name=Roles.TRANSPORTER):
             object_list = object_list.filter(transporter__user__user_id=int(bundle.request.user.id))
         elif bundle.request.user.groups.filter(name=Roles.SUPERVISOR):
-            transporter = get_model('Supervisor').objects.get(user__user_id=bundle.request.user.id)
-            object_list = object_list.filter(Q(submitted_by=transporter.supervisor_id) | Q(submitted_by=None))
-
+            supervisor = get_model('Supervisor').objects.get(user__user_id=bundle.request.user.id)
+            object_list = object_list.filter(Q(transporter=supervisor.transporter)
+                                             & (Q(submitted_by=supervisor.supervisor_id) | Q(submitted_by=None)))
         return object_list
 
     def read_detail(self, object_list, bundle):

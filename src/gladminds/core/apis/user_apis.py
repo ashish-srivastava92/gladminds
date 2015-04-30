@@ -290,9 +290,9 @@ class UserProfileResource(CustomBaseModelResource):
         if user_auth is not None:
             access_token = create_access_token(user_auth, http_host)
             user_groups = []
-            for group in request.user.groups.values():
-                user_groups.append(group['name'])
             if user_auth.is_active:
+                for group in user_auth.groups.values():
+                    user_groups.append(group['name'])
                 login(request, user_auth)
                 data = {'status': 1, 'message': "login successfully",
                         'access_token': access_token, "user_id": user_auth.id, "user_groups" : user_groups}
@@ -400,7 +400,7 @@ class ZonalServiceManagerResource(CustomBaseModelResource):
 
 class AreaServiceManagerResource(CustomBaseModelResource):
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
-    zsm = fields.ForeignKey(ZonalServiceManagerResource, 'zsm', full=True)
+    zsm = fields.ForeignKey(ZonalServiceManagerResource, 'zsm')
 
     class Meta:
         queryset = models.AreaServiceManager.objects.all()
@@ -536,6 +536,7 @@ class DealerResource(CustomBaseModelResource):
         username = load.get('username')
         phone_number = load.get('phone-number')
         email = load.get('email')
+        name = load.get('name', '')
         asm = load.get('asm_id', None)
         try:
             user = models.Dealer.objects.get(user__phone_number=phone_number, dealer_id=username)
@@ -545,6 +546,7 @@ class DealerResource(CustomBaseModelResource):
             logger.info("[register_dealer] : New dealer registration :: {0}".format(ex))
             user_data = register_user.register_user(Roles.DEALERS,username=username,
                                              phone_number=phone_number,
+                                             first_name=name,
                                              email = email, APP=settings.BRAND)
             if asm:
                 asm = models.AreaServiceManager.objects.get(asm_id=asm)
@@ -592,6 +594,7 @@ class DealerResource(CustomBaseModelResource):
             
             dealer_user= dealer_obj.user.user
             dealer_user.email=load.get('email')
+            dealer_user.first_name=load.get('name')
 
             dealer_user.save(using=settings.BRAND)
             dealer_profile.save()
@@ -877,11 +880,26 @@ class ServiceDeskUserResource(CustomBaseModelResource):
                      }
 
 class TransporterResource(CustomBaseModelResource):
+    user = fields.ForeignKey(UserProfileResource, 'user', full=True, null=True, blank=True)
     class Meta:
         queryset = models.Transporter.objects.all()
         resource_name = 'transporters'
         authorization = MultiAuthorization(DjangoAuthorization())
         detail_allowed_methods = ['get']
         always_return_data = True
-        
+        filtering = {
+                     'user':ALL_WITH_RELATIONS
+                     }
+
+class SupervisorResource(CustomBaseModelResource):
+    transporter = fields.ForeignKey(TransporterResource, 'transporter', full=True, null=True, blank=True)
+    class Meta:
+        queryset = models.Supervisor.objects.all()
+        resource_name = 'supervisors'
+        authorization = MultiAuthorization(DjangoAuthorization())
+        detail_allowed_methods = ['get']
+        always_return_data = True
+        filtering = {
+                     'transporter': ALL_WITH_RELATIONS
+                     }
 

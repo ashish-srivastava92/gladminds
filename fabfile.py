@@ -17,12 +17,11 @@ version = "build_"+str(int(time.time()))
 APPLICATION_NAME = 'Gladminds' #Replace this with the elastic beanstalk application, ask from admin
 ENVIRONMENT_NAME = 'gladminds-web-prod-2-1'#Replace this with the elastic beanstalk dev environment name, ask from admin
 
-ACCESS_KEY = 'AKIAIL7IDCSTNCG2R6JA'
-SECRET_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
-
-
 NEVER_FAIL = False
 CAPTURE = False
+
+ACCESS_KEY = 'AKIAIL7IDCSTNCG2R6JA'
+SECRET_KEY = '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'
 
 def _execute(cmd):
     if NEVER_FAIL:
