@@ -103,18 +103,24 @@ class PartPointFeed(BaseFeed):
             try:
                 part_data = get_model('SparePartMasterData').objects.get(part_number=spare['part_number'])
                 spare_object = get_model('SparePartPoint').objects.filter(part_number=part_data,
-                                                     territory=spare['territory'])
+                                                     territory=spare['territory'])               
                 if not spare_object:
                     spare_object = get_model('SparePartPoint')(part_number = part_data,
                                               points = spare['points'],
                                               price = spare['price'],
                                               MRP = spare['mrp'],
                                               valid_from = spare['valid_from'],
-                                              valid_till = spare['valid_to'],
                                               territory = spare['territory'])
                     spare_object.save(using=settings.BRAND)
+                    try:
+                        spare_object.valid_till=spare['valid_to']
+                        spare_object.save(using=settings.BRAND)
+                    except Exception as ex:
+                        ex = "[PartPointFeed]: part-{0} :: {1}".format(spare['part_number'], ex)
+                        logger.error(ex)
                 else:
                     raise ValueError('Points of the part already exists for the territory: ' + spare['territory'])
+            
             except Exception as ex:
                 total_failed += 1
                 ex = "[PartPointFeed]: part-{0} :: {1}".format(spare['part_number'], ex)

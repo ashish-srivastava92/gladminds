@@ -57,7 +57,8 @@ class UserResource(CustomBaseModelResource):
         filtering = {
                      "is_active": ALL,
                      "username" : ALL,
-                     "id" : ALL
+                     "id" : ALL,
+                     "email" : ALL
                      }
         always_return_data = True
         ordering = ['username', 'email']
