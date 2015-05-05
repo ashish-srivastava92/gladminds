@@ -416,14 +416,17 @@ class CreditNoteFeed(BaseFeed):
                         raise ValueError(message)
                     else:
                         valid_coupon = coupon_data[0]
-                        valid_coupon.status = 2
                         valid_coupon.actual_kms = credit_note['actual_kms']
-                        valid_coupon.actual_service_date = credit_note['actual_service_date']
                         valid_coupon.credit_note = credit_note['credit_note']
                         valid_coupon.credit_date = credit_note['credit_date']
                         valid_coupon.servicing_dealer = credit_note['dealer']
 #                         valid_coupon.closed_date = credit_note['closed_date']
-                        valid_coupon.closed_date = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+                        if not valid_coupon.status==6:
+                            valid_coupon.status = 2
+                        if not valid_coupon.closed_date:
+                            valid_coupon.closed_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                        if not valid_coupon.actual_service_date:
+                            valid_coupon.actual_service_date = credit_note['actual_service_date']
                         valid_coupon.save()
                 logger.info("updated credit details:: vin : {0} coupon : {1} service_type : {2}".format(
                                 credit_note['vin'], credit_note['unique_service_coupon'],
