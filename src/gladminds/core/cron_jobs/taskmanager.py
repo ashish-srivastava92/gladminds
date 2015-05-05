@@ -1,4 +1,4 @@
-from django.db import transaction
+from django.db import transaction, connections
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Q
@@ -12,9 +12,16 @@ from gladminds.core.constants import COUPON_STATUS
 from django.db.models.aggregates import Sum
 from email import email
 import logging
+from gladminds.core.core_utils.utils import dictfetchall
+from django.conf import settings
+import time
+import csv
+import StringIO
+from boto.connection import HTTPResponse
 
 AUDIT_ACTION = "SENT TO QUEUE"
 logger = logging.getLogger("gladminds")
+service_dict = {}
 
 @transaction.commit_manually()
 def get_customers_to_send_reminder(*args, **kwargs):
@@ -150,47 +157,62 @@ def get_vin_sync_feeds_detail():
     return {'feed_data':feed_data, 'feed_logs':feed_logs}
 
 ''' returns coupon details with policy descripencies'''
-
-def get_discrepant_coupon_details():
-    coupon_data = []
-    service_dict = {}
+def get_discrepant_coupon_details(brand):
     try:
         service_type_obj = models.Constant.objects.filter(constant_name__contains ='service')
         for service_type in service_type_obj:
             service_dict.update({service_type.constant_name:service_type.constant_value})
-            
-        coupons_details= models.CouponData.objects.filter((Q(service_type=1) & (~Q(valid_days=service_dict['service_1_valid_days']) | ~Q(valid_kms=service_dict['service_1_valid_kms'])))
-                                                        | (Q(service_type=2) & (~Q(valid_days=service_dict['service_2_valid_days']) | ~Q(valid_kms=service_dict['service_2_valid_kms'])))
-                                                        | (Q(service_type=3) & (~Q(valid_days=service_dict['service_3_valid_days']) | ~Q(valid_kms=service_dict['service_3_valid_kms'])))
-                                                        ).select_related('product')
-        
-        for coupon in coupons_details:
-            data = {}
-            data['date'] = coupon.created_date.strftime("%d/%m/%y")
-            data['vin'] = coupon.product.product_id
-            data['service_type'] = coupon.service_type
-            data['valid_days'] = coupon.valid_days
-            data['valid_kms'] = coupon.valid_kms
-            if coupon.service_type == 1:
-                valid_days = service_dict['service_1_valid_days']
-                valid_kms = service_dict['service_1_valid_kms']
-            elif coupon.service_type == 2:
-                valid_days = service_dict['service_2_valid_days']
-                valid_kms = service_dict['service_2_valid_kms']
-            else:
-                valid_days = service_dict['service_3_valid_days']
-                valid_kms = service_dict['service_3_valid_kms']
-            
-            if coupon.product.purchase_date:
-                updated_date = coupon.product.purchase_date + timedelta(days = int(valid_days))
-                coupon.extended_date = updated_date 
-                coupon.mark_expired_on =  updated_date
 
-            coupon.valid_days = valid_days
-            coupon.valid_kms = valid_kms
-            coupon.save()
-            coupon_data.append(data) 
-        logger.info("[Policy discpancy]: got discrepant coupons list ")
-        return coupon_data
+        query = "select p.product_id,  c.service_type, c.valid_days, c.valid_kms, c.created_date \
+                from gm_coupondata as c \
+                inner join gm_productdata as p on c.product_id = p.id where ( c.status not in (2,6) \
+                and ( (c.service_type = 1 and (c.valid_kms!={0} or c.valid_days!={1})) \
+                or ( c.service_type = 2 and (c.valid_kms!={2} or c.valid_days!={3})) \
+                or ( c.service_type = 3 and (c.valid_kms!={4} or c.valid_days!={5})) \
+                ));".format(service_dict['service_1_valid_kms'], service_dict['service_1_valid_days'], 
+                        service_dict['service_2_valid_kms'], service_dict['service_2_valid_days'],
+                        service_dict['service_3_valid_kms'], service_dict['service_3_valid_days'])
+    
+        discrepant_coupons = get_sql_data(query, brand)
+        
+        if len(discrepant_coupons) > 0:
+            csvfile = StringIO.StringIO()
+            csvwriter = csv.writer(csvfile)
+            csvwriter.writerow(["VIN", "SERVICE TYPE", "VALID DAYS", "VALID KMS"])
+            for coupon in discrepant_coupons:
+                csvwriter.writerow([coupon['product_id'], coupon['service_type'], coupon['valid_days'], coupon['valid_kms']])
+            update_coupon(brand)
+            return csvfile
+        return False
     except Exception as ex:
-        logger.info("[Exception Policy discpancy ]: {0}".format(ex))
+        logger.info("[Exception Policy discrepancy ]: {0}".format(ex))
+
+def update_coupon(brand):
+    update_days_kms = "update gm_coupondata c set c.valid_kms = (case when c.service_type=1 then {0} when \
+                       c.service_type=2 then {1} when c.service_type=3 then {2} end),c.valid_days = ".format(service_dict['service_1_valid_kms'],
+                                                                                                             service_dict['service_2_valid_kms'],
+                                                                                                             service_dict['service_3_valid_kms'])
+    
+    valid_days = " (case when c.service_type=1 then {0} when c.service_type=2 then {1} when c.service_type=3 then {2} end)".format(service_dict['service_1_valid_days'],
+                                                                                                    service_dict['service_2_valid_days'],
+                                                                                                    service_dict['service_3_valid_days'])
+    
+    update_date = "update gm_coupondata c join gm_productdata p on c.product_id=p.id set "
+    update_date_1 = "(select ADDDATE(p.purchase_date,"
+
+    update_extended_date = update_date + " c.extended_date = " + update_date_1 + valid_days + ")) where c.status not in (2, 6)and p.purchase_date is not null;"
+    update_expired_date = update_date + " c.mark_expired_on = " + update_date_1+ valid_days + ")) where c.status not in (2, 4, 6)and p.purchase_date is not null;"
+    update_days_kms = update_days_kms + valid_days + " ,c.status=1 where c.status not in (2, 6);"
+     
+    get_sql_data(query=update_extended_date, brand=brand)
+    get_sql_data(query=update_expired_date,  brand=brand)
+    get_sql_data(query=update_days_kms,  brand=brand)
+    logger.info('[Policy Discrepency]:Updated coupon data')
+    
+def get_sql_data(query, brand):
+    conn = connections[brand]
+    cursor = conn.cursor()
+    cursor.execute(query)
+    data = dictfetchall(cursor)
+    conn.close()
+    return data

@@ -330,7 +330,6 @@ class ExportCTSFeed(BaseExportFeed):
         total_failed = total_failed_on_feed
         export_status = False
         for item in items:
-            print item
             logger.error("[ExportCTSFeed]: sending CTS:{0}".format(item['Consigment_Id']))
             try:
                 result = client.service.SI_CTS_Sync(

@@ -38,9 +38,12 @@
     		}
     	});
     });
-	
-    var dealer_id = $('[name="dealer_id"]').val();
-    $('#dss_report').attr('href', 'http://bajajautomcdss.gladminds.co/redirect.html?id='+ dealer_id + '&access_token='+ localStorage.token)
+
+    if ($('[name="dealer_id"]').val() != null) {
+    	localStorage.dealer_id = $('[name="dealer_id"]').val();
+    }
+    $('#dss_report').attr('href', 'http://bajajautomcdss.gladminds.co/redirect.html?id='+
+    		localStorage.dealer_id + '&access_token='+ localStorage.token)
 	
     $('.asc-form').on('submit', function(e) {
         var data = Utils.getFormData('.asc-form');

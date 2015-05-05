@@ -13,6 +13,7 @@ from django.core.servers.basehttp import FileWrapper
 
 from django.conf import settings
 from django.http.response import HttpResponse
+from gladminds.core.auth_helper import Roles
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.core.model_fetcher import get_model
 from gladminds.sqs_tasks import send_point, send_loyalty_sms
@@ -45,36 +46,53 @@ class CoreLoyaltyService(Services):
         comment_thread.save(using=settings.BRAND)
         return comment_thread
 
-    def download_welcome_kit(self, request, choice):
-        '''Download list of new or all registered member'''
-        kwargs = {}
-        file_name=choice+'_member_details_' + datetime.now().strftime('%d_%m_%y')
-        headers=constants.WELCOME_KIT_MECHANIC_FIELDS
+    def get_mechanics_detail(self, request, choice):
+        kwargs={}
         if choice=='new':
             kwargs['download_detail'] = False
-        kwargs['form_status'] = 'Complete'
-
+        if choice!='all':
+            kwargs['form_status'] = 'Complete'
+        if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list=get_model('AreaSparesManager').objects.get(user__user=request.user).state.all()
+            kwargs['state__in'] = asm_state_list
         mechanics = get_model('Member').objects.using(settings.BRAND).filter(**kwargs)
+        return mechanics
+        
+    def check_complete_forms(self, request, choice):
+        response = {'status': False}
+        mechanics = self.get_mechanics_detail(request, choice)
+        if mechanics:
+            response['status']=True
+        return HttpResponse(json.dumps(response),
+                            content_type='application/json')
+        
+    def download_welcome_kit(self, request, choice):
+        '''Download list of new or all registered member'''
+        file_name=choice+'_member_details_' + datetime.now().strftime('%d_%m_%y')
+        headers=constants.WELCOME_KIT_MECHANIC_FIELDS
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(headers)
+        if not request.user.groups.filter(name__in=[Roles.RPS, Roles.LPS]).exists():  
+            headers.append('form_status')
+        mechanics = self.get_mechanics_detail(request, choice)
         for mechanic in mechanics:
             data=[]
             for field in headers:
                 if field=='image_url':
                     image_url="{0}/{1}".format(settings.S3_BASE_URL, mechanic.image_url)
                     data.append(image_url)
-                elif field=='Mechanic ID':
-                    data.append(getattr(mechanic, 'permanent_id'))
                 elif field=='state':
                     state = mechanic.state.state_name
                     data.append(state)
                 else:
                     data.append(getattr(mechanic, field))
             csvwriter.writerow(data)
-        mechanics.using(settings.BRAND).update(download_detail=True)
+        if choice in ['new','complete']:
+            mechanics.using(settings.BRAND).update(download_detail=True)
         response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
         response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        LOG.error('[download_welcome_kit]: Download of mechanic data by user {0}'.format(request.user))
         return response
 
 

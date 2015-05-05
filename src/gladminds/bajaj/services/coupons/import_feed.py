@@ -140,7 +140,10 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                     service_advisor = models.ServiceAdvisor.objects.select_related('user__user').get(
                                         service_advisor_id=dealer['service_advisor_id'])
                     if service_advisor.user.phone_number != dealer['phone_number']:
-                        service_advisor.user.phone_number = dealer['phone_number']
+                        new_user=service_advisor.user
+                        new_user.phone_number=dealer['phone_number']
+                        new_user.save()
+                        service_advisor.user=new_user
                         logger.info(
                         "[Info: DealerAndServiceAdvisorFeed_sa]: Updated phone number for {0}"
                         .format(dealer['service_advisor_id']))
@@ -420,7 +423,7 @@ class CreditNoteFeed(BaseFeed):
                         valid_coupon.credit_date = credit_note['credit_date']
                         valid_coupon.servicing_dealer = credit_note['dealer']
 #                         valid_coupon.closed_date = credit_note['closed_date']
-                        valid_coupon.closed_date = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+                        valid_coupon.closed_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                         valid_coupon.save()
                 logger.info("updated credit details:: vin : {0} coupon : {1} service_type : {2}".format(
                                 credit_note['vin'], credit_note['unique_service_coupon'],
@@ -585,9 +588,11 @@ class ContainerTrackerFeed(BaseFeed):
         for tracker_obj in self.data_source:
             try:
                 try:
+                    if not tracker_obj['lr_number'] or not tracker_obj['zib_indent_num']:
+                        raise ValueError('Indent number or LR number missing')
                     container_tracker_obj=models.ContainerTracker.objects.get(zib_indent_num=tracker_obj['zib_indent_num'],
                                                                               lr_number=tracker_obj['lr_number'])
-                except ObjectDoesNotExist as odne:
+                except ObjectDoesNotExist as done:
                     transporter_data = self.check_or_create_transporter(transporter_id=tracker_obj['transporter_id'],
                                                                         name=tracker_obj['tranporter_name'])
                     container_tracker_obj = models.ContainerTracker(zib_indent_num=tracker_obj['zib_indent_num'], 

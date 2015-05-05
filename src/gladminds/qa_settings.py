@@ -101,9 +101,9 @@ SQS_QUEUE_NAME = "gladminds-qa2"
 SQS_QUEUE_NAME_SMS = "gladminds-qa2"
 ######################################
 UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail QA"
-VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["gmdev@hashedin.com"]
-FEED_FAILURE["receiver"] = ["gmdev@hashedin.com"]
-VIN_SYNC_FEED["receiver"] = ["gmdev@hashedin.com"]
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
+FEED_FAILURE["receiver"] = ["naureen.razi@hashedin.com"]
+VIN_SYNC_FEED["receiver"] = ["naureen.razi@hashedin.com"]
 ###################Change Mail Subject on QA##########################
 MAIL_DETAIL["subject"] = "GladMinds Feed Report QA"
 MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
@@ -120,3 +120,5 @@ ENV = "qa"
 
 COUPON_URL = 'qa.bajaj.gladminds.co'
 API_FLAG = True 
+LOGAN_ACTIVE = True
+

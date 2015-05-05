@@ -73,8 +73,9 @@ def redirect_user(request):
     for group in USER_GROUPS:
         if group in user_groups:
             return HttpResponseRedirect(REDIRECT_USER.get(group))
-    return HttpResponseBadRequest()
-
+#     data = {'message': 'Invalid Credentials'}
+#     return HttpResponse(json.dumps(data), content_type='application/json')
+    return HttpResponseBadRequest('Not Allowed')
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def user_logout(request):

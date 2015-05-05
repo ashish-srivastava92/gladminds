@@ -143,7 +143,7 @@ def create_servicedesk_user(name, phone_number, email):
     return servicedesk_user
 
 
-def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_detail=False):
+def create_feedback(sms_dict, phone_number, email, name, dealer_email, user, with_detail=False):
     ''' Save the feedback or complain from SA and sends SMS for successfully receive '''
     manager_obj = User.objects.get(groups__name=Roles.SDMANAGERS)
     try:
@@ -171,6 +171,8 @@ def create_feedback(sms_dict, phone_number, email, name, dealer_email, with_deta
                                                             sub_department = sub_category                                                            
                                                             )
         gladminds_feedback_object.save()
+        update_feedback_activities(gladminds_feedback_object, SDActions.STATUS, None,
+                                   gladminds_feedback_object.status, user)
         if gladminds_feedback_object.assignee:
             date = set_due_date(sms_dict['priority'], gladminds_feedback_object)
             gladminds_feedback_object.due_date = date['due_date']

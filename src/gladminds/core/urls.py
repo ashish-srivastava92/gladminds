@@ -29,6 +29,8 @@ api_v1.register(user_apis.MemberResource())
 api_v1.register(user_apis.ServiceDeskUserResource())
 api_v1.register(user_apis.DepartmentSubCategoriesResource())
 api_v1.register(user_apis.BrandDepartmentResource())
+api_v1.register(user_apis.SupervisorResource())
+api_v1.register(user_apis.TransporterResource())
 
 api_v1.register(product_apis.ProductTypeResource())
 api_v1.register(product_apis.ProductResource())
@@ -118,5 +120,6 @@ urlpatterns = patterns('',
     url(r'^tasks', SqsHandler.as_view(task_map=_tasks_map)),
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
     url(r'^welcome', loyalty.send_welcome_message, name='send_welcome_message'),
-    url(r'^kit/download/(?P<choice>[a-zA-Z0-9]+)$', loyalty.download_welcome_kit, name='download_welcome_kit'),
+    url(r'^check-form/(?P<choice>[a-zA-Z0-9]+)$', loyalty.check_complete_forms, name='check_complete_forms'),
+    url(r'^kit-download/(?P<choice>[a-zA-Z0-9]+)$', loyalty.download_welcome_kit, name='download_welcome_kit'),
 )

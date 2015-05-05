@@ -724,3 +724,4 @@ HOME_URLS = {
 
 LOGIN_URL='/login'
 BATCH_SIZE = 100
+LOGAN_ACTIVE = False
