@@ -141,7 +141,7 @@ def create_new_qa_version(version):
 
 @task()
 def create_new_staging_version(version):
-#     upload_to_s3(BUCKET_NAME, version, FILE_NAME)
+    upload_to_s3(BUCKET_NAME, version, FILE_NAME)
     create_version(APPLICATION_NAME, version)
 
     ENVIRONMENT_NAME = 'gladminds-web-dev'
