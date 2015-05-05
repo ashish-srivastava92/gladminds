@@ -39,6 +39,7 @@ class AreaServiceManager(base_models.AreaServiceManager):
 class Dealer(base_models.Dealer):
     user = models.OneToOneField(UserProfile, primary_key=True,
                                 related_name='core_registered_dealer')
+    asm = models.ForeignKey(AreaServiceManager, null=True, blank=True)
 
     class Meta(base_models.Dealer.Meta):
         app_label = _APP_NAME
