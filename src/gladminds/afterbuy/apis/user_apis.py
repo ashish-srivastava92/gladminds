@@ -13,7 +13,7 @@ from django.contrib.auth import  login
 from django.conf import settings
 from gladminds.afterbuy import utils as afterbuy_utils
 from gladminds.core.auth import otp_handler
-
+from gladminds.settings import BRAND_META
 from gladminds.afterbuy import models as afterbuy_model
 from tastypie import fields, http
 from gladminds.core.apis.base_apis import CustomBaseModelResource
@@ -33,7 +33,6 @@ from gladminds.afterbuy.apis.validations import ConsumerValidation,\
     UserValidation
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.model_helpers import format_phone_number
-from gladminds.core.auth import otp_handler
 from gladminds.core import constants
 
 logger = logging.getLogger("gladminds")
@@ -347,9 +346,9 @@ class ConsumerResource(CustomBaseModelResource):
         
         try:
             if not settings.API_FLAG:
-                result = requests.get('http://'+settings.COUPON_URL+':'+port+query)
+                result = requests.get('http://'+BRAND_META[settings.BRAND]['base_url']+':'+port+query)
             else:
-                result = requests.get('http://'+settings.COUPON_URL+query)
+                result = requests.get('http://'+BRAND_META[settings.BRAND]['base_url']+query)
                 logger.info("[Product details - KTM settings.evn]:{0}".format(settings.ENV))
 
             if len(json.loads(result.content)['objects']) == 0:

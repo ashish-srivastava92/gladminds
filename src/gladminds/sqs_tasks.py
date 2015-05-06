@@ -578,10 +578,9 @@ def push_sms_to_queue(*args, **kwargs):
     url = '/v1/messages'
     try:
         if not settings.API_FLAG:
-            url = 'http://' + settings.COUPON_URL +':8000'+ url
+            url = 'http://' + settings.BRAND_META[brand]['base_url'] +':8000'+ url
         else:
-            url = 'http://' + settings.COUPON_URL + url
-        url = url.replace('bajaj', brand)
+            url = 'http://' + settings.BRAND_META[brand]['base_url'] + url
         requests.post(url=url, data=data)
     except Exception as ex:
         logger.info("[Exception in push_sms_to_queue]: {0}".format(ex))

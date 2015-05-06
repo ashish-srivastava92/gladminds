@@ -8,7 +8,7 @@ from django.http.response import HttpResponseRedirect
 from django.conf.urls import url
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.afterbuy import models as afterbuy_models
-from gladminds.settings import API_FLAG, COUPON_URL
+from gladminds.settings import API_FLAG, BRAND_META
 from tastypie.utils.urls import trailing_slash
 from gladminds.afterbuy.apis.brand_apis import BrandResource
 from gladminds.afterbuy import models as afterbuy_model
@@ -19,6 +19,7 @@ from gladminds.core.apis.authorization import CustomAuthorization,\
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.managers.mail import send_recycle_mail
 from gladminds.afterbuy.apis.validations import ProductValidation
+from django.conf import settings
 
 logger = logging.getLogger("gladminds")
 
@@ -88,9 +89,9 @@ class UserProductResource(CustomBaseModelResource):
                 product_info = afterbuy_models.UserProduct.objects.get(id=product_id)
                 brand_product_id = product_info.brand_product_id
                 if not API_FLAG:
-                    return HttpResponseRedirect('http://'+COUPON_URL+':'+port+'/v1/coupons/?product__product_id='+brand_product_id+'&'+access_token)
+                    return HttpResponseRedirect('http://'+BRAND_META[settings.BRAND]['base_url']+':'+port+'/v1/coupons/?product__product_id='+brand_product_id+'&'+access_token)
                 else:
-                    return HttpResponseRedirect('http://'+COUPON_URL+'/v1/coupons/?product__product_id='+brand_product_id+'&'+access_token)
+                    return HttpResponseRedirect('http://'+BRAND_META[settings.BRAND]['base_url']+'/v1/coupons/?product__product_id='+brand_product_id+'&'+access_token)
         except Exception as ex:
             logger.error('Invalid details')
 

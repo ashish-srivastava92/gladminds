@@ -20,7 +20,7 @@ from django.db.models.query_utils import Q
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import F
-
+from gladminds.settings import BRAND_META
 from gladminds.bajaj import models
 from gladminds.core import utils
 from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message,\
@@ -756,9 +756,9 @@ def get_active_asc_report(request, role=None):
         query = '/v1/coupons/closed-ticket-count?'+ access_token
         query = query + '&year='+ str(year) + '&month=' + str(month)
         if not settings.API_FLAG:
-            asc_query_list = requests.get('http://'+settings.COUPON_URL+':'+port+query)
+            asc_query_list = requests.get('http://'+BRAND_META[settings.BRAND]['base_url']+':'+port+query)
         else:
-            asc_query_list = requests.get('http://'+settings.COUPON_URL+query)
+            asc_query_list = requests.get('http://'+BRAND_META[settings.BRAND]['base_url']+query)
         
         asc_list = []
         x=json.loads(asc_query_list.content)
