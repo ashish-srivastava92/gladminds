@@ -571,15 +571,17 @@ def update_coupon_history_data(*args, **kwargs):
 
 @shared_task
 def push_sms_to_queue(*args, **kwargs):
+    brand= kwargs.get('brand', None)
     phone_number= kwargs.get('phone_number', None)
     message = kwargs.get('message', None)
     data = {'phoneNumber':phone_number, 'text':message}
     url = '/v1/messages'
     try:
         if not settings.API_FLAG:
-            url = 'http://'+settings.COUPON_URL+':8000'+ url
+            url = 'http://' + settings.COUPON_URL +':8000'+ url
         else:
-            url = 'http://'+settings.COUPON_URL+url
+            url = 'http://' + settings.COUPON_URL + url
+        url = url.replace('bajaj', brand)
         requests.post(url=url, data=data)
     except Exception as ex:
         logger.info("[Exception in push_sms_to_queue]: {0}".format(ex))
