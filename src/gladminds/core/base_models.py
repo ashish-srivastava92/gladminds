@@ -862,96 +862,39 @@ class Constant(BaseModel):
     def __unicode__(self):
         return self.constant_name
 
-class BOMHeader(BaseModel):
-    '''Detaills of  Header fields BOM'''
-    sku_code = models.CharField(max_length=20, null=True, blank=True)
-    plant = models.CharField(max_length=10, null=True, blank=True)
-    bom_type = models.CharField(max_length=10, null=True, blank=True)
-    bom_number = models.CharField(max_length=10, null=True, blank=True)
-    valid_from = models.DateField(null=True, blank= True)
-    valid_to = models.DateField(null=True, blank= True)
-    created_on = models.DateField(null=True, blank= True)
+
+class DateDimension(models.Model):
+    date_id = models.BigIntegerField(primary_key=True)
+    date = models.DateField(unique=True)
+    timestamp = models.DateTimeField()
+    weekend = models.CharField(max_length=10)
+    day_of_week = models.CharField(max_length=10)
+    month = models.CharField(max_length=10)
+    month_day = models.IntegerField()
+    year = models.IntegerField()
+    week_starting_monday = models.CharField(max_length=2)
 
     class Meta:
         abstract = True
-        db_table = "gm_bomheader"
-        verbose_name_plural = "Bills of Material "
-
-class BOMItem(BaseModel):
-    '''Detaills of  Service Billing of Material'''
-    timestamp = models.DateTimeField(default=datetime.now)
+        db_table = "gm_datedimension"
     
-    bom_number = models.CharField(max_length=10, null=True, blank=True)
-    part_number = models.CharField(max_length=20, null=True, blank=True)
-    revision_number = models.CharField(max_length=10, null=True, blank=True)
-    quantity = models.CharField(max_length=20, null=True, blank=True)
-    uom = models.CharField(max_length=100, null=True, blank=True)
-    valid_from = models.DateField(null=True, blank= True)
-    valid_to = models.DateField(null=True, blank= True)
-    plate_id = models.CharField(max_length=40, null=True, blank=True)
-    plate_txt = models.CharField(max_length=40, null=True, blank=True)
-    serial_number = models.CharField(max_length=20, null=True, blank=True)
-    change_number = models.CharField(max_length=12, null=True, blank=True)
-    change_number_to = models.CharField(max_length=12, null=True, blank=True)
-    item = models.CharField(max_length=10, null=True, blank=True)    
-    item_id = models.CharField(max_length=10, null=True, blank=True)
+    def __str__(self):
+        return str(self.date)
+
+class CouponFact(models.Model):
+    closed = models.BigIntegerField()
+    inprogress = models.BigIntegerField()
+    expired = models.BigIntegerField()
+    unused = models.BigIntegerField()
+    exceeds = models.BigIntegerField()
+    data_type = models.CharField(max_length=20, default='DAILY')
 
     class Meta:
         abstract = True
-        db_table = "gm_bomitem"
-        verbose_name_plural = "Bills of Material "
+        db_table = "gm_couponfact"
 
-class ECORelease(BaseModel):
-    ''' details of ECO release'''
-    eco_number  = models.CharField(max_length=20, null=True, blank=True)
-    eco_release_date = models.DateField(max_length=20, null=True, blank=True)
-    eco_description = models.CharField(max_length=40, null=True, blank=True)
-    action = models.CharField(max_length=20, null=True, blank=True)
-    parent_part = models.CharField(max_length=20, null=True, blank=True)
 
-    add_part = models.CharField(max_length=20, null=True, blank=True)
-    add_part_qty = models.FloatField(max_length=20, null=True, blank=True)
-    add_part_rev = models.CharField(max_length=20, null=True, blank=True)
-    add_part_loc_code = models.CharField(max_length=90, null=True, blank=True)
-    
-    del_part = models.CharField(max_length=20, null=True, blank=True)
-    del_part_qty = models.FloatField(max_length=20, null=True, blank=True)
-    del_part_rev = models.FloatField(max_length=20, null=True, blank=True)
-    del_part_loc_code = models.CharField(max_length=90, null=True, blank=True)
-    
-    models_applicable = models.CharField(max_length=90, null=True, blank=True)
-    serviceability = models.CharField(max_length=20, null=True, blank=True)
-    interchangebility = models.CharField(max_length=20, null=True, blank=True)
-    reason_for_change = models.CharField(max_length=90, null=True, blank=True)
-
-    class Meta:
-        abstract = True
-        db_table = "gm_ecorelease"
-        verbose_name_plural = "ECO Release"
-
-class ECOImplementation(BaseModel):
-    ''' details of ECO Implementation'''
-    change_no = models.CharField(max_length=20, null=True, blank=True)
-    change_date = models.DateField(max_length=20, null=True, blank=True)
-    change_time = models.TimeField(max_length=20, null=True, blank=True)
-    plant = models.CharField(max_length=20, null=True, blank=True)
-    action = models.CharField(max_length=20, null=True, blank=True)
-    
-    parent_part = models.CharField(max_length=20, null=True, blank=True)
-    added_part = models.CharField(max_length=20, null=True, blank=True)
-    added_part_qty = models.FloatField(max_length=20, null=True, blank=True)
-    deleted_part = models.CharField(max_length=20, null=True, blank=True)
-    deleted_part_qty = models.FloatField(max_length=20, null=True, blank=True)
-    
-    chassis_number = models.CharField(max_length=20, null=True, blank=True)
-    engine_number = models.CharField(max_length=20, null=True, blank=True)
-    eco_number = models.CharField(max_length=20, null=True, blank=True)
-    reason_code = models.CharField(max_length=20, null=True, blank=True)
-    remarks = models.CharField(max_length=20, null=True, blank=True)
-    
-    class Meta:
-        abstract = True
-        verbose_name_plural = "ECO Implementation"
+############################### CTS MODELS ###################################################
 
 class Supervisor(BaseModel):
     ''' details of Supervisor'''
@@ -1005,8 +948,7 @@ class ContainerTracker(BaseModel):
     def __unicode__(self):
         return str(self.transaction_id)
 
-
-#######################LOYALTY TABLES#################################
+#######################LOYALTY MODELS#################################
 
 class NationalSparesManager(BaseModel):
     '''details of National Spares Manager'''
@@ -1434,35 +1376,167 @@ class City(BaseModel):
     def __unicode__(self):
         return self.city
 
-class DateDimension(models.Model):
-    date_id = models.BigIntegerField(primary_key=True)
-    date = models.DateField(unique=True)
-    timestamp = models.DateTimeField()
-    weekend = models.CharField(max_length=10)
-    day_of_week = models.CharField(max_length=10)
-    month = models.CharField(max_length=10)
-    month_day = models.IntegerField()
-    year = models.IntegerField()
-    week_starting_monday = models.CharField(max_length=2)
+############################### ECO MODELS ###################################################
+
+class BOMItem(BaseModel):
+    '''Detaills of  Service Billing of Material'''
+    timestamp = models.DateTimeField(default=datetime.now)
+    
+    bom_number = models.CharField(max_length=10, null=True, blank=True)
+    part_number = models.CharField(max_length=20, null=True, blank=True)
+    revision_number = models.CharField(max_length=10, null=True, blank=True)
+    quantity = models.CharField(max_length=20, null=True, blank=True)
+    uom = models.CharField(max_length=100, null=True, blank=True)
+    valid_from = models.DateField(null=True, blank= True)
+    valid_to = models.DateField(null=True, blank= True)
+    plate_id = models.CharField(max_length=40, null=True, blank=True)
+    plate_txt = models.CharField(max_length=40, null=True, blank=True)
+    serial_number = models.CharField(max_length=20, null=True, blank=True)
+    change_number = models.CharField(max_length=12, null=True, blank=True)
+    change_number_to = models.CharField(max_length=12, null=True, blank=True)
+    item = models.CharField(max_length=10, null=True, blank=True)    
+    item_id = models.CharField(max_length=10, null=True, blank=True)
 
     class Meta:
         abstract = True
-        db_table = "gm_datedimension"
-    
-    def __str__(self):
-        return str(self.date)
+        db_table = "gm_bomitem"
+        verbose_name_plural = "Bills of Material "
+ 
+class ECORelease(BaseModel):
+    ''' details of ECO release'''
+    eco_number  = models.CharField(max_length=20, null=True, blank=True)
+    eco_release_date = models.DateField(max_length=20, null=True, blank=True)
+    eco_description = models.CharField(max_length=40, null=True, blank=True)
+    action = models.CharField(max_length=20, null=True, blank=True)
+    parent_part = models.CharField(max_length=20, null=True, blank=True)
 
-class CouponFact(models.Model):
-    closed = models.BigIntegerField()
-    inprogress = models.BigIntegerField()
-    expired = models.BigIntegerField()
-    unused = models.BigIntegerField()
-    exceeds = models.BigIntegerField()
-    data_type = models.CharField(max_length=20, default='DAILY')
+    add_part = models.CharField(max_length=20, null=True, blank=True)
+    add_part_qty = models.FloatField(max_length=20, null=True, blank=True)
+    add_part_rev = models.CharField(max_length=20, null=True, blank=True)
+    add_part_loc_code = models.CharField(max_length=90, null=True, blank=True)
+    
+    del_part = models.CharField(max_length=20, null=True, blank=True)
+    del_part_qty = models.FloatField(max_length=20, null=True, blank=True)
+    del_part_rev = models.FloatField(max_length=20, null=True, blank=True)
+    del_part_loc_code = models.CharField(max_length=90, null=True, blank=True)
+    
+    models_applicable = models.CharField(max_length=90, null=True, blank=True)
+    serviceability = models.CharField(max_length=20, null=True, blank=True)
+    interchangebility = models.CharField(max_length=20, null=True, blank=True)
+    reason_for_change = models.CharField(max_length=90, null=True, blank=True)
 
     class Meta:
         abstract = True
-        db_table = "gm_couponfact"
+        db_table = "gm_ecorelease"
+        verbose_name_plural = "ECO Release"
 
+class ECOImplementation(BaseModel):
+    ''' details of ECO Implementation'''
+    change_no = models.CharField(max_length=20, null=True, blank=True)
+    change_date = models.DateField(max_length=20, null=True, blank=True)
+    change_time = models.TimeField(max_length=20, null=True, blank=True)
+    plant = models.CharField(max_length=20, null=True, blank=True)
+    action = models.CharField(max_length=20, null=True, blank=True)
     
+    parent_part = models.CharField(max_length=20, null=True, blank=True)
+    added_part = models.CharField(max_length=20, null=True, blank=True)
+    added_part_qty = models.FloatField(max_length=20, null=True, blank=True)
+    deleted_part = models.CharField(max_length=20, null=True, blank=True)
+    deleted_part_qty = models.FloatField(max_length=20, null=True, blank=True)
+    
+    chassis_number = models.CharField(max_length=20, null=True, blank=True)
+    engine_number = models.CharField(max_length=20, null=True, blank=True)
+    eco_number = models.CharField(max_length=20, null=True, blank=True)
+    reason_code = models.CharField(max_length=20, null=True, blank=True)
+    remarks = models.CharField(max_length=20, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_ecoimplementation"
+        verbose_name_plural = "ECO Implementation"
+        
+class BrandProductRange(BaseModel):
+    '''Different range of product a brand provides'''
+    sku_code = models.CharField(max_length=50, unique=True)
+    description = models.TextField(null=True, blank=True)
+    brand = models.CharField(max_length=100)
 
+    class Meta:
+        db_table = "gm_brandproductrange"
+        abstract = True
+        verbose_name_plural = "Product Range"
+
+class BOMHeader(BaseModel):
+    '''Detaills of  Header fields BOM'''
+    sku_code = models.CharField(max_length=20, null=True, blank=True)
+    plant = models.CharField(max_length=10, null=True, blank=True)
+    bom_type = models.CharField(max_length=10, null=True, blank=True)
+    bom_number = models.CharField(max_length=10, null=True, blank=True)
+    valid_from = models.DateField(null=True, blank= True)
+    valid_to = models.DateField(null=True, blank= True)
+    created_on = models.DateField(null=True, blank= True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_bomheader"
+        verbose_name_plural = "Bills of Material "
+    
+class BOMPlate(BaseModel):
+    '''Details of BOM Plates'''
+    plate_id = models.CharField(max_length=50, unique=True)
+    plate_txt = models.CharField(max_length=200, null=True, blank=True)
+    image_url = models.FileField(upload_to=set_mechanic_image_path,
+                                  max_length=255, null=True, blank=True,
+                                  validators=[validate_image])
+    
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+    image_tag.short_description = 'Plate Image'
+    image_tag.allow_tags = True
+
+    class Meta:
+        db_table = "gm_bomplate"
+        abstract = True
+        verbose_name_plural = "BOM Plates"
+        
+class BOMPart(BaseModel):
+    '''Detaills of  BOM Parts'''
+    timestamp = models.DateTimeField(default=datetime.now)
+    
+    part_number = models.CharField(max_length=20, null=True, blank=True)
+    revision_number = models.CharField(max_length=10, null=True, blank=True)
+    description = models.CharField(max_length=200, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_bompart"
+        verbose_name_plural = "BOM Parts "
+        
+class BOMPlatePart(BaseModel):
+    '''Details of BOM Plates and part relation'''
+    quantity = models.CharField(max_length=20, null=True, blank=True)
+    valid_from = models.DateField(null=True, blank= True)
+    valid_to = models.DateField(null=True, blank= True)
+#     uom = models.CharField(max_length=100, null=True, blank=True)
+#     serial_number = models.CharField(max_length=20, null=True, blank=True)
+#     change_number = models.CharField(max_length=12, null=True, blank=True)
+#     change_number_to = models.CharField(max_length=12, null=True, blank=True)
+#     item = models.CharField(max_length=10, null=True, blank=True)    
+#     item_id = models.CharField(max_length=10, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_bomplatepart"
+        verbose_name_plural = "BOM plate Parts"
+        
+class BOMVisualization(BaseModel):
+    '''Details of BOM Plates cordinates'''
+    x_coordinate  = models.IntegerField(null=True, blank=True)
+    y_coordinate  = models.IntegerField(null=True, blank=True)
+    z_coordinate  = models.IntegerField(null=True, blank=True)
+    serial_number = models.IntegerField(null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_bomvisulization"
+        verbose_name_plural = "BOM Visualization"

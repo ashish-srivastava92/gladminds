@@ -328,27 +328,24 @@ class Constant(base_models.Constant):
     ''' contains all the constants'''
     class Meta(base_models.Constant.Meta):
         app_label = _APP_NAME
-        
-class BOMItem(base_models.BOMItem):
-    '''Details of  Service Billing of Material'''
-    class Meta(base_models.BOMItem.Meta):
+
+class DateDimension(base_models.DateDimension):
+    '''
+    Date dimension table
+    '''
+    class Meta(base_models.DateDimension.Meta):
         app_label = _APP_NAME
 
-class BOMHeader(base_models.BOMHeader):
-    '''Details of Header BOM'''
-class Meta(base_models.BOMHeader.Meta):
-        app_label = _APP_NAME
 
-class ECORelease(base_models.ECORelease):
-    '''Details of ECO Release'''
-    class Meta(base_models.ECORelease.Meta):
-        app_label = _APP_NAME
+class CouponFact(base_models.CouponFact):
+    '''Coupon Fact Table for reporting'''
+    date = models.ForeignKey(DateDimension)
 
-class ECOImplementation(base_models.ECOImplementation):
-    '''Details of ECO Implementation'''
-    class Meta:
+    class Meta(base_models.CouponFact.Meta):
         app_label = _APP_NAME
+        unique_together = ("date", "data_type")
 
+############################### CTS MODELS ###################################################
 class Transporter(base_models.Transporter):
     '''details of Transporter'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
@@ -373,7 +370,7 @@ class ContainerTracker(base_models.ContainerTracker):
     class Meta(base_models.ContainerTracker.Meta):
         app_label = _APP_NAME
 
-#######################LOYALTY TABLES#################################
+#######################LOYALTY MODELS#################################
 class Territory(base_models.Territory):
     '''List of territories'''
     
@@ -510,22 +507,6 @@ class CommentThread(base_models.CommentThread):
 
     class Meta(base_models.CommentThread.Meta):
         app_label = _APP_NAME
-
-class DateDimension(base_models.DateDimension):
-    '''
-    Date dimension table
-    '''
-    class Meta(base_models.DateDimension.Meta):
-        app_label = _APP_NAME
-
-
-class CouponFact(base_models.CouponFact):
-    '''Coupon Fact Table for reporting'''
-    date = models.ForeignKey(DateDimension)
-
-    class Meta(base_models.CouponFact.Meta):
-        app_label = _APP_NAME
-        unique_together = ("date", "data_type")
         
 class LoyaltySLA(base_models.LoyaltySLA):
 
@@ -546,3 +527,56 @@ class DiscrepantAccumulation(base_models.DiscrepantAccumulation):
      
     class Meta(base_models.DiscrepantAccumulation.Meta):
         app_label = _APP_NAME
+
+############################### ECO MODELS ###################################################      
+class BOMItem(base_models.BOMItem):
+    '''Details of  Service Billing of Material'''
+    class Meta(base_models.BOMItem.Meta):
+        app_label = _APP_NAME
+
+class ECORelease(base_models.ECORelease):
+    '''Details of ECO Release'''
+    class Meta(base_models.ECORelease.Meta):
+        app_label = _APP_NAME
+
+class ECOImplementation(base_models.ECOImplementation):
+    '''Details of ECO Implementation'''
+    class Meta:
+        app_label = _APP_NAME
+
+class BrandProductRange(base_models.BrandProductRange):
+    '''Different range of product a brand provides'''
+    class Meta(base_models.BrandProductRange.Meta):
+            app_label = _APP_NAME
+
+class BOMHeader(base_models.BOMHeader):
+    '''Details of Header BOM'''
+    class Meta(base_models.BOMHeader.Meta):
+            app_label = _APP_NAME
+            
+class BOMPlate(base_models.BOMPlate):
+    '''Details of BOM Plates'''
+    class Meta(base_models.BOMPlate.Meta):
+        app_label = _APP_NAME
+        
+class BOMPart(base_models.BOMPart):
+    '''Details of  BOM Parts'''
+    class Meta(base_models.BOMPart.Meta):
+            app_label = _APP_NAME
+        
+class BOMPlatePart(base_models.BOMPlatePart):
+    '''Details of BOM Plates and part relation'''
+    bom = models.ForeignKey(BOMHeader)
+    plate = models.ForeignKey(BOMPlate)
+    part = models.ForeignKey(BOMPart)
+
+class Meta(base_models.BOMPlatePart.Meta):
+            app_label = _APP_NAME
+
+class BOMVisualization(base_models.BOMVisualization):
+    '''Details of BOM Plates cordinates'''
+    bom = models.ForeignKey(BOMPlatePart)
+    
+    class Meta(base_models.BOMVisualization.Meta):
+            app_label = _APP_NAME
+
