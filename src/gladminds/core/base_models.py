@@ -1538,5 +1538,5 @@ class BOMVisualization(BaseModel):
     
     class Meta:
         abstract = True
-        db_table = "gm_bomvisulization"
+        db_table = "gm_bomvisualization"
         verbose_name_plural = "BOM Visualization"

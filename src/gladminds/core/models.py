@@ -501,7 +501,7 @@ class ECORelease(base_models.ECORelease):
 
 class ECOImplementation(base_models.ECOImplementation):
     '''Details of ECO Implementation'''
-    class Meta:
+    class Meta(base_models.ECOImplementation.Meta):
         app_label = _APP_NAME
 
 class BrandProductRange(base_models.BrandProductRange):
