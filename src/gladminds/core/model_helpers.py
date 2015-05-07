@@ -122,3 +122,8 @@ def set_redemption_pod_path(instance,filename):
 
 def set_welcome_kit_pod_path(instance,filename):
     return create_upload_path('welcome', instance, filename)
+
+def set_plate_image_path(instance,filename):
+    return create_upload_path('plates', instance, filename)
+
+
