@@ -128,7 +128,8 @@ class ContainerTrackerResource(CustomBaseModelResource):
                      'gatein_date' :ALL,
                      'status' : ALL,
                      'zib_indent_num' : ALL,
-                     'created_date': ALL
+                     'created_date': ALL,
+                     'submitted_by': ALL
                      }
         
         ordering = ['lr_date', 'gatein_date' ,'created_date']
@@ -155,7 +156,8 @@ class ContainerTrackerResource(CustomBaseModelResource):
                                                                   & reduce(operator.or_, query_args1)
                                                                   ).values('status').annotate(total=Count('status'))
                 else:
-                    data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args)                                                              ).values('status').annotate(total=Count('status'))
+                    data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args)
+                                                                ).values('status').annotate(total=Count('status'))
             elif request.user.groups.filter(name=Roles.SUPERVISOR):
                 supervisor = models.Supervisor.objects.get(user__user_id=request.user.id)
                 query_args.append(Q(transporter=supervisor.transporter))

@@ -73,8 +73,9 @@ def redirect_user(request):
     for group in USER_GROUPS:
         if group in user_groups:
             return HttpResponseRedirect(REDIRECT_USER.get(group))
-    return HttpResponseBadRequest()
-
+#     data = {'message': 'Invalid Credentials'}
+#     return HttpResponse(json.dumps(data), content_type='application/json')
+    return HttpResponseBadRequest('Not Allowed')
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def user_logout(request):
@@ -603,7 +604,14 @@ def create_reconciliation_report(query_params, user):
     status = query_params.get('status')
     from_date = query_params.get('from')
     to_date = query_params.get('to')
-    filter['actual_service_date__range'] = (str(from_date) + ' 00:00:00', str(to_date) +' 23:59:59')
+    input_date_range = (str(from_date) + ' 00:00:00', str(to_date) +' 23:59:59')
+
+    if query_params['type']=='credit': 
+        filter['credit_date__range'] = input_date_range
+    elif status==4:
+        filter['actual_service_date__range'] = input_date_range
+    else:
+        filter['closed_date__range'] = input_date_range
 
     if status:
         args = [Q(status=status)]
