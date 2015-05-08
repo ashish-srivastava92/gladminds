@@ -375,12 +375,12 @@ class OldFscFeed(BaseFeed):
                 if len(coupon_data) == 0:
                     self.save_to_old_fsc_table(dealer_id, fsc['service'], 'service_type', fsc['service'], vin = product_data[0] )
                 else:
-                    cupon_details = coupon_data[0]
-                    cupon_details.status = 6
-                    cupon_details.closed_date = datetime.now()
-                    cupon_details.sent_to_sap = True
-                    cupon_details.servicing_dealer = dealer_id
-                    cupon_details.save()
+                    coupon_details = coupon_data[0]
+                    coupon_details.status = 6
+                    coupon_details.closed_date = datetime.now()
+                    coupon_details.sent_to_sap = True
+                    coupon_details.servicing_dealer = dealer_id
+                    coupon_details.save()
         return self.feed_remark
 
     def save_to_old_fsc_table(self, dealer_detail,st, missing_field,missing_value, vin=None):
@@ -420,6 +420,7 @@ class CreditNoteFeed(BaseFeed):
                         valid_coupon.credit_note = credit_note['credit_note']
                         valid_coupon.credit_date = credit_note['credit_date']
                         valid_coupon.servicing_dealer = credit_note['dealer']
+                        valid_coupon.sent_to_sap = True
 #                         valid_coupon.closed_date = credit_note['closed_date']
                         if not valid_coupon.status==6:
                             valid_coupon.status = 2
