@@ -1454,12 +1454,23 @@ class ECOImplementation(BaseModel):
         abstract = True
         db_table = "gm_ecoimplementation"
         verbose_name_plural = "ECO Implementation"
-        
+
+class BrandVertical(BaseModel):
+    '''Stores the different vertical
+    a brand can have'''
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_brandvertical"
+        verbose_name_plural = "Brand Vertical"
+
 class BrandProductRange(BaseModel):
     '''Different range of product a brand provides'''
     sku_code = models.CharField(max_length=50, unique=True)
     description = models.TextField(null=True, blank=True)
-    brand = models.CharField(max_length=100)
+    vertical = models.CharField(max_length=100)
 
     class Meta:
         db_table = "gm_brandproductrange"

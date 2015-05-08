@@ -544,6 +544,12 @@ class ECOImplementation(base_models.ECOImplementation):
     class Meta(base_models.ECOImplementation.Meta):
         app_label = _APP_NAME
 
+class BrandVertical(base_models.BrandVertical):
+    '''Stores the different vertical
+    a brand can have'''
+    class Meta(base_models.BrandVertical.Meta):
+        app_label = _APP_NAME
+        
 class BrandProductRange(base_models.BrandProductRange):
     '''Different range of product a brand provides'''
     class Meta(base_models.BrandProductRange.Meta):
