@@ -711,3 +711,64 @@ REDEMPTION_REQUEST1={
                     "partner": PARTNER,
                     "points": 123
                 }
+
+BRAND_PRODUCT_RANGE = {
+                     "vertical": "vertical2",
+                     "description": "sss",
+                     "sku_code": "112"
+                     }
+
+BRAND_VERTICAL =  {
+                   "description": "dasdas",
+                   "name": "vertical2"
+                   }
+
+BOM_HEADER =  {
+               "bom_number": "1232",
+               "bom_type": "1",
+               "created_date": "2015-05-08T12:02:00",
+               "created_on": "2015-05-08",
+               "modified_date": "2015-05-08T12:02:00",
+               "plant": "112",
+               "sku_code": "112",
+               "valid_from": "2015-05-08",
+               "valid_to": "2015-05-08"
+               }
+
+BOM_PLATE_PART = {
+    "bom": {
+        "bom_number": "12w2",
+        "bom_type": "1",
+        "created_date": "2015-05-08T12:02:00",
+        "created_on": "2015-05-08",
+        "id": 1,
+        "modified_date": "2015-05-08T12:29:36",
+        "plant": "112",
+        "sku_code": "112",
+        "valid_from": "2015-05-08",
+        "valid_to": "2015-05-08"
+    },
+    "created_date": "2015-05-08T15:39:57",
+
+    "modified_date": "2015-05-08T15:39:57",
+    "part": {
+        "created_date": "2015-05-08T15:39:55",
+        "description": "1",
+        "id": 1,
+        "modified_date": "2015-05-08T15:39:55",
+        "part_number": "2121",
+        "revision_number": "12",
+        "timestamp": "2015-05-08T15:39:48"
+    },
+    "plate": {
+        "created_date": "2015-05-08T15:39:45",
+        "id": 1,
+        "image_url": None,
+        "modified_date": "2015-05-11T11:21:54",
+        "plate_id": "212",
+        "plate_txt": "21"
+    },
+    "quantity": "12",
+    "valid_from": "2015-05-08",
+    "valid_to": "2015-05-08"
+}
