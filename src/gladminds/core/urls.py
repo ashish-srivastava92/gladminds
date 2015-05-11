@@ -5,7 +5,7 @@ from gladminds.sqs_tasks import _tasks_map
 from tastypie.api import Api
 from django.conf import settings
 from gladminds.core.apis import user_apis, preferences_apis, coupon_apis, product_apis,\
-    audit_apis, dashboard_apis, service_desk_apis, loyalty_apis
+    audit_apis, dashboard_apis, service_desk_apis, loyalty_apis, part_change_apis
 from gladminds.core.managers.sms_handler import SMSResources
 from gladminds.core.apis.image_apis import upload_files
 from gladminds.core.admin import brand_admin
@@ -63,6 +63,11 @@ api_v1.register(dashboard_apis.FeedStatusResource())
 api_v1.register(dashboard_apis.SMSReportResource())
 api_v1.register(dashboard_apis.CouponReportResource())
 api_v1.register(dashboard_apis.TicketStatusResource())
+
+api_v1.register(part_change_apis.BrandProductRangeResource())
+api_v1.register(part_change_apis.BrandVerticalResource())
+api_v1.register(part_change_apis.BOMHeaderResource())
+api_v1.register(part_change_apis.BOMPlatePartResource())
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import admin

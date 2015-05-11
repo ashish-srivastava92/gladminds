@@ -4,6 +4,7 @@ from spyne.application import Application
 from spyne.protocol.soap import Soap11
 from spyne.server.django import DjangoApplication
 from gladminds.bajaj.services.coupons import feed_models as fsc_feed
+from gladminds.core.services.part_change import feed_models as epc_feed
 
 tns = settings.WSDL_TNS
 
@@ -14,10 +15,10 @@ all_app = Application([fsc_feed.BrandService,
                        fsc_feed.ASCService,
                        fsc_feed.OldFscService,
                        fsc_feed.CreditNoteService,
-                       fsc_feed.BillOfMaterialService,
-                       fsc_feed.ECOReleaseService,
+                       epc_feed.BillOfMaterialService,
+                       epc_feed.ECOReleaseService,
                        fsc_feed.ContainerTrackerService,
-                       fsc_feed.ECOImplementationService,
+                       epc_feed.ECOImplementationService,
                        ],
                       tns=tns,
                       in_protocol=Soap11(validator='lxml'),
@@ -66,19 +67,19 @@ credit_note_app = Application([fsc_feed.CreditNoteService],
                            out_protocol=Soap11()
                            )
 
-bom_app = Application([fsc_feed.BillOfMaterialService],
+bom_app = Application([epc_feed.BillOfMaterialService],
                            tns=tns,
                            in_protocol=Soap11(validator='lxml'),
                            out_protocol=Soap11()
                            )
 
-bom_app = Application([fsc_feed.BillOfMaterialService],
+bom_app = Application([epc_feed.BillOfMaterialService],
                            tns=tns,
                            in_protocol=Soap11(validator='lxml'),
                            out_protocol=Soap11()
                            )
 
-eco_release_app = Application([fsc_feed.ECOReleaseService],
+eco_release_app = Application([epc_feed.ECOReleaseService],
                            tns=tns,
                            in_protocol=Soap11(validator='lxml'),
                            out_protocol=Soap11()
@@ -90,7 +91,7 @@ container_tracker_app = Application([fsc_feed.ContainerTrackerService],
                            out_protocol=Soap11()
                            )
 
-eco_implementation_app = Application([fsc_feed.ECOImplementationService],
+eco_implementation_app = Application([epc_feed.ECOImplementationService],
                            tns=tns,
                            in_protocol=Soap11(validator='lxml'),
                            out_protocol=Soap11()
