@@ -1565,6 +1565,7 @@ class BOMVisualization(BaseModel):
     y_coordinate  = models.IntegerField(null=True, blank=True)
     z_coordinate  = models.IntegerField(null=True, blank=True)
     serial_number = models.IntegerField(null=True, blank=True)
+    part_href = models.CharField(max_length=200, null=True, blank=True)
     
     class Meta:
         abstract = True

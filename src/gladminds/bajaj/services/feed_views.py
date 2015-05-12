@@ -21,3 +21,6 @@ def view_wsdl(request, feed_type, show_indexes=False):
         return render_to_response(WSDL_URL[feed_type], content_type = 'application/xml')
     except Exception as ex:
         return HttpResponseBadRequest()
+
+def test_url(request):
+    return render_to_response('sample.html')
