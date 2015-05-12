@@ -6,7 +6,7 @@ from gladminds.core.auth_helper import Roles
 from gladminds.core.model_fetcher import models
 from django.contrib.auth.models import User, Group
 from test_constants import BRAND_PRODUCT_RANGE, BRAND_VERTICAL, BOM_HEADER,\
-    BOM_PLATE_PART
+    BOM_PLATE_PART, ECO_RELEASE, ECO_IMPLEMENTATION
 from integration.bajaj.base import BaseTestCase
 
 client=Client(SERVER_NAME='bajaj')
@@ -35,10 +35,10 @@ class PartChangeTests(BaseTestCase):
     
     def test_get_brand_vertical(self):
         access_token = self.user_login()
-        uri = '/v1/brand-vertical/'
+        uri = '/v1/brand-verticals/'
         resp = self.post(uri, BRAND_VERTICAL, access_token)
         self.assertEquals(resp.status_code, 201)
-        uri = '/v1/brand-vertical/?name=vertical2'
+        uri = '/v1/brand-verticals/?name=vertical2'
         resp = self.get(uri, access_token, content_type='application/json')
         self.assertEquals(resp.status_code, 200)
         
@@ -58,10 +58,10 @@ class PartChangeTests(BaseTestCase):
     
     def test_get_bom_header(self):
         access_token = self.user_login()
-        uri = '/v1/bom-header/'
+        uri = '/v1/bom-headers/'
         resp = self.post(uri, data=BOM_HEADER, access_token=access_token)
         self.assertEquals(resp.status_code, 201)
-        uri = '/v1/bom-header/?sku_code=112'
+        uri = '/v1/bom-headers/?sku_code=112'
         resp = self.get(uri, access_token)
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(json.loads(resp.content)['objects'][0]['sku_code'], "112")
@@ -69,11 +69,29 @@ class PartChangeTests(BaseTestCase):
     
     def test_bom_plate_part(self):
         access_token = self.user_login()
-        uri = '/v1/bom-plate-part/'
+        uri = '/v1/bom-plate-parts/'
         resp = self.post(uri, data=BOM_PLATE_PART, access_token=access_token)
         self.assertEquals(resp.status_code, 201)
-        uri = '/v1/bom-plate-part/?bom__sku_code=112'
+        uri = '/v1/bom-plate-parts/?bom__sku_code=112'
         resp = self.get(uri, access_token=access_token)
         self.assertEquals(resp.status_code, 200)
-        self.assertEquals(json.loads(resp.content)['objects'][0]['plate']['plate_id'], "212")
+        self.assertEquals(json.loads(resp.content)['objects'][0]['plate']['plate_id'], "44")
+        
+    def test_eco_release(self):
+        access_token = self.user_login()
+        uri = '/v1/eco-releases/'
+        resp = self.post(uri, data=ECO_RELEASE, access_token=access_token)
+        self.assertEquals(resp.status_code, 201)
+        uri = '/v1/eco-releases/1/?access_token='+access_token
+        resp = client.get(uri, content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        
+    def test_eco_implementation(self):
+        access_token = self.user_login()
+        uri = '/v1/eco-implementations/'
+        resp = self.post(uri, data=ECO_IMPLEMENTATION, access_token=access_token)
+        self.assertEquals(resp.status_code, 201)
+        uri = '/v1/eco-implementations/1/?access_token='+access_token
+        resp = client.get(uri, content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
         

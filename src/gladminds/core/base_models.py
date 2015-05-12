@@ -9,7 +9,8 @@ from constance import config
 from gladminds.core.managers import user_manager, coupon_manager,\
     service_desk_manager
 from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
-from gladminds.core.model_helpers import PhoneField
+from gladminds.core.model_helpers import PhoneField, set_plate_image_path,\
+    set_plate_with_part_image_path, set_brand_product_image_path
 from gladminds.core import constants
 from gladminds.core.core_utils.utils import generate_mech_id, generate_partner_id,\
     generate_nsm_id,generate_asm_id
@@ -1465,12 +1466,23 @@ class BrandVertical(BaseModel):
         abstract = True
         db_table = "gm_brandvertical"
         verbose_name_plural = "Brand Vertical"
+    
+    def __unicode__(self):
+        return self.name
+
 
 class BrandProductRange(BaseModel):
     '''Different range of product a brand provides'''
     sku_code = models.CharField(max_length=50, unique=True)
     description = models.TextField(null=True, blank=True)
     vertical = models.CharField(max_length=100)
+    image_url = models.FileField(upload_to=set_brand_product_image_path,
+                                  max_length=255, null=True, blank=True,
+                                  validators=[validate_image])
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+    image_tag.short_description = 'Brand Product Image'
+    image_tag.allow_tags = True
 
     class Meta:
         db_table = "gm_brandproductrange"
@@ -1496,14 +1508,21 @@ class BOMPlate(BaseModel):
     '''Details of BOM Plates'''
     plate_id = models.CharField(max_length=50, unique=True)
     plate_txt = models.CharField(max_length=200, null=True, blank=True)
-    image_url = models.FileField(upload_to=set_mechanic_image_path,
+    plate_image = models.FileField(upload_to=set_plate_image_path,
                                   max_length=255, null=True, blank=True,
                                   validators=[validate_image])
+    plate_image_with_part = models.FileField(upload_to=set_plate_with_part_image_path,
+                                  max_length=255, null=True, blank=True,
+                                  validators=[validate_image])
+    def plate_image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.plate_image)
+    plate_image_tag.short_description = 'Plate Image'
+    plate_image_tag.allow_tags = True
     
-    def image_tag(self):
-        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
-    image_tag.short_description = 'Plate Image'
-    image_tag.allow_tags = True
+    def plate_image_with_part_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.plate_image_with_part)
+    plate_image_with_part_tag.short_description = 'Plate with Part Image'
+    plate_image_with_part_tag.allow_tags = True
 
     class Meta:
         db_table = "gm_bomplate"
@@ -1528,12 +1547,12 @@ class BOMPlatePart(BaseModel):
     quantity = models.CharField(max_length=20, null=True, blank=True)
     valid_from = models.DateField(null=True, blank= True)
     valid_to = models.DateField(null=True, blank= True)
-#     uom = models.CharField(max_length=100, null=True, blank=True)
-#     serial_number = models.CharField(max_length=20, null=True, blank=True)
-#     change_number = models.CharField(max_length=12, null=True, blank=True)
-#     change_number_to = models.CharField(max_length=12, null=True, blank=True)
-#     item = models.CharField(max_length=10, null=True, blank=True)    
-#     item_id = models.CharField(max_length=10, null=True, blank=True)
+    uom = models.CharField(max_length=100, null=True, blank=True)
+    serial_number = models.CharField(max_length=20, null=True, blank=True)
+    change_number = models.CharField(max_length=12, null=True, blank=True)
+    change_number_to = models.CharField(max_length=12, null=True, blank=True)
+    item = models.CharField(max_length=10, null=True, blank=True)    
+    item_id = models.CharField(max_length=10, null=True, blank=True)
 
     class Meta:
         abstract = True

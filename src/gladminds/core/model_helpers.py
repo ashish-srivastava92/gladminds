@@ -126,4 +126,8 @@ def set_welcome_kit_pod_path(instance,filename):
 def set_plate_image_path(instance,filename):
     return create_upload_path('plates', instance, filename)
 
+def set_plate_with_part_image_path(instance,filename):
+    return create_upload_path('plates_with_part', instance, filename)
 
+def set_brand_product_image_path(instance,filename):
+    return create_upload_path('brand_product', instance, filename)

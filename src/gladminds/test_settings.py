@@ -26,6 +26,9 @@ DATABASES[GmApps.DAIMLER]['NAME'] = os.path.join(OUT_DIR, 'daimler.db')
 DATABASES[GmApps.BAJAJCV]['NAME'] = os.path.join(OUT_DIR, 'bajajcv.db')
 DATABASES[GmApps.DAIMLER]['ENGINE'] = 'django.db.backends.sqlite3'
 DATABASES[GmApps.DAIMLER]['NAME'] = os.path.join(OUT_DIR, 'bajajcv.db')
+DATABASES[GmApps.PROBIKING]['ENGINE'] = 'django.db.backends.sqlite3'
+DATABASES[GmApps.PROBIKING]['NAME'] = os.path.join(OUT_DIR, 'bajajcv.db')
+
 
 TEST_IGNORE_APPS = ()
 
