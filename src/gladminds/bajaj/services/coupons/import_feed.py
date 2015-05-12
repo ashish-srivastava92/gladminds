@@ -102,11 +102,7 @@ class SAPFeed(object):
             'old_fsc': OldFscFeed,
             'credit_note': CreditNoteFeed,
             'asc_sa': ASCAndServiceAdvisorFeed,
-            'bomheader': BOMHeaderFeed,
-            'bomitem': BOMItemFeed,
-            'eco_release': ECOReleaseFeed,
             'container_tracker':ContainerTrackerFeed,
-            'eco_implementation':ECOImplementationFeed,
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
@@ -375,12 +371,12 @@ class OldFscFeed(BaseFeed):
                 if len(coupon_data) == 0:
                     self.save_to_old_fsc_table(dealer_id, fsc['service'], 'service_type', fsc['service'], vin = product_data[0] )
                 else:
-                    cupon_details = coupon_data[0]
-                    cupon_details.status = 6
-                    cupon_details.closed_date = datetime.now()
-                    cupon_details.sent_to_sap = True
-                    cupon_details.servicing_dealer = dealer_id
-                    cupon_details.save()
+                    coupon_details = coupon_data[0]
+                    coupon_details.status = 6
+                    coupon_details.closed_date = datetime.now()
+                    coupon_details.sent_to_sap = True
+                    coupon_details.servicing_dealer = dealer_id
+                    coupon_details.save()
         return self.feed_remark
 
     def save_to_old_fsc_table(self, dealer_detail,st, missing_field,missing_value, vin=None):
@@ -420,6 +416,7 @@ class CreditNoteFeed(BaseFeed):
                         valid_coupon.credit_note = credit_note['credit_note']
                         valid_coupon.credit_date = credit_note['credit_date']
                         valid_coupon.servicing_dealer = credit_note['dealer']
+                        valid_coupon.sent_to_sap = True
 #                         valid_coupon.closed_date = credit_note['closed_date']
                         if not valid_coupon.status==6:
                             valid_coupon.status = 2
@@ -525,66 +522,6 @@ class ASCAndServiceAdvisorFeed(BaseFeed):
             return True
         return False
     
-class BOMItemFeed(BaseFeed):
-  
-    def import_data(self):
-        for bom in self.data_source:
-            try:
-                bom_item_obj = models.BOMItem(bom_number=bom['bom_number'], part_number=bom['part_number'],
-                                            revision_number=bom['revision_number'], quantity=bom['quantity'], 
-                                            uom=bom['uom'], change_number_to=bom['change_number_to'],
-                                            valid_from=bom['valid_from'], valid_to=bom['valid_to'], 
-                                            plate_id=bom['plate_id'], plate_txt=bom['plate_txt'],
-                                            serial_number=bom['serial_number'], change_number=bom['change_number'],
-                                            item=bom['item'], item_id=bom['item_id'])                
-                bom_item_obj.save()
-            except Exception as ex:
-                ex="[Exception: ]: BOMItemFeed {0}".format(ex)
-                logger.error(ex)
-                self.feed_remark.fail_remarks(ex)
-                
-        return self.feed_remark
-
-class BOMHeaderFeed(BaseFeed):    
-
-    def import_data(self):
-        for bom in self.data_source:
-            try:
-                bom_header_obj = models.BOMHeader(sku_code=bom['sku_code'], plant=bom['plant'],
-                                                  bom_type=bom['bom_type'], bom_number=bom['bom_number_header'],
-                                                  created_on=bom['created_on'], valid_from=bom['valid_from_header'],
-                                                  valid_to=bom['valid_to_header'])
-                bom_header_obj.save() 
-            except Exception as ex:
-                ex="[Exception: ]: BOMHeaderFeed {0}".format(ex)
-                logger.error(ex)
-                self.feed_remark.fail_remarks(ex)
-
-        return self.feed_remark
-    
-class ECOReleaseFeed(BaseFeed):    
-
-    def import_data(self):
-        for eco_obj in self.data_source:
-            try:
-                if eco_obj['eco_release_date'] == "0000-00-00" or not eco_obj['eco_release_date']:
-                    eco_release_date=None
-                else:
-                    eco_release_date=datetime.strptime(eco_obj['eco_release_date'], "%Y-%m-%d")
-                eco_release_obj = models.ECORelease(eco_number=eco_obj['eco_number'], eco_release_date=eco_release_date,
-                                                    eco_description=eco_obj['eco_description'], action=eco_obj['action'], parent_part=eco_obj['parent_part'],
-                                                    add_part=eco_obj['add_part'], add_part_qty=eco_obj['add_part_qty'], add_part_rev=eco_obj['add_part_rev'],
-                                                    add_part_loc_code=eco_obj['add_part_loc_code'], del_part=eco_obj['del_part'], del_part_qty=eco_obj['del_part_qty'],
-                                                    del_part_rev=eco_obj['del_part_rev'], del_part_loc_code=eco_obj['del_part_loc_code'], 
-                                                    models_applicable=eco_obj['models_applicable'], serviceability=eco_obj['serviceability'], 
-                                                    interchangebility=eco_obj['interchangebility'], reason_for_change=eco_obj['reason_for_change'])
-                eco_release_obj.save() 
-            except Exception as ex:
-                ex="[Exception: ]: ECOReleaseFeed {0}".format(ex)
-                logger.error(ex)
-                self.feed_remark.fail_remarks(ex)
-        return self.feed_remark
-
 class ContainerTrackerFeed(BaseFeed):
 
     def import_data(self):
@@ -628,27 +565,3 @@ class ContainerTrackerFeed(BaseFeed):
         
         return self.feed_remark
 
-class ECOImplementationFeed(BaseFeed):
-
-    def import_data(self):
-        for eco_obj in self.data_source:
-            try:
-                if eco_obj['change_date'] == "0000-00-00" or not eco_obj['change_date']:
-                    change_date=None
-                else:
-                    change_date=datetime.strptime(eco_obj['change_date'], "%Y-%m-%d")
-                eco_implementation_obj = models.ECOImplementation(change_no=eco_obj['change_no'],change_date=change_date,
-                                                           change_time=eco_obj['change_time'],plant=eco_obj['plant'],
-                                                           action=eco_obj['action'],parent_part=eco_obj['parent_part'],
-                                                           added_part=eco_obj['added_part'],added_part_qty=eco_obj['added_part_qty'],
-                                                           deleted_part=eco_obj['deleted_part'],deleted_part_qty=eco_obj['deleted_part_qty'],
-                                                           chassis_number=eco_obj['chassis_number'],engine_number=eco_obj['engine_number'],
-                                                           eco_number=eco_obj['eco_number'],reason_code=eco_obj['reason_code'],
-                                                           remarks=eco_obj['remarks']
-                                                           )
-                eco_implementation_obj.save() 
-            except Exception as ex:
-                ex="[Exception: ]: ECOImplementationFeed {0}".format(ex)
-                logger.error(ex)
-                self.feed_remark.fail_remarks(ex)
-        return self.feed_remark

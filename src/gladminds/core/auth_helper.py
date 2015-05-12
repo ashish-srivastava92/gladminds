@@ -57,6 +57,10 @@ class Roles():
     LPS = 'LogisticPartners'
     WELCOMEKITESCALATION = 'WelcomeKitEscalation'
     REDEEMESCALATION = 'RedemptionEscalation'
+    
+    VISUALIZATIONADMIN = 'VisualizationAdmin'
+    VISUALIZATIONSTAFF = 'VisualizationStaff'
+    VISUALIZATIONUSER = 'VisualizationUser'
 
 AFTERBUY_ADMIN_GROUPS = [Roles.SUPERADMINS, Roles.ADMINS]
 AFTERBUY_GROUPS = [Roles.SUPERADMINS, Roles.ADMINS, Roles.USERS]
