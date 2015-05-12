@@ -92,13 +92,16 @@ class Command(BaseCommand):
                     asm_list.append(temp)
                     
         for asm in asm_list:
-            asm_user_pro = self.register_user(Roles.AREASERVICEMANAGER,
+            try:
+                asm_object = ASM.objects.using('bajaj').get(user__user__username=asm['asm_email'])
+            except:
+                asm_user_pro = self.register_user(Roles.AREASERVICEMANAGER,
                                                        username=asm['asm_email'],
                                                        email=asm['asm_email'],
                                                        first_name=asm['asm_name'])
-            zsm_object = ZSM.objects.get(user__user__username=asm['zsm_email'])
-            asm_object = ASM(user=asm_user_pro, zsm=zsm_object)
-            asm_object.save()
+                zsm_object = ZSM.objects.get(user__user__username=asm['zsm_email'])
+                asm_object = ASM(user=asm_user_pro, zsm=zsm_object, asm_id=None)
+                asm_object.save()
                  
         for dealer in asm_list:
             if dealer['dealer_id']:
