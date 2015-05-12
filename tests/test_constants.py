@@ -737,37 +737,80 @@ BOM_HEADER =  {
 
 BOM_PLATE_PART = {
                   "bom": {
-                          "bom_number": "12w2",
-                          "bom_type": "1",
-                          "created_date": "2015-05-08T12:02:00",
-                          "created_on": "2015-05-08",
-                          "id": 1,
-                          "modified_date": "2015-05-08T12:29:36",
-                          "plant": "112",
-                          "sku_code": "112",  
-                          "valid_from": "2015-05-08",
-                          "valid_to": "2015-05-08"
+                          "bom_number": "211760",
+                          "bom_type": None,
+                          "created_on": None,
+                          "id": 3,
+                          "plant": None,
+                          "sku_code": 112,
+                          "valid_from": None,
+                          "valid_to": None
                           },
-                  "created_date": "2015-05-08T15:39:57",
-                  "modified_date": "2015-05-08T15:39:57",
+                  "change_number": "SCH01011210",
+                  "change_number_to": "",
+                  "item": "1",
+                  "item_id": "1",
+                  "modified_date": "2015-05-11T18:16:06",
                   "part": {
-                           "created_date": "2015-05-08T15:39:55",
-                           "description": "1",
-                           "id": 1,
-                           "modified_date": "2015-05-08T15:39:55",
-                           "part_number": "2121",
-                           "revision_number": "12",
-                           "timestamp": "2015-05-08T15:39:48"
+                           "description": None,
+                           "id": 1175,
+                           "part_number": "15161069",
+                           "revision_number": "0",
+                           "timestamp": "2015-05-11T18:16:05"
                            },
                   "plate": {
-                            "created_date": "2015-05-08T15:39:45",
-                            "id": 1,
-                            "image_url": None,
-                            "modified_date": "2015-05-11T11:21:54",
-                            "plate_id": "212",
-                            "plate_txt": "21"
+                            "id": 103,              
+                            "plate_id": "44",
+                            "plate_image": None,
+                            "plate_image_with_part": None,
+                            "plate_txt": "Chain Case"
                             },
-                  "quantity": "12",
-                  "valid_from": "2015-05-08",
-                  "valid_to": "2015-05-08"
+                  "quantity": "1",
+                  "serial_number": "",
+                  "uom": "EA"
                   }
+ECO_RELEASE = {
+               "action": "delete",
+               "add_part": "12",
+               "add_part_loc_code": "12",
+               "add_part_qty": 12,
+               "add_part_rev": "1",
+               "created_date": "2015-05-12T12:18:45",
+               "del_part": "1",
+               "del_part_loc_code": "12",
+               "del_part_qty": 12,
+               "del_part_rev": 12,
+               "eco_description": "pp",
+               "eco_number": "451",
+               "eco_release_date": "2015-05-12",
+               "id": 1,
+               "interchangebility": "1",
+               "models_applicable": "12",
+               "modified_date": "2015-05-12T12:19:21",
+               "parent_part": "11",
+               "reason_for_change": "p",
+               "resource_uri": "/v1/eco-release/1/",
+               "serviceability": "1"
+               }
+
+ECO_IMPLEMENTATION =  {
+                       "action": "delete",
+                       "added_part": "2",
+                       "added_part_qty": 2,
+                       "change_date": "2015-05-12",
+                       "change_no": "21",
+                       "change_time": "12:35:04",
+                       "chassis_number": "1234567891234567",
+                       "created_date": "2015-05-12T12:35:29",
+                       "deleted_part": "2",
+                       "deleted_part_qty": 2,
+                       "eco_number": "2",
+                       "engine_number": "2",
+                       "id": 1,
+                       "modified_date": "2015-05-12T12:35:29",
+                       "parent_part": "2",
+                       "plant": "1",
+                       "reason_code": "2",
+                       "remarks": "pp",
+                       "resource_uri": "/v1/eco-implementation/1/"
+                       }

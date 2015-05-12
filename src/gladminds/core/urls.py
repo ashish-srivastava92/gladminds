@@ -68,6 +68,8 @@ api_v1.register(part_change_apis.BrandProductRangeResource())
 api_v1.register(part_change_apis.BrandVerticalResource())
 api_v1.register(part_change_apis.BOMHeaderResource())
 api_v1.register(part_change_apis.BOMPlatePartResource())
+api_v1.register(part_change_apis.ECOReleaseResource())
+api_v1.register(part_change_apis.ECOImplementationResource())
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import admin

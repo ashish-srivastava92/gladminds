@@ -13,6 +13,7 @@ from gladminds.management.commands.load_state import Command as state_cmd
 from gladminds.management.commands.load_mech_data import Command as mech_cmd
 from gladminds.management.commands.load_part_data import Command as part_cmd
 from gladminds.management.commands.load_area_service_manager_data import Command as asm_cmd
+from gladminds.management.commands.load_sbom_data import Command as sbom_cmd
 from gladminds.bajaj.models import ZonalServiceManager
 
 _DEMO = GmApps.DEMO
@@ -21,6 +22,7 @@ _AFTERBUY = GmApps.AFTERBUY
 _GM = GmApps.GM
 _BAJAJCV = GmApps.BAJAJCV
 _DAIMLER = GmApps.DAIMLER
+_PROBIKING = GmApps.PROBIKING
 
 _ALL_APPS = ALL_APPS
 
@@ -59,6 +61,7 @@ class Command(BaseCommand):
         call_command('syncdb', database=_AFTERBUY, interactive=False)
         call_command('syncdb', database=_BAJAJCV, interactive=False)
         call_command('syncdb', database=_DAIMLER, interactive=False)
+        call_command('syncdb', database=_PROBIKING, interactive=False)
         call_command('syncdb', interactive=False)
         self.define_groups()
         self.upload_state()
@@ -67,14 +70,16 @@ class Command(BaseCommand):
         self.create_admin(_GM)
         self.create_admin(_BAJAJCV)
         self.create_admin(_DAIMLER)
+        self.create_admin(_PROBIKING)
         self.create_afterbuy_admins()
         self.create_territory_state()
         self.create_loyalty_admins()
         self.set_afterbuy_permissions()
-        if settings.ENV not in ['qa', 'prod', 'staging']:
+        if settings.ENV not in ['prod', 'staging']:
             self.upload_loyalty_user()
             self.upload_asm_user()
             self.upload_part_data()
+            self.upload_sbom_data()
         for brand in ALL_BRANDS:
             self.set_brand_permissions(brand)
             
@@ -92,7 +97,7 @@ class Command(BaseCommand):
         for group in AFTERBUY_GROUPS:
             self.add_group(GmApps.AFTERBUY, group)
 
-        for app in [GmApps.BAJAJ, GmApps.DEMO, GmApps.GM, GmApps.DAIMLER, GmApps.BAJAJCV]:
+        for app in [GmApps.BAJAJ, GmApps.DEMO, GmApps.GM, GmApps.DAIMLER, GmApps.BAJAJCV, GmApps.PROBIKING]:
             for group in OTHER_GROUPS:
                 self.add_group(app, group)
 
@@ -250,6 +255,16 @@ class Command(BaseCommand):
             asm_data.handle()
         except Exception as ex:
             print "[upload_asm_user]: ", ex
+    
+    def upload_sbom_data(self):
+        '''
+        Uploads distributor and mechanic data
+        '''
+        try:
+            sbom_data = sbom_cmd()
+            sbom_data.handle()
+        except Exception as ex:
+            print "[upload_sbom_data]: ", ex
 
     def upload_part_data(self):
         '''

@@ -170,6 +170,7 @@ class GmApps():
     DEMO = 'demo'
     GM = 'default'
     DAIMLER = 'daimler'
+    PROBIKING = 'probiking'
 
 # Mapping is first app name then db name
 DATABASE_APPS_MAPPING = {
@@ -179,6 +180,7 @@ DATABASE_APPS_MAPPING = {
                          GmApps.AFTERBUY:'afterbuy',
                          GmApps.BAJAJCV:'bajajcv',
                          GmApps.DAIMLER:'daimler',
+                         GmApps.PROBIKING : 'probiking'
                     }
 
 db_common = {
@@ -645,7 +647,8 @@ ADMIN_DETAILS = {GmApps.BAJAJ: {'user': 'bajaj', 'password': 'bajaj'},
           GmApps.AFTERBUY: {'user': 'afterbuy', 'password': 'afterbuy'},
           GmApps.GM: {'user': 'gladminds', 'password': 'gladminds'},
           GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'bajajcv'},
-          GmApps.DAIMLER: {'user': 'daimler', 'password': 'daimler'}
+          GmApps.DAIMLER: {'user': 'daimler', 'password': 'daimler'},
+          GmApps.PROBIKING: {'user': 'probiking', 'password': 'probiking'}
           }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True
