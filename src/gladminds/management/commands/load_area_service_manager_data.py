@@ -21,22 +21,15 @@ class Command(BaseCommand):
                       first_name='', last_name='', email='', address='',
                       state='', pincode='', APP=APP):
         user_profile = get_model('UserProfile', APP)
-        logger.info('New {0} Registration with id - {1}'.format(group, username))
         try:
             user_group = Group.objects.using(APP).get(name=group)
         except ObjectDoesNotExist as ex:
-            logger.info(
-                "[Exception: new_ registration]: {0}"
-                .format(ex))
             user_group = Group.objects.using(APP).create(name=group)
             user_group.save(using=APP)
         if username:
             try:
                 user_details = user_profile.objects.select_related('user').get(user__username=username)
             except ObjectDoesNotExist as ex:
-                logger.info(
-                    "[Exception: new_ registration]: {0}"
-                    .format(ex))    
                 new_user = User(
                     username=username, first_name=first_name, last_name=last_name, email=email)
                 if group =='customer':
@@ -92,18 +85,24 @@ class Command(BaseCommand):
                     asm_list.append(temp)
                     
         for asm in asm_list:
-            asm_user_pro = self.register_user(Roles.AREASERVICEMANAGER,
-                                                       username=asm['asm_email'],
-                                                       email=asm['asm_email'],
-                                                       first_name=asm['asm_name'])
-            zsm_object = ZSM.objects.get(user__user__username=asm['zsm_email'])
-            asm_object = ASM(user=asm_user_pro, zsm=zsm_object)
-            asm_object.save()
+            print "check ASM...", asm['asm_email']
+            asm_obj = ASM.objects.filter(user__user__username=asm['asm_email'])
+            if not asm_obj:
+                print "ADD ASM...", asm['asm_email']
+                asm_user_pro = self.register_user(Roles.AREASERVICEMANAGER,
+                                                           username=asm['asm_email'],
+                                                           email=asm['asm_email'],
+                                                           first_name=asm['asm_name'])
+                zsm_object = ZSM.objects.get(user__user__username=asm['zsm_email'])
+                asm_object = ASM(user=asm_user_pro, zsm=zsm_object)
+                asm_object.save()
                  
         for dealer in asm_list:
+            print "check dealer...", dealer['dealer_id']
             if dealer['dealer_id']:
                 dealer_obj = DEALER.objects.filter(dealer_id=dealer['dealer_id'])
                 if not dealer_obj:
+                    print "add dealer...", dealer['dealer_id']
                     if len(dealer['dealer_name'])>30:
                         full_name = dealer['dealer_name'].split(' ')
                         first_name = ' '.join(full_name[0:3])
@@ -122,17 +121,22 @@ class Command(BaseCommand):
                     dealer_object.save()
 
         for asc in asm_list:
+            print "load asc...", asc['asc_id']
             try:
-                asc_object = ASC.objects.get(asc_id=asc['asc_id'])
-             
-            except Exception as ex:
-                if len(asc['dealer_name'])>30:
-                        full_name = asc['dealer_name'].split(' ')
+                if len(asc['asc_name'])>30:
+                        full_name = asc['asc_name'].split(' ')
                         first_name = ' '.join(full_name[0:3])
                         last_name = ' '.join(full_name[3:])
                 else:
-                    first_name = asc['dealer_name']
+                    first_name = asc['asc_name']
                     last_name = ' '
+                asc_object = ASC.objects.get(asc_id=asc['asc_id'])
+                asc_user=asc_object.user.user
+                asc_user.first_name=first_name
+                asc_user.last_name=last_name
+                asc_user.save()
+            except Exception as ex:
+                print "add asc...", asc['asc_id']
                 asc_user_pro_obj = self.register_user(Roles.ASCS,
                                                      username=asc['asc_id'],
                                                      first_name=first_name,
@@ -147,7 +151,7 @@ class Command(BaseCommand):
                 asc_dealer = DEALER.objects.get(dealer_id=asc['dealer_id'])
             except Exception as ex:
                 asc_dealer = None
-                
+            
             asc_asm = ASM.objects.filter(user__user__username=asc['asm_email'])
             asc_object.dealer = asc_dealer
             asc_object.asm = asc_asm[0]
