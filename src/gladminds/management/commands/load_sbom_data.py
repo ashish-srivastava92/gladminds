@@ -37,7 +37,6 @@ class Command(BaseCommand):
                     temp['vertical'] = row_list[2].strip()
                     product_list.append(temp)
         
-        brand = brand_vertical.objects.get(name='Motorcycle')
         for product in product_list:
             try:
                 app = db_mapping.get(product['vertical'])
@@ -96,7 +95,8 @@ class Command(BaseCommand):
         BOMPLATEPART = get_model('BOMPlatePart', app)
         for product in product_list:
             try:
-                bom_header_obj = BOMHEADER.objects.using(app).get(bom_number=product['bom_number'])
+                bom_header_obj = BOMHEADER.objects.using(app).get(bom_number=product['bom_number'],
+                                                                   sku_code=product['sku_code'])
             except Exception as ObjectDoesNotExist:
                 bom_header_obj = BOMHEADER(bom_number=product['bom_number'], sku_code=product['sku_code'])
                 bom_header_obj.save(using=app)
