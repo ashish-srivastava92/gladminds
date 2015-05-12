@@ -44,7 +44,7 @@ class Command(BaseCommand):
                 user_details = user_profile(user=new_user,
                                         phone_number=phone_number, address=address,
                                         state=state, pincode=pincode)
-                user_details.save()
+                user_details.save(using=APP)
             return user_details
         else:
             logger.info('{0} id is not provided.'.format(str(group)))
@@ -96,7 +96,7 @@ class Command(BaseCommand):
                                                        first_name=asm['asm_name'])
                 zsm_object = ZSM.objects.get(user__user__username=asm['zsm_email'])
                 asm_object = ASM(user=asm_user_pro, zsm=zsm_object, asm_id=None)
-                asm_object.save()
+                asm_object.save(using=APP)
                  
         for dealer in asm_list:
             print "check dealer...", dealer['dealer_id']
@@ -119,7 +119,7 @@ class Command(BaseCommand):
                                                          address=dealer['dealer_city'],
                                                          state=dealer['dealer_state'])
                     dealer_object = DEALER(dealer_id=dealer['dealer_id'], user=dealer_user_pro)
-                    dealer_object.save()
+                    dealer_object.save(using=APP)
 
         for asc in asm_list:
             print "load asc...", asc['asc_id']
@@ -135,7 +135,7 @@ class Command(BaseCommand):
                 asc_user=asc_object.user.user
                 asc_user.first_name=first_name
                 asc_user.last_name=last_name
-                asc_user.save()
+                asc_user.save(using=APP)
             except Exception as ex:
                 print "add asc...", asc['asc_id']
                 asc_user_pro_obj = self.register_user(Roles.ASCS,
@@ -147,7 +147,7 @@ class Command(BaseCommand):
                                                      state=asc['asc_state'])
                  
                 asc_object = ASC(asc_id=asc['asc_id'], user=asc_user_pro_obj)
-                asc_object.save()    
+                asc_object.save(using=APP)
             try:     
                 asc_dealer = DEALER.objects.get(dealer_id=asc['dealer_id'])
             except Exception as ex:
@@ -158,6 +158,6 @@ class Command(BaseCommand):
             asc_object.asm = asc_asm[0]
             asc_object.asc_owner = asc['asc_owner_name']
             asc_object.asc_owner_phone = asc['asc_owner_phone']
-            asc_object.save()
+            asc_object.save(using=APP)
 
         
