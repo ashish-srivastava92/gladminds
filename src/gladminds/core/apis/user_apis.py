@@ -582,7 +582,7 @@ class DealerResource(CustomBaseModelResource):
         
     def update_dealer(self, request, **kwargs):
         self.is_authenticated(request)
-        if request.method != 'POST':
+        if request.method != 'GET':
             return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
                                 status=400)
         dealer_id=kwargs['dealer_id']
