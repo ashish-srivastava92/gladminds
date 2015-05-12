@@ -1,14 +1,20 @@
+import json
+import logging
+
+from django.conf import settings
+from django.conf.urls import url
+from django.http.response import HttpResponse, HttpResponseBadRequest
+from tastypie import fields
 from tastypie.authorization import Authorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
-from django.conf.urls import url
-from django.conf import settings
+from tastypie.utils.urls import trailing_slash
 
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.model_fetcher import get_model
-from tastypie import fields
-from tastypie.utils.urls import trailing_slash
-from django.http.response import HttpResponse
+
+
+LOG = logging.getLogger('gladminds')
 
 
 class BrandVerticalResource(CustomBaseModelResource):
@@ -100,6 +106,31 @@ class BOMPlatePartResource(CustomBaseModelResource):
                      "part" : ALL_WITH_RELATIONS
                      }
     
+    def prepend_urls(self):
+        return [ url(r"^(?P<resource_name>%s)/get-plates%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('get_plates'), name="get_plates")]
+        
+    
+    def get_plates(self, request, **kwargs):
+        sku_code = request.GET.get('sku_code')
+        bom_number = request.GET.get('bom_number')
+        try:
+            bom_plate_part =  get_model('BOMPlatePart', settings.BRAND).objects.\
+            select_related('plate').filter(bom__sku_code=sku_code, bom__bom_number=bom_number)
+            plate_details = []
+            for data in bom_plate_part:
+                plate = {}
+                plate['plate_id'] = data.plate.plate_id
+                plate['image_url'] = data.plate.plate_image
+                if not data.plate.plate_image:
+                    plate['image_url'] = ""
+                plate['description'] = data.plate.plate_txt
+                plate_details.append(plate)
+            return HttpResponse(content=json.dumps(plate_details),
+                                content_type='application/json')
+        except Exception as ex:
+            LOG.error('Exception while fetching plate images : {0}'.format(ex))
+            return HttpResponseBadRequest()
     
 class BOMVisualizationResource(CustomBaseModelResource):
     bom = fields.ForeignKey(BOMPlatePartResource, 'bom', null=True, blank=True, full=True)
