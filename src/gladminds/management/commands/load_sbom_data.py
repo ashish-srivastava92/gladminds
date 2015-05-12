@@ -85,6 +85,7 @@ class Command(BaseCommand):
                     temp['change_number_to'] = row_list[12].strip()
                     temp['item'] = row_list[13].strip()
                     temp['item_id'] = row_list[14].strip()
+                    temp['sku_code'] = row_list[15].strip()
                     product_list.append(temp)
         return product_list
     
@@ -97,7 +98,7 @@ class Command(BaseCommand):
             try:
                 bom_header_obj = BOMHEADER.objects.using(app).get(bom_number=product['bom_number'])
             except Exception as ObjectDoesNotExist:
-                bom_header_obj = BOMHEADER(bom_number=product['bom_number'])
+                bom_header_obj = BOMHEADER(bom_number=product['bom_number'], sku_code=product['sku_code'])
                 bom_header_obj.save(using=app)
             try:
                 bom_plate_obj = BOMPLATE.objects.using(app).get(plate_id=product['plate_id'])

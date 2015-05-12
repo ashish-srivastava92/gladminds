@@ -1,17 +1,20 @@
 from tastypie.authorization import Authorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
-
+from django.conf.urls import url
+    
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.model_fetcher import get_model
 from tastypie import fields
+from tastypie.utils.urls import trailing_slash
+from django.http.response import HttpResponse
 
 
 class BrandVerticalResource(CustomBaseModelResource):
     
     class Meta:
         queryset = get_model('BrandVertical').objects.all()
-        resource_name ="brand-vertical"
+        resource_name = "brand-verticals"
         authorization = Authorization()
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post']
@@ -27,7 +30,7 @@ class BrandProductRangeResource(CustomBaseModelResource):
         resource_name = "brand-product-range"
         authorization = Authorization()
         authentication = AccessTokenAuthentication()
-        detail_allowed_methods =['get', 'post']
+        detail_allowed_methods = ['get', 'post']
         always_return_data = True 
         filtering = {
                      "sku_code": ALL,
@@ -38,54 +41,90 @@ class BOMHeaderResource(CustomBaseModelResource):
     
     class Meta:
         queryset = get_model('BOMHeader').objects.all()
-        resource_name = 'bom-header'
+        resource_name = 'bom-headers'
         authorization = Authorization()
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post'] 
         always_return_data = True
-        excludes = ['created_date', 'created_on', 'modified_date', 'plant', 'valid_from', 'valid_to']
         include_resource_uri = False
         filtering = {
                      "sku_code" : ALL,
                      "bom_number" : ALL
                      }
+        
 class BOMPlateResource(CustomBaseModelResource):
     
     class Meta:
         queryset = get_model('BOMPlate').objects.all()
-        resource_name = 'bom-plate'
+        resource_name = 'bom-plates'
         authorization = Authorization()
         authentication = AccessTokenAuthentication()
         detail_allowed_method = ['get', 'post']
         always_return_data = True
         include_resource_uri = False
-        excludes = ['created_date', 'modified_date', 'image_url', 'plate_txt']
-
+        filtering = {
+                     "plate_id" : ALL
+                     }
+        
 class BOMPartResource(CustomBaseModelResource):
     
     class Meta:
         queryset = get_model('BOMPart').objects.all()
-        resource_name = 'bom-plate'
+        resource_name = 'bom-parts'
         authorization = Authorization()
         authentication = AccessTokenAuthentication()
         always_return_date = True
         include_resource_uri = False
+        filtering = {
+                     "part_number" : ALL
+                     }
+        
         
 class BOMPlatePartResource(CustomBaseModelResource):
     bom = fields.ForeignKey(BOMHeaderResource, 'bom', null=True , blank=True, full=True)
     plate = fields.ForeignKey(BOMPlateResource, 'plate', null=True, blank=True, full=True)
-    part = fields.ForeignKey(BOMPartResource, 'part', null=True, blank=True)
+    part = fields.ForeignKey(BOMPartResource, 'part', null=True, blank=True, full=True)
     class Meta:
         queryset = get_model('BOMPlatePart').objects.all()
-        resource_name = 'bom-plate-part'
+        resource_name = 'bom-plate-parts'
         authorization = Authorization()
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post']
         always_return_data = True
         include_resource_uri = False
-        excludes = ['quantity', 'valid_from', 'valid_to', 'created_date', 'modified_date', 'part']
         
         filtering = {
-                     "bom" : ALL_WITH_RELATIONS
+                     "bom" : ALL_WITH_RELATIONS,
+                     "plate" : ALL_WITH_RELATIONS,
+                     "part" : ALL_WITH_RELATIONS
                      }
+    
+class BOMVisualizationResource(CustomBaseModelResource):
+    bom = fields.ForeignKey(BOMPlatePartResource, 'bom', null=True, blank=True, full=True)
+    
+    class Meta:
+        queryset = get_model('BOMVisualization').objects.all()
+        resource_name = 'bom-visualizations'
+        authorization = Authorization()
+        authentication = AccessTokenAuthentication()
+        detail_allowed_methods = ['get']
         
+        
+class ECOReleaseResource(CustomBaseModelResource):
+    
+    class Meta:
+        queryset = get_model('ECORelease').objects.all()
+        resource_name = 'eco-releases'
+        authorization = Authorization()
+        authentication = AccessTokenAuthentication()
+        detail_allowed_methods = ['get', 'post']
+
+class ECOImplementationResource(CustomBaseModelResource):
+    
+    class Meta:
+        queryset = get_model('ECOImplementation').objects.all()
+        resource_name = 'eco-implementations'
+        authorization = Authorization()
+        authentication = AccessTokenAuthentication()
+        detail_allowed_methods = ['get', 'post']
+        always_return_data = True
