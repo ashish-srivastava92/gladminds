@@ -1,7 +1,8 @@
 from tastypie.authorization import Authorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from django.conf.urls import url
-    
+from django.conf import settings
+
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.model_fetcher import get_model
@@ -98,6 +99,7 @@ class BOMPlatePartResource(CustomBaseModelResource):
                      "plate" : ALL_WITH_RELATIONS,
                      "part" : ALL_WITH_RELATIONS
                      }
+    
     
 class BOMVisualizationResource(CustomBaseModelResource):
     bom = fields.ForeignKey(BOMPlatePartResource, 'bom', null=True, blank=True, full=True)
