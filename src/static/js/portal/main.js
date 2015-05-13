@@ -1,6 +1,5 @@
 (function() {
 	'use strict';
-    
     $('input.advisor-action').click(function() {
         var actionSet = $(this).parents('.advisor-action-item'),
             postAction = $(this).val(),

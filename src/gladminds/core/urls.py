@@ -130,5 +130,4 @@ urlpatterns = patterns('',
     url(r'^welcome', loyalty.send_welcome_message, name='send_welcome_message'),
     url(r'^check-form/(?P<choice>[a-zA-Z0-9]+)$', loyalty.check_complete_forms, name='check_complete_forms'),
     url(r'^kit-download/(?P<choice>[a-zA-Z0-9]+)$', loyalty.download_welcome_kit, name='download_welcome_kit'),
-
 )
