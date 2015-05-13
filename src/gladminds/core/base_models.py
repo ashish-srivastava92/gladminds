@@ -1504,6 +1504,9 @@ class BOMHeader(BaseModel):
         db_table = "gm_bomheader"
         verbose_name_plural = "Bills of Material "
     
+    def __unicode__(self):
+        return self.sku_code
+        
 class BOMPlate(BaseModel):
     '''Details of BOM Plates'''
     plate_id = models.CharField(max_length=50, unique=True)
