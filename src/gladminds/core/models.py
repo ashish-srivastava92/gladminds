@@ -545,3 +545,9 @@ class BOMVisualization(base_models.BOMVisualization):
     
     class Meta(base_models.BOMVisualization.Meta):
             app_label = _APP_NAME
+            
+class ServiceCircular(base_models.ServiceCircular):
+    model_sku_code = models.ManyToManyField(BrandProductRange)
+    
+    class Meta(base_models.ServiceCircular.Meta):
+        app_label = _APP_NAME

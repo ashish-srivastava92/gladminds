@@ -3,7 +3,8 @@ import logging
 import csv
 from django.conf.urls import url
 from django.conf import settings
-from django.http.response import HttpResponse
+from django.forms.models import model_to_dict
+from django.http.response import HttpResponse, HttpResponseBadRequest
 
 from tastypie import fields
 from tastypie.utils.urls import trailing_slash
@@ -13,10 +14,10 @@ from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.model_fetcher import get_model
-from gladminds.core.auth_helper import Roles
 from gladminds.core.core_utils.utils import format_part_csv
 
-logger = logging.getLogger('gladminds')
+
+LOG = logging.getLogger('gladminds')
 
 class BrandVerticalResource(CustomBaseModelResource):
     
@@ -106,14 +107,42 @@ class BOMPlatePartResource(CustomBaseModelResource):
                      "plate" : ALL_WITH_RELATIONS,
                      "part" : ALL_WITH_RELATIONS
                      }
-    
-            
+       
     def prepend_urls(self):
         return [
                  url(r"^(?P<resource_name>%s)/save-part%s" % (self._meta.resource_name,trailing_slash()),
                      self.wrap_view('save_plate_part'), name="save_plate_part"),
+                 url(r"^(?P<resource_name>%s)/get-plates%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('get_plates'), name="get_plates")
                 ]
     
+    def dehydrate(self, bundle):
+        bom_visualization = get_model('BOMVisualization').objects.filter(bom=bundle.data['id'])
+        bundle.data['bom_visualization'] = [model_to_dict(b) for b in bom_visualization]
+        return bundle    
+        
+    
+    def get_plates(self, request, **kwargs):
+        self.is_authenticated(request)
+        sku_code = request.GET.get('sku_code')
+        bom_number = request.GET.get('bom_number')
+        try:
+            bom_plate_part =  get_model('BOMPlatePart', settings.BRAND).objects.\
+            select_related('plate').filter(bom__sku_code=sku_code, bom__bom_number=bom_number)
+            plate_details = []
+            for data in bom_plate_part:
+                plate = {}
+                plate['plate_id'] = data.plate.plate_id
+                plate['image_url'] = data.plate.plate_image
+                if not data.plate.plate_image:
+                    plate['image_url'] = ""
+                plate['description'] = data.plate.plate_txt
+                plate_details.append(plate)
+            return HttpResponse(content=json.dumps(plate_details),
+                                content_type='application/json')
+        except Exception as ex:
+            LOG.error('Exception while fetching plate images : {0}'.format(ex))
+            return HttpResponseBadRequest()
     
     def save_plate_part(self, request, **kwargs):
         self.is_authenticated(request)
@@ -174,10 +203,10 @@ class BOMPlatePartResource(CustomBaseModelResource):
                         visual_obj.save(using=settings.BRAND)
                         part_entry['status']='SUCCESS'
                     except Exception as ex:
-                        logger.error('[save_plate_part]: {0}'.format(ex))
+                        LOG.error('[save_plate_part]: {0}'.format(ex))
                         part_entry['status']='INCOMPLETE'
                 else:
-                    logger.info('[save_plate_part]: the part number {0} is invalid'.format(part_entry['part_number']))
+                    LOG.info('[save_plate_part]: the part number {0} is invalid'.format(part_entry['part_number']))
                     part_entry['status']='ERROR'
                 data['part'].append(part_entry)
             for part in sbom_part_mapping:
@@ -188,7 +217,7 @@ class BOMPlatePartResource(CustomBaseModelResource):
                     temp['status']='MISSING'
                     data['part'].append(temp)
         except Exception as ex:
-            logger.info('[save_plate_part]: {0}'.format(ex))
+            LOG.info('[save_plate_part]: {0}'.format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
  
 class BOMVisualizationResource(CustomBaseModelResource):
@@ -200,6 +229,9 @@ class BOMVisualizationResource(CustomBaseModelResource):
         authorization = Authorization()
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get']
+        filtering = {
+                     "bom" : ALL_WITH_RELATIONS
+                     }
         
         
 class ECOReleaseResource(CustomBaseModelResource):

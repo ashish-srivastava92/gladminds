@@ -1561,13 +1561,43 @@ class BOMPlatePart(BaseModel):
         
 class BOMVisualization(BaseModel):
     '''Details of BOM Plates cordinates'''
+<<<<<<< HEAD
     x_coordinate  = models.IntegerField(null=True, blank=True)
     y_coordinate  = models.IntegerField(null=True, blank=True)
     z_coordinate  = models.IntegerField(null=True, blank=True)
     serial_number = models.IntegerField(null=True, blank=True)
     part_href = models.CharField(max_length=200, null=True, blank=True)
+=======
+    x_coordinate  = models.IntegerField()
+    y_coordinate  = models.IntegerField()
+    z_coordinate  = models.IntegerField()
+    serial_number = models.IntegerField()
+    part_href = models.CharField(max_length=200)
+>>>>>>> upstream/master
     
     class Meta:
         abstract = True
         db_table = "gm_bomvisualization"
         verbose_name_plural = "BOM Visualization"
+        
+class ServiceCircular(models.Model):
+    product_type = models.CharField(max_length=100, null=True, blank=True)
+    type_of_circular = models.CharField(max_length=50, null=True, blank=True)
+    change_no = models.CharField(max_length=50, null=True, blank=True)
+    new_circular = models.CharField(max_length=50, null=True, blank=True)
+    buletin_no = models.CharField(max_length=50, null=True, blank=True)
+    circular_date = models.DateTimeField(null=True, blank=True)
+    from_circular = models.CharField(max_length=50, null=True, blank=True)
+    to_circular = models.CharField(max_length=50, null=True, blank=True)
+    cc_circular = models.CharField(max_length=50, null=True, blank=True)
+    circular_subject = models.CharField(max_length=50, null=True, blank=True)
+    part_added = models.CharField(max_length=50, null=True, blank=True)
+    circular_title = models.CharField(max_length=50, null=True, blank=True)
+    part_deleted = models.CharField(max_length=50, null=True, blank=True)
+    part_changed = models.CharField(max_length=50, null=True, blank=True)
+    model_name = models.CharField(max_length=50, null=True, blank=True)
+    sku_description = models.CharField(max_length=250, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_servicecircular"

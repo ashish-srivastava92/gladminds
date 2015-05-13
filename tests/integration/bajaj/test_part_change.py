@@ -1,12 +1,7 @@
 import json
 from django.test.client import Client
-from tastypie.test import ResourceTestCase
-# from test_constants import 
-from gladminds.core.auth_helper import Roles
-from gladminds.core.model_fetcher import models
-from django.contrib.auth.models import User, Group
 from test_constants import BRAND_PRODUCT_RANGE, BRAND_VERTICAL, BOM_HEADER,\
-    BOM_PLATE_PART, ECO_RELEASE, ECO_IMPLEMENTATION
+    BOM_PLATE_PART, ECO_RELEASE, ECO_IMPLEMENTATION, BOM_VISUALIZATION
 from integration.bajaj.base import BaseTestCase
 
 client=Client(SERVER_NAME='bajaj')
@@ -93,5 +88,25 @@ class PartChangeTests(BaseTestCase):
         self.assertEquals(resp.status_code, 201)
         uri = '/v1/eco-implementations/1/?access_token='+access_token
         resp = client.get(uri, content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+    
+    def test_get_plates_image(self):
+        access_token = self.user_login()
+        uri = '/v1/bom-plate-parts/'
+        resp = self.post(uri, data=BOM_PLATE_PART, access_token=access_token)
+        self.assertEquals(resp.status_code, 201)
+        uri = '/v1/bom-plate-parts/get-plates/?sku_code=112&&bom_number=211760'
+        resp = self.get(uri, access_token=access_token)
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(json.loads(resp.content)[0]['plate_id'], "44")
+
+    def test_get_sbom_details(self):
+        access_token = self.user_login()
+        uri = '/v1/bom-visualizations/'
+        resp = self.post(uri, data=BOM_VISUALIZATION, access_token=access_token)
+        self.assertEquals(resp.status_code, 201)
+        uri = '/v1/bom-plate-parts/?plate__plate_id=44&&bom__bom_number=211760&&bom__sku_code=112'
+        resp = self.get(uri, access_token=access_token)
+        self.assertEquals(json.loads(resp.content)['objects'][0]['part']['part_number'], "15161069")
         self.assertEquals(resp.status_code, 200)
         
