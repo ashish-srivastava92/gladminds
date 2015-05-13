@@ -1,18 +1,22 @@
-from django.conf.urls import url
-from tastypie.authorization import Authorization
-from tastypie.constants import ALL, ALL_WITH_RELATIONS
+import json
+import logging
+import csv
 from django.conf.urls import url
 from django.conf import settings
+from django.http.response import HttpResponse
+
+from tastypie import fields
+from tastypie.utils.urls import trailing_slash
+from tastypie.authorization import Authorization
+from tastypie.constants import ALL, ALL_WITH_RELATIONS
 
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.model_fetcher import get_model
-from tastypie import fields
-from tastypie.utils.urls import trailing_slash
-from django.http.response import HttpResponse
-import json
 from gladminds.core.auth_helper import Roles
+from gladminds.core.core_utils.utils import format_part_csv
 
+logger = logging.getLogger('gladminds')
 
 class BrandVerticalResource(CustomBaseModelResource):
     
@@ -112,67 +116,79 @@ class BOMPlatePartResource(CustomBaseModelResource):
     
     
     def save_plate_part(self, request, **kwargs):
-        import csv
-#         self.is_authenticated(request)
-        print "344444444444444", request.POST
-        print "344444444444444", request.FILES['platImage']
-        print "344444444444444", request.FILES['plateMap']
-        abc=request.FILES['platImage']
-        xyz=request.FILES['plateMap']
-        mapping=[]
-        queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code='00DH15ZZ',
-                                                            bom__bom_number='211760',
-                                                            plate__plate_id='44')
-        for query in queryset:
-            temp={}
-            temp['part_id']=query.part.part_id
-            
-#         try:
-#             plate_obj=get_model('BOMPlate').objects.filter(plate_id='44')
-#             plate_obj[0].plate_image_with_part.save(abc.name, abc)
-#         except Exception as ex:
-#             print "344444444444444", ex
-        print "4555555555555", queryset
-        try:
-            spamreader = csv.reader(xyz, delimiter=',')
-            next(spamreader)
-            for row_list in spamreader:
-                print "3444444444444444", row_list
-        except Exception as ex:
-            print "344444444444444", ex
-        return
+        self.is_authenticated(request)
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
                                 status=400)
-        if not request.user.is_superuser and not request.user.groups.filter(name=Roles.ZSM).exists():
-            return HttpResponse(json.dumps({"message" : "Not Authorized to add ASM"}), content_type= "application/json",
-                                status=401)
+        post_data=request.POST
+        model = post_data.get('model')
+        sku_code = post_data.get('skuCode')
+        bom_number = post_data.get('bomNumber')
+        plate_id = post_data.get('plateId')
+        plate_image=request.FILES['platImage']
+        plate_map=request.FILES['plateMap']
+        sbom_part_mapping=[]
         try:
-            load = json.loads(request.body)
-        except:
-            return HttpResponse(content_type="application/json", status=404)
-        asm_id = load.get('id')
-        try:
-            asm_data = models.AreaServiceManager.objects.get(asm_id=asm_id)
-            data = {'status': 0 , 'message' : 'Area service manager with this id already exists'}
+            queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
+                                                                bom__bom_number=bom_number,
+                                                                plate__plate_id=plate_id)
+            for query in queryset:
+                temp={}
+                temp['part_number']=query.part.part_number
+                temp['bomplatepart_object']=query
+                sbom_part_mapping.append(temp)
+
+            plate_obj=get_model('BOMPlate').objects.filter(plate_id=plate_id)
+            plate_obj[0].plate_image_with_part.save(plate_image.name, plate_image)
+
+        
+            data={'plate_id':plate_id, 'sku_code':sku_code,
+                  'bom_number':bom_number,
+                  'model':model, 'part':[]}
+            spamreader = csv.reader(plate_map, delimiter=',')
+            next(spamreader)
+            csv_data=format_part_csv(spamreader)
+            for part_entry in csv_data:
+                active = filter(lambda active: active['part_number'] == part_entry['part_number'], sbom_part_mapping)
+                if active:
+                    bompartplate_obj=active[0]['bomplatepart_object']
+                    part_data=bompartplate_obj.part
+                    part_data.description=part_entry['desc']
+                    part_data.save(using=settings.BRAND)
+                    try:
+                        visual_obj=get_model('BOMVisualization').objects.filter(bom=bompartplate_obj)
+                        if not visual_obj:
+                            visual_obj=get_model('BOMVisualization')(bom=bompartplate_obj,
+                                                        x_coordinate=part_entry['x-axis'],
+                                                        y_coordinate=part_entry['y-axis'],
+                                                        z_coordinate=part_entry['z-axis'],
+                                                        serial_number=part_entry['serial_number'],
+                                                        part_href=part_entry['href'])
+                        else:
+                            visual_obj=visual_obj[0]
+                            visual_obj.x_coordinate=part_entry['x-axis']
+                            visual_obj.y_coordinate=part_entry['y-axis']
+                            visual_obj.z_coordinate=part_entry['z-axis']
+                            visual_obj.serial_number=part_entry['serial_number']
+                            visual_obj.part_href=part_entry['href']
+                        visual_obj.save(using=settings.BRAND)
+                        part_entry['status']='SUCCESS'
+                    except Exception as ex:
+                        logger.error('[save_plate_part]: {0}'.format(ex))
+                        part_entry['status']='INCOMPLETE'
+                else:
+                    logger.info('[save_plate_part]: the part number {0} is invalid'.format(part_entry['part_number']))
+                    part_entry['status']='ERROR'
+                data['part'].append(part_entry)
+            for part in sbom_part_mapping:
+                active = filter(lambda active: active['part_number'] == part['part_number'], data['part'])
+                if not active:
+                    temp={}
+                    temp['part_number']=part['part_number']
+                    temp['status']='MISSING'
+                    data['part'].append(temp)
         except Exception as ex:
-            logger.info("[register_area_service_manager]: New ASM registration:: {0}".format(ex))
-            name = load.get('name')
-            area = load.get('area')
-            phone_number = load.get('phone-number')
-            email = load.get('email')
-            zsm_id = load.get('zsm_id')
-            zsm_data = models.ZonalServiceManager.objects.get(zsm_id=zsm_id)
-            user_data = register_user.register_user(Roles.AREASERVICEMANAGER,
-                                             username=email,
-                                             phone_number=phone_number,
-                                             first_name=name,
-                                             email = email,
-                                             APP=settings.BRAND)
-            asm_data = models.AreaServiceManager(asm_id=asm_id, user=user_data,
-                                        area=area, zsm=zsm_data)
-            asm_data.save()
-            data = {"status": 1 , "message" : "Area service manager registered successfully"}
+            logger.info('[save_plate_part]: {0}'.format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
  
 class BOMVisualizationResource(CustomBaseModelResource):
