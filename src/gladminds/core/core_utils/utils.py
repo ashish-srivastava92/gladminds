@@ -88,3 +88,17 @@ def get_search_query_params(request, class_self):
         request.META['QUERY_STRING'] = 'q=%s'% search_value
         custom_search_enabled = True
     return custom_search_enabled
+
+def format_part_csv(spamreader):
+    csv_data=[]
+    for row_list in spamreader:
+        temp={}
+        temp['serial_number']=row_list[0]
+        temp['part_number']=row_list[1]
+        temp['desc']=row_list[2]
+        temp['x-axis']=row_list[3] if row_list[3] else None
+        temp['y-axis']=row_list[4] if row_list[4] else None
+        temp['z-axis']=row_list[5] if row_list[5] else None
+        temp['href']=row_list[6] if row_list[6] else None
+        csv_data.append(temp)
+    return csv_data
