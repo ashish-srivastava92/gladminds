@@ -3,6 +3,7 @@ import logging
 
 from django.conf import settings
 from django.conf.urls import url
+from django.forms.models import model_to_dict
 from django.http.response import HttpResponse, HttpResponseBadRequest
 from tastypie import fields
 from tastypie.authorization import Authorization
@@ -109,6 +110,11 @@ class BOMPlatePartResource(CustomBaseModelResource):
     def prepend_urls(self):
         return [ url(r"^(?P<resource_name>%s)/get-plates%s" % (self._meta.resource_name,trailing_slash()),
                      self.wrap_view('get_plates'), name="get_plates")]
+    
+    def dehydrate(self, bundle):
+        bom_visualization = get_model('BOMVisualization').objects.filter(bom=bundle.data['id'])
+        bundle.data['bom_visualization'] = [model_to_dict(b) for b in bom_visualization]
+        return bundle    
         
     
     def get_plates(self, request, **kwargs):
@@ -142,6 +148,9 @@ class BOMVisualizationResource(CustomBaseModelResource):
         authorization = Authorization()
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get']
+        filtering = {
+                     "bom" : ALL_WITH_RELATIONS
+                     }
         
         
 class ECOReleaseResource(CustomBaseModelResource):
