@@ -112,6 +112,7 @@ class BOMPlatePartResource(CustomBaseModelResource):
         
     
     def get_plates(self, request, **kwargs):
+        self.is_authenticated(request)
         sku_code = request.GET.get('sku_code')
         bom_number = request.GET.get('bom_number')
         try:
