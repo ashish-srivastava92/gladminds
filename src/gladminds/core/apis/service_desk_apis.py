@@ -304,7 +304,7 @@ class FeedbackResource(CustomBaseModelResource):
                     tat = {}
                     minutes, seconds = divmod(data['tat'], 60)
                     tat['tat'] = minutes
-                    tat['username'] = data['username']
+                    tat['agent_name'] = data['username']
                     total_tickets.append(tat)
             
             elif kwargs['type'] == 'fcr':
@@ -326,8 +326,8 @@ class FeedbackResource(CustomBaseModelResource):
                     fcrs = filter(lambda fc: fc['username'] == data['username'], fcr_count)
                     if fcrs:
                         fcr = {}
-                        fcr['username'] = data['username']
                         fcr['fcr'] = (fcrs[0]['cnt']/float(data['total'])) * 100
+                        fcr['agent'] = data['username']
                         total_tickets.append(fcr)
                         
             elif kwargs['type'] == 'response':

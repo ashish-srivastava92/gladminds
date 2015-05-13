@@ -1571,3 +1571,25 @@ class BOMVisualization(BaseModel):
         abstract = True
         db_table = "gm_bomvisualization"
         verbose_name_plural = "BOM Visualization"
+        
+class ServiceCircular(models.Model):
+    product_type = models.CharField(max_length=100, null=True, blank=True)
+    type_of_circular = models.CharField(max_length=50, null=True, blank=True)
+    change_no = models.CharField(max_length=50, null=True, blank=True)
+    new_circular = models.CharField(max_length=50, null=True, blank=True)
+    buletin_no = models.CharField(max_length=50, null=True, blank=True)
+    circular_date = models.DateTimeField(null=True, blank=True)
+    from_circular = models.CharField(max_length=50, null=True, blank=True)
+    to_circular = models.CharField(max_length=50, null=True, blank=True)
+    cc_circular = models.CharField(max_length=50, null=True, blank=True)
+    circular_subject = models.CharField(max_length=50, null=True, blank=True)
+    part_added = models.CharField(max_length=50, null=True, blank=True)
+    circular_title = models.CharField(max_length=50, null=True, blank=True)
+    part_deleted = models.CharField(max_length=50, null=True, blank=True)
+    part_changed = models.CharField(max_length=50, null=True, blank=True)
+    model_name = models.CharField(max_length=50, null=True, blank=True)
+    sku_description = models.CharField(max_length=250, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_servicecircular"
