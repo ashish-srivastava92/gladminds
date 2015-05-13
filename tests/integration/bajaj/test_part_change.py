@@ -104,4 +104,5 @@ class PartChangeTests(BaseTestCase):
         resp = self.get(uri, access_token=access_token)
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(json.loads(resp.content)[0]['plate_id'], "44")
+
         
