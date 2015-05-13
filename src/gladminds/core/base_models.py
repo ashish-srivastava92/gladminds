@@ -1561,19 +1561,11 @@ class BOMPlatePart(BaseModel):
         
 class BOMVisualization(BaseModel):
     '''Details of BOM Plates cordinates'''
-<<<<<<< HEAD
-    x_coordinate  = models.IntegerField(null=True, blank=True)
-    y_coordinate  = models.IntegerField(null=True, blank=True)
-    z_coordinate  = models.IntegerField(null=True, blank=True)
-    serial_number = models.IntegerField(null=True, blank=True)
-    part_href = models.CharField(max_length=200, null=True, blank=True)
-=======
     x_coordinate  = models.IntegerField()
     y_coordinate  = models.IntegerField()
     z_coordinate  = models.IntegerField()
     serial_number = models.IntegerField()
     part_href = models.CharField(max_length=200)
->>>>>>> upstream/master
     
     class Meta:
         abstract = True
