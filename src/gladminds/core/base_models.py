@@ -1488,7 +1488,10 @@ class BrandProductRange(BaseModel):
         db_table = "gm_brandproductrange"
         abstract = True
         verbose_name_plural = "Product Range"
-
+    
+    def __unicode__(self):
+        return self.sku_code
+    
 class BOMHeader(BaseModel):
     '''Detaills of  Header fields BOM'''
     sku_code = models.CharField(max_length=20, null=True, blank=True)
@@ -1531,6 +1534,9 @@ class BOMPlate(BaseModel):
         db_table = "gm_bomplate"
         abstract = True
         verbose_name_plural = "BOM Plates"
+    
+    def __unicode__(self):
+        return self.plate_id
         
 class BOMPart(BaseModel):
     '''Detaills of  BOM Parts'''
@@ -1544,6 +1550,9 @@ class BOMPart(BaseModel):
         abstract = True
         db_table = "gm_bompart"
         verbose_name_plural = "BOM Parts "
+        
+    def __unicode__(self):
+        return self.part_number
         
 class BOMPlatePart(BaseModel):
     '''Details of BOM Plates and part relation'''
