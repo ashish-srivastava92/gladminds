@@ -56,3 +56,14 @@
 --alter table gm_areaservicemanager add column area varchar(100) null;
 --alter table gm_dealer add asm_id integer;
 --alter table gm_dealer add foreign key (asm_id) references gm_areaservicemanager(id);
+
+
+For epc
+IN bajaj db; 
+update gm_bomplate set plate_image = concat("qa/bajaj/plates/", plate_id, ".png") ;
+update gm_bomplate set plate_image_with_part = concat("qa/bajaj/plates_with_part/", plate_id, ".png") ;
+
+IN bajajcv and probiking
+update gm_bomplate set plate_image = concat("qa/bajaj/plates/", plate_id, ".PNG") ;
+update gm_bomplate set plate_image_with_part = concat("qa/bajaj/plates_with_part/", plate_id, ".PNG") ;
+

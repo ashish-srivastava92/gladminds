@@ -133,7 +133,7 @@ class BOMPlatePartResource(CustomBaseModelResource):
             for data in bom_plate_part:
                 plate = {}
                 plate['plate_id'] = data.plate.plate_id
-                plate['image_url'] = data.plate.plate_image
+                plate['image_url'] = "{0}/{1}".format(settings.S3_BASE_URL, data.plate.plate_image)
                 if not data.plate.plate_image:
                     plate['image_url'] = ""
                 plate['description'] = data.plate.plate_txt
