@@ -45,7 +45,7 @@ class ProductResource(CustomBaseModelResource):
     class Meta:
         queryset = models.ProductData.objects.all()
         resource_name = "products"
-        authentication = AccessTokenAuthentication()
+#         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(Authorization())
         detail_allowed_methods = ['get']
         filtering = {
