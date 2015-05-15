@@ -618,7 +618,7 @@ def create_reconciliation_report(query_params, user):
         if status=='2':
             args = [Q(status=2),Q(status=6)]
     all_coupon_data = models.CouponData.objects.filter(reduce(operator.or_, args), reduce(operator.or_, coupon_filter), **filter).order_by('-actual_service_date')
-    map_status = {'6': 'Old FSC', '4': 'In Progress', '2':'Closed'}
+    map_status = {'6': 'Old FSC Closed', '4': 'In Progress', '2':'DFSC Closed'}
     for coupon_data in all_coupon_data:
         coupon_data_dict = {}
         coupon_data_dict['vin'] = coupon_data.product.product_id
