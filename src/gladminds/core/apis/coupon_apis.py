@@ -30,7 +30,7 @@ class CouponDataResource(CustomBaseModelResource):
         queryset = models.CouponData.objects.all()
         resource_name = "coupons"
         authorization = MultiAuthorization(DjangoAuthorization())
-        authentication = MultiAuthentication(AccessTokenAuthentication())
+#         authentication = MultiAuthentication(AccessTokenAuthentication())
         detail_allowed_methods = ['get']
         always_return_data = True
         filtering = {
