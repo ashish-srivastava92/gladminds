@@ -24,10 +24,10 @@
 				<td>{{record.customer_id|default_if_none:""}}</td>
 				<td>{{record.product_type|default_if_none:""}}</td>
 				<td>{{record.vin|default_if_none:""}}</td>
-				<td>{% if record.service_status == "Old FSC Closed" %}
+				<td>{% if record.service_status == "DFSC Closed" %}
 					{{record.coupon_no}} {% endif%}</td>
 				<td>{{record.service_avil_date}}</td>
-				<td>{% if record.service_status == "Old FSC Closed" %}
+				<td>{% if record.service_status == "DFSC Closed" %}
 					{{record.closed_date|default_if_none:""}} {% else %} N/A {% endif%}
 				</td>
 				<td>{{record.sa_phone_name|default_if_none:"N/A"}}</td>
