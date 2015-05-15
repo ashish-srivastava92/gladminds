@@ -50,7 +50,7 @@ class ProductTypeAdmin(GmModelAdmin):
     list_display = ('id', 'product_type',\
                     'image_url', 'is_active')
 
-class DispatchedProduct(get_model("ProductData", "bajaj")):
+class DispatchedProduct(get_model("ProductData")):
 
     class Meta:
         proxy = True
