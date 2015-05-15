@@ -22,6 +22,10 @@ class ServiceCircularTests(BaseTestCase):
         resp = client.get(uri+'?access_token='+access_token, content_type=content_type)
         return resp
     
+    def getCode(self, uri, access_token, content_type='application/json'):
+        resp = client.get(uri+'&&access_token='+access_token, content_type=content_type)
+        return resp
+    
     def user_login(self):
         data={"username": "bajaj", "password": "bajaj" }
         uri='/v1/gm-users/login/';
@@ -35,5 +39,8 @@ class ServiceCircularTests(BaseTestCase):
         self.assertEquals(resp.status_code, 200)
         uri = '/v1/service-circular/'
         resp = self.get(uri, access_token, content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        uri = '/v1/service-circular/?model_sku_code__sku_code=00DK04ZZ'
+        resp = self.getCode(uri, access_token, content_type='application/json')
         self.assertEquals(resp.status_code, 200)
         

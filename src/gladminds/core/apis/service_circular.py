@@ -11,11 +11,12 @@ from gladminds.core.apis.part_change_apis import BrandProductRangeResource
 from tastypie.utils.urls import trailing_slash
 from django.conf.urls import url
 from gladminds.bajaj.models import BrandProductRange
+from tastypie.constants import ALL_WITH_RELATIONS
 
 logger = logging.getLogger("gladminds")
 
 class ServiceCircularResource(CustomBaseModelResource):
-    model_sku_code = fields.ManyToManyField(BrandProductRangeResource, 'brand-product-range', full=True,null=True,blank=True)
+    model_sku_code = fields.ManyToManyField(BrandProductRangeResource, 'model_sku_code', full=True)
     
     class Meta:
         queryset = models.ServiceCircular.objects.all()
@@ -23,6 +24,9 @@ class ServiceCircularResource(CustomBaseModelResource):
         authorization = Authorization()
         detail_allowed_methods = ['get', 'post']
         always_return_data = True
+        filtering = {
+                     'model_sku_code' : ALL_WITH_RELATIONS,
+                     }
         
     def prepend_urls(self):
         return [
