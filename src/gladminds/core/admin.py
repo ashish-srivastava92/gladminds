@@ -8,7 +8,7 @@ from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib.admin import DateFieldListFilter
 from django import forms
 
-from gladminds.core.model_fetcher import models
+from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
 from gladminds.core.auth_helper import GmApps, Roles
@@ -50,7 +50,7 @@ class ProductTypeAdmin(GmModelAdmin):
     list_display = ('id', 'product_type',\
                     'image_url', 'is_active')
 
-class DispatchedProduct(models.ProductData):
+class DispatchedProduct(get_model("ProductData", "bajaj")):
 
     class Meta:
         proxy = True
@@ -73,7 +73,7 @@ class ListDispatchedProduct(GmModelAdmin):
         return query_set
 
     def UCN(self, obj):
-        coupons = models.CouponData.objects.filter(product=obj.id)
+        coupons = get_model("CouponData").objects.filter(product=obj.id)
         if coupons:
             return ' | '.join([str(ucn.unique_service_coupon) for ucn in coupons])
         else:
@@ -92,7 +92,7 @@ class ListDispatchedProduct(GmModelAdmin):
 
 
 class Couponline(TabularInline):
-    model = models.CouponData
+    model = get_model("CouponData")
     fields = ('unique_service_coupon', 'service_type', 'status', 'mark_expired_on', 'extended_date')
     extra = 0
     max_num = 0
@@ -123,14 +123,14 @@ class ProductDataAdmin(GmModelAdmin):
         return query_set
 
     def UCN(self, obj):
-        coupons = models.CouponData.objects.filter(product=obj.id)
+        coupons = get_model("CouponData").objects.filter(product=obj.id)
         if coupons:
             return ' | '.join([str(ucn.unique_service_coupon) for ucn in coupons])
         else:
             return None
 
     def service_type(self, obj):
-        gm_coupon_data_obj = models.CouponData.objects.filter(product=obj.id)
+        gm_coupon_data_obj = get_model("CouponData").objects.filter(product=obj.id)
         coupon_service_type = ''
         if gm_coupon_data_obj:
             coupon_service_type = " | ".join(
@@ -169,7 +169,7 @@ class CouponAdmin(GmModelAdmin):
     
     def associated_with(self, obj):
         if obj.service_advisor:
-            sa = models.ServiceAdvisor.objects.filter(service_advisor_id=obj.service_advisor.service_advisor_id).select_related('dealer', 'authorizedservicecenter')[0]
+            sa = get_model("ServiceAdvisor").objects.filter(service_advisor_id=obj.service_advisor.service_advisor_id).select_related('dealer', 'authorizedservicecenter')[0]
             if sa.dealer:
                 return sa.dealer.dealer_id + ' (D)'
             elif sa.asc:
@@ -430,7 +430,7 @@ class DistributorAdmin(GmModelAdmin):
     def queryset(self, request):
         query_set = self.model._default_manager.get_query_set()
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            asm_state_list=get_model("AreaSparesManager").objects.get(user__user=request.user).state.all()
             query_set=query_set.filter(state=asm_state_list)
         return query_set
 
@@ -476,7 +476,7 @@ class SparePartPointAdmin(GmModelAdmin):
         return form
 
 class SparePartline(TabularInline):
-    model = models.AccumulationRequest.upcs.through
+    model = get_model("AccumulationRequest").upcs.through
 
 class ProductCatalogAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -526,7 +526,7 @@ class AccumulationRequestAdmin(GmModelAdmin):
         """
         query_set = self.model._default_manager.get_query_set()
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            asm_state_list=get_model("AreaSparesManager").objects.get(user__user=request.user).state.all()
             query_set=query_set.filter(member__state=asm_state_list)
 
         return query_set
@@ -538,7 +538,7 @@ class AccumulationRequestAdmin(GmModelAdmin):
 
 class MemberForm(forms.ModelForm):
     class Meta:
-        model = models.Member
+        model = get_model("Member")
     
     def __init__(self, *args, **kwargs):
         super(MemberForm, self).__init__(*args, **kwargs)
@@ -571,7 +571,7 @@ class MemberAdmin(GmModelAdmin):
         """
         query_set = self.model._default_manager.get_query_set()
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            asm_state_list=get_model("AreaSparesManager").objects.get(user__user=request.user).state.all()
             query_set=query_set.filter(state=asm_state_list)
 
         return query_set
@@ -587,7 +587,7 @@ class MemberAdmin(GmModelAdmin):
 #         super(MemberAdmin, self).save_model(request, obj, form, change)
 
 class CommentThreadInline(TabularInline):
-    model = models.CommentThread
+    model = get_model("CommentThread")
     fields = ('created_date', 'user', 'message')
     extra = 0
     max_num = 0
@@ -605,7 +605,7 @@ class RedemptionCommentForm(forms.ModelForm):
         return super(RedemptionCommentForm, self).save(commit=commit)
     
     class Meta:
-        model = models.RedemptionRequest
+        model = get_model("RedemptionRequest")
 
     
 class RedemptionRequestAdmin(GmModelAdmin):
@@ -645,7 +645,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
         elif request.user.groups.filter(name=Roles.LPS).exists():
             query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=request.user)
         elif request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            asm_state_list=get_model("AreaSparesManager").objects.get(user__user=request.user).state.all()
             query_set=query_set.filter(member__state=asm_state_list)
 
         return query_set
@@ -673,7 +673,7 @@ class RedemptionRequestAdmin(GmModelAdmin):
             if obj.status=='Approved':
                 obj.is_approved=True
                 partner=None
-                partner_list = models.Partner.objects.all()
+                partner_list = get_model("Partner").objects.all()
                 if len(partner_list)==1:
                     partner=partner_list[0]
                 obj.partner=partner
@@ -722,7 +722,7 @@ class WelcomeKitCommentForm(forms.ModelForm):
         return super(WelcomeKitCommentForm, self).save(commit=commit)
     
     class Meta:
-        model = models.WelcomeKit
+        model = get_model("WelcomeKit")
        
 class WelcomeKitAdmin(GmModelAdmin):
     list_filter = ('status',)
@@ -792,7 +792,7 @@ class WelcomeKitAdmin(GmModelAdmin):
         elif request.user.groups.filter(name=Roles.LPS).exists():
             query_set=query_set.filter(status__in=constants.LP_REDEMPTION_STATUS, partner__user=request.user)
         elif request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            asm_state_list=get_model("AreaSparesManager").objects.get(user__user=request.user).state.all()
             query_set=query_set.filter(member__state=asm_state_list)
 
         return query_set
@@ -822,56 +822,61 @@ class ConstantAdmin(GmModelAdmin):
     search_fields = ('constant_name',  'constant_value')
     list_display = ('constant_name',  'constant_value',)
 
-brand_admin = CoreAdminSite(name='Core')
-
-brand_admin.register(User, UserAdmin)
-brand_admin.register(Group, GroupAdmin)
-brand_admin.register(models.UserProfile, UserProfileAdmin)
-
-if settings.ENV not in ['prod']:
-    brand_admin.register(models.Dealer, DealerAdmin)
-    brand_admin.register(models.AuthorizedServiceCenter, AuthorizedServiceCenterAdmin)
-    brand_admin.register(models.ServiceAdvisor, ServiceAdvisorAdmin)
+def get_admin_site_custom(brand):
+    brand_admin = CoreAdminSite(name=brand)
     
-    brand_admin.register(models.BrandProductCategory, BrandProductCategoryAdmin)
-    brand_admin.register(models.ProductType, ProductTypeAdmin)
-    brand_admin.register(DispatchedProduct, ListDispatchedProduct)
-    brand_admin.register(models.ProductData, ProductDataAdmin)
-    brand_admin.register(models.CouponData, CouponAdmin)
+    brand_admin.register(User, UserAdmin)
+    brand_admin.register(Group, GroupAdmin)
+    brand_admin.register(get_model("UserProfile", brand), UserProfileAdmin)
     
-    brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)
-    brand_admin.register(models.SATempRegistration, SATempRegistrationAdmin)
-    brand_admin.register(models.CustomerTempRegistration, CustomerTempRegistrationAdmin)
+    if brand not in ['core']:
+        brand_admin.register(get_model("Dealer", brand), DealerAdmin)
+        brand_admin.register(get_model("AuthorizedServiceCenter", brand), AuthorizedServiceCenterAdmin)
+        brand_admin.register(get_model("ServiceAdvisor", brand), ServiceAdvisorAdmin)
+        
+        brand_admin.register(get_model("BrandProductCategory", brand), BrandProductCategoryAdmin)
+        brand_admin.register(get_model("ProductType", brand), ProductTypeAdmin)
+        brand_admin.register(DispatchedProduct, ListDispatchedProduct)
+        brand_admin.register(get_model("ProductData", brand), ProductDataAdmin)
+        brand_admin.register(get_model("CouponData", brand), CouponAdmin)
+        
+        brand_admin.register(get_model("ASCTempRegistration", brand), ASCTempRegistrationAdmin)
+        brand_admin.register(get_model("SATempRegistration", brand), SATempRegistrationAdmin)
+        brand_admin.register(get_model("CustomerTempRegistration", brand), CustomerTempRegistrationAdmin)
+        
+    brand_admin.register(get_model("SMSLog", brand), SMSLogAdmin)
+    brand_admin.register(get_model("EmailLog", brand), EmailLogAdmin)
+    brand_admin.register(get_model("DataFeedLog", brand), FeedLogAdmin)
+    brand_admin.register(get_model("FeedFailureLog", brand))
     
-brand_admin.register(models.SMSLog, SMSLogAdmin)
-brand_admin.register(models.EmailLog, EmailLogAdmin)
-brand_admin.register(models.DataFeedLog, FeedLogAdmin)
-brand_admin.register(models.FeedFailureLog)
+    brand_admin.register(get_model("NationalSparesManager", brand), NSMAdmin)
+    brand_admin.register(get_model("AreaSparesManager", brand), ASMAdmin)
+    brand_admin.register(get_model("Distributor", brand), DistributorAdmin)
+    brand_admin.register(get_model("Member", brand), MemberAdmin)
+    
+    brand_admin.register(get_model("SparePartMasterData", brand), SparePartMasterAdmin)
+    brand_admin.register(get_model("SparePartUPC", brand), SparePartUPCAdmin)
+    brand_admin.register(get_model("SparePartPoint", brand), SparePartPointAdmin)
+    brand_admin.register(get_model("AccumulationRequest", brand), AccumulationRequestAdmin)
+    brand_admin.register(get_model("LoyaltySLA", brand), LoyaltySlaAdmin)
+    
+    brand_admin.register(get_model("Partner", brand), PartnerAdmin)
+    brand_admin.register(get_model("ProductCatalog", brand), ProductCatalogAdmin)
+    brand_admin.register(get_model("RedemptionRequest", brand), RedemptionRequestAdmin)
+    brand_admin.register(get_model("WelcomeKit", brand), WelcomeKitAdmin)
+    
+    brand_admin.register(get_model("EmailTemplate", brand), EmailTemplateAdmin)
+    brand_admin.register(get_model("MessageTemplate", brand), MessageTemplateAdmin)
+    brand_admin.register(get_model("SLA", brand), SlaAdmin)
+    brand_admin.register(get_model("ServiceDeskUser", brand), ServiceDeskUserAdmin)
+    brand_admin.register(get_model("Service", brand), ServiceAdmin)
+    brand_admin.register(get_model("ServiceType", brand))
+    brand_admin.register(get_model("Constant", brand), ConstantAdmin)
+    brand_admin.register(get_model("Feedback", brand))
+    brand_admin.register(get_model("Territory", brand))
+    brand_admin.register(get_model("BrandDepartment", brand))
+    brand_admin.register(get_model("DepartmentSubCategories", brand))
+    
+    return brand_admin
 
-brand_admin.register(models.NationalSparesManager, NSMAdmin)
-brand_admin.register(models.AreaSparesManager, ASMAdmin)
-brand_admin.register(models.Distributor, DistributorAdmin)
-brand_admin.register(models.Member, MemberAdmin)
-
-brand_admin.register(models.SparePartMasterData, SparePartMasterAdmin)
-brand_admin.register(models.SparePartUPC, SparePartUPCAdmin)
-brand_admin.register(models.SparePartPoint, SparePartPointAdmin)
-brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
-brand_admin.register(models.LoyaltySLA, LoyaltySlaAdmin)
-
-brand_admin.register(models.Partner, PartnerAdmin)
-brand_admin.register(models.ProductCatalog, ProductCatalogAdmin)
-brand_admin.register(models.RedemptionRequest, RedemptionRequestAdmin)
-brand_admin.register(models.WelcomeKit, WelcomeKitAdmin)
-
-brand_admin.register(models.EmailTemplate, EmailTemplateAdmin)
-brand_admin.register(models.MessageTemplate, MessageTemplateAdmin)
-brand_admin.register(models.SLA, SlaAdmin)
-brand_admin.register(models.ServiceDeskUser, ServiceDeskUserAdmin)
-brand_admin.register(models.Service, ServiceAdmin)
-brand_admin.register(models.ServiceType)
-brand_admin.register(models.Constant, ConstantAdmin)
-brand_admin.register(models.Feedback)
-brand_admin.register(models.Territory)
-brand_admin.register(models.BrandDepartment)
-brand_admin.register(models.DepartmentSubCategories)
+brand_admin = get_admin_site_custom("core")
