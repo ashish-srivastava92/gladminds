@@ -540,7 +540,14 @@ class ContainerTrackerFeed(BaseFeed):
                                                                     truck_no=tracker_obj['truck_no'], 
                                                                     lr_number=tracker_obj['lr_number'],                                                                    
                                                                     do_num=tracker_obj['do_num'],
-                                                                    transporter=transporter_data)
+                                                                    transporter=transporter_data,
+                                                                    container_no=tracker_obj['container_no'],
+                                                                    cts_created_date=tracker_obj['created_date'],
+                                                                    seal_no=tracker_obj['seal_no'],
+                                                                    shippingline_id=tracker_obj['shippingline_id'],
+                                                                    ib_dispatch_dt=tracker_obj['ib_dispatch_dt'], 
+                                                                    no_of_containers= int(tracker_obj['no_of_containers'])
+                                                                    )
 
                     if tracker_obj['lr_date'] == "0000-00-00" or not tracker_obj['lr_date']:
                         lr_date=None

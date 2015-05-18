@@ -936,10 +936,15 @@ class ContainerTracker(BaseModel):
     gatein_date = models.DateField(max_length=10, null=True, blank=True)
     gatein_time = models.TimeField(max_length=10, null=True, blank=True)
     status = models.CharField(max_length=12, choices=constants.CONSIGNMENT_STATUS, default='Open')
-    seal_no = models.CharField(max_length=20, null=True, blank=True)
-    container_no = models.CharField(max_length=20, null=True, blank=True)
+    seal_no = models.CharField(max_length=40, null=True, blank=True)
+    container_no = models.CharField(max_length=40, null=True, blank=True)
     sent_to_sap = models.BooleanField(default=False)
     submitted_by = models.CharField(max_length=50, null=True, blank=True)
+
+    shippingline_id = models.CharField(max_length=50, null=True, blank=True)
+    ib_dispatch_dt = models.DateField(null=True, blank=True)
+    cts_created_date = models.DateField(null=True, blank=True)
+    no_of_containers = models.IntegerField()
 
     class Meta:
         abstract = True

@@ -57,6 +57,13 @@
 --alter table gm_dealer add asm_id integer;
 --alter table gm_dealer add foreign key (asm_id) references gm_areaservicemanager(id);
 
+alter table gm_containertracker add column shippingline_id varchar(50) null;
+alter table gm_containertracker add column ib_dispatch_dt int null;
+alter table gm_containertracker add column no_of_containers int null;
+alter table gm_containertracker add column cts_created_date  datetime  null;
+alter table gm_containertracker modify container_no varchar(50) null;
+alter table gm_containertracker modify seal_no varchar(50) null;
+
 
 For epc
 IN bajaj db; 
