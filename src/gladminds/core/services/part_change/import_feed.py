@@ -55,7 +55,7 @@ class BOMItemFeed(BaseFeed):
                                                         created_on=bom['created_on'],
                                                         valid_from=bom['valid_from_header'],
                                                         valid_to=bom['valid_to_header'])
-                bom_header_obj.save() 
+                bom_header_obj.save(using=settings.BRAND) 
             except Exception as ex:
                 ex="[Exception: ]: BOMHeaderFeed {0}".format(ex)
                 logger.error(ex)
@@ -64,10 +64,10 @@ class BOMItemFeed(BaseFeed):
         for bom in self.data_source[0]:
             try:
                 bom_plate_obj = get_model('BOMPlate')(plate_id=bom['plate_id'], plate_txt=bom['plate_txt'])
-                bom_plate_obj.save()
+                bom_plate_obj.save(using=settings.BRAND)
                 
                 bom_part_obj = get_model('BOMPart')(part_number=bom['part_number'], revision_number=bom['revision_number'])
-                bom_part_obj.save()
+                bom_part_obj.save(using=settings.BRAND)
 
                 bomplatepart_obj = get_model('BOMPlatePart')(quantity=bom['quantity'], uom=bom['uom'],
                                                             change_number_to=bom['change_number_to'],
@@ -79,7 +79,7 @@ class BOMItemFeed(BaseFeed):
                 bomplatepart_obj.bom = bom_header_obj
                 bomplatepart_obj.part = bom_part_obj
                 bomplatepart_obj.plate = bom_plate_obj
-                bomplatepart_obj.save()
+                bomplatepart_obj.save(using=settings.BRAND)
             except Exception as ex:
                 ex="[Exception: ]: BOMItemFeed {0}".format(ex)
                 logger.error(ex)
