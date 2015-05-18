@@ -33,7 +33,6 @@ class SAPFeed(object):
 
     def import_to_db(self, feed_type=None, data_source=[], feed_remark=None):
         function_mapping = {
-            'bomheader': BOMHeaderFeed,
             'bomitem': BOMItemFeed,
             'eco_release': ECOReleaseFeed,
             'eco_implementation':ECOImplementationFeed,
@@ -46,37 +45,45 @@ class SAPFeed(object):
 class BOMItemFeed(BaseFeed):
   
     def import_data(self):
-        for bom in self.data_source:
+        bom_header_obj = 0
+        for bom in self.data_source[1]:
             try:
-                bom_item_obj = get_model('BOMItem')(bom_number=bom['bom_number'], part_number=bom['part_number'],
-                                            revision_number=bom['revision_number'], quantity=bom['quantity'], 
-                                            uom=bom['uom'], change_number_to=bom['change_number_to'],
-                                            valid_from=bom['valid_from'], valid_to=bom['valid_to'], 
-                                            plate_id=bom['plate_id'], plate_txt=bom['plate_txt'],
-                                            serial_number=bom['serial_number'], change_number=bom['change_number'],
-                                            item=bom['item'], item_id=bom['item_id'])                
-                bom_item_obj.save()
-            except Exception as ex:
-                ex="[Exception: ]: BOMItemFeed {0}".format(ex)
-                logger.error(ex)
-                self.feed_remark.fail_remarks(ex)
-                
-        return self.feed_remark
-
-class BOMHeaderFeed(BaseFeed):    
-
-    def import_data(self):
-        for bom in self.data_source:
-            try:
-                bom_header_obj = get_model('BOMHeader')(sku_code=bom['sku_code'], plant=bom['plant'],
-                                                  bom_type=bom['bom_type'], bom_number=bom['bom_number_header'],
-                                                  created_on=bom['created_on'], valid_from=bom['valid_from_header'],
-                                                  valid_to=bom['valid_to_header'])
-                bom_header_obj.save() 
+                bom_header_obj = get_model('BOMHeader')(sku_code=bom['sku_code'],
+                                                        plant=bom['plant'],
+                                                        bom_type=bom['bom_type'],
+                                                        bom_number=bom['bom_number_header'],
+                                                        created_on=bom['created_on'],
+                                                        valid_from=bom['valid_from_header'],
+                                                        valid_to=bom['valid_to_header'])
+                bom_header_obj.save(using=settings.BRAND) 
             except Exception as ex:
                 ex="[Exception: ]: BOMHeaderFeed {0}".format(ex)
                 logger.error(ex)
-                self.feed_remark.fail_remarks(ex)
+                self.feed_remark[1].fail_remarks(ex)
+
+        for bom in self.data_source[0]:
+            try:
+                bom_plate_obj = get_model('BOMPlate')(plate_id=bom['plate_id'], plate_txt=bom['plate_txt'])
+                bom_plate_obj.save(using=settings.BRAND)
+                
+                bom_part_obj = get_model('BOMPart')(part_number=bom['part_number'], revision_number=bom['revision_number'])
+                bom_part_obj.save(using=settings.BRAND)
+
+                bomplatepart_obj = get_model('BOMPlatePart')(quantity=bom['quantity'], uom=bom['uom'],
+                                                            change_number_to=bom['change_number_to'],
+                                                            change_number=bom['change_number'],
+                                                            valid_from=bom['valid_from'], valid_to=bom['valid_to'], 
+                                                            serial_number=bom['serial_number'],
+                                                            item=bom['item'], item_id=bom['item_id'])
+
+                bomplatepart_obj.bom = bom_header_obj
+                bomplatepart_obj.part = bom_part_obj
+                bomplatepart_obj.plate = bom_plate_obj
+                bomplatepart_obj.save(using=settings.BRAND)
+            except Exception as ex:
+                ex="[Exception: ]: BOMItemFeed {0}".format(ex)
+                logger.error(ex)
+                self.feed_remark[0].fail_remarks(ex)
 
         return self.feed_remark
     
