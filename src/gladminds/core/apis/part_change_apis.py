@@ -241,7 +241,8 @@ class BOMVisualizationResource(CustomBaseModelResource):
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get']
         filtering = {
-                     "bom" : ALL_WITH_RELATIONS
+                     "bom" : ALL_WITH_RELATIONS,
+                     "status" : ALL
                      }
         
     def prepend_urls(self):
