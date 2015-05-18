@@ -1,8 +1,12 @@
 import json
+
 from django.test.client import Client
-from test_constants import BRAND_PRODUCT_RANGE, BRAND_VERTICAL, BOM_HEADER,\
-    BOM_PLATE_PART, ECO_RELEASE, ECO_IMPLEMENTATION, BOM_VISUALIZATION
+
 from integration.bajaj.base import BaseTestCase
+from test_constants import BRAND_PRODUCT_RANGE, BRAND_VERTICAL, BOM_HEADER, \
+    BOM_PLATE_PART, ECO_RELEASE, ECO_IMPLEMENTATION, BOM_VISUALIZATION, \
+    SBOM_REVIEW
+
 
 client=Client(SERVER_NAME='bajaj')
 
@@ -109,4 +113,14 @@ class PartChangeTests(BaseTestCase):
         resp = self.get(uri, access_token=access_token)
         self.assertEquals(json.loads(resp.content)['objects'][0]['part']['part_number'], "15161069")
         self.assertEquals(resp.status_code, 200)
+
+    def test_review_sbom(self):
+        access_token = self.user_login()
+        uri = '/v1/bom-visualizations/'
+        resp = self.post(uri, data=BOM_VISUALIZATION, access_token=access_token)
+        self.assertEquals(resp.status_code, 201)
+        uri = '/v1/bom-visualizations/review-sbom/'
+        resp = self.post(uri, data=SBOM_REVIEW, access_token=access_token)
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(json.loads(resp.content)['message'], "Success")
         
