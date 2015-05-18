@@ -1493,7 +1493,10 @@ class BrandProductRange(BaseModel):
         db_table = "gm_brandproductrange"
         abstract = True
         verbose_name_plural = "Product Range"
-
+    
+    def __unicode__(self):
+        return self.sku_code
+    
 class BOMHeader(BaseModel):
     '''Detaills of  Header fields BOM'''
     sku_code = models.CharField(max_length=20, null=True, blank=True)
@@ -1509,6 +1512,9 @@ class BOMHeader(BaseModel):
         db_table = "gm_bomheader"
         verbose_name_plural = "Bills of Material "
     
+    def __unicode__(self):
+        return self.sku_code
+        
 class BOMPlate(BaseModel):
     '''Details of BOM Plates'''
     plate_id = models.CharField(max_length=50, unique=True)
@@ -1533,6 +1539,9 @@ class BOMPlate(BaseModel):
         db_table = "gm_bomplate"
         abstract = True
         verbose_name_plural = "BOM Plates"
+    
+    def __unicode__(self):
+        return self.plate_id
         
 class BOMPart(BaseModel):
     '''Detaills of  BOM Parts'''
@@ -1546,6 +1555,9 @@ class BOMPart(BaseModel):
         abstract = True
         db_table = "gm_bompart"
         verbose_name_plural = "BOM Parts "
+        
+    def __unicode__(self):
+        return self.part_number
         
 class BOMPlatePart(BaseModel):
     '''Details of BOM Plates and part relation'''
@@ -1566,10 +1578,11 @@ class BOMPlatePart(BaseModel):
         
 class BOMVisualization(BaseModel):
     '''Details of BOM Plates cordinates'''
-    x_coordinate  = models.IntegerField(null=True, blank=True)
-    y_coordinate  = models.IntegerField(null=True, blank=True)
-    z_coordinate  = models.IntegerField(null=True, blank=True)
-    serial_number = models.IntegerField(null=True, blank=True)
+    x_coordinate  = models.IntegerField()
+    y_coordinate  = models.IntegerField()
+    z_coordinate  = models.IntegerField()
+    serial_number = models.IntegerField()
+    part_href = models.CharField(max_length=200)
     
     class Meta:
         abstract = True

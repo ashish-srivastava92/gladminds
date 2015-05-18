@@ -814,3 +814,47 @@ ECO_IMPLEMENTATION =  {
                        "remarks": "pp",
                        "resource_uri": "/v1/eco-implementation/1/"
                        }
+
+BOM_VISUALIZATION = {
+                     "bom": {
+                             "bom": {
+                                     "bom_number": "211760",
+                                     "bom_type": None,
+                                     "id": 5,
+                                     "plant": None,
+                                     "sku_code": "112",
+                                     "valid_from": None,
+                                     "valid_to": None
+                                     },
+                             "change_number": "SCH01011210",
+                             "change_number_to": "",
+                             "id": 4701,
+                             "item": "1",
+                             "item_id": "1",
+                             "part": {
+                                      "description": None,
+                                      "id": 2487,
+                                      "part_number": "15161069",
+                                      "revision_number": "0"
+                                      },
+                             "plate": {
+                                       "id": 205,
+                                       "plate_id": "44",
+                                       "plate_image": None,
+                                        "plate_image_with_part": None,
+                                        "plate_txt": "Chain Case"
+                                        },
+                             "quantity": "1",
+                             "serial_number": "",
+                             "uom": "EA"
+                             },
+
+                             "resource_uri": "/v1/bom-visualizations/1/",
+                             "serial_number": 123,
+                             "x_coordinate": 10,
+                             "y_coordinate": 20,
+                             "z_coordinate": 30
+                             } 
+
+SERVICE_CIRCULAR = dict((('product_type','p1'),('type_of_circular','1'),('change_no','12'),('new_circular','1'),('buletin_no','123'),('circular_date','2015-04-12'),('from_circular','a'),('to_circular','s'),('cc_circular','d'),('circular_subject','dd'),('part_added','lk'),('circular_title','hj'),('part_deleted','jh'),('part_changed','kj'),('model_name','hn'),('sku_description','uu'),('model_sku_code','00DJ07ZZ'),('model_sku_code','00DK04ZZ')))
+

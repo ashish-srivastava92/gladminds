@@ -115,7 +115,7 @@ def set_mechanic_image_path(instance,filename):
     return create_upload_path('mechanics', instance, filename)
 
 def set_product_catalog_image_path(instance,filename):
-    return create_upload_path('product', instance, filename)
+    return create_upload_path('redeem_product', instance, filename)
 
 def set_redemption_pod_path(instance,filename):
     return create_upload_path('redemption', instance, filename)
