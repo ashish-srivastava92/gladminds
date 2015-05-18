@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime
 import json
 import logging
 
@@ -9,7 +10,6 @@ from django.http.response import HttpResponse, HttpResponseBadRequest
 from tastypie import fields
 from tastypie.authorization import Authorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
-from tastypie.utils.mime import build_content_type
 from tastypie.utils.urls import trailing_slash
 
 from gladminds.core.apis.authentication import AccessTokenAuthentication
@@ -244,7 +244,43 @@ class BOMVisualizationResource(CustomBaseModelResource):
                      "bom" : ALL_WITH_RELATIONS
                      }
         
+    def prepend_urls(self):
+        return [
+                 url(r"^(?P<resource_name>%s)/review-sbom%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('review_sbom_details'), name="review_sbom_details")
+                ]
         
+    def review_sbom_details(self, request, **kwargs):
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        bom_number = load.get('bom_number')
+        sku_code = load.get('sku_code')
+        plate_id = load.get('plate_id')
+        part_number = load.get('part_number')
+        status = load.get('status')
+        quantity = load.get('quantity')
+        try:
+            bom_details = get_model('BOMPlatePart').objects.get(bom__sku_code=sku_code,
+                                                                bom__bom_number=bom_number,
+                                                                plate__plate_id=plate_id,
+                                                                part__part_number=part_number,
+                                                                quantity=quantity)
+            bom_visualizations = get_model('BOMVisualization').objects.filter(bom=bom_details)
+            bom_visualization = bom_visualizations[0]
+            bom_visualization.status = status
+            if status == 'Publish':
+                bom_visualization.published_date = datetime.now()
+            bom_visualization.save(using=settings.BRAND)
+            return HttpResponse(json.dumps({"message": "Success"}), content_type='application/json')
+        except Exception as ex:
+            LOG.info('[review_sbom]: {0}'.format(ex))
+            return HttpResponseBadRequest()
+
 class ECOReleaseResource(CustomBaseModelResource):
     
     class Meta:

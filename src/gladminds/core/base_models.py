@@ -20,6 +20,7 @@ from gladminds.core.model_helpers import set_service_training_material_path,\
     set_welcome_kit_pod_path
 from gladminds.core.managers.mail import sent_password_reset_link,\
     send_email_activation
+from gladminds.core.constants import SBOM_STATUS
 
 try:
     from django.utils.timezone import now as datetime_now
@@ -1578,6 +1579,10 @@ class BOMVisualization(BaseModel):
     z_coordinate  = models.IntegerField()
     serial_number = models.IntegerField()
     part_href = models.CharField(max_length=200)
+    status =  models.CharField(max_length=25, choices=SBOM_STATUS,
+                              blank=True, null=True)
+    published_date = models.DateTimeField(null=True, blank=True)
+
     
     class Meta:
         abstract = True

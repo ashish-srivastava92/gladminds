@@ -67,3 +67,7 @@ IN bajajcv and probiking
 update gm_bomplate set plate_image = concat("qa/bajaj/plates/", plate_id, ".PNG") ;
 update gm_bomplate set plate_image_with_part = concat("qa/bajaj/plates_with_part/", plate_id, ".PNG") ;
 
+
+
+alter table gm_bomvisualization add column status varchar(25) null;
+alter table gm_bomvisualization add column published_date datetime null;

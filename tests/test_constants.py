@@ -858,3 +858,10 @@ BOM_VISUALIZATION = {
 
 SERVICE_CIRCULAR = dict((('product_type','p1'),('type_of_circular','1'),('change_no','12'),('new_circular','1'),('buletin_no','123'),('circular_date','2015-04-12'),('from_circular','a'),('to_circular','s'),('cc_circular','d'),('circular_subject','dd'),('part_added','lk'),('circular_title','hj'),('part_deleted','jh'),('part_changed','kj'),('model_name','hn'),('sku_description','uu'),('model_sku_code','00DJ07ZZ'),('model_sku_code','00DK04ZZ')))
 
+SBOM_REVIEW = {"bom_number":"211760",
+               "sku_code":"112",
+               "plate_id" : "44",
+               "part_number" : "15161069",
+               "status" : "Publish",
+               "quantity" : "1"
+               }
