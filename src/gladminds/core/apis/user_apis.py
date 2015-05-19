@@ -40,6 +40,7 @@ from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.managers.mail import send_reset_link_email
 from gladminds.core.utils import get_sql_data
 from gladminds.afterbuy import utils as core_utils
+from gladminds.core.model_fetcher import get_model
 
 logger = logging.getLogger('gladminds')
 
@@ -186,7 +187,7 @@ class UserProfileResource(CustomBaseModelResource):
             load = json.loads(request.body)
         except:
             return HttpResponse(content_type="application/json", status=404)
-        email = load.get('email_id')
+        email = load.get('email')
         phone_number = load.get('phone_number')
         if not phone_number and not email:
             return HttpBadRequest("phone_number or email is required")
@@ -197,8 +198,10 @@ class UserProfileResource(CustomBaseModelResource):
                 user_obj = models.UserProfile.objects.get(phone_number=phone_number).user
                 otp = otp_handler.get_otp(user=user_obj)
                 message = core_utils.get_template('SEND_OTP').format(otp)
-                send_job_to_queue('send_otp', {'phone_number': phone_number,
-                                             'message': message, "sms_client": settings.SMS_CLIENT})
+                
+                send_job_to_queue(send_otp, {'phone_number': phone_number,
+                                             'message': message, "sms_client": settings.SMS_CLIENT},
+                                  brand=settings.BRAND)
                 logger.info('OTP sent to mobile {0}'.format(phone_number))
                 data = {'status': 1, 'message': "OTP sent_successfully"}
                 #Send email if email address exist
@@ -206,13 +209,13 @@ class UserProfileResource(CustomBaseModelResource):
                 try:
                     user_obj = models.UserProfile.objects.get(user__email=email, is_email_verified=True)
                     site = RequestSite(request)
-                    models.EmailToken.objects.create_email_token(user_obj, email, site, trigger_mail='forgot-password')
+                    get_model('EmailToken').objects.create_email_token(user_obj, email, site, trigger_mail='forgot-password')
                     data = {'status': 1, 'message': "Password reset link sent successfully"}
                     return HttpResponse(json.dumps(data), content_type="application/json")
                 except Exception as ex:
-                        log_message = "new user :{0}".format(ex)
-                        logger.info(log_message)
-                        data = {'status': 0, 'message': "Either your email is not verified or its not exist"}
+                    log_message = "Send email for forgot password :{0}".format(ex)
+                    logger.info(log_message)
+                    data = {'status': 0, 'message': "Either your email is not verified or its not exist"}
         except Exception as ex:
             logger.error('Invalid details, mobile {0} and exception {1}'.format(request.POST.get('phone_number', ''),ex))
             data = {'status': 0, 'message': "inavlid phone_number/email_id"}
@@ -251,7 +254,8 @@ class UserProfileResource(CustomBaseModelResource):
             return HttpBadRequest("password1 and password2 not matched")
         try:
             user_obj = models.UserProfile.objects.get(user__email=email, is_email_verified=True)
-        except Exception:
+        except Exception as ex:
+            logger.info("[Exception while changing password]:{0}".format(ex))
             raise ImmediateHttpResponse(
                 response=http.HttpBadRequest('invalid authentication key!'))
         user_details['email'] = user_obj.user.email
