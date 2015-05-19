@@ -655,7 +655,7 @@ ENABLE_SERVICE_DESK = True
 
 DEFAULT_IMAGE_ID = 'guest.png'
 
-FORGOT_PASSWORD_LINK = {'bajaj':'x'}
+FORGOT_PASSWORD_LINK = {'bajaj':'/v1/gm-users/forgot-password/email/'}
 CONSTANCE_CONFIG = {
     'DEFAULT_IMAGE': ('guest.png', 'Default image to be used by any app'),
     'AFTERBUY_FORGOT_PASSWORD_URL': ('http://afterbuy.co/demo/staging_qw741qaz5/change-password.php', 'Afterbuy forgot password url'),

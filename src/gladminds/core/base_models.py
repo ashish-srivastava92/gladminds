@@ -8,7 +8,6 @@ from constance import config
 
 from gladminds.core.managers import user_manager, coupon_manager,\
     service_desk_manager
-from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
 from gladminds.core.model_helpers import PhoneField, set_plate_image_path,\
     set_plate_with_part_image_path, set_brand_product_image_path
 from gladminds.core import constants
@@ -21,6 +20,7 @@ from gladminds.core.model_helpers import set_service_training_material_path,\
 from gladminds.core.managers.mail import sent_password_reset_link,\
     send_email_activation
 from gladminds.core.constants import SBOM_STATUS
+from gladminds.core.managers.email_token_manager import EmailTokenManager
 
 try:
     from django.utils.timezone import now as datetime_now
@@ -576,7 +576,8 @@ class EmailToken(models.Model):
                     'base_url':settings.DOMAIN_BASE_URL}
         if trigger_mail == 'forgot-password':
             ctx_dict = {'activation_key': self.activation_key,
-                    'link': settings.FORGOT_PASSWORD_LINK[settings.BRAND]}
+                    'link': settings.FORGOT_PASSWORD_LINK[settings.BRAND],
+                    'base_url': settings.COUPON_URL}
             sent_password_reset_link(reciever_email, ctx_dict)
         else:
             send_email_activation(reciever_email, ctx_dict)

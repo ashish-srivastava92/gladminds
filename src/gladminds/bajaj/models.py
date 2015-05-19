@@ -516,6 +516,8 @@ class LoyaltySLA(base_models.LoyaltySLA):
 
         
 class EmailToken(base_models.EmailToken):
+    user = models.ForeignKey(UserProfile)
+
     class Meta(base_models.EmailToken.Meta):
         verbose_name_plural = 'email_tokens'
 
