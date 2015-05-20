@@ -287,10 +287,9 @@ class UserProfileResource(CustomBaseModelResource):
                             password=old_password)
             if not user_auth:
                 data = {"status":0, "message" : "Old password is wrong"}
-                print "user auth", user_auth
             else:
                 if password != repassword:
-                    return HttpBadRequest("password1 and password2 not matched")
+                    return HttpBadRequest("new password and confirm password do not matched")
                 user_details['email'] = user_obj.user.email
                 user = User.objects.filter(**user_details)[0]
                 user.set_password(password)
