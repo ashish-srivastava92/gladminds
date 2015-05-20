@@ -542,29 +542,23 @@ class ContainerTrackerFeed(BaseFeed):
                                                                     do_num=tracker_obj['do_num'],
                                                                     transporter=transporter_data,
                                                                     container_no=tracker_obj['container_no'],
-                                                                    cts_created_date=tracker_obj['created_date'],
                                                                     seal_no=tracker_obj['seal_no'],
                                                                     shippingline_id=tracker_obj['shippingline_id'],
-                                                                    ib_dispatch_dt=tracker_obj['ib_dispatch_dt'], 
                                                                     no_of_containers= int(tracker_obj['no_of_containers'])
                                                                     )
-
-                    if tracker_obj['lr_date'] == "0000-00-00" or not tracker_obj['lr_date']:
-                        lr_date=None
-                    else:
-                        lr_date=datetime.strptime(tracker_obj['lr_date'], "%Y-%m-%d")
-                    container_tracker_obj.lr_date=lr_date
+                    
+                container_tracker_obj.ib_dispatch_dt = format_date(tracker_obj['ib_dispatch_dt'])
+                container_tracker_obj.cts_created_date = format_date(tracker_obj['created_date'])
+                container_tracker_obj.lr_date = format_date(tracker_obj['lr_date'])
+                gatein_date = format_date(tracker_obj['gatein_date'])
                 
-                if tracker_obj['gatein_date'] != "0000-00-00":
-                    gatein_date=datetime.strptime(tracker_obj['gatein_date'], "%Y-%m-%d")
-                    status="Closed"
-                else:
-                    gatein_date=None
+                status="Closed"               
+                if gatein_date: 
                     status="Open"
                 container_tracker_obj.gatein_date=gatein_date
                 container_tracker_obj.gatein_time=tracker_obj['gatein_time']
                 container_tracker_obj.status=status
-                container_tracker_obj.save() 
+                container_tracker_obj.save(using=settings.BRAND) 
             except Exception as ex:
                 ex="[Exception: ]: ContainerTrackerFeed {0}".format(ex)
                 logger.error(ex)
@@ -572,3 +566,9 @@ class ContainerTrackerFeed(BaseFeed):
         
         return self.feed_remark
 
+def format_date(date):
+    if date == "0000-00-00" or not date:
+        date=None
+    else:
+        date=datetime.strptime(date, "%Y-%m-%d")
+    return date

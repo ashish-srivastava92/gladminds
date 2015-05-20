@@ -276,8 +276,8 @@ class ContainerTrackerModel(ComplexModel):
     CONTAINER_NO = Unicode
     SEAL_NO = Unicode
     SHIPPINGLINE_ID = Unicode
-    CREATED_DATE = Date(default=None)
-    IB_DISPATCH_DT = Date(default=None)
+    CREATED_DATE = Unicode(default=None)
+    IB_DISPATCH_DT = Unicode(default=None)
     NO_OF_CONTAINERS = Unicode
     
 class ContainerTrackerModelList(ComplexModel):
