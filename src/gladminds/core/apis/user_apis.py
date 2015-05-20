@@ -115,7 +115,10 @@ class UserProfileResource(CustomBaseModelResource):
                 self.wrap_view('validate_otp'), name="validate_otp"),
             url(r"^(?P<resource_name>%s)/logout%s" % (self._meta.resource_name,
                                                       trailing_slash()),
-                self.wrap_view('logout'), name="logout")
+                self.wrap_view('logout'), name="logout"),
+            url(r"^(?P<resource_name>%s)/change-password%s" % 
+                (self._meta.resource_name, trailing_slash()), self.wrap_view
+                ('change_password'), name="change_password"),
         ]
     
     def sent_otp_user_phone_number(self, request, **kwargs):
@@ -263,6 +266,40 @@ class UserProfileResource(CustomBaseModelResource):
         user.set_password(password)
         user.save()
         data = {'status': 1, 'message': "password updated successfully"}
+        return HttpResponse(json.dumps(data), content_type="application/json")
+    
+    def change_password(self, request, **kwargs):
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        email = load.get('email_id')
+        old_password = load.get('old_password')
+        password = load.get('new_password')
+        repassword = load.get('confirm_password')
+
+        user_details = {}
+        try:
+            user_obj = models.UserProfile.objects.get(user__email=email)
+            user_auth = authenticate(username=str(user_obj.user.username),
+                            password=old_password)
+            if not user_auth:
+                data = {"status":0, "message" : "Old password is wrong"}
+                print "user auth", user_auth
+            else:
+                if password != repassword:
+                    return HttpBadRequest("password1 and password2 not matched")
+                user_details['email'] = user_obj.user.email
+                user = User.objects.filter(**user_details)[0]
+                user.set_password(password)
+                user.save()
+                data = {'status': 1, 'message': "password updated successfully"}
+        except Exception as ex:
+            logger.info("[Exception while changing password]:{0}".format(ex))
+            raise ImmediateHttpResponse(
+                response=http.HttpBadRequest('invalid authentication key!'))
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def login(self, request, **kwargs):
