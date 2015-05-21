@@ -334,5 +334,41 @@
             "body": "",
             "description":"Mail to ASCs on customer support"
             }
+    },
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 29,
+        "fields": {
+            "template_key": "ECO_RELEASE_FEED",
+            "sender": "feed-report@gladminds.co",
+            "receiver": "",
+            "subject": "ECO_RELEASE_FEED",
+            "body": "",
+            "description":"ECO_RELEASE_FEED"
+            }
+    },
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 30,
+        "fields": {
+            "template_key": "ECO_IMPLEMENTED_FEED",
+            "sender": "feed-report@gladminds.co",
+            "receiver": "",
+            "subject": "ECO_IMPLEMENTED_FEED",
+            "body": "",
+            "description":"ECO_IMPLEMENTED_FEED"
+            }
+    },
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 31,
+        "fields": {
+            "template_key": "SBOM_FEED",
+            "sender": "feed-report@gladminds.co",
+            "receiver": "priyanka.n@hashedin.com",
+            "subject": "SBOM_FEED_RECEIVED",
+            "body": "We have received the sbom feed",
+            "description":"SBOM_FEEDs"
+            }
     }
 ]

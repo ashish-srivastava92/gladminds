@@ -78,3 +78,4 @@ update gm_bomplate set plate_image_with_part = concat("qa/bajaj/plates_with_part
 
 alter table gm_bomvisualization add column status varchar(25) null;
 alter table gm_bomvisualization add column published_date datetime null;
+alter table gm_bomvisualization add column remarks varchar(500) null;

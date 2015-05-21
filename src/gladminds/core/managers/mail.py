@@ -542,3 +542,18 @@ def send_phone_number_update_count_exceeded(update_details=None, brand=None):
         logger.info("Sending out customer phone number update exceeds emails")
     except Exception as ex:
         logger.info("[Exception customer phone number update]: {0}".format(ex))
+
+
+def send_sbom_feed_received_mail(brand=None):
+    try:
+        data = get_email_template('SBOM_FEED', brand)
+        file_stream = open(settings.EMAIL_DIR+'/base_email_template.html')
+        feed_temp = file_stream.read()
+        template = Template(feed_temp)
+        context = Context({"content": data['body']})
+        body = template.render(context)
+        send_email(sender = data['sender'], receiver = data['receiver'], 
+                   subject = data['subject'], body = body, message=data['body'],
+                   smtp_server = settings.MAIL_SERVER)
+    except Exception as ex:
+        logger.info("[Exception while sending sbom received email]: {0}".format(ex))

@@ -244,7 +244,7 @@ class BOMVisualizationResource(CustomBaseModelResource):
                      "bom" : ALL_WITH_RELATIONS,
                      "status" : ALL
                      }
-        
+     
     def prepend_urls(self):
         return [
                  url(r"^(?P<resource_name>%s)/review-sbom%s" % (self._meta.resource_name,trailing_slash()),
@@ -252,6 +252,7 @@ class BOMVisualizationResource(CustomBaseModelResource):
                 ]
         
     def review_sbom_details(self, request, **kwargs):
+        self.is_authenticated(request)
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
                                 status=400)
@@ -265,6 +266,7 @@ class BOMVisualizationResource(CustomBaseModelResource):
         part_number = load.get('part_number')
         status = load.get('status')
         quantity = load.get('quantity')
+        remarks = load.get('remarks')
         try:
             bom_details = get_model('BOMPlatePart').objects.get(bom__sku_code=sku_code,
                                                                 bom__bom_number=bom_number,
@@ -274,6 +276,8 @@ class BOMVisualizationResource(CustomBaseModelResource):
             bom_visualizations = get_model('BOMVisualization').objects.filter(bom=bom_details)
             bom_visualization = bom_visualizations[0]
             bom_visualization.status = status
+            if remarks:
+                bom_visualization.remarks = remarks
             if status == 'Publish':
                 bom_visualization.published_date = datetime.now()
             bom_visualization.save(using=settings.BRAND)

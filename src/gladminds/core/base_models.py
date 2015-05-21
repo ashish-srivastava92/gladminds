@@ -1588,6 +1588,7 @@ class BOMVisualization(BaseModel):
     status =  models.CharField(max_length=25, choices=SBOM_STATUS,
                               blank=True, null=True)
     published_date = models.DateTimeField(null=True, blank=True)
+    remarks = models.CharField(max_length=500, null=True, blank=True)
 
     
     class Meta:
