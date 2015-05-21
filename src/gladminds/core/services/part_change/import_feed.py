@@ -17,6 +17,7 @@ from gladminds.core.managers.audit_manager import feed_log, sms_log
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.auth_helper import Roles
 from gladminds.core.services.feed_resources import BaseFeed, BaseExportFeed
+from gladminds.core.managers.mail import send_sbom_feed_received_mail
 logger = logging.getLogger("gladminds")
 
 USER_GROUP = {'dealer': Roles.DEALERS,
@@ -80,6 +81,7 @@ class BOMItemFeed(BaseFeed):
                 bomplatepart_obj.part = bom_part_obj
                 bomplatepart_obj.plate = bom_plate_obj
                 bomplatepart_obj.save(using=settings.BRAND)
+                send_sbom_feed_received_mail(brand=settings.BRAND)
             except Exception as ex:
                 ex="[Exception: ]: BOMItemFeed {0}".format(ex)
                 logger.error(ex)
