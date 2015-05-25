@@ -584,9 +584,18 @@
     "model": "gladminds.messagetemplate",
     "pk": 65,
     "fields": {
-      "template_key":"SEND_CUSTOMER_REGISTER_KTM",
-      "template":  "Dear {customer_name}, Congratulations for owning KTM Duke Bike. Download link for KTM Duke Owner's Manual at {ktm_url}. Welcome to Orange World.",
-      "description": "Send message on KTM bike purchase"
+      "template_key":"SEND_CUSTOMER_REGISTER_KTM_DUKE",
+      "template":  "Dear {customer_name}, Congratulations for owning KTM Duke Bike. Download link for KTM Duke Owner's Manual for Android. Users: {duke_android_url} and Web Users : {duke_web_url}", 
+      "description": "Send message on KTM DUKE bike purchase"
+    }
+  },
+     {
+    "model": "gladminds.messagetemplate",
+    "pk": 66,
+    "fields": {
+      "template_key":"SEND_CUSTOMER_REGISTER_KTM_RC",
+      "template":  "Dear {customer_name}, Congratulations for owning KTM RC Bike. Download link for KTM RC Owner's Manual for Android. Users: {rc_android_url} and Web Users : {rc_web_url}", 
+      "description": "Send message on KTM RC bike purchase"
     }
   }
 ]
