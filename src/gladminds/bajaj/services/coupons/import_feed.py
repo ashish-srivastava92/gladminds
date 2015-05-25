@@ -270,13 +270,21 @@ class ProductPurchaseFeed(BaseFeed):
                 
                 post_save.connect(
                     update_coupon_data, sender=models.ProductData)
-# 
-#                 if str(product['vin']).upper().startswith('VBK', 0, 3):
-#                     from gladminds.sqs_tasks import send_on_product_purchase
-#                     message = templates.get_template('SEND_CUSTOMER_REGISTER_KTM'
-#                                                      ).format(customer_name=product_data.customer_name, ktm_url="http://tinyurl.com/com-ktm-ab")            
-#                     sms_log(settings.BRAND, receiver=product_data.customer_phone_number, action='SEND TO QUEUE', message=message)
-#                     send_job_to_queue(send_on_product_purchase, {"phone_number":product_data.customer_phone_number, "message":message, "sms_client":settings.SMS_CLIENT}) 
+
+                if str(product['vin']).upper().startswith('VBK', 0, 3):
+                    from gladminds.sqs_tasks import send_on_product_purchase
+                    if str(product['vin']).upper()[4]=='U' or str(product['vin']).upper()[4]=='G':
+                        message = templates.get_template('SEND_CUSTOMER_REGISTER_KTM_DUKE'
+                                                     ).format(customer_name=product_data.customer_name,
+                                                              duke_android_url="http://tinyurl.com/com-ktm-ab",
+                                                              duke_web_url="http://ktmdukeweb.gladminds.co")
+                    elif str(product['vin']).upper()[4]=='Y':
+                        message = templates.get_template('SEND_CUSTOMER_REGISTER_KTM_RC'
+                                                     ).format(customer_name=product_data.customer_name,
+                                                              rc_android_url="http://tinyurl.com/COM-KTM-RC",
+                                                              rc_web_url="http://ktmrcweb.gladminds.co")
+                    sms_log(settings.BRAND, receiver=product_data.customer_phone_number, action='SEND TO QUEUE', message=message)
+                    send_job_to_queue(send_on_product_purchase, {"phone_number":product_data.customer_phone_number, "message":message, "sms_client":settings.SMS_CLIENT}) 
 
             except ObjectDoesNotExist as done:
                 ex='[Info: ProductPurchaseFeed_product_data]: VIN- {0} :: {1}'''.format(product['vin'], done)
