@@ -271,21 +271,6 @@ class ProductPurchaseFeed(BaseFeed):
                 post_save.connect(
                     update_coupon_data, sender=models.ProductData)
 
-                if str(product['vin']).upper().startswith('VBK', 0, 3):
-                    from gladminds.sqs_tasks import send_on_product_purchase
-                    if str(product['vin']).upper()[4]=='U' or str(product['vin']).upper()[4]=='G':
-                        message = templates.get_template('SEND_CUSTOMER_REGISTER_KTM_DUKE'
-                                                     ).format(customer_name=product_data.customer_name,
-                                                              duke_android_url="http://tinyurl.com/com-ktm-ab",
-                                                              duke_web_url="http://ktmdukeweb.gladminds.co")
-                    elif str(product['vin']).upper()[4]=='Y':
-                        message = templates.get_template('SEND_CUSTOMER_REGISTER_KTM_RC'
-                                                     ).format(customer_name=product_data.customer_name,
-                                                              rc_android_url="http://tinyurl.com/COM-KTM-RC",
-                                                              rc_web_url="http://ktmrcweb.gladminds.co")
-                    sms_log(settings.BRAND, receiver=product_data.customer_phone_number, action='SEND TO QUEUE', message=message)
-                    send_job_to_queue(send_on_product_purchase, {"phone_number":product_data.customer_phone_number, "message":message, "sms_client":settings.SMS_CLIENT}) 
-
             except ObjectDoesNotExist as done:
                 ex='[Info: ProductPurchaseFeed_product_data]: VIN- {0} :: {1}'''.format(product['vin'], done)
                 logger.error(ex)
@@ -343,7 +328,9 @@ def update_coupon_data(sender, **kwargs):
             customer_phone_number = utils.get_phone_number_format(instance.customer_phone_number)
             customer_id=instance.customer_id
             temp_customer_data = models.CustomerTempRegistration.objects.filter(product_data__product_id=vin)
+            customer_id_replaced = False
             if temp_customer_data and not temp_customer_data[0].temp_customer_id == customer_id:
+                customer_id_replaced = True
                 message = templates.get_template('SEND_REPLACED_CUSTOMER_ID').format(
                     customer_name=customer_name, sap_customer_id=customer_id)
             elif instance.customer_id.find('T') == 0:
@@ -356,10 +343,25 @@ def update_coupon_data(sender, **kwargs):
                 else:
                     message = templates.get_template('SEND_REPLACED_CUSTOMER_ID').format(
                     customer_name=customer_name, sap_customer_id=customer_id)
-            
             sms_log(
                 settings.BRAND, receiver=customer_phone_number, action='SEND TO QUEUE', message=message)
             send_job_to_queue(send_on_product_purchase, {"phone_number":customer_phone_number, "message":message, "sms_client":settings.SMS_CLIENT}) 
+
+            if not customer_id_replaced:
+                if str(vin).upper().startswith('VBK', 0, 3):
+                    if str(vin).upper()[4] in ['U','G']:
+                        message = templates.get_template('SEND_CUSTOMER_REGISTER_KTM_DUKE'
+                                                     ).format(customer_name=instance.customer_name,
+                                                              duke_android_url="http://tinyurl.com/com-ktm-ab",
+                                                              duke_web_url="http://ktmdukeweb.gladminds.co")
+                    elif str(vin).upper()[4]=='Y':
+                        message = templates.get_template('SEND_CUSTOMER_REGISTER_KTM_RC'
+                                                     ).format(customer_name=instance.customer_name,
+                                                              rc_android_url="http://tinyurl.com/COM-KTM-RC",
+                                                              rc_web_url="http://ktmrcweb.gladminds.co")
+                    sms_log(settings.BRAND, receiver=instance.customer_phone_number, action='SEND TO QUEUE', message=message)
+                    send_job_to_queue(send_on_product_purchase, {"phone_number":instance.customer_phone_number, "message":message, "sms_client":settings.SMS_CLIENT}) 
+            
         except Exception as ex:
             logger.info("[Exception]: Signal-In Update Coupon Data %s" % ex)
 

@@ -174,7 +174,7 @@ class UserProfileResource(CustomBaseModelResource):
         if not email_id:
             return HttpBadRequest("email id is required")
         try:
-            models.UserProfile.objects.get(user__email=email_id, is_email_verified=True)
+            models.UserProfile.objects.get(user__email=email_id)
             data = {'status': 1, 'message': "email id verified"}
             return HttpResponse(json.dumps(data), content_type="application/json")
         except Exception as ex:
@@ -210,7 +210,7 @@ class UserProfileResource(CustomBaseModelResource):
                 #Send email if email address exist
             if email:
                 try:
-                    user_obj = models.UserProfile.objects.get(user__email=email, is_email_verified=True)
+                    user_obj = models.UserProfile.objects.get(user__email=email)
                     site = RequestSite(request)
                     get_model('EmailToken').objects.create_email_token(user_obj, email, site, trigger_mail='forgot-password')
                     data = {'status': 1, 'message': "Password reset link sent successfully"}
@@ -233,7 +233,7 @@ class UserProfileResource(CustomBaseModelResource):
             return HttpResponse(content_type="application/json", status=404)
         email = load.get('email')
         try:
-            user_obj = models.UserProfile.objects.get(user__email=email, is_email_verified=True)
+            user_obj = models.UserProfile.objects.get(user__email=email)
         except Exception as ex:
             return HttpBadRequest("Either your email is not verified or its not exist")
         site = RequestSite(request)
@@ -256,7 +256,7 @@ class UserProfileResource(CustomBaseModelResource):
         if password != repassword:
             return HttpBadRequest("password1 and password2 not matched")
         try:
-            user_obj = models.UserProfile.objects.get(user__email=email, is_email_verified=True)
+            user_obj = models.UserProfile.objects.get(user__email=email)
         except Exception as ex:
             logger.info("[Exception while changing password]:{0}".format(ex))
             raise ImmediateHttpResponse(

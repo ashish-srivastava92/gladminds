@@ -460,44 +460,50 @@ class AccumulationRequestAdmin(GmModelAdmin):
     get_mechanic_city.short_description = 'City'
     get_upcs.short_description = 'UPC'
 
-brand_admin = DemoAdminSite(name=GmApps.DEMO)
+def get_admin_site_custom(brand):
 
-brand_admin.register(User, UserAdmin)
-brand_admin.register(Group, GroupAdmin)
-brand_admin.register(models.UserProfile, UserProfileAdmin)
+    brand_admin = DemoAdminSite(name=brand)
+    
+    brand_admin.register(User, UserAdmin)
+    brand_admin.register(Group, GroupAdmin)
+    brand_admin.register(models.UserProfile, UserProfileAdmin)
+    
+    brand_admin.register(models.Dealer, DealerAdmin)
+    brand_admin.register(models.AuthorizedServiceCenter, AuthorizedServiceCenterAdmin)
+    brand_admin.register(models.ServiceAdvisor, ServiceAdvisorAdmin)
+    
+    brand_admin.register(models.BrandProductCategory, BrandProductCategoryAdmin)
+    brand_admin.register(models.ProductType, ProductTypeAdmin)
+    brand_admin.register(DispatchedProduct, ListDispatchedProduct)
+    brand_admin.register(models.ProductData, ProductDataAdmin)
+    brand_admin.register(models.CouponData, CouponAdmin)
+    
+    brand_admin.register(models.SMSLog, SMSLogAdmin)
+    brand_admin.register(models.EmailLog, EmailLogAdmin)
+    brand_admin.register(models.DataFeedLog, FeedLogAdmin)
+    
+    brand_admin.register(models.NationalSparesManager, NSMAdmin)
+    brand_admin.register(models.AreaSparesManager, ASMAdmin)
+    brand_admin.register(models.Distributor, DistributorAdmin)
+    brand_admin.register(models.Member, MemberAdmin)
+    
+    brand_admin.register(models.SparePartMasterData, SparePartMasterAdmin)
+    brand_admin.register(models.SparePartUPC, SparePartUPCAdmin)
+    brand_admin.register(models.SparePartPoint, SparePartPointAdmin)
+    brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
+    
+    brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)
+    brand_admin.register(models.SATempRegistration, SATempRegistrationAdmin)
+    brand_admin.register(models.CustomerTempRegistration, CustomerTempRegistrationAdmin)
+    
+    brand_admin.register(models.EmailTemplate, EmailTemplateAdmin)
+    brand_admin.register(models.MessageTemplate, MessageTemplateAdmin)
+    brand_admin.register(models.SLA, SlaAdmin)
+    brand_admin.register(models.ServiceDeskUser, ServiceDeskUserAdmin)
+    brand_admin.register(models.BrandDepartment)
+    brand_admin.register(models.DepartmentSubCategories)
+    brand_admin.register(models.Feedback)
 
-brand_admin.register(models.Dealer, DealerAdmin)
-brand_admin.register(models.AuthorizedServiceCenter, AuthorizedServiceCenterAdmin)
-brand_admin.register(models.ServiceAdvisor, ServiceAdvisorAdmin)
+    return brand_admin
 
-brand_admin.register(models.BrandProductCategory, BrandProductCategoryAdmin)
-brand_admin.register(models.ProductType, ProductTypeAdmin)
-brand_admin.register(DispatchedProduct, ListDispatchedProduct)
-brand_admin.register(models.ProductData, ProductDataAdmin)
-brand_admin.register(models.CouponData, CouponAdmin)
-
-brand_admin.register(models.SMSLog, SMSLogAdmin)
-brand_admin.register(models.EmailLog, EmailLogAdmin)
-brand_admin.register(models.DataFeedLog, FeedLogAdmin)
-
-brand_admin.register(models.NationalSparesManager, NSMAdmin)
-brand_admin.register(models.AreaSparesManager, ASMAdmin)
-brand_admin.register(models.Distributor, DistributorAdmin)
-brand_admin.register(models.Member, MemberAdmin)
-
-brand_admin.register(models.SparePartMasterData, SparePartMasterAdmin)
-brand_admin.register(models.SparePartUPC, SparePartUPCAdmin)
-brand_admin.register(models.SparePartPoint, SparePartPointAdmin)
-brand_admin.register(models.AccumulationRequest, AccumulationRequestAdmin)
-
-brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)
-brand_admin.register(models.SATempRegistration, SATempRegistrationAdmin)
-brand_admin.register(models.CustomerTempRegistration, CustomerTempRegistrationAdmin)
-
-brand_admin.register(models.EmailTemplate, EmailTemplateAdmin)
-brand_admin.register(models.MessageTemplate, MessageTemplateAdmin)
-brand_admin.register(models.SLA, SlaAdmin)
-brand_admin.register(models.ServiceDeskUser, ServiceDeskUserAdmin)
-brand_admin.register(models.BrandDepartment)
-brand_admin.register(models.DepartmentSubCategories)
-brand_admin.register(models.Feedback)
+brand_admin = get_admin_site_custom(GmApps.DEMO)
