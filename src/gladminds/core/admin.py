@@ -673,11 +673,13 @@ class RedemptionRequestAdmin(GmModelAdmin):
             if obj.status=='Approved':
                 obj.is_approved=True
                 partner=None
+                packed_by=None
                 partner_list = get_model("Partner").objects.all()
                 if len(partner_list)==1:
                     partner=partner_list[0]
+                    packed_by=partner.user.user.username
                 obj.partner=partner
-                obj.packed_by=partner.user.user.username
+                obj.packed_by=packed_by
                 obj.approved_date=datetime.datetime.now()
             elif obj.status in ['Rejected', 'Open'] :
                 obj.is_approved=False

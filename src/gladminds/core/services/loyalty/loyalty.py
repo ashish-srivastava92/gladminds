@@ -159,12 +159,15 @@ class CoreLoyaltyService(Services):
                                                    mechanic_obj.shop_name,
                                                    mechanic_obj.shop_address)))
         partner=None
+        packed_by=None
         partner_list = get_model('Partner').objects.using(settings.BRAND).all()
         if len(partner_list)==1:
             partner=partner_list[0]
+            packed_by=partner.user.user.username
         welcome_kit=get_model('WelcomeKit')(member=mechanic_obj,
                                     delivery_address=delivery_address,
-                                    partner=partner)
+                                    partner=partner,
+                                    packed_by=packed_by)
         welcome_kit.save(using=settings.BRAND)
         self.send_welcome_kit_mail_to_partner(welcome_kit)
         return welcome_kit
