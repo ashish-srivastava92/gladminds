@@ -81,7 +81,7 @@ class BOMItemFeed(BaseFeed):
                 bomplatepart_obj.part = bom_part_obj
                 bomplatepart_obj.plate = bom_plate_obj
                 bomplatepart_obj.save(using=settings.BRAND)
-                mail.send_sbom_feed_received_mail(brand=settings.BRAND)
+                mail.send_epc_feed_received_mail(brand=settings.BRAND, template_name='SBOM_FEED')
             except Exception as ex:
                 ex="[Exception: ]: BOMItemFeed {0}".format(ex)
                 logger.error(ex)
@@ -106,7 +106,7 @@ class ECOReleaseFeed(BaseFeed):
                                                     models_applicable=eco_obj['models_applicable'], serviceability=eco_obj['serviceability'], 
                                                     interchangebility=eco_obj['interchangebility'], reason_for_change=eco_obj['reason_for_change'])
                 eco_release_obj.save()
-                mail.send_eco_release_feed_received_mail(brand=settings.BRAND)
+                mail.send_epc_feed_received_mail(brand=settings.BRAND, template_name='ECO_RELEASE_FEED')
             except Exception as ex:
                 ex="[Exception: ]: ECOReleaseFeed {0}".format(ex)
                 logger.error(ex)
@@ -133,7 +133,7 @@ class ECOImplementationFeed(BaseFeed):
                                                            )
                 eco_implementation_obj.save()
                 self.modify_sbom_data(eco_implementation_obj)
-                mail.send_eco_implementation_feed_received_mail(brand=settings.BRAND)
+                mail.send_epc_feed_received_mail(brand=settings.BRAND, template_name='ECO_RELEASE_FEED')
                 
             except Exception as ex:
                 ex="[Exception: ]: ECOImplementationFeed {0}".format(ex)
