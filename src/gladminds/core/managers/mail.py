@@ -558,7 +558,7 @@ def send_sbom_feed_received_mail(brand=None):
     except Exception as ex:
         logger.info("[Exception while sending sbom received email]: {0}".format(ex))
 
-w
+
 def send_eco_release_feed_received_mail(brand=None):
     try:
         data = get_email_template('ECO_RELEASE_FEED', brand)
