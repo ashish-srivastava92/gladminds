@@ -557,3 +557,32 @@ def send_sbom_feed_received_mail(brand=None):
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception while sending sbom received email]: {0}".format(ex))
+
+w
+def send_eco_release_feed_received_mail(brand=None):
+    try:
+        data = get_email_template('ECO_RELEASE_FEED', brand)
+        file_stream = open(settings.EMAIL_DIR+'/base_email_template.html')
+        feed_temp = file_stream.read()
+        template = Template(feed_temp)
+        context = Context({"content": data['body']})
+        body = template.render(context)
+        send_email(sender = data['sender'], receiver = data['receiver'], 
+                   subject = data['subject'], body = body, message=data['body'],
+                   smtp_server = settings.MAIL_SERVER)
+    except Exception as ex:
+        logger.info("[Exception while sending eco release feed received email]: {0}".format(ex))
+
+def send_eco_implementation_feed_received_mail(brand=None):
+    try:
+        data = get_email_template('ECO_IMPLEMENTED_FEED', brand)
+        file_stream = open(settings.EMAIL_DIR+'/base_email_template.html')
+        feed_temp = file_stream.read()
+        template = Template(feed_temp)
+        context = Context({"content": data['body']})
+        body = template.render(context)
+        send_email(sender = data['sender'], receiver = data['receiver'], 
+                   subject = data['subject'], body = body, message=data['body'],
+                   smtp_server = settings.MAIL_SERVER)
+    except Exception as ex:
+        logger.info("[Exception while sending eco implementation feed received email]: {0}".format(ex))

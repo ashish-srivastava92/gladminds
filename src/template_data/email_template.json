@@ -341,9 +341,9 @@
         "fields": {
             "template_key": "ECO_RELEASE_FEED",
             "sender": "feed-report@gladminds.co",
-            "receiver": "",
+            "receiver": "priyanka.n@hashedin.com",
             "subject": "ECO_RELEASE_FEED",
-            "body": "",
+            "body": "We have received the eco release feed",
             "description":"ECO_RELEASE_FEED"
             }
     },
@@ -353,9 +353,9 @@
         "fields": {
             "template_key": "ECO_IMPLEMENTED_FEED",
             "sender": "feed-report@gladminds.co",
-            "receiver": "",
+            "receiver": "priyanka.n@hashedin.com",
             "subject": "ECO_IMPLEMENTED_FEED",
-            "body": "",
+            "body": "We have received the eco implementation feed",
             "description":"ECO_IMPLEMENTED_FEED"
             }
     },
