@@ -441,7 +441,7 @@
     "pk": 49,
     "fields": {
       "template_key": "COMPLETE_FORM",
-      "template": "Dear {mechanic_name}, We have received registration for Bajaj USTAAD program. After verification, you will receive the welcome kit in days",
+      "template": "Dear Mr {mechanic_name}, , to Bajaj Commercial Vehicle Power reward program.The welcome kit will be dispatched soon. your id is {mechanic_ID}",
       "description": "welcome message to mechanic"
       }
     },

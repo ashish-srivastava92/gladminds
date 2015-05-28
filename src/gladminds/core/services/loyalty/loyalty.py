@@ -100,7 +100,7 @@ class CoreLoyaltyService(Services):
         '''Send welcome sms to mechanics when registered'''
         phone_number=utils.get_phone_number_format(mech.phone_number)
         message=get_template('COMPLETE_FORM').format(
-                        mechanic_name=mech.first_name)
+                        mechanic_name=mech.first_name, mechanic_ID=mech.member_id)
         sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
         self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
