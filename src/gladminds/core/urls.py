@@ -130,7 +130,10 @@ urlpatterns = patterns('',
     url(r'^trigger-tasks', 'gladminds.core.views.trigger_sqs_tasks'),
     url(r'^tasks', SqsHandler.as_view(task_map=_tasks_map)),
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
+
     url(r'^welcome', loyalty.send_welcome_message, name='send_welcome_message'),
-    url(r'^check-form/(?P<choice>[a-zA-Z0-9]+)$', loyalty.check_complete_forms, name='check_complete_forms'),
-    url(r'^kit-download/(?P<choice>[a-zA-Z0-9]+)$', loyalty.download_welcome_kit, name='download_welcome_kit'),
+    url(r'^check-detail/(?P<model>[a-zA-Z0-9]+)/(?P<choice>[a-zA-Z0-9]+)$', loyalty.check_details, name='check_details'),
+    url(r'^member-download/(?P<choice>[a-zA-Z0-9]+)$', loyalty.download_member_detail, name='download_member_detail'),
+    url(r'^kit-download/(?P<choice>[a-zA-Z0-9]+)$', loyalty.download_welcome_kit_detail, name='download_welcome_kit_detail'),
+    url(r'^redemption-download/(?P<choice>[a-zA-Z0-9]+)$', loyalty.download_redemption_detail, name='download_redemption_detail'),
 )
