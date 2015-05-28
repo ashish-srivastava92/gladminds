@@ -142,7 +142,11 @@ class ECOImplementationFeed(BaseFeed):
         return self.feed_remark
     
     def modify_sbom_data(self, eco_implementation_obj):
-        eco_release_obj  = get_model('ECORelease').objects.get(eco_number=eco_implementation_obj.eco_number)
+        try:
+            eco_release_obj  = get_model('ECORelease').objects.get(eco_number=eco_implementation_obj.eco_number)
+        except Exception as ex:
+            ex = "[Exception]: while fetching eco release data {0}".format(ex)
+            logger.error(ex)
         bom_header = get_model('BOMHeader').objects.get(sku_code=eco_release_obj.models_applicable)
         bom_plate = get_model('BOMPlate').objects.get(plate_id=eco_implementation_obj.parent_part)
         if eco_implementation_obj.added_part:
