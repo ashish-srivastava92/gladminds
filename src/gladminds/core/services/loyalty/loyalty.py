@@ -100,7 +100,8 @@ class CoreLoyaltyService(Services):
         '''Send welcome sms to mechanics when registered'''
         phone_number=utils.get_phone_number_format(mech.phone_number)
         message=get_template('COMPLETE_FORM').format(
-                        mechanic_name=mech.first_name)
+                        mechanic_name=mech.first_name,
+                        member_id=mech.permanent_id)
         sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
         self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
@@ -291,31 +292,40 @@ class CoreLoyaltyService(Services):
             elif mechanic and  mechanic[0].form_status=='Incomplete':
                 message=get_template('INCOMPLETE_FORM')
                 raise ValueError('Incomplete user details')
+            state_code= mechanic[0].state.state_code
             spares = get_model('SparePartUPC').objects.get_spare_parts(unique_product_codes)
             added_points=0
+            spare_upc_part_map={}
             total_points=mechanic[0].total_points
             if spares:
-                accumulation_log=get_model('AccumulationRequest')(member=mechanic[0],
-                                                        points=0,total_points=0)
-                accumulation_log.save(using=settings.BRAND)
                 for spare in spares:
                     valid_product_number.append(spare.part_number)
-                    valid_upc.append(spare.unique_part_code.upper())
-                    accumulation_log.upcs.add(spare)
-                spare_points = get_model('SparePartPoint').objects.get_part_number(valid_product_number)
-                for spare_point in spare_points:
-                    added_points=added_points+spare_point.points
-                total_points=self.update_points(mechanic[0],
+                    if not spare_upc_part_map.has_key(spare.part_number):
+                        spare_upc_part_map[spare.part_number]=[]
+                    spare_upc_part_map[spare.part_number].append(spare.unique_part_code.upper())
+                spare_points = get_model('SparePartPoint').objects.get_part_number(valid_product_number, state_code)
+                if spare_points:
+                    accumulation_log=get_model('AccumulationRequest')(member=mechanic[0],
+                                                            points=0,total_points=0)
+                    accumulation_log.save(using=settings.BRAND)
+                    for spare_point in spare_points:
+                        added_points=added_points+(len(spare_upc_part_map[spare_point.part_number]) * spare_point.points)
+                        valid_upc.extend(spare_upc_part_map[spare_point.part_number])
+                    total_points=self.update_points(mechanic[0],
                                     accumulate=added_points)
-                accumulation_log.points=added_points
-                spares.using(settings.BRAND).update(is_used=True)
-                accumulation_log.total_points=total_points
-                accumulation_log.save(using=settings.BRAND)
+
+                    valid_spares = get_model('SparePartUPC').objects.get_spare_parts(valid_upc)
+                    for spare in valid_spares:
+                        accumulation_log.upcs.add(spare)
+                    accumulation_log.points=added_points
+                    accumulation_log.total_points=total_points
+                    accumulation_log.save(using=settings.BRAND)
+                    valid_spares.using(settings.BRAND).update(is_used=True)
             invalid_upcs = list(set(unique_product_codes).difference(valid_upc))
             if invalid_upcs:
                 invalid_upcs_message=' Invalid Entry... {0} does not exist in our records.'.format(
                                               (', '.join(invalid_upcs)))
-                used_upcs = get_model('SparePartUPC').objects.get_spare_parts(invalid_upcs, is_used=True) 
+                used_upcs = get_model('SparePartUPC').objects.get_spare_parts(invalid_upcs, is_used=True)
                 if used_upcs:
                     accumulation_requests = get_model('AccumulationRequest').objects.using(settings.BRAND).filter(upcs__in=used_upcs).prefetch_related('upcs').select_related('upcs')
                     accumulation_dict = {}
