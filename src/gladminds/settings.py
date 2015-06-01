@@ -25,7 +25,6 @@ ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
                     'check_point_balance':'chkbal'}
 
 ADMINS = (
-    ('pavan', 'pavankumar.s@hashedin.com'),
     ('naureen', 'naureen.razi@hashedin.com'),
     ('priyanka', 'priyanka.n@hashedin.com')
 )
@@ -485,7 +484,7 @@ PHONE_NUMBER_UPDATE_COUNT_EXCEEDED_MAIL_TO_ASM = {
 
 POLICY_DISCREPANCY_MAIL_TO_MANAGER = {
     "sender": "feed-report@gladminds.co",
-    "receiver": ["pavankumar.s@hashedin.com", "suresh@hashedin.com"],
+    "receiver": ["naureen.razi@hashedin.com", "suresh@hashedin.com"],
     "subject": "Gladminds customer phone number update",
     "body": """""",
 }

@@ -52,7 +52,7 @@
 {% block content %}
 <div class="alert alert-danger download-fail hide">
    <button class="close" data-dismiss="alert">×</button>
-   No new details to download.
+   No details to download for selected option.
 </div>
   <div id="content-main">
     <div class="inner-center-column">
@@ -73,7 +73,19 @@
           {% ifequal cl.opts.verbose_name "member" %}
           {%include "admin/download_option.html" %}
           <div class="object-tools">
-            <a href="" class="btn btn-info" data-toggle="modal" data-target="#downloadModal">Download welcome kit details</a>
+            <a href="" class="btn btn-info" data-toggle="modal" data-target="#downloadMemberModal">Download member details</a>
+          </div>
+          {% endifequal %}
+          {% ifequal cl.opts.verbose_name "welcome kit" %}
+          {%include "admin/download_option.html" %}
+          <div class="object-tools">
+            <a href="" class="btn btn-info" data-toggle="modal" data-target="#downloadWelcomeModal">Download welcome kit details</a>
+          </div>
+          {% endifequal %}
+          {% ifequal cl.opts.verbose_name "redemption request" %}
+          {%include "admin/download_option.html" %}
+          <div class="object-tools">
+            <a href="" class="btn btn-info" data-toggle="modal" data-target="#downloadRedemptionModal">Download redemption request details</a>
           </div>
           {% endifequal %}
 		  {% if custom_search %}

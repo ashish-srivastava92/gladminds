@@ -156,7 +156,8 @@ ADMIN_DETAILS = {GmApps.BAJAJ: {'user': 'bajaj001', 'password': 'bajaj001'},
           GmApps.AFTERBUY: {'user': 'afterbuy', 'password': 'afterbuy'},
           GmApps.GM: {'user': 'gladminds', 'password': 'gladminds'},
           GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'bajajcv'},
-          GmApps.DAIMLER: {'user': 'daimler', 'password': 'daimler'}
+          GmApps.DAIMLER: {'user': 'daimler', 'password': 'daimler'},
+          GmApps.PROBIKING: {'user': 'probiking', 'password': 'probiking'}
           }
 
 

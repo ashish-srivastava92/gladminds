@@ -46,7 +46,7 @@ class CoreLoyaltyService(Services):
         comment_thread.save(using=settings.BRAND)
         return comment_thread
 
-    def get_mechanics_detail(self, request, choice):
+    def get_mechanics_detail(self, request, choice, model_name):
         kwargs={}
         if choice=='new':
             kwargs['download_detail'] = False
@@ -55,27 +55,47 @@ class CoreLoyaltyService(Services):
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm_state_list=get_model('AreaSparesManager').objects.get(user__user=request.user).state.all()
             kwargs['state__in'] = asm_state_list
-        mechanics = get_model('Member').objects.using(settings.BRAND).filter(**kwargs)
+        mechanics = get_model(model_name).objects.using(settings.BRAND).filter(**kwargs)
         return mechanics
+    
+    def get_welcome_redemption_detail(self, request, choice, model_name):
+        kwargs={}
+        if choice!='all':
+            kwargs['status'] = choice
+        if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list=get_model('AreaSparesManager').objects.get(user__user=request.user).state.all()
+            kwargs['member__state__in'] = asm_state_list
+        elif request.user.groups.filter(name=Roles.RPS).exists():
+            kwargs['packed_by'] = request.user.username
+        elif request.user.groups.filter(name=Roles.LPS).exists():
+            kwargs['partner__user'] = request.user
+        welcome_kits = get_model(model_name).objects.using(settings.BRAND).filter(**kwargs).select_related('member')
+        return welcome_kits
         
-    def check_complete_forms(self, request, choice):
+    def check_details(self, request, model, choice):
         response = {'status': False}
-        mechanics = self.get_mechanics_detail(request, choice)
-        if mechanics:
+        request_handler={'Member': 'get_mechanics_detail',
+                         'WelcomeKit': 'get_welcome_redemption_detail',
+                         'RedemptionRequest': 'get_welcome_redemption_detail'
+                         }
+        handler_funtion=getattr(self, request_handler[model])
+        details = handler_funtion(request, choice, model)
+        if details:
             response['status']=True
         return HttpResponse(json.dumps(response),
                             content_type='application/json')
         
-    def download_welcome_kit(self, request, choice):
+    def download_member_detail(self, request, choice):
         '''Download list of new or all registered member'''
         file_name=choice+'_member_details_' + datetime.now().strftime('%d_%m_%y')
-        headers=constants.WELCOME_KIT_MECHANIC_FIELDS
+        headers=[]
+        headers=headers+constants.DOWNLOAD_MECHANIC_FIELDS
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(headers)
         if not request.user.groups.filter(name__in=[Roles.RPS, Roles.LPS]).exists():  
             headers.append('form_status')
-        mechanics = self.get_mechanics_detail(request, choice)
+        csvwriter.writerow(headers)
+        mechanics = self.get_mechanics_detail(request, choice, 'Member')
         for mechanic in mechanics:
             data=[]
             for field in headers:
@@ -83,8 +103,7 @@ class CoreLoyaltyService(Services):
                     image_url="{0}/{1}".format(settings.S3_BASE_URL, mechanic.image_url)
                     data.append(image_url)
                 elif field=='state':
-                    state = mechanic.state.state_name
-                    data.append(state)
+                    data.append(mechanic.state.state_name)
                 else:
                     data.append(getattr(mechanic, field))
             csvwriter.writerow(data)
@@ -92,7 +111,60 @@ class CoreLoyaltyService(Services):
             mechanics.using(settings.BRAND).update(download_detail=True)
         response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
         response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
-        LOG.error('[download_welcome_kit]: Download of mechanic data by user {0}'.format(request.user))
+        LOG.error('[download_member_detail]: Download of mechanic data by user {0}'.format(request.user))
+        return response
+
+    def download_welcome_kit_detail(self, request, choice):
+        '''Download list of new or all welcome kit'''
+        file_name=choice+'_welcome_kit_details_' + datetime.now().strftime('%d_%m_%y')
+        headers=constants.DOWNLOAD_WELCOME_KIT_FIELDS
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(headers)
+        welcome_kits = self.get_welcome_redemption_detail(request, choice, 'WelcomeKit')
+        for kit in welcome_kits:
+            data=[]
+            for field in headers:
+                member=kit.member
+                if field=='image_url':
+                    image_url="{0}/{1}".format(settings.S3_BASE_URL, member.image_url)
+                    data.append(image_url)
+                elif field=='state':
+                    data.append(member.state.state_name)
+                elif field=='delivery_address':
+                    data.append(kit.delivery_address)
+                else:
+                    data.append(getattr(member, field))
+            csvwriter.writerow(data)
+        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        LOG.error('[download_welcome_kit]: Download of welcome kit data by user {0}'.format(request.user))
+        return response
+
+    def download_redemption_detail(self, request, choice):
+        '''Download list of new or all redemption request'''
+        file_name=choice+'_redemption_request_details_' + datetime.now().strftime('%d_%m_%y')
+        headers=constants.DOWNLOAD_REDEMPTION_FIELDS
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(headers)
+        redemptions = self.get_welcome_redemption_detail(request, choice, 'RedemptionRequest')
+        for redemption in redemptions:
+            data=[]
+            for field in headers:
+                member=redemption.member
+                if field=='state':
+                    data.append(member.state.state_name)
+                elif field=='delivery_address':
+                    data.append(redemption.delivery_address)
+                elif field=='product':
+                    data.append(redemption.product.product_id)
+                else:
+                    data.append(getattr(member, field))
+            csvwriter.writerow(data)
+        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        LOG.error('[download_redemption_detail]: Download of redemption request data by user {0}'.format(request.user))
         return response
 
 
@@ -165,10 +237,13 @@ class CoreLoyaltyService(Services):
         if len(partner_list)==1:
             partner=partner_list[0]
             packed_by=partner.user.user.username
+        date = self.set_date('Welcome Kit', 'Open')
         welcome_kit=get_model('WelcomeKit')(member=mechanic_obj,
                                     delivery_address=delivery_address,
                                     partner=partner,
-                                    packed_by=packed_by)
+                                    packed_by=packed_by,
+                                    due_date=date['due_date'],
+                                    expected_delivery_date=date['expected_delivery_date'])
         welcome_kit.save(using=settings.BRAND)
         self.send_welcome_kit_mail_to_partner(welcome_kit)
         return welcome_kit
