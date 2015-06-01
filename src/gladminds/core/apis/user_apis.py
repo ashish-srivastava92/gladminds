@@ -38,7 +38,7 @@ from django.contrib.sites.models import RequestSite
 from gladminds.core.model_helpers import format_phone_number
 from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.managers.mail import send_reset_link_email
-from gladminds.core.utils import get_sql_data
+from gladminds.core.utils import get_sql_data, check_password
 from gladminds.afterbuy import utils as core_utils
 from gladminds.core.model_fetcher import get_model
 
@@ -119,7 +119,36 @@ class UserProfileResource(CustomBaseModelResource):
             url(r"^(?P<resource_name>%s)/change-password%s" % 
                 (self._meta.resource_name, trailing_slash()), self.wrap_view
                 ('change_password'), name="change_password"),
+            url(r"^(?P<resource_name>%s)/reset-password%s" % 
+                (self._meta.resource_name, trailing_slash()), self.wrap_view
+                ('reset_password'), name="reset_password"),
+
         ]
+    
+    def reset_password(self, request, **kwargs):
+        try:
+            new_password = request.POST['newPassword']
+            old_password = request.POST['oldPassword'] 
+            user = User.objects.get(username=request.user)
+            check_pass = user.check_password(str(old_password))
+            if check_pass:
+                invalid_password = check_password(new_password)
+                if (invalid_password):
+                    data = {'message':"password does not match the rules",'status':False}
+                else:    
+                    user.set_password(str(new_password))
+                    user.save(using=settings.BRAND)
+                    user_obj =  get_model('UserProfile').objects.get(user=user)
+                    user_obj.reset_password = True
+                    user_obj.reset_date = datetime.now()
+                    user_obj.save(using=settings.BRAND)
+                    data = {'message': 'Password Changed successfully', 'status': True}
+            else:
+                data = {'message': 'Old password wrong', 'status': False}
+            return HttpResponse(json.dumps(data), content_type='application/json')
+        except Exception as ex:
+            logger.error('Exception while changing password {0}'.format(ex))
+        return HttpBadRequest()
     
     def sent_otp_user_phone_number(self, request, **kwargs):
         if request.method != 'POST':

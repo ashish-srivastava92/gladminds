@@ -59,6 +59,8 @@ class UserProfile(BaseModel):
     image_url = models.FileField(upload_to=set_user_pic_path,
                                   max_length=200, null=True, blank=True,
                                   validators=[validate_image])
+    reset_password = models.BooleanField(default=False)
+    reset_date = models.DateTimeField(null=True, blank=True)
         
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
