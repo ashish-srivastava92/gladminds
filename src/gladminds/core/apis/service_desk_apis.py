@@ -52,7 +52,7 @@ class FeedbackResource(CustomBaseModelResource):
         model_name = "Feedback"
         authorization = MultiAuthorization(DjangoAuthorization(), ServiceDeskCustomAuthorization())
         authentication = MultiAuthentication(AccessTokenAuthentication())
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         always_return_data = True
         filtering = {
                         "priority" : ALL,
@@ -442,7 +442,7 @@ class CommentsResource(CustomBaseModelResource):
         queryset = models.Comment.objects.all()
         resource_name = 'comments'
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         authentication = MultiAuthentication(AccessTokenAuthentication())
         authorization = Authorization()
         always_return_data = True
