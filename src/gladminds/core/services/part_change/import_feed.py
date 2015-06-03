@@ -149,30 +149,20 @@ class ECOImplementationFeed(BaseFeed):
             if eco_implementation_obj.added_part:
                 try:
                     bom_part = get_model('BOMPart').objects.get(part_number=eco_implementation_obj.added_part)
-                    bom_plate_part = get_model('BOMPlatePart')(plate__plate_id=eco_implementation_obj.parent_part,
-                                                               part=bom_part, quantity=eco_implementation_obj.added_part_qty,
-                                                               valid_from=eco_implementation_obj.change_date,
-                                                               valid_to='9999-12-31',
-                                                               change_number=eco_implementation_obj.change_no)
-                    bom_plate_part.bom.bom_number=bom_header.bom_number
-                    bom_plate_part.save(using=settings.BRAND)
                 except Exception as ex:
                     ex="[Exception: ]: while adding new part {0}".format(ex)
                     logger.error(ex)
                     bom_part = get_model('BOMPart')(part_number=eco_implementation_obj.added_part)
                     bom_part.save(using=settings.BRAND)
-                    try:
-                        bom_plate_part = get_model('BOMPlatePart')(bom=bom_header, plate=bom_plate, part=bom_part,
+                bom_plate_part = get_model('BOMPlatePart')(bom=bom_header, plate=bom_plate, part=bom_part,
                                                                    quantity=eco_implementation_obj.added_part_qty,
                                                                    valid_from=eco_implementation_obj.change_date,
                                                                    valid_to='9999-12-31',
                                                                    change_number=eco_implementation_obj.change_no)
-                        bom_plate_part.save(using=settings.BRAND)
-                        bom_plate_part.bom.bom_number=bom_header.bom_number
-                        bom_plate_part.plate.plate_id=eco_implementation_obj.parent_part
-                    except Exception as ex:
-                        ex="[Exception]: while adding new bomplatepart {0}".format(ex)
-                        logger.error(ex)
+                bom_plate_part.save(using=settings.BRAND)
+                bom_plate_part.bom.bom_number=bom_header.bom_number
+                bom_plate_part.plate.plate_id=eco_implementation_obj.parent_part
+                bom_plate_part.save(using=settings.BRAND)
             if eco_implementation_obj.deleted_part:
                 try:
                     bom_part = get_model('BOMPart').objects.get(part_number=eco_implementation_obj.deleted_part)

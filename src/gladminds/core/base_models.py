@@ -948,7 +948,7 @@ class ContainerTracker(BaseModel):
     shippingline_id = models.CharField(max_length=50, null=True, blank=True)
     ib_dispatch_dt = models.DateField(null=True, blank=True)
     cts_created_date = models.DateField(null=True, blank=True)
-    no_of_containers = models.IntegerField(null=True, blank=True)
+    no_of_containers = models.IntegerField(default=0)
 
     class Meta:
         abstract = True
