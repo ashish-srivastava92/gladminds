@@ -21,7 +21,7 @@ from gladminds.core.constants import BY_DEFAULT_RECORDS_PER_PAGE, \
     FEEDBACK_STATUS, PAGINATION_LINKS, RECORDS_PER_PAGE, FEEDBACK_TYPE,\
     ROOT_CAUSE, DEMO_PRIORITY
 from gladminds.core.utils import get_list_from_set
-from gladminds.core.model_fetcher import models
+from gladminds.core.model_fetcher import models, get_model
 from gladminds.management.commands import load_area_service_manager_data
 
 
@@ -35,7 +35,7 @@ def get_helpdesk(request):
         return HttpResponseRedirect('/aftersell/servicedesk/')
             
 def get_brand_departments():
-    departments = models.BrandDepartment.objects.all()
+    departments = get_model('BrandDepartment').objects.all()
     brand_departments = []
     for department in departments:
         brand_departments.append(department)
@@ -60,7 +60,7 @@ def service_desk(request):
     page_details['to'] = feedbacks.end_index()
     groups = utils.stringify_groups(request.user)
     brand_departments = get_brand_departments()
-    training_material = models.Service.objects.filter(service_type__name=Services.SERVICE_DESK)
+    training_material = get_model('Service').objects.filter(service_type__name=Services.SERVICE_DESK)
     department_sub_categories= get_subcategories()
     if len(training_material)>0:
         training_material = training_material[0].training_material_url
@@ -70,10 +70,10 @@ def service_desk(request):
         template = 'portal/feedback_details.html'
         data = None
         if request.user.groups.filter(name=Roles.DEALERS).exists():
-            data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
+            data = get_model('ServiceAdvisor').objects.active_under_dealer(request.user)
         else:
-            data = models.ServiceAdvisor.objects.active_under_asc(request.user)
-        dealer_asc_details = models.UserProfile.objects.get(user__username=request.user)
+            data = get_model('ServiceAdvisor').objects.active_under_asc(request.user)
+        dealer_asc_details = get_model('UserProfile').objects.get(user__username=request.user)
         return render(request, template, {"feedbacks" : feedbacks,
                                           'active_menu': 'support',
                                           "data": data, 'groups': groups,
@@ -116,11 +116,11 @@ def save_help_desk_data(request):
         sms_dict['file_location'] =  request.FILES['sd_file']
     else:
         sms_dict['file_location'] = None
-    user_profile = models.UserProfile.objects.get(user__username=str(sms_dict['advisorMobile']))
+    user_profile = get_model('UserProfile').objects.get(user__username=str(sms_dict['advisorMobile']))
     if request.user.groups.filter(name=Roles.DEALERS).exists():
-        dealer_asc_obj = models.Dealer.objects.get(dealer_id=request.user)
+        dealer_asc_obj = get_model('Dealer').objects.get(dealer_id=request.user)
     elif request.user.groups.filter(name=Roles.ASCS).exists():
-        dealer_asc_obj = models.AuthorizedServiceCenter.objects.get(asc_id=request.user)
+        dealer_asc_obj = get_model('AuthorizedServiceCenter').objects.get(asc_id=request.user)
     else:
         dealer_asc_obj = None
     if dealer_asc_obj:
@@ -153,7 +153,7 @@ def get_servicedesk_tickets(request):
     page_details['to'] = feedbacks.end_index()
     brand_departments = get_brand_departments()
     department_sub_categories= get_subcategories()
-    training_material = models.Service.objects.filter(service_type__name=Services.SERVICE_DESK)
+    training_material = get_model('Service').objects.filter(service_type__name=Services.SERVICE_DESK)
     if len(training_material)>0:
         training_material = training_material[0].training_material_url
     else:
@@ -174,8 +174,8 @@ def get_servicedesk_tickets(request):
                                         )
 
 def get_subcategories():
-    departments = models.BrandDepartment.objects.all()
-    sub_departments = models.DepartmentSubCategories.objects.all()
+    departments = get_model('BrandDepartment').objects.all()
+    sub_departments = get_model('DepartmentSubCategories').objects.all()
     all_departments = []
     for department in departments:
         brand_departments = {}
@@ -193,7 +193,7 @@ def get_subcategories():
     return all_departments
 
 def get_brand_users(request):
-    sub_department_users = models.ServiceDeskUser.objects.filter(sub_department__department__id=request.POST.get('department'))
+    sub_department_users = get_model('ServiceDeskUser').objects.filter(sub_department__department__id=request.POST.get('department'))
     brand_sub_department_users = []
     for sub_department in sub_department_users:
         brand_sub_department = {}
@@ -238,13 +238,13 @@ def modify_servicedesk_tickets(request, feedback_id):
 @require_http_methods(["POST"])
 def modify_feedback_comments(request, feedback_id, comment_id):
     data = request.POST
-    feedback_obj = models.Feedback.objects.get(id=feedback_id)
+    feedback_obj = get_model('Feedback').objects.get(id=feedback_id)
     try:
-        comment = models.Comment.objects.get(feedback_object_id=feedback_id, id=comment_id)
+        comment = get_model('Comment').objects.get(feedback_object_id=feedback_id, id=comment_id)
         previous_comment = comment.comment
         comment.comment = data['commentDescription']
         comment.modified_date = datetime.datetime.now()
-        comment.save()
+        comment.save(using=settings.BRAND)
         update_feedback_activities(feedback_obj, SDActions.COMMENT_UPDATE, previous_comment,
                                    data['commentDescription'], request.user)
         return HttpResponse("Success")
@@ -258,7 +258,7 @@ def modify_feedback_comments(request, feedback_id, comment_id):
 def get_feedback_response(request, feedback_id):
     data = request.POST
     if data['feedbackresponse']:
-        models.Feedback.objects.filter(
+        get_model('Feedback').objects.filter(
                   id=feedback_id).update(ratings=str(data['feedbackresponse']))
         return render(request, 'service-desk/feedback_received.html')
     else:
@@ -272,7 +272,7 @@ def add_servicedesk_user(request):
         dealer_user_obj = register_user.register_user(Roles.DEALERS,username=request.POST.get('name'),
                                                  phone_number=request.POST.get('phone-number'),
                                                  email = request.POST.get('email'), APP=settings.BRAND)
-        dealer_obj = models.Dealer(dealer_id=request.POST.get('name'), user=dealer_user_obj)
-        dealer_obj.save()
+        dealer_obj = get_model('Dealer')(dealer_id=request.POST.get('name'), user=dealer_user_obj)
+        dealer_obj.save(using=settings.BRAND)
         return HttpResponse(json.dumps({'message': "Registered Successfully"}),
                             content_type='application/json')

@@ -38,7 +38,7 @@ from django.contrib.sites.models import RequestSite
 from gladminds.core.model_helpers import format_phone_number
 from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.managers.mail import send_reset_link_email
-from gladminds.core.utils import get_sql_data
+from gladminds.core.utils import get_sql_data, check_password
 from gladminds.afterbuy import utils as core_utils
 from gladminds.core.model_fetcher import get_model
 
@@ -54,7 +54,7 @@ class UserResource(CustomBaseModelResource):
         authorization = Authorization()
 #         authentication = AccessTokenAuthentication()
 #         authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         filtering = {
                      "is_active": ALL,
                      "username" : ALL,
@@ -73,7 +73,7 @@ class UserProfileResource(CustomBaseModelResource):
         authorization = Authorization()
 #         authorization = MultiAuthorization(DjangoAuthorization())
 #         authentication = AccessTokenAuthentication()
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         filtering = {
                      "user":  ALL_WITH_RELATIONS,
                      "phone_number": ALL,
@@ -119,7 +119,36 @@ class UserProfileResource(CustomBaseModelResource):
             url(r"^(?P<resource_name>%s)/change-password%s" % 
                 (self._meta.resource_name, trailing_slash()), self.wrap_view
                 ('change_password'), name="change_password"),
+            url(r"^(?P<resource_name>%s)/reset-password%s" % 
+                (self._meta.resource_name, trailing_slash()), self.wrap_view
+                ('reset_password'), name="reset_password"),
+
         ]
+    
+    def reset_password(self, request, **kwargs):
+        try:
+            new_password = request.POST['newPassword']
+            old_password = request.POST['oldPassword'] 
+            user = User.objects.get(username=request.user)
+            check_pass = user.check_password(str(old_password))
+            if check_pass:
+                invalid_password = check_password(new_password)
+                if (invalid_password):
+                    data = {'message':"password does not match the rules",'status':False}
+                else:    
+                    user.set_password(str(new_password))
+                    user.save(using=settings.BRAND)
+                    user_obj =  get_model('UserProfile').objects.get(user=user)
+                    user_obj.reset_password = True
+                    user_obj.reset_date = datetime.now()
+                    user_obj.save(using=settings.BRAND)
+                    data = {'message': 'Password Changed successfully', 'status': True}
+            else:
+                data = {'message': 'Old password wrong', 'status': False}
+            return HttpResponse(json.dumps(data), content_type='application/json')
+        except Exception as ex:
+            logger.error('Exception while changing password {0}'.format(ex))
+        return HttpBadRequest()
     
     def sent_otp_user_phone_number(self, request, **kwargs):
         if request.method != 'POST':
@@ -360,7 +389,7 @@ class ZonalServiceManagerResource(CustomBaseModelResource):
         resource_name = "zonal-service-managers"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get', 'delete']
+        allowed_methods = ['get', 'delete']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "zsm_id": ALL,
@@ -448,7 +477,7 @@ class AreaServiceManagerResource(CustomBaseModelResource):
         resource_name = "area-service-managers"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization(), ZSMCustomAuthorization())
-        detail_allowed_methods = ['get', 'delete']
+        allowed_methods = ['get', 'delete']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "asm_id": ALL, 
@@ -546,7 +575,7 @@ class DealerResource(CustomBaseModelResource):
         resource_name = "dealers"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization(), DealerCustomAuthorization())
-        detail_allowed_methods = ['get', 'post', 'delete']
+        allowed_methods = ['get', 'post']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "dealer_id": ALL,
@@ -655,7 +684,7 @@ class AuthorizedServiceCenterResource(CustomBaseModelResource):
         resource_name = "authorized-service-centers"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "asc_id": ALL,
@@ -674,7 +703,7 @@ class ServiceAdvisorResource(CustomBaseModelResource):
         resource_name = "service-advisors"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "dealer": ALL_WITH_RELATIONS,
@@ -689,7 +718,7 @@ class TerritoryResource(CustomBaseModelResource):
         queryset = models.Territory.objects.all()
         resource_name = "territories"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'put', 'delete']
+        allowed_methods = ['get', 'put', 'delete']
         always_return_data = True
         filtering = {
                      "territory":ALL
@@ -702,7 +731,7 @@ class StateResource(CustomBaseModelResource):
         queryset = models.State.objects.all()
         resource_name = "states"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        allowed_methods = ['get', 'post', 'put', 'delete']
         always_return_data = True
         filtering = {
                      "state_name":ALL_WITH_RELATIONS, 
@@ -714,7 +743,7 @@ class CityResource(CustomBaseModelResource):
         queryset = models.City.objects.all()
         resource_name = "cities"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        allowed_methods = ['get', 'post', 'put', 'delete']
         always_return_data = True
         filtering = {
                      "city":ALL,
@@ -727,7 +756,7 @@ class NationalSparesManagerResource(CustomBaseModelResource):
         queryset = models.NationalSparesManager.objects.all()
         resource_name = "national-spares-managers"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         
         
@@ -736,7 +765,7 @@ class AreaSparesManagerResource(CustomBaseModelResource):
         queryset = models.AreaSparesManager.objects.all()
         resource_name = "area-spares-managers"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         
 class PartnerResource(CustomBaseModelResource):
@@ -744,7 +773,7 @@ class PartnerResource(CustomBaseModelResource):
         queryset = models.Partner.objects.all()
         resource_name = "partners"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
 
@@ -755,7 +784,7 @@ class DistributorResource(CustomBaseModelResource):
         queryset = models.Distributor.objects.all()
         resource_name = "distributors"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
 
@@ -764,7 +793,7 @@ class RetailerResource(CustomBaseModelResource):
         queryset = models.Retailer.objects.all()
         resource_name = "retailers"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
 class MemberResource(CustomBaseModelResource):
@@ -778,7 +807,7 @@ class MemberResource(CustomBaseModelResource):
         args = constants.LOYALTY_ACCESS
         authorization = MultiAuthorization(Authorization(), LoyaltyCustomAuthorization(query_field=args['query_field']))
         authentication = AccessTokenAuthentication()
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "state": ALL_WITH_RELATIONS,
@@ -874,7 +903,7 @@ class BrandDepartmentResource(CustomBaseModelResource):
         queryset = models.BrandDepartment.objects.all()
         resource_name = "brand-departments"
         authorization = Authorization()
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         always_return_data = True
         filtering = {
                      "id" : ALL,
@@ -889,7 +918,7 @@ class DepartmentSubCategoriesResource(CustomBaseModelResource):
         queryset = models.DepartmentSubCategories.objects.all()
         resource_name = "department-sub-categories"
         authorization = Authorization()
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         always_return_data = True
         filtering = { 
                      "department": ALL_WITH_RELATIONS,
@@ -912,7 +941,7 @@ class ServiceDeskUserResource(CustomBaseModelResource):
 #         authorization = MultiAuthorization(DjangoAuthorization())
 #         authentication = MultiAuthentication(AccessTokenAuthentication())
         authorization = Authorization()
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         always_return_data = True
         filtering = {
                         "user": ALL_WITH_RELATIONS,
@@ -926,7 +955,7 @@ class TransporterResource(CustomBaseModelResource):
         queryset = models.Transporter.objects.all()
         resource_name = 'transporters'
         authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         always_return_data = True
         filtering = {
                      'user':ALL_WITH_RELATIONS
@@ -938,7 +967,7 @@ class SupervisorResource(CustomBaseModelResource):
         queryset = models.Supervisor.objects.all()
         resource_name = 'supervisors'
         authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         always_return_data = True
         filtering = {
                      'transporter': ALL_WITH_RELATIONS

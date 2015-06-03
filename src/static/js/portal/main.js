@@ -226,16 +226,14 @@ function vinSyncFeed(data){
             var data = Utils.getFormData('.change-password-form');
             $.ajax({
                 type: 'POST',
-                url: '/aftersell/provider/change-password',
+                url: '/v1/gm-users/reset-password/',
                 data: data,
                 success: function(data){
                         if (data.message) {
                             Utils.showErrorMessage(data.message, 10, 7000);
                         }
-                        setTimeout(function(){
-                            if(data.status){
-                                history.back();
-                            }
+                        setTimeout(function() {
+                        	parent.window.location='/aftersell/register/asc';
                         }, 2000);
                     },
                 error: function(data) {
@@ -464,6 +462,7 @@ function vinSyncFeed(data){
         return false;
     });
 
+    
     
     $('.servicedesk').on('submit', function(e) {
         var data = Utils.getFormData('.servicedesk'),
@@ -752,3 +751,4 @@ $(document).on("click", ".open-add-comment-dialog", function (e) {
 	$(_self.attr('href')).modal('show');
 	
 });
+

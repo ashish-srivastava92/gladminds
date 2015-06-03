@@ -17,7 +17,7 @@ from gladminds.core.managers.audit_manager import feed_log, sms_log
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.auth_helper import Roles
 from gladminds.core.services.feed_resources import BaseFeed, BaseExportFeed
-from gladminds.core.managers.mail import send_sbom_feed_received_mail
+from gladminds.core.managers import mail
 logger = logging.getLogger("gladminds")
 
 USER_GROUP = {'dealer': Roles.DEALERS,
@@ -81,7 +81,7 @@ class BOMItemFeed(BaseFeed):
                 bomplatepart_obj.part = bom_part_obj
                 bomplatepart_obj.plate = bom_plate_obj
                 bomplatepart_obj.save(using=settings.BRAND)
-                send_sbom_feed_received_mail(brand=settings.BRAND)
+                mail.send_epc_feed_received_mail(brand=settings.BRAND, template_name='SBOM_FEED')
             except Exception as ex:
                 ex="[Exception: ]: BOMItemFeed {0}".format(ex)
                 logger.error(ex)
@@ -105,7 +105,8 @@ class ECOReleaseFeed(BaseFeed):
                                                     del_part_rev=eco_obj['del_part_rev'], del_part_loc_code=eco_obj['del_part_loc_code'], 
                                                     models_applicable=eco_obj['models_applicable'], serviceability=eco_obj['serviceability'], 
                                                     interchangebility=eco_obj['interchangebility'], reason_for_change=eco_obj['reason_for_change'])
-                eco_release_obj.save() 
+                eco_release_obj.save()
+                mail.send_epc_feed_received_mail(brand=settings.BRAND, template_name='ECO_RELEASE_FEED')
             except Exception as ex:
                 ex="[Exception: ]: ECOReleaseFeed {0}".format(ex)
                 logger.error(ex)
@@ -130,9 +131,51 @@ class ECOImplementationFeed(BaseFeed):
                                                            eco_number=eco_obj['eco_number'],reason_code=eco_obj['reason_code'],
                                                            remarks=eco_obj['remarks']
                                                            )
-                eco_implementation_obj.save() 
+                eco_implementation_obj.save()
+                self.modify_sbom_data(eco_implementation_obj)
+                mail.send_epc_feed_received_mail(brand=settings.BRAND, template_name='ECO_RELEASE_FEED')
+                
             except Exception as ex:
                 ex="[Exception: ]: ECOImplementationFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         return self.feed_remark
+    
+    def modify_sbom_data(self, eco_implementation_obj):
+        try:
+            eco_release_obj  = get_model('ECORelease').objects.get(eco_number=eco_implementation_obj.eco_number)
+            bom_header = get_model('BOMHeader').objects.get(sku_code=eco_release_obj.models_applicable)
+            bom_plate = get_model('BOMPlate').objects.get(plate_id=eco_implementation_obj.parent_part)
+            if eco_implementation_obj.added_part:
+                try:
+                    bom_part = get_model('BOMPart').objects.get(part_number=eco_implementation_obj.added_part)
+                except Exception as ex:
+                    ex="[Exception: ]: while adding new part {0}".format(ex)
+                    logger.error(ex)
+                    bom_part = get_model('BOMPart')(part_number=eco_implementation_obj.added_part)
+                    bom_part.save(using=settings.BRAND)
+                bom_plate_part = get_model('BOMPlatePart')(bom=bom_header, plate=bom_plate, part=bom_part,
+                                                                   quantity=eco_implementation_obj.added_part_qty,
+                                                                   valid_from=eco_implementation_obj.change_date,
+                                                                   valid_to='9999-12-31',
+                                                                   change_number=eco_implementation_obj.change_no)
+                bom_plate_part.save(using=settings.BRAND)
+                bom_plate_part.bom.bom_number=bom_header.bom_number
+                bom_plate_part.plate.plate_id=eco_implementation_obj.parent_part
+                bom_plate_part.save(using=settings.BRAND)
+            if eco_implementation_obj.deleted_part:
+                try:
+                    bom_part = get_model('BOMPart').objects.get(part_number=eco_implementation_obj.deleted_part)
+                    bom_plate_part = get_model('BOMPlatePart').objects.filter(bom__bom_number=bom_header.bom_number,
+                                                                              plate__plate_id=eco_implementation_obj.parent_part,
+                                                                              part=bom_part)
+                    if len(bom_plate_part) > 0:
+                        bom_plate_part.update(valid_to=eco_implementation_obj.change_date)
+                except Exception as ex:
+                    ex="[Exception] : while deleting a part {0}".format(ex)
+                    logger.error(ex)
+        except ObjectDoesNotExist as odne:
+            ex = "[Exception]: modify sbom data {0}".format(odne)
+            logger.error(ex)
+        return
+        
