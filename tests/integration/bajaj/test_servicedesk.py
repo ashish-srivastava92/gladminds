@@ -7,6 +7,7 @@ from integration.bajaj.test_brand_logic import Brand
 from django.test import TestCase
 import datetime
 from time import sleep
+import json
 from django.contrib.auth.models import User
 from gladminds.core.auth_helper import Roles
 
@@ -23,6 +24,7 @@ class TestServiceDeskFlow(BaseTestCase):
         self.brand = Brand(self)
         brand = self.brand
         system = self.system
+        self.base_version = 'http://local.daimler.gladminds.co:8000'
         self.create_user(username='gladminds', email='gladminds@gladminds.co', password='gladminds')
         self.create_user(username='bajaj', email='bajaj@gladminds.co', password='bajaj')
         brand.send_service_advisor_feed()
@@ -32,6 +34,26 @@ class TestServiceDeskFlow(BaseTestCase):
         system.create_sla(priority="High")
         system.create_dealer(username='dealer', email='dealer@xyz.com', password='123', phone_number="+919999999999")
                 
+    def post(self, uri, data, access_token=None, content_type='application/json'):
+        if access_token:
+            uri = uri+'?access_token='+access_token
+        resp = client.post(uri, data=json.dumps(data), content_type=content_type)
+        return resp
+
+    def get(self, uri, access_token, content_type='application/json'):
+        resp = client.get(uri+'?access_token='+access_token, content_type=content_type)
+        return resp
+    
+    def getCode(self, uri, access_token, content_type='application/json'):
+        resp = client.get(uri+'&&access_token='+access_token, content_type=content_type)
+        return resp
+    
+    def user_login(self):
+        data={"username": "sdm", "password": "123" }
+        uri='/v1/gm-users/login/';
+        resp=client.post(self.base_version+uri, data=json.dumps(data),content_type='application/json')
+        return json.loads(resp.content)['access_token']
+    
     def test_send_servicedesk_feedback(self):
         initiator = self.system
         SMSLog.objects.all().delete()
@@ -183,4 +205,22 @@ class TestServiceDeskFlow(BaseTestCase):
         response=service_desk_manager.update_comment(commentDescription='test')
         system.verify_result(input=Comment.objects.get(id=1).comment, output= 'test')
         self.assertEqual(response.status_code, 200)
+        
+    def test_get_agents(self):
+        access_token = self.user_login()
+        initiator = self.system
+        initiator.post_feedback()
+        service_desk_manager = self.system
+        service_desk_manager.login(username='sdm', password='123', provider='desk', group_name=Roles.SDMANAGERS)
+        response = service_desk_manager.update_feedback(status='Closed', assign_to=None)
+        self.assertEqual(response.status_code, 200)
+        uri = '/v1/feedbacks/load-analysis/agents/'
+        resp = self.get(uri, access_token, content_type='application/json')
+        obj = resp.content
+        obj = json.loads(obj)
+        count_val = filter(lambda x: x['agent_name'] == 'sdo', obj)
+        count_val = count_val[0]['count']
+        system = self.system
+        system.verify_result(input=count_val, output= 1)
+        self.assertEquals(resp.status_code, 200)
 
