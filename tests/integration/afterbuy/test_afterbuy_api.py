@@ -68,7 +68,7 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
         self.assertEquals(resp.status_code, 200)
 
     def test_change_user_password(self):
-        create_mock_data = {"password1": "1234",  "password2": "1234", "otp_token":"000000",
+        create_mock_data = {"password1": "aA1234@",  "password2": "aA1234@", "otp_token":"000000",
                             "auth_key": "e6281aa90743296987089ab013ee245dab66b27b"}
         uri = '/afterbuy/v1/consumers/forgot-password/phone/'
         resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
@@ -146,4 +146,5 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
 #         resp = self.client.get('/afterbuy/v1/products/1/')
 #         self.assertEqual(self.deserialize(resp)['nick_name'], "bbb")
 #
-#
+
+    
