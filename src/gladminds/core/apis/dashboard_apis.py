@@ -62,7 +62,7 @@ def get_set_cache(key, data_func, timeout=15):
             result = data_func
         else:
             result = data_func()
-        Cache.set(key, result, timeout*60)
+        Cache.set(key, result, timeout)
     return result
 
 _KEYS = ["id", "name", "value"]
@@ -400,7 +400,7 @@ class TicketStatusResource(CustomBaseResource):
             data = self.get_sql_data("select status, count(*) as count from gm_feedback where reporter_id=%(reporter_id)s group by status",
                      filters={'reporter_id' : reporter_id})
             
-        return get_set_cache('gm_ticket_count' + str(request.user.id), data)
+        return get_set_cache('gm_ticket_count' + str(request.user.id), data, timeout=2)
     
     def get_sql_data(self, query, filters={}):
         conn = connections[settings.BRAND]
