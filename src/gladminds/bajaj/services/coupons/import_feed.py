@@ -250,6 +250,8 @@ class ProductPurchaseFeed(BaseFeed):
         for product in self.data_source:
             try:
                 product_data = models.ProductData.objects.get(product_id=product['vin'])
+                if product_data.customer_id  and product_data.customer_id.find('T') != 0 and product_data.customer_id != product['sap_customer_id']:
+                    raise ValueError('Permanent ID {0} already Exists! New ID {1}'.format(product_data.customer_id, product['sap_customer_id']))
                 if product_data.customer_phone_number and product_data.customer_id == product['sap_customer_id']:
                     post_save.disconnect(
                         update_coupon_data, sender=models.ProductData)
