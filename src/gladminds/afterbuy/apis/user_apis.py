@@ -325,7 +325,6 @@ class ConsumerResource(CustomBaseModelResource):
     
     def get_product_details(self, request, **kwargs):
         port = request.META['SERVER_PORT']
-        access_token = request.META['QUERY_STRING'] 
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
         try:
@@ -335,16 +334,20 @@ class ConsumerResource(CustomBaseModelResource):
 
         phone_number = load.get('phone_number', None)
         product_id = load.get('product_id', None)
-        query = '/v1/coupons/?'+ access_token
-        
+        query = '/v1/coupons/'
+        params = ''
         if product_id:
             if product_id[:3].upper()!= constants.KTM_VIN:
                 return HttpResponse(json.dumps({'message':'Incorrect VIN'}), content_type='application/json')
-            query = query + '&product__product_id='+product_id
+            params =  '?product__product_id='+product_id
         
         if phone_number:
-            query = query + '&product__customer_phone_number__contains='+phone_number+'&product__product_id__startswith=VBK'
-        
+            if params:
+                params = params + '&product__customer_phone_number__contains='+phone_number+'&product__product_id__startswith=VBK'
+            else:
+                params = '?product__customer_phone_number__contains='+phone_number+'&product__product_id__startswith=VBK'
+    
+        query = query + params  
         try:
             if not settings.API_FLAG:
                 result = requests.get('http://'+settings.COUPON_URL+':'+port+query)

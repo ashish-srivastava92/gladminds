@@ -273,6 +273,12 @@ class ContainerTrackerModel(ComplexModel):
     GATEIN_TIME = Time(default=None)
     GATEIN_DATE = Unicode(default=None)
     TRANS_NAME = Unicode
+    CONTAINER_NO = Unicode
+    SEAL_NO = Unicode
+    SHIPPINGLINE_ID = Unicode
+    CREATED_DATE = Unicode(default=None)
+    IB_DISPATCH_DT = Unicode(default=None)
+    NO_OF_CONTAINERS = Unicode
     
 class ContainerTrackerModelList(ComplexModel):
     __namespace__ = tns
@@ -299,6 +305,12 @@ class ContainerTrackerService(ServiceBase):
                                 'gatein_date' :  tracker_obj.GATEIN_DATE,
                                 'gatein_time' :  tracker_obj.GATEIN_TIME,
                                 'tranporter_name' : tracker_obj.TRANS_NAME,
+                                'container_no' :  tracker_obj.CONTAINER_NO,
+                                'seal_no' :  tracker_obj.SEAL_NO,
+                                'shippingline_id' :  tracker_obj.SHIPPINGLINE_ID,
+                                'ib_dispatch_dt' :  tracker_obj.IB_DISPATCH_DT,
+                                'created_date' :  tracker_obj.CREATED_DATE,
+                                'no_of_containers' :  tracker_obj.NO_OF_CONTAINERS
                             })
 
         feed_remark = save_to_db(feed_type='container_tracker', data_source=tracker_list, feed_remark=feed_remark)

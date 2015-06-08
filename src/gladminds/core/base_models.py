@@ -8,7 +8,6 @@ from constance import config
 
 from gladminds.core.managers import user_manager, coupon_manager,\
     service_desk_manager
-from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
 from gladminds.core.model_helpers import PhoneField, set_plate_image_path,\
     set_plate_with_part_image_path, set_brand_product_image_path
 from gladminds.core import constants
@@ -20,6 +19,8 @@ from gladminds.core.model_helpers import set_service_training_material_path,\
     set_welcome_kit_pod_path
 from gladminds.core.managers.mail import sent_password_reset_link,\
     send_email_activation
+from gladminds.core.constants import SBOM_STATUS
+from gladminds.core.managers.email_token_manager import EmailTokenManager
 
 try:
     from django.utils.timezone import now as datetime_now
@@ -58,6 +59,8 @@ class UserProfile(BaseModel):
     image_url = models.FileField(upload_to=set_user_pic_path,
                                   max_length=200, null=True, blank=True,
                                   validators=[validate_image])
+    reset_password = models.BooleanField(default=False)
+    reset_date = models.DateTimeField(null=True, blank=True)
         
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
@@ -575,7 +578,8 @@ class EmailToken(models.Model):
                     'base_url':settings.DOMAIN_BASE_URL}
         if trigger_mail == 'forgot-password':
             ctx_dict = {'activation_key': self.activation_key,
-                    'link': settings.FORGOT_PASSWORD_LINK[settings.BRAND]}
+                    'link': settings.FORGOT_PASSWORD_LINK[settings.BRAND],
+                    'base_url': settings.COUPON_URL}
             sent_password_reset_link(reciever_email, ctx_dict)
         else:
             send_email_activation(reciever_email, ctx_dict)
@@ -936,10 +940,15 @@ class ContainerTracker(BaseModel):
     gatein_date = models.DateField(max_length=10, null=True, blank=True)
     gatein_time = models.TimeField(max_length=10, null=True, blank=True)
     status = models.CharField(max_length=12, choices=constants.CONSIGNMENT_STATUS, default='Open')
-    seal_no = models.CharField(max_length=20, null=True, blank=True)
-    container_no = models.CharField(max_length=20, null=True, blank=True)
+    seal_no = models.CharField(max_length=40, null=True, blank=True)
+    container_no = models.CharField(max_length=40, null=True, blank=True)
     sent_to_sap = models.BooleanField(default=False)
     submitted_by = models.CharField(max_length=50, null=True, blank=True)
+
+    shippingline_id = models.CharField(max_length=50, null=True, blank=True)
+    ib_dispatch_dt = models.DateField(null=True, blank=True)
+    cts_created_date = models.DateField(null=True, blank=True)
+    no_of_containers = models.IntegerField(default=0)
 
     class Meta:
         abstract = True
@@ -1488,7 +1497,10 @@ class BrandProductRange(BaseModel):
         db_table = "gm_brandproductrange"
         abstract = True
         verbose_name_plural = "Product Range"
-
+    
+    def __unicode__(self):
+        return self.sku_code
+    
 class BOMHeader(BaseModel):
     '''Detaills of  Header fields BOM'''
     sku_code = models.CharField(max_length=20, null=True, blank=True)
@@ -1531,6 +1543,9 @@ class BOMPlate(BaseModel):
         db_table = "gm_bomplate"
         abstract = True
         verbose_name_plural = "BOM Plates"
+    
+    def __unicode__(self):
+        return self.plate_id
         
 class BOMPart(BaseModel):
     '''Detaills of  BOM Parts'''
@@ -1544,6 +1559,9 @@ class BOMPart(BaseModel):
         abstract = True
         db_table = "gm_bompart"
         verbose_name_plural = "BOM Parts "
+        
+    def __unicode__(self):
+        return self.part_number
         
 class BOMPlatePart(BaseModel):
     '''Details of BOM Plates and part relation'''
@@ -1569,6 +1587,11 @@ class BOMVisualization(BaseModel):
     z_coordinate  = models.IntegerField()
     serial_number = models.IntegerField()
     part_href = models.CharField(max_length=200)
+    status =  models.CharField(max_length=25, choices=SBOM_STATUS,
+                              blank=True, null=True)
+    published_date = models.DateTimeField(null=True, blank=True)
+    remarks = models.CharField(max_length=500, null=True, blank=True)
+
     
     class Meta:
         abstract = True

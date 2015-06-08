@@ -31,6 +31,7 @@ from gladminds.core.core_utils.utils import dictfetchall
 from gladminds.core.managers.mail import get_email_template
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from django.forms.models import model_to_dict   
+from gladminds.core.model_fetcher import get_model
 
 logger = logging.getLogger('gladminds')
 
@@ -367,7 +368,7 @@ def set_wait_time(feedback_data):
     wait = end_date - start_date
     wait_time = wait.total_seconds()
     previous_wait = feedback_data.wait_time
-    models.Feedback.objects.filter(id = feedback_data.id).update(wait_time = wait_time+previous_wait)
+    get_model('Feedback').objects.filter(id = feedback_data.id).update(wait_time = wait_time+previous_wait)
 
 
 def services_search_details(data):

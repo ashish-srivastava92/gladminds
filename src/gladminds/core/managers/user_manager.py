@@ -77,8 +77,8 @@ class SparePartUPCManager(models.Manager):
 
 
 class SparePartPointManager(models.Manager):
-    def get_part_number(self, valid_product_number):
-        return super(SparePartPointManager, self).get_query_set().filter(part_number__in=valid_product_number)
+    def get_part_number(self, valid_product_number, state):
+        return super(SparePartPointManager, self).get_query_set().filter(part_number__in=valid_product_number, territory=state)
 
 class RegisterUser():
     def register_user(self, group, username=None, phone_number=None,

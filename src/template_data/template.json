@@ -180,7 +180,7 @@
   	"pk": 20,
   	"fields": {
   		"template_key": "SEND_CUSTOMER_SUPPORTED_KEYWORD",
-  		"template": "Supported keyword: 1.GCP_REG 2.SERVICE 3.BRAND 4.A 5.C 6.SD 7.R",
+  		"template": "Supported keyword: 1.A 2.C 3.SD 4.R 5.AC 6.RD 7.CHKBAL",
   		"description": "Send supported message format to customer"
   	}
   },
@@ -441,7 +441,7 @@
     "pk": 49,
     "fields": {
       "template_key": "COMPLETE_FORM",
-      "template": "Dear {mechanic_name}, We have received registration for Bajaj USTAAD program. After verification, you will receive the welcome kit in days",
+      "template": "Welcome Mr {mechanic_name}, to Bajaj Commercial Vehicle Power reward program.The welcome kit will be dispatched soon. your id is {member_id}",
       "description": "welcome message to mechanic"
       }
     },
@@ -584,9 +584,18 @@
     "model": "gladminds.messagetemplate",
     "pk": 65,
     "fields": {
-      "template_key":"SEND_CUSTOMER_REGISTER_KTM",
-      "template":  "Dear {customer_name}, Congratulations for owning KTM Duke Bike. Download link for KTM Duke Owner's Manual at {ktm_url}. Welcome to Orange World.",
-      "description": "Send message on KTM bike purchase"
+      "template_key":"SEND_CUSTOMER_REGISTER_KTM_DUKE",
+      "template":  "Dear {customer_name}, Congratulations for owning KTM Duke Bike. Download link for KTM Duke Owner's Manual for Android. Users: {duke_android_url} and Web Users : {duke_web_url}", 
+      "description": "Send message on KTM DUKE bike purchase"
+    }
+  },
+     {
+    "model": "gladminds.messagetemplate",
+    "pk": 66,
+    "fields": {
+      "template_key":"SEND_CUSTOMER_REGISTER_KTM_RC",
+      "template":  "Dear {customer_name}, Congratulations for owning KTM RC Bike. Download link for KTM RC Owner's Manual for Android. Users: {rc_android_url} and Web Users : {rc_web_url}", 
+      "description": "Send message on KTM RC bike purchase"
     }
   }
 ]

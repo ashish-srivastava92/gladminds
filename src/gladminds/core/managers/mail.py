@@ -8,7 +8,7 @@ from django.template import Context, Template
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 from gladminds.core.managers import audit_manager
-from gladminds.core.auth_helper import GmApps
+from gladminds.core.auth_helper import GmApps, Roles
 from gladminds.core.model_fetcher import get_model
 
 logger = logging.getLogger("gladminds")
@@ -542,3 +542,23 @@ def send_phone_number_update_count_exceeded(update_details=None, brand=None):
         logger.info("Sending out customer phone number update exceeds emails")
     except Exception as ex:
         logger.info("[Exception customer phone number update]: {0}".format(ex))
+
+
+def send_epc_feed_received_mail(brand, template_name):
+    try:
+        data = get_email_template(template_name, brand)
+        file_stream = open(settings.EMAIL_DIR+'/base_email_template.html')
+        feed_temp = file_stream.read()
+        template = Template(feed_temp)
+        context = Context({"content": data['body']})
+        body = template.render(context)
+        epc_users = get_model('UserProfile').objects.filter(user__groups__name=Roles.VISUALIZATIONUSER)
+        receiver_email = []
+        for user in epc_users:
+            receiver_email.append(user.user.email)
+
+        send_email(sender = data['sender'], receiver = receiver_email, 
+                   subject = data['subject'], body = body, message=data['body'],
+                   smtp_server = settings.MAIL_SERVER)
+    except Exception as ex:
+        logger.info("[Exception while sending {0} email]: {1} ".format(template_name, ex))

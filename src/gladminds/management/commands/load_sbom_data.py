@@ -112,7 +112,11 @@ class Command(BaseCommand):
                 bom_part_obj = BOMPART(part_number=product['part_number'],
                                        revision_number=product['revision_number'])
                 bom_part_obj.save(using=app)
-            bom_plate_part_obj = BOMPLATEPART(bom=bom_header_obj, plate=bom_plate_obj, part=bom_part_obj,
+            try:
+                bom_plate_part_obj = BOMPLATEPART.objects.get(bom=bom_header_obj, plate=bom_plate_obj,
+                                                              part=bom_part_obj, quantity=product['quantity'])
+            except Exception as ex:
+                bom_plate_part_obj = BOMPLATEPART(bom=bom_header_obj, plate=bom_plate_obj, part=bom_part_obj,
                                               quantity=product['quantity'], uom=product['uom'],
                                               valid_from=product['valid_from'], valid_to=product['valid_to'],
                                               serial_number=product['serial_number'],

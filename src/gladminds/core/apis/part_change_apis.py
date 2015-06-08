@@ -1,20 +1,21 @@
+import csv
+from datetime import datetime
 import json
 import logging
-import csv
-from django.conf.urls import url
+
 from django.conf import settings
+from django.conf.urls import url
 from django.forms.models import model_to_dict
 from django.http.response import HttpResponse, HttpResponseBadRequest
-
 from tastypie import fields
-from tastypie.utils.urls import trailing_slash
 from tastypie.authorization import Authorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
+from tastypie.utils.urls import trailing_slash
 
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.core.model_fetcher import get_model
 from gladminds.core.core_utils.utils import format_part_csv
+from gladminds.core.model_fetcher import get_model
 
 
 LOG = logging.getLogger('gladminds')
@@ -45,6 +46,10 @@ class BrandProductRangeResource(CustomBaseModelResource):
                      "sku_code": ALL,
                      "vertical" : ALL
                      }
+        
+    def dehydrate(self, bundle):
+        bundle.data['image_url'] = bundle.data['image_url'].split('?')[0]
+        return bundle    
     
 class BOMHeaderResource(CustomBaseModelResource):
     
@@ -90,8 +95,8 @@ class BOMPartResource(CustomBaseModelResource):
         
         
 class BOMPlatePartResource(CustomBaseModelResource):
-    bom = fields.ForeignKey(BOMHeaderResource, 'bom', null=True , blank=True, full=True)
-    plate = fields.ForeignKey(BOMPlateResource, 'plate', null=True, blank=True, full=True)
+    bom = fields.ForeignKey(BOMHeaderResource, 'bom', null=True , blank=True)
+    plate = fields.ForeignKey(BOMPlateResource, 'plate', null=True, blank=True)
     part = fields.ForeignKey(BOMPartResource, 'part', null=True, blank=True, full=True)
     class Meta:
         queryset = get_model('BOMPlatePart').objects.all()
@@ -107,7 +112,7 @@ class BOMPlatePartResource(CustomBaseModelResource):
                      "plate" : ALL_WITH_RELATIONS,
                      "part" : ALL_WITH_RELATIONS
                      }
-       
+    
     def prepend_urls(self):
         return [
                  url(r"^(?P<resource_name>%s)/save-part%s" % (self._meta.resource_name,trailing_slash()),
@@ -116,11 +121,17 @@ class BOMPlatePartResource(CustomBaseModelResource):
                      self.wrap_view('get_plates'), name="get_plates")
                 ]
     
+    def alter_list_data_to_serialize(self, request, data):
+        plate =  get_model('BOMPlate').objects.get(plate_id=request.GET.get('plate__plate_id'))
+        data['meta']['plate_id'] = plate.plate_id
+        data['meta']['plate_image'] = "{0}/{1}".format(settings.S3_BASE_URL, plate.plate_image)
+        data['meta']['plate_image_with_part'] = "{0}/{1}".format(settings.S3_BASE_URL, plate.plate_image_with_part)
+        return data
+        
     def dehydrate(self, bundle):
         bom_visualization = get_model('BOMVisualization').objects.filter(bom=bundle.data['id'])
         bundle.data['bom_visualization'] = [model_to_dict(b) for b in bom_visualization]
         return bundle    
-        
     
     def get_plates(self, request, **kwargs):
         self.is_authenticated(request)
@@ -133,7 +144,7 @@ class BOMPlatePartResource(CustomBaseModelResource):
             for data in bom_plate_part:
                 plate = {}
                 plate['plate_id'] = data.plate.plate_id
-                plate['image_url'] = data.plate.plate_image
+                plate['image_url'] = "{0}/{1}".format(settings.S3_BASE_URL, data.plate.plate_image)
                 if not data.plate.plate_image:
                     plate['image_url'] = ""
                 plate['description'] = data.plate.plate_txt
@@ -230,10 +241,51 @@ class BOMVisualizationResource(CustomBaseModelResource):
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get']
         filtering = {
-                     "bom" : ALL_WITH_RELATIONS
+                     "bom" : ALL_WITH_RELATIONS,
+                     "status" : ALL
                      }
+     
+    def prepend_urls(self):
+        return [
+                 url(r"^(?P<resource_name>%s)/review-sbom%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('review_sbom_details'), name="review_sbom_details")
+                ]
         
-        
+    def review_sbom_details(self, request, **kwargs):
+        self.is_authenticated(request)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        bom_number = load.get('bom_number')
+        sku_code = load.get('sku_code')
+        plate_id = load.get('plate_id')
+        part_number = load.get('part_number')
+        status = load.get('status')
+        quantity = load.get('quantity')
+        remarks = load.get('remarks')
+        try:
+            bom_details = get_model('BOMPlatePart').objects.get(bom__sku_code=sku_code,
+                                                                bom__bom_number=bom_number,
+                                                                plate__plate_id=plate_id,
+                                                                part__part_number=part_number,
+                                                                quantity=quantity)
+            bom_visualizations = get_model('BOMVisualization').objects.filter(bom=bom_details)
+            bom_visualization = bom_visualizations[0]
+            bom_visualization.status = status
+            if remarks:
+                bom_visualization.remarks = remarks
+            if status == 'Publish':
+                bom_visualization.published_date = datetime.now()
+            bom_visualization.save(using=settings.BRAND)
+            return HttpResponse(json.dumps({"message": "Success"}), content_type='application/json')
+        except Exception as ex:
+            LOG.info('[review_sbom]: {0}'.format(ex))
+            return HttpResponseBadRequest()
+
 class ECOReleaseResource(CustomBaseModelResource):
     
     class Meta:

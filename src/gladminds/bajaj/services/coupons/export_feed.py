@@ -217,6 +217,23 @@ class ExportUnsyncProductFeed(BaseExportFeed):
                     message='The Chassis was found in the main database. Please try after sometime.'
                     for results in result[0]:
                         try:
+                            valid_dict = {
+                                     1 : {
+                                          "valid_days": 365,
+                                          "valid_kms": 2000
+                                             },
+                                     2 : {
+                                          "valid_days": 730,
+                                          "valid_kms": 8000,
+                                             },
+                                     3 : {
+                                          "valid_days": 730,
+                                          "valid_kms": 15000,
+                                             }
+                                    }
+                            
+                            results['DAYS_LIMIT_TO'] = valid_dict[int(results['SERV_TYP'])]['valid_days']
+                            results['KMS_TO'] = valid_dict[int(results['SERV_TYP'])]['valid_kms']
                             data_source.append(utils.create_dispatch_feed_data(results))
                             feed_remark = FeedLogWithRemark(len(data_source),
                                             feed_type='VIN sync Feed',

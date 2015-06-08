@@ -32,7 +32,7 @@ class ProductTypeResource(CustomBaseModelResource):
 #         authentication = AccessTokenAuthentication()
 #         authorization = MultiAuthorization(DjangoAuthorization())
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        allowed_methods = ['get', 'post', 'put', 'delete']
         always_return_data = True
 
 
@@ -45,9 +45,9 @@ class ProductResource(CustomBaseModelResource):
     class Meta:
         queryset = models.ProductData.objects.all()
         resource_name = "products"
-        authentication = AccessTokenAuthentication()
+#         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(Authorization())
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         filtering = {
                      "product_id":  ALL,
                      "customer_id": ALL,
@@ -68,7 +68,7 @@ class CustomerTempRegistrationResource(CustomBaseModelResource):
         resource_name = "customer-changes"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         always_return_data = True
         filtering = {
                       "product_data" : ALL_WITH_RELATIONS 
@@ -81,7 +81,7 @@ class ProductCatalogResource(CustomBaseModelResource):
         queryset = models.ProductCatalog.objects.all()
         resource_name = "product-catalogs"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
 class SpareMasterResource(CustomBaseModelResource):
@@ -90,7 +90,7 @@ class SpareMasterResource(CustomBaseModelResource):
         queryset = models.SparePartMasterData.objects.all()
         resource_name = "spare-masters"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
 class SparePartPointResource(CustomBaseModelResource):
@@ -99,7 +99,7 @@ class SparePartPointResource(CustomBaseModelResource):
         queryset = models.SparePartPoint.objects.all()
         resource_name = "spare-points"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
 class SparePartUPCResource(CustomBaseModelResource):
@@ -108,7 +108,7 @@ class SparePartUPCResource(CustomBaseModelResource):
         queryset = models.SparePartUPC.objects.all()
         resource_name = "spare-upcs"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
 class ContainerTrackerResource(CustomBaseModelResource):
@@ -119,7 +119,7 @@ class ContainerTrackerResource(CustomBaseModelResource):
         resource_name = 'container-trackers'
         authorization = MultiAuthorization(DjangoAuthorization(), CTSCustomAuthorization())
         authentication = MultiAuthentication(AccessTokenAuthentication())
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data =True
         filtering = {
                      'transporter': ALL_WITH_RELATIONS,

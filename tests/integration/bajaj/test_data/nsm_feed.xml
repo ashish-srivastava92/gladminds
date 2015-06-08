@@ -7,9 +7,9 @@
           <ns1:NSMModel>
           	<ns1:PHONE_NUMBER>123456789</ns1:PHONE_NUMBER>
           	<ns1:USER_ID>123</ns1:USER_ID>
-          	<ns1:NAME>PAVAN</ns1:NAME>
+          	<ns1:NAME>TestNSM</ns1:NAME>
             <ns1:TERRITORY>Karnataka</ns1:TERRITORY>
-            <ns1:EMAIL>PAVANKUMAR.S@HASEDIN.COM</ns1:EMAIL>
+            <ns1:EMAIL>test.nsm@gmail.com</ns1:EMAIL>
            	</ns1:NSMModel>
         </ns1:NSMData>
       </ns1:ObjectList>

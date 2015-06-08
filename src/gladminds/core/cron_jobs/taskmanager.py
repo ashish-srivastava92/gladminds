@@ -202,7 +202,7 @@ def update_coupon(brand):
 
     update_extended_date = update_date + " c.extended_date = " + update_date_1 + valid_days + ")) where c.status not in (2, 6)and p.purchase_date is not null;"
     update_expired_date = update_date + " c.mark_expired_on = " + update_date_1+ valid_days + ")) where c.status not in (2, 4, 6)and p.purchase_date is not null;"
-    update_days_kms = update_days_kms + valid_days + " ,c.status=1 where c.status not in (2, 6);"
+    update_days_kms = update_days_kms + valid_days + " ,c.status=1 where c.status not in (2, 4, 5, 6);"
      
     get_sql_data(query=update_extended_date, brand=brand)
     get_sql_data(query=update_expired_date,  brand=brand)
