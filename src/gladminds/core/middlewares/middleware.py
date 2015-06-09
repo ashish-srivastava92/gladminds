@@ -32,6 +32,7 @@ class GladmindsMessageMiddleware(object):
             SMS_CLIENT.value = "KAP"
         else :
             SMS_CLIENT.value = "AIRTEL"
+        logger.info('[middleware]::sms_client is {0}'.format(SMS_CLIENT.value))
 
 """
 Gladminds middleware to identify the user type (i.e Customer, Service Advisor and Admin).

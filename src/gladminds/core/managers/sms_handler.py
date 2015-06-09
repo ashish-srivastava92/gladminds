@@ -75,14 +75,9 @@ class SMSResources(Resource):
             error_template = ANGULAR_FORMAT('CORRECT FORMAT: ' + inf.template)
             error_message = inf.message
         if error_template:
-            l1 = time()
             sms_log(settings.BRAND, receiver=phone_number,
                     action=AUDIT_ACTION, message=error_template)
-            l2 = time()
-            LOGGER.info("The database took {0} secs yippee".format(l2-l1))
             send_job_to_queue(send_invalid_keyword_message, {"phone_number":phone_number, "message":error_template, "sms_client":settings.SMS_CLIENT})
-            l3 = time()
-            LOGGER.info("The sqs took {0} secs yippee".format(l3-l2))
             raise ImmediateHttpResponse(HttpBadRequest(error_message))
         to_be_serialized = {}
         try:
