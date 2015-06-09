@@ -44,7 +44,7 @@ class TestServiceDeskFlow(BaseTestCase):
         resp = client.get(uri+'?access_token='+access_token, content_type=content_type)
         return resp
     
-    def getCode(self, uri, access_token, content_type='application/json'):
+    def getcode(self, uri, access_token, content_type='application/json'):
         resp = client.get(uri+'&&access_token='+access_token, content_type=content_type)
         return resp
     
