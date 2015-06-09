@@ -23,6 +23,8 @@ class GladmindsMessageMiddleware(object):
 
     def process_request(self, request, **kwargs):
         source_client = request.GET.get('__gm_source', None)
+        sms_client = request.GET.get('sms_client', None)
+        logger.info('[middleware]::sms_client in kwargs is {0}'.format(sms_client))
 
         if settings.ENV in ['local', 'test', 'staging']:
             SMS_CLIENT.value = None
@@ -31,7 +33,12 @@ class GladmindsMessageMiddleware(object):
         if source_client == settings.SMS_CLIENT_DETAIL['KAP']['params']:
             SMS_CLIENT.value = "KAP"
         else :
-            SMS_CLIENT.value = "AIRTEL"
+            try:
+                SMS_CLIENT.value = settings.BRAND_SMS_GATEWAY.get(settings.BRAND)
+                logger.info('[middleware]::Got brand in settings {0}: {1}'.format(settings.BRAND, SMS_CLIENT.value ))
+            except:
+                SMS_CLIENT.value = "AIRTEL"
+                logger.info('[middleware]::Not got brand in settings {0}: {1}'.format(settings.BRAND, SMS_CLIENT.value ))
         logger.info('[middleware]::sms_client is {0}'.format(SMS_CLIENT.value))
 
 """
