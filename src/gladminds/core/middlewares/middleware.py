@@ -33,10 +33,8 @@ class GladmindsMessageMiddleware(object):
         else :
             try:
                 SMS_CLIENT.value = settings.BRAND_SMS_GATEWAY.get(settings.BRAND)
-                logger.info('[middleware]::Got brand in settings {0}: {1}'.format(settings.BRAND, SMS_CLIENT.value ))
             except:
                 SMS_CLIENT.value = "AIRTEL"
-                logger.info('[middleware]::Not got brand in settings {0}: {1}'.format(settings.BRAND, SMS_CLIENT.value ))
         logger.info('[middleware]::sms_client is {0}'.format(SMS_CLIENT.value))
 
 """
