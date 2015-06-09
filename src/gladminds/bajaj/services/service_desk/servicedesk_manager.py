@@ -428,7 +428,7 @@ def modify_feedback(feedback_obj, data, user, host):
                     
         context = create_context('TICKET_RESOLVED_DETAIL_TO_BAJAJ',
                                  feedback_obj)
-        mail.send_email_to_bajaj_after_issue_resolved(context)
+        mail.send_email_to_brand_after_issue_resolved(context)
         context = create_context('TICKET_RESOLVED_DETAIL_TO_MANAGER',
                                  feedback_obj)
         mail.send_email_to_manager_after_issue_resolved(context, servicedesk_obj_all[0])
