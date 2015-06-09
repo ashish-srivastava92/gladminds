@@ -41,7 +41,7 @@ TEMPLATE_DIRS = (
 #                 }
 FILE_CACHE_DURATION = 0
 
-SMS_CLIENT = "AIRTEL"
+SMS_CLIENT = "KAP"
 FEED_TYPE = 'CSV'
 
 #AfterBuy File Upload location configuration
