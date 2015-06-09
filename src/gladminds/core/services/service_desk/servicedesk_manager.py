@@ -127,7 +127,6 @@ def send_feedback_sms(template_name, phone_number, feedback_obj, comment_obj=Non
         LOG.info("Send complain message received successfully with {0}".format(message))
         phone_number = utils.get_phone_number_format(phone_number)
         sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
-        LOG.info("[send_feedback_sms]: {0}".format(settings.SMS_CLIENT))
         send_job_to_queue(send_servicedesk_feedback_detail, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
     return {'status': True, 'message': message}
 
