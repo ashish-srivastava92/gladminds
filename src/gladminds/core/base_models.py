@@ -957,6 +957,11 @@ class ContainerTracker(BaseModel):
     
     def __unicode__(self):
         return str(self.transaction_id)
+    
+    def save(self, *args, **kwargs):
+        if not self.submitted_by:
+            self.submitted_by = None
+        super(ContainerTracker, self).save(*args, **kwargs)
 
 #######################LOYALTY MODELS#################################
 
