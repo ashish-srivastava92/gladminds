@@ -167,7 +167,7 @@ class ConsumerResource(CustomBaseModelResource):
         try:
             afterbuy_model.Consumer.objects.get(
                                                 phone_number=phone_number)
-            data = {'status': 0, 'message': 'phone number already registered'}
+            data = {'status_code': 0, 'message': 'phone number already registered'}
         except Exception as ex:
             try:
                 user_obj = User.objects.using(GmApps.AFTERBUY).create(username=phone_number)

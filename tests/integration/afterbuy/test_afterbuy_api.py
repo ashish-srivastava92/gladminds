@@ -36,14 +36,17 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
         self.create_afterbuy_user()
 
     def test_user_registration(self):
-#         self.create_afterbuy_user()
 
-        create_mock_data = {"first_name": "saurav","phone_number":"7760814041",
-                            "email_id":"test.ab@gmail.com","password":"123",
-                            "otp_token":"000000"}
+        create_mock_data = {"phone_number":"7760814043",
+                            }
         uri = '/afterbuy/v1/consumers/registration/'
         resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
-        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(json.loads(resp.content)['status_code'], 200)
+        create_mock_data = {"phone_number":"7760814043",
+                            }
+        uri = '/afterbuy/v1/consumers/registration/'
+        resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
+        self.assertEquals(json.loads(resp.content)['status_code'], 0)
 
     def test_user_login(self):
         login_data = {"phone_number":"7760814041", "password":"123"}
