@@ -69,6 +69,7 @@ class Consumer(base_models.BaseModel):
     tshirt_size = models.CharField(max_length=2, choices=SIZE_CHOICES,
                                    blank=True, null=True)
     is_email_verified = models.BooleanField(default=False)
+    is_phone_verified = models.BooleanField(default=False)
 
     class Meta:
         app_label = _APP_NAME

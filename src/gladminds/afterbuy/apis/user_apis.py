@@ -101,6 +101,58 @@ class ConsumerResource(CustomBaseModelResource):
             data = {'status': 0, 'message': ex}
         return HttpResponse(json.dumps(data), content_type="application/json")
             
+#     @atomic(using=GmApps.AFTERBUY)
+#     def user_registration(self, request, **kwargs):
+#         if request.method != 'POST':
+#             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+#         try:
+#             load = json.loads(request.body)
+#         except:
+#             return HttpResponse(content_type="application/json", status=404)
+# #         otp_token = load['otp_token']
+#         phone_number = load['phone_number']
+# #         try:
+# #             if not (settings.ENV in settings.IGNORE_ENV and otp_token in settings.HARCODED_OTPS):
+# #                 otp_handler.validate_otp(otp_token, phone_number=phone_number)
+# #         except Exception:
+# #             raise ImmediateHttpResponse(
+# #                 response=http.HttpBadRequest('Wrong OTP!'))
+#         phone_number = load.get('phone_number')
+#         email_id = load.get('email_id')
+#         user_name = load.get('username', str(uuid4())[:30])
+#         first_name = load.get('first_name')
+#         last_name = load.get('last_name','')
+#         password = load.get('password')
+#         invalid_password = check_password(password)
+#         if not invalid_password:
+#             return HttpBadRequest("password is not meant according to the rules")
+#         if not phone_number or not password:
+#             return HttpBadRequest("phone_number, password required.")
+#         try:
+#             afterbuy_model.Consumer.objects.get(
+#                                                 phone_number=phone_number)
+#             data = {'status': 0, 'message': 'phone number already registered'}
+#         except Exception as ex:
+#                 try:
+#                     afterbuy_model.Consumer.objects.get(user__email=email_id, is_email_verified=True)
+#                     data = {'status': 0, 'message': 'email id already registered'}
+#                     return HttpResponse(json.dumps(data), content_type="application/json")
+#                 except Exception as ex:
+#                         log_message = "new user :{0}".format(ex)
+#                         logger.info(log_message)
+#                         create_user = User.objects.using(GmApps.AFTERBUY).create(username=user_name)
+#                         create_user.set_password(password)
+#                         create_user.email = email_id
+#                         create_user.first_name = first_name
+#                         create_user.last_name = last_name
+#                         create_user.save(using=GmApps.AFTERBUY)
+#                         user_register = afterbuy_model.Consumer(user=create_user,
+#                                     phone_number=phone_number)
+#                         user_register.save()
+#                         site = RequestSite(request)
+#                         afterbuy_model.EmailToken.objects.create_email_token(user_register, email_id, site)
+#                         data = {'status': 1, 'message': 'succefully registered'}
+#         return HttpResponse(json.dumps(data), content_type="application/json")
     @atomic(using=GmApps.AFTERBUY)
     def user_registration(self, request, **kwargs):
         if request.method != 'POST':
@@ -109,49 +161,48 @@ class ConsumerResource(CustomBaseModelResource):
             load = json.loads(request.body)
         except:
             return HttpResponse(content_type="application/json", status=404)
-#         otp_token = load['otp_token']
-        phone_number = load['phone_number']
-#         try:
-#             if not (settings.ENV in settings.IGNORE_ENV and otp_token in settings.HARCODED_OTPS):
-#                 otp_handler.validate_otp(otp_token, phone_number=phone_number)
-#         except Exception:
-#             raise ImmediateHttpResponse(
-#                 response=http.HttpBadRequest('Wrong OTP!'))
         phone_number = load.get('phone_number')
-        email_id = load.get('email_id')
-        user_name = load.get('username', str(uuid4())[:30])
-        first_name = load.get('first_name')
-        last_name = load.get('last_name','')
-        password = load.get('password')
-        invalid_password = check_password(password)
-        if not invalid_password:
-            return HttpBadRequest("password is not meant according to the rules")
-        if not phone_number or not password:
-            return HttpBadRequest("phone_number, password required.")
+        if not phone_number:
+            return HttpBadRequest("Enter phone number")
         try:
             afterbuy_model.Consumer.objects.get(
                                                 phone_number=phone_number)
             data = {'status': 0, 'message': 'phone number already registered'}
         except Exception as ex:
+            try:
+                user_obj = User.objects.using(GmApps.AFTERBUY).create(username=phone_number)
+                password = phone_number+'@123'
+                user_obj.set_password(password)
+                user_obj.save(using=GmApps.AFTERBUY)
+                consumer_obj = afterbuy_model.Consumer(user=user_obj, phone_number=phone_number)
+                consumer_obj.save(using=GmApps.AFTERBUY)
+                http_host = request.META.get('HTTP_HOST', 'localhost')
+                user_auth = authenticate(username=str(phone_number),
+                                password=password)
+                if user_auth is not None:
+                    try:
+                        access_token = create_access_token(user_auth, user_obj.username, password, http_host)
+                        if user_auth.is_active:
+                            login(request, user_auth)
+                            data = {'status_code': 200 , 'message':'success', 'access_token': access_token}
+                        else:
+                            data = {'status': 0, 'message': "failure"}
+                    except Exception as ex:
+                        logger.info('Exception while generating access token {0}'.format(ex))
+                        
                 try:
-                    afterbuy_model.Consumer.objects.get(user__email=email_id, is_email_verified=True)
-                    data = {'status': 0, 'message': 'email id already registered'}
-                    return HttpResponse(json.dumps(data), content_type="application/json")
+                    logger.info('OTP request received. Mobile: {0}'.format(phone_number))
+                    user_obj = afterbuy_model.Consumer.objects.get(phone_number=phone_number).user
+                    otp = otp_handler.get_otp(phone_number=phone_number)
+                    message = afterbuy_utils.get_template('SEND_OTP').format(otp)
+                    send_job_to_queue('send_otp', {'phone_number': phone_number,
+                                             'message': message, "sms_client": settings.SMS_CLIENT})
+                    logger.info('OTP sent to mobile {0}'.format(phone_number))
+                    data = {'status': 1, 'message': "OTP sent_successfully"}
                 except Exception as ex:
-                        log_message = "new user :{0}".format(ex)
-                        logger.info(log_message)
-                        create_user = User.objects.using(GmApps.AFTERBUY).create(username=user_name)
-                        create_user.set_password(password)
-                        create_user.email = email_id
-                        create_user.first_name = first_name
-                        create_user.last_name = last_name
-                        create_user.save(using=GmApps.AFTERBUY)
-                        user_register = afterbuy_model.Consumer(user=create_user,
-                                    phone_number=phone_number)
-                        user_register.save()
-                        site = RequestSite(request)
-                        afterbuy_model.EmailToken.objects.create_email_token(user_register, email_id, site)
-                        data = {'status': 1, 'message': 'succefully registered'}
+                    logger.info("Exception while generating OTP token {0}".format(ex))
+            except Exception as ex:
+                logger.info("Exception while registering user {0}".format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def activate_email(self, request, **kwargs):
