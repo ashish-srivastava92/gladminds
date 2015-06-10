@@ -64,3 +64,11 @@ def get_date_from_string(date, fmt="%d-%m-%YT%H:%M:%S", timezone=None):
     date_object = datetime.strptime(date, fmt)
     date_object.replace(tzinfo=pytz.timezone(timezone))
     return date_object
+
+
+def mobile_format(phone_number):
+    '''
+        GM store numbers in +91 format
+        And when airtel pull message from customer
+        or service advisor we will check that number in +91 format'''
+    return '+91' + phone_number[-10:]

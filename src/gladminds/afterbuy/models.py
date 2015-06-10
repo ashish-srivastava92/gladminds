@@ -90,6 +90,7 @@ class UserProduct(base_models.BaseModel):
     color = models.CharField(max_length=50)
     is_deleted = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
+    is_accepted = models.BooleanField(default=False)
 
     class Meta:
         app_label = _APP_NAME

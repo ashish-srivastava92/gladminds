@@ -2,7 +2,7 @@ import logging
 import json
 from django.http.response import HttpResponse
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
-from tastypie.authorization import DjangoAuthorization
+from tastypie.authorization import DjangoAuthorization, Authorization
 from tastypie import fields
 from django.http.response import HttpResponseRedirect
 from django.conf.urls import url
@@ -19,6 +19,8 @@ from gladminds.core.apis.authorization import CustomAuthorization,\
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.managers.mail import send_recycle_mail
 from gladminds.afterbuy.apis.validations import ProductValidation
+from tastypie.http import HttpBadRequest
+from gladminds.afterbuy import utils
 
 logger = logging.getLogger("gladminds")
 
@@ -41,7 +43,7 @@ class UserProductResource(CustomBaseModelResource):
         queryset = afterbuy_models.UserProduct.objects.all()
         resource_name = "products"
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(Authorization(), CustomAuthorization())
         validation = ProductValidation()
         always_return_data = True
         filtering = {
@@ -76,7 +78,8 @@ class UserProductResource(CustomBaseModelResource):
     def prepend_urls(self):
         return [
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/coupons%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_coupons'), name="get_product_coupons" ),
-                url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/recycle%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('mail_products_details'), name="mail_products_details" )
+                url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/recycle%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('mail_products_details'), name="mail_products_details" ),
+                url(r"^(?P<resource_name>%s)/get-brands%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_brand_details'), name="get_brand_details" )
         ]
 
     def get_product_coupons(self, request, **kwargs):
@@ -109,7 +112,27 @@ class UserProductResource(CustomBaseModelResource):
             logger.error('Invalid details')  
             data = {'status': 0, 'message': 'email not sent'}
         return HttpResponse(json.dumps(data), content_type="application/json")
-
+    
+    def get_brand_details(self, request, **kwargs):
+        self.is_authenticated(request)
+        try:
+            products = afterbuy_models.UserProduct.objects.filter(consumer__user=request.user).select_related('brand')
+            details = {}
+            brand_details = []
+            for product in products:
+                brands = {}
+                brands['brandId'] = product.brand.id
+                brands['brandName'] = product.brand.name
+                brands['brandImage'] = product.brand.image_url
+                brands['brandProductId'] = product.brand_product_id
+                brands['productType'] = product.product_type.product_type
+                brand_details.append(brands)
+            details['brands'] = brand_details
+            details['status_code'] = str(200)
+            return HttpResponse(json.dumps(details), content_type='application/json')
+        except Exception as ex:
+            logger.error("Exception while fetching brands associated with phone number {0}".format(ex))
+            return HttpBadRequest()
 
 class ProductInsuranceInfoResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', null=True, blank=True, full=True)
