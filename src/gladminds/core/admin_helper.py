@@ -61,18 +61,18 @@ class GmModelAdmin(ModelAdmin):
     def get_mechanic_name(self, obj):
         return obj.member.first_name
 
-    def get_transporter_name(self, obj):
+    def get_transporter_username(self, obj):
         return obj.user.user.username
     
-    def get_supervisor_name(self, obj):
-        return obj.user.user.username
-
-    def get_supervisor_first_name(self, obj):
+    def get_transporter_name(self, obj):
         return obj.user.user.first_name
     
-    def get_supervisor_last_name(self, obj):
-        return obj.user.user.last_name
+    def get_supervisor_username(self, obj):
+        return obj.user.user.username
 
+    def get_supervisor_name(self, obj):
+        return obj.user.user.first_name
+        
     def get_mechanic_pincode(self, obj):
         return obj.member.pincode
 
@@ -90,15 +90,13 @@ class GmModelAdmin(ModelAdmin):
     get_mechanic_pincode.short_description = 'PIN code'
     get_mechanic_district.short_description = 'City'
     get_mechanic_state.short_description = 'State'
+    get_transporter_username.short_description = 'Username'
     get_transporter_name.short_description = 'Name'
-    get_supervisor_first_name.short_description = 'First Name'
-    get_supervisor_last_name.short_description = 'Last Name'
-    get_supervisor_name.short_description = 'Username'
+    get_supervisor_username.short_description = 'Username'
+    get_supervisor_name.short_description = 'Name'
     get_transporter.short_description = 'Transporter ID'
     
     def get_part_description(self, obj):
         return obj.part_number.description
-    
-    
-    
+
     get_part_description.short_description = 'Description'
