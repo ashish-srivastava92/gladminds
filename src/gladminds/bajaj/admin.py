@@ -833,10 +833,10 @@ class ConstantAdmin(GmModelAdmin):
     
 
 class TransporterAdmin(GmModelAdmin):
-    list_display = ('transporter_id', 'get_transporter_name')
+    list_display = ('transporter_id', 'get_transporter_username', 'get_transporter_name')
 
 class SupervisorAdmin(GmModelAdmin):
-    list_display = ('supervisor_id', 'get_supervisor_name', 'get_supervisor_first_name', 'get_supervisor_last_name')
+    list_display = ('supervisor_id', 'get_supervisor_username', 'get_supervisor_name', 'get_transporter')
 
 class ContainerTrackerAdmin(GmModelAdmin):
     list_display = ('zib_indent_num', 'lr_number', 'consignment_id',
@@ -890,9 +890,9 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("Territory", brand))
     brand_admin.register(get_model("BrandDepartment", brand))
     brand_admin.register(get_model("DepartmentSubCategories", brand))
-    brand_admin.register(get_model("ContainerTracker", brand))
-    brand_admin.register(get_model("Transporter", brand))
-    brand_admin.register(get_model("Supervisor", brand))
+    brand_admin.register(get_model("ContainerTracker", brand), ContainerTrackerAdmin)
+    brand_admin.register(get_model("Transporter", brand), TransporterAdmin)
+    brand_admin.register(get_model("Supervisor", brand), SupervisorAdmin)
     
     return brand_admin
 

@@ -63,6 +63,7 @@ alter table gm_containertracker add column no_of_containers int null;
 alter table gm_containertracker add column cts_created_date  datetime  null;
 alter table gm_containertracker modify container_no varchar(50) null;
 alter table gm_containertracker modify seal_no varchar(50) null;
+alter table gm_containertracker add column submitted_by varchar(50) null;
 
 
 For epc
