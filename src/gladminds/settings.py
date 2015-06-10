@@ -477,7 +477,7 @@ CUSTOMER_PHONE_NUMBER_UPDATE = {
 PHONE_NUMBER_UPDATE_COUNT_EXCEEDED_MAIL_TO_ASM = {
 
     "sender": "feed-report@gladminds.co",
-    "receiver": ["karishma.c@hashedin.com"],
+    "receiver": ["priyanka.n@hashedin.com"],
     "subject": "Limit for updating Gladminds customer phone number exceeded",
     "body": """""",
 }

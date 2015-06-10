@@ -890,9 +890,9 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("Territory", brand))
     brand_admin.register(get_model("BrandDepartment", brand))
     brand_admin.register(get_model("DepartmentSubCategories", brand))
-    brand_admin.register(get_model("ContainerTracker", brand))
-    brand_admin.register(get_model("Transporter", brand))
-    brand_admin.register(get_model("Supervisor", brand))
+    brand_admin.register(get_model("ContainerTracker", brand), ContainerTrackerAdmin)
+    brand_admin.register(get_model("Transporter", brand), TransporterAdmin)
+    brand_admin.register(get_model("Supervisor", brand), SupervisorAdmin)
     
     return brand_admin
 

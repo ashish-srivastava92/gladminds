@@ -133,14 +133,14 @@ class Command(BaseCommand):
         for details in _AFTERBUY_SUPERADMINS:
             self.create_consumer(details, Roles.SUPERADMINS)
             
-    def create_territory_state(self):
-       from gladminds.core.models import Territory, State
-       for territory in _BAJAJ_LOYALTY_TERRITORY:
-           try:
-               territory_obj = Territory.objects.using(GmApps.BAJAJCV).get(territory=territory)
-           except:
-               territory_obj = Territory(territory=territory)
-               territory_obj.save(using=GmApps.BAJAJCV)
+    def create_territory(self):
+        from gladminds.core.models import Territory
+        for territory in _BAJAJ_LOYALTY_TERRITORY:
+            try:
+                territory_obj = Territory.objects.using(GmApps.BAJAJCV).get(territory=territory)
+            except:
+                territory_obj = Territory(territory=territory)
+                territory_obj.save(using=GmApps.BAJAJCV)
         
     
     @atomic
