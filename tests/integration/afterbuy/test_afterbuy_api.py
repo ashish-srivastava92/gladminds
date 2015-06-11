@@ -47,6 +47,13 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
         uri = '/afterbuy/v1/consumers/registration/'
         resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
         self.assertEquals(json.loads(resp.content)['status_code'], 0)
+    
+    def test_validate_otp(self):
+        self.test_user_registration()
+        uri = '/afterbuy/v1/consumers/validate-otp/'
+        mock_data = {"otp_token": "000000"}
+        resp = self.post(uri, content_type='application/json', data=mock_data)
+        self.assertEquals(json.loads(resp.content)['status'], 200)
 
     def test_user_login(self):
         login_data = {"phone_number":"7760814041", "password":"123"}

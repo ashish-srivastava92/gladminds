@@ -213,7 +213,27 @@ class ConsumerResource(CustomBaseModelResource):
         else:
             data = {'status': 0, 'message': 'email-id not validated'}
         return HttpResponse(json.dumps(data), content_type="application/json")
-
+    
+    def validate_otp(self, request, **kwargs):
+        self.is_authenticated(request)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message":"method not allowed"}),
+                                content_type="application/json",status=401)
+            
+        try:
+            load = json.loads(request.body)
+            otp_token = load.get('otp_token')
+            if not otp_token:
+                return HttpBadRequest("Enter the OTP")
+            user = afterbuy_model.Consumer.objects.get(user=request.user)
+            otp_handler.validate_otp(otp_token, phone_number=user.phone_number)
+            return HttpResponse(json.dumps({'status': 200, 'message':'OTP validated'}),
+                                content_type='application/json')
+        except Exception as ex:
+            logger.info("Exception while validating OTP {0}".format(ex))
+            return HttpBadRequest("OTP couldnot be validated")
+         
+        
     def validate_user_phone_number(self,phone_number, otp):
         if not otp and not phone_number :
             return HttpBadRequest("otp and phone_number required")
