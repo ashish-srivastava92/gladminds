@@ -227,6 +227,8 @@ class ConsumerResource(CustomBaseModelResource):
                 return HttpBadRequest("Enter the OTP")
             user = afterbuy_model.Consumer.objects.get(user=request.user)
             otp_handler.validate_otp(otp_token, phone_number=user.phone_number)
+            user.is_phone_verified = True
+            user.save(using=settings.BRAND)
             return HttpResponse(json.dumps({'status': 200, 'message':'OTP validated'}),
                                 content_type='application/json')
         except Exception as ex:
