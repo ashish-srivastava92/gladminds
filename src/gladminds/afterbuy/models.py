@@ -92,6 +92,9 @@ class UserProduct(base_models.BaseModel):
     is_deleted = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
     is_accepted = models.BooleanField(default=False)
+    service_reminder = models.IntegerField(blank=True, null=True)
+    details_completed = models.IntegerField(blank=True, null=True)
+    manual_link = models.CharField(max_length=512, blank=True, null=True)
 
     class Meta:
         app_label = _APP_NAME

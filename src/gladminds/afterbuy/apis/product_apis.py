@@ -40,7 +40,7 @@ class UserProductResource(CustomBaseModelResource):
     product_type = fields.ForeignKey(ProductTypeResource, 'product_type', null=True, blank=True, full=True)
 
     class Meta:
-        queryset = afterbuy_models.UserProduct.objects.all()
+        queryset = afterbuy_models.UserProduct.objects.filter(is_accepted=True)
         resource_name = "products"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(Authorization(), CustomAuthorization())
