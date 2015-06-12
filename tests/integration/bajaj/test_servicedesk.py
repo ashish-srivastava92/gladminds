@@ -10,6 +10,7 @@ from time import sleep
 import json
 from django.contrib.auth.models import User
 from gladminds.core.auth_helper import Roles
+from gladminds.core.auth import access_token_handler
 
 client = Client(SERVER_NAME='bajaj')
 
@@ -223,4 +224,9 @@ class TestServiceDeskFlow(BaseTestCase):
         system = self.system
         system.verify_result(input=count_val, output= 1)
         self.assertEquals(resp.status_code, 200)
-
+    
+    def test_add_ticket_api(self):
+        access_token = self.user_login()
+        initiator = self.system
+        initiator.post_ticket(access_token)
+        
