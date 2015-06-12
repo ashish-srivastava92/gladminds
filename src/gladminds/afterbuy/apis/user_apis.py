@@ -46,6 +46,7 @@ class DjangoUserResources(ModelResource):
         authentication = AccessTokenAuthentication()
         validation = UserValidation()
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        allowed_methods = ['get', 'post', 'put']
         excludes = ['password', 'is_superuser']
         always_return_data = True
         
@@ -59,7 +60,7 @@ class ConsumerResource(CustomBaseModelResource):
         authentication = AccessTokenAuthentication()
         validation = ConsumerValidation()
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
-        detail_allowed_methods = ['get', 'delete', 'put']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "consumer_id": ALL
@@ -101,58 +102,6 @@ class ConsumerResource(CustomBaseModelResource):
             data = {'status': 0, 'message': ex}
         return HttpResponse(json.dumps(data), content_type="application/json")
             
-#     @atomic(using=GmApps.AFTERBUY)
-#     def user_registration(self, request, **kwargs):
-#         if request.method != 'POST':
-#             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
-#         try:
-#             load = json.loads(request.body)
-#         except:
-#             return HttpResponse(content_type="application/json", status=404)
-# #         otp_token = load['otp_token']
-#         phone_number = load['phone_number']
-# #         try:
-# #             if not (settings.ENV in settings.IGNORE_ENV and otp_token in settings.HARCODED_OTPS):
-# #                 otp_handler.validate_otp(otp_token, phone_number=phone_number)
-# #         except Exception:
-# #             raise ImmediateHttpResponse(
-# #                 response=http.HttpBadRequest('Wrong OTP!'))
-#         phone_number = load.get('phone_number')
-#         email_id = load.get('email_id')
-#         user_name = load.get('username', str(uuid4())[:30])
-#         first_name = load.get('first_name')
-#         last_name = load.get('last_name','')
-#         password = load.get('password')
-#         invalid_password = check_password(password)
-#         if not invalid_password:
-#             return HttpBadRequest("password is not meant according to the rules")
-#         if not phone_number or not password:
-#             return HttpBadRequest("phone_number, password required.")
-#         try:
-#             afterbuy_model.Consumer.objects.get(
-#                                                 phone_number=phone_number)
-#             data = {'status': 0, 'message': 'phone number already registered'}
-#         except Exception as ex:
-#                 try:
-#                     afterbuy_model.Consumer.objects.get(user__email=email_id, is_email_verified=True)
-#                     data = {'status': 0, 'message': 'email id already registered'}
-#                     return HttpResponse(json.dumps(data), content_type="application/json")
-#                 except Exception as ex:
-#                         log_message = "new user :{0}".format(ex)
-#                         logger.info(log_message)
-#                         create_user = User.objects.using(GmApps.AFTERBUY).create(username=user_name)
-#                         create_user.set_password(password)
-#                         create_user.email = email_id
-#                         create_user.first_name = first_name
-#                         create_user.last_name = last_name
-#                         create_user.save(using=GmApps.AFTERBUY)
-#                         user_register = afterbuy_model.Consumer(user=create_user,
-#                                     phone_number=phone_number)
-#                         user_register.save()
-#                         site = RequestSite(request)
-#                         afterbuy_model.EmailToken.objects.create_email_token(user_register, email_id, site)
-#                         data = {'status': 1, 'message': 'succefully registered'}
-#         return HttpResponse(json.dumps(data), content_type="application/json")
     @atomic(using=GmApps.AFTERBUY)
     def user_registration(self, request, **kwargs):
         if request.method != 'POST':

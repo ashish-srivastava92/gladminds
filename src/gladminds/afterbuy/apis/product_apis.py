@@ -44,6 +44,7 @@ class UserProductResource(CustomBaseModelResource):
         resource_name = "products"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(Authorization(), CustomAuthorization())
+        allowed_methods = ['get', 'post', 'put']
         validation = ProductValidation()
         always_return_data = True
         filtering = {
@@ -79,7 +80,9 @@ class UserProductResource(CustomBaseModelResource):
         return [
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/coupons%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_coupons'), name="get_product_coupons" ),
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/recycle%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('mail_products_details'), name="mail_products_details" ),
-                url(r"^(?P<resource_name>%s)/get-brands%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_brand_details'), name="get_brand_details" )
+                url(r"^(?P<resource_name>%s)/get-brands%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_brand_details'), name="get_brand_details" ),
+                url(r"^(?P<resource_name>%s)/accept-product%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('user_product_acceptance'), name="user_product_acceptance" )
+               
         ]
 
     def get_product_coupons(self, request, **kwargs):
@@ -96,7 +99,7 @@ class UserProductResource(CustomBaseModelResource):
                     return HttpResponseRedirect('http://'+COUPON_URL+'/v1/coupons/?product__product_id='+brand_product_id+'&'+access_token)
         except Exception as ex:
             logger.error('Invalid details')
-
+    
     def mail_products_details(self, request, **kwargs):
         try:
             product_id = kwargs['product_id']
@@ -127,12 +130,29 @@ class UserProductResource(CustomBaseModelResource):
                 brands['brandProductId'] = product.brand_product_id
                 brands['productType'] = product.product_type.product_type
                 brand_details.append(brands)
-            details['brands'] = brand_details
-            details['status_code'] = str(200)
-            return HttpResponse(json.dumps(details), content_type='application/json')
+            return HttpResponse(json.dumps({'status_code':200, 'brands': brand_details}), content_type='application/json')
         except Exception as ex:
             logger.error("Exception while fetching brands associated with phone number {0}".format(ex))
             return HttpBadRequest()
+        
+    def user_product_acceptance(self, request, **kwargs):
+        self.is_authenticated(request)
+        if request.method!= 'POST':
+            return HttpResponse(json.dumps({"message":"method not allowed"}),
+                                content_type="application/json",status=401)
+        try:
+            load = json.loads(request.body)
+            brand_product_id = load.get('product_id')
+            user_product = afterbuy_models.UserProduct.objects.get(brand_product_id=brand_product_id,
+                                                                   consumer__user=request.user)
+            user_product.is_accepted = True
+            user_product.save()
+            return HttpResponse(json.dumps({'status':200, 'message': True}),
+                                content_type='application/json')
+        except Exception as ex:
+            logger.error("Exception while accepting the product{0}".format(ex))
+            return HttpBadRequest("Incorrect Details")
+        return
 
 class ProductInsuranceInfoResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', null=True, blank=True, full=True)
@@ -141,6 +161,7 @@ class ProductInsuranceInfoResource(CustomBaseModelResource):
         queryset = afterbuy_models.ProductInsuranceInfo.objects.all()
         resource_name = "insurances"
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        allowed_methods = ['get', 'post', 'put']
         authentication = AccessTokenAuthentication()
         always_return_data = True
         filtering = {
@@ -158,6 +179,7 @@ class InvoiceResource(CustomBaseModelResource):
         resource_name = "invoices"
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         authentication = AccessTokenAuthentication()
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "product": ALL
@@ -172,6 +194,7 @@ class LicenseResource(CustomBaseModelResource):
         resource_name = 'licenses'
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         authentication = AccessTokenAuthentication()
+        allowed_methods = ['get', 'post', 'put']
         always_return_data =True
         filtering = {
                      "product" : ALL
@@ -186,6 +209,7 @@ class RegistrationCertificateResource(CustomBaseModelResource):
         resource_name = 'registrations'
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
         authentication = AccessTokenAuthentication()
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "product": ALL
@@ -200,6 +224,7 @@ class PollutionCertificateResource(CustomBaseModelResource):
         resource_name = 'pollution'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "product": ALL
@@ -215,6 +240,7 @@ class SupportResource(CustomBaseModelResource):
         resource_name = 'support'
         authentication = AccessTokenAuthentication()
         authorization = DjangoAuthorization()
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "brand": ALL,
@@ -230,6 +256,7 @@ class ProductSupportResource(CustomBaseModelResource):
         resource_name = 'product-support'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "product": ALL,
@@ -244,6 +271,7 @@ class SellInformationResource(CustomBaseModelResource):
         resource_name = 'sell-information'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "product": ALL,
@@ -258,6 +286,7 @@ class UserProductImagesResource(CustomBaseModelResource):
         resource_name = 'product-images'
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "product": ALL,
@@ -271,4 +300,5 @@ class InterestResource(CustomBaseModelResource):
         resource_name = "interests"
         authentication = AccessTokenAuthentication()
         authorization = DjangoAuthorization()
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True

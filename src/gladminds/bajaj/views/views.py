@@ -127,12 +127,12 @@ def generate_otp(request):
             user_profile_obj = models.UserProfile.objects.filter(user=user)
             if user_profile_obj:
                 phone_number = user_profile_obj[0].phone_number
-            logger.info('OTP request received . username: {0}'.format(username))
-            token = otp_handler.get_otp(user=user)
-            message = get_template('SEND_OTP').format(token)
-            send_job_to_queue(send_otp, {'phone_number': phone_number, 'message': message,
+                logger.info('OTP request received . username: {0}'.format(username))
+                token = otp_handler.get_otp(user=user)
+                message = get_template('SEND_OTP').format(token)
+                send_job_to_queue(send_otp, {'phone_number': phone_number, 'message': message,
                                          'sms_client': settings.SMS_CLIENT})
-            logger.info('OTP sent to mobile {0}'.format(phone_number))
+                logger.info('OTP sent to mobile {0}'.format(phone_number))
 #             #Send email if email address exist
             if user.email:
                 sent_otp_email(data=token, receiver=user.email, subject='Forgot Password')
@@ -140,7 +140,7 @@ def generate_otp(request):
             return HttpResponseRedirect('/aftersell/users/otp/validate?username='+username)
         
         except Exception as ex:
-            logger.error('Invalid details, mobile {0}'.format(phone_number))
+            logger.error('Invalid details, mobile {0}'.format(ex))
             return HttpResponseRedirect('/aftersell/users/otp/generate?details=invalid')    
     
     elif request.method == 'GET':
