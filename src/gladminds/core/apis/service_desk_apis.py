@@ -293,7 +293,7 @@ class FeedbackResource(CustomBaseModelResource):
             if kwargs['type'] == 'tat':
                 query = "select au.username, sum(f2.dt) as sums ,count(*) as c , avg(f2.dt) as tat, \
                 YEAR(f1.created_date) as year, MONTH(f1.created_date) as month , f1.assignee_id from \
-                gm_feedback f1 inner join (select f2.id, TIMEDIFF(f2.resolved_date,f2.created_date) \
+                gm_feedback f1 inner join (select f2.id, TIMESTAMPDIFF(second,f2.created_date,f2.resolved_date) \
                 as dt , f2.created_date from gm_feedback f2 where status= 'resolved') f2 on f2.id=f1.id left \
                 outer join gm_servicedeskuser s on s.id= f1.assignee_id left outer join gm_userprofile u on \
                 s.user_profile_id=u.user_id  left outer join auth_user au on u.user_id=au.id where \
@@ -303,7 +303,7 @@ class FeedbackResource(CustomBaseModelResource):
                 for data in tickets:
                     tat = {}
                     minutes, seconds = divmod(data['tat'], 60)
-                    tat['tat'] = minutes
+                    tat['tat'] = int(minutes)
                     tat['agent_name'] = data['username']
                     total_tickets.append(tat)
             

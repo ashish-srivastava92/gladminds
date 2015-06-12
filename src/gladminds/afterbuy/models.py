@@ -69,6 +69,7 @@ class Consumer(base_models.BaseModel):
     tshirt_size = models.CharField(max_length=2, choices=SIZE_CHOICES,
                                    blank=True, null=True)
     is_email_verified = models.BooleanField(default=False)
+    is_phone_verified = models.BooleanField(default=False)
 
     class Meta:
         app_label = _APP_NAME
@@ -90,6 +91,10 @@ class UserProduct(base_models.BaseModel):
     color = models.CharField(max_length=50)
     is_deleted = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
+    is_accepted = models.BooleanField(default=False)
+    service_reminder = models.IntegerField(blank=True, null=True)
+    details_completed = models.IntegerField(blank=True, null=True)
+    manual_link = models.CharField(max_length=512, blank=True, null=True)
 
     class Meta:
         app_label = _APP_NAME

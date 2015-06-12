@@ -82,3 +82,9 @@ alter table gm_bomvisualization add column published_date datetime null;
 alter table gm_bomvisualization add column remarks varchar(500) null;
 alter table gm_userprofile add column reset_password boolean default false;
 alter table gm_userprofile add column reset_date datetime null;
+alter table afterbuy_userproduct add column is_accepted boolean default false;	
+alter table afterbuy_consumer add column is_phone_verified boolean default false;
+alter table afterbuy_userproduct add column service_reminder int null;
+alter table afterbuy_userproduct add column details_completed int null;
+alter table afterbuy_userproduct add column manual_link varchar(512) null;
+

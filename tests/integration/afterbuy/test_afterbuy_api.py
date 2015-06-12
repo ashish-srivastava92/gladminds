@@ -18,6 +18,7 @@ client = Client(SERVER_NAME='afterbuy')
 
 
 class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
+    multi_db = True 
     def setUp(self):
         super(TestAfterbuyApi, self).setUp()
         token = models.OTPToken( token=settings.HARCODED_OTPS[0],
@@ -35,12 +36,24 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
         self.create_afterbuy_user()
 
     def test_user_registration(self):
-        create_mock_data = {"first_name": "saurav","phone_number":"7760814041",
-                            "email_id":"test.ab@gmail.com","password":"123",
-                            "otp_token":"000000"}
+
+        create_mock_data = {"phone_number":"7760814043",
+                            }
         uri = '/afterbuy/v1/consumers/registration/'
         resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
-        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(json.loads(resp.content)['status_code'], 200)
+        create_mock_data = {"phone_number":"7760814043",
+                            }
+        uri = '/afterbuy/v1/consumers/registration/'
+        resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
+        self.assertEquals(json.loads(resp.content)['status_code'], 0)
+    
+    def test_validate_otp(self):
+        self.test_user_registration()
+        uri = '/afterbuy/v1/consumers/validate-otp/'
+        mock_data = {"otp_token": "000000"}
+        resp = self.post(uri, content_type='application/json', data=mock_data)
+        self.assertEquals(json.loads(resp.content)['status'], 200)
 
     def test_user_login(self):
         login_data = {"phone_number":"7760814041", "password":"123"}
@@ -77,8 +90,8 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
         resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
         self.assertEquals(resp.status_code, 200)
 
-    def test_add_product(self):
-        self.test_user_registration()
+#     def test_add_product(self):
+#         self.test_user_registration()
 
     def test_product_api(self):
         resp = self.post('/afterbuy/v1/products/', data=AFTERBUY_PRODUCT)
@@ -146,5 +159,3 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
 #         resp = self.client.get('/afterbuy/v1/products/1/')
 #         self.assertEqual(self.deserialize(resp)['nick_name'], "bbb")
 #
-
-    
