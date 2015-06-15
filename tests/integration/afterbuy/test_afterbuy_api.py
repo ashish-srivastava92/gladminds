@@ -100,6 +100,18 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
         resp = self.post('/afterbuy/v1/products/', data=AFTERBUY_PRODUCTS)
         self.assertEquals(resp.status_code,201)
 
+    def test_user_product_acceptance(self):
+        login_detail = self.login()
+        access_token =  json.loads(login_detail.content)['access_token']
+        uri = '/afterbuy/v1/products/?access_token='+access_token
+        resp = client.post(uri, data=json.dumps(AFTERBUY_PRODUCTS), content_type='application/json')
+        self.assertEquals(resp.status_code, 201)
+        mock_data = {'product_id':"11", 'is_accepted': 1}
+        resp = client.post('/afterbuy/v1/products/accept-product/?access_token='+access_token,
+                           data=json.dumps(mock_data), content_type='application/json')
+        self.assertEquals(json.loads(resp.content)['status'], 200)
+        self.assertEquals(resp.status_code, 200)
+       
     def test_insurances_api(self):
         resp = self.post('/afterbuy/v1/insurances/', data=AFTERBUY_INSURANCES)
         self.assertEquals(resp.status_code,201)

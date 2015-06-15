@@ -40,7 +40,7 @@ class UserProductResource(CustomBaseModelResource):
     product_type = fields.ForeignKey(ProductTypeResource, 'product_type', null=True, blank=True, full=True)
 
     class Meta:
-        queryset = afterbuy_models.UserProduct.objects.filter(is_accepted=True)
+        queryset = afterbuy_models.UserProduct.objects.filter(is_accepted=False)
         resource_name = "products"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(Authorization(), CustomAuthorization())
@@ -142,10 +142,14 @@ class UserProductResource(CustomBaseModelResource):
                                 content_type="application/json",status=401)
         try:
             load = json.loads(request.body)
+            is_accepted = load.get('is_accepted')
             brand_product_id = load.get('product_id')
             user_product = afterbuy_models.UserProduct.objects.get(brand_product_id=brand_product_id,
                                                                    consumer__user=request.user)
-            user_product.is_accepted = True
+            if is_accepted:
+                user_product.is_accepted = True
+            else:
+                user_product.is_accepted = False
             user_product.save()
             return HttpResponse(json.dumps({'status':200, 'message': True}),
                                 content_type='application/json')

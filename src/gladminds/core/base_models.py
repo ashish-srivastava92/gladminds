@@ -236,6 +236,7 @@ class ProductType(BaseModel):
     image_url = models.CharField(
                    max_length=200, blank=True, null=True)
     is_active = models.BooleanField(default=True)
+    overview = models.CharField(max_length=512, null=True, blank=True)
 
     class Meta:
         abstract = True

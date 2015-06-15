@@ -222,6 +222,36 @@ class Support (base_models.BaseModel):
         app_label = _APP_NAME
         verbose_name_plural = "support"
 
+class ProductSpecification(base_models.BaseModel):
+    product_type = models.ForeignKey(ProductType)
+    type = models.CharField(max_length=255, null=True, blank=True)
+    engine_displacement = models.CharField(max_length=255, null=True, blank=True)
+    engine_type = models.CharField(max_length=255, null=True, blank=True)
+    engine_starting = models.CharField(max_length=255, null=True, blank=True)
+    maximum_power = models.CharField(max_length=255, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Product Specifications"
+        
+class ProductFeature(base_models.BaseModel):
+    description = models.CharField(max_length=512, null=True, blank=True)
+    product_type = models.ForeignKey(ProductType)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Product Features"
+        
+class RecommendedPart(base_models.BaseModel):
+    product_type = models.ForeignKey(ProductType)
+    part_id = models.CharField(max_length=30, null=True, blank=True)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    material = models.CharField(max_length=255, null=True, blank=True)
+    price = models.CharField(max_length=255, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Recommended Parts"
 
 class OTPToken(base_models.OTPToken):
     user = models.ForeignKey(Consumer, blank=True, null=True)
@@ -450,3 +480,4 @@ class EmailToken(models.Model):
         else:
             send_email_activation(receiver_email, data=ctx_dict,
                                   brand=GmApps.AFTERBUY)
+
