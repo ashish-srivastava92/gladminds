@@ -1,0 +1,18 @@
+[
+  {
+    "model": "gladminds.branddata",
+    "pk": 1,
+    "fields": {
+      "brand_id":"BRAND001",
+      "brand_name":"bajaj"
+    }
+  },
+  {
+    "model": "gladminds.branddata",
+    "pk": 2,
+    "fields": {
+      "brand_id":"BRAND003",
+      "brand_name":"honda"
+    }
+  }
+]

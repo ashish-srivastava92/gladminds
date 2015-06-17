@@ -95,3 +95,54 @@ Contributions and ideas are welcome. These are some ideas we would like to imple
 3. ```build``` for jenkins build and package
 4. ```incr``` for linting or testing incremental changes e.g. modified files only.
 5. more ...
+
+
+
+
+-----------------Local Development changes-------------------
+'''
+Edit /etc/hosts file
+add:-
+
+127.0.0.1       local.api.afterbuy.co
+127.0.0.1       local.admin.gladminds.co
+127.0.0.1       local.bajaj.gladminds.co
+127.0.0.1       local.demo.gladminds.co
+
+'''
+GM app name is 'default'
+'''
+drop database gm;
+drop database bajaj;
+drop database demo;
+drop database afterbuy;
+create database gm;
+create database bajaj;
+create database demo;
+create database afterbuy;
+'''
+
+Command to sync data
+'''
+bin/django setup
+'''
+OR
+'''
+bin/django syncdb --database=bajaj      to create tables in bajaj
+bin/django syncdb --database=demo       to create tables in mock
+bin/django syncdb --database=afterbuy       to create tables in mock
+bin/django syncdb                       to create tables in gm
+'''
+
+Using migration of south ->
+To apply migration
+'''
+bin/django gm_migration
+'''
+To generate migration
+'''
+bin/django gm_schemamigration
+'''
+
+https://github.com/hashedin/gladminds/wiki/How-to-start-working-on-Stage-2.1
+

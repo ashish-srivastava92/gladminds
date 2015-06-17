@@ -1,0 +1,150 @@
+{% extends "base_template.html" %}
+
+{% block style %}
+<link href="/static/css/portal.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="navbar navbar-fixed-top">
+	<div class="navbar-inner">
+		<a class="brand" href="#"><img src="/static/img/bajaj_logo.jpg" height=50px width=209px></a>
+	</div>
+</div>
+
+<div class="user-message">
+	<div class="message"></div>
+</div>
+
+<div class="well">
+	<div class="row">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Tasks</th>
+					<th>Handler</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>1</td>
+					<td>Send Feed Mail</td>
+					<td class="send-feed-mail">
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>
+				<tr>
+					<td>2</td>
+					<td>Export Coupon Redeem To Sap</td>
+					<td class="export-coupon-redeem">
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>
+				<tr>
+					<td>3</td>
+					<td>Expire Service Coupon</td>
+					<td class="expire-service-coupon">
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>
+				<tr>
+					<td>4</td>
+					<td>Send Reminder</td>
+					<td class="send-reminder">
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>
+				<tr>
+					<td>5</td>
+					<td>Export Customer</td>
+					<td class="export-customer-registered">
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>
+				<tr>
+					<td>6</td>
+					<td>Send Reminder SD</td>
+					<td class="send_reminders_for_servicedesk">
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>
+				<tr>
+					<td>7</td>
+					<td>Send Feed Failure</td>
+					<td class=send_mail_for_feed_failure>
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>	
+				<tr>
+					<td>8</td>
+					<td>Send VINs Failed in Purchase Feed</td>
+					<td class=export_purchase_feed_sync_to_sap>
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>
+				<tr>
+					<td>9</td>
+					<td>Send mail for policy discrepency</td>
+					<td class=send_mail_for_policy_discrepency>
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>
+				<tr>
+					<td>10</td>
+					<td>Send Mechanic Feed</td>
+					<td class=export_member_temp_id_to_sap>
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>				
+				<tr>
+					<td>11</td>
+					<td>Send accumulation request feed</td>
+					<td class=export_member_accumulation_to_sap>
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>
+				<tr>
+					<td>12</td>
+					<td>Send redemption request feed</td>
+					<td class=export_member_redemption_to_sap>
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>
+				<tr>
+					<td>13</td>
+					<td>Send distributor feed</td>
+					<td class=export_distributor_to_sap>
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>
+				<tr>
+					<td>13</td>
+					<td>Send container tracker feed</td>
+					<td class=export_cts_to_sap>
+					<button type="button" class="btn tasksER">
+						Trigger
+					</button></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block dependency%}
+<script src="/static/js/portal/triggerSQSTasks.js"></script>
+{% endblock dependency %}

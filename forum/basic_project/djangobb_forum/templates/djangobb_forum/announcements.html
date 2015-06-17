@@ -1,0 +1,19 @@
+{% extends 'djangobb_forum/base.html' %}
+{% load forum_extras %}
+{% load i18n %}
+{% block extra_meta %}
+{% endblock %}
+
+{% block content %}
+<div id="id-announcements">
+	<div class="announcement-head">Announcements</div>
+	{% for announcement in announcements %}
+		 <div class="row">
+		   <div class="col-md-1">
+		     <img src="/static/djangobb_forum/img/{{announcement.img}}" width="35px" height="35px">
+		   </div>
+		   <div class="col-md-10 announcement-section">{{announcement.text}}</div>
+		 </div>
+	{% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+DIV.box,#adminconsole FIELDSET TH,.rowodd,.roweven {
+	background-color: #fff;
+	background-image: None;
+}
+
+.djangobb {
+	FONT-SIZE: 12px;
+}
+
+.calendar {
+	height: 240px;
+}
+
+.djangobb H2 {
+	PADDING: 18px 6px;
+}
+
+.announcement-head{
+	background-color: #ACCBF3;
+	color: #fff;
+	padding: 20px;
+	font-weight: bold;
+	font-size: 20px;
+	margin-bottom: 20px;
+	border-radius: 10px;
+}
+
+.announcement-section{
+	background-color: #77A6E2;
+	color: #fff;
+	padding: 15px;
+	font-size: 15px;
+	border-radius: 10px;
+	margin-bottom: 10px;
+}

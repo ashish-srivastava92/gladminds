@@ -8,28 +8,15 @@ STATIC_DIR = os.path.join(BASE_DIR, "src/static")
 TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gladmindsdb',
-        'USER': 'gladminds',
-        'PASSWORD': 'gladminds123',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-    }
-}
-
-
-
-BROKER_URL= 'redis://localhost:6379'
+BROKER_URL = 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
 
+JOBCARD_DIR = '{0}/jobcards/qa/'
 
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
@@ -45,29 +32,16 @@ TEMPLATE_DIRS = (
     TEMPLATE_DIR,
 )
 
-SMS_CLIENT = "AIRTEL"
-
-# SMS_CLIENT_DETAIL = {
+# SMS_CLIENT = "TWILIO"
+# # SMS_CLIENT_DETAIL = {
 #                      'OTP_TWILIO_ACCOUNT' : 'ACbb8cb45f6113b8f2f6243c8eaa5ff971',
 #                      'OTP_TWILIO_AUTH' : 'aa445a4f0a7e651738e89810601f8860',
 #                      'OTP_TWILIO_FROM' : '+1 469-513-9856',
 #                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/Messages.json'
 #                 }
+FILE_CACHE_DURATION = 0
 
-SMS_CLIENT_DETAIL={
-                   'login':'bajajauto',
-                   'pass':'bajaj',
-                   'authenticate_url':'http://117.99.128.32:80/login/pushsms.php' ,
-                   'message_url': 'http://117.99.128.32:80/login/pushsms.php'                  
-                   }
-MAIL_SERVER = 'localhost'
-MAIL_DETAIL = {
-                  "sender": "feed-report@gladminds.co",
-                  "reciever": "gladminds@hashedin.com,naveen.shankar@gladminds.co",
-                  "subject": "Gladminds Feed Report For QA",
-                  "body": """""",
-              }
-
+SMS_CLIENT = "KAP"
 FEED_TYPE = 'CSV'
 
 #AfterBuy File Upload location configuration
@@ -85,17 +59,27 @@ MEDIA_URL = '/media/'
 
 #S3 Configuration
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_ACCESS_KEY_ID = 'AKIAIL7IDCSTNCG2R6JA'
-AWS_SECRET_ACCESS_KEY = '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'
-AWS_STORAGE_BUCKET_NAME = 'afterbuy'
 
 SAP_CRM_DETAIL = {
                   'username':'pisuper',
                   'password':'welcome123'
                   }
 
-COUPON_WSDL_URL = "http://api-qa.gladmindsplatform.co/api/v1/bajaj/redeem-feed/?wsdl&v0"
+COUPON_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/coupon-redeem/?wsdl&v0"
+CUSTOMER_REGISTRATION_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
+VIN_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/vin-sync/?wsdl&v0"
+PURCHASE_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/purchase-sync/?wsdl&v0"
+CTS_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/container-tracker/?wsdl&v0"
 
+MEMBER_SYNC_WSDL_URL="http://qa.bajaj.gladminds.co/api/v1/member-sync/?wsdl&v0"
+ACCUMULATION_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/accumulation-request/?wsdl&v0"
+REDEMPTION_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/redemption-request/?wsdl&v0"
+DISTRIBUTOR_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/distributor-sync/?wsdl&v0"
+
+WSDL_TNS="http://qa.bajaj.gladminds.co/api/v1/feed/"
+CORE_WSDL_TNS="http://qa.bajajcv.gladminds.co/api/v1/feed/"
+
+ENABLE_AMAZON_SQS = True
 
 AFTER_BUY_CONSTANTS = {
                        "username": 'support@gladminds.com',
@@ -108,8 +92,33 @@ AFTER_BUY_CONSTANTS = {
                        "ios_apk_loc": "afterbuy_script/qa_ios_afterbuy.ipa",
                        "create_method": "file",
                        "package": "com.gladminds.afterbuyv1",
-                       "version": "0.1.0", 
+                       "version": "0.1.0",
                        "title": "Afterbuy V1 App"
                        }
 
+########################SQS Queue Name
+SQS_QUEUE_NAME = "gladminds-qa2"
+SQS_QUEUE_NAME_SMS = "gladminds-qa2"
+######################################
+UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail QA"
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
+FEED_FAILURE["receiver"] = ["naureen.razi@hashedin.com"]
+VIN_SYNC_FEED["receiver"] = ["naureen.razi@hashedin.com"]
+###################Change Mail Subject on QA##########################
+MAIL_DETAIL["subject"] = "GladMinds Feed Report QA"
+MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
+#######################################################################
+ENV = "qa"
+
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_elasticache.memcached.ElastiCache',
+#         'LOCATION': 'gladminds-memcache.t2nfas.cfg.use1.cache.amazonaws.com:11211'
+#     }
+# }
+
+COUPON_URL = 'qa.bajaj.gladminds.co'
+API_FLAG = True 
+LOGAN_ACTIVE = True
 

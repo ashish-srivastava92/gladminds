@@ -8,24 +8,22 @@ STATIC_DIR = os.path.join(BASE_DIR, "src/static")
 TEMPLATE_DIR = os.path.join(BASE_DIR, "src/templates")
 OUT_DIR = os.path.join(BASE_DIR, "out")
 
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gladminds',
-        'USER': 'gladminds',
-        'PASSWORD': 'gladmindsRocks',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-    }
-}
 
-
-BROKER_URL= 'redis://localhost:6379'
+COUPON_URL = 'staging.bajaj.gladminds.co'
+API_FLAG = True 
+BROKER_URL = 'redis://localhost:6379'
 REDIS_URL = 'redis://localhost:6379'
+
+
+JOBCARD_DIR = '{0}/jobcards/dev/'
+
+FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/dev/'
+FEED_FAILURE_BUCKET = 'gladminds'
+
+MAIL_SERVER = 'localhost'
 
 
 STATICFILES_DIRS = (
@@ -42,20 +40,31 @@ TEMPLATE_DIRS = (
     TEMPLATE_DIR,
 )
 
-SMS_CLIENT = "AIRTEL"
+######################################################
+#ADDED SETTINGS TO TEST CAPSYSTEM ON DEV ENV
+###########################################################
+ENABLE_AMAZON_SQS = False
 
-# SMS_CLIENT_DETAIL = {
-#                      'OTP_TWILIO_ACCOUNT' : 'ACbb8cb45f6113b8f2f6243c8eaa5ff971',
-#                      'OTP_TWILIO_AUTH' : 'aa445a4f0a7e651738e89810601f8860',
-#                      'OTP_TWILIO_FROM' : '+1 469-513-9856',
-#                      'OTP_TWILIO_URI' : 'https://api.twilio.com/2010-04-01/Accounts/{0}/Messages.json'
-#                 }
+FILE_CACHE_DURATION = 0
+SMS_CLIENT = "KAP"
 
-SMS_CLIENT_DETAIL={
-                   'login':'bajajauto',
-                   'pass':'bajaj',
-                   'authenticate_url':'http://117.99.128.32:80/login/pushsms.php' ,
-                   'message_url': 'http://117.99.128.32:80/login/pushsms.php'                  
-                   }
+########################SQS Queue Name
+SQS_QUEUE_NAME = "gladminds-dev"
+######################################
 
 FEED_TYPE = 'CSV'
+FEED_FAILURE_MAIL_ENABLED = True
+
+MAIL_DETAIL["subject"] = "GladMinds Feed Report DEV"
+MAIL_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
+
+FEED_FAILURE["receiver"] = ["naureen.razi@hashedin.com"]
+CUSTOMER_PHONE_NUMBER_UPDATE["receiver"] = ["naureen.razi@hashedin.com"]
+UCN_RECOVERY_MAIL_DETAIL["subject"] = "GladMinds UCN Recovery Mail DEV"
+VIN_DOES_NOT_EXIST_DETAIL["receiver"] = ["naureen.razi@hashedin.com"]
+
+#############################################################################
+ENV = "dev"
+
+WSDL_TNS="http://dev.bajaj.gladminds.co/api/v1/feed/"
+CORE_WSDL_TNS="http://dev.bajajcv.gladminds.co/api/v1/feed/"

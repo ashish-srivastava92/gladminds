@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://local.bajaj.gladminds.co:8000/api/v1/feed/">
+  <SOAP-ENV:Body>
+    <ns1:postPartUPC>
+      <ns1:ObjectList>
+        <ns1:PartUPCData>
+          <ns1:PartUPCModel>
+            <ns1:PART_UPC>UPC11</ns1:PART_UPC>
+            <ns1:PART_NUMBER>12389</ns1:PART_NUMBER>
+          </ns1:PartUPCModel>
+        </ns1:PartUPCData>
+      </ns1:ObjectList>
+      <ns1:Credential>
+        <ns1:UserName>bajaj</ns1:UserName>
+        <ns1:Password>bajaj</ns1:Password>
+      </ns1:Credential>
+    </ns1:postPartUPC>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

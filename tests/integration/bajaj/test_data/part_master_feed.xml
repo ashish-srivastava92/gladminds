@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://local.bajaj.gladminds.co:8000/api/v1/feed/">
+  <SOAP-ENV:Body>
+    <ns1:postPartMaster>
+      <ns1:ObjectList>
+        <ns1:PartMasterData>
+          <ns1:PartMasterModel>
+            <ns1:CATEGORY>EE</ns1:CATEGORY>
+            <ns1:DESCRIPTION>WIPER MOTORW/CAPACI</ns1:DESCRIPTION>
+            <ns1:SEGMENT>Electrical</ns1:SEGMENT>
+            <ns1:PART_MODEL>12345</ns1:PART_MODEL>
+            <ns1:PART_NUMBER>123890</ns1:PART_NUMBER>
+            <ns1:PART_TYPE>3W</ns1:PART_TYPE>
+            <ns1:SUPPLIER>FLASH ELECTRONICS ( I ) PVT L</ns1:SUPPLIER>
+          </ns1:PartMasterModel>
+        </ns1:PartMasterData>
+      </ns1:ObjectList>
+      <ns1:Credential>
+        <ns1:UserName>bajaj</ns1:UserName>
+        <ns1:Password>bajaj</ns1:Password>
+      </ns1:Credential>
+    </ns1:postPartMaster>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

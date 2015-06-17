@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="urn:ZSI" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="asc" targetNamespace="urn:ZSI">
+  <wsdl:types>
+    <xsd:schema targetNamespace="urn:ZSI">
+      <xsd:element name="ASCFeed">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="ASC_MOBILE" type="xsd:string"/>
+            <xsd:element name="ASC_NAME" type="xsd:string"/>
+            <xsd:element name="CITY" type="xsd:string"/>
+            <xsd:element name="STATE" type="xsd:string"/>
+            <xsd:element name="COUNTRY" type="xsd:string"/>
+            <xsd:element name="PIN_NO" type="xsd:string"/>
+            <xsd:element name="IS_ACTIVE" type="xsd:string"/>
+            <xsd:element name="DEALER_ID" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="ASCOutput">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="RESPONSE_CODE" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="GetASCFeedInput">
+    <wsdl:part element="tns:ASCFeedInput" name="parameters"/>
+  </wsdl:message>
+  <wsdl:message name="GetASCFeedOutput">
+    <wsdl:part element="tns:ASCFeedOutput" name="parameters"/>
+  </wsdl:message>
+  <wsdl:portType name="ASCFeed">
+    <wsdl:operation name="getASCFeed">
+      <wsdl:input message="tns:GetASCFeedInput"/>
+      <wsdl:output message="tns:GetASCFeedOutput"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="ASCFeedSOAP" type="tns:ASCFeed">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="getASCFeed">
+      <soap:operation soapAction="http://localhost:8000/productPurchase/GetASCFeed"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="ASCFeed">
+    <wsdl:port binding="tns:ASCFeedSOAP" name="ASCFeedSOAP">
+      <soap:address location="http://localhost:8000/"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

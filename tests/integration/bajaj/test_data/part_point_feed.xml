@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://local.bajaj.gladminds.co:8000/api/v1/feed/">
+  <SOAP-ENV:Body>
+    <ns1:postPartPoint>
+      <ns1:ObjectList>
+        <ns1:PartPointData>
+          <ns1:PartPointModel>
+            <ns1:VALID_FROM>2014-12-23</ns1:VALID_FROM>
+            <ns1:PRICE>1234</ns1:PRICE>
+            <ns1:MRP>12345</ns1:MRP>
+            <ns1:VALID_TILL>2016-12-23</ns1:VALID_TILL>
+            <ns1:PART_NUMBER>123890</ns1:PART_NUMBER>
+            <ns1:POINTS>100</ns1:POINTS>
+            <ns1:TERRITORY>south</ns1:TERRITORY>
+          </ns1:PartPointModel>
+        </ns1:PartPointData>
+      </ns1:ObjectList>
+      <ns1:Credential>
+        <ns1:UserName>bajaj</ns1:UserName>
+        <ns1:Password>bajaj</ns1:Password>
+      </ns1:Credential>
+    </ns1:postPartPoint>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

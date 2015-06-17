@@ -1,0 +1,29 @@
+Hello,<br/><br/>
+{% if feed_logs %}
+The summary of the feeds received /sent on {{yesterday}} are as below:<br/>
+<table border=1px style="width: 60%">
+	<tbody>
+		<tr>
+			<th>Feed Type</th>
+			<th>Total Feed</th>
+			<th>Failed Count</th>
+			<th>Success Count</th>
+			<th>Action</th>
+		</tr>
+		{% for data in feed_logs %}
+		<tr>
+			<td>{{data.feed_type}}</td>
+			<td>{{data.total_count}}</td>
+			<td>{{data.total_failed_data_count}}</td>
+			<td>{{data.total_success_data_count}}</td>
+			<td>{{data.action}}</td>
+		</tr>
+	   {% endfor %}
+	</tbody>
+</table>
+{% else %}
+No feeds received on {{yesterday}}.
+{% endif %}
+<br/><br/>
+Thanks<br/>
+GCP Bajaj Data Feeds Team

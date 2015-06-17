@@ -1,0 +1,97 @@
+{% extends "base_template.html" %}
+
+{% block body %}
+<div class="well">
+    <div class="user-message">
+        <div class="message"></div>
+    </div>
+    <div id="wrapper">
+        <div class="row">
+            <div class="col-md-3 .col-md-offset-1">
+                {% include "portal/base_portal.html" %}
+            </div>
+            <div class="col-md-8">
+            <div class="row portal-form-heading">
+                  <div class="col-md-10 col-md-offset-1">
+                      <h3 class="text-center">Search Service Advisor by mobile number</h3>
+                  </div>
+              </div>
+            <form class="sa-reg-form row" role="search">
+              <div class="col-md-offset-2"> 
+                <div class="row">
+                  <div class="col-md-2 form-group">
+                    <label class="control-label">SA mobile:</label>
+                  </div>
+                  <div class="col-md-7 input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="srch-sa" id="srch-sa" maxlength="10" pattern="[1-9]\d{9}" required>
+                    <div class="input-group-btn">
+                      <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+                    </div>
+                  </div>
+                </div>
+                </div>
+              </form>
+                <div class="row portal-form-heading">
+                    <div class="col-md-10 col-md-offset-1">
+                        <h3 class="text-center">Service Advisor Registration</h3>
+                    </div>
+                </div>
+                <form class="sa-form row" role="form">{% csrf_token %}
+                <div class="col-md-offset-2"> 
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label class="control-label">Service Advisor ID:</label>
+                        </div>
+                        <div class="col-md-5 form-group">
+                            <input type="text" class="form-control sa-id" name="sa-id" required autofocus readonly/>
+                        </div>
+                    </div> 
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label class="control-label">Service Advisor Name:</label>
+                        </div>
+                        <div class="col-md-5 form-group">
+                            <input type="text" class="form-control sa-name" name="name" required autofocus readonly/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label class="control-label">Service Advisor Mobile:</label>
+                        </div>
+                        <div class="col-md-5 form-group">
+                            <input type="text" class="form-control sa-phone" name="phone-number" required maxlength="10"  placeholder="10 digits" readonly/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label  class="control-label">Activity Status*:</label>
+                        </div>
+                        <div class="col-md-5 form-group">
+                            <select class="form-control sa-status" name="status" readonly required>
+                              <option value="">Select status</option>
+                              <option value="Y">Y</option>
+                              <option value="N">N</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-9 form-group">
+                            <button type="submit" value="Submit" class="btn btn-primary pull-right sa-submit" disabled>
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% include "portal/modal.html" %}
+{% include "portal/waiting_modal.html" %}
+{% endblock %}
+
+{% block dependency %}
+<script src="/static/js/portal/utils.js"></script>
+<script src="/static/js/portal/main.js"></script>
+{% endblock dependency %}

@@ -1,0 +1,118 @@
+{% extends "base_template.html" %}
+
+{% block body %}
+<div class="well">
+    <div class="user-message">
+        <div class="message"></div>
+    </div>
+    <div id="wrapper">
+        <div class="row">
+            {% if group != CONSTANTS.SD_CONSTANTS.SD_MANAGER  or group == None %}
+                <div class="col-md-3 .col-md-offset-1">
+                    {% include "portal/base_portal.html" %}
+                </div>
+            {% endif %}
+            <div class="col-md-8">
+                          <div class="row portal-form-heading">
+                  <div class="col-md-10">
+                      <h3 class="text-center">Search by Chassis#</h3>
+                  </div>
+              </div>
+              <form class="cutomer-reg-form" role="search">
+               <div class="col-md-offset-2"> 
+                <div class="row">
+                  <div class="col-md-2 form-group">
+                    <label class="control-label">Chassis#:</label>
+                  </div>
+                  <div class="col-md-7 input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="srch-vin" id="srch-vin" maxlength="17" required>
+                    <div class="input-group-btn">
+                      <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"></span></button>
+                    </div>
+                  </div>
+                </div>
+               </div>
+              </form>
+              <div class="row portal-form-heading">
+                <div class="col-md-10">
+                  <h3 class="text-center">Customer Registration</h3>
+                </div>
+              </div>
+             <form class="customer-form row" role="form">
+             <div class="col-md-offset-2"> 
+              <div class="row hide">
+                <div class="col-md-3 form-group">
+                    <label class="control-label">Chassis:</label>
+                </div>
+                <div class="col-md-4 form-group">
+                    <input type="text" name='customer-vin' class="form-control customer-vin"/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4 form-group">
+                    <label class="control-label">Customer ID:</label>
+                </div>
+                <div class="col-md-5 form-group">
+                    <input type="text" name='customer-id' class="form-control customer-id" readonly/> 
+                </div>
+              </div>
+               <div class="row">
+                <div class="col-md-4 form-group">
+                    <label class="control-label">Customer Name:</label>
+                </div>
+                <div class="col-md-5 form-group">
+                    <input type="text" name='customer-name' class="form-control customer-name"
+                            required readonly/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4 form-group">
+                    <label class="control-label">Customer Phone:</label>
+                </div>
+                <div class="col-md-5 form-group">
+                    <input type="text" name="customer-phone" class="form-control customer-phone"
+                            maxlength="10" pattern="[1-9]\d{9}" required
+                            placeholder="10 digits" readonly/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4 form-group">
+                    <label class="control-label">Product purchase Date:</label>
+                </div>
+                <div class="col-md-5 form-group">
+                    <input type="text" name='purchase-date' id='purchase-date' class="form-control purchase-date purchase-date-picker"
+                            pattern="^(\d{1,2})\/(\d{1,2})\/(\d{4})$" required
+                            placeholder="dd/mm/yyyy" disabled/>
+                </div>
+              </div>
+              <div class="row">
+                  <div class="col-md-9 form-group">
+                      <button type="submit" value="Submit" class="btn btn-primary pull-right customer-submit" disabled>
+                          Submit
+                      </button>
+                  </div>
+              </div>
+              </div>             
+             </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% include "portal/modal.html" %}
+{% include "portal/waiting_modal.html" %}
+{% endblock %}
+
+{% block dependency %}
+<script src="/static/js/portal/utils.js"></script>
+<script src="/static/js/portal/main.js"></script>
+
+<script type="text/javascript">
+$('.purchase-date-picker').datetimepicker({
+	timepicker:false, 
+	format:'d/m/Y',
+	formatDate:'d/m/y',
+	
+});
+
+</script>
+{% endblock dependency %}

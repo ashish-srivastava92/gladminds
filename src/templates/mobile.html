@@ -55,13 +55,13 @@ select {
   <div class="row">
     <div>
       <div id="messageBox" class="login section">
-	      <h3>Welcome to GladMinds</h3>
+	      <h3>Welcome to Gladminds</h3>
 	      
 	      
 	     
 		<p>Please enter your message</p>
 		
-    <form action="/v1/messages" method="POST">
+    <form action="/v1/messages?format=json" method="POST">
     	
    		<input type="text" placeholder="mobile number" name="phoneNumber" required />
       <textarea name="text" rows="10" cols="30" required></textarea>

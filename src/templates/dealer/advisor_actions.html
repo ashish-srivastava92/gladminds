@@ -1,5 +1,9 @@
 {% extends "base_template.html" %}
 
+{% block style %}
+<link href="/static/css/portal.css" rel="stylesheet">
+{% endblock %}
+
 {% block body %}
 <div class="navbar navbar-fixed-top">
   <div class="navbar-inner">
@@ -10,8 +14,8 @@
   <div class="user-message"><div class="message"></div></div>
   <div id="wrapper">
     <div class="row">
-      <div class="col-md-12 col-md-offset-8">
-        <a href="/dealers/logout">Logout</a>
+      <div class="col-md-1 col-md-offset-8">
+        <a href="/dealers/logout" class="dealer-logout">Logout</a>
       </div>
     </div>
     <div class="row">
@@ -22,7 +26,8 @@
               <label for="advisorMobile">Service Advisor Mobile Number</label>
             </div>
             <div class="col-md-3 form-group">
-              <select class="form-control" name="advisorMobile" id="advisorMobile">
+              <select class="form-control" name="advisorMobile" id="advisorMobile" required>
+                <option value="">Select mobile number</option>
                 {% for phone in phones %}
                 <option>{{phone}}</option>
                 {% endfor %}
@@ -71,5 +76,5 @@
 {% endblock %}
 
 {% block dependency %}
-<script src="/static/js/dealer/main.js"></script>
+<script src="/static/js/portal/main.js"></script>
 {% endblock dependency %}

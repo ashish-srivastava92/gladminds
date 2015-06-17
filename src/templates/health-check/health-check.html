@@ -1,0 +1,42 @@
+{% extends "base_template.html" %}
+
+{% block style %}
+<link href="/static/css/health-check/health-check.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="navbar navbar-fixed-top">
+	<div class="navbar-inner">
+		<a class="brand" href="#"><img src="/static/img/bajaj_logo.jpg" height=50px width=209px></a>
+	</div>
+</div>
+
+<div class="user-message">
+	<div class="message"></div>
+</div>
+
+<div class="container">
+	<div class="row">
+		
+		<div class="col-lg-3 col-lg-offset-1 {{check_db_connection.health_status}}" >
+          <h2>DB Connection</h2>
+          <p>{{check_db_connection.reason}}</p>
+          <!-- <p><a class="btn btn-default" href="#" role="button">View details »</a></p> -->
+        </div>
+        <div class="col-lg-3 col-lg-offset-1 {{check_sms_errors.health_status}}">
+          <h2>SMS Health Status</h2>
+          <p>{{check_sms_errors.reason}}</p>
+          <!-- <p><a class="btn btn-default" href="#" role="button">View details »</a></p> -->
+        </div>
+        <div class="col-lg-3 col-lg-offset-1 {{check_feed_errors.health_status}}" >
+          <h2>Feed Health Status</h2>
+          <p>{{check_feed_errors.reason}}</p>
+          <!-- <p><a class="btn btn-default" href="#" role="button">View details »</a></p> -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block dependency%}
+<script src="/static/js/health-check/healthCheck.js"></script>
+{% endblock dependency %}
