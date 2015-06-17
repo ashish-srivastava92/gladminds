@@ -86,4 +86,7 @@ alter table afterbuy_consumer add column is_phone_verified boolean default false
 alter table afterbuy_userproduct add column service_reminder int null;
 alter table afterbuy_userproduct add column details_completed int null;
 alter table afterbuy_userproduct add column manual_link varchar(512) null;
-
+alter table afterbuy_producttype add column overview varchar(512) null;
+alter table gm_producttype add column overview varchar(512) null;
+--alter table gm_containertracker drop column ib_dispatch_dt ;
+--alter table gm_containertracker add column ib_dispatch_dt datetime null;

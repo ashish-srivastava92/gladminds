@@ -21,6 +21,8 @@ from gladminds.core.managers.mail import send_recycle_mail
 from gladminds.afterbuy.apis.validations import ProductValidation
 from tastypie.http import HttpBadRequest
 from gladminds.afterbuy import utils
+from django.core import serializers
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger("gladminds")
 
@@ -81,7 +83,8 @@ class UserProductResource(CustomBaseModelResource):
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/coupons%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_coupons'), name="get_product_coupons" ),
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/recycle%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('mail_products_details'), name="mail_products_details" ),
                 url(r"^(?P<resource_name>%s)/get-brands%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_brand_details'), name="get_brand_details" ),
-                url(r"^(?P<resource_name>%s)/accept-product%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('user_product_acceptance'), name="user_product_acceptance" )
+                url(r"^(?P<resource_name>%s)/accept-product%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('user_product_acceptance'), name="user_product_acceptance" ),
+                url(r"^(?P<resource_name>%s)/specifications%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('product_specifications'), name="product_specifications" )
                
         ]
 
@@ -157,6 +160,47 @@ class UserProductResource(CustomBaseModelResource):
             logger.error("Exception while accepting the product{0}".format(ex))
             return HttpBadRequest("Incorrect Details")
         return
+    
+    def product_specifications(self, request, **kwargs):
+        self.is_authenticated(request)
+        try:
+            product_id = request.GET['product_id']
+            product_type = afterbuy_models.ProductType.objects.filter(product_type=product_id)
+            if len(product_type)==0:
+                return HttpResponse(json.dumps({'message': 'Incorrect Product ID'}),
+                                    content_type='application/json')
+            try:
+                specifications = afterbuy_models.ProductSpecification.objects.get(product_type=product_type[0])
+                features = afterbuy_models.ProductFeature.objects.filter(product_type=product_type[0])
+                recommended_parts = afterbuy_models.RecommendedPart.objects.get(product_type=product_type[0])
+            except Exception as ObjectDoesNotExist:
+                logger.error(ObjectDoesNotExist)
+
+            result = {}
+            details = []
+            details.append(model_to_dict(specifications))
+            result['specifications'] =  details
+            
+            details = []
+            details.append(model_to_dict(recommended_parts))
+            result['recommended_parts'] = details
+            
+            details = []
+            for feature in features:
+                data = {}
+                data['description'] = feature.description
+                details.append(data)
+                                            
+            result['features'] = details
+            
+            result['Overview'] = product_type[0].overview
+            result['status_code'] = 200
+            
+            return HttpResponse(json.dumps(result),
+                                content_type='application/json') 
+        except Exception as ex:
+            logger.error("Exception while fetching product specifications - {0}".format(ex))
+            return HttpBadRequest("Incorrect Details")
 
 class ProductInsuranceInfoResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', null=True, blank=True, full=True)
