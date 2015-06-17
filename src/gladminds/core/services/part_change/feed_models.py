@@ -1,15 +1,12 @@
-import json
 import logging
 
 from django.conf import settings
-from django.views.decorators.csrf import csrf_exempt
 from spyne.application import Application
 from spyne.decorator import srpc
 from spyne.model.complex import Array
 from spyne.model.complex import ComplexModel
 from spyne.model.complex import Iterable
-from spyne.model.primitive import Integer, Decimal, Date, Time
-from spyne.model.primitive import Unicode, Mandatory, Boolean
+from spyne.model.primitive import Integer, Decimal, Date, Time, Unicode, Mandatory, Boolean
 from spyne.protocol.soap import Soap11
 from spyne.server.django import DjangoApplication
 from spyne.server.wsgi import WsgiApplication
@@ -129,7 +126,40 @@ class EcoImplementationModel(ComplexModel):
 class EcoImplementationList(ComplexModel):
     __namespace__ = tns
     EcoImplementationData = Array(EcoImplementationModel)
-    
+
+class ManufactureDataModel(ComplexModel):
+    __namespace__ = tns
+    CHASSIS  = Unicode
+    MATNR = Unicode
+    WERKS = Unicode
+    VODATE = Date()
+    ENGINE = Unicode
+
+class ManufactureDataModelList(ComplexModel):
+    __namespace__ = tns
+    ManufactureData = Array(ManufactureDataModel)
+
+class ManufactureDataService(ServiceBase):
+    __namespace__ = tns
+
+    @srpc(ManufactureDataModelList, AuthenticationModel,  _returns=Unicode)
+    def postManufactureData(ObjectList, Credential):
+        data_list = []
+        feed_remark = FeedLogWithRemark(len(ObjectList.ManufactureData), feed_type='Manufacture data Feed', action='Received', status=True)
+
+        for data_obj in ObjectList.ManufactureData:
+            data_list.append({
+                            'product_id' : data_obj.CHASSIS,
+                            'material_number' : data_obj.MATNR,
+                            'plant' : data_obj.WERKS,
+                            'engine' : data_obj.ENGINE,
+                            'vehicle_off_line_date' : data_obj.VODATE
+                            })
+
+        feed_remark = save_to_db(feed_type='manufacture_data', data_source=data_list, feed_remark=feed_remark)
+        feed_remark.save_to_feed_log()
+        return get_response(feed_remark)
+
 class ECOImplementationService(ServiceBase):
     __namespace__ = tns
 

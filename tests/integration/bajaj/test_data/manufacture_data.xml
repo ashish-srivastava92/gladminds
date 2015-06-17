@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://local.bajaj.gladminds.co:8000/api/v1/feed/">
+  <SOAP-ENV:Body>
+    <ns1:postManufactureData>
+        <ns1:ObjectList>
+          <ns1:ManufactureData>
+            <ns1:ManufactureDataModel>
+              <ns1:ENGINE>0000DHFE</ns1:ENGINE>
+              <ns1:WERKS>CH01</ns1:WERKS>
+              <ns1:MATNR>000QWRER</ns1:MATNR>
+              <ns1:VODATE>2014-12-03</ns1:VODATE>
+              <ns1:CHASSIS>MD2A18AZ8FPA36285</ns1:CHASSIS>
+            </ns1:ManufactureDataModel>
+          </ns1:ManufactureData>
+      </ns1:ObjectList>
+      <ns1:Credential>
+        <ns1:UserName>bajaj</ns1:UserName>
+        <ns1:Password>bajaj</ns1:Password>
+      </ns1:Credential>
+    </ns1:postManufactureData>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
