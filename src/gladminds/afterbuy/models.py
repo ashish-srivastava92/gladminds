@@ -243,7 +243,7 @@ class ProductFeature(base_models.BaseModel):
         verbose_name_plural = "Product Features"
         
 class RecommendedPart(base_models.BaseModel):
-    product_type = models.ForeignKey(ProductType)
+    product_type = models.ManyToManyField(ProductType)
     part_id = models.CharField(max_length=30, null=True, blank=True)
     name = models.CharField(max_length=255, null=True, blank=True)
     material = models.CharField(max_length=255, null=True, blank=True)

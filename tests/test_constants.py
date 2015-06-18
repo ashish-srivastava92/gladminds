@@ -865,3 +865,60 @@ SBOM_REVIEW = {"bom_number":"211760",
                "status" : "Publish",
                "quantity" : "1"
                }
+
+PRODUCT_SPECIFICATIONS =  {
+                           "created_date": "2015-06-16T14:23:29",
+                           "engine_displacement": "125 cc",
+                           "engine_starting": "electric",
+                           "engine_type": "1 cylinder",
+                           "maximum_power": "15",
+                           "modified_date": "2015-06-16T14:23:29",
+                           "product_type": {
+                                            "created_date": "2014-11-28T20:31:20",
+                                            "id": 2,
+                                            "image_url": "string",
+                                            "is_active": True,
+                                            "modified_date": "2015-06-16T14:26:01",
+                                            "overview": "overview",
+                                            "product_type": "consumer_electronics",
+                                            "resource_uri": "/afterbuy/v1/product-types/2/"
+                                            },
+                           "type": "motorcycle"
+                           }
+PRODUCT_FEATURES = {
+                    "created_date": "2015-06-16T14:23:53",
+                    "description": "Electronics",
+                    "modified_date": "2015-06-16T14:23:53",
+                    "product_type": {
+                                     "created_date": "2014-11-28T20:31:20",
+                                     "id": 2,
+                                     "image_url": "string",
+                                     "is_active": True,
+                                     "modified_date": "2015-06-17T13:05:42",
+                                     "overview": "overview",
+                                     "product_type": "consumer_electronics",
+                                     "resource_uri": "/afterbuy/v1/product-types/2/"
+                                     },
+                    }
+
+PRODUCT_RECOMMENDED_PARTS = {
+                             "created_date": "2015-06-17T15:04:15",
+                             "material": "copper",
+                             "modified_date": "2015-06-17T15:04:15",
+                             "name": "dasdasd",
+                             "part_id": "121",
+                             "price": "1200",
+                             "product_type": [
+                                              {
+                                               "created_date": "2014-11-28T20:31:20",
+                                               "id": 2,
+                                               "image_url": "string",
+                                               "is_active": True,
+                                               "modified_date": "2015-06-17T13:29:30",
+                                               "overview": "overview",
+                                               "product_type": "consumer_electronics",
+                                               "resource_uri": "/afterbuy/v1/product-types/2/"
+                                               }
+                                              ],
+                             "resource_uri": "/afterbuy/v1/product-parts/1/"
+                             }

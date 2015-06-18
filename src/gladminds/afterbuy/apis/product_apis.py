@@ -20,9 +20,6 @@ from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.managers.mail import send_recycle_mail
 from gladminds.afterbuy.apis.validations import ProductValidation
 from tastypie.http import HttpBadRequest
-from gladminds.afterbuy import utils
-from django.core import serializers
-from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger("gladminds")
 
@@ -32,9 +29,42 @@ class ProductTypeResource(CustomBaseModelResource):
         queryset = afterbuy_models.ProductType.objects.all()
         resource_name = "product-types"
         authentication = AccessTokenAuthentication()
-        authorization = DjangoAuthorization()
+        authorization = Authorization()
         always_return_data = True
 
+
+class ProductSpecificationResource(CustomBaseModelResource):
+    product_type = fields.ForeignKey(ProductTypeResource, 'product_type', null=True, blank=True,
+                                     full=True)
+    class Meta:
+        queryset = afterbuy_models.ProductSpecification.objects.all()
+        resource_name = "product-specifications"
+        allowed_methods = ['get', 'post']
+        authentication = AccessTokenAuthentication()
+        authorization = Authorization()
+        always_return_data = True
+        
+class ProductFeatureResource(CustomBaseModelResource):
+    product_type = fields.ForeignKey(ProductTypeResource, 'product_type', null=True, blank=True,
+                                     full=True)
+    class Meta:
+        queryset = afterbuy_models.ProductFeature.objects.all()
+        resource_name = "product-features"
+        allowed_methods = ['get', 'post']
+        authentication = AccessTokenAuthentication()
+        authorization = Authorization()
+        always_return_data = True
+
+class RecommendedPartResource(CustomBaseModelResource):
+    product_type = fields.ManyToManyField(ProductTypeResource, 'product_type', null=True, blank=True,
+                                     full=True)
+    class Meta:
+        queryset = afterbuy_models.RecommendedPart.objects.all()
+        resource_name = "product-parts"
+        allowed_methods = ['get', 'post']
+        authentication = AccessTokenAuthentication()
+        authorization = Authorization()
+        always_return_data = True
 
 class UserProductResource(CustomBaseModelResource):
     consumer = fields.ForeignKey(ConsumerResource, 'consumer', null=True, blank=True, full=True)
@@ -84,7 +114,7 @@ class UserProductResource(CustomBaseModelResource):
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/recycle%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('mail_products_details'), name="mail_products_details" ),
                 url(r"^(?P<resource_name>%s)/get-brands%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_brand_details'), name="get_brand_details" ),
                 url(r"^(?P<resource_name>%s)/accept-product%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('user_product_acceptance'), name="user_product_acceptance" ),
-                url(r"^(?P<resource_name>%s)/specifications%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('product_specifications'), name="product_specifications" )
+                url(r"^(?P<resource_name>%s)/details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('product_specifications'), name="product_specifications" )
                
         ]
 
@@ -169,20 +199,32 @@ class UserProductResource(CustomBaseModelResource):
             if len(product_type)==0:
                 return HttpResponse(json.dumps({'message': 'Incorrect Product ID'}),
                                     content_type='application/json')
-            try:
-                specifications = afterbuy_models.ProductSpecification.objects.get(product_type=product_type[0])
-                features = afterbuy_models.ProductFeature.objects.filter(product_type=product_type[0])
-                recommended_parts = afterbuy_models.RecommendedPart.objects.get(product_type=product_type[0])
-            except Exception as ObjectDoesNotExist:
-                logger.error(ObjectDoesNotExist)
+            specifications = afterbuy_models.ProductSpecification.objects.filter(product_type=product_type[0])
+            features = afterbuy_models.ProductFeature.objects.filter(product_type=product_type[0])
+            recommended_parts = afterbuy_models.RecommendedPart.objects.filter(product_type=product_type[0])
 
             result = {}
             details = []
-            details.append(model_to_dict(specifications))
+
+            for specification in specifications:
+                data = {}
+                data['type'] = specification.type
+                data['engine_displacement'] = specification.engine_displacement
+                data['engine_type'] = specification.engine_type
+                data['engine_starting'] = specification.engine_starting
+                data['maximum_power'] = specification.maximum_power
+                details.append(data)
+                
             result['specifications'] =  details
             
             details = []
-            details.append(model_to_dict(recommended_parts))
+            for part in recommended_parts:
+                data = {}
+                data['part_id'] = part.part_id
+                data['name'] = part.name
+                data['material'] = part.material
+                data['price'] = part.price
+                details.append(data)
             result['recommended_parts'] = details
             
             details = []
