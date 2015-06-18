@@ -578,19 +578,24 @@ class BOMPlatePart(base_models.BOMPlatePart):
     plate = models.ForeignKey(BOMPlate)
     part = models.ForeignKey(BOMPart)
 
-class Meta(base_models.BOMPlatePart.Meta):
-            app_label = _APP_NAME
+    class Meta(base_models.BOMPlatePart.Meta):
+        app_label = _APP_NAME
 
 class BOMVisualization(base_models.BOMVisualization):
     '''Details of BOM Plates cordinates'''
     bom = models.ForeignKey(BOMPlatePart)
     
     class Meta(base_models.BOMVisualization.Meta):
-            app_label = _APP_NAME
+        app_label = _APP_NAME
             
 class ServiceCircular(base_models.ServiceCircular):
     model_sku_code = models.ManyToManyField(BrandProductRange)
     
     class Meta(base_models.ServiceCircular.Meta):
+        app_label = _APP_NAME
+
+class ManufacturingData(base_models.ManufacturingData):
+
+    class Meta(base_models.ManufacturingData.Meta):
         app_label = _APP_NAME
 

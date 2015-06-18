@@ -423,6 +423,7 @@ class LoyaltyApiTests(ResourceTestCase):
         uri = '/v1/spare-points/1/'
         resp = self.get(uri)
         self.assertEqual(self.deserialize(resp)['MRP'], 31)
+    
     def test_create_accumulation(self):
         uri = '/v1/asms/'
         resp = self.post(uri,data=AREA_SPARES_MANAGER)

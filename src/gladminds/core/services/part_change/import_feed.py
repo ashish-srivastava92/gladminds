@@ -37,6 +37,7 @@ class SAPFeed(object):
             'bomitem': BOMItemFeed,
             'eco_release': ECOReleaseFeed,
             'eco_implementation':ECOImplementationFeed,
+            'manufacture_data': ManufactureDataFeed,
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
@@ -178,4 +179,22 @@ class ECOImplementationFeed(BaseFeed):
             ex = "[Exception]: modify sbom data {0}".format(odne)
             logger.error(ex)
         return
-        
+    
+class ManufactureDataFeed(BaseFeed):    
+
+    def import_data(self):
+        for data_obj in self.data_source:
+            try:
+                manufacture_data_obj = get_model('ManufacturingData').objects.filter(product_id=data_obj['product_id'])
+                if manufacture_data_obj:
+                    raise ValueError("Chassis {0} already has manufacture data:: {1}".format(data_obj['product_id'], data_obj))
+                manufacture_data_obj = get_model('ManufacturingData')(product_id=data_obj['product_id'],
+                                           material_number=data_obj['material_number'],
+                                           plant=data_obj['plant'], engine=data_obj['engine'],
+                                           vehicle_off_line_date=data_obj['vehicle_off_line_date'])
+                manufacture_data_obj.save()
+            except Exception as ex:
+                ex="[Exception: ]: ManufactureDataFeed {0}".format(ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+        return self.feed_remark
