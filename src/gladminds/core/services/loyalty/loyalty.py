@@ -102,7 +102,10 @@ class CoreLoyaltyService(Services):
                     image_url="{0}/{1}".format(settings.S3_BASE_URL, mechanic.image_url)
                     data.append(image_url)
                 elif field=='state':
-                    data.append(mechanic.state.state_name)
+                    if mechanic.state:
+                        data.append(mechanic.state.state_name)
+                    else:
+                        data.append(mechanic.state)
                 else:
                     data.append(getattr(mechanic, field))
             csvwriter.writerow(data)
