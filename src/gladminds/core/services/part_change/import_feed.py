@@ -185,15 +185,15 @@ class ManufactureDataFeed(BaseFeed):
     def import_data(self):
         for data_obj in self.data_source:
             try:
-                is_descrepant=False
+                is_discrepant=False
                 manufacture_data_obj = get_model('ManufacturingData').objects.filter(product_id=data_obj['product_id'])
                 if manufacture_data_obj:
-                    is_descrepant=True
+                    is_discrepant=True
                 manufacture_data_obj = get_model('ManufacturingData')(product_id=data_obj['product_id'],
                                            material_number=data_obj['material_number'],
                                            plant=data_obj['plant'], engine=data_obj['engine'],
                                            vehicle_off_line_date=data_obj['vehicle_off_line_date'],
-                                           is_descrepant=is_descrepant)
+                                           is_discrepant=is_discrepant)
                 manufacture_data_obj.save()
             except Exception as ex:
                 ex="[Exception: ]: ManufactureDataFeed {0}".format(ex)

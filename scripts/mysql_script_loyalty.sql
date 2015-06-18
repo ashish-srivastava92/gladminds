@@ -111,7 +111,7 @@
 --alter table gm_member add column total_accumulation_points integer(50) default 0;
 --alter table gm_member add column total_redemption_points integer(50) default 0;
 
-alter table gm_manufacturingdata add column is_descrepant bool default 0;
+alter table gm_manufacturingdata add column is_discrepant bool default 0;
 alter table gm_manufacturingdata add column sent_to_sap bool default 0;
 
 

@@ -1645,7 +1645,7 @@ class ManufacturingData(models.Model):
     plant = models.CharField(max_length=100, null=True, blank=True)
     engine = models.CharField(max_length=100, null=True, blank=True)
     vehicle_off_line_date =  models.DateTimeField(null=True, blank= True)
-    is_descrepant = models.BooleanField(default=False)
+    is_discrepant = models.BooleanField(default=False)
     sent_to_sap = models.BooleanField(default=False)
 
     class Meta:
