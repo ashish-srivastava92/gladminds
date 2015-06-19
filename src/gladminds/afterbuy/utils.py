@@ -58,7 +58,7 @@ def get_template(template_key):
     return object.template
 
 
-def get_date_from_string(date, fmt="%d-%m-%YT%H:%M:%S", timezone=None):
+def get_date_from_string(date, fmt="%Y-%m-%dT%H:%M:%S", timezone=None):
     if timezone is None:
         timezone = get_current_timezone_name()
     date_object = datetime.strptime(date, fmt)

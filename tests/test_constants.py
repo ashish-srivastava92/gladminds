@@ -112,131 +112,148 @@ APP_PREFERENCE = {
                 }
 
 AFTERBUY_PRODUCT = {
-                     "brand": {
-                               "created_date": "2014-11-20T14:49:11",
-                               "description": "",
-                               "id": 1,
-                               "image_url": "a",
-                               "industry": {
-                                            "created_date": "20-11-2014T12:49:10",
-                                            "description": "a",
-                                            "id": 1,                                    
-                                            "modified_date": "20-11-20T12:49:10",
-                                            "name": "Aruba",                            
-                                            "resource_uri": "/afterbuy/v1/industries/1/"
-                                            },
-                               "is_active": True,
-                               "modified_date": "2014-11-20T12:49:11",
-                               "name": "Aruba",
-                               "resource_uri": "/afterbuy/v1/brands/1/"
-                               },
-                     "brand_product_id": "11",
-                     "color": "red",
-                     "consumer": {
-                                  "accepted_terms": False,
-                                  "address": "",
-                                  "consumer_id": "2c099e10-043d-4b59-9243-8ece03b137d0",
-                                  "country": "",
-                                  "created_date": "20-11-2012T14:48:51",
-                                  "date_of_birth": None,
-                                  "gender": None,
-                                  "image_url": "guest.png",
-                                  "modified_date": "20-11-2012T14:48:51",
-                                  "phone_number": "7760814041",
-                                  "pincode": "",
-                                  "resource_uri": "/afterbuy/v1/consumers/2/",
-                                  "state": "h",
-                                  "tshirt_size": None,
-                                  "user": {
-                                           "date_joined": "20-11-2014T12:48:24",
-                                           "email":"test.ab@gmail.com",
-                                           "first_name": "",
-                                           "id": 1,                                   
-                                           "last_login": "20-11-2014T12:48:23",
-                                           "last_name": "",
-                                           "resource_uri": "",
-                                           "username": "test"
-                                           }
-                                  },
-                     "description": "",
-
-                     "image_url": "sss",
-                     "is_deleted": False,
-                     "nick_name": "aaa",
-                     "product_type": {
-                                      "created_date": "20-11-2014T12:49:20",
-                                      "id": 1,
-                                      "image_url": "a",
-                                      "is_active": True,
-                                      "modified_date": "20-11-2014T12:49:20",
-                                      "product_type": "aaa",
-                                      "resource_uri": "/afterbuy/v1/product-types/1/"
-                                      },
-                     "purchase_date": "20-11-2014T12:49:24"
-                     }
-
+                    "brand_product_id": "zxcvbnm",
+                    "color": "",
+                    "consumer": {
+                                 "accepted_terms": False,
+                                 "address": "",
+                                 "consumer_id": "08b59d1a-e838-42ea-84de-33174f2c30c9",
+                                 "country": None,
+                                 "created_date": "2015-06-19T11:20:17",
+                                 "date_of_birth": None,
+                                 "gender": None,
+                                 "image_url": "guest.png",
+                                 "is_phone_verified": False,
+                                 "modified_date": "2015-06-19T15:21:06",
+                                 "phone_number": "7760814043",
+                                 "pincode": None,
+                                 "resource_uri": "/afterbuy/v1/consumers/5/",
+                                 "state": None,
+                                 "tshirt_size": None,
+                                 "user": {
+                                          "date_joined": "2015-06-19T11:20:17",
+                                          "first_name": "",
+                                          "id": 5,
+                                          "is_active": True,
+                                          "is_staff": False,
+                                          "last_login": "2015-06-19T12:38:47",
+                                          "last_name": "",
+                                          "resource_uri": "",
+                                          "username": "7760814043"
+                                          }
+                                 },
+                    "created_date": "2015-06-19T11:21:25",
+                    "description": "",
+                    "details_completed": None,
+                    "image_url": "",
+                    "is_accepted": True,
+                    "is_deleted": False,
+                    "manual_link": "",
+                    "modified_date": "2015-06-19T12:39:14",
+                    "nick_name": "ddq",
+                    "product_type": {
+                                     "brand": {
+                                               "created_date": "2015-06-19T11:20:37",
+                                               "description": "",
+                                               "id": 1,
+                                               "image_url": "sss",
+                                               "industry": {
+                                                            "created_date": "2015-06-19T11:20:33",
+                                                            "description": "",
+                                                            "id": 1,
+                                                            "modified_date": "2015-06-19T15:23:56",
+                                                            "name": "Automobiles",
+                                                            "resource_uri": "/afterbuy/v1/industries/1/"
+                                                            },                                              
+                                               "is_active": True,
+                                               "modified_date": "2015-06-19T15:23:56",
+                                               "name": "bajaj",
+                                               "resource_uri": "/afterbuy/v1/brands/1/"
+                                               },
+                                     "created_date": "2015-06-19T11:20:56",
+                                     "id": 1,
+                                     "image_url": "",
+                                     "is_active": True,
+                                     "modified_date": "2015-06-19T15:23:56",
+                                     "overview": "",
+                                     "product_type": "motorcycle",
+                                     "resource_uri": "/afterbuy/v1/product-types/1/"
+                                     },
+                    "purchase_date": "2015-06-19T11:21:11",
+                    "resource_uri": "/afterbuy/v1/products/1/",
+                    "service_reminder": None
+                    }                   
 AFTERBUY_PRODUCTS = {
-                     "brand": {
-                               "created_date": "2014-11-20T14:49:11",
-                               "description": "",
-                               "id": 1,
-                               "image_url": "a",
-                               "industry": {
-                                            "created_date": "20-11-2014T12:49:10",
-                                            "description": "a",
-                                            "id": 1,                                    
-                                            "modified_date": "20-11-20T12:49:10",
-                                            "name": "Aruba",                            
-                                            "resource_uri": "/afterbuy/v1/industries/1/"
-                                            },
-                               "is_active": True,
-                               "modified_date": "2014-11-20T12:49:11",
-                               "name": "Aruba",
-                               "resource_uri": "/afterbuy/v1/brands/1/"
-                               },
-                     "brand_product_id": "11",
-                     "color": "red",
+                     "brand_product_id": "zxcvbnm",
+                     "color": "",
                      "consumer": {
                                   "accepted_terms": False,
                                   "address": "",
-                                  "consumer_id": "2c099e10-043d-4b59-9243-8ece03b137d0",
-                                  "country": "",
-                                  "created_date": "20-11-2012T14:48:51",
+                                  "consumer_id": "08b59d1a-e838-42ea-84de-33174f2c30c9",
+                                  "country": None,
+                                  "created_date": "2015-06-19T11:20:17",
                                   "date_of_birth": None,
                                   "gender": None,
                                   "image_url": "guest.png",
-                                  "modified_date": "20-11-2012T14:48:51",                                  
-                                  "pincode": "",
-                                  "resource_uri": "/afterbuy/v1/consumers/2/",
-                                  "state": "h",
+                                  "is_phone_verified": False,
+                                  "modified_date": "2015-06-19T15:21:06",
+                                  "pincode": None,
+                                  "resource_uri": "/afterbuy/v1/consumers/5/",
+                                  "state": None,
                                   "tshirt_size": None,
                                   "user": {
-                                           "date_joined": "20-11-2014T12:48:24",                                           
+                                           "date_joined": "2015-06-19T11:20:17",
                                            "first_name": "",
-                                           "id": 1,                                   
-                                           "last_login": "20-11-2014T12:48:23",
+                                           "id": 5,
+                                           "is_active": True,
+                                           "is_staff": False,
+                                           "last_login": "2015-06-19T12:38:47",
                                            "last_name": "",
                                            "resource_uri": "",
-                                           "username": "test"
+                                           "username": "7760814041"
                                            }
                                   },
+                     "created_date": "2015-06-19T11:21:25",
                      "description": "",
-
-                     "image_url": "sss",
+                     "details_completed": None,
+                     "image_url": "",
+                     "is_accepted": True,
                      "is_deleted": False,
-                     "nick_name": "aaa",
+                     "manual_link": "",
+                     "modified_date": "2015-06-19T12:39:14",
+                     "nick_name": "ddq",
                      "product_type": {
-                                      "created_date": "20-11-2014T12:49:20",
+                                      "brand": {
+                                                "created_date": "2015-06-19T11:20:37",
+                                                "description": "",
+                                                "id": 1,
+                                                "image_url": "sss",
+                                                "industry": {
+                                                             "created_date": "2015-06-19T11:20:33",
+                                                             "description": "",
+                                                             "id": 1,
+                                                             "modified_date": "2015-06-19T15:23:56",
+                                                             "name": "Automobiles",
+                                                             "resource_uri": "/afterbuy/v1/industries/1/"
+                                                             },
+                                                "is_active": True,
+                                                "modified_date": "2015-06-19T15:23:56",
+                                                "name": "bajaj",
+                                                "resource_uri": "/afterbuy/v1/brands/1/"
+                                                },
+                                      "created_date": "2015-06-19T11:20:56",
                                       "id": 1,
-                                      "image_url": "a",
+                                      "image_url": "",
                                       "is_active": True,
-                                      "modified_date": "20-11-2014T12:49:20",
-                                      "product_type": "aaa",
+                                      "modified_date": "2015-06-19T15:23:56",
+                                      "overview": "",
+                                      "product_type": "motorcycle",
                                       "resource_uri": "/afterbuy/v1/product-types/1/"
                                       },
-                     "purchase_date": "20-11-2014T12:49:24"
+                     "purchase_date": "2015-06-19T11:21:11",
+                     "resource_uri": "/afterbuy/v1/products/1/",
+                     "service_reminder": None
                      }
-
 AFTERBUY_INSURANCES = {
                         "product":AFTERBUY_PRODUCTS,
                         "modified_date": "2010-11-10T03:07:43",
@@ -328,7 +345,7 @@ AFTERBUY_REGISTATION = {
                         }
 
 AFTERBUY_SUPPORT = {
-                    "brand":AFTERBUY_PRODUCTS.get("brand"), 
+                    "brand":AFTERBUY_PRODUCTS.get("product_type")['brand'],
                     "brand_product_category":AFTERBUY_PRODUCTS.get("brand"), 
                     "company_name ":"Bajaj",
                     "toll_free":"18001800",
@@ -865,3 +882,30 @@ SBOM_REVIEW = {"bom_number":"211760",
                "status" : "Publish",
                "quantity" : "1"
                }
+
+PRODUCT_SPECIFICATIONS =  {
+                           "created_date": "2015-06-16T14:23:29",
+                           "engine_displacement": "125 cc",
+                           "engine_starting": "electric",
+                           "engine_type": "1 cylinder",
+                           "maximum_power": "15",
+                           "modified_date": "2015-06-16T14:23:29",
+                           "product_type": AFTERBUY_PRODUCTS.get("product_type")
+                           }
+PRODUCT_FEATURES = {
+                    "created_date": "2015-06-16T14:23:53",
+                    "description": "Electronics",
+                    "modified_date": "2015-06-16T14:23:53",
+                    "product_type": AFTERBUY_PRODUCTS.get("product_type")
+                    }
+
+PRODUCT_RECOMMENDED_PARTS = {
+                             "created_date": "2015-06-17T15:04:15",
+                             "material": "copper",
+                             "modified_date": "2015-06-17T15:04:15",
+                             "name": "dasdasd",
+                             "part_id": "121",
+                             "price": "1200",
+                             "product_type":[AFTERBUY_PRODUCTS.get("product_type")],
+                             "resource_uri": "/afterbuy/v1/product-parts/1/"
+                             }
