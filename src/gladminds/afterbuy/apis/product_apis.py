@@ -188,6 +188,7 @@ class UserProductResource(CustomBaseModelResource):
             return HttpBadRequest("Incorrect Details")
         return
     
+    #TODO:Fixme
     def product_specifications(self, request, **kwargs):
         self.is_authenticated(request)
         try:
