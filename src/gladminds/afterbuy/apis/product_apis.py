@@ -175,14 +175,11 @@ class UserProductResource(CustomBaseModelResource):
                                 content_type="application/json",status=401)
         try:
             load = json.loads(request.body)
-            is_accepted = load.get('is_accepted')
+            is_accepted = load.get('is_accepted', False)
             brand_product_id = load.get('product_id')
             user_product = afterbuy_models.UserProduct.objects.get(brand_product_id=brand_product_id,
                                                                    consumer__user=request.user)
-            if is_accepted:
-                user_product.is_accepted = True
-            else:
-                user_product.is_accepted = False
+            user_product.is_accepted = is_accepted
             user_product.save()
             return HttpResponse(json.dumps({'status':200, 'message': True}),
                                 content_type='application/json')

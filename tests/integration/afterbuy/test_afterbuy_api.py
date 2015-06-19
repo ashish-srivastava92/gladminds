@@ -110,18 +110,19 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
         resp = client.get('/afterbuy/v1/products/get-brands/?access_token='+access_token)
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(json.loads(resp.content)['status_code'], 200  )
-        
-#     def test_user_product_acceptance(self):
-#         access_token = self.user_login()
-#         uri = '/afterbuy/v1/products/?access_token='+access_token
-# 
-#         resp = client.post(uri, data=json.dumps(AFTERBUY_PRODUCTS), content_type='application/json')
-#         self.assertEquals(resp.status_code, 201)
-#         mock_data = {'product_id':"zxcvbnm", 'is_accepted': 1}
-#         resp = client.post('/afterbuy/v1/products/accept-product/?access_token='+access_token,
-#                            data=json.dumps(mock_data), content_type='application/json')
-#         self.assertEquals(json.loads(resp.content)['status'], 200)
-#         self.assertEquals(resp.status_code, 200)
+
+    @unittest.skip("skip the test")
+    def test_user_product_acceptance(self):
+        access_token = self.user_login()
+        uri = '/afterbuy/v1/products/?access_token='+access_token
+ 
+        resp = client.post(uri, data=json.dumps(AFTERBUY_PRODUCTS), content_type='application/json')
+        self.assertEquals(resp.status_code, 201)
+        mock_data = {'product_id':"zxcvbnm", 'is_accepted': 1}
+        resp = client.post('/afterbuy/v1/products/accept-product/?access_token='+access_token,
+                           data=json.dumps(mock_data), content_type='application/json')
+        self.assertEquals(json.loads(resp.content)['status'], 200)
+        self.assertEquals(resp.status_code, 200)
     
     def test_insurances_api(self):
         resp = self.post('/afterbuy/v1/insurances/', data=AFTERBUY_INSURANCES)
@@ -195,18 +196,3 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
         resp = client.get('/afterbuy/v1/products/details/?product_id=motor&&access_token='+access_token)
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(json.loads(resp.content)['message'], "Incorrect Product ID")
-
-
-#         #Checking get api
-#         resp = self.client.get('/afterbuy/v1/products/1/')
-#         self.assertEquals(resp.status_code,200)
-#         self.assertEqual(self.deserialize(resp)['nick_name'], "aaa")
-#         self.assertEqual(len(self.deserialize(resp)), 17)
-#
-#         #Cheking put api
-#         json_data = json.dumps({"nick_name":"bbb"})
-#         resp = self.client.put('/afterbuy/v1/products/1/',json_data, content_type='application/json')
-#         self.assertEquals(resp.status_code, 200)
-#         resp = self.client.get('/afterbuy/v1/products/1/')
-#         self.assertEqual(self.deserialize(resp)['nick_name'], "bbb")
-
