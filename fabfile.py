@@ -97,11 +97,12 @@ def test_unit():
     '''Runs All Tests in tests/unit package'''
     test('unit')
 
-@task()
-def test_smoke(package):
-    '''Runs All Tests in tests/integration package'''
-    COVERAGE_ENABLED = False
-    test('smoke.{0}'.format(package))
+#will add smoke test after fixes
+#@task()
+#def test_smoke(package):
+#    '''Runs All Tests in tests/integration package'''
+#    COVERAGE_ENABLED = False
+#    test('smoke.{0}'.format(package))
     
 
 # Include new commands for deployment to elastic beanstalk

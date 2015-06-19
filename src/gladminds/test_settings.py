@@ -67,7 +67,7 @@ LOGGING['handlers']['afterbuy_logs']['filename'] = 'log/test_case.log'
 LOGGING['handlers']['sql']['filename'] = 'log/sql.log'
 LOGGING['loggers']['gladminds']['handlers'] = ['gladminds_logs', 'console'] 
 LOGGING['loggers']['spyne']['handlers'] = ['gladminds_logs', 'console'] 
-LOGGING['loggers']['afterbuy']['handlers'] = ['gladminds_logs', 'console'] 
+LOGGING['loggers']['afterbuy']['handlers'] = ['afterbuy_logs', 'console'] 
 
 FEED_FAILURE_MAIL_ENABLED = False
 
