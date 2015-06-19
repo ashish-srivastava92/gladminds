@@ -90,3 +90,15 @@ alter table afterbuy_producttype add column overview varchar(512) null;
 alter table gm_producttype add column overview varchar(512) null;
 --alter table gm_containertracker drop column ib_dispatch_dt ;
 --alter table gm_containertracker add column ib_dispatch_dt datetime null;
+
+alter table afterbuy_userproduct drop foreign key `brand_id_refs_id_e5504abf`;
+alter table afterbuy_userproduct drop column brand_id;
+
+alter table afterbuy_producttype add brand_id integer;
+alter table afterbuy_producttype add foreign key (brand_id) references afterbuy_producttype(id);
+
+alter table gm_producttype add brand_id integer;
+alter table gm_producttype add foreign key (brand_id) references gm_producttype(id);
+
+alter table afterbuy_userproduct drop column nick_name;
+alter table afterbuy_userproduct add column nick_name varchar(100) null;

@@ -44,6 +44,7 @@ class BrandProductCategory(base_models.BrandProductCategory):
 
 
 class ProductType(base_models.ProductType):
+    brand = models.ForeignKey(Brand)
 
     class Meta:
         app_label = _APP_NAME
@@ -81,14 +82,13 @@ class Consumer(base_models.BaseModel):
 
 class UserProduct(base_models.BaseModel):
     consumer = models.ForeignKey(Consumer)
-    brand = models.ForeignKey(Brand)
-    nick_name = models.CharField(max_length=100, default="")
+    nick_name = models.CharField(max_length=100, null=True, blank=True)
     product_type = models.ForeignKey(ProductType)
     purchase_date = models.DateTimeField(null=True, blank=True)
     brand_product_id = models.CharField(max_length=100, null=True, blank=True)
     image_url = models.CharField(
                    max_length=200, blank=True, null=True)
-    color = models.CharField(max_length=50)
+    color = models.CharField(max_length=50, null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
     is_accepted = models.BooleanField(default=False)
@@ -224,7 +224,6 @@ class Support (base_models.BaseModel):
 
 class ProductSpecification(base_models.BaseModel):
     product_type = models.ForeignKey(ProductType)
-    type = models.CharField(max_length=255, null=True, blank=True)
     engine_displacement = models.CharField(max_length=255, null=True, blank=True)
     engine_type = models.CharField(max_length=255, null=True, blank=True)
     engine_starting = models.CharField(max_length=255, null=True, blank=True)
