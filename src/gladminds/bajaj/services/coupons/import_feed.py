@@ -564,9 +564,9 @@ class ContainerTrackerFeed(BaseFeed):
                 container_tracker_obj.lr_date = format_date(tracker_obj['lr_date'])
                 gatein_date = format_date(tracker_obj['gatein_date'])
                 
-                status="Closed"               
+                status="Open"               
                 if gatein_date: 
-                    status="Open"
+                    status="Closed"
                 container_tracker_obj.gatein_date=gatein_date
                 container_tracker_obj.gatein_time=tracker_obj['gatein_time']
                 container_tracker_obj.status=status
