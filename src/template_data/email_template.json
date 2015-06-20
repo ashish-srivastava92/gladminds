@@ -370,5 +370,17 @@
             "body": "We have received the sbom feed",
             "description":"SBOM_FEEDs"
             }
+    },
+    {
+        "model": "gladminds.emailtemplate",
+        "pk": 32,
+        "fields": {
+            "template_key": "MANUFACTURE_DISCREPANCY_MAIL_TO_MANAGER",
+            "sender": "feed-report@gladminds.co",
+            "receiver": "",
+            "subject": "Discrepancy in manufacturing data received",
+            "body": "There are some discrepancy in the manufacturing data received for following vehicle",
+            "description":"Mail to manager group if there discrepancy in the manufacturing data received"
+        }
     }
 ]

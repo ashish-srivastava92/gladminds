@@ -3,7 +3,7 @@ from django.conf import settings
 from datetime import datetime, timedelta
 import operator
 
-from gladminds.bajaj import models as models
+from gladminds.core.model_fetcher import get_model
 from gladminds.core import utils, export_file
 from gladminds.core.managers.audit_manager import sms_log, feed_log
 from gladminds.core.managers.sms_client_manager import load_gateway, MessageSentFailed
@@ -27,6 +27,8 @@ from gladminds.core.managers.mail import get_email_template,send_email_to_redeem
 from gladminds.core.auth_helper import Roles
 from django.db.models import Q
 import textwrap
+import StringIO
+import csv
 
 
 logger = logging.getLogger("gladminds")
@@ -444,7 +446,7 @@ def send_report_mail_for_feed(*args, **kwargs):
     today = datetime.now().date()
     start_date = today - timedelta(days=day)
     feed_data = taskmanager.get_data_feed_log_detail(
-        start_date=start_date, end_date=today)
+        start_date=start_date, end_date=today, brand=brand)
     mail.feed_report(feed_data=feed_data, brand=brand)
 
 @shared_task
@@ -454,7 +456,7 @@ def send_mail_for_feed_failure(*args, **kwargs):
     '''
     brand= kwargs.get('brand', None)
     for feed_type in FEED_TYPES:
-        feed_data = taskmanager.get_feed_failure_log_detail(type=feed_type)
+        feed_data = taskmanager.get_feed_failure_log_detail(feed_type=feed_type, brand=brand)
         if feed_data['feed_data']:
             mail.feed_failure(feed_data=feed_data['feed_data'], brand=brand)
             feed_data['feed_logs'].update(email_flag=True)
@@ -463,7 +465,7 @@ def send_mail_for_feed_failure(*args, **kwargs):
 def send_vin_sync_feed_details(*args, **kwargs):
     ''' send vin sync feeds'''
     brand= kwargs.get('brand', None)
-    feed_data = taskmanager.get_vin_sync_feeds_detail()
+    feed_data = taskmanager.get_vin_sync_feeds_detail(brand=brand)
     if feed_data['feed_data']:
         mail.send_vin_sync_feed_report(feed_data=feed_data['feed_data'], brand=brand)
         feed_data['feed_logs'].update(email_flag=True)
@@ -474,7 +476,7 @@ def send_mail_for_customer_phone_number_update(*args, **kwargs):
     send customer phone number update email
     '''
     brand= kwargs.get('brand', None)
-    customer_details = taskmanager.get_customer_details()
+    customer_details = taskmanager.get_customer_details(brand=brand)
     if customer_details['customer_data']:
         mail.customer_phone_number_update(customer_details=customer_details['customer_data'], brand=brand)
         customer_details['customer_details'].update(email_flag=True)
@@ -485,7 +487,7 @@ def send_mail_customer_phone_number_update_exceeds(*args, **kwargs):
     send email to asm when customer number update exceeds
     '''
     brand= kwargs.get('brand', None)
-    update_details = taskmanager.get_update_number_exceeds()
+    update_details = taskmanager.get_update_number_exceeds(brand=brand)
     if update_details['update_data']:
         mail.send_phone_number_update_count_exceeded(update_details=update_details['update_data'], brand=brand)
         update_details['update_details'].update(email_flag=True) 
@@ -493,7 +495,7 @@ def send_mail_customer_phone_number_update_exceeds(*args, **kwargs):
 @shared_task
 def send_mail_for_policy_discrepency(*args, **kwargs):
     ''' send mail for policy_discrepency'''
-    brand= kwargs.get('brand', 'bajaj')
+    brand= kwargs.get('brand', None)
     discrepant_coupons_csv = taskmanager.get_discrepant_coupon_details(brand=brand)
     if discrepant_coupons_csv:
         mail.discrepant_coupon_update(csv_file=discrepant_coupons_csv, brand=brand)
@@ -540,7 +542,8 @@ def delete_unused_otp(*args, **kwargs):
     '''
     Delete the all the generated otp by end of day.
     '''
-    models.OTPToken.objects.all().delete()
+    brand= kwargs.get('brand', None) 
+    get_model("OTPToken", brand).objects.all().delete()
 
 @shared_task
 def export_customer_reg_to_sap(*args, **kwargs):
@@ -608,7 +611,7 @@ def send_reminders_for_servicedesk(*args, **kwargs):
     send mail when reminder_date is less than current date or when due date is less than current date
     '''
     brand= kwargs.get('brand', None)
-    feedback_obj = models.Feedback.objects.filter(reminder_date__lte=time, reminder_flag=False) or models.Feedback.objects.filter(due_date__lte=time,resolution_flag=False)
+    feedback_obj = get_model("Feedback", brand).objects.filter(reminder_date__lte=time, reminder_flag=False) or get_model("Feedback", brand).objects.filter(due_date__lte=time,resolution_flag=False)
     for feedback in feedback_obj:
         if not feedback.reminder_flag:
             context = utils.create_context('DUE_DATE_EXCEEDED_MAIL_TO_AGENT', feedback)
@@ -619,7 +622,7 @@ def send_reminders_for_servicedesk(*args, **kwargs):
  
         if not feedback.resolution_flag:
             context = utils.create_context('DUE_DATE_EXCEEDED_MAIL_TO_MANAGER', feedback)
-            escalation_list = models.UserProfile.objects.filter(user__groups__name=Roles.SDESCALATION)
+            escalation_list = get_model("UserProfile", brand).objects.filter(user__groups__name=Roles.SDESCALATION)
             escalation_list_detail = utils.get_escalation_mailing_list(escalation_list)
             send_due_date_exceeded(context, escalation_list_detail['mail'])
             for phone_number in escalation_list_detail['sms']: 
@@ -656,8 +659,8 @@ def customer_support_helper(obj_list, data, message):
             
 def dfsc_customer_support(*args, **kwargs):
     brand= kwargs.get('brand', None)    
-    asc_obj = models.AuthorizedServiceCenter.objects.filter(user__state='MAH').select_related('user, user__user')
-    dealer_obj = models.Dealer.objects.filter(user__state='MAH').select_related('user, user__user')
+    asc_obj = get_model("AuthorizedServiceCenter", brand).objects.filter(user__state='MAH').select_related('user, user__user')
+    dealer_obj = get_model("Dealer", brand).objects.filter(user__state='MAH').select_related('user, user__user')
     
     data = get_email_template('CUSTOMER_SUPPORT_FOR_DFSC', brand)
     data['newsubject'] = data['subject']
@@ -756,13 +759,13 @@ def welcome_kit_due_date_escalation(*args, **kwargs):
     '''
     brand= kwargs.get('brand', None)
     args=[Q(due_date__lte=time), Q(resolution_flag=False),~Q(status='Shipped')]
-    welcome_kit_obj = models.WelcomeKit.objects.filter(reduce(operator.and_, args))
+    welcome_kit_obj = get_model("WelcomeKit", brand).objects.filter(reduce(operator.and_, args))
     for welcome_kit in welcome_kit_obj:
         data = get_email_template('WELCOME_KIT_DUE_DATE_EXCEED_MAIL_TO_MANAGER',brand)
         data['newsubject'] = data['subject'].format(id = welcome_kit.transaction_id)
         data['content'] = data['body'].format(transaction_id=welcome_kit.transaction_id, 
                                       due_date=welcome_kit.due_date, status=welcome_kit.status )
-        escalation_list = models.UserProfile.objects.filter(user__groups__name=Roles.WELCOMEKITESCALATION)
+        escalation_list = get_model("UserProfile", brand).objects.filter(user__groups__name=Roles.WELCOMEKITESCALATION)
         escalation_list_detail = utils.get_escalation_mailing_list(escalation_list)
         send_email_to_welcomekit_escaltion_group(data, escalation_list_detail)
 
@@ -783,13 +786,13 @@ def redemption_request_due_date_escalation(*args, **kwargs):
     '''
     brand= kwargs.get('brand', None)
     args=[Q(due_date__lte=time), Q(resolution_flag=False),~Q(status='Delivered')]
-    redemption_request_obj = models.RedemptionRequest.objects.filter(reduce(operator.and_, args))
+    redemption_request_obj = get_model("RedemptionRequest", brand).objects.filter(reduce(operator.and_, args))
     for redemption_request in redemption_request_obj:
         data = get_email_template('REDEMPTION_REQUEST_DUE_DATE_EXCEED_MAIL_TO_MANAGER',brand)
         data['newsubject'] = data['subject'].format(id = redemption_request.transaction_id)
         data['content'] = data['body'].format(transaction_id=redemption_request.transaction_id,
                                                                   status=redemption_request.status)
-        escalation_list = models.UserProfile.objects.filter(user__groups__name=Roles.REDEEMESCALATION)
+        escalation_list = get_model("UserProfile", brand).objects.filter(user__groups__name=Roles.REDEEMESCALATION)
         escalation_list_detail = utils.get_escalation_mailing_list(escalation_list)
         send_email_to_redeem_escaltion_group(data, escalation_list_detail)
         
@@ -802,6 +805,22 @@ def redemption_request_due_date_escalation(*args, **kwargs):
                                {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
         redemption_request.resolution_flag = True
         redemption_request.save()
+        
+@shared_task
+def send_mail_for_manufacture_data_discrepancy(*args, **kwargs):
+    ''' send mail for manufacture_data_discrepency'''
+    brand= kwargs.get('brand', None)
+    discrepant_entries = get_model("ManufacturingData", brand).objects.filter(is_discrepant=True, sent_to_sap=False)
+    if discrepant_entries:
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(["CHASSIS", "MATNR", "WERKS", "ENGINE", "VODATE"])
+        for data in discrepant_entries:
+            csvwriter.writerow([data.product_id, data.material_number, data.plant, data.engine, data.vehicle_off_line_date])
+        mail.discrepant_manufacture_data(csv_file=csvfile, brand=brand)
+        discrepant_entries.update(sent_to_sap=True)
+    else:
+        logger.info("[manufacture_data_discrepancy]: No discrepancy were update on {0}".format(datetime.now()))
 
 _tasks_map = {"send_registration_detail": send_registration_detail,
 
@@ -888,5 +907,7 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               "redemption_request_due_date_escalation":redemption_request_due_date_escalation,
 
               "welcome_kit_due_date_escalation":welcome_kit_due_date_escalation,
+              
+              "send_mail_for_manufacture_data_discrepancy": send_mail_for_manufacture_data_discrepancy,
 
               }

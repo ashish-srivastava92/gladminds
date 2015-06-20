@@ -144,7 +144,7 @@ def discrepant_coupon_update(csv_file, brand=None):
     try:
         yesterday = datetime.now().date() - timedelta(days=1)
         mail_detail = get_email_template('POLICY_DISCREPANCY_MAIL_TO_MANAGER', brand)
-        receivers = get_mail_receiver(settings.POLICY_DISCREPANCY_MAIL_TO_MANAGER, mail_detail)
+        receivers = get_mail_receiver(settings.DISCREPANCY_MAIL_TO_MANAGER, mail_detail)
         send_email_with_file_attachment(mail_detail['sender'], receivers, mail_detail['subject'],
                                           mail_detail['body'].format(date=yesterday.strftime("%b %d %Y")), 
                                           'discrepant_coupon_update_', csv_file)
@@ -570,3 +570,16 @@ def send_epc_feed_received_mail(brand, template_name):
                    smtp_server = settings.MAIL_SERVER)
     except Exception as ex:
         logger.info("[Exception while sending {0} email]: {1} ".format(template_name, ex))
+        
+def discrepant_manufacture_data(csv_file, brand=None):
+    try:
+        yesterday = datetime.now().date() - timedelta(days=1)
+        mail_detail = get_email_template('MANUFACTURE_DISCREPANCY_MAIL_TO_MANAGER', brand)
+        receivers = get_mail_receiver(settings.DISCREPANCY_MAIL_TO_MANAGER, mail_detail)
+        send_email_with_file_attachment(mail_detail['sender'], receivers, mail_detail['subject'],
+                                          mail_detail['body'].format(date=yesterday.strftime("%b %d %Y")), 
+                                          'discrepant_manufacture_data_', csv_file)
+
+        logger.info("Sending out discrepant manufacture data emails")
+    except Exception as ex:
+        logger.info("[Exception discrepant manufacture data while sending mail]: {0}".format(ex))

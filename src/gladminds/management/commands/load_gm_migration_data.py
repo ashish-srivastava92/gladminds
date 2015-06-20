@@ -40,13 +40,13 @@ class Command(BaseCommand):
         message_templates = json.loads(open(file_path).read())
         for app in ALL_APPS:
             mt = get_model('MessageTemplate', app)
-            #mt = getattr(import_module('gladminds.{0}.models'.format(app)), 'MessageTemplate')
-            mt.objects.using(app).all().delete()
             for message_temp in message_templates:
                 fields = message_temp['fields']
-                temp_obj = mt(id=message_temp['pk'], created_date=TODAY, template_key=fields['template_key']\
-                           , template=fields['template'], description=fields['description'])
-                temp_obj.save(using=app)
+                temp_obj=mt.objects.using(app).filter(template=fields['template'])
+                if not temp_obj:
+                    temp_obj = mt(id=message_temp['pk'], created_date=TODAY, template_key=fields['template_key']\
+                               , template=fields['template'], description=fields['description'])
+                    temp_obj.save(using=app)
             print "Loaded sms template..."
     
     def add_email_template(self):
@@ -55,14 +55,15 @@ class Command(BaseCommand):
         email_templates = json.loads(open(file_path).read())
         for app in ALL_APPS:
             et = get_model('EmailTemplate', app)
-            et.objects.using(app).all().delete()
             for email_temp in email_templates:
                 fields = email_temp['fields']
-                temp_obj = et(id=email_temp['pk'], created_date=TODAY, template_key=fields['template_key']\
-                           , sender=fields['sender'], receiver=fields['receiver'],\
-                            subject=fields['subject'], body=fields['body'],\
-                            description=fields['description'])
-                temp_obj.save(using=app)
+                temp_obj=et.objects.using(app).filter(template_key=fields['template_key'])
+                if not temp_obj:
+                    temp_obj = et(id=email_temp['pk'], created_date=TODAY, template_key=fields['template_key']\
+                               , sender=fields['sender'], receiver=fields['receiver'],\
+                                subject=fields['subject'], body=fields['body'],\
+                                description=fields['description'])
+                    temp_obj.save(using=app)
             print "Loaded email template..."  
         
     def add_user_for_existing_dealer(self):
@@ -89,6 +90,8 @@ class Command(BaseCommand):
         cons.objects.all().delete()
         for constant in constants:
             fields = constant['fields']
-            temp_obj = cons(id=constant['pk'], created_date=TODAY, constant_name=fields['constant_name'],constant_value=fields['constant_value'])
-            temp_obj.save()
+            temp_obj = cons.objects.filter(constant_name=fields['constant_name'])
+            if temp_obj:
+                temp_obj = cons(id=constant['pk'], created_date=TODAY, constant_name=fields['constant_name'],constant_value=fields['constant_value'])
+                temp_obj.save()
         print "Loaded constants..."
