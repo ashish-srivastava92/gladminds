@@ -621,7 +621,7 @@ BRANDS = OUTSIDE_BRANDS + ['afterbuy']
 ###############################################
 AIRTEL_IP = '54.84.243.77'
 SMS_CLIENT = "MOCK"
-BRAND_SMS_GATEWAY={'bajaj':'AIRTEL', 'daimler':'KAP', 'bajajcv': 'AIRTEL'}
+BRAND_SMS_GATEWAY={'bajaj':'AIRTEL', 'daimler':'KAP', 'bajajcv': 'AIRTEL', 'afterbuy': 'KAP'}
 SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                               'pass':'bajaj',
                               'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',
