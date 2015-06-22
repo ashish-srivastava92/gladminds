@@ -127,7 +127,7 @@ CUSTOMER_PHONE_NUMBER_UPDATE["receiver"] = ["suresh@hashedin.com", "ssozarde@baj
 VIN_SYNC_FEED["receiver"] = ["suresh@hashedin.com", "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in", "ssozarde@bajajauto.co.in", "gladminds@hashedin.com",
                              "jojibabu.vege@gladminds.co"]
 
-POLICY_DISCREPANCY_MAIL_TO_MANAGER ["receiver"] = ["suresh@hashedin.com", "ssozarde@bajajauto.co.in",
+DISCREPANCY_MAIL_TO_MANAGER ["receiver"] = ["suresh@hashedin.com", "ssozarde@bajajauto.co.in",
                                                    "sudhir.patil@gladminds.co", "rkjena@bajajauto.co.in", "dhazarika@bajajauto.co.in",
                                                    "gladminds@hashedin.com", "naveen.shankar@gladminds.co",
                                                    "ashakiran@gladminds.co", "aparajita.reang@gladminds.co",

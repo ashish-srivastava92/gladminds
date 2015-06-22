@@ -718,7 +718,7 @@ class TerritoryResource(CustomBaseModelResource):
         queryset = models.Territory.objects.all()
         resource_name = "territories"
         authorization = Authorization()
-        allowed_methods = ['get', 'put', 'delete']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "territory":ALL
@@ -731,7 +731,7 @@ class StateResource(CustomBaseModelResource):
         queryset = models.State.objects.all()
         resource_name = "states"
         authorization = Authorization()
-        allowed_methods = ['get', 'post', 'put', 'delete']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "state_name":ALL_WITH_RELATIONS, 
@@ -743,7 +743,7 @@ class CityResource(CustomBaseModelResource):
         queryset = models.City.objects.all()
         resource_name = "cities"
         authorization = Authorization()
-        allowed_methods = ['get', 'post', 'put', 'delete']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "city":ALL,

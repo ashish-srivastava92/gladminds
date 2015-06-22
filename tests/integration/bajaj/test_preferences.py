@@ -2,7 +2,6 @@
 It will have all test cases for preferences APIs
 """
 import unittest
-from django.test.utils import setup_test_environment
 from django.contrib.auth.models import User
 from tastypie.test import ResourceTestCase
 from django.test.client import Client
@@ -11,7 +10,6 @@ from provider.oauth2.models import Client as auth_client
 from test_constants import USER_PREFERENCE, APP_PREFERENCE
 
 client = Client()
-setup_test_environment()
 
 class TestUserPreferencesResourceApi(ResourceTestCase):
 

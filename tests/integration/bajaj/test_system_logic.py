@@ -7,7 +7,7 @@ from django.test.client import Client
 from gladminds.bajaj.models import AuditLog, Feedback, SMSLog
 from gladminds.core.auth_helper import Roles
 
-client = Client(SERVER_NAME='bajaj')
+client = Client(SERVER_NAME='bajajcv')
 
 
 class System(BaseTestCase):
@@ -138,7 +138,7 @@ class System(BaseTestCase):
                     'customer-phone': '9999999999',
                     'customer-name': 'TestUser',
                     'purchase-date': '11/5/2014',
-                    'customer-vin': 'XXXXXXXXXX',
+                    'customer-vin': '12345678901232792',
                     'customer-id': 'GMCUSTOMER01',
                 }
         response = self.tester.client.post('/aftersell/register/customer', data=data)

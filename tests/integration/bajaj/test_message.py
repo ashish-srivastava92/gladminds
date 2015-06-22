@@ -15,7 +15,7 @@ logger = logging.getLogger('gladminds')
 client = Client()
 
 
-class CustomerRegistrationTest(BrandResourceTestCase, BaseTestCase):
+class CustomerRegistrationTest(BaseTestCase):
  
     def setUp(self):
         TestCase.setUp(self)
@@ -99,30 +99,30 @@ class CustomerServiceTest(BaseTestCase):
         system.verify_result(input=response.status_code, output=200)
 
 
-class CouponCheckAndClosure(BrandResourceTestCase, BaseTestCase):
+class CouponCheckAndClosure(BrandResourceTestCase):
 
     def setUp(self):
         '''
             Test Case Checking coupon validation can be done only from
             registered dealer's number
         '''
-        TestCase.setUp(self)
-        BaseTestCase.setUp(self)
+        BrandResourceTestCase.setUp(self)
         self.brand = Brand(self)
         brand = self.brand
         self.system = System(self)
-        self.create_user(username='gladminds', email='gladminds@gladminds.co', password='gladminds')
+        self.create_user(username='gladminds', email='gladminds@gladminds.co', password='gladminds', brand='bajaj')
+        self.create_user(username='bajaj', email='bajaj@gladminds.co', password='bajaj', brand='bajaj')
         brand.send_service_advisor_feed()
         brand.send_dispatch_feed()
         brand.send_purchase_feed()
-        self.product_obj = brand.get_product_obj(product_id='XXXXXXXXXX')
+        self.product_obj = brand.get_product_obj(product_id='12345678901232792')
 
     def test_simple_inprogress_from_unused(self):
         brand = self.brand
         system = self.system
-        create_sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(create_sms_dict, "9999999999")
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
+        create_sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': '29122701'}
+        brand.check_coupon(create_sms_dict, "1111111111")
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9217')
         system.verify_result(input=coupon_status.status, output=4)
 
 #     Need to find out how to write this test case because it creates cyclic dependency.
@@ -135,102 +135,87 @@ class CouponCheckAndClosure(BrandResourceTestCase, BaseTestCase):
 #         sa_dealer_rel.status = 'N'
 #         sa_dealer_rel.save()
 
-    def test_coupon_expiry(self):
+    def test_coupon_exceed(self):
         brand = self.brand
         system = self.system
-        brand.get_coupon_obj(unique_service_coupon='USC0002', product=self.product_obj, valid_days=30, valid_kms=2000, service_type=2)
-        brand.get_coupon_obj(unique_service_coupon='USC0003', product=self.product_obj, valid_days=30, valid_kms=5000, service_type=3)
-        create_sms_dict = {'kms': 2050, 'service_type': 3, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(create_sms_dict, '9999999999')
-        system.verify_result(input=models.CouponData.objects.filter(unique_service_coupon='USC001')[0].status, output=5)
-        system.verify_result(input=models.CouponData.objects.filter(unique_service_coupon='USC0002')[0].status, output=5)
-        system.verify_result(input=models.CouponData.objects.filter(unique_service_coupon='USC0003')[0].status, output=4)
+        create_sms_dict = {'kms': 12050, 'service_type': 3, 'sap_customer_id': '29122701'}
+        brand.check_coupon(create_sms_dict, '1111111111')
+        system.verify_result(input=models.CouponData.objects.filter(unique_service_coupon='USC9217')[0].status, output=5)
+        system.verify_result(input=models.CouponData.objects.filter(unique_service_coupon='USC9227')[0].status, output=5)
+        system.verify_result(input=models.CouponData.objects.filter(unique_service_coupon='USC9237')[0].status, output=4)
   
     def test_invalid_ucn_or_sap_id(self):
         brand = self.brand
-        brand.get_coupon_obj(unique_service_coupon='USC0002', product=self.product_obj, valid_days=30, valid_kms=2000, service_type=2)
-        brand.get_coupon_obj(unique_service_coupon='USC0003', product=self.product_obj, valid_days=30, valid_kms=5000, service_type=3)
-        data = 'C {0} {1}'.format('SAP004', 'USC002')
-        sms_dict = {'text': data, 'phoneNumber': '9999999999'}
+        create_sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': '29122701'}
+        brand.check_coupon(create_sms_dict, "1111111111")
+        data = 'C {0} {1}'.format('29122701', 'USC9227')
+        sms_dict = {'text': data, 'phoneNumber': '1111111111'}
         response = brand.send_sms(url=self.MESSAGE_URL, message=sms_dict)
         result = json.loads(response.content)
         self.assertFalse(result['status'])
 
     def test_coupon_logic_1(self):
         '''
-            check SAP001 450 2
             If we have check coupon with this message
             and 1 service is unused.
-            Then then 1 is in-progress and 2 is in unused state
+            then 1 is in-progress and 2 is in unused state
         '''
         brand = self.brand
         system = self.system
-        brand.get_coupon_obj(unique_service_coupon='USC0003', product=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
-        '''Service Advisor Obj is not created as required'''
-        system.verify_result(input=models.ServiceAdvisor.objects.count(), output=3)
-        create_sms_dict = {'kms': 450, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(create_sms_dict, '9999999999')
+        create_sms_dict = {'kms': 450, 'service_type': 2, 'sap_customer_id': '29122701'}
+        brand.check_coupon(create_sms_dict, '1111111111')
   
         '''In-progress Coupon'''
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC002')
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9227')
         system.verify_result(input=coupon_status.status, output=4)
      
         '''Unused Coupon'''
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9217')
         system.verify_result(input=coupon_status.status, output=1)
  
     def test_coupon_logic_2(self):
         '''
             If we have check coupon with this message
             check SAP001 600 2.
-            Then then 1 is expired and 2 is in progress state
+            Then then 1 is exceed and 2 is in unused state
         '''
         brand = self.brand
         system = self.system
-        brand.get_coupon_obj(unique_service_coupon='USC0002', product=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
  
-        '''Service Advisor Obj is not created as required'''
-        system.verify_result(input=models.ServiceAdvisor.objects.count(), output=3)
+        create_sms_dict = {'kms': 2600, 'service_type': 1, 'sap_customer_id': '29122701'}
+        brand.check_coupon(create_sms_dict, '1111111111')
  
-        create_sms_dict = {'kms': 600, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(create_sms_dict, '9999999999')
- 
-        '''In-progress Coupon'''
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC0002')
-        system.verify_result(input=coupon_status.status, output=4)
+        '''Exceed Coupon'''
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9217')
+        system.verify_result(input=coupon_status.status, output=5)
  
         '''Unused Coupon'''
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
-        system.verify_result(input=coupon_status.status, output=5)
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9227')
+        system.verify_result(input=coupon_status.status, output=1)
  
     def test_coupon_logic_3(self):
         '''
             Initial state
-            coupon 1 is in unused and valid in b/w (400 - 500)
-            coupon 2 is in unused and valid in b/w (900 - 1000)
-            If we have check coupon with this message
-            check SAP001 1100 2
-            Mark 1 service as exceed limit if it not used yet
-            or nothing happen to coupon 1 if it is in-progress
-            And make 2 service as exceed limit
+            coupon 1 is in inprogress and valid in b/w (1 - 2000)
+            coupon 2 is in unused and valid in b/w (2001 - 8000)
+            Check command returns service type 1
         '''
         brand = self.brand
         system = self.system
-        brand.get_coupon_obj(unique_service_coupon='USC0002', product=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
   
-        '''Service Advisor Obj is not created as required'''
-        system.verify_result(input=models.ServiceAdvisor.objects.count(), output=3)
-  
-        create_sms_dict = {'kms': 1100, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(create_sms_dict, '9999999999')
+        create_sms_dict = {'kms': 1100, 'service_type': 1, 'sap_customer_id': '29122701'}
+        brand.check_coupon(create_sms_dict, '1111111111')
   
         '''in_progess_coupon status should be 4'''
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
-        system.verify_result(input=coupon_status.status, output=5)
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9217')
+        system.verify_result(input=coupon_status.status, output=4)
+        
+        create_sms_dict = {'kms': 1100, 'service_type': 2, 'sap_customer_id': '29122701'}
+        brand.check_coupon(create_sms_dict, '1111111111')
   
         '''Coupon should be in unused State'''
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC0002')
-        system.verify_result(input=coupon_status.status, output=5)
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9227')
+        system.verify_result(input=coupon_status.status, output=1)
   
     def test_coupon_logic_4(self):
         '''
@@ -238,32 +223,30 @@ class CouponCheckAndClosure(BrandResourceTestCase, BaseTestCase):
             coupon 1 is in in-progress and valid in b/w (400 - 500)
             coupon 2 is in unused and valid in b/w (900 - 1000)
             If we have check coupon with this message
-            check SAP001 1100 2
-            Mark 1 service as exceed limit if it not used yet
-            or nothing happen to coupon 1 if it is in-progress
-            And make 2 service as exceed limit
+            check SAP001 2100 2
+            Mark 1 service as exceed limit
+            And make 2 service as inprogress
         '''
         brand = self.brand
         system = self.system
   
-        brand.get_coupon_obj(unique_service_coupon='USC0002', product=self.product_obj, valid_days=30, valid_kms=1000, service_type=2)
+        sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': '29122701'}
+        brand.check_coupon(sms_dict, '1111111111')
+        
+        '''in_progess_coupon status should be 4'''
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9217')
+        system.verify_result(input=coupon_status.status, output=4)
   
-        '''Service Advisor Obj is not created as required'''
-        system.verify_result(input=models.ServiceAdvisor.objects.count(), output=3)
-  
-        sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(sms_dict, '9999999999')
-  
-        sms_dict = {'kms': 1100, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(sms_dict, '9999999999')
+        sms_dict = {'kms': 2200, 'service_type': 2, 'sap_customer_id': '29122701'}
+        brand.check_coupon(sms_dict, '1111111111')
   
         '''in_progess_coupon status should be 4'''
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9217')
         system.verify_result(input=coupon_status.status, output=5)
   
         '''Coupon should be in unused State'''
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC0002')
-        system.verify_result(input=coupon_status.status, output=5)
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9227')
+        system.verify_result(input=coupon_status.status, output=4)
   
     def test_coupon_logic_5(self):
         '''
@@ -285,28 +268,27 @@ class CouponCheckAndClosure(BrandResourceTestCase, BaseTestCase):
         
         brand = self.brand
         system = self.system
-        brand.get_coupon_obj(unique_service_coupon='USC0003', product=self.product_obj, valid_days=90, valid_kms=1500, service_type=3)
  
-        sms_dict = {'kms': 1100, 'service_type': 2, 'sap_customer_id': 'GMCUSTOMER01'}
+        sms_dict = {'kms': 9200, 'service_type': 2, 'sap_customer_id': '29122701'}
         
-        brand.check_coupon(sms_dict, '9999999999')
+        brand.check_coupon(sms_dict, '1111111111')
                
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9217')
         system.verify_result(input=coupon_status.status, output=5)
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC002')
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9227')
         system.verify_result(input=coupon_status.status, output=5)
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC0003')
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9237')
         system.verify_result(input=coupon_status.status, output=1)
  
-        sms_dict = {'kms': 450, 'service_type': 1, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(sms_dict, '9999999999')
+        sms_dict = {'kms': 900, 'service_type': 1, 'sap_customer_id': '29122701'}
+        brand.check_coupon(sms_dict, '1111111111')
         
         
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9217')
         system.verify_result(input=coupon_status.status, output=4)
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC002')
-        system.verify_result(input=coupon_status.status, output=5)
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC0003')
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9227')
+        system.verify_result(input=coupon_status.status, output=1)
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9237')
         system.verify_result(input=coupon_status.status, output=1)
   
         '''
@@ -320,14 +302,14 @@ class CouponCheckAndClosure(BrandResourceTestCase, BaseTestCase):
             Mark 2 as exceed limit
             Mark 3 as exceed limit
         '''
-        sms_dict = {'kms': 1550, 'service_type': 3, 'sap_customer_id': 'GMCUSTOMER01'}
-        brand.check_coupon(sms_dict, '9999999999')
+        sms_dict = {'kms': 15050, 'service_type': 3, 'sap_customer_id': '29122701'}
+        brand.check_coupon(sms_dict, '1111111111')
   
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC001')
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9217')
         system.verify_result(input=coupon_status.status, output=5)
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC002')
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9227')
         system.verify_result(input=coupon_status.status, output=5)
-        coupon_status = brand.check_coupon_status(unique_service_coupon='USC0003')
+        coupon_status = brand.check_coupon_status(unique_service_coupon='USC9237')
         system.verify_result(input=coupon_status.status, output=5)
 
 

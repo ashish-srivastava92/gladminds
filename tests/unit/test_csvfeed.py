@@ -2,7 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 import time
 
 from base_unit import GladmindsUnitTestCase
-from gladminds.bajaj.feeds import feed
+from gladminds.bajaj.services.coupons import import_feed as feed
 from gladminds.bajaj import models
 
 

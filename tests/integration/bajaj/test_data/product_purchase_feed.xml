@@ -16,7 +16,7 @@
             <ns1:STATE>Karnataka</ns1:STATE>
             <ns1:CHASSIS>12345678901232792</ns1:CHASSIS>
             <ns1:VEH_SL_DT>2012-02-12</ns1:VEH_SL_DT>
-            <ns1:CUSTOMER_ID>TM-29122701</ns1:CUSTOMER_ID>
+            <ns1:CUSTOMER_ID>29122701</ns1:CUSTOMER_ID>
             <ns1:CUSTOMER_NAME>TestU2927</ns1:CUSTOMER_NAME>
           </ns1:ProductPurchaseModel>
         </ns1:ProductPurchaseData>

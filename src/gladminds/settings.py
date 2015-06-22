@@ -482,9 +482,9 @@ PHONE_NUMBER_UPDATE_COUNT_EXCEEDED_MAIL_TO_ASM = {
     "body": """""",
 }
 
-POLICY_DISCREPANCY_MAIL_TO_MANAGER = {
+DISCREPANCY_MAIL_TO_MANAGER = {
     "sender": "feed-report@gladminds.co",
-    "receiver": ["naureen.razi@hashedin.com", "suresh@hashedin.com"],
+    "receiver": ["naureen.razi@hashedin.com",],
     "subject": "Gladminds customer phone number update",
     "body": """""",
 }
