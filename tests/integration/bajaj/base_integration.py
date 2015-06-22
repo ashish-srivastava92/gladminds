@@ -21,6 +21,7 @@ class BrandResourceTestCase(CoreResourceTestCase):
         load_email_obj.add_email_template()
         load_email_obj.add_sms_template()
         load_email_obj.add_group()
+        load_email_obj.add_constants()
         load_services = service_setup.Command()
         load_services.create_service_types()
         load_services.create_services()

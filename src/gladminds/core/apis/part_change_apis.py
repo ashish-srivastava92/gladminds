@@ -48,7 +48,8 @@ class BrandProductRangeResource(CustomBaseModelResource):
                      }
         
     def dehydrate(self, bundle):
-        bundle.data['image_url'] = bundle.data['image_url'].split('?')[0]
+        if bundle.data['image_url']:
+            bundle.data['image_url'] = bundle.data['image_url'].split('?')[0]
         return bundle    
     
 class BOMHeaderResource(CustomBaseModelResource):

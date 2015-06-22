@@ -86,12 +86,12 @@ class Command(BaseCommand):
         print "Loading constants.."
         file_path = os.path.join(settings.PROJECT_DIR, 'template_data/constant.json')
         constants = json.loads(open(file_path).read())
-        cons = get_model('Constant', 'bajaj')
-        cons.objects.all().delete()
-        for constant in constants:
-            fields = constant['fields']
-            temp_obj = cons.objects.filter(constant_name=fields['constant_name'])
-            if temp_obj:
-                temp_obj = cons(id=constant['pk'], created_date=TODAY, constant_name=fields['constant_name'],constant_value=fields['constant_value'])
-                temp_obj.save()
-        print "Loaded constants..."
+        for app in ALL_APPS:
+            cons = get_model('Constant', app)
+            for constant in constants:
+                fields = constant['fields']
+                temp_obj = cons.objects.using(app).filter(constant_name=fields['constant_name'])
+                if not temp_obj:
+                    temp_obj = cons(id=constant['pk'], created_date=TODAY, constant_name=fields['constant_name'],constant_value=fields['constant_value'])
+                    temp_obj.save(using=app)
+            print "Loaded constants..."

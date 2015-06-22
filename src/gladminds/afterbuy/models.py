@@ -364,6 +364,11 @@ class AuditLog(base_models.AuditLog):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Audit Log"
+        
+class Constant(base_models.Constant):
+    ''' contains all the constants'''
+    class Meta(base_models.Constant.Meta):
+        app_label = _APP_NAME
 
 
 class EmailToken(models.Model):

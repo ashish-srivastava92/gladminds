@@ -438,7 +438,7 @@ PRODUCT = {
             "image_url": "",
             "is_active": True,
             "model": "",
-            "points": 123,
+            "points": 12,
             "price": 12,
             "product_id": "123",
             "resource_uri": "/v1/productcatalog/1/",
