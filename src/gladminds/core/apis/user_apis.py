@@ -658,7 +658,10 @@ class DealerResource(CustomBaseModelResource):
         try:
             dealer_obj = models.Dealer.objects.get(user__user__id=dealer_id)
             load = json.loads(request.body)
-            
+            asm = load.get('asm_id', None)
+            if asm:
+                asm = models.AreaServiceManager.objects.get(asm_id=asm)
+                dealer_obj.asm=asm
             dealer_profile = dealer_obj.user
             dealer_profile.phone_number = load.get('phone-number')
             
