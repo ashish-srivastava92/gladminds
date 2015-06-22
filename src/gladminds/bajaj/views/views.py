@@ -617,7 +617,7 @@ def create_reconciliation_report(query_params, user):
 
     if query_params['type']=='credit': 
         filter['credit_date__range'] = input_date_range
-    elif status==4:
+    elif status=='4':
         filter['actual_service_date__range'] = input_date_range
     else:
         filter['closed_date__range'] = input_date_range

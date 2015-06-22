@@ -43,7 +43,6 @@
 				    	<label class="col-md-3 control-label">Status</label>
 				    	<div class="col-md-9">
 				      		<select placeholder="Choose Status" name="status" class="coupon-status-dropdown form-control chosen-select">
-								<option value=""> ...... </option>
 								{% for key,val in status_options.items %}
 									<option {% if params.status == key  %} selected {% endif %} 
 									value="{{key}}">{{val}}</option>

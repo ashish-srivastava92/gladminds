@@ -186,7 +186,7 @@ def check():
     CAPTURE = True
     NEVER_FAIL = True
 
-    test_all()
+    test_integration()
     js_lint = lint_js().split('\n')
     py_lint = lint_py().split('\n')
     css_lint = lint_css()
