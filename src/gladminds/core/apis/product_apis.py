@@ -132,7 +132,7 @@ class ContainerTrackerResource(CustomBaseModelResource):
                      'submitted_by': ALL
                      }
         
-        ordering = ['lr_date', 'gatein_date' ,'created_date']
+        ordering = ['lr_date', 'gatein_date' ,'created_date', 'status']
         
     def prepend_urls(self):
         return [
@@ -151,21 +151,17 @@ class ContainerTrackerResource(CustomBaseModelResource):
                 supervisor_id = args.get('supervisor_id', None)
                 query_args.append(Q(transporter__user_id=request.user.id))
                 if supervisor_id:
-                    query_args1 = [Q(submitted_by=supervisor_id), Q(submitted_by=None)]
-                    data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args)
-                                                                  & reduce(operator.or_, query_args1)
-                                                                  ).values('status').annotate(total=Count('status'))
-                else:
-                    data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args)
-                                                                ).values('status').annotate(total=Count('status'))
+                    query_args.append(Q(submitted_by=supervisor_id))
+                data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args)
+                                                              ).values('status').annotate(total=Count('status')).order_by('-status')
             elif request.user.groups.filter(name=Roles.SUPERVISOR):
                 supervisor = models.Supervisor.objects.get(user__user_id=request.user.id)
                 query_args.append(Q(transporter=supervisor.transporter))
                 data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args) &
                                                               (Q(submitted_by=supervisor.supervisor_id)| Q(submitted_by=None))
-                                                              ).values('status').annotate(total=Count('status'))
+                                                              ).values('status').annotate(total=Count('status')).order_by('-status')
             else:
-                data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args)).values('status').annotate(total=Count('status'))
+                data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args)).values('status').annotate(total=Count('status')).order_by('-status')
         except Exception as ex:
             LOG.error('Exception while obtaining CTS count : {0}'.format(ex))
         return HttpResponse(content=json.dumps(list(data), cls=DjangoJSONEncoder), content_type='application/json')
