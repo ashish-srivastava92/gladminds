@@ -148,7 +148,6 @@ class ConsumerResource(CustomBaseModelResource):
                     send_job_to_queue(send_otp, {'phone_number': phone_number,
                                              'message': message,'sms_client': settings.SMS_CLIENT})
                     logger.info('OTP sent to mobile {0}'.format(phone_number))
-                    data = {'status': 1, 'message': "OTP sent_successfully"}
                 except Exception as ex:
                     logger.info("Exception while generating OTP token {0}".format(ex))
             except Exception as ex:
