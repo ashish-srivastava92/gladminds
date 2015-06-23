@@ -199,54 +199,54 @@ class ExportRedemptionFeed(BaseExportFeed):
         client = self.get_client()
         total_failed = total_failed_on_feed
         item_batch=self.get_chunk(items, settings.BATCH_SIZE)
-        for item in item_batch:
-            try: 
-                result = client.service.SI_Redum_Sync(
-                            DT_Redum={'Item':list(item)}, DT_STAMP={'Item':item_stamp})
-                logger.info("[ExportRedemptionFeed]: Response from SAP: {0}".format(result))
-                if result[0]['STATUS'] == 'SUCCESS':
-                    transaction_id_list=[]
-                    for redemption in item:
-                        transaction_id_list.append(redemption['TRANSID'])
-                    results = get_model('RedemptionRequest').objects.using(brand).filter(transaction_id__in=transaction_id_list)
-                    results.using(brand).update(sent_to_sap=True)
-                    export_status = True
-                    logger.error("[ExportRedemptionFeed]: Sent details o SAP")
-                else:
-                    total_failed = total_failed + len(item)
-                    logger.error("[ExportRedemptionFeed]: Not received success from sap")
-            except Exception as ex:
-                    total_failed = total_failed + len(item)
-                    logger.error("[ExportRedemptionFeed]: Error in sending accumulation :{0}".format(ex))
-            feed_log(brand, feed_type=self.feed_type, total_data_count=len(item)\
-                 + total_failed_on_feed, failed_data_count=total_failed,\
-                 success_data_count=len(item) + total_failed_on_feed - total_failed,\
-                 action='Sent', status=export_status)
-#         for item in items:
-#             logger.info("[ExportRedemptionFeed]: Trying to send SAP the member: {0}"\
-#                         .format(item))
-#             try:            
+#         for item in item_batch:
+#             try: 
 #                 result = client.service.SI_Redum_Sync(
-#                     DT_Redum={'Item':[item]}, DT_STAMP={'Item':item_batch})
+#                             DT_Redum={'Item':list(item)}, DT_STAMP={'Item':item_stamp})
 #                 logger.info("[ExportRedemptionFeed]: Response from SAP: {0}".format(result))
 #                 if result[0]['STATUS'] == 'SUCCESS':
-#                     try:
-#                         redemption_detail = models.RedemptionRequest.objects.get(transaction_id=item['TRANSID'])
-#                         redemption_detail.sent_to_sap = True
-#                         redemption_detail.save()
-#                         logger.info("[ExportRedemptionFeed]: Sent the details of member {0} to sap".format(item['TRANSID']))
-#                         export_status = True
-#                     except Exception as ex:
-#                         logger.error("[ExportRedemptionFeed]: Error in sending accumulation:{0}::{1}".format(item['TRANSID'], ex))
+#                     transaction_id_list=[]
+#                     for redemption in item:
+#                         transaction_id_list.append(redemption['TRANSID'])
+#                     results = get_model('RedemptionRequest').objects.using(brand).filter(transaction_id__in=transaction_id_list)
+#                     results.using(brand).update(sent_to_sap=True)
+#                     export_status = True
+#                     logger.error("[ExportRedemptionFeed]: Sent details o SAP")
 #                 else:
-#                     total_failed = total_failed + 1
-#                     logger.error("[ExportRedemptionFeed]: {0}:: Not received success from sap".format(item['TRANSID']))
+#                     total_failed = total_failed + len(item)
+#                     logger.error("[ExportRedemptionFeed]: Not received success from sap")
 #             except Exception as ex:
-#                 logger.error("[ExportRedemptionFeed]: Error in sending accumulation :{0}::{1}".format(item['TRANSID'], ex))
-#         feed_log(brand, feed_type=self.feed_type, total_data_count=len(items)\
+#                     total_failed = total_failed + len(item)
+#                     logger.error("[ExportRedemptionFeed]: Error in sending accumulation :{0}".format(ex))
+#             feed_log(brand, feed_type=self.feed_type, total_data_count=len(item)\
 #                  + total_failed_on_feed, failed_data_count=total_failed,\
-#                  success_data_count=len(items) + total_failed_on_feed - total_failed,\
+#                  success_data_count=len(item) + total_failed_on_feed - total_failed,\
 #                  action='Sent', status=export_status)
+        for item in items:
+            logger.info("[ExportRedemptionFeed]: Trying to send SAP the member: {0}"\
+                        .format(item))
+            try:            
+                result = client.service.SI_Redum_Sync(
+                    DT_Redum={'Item':[item]}, DT_STAMP={'Item':item_batch})
+                logger.info("[ExportRedemptionFeed]: Response from SAP: {0}".format(result))
+                if result[0]['STATUS'] == 'SUCCESS':
+                    try:
+                        redemption_detail = models.RedemptionRequest.objects.get(transaction_id=item['TRANSID'])
+                        redemption_detail.sent_to_sap = True
+                        redemption_detail.save()
+                        logger.info("[ExportRedemptionFeed]: Sent the details of member {0} to sap".format(item['TRANSID']))
+                        export_status = True
+                    except Exception as ex:
+                        logger.error("[ExportRedemptionFeed]: Error in sending accumulation:{0}::{1}".format(item['TRANSID'], ex))
+                else:
+                    total_failed = total_failed + 1
+                    logger.error("[ExportRedemptionFeed]: {0}:: Not received success from sap".format(item['TRANSID']))
+            except Exception as ex:
+                logger.error("[ExportRedemptionFeed]: Error in sending accumulation :{0}::{1}".format(item['TRANSID'], ex))
+        feed_log(brand, feed_type=self.feed_type, total_data_count=len(items)\
+                 + total_failed_on_feed, failed_data_count=total_failed,\
+                 success_data_count=len(items) + total_failed_on_feed - total_failed,\
+                 action='Sent', status=export_status)
         
 
 class ExportDistributorFeed(BaseExportFeed):
