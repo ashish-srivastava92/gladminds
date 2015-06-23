@@ -839,7 +839,7 @@ class SupervisorAdmin(GmModelAdmin):
     list_display = ('supervisor_id', 'get_supervisor_username', 'get_supervisor_name', 'get_transporter')
 
 class ContainerTrackerAdmin(GmModelAdmin):
-    list_display = ('zib_indent_num', 'lr_number', 'consignment_id',
+    list_display = ('zib_indent_num', 'lr_number', 'consignment_id', 'container_no',
                     'seal_no', 'status', 'gatein_date',
                     'get_transporter', 'submitted_by')
 
