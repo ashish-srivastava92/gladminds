@@ -1,27 +1,30 @@
-import logging
 import json
-from django.http.response import HttpResponse
-from tastypie.constants import ALL, ALL_WITH_RELATIONS
-from tastypie.authorization import DjangoAuthorization, Authorization
-from tastypie import fields
-from django.http.response import HttpResponseRedirect
-from django.conf.urls import url
-from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.afterbuy import models as afterbuy_models
-from tastypie.utils.urls import trailing_slash
-from gladminds.afterbuy.apis.brand_apis import BrandResource
-from gladminds.afterbuy import models as afterbuy_model
-from gladminds.afterbuy.apis.user_apis import ConsumerResource
-from django.forms.models import model_to_dict
-from gladminds.core.apis.authorization import CustomAuthorization,\
-    MultiAuthorization
-from gladminds.core.apis.authentication import AccessTokenAuthentication
-from gladminds.core.managers.mail import send_recycle_mail
-from gladminds.afterbuy.apis.validations import ProductValidation
-from tastypie.http import HttpBadRequest
+import logging
+
 from django.conf import settings
-import requests
+from django.conf.urls import url
 from django.core.exceptions import ObjectDoesNotExist
+from django.forms.models import model_to_dict
+from django.http.response import HttpResponse
+from django.http.response import HttpResponseRedirect
+import requests
+from tastypie import fields
+from tastypie.authorization import DjangoAuthorization, Authorization
+from tastypie.constants import ALL, ALL_WITH_RELATIONS
+from tastypie.http import HttpBadRequest
+from tastypie.utils.urls import trailing_slash
+
+from gladminds.afterbuy import models as afterbuy_model
+from gladminds.afterbuy import models as afterbuy_models
+from gladminds.afterbuy.apis.brand_apis import BrandResource
+from gladminds.afterbuy.apis.user_apis import ConsumerResource
+from gladminds.afterbuy.apis.validations import ProductValidation
+from gladminds.core.apis.authentication import AccessTokenAuthentication
+from gladminds.core.apis.authorization import CustomAuthorization, \
+    MultiAuthorization
+from gladminds.core.apis.base_apis import CustomBaseModelResource
+from gladminds.core.managers.mail import send_recycle_mail
+
 
 logger = logging.getLogger("gladminds")
 
@@ -211,10 +214,7 @@ class UserProductResource(CustomBaseModelResource):
             for specification in specifications:
                 data = {}
                 data['type'] = specification.product_type.product_type
-                data['engine_displacement'] = specification.engine_displacement
-                data['engine_type'] = specification.engine_type
-                data['engine_starting'] = specification.engine_starting
-                data['maximum_power'] = specification.maximum_power
+                data[specification.key] = specification.value
                 details.append(data)
                 
             result['specifications'] =  details

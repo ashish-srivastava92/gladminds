@@ -224,10 +224,8 @@ class Support (base_models.BaseModel):
 
 class ProductSpecification(base_models.BaseModel):
     product_type = models.ForeignKey(ProductType)
-    engine_displacement = models.CharField(max_length=255, null=True, blank=True)
-    engine_type = models.CharField(max_length=255, null=True, blank=True)
-    engine_starting = models.CharField(max_length=255, null=True, blank=True)
-    maximum_power = models.CharField(max_length=255, null=True, blank=True)
+    key = models.CharField(max_length=255, null=True, blank=True)
+    value = models.CharField(max_length=255, null=True, blank=True)
     
     class Meta:
         app_label = _APP_NAME
