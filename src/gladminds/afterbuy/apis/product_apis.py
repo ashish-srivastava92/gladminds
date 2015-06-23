@@ -8,7 +8,6 @@ from django.http.response import HttpResponseRedirect
 from django.conf.urls import url
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.afterbuy import models as afterbuy_models
-from gladminds.settings import API_FLAG, COUPON_URL
 from tastypie.utils.urls import trailing_slash
 from gladminds.afterbuy.apis.brand_apis import BrandResource
 from gladminds.afterbuy import models as afterbuy_model
@@ -20,6 +19,9 @@ from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.managers.mail import send_recycle_mail
 from gladminds.afterbuy.apis.validations import ProductValidation
 from tastypie.http import HttpBadRequest
+from django.conf import settings
+import requests
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger("gladminds")
 
@@ -114,7 +116,9 @@ class UserProductResource(CustomBaseModelResource):
                 url(r"^(?P<resource_name>%s)/get-brands%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_brand_details'), name="get_brand_details" ),
                 url(r"^(?P<resource_name>%s)/accept-product%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('user_product_acceptance'), name="user_product_acceptance" ),
                 url(r"^(?P<resource_name>%s)/details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('product_specifications'), name="product_specifications" ),
-                url(r"^(?P<resource_name>%s)/add%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('add_product'), name="add_product")
+                url(r"^(?P<resource_name>%s)/add%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('add_product'), name="add_product"),
+                url(r"^(?P<resource_name>%s)/brand-sync%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('brand_sync'), name="brand_sync")
+
                
         ]
 
@@ -126,10 +130,10 @@ class UserProductResource(CustomBaseModelResource):
             if product_id:
                 product_info = afterbuy_models.UserProduct.objects.get(id=product_id)
                 brand_product_id = product_info.brand_product_id
-                if not API_FLAG:
-                    return HttpResponseRedirect('http://'+COUPON_URL+':'+port+'/v1/coupons/?product__product_id='+brand_product_id+'&'+access_token)
+                if not settings.API_FLAG:
+                    return HttpResponseRedirect('http://'+settings.COUPON_URL+':'+port+'/v1/coupons/?product__product_id='+brand_product_id+'&'+access_token)
                 else:
-                    return HttpResponseRedirect('http://'+COUPON_URL+'/v1/coupons/?product__product_id='+brand_product_id+'&'+access_token)
+                    return HttpResponseRedirect('http://'+settings.COUPON_URL+'/v1/coupons/?product__product_id='+brand_product_id+'&'+access_token)
         except Exception as ex:
             logger.error('Invalid details')
     
@@ -241,6 +245,44 @@ class UserProductResource(CustomBaseModelResource):
         except Exception as ex:
             logger.error("Exception while fetching product specifications - {0}".format(ex))
             return HttpBadRequest("Incorrect Details")
+    
+    def brand_sync(self, request, **kwargs):
+        self.is_authenticated(request)
+        try:
+            phone_number = request.GET['phone_number']
+            port = request.META['SERVER_PORT']
+            query = '/v1/products/?customer_phone_number__contains='+phone_number
+            if not settings.API_FLAG:
+                resp = requests.get('http://'+settings.COUPON_URL+':'+port+query)
+            else:
+                resp = requests.get('http://'+settings.COUPON_URL+query)
+            if len(json.loads(resp.content)['objects']) > 0:
+                products = json.loads(resp.content)['objects']
+                for product in  products:
+                    try:
+                        product_type = afterbuy_models.ProductType.objects.get(product_type=product['sku_code'])
+                    except Exception as ObjectDoesNotExist:
+                        product_brand =  afterbuy_models.Brand.objects.get(name='bajaj')
+                        product_type = afterbuy_models.ProductType(product_type=product['sku_code'],
+                                                                   brand=product_brand)
+                        product_type.save()
+                    consumer = afterbuy_models.Consumer.objects.get(user=request.user)
+
+                    try:
+                        user_product = afterbuy_models.UserProduct.objects.get(consumer__user=request.user,
+                                                                               brand_product_id=product['product_id'])
+                    except Exception as ObjectDoesNotExist:
+                        user_product =  afterbuy_models.UserProduct(consumer=consumer,
+                                                                purchase_date=product['purchase_date'],
+                                                                brand_product_id=product['product_id'],
+                                                                product_type=product_type)
+                        user_product.save()
+                    return HttpResponse(json.dumps({'status' : 200 , 'message':'Products Synced Successfully'}),
+                                        content_type='application/json')
+                return HttpResponse(json.dumps({'status':200 , 'message': 'No products to be synced'}))
+        except Exception as ex:
+            logger.error("Exception while syncing the products{0}".format(ex))
+            return HttpBadRequest("Products couldn't be synced")
 
 class ProductInsuranceInfoResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', null=True, blank=True, full=True)
