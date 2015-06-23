@@ -172,6 +172,8 @@ class ExportRedemptionFeed(BaseExportFeed):
             'TIMESTAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
         for redemption in results:
             try:
+                
+                image_url="{0}{1}".format(settings.S3_BASE_URL, redemption.image_url)
                 item = {
                         "CRDAT": redemption.created_date.date().strftime("%Y-%m-%d"),
                         "MECHID": redemption.member.permanent_id,
@@ -183,7 +185,7 @@ class ExportRedemptionFeed(BaseExportFeed):
                         "SHPID": redemption.tracking_id,
                         "DELVDAT": redemption.delivery_date.date().strftime("%Y-%m-%d"),
                         "PODNO": redemption.pod_number,
-                        "PODDOC": redemption.image_url,
+                        "PODDOC": image_url,
                         "TRANSID": redemption.transaction_id,
                     }
                 items.append(item)
@@ -203,7 +205,7 @@ class ExportRedemptionFeed(BaseExportFeed):
                         .format(item))
             try:
                 result = client.service.SI_Redum_Sync(
-                    DT_Redum={'Item':list(item)}, DT_STAMP={'Item':item_stamp})
+                    DT_Redum={'Item':[item]}, DT_STAMP={'Item':item_stamp})
                 logger.info("[ExportRedemptionFeed]: Response from SAP: {0}".format(result))
                 if result[0]['STATUS'] == 'SUCCESS':
                     try:
@@ -264,6 +266,7 @@ class ExportDistributorFeed(BaseExportFeed):
             logger.info("[ExportDistributorFeed]: Trying to send SAP the member: {0}"\
                         .format(item))
             try:
+                
                 result = client.service.SI_Dist_Sync(
                     DT_DIST={'Item':[item]}, DT_STAMP={'Item_Stamp':item_batch})
                 logger.info("[ExportDistributorFeed]: Response from SAP: {0}".format(result))
