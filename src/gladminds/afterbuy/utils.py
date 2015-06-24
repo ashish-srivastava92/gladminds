@@ -76,25 +76,10 @@ def mobile_format(phone_number):
         or service advisor we will check that number in +91 format'''
     return '+91' + phone_number[-10:]
 
-def get_domain_and_port(request):
-    """
-    Django's request.get_host() returns the requested host and possibly the
-    port number.  Return a tuple of domain, port number.
-    Domain will be lowercased
-    """
+def get_url(request):
     host = request.get_host()
-    if ':' in host:
-        domain, port = host.split(':')
-        return (domain.lower(), port)
-    else:
-        return (host.lower(),
-            request.META.get('SERVER_PORT'))
-
-def get_url(domain, port ,field):
-    fields = domain.split('.')
+    fields = host.split('.')
     fields[1] = 'bajaj'
     url = '.'.join(fields)
-    if settings.ENV in ['local']:
-        url = url + ':' + port
     return url
     

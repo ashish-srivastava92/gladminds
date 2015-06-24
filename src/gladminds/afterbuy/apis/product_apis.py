@@ -24,7 +24,7 @@ from gladminds.core.apis.authorization import CustomAuthorization, \
     MultiAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.managers.mail import send_recycle_mail
-from gladminds.afterbuy.utils import get_domain_and_port, get_url
+from gladminds.afterbuy.utils import get_url
 
 
 logger = logging.getLogger("gladminds")
@@ -259,11 +259,9 @@ class UserProductResource(CustomBaseModelResource):
         self.is_authenticated(request)
         try:
             phone_number = request.GET['phone_number']
-            port = request.META['SERVER_PORT']
             query = '/v1/products/?customer_phone_number__contains='+phone_number
-            domain , port = get_domain_and_port(request)
             
-            url = get_url(domain, port, fields)
+            url = get_url(request)
 
             resp = requests.get('http://'+url+query)
             
