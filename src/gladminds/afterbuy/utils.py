@@ -1,14 +1,17 @@
 from datetime import datetime
 from random import randint
-from django.utils import timezone
-from gladminds.core.exceptions import OtpFailedException
-from gladminds.afterbuy import models as common
-from gladminds.afterbuy import models as afterbuy_model
-from django_otp.oath import TOTP
-from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
+
+from django.conf import settings
 from django.contrib.auth.models import User
-import pytz
+from django.utils import timezone
 from django.utils.timezone import get_current_timezone_name
+from django_otp.oath import TOTP
+import pytz
+
+from gladminds.afterbuy import models as afterbuy_model
+from gladminds.core.exceptions import OtpFailedException
+from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
+
 
 def save_otp(token, **kwargs):
     if 'user' in kwargs.keys():
@@ -72,3 +75,26 @@ def mobile_format(phone_number):
         And when airtel pull message from customer
         or service advisor we will check that number in +91 format'''
     return '+91' + phone_number[-10:]
+
+def get_domain_and_port(request):
+    """
+    Django's request.get_host() returns the requested host and possibly the
+    port number.  Return a tuple of domain, port number.
+    Domain will be lowercased
+    """
+    host = request.get_host()
+    if ':' in host:
+        domain, port = host.split(':')
+        return (domain.lower(), port)
+    else:
+        return (host.lower(),
+            request.META.get('SERVER_PORT'))
+
+def get_url(domain, port ,field):
+    fields = domain.split('.')
+    fields[1] = 'bajaj'
+    url = '.'.join(fields)
+    if settings.ENV in ['local']:
+        url = url + ':' + port
+    return url
+    
