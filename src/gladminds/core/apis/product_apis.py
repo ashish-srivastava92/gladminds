@@ -143,7 +143,7 @@ class ContainerTrackerResource(CustomBaseModelResource):
     def  get_status_count(self, request, **kwargs):
         self.is_authenticated(request)
         args = request.GET
-        from_date = args.get('from', datetime.now() - timedelta(days=30))
+        from_date = args.get('from', datetime.now() - timedelta(days=180))
         to_date = args.get('to', datetime.now())
         query_args = [Q(created_date__range=[from_date, to_date])]
         try:
@@ -152,16 +152,21 @@ class ContainerTrackerResource(CustomBaseModelResource):
                 query_args.append(Q(transporter__user_id=request.user.id))
                 if supervisor_id:
                     query_args.append(Q(submitted_by=supervisor_id))
-                data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args)
-                                                              ).values('status').annotate(total=Count('status')).order_by('-status')
+                indent_list = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args)
+                                                              ).values_list('zib_indent_num', flat=True).distinct()
             elif request.user.groups.filter(name=Roles.SUPERVISOR):
                 supervisor = models.Supervisor.objects.get(user__user_id=request.user.id)
                 query_args.append(Q(transporter=supervisor.transporter))
-                data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args) &
+                indent_list = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args) &
                                                               (Q(submitted_by=supervisor.supervisor_id)| Q(submitted_by=None))
-                                                              ).values('status').annotate(total=Count('status')).order_by('-status')
+                                                              ).values_list('zib_indent_num', flat=True).distinct()
             else:
-                data = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args)).values('status').annotate(total=Count('status')).order_by('-status')
+                indent_list = models.ContainerTracker.objects.filter(reduce(operator.and_, query_args)
+                                                              ).values_list('zib_indent_num', flat=True).distinct()
+            open_indent=models.ContainerTracker.objects.filter(zib_indent_num__in=indent_list, status='Open').values_list('zib_indent_num', flat=True).distinct()
+            remaining_indent=list(set(indent_list).difference(open_indent))
+            inporgress_indent=models.ContainerTracker.objects.filter(zib_indent_num__in=remaining_indent, status='Inprogress').values_list('zib_indent_num', flat=True).distinct()
+            data=[{'status':'Open', 'total':len(open_indent)},{'status':'Inprogress','total':len(inporgress_indent)}]
         except Exception as ex:
             LOG.error('Exception while obtaining CTS count : {0}'.format(ex))
         return HttpResponse(content=json.dumps(list(data), cls=DjangoJSONEncoder), content_type='application/json')
