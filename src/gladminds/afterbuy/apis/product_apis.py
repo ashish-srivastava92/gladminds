@@ -24,7 +24,7 @@ from gladminds.core.apis.authorization import CustomAuthorization, \
     MultiAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.managers.mail import send_recycle_mail
-from gladminds.afterbuy.utils import get_domain_and_port, get_fields, get_url
+from gladminds.afterbuy.utils import get_domain_and_port, get_url
 
 
 logger = logging.getLogger("gladminds")
