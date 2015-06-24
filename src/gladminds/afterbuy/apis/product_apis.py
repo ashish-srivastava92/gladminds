@@ -24,6 +24,7 @@ from gladminds.core.apis.authorization import CustomAuthorization, \
     MultiAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.managers.mail import send_recycle_mail
+from gladminds.afterbuy.utils import get_domain_and_port, get_fields, get_url
 
 
 logger = logging.getLogger("gladminds")
@@ -247,39 +248,50 @@ class UserProductResource(CustomBaseModelResource):
             return HttpBadRequest("Incorrect Details")
     
     def brand_sync(self, request, **kwargs):
+        '''
+        Gets all the products from the brand database and adds it to afterbuy
+        Args:
+        phone_number : The phone number of the afterbuy user
+        
+        Returns:
+        Syncs all the products of that user  
+        '''
         self.is_authenticated(request)
         try:
             phone_number = request.GET['phone_number']
             port = request.META['SERVER_PORT']
             query = '/v1/products/?customer_phone_number__contains='+phone_number
-            if not settings.API_FLAG:
-                resp = requests.get('http://'+settings.COUPON_URL+':'+port+query)
-            else:
-                resp = requests.get('http://'+settings.COUPON_URL+query)
-            if len(json.loads(resp.content)['objects']) > 0:
-                products = json.loads(resp.content)['objects']
-                for product in  products:
-                    try:
-                        product_type = afterbuy_models.ProductType.objects.get(product_type=product['sku_code'])
-                    except Exception as ObjectDoesNotExist:
-                        product_brand =  afterbuy_models.Brand.objects.get(name='bajaj')
-                        product_type = afterbuy_models.ProductType(product_type=product['sku_code'],
-                                                                   brand=product_brand)
-                        product_type.save()
-                    consumer = afterbuy_models.Consumer.objects.get(user=request.user)
+            domain , port = get_domain_and_port(request)
+            
+            url = get_url(domain, port, fields)
 
-                    try:
-                        user_product = afterbuy_models.UserProduct.objects.get(consumer__user=request.user,
-                                                                               brand_product_id=product['product_id'])
-                    except Exception as ObjectDoesNotExist:
-                        user_product =  afterbuy_models.UserProduct(consumer=consumer,
-                                                                purchase_date=product['purchase_date'],
-                                                                brand_product_id=product['product_id'],
-                                                                product_type=product_type)
-                        user_product.save()
-                    return HttpResponse(json.dumps({'status' : 200 , 'message':'Products Synced Successfully'}),
-                                        content_type='application/json')
+            resp = requests.get('http://'+url+query)
+            
+            if not json.loads(resp.content)['objects']:
                 return HttpResponse(json.dumps({'status':200 , 'message': 'No products to be synced'}))
+
+            products = json.loads(resp.content)['objects']
+            for product in  products:
+                try:
+                    product_type = afterbuy_models.ProductType.objects.get(product_type=product['sku_code'])
+                except Exception as ObjectDoesNotExist:
+                    product_brand =  afterbuy_models.Brand.objects.get(name='bajaj')
+                    product_type = afterbuy_models.ProductType(product_type=product['sku_code'],
+                                                               brand=product_brand)
+                    product_type.save()
+                consumer = afterbuy_models.Consumer.objects.get(user=request.user)
+
+                try:
+                    user_product = afterbuy_models.UserProduct.objects.get(consumer__user=request.user,
+                                                                           brand_product_id=product['product_id'])
+                except Exception as ObjectDoesNotExist:
+                    user_product =  afterbuy_models.UserProduct(consumer=consumer,
+                                                            purchase_date=product['purchase_date'],
+                                                            brand_product_id=product['product_id'],
+                                                            product_type=product_type)
+                    user_product.save()
+                return HttpResponse(json.dumps({'status' : 200 , 'message':'Products Synced Successfully'}),
+                                        content_type='application/json')
         except Exception as ex:
             logger.error("Exception while syncing the products{0}".format(ex))
             return HttpBadRequest("Products couldn't be synced")
