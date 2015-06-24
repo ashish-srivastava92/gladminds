@@ -78,8 +78,7 @@ def mobile_format(phone_number):
 
 def get_url(request):
     host = request.get_host()
-    fields = host.split('.')
-    fields[1] = 'bajaj'
-    url = '.'.join(fields)
-    return url
+    host = host.replace('api', 'bajaj')
+    host = host.replace('afterbuy', 'gladminds')
+    return host
     
