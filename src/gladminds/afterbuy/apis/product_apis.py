@@ -25,8 +25,6 @@ from gladminds.core.apis.authorization import CustomAuthorization, \
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.managers.mail import send_recycle_mail
 from gladminds.afterbuy.utils import get_url
-from smoke import afterbuy
-
 
 logger = logging.getLogger("gladminds")
 
