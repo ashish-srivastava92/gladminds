@@ -34,6 +34,8 @@ class Brand(base_models.Brand):
         app_label = _APP_NAME
         verbose_name_plural = "Brands"
 
+    def __unicode__(self):
+        return self.name
 
 class BrandProductCategory(base_models.BrandProductCategory):
     brand = models.ForeignKey(Brand)
@@ -50,7 +52,9 @@ class ProductType(base_models.ProductType):
         app_label = _APP_NAME
         verbose_name_plural = "Product Types"
 
-
+    def __unicode__(self):
+        return self.product_type
+    
 class Consumer(base_models.BaseModel):
     user = models.OneToOneField(User, primary_key=True)
     consumer_id = models.CharField(
@@ -99,6 +103,9 @@ class UserProduct(base_models.BaseModel):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "User Products"
+    
+    def __unicode__(self):
+        return self.brand_product_id
 
 
 class ProductSupport(base_models.BaseModel):

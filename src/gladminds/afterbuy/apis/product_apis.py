@@ -25,6 +25,7 @@ from gladminds.core.apis.authorization import CustomAuthorization, \
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.managers.mail import send_recycle_mail
 from gladminds.afterbuy.utils import get_url
+from smoke import afterbuy
 
 
 logger = logging.getLogger("gladminds")
@@ -121,9 +122,8 @@ class UserProductResource(CustomBaseModelResource):
                 url(r"^(?P<resource_name>%s)/accept-product%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('user_product_acceptance'), name="user_product_acceptance" ),
                 url(r"^(?P<resource_name>%s)/details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('product_specifications'), name="product_specifications" ),
                 url(r"^(?P<resource_name>%s)/add%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('add_product'), name="add_product"),
-                url(r"^(?P<resource_name>%s)/brand-sync%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('brand_sync'), name="brand_sync")
-
-               
+                url(r"^(?P<resource_name>%s)/brand-sync%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('brand_sync'), name="brand_sync"),
+                url(r"^(?P<resource_name>%s)/get-service-details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_service_details'), name="get_service_details")               
         ]
 
     def get_product_coupons(self, request, **kwargs):
@@ -260,9 +260,7 @@ class UserProductResource(CustomBaseModelResource):
         try:
             phone_number = request.GET['phone_number']
             query = '/v1/products/?customer_phone_number__contains='+phone_number
-            
             url = get_url(request)
-
             resp = requests.get('http://'+url+query)
             
             if not json.loads(resp.content)['objects']:

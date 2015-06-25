@@ -9,15 +9,15 @@ from django.contrib.auth.models import Group, User, Permission
 from test_constants import *
 from integration.afterbuy import base_integration
 from gladminds.afterbuy import models
-from provider.oauth2.models import AccessToken
-from suds.properties import Skin
+from gladminds.bajaj import models as bajaj
 from django.test._doctest import SKIP
 from gladminds.core.auth_helper import GmApps, Roles
+from integration.bajaj.test_feeds import FeedsResourceTest
 
 client = Client(SERVER_NAME='afterbuy')
+client1 = Client(SERVER_NAME='bajaj')
 
-
-class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
+class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase, FeedsResourceTest):
     multi_db = True 
     def setUp(self):
         super(TestAfterbuyApi, self).setUp()
@@ -34,6 +34,8 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase):
                 group.permissions.add(permission)
 
         self.create_afterbuy_user()
+        self.request_headers_afterbuy = {'HTTP_HOST' :'local.api.afterbuy.co:8000'}
+        self.request_headers_bajaj = {'HTTP_HOST' :'local.bajaj.gladminds.co:8000'}
     
     def user_login(self):
         login_details = self.login()
