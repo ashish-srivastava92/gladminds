@@ -853,6 +853,45 @@ class ContainerTrackerAdmin(GmModelAdmin):
         if css_class:
             return {'class': css_class}
 
+class ContainerIndentAdmin(GmModelAdmin):
+    list_display = ('indent_num',
+                    'no_of_containers',
+                    'status', 'get_transporter')
+
+    def suit_row_attributes(self, obj):
+        class_map = {
+            'Open': 'success',
+            'Closed': 'warning',
+            'Inprogress': 'info',
+        }
+        css_class = class_map.get(str(obj.status))
+        if css_class:
+            return {'class': css_class}
+
+
+class ContainerLRAdmin(GmModelAdmin):
+    list_display = ('lr_number', 'zib_indent_num',
+                    'get_indent_status',
+                    'consignment_id', 'container_no',
+                    'seal_no', 'gatein_date',
+                    'get_indent_transporter', 'submitted_by')
+    
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('status','sent_to_sap')
+        form = super(ContainerLRAdmin, self).get_form(request, obj, **kwargs)
+        form.current_user=request.user
+        return form
+
+    def suit_row_attributes(self, obj):
+        class_map = {
+            'Open': 'success',
+            'Closed': 'warning',
+            'Inprogress': 'info',
+        }
+        css_class = class_map.get(str(obj.zib_indent_num.status))
+        if css_class:
+            return {'class': css_class}
+
 def get_admin_site_custom(brand):
     brand_admin = BajajAdminSite(name=brand)
     
@@ -893,7 +932,9 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("ContainerTracker", brand), ContainerTrackerAdmin)
     brand_admin.register(get_model("Transporter", brand), TransporterAdmin)
     brand_admin.register(get_model("Supervisor", brand), SupervisorAdmin)
-    
+    brand_admin.register(get_model("ContainerIndent", brand), ContainerIndentAdmin)
+    brand_admin.register(get_model("ContainerLR", brand), ContainerLRAdmin)
+
     return brand_admin
 
 brand_admin = get_admin_site_custom(GmApps.BAJAJ)

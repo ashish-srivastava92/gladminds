@@ -137,8 +137,10 @@ SUIT_CONFIG = {
                      'label': 'Transporter'},
                     {'model': 'supervisor',
                      'label': 'Supervisor'},
-                   {'model': 'containertracker',
-                     'label': 'Container Tracker'},
+                   {'model': 'containerindent',
+                     'label': 'Container Indent'},
+                   {'model': 'containerlr',
+                     'label': 'Container LR'},
                    )},
         {'app': 'bajaj', 'label': 'User Registrations', 'icon': ' icon-folder-open',
          'models':(

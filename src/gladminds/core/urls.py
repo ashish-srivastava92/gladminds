@@ -44,6 +44,8 @@ api_v1.register(product_apis.ProductCatalogResource())
 api_v1.register(product_apis.SparePartUPCResource())
 api_v1.register(product_apis.SparePartPointResource())
 api_v1.register(product_apis.ContainerTrackerResource())
+api_v1.register(product_apis.ContainerIndentResource())
+api_v1.register(product_apis.ContainerLRResource())
 
 api_v1.register(coupon_apis.CouponDataResource())
 
