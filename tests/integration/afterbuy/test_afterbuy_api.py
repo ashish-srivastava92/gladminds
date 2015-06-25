@@ -9,8 +9,6 @@ from django.contrib.auth.models import Group, User, Permission
 from test_constants import *
 from integration.afterbuy import base_integration
 from gladminds.afterbuy import models
-from gladminds.bajaj import models as bajaj
-from django.test._doctest import SKIP
 from gladminds.core.auth_helper import GmApps, Roles
 from integration.bajaj.test_feeds import FeedsResourceTest
 
@@ -198,3 +196,18 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase, FeedsResourceTe
         resp = client.get('/afterbuy/v1/products/details/?product_id=motor&&access_token='+access_token)
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(json.loads(resp.content)['message'], "Incorrect Product ID")
+
+    def test_add_brand_details(self):
+        access_token = self.user_login()
+        resp = client.post('/afterbuy/v1/brands/?access_token='+access_token,
+                           data=json.dumps(PRODUCT_BRAND), content_type='application/json')
+        self.assertEquals(resp.status_code, 201)
+        return access_token
+        
+    def test_add_products(self):
+        access_token = self.test_add_brand_details()
+        resp = client.post('/afterbuy/v1/products/add/?access_token='+access_token,
+                           data = json.dumps(ADD_PRODUCT), content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(json.loads(resp.content)['status'], 200)
+      

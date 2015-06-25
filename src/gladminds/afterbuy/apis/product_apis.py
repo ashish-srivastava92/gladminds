@@ -25,6 +25,7 @@ from gladminds.core.apis.authorization import CustomAuthorization, \
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.managers.mail import send_recycle_mail
 from gladminds.afterbuy.utils import get_url
+from gladminds.core.auth_helper import GmApps
 
 logger = logging.getLogger("gladminds")
 
@@ -289,6 +290,41 @@ class UserProductResource(CustomBaseModelResource):
         except Exception as ex:
             logger.error("Exception while syncing the products{0}".format(ex))
             return HttpBadRequest("Products couldn't be synced")
+
+    def add_product(self, request, **kwargs):
+        self.is_authenticated(request)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({'message' : 'Method not alowed'}),
+                                content_type='application/json')
+        try:
+            load = json.loads(request.body)
+            product_id = load.get('product_id')
+            brand_name = load.get('brand_name')
+            type = load.get('model_name')
+            year = load.get('model_year')
+            try:
+                product_type = afterbuy_models.ProductType.objects.get(product_type=type, brand__name=brand_name)
+            except Exception as ObjectDoesNotExist:
+                brand = afterbuy_models.Brand.objects.get(name=GmApps.BAJAJ)
+                product_type = afterbuy_models.ProductType(product_type=type,
+                                                           brand=brand)
+                product_type.save()
+            
+            consumer = afterbuy_models.Consumer.objects.get(user=request.user)
+            try:
+                user_product = afterbuy_models.UserProduct.objects.get(consumer__user=request.user,
+                                                                       brand_product_id=product_id)
+                return HttpResponse(json.dumps({'status':200 , 'message' : 'This product has been already registered'}),
+                                    content_type='application/json')
+            except Exception as ObjectDoesNotExist:
+                user_product = afterbuy_models.UserProduct(consumer=consumer, brand_product_id=product_id,
+                                                  purchase_date=year, product_type=product_type)
+                user_product.save()
+                return HttpResponse(json.dumps({'status':200, 'message' : 'Product added successfully'}),
+                                content_type='application/json')
+        except Exception as ex:
+            logger.error("Exception while afterbuy user product {0}", format(ex))
+            return HttpBadRequest('Product cannot be added')
 
 class ProductInsuranceInfoResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', null=True, blank=True, full=True)
