@@ -72,7 +72,7 @@ def get_customers_to_send_reminder_by_admin(*args, **kwargs):
 def expire_service_coupon(*args, **kwargs):
     today = timezone.now()
     brand= kwargs.get('brand', None)
-    threat_coupons = get_model("CouponData", brand).objects.filter(mark_expired_on__lte=today.date()).exclude(Q(status=2) | Q(status=3))
+    threat_coupons = get_model("CouponData", brand).objects.filter(mark_expired_on__lte=today.date()).exclude(Q(status=2) | Q(status=3) | Q(status=6))
     for coupon in threat_coupons:
         #If the coupon was initiated, it will expire if initiated more than 30days ago.
         if coupon.status == COUPON_STATUS['In Progress']:
