@@ -131,3 +131,12 @@ def set_plate_with_part_image_path(instance,filename):
 
 def set_brand_product_image_path(instance,filename):
     return create_upload_path('brand_product', instance, filename)
+
+def set_afterbuy_consumer_image(instance, filename):
+    return create_upload_path('afterbuy_consumer', instance, filename)
+
+def set_afterbuy_user_product_image(instance, filename):
+    return create_upload_path('afterbuy_user_product', instance, filename)
+
+def set_brand_image(instance, filename):
+    return create_upload_path('brand_image', instance, filename)

@@ -103,3 +103,18 @@ alter table gm_producttype add foreign key (brand_id) references gm_producttype(
 
 alter table afterbuy_userproduct drop column nick_name;
 alter table afterbuy_userproduct add column nick_name varchar(100) null;
+
+alter table afterbuy_userproduct add column warranty_year datetime null;
+alter table afterbuy_userproduct add column insurance_year datetime null;
+
+alter table afterbuy_consumer drop column image_url;
+alter table afterbuy_consumer add column image_url varchar(255) null;
+
+alter table afterbuy_userproduct drop column image_url;
+alter table afterbuy_userproduct add column image_url varchar(255) null;
+
+alter table gm_brand drop column image_url;
+alter table gm_brand add column image_url varchar(255) null;
+
+alter table afterbuy_brand drop column image_url;
+alter table afterbuy_brand add column image_url varchar(255) null;

@@ -915,7 +915,7 @@ ADD_PRODUCT = {
                "product_id" : "VBKJUC4L2FC035111",
                "model_name" : "bike",
                "model_year" : "2014-02-01"
-               }
+            }
 
 PRODUCT_BRAND =  {
                   "created_date": "2015-06-19T11:20:37",

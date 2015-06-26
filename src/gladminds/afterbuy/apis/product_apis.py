@@ -91,28 +91,6 @@ class UserProductResource(CustomBaseModelResource):
                      "is_deleted": ALL
                      }
 
-    def dehydrate(self, bundle):
-        insurance = afterbuy_models.ProductInsuranceInfo.objects.filter(product=bundle.data['id'])
-        invoice = afterbuy_models.Invoice.objects.filter(product=bundle.data['id'])
-        license = afterbuy_models.License.objects.filter(product=bundle.data['id'])
-        registrations = afterbuy_models.RegistrationCertificate.objects.filter(product=bundle.data['id'])
-        pollution = afterbuy_models.PollutionCertificate.objects.filter(product=bundle.data['id'])
-        product_support = afterbuy_models.ProductSupport.objects.filter(product=bundle.data['id'])
-        sell_information = afterbuy_models.SellInformation.objects.filter(product=bundle.data['id'])
-        brand_id = bundle.data['product_type'].data['brand'].data['id']
-        support = afterbuy_models.Support.objects.filter(brand=int(brand_id))
-        product_image = afterbuy_models.UserProductImages.objects.filter(product=bundle.data['id'])
-        bundle.data['insurance'] = [model_to_dict(c) for c in insurance]
-        bundle.data['invoice'] = [model_to_dict(c) for c in invoice]
-        bundle.data['license'] = [model_to_dict(c) for c in license]
-        bundle.data['registrations'] = [model_to_dict(c) for c in registrations]
-        bundle.data['pollution'] = [model_to_dict(c) for c in pollution]
-        bundle.data['support'] = [model_to_dict(c) for c in support]
-        bundle.data['product_image'] = [model_to_dict(c) for c in product_image]
-        bundle.data['product_support'] = [model_to_dict(c) for c in product_support]
-        bundle.data['sell_information'] = [model_to_dict(c) for c in sell_information]
-        return bundle
-
     def prepend_urls(self):
         return [
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/coupons%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_coupons'), name="get_product_coupons" ),
@@ -302,6 +280,8 @@ class UserProductResource(CustomBaseModelResource):
             brand_name = load.get('brand_name')
             type = load.get('model_name')
             year = load.get('model_year')
+            warranty_year = load.get('warranty_year', None)
+            insurance_year = load.get('insurance_year', None)
             try:
                 product_type = afterbuy_models.ProductType.objects.get(product_type=type, brand__name=brand_name)
             except Exception as ObjectDoesNotExist:
@@ -318,7 +298,8 @@ class UserProductResource(CustomBaseModelResource):
                                     content_type='application/json')
             except Exception as ObjectDoesNotExist:
                 user_product = afterbuy_models.UserProduct(consumer=consumer, brand_product_id=product_id,
-                                                  purchase_date=year, product_type=product_type)
+                                                  purchase_date=year, product_type=product_type,
+                                                  warranty_year=warranty_year, insurance_year=insurance_year)
                 user_product.save()
                 return HttpResponse(json.dumps({'status':200, 'message' : 'Product added successfully'}),
                                 content_type='application/json')
@@ -332,7 +313,7 @@ class ProductInsuranceInfoResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.ProductInsuranceInfo.objects.all()
         resource_name = "insurances"
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(Authorization(), CustomAuthorization())
         allowed_methods = ['get', 'post', 'put']
         authentication = AccessTokenAuthentication()
         always_return_data = True
@@ -349,7 +330,7 @@ class InvoiceResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.Invoice.objects.all()
         resource_name = "invoices"
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(Authorization(), CustomAuthorization())
         authentication = AccessTokenAuthentication()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -364,7 +345,7 @@ class LicenseResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.License.objects.all()
         resource_name = 'licenses'
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(Authorization(), CustomAuthorization())
         authentication = AccessTokenAuthentication()
         allowed_methods = ['get', 'post', 'put']
         always_return_data =True
@@ -379,7 +360,7 @@ class RegistrationCertificateResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.RegistrationCertificate.objects.all()
         resource_name = 'registrations'
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(Authorization(), CustomAuthorization())
         authentication = AccessTokenAuthentication()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -395,7 +376,7 @@ class PollutionCertificateResource(CustomBaseModelResource):
         queryset = afterbuy_models.PollutionCertificate.objects.all()
         resource_name = 'pollution'
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(Authorization(), CustomAuthorization())
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
@@ -411,7 +392,7 @@ class SupportResource(CustomBaseModelResource):
         queryset = afterbuy_models.Support.objects.all()
         resource_name = 'support'
         authentication = AccessTokenAuthentication()
-        authorization = DjangoAuthorization()
+        authorization = Authorization()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
@@ -427,7 +408,7 @@ class ProductSupportResource(CustomBaseModelResource):
         queryset = afterbuy_models.ProductSupport.objects.all()
         resource_name = 'product-support'
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(Authorization(), CustomAuthorization())
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
@@ -442,7 +423,7 @@ class SellInformationResource(CustomBaseModelResource):
         queryset = afterbuy_models.SellInformation.objects.all()
         resource_name = 'sell-information'
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(Authorization(), CustomAuthorization())
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
@@ -457,7 +438,7 @@ class UserProductImagesResource(CustomBaseModelResource):
         queryset = afterbuy_models.UserProductImages.objects.all()
         resource_name = 'product-images'
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(Authorization(), CustomAuthorization())
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
@@ -471,6 +452,6 @@ class InterestResource(CustomBaseModelResource):
         queryset = afterbuy_model.Interest.objects.all()
         resource_name = "interests"
         authentication = AccessTokenAuthentication()
-        authorization = DjangoAuthorization()
+        authorization = Authorization()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
