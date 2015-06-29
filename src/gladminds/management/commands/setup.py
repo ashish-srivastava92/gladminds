@@ -72,7 +72,7 @@ class Command(BaseCommand):
         self.create_admin(_DAIMLER)
         self.create_admin(_PROBIKING)
         self.create_afterbuy_admins()
-        self.create_territory_state()
+        self.create_territory()
         self.create_loyalty_admins()
         self.set_afterbuy_permissions()
         if settings.ENV not in ['prod', 'staging']:

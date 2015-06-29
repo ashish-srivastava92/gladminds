@@ -946,6 +946,50 @@ class Transporter(BaseModel):
     def __unicode__(self):
         return self.transporter_id
 
+class ContainerIndent(BaseModel):
+    ''' details of Container Indent'''
+    
+    indent_num = models.CharField(max_length=30, unique=True)
+    no_of_containers = models.IntegerField(default=0)
+    status = models.CharField(max_length=12, choices=constants.CONSIGNMENT_STATUS, default='Open')
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_containerindent"
+        verbose_name_plural = "Container Indent"
+    
+    def __unicode__(self):
+        return str(self.indent_num)
+
+class ContainerLR(BaseModel):
+    ''' details of Container LR'''
+    
+    transaction_id = models.AutoField(primary_key=True)
+    consignment_id = models.CharField(max_length=30, null=True, blank=True)
+    truck_no = models.CharField(max_length=30, null=True, blank=True)
+    lr_number = models.CharField(max_length=20, null=True, blank=True)
+    lr_date = models.DateField(max_length=10, null=True, blank=True)
+    do_num = models.CharField(max_length=30, null=True, blank=True)
+    gatein_date = models.DateField(max_length=10, null=True, blank=True)
+    gatein_time = models.TimeField(max_length=10, null=True, blank=True)
+    seal_no = models.CharField(max_length=40, null=True, blank=True)
+    container_no = models.CharField(max_length=40, null=True, blank=True)
+
+    shippingline_id = models.CharField(max_length=50, null=True, blank=True)
+    ib_dispatch_dt = models.DateField(null=True, blank=True)
+    cts_created_date = models.DateField(null=True, blank=True)
+    submitted_by = models.CharField(max_length=50, null=True, blank=True)
+    status = models.CharField(max_length=12, choices=constants.CONSIGNMENT_STATUS, default='Open')
+    sent_to_sap = models.BooleanField(default=False)
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_containerlr"
+        verbose_name_plural = "Container LR"
+    
+    def __unicode__(self):
+        return str(self.transaction_id)
+
 class ContainerTracker(BaseModel):
     ''' details of Container Tracker'''
     
