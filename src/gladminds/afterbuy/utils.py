@@ -76,9 +76,3 @@ def mobile_format(phone_number):
         or service advisor we will check that number in +91 format'''
     return '+91' + phone_number[-10:]
 
-def get_url(request):
-    host = request.get_host()
-    host = host.replace('api', 'bajaj')
-    host = host.replace('afterbuy', 'gladminds')
-    return host
-    

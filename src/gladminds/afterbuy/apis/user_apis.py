@@ -35,6 +35,11 @@ from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.model_helpers import format_phone_number
 from gladminds.core.auth import otp_handler
 from gladminds.core import constants
+from django.db.models.query_utils import Q
+from gladminds.core.model_fetcher import get_model
+import operator
+from django.forms.models import model_to_dict
+from django.core.serializers.json import DjangoJSONEncoder
 
 logger = logging.getLogger("gladminds")
 
@@ -346,7 +351,7 @@ class ConsumerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def get_product_details(self, request, **kwargs):
-        port = request.META['SERVER_PORT']
+        self.is_authenticated(request)
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
         try:
@@ -356,31 +361,23 @@ class ConsumerResource(CustomBaseModelResource):
 
         phone_number = load.get('phone_number', None)
         product_id = load.get('product_id', None)
-        query = '/v1/coupons/'
-        params = ''
+        query_args = []
         if product_id:
             if product_id[:3].upper()!= constants.KTM_VIN:
                 return HttpResponse(json.dumps({'message':'Incorrect VIN'}), content_type='application/json')
-            params =  '?product__product_id='+product_id
+            query_args.append(Q(product__product_id=product_id))
         
         if phone_number:
-            if params:
-                params = params + '&product__customer_phone_number__contains='+phone_number+'&product__product_id__startswith=VBK'
-            else:
-                params = '?product__customer_phone_number__contains='+phone_number+'&product__product_id__startswith=VBK'
-    
-        query = query + params  
+            query_args.append(Q(product__customer_phone_number__contains=phone_number))
+        
+        coupons = get_model('CouponData', GmApps.BAJAJ).objects.filter(reduce(operator.and_, query_args))
         try:
-            if not settings.API_FLAG:
-                result = requests.get('http://'+settings.COUPON_URL+':'+port+query)
+            if not coupons:
+                    return HttpResponse(json.dumps({'message' : 'No coupons associated with the data'}), content_type='application/json')
             else:
-                result = requests.get('http://'+settings.COUPON_URL+query)
-                logger.info("[Product details - KTM settings.evn]:{0}".format(settings.ENV))
-
-            if len(json.loads(result.content)['objects']) == 0:
-                    return HttpResponse(json.dumps({'message' : 'Invalid Details'}), content_type='application/json')
-            else:
-                return HttpResponse(json.dumps({'result': json.loads(result.content)}), content_type='application/json')
+                result = {}
+                result['coupons'] = [model_to_dict(c, exclude='product_id') for c in coupons]
+                return HttpResponse(json.dumps(result, cls=DjangoJSONEncoder), content_type='application/json')
         
         except Exception as ex:
             logger.info("[Exception while fetching product details]:{0}".format(ex))

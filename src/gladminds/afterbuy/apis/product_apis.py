@@ -7,7 +7,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
 from django.http.response import HttpResponse
 from django.http.response import HttpResponseRedirect
-import requests
 from tastypie import fields
 from tastypie.authorization import DjangoAuthorization, Authorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
@@ -24,8 +23,9 @@ from gladminds.core.apis.authorization import CustomAuthorization, \
     MultiAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.managers.mail import send_recycle_mail
-from gladminds.afterbuy.utils import get_url
 from gladminds.core.auth_helper import GmApps
+from gladminds.core.model_fetcher import get_model
+from django.core.serializers.json import DjangoJSONEncoder
 
 logger = logging.getLogger("gladminds")
 
@@ -94,7 +94,7 @@ class UserProductResource(CustomBaseModelResource):
 
     def prepend_urls(self):
         return [
-                url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/coupons%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_coupons'), name="get_product_coupons" ),
+                url(r"^(?P<resource_name>%s)/coupons%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_coupons'), name="get_product_coupons" ),
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/recycle%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('mail_products_details'), name="mail_products_details" ),
                 url(r"^(?P<resource_name>%s)/get-brands%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_brand_details'), name="get_brand_details" ),
                 url(r"^(?P<resource_name>%s)/accept-product%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('user_product_acceptance'), name="user_product_acceptance" ),
@@ -105,19 +105,19 @@ class UserProductResource(CustomBaseModelResource):
         ]
 
     def get_product_coupons(self, request, **kwargs):
-        port = request.META['SERVER_PORT']
-        product_id = kwargs.get('product_id')
-        access_token = request.META['QUERY_STRING'] 
+        self.is_authenticated(request)
+        product_id = request.GET['product_id']
         try:
             if product_id:
-                product_info = afterbuy_models.UserProduct.objects.get(id=product_id)
-                brand_product_id = product_info.brand_product_id
-                if not settings.API_FLAG:
-                    return HttpResponseRedirect('http://'+settings.COUPON_URL+':'+port+'/v1/coupons/?product__product_id='+brand_product_id+'&'+access_token)
-                else:
-                    return HttpResponseRedirect('http://'+settings.COUPON_URL+'/v1/coupons/?product__product_id='+brand_product_id+'&'+access_token)
+                coupons = get_model('CouponData', GmApps.BAJAJ).objects.filter(product__product_id=product_id)
+                if not coupons:
+                    return HttpResponse(json.dumps({'message' : 'No coupons', 'status' : 200}),
+                                        content_type='application/json')
+                coupon_data = {}
+                coupon_data['coupon_data'] = [model_to_dict(c, exclude='product_type, id') for c in coupons]
+                return HttpResponse(json.dumps(coupon_data, cls=DjangoJSONEncoder), content_type='application/json')
         except Exception as ex:
-            logger.error('Invalid details')
+            logger.error('Exception while fetching coupon data - {0}'.format(ex))
     
     def mail_products_details(self, request, **kwargs):
         try:
@@ -174,8 +174,13 @@ class UserProductResource(CustomBaseModelResource):
             return HttpBadRequest("Incorrect Details")
         return
     
-    #TODO:Fixme
     def product_specifications(self, request, **kwargs):
+        '''
+        Get the product specifications
+        
+        Args : Product Type 
+        Returns : All the features of that product type 
+        '''
         self.is_authenticated(request)
         try:
             product_id = request.GET['product_id']
@@ -197,25 +202,8 @@ class UserProductResource(CustomBaseModelResource):
                 details.append(data)
                 
             result['specifications'] =  details
-            
-            details = []
-            for part in recommended_parts:
-                data = {}
-                data['part_id'] = part.part_id
-                data['name'] = part.name
-                data['material'] = part.material
-                data['price'] = part.price
-                details.append(data)
-            result['recommended_parts'] = details
-            
-            details = []
-            for feature in features:
-                data = {}
-                data['description'] = feature.description
-                details.append(data)
-                                            
-            result['features'] = details
-            
+            result['recommended_parts'] = [model_to_dict(c, exclude='product_type, id') for c in recommended_parts]
+            result['features'] = [model_to_dict(c, exclude='product_type, id') for c in features]
             result['Overview'] = product_type[0].overview
             result['status_code'] = 200
             
@@ -237,40 +225,43 @@ class UserProductResource(CustomBaseModelResource):
         self.is_authenticated(request)
         try:
             phone_number = request.GET['phone_number']
-            query = '/v1/products/?customer_phone_number__contains='+phone_number
-            url = get_url(request)
-            resp = requests.get('http://'+url+query)
+            products = get_model('ProductData', GmApps.BAJAJ).objects.filter(customer_phone_number__contains=phone_number)
             
-            if not json.loads(resp.content)['objects']:
+            if not products:
                 return HttpResponse(json.dumps({'status':200 , 'message': 'No products to be synced'}))
 
-            products = json.loads(resp.content)['objects']
             for product in  products:
                 try:
-                    product_type = afterbuy_models.ProductType.objects.get(product_type=product['sku_code'])
+                    product_type = afterbuy_models.ProductType.objects.get(product_type=product.sku_code)
                 except Exception as ObjectDoesNotExist:
                     product_brand =  afterbuy_models.Brand.objects.get(name='bajaj')
-                    product_type = afterbuy_models.ProductType(product_type=product['sku_code'],
+                    product_type = afterbuy_models.ProductType(product_type=product.sku_code,
                                                                brand=product_brand)
                     product_type.save()
                 consumer = afterbuy_models.Consumer.objects.get(user=request.user)
 
                 try:
                     user_product = afterbuy_models.UserProduct.objects.get(consumer__user=request.user,
-                                                                           brand_product_id=product['product_id'])
+                                                                           brand_product_id=product.product_id)
                 except Exception as ObjectDoesNotExist:
                     user_product =  afterbuy_models.UserProduct(consumer=consumer,
-                                                            purchase_date=product['purchase_date'],
-                                                            brand_product_id=product['product_id'],
+                                                            purchase_date=product.purchase_date,
+                                                            brand_product_id=product.product_id,
                                                             product_type=product_type)
                     user_product.save()
                 return HttpResponse(json.dumps({'status' : 200 , 'message':'Products Synced Successfully'}),
                                         content_type='application/json')
         except Exception as ex:
-            logger.error("Exception while syncing the products{0}".format(ex))
+            logger.error("Exception while syncing the products - {0}".format(ex))
             return HttpBadRequest("Products couldn't be synced")
 
     def add_product(self, request, **kwargs):
+        '''
+        Add product manually
+        
+        Args : product id, brand name , product type , year , warranty year, insurance year
+        Returns : Saves the product  
+        '''
         self.is_authenticated(request)
         if request.method != 'POST':
             return HttpResponse(json.dumps({'message' : 'Method not alowed'}),
@@ -307,6 +298,34 @@ class UserProductResource(CustomBaseModelResource):
         except Exception as ex:
             logger.error("Exception while afterbuy user product {0}", format(ex))
             return HttpBadRequest('Product cannot be added')
+    
+    def get_service_details(self, request, **kwargs):
+        self.is_authenticated(request)
+        try:
+            product_id = request.GET['product_id']
+            coupons = get_model('CouponData', GmApps.BAJAJ).objects.filter(product__product_id=product_id)
+
+            if not coupons:
+                return HttpResponse(json.dumps({'status':200 , 'message': 'No Services to be displayed'}))
+            details = []
+            history = []
+            for coupon in coupons:
+                data = {}
+                if not coupon.closed_date:
+                    data['serviceNumber'] = coupon.service_type
+                    data['dueDate'] = str(coupon.schedule_reminder_date)
+                    details.append(data)
+                data = {}
+                data['serviceDate'] = str(coupon.actual_service_date)
+                data['ucn'] = coupon.unique_service_coupon
+                history.append(data)
+                    
+            return HttpResponse(json.dumps({'serviceDueReminder' : details,
+                                            'serviceHistory' : history}),
+                                content_type='application/json')
+        except Exception as ex:
+            logger.error("Exception while fetching service details for : {0} {1}".format(product_id, ex))
+            return HttpBadRequest("Service Details couldn't be fetched")
 
 class ProductInsuranceInfoResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', null=True, blank=True, full=True)
