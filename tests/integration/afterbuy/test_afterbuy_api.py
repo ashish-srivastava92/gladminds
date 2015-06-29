@@ -19,7 +19,7 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase, FeedsResourceTe
     multi_db = True 
     def setUp(self):
         super(TestAfterbuyApi, self).setUp()
-        token = models.OTPToken( token=settings.HARCODED_OTPS[0],
+        token = models.OTPToken(token=settings.HARCODED_OTPS[0],
                                  request_date=datetime.now(),
                                  email='test.ab@gmail.com',
                                  phone_number='7760814041')
@@ -86,7 +86,7 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase, FeedsResourceTe
         self.assertEquals(resp.status_code, 200)
 
     def test_change_user_password(self):
-        create_mock_data = {"password1": "aA1234@",  "password2": "aA1234@", "otp_token":"000000",
+        create_mock_data = {"password1": "aA1234@", "password2": "aA1234@", "otp_token":"000000",
                             "auth_key": "e6281aa90743296987089ab013ee245dab66b27b"}
         uri = '/afterbuy/v1/consumers/forgot-password/phone/'
         resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
@@ -97,78 +97,78 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase, FeedsResourceTe
 
     def test_product_api(self):
         resp = self.post('/afterbuy/v1/products/', data=AFTERBUY_PRODUCT)
-        self.assertEquals(json.loads(resp.content)['consumers']['phone_number'],[u'You cannot update phone number'])
+        self.assertEquals(json.loads(resp.content)['consumers']['phone_number'], [u'You cannot update phone number'])
 
         resp = self.post('/afterbuy/v1/products/', data=AFTERBUY_PRODUCTS)
-        self.assertEquals(resp.status_code,201)
+        self.assertEquals(resp.status_code, 201)
 
     def test_get_brand_details(self):
         access_token = self.user_login()
-        resp = client.post('/afterbuy/v1/products/?access_token='+access_token, data=json.dumps(AFTERBUY_PRODUCTS),
+        resp = client.post('/afterbuy/v1/products/?access_token=' + access_token, data=json.dumps(AFTERBUY_PRODUCTS),
                            content_type='application/json')
-        self.assertEquals(resp.status_code,201)
-        resp = client.get('/afterbuy/v1/products/get-brands/?access_token='+access_token)
+        self.assertEquals(resp.status_code, 201)
+        resp = client.get('/afterbuy/v1/products/get-brands/?access_token=' + access_token)
         self.assertEquals(resp.status_code, 200)
-        self.assertEquals(json.loads(resp.content)['status_code'], 200  )
+        self.assertEquals(json.loads(resp.content)['status_code'], 200)
 
     @unittest.skip("skip the test")
     def test_user_product_acceptance(self):
         access_token = self.user_login()
-        uri = '/afterbuy/v1/products/?access_token='+access_token
+        uri = '/afterbuy/v1/products/?access_token=' + access_token
  
         resp = client.post(uri, data=json.dumps(AFTERBUY_PRODUCTS), content_type='application/json')
         self.assertEquals(resp.status_code, 201)
         mock_data = {'product_id':"zxcvbnm", 'is_accepted': 1}
-        resp = client.post('/afterbuy/v1/products/accept-product/?access_token='+access_token,
+        resp = client.post('/afterbuy/v1/products/accept-product/?access_token=' + access_token,
                            data=json.dumps(mock_data), content_type='application/json')
         self.assertEquals(json.loads(resp.content)['status'], 200)
         self.assertEquals(resp.status_code, 200)
     
     def test_insurances_api(self):
         resp = self.post('/afterbuy/v1/insurances/', data=AFTERBUY_INSURANCES)
-        self.assertEquals(resp.status_code,201)
+        self.assertEquals(resp.status_code, 201)
 
     def test_invoices_api(self):
         resp = self.post('/afterbuy/v1/invoices/', data=AFTERBUY_INVOICES)
-        self.assertEquals(resp.status_code,201)
+        self.assertEquals(resp.status_code, 201)
 
     def test_licenses_api(self):
         resp = self.post('/afterbuy/v1/licenses/', data=AFTERBUY_LICENCES)
-        self.assertEquals(resp.status_code,201)
+        self.assertEquals(resp.status_code, 201)
 
     def test_pollution_api(self):
         resp = self.post('/afterbuy/v1/pollution/', data=AFTERBUY_POLLUTION)
-        self.assertEquals(resp.status_code,201)
+        self.assertEquals(resp.status_code, 201)
 
     def test_product_support_api(self):
         resp = self.post('/afterbuy/v1/product-support/', data=AFTERBUY_PRODUCTSUPPORT)
-        self.assertEquals(resp.status_code,201)
+        self.assertEquals(resp.status_code, 201)
 
     def test_sell_information_api(self):
         resp = self.post('/afterbuy/v1/sell-information/', data=AFTERBUY_SELLINFORMATION)
-        self.assertEquals(resp.status_code,201)
+        self.assertEquals(resp.status_code, 201)
 
     def test_product_imagesn_api(self):
         resp = self.post('/afterbuy/v1/product-images/', data=AFTERBUY_USERPRODUCTIMAGES)
-        self.assertEquals(resp.status_code,201)
+        self.assertEquals(resp.status_code, 201)
 
     def test_registrations_api(self):
         resp = self.post('/afterbuy/v1/registrations/', data=AFTERBUY_REGISTATION)
-        self.assertEquals(resp.status_code,201)
+        self.assertEquals(resp.status_code, 201)
 
     def test_support_api(self):
         resp = self.post('/afterbuy/v1/support/', data=AFTERBUY_SUPPORT)
-        self.assertEquals(resp.status_code,201)
+        self.assertEquals(resp.status_code, 201)
 
     def test_product_coupons(self):
         create_mock_data = {'product_id':'1'}
         resp = self.post('/afterbuy/v1/products/1/coupons', data=json.dumps(create_mock_data))
-        self.assertEquals(resp.status_code,301)
+        self.assertEquals(resp.status_code, 301)
 
     def test_mail_products_details(self):
         create_mock_data = {'product_id':'1'}
-        resp = self.post('/afterbuy/v1/products/1/recycles',data=json.dumps(create_mock_data))
-        self.assertEquals(resp.status_code,301)
+        resp = self.post('/afterbuy/v1/products/1/recycles', data=json.dumps(create_mock_data))
+        self.assertEquals(resp.status_code, 301)
     
     def test_post_product_specifications(self):
         resp = self.post('/afterbuy/v1/product-specifications/', data=PRODUCT_SPECIFICATIONS)
@@ -184,30 +184,30 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase, FeedsResourceTe
 
     def test_product_details(self):
         access_token = self.user_login()
-        resp = client.post('/afterbuy/v1/product-specifications/?access_token='+access_token,
+        resp = client.post('/afterbuy/v1/product-specifications/?access_token=' + access_token,
                            data=json.dumps(PRODUCT_SPECIFICATIONS), content_type='application/json')
         self.assertEquals(resp.status_code, 201)
-        resp = client.post('/afterbuy/v1/product-features/?access_token='+access_token,
+        resp = client.post('/afterbuy/v1/product-features/?access_token=' + access_token,
                            data=json.dumps(PRODUCT_FEATURES), content_type='application/json')
         self.assertEquals(resp.status_code, 201)
-        resp = client.get('/afterbuy/v1/products/details/?product_id=motorcycle&&access_token='+access_token)
+        resp = client.get('/afterbuy/v1/products/details/?product_id=motorcycle&&access_token=' + access_token)
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(json.loads(resp.content)['status_code'], 200)
-        resp = client.get('/afterbuy/v1/products/details/?product_id=motor&&access_token='+access_token)
+        resp = client.get('/afterbuy/v1/products/details/?product_id=motor&&access_token=' + access_token)
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(json.loads(resp.content)['message'], "Incorrect Product ID")
 
     def test_add_brand_details(self):
         access_token = self.user_login()
-        resp = client.post('/afterbuy/v1/brands/?access_token='+access_token,
+        resp = client.post('/afterbuy/v1/brands/?access_token=' + access_token,
                            data=json.dumps(PRODUCT_BRAND), content_type='application/json')
         self.assertEquals(resp.status_code, 201)
         return access_token
         
     def test_add_products(self):
         access_token = self.test_add_brand_details()
-        resp = client.post('/afterbuy/v1/products/add/?access_token='+access_token,
-                           data = json.dumps(ADD_PRODUCT), content_type='application/json')
+        resp = client.post('/afterbuy/v1/products/add/?access_token=' + access_token,
+                           data=json.dumps(ADD_PRODUCT), content_type='application/json')
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(json.loads(resp.content)['status'], 200)
       

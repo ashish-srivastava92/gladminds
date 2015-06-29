@@ -88,7 +88,8 @@ class UserProductResource(CustomBaseModelResource):
         filtering = {
                      "consumer": ALL_WITH_RELATIONS,
                      "product_type": ALL_WITH_RELATIONS,
-                     "is_deleted": ALL
+                     "is_deleted": ALL,
+                     "brand_product_id" : ALL
                      }
 
     def prepend_urls(self):

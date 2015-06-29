@@ -185,6 +185,7 @@ AFTERBUY_PRODUCT = {
                     }                   
 AFTERBUY_PRODUCTS = {
                      "brand_product_id": "zxcvbnm",
+                     "warranty_year" : "2015-01-01",
                      "color": "",
                      "consumer": {
                                   "accepted_terms": False,
