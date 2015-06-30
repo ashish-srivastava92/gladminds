@@ -279,6 +279,7 @@ class ContainerTrackerModel(ComplexModel):
     CREATED_DATE = Unicode(default=None)
     IB_DISPATCH_DT = Unicode(default=None)
     NO_OF_CONTAINERS = Unicode
+    PARTNER_NAME = Unicode
     
 class ContainerTrackerModelList(ComplexModel):
     __namespace__ = tns
@@ -310,7 +311,8 @@ class ContainerTrackerService(ServiceBase):
                                 'shippingline_id' :  tracker_obj.SHIPPINGLINE_ID,
                                 'ib_dispatch_dt' :  tracker_obj.IB_DISPATCH_DT,
                                 'created_date' :  tracker_obj.CREATED_DATE,
-                                'no_of_containers' :  tracker_obj.NO_OF_CONTAINERS
+                                'no_of_containers' :  tracker_obj.NO_OF_CONTAINERS,
+                                'partner_name' : tracker_obj.PARTNER_NAME
                             })
 
         feed_remark = save_to_db(feed_type='container_tracker', data_source=tracker_list, feed_remark=feed_remark)

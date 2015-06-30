@@ -856,7 +856,7 @@ class ContainerTrackerAdmin(GmModelAdmin):
 class ContainerIndentAdmin(GmModelAdmin):
     list_display = ('indent_num',
                     'no_of_containers',
-                    'status', 'get_transporter')
+                    'status')
 
     def suit_row_attributes(self, obj):
         class_map = {
@@ -874,7 +874,7 @@ class ContainerLRAdmin(GmModelAdmin):
                     'get_indent_status',
                     'consignment_id', 'container_no',
                     'seal_no', 'gatein_date',
-                    'get_indent_transporter', 'submitted_by')
+                    'get_transporter', 'submitted_by')
     
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('status','sent_to_sap')

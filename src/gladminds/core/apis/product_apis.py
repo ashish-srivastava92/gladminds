@@ -113,7 +113,6 @@ class SparePartUPCResource(CustomBaseModelResource):
         always_return_data = True
 
 class ContainerIndentResource(CustomBaseModelResource):
-    transporter = fields.ForeignKey(TransporterResource, 'transporter', null=True, blank=True)
 
     class Meta:
         queryset = get_model('ContainerIndent').objects.all()
@@ -147,13 +146,14 @@ class ContainerIndentResource(CustomBaseModelResource):
         query_args = [Q(created_date__range=[from_date, to_date])]
         try:
             if request.user.groups.filter(name=Roles.TRANSPORTER):
-                query_args.append(Q(transporter__user_id=request.user.id))
+                submitted_indents = get_model('ContainerLR').objects.filter(transporter__user__user_id=request.user.id
+                                                                    ).values_list('zib_indent_num_id', flat=True)
             elif request.user.groups.filter(name=Roles.SUPERVISOR):
                 supervisor = get_model('Supervisor').objects.get(user__user_id=request.user.id)
                 submitted_indents = get_model('ContainerLR').objects.filter(Q(submitted_by=supervisor.supervisor_id) | Q(submitted_by=None) 
-                                                                        & Q(zib_indent_num_id__transporter=supervisor.transporter
+                                                                        & Q(transporter=supervisor.transporter
                                                                     )).values_list('zib_indent_num_id', flat=True)
-                query_args.append(Q(id__in=submitted_indents))
+            query_args.append(Q(id__in=submitted_indents))
             data = get_model('ContainerIndent').objects.filter(reduce(operator.and_, query_args)
                                                               ).values('status').annotate(total=Count('status')).order_by('-status')
         except Exception as ex:
@@ -163,6 +163,7 @@ class ContainerIndentResource(CustomBaseModelResource):
 class ContainerLRResource(CustomBaseModelResource):
     zib_indent_num = fields.ForeignKey(ContainerIndentResource, 'zib_indent_num', null=True,
                                     blank=True, full=True)
+    transporter = fields.ForeignKey(TransporterResource, 'transporter', null=True, blank=True)
 
     class Meta:
         queryset = get_model('ContainerLR').objects.all()
@@ -204,14 +205,15 @@ class ContainerLRResource(CustomBaseModelResource):
         try:
             conatiner_lr = get_model('ContainerLR').objects.get(transaction_id=transaction_id)
             conatiner_lr.status = status
+            if status=='Inprogress':
+                conatiner_lr.submitted_by = request.user.username
             conatiner_lr.save()
             container_indent=conatiner_lr.zib_indent_num
             if status=='Open':
                 container_indent.status = status
                 container_indent.save()
             else:
-                container_indent=conatiner_lr.zib_indent_num
-                all_indent_lr = get_model('ContainerLR').objects.filter(zib_indent_num=conatiner_lr.zib_indent_num, status=status)
+                all_indent_lr = get_model('ContainerLR').objects.filter(zib_indent_num=container_indent, status=status)
                 if len(all_indent_lr)==container_indent.no_of_containers:
                     container_indent.status = status
                     container_indent.save()

@@ -329,7 +329,6 @@ class Supervisor(base_models.Supervisor):
 
 class ContainerIndent(base_models.ContainerIndent):
     ''' details of Container Indent'''
-    transporter = models.ForeignKey(Transporter)
 
     class Meta(base_models.ContainerIndent.Meta):
         app_label = _APP_NAME
@@ -337,6 +336,7 @@ class ContainerIndent(base_models.ContainerIndent):
 class ContainerLR(base_models.ContainerLR):
     ''' details of Container LR'''
     zib_indent_num = models.ForeignKey(ContainerIndent)
+    transporter = models.ForeignKey(Transporter)
 
     class Meta(base_models.ContainerLR.Meta):
         app_label = _APP_NAME
