@@ -103,7 +103,6 @@ class Industry(BaseModel):
 class Brand(BaseModel):
     '''Details of brands signed up'''
     name = models.CharField(max_length=250)
-#     image_url = models.CharField(max_length=200, null=True, blank=True)
     image_url = models.FileField(upload_to=set_brand_image,
                               max_length=255, null=True, blank=True,
                               validators=[validate_image])

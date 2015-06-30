@@ -61,8 +61,6 @@ class Consumer(base_models.BaseModel):
     consumer_id = models.CharField(
         max_length=50, unique=True, default=uuid4)
     phone_number = PhoneField(unique=True)
-#   image_url = models.CharField(
-#                  max_length=200, default=settings.DEFAULT_IMAGE_ID)
     image_url = models.FileField(upload_to=set_afterbuy_consumer_image,
                               max_length=255, null=True, blank=True,
                               validators=[validate_image])
@@ -99,8 +97,6 @@ class UserProduct(base_models.BaseModel):
     product_type = models.ForeignKey(ProductType)
     purchase_date = models.DateTimeField(null=True, blank=True)
     brand_product_id = models.CharField(max_length=100, null=True, blank=True)
-#     image_url = models.CharField(
-#                    max_length=200, blank=True, null=True)
     image_url = models.FileField(upload_to=set_afterbuy_user_product_image,
                               max_length=255, null=True, blank=True,
                               validators=[validate_image])
