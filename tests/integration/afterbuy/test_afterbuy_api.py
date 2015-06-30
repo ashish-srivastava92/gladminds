@@ -11,11 +11,14 @@ from integration.afterbuy import base_integration
 from gladminds.afterbuy import models
 from gladminds.core.auth_helper import GmApps, Roles
 from integration.bajaj.test_feeds import FeedsResourceTest
+from integration.bajaj.test_brand_logic import Brand
+from integration.bajaj.base import BaseTestCase
+# from integration.bajaj.test_feeds import FeedsResourceTest
 
 client = Client(SERVER_NAME='afterbuy')
 client1 = Client(SERVER_NAME='bajaj')
 
-class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase, FeedsResourceTest):
+class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase, BaseTestCase):
     multi_db = True 
     def setUp(self):
         super(TestAfterbuyApi, self).setUp()
@@ -210,4 +213,34 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase, FeedsResourceTe
                            data=json.dumps(ADD_PRODUCT), content_type='application/json')
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(json.loads(resp.content)['status'], 200)
-      
+        
+    def test_connent_to_brand(self):
+        self.brand = Brand(self)
+        self.create_user(username='bajaj', email='bajaj@gladminds.co', password='bajaj')
+        self.brand.send_dispatch_feed()
+        self.brand.send_purchase_feed() 
+
+    def test_brand_sync(self):
+        self.test_connent_to_brand()
+        access_token = self.test_add_brand_details()
+        uri = '/afterbuy/v1/products/brand-sync/?phone_number=7777777777&&access_token='+ access_token
+        resp = client.get(uri)
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(json.loads(resp.content)['status'], 200)
+    
+    def test_get_service_details(self):
+        self.test_connent_to_brand()
+        access_token = self.test_add_brand_details()
+        uri = '/afterbuy/v1/products/get-service-details/?product_id=12345678901232792&&access_token='+ access_token        
+        resp = client.get(uri)
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(json.loads(resp.content)['serviceHistory'][0]['ucn'], 'USC9217')
+        
+    def test_get_product_coupons(self):
+        self.test_connent_to_brand()
+        access_token = self.user_login()
+        uri = '/afterbuy/v1/products/coupons/?product_id=12345678901232792&&access_token='+ access_token
+        resp = client.get(uri)
+        self.assertEquals(json.loads(resp.content)['coupon_data'][0]['unique_service_coupon'], 'USC9217')
+        self.assertEquals(resp.status_code, 200)
+        
