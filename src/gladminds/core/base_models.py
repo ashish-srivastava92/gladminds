@@ -972,6 +972,7 @@ class ContainerLR(BaseModel):
     submitted_by = models.CharField(max_length=50, null=True, blank=True)
     status = models.CharField(max_length=12, choices=constants.CONSIGNMENT_STATUS, default='Open')
     sent_to_sap = models.BooleanField(default=False)
+    partner_name = models.CharField(max_length=50, null=True, blank=True)
     
     class Meta:
         abstract = True

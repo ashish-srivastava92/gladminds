@@ -85,9 +85,6 @@ class GmModelAdmin(ModelAdmin):
     def get_transporter(self, obj):
         return obj.transporter.transporter_id
     
-    def get_indent_transporter(self, obj):
-        return obj.zib_indent_num.transporter.transporter_id
-    
     def get_indent_status(self, obj):
         return obj.zib_indent_num.status
     
@@ -102,7 +99,6 @@ class GmModelAdmin(ModelAdmin):
     get_supervisor_username.short_description = 'Username'
     get_supervisor_name.short_description = 'Name'
     get_transporter.short_description = 'Transporter ID'
-    get_indent_transporter.short_description = 'Transporter ID'
     
     def get_part_description(self, obj):
         return obj.part_number.description
