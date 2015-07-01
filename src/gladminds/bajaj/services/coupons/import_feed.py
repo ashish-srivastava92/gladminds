@@ -557,17 +557,11 @@ class ContainerTrackerFeed(BaseFeed):
                     except ObjectDoesNotExist as done:                                       
                         container_lr_obj = models.ContainerLR(zib_indent_num=container_indent_obj, 
                                                         consignment_id=tracker_obj['consignment_id'],
-                                                        truck_no=tracker_obj['truck_no'], 
                                                         lr_number=tracker_obj['lr_number'],                                                                    
                                                         do_num=tracker_obj['do_num'],
-                                                        transporter=transporter_data,
-                                                        container_no=tracker_obj['container_no'],
-                                                        seal_no=tracker_obj['seal_no'],
-                                                        shippingline_id=tracker_obj['shippingline_id'],
-                                                        partner_name=tracker_obj['partner_name'])
+                                                        transporter=transporter_data)
                         container_lr_obj.ib_dispatch_dt = format_date(tracker_obj['ib_dispatch_dt'])
                         container_lr_obj.cts_created_date = format_date(tracker_obj['created_date'])
-                        container_lr_obj.lr_date = format_date(tracker_obj['lr_date'])
                         container_lr_obj.save(using=settings.BRAND)
                     
                     gatein_date = format_date(tracker_obj['gatein_date'])
@@ -579,6 +573,12 @@ class ContainerTrackerFeed(BaseFeed):
                             status="Inprogress"
                     container_lr_obj.gatein_date=gatein_date
                     container_lr_obj.gatein_time=tracker_obj['gatein_time']
+                    container_lr_obj.container_no=tracker_obj['container_no']
+                    container_lr_obj.seal_no=tracker_obj['seal_no']
+                    container_lr_obj.lr_date = format_date(tracker_obj['lr_date'])
+                    container_lr_obj.shippingline_id=tracker_obj['shippingline_id']
+                    container_lr_obj.truck_no=tracker_obj['truck_no']
+                    container_lr_obj.partner_name=tracker_obj['partner_name']
                     container_lr_obj.status=status
                     container_lr_obj.save(using=settings.BRAND)
                     if status=="Open":
