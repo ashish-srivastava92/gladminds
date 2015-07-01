@@ -228,11 +228,11 @@ def test(package=''):
 
     if COVERAGE_ENABLED:
         options.append('--with-coverage')
-        options.append('--cover-html')
+        #options.append('--cover-html')
         options.append('--cover-xml')
         options.append('--cover-xml-file=out/coverage.xml')
         options.append('--cover-erase')
-        options.append('--cover-html-dir=out/coverage')
+        #options.append('--cover-html-dir=out/coverage')
         options.append('--cover-package=%s' % PROJECT_PACKGE)
         options.append('--cover-min-percentage=80')
 

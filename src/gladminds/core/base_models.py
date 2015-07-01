@@ -4,7 +4,6 @@ from django.core.exceptions import ValidationError
 from composite_field.base import CompositeField
 from django.conf import settings
 from django.utils.translation import gettext as _
-from constance import config
 
 from gladminds.core.managers import user_manager, coupon_manager,\
     service_desk_manager
@@ -981,6 +980,11 @@ class ContainerLR(BaseModel):
     
     def __unicode__(self):
         return str(self.transaction_id)
+    
+    def save(self, *args, **kwargs):
+        if not self.submitted_by:
+            self.submitted_by = None
+        super(ContainerLR, self).save(*args, **kwargs)
 
 class ContainerTracker(BaseModel):
     ''' details of Container Tracker'''
@@ -1453,7 +1457,7 @@ class City(BaseModel):
 ############################### EPC MODELS ###################################################
 
 class BOMItem(BaseModel):
-    '''Detaills of  Service Billing of Material'''
+    '''Details of  Service Billing of Material'''
     timestamp = models.DateTimeField(default=datetime.now)
     
     bom_number = models.CharField(max_length=10, null=True, blank=True)
@@ -1686,6 +1690,7 @@ class ServiceCircular(models.Model):
         db_table = "gm_servicecircular"
 
 class ManufacturingData(models.Model):
+    '''Manufacturing data of a product'''
     product_id = models.CharField(max_length=100, null=True, blank=True)
     material_number = models.CharField(max_length=100, null=True, blank=True)
     plant = models.CharField(max_length=100, null=True, blank=True)
