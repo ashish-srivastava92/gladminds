@@ -737,7 +737,7 @@ class StateResource(CustomBaseModelResource):
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
-                     "state_name":ALL_WITH_RELATIONS, 
+                     "state_name":ALL, 
                      }
 
 class CityResource(CustomBaseModelResource):

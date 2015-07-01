@@ -127,7 +127,6 @@ class ContainerIndentResource(CustomBaseModelResource):
                      'indent_num' : ALL,
                      'no_of_containers': ALL,
                      'status' : ALL,
-                     'transporter': ALL_WITH_RELATIONS,
                      }
         
         ordering = ['status', 'indent_num' ,'created_date', 'modified_date']
@@ -180,7 +179,8 @@ class ContainerLRResource(CustomBaseModelResource):
                      'status' : ALL,
                      'created_date': ALL,
                      'modified_date': ALL,
-                     'submitted_by': ALL
+                     'submitted_by': ALL,
+                     'transporter': ALL_WITH_RELATIONS
                      }
         
         ordering = ['lr_date', 'gatein_date' ,'created_date', 'status']
