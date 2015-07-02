@@ -103,6 +103,7 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase, BaseTestCase):
         self.assertEquals(json.loads(resp.content)['consumers']['phone_number'], [u'You cannot update phone number'])
 
         resp = self.post('/afterbuy/v1/products/', data=AFTERBUY_PRODUCTS)
+        self.assertEquals(json.loads(resp.content)['brand_product_id'],'zxcvbnm')
         self.assertEquals(resp.status_code, 201)
 
     def test_get_brand_details(self):
@@ -130,30 +131,37 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase, BaseTestCase):
     def test_insurances_api(self):
         resp = self.post('/afterbuy/v1/insurances/', data=AFTERBUY_INSURANCES)
         self.assertEquals(resp.status_code, 201)
+        self.assertEquals(json.loads(resp.content)['agency_contact'], 'bajaj')
 
     def test_invoices_api(self):
         resp = self.post('/afterbuy/v1/invoices/', data=AFTERBUY_INVOICES)
         self.assertEquals(resp.status_code, 201)
+        self.assertEquals(json.loads(resp.content)['invoice_number'], '123456')
 
     def test_licenses_api(self):
         resp = self.post('/afterbuy/v1/licenses/', data=AFTERBUY_LICENCES)
         self.assertEquals(resp.status_code, 201)
+        self.assertEquals(json.loads(resp.content)['license_number'], '12345')
 
     def test_pollution_api(self):
         resp = self.post('/afterbuy/v1/pollution/', data=AFTERBUY_POLLUTION)
         self.assertEquals(resp.status_code, 201)
+        self.assertEquals(json.loads(resp.content)['pucc_number'], '123')
 
     def test_product_support_api(self):
         resp = self.post('/afterbuy/v1/product-support/', data=AFTERBUY_PRODUCTSUPPORT)
         self.assertEquals(resp.status_code, 201)
+        self.assertEquals(json.loads(resp.content)['contact'], '1234567890')
 
     def test_sell_information_api(self):
         resp = self.post('/afterbuy/v1/sell-information/', data=AFTERBUY_SELLINFORMATION)
         self.assertEquals(resp.status_code, 201)
+        self.assertEquals(json.loads(resp.content)['id'], 1)
 
     def test_product_imagesn_api(self):
         resp = self.post('/afterbuy/v1/product-images/', data=AFTERBUY_USERPRODUCTIMAGES)
         self.assertEquals(resp.status_code, 201)
+        self.assertEquals(json.loads(resp.content)['image_url'], 'aaa')
 
     def test_registrations_api(self):
         resp = self.post('/afterbuy/v1/registrations/', data=AFTERBUY_REGISTATION)

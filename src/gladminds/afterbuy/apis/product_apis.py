@@ -99,12 +99,18 @@ class UserProductResource(CustomBaseModelResource):
                 url(r"^(?P<resource_name>%s)/get-brands%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_brand_details'), name="get_brand_details" ),
                 url(r"^(?P<resource_name>%s)/accept-product%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('user_product_acceptance'), name="user_product_acceptance" ),
                 url(r"^(?P<resource_name>%s)/details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('product_specifications'), name="product_specifications" ),
-                url(r"^(?P<resource_name>%s)/add%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('add_product'), name="add_product"),
+                url(r"^(?P<resource_name>%s)/create%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('add_product'), name="add_product"),
                 url(r"^(?P<resource_name>%s)/brand-sync%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('brand_sync'), name="brand_sync"),
                 url(r"^(?P<resource_name>%s)/get-service-details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_service_details'), name="get_service_details")               
         ]
 
     def get_product_coupons(self, request, **kwargs):
+        '''
+        Get all the coupons associated with product id
+        Args : product_id
+        Return : all the coupons associated with product id 
+        
+        '''
         self.is_authenticated(request)
         product_id = request.GET['product_id']
         try:
@@ -136,9 +142,16 @@ class UserProductResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def get_brand_details(self, request, **kwargs):
+        '''
+        Get the brand and product details of the logged in user
+        Args : Access Token of the user
+        Returns : Product and Brand details associated with the user
+        '''
         self.is_authenticated(request)
         try:
+            print "9888888888888888=============", request.user
             products = afterbuy_models.UserProduct.objects.filter(consumer__user=request.user).select_related('product_type')
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>sssssssssssssss>>>>>", products
             details = {}
             brand_details = []
             for product in products:
@@ -155,6 +168,11 @@ class UserProductResource(CustomBaseModelResource):
             return HttpBadRequest()
         
     def user_product_acceptance(self, request, **kwargs):
+        '''
+        Allow the user to accept the product
+        Args : product_id , is_accepted (1 or 0)
+        Returns : Accept the product if is_accepted is 1  
+        '''
         self.is_authenticated(request)
         if request.method!= 'POST':
             return HttpResponse(json.dumps({"message":"method not allowed"}),
@@ -300,6 +318,11 @@ class UserProductResource(CustomBaseModelResource):
             return HttpBadRequest('Product cannot be added')
     
     def get_service_details(self, request, **kwargs):
+        '''
+        Service details for specific product
+        Args : product_id
+        Return : List of services for the product 
+        '''
         self.is_authenticated(request)
         try:
             product_id = request.GET['product_id']
