@@ -1,12 +1,9 @@
 import csv
-import time
 import random
 
-from datetime import datetime
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User, Group
-# from gladminds.core import utils
 
 from gladminds.core.auth_helper import Roles
 from gladminds.core.model_fetcher import get_model
@@ -36,6 +33,7 @@ class Command(BaseCommand):
         return user_details
 
     def upload_dealer_data(self):
+        '''Upload data of the dealers'''
         print "Started running dealer function..."
         file_list = ['sa_data_goa_dl_hr.csv']
         dealer_list = []
@@ -81,6 +79,7 @@ class Command(BaseCommand):
             user_pro_obj.save()
 
     def upload_service_advisor_data(self):
+        '''Upload data of SA associated with the dealers'''
         print "Started running SA function..."
         file_list = ['sa_data_goa_dl_hr.csv']
         file = open("sa_details.txt", "w")

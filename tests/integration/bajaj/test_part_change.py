@@ -46,14 +46,10 @@ class PartChangeTests(BaseTestCase):
         uri = '/v1/brand-product-range/'
         resp = self.post(uri, data=BRAND_PRODUCT_RANGE, access_token=access_token)
         self.assertEquals(resp.status_code,201)
-        uri = '/v1/brand-product-range/?vertical=vertical2'
+        uri = '/v1/brand-product-range/'
         resp = self.get(uri=uri, access_token=access_token)
         self.assertEquals(resp.status_code , 200)
         self.assertEquals(json.loads(resp.content)['objects'][0]['sku_code'], "112")
-        uri = '/v1/brand-product-range/?vertical=vertical22'
-        resp = self.get(uri=uri, access_token=access_token)
-        self.assertEquals(len(json.loads(resp.content)['objects']), 0)
-        self.assertEquals(resp.status_code , 200)
     
     def test_get_bom_header(self):
         access_token = self.user_login()

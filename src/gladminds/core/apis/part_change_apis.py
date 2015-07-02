@@ -44,7 +44,6 @@ class BrandProductRangeResource(CustomBaseModelResource):
         always_return_data = True 
         filtering = {
                      "sku_code": ALL,
-                     "vertical" : ALL
                      }
         
     def dehydrate(self, bundle):
