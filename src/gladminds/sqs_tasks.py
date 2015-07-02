@@ -743,13 +743,14 @@ def export_cts_to_sap(*args, **kwargs):
     '''
     send container tracking system info to sap
     '''
+    brand= kwargs.get('brand', None)
     cts = export_feed.ExportCTSFeed(username=settings.SAP_CRM_DETAIL['username'],
                                     password=settings.SAP_CRM_DETAIL['password'],
                                     wsdl_url=settings.CTS_WSDL_URL, feed_type='CTS Feed')
-    feed_export_data = cts.export_data()
+    feed_export_data = cts.export_data(brand=brand)
     if len(feed_export_data[0]) > 0:
         logger.info("[export_cts_to_sap]: sending cts data")
-        cts.export(items=feed_export_data[0], item_batch=feed_export_data[1],
+        cts.export(brand=brand, items=feed_export_data[0], item_batch=feed_export_data[1],
                    total_failed_on_feed=feed_export_data[2])
 
 def welcome_kit_due_date_escalation(*args, **kwargs):
