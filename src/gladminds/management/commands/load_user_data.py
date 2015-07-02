@@ -4,8 +4,8 @@ from datetime import datetime
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from gladminds.core.feed_log_remark import FeedLogWithRemark
-from gladminds.feed import SAPFeed
+from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
+from gladminds.bajaj.services.coupons.import_feed import SAPFeed
 
 
 class Command(BaseCommand):

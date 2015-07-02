@@ -1552,7 +1552,6 @@ class BrandProductRange(BaseModel):
     '''Different range of product a brand provides'''
     sku_code = models.CharField(max_length=50, unique=True)
     description = models.TextField(null=True, blank=True)
-    vertical = models.CharField(max_length=100)
     image_url = models.FileField(upload_to=set_brand_product_image_path,
                                   max_length=255, null=True, blank=True,
                                   validators=[validate_image])

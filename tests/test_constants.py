@@ -730,7 +730,6 @@ REDEMPTION_REQUEST1={
                 }
 
 BRAND_PRODUCT_RANGE = {
-                     "vertical": "vertical2",
                      "description": "sss",
                      "sku_code": "112"
                      }

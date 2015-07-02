@@ -6,7 +6,6 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group
 from django.conf import settings
 
-from gladminds.bajaj.models import MessageTemplate, EmailTemplate
 from gladminds.bajaj import models as common
 from gladminds.bajaj.services.coupons import import_feed
 from gladminds.core.auth_helper import ALL_APPS, Roles
@@ -23,6 +22,7 @@ class Command(BaseCommand):
         self.add_constants()
 
     def add_group(self):
+        '''Upload data of the groups'''
         print "Loading groups..."
         file_path = os.path.join(settings.PROJECT_DIR, 'template_data/group.json')
         groups = json.loads(open(file_path).read())
@@ -31,10 +31,9 @@ class Command(BaseCommand):
             group = Group(id=group['fields']["id"],name=group['fields']["name"])
             group.save()
         print "Loaded groups..."
-         
-        
-    
+
     def add_sms_template(self):
+        '''Upload data of the SMS template'''
         print "Loading sms template..."
         file_path = os.path.join(settings.PROJECT_DIR, 'template_data/template.json')
         message_templates = json.loads(open(file_path).read())
@@ -50,6 +49,7 @@ class Command(BaseCommand):
             print "Loaded sms template..."
     
     def add_email_template(self):
+        '''Upload data of the Email template'''
         print "Loading email template..."
         file_path = os.path.join(settings.PROJECT_DIR, 'template_data/email_template.json')
         email_templates = json.loads(open(file_path).read())
@@ -66,23 +66,8 @@ class Command(BaseCommand):
                     temp_obj.save(using=app)
             print "Loaded email template..."  
         
-    def add_user_for_existing_dealer(self):
-        print "Loading users for existing dealer...."
-        all_dealers = common.Dealer.objects.all()
-        for dealer in all_dealers:
-            BASIC_FEED.register_user(Roles.DEALERS, username=dealer.dealer_id)
-        print "Loaded users for existing dealer...."
-        
-    def add_user_in_gladminds_table(self):
-        print "Adding users in ...."
-        all_gladminds_users = common.UserProfile.objects.all()
-        for gladminds_user in all_gladminds_users:
-            user = BASIC_FEED.register_user('customer', username=gladminds_user.gladmind_customer_id)
-            gladminds_user.user = user
-            gladminds_user.save()
-        print "Loading users for existing dealer...."
-        
     def add_constants(self):
+        '''Upload data of the Constants'''
         print "Loading constants.."
         file_path = os.path.join(settings.PROJECT_DIR, 'template_data/constant.json')
         constants = json.loads(open(file_path).read())

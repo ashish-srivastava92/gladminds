@@ -22,7 +22,7 @@ from gladminds.core.constants import BY_DEFAULT_RECORDS_PER_PAGE, \
     ROOT_CAUSE, DEMO_PRIORITY
 from gladminds.core.utils import get_list_from_set
 from gladminds.core.model_fetcher import models, get_model
-from gladminds.management.commands import load_area_service_manager_data
+from gladminds.management.commands import load_asc_with_asm
 
 
 LOG = logging.getLogger('gladminds')
@@ -253,7 +253,6 @@ def modify_feedback_comments(request, feedback_id, comment_id):
         LOG.info("[Exception comment not found]: {0}".format(ex))
         return HttpResponseNotFound()
 
-
 @require_http_methods(["POST"])
 def get_feedback_response(request, feedback_id):
     data = request.POST
@@ -265,7 +264,8 @@ def get_feedback_response(request, feedback_id):
         return HttpResponse()
 
 def add_servicedesk_user(request):
-    register_user = load_area_service_manager_data.Command()
+    #TODO: The command function needs to be removed
+    register_user = load_asc_with_asm.Command()
     if request.method == 'GET':
         return render(request, 'service-desk/servicedesk_user_registration.html')
     elif request.method == 'POST':
