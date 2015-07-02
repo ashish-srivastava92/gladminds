@@ -253,7 +253,6 @@ def modify_feedback_comments(request, feedback_id, comment_id):
         LOG.info("[Exception comment not found]: {0}".format(ex))
         return HttpResponseNotFound()
 
-
 @require_http_methods(["POST"])
 def get_feedback_response(request, feedback_id):
     data = request.POST
@@ -265,6 +264,7 @@ def get_feedback_response(request, feedback_id):
         return HttpResponse()
 
 def add_servicedesk_user(request):
+    #TODO: The command function needs to be removed
     register_user = load_asc_with_asm.Command()
     if request.method == 'GET':
         return render(request, 'service-desk/servicedesk_user_registration.html')
