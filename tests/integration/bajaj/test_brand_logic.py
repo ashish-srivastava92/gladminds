@@ -179,6 +179,11 @@ class Brand(object):
         data=json.dumps({"username": "bajaj", "password": "bajaj"})
         resp=client.post('/v1/gm-users/login/', data=data, content_type='application/json')
         return json.loads(resp.content)['access_token']
+    
+    def tranporter_login(self):
+        data=json.dumps({"username": "15346", "password": "15346@123"})
+        resp=client.post('/v1/gm-users/login/', data=data, content_type='application/json')
+        return json.loads(resp.content)['access_token']
 
     def get_container_indent(self, access_token):
         uri = '/v1/container-indents/?access_token='+access_token
@@ -191,4 +196,8 @@ class Brand(object):
         response = client.get(uri, content_type='application/json')
         response_data=json.loads(response.content)['objects']
         return response_data
-
+    
+    def submit_container_indent(self, access_token, indent_id):
+        data=json.dumps({"status": "Inprogress",  "modified_date": "2015-07-02"})
+        uri = '/v1/container-indents/submit/'+indent_id+'/?access_token='+access_token
+        resp=client.put(uri, data=data, content_type='application/json')        
