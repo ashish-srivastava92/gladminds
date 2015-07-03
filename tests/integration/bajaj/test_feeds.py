@@ -140,11 +140,15 @@ class FeedsResourceTest(BaseTestCase):
         system = self.system
         brand.send_container_tracker_feed()
         access_token=brand.admin_login()
+        
         saved_cts_indent_data=brand.get_container_indent(access_token)
+        system.verify_result(input=len(saved_cts_indent_data), output=2)
+        system.verify_result(input=saved_cts_indent_data[0]['status'], output='Open')
+        system.verify_result(input=saved_cts_indent_data[1]['status'], output='Inprogress')
+        
         saved_cts_lr_data=brand.get_container_lr(access_token)
         system.verify_result(input=len(saved_cts_lr_data), output=4)
         system.verify_result(input=saved_cts_lr_data[0]['status'], output='Open')
         system.verify_result(input=saved_cts_lr_data[1]['status'], output='Inprogress')
         system.verify_result(input=saved_cts_lr_data[2]['status'], output='Closed')
-        system.verify_result(input=len(saved_cts_indent_data), output=1)
-        system.verify_result(input=saved_cts_indent_data[0]['status'], output='Open')
+        system.verify_result(input=saved_cts_lr_data[3]['status'], output='Inprogress')
