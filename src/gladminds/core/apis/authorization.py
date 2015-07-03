@@ -239,6 +239,7 @@ class ServiceDeskCustomAuthorization(Authorization):
 class ContainerIndentCustomAuthorization(Authorization):
 
     def get_indents_query(self, object_list, bundle):
+        query_set=[]
         if bundle.request.user.groups.filter(name=Roles.TRANSPORTER):
             query_set = get_model('ContainerLR').objects.filter(transporter__user__user_id=bundle.request.user.id)
             
@@ -250,8 +251,9 @@ class ContainerIndentCustomAuthorization(Authorization):
         
     def read_list(self, object_list, bundle):
         query_set = self.get_indents_query(object_list, bundle)
-        submitted_indents=query_set.values_list('zib_indent_num_id', flat=True)
-        object_list = object_list.filter(id__in=submitted_indents)
+        if query_set:
+            submitted_indents=query_set.values_list('zib_indent_num_id', flat=True)
+            object_list = object_list.filter(id__in=submitted_indents)
         return object_list
 
 class ContainerLRCustomAuthorization(Authorization):

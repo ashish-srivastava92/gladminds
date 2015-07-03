@@ -12,9 +12,8 @@ from gladminds.core.model_fetcher import get_model
 from gladminds.management.commands.load_state import Command as state_cmd
 from gladminds.management.commands.load_mech_data import Command as mech_cmd
 from gladminds.management.commands.load_part_data import Command as part_cmd
-from gladminds.management.commands.load_area_service_manager_data import Command as asm_cmd
+from gladminds.management.commands.load_asc_with_asm import Command as asm_cmd
 from gladminds.management.commands.load_sbom_data import Command as sbom_cmd
-from gladminds.bajaj.models import ZonalServiceManager
 
 _DEMO = GmApps.DEMO
 _BAJAJ = GmApps.BAJAJ
