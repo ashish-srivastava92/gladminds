@@ -118,3 +118,6 @@ alter table gm_brand add column image_url varchar(255) null;
 
 alter table afterbuy_brand drop column image_url;
 alter table afterbuy_brand add column image_url varchar(255) null;
+--------------- RUN ONLY IN AFTERBUY---------
+rename table gm_constant to afterbuy_constant;
+---------------------------------------------

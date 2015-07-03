@@ -4,28 +4,28 @@ import logging
 from django.conf import settings
 from django.conf.urls import url
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.serializers.json import DjangoJSONEncoder
 from django.forms.models import model_to_dict
 from django.http.response import HttpResponse
-from django.http.response import HttpResponseRedirect
 from tastypie import fields
-from tastypie.authorization import DjangoAuthorization, Authorization
+from tastypie.authorization import Authorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.http import HttpBadRequest
 from tastypie.utils.urls import trailing_slash
 
-from gladminds.afterbuy import models as afterbuy_model
 from gladminds.afterbuy import models as afterbuy_models
 from gladminds.afterbuy.apis.brand_apis import BrandResource
 from gladminds.afterbuy.apis.user_apis import ConsumerResource
 from gladminds.afterbuy.apis.validations import ProductValidation
+from gladminds.afterbuy.utils import get_sql_data
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import CustomAuthorization, \
     MultiAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.core.managers.mail import send_recycle_mail
 from gladminds.core.auth_helper import GmApps
+from gladminds.core.managers.mail import send_recycle_mail
 from gladminds.core.model_fetcher import get_model
-from django.core.serializers.json import DjangoJSONEncoder
+
 
 logger = logging.getLogger("gladminds")
 
@@ -131,7 +131,7 @@ class UserProductResource(CustomBaseModelResource):
             product_info = afterbuy_models.UserProduct.objects.get(id=product_id)
             email_id = product_info.consumer.user.email
             try:
-                afterbuy_model.Consumer.objects.get(user__email=email_id, is_email_verified=True)
+                afterbuy_models.Consumer.objects.get(user__email=email_id, is_email_verified=True)
                 send_recycle_mail(email_id, data=product_info)
                 data = {'status': 1, 'message': 'email sent successfully'}
             except Exception as ex:
@@ -149,9 +149,7 @@ class UserProductResource(CustomBaseModelResource):
         '''
         self.is_authenticated(request)
         try:
-            print "9888888888888888=============", request.user
             products = afterbuy_models.UserProduct.objects.filter(consumer__user=request.user).select_related('product_type')
-            print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>sssssssssssssss>>>>>", products
             details = {}
             brand_details = []
             for product in products:
@@ -492,9 +490,75 @@ class UserProductImagesResource(CustomBaseModelResource):
 class InterestResource(CustomBaseModelResource):
 
     class Meta:
-        queryset = afterbuy_model.Interest.objects.all()
+        queryset = afterbuy_models.Interest.objects.all()
         resource_name = "interests"
         authentication = AccessTokenAuthentication()
         authorization = Authorization()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
+
+
+class ServiceCenterLocationResource(CustomBaseModelResource):
+    
+    class Meta:
+        queryset = afterbuy_models.ServiceCenterLocation.objects.all()
+        resource_name = 'service-center-locations'
+        authentication = AccessTokenAuthentication()
+        authorization = Authorization()
+        allowed_methods = ['get']
+        always_return_data = True
+        
+    def prepend_urls(self):
+        return [
+                url(r"^(?P<resource_name>%s)/get-nearest-centers%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_service_centers'), name="get_service_centers")
+        ]
+
+    def get_locations(self, latitude, longitude, brand, radius=50):
+        query = "SELECT z.name, z.latitude, z.longitude, p.distance_unit\
+                 * DEGREES(ACOS(COS(RADIANS(p.latpoint))\
+                 * COS(RADIANS(z.latitude))\
+                 * COS(RADIANS(p.longpoint) - RADIANS(z.longitude))\
+                 + SIN(RADIANS(p.latpoint))\
+                 * SIN(RADIANS(z.latitude)))) AS distance_in_km\
+                FROM afterbuy_servicecenterlocation AS z\
+                JOIN (   /* these are the query parameters */\
+                SELECT  {0}  AS latpoint,  {1} AS longpoint, {2} AS radius, 111.045 AS distance_unit\
+                    ) AS p ON 1=1\
+                WHERE brand = '{3}' and z.latitude\
+                BETWEEN p.latpoint  - (p.radius / p.distance_unit)\
+                AND p.latpoint  + (p.radius / p.distance_unit)\
+                AND z.longitude\
+                BETWEEN p.longpoint - (p.radius / (p.distance_unit * COS(RADIANS(p.latpoint))))\
+                AND p.longpoint + (p.radius / (p.distance_unit * COS(RADIANS(p.latpoint))))\
+                ORDER BY distance_in_km LIMIT 3;".format(latitude, longitude, radius, brand)
+        result = get_sql_data(query)
+        return result
+
+    
+    def get_service_centers(self, request , **kwargs):
+        '''
+        Get nearest service center locations
+        Args : latitude , longitude, brand 
+        Returns : The nearest 3 service centers 
+        '''
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({'message' :  'Method not allowed'}),
+                                content_type='application/json')
+        try:
+            load = json.loads(request.body)
+            latitude =  load.get('latitude')
+            longitude = load.get('longitude')
+            brand = load.get('brand')
+            result = self.get_locations(latitude, longitude, brand)
+            service_center_count = get_model("Constant", settings.BRAND).objects.get\
+                                    (constant_name='service_center_count').constant_value
+            if len(result) < service_center_count:
+                result = self.get_locations(latitude, longitude, brand, radius=400)
+            
+            return HttpResponse(json.dumps({'status':200, 'results': result}),
+                                content_type='application/json') 
+        except Exception as ex:
+            logger.error("Exception while locating nearby service centers - {0}".format(ex))
+            return HttpBadRequest("Cannot locate nearby service centers")
+        
+        

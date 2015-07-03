@@ -1,10 +1,10 @@
 from django.contrib.admin import AdminSite
 from django.contrib.admin.options import ModelAdmin
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from django.contrib.auth.models import User, Group, Permission
 
 from gladminds.core.auth_helper import GmApps
 from gladminds.core.model_fetcher import get_model
-from django.contrib.auth.models import User, Group, Permission
 
 
 class AfterbuyAdminSite(AdminSite):
@@ -37,7 +37,6 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("BrandProductCategory"))
     brand_admin.register(get_model("ServiceType"))
     brand_admin.register(get_model("Service"))
-    brand_admin.register(get_model("SellInformation"))
     brand_admin.register(get_model("Consumer", brand), ConsumerAdmin)
     brand_admin.register(get_model("ProductType",brand), ProductTypeAdmin)
     brand_admin.register(get_model("UserProduct", brand))
@@ -45,11 +44,6 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("ProductWarrantyInfo", brand))
     brand_admin.register(get_model("PollutionCertificate", brand))
     brand_admin.register(get_model("License", brand))
-    
-    brand_admin.register(User, UserAdmin)
-    brand_admin.register(Group, GroupAdmin)
-    brand_admin.register(Permission)
-    
     brand_admin.register(get_model("MessageTemplate", brand))
     brand_admin.register(get_model("EmailTemplate", brand))
     brand_admin.register(get_model("SMSLog", brand))
@@ -59,6 +53,12 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("ProductSpecification", brand))
     brand_admin.register(get_model("ProductFeature", brand))
     brand_admin.register(get_model("RecommendedPart", brand))
+    brand_admin.register(get_model("Constant", brand))
+    
+    brand_admin.register(User, UserAdmin)
+    brand_admin.register(Group, GroupAdmin)
+    brand_admin.register(Permission)
+    
     return brand_admin
 
 brand_admin = get_admin_site_custom(GmApps.AFTERBUY)

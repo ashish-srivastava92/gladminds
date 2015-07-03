@@ -417,8 +417,9 @@ class AuditLog(base_models.AuditLog):
         
 class Constant(base_models.Constant):
     ''' contains all the constants'''
-    class Meta(base_models.Constant.Meta):
+    class Meta():
         app_label = _APP_NAME
+        verbose_name_plural = 'Constants'
 
 
 class EmailToken(models.Model):
@@ -505,4 +506,22 @@ class EmailToken(models.Model):
         else:
             send_email_activation(receiver_email, data=ctx_dict,
                                   brand=GmApps.AFTERBUY)
+
+class ServiceCenterLocation(base_models.BaseModel):
+    brand = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    phone_number = models.CharField(max_length=25, null=True, blank=True)
+    address = models.TextField(blank=True, null=True)
+    state = models.CharField(max_length=255, null=True, blank=True)
+    country = models.CharField(max_length=255, null=True, blank=True)
+    pincode = models.CharField(max_length=15, null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Service Locations"
+    
+    def __unicode__(self):
+        return self.name
 

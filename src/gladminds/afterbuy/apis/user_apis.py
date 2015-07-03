@@ -1,45 +1,46 @@
-from uuid import uuid4
 import json
 import logging
-import requests
+import operator
 import re
-from gladminds.core.utils import check_password
-from django.http.response import HttpResponse
-from django.conf.urls import url
-from tastypie.http import HttpBadRequest
-from tastypie.utils.urls import trailing_slash
-from django.contrib.auth.models import User
-from django.contrib.auth import  login
+from uuid import uuid4
+
 from django.conf import settings
-from gladminds.afterbuy import utils as afterbuy_utils
-from gladminds.core.auth import otp_handler
+from django.conf.urls import url
+from django.contrib.auth import  login
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
+from django.contrib.sites.models import RequestSite
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models.query_utils import Q
+from django.db.transaction import atomic
+from django.forms.models import model_to_dict
+from django.http.response import HttpResponse
+import requests
+from tastypie import fields, http
+from tastypie.authorization import DjangoAuthorization, Authorization
+from tastypie.exceptions import ImmediateHttpResponse
+from tastypie.http import HttpBadRequest
+from tastypie.resources import  ALL, ModelResource
+from tastypie.utils.urls import trailing_slash
 
 from gladminds.afterbuy import models as afterbuy_model
-from tastypie import fields, http
-from gladminds.core.apis.base_apis import CustomBaseModelResource
-from gladminds.sqs_tasks import send_otp
-from django.contrib.auth import authenticate
-from tastypie.resources import  ALL, ModelResource
-from tastypie.exceptions import ImmediateHttpResponse
-from gladminds.core.views.auth_view import get_access_token, create_access_token
-from tastypie.authorization import DjangoAuthorization, Authorization
-from gladminds.core.apis.authorization import CustomAuthorization,\
-    MultiAuthorization
-from django.contrib.sites.models import RequestSite
-from gladminds.core.apis.authentication import AccessTokenAuthentication
-from django.db.transaction import atomic
-from gladminds.core.auth_helper import GmApps
-from gladminds.afterbuy.apis.validations import ConsumerValidation,\
+from gladminds.afterbuy import utils as afterbuy_utils
+from gladminds.afterbuy.apis.validations import ConsumerValidation, \
     UserValidation
-from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
-from gladminds.core.model_helpers import format_phone_number
-from gladminds.core.auth import otp_handler
 from gladminds.core import constants
-from django.db.models.query_utils import Q
+from gladminds.core.apis.authentication import AccessTokenAuthentication
+from gladminds.core.apis.authorization import CustomAuthorization, \
+    MultiAuthorization
+from gladminds.core.apis.base_apis import CustomBaseModelResource
+from gladminds.core.auth import otp_handler
+from gladminds.core.auth_helper import GmApps
+from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.model_fetcher import get_model
-import operator
-from django.forms.models import model_to_dict
-from django.core.serializers.json import DjangoJSONEncoder
+from gladminds.core.model_helpers import format_phone_number
+from gladminds.core.utils import check_password
+from gladminds.core.views.auth_view import get_access_token, create_access_token
+from gladminds.sqs_tasks import send_otp
+
 
 logger = logging.getLogger("gladminds")
 

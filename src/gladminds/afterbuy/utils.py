@@ -1,6 +1,6 @@
 from datetime import datetime
 from random import randint
-
+from django.db import connections
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -76,3 +76,18 @@ def mobile_format(phone_number):
         or service advisor we will check that number in +91 format'''
     return '+91' + phone_number[-10:]
 
+def dictfetchall(cursor):
+    "Returns all rows from a cursor as a dict"
+    desc = cursor.description
+    return [
+        dict(zip([col[0] for col in desc], row))
+        for row in cursor.fetchall()
+    ]
+
+def get_sql_data(query):
+    conn = connections[settings.BRAND]
+    cursor = conn.cursor()
+    cursor.execute(query)
+    data = dictfetchall(cursor)
+    conn.close()
+    return data
