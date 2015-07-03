@@ -172,6 +172,7 @@ class ContainerIndentResource(CustomBaseModelResource):
         from_date = args.get('from', datetime.now() - timedelta(days=180))
         to_date = args.get('to', datetime.now())
         query_args = [Q(created_date__range=[from_date, to_date])]
+        submitted_indents=[]
         try:
             if request.user.groups.filter(name=Roles.TRANSPORTER):
                 submitted_indents = get_model('ContainerLR').objects.filter(transporter__user__user_id=request.user.id
@@ -181,7 +182,8 @@ class ContainerIndentResource(CustomBaseModelResource):
                 submitted_indents = get_model('ContainerLR').objects.filter(Q(submitted_by=supervisor.supervisor_id) | Q(submitted_by=None) 
                                                                         & Q(transporter=supervisor.transporter
                                                                     )).values_list('zib_indent_num_id', flat=True)
-            query_args.append(Q(id__in=submitted_indents))
+            if submitted_indents:
+                query_args.append(Q(id__in=submitted_indents))
             data = get_model('ContainerIndent').objects.filter(reduce(operator.and_, query_args)
                                                               ).values('status').annotate(total=Count('status')).order_by('-status')
         except Exception as ex:
@@ -275,12 +277,17 @@ class ContainerLRResource(CustomBaseModelResource):
             container_indent=conatiner_lr.zib_indent_num
             if status=='Open':
                 container_indent.status = status
-                container_indent.save()
+            elif status=='Inprogress':
+                all_open_lr = get_model('ContainerLR').objects.filter(zib_indent_num=container_indent, status='Open')
+                if all_open_lr:
+                    container_indent.status = 'Open'
+                else:
+                    container_indent.status = status
             else:
                 all_indent_lr = get_model('ContainerLR').objects.filter(zib_indent_num=container_indent, status=status)
                 if len(all_indent_lr)==container_indent.no_of_containers:
                     container_indent.status = status
-                    container_indent.save()
+            container_indent.save()
             data=[{'status':1, 'message': 'LR status updated successfully'}]
         except Exception as ex:
             data=[{'status':0,'message': 'LR status update unsuccessful'}]

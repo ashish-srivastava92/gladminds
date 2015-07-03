@@ -72,7 +72,7 @@ class BaseTestCase(ResourceTestCase):
 
     def create_user(self, **kwargs):
         user = User.objects.create_user(kwargs['username'], kwargs['email'], kwargs['password'])
-        if kwargs['is_superuser']:
+        if kwargs.has_key('is_superuser'):
             user.is_superuser=kwargs['is_superuser']
         user.save()
         if kwargs.get('group_name'):

@@ -581,8 +581,15 @@ class ContainerTrackerFeed(BaseFeed):
                     container_lr_obj.partner_name=tracker_obj['partner_name']
                     container_lr_obj.status=status
                     container_lr_obj.save(using=settings.BRAND)
-                    if status=="Open":
-                        container_indent_obj.status=status
+                    
+                    if status=='Open':
+                        container_indent_obj.status = status
+                    elif status=='Inprogress':
+                        all_open_lr = models.ContainerLR.objects.filter(zib_indent_num=container_indent_obj, status='Open')
+                        if all_open_lr:
+                            container_indent_obj.status = 'Open'
+                        else:
+                            container_indent_obj.status = status
                     else:
                         all_indent_lr = models.ContainerLR.objects.filter(zib_indent_num=container_indent_obj, status=status)
                         if len(all_indent_lr)==container_indent_obj.no_of_containers:

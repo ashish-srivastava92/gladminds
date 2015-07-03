@@ -200,4 +200,16 @@ class Brand(object):
     def submit_container_indent(self, access_token, indent_id):
         data=json.dumps({"status": "Inprogress",  "modified_date": "2015-07-02"})
         uri = '/v1/container-indents/submit/'+indent_id+'/?access_token='+access_token
-        resp=client.put(uri, data=data, content_type='application/json')        
+        resp=client.put(uri, data=data, content_type='application/json')     
+    
+    def get_indent_count(self, access_token):
+        uri = '/v1/container-indents/count/?access_token='+access_token
+        response = client.get(uri, content_type='application/json')
+        response_data=json.loads(response.content)
+        return response_data
+
+    def save_container_lr(self, access_token, transaction_id, status):
+        data=json.dumps({"status":status, "modified_date": "2015-03-05",
+                         "seal_no":"123", "container_no":"723389"})
+        uri = '/v1/container-lrs/save/'+transaction_id+'/?access_token='+access_token
+        resp=client.put(uri, data=data, content_type='application/json')     

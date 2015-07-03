@@ -73,10 +73,10 @@
                         <ns1:TRANS_NAME>trans new pvt ltd</ns1:TRANS_NAME>
                         <ns1:CONTAINER_NO>123</ns1:CONTAINER_NO>
                         <ns1:LR_DATE>2015-03-04</ns1:LR_DATE>
-                        <ns1:SHIPPINGLINE_ID></ns1:SHIPPINGLINE_ID>
+                        <ns1:SHIPPINGLINE_ID>123</ns1:SHIPPINGLINE_ID>
                         <ns1:DO_NUM>1</ns1:DO_NUM>
                         <ns1:TRUCK_NO>45</ns1:TRUCK_NO>
-                        <ns1:NO_OF_CONTAINERS>3</ns1:NO_OF_CONTAINERS>
+                        <ns1:NO_OF_CONTAINERS>1</ns1:NO_OF_CONTAINERS>
                         <ns1:GATEIN_DATE>0000-00-00</ns1:GATEIN_DATE>    
                         <ns1:IB_DISPATCH_DT>0000-00-00</ns1:IB_DISPATCH_DT>
                     </ns1:ContainerTrackerModel>
