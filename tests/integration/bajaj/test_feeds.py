@@ -128,3 +128,24 @@ class FeedsResourceTest(BaseTestCase):
         brand.send_asc_feed()
         brand.check_asc_feed_saved_to_database()
 
+    def test_container_tracker_feed(self):
+        '''
+           Test the CTS feed.
+           1. if no seal no. and contianer no. - indent should be Open
+           2. if seal no. and contianer no. - indent should be Inprogress
+           3. if seal no., contianer no. and gatein date- indent should be Closed
+           4. overall status of the Indent should be Open
+        '''
+        brand = self.brand
+        system = self.system
+        brand.send_container_tracker_feed()
+        access_token=brand.admin_login()
+        saved_cts_indent_data=brand.get_container_indent(access_token)
+        saved_cts_lr_data=brand.get_container_lr(access_token)
+        system.verify_result(input=len(saved_cts_lr_data), output=3)
+        system.verify_result(input=saved_cts_lr_data[0]['status'], output='Open')
+        system.verify_result(input=saved_cts_lr_data[1]['status'], output='Inprogress')
+        system.verify_result(input=saved_cts_lr_data[2]['status'], output='Closed')
+        system.verify_result(input=len(saved_cts_indent_data), output=1)
+        system.verify_result(input=saved_cts_indent_data[0]['status'], output='Open')
+

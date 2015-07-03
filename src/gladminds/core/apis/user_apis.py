@@ -1,26 +1,20 @@
 from datetime import datetime, timedelta, date
 import json
 import logging
-
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.db.models.aggregates import Count, Sum
 from django.http.response import HttpResponse
-from django.core.serializers.json import DjangoJSONEncoder
-
 from tastypie.utils.urls import trailing_slash
 from tastypie import fields,http
 from tastypie.http import HttpBadRequest
-from tastypie.authentication import MultiAuthentication
 from tastypie.authorization import Authorization
 from tastypie.authorization import DjangoAuthorization
 from tastypie.constants import ALL_WITH_RELATIONS, ALL
-
 from gladminds.core import constants
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-
 from gladminds.core.apis.authorization import MultiAuthorization,\
     LoyaltyCustomAuthorization,\
      ZSMCustomAuthorization, DealerCustomAuthorization
@@ -30,15 +24,13 @@ from gladminds.core.auth.access_token_handler import create_access_token, \
 from gladminds.core.auth_helper import Roles
 from gladminds.core.managers.user_manager import RegisterUser
 from gladminds.core.model_fetcher import models
-
 from gladminds.sqs_tasks import send_otp
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.auth import otp_handler
 from django.contrib.sites.models import RequestSite
 from gladminds.core.model_helpers import format_phone_number
 from tastypie.exceptions import ImmediateHttpResponse
-from gladminds.core.managers.mail import send_reset_link_email
-from gladminds.core.utils import get_sql_data, check_password
+from gladminds.core.utils import check_password
 from gladminds.afterbuy import utils as core_utils
 from gladminds.core.model_fetcher import get_model
 
@@ -405,31 +397,35 @@ class UserProfileResource(CustomBaseModelResource):
         password = load.get('password')
         if not phone_number and not email_id and not username:
             return HttpBadRequest("phone_number/email/username required.")
-        if phone_number:
-            user_obj = models.UserProfile.objects.get(phone_number
-                                             =phone_number,is_phone_verified=True).user
-        elif email_id:
-            user_obj = models.UserProfile.objects.using(settings.BRAND).get(user__email=
-                                                                  email_id,is_email_verified=True).user
-        elif username:
-            user_obj = User.objects.using(settings.BRAND).get(username=
-                                                                  username)
-
-        http_host = request.META.get('HTTP_HOST', 'localhost')
-        user_auth = authenticate(username=str(user_obj.username),
-                            password=password)
-
-        if user_auth is not None:
-            access_token = create_access_token(user_auth, http_host)
-            user_groups = []
-            if user_auth.is_active:
-                for group in user_auth.groups.values():
-                    user_groups.append(group['name'])
-                login(request, user_auth)
-                data = {'status': 1, 'message': "login successfully",
-                        'access_token': access_token, "user_id": user_auth.id, "user_groups" : user_groups}
-        else:
-            data = {'status': 0, 'message': "login unsuccessful"}
+        try:
+            if phone_number:
+                user_obj = models.UserProfile.objects.get(phone_number
+                                                 =phone_number,is_phone_verified=True).user
+            elif email_id:
+                user_obj = models.UserProfile.objects.using(settings.BRAND).get(user__email=
+                                                                      email_id,is_email_verified=True).user
+            elif username:
+                user_obj = User.objects.using(settings.BRAND).get(username=
+                                                                      username)
+    
+            http_host = request.META.get('HTTP_HOST', 'localhost')
+            user_auth = authenticate(username=str(user_obj.username),
+                                password=password)
+    
+            if user_auth is not None:
+                access_token = create_access_token(user_auth, http_host)
+                user_groups = []
+                if user_auth.is_active:
+                    for group in user_auth.groups.values():
+                        user_groups.append(group['name'])
+                    login(request, user_auth)
+                    data = {'status': 1, 'message': "login successfully",
+                            'access_token': access_token, "user_id": user_auth.id, "user_groups" : user_groups}
+            else:
+                data = {'status': 0, 'message': "login unsuccessful"}
+        except Exception as ex:
+            logger.error(ex)
+            data = {'status': 0, 'message': "user is not registered"}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def logout(self, request, **kwargs):

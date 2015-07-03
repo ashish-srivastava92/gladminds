@@ -1,15 +1,17 @@
 import json
-
+import operator
+import logging
+from datetime import datetime, timedelta
 from django.conf.urls import url
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.aggregates import Count
 from django.http.response import HttpResponse
+from django.db.models.query_utils import Q
 from tastypie import fields 
 from tastypie.authentication import MultiAuthentication
 from tastypie.authorization import DjangoAuthorization, Authorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.utils.urls import trailing_slash
-
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import MultiAuthorization, \
     CTSCustomAuthorization, ContainerLRCustomAuthorization, \
@@ -19,25 +21,29 @@ from gladminds.core.apis.user_apis import DealerResource, PartnerResource,\
     TransporterResource
 from gladminds.core.auth_helper import Roles
 from gladminds.core.model_fetcher import get_model
-from django.db.models.query_utils import Q
-import operator
-from datetime import date, datetime, timedelta
-import logging
+
+
 
 LOG = logging.getLogger('gladminds')
 
 class ProductTypeResource(CustomBaseModelResource):
+    '''
+       Product types available for a brand resource
+    '''
     class Meta:
         queryset = get_model('ProductType').objects.all()
         resource_name = "product-types"
-#         authentication = AccessTokenAuthentication()
-#         authorization = MultiAuthorization(DjangoAuthorization())
+        authentication = AccessTokenAuthentication()
+        authorization = MultiAuthorization(DjangoAuthorization())
         authorization = Authorization()
         allowed_methods = ['get', 'post', 'put', 'delete']
         always_return_data = True
 
 
 class ProductResource(CustomBaseModelResource):
+    '''
+       Product available for a brand resource
+    '''
     product_type = fields.ForeignKey(ProductTypeResource, 'product_type',
                                      null=True, blank=True, full=True)
     dealer_id = fields.ForeignKey(DealerResource, 'dealer_id',
@@ -46,7 +52,7 @@ class ProductResource(CustomBaseModelResource):
     class Meta:
         queryset = get_model('ProductData').objects.all()
         resource_name = "products"
-#         authentication = AccessTokenAuthentication()
+        authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(Authorization())
         allowed_methods = ['get']
         filtering = {
@@ -62,6 +68,9 @@ class ProductResource(CustomBaseModelResource):
 
 
 class CustomerTempRegistrationResource(CustomBaseModelResource):
+    '''
+       Registration of customer of a product resource
+    '''
     product_data = fields.ForeignKey(ProductResource, 'product_data', null=True, blank=True, full=True)
 
     class Meta:
@@ -76,6 +85,9 @@ class CustomerTempRegistrationResource(CustomBaseModelResource):
                      }
 
 class ProductCatalogResource(CustomBaseModelResource):
+    '''
+       Product available for redemption resource
+    '''
     partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)
     
     class Meta:

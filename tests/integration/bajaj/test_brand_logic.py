@@ -1,21 +1,17 @@
 import logging
-
-from gladminds.bajaj import models
+import os
+import json
+from datetime import datetime, timedelta
 import xml.etree.ElementTree as ET
 from django.db import transaction
-import os
 from django.conf import settings
-from gladminds.bajaj.services.coupons import import_feed, export_feed
-from datetime import datetime, timedelta
-
 from django.test.client import Client
-
+from gladminds.bajaj import models
+from gladminds.bajaj.services.coupons import import_feed, export_feed
 
 client = Client(SERVER_NAME='bajaj')
 
 logger = logging.getLogger('gladminds')
-
-
 
 class Brand(object):
     def __init__(self, tester):
@@ -68,6 +64,10 @@ class Brand(object):
 
     def send_service_advisor_feed_with_new_status(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/bajaj/test_data/service_advisor_feed_2.xml')
+        self.post_feed(file_path)
+    
+    def send_container_tracker_feed(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/bajaj/test_data/container_tracker.xml')
         self.post_feed(file_path)
 
     def post_feed(self, file_path):
@@ -174,4 +174,21 @@ class Brand(object):
         sa_obj_3 = models.ServiceAdvisor.objects.filter(service_advisor_id='GMDEALER001SA33')
         self.tester.assertEquals(1, len(sa_obj_3))
         self.tester.assertEquals(0, len(dealer_obj_3))
+    
+    def admin_login(self):
+        data=json.dumps({"username": "bajaj", "password": "bajaj"})
+        resp=client.post('/v1/gm-users/login/', data=data, content_type='application/json')
+        return json.loads(resp.content)['access_token']
+
+    def get_container_indent(self, access_token):
+        uri = '/v1/container-indents/?access_token='+access_token
+        response = client.get(uri, content_type='application/json')
+        response_data=json.loads(response.content)['objects']
+        return response_data
+
+    def get_container_lr(self, access_token):
+        uri = '/v1/container-lrs/?access_token='+access_token
+        response = client.get(uri, content_type='application/json')
+        response_data=json.loads(response.content)['objects']
+        return response_data
 
