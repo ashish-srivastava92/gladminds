@@ -583,7 +583,7 @@ class ContainerTrackerFeed(BaseFeed):
                     container_lr_obj.save(using=settings.BRAND)
                     
                     if status=='Open':
-                        container_indent_obj.status.status = status
+                        container_indent_obj.status = status
                     elif status=='Inprogress':
                         all_open_lr = models.ContainerLR.objects.filter(zib_indent_num=container_indent_obj, status='Open')
                         if all_open_lr:
