@@ -25,6 +25,7 @@ from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.auth_helper import GmApps
 from gladminds.core.managers.mail import send_recycle_mail
 from gladminds.core.model_fetcher import get_model
+from django.db.models.query_utils import Q
 
 
 logger = logging.getLogger("gladminds")
@@ -154,11 +155,11 @@ class UserProductResource(CustomBaseModelResource):
             brand_details = []
             for product in products:
                 brands = {}
-                brands['brandId'] = product.product_type.brand.id
-                brands['brandName'] = product.product_type.brand.name
-                brands['brandImage'] = product.product_type.brand.image_url
-                brands['brandProductId'] = product.brand_product_id
-                brands['productType'] = product.product_type.product_type
+                brands['brand_id'] = product.product_type.brand.id
+                brands['brand_name'] = product.product_type.brand.name
+                brands['brand_image'] = product.product_type.brand.image_url
+                brands['brand_product_id'] = product.brand_product_id
+                brands['product_type'] = product.product_type.product_type
                 brand_details.append(brands)
             return HttpResponse(json.dumps({'status_code':200, 'brands': brand_details}), content_type='application/json')
         except Exception as ex:
@@ -241,6 +242,11 @@ class UserProductResource(CustomBaseModelResource):
         self.is_authenticated(request)
         try:
             phone_number = request.GET['phone_number']
+            consumer = afterbuy_models.Consumer.objects.get(user=request.user)
+            all_users = afterbuy_models.Consumer.objects.filter(~Q(user__email=consumer.user.email) & Q(phone_number=consumer.phone_number))
+            if len(all_users)>1:
+                return HttpResponse(json.dumps({'message': 'Products cannot be synced'}),
+                                    content_type='application/json')
             products = get_model('ProductData', GmApps.BAJAJ).objects.filter(customer_phone_number__contains=phone_number)
             
             if not products:
@@ -286,25 +292,24 @@ class UserProductResource(CustomBaseModelResource):
             load = json.loads(request.body)
             product_id = load.get('product_id')
             brand_name = load.get('brand_name')
-            type = load.get('model_name')
+            product_type = load.get('model_name')
             year = load.get('model_year')
             warranty_year = load.get('warranty_year', None)
             insurance_year = load.get('insurance_year', None)
-            try:
-                product_type = afterbuy_models.ProductType.objects.get(product_type=type, brand__name=brand_name)
-            except Exception as ObjectDoesNotExist:
-                brand = afterbuy_models.Brand.objects.get(name=GmApps.BAJAJ)
-                product_type = afterbuy_models.ProductType(product_type=type,
-                                                           brand=brand)
-                product_type.save()
-            
-            consumer = afterbuy_models.Consumer.objects.get(user=request.user)
             try:
                 user_product = afterbuy_models.UserProduct.objects.get(consumer__user=request.user,
                                                                        brand_product_id=product_id)
                 return HttpResponse(json.dumps({'status':200 , 'message' : 'This product has been already registered'}),
                                     content_type='application/json')
             except Exception as ObjectDoesNotExist:
+                try:
+                    product_type = afterbuy_models.ProductType.objects.get(product_type=product_type, brand__name=brand_name)
+                except Exception as ObjectDoesNotExist:
+                    brand = afterbuy_models.Brand.objects.get(name=GmApps.BAJAJ)
+                    product_type = afterbuy_models.ProductType(product_type=product_type,
+                                                           brand=brand)
+                    product_type.save()
+                consumer = afterbuy_models.Consumer.objects.get(user=request.user)
                 user_product = afterbuy_models.UserProduct(consumer=consumer, brand_product_id=product_id,
                                                   purchase_date=year, product_type=product_type,
                                                   warranty_year=warranty_year, insurance_year=insurance_year)
@@ -333,16 +338,16 @@ class UserProductResource(CustomBaseModelResource):
             for coupon in coupons:
                 data = {}
                 if not coupon.closed_date:
-                    data['serviceNumber'] = coupon.service_type
-                    data['dueDate'] = str(coupon.schedule_reminder_date)
+                    data['service_number'] = coupon.service_type
+                    data['due_date'] = str(coupon.schedule_reminder_date)
                     details.append(data)
                 data = {}
-                data['serviceDate'] = str(coupon.actual_service_date)
+                data['service_date'] = str(coupon.actual_service_date)
                 data['ucn'] = coupon.unique_service_coupon
                 history.append(data)
                     
-            return HttpResponse(json.dumps({'serviceDueReminder' : details,
-                                            'serviceHistory' : history}),
+            return HttpResponse(json.dumps({'service_due_reminder' : details,
+                                            'service_history' : history}),
                                 content_type='application/json')
         except Exception as ex:
             logger.error("Exception while fetching service details for : {0} {1}".format(product_id, ex))
