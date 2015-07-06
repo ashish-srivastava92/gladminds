@@ -1,14 +1,11 @@
 import csv
 import logging
-import datetime
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
 from gladminds.core.model_fetcher import get_model
-# from gladminds.core.utils import generate_temp_id, mobile_format
-from gladminds.core.auth_helper import Roles, GmApps
+from gladminds.core.auth_helper import Roles
 from django.contrib.auth.models import Group, User
-from django.core.exceptions import ObjectDoesNotExist
 APP='bajaj'
 logger = logging.getLogger("gladminds")
 
@@ -50,7 +47,9 @@ class Command(BaseCommand):
             logger.info('{0} id is not provided.'.format(str(group)))
             raise Exception('{0} id is not provided.'.format(str(group)))   
 
-    def upload_asm_data(self):
+    def upload_asc_with_asm_data(self):
+        '''Uploads data of ASC with their
+           associated ASM and the ZSM'''
         print ''' Started uploading Area Service Manager data'''
         file_list = ['AREA_SERVICE_MANAGER_DATA.csv']
         asm_list = []

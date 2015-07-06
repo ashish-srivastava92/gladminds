@@ -2,13 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from gladminds.core import base_models, constants
 from gladminds.core.auth_helper import GmApps
-from django.conf import settings
-from django.utils.translation import gettext as _
-from constance import config
-from gladminds.core.managers.email_token_manager import EmailTokenManager
-from gladminds.core.model_helpers import validate_image, validate_file
-from gladminds.core.managers.mail import sent_password_reset_link,\
-    send_email_activation
 import datetime
 
 _APP_NAME = GmApps.BAJAJ
@@ -364,7 +357,6 @@ class Supervisor(base_models.Supervisor):
 
 class ContainerIndent(base_models.ContainerIndent):
     ''' details of Container Indent'''
-    transporter = models.ForeignKey(Transporter)
 
     class Meta(base_models.ContainerIndent.Meta):
         app_label = _APP_NAME
@@ -372,6 +364,7 @@ class ContainerIndent(base_models.ContainerIndent):
 class ContainerLR(base_models.ContainerLR):
     ''' details of Container LR'''
     zib_indent_num = models.ForeignKey(ContainerIndent)
+    transporter = models.ForeignKey(Transporter)
 
     class Meta(base_models.ContainerLR.Meta):
         app_label = _APP_NAME
@@ -602,13 +595,14 @@ class BOMVisualization(base_models.BOMVisualization):
         app_label = _APP_NAME
             
 class ServiceCircular(base_models.ServiceCircular):
+    '''Save the service circular created for a product'''
     model_sku_code = models.ManyToManyField(BrandProductRange)
     
     class Meta(base_models.ServiceCircular.Meta):
         app_label = _APP_NAME
 
 class ManufacturingData(base_models.ManufacturingData):
-
+    '''Manufacturing data of a product'''
     class Meta(base_models.ManufacturingData.Meta):
         app_label = _APP_NAME
 

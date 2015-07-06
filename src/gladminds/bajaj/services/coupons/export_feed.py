@@ -1,13 +1,16 @@
+import json
+import logging
 from datetime import datetime
 from gladminds.core.managers.audit_manager import feed_log, feed_failure_log
 from gladminds.bajaj import models
 from django.conf import settings
-import logging
+
 from gladminds.core import utils
+from gladminds.core.model_fetcher import get_model
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.bajaj.services.coupons.feed_models import save_to_db
 from gladminds.core.services.feed_resources import BaseExportFeed
-import json
+
 logger = logging.getLogger("gladminds")
 
 class ExportCouponRedeemFeed(BaseExportFeed):
@@ -316,18 +319,18 @@ class ExportPurchaseSynFeed(BaseExportFeed):
                  action='Sent', status=export_status)
         
 class ExportCTSFeed(BaseExportFeed):
-    def export_data(self):
+    def export_data(self, brand=None):
         items = []
         total_failed = 0
         item_batch = {
             'ITIMESTAMP': datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}
         
-        cts_objs = models.ContainerTracker.objects.filter(sent_to_sap=0).select_related('transporter')
+        cts_objs = get_model('ContainerLR', brand).objects.filter(zib_indent_num__status='Inprogress',sent_to_sap=0).select_related('transporter', 'zib_indent_num')
                 
         for cts_obj in cts_objs:
             try:
                 item = {
-                    "Indent_Num": cts_obj.zib_indent_num,
+                    "Indent_Num": cts_obj.zib_indent_num.indent_num,
                     "Consigment_Id": cts_obj.consignment_id,
                     "Truck_No": cts_obj.truck_no,
                     "Transporter_Id": cts_obj.transporter.transporter_id,
@@ -347,24 +350,24 @@ class ExportCTSFeed(BaseExportFeed):
         total_failed = total_failed_on_feed
         export_status = False
         for item in items:
-            logger.error("[ExportCTSFeed]: sending CTS:{0}".format(item['Consigment_Id']))
+            logger.error("[ExportCTSFeed]: sending CTS:{0}".format(item['Transaction_Id']))
             try:
                 result = client.service.SI_CTS_Sync(
                     DT_CTS_Item={'Item':[item]}, DT_STAMP={'Item_STAMP':item_batch})
                 logger.info("[ExportCTSFeed]: Response from SAP: {0}".format(result))                
                 if result[0]['STATUS'] == 'SUCCESS':
                     try:
-                        cts = models.ContainerTracker.objects.get(consignment_id=item['Consigment_Id'])
+                        cts = get_model('ContainerLR', brand).objects.get(transaction_id=item['Transaction_Id'])
                         cts.sent_to_sap = True
-                        cts.save()
+                        cts.save(using=brand)
                         export_status = True
                     except Exception as ex:
-                        logger.error("[ExportCTSFeed]: Error in sending CTS:{0}::{1}".format(item['Consigment_Id'], ex))
+                        logger.error("[ExportCTSFeed]: Error in sending CTS:{0}::{1}".format(item['Transaction_Id'], ex))
                 else:
                     total_failed = total_failed + 1
-                    logger.error("[ExportCTSFeed]: {0}:: Not received success from sap".format(item['Consigment_Id']))
+                    logger.error("[ExportCTSFeed]: {0}:: Not received success from sap".format(item['Transaction_Id']))
             except Exception as ex:
-                logger.error("[ExportCTSFeed]: Error in sending CTS :{0}::{1}".format(item['Consigment_Id'], ex))
+                logger.error("[ExportCTSFeed]: Error in sending CTS :{0}::{1}".format(item['Transaction_Id'], ex))
         
         feed_log(brand, feed_type=self.feed_type,
                  total_data_count=len(items)+ total_failed_on_feed, 

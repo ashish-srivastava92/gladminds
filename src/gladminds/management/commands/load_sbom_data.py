@@ -1,14 +1,9 @@
 import csv
 import logging
-import datetime
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
-from django.core.exceptions import ObjectDoesNotExist
 from gladminds.core.model_fetcher import get_model
-# from gladminds.core.utils import generate_temp_id, mobile_format
-from gladminds.core.auth_helper import Roles, GmApps
-from django.contrib.auth.models import Group, User
-from django.core.exceptions import ObjectDoesNotExist
 APP='bajaj'
 logger = logging.getLogger("gladminds")
 
@@ -18,37 +13,9 @@ class Command(BaseCommand):
         self.upload_sbom_data()
         
     def upload_sbom_data(self):
+        '''Upload data of the SBOM'''
         print ''' Started uploading SBOM data data'''
-        file_list = ['brand_product_range.csv']
-        db_mapping = { 'Motorcycle' : 'bajaj',
-                      'Commercial Vehicle' : 'bajajcv',
-                      'Probiking' : 'probiking'
-                      }
-        product_list = []
-        brand_vertical = get_model('BrandVertical', APP)
-        for i in range(0, 1):
-            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
-                spamreader = csv.reader(csvfile, delimiter=',')
-                next(spamreader)
-                for row_list in spamreader:
-                    temp ={}
-                    temp['sku_code'] = row_list[0].strip()
-                    temp['description'] = row_list[1].strip()
-                    temp['vertical'] = row_list[2].strip()
-                    product_list.append(temp)
-        
-        for product in product_list:
-            try:
-                app = db_mapping.get(product['vertical'])
-                brand_product_range = get_model('BrandProductRange', app)
-                brand_product_obj = brand_product_range.objects.using(app).get(sku_code=product['sku_code'])
-            except Exception as ObjectDoesNotExist:
-                brand_product_obj = brand_product_range(sku_code=product['sku_code'],
-                                                        description=product['description'],
-                                                        vertical=product['vertical'])
-                brand_product_obj.save(using=app)
-                
-                
+
         file_list = ['sbom_mc_data.csv']
         product_list = self.read_from_csv(file_list)
         self.upload_bom_data(app='bajaj', product_list=product_list)

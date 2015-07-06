@@ -539,38 +539,62 @@ class ContainerTrackerFeed(BaseFeed):
     def import_data(self):
         for tracker_obj in self.data_source:
             try:
-                try:
-                    if not tracker_obj['lr_number'] or not tracker_obj['zib_indent_num']:
-                        raise ValueError('Indent number or LR number missing')
-                    container_tracker_obj=models.ContainerTracker.objects.get(zib_indent_num=tracker_obj['zib_indent_num'],
-                                                                              lr_number=tracker_obj['lr_number'])
-                except ObjectDoesNotExist as done:
-                    transporter_data = self.check_or_create_transporter(transporter_id=tracker_obj['transporter_id'],
+                if not tracker_obj['zib_indent_num']:
+                        raise ValueError('Indent number is missing')
+                transporter_data = self.check_or_create_transporter(transporter_id=str(int(tracker_obj['transporter_id'])),
                                                                         name=tracker_obj['tranporter_name'])
-                    container_tracker_obj = models.ContainerTracker(zib_indent_num=tracker_obj['zib_indent_num'], 
-                                                                    consignment_id=tracker_obj['consignment_id'],
-                                                                    truck_no=tracker_obj['truck_no'], 
-                                                                    lr_number=tracker_obj['lr_number'],                                                                    
-                                                                    do_num=tracker_obj['do_num'],
-                                                                    transporter=transporter_data,
-                                                                    container_no=tracker_obj['container_no'],
-                                                                    seal_no=tracker_obj['seal_no'],
-                                                                    shippingline_id=tracker_obj['shippingline_id'],
-                                                                    no_of_containers= int(tracker_obj['no_of_containers'])
-                                                                    )
-                    
-                container_tracker_obj.ib_dispatch_dt = format_date(tracker_obj['ib_dispatch_dt'])
-                container_tracker_obj.cts_created_date = format_date(tracker_obj['created_date'])
-                container_tracker_obj.lr_date = format_date(tracker_obj['lr_date'])
-                gatein_date = format_date(tracker_obj['gatein_date'])
+                try:
+                    container_indent_obj=models.ContainerIndent.objects.get(indent_num=tracker_obj['zib_indent_num'])
+                except ObjectDoesNotExist as done:
+                    container_indent_obj=models.ContainerIndent(indent_num=tracker_obj['zib_indent_num'],
+                                                                no_of_containers=int(tracker_obj['no_of_containers']))
+                    container_indent_obj.save(using=settings.BRAND)
                 
-                status="Open"               
-                if gatein_date: 
-                    status="Closed"
-                container_tracker_obj.gatein_date=gatein_date
-                container_tracker_obj.gatein_time=tracker_obj['gatein_time']
-                container_tracker_obj.status=status
-                container_tracker_obj.save(using=settings.BRAND) 
+                if tracker_obj['lr_number']:
+                    try:
+                        container_lr_obj = models.ContainerLR.objects.get(zib_indent_num=container_indent_obj,
+                                                                           lr_number=tracker_obj['lr_number']) 
+                    except ObjectDoesNotExist as done:                                       
+                        container_lr_obj = models.ContainerLR(zib_indent_num=container_indent_obj, 
+                                                        consignment_id=tracker_obj['consignment_id'],
+                                                        lr_number=tracker_obj['lr_number'],                                                                    
+                                                        do_num=tracker_obj['do_num'],
+                                                        transporter=transporter_data)
+                        container_lr_obj.ib_dispatch_dt = format_date(tracker_obj['ib_dispatch_dt'])
+                        container_lr_obj.cts_created_date = format_date(tracker_obj['created_date'])
+                        container_lr_obj.save(using=settings.BRAND)
+                    
+                    gatein_date = format_date(tracker_obj['gatein_date'])
+                    status="Open"               
+                    if tracker_obj['container_no'] and tracker_obj['seal_no']:
+                        if gatein_date: 
+                            status="Closed"
+                        else:
+                            status="Inprogress"
+                    container_lr_obj.gatein_date=gatein_date
+                    container_lr_obj.gatein_time=tracker_obj['gatein_time']
+                    container_lr_obj.container_no=tracker_obj['container_no']
+                    container_lr_obj.seal_no=tracker_obj['seal_no']
+                    container_lr_obj.lr_date = format_date(tracker_obj['lr_date'])
+                    container_lr_obj.shippingline_id=tracker_obj['shippingline_id']
+                    container_lr_obj.truck_no=tracker_obj['truck_no']
+                    container_lr_obj.partner_name=tracker_obj['partner_name']
+                    container_lr_obj.status=status
+                    container_lr_obj.save(using=settings.BRAND)
+                    
+                    if status=='Open':
+                        container_indent_obj.status = status
+                    elif status=='Inprogress':
+                        all_open_lr = models.ContainerLR.objects.filter(zib_indent_num=container_indent_obj, status='Open')
+                        if all_open_lr:
+                            container_indent_obj.status = 'Open'
+                        else:
+                            container_indent_obj.status = status
+                    else:
+                        all_indent_lr = models.ContainerLR.objects.filter(zib_indent_num=container_indent_obj, status=status)
+                        if len(all_indent_lr)==container_indent_obj.no_of_containers:
+                            container_indent_obj.status = status
+                    container_indent_obj.save(using=settings.BRAND)
             except Exception as ex:
                 ex="[Exception: ]: ContainerTrackerFeed {0}".format(ex)
                 logger.error(ex)

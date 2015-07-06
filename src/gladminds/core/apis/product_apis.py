@@ -1,15 +1,17 @@
 import json
-
+import operator
+import logging
+from datetime import datetime, timedelta
 from django.conf.urls import url
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.aggregates import Count
 from django.http.response import HttpResponse
+from django.db.models.query_utils import Q
 from tastypie import fields 
 from tastypie.authentication import MultiAuthentication
 from tastypie.authorization import DjangoAuthorization, Authorization
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.utils.urls import trailing_slash
-
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import MultiAuthorization, \
     CTSCustomAuthorization, ContainerLRCustomAuthorization, \
@@ -19,25 +21,29 @@ from gladminds.core.apis.user_apis import DealerResource, PartnerResource,\
     TransporterResource
 from gladminds.core.auth_helper import Roles
 from gladminds.core.model_fetcher import get_model
-from django.db.models.query_utils import Q
-import operator
-from datetime import date, datetime, timedelta
-import logging
+
+
 
 LOG = logging.getLogger('gladminds')
 
 class ProductTypeResource(CustomBaseModelResource):
+    '''
+       Product types available for a brand resource
+    '''
     class Meta:
         queryset = get_model('ProductType').objects.all()
         resource_name = "product-types"
-#         authentication = AccessTokenAuthentication()
-#         authorization = MultiAuthorization(DjangoAuthorization())
+        authentication = AccessTokenAuthentication()
+        authorization = MultiAuthorization(DjangoAuthorization())
         authorization = Authorization()
         allowed_methods = ['get', 'post', 'put', 'delete']
         always_return_data = True
 
 
 class ProductResource(CustomBaseModelResource):
+    '''
+       Product available for a brand resource
+    '''
     product_type = fields.ForeignKey(ProductTypeResource, 'product_type',
                                      null=True, blank=True, full=True)
     dealer_id = fields.ForeignKey(DealerResource, 'dealer_id',
@@ -46,7 +52,7 @@ class ProductResource(CustomBaseModelResource):
     class Meta:
         queryset = get_model('ProductData').objects.all()
         resource_name = "products"
-#         authentication = AccessTokenAuthentication()
+        authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(Authorization())
         allowed_methods = ['get']
         filtering = {
@@ -62,6 +68,9 @@ class ProductResource(CustomBaseModelResource):
 
 
 class CustomerTempRegistrationResource(CustomBaseModelResource):
+    '''
+       Registration of customer of a product resource
+    '''
     product_data = fields.ForeignKey(ProductResource, 'product_data', null=True, blank=True, full=True)
 
     class Meta:
@@ -76,6 +85,9 @@ class CustomerTempRegistrationResource(CustomBaseModelResource):
                      }
 
 class ProductCatalogResource(CustomBaseModelResource):
+    '''
+       Product available for redemption resource
+    '''
     partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)
     
     class Meta:
@@ -86,6 +98,9 @@ class ProductCatalogResource(CustomBaseModelResource):
         always_return_data = True
 
 class SpareMasterResource(CustomBaseModelResource):
+    '''
+	   Spare part master resource
+	'''
     product_type = fields.ForeignKey(ProductTypeResource, 'product_type', full=True)
     class Meta:
         queryset = get_model('SparePartMasterData').objects.all()
@@ -95,6 +110,9 @@ class SpareMasterResource(CustomBaseModelResource):
         always_return_data = True
 
 class SparePartPointResource(CustomBaseModelResource):
+    '''
+	   Spare part point resource
+	'''
     part_number = fields.ForeignKey(SpareMasterResource, 'part_number', full=True)
     class Meta:
         queryset = get_model('SparePartPoint').objects.all()
@@ -104,6 +122,9 @@ class SparePartPointResource(CustomBaseModelResource):
         always_return_data = True
 
 class SparePartUPCResource(CustomBaseModelResource):
+    '''
+	   Spare part upc resource
+	'''
     part_number = fields.ForeignKey(SpareMasterResource, 'part_number', full=True)
     class Meta:
         queryset = get_model('SparePartUPC').objects.all()
@@ -113,8 +134,9 @@ class SparePartUPCResource(CustomBaseModelResource):
         always_return_data = True
 
 class ContainerIndentResource(CustomBaseModelResource):
-    transporter = fields.ForeignKey(TransporterResource, 'transporter', null=True, blank=True)
-
+    '''
+	   Container tracker Indent resource
+	'''
     class Meta:
         queryset = get_model('ContainerIndent').objects.all()
         resource_name = 'container-indents'
@@ -128,7 +150,6 @@ class ContainerIndentResource(CustomBaseModelResource):
                      'indent_num' : ALL,
                      'no_of_containers': ALL,
                      'status' : ALL,
-                     'transporter': ALL_WITH_RELATIONS,
                      }
         
         ordering = ['status', 'indent_num' ,'created_date', 'modified_date']
@@ -136,23 +157,32 @@ class ContainerIndentResource(CustomBaseModelResource):
     def prepend_urls(self):
         return [
                 url(r"^(?P<resource_name>%s)/count%s" % (self._meta.resource_name,trailing_slash()),
-                self.wrap_view('get_status_count'), name="get_status_count")
+                self.wrap_view('get_status_count'), name="get_status_count"),
+			    url(r"^(?P<resource_name>%s)/submit/(?P<id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                self.wrap_view('submit_indent'), name="submit_indent")
                 ]
         
     def  get_status_count(self, request, **kwargs):
+        '''
+           Gives the count of all the indents 
+           based on the user status wise.
+    	'''
         self.is_authenticated(request)
         args = request.GET
         from_date = args.get('from', datetime.now() - timedelta(days=180))
         to_date = args.get('to', datetime.now())
         query_args = [Q(created_date__range=[from_date, to_date])]
+        submitted_indents=[]
         try:
             if request.user.groups.filter(name=Roles.TRANSPORTER):
-                query_args.append(Q(transporter__user_id=request.user.id))
+                submitted_indents = get_model('ContainerLR').objects.filter(transporter__user__user_id=request.user.id
+                                                                    ).values_list('zib_indent_num_id', flat=True)
             elif request.user.groups.filter(name=Roles.SUPERVISOR):
                 supervisor = get_model('Supervisor').objects.get(user__user_id=request.user.id)
                 submitted_indents = get_model('ContainerLR').objects.filter(Q(submitted_by=supervisor.supervisor_id) | Q(submitted_by=None) 
-                                                                        & Q(zib_indent_num_id__transporter=supervisor.transporter
+                                                                        & Q(transporter=supervisor.transporter
                                                                     )).values_list('zib_indent_num_id', flat=True)
+            if submitted_indents:
                 query_args.append(Q(id__in=submitted_indents))
             data = get_model('ContainerIndent').objects.filter(reduce(operator.and_, query_args)
                                                               ).values('status').annotate(total=Count('status')).order_by('-status')
@@ -160,9 +190,36 @@ class ContainerIndentResource(CustomBaseModelResource):
             LOG.error('Exception while obtaining CTS count : {0}'.format(ex))
         return HttpResponse(content=json.dumps(list(data), cls=DjangoJSONEncoder), content_type='application/json')
 
+    def submit_indent(self, request, **kwargs):
+        '''Saves the status of an Indent
+		args:
+		 id: the primary key to identify the Indent
+		 status: new status to be saved
+		 modified_date: timestamp modified
+		'''
+        self.is_authenticated(request)
+        indent_id=kwargs['id']
+        load = json.loads(request.body)
+        status = load.get('status', None)
+        modified_date = load.get('modified_date', None)
+        try:
+            conatiner_indent = get_model('ContainerIndent').objects.get(id=indent_id)
+            conatiner_indent.status = status
+            conatiner_indent.save()
+            get_model('ContainerIndent').objects.filter(id=indent_id).update(modified_date=modified_date)
+            data=[{'status':1, 'message': 'LR status updated successfully'}]
+        except Exception as ex:
+            data=[{'status':0, 'message': 'LR status update unsuccessful'}]
+            LOG.error('Exception while obtaining CTS count : {0}'.format(ex))
+        return HttpResponse(content=json.dumps(list(data), cls=DjangoJSONEncoder), content_type='application/json')
+
 class ContainerLRResource(CustomBaseModelResource):
+    '''
+	   Container tracker LR resource
+	'''
     zib_indent_num = fields.ForeignKey(ContainerIndentResource, 'zib_indent_num', null=True,
                                     blank=True, full=True)
+    transporter = fields.ForeignKey(TransporterResource, 'transporter', null=True, blank=True)
 
     class Meta:
         queryset = get_model('ContainerLR').objects.all()
@@ -179,7 +236,8 @@ class ContainerLRResource(CustomBaseModelResource):
                      'status' : ALL,
                      'created_date': ALL,
                      'modified_date': ALL,
-                     'submitted_by': ALL
+                     'submitted_by': ALL,
+                     'transporter': ALL_WITH_RELATIONS
                      }
         
         ordering = ['lr_date', 'gatein_date' ,'created_date', 'status']
@@ -195,29 +253,44 @@ class ContainerLRResource(CustomBaseModelResource):
         update status of indent accordingly
         args:
          transaction_id: the primary key to identify the LR
+         modified_date: timestamp modified
          status: new status to be saved
+         seal_no: new seal number
+         container_no: new container number
         '''
         self.is_authenticated(request)
         transaction_id=kwargs['transaction_id']
         load = json.loads(request.body)
+        modified_date = load.get('modified_date', None)
         status = load.get('status', None)
+        seal_no = load.get('seal_no', None)
+        container_no = load.get('container_no', None)
         try:
             conatiner_lr = get_model('ContainerLR').objects.get(transaction_id=transaction_id)
             conatiner_lr.status = status
+            if status=='Inprogress':
+                conatiner_lr.submitted_by = request.user.username
+            conatiner_lr.seal_no = seal_no
+            conatiner_lr.container_no = container_no
             conatiner_lr.save()
+            get_model('ContainerLR').objects.filter(transaction_id=transaction_id).update(modified_date=modified_date)
             container_indent=conatiner_lr.zib_indent_num
             if status=='Open':
                 container_indent.status = status
-                container_indent.save()
+            elif status=='Inprogress':
+                all_open_lr = get_model('ContainerLR').objects.filter(zib_indent_num=container_indent, status='Open')
+                if all_open_lr:
+                    container_indent.status = 'Open'
+                else:
+                    container_indent.status = status
             else:
-                container_indent=conatiner_lr.zib_indent_num
-                all_indent_lr = get_model('ContainerLR').objects.filter(zib_indent_num=conatiner_lr.zib_indent_num, status=status)
+                all_indent_lr = get_model('ContainerLR').objects.filter(zib_indent_num=container_indent, status=status)
                 if len(all_indent_lr)==container_indent.no_of_containers:
                     container_indent.status = status
-                    container_indent.save()
-            data=[{'message': 'LR status updated successfully'}]
+            container_indent.save()
+            data=[{'status':1, 'message': 'LR status updated successfully'}]
         except Exception as ex:
-            data=[{'message': 'LR status update unsuccessful'}]
+            data=[{'status':0,'message': 'LR status update unsuccessful'}]
             LOG.error('Exception while obtaining CTS count : {0}'.format(ex))
         return HttpResponse(content=json.dumps(list(data), cls=DjangoJSONEncoder), content_type='application/json')
 
