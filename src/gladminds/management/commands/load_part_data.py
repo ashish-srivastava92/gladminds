@@ -26,7 +26,7 @@ class Command(BaseCommand):
         spare_master = get_model('SparePartMasterData', APP)
         spare_type = get_model('ProductType', APP)
         for i in range(0, 1):
-            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
+            with open(settings.PROJECT_DIR + '/upload_data/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
                 for row_list in spamreader:
@@ -68,7 +68,7 @@ class Command(BaseCommand):
         spare_master = get_model('SparePartMasterData', APP)
         spare_upc = get_model('SparePartUPC', APP)
         for i in range(0, 1):
-            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
+            with open(settings.PROJECT_DIR + '/upload_data/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
                 for row_list in spamreader:
@@ -94,7 +94,7 @@ class Command(BaseCommand):
         spare_master = get_model('SparePartMasterData', APP)
         spare_part = get_model('SparePartPoint', APP)
         for i in range(0, 1):
-            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
+            with open(settings.PROJECT_DIR + '/upload_data/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
                 for row_list in spamreader:

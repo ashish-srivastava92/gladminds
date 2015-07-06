@@ -68,16 +68,16 @@ SAP_CRM_DETAIL = {
                   'password':'welcome123'
                   }
 
-COUPON_WSDL = 'prod_coupon_redeem.wsdl'
-CUSTOMER_REGISTRATION_WSDL = 'prod_customer_registration.wsdl'
-VIN_SYNC_WSDL='prod_vin_sync.wsdl'
-PURCHASE_SYNC_WSDL='prod_purchase_sync_feed.wsdl'
-CTS_WSDL = 'prod_container_tracker.wsdl'
+COUPON_WSDL = 'prod_wsdl/prod_coupon_redeem.wsdl'
+CUSTOMER_REGISTRATION_WSDL = 'prod_wsdl/prod_customer_registration.wsdl'
+VIN_SYNC_WSDL='prod_wsdl/prod_vin_sync.wsdl'
+PURCHASE_SYNC_WSDL='prod_wsdl/prod_purchase_sync_feed.wsdl'
+CTS_WSDL = 'prod_wsdl/prod_container_tracker.wsdl'
 
-MEMBER_SYNC_WSDL='prod_member_sync_feed.wsdl'
-ACCUMULATION_SYNC_WSDL = 'prod_accumulation_feed.wsdl'
-REDEMPTION_SYNC_WSDL = 'prod_redemption_feed.wsdl'
-DISTRIBUTOR_SYNC_WSDL = 'prod_distributor_sync_feed.wsdl' 
+MEMBER_SYNC_WSDL='prod_wsdl/prod_member_sync_feed.wsdl'
+ACCUMULATION_SYNC_WSDL = 'prod_wsdl/prod_accumulation_feed.wsdl'
+REDEMPTION_SYNC_WSDL = 'prod_wsdl/prod_redemption_feed.wsdl'
+DISTRIBUTOR_SYNC_WSDL = 'prod_wsdl/prod_distributor_sync_feed.wsdl' 
 
 COUPON_WSDL_URL = "http://bajaj.gladminds.co/api/v1/coupon-redeem/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL_URL = "http://bajaj.gladminds.co/api/v1/customer-feed/?wsdl&v0"
