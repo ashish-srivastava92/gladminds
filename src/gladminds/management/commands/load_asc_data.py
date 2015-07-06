@@ -12,6 +12,7 @@ class Command(BaseCommand):
         self.upload_asc_data()
 
     def upload_asc_data(self):
+        '''Uplaod ASC data'''
         print "Started running function..."
         file_list = ['new_asc_list.csv']
         file = open("newfile.txt", "w")

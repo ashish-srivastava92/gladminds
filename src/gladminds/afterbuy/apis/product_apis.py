@@ -20,37 +20,68 @@ from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.managers.mail import send_recycle_mail
 from gladminds.afterbuy.apis.validations import ProductValidation
 from tastypie.http import HttpBadRequest
-from gladminds.afterbuy import utils
 
 logger = logging.getLogger("gladminds")
 
 
 class ProductTypeResource(CustomBaseModelResource):
+    brand = fields.ForeignKey(BrandResource, 'brand', null=True, blank=True, full=True)
     class Meta:
         queryset = afterbuy_models.ProductType.objects.all()
         resource_name = "product-types"
         authentication = AccessTokenAuthentication()
-        authorization = DjangoAuthorization()
+        authorization = Authorization()
         always_return_data = True
 
 
+class ProductSpecificationResource(CustomBaseModelResource):
+    product_type = fields.ForeignKey(ProductTypeResource, 'product_type', null=True, blank=True,
+                                     full=True)
+    class Meta:
+        queryset = afterbuy_models.ProductSpecification.objects.all()
+        resource_name = "product-specifications"
+        allowed_methods = ['get', 'post']
+        authentication = AccessTokenAuthentication()
+        authorization = Authorization()
+        always_return_data = True
+        
+class ProductFeatureResource(CustomBaseModelResource):
+    product_type = fields.ForeignKey(ProductTypeResource, 'product_type', null=True, blank=True,
+                                     full=True)
+    class Meta:
+        queryset = afterbuy_models.ProductFeature.objects.all()
+        resource_name = "product-features"
+        allowed_methods = ['get', 'post']
+        authentication = AccessTokenAuthentication()
+        authorization = Authorization()
+        always_return_data = True
+
+class RecommendedPartResource(CustomBaseModelResource):
+    product_type = fields.ManyToManyField(ProductTypeResource, 'product_type', null=True, blank=True,
+                                     full=True)
+    class Meta:
+        queryset = afterbuy_models.RecommendedPart.objects.all()
+        resource_name = "product-parts"
+        allowed_methods = ['get', 'post']
+        authentication = AccessTokenAuthentication()
+        authorization = Authorization()
+        always_return_data = True
+
 class UserProductResource(CustomBaseModelResource):
     consumer = fields.ForeignKey(ConsumerResource, 'consumer', null=True, blank=True, full=True)
-    brand = fields.ForeignKey(BrandResource, 'brand', null=True, blank=True, full=True)
     product_type = fields.ForeignKey(ProductTypeResource, 'product_type', null=True, blank=True, full=True)
 
     class Meta:
         queryset = afterbuy_models.UserProduct.objects.filter(is_accepted=True)
         resource_name = "products"
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(Authorization(), CustomAuthorization())
+        authorization = Authorization()
         allowed_methods = ['get', 'post', 'put']
         validation = ProductValidation()
         always_return_data = True
         filtering = {
-                     "consumer": ALL,
-                     "product_type": ALL,
-                     "brand": ALL_WITH_RELATIONS,
+                     "consumer": ALL_WITH_RELATIONS,
+                     "product_type": ALL_WITH_RELATIONS,
                      "is_deleted": ALL
                      }
 
@@ -62,7 +93,7 @@ class UserProductResource(CustomBaseModelResource):
         pollution = afterbuy_models.PollutionCertificate.objects.filter(product=bundle.data['id'])
         product_support = afterbuy_models.ProductSupport.objects.filter(product=bundle.data['id'])
         sell_information = afterbuy_models.SellInformation.objects.filter(product=bundle.data['id'])
-        brand_id = bundle.data['brand'].data['id']
+        brand_id = bundle.data['product_type'].data['brand'].data['id']
         support = afterbuy_models.Support.objects.filter(brand=int(brand_id))
         product_image = afterbuy_models.UserProductImages.objects.filter(product=bundle.data['id'])
         bundle.data['insurance'] = [model_to_dict(c) for c in insurance]
@@ -81,7 +112,9 @@ class UserProductResource(CustomBaseModelResource):
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/coupons%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_coupons'), name="get_product_coupons" ),
                 url(r"^(?P<resource_name>%s)/(?P<product_id>[\d]+)/recycle%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('mail_products_details'), name="mail_products_details" ),
                 url(r"^(?P<resource_name>%s)/get-brands%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_brand_details'), name="get_brand_details" ),
-                url(r"^(?P<resource_name>%s)/accept-product%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('user_product_acceptance'), name="user_product_acceptance" )
+                url(r"^(?P<resource_name>%s)/accept-product%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('user_product_acceptance'), name="user_product_acceptance" ),
+                url(r"^(?P<resource_name>%s)/details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('product_specifications'), name="product_specifications" ),
+                url(r"^(?P<resource_name>%s)/add%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('add_product'), name="add_product")
                
         ]
 
@@ -119,14 +152,14 @@ class UserProductResource(CustomBaseModelResource):
     def get_brand_details(self, request, **kwargs):
         self.is_authenticated(request)
         try:
-            products = afterbuy_models.UserProduct.objects.filter(consumer__user=request.user).select_related('brand')
+            products = afterbuy_models.UserProduct.objects.filter(consumer__user=request.user).select_related('product_type')
             details = {}
             brand_details = []
             for product in products:
                 brands = {}
-                brands['brandId'] = product.brand.id
-                brands['brandName'] = product.brand.name
-                brands['brandImage'] = product.brand.image_url
+                brands['brandId'] = product.product_type.brand.id
+                brands['brandName'] = product.product_type.brand.name
+                brands['brandImage'] = product.product_type.brand.image_url
                 brands['brandProductId'] = product.brand_product_id
                 brands['productType'] = product.product_type.product_type
                 brand_details.append(brands)
@@ -142,10 +175,11 @@ class UserProductResource(CustomBaseModelResource):
                                 content_type="application/json",status=401)
         try:
             load = json.loads(request.body)
+            is_accepted = load.get('is_accepted', False)
             brand_product_id = load.get('product_id')
             user_product = afterbuy_models.UserProduct.objects.get(brand_product_id=brand_product_id,
                                                                    consumer__user=request.user)
-            user_product.is_accepted = True
+            user_product.is_accepted = is_accepted
             user_product.save()
             return HttpResponse(json.dumps({'status':200, 'message': True}),
                                 content_type='application/json')
@@ -153,6 +187,60 @@ class UserProductResource(CustomBaseModelResource):
             logger.error("Exception while accepting the product{0}".format(ex))
             return HttpBadRequest("Incorrect Details")
         return
+    
+    #TODO:Fixme
+    def product_specifications(self, request, **kwargs):
+        self.is_authenticated(request)
+        try:
+            product_id = request.GET['product_id']
+            product_type = afterbuy_models.ProductType.objects.filter(product_type=product_id)
+            if len(product_type)==0:
+                return HttpResponse(json.dumps({'message': 'Incorrect Product ID'}),
+                                    content_type='application/json')
+            specifications = afterbuy_models.ProductSpecification.objects.filter(product_type=product_type[0])
+            features = afterbuy_models.ProductFeature.objects.filter(product_type=product_type[0])
+            recommended_parts = afterbuy_models.RecommendedPart.objects.filter(product_type=product_type[0])
+
+            result = {}
+            details = []
+
+            for specification in specifications:
+                data = {}
+                data['type'] = specification.product_type.product_type
+                data['engine_displacement'] = specification.engine_displacement
+                data['engine_type'] = specification.engine_type
+                data['engine_starting'] = specification.engine_starting
+                data['maximum_power'] = specification.maximum_power
+                details.append(data)
+                
+            result['specifications'] =  details
+            
+            details = []
+            for part in recommended_parts:
+                data = {}
+                data['part_id'] = part.part_id
+                data['name'] = part.name
+                data['material'] = part.material
+                data['price'] = part.price
+                details.append(data)
+            result['recommended_parts'] = details
+            
+            details = []
+            for feature in features:
+                data = {}
+                data['description'] = feature.description
+                details.append(data)
+                                            
+            result['features'] = details
+            
+            result['Overview'] = product_type[0].overview
+            result['status_code'] = 200
+            
+            return HttpResponse(json.dumps(result),
+                                content_type='application/json') 
+        except Exception as ex:
+            logger.error("Exception while fetching product specifications - {0}".format(ex))
+            return HttpBadRequest("Incorrect Details")
 
 class ProductInsuranceInfoResource(CustomBaseModelResource):
     product = fields.ForeignKey(UserProductResource, 'product', null=True, blank=True, full=True)

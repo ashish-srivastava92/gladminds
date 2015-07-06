@@ -5,19 +5,15 @@ from django.db.models import Q
 
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.core.services import message_template as templates
-from gladminds.bajaj import models
+from gladminds.core.model_fetcher import get_model
 from gladminds.afterbuy import models as afterbuy_models
-from gladminds.core.base_models import CouponData
 from gladminds.core.constants import COUPON_STATUS
 from django.db.models.aggregates import Sum
-from email import email
 import logging
 from gladminds.core.core_utils.utils import dictfetchall
 from django.conf import settings
-import time
 import csv
 import StringIO
-from boto.connection import HTTPResponse
 
 AUDIT_ACTION = "SENT TO QUEUE"
 logger = logging.getLogger("gladminds")
@@ -27,9 +23,10 @@ service_dict = {}
 def get_customers_to_send_reminder(*args, **kwargs):
     from gladminds.sqs_tasks import send_reminder_message
     day = kwargs.get('reminder_day', None)
+    brand= kwargs.get('brand', None)
     today_date = datetime.now().date()
     reminder_date = datetime.now().date()+timedelta(days=day)
-    results = CouponData.objects.select_for_update().filter(mark_expired_on__range=(today_date,
+    results = get_model("CouponData", brand).objects.select_for_update().filter(mark_expired_on__range=(today_date,
                                     reminder_date), last_reminder_date__isnull=True,
                                     status=1).select_related('vin', 'customer_phone_number__phone_number')
     for reminder in results:
@@ -44,7 +41,7 @@ def get_customers_to_send_reminder(*args, **kwargs):
         sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
         reminder.last_reminder_date = datetime.now()
         reminder.save()
-        user = models.UserProfile.objects.filter(phone_number=phone_number)
+        user = get_model("UserProfile", brand).objects.filter(phone_number=phone_number)
         notification = afterbuy_models.UserNotification(user=user[0],message=message, notification_date=datetime.now(),
                                                         notification_read=0)
         notification.save()
@@ -54,7 +51,8 @@ def get_customers_to_send_reminder(*args, **kwargs):
 def get_customers_to_send_reminder_by_admin(*args, **kwargs):
     from gladminds.sqs_tasks import send_reminder_message
     today = datetime.now().date()
-    results = models.CouponData.objects.filter(schedule_reminder_date__day=today.day, schedule_reminder_date__month=today.month, schedule_reminder_date__year=today.year, status=1).select_related('product_id', 'customer_phone_number')
+    brand= kwargs.get('brand', None)
+    results = get_model("CouponData", brand).objects.filter(schedule_reminder_date__day=today.day, schedule_reminder_date__month=today.month, schedule_reminder_date__year=today.year, status=1).select_related('product_id', 'customer_phone_number')
     for reminder in results:
         product_obj = reminder.product
         phone_number = product_obj.customer_phone_number
@@ -73,7 +71,8 @@ def get_customers_to_send_reminder_by_admin(*args, **kwargs):
 
 def expire_service_coupon(*args, **kwargs):
     today = timezone.now()
-    threat_coupons = models.CouponData.objects.filter(mark_expired_on__lte=today.date()).exclude(Q(status=2) | Q(status=3))
+    brand= kwargs.get('brand', None)
+    threat_coupons = get_model("CouponData", brand).objects.filter(mark_expired_on__lte=today.date()).exclude(Q(status=2) | Q(status=3) | Q(status=6))
     for coupon in threat_coupons:
         #If the coupon was initiated, it will expire if initiated more than 30days ago.
         if coupon.status == COUPON_STATUS['In Progress']:
@@ -87,23 +86,24 @@ def expire_service_coupon(*args, **kwargs):
             coupon.save()
 
 def mark_feeback_to_closed(*args, **kwargs):
+    brand= kwargs.get('brand', None)
     feedback_closed_date = datetime.now()-timedelta(days=2)
-    models.Feedback.objects.filter(status = 'Resolved', resloved_date__lte = feedback_closed_date )\
+    get_model("Feedback", brand).objects.filter(status = 'Resolved', resloved_date__lte = feedback_closed_date )\
                                         .update(status = 'Closed', closed_date = datetime.now())
 
 def import_data_from_sap(*args, **kwargs):
     pass
 
-def get_data_feed_log_detail(start_date=None, end_date=None):
+def get_data_feed_log_detail(start_date=None, end_date=None, brand=None):
     start_date = start_date
     end_date = end_date
-    feed_logs = models.DataFeedLog.objects.filter(timestamp__range=(start_date, end_date))
+    feed_logs = get_model("DataFeedLog", brand).objects.filter(timestamp__range=(start_date, end_date))
     return feed_logs.values('feed_type','action').annotate(total_count=Sum('total_data_count'),
                                                                   total_success_data_count=Sum('success_data_count'),
                                                                   total_failed_data_count=Sum('failed_data_count'))
 
-def get_feed_failure_log_detail(type=None):
-    feed_logs = models.FeedFailureLog.objects.filter(email_flag=False, feed_type=type)
+def get_feed_failure_log_detail(feed_type=None, brand=None):
+    feed_logs = get_model("FeedFailureLog", brand).objects.filter(email_flag=False, feed_type=feed_type)
     feed_data = []
     for feed in feed_logs:
         data = {}
@@ -113,8 +113,8 @@ def get_feed_failure_log_detail(type=None):
         feed_data.append(data)
     return { 'feed_data':feed_data , 'feed_logs':feed_logs}
 
-def get_customer_details():
-    customer_details = models.CustomerUpdateHistory.objects.filter(email_flag=False, temp_customer__dealer_asc_id__isnull=False)
+def get_customer_details(brand=None):
+    customer_details = get_model("CustomerUpdateHistory", brand).objects.filter(email_flag=False, temp_customer__dealer_asc_id__isnull=False)
     customer_data = []
     for customer in customer_details:
         if customer.new_value != customer.old_value:
@@ -128,8 +128,8 @@ def get_customer_details():
             customer_data.append(data)
     return {'customer_data' : customer_data, 'customer_details':customer_details}
 
-def get_update_number_exceeds():
-    update_details = models.CustomerUpdateFailure.objects.filter(email_flag=False, updated_by__isnull=False)
+def get_update_number_exceeds(brand=None):
+    update_details = get_model("CustomerUpdateFailure", brand).objects.filter(email_flag=False, updated_by__isnull=False)
     update_data = []
     for update in update_details:
         if update.new_number != update.old_number:
@@ -144,8 +144,8 @@ def get_update_number_exceeds():
             update_data.append(data)
     return {'update_data' : update_data, 'update_details':update_details}
 
-def get_vin_sync_feeds_detail():
-    feed_logs = models.VinSyncFeedLog.objects.filter(email_flag=False)
+def get_vin_sync_feeds_detail(brand=None):
+    feed_logs = get_model("VinSyncFeedLog", brand).objects.filter(email_flag=False)
     feed_data = []
     for feed in feed_logs:
         data = {}
@@ -159,7 +159,7 @@ def get_vin_sync_feeds_detail():
 ''' returns coupon details with policy descripencies'''
 def get_discrepant_coupon_details(brand):
     try:
-        service_type_obj = models.Constant.objects.filter(constant_name__contains ='service')
+        service_type_obj = get_model("Constant", brand).objects.filter(constant_name__contains ='service')
         for service_type in service_type_obj:
             service_dict.update({service_type.constant_name:service_type.constant_value})
 
@@ -216,3 +216,5 @@ def get_sql_data(query, brand):
     data = dictfetchall(cursor)
     conn.close()
     return data
+    
+    

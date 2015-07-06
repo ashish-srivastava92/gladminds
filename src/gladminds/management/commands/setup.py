@@ -12,9 +12,8 @@ from gladminds.core.model_fetcher import get_model
 from gladminds.management.commands.load_state import Command as state_cmd
 from gladminds.management.commands.load_mech_data import Command as mech_cmd
 from gladminds.management.commands.load_part_data import Command as part_cmd
-from gladminds.management.commands.load_area_service_manager_data import Command as asm_cmd
+from gladminds.management.commands.load_asc_with_asm import Command as asm_cmd
 from gladminds.management.commands.load_sbom_data import Command as sbom_cmd
-from gladminds.bajaj.models import ZonalServiceManager
 
 _DEMO = GmApps.DEMO
 _BAJAJ = GmApps.BAJAJ
@@ -72,7 +71,7 @@ class Command(BaseCommand):
         self.create_admin(_DAIMLER)
         self.create_admin(_PROBIKING)
         self.create_afterbuy_admins()
-        self.create_territory_state()
+        self.create_territory()
         self.create_loyalty_admins()
         self.set_afterbuy_permissions()
         if settings.ENV not in ['prod', 'staging']:

@@ -8,7 +8,8 @@ from gladminds.afterbuy.models import Brand, Consumer, ProductType,\
 MessageTemplate, EmailTemplate, Industry, UserProduct, License,\
     ProductInsuranceInfo, ProductWarrantyInfo, PollutionCertificate,\
     BrandProductCategory, SMSLog, EmailLog, OTPToken, EmailToken,\
-    ServiceType, Service, SellInformation
+    ServiceType, Service, SellInformation, ProductSpecification, ProductFeature,\
+    RecommendedPart
 from gladminds.core.auth_helper import GmApps
 
 
@@ -62,6 +63,9 @@ def get_admin_site_custom(brand):
     brand_admin.register(EmailLog)
     brand_admin.register(EmailToken)
     brand_admin.register(OTPToken)
+    brand_admin.register(ProductSpecification)
+    brand_admin.register(ProductFeature)
+    brand_admin.register(RecommendedPart)
     return brand_admin
 
 brand_admin = get_admin_site_custom(GmApps.AFTERBUY)

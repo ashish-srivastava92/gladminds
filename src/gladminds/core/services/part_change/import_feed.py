@@ -37,6 +37,7 @@ class SAPFeed(object):
             'bomitem': BOMItemFeed,
             'eco_release': ECOReleaseFeed,
             'eco_implementation':ECOImplementationFeed,
+            'manufacture_data': ManufactureDataFeed,
         }
         feed_obj = function_mapping[feed_type](data_source=data_source,
                                              feed_remark=feed_remark)
@@ -178,4 +179,24 @@ class ECOImplementationFeed(BaseFeed):
             ex = "[Exception]: modify sbom data {0}".format(odne)
             logger.error(ex)
         return
-        
+    
+class ManufactureDataFeed(BaseFeed):    
+
+    def import_data(self):
+        for data_obj in self.data_source:
+            try:
+                is_discrepant=False
+                manufacture_data_obj = get_model('ManufacturingData').objects.filter(product_id=data_obj['product_id'])
+                if manufacture_data_obj:
+                    is_discrepant=True
+                manufacture_data_obj = get_model('ManufacturingData')(product_id=data_obj['product_id'],
+                                           material_number=data_obj['material_number'],
+                                           plant=data_obj['plant'], engine=data_obj['engine'],
+                                           vehicle_off_line_date=data_obj['vehicle_off_line_date'],
+                                           is_discrepant=is_discrepant)
+                manufacture_data_obj.save()
+            except Exception as ex:
+                ex="[Exception: ]: ManufactureDataFeed {0}".format(ex)
+                logger.error(ex)
+                self.feed_remark.fail_remarks(ex)
+        return self.feed_remark

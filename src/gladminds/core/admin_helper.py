@@ -85,6 +85,10 @@ class GmModelAdmin(ModelAdmin):
     def get_transporter(self, obj):
         return obj.transporter.transporter_id
     
+    def get_indent_status(self, obj):
+        return obj.zib_indent_num.status
+    
+    get_indent_status.short_description = 'Status'
     get_mechanic_id.short_description = 'Mechanic ID'
     get_mechanic_name.short_description = 'Name'
     get_mechanic_pincode.short_description = 'PIN code'

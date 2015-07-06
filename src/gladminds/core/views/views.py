@@ -116,7 +116,7 @@ def auth_login(request):
                 return HttpResponseRedirect(redirect_url(request))
         return HttpResponseRedirect(str(request.META.get('HTTP_REFERER')))
     else:
-        return render(request, 'login.html')
+        return render(request, 'dealer/login.html')
 
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
@@ -518,13 +518,17 @@ def trigger_sqs_tasks(request):
         'send-reminder': 'send_reminder',
         'export-customer-registered': 'export_customer_reg_to_sap',
         'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk',
-        'export_member_temp_id_to_sap': 'export_member_temp_id_to_sap',
         'export_purchase_feed_sync_to_sap': 'export_purchase_feed_sync_to_sap',
         'send_mail_for_policy_discrepency': 'send_mail_for_policy_discrepency',
+        'export_member_temp_id_to_sap': 'export_member_temp_id_to_sap',
         'export_member_accumulation_to_sap': 'export_member_accumulation_to_sap',
         'export_member_redemption_to_sap':'export_member_redemption_to_sap',
         'export_distributor_to_sap': 'export_distributor_to_sap',
-        'export_cts_to_sap': 'export_cts_to_sap'
+        'export_cts_to_sap': 'export_cts_to_sap',
+        'send_mail_for_feed_failure': 'send_mail_for_feed_failure',
+        'send_mail_for_manufacture_data_discrepancy': 'send_mail_for_manufacture_data_discrepancy',
+        'send_vin_sync_feed_details': 'send_vin_sync_feed_details'
+        
     }
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)
     taskqueue.add(sqs_tasks[request.POST['task']], settings.BRAND)

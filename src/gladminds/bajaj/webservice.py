@@ -19,6 +19,7 @@ all_app = Application([fsc_feed.BrandService,
                        epc_feed.ECOReleaseService,
                        fsc_feed.ContainerTrackerService,
                        epc_feed.ECOImplementationService,
+                       epc_feed.ManufactureDataService,
                        ],
                       tns=tns,
                       in_protocol=Soap11(validator='lxml'),
@@ -97,6 +98,11 @@ eco_implementation_app = Application([epc_feed.ECOImplementationService],
                            out_protocol=Soap11()
                            )
  
+manufacture_date_app = Application([epc_feed.ManufactureDataService],
+                           tns=tns,
+                           in_protocol=Soap11(validator='lxml'),
+                           out_protocol=Soap11()
+                           )
  
 all_service = csrf_exempt(DjangoApplication(all_app))
 brand_service = csrf_exempt(DjangoApplication(brand_app))
@@ -110,3 +116,4 @@ bom_service = csrf_exempt(DjangoApplication(bom_app))
 eco_release_app = csrf_exempt(DjangoApplication(eco_release_app))
 container_tracker_app = csrf_exempt(DjangoApplication(container_tracker_app))
 eco_implementation_app = csrf_exempt(DjangoApplication(eco_implementation_app))
+manufacture_date_app = csrf_exempt(DjangoApplication(manufacture_date_app))

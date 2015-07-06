@@ -22,7 +22,7 @@ from django.contrib.auth import authenticate
 from tastypie.resources import  ALL, ModelResource
 from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.views.auth_view import get_access_token, create_access_token
-from tastypie.authorization import DjangoAuthorization
+from tastypie.authorization import DjangoAuthorization, Authorization
 from gladminds.core.apis.authorization import CustomAuthorization,\
     MultiAuthorization
 from django.contrib.sites.models import RequestSite
@@ -45,7 +45,7 @@ class DjangoUserResources(ModelResource):
         resource_name = 'users'
         authentication = AccessTokenAuthentication()
         validation = UserValidation()
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(Authorization(), CustomAuthorization())
         allowed_methods = ['get', 'post', 'put']
         excludes = ['password', 'is_superuser']
         always_return_data = True
@@ -59,7 +59,8 @@ class ConsumerResource(CustomBaseModelResource):
         resource_name = "consumers"
         authentication = AccessTokenAuthentication()
         validation = ConsumerValidation()
-        authorization = MultiAuthorization(DjangoAuthorization(), CustomAuthorization())
+        authorization = MultiAuthorization(Authorization(), CustomAuthorization())
+        authorization = Authorization()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
@@ -144,10 +145,9 @@ class ConsumerResource(CustomBaseModelResource):
                     user_obj = afterbuy_model.Consumer.objects.get(phone_number=phone_number).user
                     otp = otp_handler.get_otp(phone_number=phone_number)
                     message = afterbuy_utils.get_template('SEND_OTP').format(otp)
-                    send_job_to_queue('send_otp', {'phone_number': phone_number,
-                                             'message': message, "sms_client": settings.SMS_CLIENT})
+                    send_job_to_queue(send_otp, {'phone_number': phone_number,
+                                             'message': message,'sms_client': settings.SMS_CLIENT})
                     logger.info('OTP sent to mobile {0}'.format(phone_number))
-                    data = {'status': 1, 'message': "OTP sent_successfully"}
                 except Exception as ex:
                     logger.info("Exception while generating OTP token {0}".format(ex))
             except Exception as ex:

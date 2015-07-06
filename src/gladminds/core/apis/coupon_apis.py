@@ -22,6 +22,9 @@ import datetime
 LOG = logging.getLogger('gladminds')
 
 class CouponDataResource(CustomBaseModelResource):
+    '''
+       Free service coupons of a product available for a brand resource
+    '''
     product = fields.ForeignKey(ProductResource, 'product', full=True)
     service_advisor = fields.ForeignKey(ServiceAdvisorResource, 'service_advisor',
                                         full=True, null=True, blank=True)
@@ -30,7 +33,7 @@ class CouponDataResource(CustomBaseModelResource):
         queryset = models.CouponData.objects.all()
         resource_name = "coupons"
         authorization = MultiAuthorization(DjangoAuthorization())
-#         authentication = MultiAuthentication(AccessTokenAuthentication())
+        authentication = MultiAuthentication(AccessTokenAuthentication())
         detail_allowed_methods = ['get']
         always_return_data = True
         filtering = {
@@ -55,6 +58,12 @@ class CouponDataResource(CustomBaseModelResource):
         return data
         
     def closed_ticket_count(self, request, **kwargs):
+        '''
+           Gets the count of coupon closed on on everyday of the month
+           params:
+               year: Year of closure
+               month: month of closure
+        '''
         date = request.GET
         year = date.get('year')
         month = date.get('month')

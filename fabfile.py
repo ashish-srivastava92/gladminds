@@ -99,7 +99,7 @@ def test_unit():
 
 @task()
 def test_smoke(package):
-    '''Runs All Tests in tests/integration package'''
+    '''Runs All Tests in tests/smoke package'''
     COVERAGE_ENABLED = False
     test('smoke.{0}'.format(package))
     
@@ -186,7 +186,7 @@ def check():
     CAPTURE = True
     NEVER_FAIL = True
 
-    test_all()
+    test_integration()
     js_lint = lint_js().split('\n')
     py_lint = lint_py().split('\n')
     css_lint = lint_css()

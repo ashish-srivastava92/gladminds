@@ -137,8 +137,10 @@ SUIT_CONFIG = {
                      'label': 'Transporter'},
                     {'model': 'supervisor',
                      'label': 'Supervisor'},
-                   {'model': 'containertracker',
-                     'label': 'Container Tracker'},
+                   {'model': 'containerindent',
+                     'label': 'Container Indent'},
+                   {'model': 'containerlr',
+                     'label': 'Container LR'},
                    )},
         {'app': 'bajaj', 'label': 'User Registrations', 'icon': ' icon-folder-open',
          'models':(
@@ -482,9 +484,9 @@ PHONE_NUMBER_UPDATE_COUNT_EXCEEDED_MAIL_TO_ASM = {
     "body": """""",
 }
 
-POLICY_DISCREPANCY_MAIL_TO_MANAGER = {
+DISCREPANCY_MAIL_TO_MANAGER = {
     "sender": "feed-report@gladminds.co",
-    "receiver": ["naureen.razi@hashedin.com", "suresh@hashedin.com"],
+    "receiver": ["naureen.razi@hashedin.com",],
     "subject": "Gladminds customer phone number update",
     "body": """""",
 }
@@ -621,7 +623,7 @@ BRANDS = OUTSIDE_BRANDS + ['afterbuy']
 ###############################################
 AIRTEL_IP = '54.84.243.77'
 SMS_CLIENT = "MOCK"
-BRAND_SMS_GATEWAY={'bajaj':'AIRTEL', 'daimler':'KAP', 'bajajcv': 'AIRTEL'}
+BRAND_SMS_GATEWAY={'bajaj':'AIRTEL', 'daimler':'KAP', 'bajajcv': 'AIRTEL', 'afterbuy': 'KAP'}
 SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                               'pass':'bajaj',
                               'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',

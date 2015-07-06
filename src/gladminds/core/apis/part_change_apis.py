@@ -44,11 +44,11 @@ class BrandProductRangeResource(CustomBaseModelResource):
         always_return_data = True 
         filtering = {
                      "sku_code": ALL,
-                     "vertical" : ALL
                      }
         
     def dehydrate(self, bundle):
-        bundle.data['image_url'] = bundle.data['image_url'].split('?')[0]
+        if bundle.data['image_url']:
+            bundle.data['image_url'] = bundle.data['image_url'].split('?')[0]
         return bundle    
     
 class BOMHeaderResource(CustomBaseModelResource):

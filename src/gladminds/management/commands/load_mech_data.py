@@ -14,6 +14,7 @@ class Command(BaseCommand):
         self.upload_mech_data()
     
     def upload_dist_data(self):
+        '''Upload data of the distributors'''
         print "Started uploading distributor..."
         file_list = ['DIST_DATA.csv']
         dealer_list = []
@@ -69,6 +70,7 @@ class Command(BaseCommand):
             return int(value)
 
     def upload_mech_data(self):
+        '''Upload data of the mechanic'''
         print "Started uploading mech data..."
         file_list = ['MECHANIC_DATA.csv']
         mech_list = []

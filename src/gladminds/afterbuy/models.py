@@ -44,6 +44,7 @@ class BrandProductCategory(base_models.BrandProductCategory):
 
 
 class ProductType(base_models.ProductType):
+    brand = models.ForeignKey(Brand)
 
     class Meta:
         app_label = _APP_NAME
@@ -81,14 +82,13 @@ class Consumer(base_models.BaseModel):
 
 class UserProduct(base_models.BaseModel):
     consumer = models.ForeignKey(Consumer)
-    brand = models.ForeignKey(Brand)
-    nick_name = models.CharField(max_length=100, default="")
+    nick_name = models.CharField(max_length=100, null=True, blank=True)
     product_type = models.ForeignKey(ProductType)
     purchase_date = models.DateTimeField(null=True, blank=True)
     brand_product_id = models.CharField(max_length=100, null=True, blank=True)
     image_url = models.CharField(
                    max_length=200, blank=True, null=True)
-    color = models.CharField(max_length=50)
+    color = models.CharField(max_length=50, null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
     is_accepted = models.BooleanField(default=False)
@@ -222,6 +222,35 @@ class Support (base_models.BaseModel):
         app_label = _APP_NAME
         verbose_name_plural = "support"
 
+class ProductSpecification(base_models.BaseModel):
+    product_type = models.ForeignKey(ProductType)
+    engine_displacement = models.CharField(max_length=255, null=True, blank=True)
+    engine_type = models.CharField(max_length=255, null=True, blank=True)
+    engine_starting = models.CharField(max_length=255, null=True, blank=True)
+    maximum_power = models.CharField(max_length=255, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Product Specifications"
+        
+class ProductFeature(base_models.BaseModel):
+    description = models.CharField(max_length=512, null=True, blank=True)
+    product_type = models.ForeignKey(ProductType)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Product Features"
+        
+class RecommendedPart(base_models.BaseModel):
+    product_type = models.ManyToManyField(ProductType)
+    part_id = models.CharField(max_length=30, null=True, blank=True)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    material = models.CharField(max_length=255, null=True, blank=True)
+    price = models.CharField(max_length=255, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Recommended Parts"
 
 class OTPToken(base_models.OTPToken):
     user = models.ForeignKey(Consumer, blank=True, null=True)
@@ -364,6 +393,11 @@ class AuditLog(base_models.AuditLog):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Audit Log"
+        
+class Constant(base_models.Constant):
+    ''' contains all the constants'''
+    class Meta(base_models.Constant.Meta):
+        app_label = _APP_NAME
 
 
 class EmailToken(models.Model):
@@ -450,3 +484,4 @@ class EmailToken(models.Model):
         else:
             send_email_activation(receiver_email, data=ctx_dict,
                                   brand=GmApps.AFTERBUY)
+

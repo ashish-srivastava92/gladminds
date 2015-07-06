@@ -1,18 +1,13 @@
 '''Handlers for loyalty service logic'''
 
-import logging
 from gladminds.core.services.services import Services
 import logging
 import json
 from datetime import datetime,timedelta
-from constance import config
 import StringIO
 import csv
 from django.http import HttpResponse
-from django.core.servers.basehttp import FileWrapper
-
 from django.conf import settings
-from django.http.response import HttpResponse
 from gladminds.core.auth_helper import Roles
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.core.model_fetcher import get_model
@@ -33,11 +28,12 @@ class CoreLoyaltyService(Services):
     def __init__(self):
         Services.__init__(self)
 
-    def save_comment(self, type, message, transaction_id, user):
+    def save_comment(self, comment_type, message, transaction_id, user):
+        '''Saves comment for welcome kit and redemption request'''
         redemption=welcome_kit=None
-        if type=='redemption':
+        if comment_type=='redemption':
             redemption = transaction_id
-        elif type=='welcome_kit':
+        elif comment_type=='welcome_kit':
             welcome_kit = transaction_id
         comment_thread = get_model('CommentThread')(user=user,
                                               message=message,
@@ -47,6 +43,7 @@ class CoreLoyaltyService(Services):
         return comment_thread
 
     def get_mechanics_detail(self, request, choice, model_name):
+        '''Fetches the details of the mechanics based on args'''
         kwargs={}
         if choice=='new':
             kwargs['download_detail'] = False
@@ -59,6 +56,7 @@ class CoreLoyaltyService(Services):
         return mechanics
     
     def get_welcome_redemption_detail(self, request, choice, model_name):
+        '''Fetches the details of the welcome/redemption based on args'''
         kwargs={}
         if choice!='all':
             kwargs['status'] = choice
@@ -73,6 +71,7 @@ class CoreLoyaltyService(Services):
         return welcome_kits
         
     def check_details(self, request, model, choice):
+        '''Before download checks if there is any valid data to be download'''
         response = {'status': False}
         request_handler={'Member': 'get_mechanics_detail',
                          'WelcomeKit': 'get_welcome_redemption_detail',
@@ -103,7 +102,10 @@ class CoreLoyaltyService(Services):
                     image_url="{0}/{1}".format(settings.S3_BASE_URL, mechanic.image_url)
                     data.append(image_url)
                 elif field=='state':
-                    data.append(mechanic.state.state_name)
+                    if mechanic.state:
+                        data.append(mechanic.state.state_name)
+                    else:
+                        data.append(mechanic.state)
                 else:
                     data.append(getattr(mechanic, field))
             csvwriter.writerow(data)
@@ -483,6 +485,7 @@ class CoreLoyaltyService(Services):
         return {'status': True, 'message': message}
 
     def set_date(self,action,status):
+        '''Sets date of SLA based on action and status'''
         loyalty_sla_obj = get_model('LoyaltySLA').objects.using(settings.BRAND).get(action=action, status=status)
         total_seconds = get_time_in_seconds(loyalty_sla_obj.resolution_time, loyalty_sla_obj.resolution_unit)
         due_date = datetime.now() + timedelta(seconds=total_seconds)
