@@ -207,9 +207,9 @@ class ContainerIndentResource(CustomBaseModelResource):
             conatiner_indent.status = status
             conatiner_indent.save()
             get_model('ContainerIndent').objects.filter(id=indent_id).update(modified_date=modified_date)
-            data=[{'status':1, 'message': 'LR status updated successfully'}]
+            data=[{'status':1, 'message': 'Indent submitted successfully'}]
         except Exception as ex:
-            data=[{'status':0, 'message': 'LR status update unsuccessful'}]
+            data=[{'status':0, 'message': 'Indent submit was unsuccessful'}]
             LOG.error('Exception while obtaining CTS count : {0}'.format(ex))
         return HttpResponse(content=json.dumps(list(data), cls=DjangoJSONEncoder), content_type='application/json')
 
@@ -288,9 +288,9 @@ class ContainerLRResource(CustomBaseModelResource):
                 if len(all_indent_lr)==container_indent.no_of_containers:
                     container_indent.status = status
             container_indent.save()
-            data=[{'status':1, 'message': 'LR status updated successfully'}]
+            data=[{'status':1, 'message': 'LR updated successfully'}]
         except Exception as ex:
-            data=[{'status':0,'message': 'LR status update unsuccessful'}]
+            data=[{'status':0,'message': 'LR update was unsuccessful'}]
             LOG.error('Exception while obtaining CTS count : {0}'.format(ex))
         return HttpResponse(content=json.dumps(list(data), cls=DjangoJSONEncoder), content_type='application/json')
 

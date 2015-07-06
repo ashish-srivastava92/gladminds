@@ -31,7 +31,7 @@
             	e.preventDefault();
             	localStorage.id = data['user_id'];
             	localStorage.token = data['access_token'];
-            	window.location.replace('/aftersell/provider/redirect')
+            	window.location.replace('/aftersell/provider/redirect');
             },
     		error: function(data){
     			e.preventDefault();
@@ -39,11 +39,11 @@
     	});
     });
 
-    if ($('[name="dealer_id"]').val() != null) {
-    	localStorage.dealer_id = $('[name="dealer_id"]').val();
+    if ($('[name="dealer_id"]').val() !== null) {
+    	localStorage.DealerId = $('[name="dealer_id"]').val();
     }
     $('#dss_report').attr('href', 'http://bajajautomcdss.gladminds.co/redirect.html?id='+
-    		localStorage.dealer_id + '&access_token='+ localStorage.token)
+    		localStorage.DealerId + '&access_token='+ localStorage.token);
 	
     $('.asc-form').on('submit', function(e) {
         var data = Utils.getFormData('.asc-form');
@@ -102,45 +102,45 @@
             url: '/aftersell/exceptions/customer',
             data: {'vin': vin},
             success: function(data){
-            		if (data['phone'] && user=="d123") {
-            			$('.customer-phone').val(data['phone']).attr('readOnly', false);
-            		    $('.customer-name').val(data['name']).attr('readOnly', false);
-            		    $('.purchase-date').val(data['purchase_date']).attr('readOnly', false);
-            		    $('.customer-id').val(data['id']).attr('readOnly', true);
+            		if (data.phone && user==='d123') {
+            			$('.customer-phone').val(data.phone).attr('readOnly', false);
+            		    $('.customer-name').val(data.name).attr('readOnly', false);
+            		    $('.purchase-date').val(data.purchase_date).attr('readOnly', false);
+            		    $('.customer-id').val(data.id).attr('readOnly', true);
             		    $('.customer-submit').attr('disabled', false);
             		 	}
             	
-            else if (data['phone']) {
-                  $('.customer-phone').val(data['phone']).attr('readOnly', true);
-            	  if (data['group']=='AuthorisedServiceCenters' || data['group']=='Dealers' || data['group']=='SdManagers'){
-            		  $('.customer-phone').val(data['phone']).attr('readOnly', false);
-            	}
-                  $('.customer-name').val(data['name']).attr('readOnly', true);
-                  $('.purchase-date').val(data['purchase_date']).attr('disabled', true);
-                  $('.customer-id').val(data['id']).attr('readOnly', true);
-                  $('.customer-submit').attr('disabled', false);
-              }	
-              else if (data['message']) {
-                  $('.customer-phone').val('').attr('readOnly', false);
-            	  $('.customer-name').val('').attr('readOnly', false);
-            	  $('.purchase-date').val('').attr('disabled', false);
-                  $('.customer-id').val('').attr('readOnly', false);
-                  $('.customer-submit').attr('disabled', true);
-                  messageBlock.text(data.message);
-                  messageModal.modal('show');
-                  if (!data['status']) {
-                	  $('.modal-header .close').css("display", "block");
-                	  $('.customer-id').val('').attr('readOnly', true);
-                	  $('.customer-submit').attr('disabled', false);
-                  }
-                  else {
-                      $('.modal-header .close').css("display", "none");
-                      setTimeout(function(){
-                      	messageModal.modal('hide');
-                      }, 3000);
-                	  vinSyncFeed(data);
-                  }
-              }
+		            else if (data.phone) {
+		                  $('.customer-phone').val(data.phone).attr('readOnly', true);
+		            	  if (data.group==='AuthorisedServiceCenters' || data.group==='Dealers' || data.group==='SdManagers'){
+		            		  $('.customer-phone').val(data.phone).attr('readOnly', false);
+		            	  }
+		                  $('.customer-name').val(data.name).attr('readOnly', true);
+		                  $('.purchase-date').val(data.purchase_date).attr('disabled', true);
+		                  $('.customer-id').val(data.id).attr('readOnly', true);
+		                  $('.customer-submit').attr('disabled', false);
+		              }	
+		              else if (data.message) {
+		                  $('.customer-phone').val('').attr('readOnly', false);
+		            	  $('.customer-name').val('').attr('readOnly', false);
+		            	  $('.purchase-date').val('').attr('disabled', false);
+		                  $('.customer-id').val('').attr('readOnly', false);
+		                  $('.customer-submit').attr('disabled', true);
+		                  messageBlock.text(data.message);
+		                  messageModal.modal('show');
+		                  if (!data.status) {
+		                	  $('.modal-header .close').css('display', 'block');
+		                	  $('.customer-id').val('').attr('readOnly', true);
+		                	  $('.customer-submit').attr('disabled', false);
+		                  }
+		                  else {
+		                      $('.modal-header .close').css('display', 'none');
+		                      setTimeout(function(){
+		                      	messageModal.modal('hide');
+		                      }, 3000);
+		//                	  vinSyncFeed(data);
+		                  }
+                      }
             		
             },
             error: function() {
@@ -160,8 +160,8 @@ function vinSyncFeed(data){
         url: '/aftersell/feeds/vin-sync/',
         data : data,
         success: function(data){
-        if (data['message']) {
-            $('.modal-header .close').css("display", "none");
+        if (data.message) {
+            $('.modal-header .close').css('display', 'none');
         	waitingModal.modal('show');
             messageBlock.text(data.message);
             messageModal.modal('show');
@@ -179,7 +179,7 @@ function vinSyncFeed(data){
     }
 
     $('.service-status-search').on('submit', function() {
-    	var table = $(".status-search-results tbody .search-detail");
+    	var table = $('.status-search-results tbody .search-detail');
     		table.remove(); 
     		$('.other-details').remove();
     	var value = $('.status-search-value').val(),
@@ -193,17 +193,17 @@ function vinSyncFeed(data){
             url: '/aftersell/exceptions/status',
             data: data,
             success: function(data){
-            	var service_detail = data['search_results'],
-            		other_details = data['other_details']; 
-            	if (data['message']) {
+            	var serviceDetail = data.search_results,
+            		otherDetails = data.other_details; 
+            	if (data.message) {
                     messageBlock.text(data.message);
                     messageModal.modal('show');
             	}else{
-	            	if (service_detail.length > 0) {
-	            		var details_html = "<div class='other-details'><label class='control-label'>VIN:&nbsp</label>"+ other_details.vin +"<br><label class='control-label'>Customer Id:&nbsp</label>"+ other_details.customer_id +"<br><label class='control-label'>Customer Name:&nbsp</label>"+ other_details.customer_name +"</div>",
-	            			table = $(".status-search-results tbody");
-	            			$('.status-result-detail').append(details_html);
-	            			$.each(service_detail, function(idx, elem){
+	            	if (serviceDetail.length > 0) {
+	            		var DetailsHtml = "<div class='other-details'><label class='control-label'>VIN:&nbsp</label>"+ otherDetails.vin +"<br><label class='control-label'>Customer Id:&nbsp</label>"+ otherDetails.customer_id +"<br><label class='control-label'>Customer Name:&nbsp</label>"+ otherDetails.customer_name +"</div>",
+	            			table = $('.status-search-results tbody');
+	            			$('.status-result-detail').append(DetailsHtml);
+	            			$.each(serviceDetail, function(idx, elem){
 	            				table.append("<tr class='search-detail'><td>"+elem.service_type+"</td><td>"+elem.status+"</td></tr>");
 	            			});
 	            	}
@@ -419,8 +419,8 @@ function vinSyncFeed(data){
     $('.comment-form').on('submit', function(e) {
         var data = Utils.getFormData('.servicedesk'),
             formData = new FormData($(this).get(0)),
-            comment_data = Utils.getFormData('.comment-form'),
-            url = '/aftersell/feedbackdetails/'+data.ticketId+'/comments/'+comment_data.commentId+'/',
+            commentData = Utils.getFormData('.comment-form'),
+            url = '/aftersell/feedbackdetails/'+data.ticketId+'/comments/'+commentData.commentId+'/',
             messageModal = $('.modal.message-modal'),
             messageBlock = $('.modal-body', messageModal),
             messageHeader = $('.modal-title', messageModal),
@@ -438,7 +438,7 @@ function vinSyncFeed(data){
                 waitingModal.modal('show');
             },
             success: function(data){
-            	var data = Utils.getFormData('.servicedesk');
+            	var formData = Utils.getFormData('.servicedesk');
                 messageBlock.text('Updated Successfully');
                 messageHeader.text('Save');
                 waitingModal.modal('hide');
@@ -448,7 +448,7 @@ function vinSyncFeed(data){
 	            $('.comment-description').val('');
 	            $('.comment-date').val('');
                 setTimeout(function() {
-                	parent.window.location='/aftersell/feedbackdetails/'+data.ticketId+'/';
+                	parent.window.location='/aftersell/feedbackdetails/'+formData.ticketId+'/';
                 }, 2000);
                 
             },
@@ -612,43 +612,45 @@ function vinSyncFeed(data){
     	format:'Y-m-d H:i:s',
 	});
     
-    $(".feedback-free-text-search").click(function(){
-    	window.location.href = change_url_by_filter();
-    })
+    $('.feedback-free-text-search').click(function(){
+    	window.location.href = changeUrlByFilter();
+    });
     
     $('.feedback-filters-options').change(function() {
-    	window.location.href = change_url_by_filter();
-    })
+    	window.location.href = changeUrlByFilter();
+    });
     
 })();
 
-function getUrl(current_page_num, no_of_link_in_page, flage){
-	var url = change_url_by_filter() + 'page=';
-		if (flage == 'true'){
-			url = url +  current_page_num
+function getUrl(currentPageNum, numOfLinkInPage, flag){
+	'use strict';
+	var url = changeUrlByFilter() + 'page=';
+		if (flag === 'true'){
+			url = url +  currentPageNum;
 		}else{
-			var diff = current_page_num - no_of_link_in_page;
+			var diff = currentPageNum - numOfLinkInPage;
 				if (diff > 1){
-					url = url + diff 
+					url = url + diff;
 				}else{
-					url = url + 1
+					url = url + 1;
 				}
 		}
 		
 		window.location.href = url;
 }
 
-function change_url_by_filter(){
+function changeUrlByFilter(){
+	'use strict';
 	var url = window.location.pathname + '?',
-		serch_text = $(".feedback-search-text").val(),
+		searchText = $('.feedback-search-text').val(),
     	selectedOptions = $('.feedback-filters-options'),
     	filters = ['priority', 'type', 'status', 'count'];
     	$.each(filters, function(index, val){
-    		url = url + val + '=' + selectedOptions[index].options[selectedOptions[index].selectedIndex].value + '&'
+    		url = url + val + '=' + selectedOptions[index].options[selectedOptions[index].selectedIndex].value + '&';
     	});
     	
-    	if(serch_text){
-    		url = url + "search=" + serch_text
+    	if(searchText){
+    		url = url + 'search=' + searchText;
     	}
     	return url;
 }
@@ -689,14 +691,15 @@ function rootCause(status){
 	}
 	
 }
-function disable_func(group){
+function disableFunc(group){
+	'use strict';
 	if (group === 'Manager'){
-		$("#type").prop("disabled", true);
+		$('#type').prop('disabled', true);
 	}else{
-		$("#type").prop("disabled", true);
-		$("#priority").prop("disabled", true);
-		$("#assignee").prop("disabled", true);
-		$("#status").prop("disabled", true);
+		$('#type').prop('disabled', true);
+		$('#priority').prop('disabled', true);
+		$('#assignee').prop('disabled', true);
+		$('#status').prop('disabled', true);
 	}
 }
 
@@ -705,7 +708,8 @@ function showMessage(id){
 	$('#'+id).popover();
 }
 
-function change_status(){
+function changeStatus(){
+	'use strict';
 	var status = window.location.search.split('?status=')[1];
     $('.status').val(status);
     $('.status').change(function() {
@@ -716,20 +720,19 @@ function change_status(){
 }
 
 function getDataByDate(){
+	'use strict';
     var month = $('#month').val(),
         year =  $('#year').val();
-    if(month=='' || year==''){
-    	window.location.href = window.location.pathname
-    	
+    if(month==='' || year===''){
+    	window.location.href = window.location.pathname;
     }
     else{
     window.location.href = window.location.pathname + '?month='+month+'&'+'year='+year;
     }
-   
 }
 
-$(document).on("click", ".open-add-comment-dialog", function (e) {
-
+$(document).on('click', '.open-add-comment-dialog', function (e) {
+	'use strict';
 	e.preventDefault();
 	
 	var _self = $(this);
@@ -739,15 +742,14 @@ $(document).on("click", ".open-add-comment-dialog", function (e) {
 	    commentDate = _self.data('date'),
 	    comment = $('.comment-description'),
 	    loginUser = _self.data('owner');
-	$(".comment-id").val(commentId);
-	$(".comment-user").val(commentUser);
-	$(".comment-description").val(commentDescription);
-	$(".comment-date").val(commentDate);
+	$('.comment-id').val(commentId);
+	$('.comment-user').val(commentUser);
+	$('.comment-description').val(commentDescription);
+	$('.comment-date').val(commentDate);
 	comment.attr('readonly', false);
-	if (loginUser != commentUser){
+	if (loginUser !== commentUser){
 		comment.attr('readonly', true);
 	}
-	
 	$(_self.attr('href')).modal('show');
 	
 });

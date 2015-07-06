@@ -111,17 +111,5 @@
 --alter table gm_member add column total_accumulation_points integer(50) default 0;
 --alter table gm_member add column total_redemption_points integer(50) default 0;
 
-alter table gm_manufacturingdata add column is_discrepant bool default 0;
-alter table gm_manufacturingdata add column sent_to_sap bool default 0;
-
-alter table gm_containerindent drop foreign key `transporter_id_refs_id_52bca095`;
-alter table gm_containerindent drop column transporter_id;
-alter table gm_containerlr add column transporter_id integer;
-alter table gm_containerlr add foreign key (transporter_id) references gm_transporter(id);
-update gm_containerlr new inner join gm_containertracker old on old.transaction_id=new.transaction_id set new.transporter_id=old.transporter_id;
-alter table gm_containerlr add column partner_name varchar(50);
-
-alter table gm_brandproductrange drop column vertical;
-
 
 
