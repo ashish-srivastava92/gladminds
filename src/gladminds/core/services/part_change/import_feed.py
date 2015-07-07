@@ -1,22 +1,12 @@
-import csv
 import logging
-import os
-import time
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models.signals import post_save
-from django.contrib.auth.models import User, Group
-from django.db.models import signals
 
-from gladminds.core.services import message_template as templates
-from gladminds.core import utils
 from gladminds.core.model_fetcher import get_model
-from gladminds.core.managers.audit_manager import feed_log, sms_log
-from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.auth_helper import Roles
-from gladminds.core.services.feed_resources import BaseFeed, BaseExportFeed
+from gladminds.core.services.feed_resources import BaseFeed
 from gladminds.core.managers import mail
 logger = logging.getLogger("gladminds")
 
@@ -186,8 +176,12 @@ class ManufactureDataFeed(BaseFeed):
         for data_obj in self.data_source:
             try:
                 is_discrepant=False
-                manufacture_data_obj = get_model('ManufacturingData').objects.filter(product_id=data_obj['product_id'])
+                manufacture_data_obj = get_model('ManufacturingData').objects.filter(
+                                                            product_id=data_obj['product_id'],
+                                                            is_discrepant=is_discrepant)
                 if manufacture_data_obj:
+                    if self.all_values_same(manufacture_data_obj.values(), data_obj):
+                        continue
                     is_discrepant=True
                 manufacture_data_obj = get_model('ManufacturingData')(product_id=data_obj['product_id'],
                                            material_number=data_obj['material_number'],
@@ -200,3 +194,10 @@ class ManufactureDataFeed(BaseFeed):
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         return self.feed_remark
+    
+    def all_values_same(self,manufacture_data_obj, data_obj):
+        for key, value in data_obj.items():
+            active = filter(lambda active: active[key] == value, manufacture_data_obj)
+            if not active:
+                return False
+        return True      

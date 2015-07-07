@@ -28,6 +28,7 @@ from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_mess
 from gladminds.core.managers.mail import sent_otp_email,\
     send_recovery_email_to_admin, send_mail_when_vin_does_not_exist
 from gladminds.bajaj.services.coupons.import_feed import SAPFeed
+from gladminds.core.apis.coupon_apis import CouponDataResource
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
@@ -453,14 +454,14 @@ def get_customer_info(data):
     except Exception as ex:
         logger.info(ex)
         message = "The Chassis {0} is not available in the current database, please wait while the Main database is being scanned.".format(data['vin'])
-        return {'message': message, 'status': 'fail', 'vin': data['vin']}
+        return {'message': message, 'status': 0}
     if product_obj.purchase_date:
         product_data = format_product_object(product_obj)
         product_data['group'] = data['groups'][0] 
-        return product_data
+        return {'product': product_data, 'status': 1}
     else:
         message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
-        return {'message': message}
+        return {'message': message, 'status': 1}
 
 @login_required()
 def exceptions(request, exception=None):
@@ -655,131 +656,26 @@ def create_reconciliation_report(query_params, user):
         report_data.append(coupon_data_dict)
     return report_data
 
-
-@check_service_active(Services.FREE_SERVICE_COUPON)
-def brand_details(requests, role=None):
-    data = requests.GET.copy()
-    data_list = []
-    data_dict = {}
-    limit = data.get('limit', 20)
-    offset = data.get('offset', 0)
-    limit = int(limit)
-    offset = int(offset)
-    function_mapping = {
-            'asc': get_asc_info,
-            'sa': get_sa_info,
-            'customers': get_customers_info,
-            'active-asc': get_active_asc_info,
-            'not-active-asc': get_not_active_asc_info
-        }
-    get_data = requests.GET
-    data = function_mapping[role](data, limit, offset , data_dict, data_list)
-    return HttpResponse(json.dumps(data), mimetype="application/json")
-
-
-def get_asc_info(data, limit, offset, data_dict, data_list):
-    '''get city and state from parameter'''
-    asc_details = {}
-    if data.has_key('city') and data.has_key('state'):
-        asc_details['user__address'] = ', '.join([data['city'].upper(), data['state'].upper()])
-    asc_data = models.AuthorizedServiceCenter.objects.filter(**asc_details)
-    data_dict['total_count'] = len(asc_data)
-    for asc in asc_data[offset:limit]:
-        asc_detail = OrderedDict();
-        asc_detail['id'] = asc.dealer.dealer_id
-        asc_detail['address'] = asc.user.address
-        utils.get_state_city(asc_detail, asc.user.address)
-        data_list.append(asc_detail)
-    data_dict['asc'] = data_list
-    return data_dict
-
-
-def get_sa_info(data, limit, offset, data_dict, data_list):
-    sa_details = {}
-    if data.has_key('phone_number'):
-        sa_details['user__phone_number'] = utils.mobile_format(str(data['phone_number']))
-    sa_data = models.ServiceAdvisor.objects.filter(**sa_details)
-    data_dict['total_count'] = len(sa_data)
-    for sa in sa_data[offset:limit]:
-        sa_detail = OrderedDict();
-        sa_detail['id'] = sa.service_advisor_id
-        sa_detail['name'] = sa.user.user.first_name
-        sa_detail['phone_number'] = sa.user.phone_number
-        sa_detail = get_sa_details(sa_detail, sa)
-        data_list.append(sa_detail)
-    data_dict['sa'] = data_list
-    return data_dict
-
-
-def get_customers_info(data, limit, offset, data_dict, data_list):
-    kwargs = {}
-    if data.has_key('sap_id'):
-        kwargs['customer_id'] = data['sap_id']
-    args = {~Q(product_purchase_date=None)}
-    customer_products = models.ProductData.objects.filter(*args, **kwargs)[offset:limit]
-    for customer in customer_products:
-        customer_detail = OrderedDict();
-        customer_detail['sap_id'] = customer.customer_id
-        customer_detail['vin'] = customer.product_id
-        customer_detail['name'] = customer.customer_name
-        customer_detail['phone_number'] = customer.customer_phone_number
-        customer_detail['city'] = customer.customer_city
-        customer_detail['state'] = customer.customer_state
-        data_list.append(customer_detail)
-    data_dict['customers'] = data_list
-    return data_dict
-
-
- 
-def get_active_asc_info(data, limit, offset, data_dict, data_list):
-    '''get city and state from parameter'''
-    asc_details = utils.get_asc_data(data)
-    active_asc_list = asc_details.filter(~Q(date_joined=F('last_login')))
-    active_ascs = active_asc_list.values_list('username', flat=True)
-    asc_obj = models.Dealer.objects.filter(dealer_id__in=active_ascs)
-    for asc_data in asc_obj[offset:limit]:
-        active_ascs = OrderedDict();
-        active_ascs['id'] = asc_data.dealer_id
-        active_ascs['address'] = asc_data.address
-        active_ascs = utils.get_state_city(active_ascs, asc_data.address)
-        active_ascs['coupon_closed'] = utils.asc_cuopon_data(asc_data, 2)
-        active_ascs['coupon_inprogress'] = utils.asc_cuopon_data(asc_data, 4)
-        active_ascs['coupon_closed_old_fsc'] = utils.asc_cuopon_data(asc_data, 6)
-        data_list.append(active_ascs)
-    data_dict['count'] = len(active_asc_list)
-    data_dict['active-asc'] = data_list
-    return data_dict
-
-
 #FIXME: Refactor the code
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def get_active_asc_report(request, role=None):
-    '''get city and state from parameter'''
-    data = request.GET.copy()
-    if data.has_key('month'):
-        month = MONTHS.index(data['month']) + 1
-        year = data['year']
-    else:
-        now = datetime.datetime.now()
-        year = now.year
-        month = now.month
-    port = request.META['SERVER_PORT']
-    access_token = request.META['QUERY_STRING'] 
-    no_of_days = utils.get_number_of_days(year, month)
+    '''get number of tickets closed by ASC'''
     if request.method != 'GET':
         return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
     try:
-        query = '/v1/coupons/closed-ticket-count?'+ access_token
-        query = query + '&year='+ str(year) + '&month=' + str(month)
-        if not settings.API_FLAG:
-            asc_query_list = requests.get('http://'+settings.COUPON_URL+':'+port+query)
+        data = request.GET.copy()
+        if data.has_key('month'):
+            month = MONTHS.index(data['month']) + 1
+            year = data['year']
         else:
-            asc_query_list = requests.get('http://'+settings.COUPON_URL+query)
-        
+            now = datetime.datetime.now()
+            year = now.year
+            month = now.month
+        no_of_days = utils.get_number_of_days(year, month)
+        coupon_resource = CouponDataResource()
+        asc_query=coupon_resource.closed_ticket(year, month)
         asc_list = []
-        x=json.loads(asc_query_list.content)
-        for asc in x:
-            
+        for asc in asc_query:
             active = filter(lambda active: active['id']==asc['asc_id'], asc_list)
             if not active:
                 temp= {}
@@ -799,6 +695,7 @@ def get_active_asc_report(request, role=None):
                 active[0]['coupon_closed'][day]= asc['cnt']
                 active[0]['total_coupon_closed'] = active[0]['total_coupon_closed'] + asc['cnt']
     except Exception as ex:
+        print "322222222222", ex
         logger.error('Exception while counting data : {0}'.format(ex))
         return HttpResponseBadRequest()
     years = utils.gernate_years()
@@ -811,30 +708,3 @@ def get_active_asc_report(request, role=None):
                    "cyear": str(year),
                    "role": role
                    })
-
-def get_not_active_asc_info(data, limit, offset, data_dict, data_list):
-    '''get city and state from parameter'''
-    asc_details = utils.get_asc_data(data)
-    not_active_asc_list = asc_details.filter(date_joined=F('last_login'))
-    not_active_ascs = not_active_asc_list.values_list('username', flat=True)
-    not_asc_obj = models.AuthorizedServiceCenter.objects.filter(asc_id__in=not_active_ascs)
-    for asc in not_asc_obj[offset:limit]:
-        not_active_ascs = OrderedDict();
-        not_active_ascs['id'] = asc.asc_id
-        not_active_ascs['address'] = asc.user.address
-        not_active_ascs = utils.get_state_city(not_active_ascs, asc.user.address)
-        data_list.append(not_active_ascs)
-    data_dict['count'] = len( not_active_asc_list)
-    data_dict['not-active-asc'] = data_list
-    return data_dict
-
-def get_sa_details(sa_details, id):
-    sa_detail = models.ServiceAdvisor.objects.filter(service_advisor_id=id)
-    if sa_detail:
-        if sa_detail.dealer:
-            sa_details['dealer'] = sa_detail.dealer.dealer_id
-        elif sa_detail.asc:
-            sa_details['asc'] = sa_detail.asc.asc_id
-    else:
-        sa_details['dealer/asc'] = 'Null'
-    return sa_details

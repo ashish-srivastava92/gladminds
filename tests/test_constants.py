@@ -185,6 +185,7 @@ AFTERBUY_PRODUCT = {
                     }                   
 AFTERBUY_PRODUCTS = {
                      "brand_product_id": "zxcvbnm",
+                     "warranty_year" : "2015-01-01",
                      "color": "",
                      "consumer": {
                                   "accepted_terms": False,
@@ -908,3 +909,28 @@ PRODUCT_RECOMMENDED_PARTS = {
                              "product_type":[AFTERBUY_PRODUCTS.get("product_type")],
                              "resource_uri": "/afterbuy/v1/product-parts/1/"
                              }
+
+ADD_PRODUCT = {
+               "brand_name": "bajaj",
+               "product_id" : "VBKJUC4L2FC035111",
+               "model_name" : "bike",
+               "model_year" : "2014-02-01"
+            }
+
+PRODUCT_BRAND =  {
+                  "created_date": "2015-06-19T11:20:37",
+                  "description": "",
+                  "image_url": "sss",
+                  "industry": {
+                               "created_date": "2015-06-19T11:20:33",
+                               "description": "",
+                               "id": 1,
+                               "modified_date": "2015-06-19T15:42:55",
+                               "name": "Automobiles",
+                               "resource_uri": "/afterbuy/v1/industries/1/"
+                               },
+                  "is_active": True,
+                  "modified_date": "2015-06-19T15:42:55",
+                  "name": "bajaj",
+                  "resource_uri": "/afterbuy/v1/brands/1/"
+                  } 

@@ -6,7 +6,8 @@ from django.conf import settings
 from django.utils.translation import gettext as _
 from gladminds.core import base_models
 from gladminds.core.constants import GENDER_CHOICES, SIZE_CHOICES, FUEL_CHOICES
-from gladminds.core.model_helpers import PhoneField
+from gladminds.core.model_helpers import PhoneField, set_afterbuy_consumer_image,\
+    validate_image, set_afterbuy_user_product_image
 from gladminds.core.auth_helper import GmApps
 from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
 from gladminds.core.managers.mail import send_email_activation,\
@@ -34,6 +35,8 @@ class Brand(base_models.Brand):
         app_label = _APP_NAME
         verbose_name_plural = "Brands"
 
+    def __unicode__(self):
+        return self.name
 
 class BrandProductCategory(base_models.BrandProductCategory):
     brand = models.ForeignKey(Brand)
@@ -50,14 +53,17 @@ class ProductType(base_models.ProductType):
         app_label = _APP_NAME
         verbose_name_plural = "Product Types"
 
-
+    def __unicode__(self):
+        return self.product_type
+    
 class Consumer(base_models.BaseModel):
     user = models.OneToOneField(User, primary_key=True)
     consumer_id = models.CharField(
         max_length=50, unique=True, default=uuid4)
     phone_number = PhoneField(unique=True)
-    image_url = models.CharField(
-                   max_length=200, default=settings.DEFAULT_IMAGE_ID)
+    image_url = models.FileField(upload_to=set_afterbuy_consumer_image,
+                              max_length=255, null=True, blank=True,
+                              validators=[validate_image])
     address = models.TextField(blank=True, null=True)
     state = models.CharField(max_length=255, null=True, blank=True)
     country = models.CharField(max_length=255, null=True, blank=True)
@@ -71,6 +77,11 @@ class Consumer(base_models.BaseModel):
                                    blank=True, null=True)
     is_email_verified = models.BooleanField(default=False)
     is_phone_verified = models.BooleanField(default=False)
+    
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+    image_tag.short_description = 'Consumer Image'
+    image_tag.allow_tags = True
 
     class Meta:
         app_label = _APP_NAME
@@ -86,8 +97,10 @@ class UserProduct(base_models.BaseModel):
     product_type = models.ForeignKey(ProductType)
     purchase_date = models.DateTimeField(null=True, blank=True)
     brand_product_id = models.CharField(max_length=100, null=True, blank=True)
-    image_url = models.CharField(
-                   max_length=200, blank=True, null=True)
+    image_url = models.FileField(upload_to=set_afterbuy_user_product_image,
+                              max_length=255, null=True, blank=True,
+                              validators=[validate_image])
+
     color = models.CharField(max_length=50, null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
@@ -95,10 +108,20 @@ class UserProduct(base_models.BaseModel):
     service_reminder = models.IntegerField(blank=True, null=True)
     details_completed = models.IntegerField(blank=True, null=True)
     manual_link = models.CharField(max_length=512, blank=True, null=True)
+    warranty_year = models.DateTimeField(null=True, blank=True)
+    insurance_year = models.DateTimeField(null=True, blank=True)
+    
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+    image_tag.short_description = 'User Product Image'
+    image_tag.allow_tags = True
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "User Products"
+    
+    def __unicode__(self):
+        return self.brand_product_id
 
 
 class ProductSupport(base_models.BaseModel):
@@ -224,10 +247,8 @@ class Support (base_models.BaseModel):
 
 class ProductSpecification(base_models.BaseModel):
     product_type = models.ForeignKey(ProductType)
-    engine_displacement = models.CharField(max_length=255, null=True, blank=True)
-    engine_type = models.CharField(max_length=255, null=True, blank=True)
-    engine_starting = models.CharField(max_length=255, null=True, blank=True)
-    maximum_power = models.CharField(max_length=255, null=True, blank=True)
+    key = models.CharField(max_length=255, null=True, blank=True)
+    value = models.CharField(max_length=255, null=True, blank=True)
     
     class Meta:
         app_label = _APP_NAME
@@ -396,8 +417,9 @@ class AuditLog(base_models.AuditLog):
         
 class Constant(base_models.Constant):
     ''' contains all the constants'''
-    class Meta(base_models.Constant.Meta):
+    class Meta():
         app_label = _APP_NAME
+        verbose_name_plural = 'Constants'
 
 
 class EmailToken(models.Model):
@@ -484,4 +506,22 @@ class EmailToken(models.Model):
         else:
             send_email_activation(receiver_email, data=ctx_dict,
                                   brand=GmApps.AFTERBUY)
+
+class ServiceCenterLocation(base_models.BaseModel):
+    brand = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    phone_number = models.CharField(max_length=25, null=True, blank=True)
+    address = models.TextField(blank=True, null=True)
+    state = models.CharField(max_length=255, null=True, blank=True)
+    country = models.CharField(max_length=255, null=True, blank=True)
+    pincode = models.CharField(max_length=15, null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Service Locations"
+    
+    def __unicode__(self):
+        return self.name
 

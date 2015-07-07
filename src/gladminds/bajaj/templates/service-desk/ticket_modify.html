@@ -27,7 +27,7 @@
 							<div class="form-group">
                     			<label class="col-sm-4 control-label" for="type">Type</label>
                         		<div class="col-sm-8">
-                            		<select id="type" class="form-control" name="type"  {% if group == CONSTANTS.SD_CONSTANTS.SD_OWNER or group == CONSTANTS.SD_CONSTANTS.DEALER or group == CONSTANTS.SD_CONSTANTS.FSCADMIN or group == CONSTANTS.SD_CONSTANTS.ASC %} onfocus="disable_func('Other')"  readonly {% else %} onfocus="disable_func('Manager')" {% endif %}  >
+                            		<select id="type" class="form-control" name="type"  {% if group == CONSTANTS.SD_CONSTANTS.SD_OWNER or group == CONSTANTS.SD_CONSTANTS.DEALER or group == CONSTANTS.SD_CONSTANTS.FSCADMIN or group == CONSTANTS.SD_CONSTANTS.ASC %} onfocus="disableFunc('Other')"  readonly {% else %} onfocus="disableFunc('Manager')" {% endif %}  >
                                 		{% for type in FEEDBACK_TYPE %}
                      	            		<option {% if type == feedback.type %} selected {% endif %} value="{{type}}">{{type}}</option>
                                     	{% endfor %}
@@ -43,7 +43,7 @@
 	 						<div class="form-group">
                     			<label class="col-sm-4 control-label" for="Priority">Priority</label>
                         		<div class="col-sm-8">
-                            		<select id="priority" class="form-control" name="Priority"  {% if group == CONSTANTS.SD_CONSTANTS.SD_OWNER or group == CONSTANTS.SD_CONSTANTS.DEALER or group == CONSTANTS.SD_CONSTANTS.FSCADMIN or group == CONSTANTS.SD_CONSTANTS.ASC %} onfocus="disable_func()" readonly {% endif %}>
+                            		<select id="priority" class="form-control" name="Priority"  {% if group == CONSTANTS.SD_CONSTANTS.SD_OWNER or group == CONSTANTS.SD_CONSTANTS.DEALER or group == CONSTANTS.SD_CONSTANTS.FSCADMIN or group == CONSTANTS.SD_CONSTANTS.ASC %} onfocus="disableFunc()" readonly {% endif %}>
                                 		{% for type in PRIORITY %}
                       	            		<option {% if type == feedback.priority %} selected {% endif %} value="{{type}}">{{type}}</option>
                                     	{% endfor %}
@@ -56,7 +56,7 @@
 							<div class="form-group">
                     			<label class="col-sm-4 control-label" for="Status">Status</label>
                        			<div class="col-sm-8">
-	                    			<select id="status" class="form-control status" name="status" {% if group == CONSTANTS.SD_CONSTANTS.DEALER and feedback.status != 'Pending' and feedback.status != 'Resolved' %} onfocus="disable_func()" readonly
+	                    			<select id="status" class="form-control status" name="status" {% if group == CONSTANTS.SD_CONSTANTS.DEALER and feedback.status != 'Pending' and feedback.status != 'Resolved' %} onfocus="disableFunc()" readonly
                                 			{% endif %} onchange="rootCause(this.options[this.selectedIndex].value)" >
                             			{% for type in FEEDBACK_STATUS %}
                                 			<option {% if type == feedback.status %} selected {% endif %}
@@ -85,7 +85,7 @@
 							<div class="form-group">
                     			<label class="col-sm-4 control-label" for="Assign To">Assignee</label>
                         		<div class="col-sm-8">
-                        			<select id="assignee" class="form-control assignee" name="assign_to"   {% if group == CONSTANTS.SD_CONSTANTS.SD_OWNER or group == CONSTANTS.SD_CONSTANTS.DEALER or group == CONSTANTS.SD_CONSTANTS.FSCADMIN or group == CONSTANTS.SD_CONSTANTS.ASC %} onfocus="disable_func()" readonly {% endif %} onchange="dueDateRequire(this.options[this.selectedIndex].value)" >
+                        			<select id="assignee" class="form-control assignee" name="assign_to"   {% if group == CONSTANTS.SD_CONSTANTS.SD_OWNER or group == CONSTANTS.SD_CONSTANTS.DEALER or group == CONSTANTS.SD_CONSTANTS.FSCADMIN or group == CONSTANTS.SD_CONSTANTS.ASC %} onfocus="disableFunc()" readonly {% endif %} onchange="dueDateRequire(this.options[this.selectedIndex].value)" >
                             			<option value=""></option>
                             			<option value={{feedback.previous_assignee.user_profile.user.username}}>Previous assignee</option>
                                			{% for type in servicedeskuser %}

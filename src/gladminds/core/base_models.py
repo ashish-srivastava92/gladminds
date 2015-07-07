@@ -8,7 +8,8 @@ from django.utils.translation import gettext as _
 from gladminds.core.managers import user_manager, coupon_manager,\
     service_desk_manager
 from gladminds.core.model_helpers import PhoneField, set_plate_image_path,\
-    set_plate_with_part_image_path, set_brand_product_image_path
+    set_plate_with_part_image_path, set_brand_product_image_path,\
+    set_brand_image
 from gladminds.core import constants
 from gladminds.core.core_utils.utils import generate_mech_id, generate_partner_id,\
     generate_nsm_id,generate_asm_id
@@ -101,9 +102,16 @@ class Industry(BaseModel):
 class Brand(BaseModel):
     '''Details of brands signed up'''
     name = models.CharField(max_length=250)
-    image_url = models.CharField(max_length=200, null=True, blank=True)
+    image_url = models.FileField(upload_to=set_brand_image,
+                              max_length=255, null=True, blank=True,
+                              validators=[validate_image])
     is_active = models.BooleanField(default=True)
     description = models.TextField(null=True, blank=True)
+    
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+    image_tag.short_description = 'Brand Image'
+    image_tag.allow_tags = True
 
     class Meta:
         abstract = True
@@ -1694,7 +1702,7 @@ class ManufacturingData(models.Model):
     material_number = models.CharField(max_length=100, null=True, blank=True)
     plant = models.CharField(max_length=100, null=True, blank=True)
     engine = models.CharField(max_length=100, null=True, blank=True)
-    vehicle_off_line_date =  models.DateTimeField(null=True, blank= True)
+    vehicle_off_line_date =  models.DateField(null=True, blank= True)
     is_discrepant = models.BooleanField(default=False)
     sent_to_sap = models.BooleanField(default=False)
 

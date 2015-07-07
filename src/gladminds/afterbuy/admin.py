@@ -1,21 +1,14 @@
 from django.contrib.admin import AdminSite
-from django.contrib.auth.models import User, Group, Permission
-from constance.admin import Config, ConstanceAdmin
 from django.contrib.admin.options import ModelAdmin
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from django.contrib.auth.models import User, Group, Permission
 
-from gladminds.afterbuy.models import Brand, Consumer, ProductType,\
-MessageTemplate, EmailTemplate, Industry, UserProduct, License,\
-    ProductInsuranceInfo, ProductWarrantyInfo, PollutionCertificate,\
-    BrandProductCategory, SMSLog, EmailLog, OTPToken, EmailToken,\
-    ServiceType, Service, SellInformation, ProductSpecification, ProductFeature,\
-    RecommendedPart
 from gladminds.core.auth_helper import GmApps
+from gladminds.core.model_fetcher import get_model
 
 
 class AfterbuyAdminSite(AdminSite):
     pass
-
 
 class BrandAdmin(ModelAdmin):
     search_fields = ('name', 'industry__name')
@@ -39,33 +32,33 @@ class ProductTypeAdmin(ModelAdmin):
 def get_admin_site_custom(brand):
     brand_admin = AfterbuyAdminSite(name=brand)
 
-    brand_admin.register(Industry, IndustryAdmin)
-    brand_admin.register(Brand, BrandAdmin)
-    brand_admin.register(BrandProductCategory)
-    brand_admin.register(ServiceType)
-    brand_admin.register(Service)
-    brand_admin.register(SellInformation)
-    brand_admin.register(Consumer, ConsumerAdmin)
-    brand_admin.register(ProductType, ProductTypeAdmin)
-    brand_admin.register(UserProduct)
-    brand_admin.register(ProductInsuranceInfo)
-    brand_admin.register(ProductWarrantyInfo)
-    brand_admin.register(PollutionCertificate)
-    brand_admin.register(License)
+    brand_admin.register(get_model("Industry", brand), IndustryAdmin)
+    brand_admin.register(get_model("Brand", brand), BrandAdmin)
+    brand_admin.register(get_model("BrandProductCategory"))
+    brand_admin.register(get_model("ServiceType"))
+    brand_admin.register(get_model("Service"))
+    brand_admin.register(get_model("Consumer", brand), ConsumerAdmin)
+    brand_admin.register(get_model("ProductType",brand), ProductTypeAdmin)
+    brand_admin.register(get_model("UserProduct", brand))
+    brand_admin.register(get_model("ProductInsuranceInfo", brand))
+    brand_admin.register(get_model("ProductWarrantyInfo", brand))
+    brand_admin.register(get_model("PollutionCertificate", brand))
+    brand_admin.register(get_model("License", brand))
+    brand_admin.register(get_model("MessageTemplate", brand))
+    brand_admin.register(get_model("EmailTemplate", brand))
+    brand_admin.register(get_model("SMSLog", brand))
+    brand_admin.register(get_model("EmailLog", brand))
+    brand_admin.register(get_model("EmailToken", brand))
+    brand_admin.register(get_model("OTPToken", brand))
+    brand_admin.register(get_model("ProductSpecification", brand))
+    brand_admin.register(get_model("ProductFeature", brand))
+    brand_admin.register(get_model("RecommendedPart", brand))
+    brand_admin.register(get_model("Constant", brand))
     
     brand_admin.register(User, UserAdmin)
     brand_admin.register(Group, GroupAdmin)
     brand_admin.register(Permission)
     
-    brand_admin.register(MessageTemplate)
-    brand_admin.register(EmailTemplate)
-    brand_admin.register(SMSLog)
-    brand_admin.register(EmailLog)
-    brand_admin.register(EmailToken)
-    brand_admin.register(OTPToken)
-    brand_admin.register(ProductSpecification)
-    brand_admin.register(ProductFeature)
-    brand_admin.register(RecommendedPart)
     return brand_admin
 
 brand_admin = get_admin_site_custom(GmApps.AFTERBUY)

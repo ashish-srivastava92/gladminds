@@ -304,3 +304,16 @@ class ECOImplementationResource(CustomBaseModelResource):
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post']
         always_return_data = True
+
+class ManufacturingDataResource(CustomBaseModelResource):
+    '''
+       Manufacturing Data resource
+    '''
+
+    class Meta:
+        queryset = get_model('ManufacturingData').objects.all()
+        resource_name = 'manufacturing-details'
+        authorization = Authorization()
+        authentication = AccessTokenAuthentication()
+        allowed_methods = ['get']
+        always_return_data =True
