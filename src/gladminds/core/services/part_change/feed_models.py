@@ -13,7 +13,6 @@ from spyne.server.wsgi import WsgiApplication
 from spyne.service import ServiceBase
 from spyne.util.wsgi_wrapper import WsgiMounter
 
-from gladminds.core import utils
 from gladminds.core.managers.audit_manager import feed_failure_log
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.services.part_change.import_feed import SAPFeed

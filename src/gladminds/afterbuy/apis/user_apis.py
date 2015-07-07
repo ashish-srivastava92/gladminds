@@ -1,8 +1,6 @@
 import json
 import logging
 import operator
-import re
-from uuid import uuid4
 
 from django.conf import settings
 from django.conf.urls import url
@@ -15,7 +13,6 @@ from django.db.models.query_utils import Q
 from django.db.transaction import atomic
 from django.forms.models import model_to_dict
 from django.http.response import HttpResponse
-import requests
 from tastypie import fields, http
 from tastypie.authorization import DjangoAuthorization, Authorization
 from tastypie.exceptions import ImmediateHttpResponse

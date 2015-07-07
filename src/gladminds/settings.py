@@ -674,16 +674,16 @@ SAP_CRM_DETAIL = {
                   }
 FILE_CACHE_DURATION = 0
 
-COUPON_WSDL = 'qa_coupon_redeem.wsdl'
-CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
-VIN_SYNC_WSDL='qa_vin_sync.wsdl'
-PURCHASE_SYNC_WSDL='qa_purchase_sync_feed.wsdl'
-CTS_WSDL = 'qa_container_tracker_feed.wsdl'
+COUPON_WSDL = 'qa_wsdl/qa_coupon_redeem.wsdl'
+CUSTOMER_REGISTRATION_WSDL = 'qa_wsdl/qa_customer_registration.wsdl'
+VIN_SYNC_WSDL='qa_wsdl/qa_vin_sync.wsdl'
+PURCHASE_SYNC_WSDL='qa_wsdl/qa_purchase_sync_feed.wsdl'
+CTS_WSDL = 'qa_wsdl/qa_container_tracker_feed.wsdl'
 
-MEMBER_SYNC_WSDL='qa_member_sync_feed.wsdl'
-ACCUMULATION_SYNC_WSDL = 'qa_accumulation_feed.wsdl'
-REDEMPTION_SYNC_WSDL = 'qa_redemption_feed.wsdl'
-DISTRIBUTOR_SYNC_WSDL = 'qa_distributor_sync_feed.wsdl'                
+MEMBER_SYNC_WSDL='qa_wsdl/qa_member_sync_feed.wsdl'
+ACCUMULATION_SYNC_WSDL = 'qa_wsdl/qa_accumulation_feed.wsdl'
+REDEMPTION_SYNC_WSDL = 'qa_wsdl/qa_redemption_feed.wsdl'
+DISTRIBUTOR_SYNC_WSDL = 'qa_wsdl/qa_distributor_sync_feed.wsdl'                
 
 COUPON_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/coupon-redeem/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/customer-feed/?wsdl&v0"

@@ -27,7 +27,7 @@ class Command(BaseCommand):
         for i in range(0, 3):
             data = []
             self.failed_feed_vins = []
-            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
+            with open(settings.PROJECT_DIR + '/upload_data/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
                 for row_list in spamreader:

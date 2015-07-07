@@ -9,7 +9,7 @@ var Utils = {
 	},
 	
 	showErrorMessage : function(message, fadeIn, fadeOut){
-		var messageBlock = $(".user-message .message");
+		var messageBlock = $('.user-message .message');
 	      	messageBlock.text(message);
 	      	messageBlock.stop().fadeOut(0);
 	      	messageBlock.fadeIn(fadeIn).fadeOut(fadeOut);
@@ -20,7 +20,7 @@ var Utils = {
 		var messageModal = $('.modal.message-modal'),
             messageBlock = $('.modal-body', messageModal),
             waitingModal = $('.modal.waiting-dialog');
-		if (data['password'] && (data['password'] !== data['re-password'])) {
+		if (data.password && (data.password !== data['re-password'])) {
 			messageBlock.text('Re-typed password does not match');
 			messageModal.modal('show');
 			return;
@@ -39,9 +39,9 @@ var Utils = {
 				event.preventDefault();
 			},
 			error : function() {
-				waitingModal.modal("hide");
-				messageBlock.text("Some error occurred. Please contact customer support: +91-7847011011");
-				messageModal.modal("show");
+				waitingModal.modal('hide');
+				messageBlock.text('Some error occurred. Please contact customer support: +91-7847011011');
+				messageModal.modal('show');
 			}
 		});
 	}

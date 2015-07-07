@@ -51,9 +51,9 @@ $(function() {
     var populateFields = function() {
         var splittedUrl = window.location.href.split('?');
         if(splittedUrl.length > 1) {
-            if(splittedUrl[1].indexOf("username")>=0){
+            if(splittedUrl[1].indexOf('username')>=0){
                 var username = splittedUrl[1].split('=')[1];
-                $(".otp-validation-form #username").val(username);
+                $('.otp-validation-form #username').val(username);
             }
         }
     };

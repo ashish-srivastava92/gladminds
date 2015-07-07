@@ -32,7 +32,7 @@ class Command(BaseCommand):
         file_list = file_list
         product_list = []
         for i in range(0, 1):
-            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
+            with open(settings.PROJECT_DIR + '/upload_data/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
                 for row_list in spamreader:
