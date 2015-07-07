@@ -56,6 +56,21 @@ class CouponDataResource(CustomBaseModelResource):
         data = dictfetchall(cursor)
         conn.close()
         return data
+    
+    def closed_ticket(self, year, month):
+        trans_date = datetime.datetime.now() - datetime.timedelta(days=30)
+        query = "select count(*) as cnt, day(c.closed_date) as day, a.asc_id, e.address, f.first_name \
+                                      from gm_coupondata c\
+                                      left outer join gm_serviceadvisor s on c.service_advisor_id=s.user_id \
+                                      left outer join gm_dealer d on s.dealer_id=d.user_id left outer join \
+                                      gm_authorizedservicecenter a on s.asc_id=a.user_id \
+                                      left outer join gm_userprofile e on a.user_id = e.user_id \
+                                      left outer join auth_user f on a.asc_id = f.username \
+                                      where YEAR(closed_date)={0} and MONTH(closed_date)={1} \
+                                      and a.last_transaction_date > \"{2}\"\
+                                      group by date(c.closed_date),a.asc_id;".format( year, month, trans_date)
+        details = self.get_sql_data(query)
+        return details
         
     def closed_ticket_count(self, request, **kwargs):
         '''
@@ -67,21 +82,6 @@ class CouponDataResource(CustomBaseModelResource):
         date = request.GET
         year = date.get('year')
         month = date.get('month')
-        trans_date = datetime.datetime.now() - datetime.timedelta(days=30)
-        try:
-            query = "select count(*) as cnt, day(c.closed_date) as day, a.asc_id, e.address, f.first_name \
-                                      from gm_coupondata c\
-                                      left outer join gm_serviceadvisor s on c.service_advisor_id=s.user_id \
-                                      left outer join gm_dealer d on s.dealer_id=d.user_id left outer join \
-                                      gm_authorizedservicecenter a on s.asc_id=a.user_id \
-                                      left outer join gm_userprofile e on a.user_id = e.user_id \
-                                      left outer join auth_user f on a.asc_id = f.username \
-                                      where YEAR(closed_date)={0} and MONTH(closed_date)={1} \
-                                      and a.last_transaction_date > \"{2}\"\
-                                      group by date(c.closed_date),a.asc_id;".format( year, month, trans_date)
-            details = self.get_sql_data(query)
-        except Exception as ex:
-            LOG.error('Exception while quering data : {0}'.format(ex))
-            return HttpResponseBadRequest()
+        details= self.closed_ticket(year, month)
         data =  json.dumps(details, cls=DjangoJSONEncoder)
         return HttpResponse(content=data,content_type='application/json')
