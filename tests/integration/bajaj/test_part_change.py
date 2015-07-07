@@ -10,7 +10,7 @@ from test_constants import BRAND_PRODUCT_RANGE, BRAND_VERTICAL, BOM_HEADER, \
 
 client=Client(SERVER_NAME='bajaj')
 
-class PartChangeTests(BaseTestCase):
+class PartChangeAPIsTests(BaseTestCase):
     multi_db=True
     def setUp(self):
         super(PartChangeTests, self).setUp()

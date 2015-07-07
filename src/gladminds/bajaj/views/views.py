@@ -453,14 +453,14 @@ def get_customer_info(data):
     except Exception as ex:
         logger.info(ex)
         message = "The Chassis {0} is not available in the current database, please wait while the Main database is being scanned.".format(data['vin'])
-        return {'message': message, 'status': 'fail', 'vin': data['vin']}
+        return {'message': message, 'status': 0}
     if product_obj.purchase_date:
         product_data = format_product_object(product_obj)
         product_data['group'] = data['groups'][0] 
-        return product_data
+        return {'product': product_data, 'status': 1}
     else:
         message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
-        return {'message': message}
+        return {'message': message, 'status': 1}
 
 @login_required()
 def exceptions(request, exception=None):

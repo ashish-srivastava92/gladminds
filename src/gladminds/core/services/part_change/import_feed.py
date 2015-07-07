@@ -176,8 +176,12 @@ class ManufactureDataFeed(BaseFeed):
         for data_obj in self.data_source:
             try:
                 is_discrepant=False
-                manufacture_data_obj = get_model('ManufacturingData').objects.filter(product_id=data_obj['product_id'])
+                manufacture_data_obj = get_model('ManufacturingData').objects.filter(
+                                                            product_id=data_obj['product_id'],
+                                                            is_discrepant=is_discrepant)
                 if manufacture_data_obj:
+                    if self.all_values_same(manufacture_data_obj.values(), data_obj):
+                        continue
                     is_discrepant=True
                 manufacture_data_obj = get_model('ManufacturingData')(product_id=data_obj['product_id'],
                                            material_number=data_obj['material_number'],
@@ -190,3 +194,10 @@ class ManufactureDataFeed(BaseFeed):
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         return self.feed_remark
+    
+    def all_values_same(self,manufacture_data_obj, data_obj):
+        for key, value in data_obj.items():
+            active = filter(lambda active: active[key] == value, manufacture_data_obj)
+            if not active:
+                return False
+        return True      
