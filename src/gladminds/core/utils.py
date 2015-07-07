@@ -155,7 +155,7 @@ def format_product_object(product_obj):
     return {'id': product_obj.customer_id,
             'phone': get_phone_number_format(str(product_obj.customer_phone_number)), 
             'name': product_obj.customer_name, 
-            'purchase_date': purchase_date,
+            'purchased': purchase_date,
             'vin': product_obj.product_id}
 
 def get_sa_list_for_login_dealer(user):
