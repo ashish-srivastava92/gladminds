@@ -84,6 +84,7 @@ api_v1.register(part_change_apis.BOMPlatePartResource())
 api_v1.register(part_change_apis.ECOReleaseResource())
 api_v1.register(part_change_apis.ECOImplementationResource())
 api_v1.register(part_change_apis.BOMVisualizationResource())
+api_v1.register(part_change_apis.ManufacturingDataResource())
 
 api_v1.register(service_circular.ServiceCircularResource())
 
