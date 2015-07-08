@@ -15,7 +15,7 @@ from gladminds.core.auth import access_token_handler
 client = Client(SERVER_NAME='bajaj')
 
 
-class TestServiceDeskFlow(BaseTestCase):
+class ServiceDeskFlowTest(BaseTestCase):
     multi_db=True
     def setUp(self):
         TestCase.setUp(self)

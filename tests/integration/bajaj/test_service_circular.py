@@ -5,12 +5,12 @@ from integration.bajaj.base import BaseTestCase
 
 client=Client(SERVER_NAME='bajaj')
 
-class ServiceCircularTests(BaseTestCase):
+class ServiceCircularTest(BaseTestCase):
     multi_db=True
     def setUp(self):
         self.create_user(username='bajaj', email='bajaj@gladminds.co', password='bajaj')
         self.base_version = 'http://local.bajaj.gladminds.co:8000'
-        super(ServiceCircularTests, self).setUp()
+        super(ServiceCircularTest, self).setUp()
 
     def post(self, uri, data, access_token=None):
         if access_token:

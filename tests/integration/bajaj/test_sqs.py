@@ -8,7 +8,7 @@ logger = logging.getLogger('gladminds')
 client = Client()
 
 
-class TestSQSTasks(base_integration.BrandResourceTestCase):
+class SQSTaskTest(base_integration.BrandResourceTestCase):
 
     def setUp(self):
         pass

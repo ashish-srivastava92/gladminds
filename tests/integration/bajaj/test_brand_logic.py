@@ -73,6 +73,10 @@ class Brand(object):
     def send_manufacture_data_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/bajaj/test_data/manufacture_data.xml')
         self.post_feed(file_path)
+    
+    def send_sbom_data_feed(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/bajaj/test_data/bom_feed.xml')
+        self.post_feed(file_path)
 
     def post_feed(self, file_path):
         xml_data = open(file_path, 'r').read()

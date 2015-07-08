@@ -11,10 +11,10 @@ from test_constants import USER_PREFERENCE, APP_PREFERENCE
 
 client = Client()
 
-class TestUserPreferencesResourceApi(ResourceTestCase):
+class UserPreferencesResourceApiTest(ResourceTestCase):
 
     def setup(self):
-        super(TestUserPreferencesResourceApi, self).setUp()
+        super(UserPreferencesResourceApiTest, self).setUp()
         self.access_token = 'testaccesstoken'
         user = User.objects.create_user(username='gladminds', email='gm@gm.com',password='gladminds')
         secret_cli = auth_client(user=user, name='client', client_type=1, url='')

@@ -232,7 +232,7 @@ class TicketStatus():
     RESOLVED = 'Resolved'
     PENDING = 'Pending'
 
-DOWNLOAD_MECHANIC_FIELDS = ['permanent_id', 'first_name', 'middle_name', 'last_name', 'phone_number', 'date_of_birth', 'address_line_1', 'address_line_2', 'address_line_3', 'address_line_4', 'address_line_5', 'address_line_6','shop_name', 'shop_address', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url',]
+DOWNLOAD_MECHANIC_FIELDS = ['permanent_id', 'first_name', 'middle_name', 'last_name', 'phone_number', 'date_of_birth', 'address_line_1', 'address_line_2', 'address_line_3', 'address_line_4', 'address_line_5', 'address_line_6','shop_number', 'shop_name', 'shop_address', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url',]
 DOWNLOAD_WELCOME_KIT_FIELDS = ['permanent_id', 'first_name', 'middle_name', 'last_name', 'phone_number', 'delivery_address', 'district', 'state', 'pincode', 'image_url']
 DOWNLOAD_REDEMPTION_FIELDS = ['permanent_id', 'first_name', 'middle_name', 'last_name', 'phone_number', 'delivery_address', 'district', 'state', 'pincode', 'product']
 
