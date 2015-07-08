@@ -10,10 +10,16 @@ from test_constants import BRAND_PRODUCT_RANGE, BRAND_VERTICAL, BOM_HEADER, \
 
 client=Client(SERVER_NAME='bajaj')
 
-class PartChangeAPIsTests(BaseTestCase):
+class PartChangeTest(BaseTestCase):
     multi_db=True
     def setUp(self):
-        super(PartChangeTests, self).setUp()
+        TestCase.setUp(self)
+        self.brand = Brand(self)
+        self.system = System(self)
+        BaseTestCase.setUp(self)
+        self.create_user(username='bajaj', email='bajaj@gladminds.co', password='bajaj')
+        self.access_token = self.brand.admin_login()
+
 
     def post(self, uri, data, access_token=None, content_type='application/json'):
         if access_token:
@@ -21,7 +27,7 @@ class PartChangeAPIsTests(BaseTestCase):
         resp = client.post(uri, data=json.dumps(data), content_type=content_type)
         return resp
 
-    def get(self, uri, access_token, content_type='application/json'):
+    def get(self, uri, access_token, data=None, content_type='application/json'):
         resp = client.get(uri+'&&access_token='+access_token, content_type=content_type)
         return resp
     
@@ -119,4 +125,11 @@ class PartChangeAPIsTests(BaseTestCase):
         resp = self.post(uri, data=SBOM_REVIEW, access_token=access_token)
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(json.loads(resp.content)['message'], "Success")
+        
+    def test_sbom_search_by_vin(self):
+        access_token = self.access_token
+        brnad.send_dispatch_feed()
+        brand.send_sbom_data_feed()
+
+        
         

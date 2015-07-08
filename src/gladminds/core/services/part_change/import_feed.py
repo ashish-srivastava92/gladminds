@@ -24,7 +24,7 @@ class SAPFeed(object):
 
     def import_to_db(self, feed_type=None, data_source=[], feed_remark=None):
         function_mapping = {
-            'bomitem': BOMItemFeed,
+            'sbom_main': SBOMMainFeed,
             'eco_release': ECOReleaseFeed,
             'eco_implementation':ECOImplementationFeed,
             'manufacture_data': ManufactureDataFeed,
@@ -34,7 +34,7 @@ class SAPFeed(object):
         return feed_obj.import_data()
 
     
-class BOMItemFeed(BaseFeed):
+class SBOMMainFeed(BaseFeed):
   
     def import_data(self):
         bom_header_obj = 0
@@ -49,7 +49,7 @@ class BOMItemFeed(BaseFeed):
                                                         valid_to=bom['valid_to_header'])
                 bom_header_obj.save(using=settings.BRAND) 
             except Exception as ex:
-                ex="[Exception: ]: BOMHeaderFeed {0}".format(ex)
+                ex="[Exception: ]: SBOMMainFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark[1].fail_remarks(ex)
 
@@ -74,7 +74,7 @@ class BOMItemFeed(BaseFeed):
                 bomplatepart_obj.save(using=settings.BRAND)
                 mail.send_epc_feed_received_mail(brand=settings.BRAND, template_name='SBOM_FEED')
             except Exception as ex:
-                ex="[Exception: ]: BOMItemFeed {0}".format(ex)
+                ex="[Exception: ]: SBOMMainFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark[0].fail_remarks(ex)
 

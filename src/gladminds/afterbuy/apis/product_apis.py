@@ -157,7 +157,9 @@ class UserProductResource(CustomBaseModelResource):
                 brands = {}
                 brands['brand_id'] = product.product_type.brand.id
                 brands['brand_name'] = product.product_type.brand.name
-                brands['brand_image'] = product.product_type.brand.image_url
+                brands['brand_image'] = ""
+                if product.product_type.brand.image_url:
+                    brands['brand_image'] = "{0}/{1}".format(settings.S3_BASE_URL, product.product_type.brand.image_url)
                 brands['brand_product_id'] = product.brand_product_id
                 brands['product_type'] = product.product_type.product_type
                 brand_details.append(brands)
