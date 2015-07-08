@@ -500,10 +500,6 @@ class DiscrepantAccumulation(base_models.DiscrepantAccumulation):
         app_label = _APP_NAME
 
 ############################### ECO MODELS ###################################################      
-class BOMItem(base_models.BOMItem):
-    '''Details of  Service Billing of Material'''
-    class Meta(base_models.BOMItem.Meta):
-        app_label = _APP_NAME
 
 class ECORelease(base_models.ECORelease):
     '''Details of ECO Release'''

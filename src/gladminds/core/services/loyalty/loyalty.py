@@ -52,7 +52,7 @@ class CoreLoyaltyService(Services):
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm_state_list=get_model('AreaSparesManager').objects.get(user__user=request.user).state.all()
             kwargs['state__in'] = asm_state_list
-        mechanics = get_model(model_name).objects.using(settings.BRAND).filter(**kwargs)
+        mechanics = get_model(model_name).objects.using(settings.BRAND).filter(**kwargs).select_related('state', 'registered_by_distributor')
         return mechanics
     
     def get_welcome_redemption_detail(self, request, choice, model_name):
@@ -67,7 +67,7 @@ class CoreLoyaltyService(Services):
             kwargs['packed_by'] = request.user.username
         elif request.user.groups.filter(name=Roles.LPS).exists():
             kwargs['partner__user'] = request.user
-        welcome_kits = get_model(model_name).objects.using(settings.BRAND).filter(**kwargs).select_related('member')
+        welcome_kits = get_model(model_name).objects.using(settings.BRAND).filter(**kwargs).select_related('member__state', 'product')
         return welcome_kits
         
     def check_details(self, request, model, choice):
@@ -106,6 +106,11 @@ class CoreLoyaltyService(Services):
                         data.append(mechanic.state.state_name)
                     else:
                         data.append(mechanic.state)
+                elif field=='registered_by_distributor':
+                    if mechanic.registered_by_distributor:
+                        data.append(mechanic.registered_by_distributor.distributor_id)
+                    else:
+                        data.append(mechanic.registered_by_distributor)
                 else:
                     data.append(getattr(mechanic, field))
             csvwriter.writerow(data)
