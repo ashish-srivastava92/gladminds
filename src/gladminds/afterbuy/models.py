@@ -1,17 +1,20 @@
-from uuid import uuid4
 import datetime
-from django.db import models
-from django.contrib.auth.models import User
+from uuid import uuid4
+
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.db import models
 from django.utils.translation import gettext as _
-from gladminds.core import base_models
-from gladminds.core.constants import GENDER_CHOICES, SIZE_CHOICES, FUEL_CHOICES
-from gladminds.core.model_helpers import PhoneField, set_afterbuy_consumer_image,\
-    validate_image, set_afterbuy_user_product_image
-from gladminds.core.auth_helper import GmApps
+
 from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
-from gladminds.core.managers.mail import send_email_activation,\
+from gladminds.core import base_models
+from gladminds.core.auth_helper import GmApps
+from gladminds.core.constants import GENDER_CHOICES, SIZE_CHOICES, FUEL_CHOICES
+from gladminds.core.managers.mail import send_email_activation, \
     sent_password_reset_link
+from gladminds.core.model_helpers import PhoneField, set_afterbuy_consumer_image, \
+    validate_image, set_afterbuy_user_product_image
+
 
 try:
     from django.utils.timezone import now as datetime_now
@@ -57,10 +60,9 @@ class ProductType(base_models.ProductType):
         return self.product_type
     
 class Consumer(base_models.BaseModel):
-    user = models.OneToOneField(User, primary_key=True)
-    consumer_id = models.CharField(
-        max_length=50, unique=True, default=uuid4)
-    phone_number = PhoneField(unique=True)
+    user = models.OneToOneField(User, primary_key=True, related_name='afterbuy_consumer')
+    consumer_id = models.CharField(max_length=50, unique=True, default=uuid4)
+    phone_number = PhoneField()
     image_url = models.FileField(upload_to=set_afterbuy_consumer_image,
                               max_length=255, null=True, blank=True,
                               validators=[validate_image])
@@ -510,7 +512,7 @@ class EmailToken(models.Model):
 class ServiceCenterLocation(base_models.BaseModel):
     brand = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, null=True, blank=True)
-    phone_number = models.CharField(max_length=25, null=True, blank=True)
+    phone_number = PhoneField(null=True, blank=True)
     address = models.TextField(blank=True, null=True)
     state = models.CharField(max_length=255, null=True, blank=True)
     country = models.CharField(max_length=255, null=True, blank=True)

@@ -8,6 +8,7 @@ from django.contrib.auth import  login
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.sites.models import RequestSite
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.query_utils import Q
 from django.db.transaction import atomic
@@ -31,6 +32,7 @@ from gladminds.core.apis.authorization import CustomAuthorization, \
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.auth import otp_handler
 from gladminds.core.auth_helper import GmApps
+from gladminds.core.core_utils.utils import generate_consumer_id
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.model_helpers import format_phone_number
@@ -106,57 +108,53 @@ class ConsumerResource(CustomBaseModelResource):
             data = {'status': 0, 'message': ex}
         return HttpResponse(json.dumps(data), content_type="application/json")
     
+    def create_user(self, phone_number, email=None):
+        consumer_id = generate_consumer_id()
+        user_obj = User.objects.using(settings.BRAND).create(username=consumer_id)
+        password = consumer_id+'@123'
+        user_obj.set_password(password)
+        user_obj.is_active = False
+        if email:
+            user_obj.email=email
+        user_obj.save(using=settings.BRAND)
+        consumer_obj = get_model('Consumer', settings.BRAND)(user=user_obj, phone_number=phone_number,
+                                                              consumer_id=consumer_id)
+        consumer_obj.save(using=settings.BRAND)
+        return {'consumer_obj': consumer_obj, 'password': password}
     
-#     @atomic(using=GmApps.AFTERBUY)
-#     def user_registration(self, request, **kwargs):
-#         if request.method != 'POST':
-#             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
-#         try:
-#             load = json.loads(request.body)
-#         except:
-#             return HttpResponse(content_type="application/json", status=404)
-#         phone_number = load.get('phone_number')
-#         if not phone_number:
-#             return HttpBadRequest("Enter phone number")
-#         try:
-#             afterbuy_model.Consumer.objects.get(
-#                                                 phone_number=phone_number)
-#             data = {'status_code': 0, 'message': 'phone number already registered'}
-#         except Exception as ex:
-#             try:
-#                 user_obj = User.objects.using(GmApps.AFTERBUY).create(username=phone_number)
-#                 password = phone_number+'@123'
-#                 user_obj.set_password(password)
-#                 user_obj.save(using=GmApps.AFTERBUY)
-#                 consumer_obj = afterbuy_model.Consumer(user=user_obj, phone_number=phone_number)
-#                 consumer_obj.save(using=GmApps.AFTERBUY)
-#                 http_host = request.META.get('HTTP_HOST', 'localhost')
-#                 user_auth = authenticate(username=str(phone_number),
-#                                 password=password)
-#                 if user_auth is not None:
-#                     try:
-#                         access_token = create_access_token(user_auth, user_obj.username, password, http_host)
-#                         if user_auth.is_active:
-#                             login(request, user_auth)
-#                             data = {'status_code': 200 , 'message':'success', 'access_token': access_token}
-#                         else:
-#                             data = {'status': 0, 'message': "failure"}
-#                     except Exception as ex:
-#                         logger.info('Exception while generating access token {0}'.format(ex))
-#                         
-#                 try:
-#                     logger.info('OTP request received. Mobile: {0}'.format(phone_number))
-#                     user_obj = afterbuy_model.Consumer.objects.get(phone_number=phone_number).user
-#                     otp = otp_handler.get_otp(phone_number=phone_number)
-#                     message = afterbuy_utils.get_template('SEND_OTP').format(otp)
-#                     send_job_to_queue(send_otp, {'phone_number': phone_number,
-#                                              'message': message,'sms_client': settings.SMS_CLIENT})
-#                     logger.info('OTP sent to mobile {0}'.format(phone_number))
-#                 except Exception as ex:
-#                     logger.info("Exception while generating OTP token {0}".format(ex))
-#             except Exception as ex:
-#                 logger.info("Exception while registering user {0}".format(ex))
-#         return HttpResponse(json.dumps(data), content_type="application/json")
+    @atomic(using=settings.BRAND)
+    def user_registration(self, request, **kwargs):
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        phone_number = load.get('phone_number')
+        if not phone_number:
+            return HttpBadRequest("Enter phone number")
+        try:
+            consumer_obj = get_model('Consumer', settings.BRAND).objects.get(phone_number=phone_number, user__is_active=True)
+            data = {'status_code': 0, 'message': 'phone number already registered'}
+        except Exception as ObjectDoesNotExist:
+            try:
+                user_obj = self.create_user(phone_number=phone_number)
+                data = {'status':200, 'message': 'Phone number registered successfully'}
+            except Exception as ex:
+                logger.info("Exception while registering user with phone number - {0}".format(ex))
+                return HttpBadRequest("Phone number could not be registered")
+        try:
+            otp = otp_handler.get_otp(phone_number=phone_number)
+            message = afterbuy_utils.get_template('SEND_OTP').format(otp)
+            send_job_to_queue(send_otp, {'phone_number': phone_number,
+                                             'message': message,'sms_client': settings.SMS_CLIENT})
+            user_obj['consumer_obj'].is_phone_verified = False
+            user_obj['consumer_obj'].save()
+            logger.info('OTP sent to mobile {0}'.format(phone_number))
+            return HttpResponse(json.dumps(data), content_type="application/json")
+        except Exception as ex:
+            logger.info('Exception while generating OTP - {0}'.format(ex))
+            return HttpBadRequest("OTP could not be generated")
 
     def activate_email(self, request, **kwargs):
         activation_key = request.GET['activation_key']

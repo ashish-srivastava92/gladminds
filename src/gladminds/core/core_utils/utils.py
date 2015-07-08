@@ -35,6 +35,10 @@ def generate_mech_id():
     mechanic_id=generate_temp_id('TME')
     return mechanic_id
 
+def generate_consumer_id():
+    consumer_id = generate_temp_id('AFTERBUY')
+    return consumer_id
+
 def generate_partner_id():
     partner_id=generate_temp_id('PRT')
     return partner_id
