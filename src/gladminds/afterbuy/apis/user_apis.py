@@ -74,7 +74,7 @@ class ConsumerResource(CustomBaseModelResource):
 
     def prepend_urls(self):
         return [
-            url(r"^(?P<resource_name>%s)/registration%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('user_registration'), name="user_registration"),
+            url(r"^(?P<resource_name>%s)/registration/phone%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('user_registration_phone'), name="user_registration_phone"),
             url(r"^(?P<resource_name>%s)/activate-email%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('activate_email'), name="activate_email"),
             url(r"^(?P<resource_name>%s)/phone-number/send-otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('sent_otp_user_phone_number'), name="sent_otp_user_phone_number"),
             url(r"^(?P<resource_name>%s)/authenticate-email%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('authenticate_user_email_id'), name="authenticate_user_email_id"),
@@ -123,7 +123,7 @@ class ConsumerResource(CustomBaseModelResource):
         return {'consumer_obj': consumer_obj, 'password': password}
     
     @atomic(using=settings.BRAND)
-    def user_registration(self, request, **kwargs):
+    def user_registration_phone(self, request, **kwargs):
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
         try:
