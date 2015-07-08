@@ -113,7 +113,7 @@ class ConsumerResource(CustomBaseModelResource):
         user_obj = User.objects.using(settings.BRAND).create(username=consumer_id)
         password = consumer_id+'@123'
         user_obj.set_password(password)
-        user_obj.is_active = False
+        user_obj.is_active = True
         if email:
             user_obj.email=email
         user_obj.save(using=settings.BRAND)
@@ -134,11 +134,13 @@ class ConsumerResource(CustomBaseModelResource):
         if not phone_number:
             return HttpBadRequest("Enter phone number")
         try:
-            consumer_obj = get_model('Consumer', settings.BRAND).objects.get(phone_number=phone_number, user__is_active=True)
-            data = {'status_code': 0, 'message': 'phone number already registered'}
+            consumer_obj = get_model('Consumer', settings.BRAND).objects.get(phone_number=phone_number,
+                                                                             user__is_active=True)
+            data = {'status_code': 200, 'message': 'phone number already registered'}
         except Exception as ObjectDoesNotExist:
             try:
                 user_obj = self.create_user(phone_number=phone_number)
+                consumer_obj = user_obj['consumer_obj']
                 data = {'status':200, 'message': 'Phone number registered successfully'}
             except Exception as ex:
                 logger.info("Exception while registering user with phone number - {0}".format(ex))
@@ -148,8 +150,8 @@ class ConsumerResource(CustomBaseModelResource):
             message = afterbuy_utils.get_template('SEND_OTP').format(otp)
             send_job_to_queue(send_otp, {'phone_number': phone_number,
                                              'message': message,'sms_client': settings.SMS_CLIENT})
-            user_obj['consumer_obj'].is_phone_verified = False
-            user_obj['consumer_obj'].save()
+            consumer_obj.is_phone_verified = False
+            consumer_obj.save()
             logger.info('OTP sent to mobile {0}'.format(phone_number))
             return HttpResponse(json.dumps(data), content_type="application/json")
         except Exception as ex:
@@ -166,7 +168,6 @@ class ConsumerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def validate_otp(self, request, **kwargs):
-        self.is_authenticated(request)
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message":"method not allowed"}),
                                 content_type="application/json",status=401)
@@ -174,10 +175,12 @@ class ConsumerResource(CustomBaseModelResource):
         try:
             load = json.loads(request.body)
             otp_token = load.get('otp_token')
-            if not otp_token:
-                return HttpBadRequest("Enter the OTP")
-            user = afterbuy_model.Consumer.objects.get(user=request.user)
-            otp_handler.validate_otp(otp_token, phone_number=user.phone_number)
+            phone_number = load.get('phone_number')
+            if not otp_token or not phone_number:
+                return HttpBadRequest("OTP and phone number is mandatory")
+            user = get_model('Consumer', settings.BRAND).objects.get(phone_number=phone_number,
+                                                                     user__is_active=True)
+            otp_handler.validate_otp(otp_token, phone_number=phone_number)
             user.is_phone_verified = True
             user.save(using=settings.BRAND)
             return HttpResponse(json.dumps({'status': 200, 'message':'OTP validated'}),
