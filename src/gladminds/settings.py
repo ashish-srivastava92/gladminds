@@ -28,6 +28,7 @@ ADMINS = (
     ('naureen', 'naureen.razi@hashedin.com'),
     ('priyanka', 'priyanka.n@hashedin.com')
 )
+
 API_FLAG = False
 COUPON_VALID_DAYS = 30
 COUPON_URL = 'local.bajaj.gladminds.co'
@@ -708,8 +709,8 @@ BRAND_META = {
                }
 
 HOME_URLS = {
-             "bajaj": { "AuthorisedServiceCenters" :[{"DFSC":"/aftersell/register/asc"}, {"SERVICE DESK":"/aftersell/helpdesk"}],
-                       "Dealers" :[{"DFSC":"/aftersell/register/asc"}, {"SERVICE DESK":"/aftersell/helpdesk"}],
+             "bajaj": { "AuthorisedServiceCenters" :[{"DFSC":"/aftersell/register/asc"}],
+                       "Dealers" :[{"DFSC":"/aftersell/register/asc"}],
                        "SdManagers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        },

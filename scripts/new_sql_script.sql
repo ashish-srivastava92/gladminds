@@ -56,3 +56,5 @@ update gm_containerlr new inner join gm_containertracker old on old.transaction_
 alter table gm_containerlr add column partner_name varchar(50);
 
 alter table gm_brandproductrange drop column vertical;
+
+alter table gm_bomheader add column revision_number int default 0;

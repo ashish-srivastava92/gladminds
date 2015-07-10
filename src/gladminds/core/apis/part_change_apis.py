@@ -111,7 +111,7 @@ class BOMPlatePartResource(CustomBaseModelResource):
        Resource for BOMheader, plate and part associations
     '''
     bom = fields.ForeignKey(BOMHeaderResource, 'bom', null=True , blank=True)
-    plate = fields.ForeignKey(BOMPlateResource, 'plate', null=True, blank=True)
+    plate = fields.ForeignKey(BOMPlateResource, 'plate', null=True, blank=True, full=True)
     part = fields.ForeignKey(BOMPartResource, 'part', null=True, blank=True, full=True)
     class Meta:
         queryset = get_model('BOMPlatePart').objects.all()
@@ -125,7 +125,9 @@ class BOMPlatePartResource(CustomBaseModelResource):
         filtering = {
                      "bom" : ALL_WITH_RELATIONS,
                      "plate" : ALL_WITH_RELATIONS,
-                     "part" : ALL_WITH_RELATIONS
+                     "part" : ALL_WITH_RELATIONS,
+                     "valid_to": ALL,
+                     "valid_from": ALL
                      }
     
     def prepend_urls(self):
@@ -139,10 +141,11 @@ class BOMPlatePartResource(CustomBaseModelResource):
                 ]
     
     def alter_list_data_to_serialize(self, request, data):
-        plate =  get_model('BOMPlate').objects.get(plate_id=request.GET.get('plate__plate_id'))
-        data['meta']['plate_id'] = plate.plate_id
-        data['meta']['plate_image'] = "{0}/{1}".format(settings.S3_BASE_URL, plate.plate_image)
-        data['meta']['plate_image_with_part'] = "{0}/{1}".format(settings.S3_BASE_URL, plate.plate_image_with_part)
+        if request.GET.get('plate__plate_id'):
+            plate =  get_model('BOMPlate').objects.get(plate_id=request.GET.get('plate__plate_id'))
+            data['meta']['plate_id'] = plate.plate_id
+            data['meta']['plate_image'] = "{0}/{1}".format(settings.S3_BASE_URL, plate.plate_image)
+            data['meta']['plate_image_with_part'] = "{0}/{1}".format(settings.S3_BASE_URL, plate.plate_image_with_part)
         return data
         
     def dehydrate(self, bundle):
@@ -284,41 +287,72 @@ class BOMPlatePartResource(CustomBaseModelResource):
         '''
            Gives the sbom data for a particular VIN
         '''
-        pass
+        get_data=request.GET
+        vin = get_data.get('value')
+        try:
+            product_obj=get_model('ProductData').objects.get(product_id=vin)
+            bom_header_obj=get_model('BOMHeader').objects.get(sku_code=product_obj.sku_code,
+                                                           valid_from__lte=product_obj.invoice_date,
+                                                           valid_to__gte=product_obj.invoice_date)
+            return self.get_list(request, bom=bom_header_obj,
+                                   valid_from__lte=product_obj.invoice_date,
+                                   valid_to__gte=product_obj.invoice_date)
+        except Exception as ex:
+            LOG.error('[search_sbom_for_vin]: {0}'.format(ex))
+            data = {'status':0 , 'message': 'VIN has no matching BOM number'}
+            return HttpResponse(json.dumps(data), content_type="application/json")
         
 
     def search_sku_for_desc(self, request):
         '''
            Gives list of sku code for a desc
         '''
-        pass
+        get_data=request.GET
+        product_description = get_data.get('value')
+        product_obj=get_model('BrandProductRange').objects.filter(description__startswith=product_description)
+        data = {'objects': [model_to_dict(c, exclude='image_url') for c in product_obj]}
+        return HttpResponse(json.dumps(data), content_type="application/json")
     
     def search_revison_for_sku(self, request):
         '''
            Gives list of revision for a sku code
         '''
-        pass
+        get_data=request.GET
+        sku_code = get_data.get('value')
+        header_obj=get_model('BOMHeader').objects.filter(sku_code=sku_code)
+        data = {'objects': [model_to_dict(c, fields=['sku_code','revision_number']) for c in header_obj]}
+        return HttpResponse(json.dumps(data), content_type="application/json")
     
     def search_sbom_for_revision(self, request):
         '''
            Gives the sbom data for a given revision
         '''
-        pass
+        get_data=request.GET
+        revision_number = int(get_data.get('value'))
+        sku_code = get_data.get('sku_code')
+        try:
+            bom_header_obj=get_model('BOMHeader').objects.get(sku_code=sku_code,
+                                                revision_number=revision_number)
+            return self.get_list(request, bom=bom_header_obj)
+        except Exception as ex:
+            LOG.error('[search_sbom_for_revision]: {0}'.format(ex))
+            data = {'status':0 , 'message': 'SKU and Revision has no matching BOM data'}
+            return HttpResponse(json.dumps(data), content_type="application/json")
+        
     
-    def search_sbom(self, request):
+    def search_sbom(self, request, **kwargs):
         if request.method != 'GET':
             return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
                                 status=400)
         get_data=request.GET
-        parameter = get_data.get('parameter')
+        parameter = get_data.get('parameter').lower()
         search_handler = {
-                          'VIN': 'search_sbom_for_vin',
-                          'description': 'search_sku_for_desc',
-                          'sku_code': 'search_revison_for_sku',
-                          'revision': 'search_sbom_for_revision'
+                          'vin': self.search_sbom_for_vin,
+                          'description': self.search_sku_for_desc,
+                          'sku_code': self.search_revison_for_sku,
+                          'revision': self.search_sbom_for_revision
                           }
-        data = search_handler[parameter](self, request)
-        return HttpResponse(json.dumps(data), content_type="application/json")
+        return search_handler[parameter](request)
 
 class BOMVisualizationResource(CustomBaseModelResource):
     '''

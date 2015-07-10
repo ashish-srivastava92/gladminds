@@ -72,12 +72,11 @@ class SBOMMainFeed(BaseFeed):
                 bomplatepart_obj.part = bom_part_obj
                 bomplatepart_obj.plate = bom_plate_obj
                 bomplatepart_obj.save(using=settings.BRAND)
-                mail.send_epc_feed_received_mail(brand=settings.BRAND, template_name='SBOM_FEED')
             except Exception as ex:
                 ex="[Exception: ]: SBOMMainFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark[0].fail_remarks(ex)
-
+          mail.send_epc_feed_received_mail(brand=settings.BRAND, template_name='SBOM_FEED')
         return self.feed_remark
     
 class ECOReleaseFeed(BaseFeed):    

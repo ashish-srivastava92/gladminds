@@ -116,7 +116,7 @@ def auth_login(request):
                 return HttpResponseRedirect(redirect_url(request))
         return HttpResponseRedirect(str(request.META.get('HTTP_REFERER')))
     else:
-        return render(request, 'dealer/login.html')
+        return render(request, 'login.html')
 
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
