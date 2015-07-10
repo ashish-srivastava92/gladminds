@@ -76,7 +76,7 @@ class SBOMMainFeed(BaseFeed):
                 ex="[Exception: ]: SBOMMainFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark[0].fail_remarks(ex)
-          mail.send_epc_feed_received_mail(brand=settings.BRAND, template_name='SBOM_FEED')
+        mail.send_epc_feed_received_mail(brand=settings.BRAND, template_name='SBOM_FEED')
         return self.feed_remark
     
 class ECOReleaseFeed(BaseFeed):    
