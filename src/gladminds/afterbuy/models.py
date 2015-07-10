@@ -14,6 +14,7 @@ from gladminds.core.managers.mail import send_email_activation, \
     sent_password_reset_link
 from gladminds.core.model_helpers import PhoneField, set_afterbuy_consumer_image, \
     validate_image, set_afterbuy_user_product_image
+from gladminds.afterbuy.managers import user_manager
 
 
 try:
@@ -79,6 +80,7 @@ class Consumer(base_models.BaseModel):
                                    blank=True, null=True)
     is_email_verified = models.BooleanField(default=False)
     is_phone_verified = models.BooleanField(default=False)
+    objects = user_manager.ConsumerManager()
     
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)

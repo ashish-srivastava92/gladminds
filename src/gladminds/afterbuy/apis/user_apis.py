@@ -32,13 +32,15 @@ from gladminds.core.apis.authorization import CustomAuthorization, \
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.auth import otp_handler
 from gladminds.core.auth_helper import GmApps
-from gladminds.core.core_utils.utils import generate_consumer_id
+from gladminds.core.core_utils.utils import generate_temp_id
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
+from gladminds.core.managers.mail import sent_otp_email
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.model_helpers import format_phone_number
-from gladminds.core.utils import check_password
+from gladminds.core.utils import check_password, generate_unique_customer_id
 from gladminds.core.views.auth_view import get_access_token, create_access_token
 from gladminds.sqs_tasks import send_otp
+from tornado.test import httputil_test
 
 
 logger = logging.getLogger("gladminds")
@@ -75,13 +77,15 @@ class ConsumerResource(CustomBaseModelResource):
     def prepend_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/registration/phone%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('user_registration_phone'), name="user_registration_phone"),
+            url(r"^(?P<resource_name>%s)/registration/email%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('user_registration_email'), name="user_registration_email"),
             url(r"^(?P<resource_name>%s)/activate-email%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('activate_email'), name="activate_email"),
             url(r"^(?P<resource_name>%s)/phone-number/send-otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('sent_otp_user_phone_number'), name="sent_otp_user_phone_number"),
             url(r"^(?P<resource_name>%s)/authenticate-email%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('authenticate_user_email_id'), name="authenticate_user_email_id"),
             url(r"^(?P<resource_name>%s)/send-otp/forgot-password%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('authenticate_user_send_otp'), name="authenticate_user_send_otp"),
             url(r"^(?P<resource_name>%s)/forgot-password/(?P<type>[a-zA-Z0-9.-]+)%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('change_user_password'), name="change_user_password"),
             url(r"^(?P<resource_name>%s)/login%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('auth_login'), name="auth_login"),
-            url(r"^(?P<resource_name>%s)/validate-otp%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('validate_otp'), name="validate_otp"),
+            url(r"^(?P<resource_name>%s)/validate-otp/phone%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('validate_otp_phone'), name="validate_otp_phone"),
+            url(r"^(?P<resource_name>%s)/validate-otp/email%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('validate_otp_email'), name="validate_otp_email"),
             url(r"^(?P<resource_name>%s)/logout%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('logout'), name="logout"),
             url(r"^(?P<resource_name>%s)/product-details%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_product_details'), name="get_product_details")
         ]
@@ -108,12 +112,30 @@ class ConsumerResource(CustomBaseModelResource):
             data = {'status': 0, 'message': ex}
         return HttpResponse(json.dumps(data), content_type="application/json")
     
-    def create_user(self, phone_number, email=None):
-        consumer_id = generate_consumer_id()
+    def generate_access_token(self, request, consumer):
+        http_host = request.META.get('HTTP_HOST', 'localhost')
+        password = consumer.consumer_id+'@123'
+        user_auth = authenticate(username=consumer.consumer_id,
+                        password=password)
+        if user_auth is not None:
+            try:
+                access_token = create_access_token(user_auth, consumer.user.username,
+                                                   password, http_host)
+                if user_auth.is_active:
+                    login(request, user_auth)
+                    data = {'status_code': 200 , 'message':'success', 'access_token': access_token}
+                else:
+                    data = {'status': 0, 'message': "failure"}
+            except Exception as ex:
+                logger.info('Exception while generating access token {0}'.format(ex))
+        return data
+    
+    def create_user(self, is_active, phone_number, email=None):
+        consumer_id = generate_unique_customer_id()
         user_obj = User.objects.using(settings.BRAND).create(username=consumer_id)
         password = consumer_id+'@123'
         user_obj.set_password(password)
-        user_obj.is_active = True
+        user_obj.is_active = is_active
         if email:
             user_obj.email=email
         user_obj.save(using=settings.BRAND)
@@ -139,7 +161,7 @@ class ConsumerResource(CustomBaseModelResource):
             data = {'status_code': 200, 'message': 'phone number already registered'}
         except Exception as ObjectDoesNotExist:
             try:
-                user_obj = self.create_user(phone_number=phone_number)
+                user_obj = self.create_user(True, phone_number=phone_number)
                 consumer_obj = user_obj['consumer_obj']
                 data = {'status':200, 'message': 'Phone number registered successfully'}
             except Exception as ex:
@@ -157,7 +179,72 @@ class ConsumerResource(CustomBaseModelResource):
         except Exception as ex:
             logger.info('Exception while generating OTP - {0}'.format(ex))
             return HttpBadRequest("OTP could not be generated")
-
+    
+    def update_consumer_email(self, consumer_obj, email, is_email_verified):
+        user_obj = consumer_obj.user
+        user_obj.email = email
+        user_obj.save(using=settings.BRAND)
+        consumer_obj.is_email_verified = is_email_verified
+        consumer_obj.save(using=settings.BRAND)
+    
+    def send_otp_to_mail(self, phone_number, email):
+        otp = otp_handler.get_otp(phone_number=phone_number, email=email)
+        sent_otp_email(data=otp, receiver=email, subject='User registration')
+        logger.info('OTP sent to email {0}'.format(email))
+        return HttpResponse(json.dumps({'status':200, 'message' : 'OTP sent successfully'}),
+                                        content_type='application/json')
+            
+    def user_registration_email(self, request, **kwargs):
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({'message':'Method not allowed'}),
+                                content_type='application/json')
+        load = json.loads(request.body)
+        email = load.get('email', None)
+        phone_number = load.get('phone_number', None)
+        if not email or not phone_number:
+            return HttpBadRequest("Phone number and email is mandatory")
+        try:
+            consumer = get_model('Consumer', settings.BRAND).objects.get_active_consumers_with_email(email)
+            if consumer.phone_number == phone_number:
+                access_token = self.generate_access_token(request, consumer)
+                return HttpResponse(json.dumps(access_token),
+                                    content_type='application/json')
+            else:
+                consumer_obj = get_model('Consumer', settings.BRAND).objects.\
+                get_active_consumers_with_phone(phone_number)
+                if not consumer_obj.user.email:
+                    self.update_consumer_email(consumer_obj, email, False)
+                    self.send_otp_to_mail(phone_number, email)
+                    return HttpResponse(json.dumps({'status':200, 'message' : 'OTP sent successfully'}),
+                                        content_type='application/json')
+        except Exception as ex:
+            logger.info("Exception while registering user whose email exists - {0}".format(ex))
+            try:
+                consumer_obj = get_model('Consumer', settings.BRAND).objects.\
+                get_active_consumers_with_phone(phone_number)
+                if not consumer_obj.user.email:
+                    self.update_consumer_email(consumer_obj, email, True)
+                    access_token = self.generate_access_token(request, consumer_obj)
+                    return HttpResponse(json.dumps(access_token),
+                                        content_type='application/json')
+                else:
+                    consumer_obj = get_model('Consumer', settings.BRAND).objects.get(Q(phone_number=phone_number) &
+                                                                                     ~Q(user__email=email) &
+                                                                                     Q(user__is_active=True)    
+                                                                                     )
+                    user_obj = consumer_obj.user 
+                    user_obj.is_active = False
+                    user_obj.save(using=settings.BRAND)
+                    consumer_obj.save(using=settings.BRAND)
+                    user_obj = self.create_user(False, phone_number, email)
+                    self.send_otp_to_mail(phone_number, email)
+                    return HttpResponse(json.dumps({'status':200, 'message' : 'OTP sent successfully'}),
+                                        content_type='application/json')
+            except Exception as ex:
+                print "=[>", ex
+                logger.info("Exception while registering user whose email doesnot exist - {0}".format(ex))
+                return HttpBadRequest("Could not register the user with this email")
+            
     def activate_email(self, request, **kwargs):
         activation_key = request.GET['activation_key']
         activated_user = afterbuy_model.EmailToken.objects.activate_user(activation_key)
@@ -167,7 +254,7 @@ class ConsumerResource(CustomBaseModelResource):
             data = {'status': 0, 'message': 'email-id not validated'}
         return HttpResponse(json.dumps(data), content_type="application/json")
     
-    def validate_otp(self, request, **kwargs):
+    def validate_otp_phone(self, request, **kwargs):
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message":"method not allowed"}),
                                 content_type="application/json",status=401)
@@ -189,6 +276,27 @@ class ConsumerResource(CustomBaseModelResource):
             logger.info("Exception while validating OTP {0}".format(ex))
             return HttpBadRequest("OTP couldnot be validated")
          
+    def validate_otp_email(self, request, **kwargs):
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({'message':"Method not allowed"}),
+                                content_type='application/json')
+        try:
+            load = json.loads(request.body)
+            phone_number = load.get('phone_number')
+            otp_token = load.get('otp_token')
+            email = load.get('email')
+            if not otp_token or not phone_number or not email:
+                return HttpBadRequest("OTP , phone number , email is mandatory")
+            otp_handler.validate_otp(otp_token, email=email)
+            consumer = get_model('Consumer', settings.BRAND).objects.filter(Q(user__email=email) &
+                                                                            ~Q(phone_number=phone_number))
+            user = consumer.user
+            user.update(is_active=False)
+            return HttpResponse(json.dumps({'status':200, 'message': 'OTP validated'}),
+                                content_type='application/json')
+        except Exception as ex:
+            logger.info("Exception while validating email otp - {0}".format(ex))
+            return HttpBadRequest("OTP could not be validated")
         
     def validate_user_phone_number(self,phone_number, otp):
         if not otp and not phone_number :
