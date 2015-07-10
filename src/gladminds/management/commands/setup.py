@@ -74,7 +74,7 @@ class Command(BaseCommand):
         self.create_territory()
         self.create_loyalty_admins()
         self.set_afterbuy_permissions()
-        if settings.ENV not in ['prod', 'staging']:
+        if settings.ENV not in ['prod', 'staging', 'qa']:
             self.upload_loyalty_user()
             self.upload_asm_user()
             self.upload_part_data()
