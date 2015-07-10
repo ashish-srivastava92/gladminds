@@ -14,7 +14,7 @@ class Command(BaseCommand):
         
     def upload_sbom_data(self):
         '''Upload data of the SBOM'''
-        print ''' Started uploading SBOM data data'''
+        print ''' Started uploading SBOM data'''
 
         file_list = ['sbom_mc_data.csv']
         product_list = self.read_from_csv(file_list)
