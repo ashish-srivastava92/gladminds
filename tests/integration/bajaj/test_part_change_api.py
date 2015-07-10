@@ -1,19 +1,34 @@
 import json
+import unittest
 
 from django.test.client import Client
+from django.test import TestCase
+from django.core import mail
+from django.conf import settings
+from django.test.utils import override_settings
 
 from integration.bajaj.base import BaseTestCase
+from integration.bajaj.test_brand_logic import Brand
+from integration.bajaj.test_system_logic import System
 from test_constants import BRAND_PRODUCT_RANGE, BRAND_VERTICAL, BOM_HEADER, \
     BOM_PLATE_PART, ECO_RELEASE, ECO_IMPLEMENTATION, BOM_VISUALIZATION, \
     SBOM_REVIEW
 
+from gladminds.core.auth_helper import Roles
 
 client=Client(SERVER_NAME='bajaj')
 
-class PartChangeTests(BaseTestCase):
+class PartChangeTest(BaseTestCase):
     multi_db=True
     def setUp(self):
-        super(PartChangeTests, self).setUp()
+        TestCase.setUp(self)
+        self.brand = Brand(self)
+        self.system = System(self)
+        BaseTestCase.setUp(self)
+        self.create_user(username='bajaj', email='bajaj@gladminds.co', password='bajaj')
+        self.create_user(username='epcuser', email='epctest@gladminds.co',
+                         password='epcuser', group_name=Roles.VISUALIZATIONUSER)
+        self.access_token = self.brand.admin_login()
 
     def post(self, uri, data, access_token=None, content_type='application/json'):
         if access_token:
@@ -21,8 +36,10 @@ class PartChangeTests(BaseTestCase):
         resp = client.post(uri, data=json.dumps(data), content_type=content_type)
         return resp
 
-    def get(self, uri, access_token, content_type='application/json'):
-        resp = client.get(uri+'&&access_token='+access_token, content_type=content_type)
+    def get(self, uri, access_token, data=None, content_type='application/json'):
+        if access_token:
+            uri = uri+'?access_token='+access_token
+        resp = client.get(uri, data=data, content_type=content_type)
         return resp
     
     def user_login(self):
@@ -120,3 +137,50 @@ class PartChangeTests(BaseTestCase):
         self.assertEquals(resp.status_code, 200)
         self.assertEquals(json.loads(resp.content)['message'], "Success")
         
+    @unittest.skip("skip the test mails to be fixed")
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.dummy.EmailBackend')
+    def test_sbom_search_by_vin(self):
+        access_token = self.access_token
+        brand=self.brand
+        system=self.system
+        brand.send_dispatch_feed()
+        brand.send_sbom_data_feed()
+#         self.assertEqual(len(mail.outbox), 1)
+        response=brand.search_sbom_data(access_token, 'vin', '12345678901232792')
+        system.verify_result(input=len(response), output=2)
+    
+    @unittest.skip("skip the test mails to be fixed")
+    def test_sbom_search_by_desc(self):
+        access_token = self.access_token
+        brand=self.brand
+        system=self.system
+        brand.send_dispatch_feed()
+        brand.send_sbom_data_feed()
+#         self.assertEqual(len(mail.outbox), 1)
+        response=brand.search_sbom_data(access_token, 'description', 'pulsar')
+        sku = filter(lambda sku: sku['sku_code']=='00DH15ZZ', response)
+        system.verify_result(input=len(sku), output=1)
+        system.verify_result(input=sku[0]['description'], output='PULSAR 150')
+
+    @unittest.skip("skip the test mails to be fixed")
+    def test_sbom_search_by_sku(self):
+        access_token = self.access_token
+        brand=self.brand
+        system=self.system
+        brand.send_dispatch_feed()
+        brand.send_sbom_data_feed()
+#         self.assertEqual(len(mail.outbox), 1)
+        response=brand.search_sbom_data(access_token, 'sku_code', '00DH15ZZ')
+        system.verify_result(input=len(response), output=1)
+        system.verify_result(input=response[0]['revision_number'], output=0)
+
+    @unittest.skip("skip the test mails to be fixed")
+    def test_sbom_search_by_revision(self):
+        access_token = self.access_token
+        brand=self.brand
+        system=self.system
+        brand.send_dispatch_feed()
+        brand.send_sbom_data_feed()
+#         self.assertEqual(len(mail.outbox), 1)
+        response=brand.search_sbom_data(access_token, 'revision', '0')
+        system.verify_result(input=len(response), output=3)

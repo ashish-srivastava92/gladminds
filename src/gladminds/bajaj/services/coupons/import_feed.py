@@ -564,6 +564,7 @@ class ContainerTrackerFeed(BaseFeed):
                         container_lr_obj.cts_created_date = format_date(tracker_obj['created_date'])
                         container_lr_obj.save(using=settings.BRAND)
                     
+                    
                     gatein_date = format_date(tracker_obj['gatein_date'])
                     status="Open"               
                     if tracker_obj['container_no'] and tracker_obj['seal_no']:
@@ -573,6 +574,8 @@ class ContainerTrackerFeed(BaseFeed):
                             status="Inprogress"
                     container_lr_obj.gatein_date=gatein_date
                     container_lr_obj.gatein_time=tracker_obj['gatein_time']
+                    if tracker_obj['container_no'].upper().startswith('DUMY', 0, 4):
+                        tracker_obj['container_no']=None
                     container_lr_obj.container_no=tracker_obj['container_no']
                     container_lr_obj.seal_no=tracker_obj['seal_no']
                     container_lr_obj.lr_date = format_date(tracker_obj['lr_date'])

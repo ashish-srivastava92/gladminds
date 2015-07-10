@@ -82,11 +82,7 @@
     });
     
     $('.cutomer-reg-form').on('submit', function() {
-        $('.customer-phone').val('').attr('readOnly', true);
-        $('.customer-name').val('').attr('readOnly', true);
-        $('.purchase-date').val('').attr('readOnly', false);
         var vin = $('#srch-vin').val(),
-          user = $('#user').text().trim(),
           purchaseDate = $('#purchase-date').val(),	
           messageModal = $('.modal.message-modal'),
           messageBlock = $('.modal-body', messageModal),
@@ -102,25 +98,23 @@
             url: '/aftersell/exceptions/customer',
             data: {'vin': vin},
             success: function(data){
-            		if (data.phone && user==='d123') {
-            			$('.customer-phone').val(data.phone).attr('readOnly', false);
-            		    $('.customer-name').val(data.name).attr('readOnly', false);
-            		    $('.purchase-date').val(data.purchase_date).attr('readOnly', false);
-            		    $('.customer-id').val(data.id).attr('readOnly', true);
-            		    $('.customer-submit').attr('disabled', false);
-            		 	}
-            	
-		            else if (data.phone) {
-		                  $('.customer-phone').val(data.phone).attr('readOnly', true);
-		            	  if (data.group==='AuthorisedServiceCenters' || data.group==='Dealers' || data.group==='SdManagers'){
-		            		  $('.customer-phone').val(data.phone).attr('readOnly', false);
-		            	  }
-		                  $('.customer-name').val(data.name).attr('readOnly', true);
-		                  $('.purchase-date').val(data.purchase_date).attr('disabled', true);
-		                  $('.customer-id').val(data.id).attr('readOnly', true);
-		                  $('.customer-submit').attr('disabled', false);
-		              }	
-		              else if (data.message) {
+            		if (data.product) {
+            			var product=data.product;
+            			$('.customer-id').val(product.id).attr('readOnly', true);
+            			$('.customer-name').val(product.name).attr('readOnly', true);
+		                $('.purchase-date').val(product.purchased).attr('disabled', true);
+		                $('.customer-phone').val(product.phone).attr('readOnly', false);
+		                $('.customer-submit').attr('disabled', false);
+            			if (data.group==='SdOwners'){
+		            		  $('.customer-phone').val(data.phone).attr('readOnly', true);
+		            		  $('.customer-submit').attr('disabled', true);
+		            	}
+            			if(userName==='d123'){
+                		    $('.customer-name').val(product.name).attr('readOnly', false);
+                		    $('.purchase-date').val(product.purchased).attr('readOnly', false);
+            			}
+            		 }
+		              else{
 		                  $('.customer-phone').val('').attr('readOnly', false);
 		            	  $('.customer-name').val('').attr('readOnly', false);
 		            	  $('.purchase-date').val('').attr('disabled', false);
@@ -128,7 +122,7 @@
 		                  $('.customer-submit').attr('disabled', true);
 		                  messageBlock.text(data.message);
 		                  messageModal.modal('show');
-		                  if (!data.status) {
+		                  if (data.status===1) {
 		                	  $('.modal-header .close').css('display', 'block');
 		                	  $('.customer-id').val('').attr('readOnly', true);
 		                	  $('.customer-submit').attr('disabled', false);
@@ -137,8 +131,8 @@
 		                      $('.modal-header .close').css('display', 'none');
 		                      setTimeout(function(){
 		                      	messageModal.modal('hide');
-		                      }, 3000);
-		//                	  vinSyncFeed(data);
+			                    vinSyncFeed(vin);
+			                  }, 3000);
 		                  }
                       }
             		
@@ -151,23 +145,23 @@
         return false;
     });
     
-function vinSyncFeed(data){
+function vinSyncFeed(vin){
     var messageModal = $('.modal.message-modal'),
     	messageBlock = $('.modal-body', messageModal),
         waitingModal = $('.modal.waiting-dialog');
+        waitingModal.modal('show');
     var jqXHR = $.ajax({
         type: 'POST',
         url: '/aftersell/feeds/vin-sync/',
-        data : data,
+        data : {'vin':vin},
         success: function(data){
         if (data.message) {
             $('.modal-header .close').css('display', 'none');
-        	waitingModal.modal('show');
             messageBlock.text(data.message);
-            messageModal.modal('show');
             setTimeout(function(){
-            	messageModal.modal('hide');
             	waitingModal.modal('hide');
+            	$('.modal-header .close').css('display', 'block');
+            	messageModal.modal('show');
             }, 5000);
             }
         },

@@ -6,7 +6,7 @@ from integration.bajaj.test_system_logic import System
 
 client  =  Client(SERVER_NAME='bajaj')
 
-class TestDealerRegistration(BaseTestCase):
+class DealerRegistrationTest(BaseTestCase):
     multi_db=True
     
     def setUp(self):
@@ -19,7 +19,7 @@ class TestDealerRegistration(BaseTestCase):
         dealer.dealer_login()
 
 
-class TestCustomerRegistration(BaseTestCase):
+class CustomerRegistrationTest(BaseTestCase):
     multi_db=True
     
     def setUp(self):

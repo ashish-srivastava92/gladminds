@@ -24,7 +24,7 @@ class SAPFeed(object):
 
     def import_to_db(self, feed_type=None, data_source=[], feed_remark=None):
         function_mapping = {
-            'bomitem': BOMItemFeed,
+            'sbom_main': SBOMMainFeed,
             'eco_release': ECOReleaseFeed,
             'eco_implementation':ECOImplementationFeed,
             'manufacture_data': ManufactureDataFeed,
@@ -34,7 +34,7 @@ class SAPFeed(object):
         return feed_obj.import_data()
 
     
-class BOMItemFeed(BaseFeed):
+class SBOMMainFeed(BaseFeed):
   
     def import_data(self):
         bom_header_obj = 0
@@ -49,7 +49,7 @@ class BOMItemFeed(BaseFeed):
                                                         valid_to=bom['valid_to_header'])
                 bom_header_obj.save(using=settings.BRAND) 
             except Exception as ex:
-                ex="[Exception: ]: BOMHeaderFeed {0}".format(ex)
+                ex="[Exception: ]: SBOMMainFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark[1].fail_remarks(ex)
 
@@ -72,12 +72,11 @@ class BOMItemFeed(BaseFeed):
                 bomplatepart_obj.part = bom_part_obj
                 bomplatepart_obj.plate = bom_plate_obj
                 bomplatepart_obj.save(using=settings.BRAND)
-                mail.send_epc_feed_received_mail(brand=settings.BRAND, template_name='SBOM_FEED')
             except Exception as ex:
-                ex="[Exception: ]: BOMItemFeed {0}".format(ex)
+                ex="[Exception: ]: SBOMMainFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark[0].fail_remarks(ex)
-
+        mail.send_epc_feed_received_mail(brand=settings.BRAND, template_name='SBOM_FEED')
         return self.feed_remark
     
 class ECOReleaseFeed(BaseFeed):    
@@ -176,8 +175,12 @@ class ManufactureDataFeed(BaseFeed):
         for data_obj in self.data_source:
             try:
                 is_discrepant=False
-                manufacture_data_obj = get_model('ManufacturingData').objects.filter(product_id=data_obj['product_id'])
+                manufacture_data_obj = get_model('ManufacturingData').objects.filter(
+                                                            product_id=data_obj['product_id'],
+                                                            is_discrepant=is_discrepant)
                 if manufacture_data_obj:
+                    if self.all_values_same(manufacture_data_obj.values(), data_obj):
+                        continue
                     is_discrepant=True
                 manufacture_data_obj = get_model('ManufacturingData')(product_id=data_obj['product_id'],
                                            material_number=data_obj['material_number'],
@@ -190,3 +193,10 @@ class ManufactureDataFeed(BaseFeed):
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         return self.feed_remark
+    
+    def all_values_same(self,manufacture_data_obj, data_obj):
+        for key, value in data_obj.items():
+            active = filter(lambda active: active[key] == value, manufacture_data_obj)
+            if not active:
+                return False
+        return True      

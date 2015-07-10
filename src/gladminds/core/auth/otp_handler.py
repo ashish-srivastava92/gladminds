@@ -41,11 +41,11 @@ def validate_otp(otp, **kwargs):
     elif 'email' in kwargs.keys():
         email = kwargs.get('email')
         token_obj = OTPToken.objects.get(email=email)
-        OTP_VALIDITY = 5000
+        OTP_VALIDITY = 300
     else:
         phone_number = kwargs.get('phone_number')
         token_obj = OTPToken.objects.get(phone_number=phone_number)
-
+    
     if int(otp) == int(token_obj.token) and (timezone.now()-token_obj.request_date).seconds <= OTP_VALIDITY:
         return True
     elif (timezone.now()-token_obj.request_date).seconds > OTP_VALIDITY:

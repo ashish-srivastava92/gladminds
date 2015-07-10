@@ -32,17 +32,15 @@
       <div class="navbar navbar-style">
         <div class="navbar-inner">
            <a class="brand" href="#"><img src="/static/{{METAINFO.logo}}" class='brand-logo logo-size'></a>
-           {% if not asc_registration %}
               <ul class="nav pull-right">
                  <li class="dropdown style-username">
-                 	<a href="#" class="dropdown-toggle" id="user" data-toggle="dropdown">{{user.first_name}}, {{user.username}}<b class="caret"></b></a>
+                 	<a href="#" class="dropdown-toggle" id="userData" value={{user.username}} data-toggle="dropdown">{{user.first_name}}, {{user.username}}<b class="caret"></b></a>
                     <ul class="dropdown-menu pull-right">
                        <li><a href="/aftersell/provider/change-password">Change Password</a></li>
                        <li><a href="/aftersell/provider/logout">Logout</a></li>
                    </ul>
                 </li>
              </ul>
-           {% endif %}
         </div>
       </div>
     {% endblock %}
@@ -78,6 +76,10 @@
 	    <script src="/static/libs/jquery.datetimepicker.js"></script>
 	    <script src="/static/libs/tablesorter/jquery.tablesorter.js"></script>
 	    <script src="/static/libs/tablesorter/tables.js"></script>
+	    <script type="text/javascript">
+            var userName = '{{user.username}}';
+        </script>
+	    
     {% block dependency %}
     {% endblock dependency %}
   </body>

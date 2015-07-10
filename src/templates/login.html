@@ -3,16 +3,16 @@
 {% block body %}
 <div class="col-md-6 col-md-offset-2" id="loginModal">
 	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-		<h3>Have an Account?</h3>
+		<h3>Log-in</h3>
 	</div>
 	<div class="modal-body">
 		<div class="well">
-			<b>Log in using:</b>
+		    <h3></h3>
+			<!--  <b>Log in using:</b>
 			<ul class="nav nav-tabs">
 				<li class="active"><a href="#login-username" data-toggle="tab">Username</a></li>
-				<li><a href="#login-mobile" data-toggle="tab">Mobile</a></li>
-			</ul>
+				<!-- <li><a href="#login-mobile" data-toggle="tab">Mobile</a></li>
+			</ul> -->
 			<div id="myTabContent" class="tab-content">
 			  <div class="tab-pane active in" id="login-username">
 					<form role="form" action="/login/" method="post" id="login-form1" autocomplete="off">{% csrf_token %}
@@ -27,7 +27,7 @@
                         <input type="submit" id="btn-login" class="btn btn-success btn-lg btn-block" value="Log in">
                     </form>                
 				</div>
-				<div class="tab-pane fade" id="login-mobile">
+				<!--<div class="tab-pane fade" id="login-mobile">
 					<form role="form" action="/login/" method="post" id="login-form2" autocomplete="off">{% csrf_token %}
 					     <div class="form-group">
 				           <label for="mobile" class="sr-only">Mobile</label>
@@ -39,7 +39,7 @@
                         </div>
                         <input type="submit" id="btn-login" class="btn btn-success btn-lg btn-block" value="Log in">
                     </form>
-				</div>
+				</div> -->
 			</div>
 			<a href="javascript:;" class="forget" data-toggle="modal" data-target=".forget-modal">Forgot your password?</a>
                     <hr>

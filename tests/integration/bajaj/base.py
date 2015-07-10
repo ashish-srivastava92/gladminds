@@ -1,7 +1,8 @@
 from tastypie.test import ResourceTestCase
 from django.contrib.auth.models import User, Group
 from gladminds.bajaj import models
-from gladminds.management.commands import load_gm_migration_data, service_setup, setup
+from gladminds.management.commands import load_gm_migration_data,\
+                service_setup, setup, load_sku
 from time import sleep
 from datetime import datetime
  
@@ -50,6 +51,8 @@ class BaseTestCase(ResourceTestCase):
         load_services.create_industries()
         load_services.create_brands()
         load_services.create_brands_services()
+        load_sku_obj = load_sku.Command()
+        load_sku_obj.upload_sku_data()
         self.MESSAGE_URL = "/v1/messages"
 
     def assert_successful_http_response(self, resp, msg=None):

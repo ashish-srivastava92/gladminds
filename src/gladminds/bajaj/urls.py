@@ -22,7 +22,6 @@ urlpatterns = patterns('',
 
     url(r'^aftersell/users/(?P<users>[a-zA-Z0-9]+)$', 'gladminds.bajaj.views.views.users'),
     url(r'^aftersell/sa/(?P<id>[a-zA-Z0-9]+)/$', 'gladminds.bajaj.views.views.get_sa_under_asc'),
-    url(r'^report/(?P<role>[a-zA-Z0-9.-]+)/$', 'gladminds.bajaj.views.views.brand_details'),
     url(r'^aftersell/reports/reconciliation$', 'gladminds.bajaj.views.views.reports'),
     url(r'^coupon/report/(?P<role>[a-zA-Z0-9.-]+)/$', 'gladminds.bajaj.views.views.get_active_asc_report'),
     url(r'^aftersell/register/(?P<menu>[a-zA-Z0-9]+)$', 'gladminds.bajaj.views.views.register'),

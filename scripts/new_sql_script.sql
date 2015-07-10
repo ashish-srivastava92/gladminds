@@ -101,3 +101,4 @@ rename table gm_constant to afterbuy_constant;
 
 alter table afterbuy_consumer drop index phone_number;
 
+alter table gm_bomheader add column revision_number int default 0;

@@ -69,6 +69,14 @@ class Brand(object):
     def send_container_tracker_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/bajaj/test_data/container_tracker.xml')
         self.post_feed(file_path)
+        
+    def send_manufacture_data_feed(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/bajaj/test_data/manufacture_data.xml')
+        self.post_feed(file_path)
+    
+    def send_sbom_data_feed(self):
+        file_path = os.path.join(settings.BASE_DIR, 'tests/integration/bajaj/test_data/bom_feed.xml')
+        self.post_feed(file_path)
 
     def post_feed(self, file_path):
         xml_data = open(file_path, 'r').read()
@@ -212,4 +220,19 @@ class Brand(object):
         data=json.dumps({"status":status, "modified_date": "2015-03-05",
                          "seal_no":"123", "container_no":"723389"})
         uri = '/v1/container-lrs/save/'+transaction_id+'/?access_token='+access_token
-        resp=client.put(uri, data=data, content_type='application/json')     
+        resp=client.put(uri, data=data, content_type='application/json')  
+
+    def get_manufaturing_data(self, access_token):
+        uri = '/v1/manufacturing-details/?access_token='+access_token
+        response = client.get(uri, content_type='application/json')
+        response_data=json.loads(response.content)
+        return response_data['objects']
+
+    def search_sbom_data(self, access_token, parameter, value):
+        data = {'parameter': parameter, 'value': value}
+        if parameter=='revision':
+            data['sku_code']='00DH15ZZ'
+        uri = '/v1/bom-plate-parts/search-sbom/'
+        response = client.get(uri, data=data, access_token=access_token)
+        response_data= json.loads(response.content)
+        return response_data['objects']

@@ -268,8 +268,8 @@ class BillOfMaterialService(ServiceBase):
                             })
 
         feed_remark_header = FeedLogWithRemark(header_count, feed_type='BOM Header Feed', action='Received', status=True)        
-        feed_remark_item = FeedLogWithRemark(item_count, feed_type='BOM Item Feed', action='Received', status=True)
-        feed_remark_item = save_to_db(feed_type='bomitem', data_source=[bom_item_list, bom_header_list], feed_remark=[feed_remark_item, feed_remark_header])
+        feed_remark_item = FeedLogWithRemark(item_count, feed_type='BOM Main Feed', action='Received', status=True)
+        feed_remark_item = save_to_db(feed_type='sbom_main', data_source=[bom_item_list, bom_header_list], feed_remark=[feed_remark_item, feed_remark_header])
         feed_remark_item[1].save_to_feed_log()
         feed_remark_item[0].save_to_feed_log()
         item_log = get_response(feed_remark_item[0])

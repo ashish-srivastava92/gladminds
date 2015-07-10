@@ -1464,30 +1464,6 @@ class City(BaseModel):
 
 ############################### EPC MODELS ###################################################
 
-class BOMItem(BaseModel):
-    '''Details of  Service Billing of Material'''
-    timestamp = models.DateTimeField(default=datetime.now)
-    
-    bom_number = models.CharField(max_length=10, null=True, blank=True)
-    part_number = models.CharField(max_length=20, null=True, blank=True)
-    revision_number = models.CharField(max_length=10, null=True, blank=True)
-    quantity = models.CharField(max_length=20, null=True, blank=True)
-    uom = models.CharField(max_length=100, null=True, blank=True)
-    valid_from = models.DateField(null=True, blank= True)
-    valid_to = models.DateField(null=True, blank= True)
-    plate_id = models.CharField(max_length=40, null=True, blank=True)
-    plate_txt = models.CharField(max_length=40, null=True, blank=True)
-    serial_number = models.CharField(max_length=20, null=True, blank=True)
-    change_number = models.CharField(max_length=12, null=True, blank=True)
-    change_number_to = models.CharField(max_length=12, null=True, blank=True)
-    item = models.CharField(max_length=10, null=True, blank=True)    
-    item_id = models.CharField(max_length=10, null=True, blank=True)
-
-    class Meta:
-        abstract = True
-        db_table = "gm_bomitem"
-        verbose_name_plural = "Bills of Material "
- 
 class ECORelease(BaseModel):
     ''' details of ECO release'''
     eco_number  = models.CharField(max_length=20, null=True, blank=True)
@@ -1585,6 +1561,7 @@ class BOMHeader(BaseModel):
     valid_from = models.DateField(null=True, blank= True)
     valid_to = models.DateField(null=True, blank= True)
     created_on = models.DateField(null=True, blank= True)
+    revision_number = models.IntegerField(default=0)
 
     class Meta:
         abstract = True
@@ -1702,7 +1679,7 @@ class ManufacturingData(models.Model):
     material_number = models.CharField(max_length=100, null=True, blank=True)
     plant = models.CharField(max_length=100, null=True, blank=True)
     engine = models.CharField(max_length=100, null=True, blank=True)
-    vehicle_off_line_date =  models.DateTimeField(null=True, blank= True)
+    vehicle_off_line_date =  models.DateField(null=True, blank= True)
     is_discrepant = models.BooleanField(default=False)
     sent_to_sap = models.BooleanField(default=False)
 
