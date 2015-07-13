@@ -91,6 +91,11 @@ class ConsumerResource(CustomBaseModelResource):
         ]
 
     def sent_otp_user_phone_number(self, request, **kwargs):
+        '''
+        Send OTP to user's phone on successfull registration
+        Args : phone number
+        Returns : OTP is sent to user's phone number
+        '''
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
         try:
@@ -123,7 +128,7 @@ class ConsumerResource(CustomBaseModelResource):
                                                    password, http_host)
                 if user_auth.is_active:
                     login(request, user_auth)
-                    data = {'status_code': 200 , 'message':'success', 'access_token': access_token}
+                    data = {'status':1 , 'message':'success', 'access_token': access_token}
                 else:
                     data = {'status': 0, 'message': "failure"}
             except Exception as ex:
@@ -132,8 +137,8 @@ class ConsumerResource(CustomBaseModelResource):
     
     def create_user(self, is_active, phone_number, email=None):
         consumer_id = generate_unique_customer_id()
+        password = consumer_id+settings.PASSWORD_POSTFIX
         user_obj = User.objects.using(settings.BRAND).create(username=consumer_id)
-        password = consumer_id+'@123'
         user_obj.set_password(password)
         user_obj.is_active = is_active
         if email:
@@ -142,10 +147,16 @@ class ConsumerResource(CustomBaseModelResource):
         consumer_obj = get_model('Consumer', settings.BRAND)(user=user_obj, phone_number=phone_number,
                                                               consumer_id=consumer_id)
         consumer_obj.save(using=settings.BRAND)
-        return {'consumer_obj': consumer_obj, 'password': password}
+        return {'consumer_obj': consumer_obj}
     
     @atomic(using=settings.BRAND)
     def user_registration_phone(self, request, **kwargs):
+        '''
+        Register user with valid phone number
+        Args : phone number
+        Returns : OTP is sent to user's phone on successful registration
+        
+        '''
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
         try:
@@ -158,12 +169,12 @@ class ConsumerResource(CustomBaseModelResource):
         try:
             consumer_obj = get_model('Consumer', settings.BRAND).objects.get(phone_number=phone_number,
                                                                              user__is_active=True)
-            data = {'status_code': 200, 'message': 'phone number already registered'}
+            data = {'status': 1, 'message': 'phone number already registered'}
         except Exception as ObjectDoesNotExist:
             try:
                 user_obj = self.create_user(True, phone_number=phone_number)
                 consumer_obj = user_obj['consumer_obj']
-                data = {'status':200, 'message': 'Phone number registered successfully'}
+                data = {'status':1, 'message': 'Phone number registered successfully'}
             except Exception as ex:
                 logger.info("Exception while registering user with phone number - {0}".format(ex))
                 return HttpBadRequest("Phone number could not be registered")
@@ -191,10 +202,16 @@ class ConsumerResource(CustomBaseModelResource):
         otp = otp_handler.get_otp(phone_number=phone_number, email=email)
         sent_otp_email(data=otp, receiver=email, subject='User registration')
         logger.info('OTP sent to email {0}'.format(email))
-        return HttpResponse(json.dumps({'status':200, 'message' : 'OTP sent successfully'}),
+        return HttpResponse(json.dumps({'status':1, 'message' : 'OTP sent successfully'}),
                                         content_type='application/json')
-            
+#Fixme          
     def user_registration_email(self, request, **kwargs):
+        '''
+        Register the user with email
+        
+        Args: phone number , email
+        Return : Access token if email id doesnt exist else otp is sent to user's email 
+        '''
         if request.method != 'POST':
             return HttpResponse(json.dumps({'message':'Method not allowed'}),
                                 content_type='application/json')
@@ -215,7 +232,7 @@ class ConsumerResource(CustomBaseModelResource):
                 if not consumer_obj.user.email:
                     self.update_consumer_email(consumer_obj, email, False)
                     self.send_otp_to_mail(phone_number, email)
-                    return HttpResponse(json.dumps({'status':200, 'message' : 'OTP sent successfully'}),
+                    return HttpResponse(json.dumps({'status':1, 'message' : 'OTP sent successfully'}),
                                         content_type='application/json')
         except Exception as ex:
             logger.info("Exception while registering user whose email exists - {0}".format(ex))
@@ -239,7 +256,7 @@ class ConsumerResource(CustomBaseModelResource):
                     
                     user_obj = self.create_user(False, phone_number, email)
                     self.send_otp_to_mail(phone_number, email)
-                    return HttpResponse(json.dumps({'status':200, 'message' : 'OTP sent successfully'}),
+                    return HttpResponse(json.dumps({'status':1, 'message' : 'OTP sent successfully'}),
                                         content_type='application/json')
             except Exception as ex:
                 logger.info("Exception while registering user whose email doesnot exist - {0}".format(ex))
@@ -255,6 +272,11 @@ class ConsumerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def validate_otp_phone(self, request, **kwargs):
+        '''
+        Validate otp sent to phone
+        args : phone number and otp
+        return : status 1 on successfull validation
+        '''
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message":"method not allowed"}),
                                 content_type="application/json",status=401)
@@ -270,7 +292,7 @@ class ConsumerResource(CustomBaseModelResource):
             otp_handler.validate_otp(otp_token, phone_number=phone_number)
             user.is_phone_verified = True
             user.save(using=settings.BRAND)
-            return HttpResponse(json.dumps({'status': 200, 'message':'OTP validated'}),
+            return HttpResponse(json.dumps({'status': 1, 'message':'OTP validated'}),
                                 content_type='application/json')
         except Exception as ex:
             logger.info("Exception while validating OTP {0}".format(ex))
@@ -278,6 +300,11 @@ class ConsumerResource(CustomBaseModelResource):
 
     @atomic(using=settings.BRAND)
     def validate_otp_email(self, request, **kwargs):
+        '''
+        Validate the otp sent to email and map user products
+        Args : email , phone number , otp
+        Returns : map the products and returns access token 
+        '''
         if request.method != 'POST':
             return HttpResponse(json.dumps({'message':"Method not allowed"}),
                                 content_type='application/json')
@@ -296,7 +323,8 @@ class ConsumerResource(CustomBaseModelResource):
             
             user_products = get_model('UserProduct', settings.BRAND).objects.\
                     select_related('consumer').filter(~Q(consumer__phone_number=phone_number) &
-                                                      Q(consumer__user__email=email))
+                                                      Q(consumer__user__email=email) &
+                                                      Q(consumer__user__is_active=True))
             for product in user_products:
                 user = product.consumer.user
                 user.is_active =  False
@@ -347,11 +375,11 @@ class ConsumerResource(CustomBaseModelResource):
     
     
     def update_product_insurance_warranty(self, product_dict, details):
-        for insurance in details:
-            if product_dict.has_key(insurance.product.brand_product_id):
-                product = product_dict[insurance.product.brand_product_id]
-                insurance.product = product
-                insurance.save(using=settings.BRAND)
+        for data in details:
+            if product_dict.has_key(data.product.brand_product_id):
+                product = product_dict[data.product.brand_product_id]
+                data.product = product
+                data.save(using=settings.BRAND)
           
           
     def validate_user_phone_number(self,phone_number, otp):

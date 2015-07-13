@@ -53,7 +53,6 @@ alter table gm_containerindent drop column transporter_id;
 alter table gm_containerlr add column transporter_id integer;
 alter table gm_containerlr add foreign key (transporter_id) references gm_transporter(id);
 update gm_containerlr new inner join gm_containertracker old on old.transaction_id=new.transaction_id set new.transporter_id=old.transporter_id;
-alter table gm_containerlr add column partner_name varchar(50);
 
 alter table gm_brandproductrange drop column vertical;
 
