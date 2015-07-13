@@ -47,12 +47,12 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase, BaseTestCase):
 
         create_mock_data = {"phone_number":"1111111111",
                             }
-        uri = '/afterbuy/v1/consumers/registration/'
+        uri = '/afterbuy/v1/consumers/registration/phone'
         resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
-        self.assertEquals(json.loads(resp.content)['status_code'], 200)
-        create_mock_data = {"phone_number":"7760814043",
+        self.assertEquals(json.loads(resp.content)['status'], 200)
+        create_mock_data = {"phone_number":"1111111111",
                             }
-        uri = '/afterbuy/v1/consumers/registration/'
+        uri = '/afterbuy/v1/consumers/registration/phone'
         resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
         self.assertEquals(json.loads(resp.content)['status_code'], 200)
     
